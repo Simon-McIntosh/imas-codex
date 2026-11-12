@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-definitions-by-construction">
+<meta name="node-id" content="sdbc-name-definition-count">
+<title>Every published definition counted against its name</title>
+</head>
+<body>
+<main>
+<h1 id="sdbc-name-definition-count-title">A labelled sample of 381 published names, each read against its definition</h1>
+
+<p id="sdbc-name-definition-count-summary">
+381 of the 1975 names published in <code>v0.4.0rc8</code>
+(<code>4a48c6c5</code>) were drawn across all 28 domain files,
+in proportion to each file's published count and with a floor of 10 per
+file that has that many. Each was labelled by reading its name, description, documentation and
+unit together. <strong>270 agree with their name and
+111 do not</strong>: 83
+carry a qualifier the name lacks, 8 are narrower
+than the name, 19 publish an abstract parent as a
+quantity, and 1 has a unit whose dimension does not fit
+its name. Projected per file onto the published set, the first class accounts for about
+461
+names.
+</p>
+
+<h2 id="sdbc-name-definition-count-verdict">What the sample measures</h2>
+<table id="sdbc-name-definition-count-classes">
+<thead><tr><th>Class</th><th>In sample</th><th>Share</th><th>Projected (stratified)</th><th>Projected (naive)</th></tr></thead>
+<tbody>
+<tr><td>qualifier-missing-from-name</td><td>83</td><td>21.8&#8201;%</td><td>460.5</td><td>430.2</td></tr>
+<tr><td>definition-narrower-than-name</td><td>8</td><td>2.1&#8201;%</td><td>17.7</td><td>41.5</td></tr>
+<tr><td>abstract-parent-as-quantity</td><td>19</td><td>5.0&#8201;%</td><td>116.3</td><td>98.5</td></tr>
+<tr><td>unit-does-not-fit-name</td><td>1</td><td>0.3&#8201;%</td><td>6.4</td><td>5.2</td></tr>
+<tr><td>agrees</td><td>270</td><td>70.9&#8201;%</td><td>1374.1</td><td>1399.6</td></tr>
+</tbody>
+</table>
+<p id="sdbc-name-definition-count-projection">The stratified projection applies each file's
+class share to that file's own published count and sums over the files, which is what makes the
+per-file floor harmless: a file drawn at 10 of 34 contributes its own rate, not a
+sample-wide rate. The naive column repeats the sample share unchanged and is given only for
+comparison.</p>
+
+<h2 id="sdbc-name-definition-count-cited">The ten names the opening census cited</h2>
+<p>Each was added outside the random draw. 9 of 10 carry the class the census gave them.</p>
+<table id="sdbc-name-definition-count-cited-table">
+<thead><tr><th>Name</th><th>Class in §1</th><th>Class recorded here</th><th>Wording</th></tr></thead>
+<tbody>
+<tr><td><code>neon_density</code></td><td>abstract-parent-as-quantity</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>temperature_of_coil_conductor</code></td><td>definition-narrower-than-name</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>alfven_frequency</code></td><td>qualifier-missing-from-name</td><td>qualifier-missing-from-name</td><td>complex-angular</td></tr>
+<tr><td><code>argon_source_rate_due_to_gas_injection</code></td><td>qualifier-missing-from-name</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>field_line_length</code></td><td>definition-narrower-than-name</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>incident_neutral_particle_flux_at_wall</code></td><td>qualifier-missing-from-name</td><td>unit-does-not-fit-name</td><td>unit-dimension</td></tr>
+<tr><td><code>deuterium_deuterium_emissivity_due_to_fusion</code></td><td>qualifier-missing-from-name</td><td>qualifier-missing-from-name</td><td>energy-channel</td></tr>
+<tr><td><code>energy_of_detector_pixel</code></td><td>definition-narrower-than-name</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>torque_density</code></td><td>abstract-parent-as-quantity</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>momentum_flux_due_to_e_cross_b_drift</code></td><td>qualifier-missing-from-name</td><td>qualifier-missing-from-name</td><td>norm</td></tr>
+</tbody>
+</table>
+<p id="sdbc-name-definition-count-cited-note">
+<code>incident_neutral_particle_flux_at_wall</code> is recorded here as
+<em>unit-does-not-fit-name</em> rather than under the census's qualifier row. The census's reading
+is not wrong — the definition is a wall-integrated rate — but the discriminating evidence is the
+definition's unit, <code>s^-1</code>: a rate on a name that states a flux. Recording it by the unit
+keeps the class readable as one instrument's verdict, and it is the positive control for this
+record's unit check, because a census already committed beside this file lists the same name in its
+<code>particle_flux s^-1</code> group.
+</p>
+
+<h2 id="sdbc-name-definition-count-patterns">The wordings that produced the mismatches</h2>
+<p>Each pattern is a sentence or convention a writer re-uses, so a class read down this table is
+read as a family of wordings rather than as a count of unrelated defects.</p>
+<table id="sdbc-name-definition-count-pattern-table">
+<thead><tr><th>Class</th><th>Wording</th><th>Count</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td>qualifier-missing-from-name</td><td>pop-ion-only</td><td>40</td><td><code>helium_3_density_at_pedestal_top</code>, <code>line_averaged_tungsten_density</code>, <code>oxygen_density_at_divertor_target</code>, <code>tungsten_density_at_divertor_target</code>, <code>flux_surface_averaged_xenon_density_at_plasma_boundary</code></td></tr>
+<tr><td>abstract-parent-as-quantity</td><td>parent</td><td>19</td><td><code>density_at_plasma_boundary</code>, <code>particle_diffusivity</code>, <code>current_weighted_average_external_magnetic_flux</code>, <code>magnetic_field</code>, <code>neon_density</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>eq-electron-weight</td><td>13</td><td><code>accumulated_deuterated_methane_prefill_count</code>, <code>accumulated_total_prefill_gas_count</code>, <code>accumulated_ammonia_count</code>, <code>accumulated_ammonia_deuterated_count</code>, <code>accumulated_helium_3_prefill_count_due_to_gas_injection</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>weight</td><td>9</td><td><code>per_toroidal_mode_thermal_ion_charge_state_power_density</code>, <code>flux_surface_averaged_toroidal_current_density</code>, <code>counter_passing_fast_ion_charge_state_power_density_due_to_collisions</code>, <code>counter_passing_power_density</code>, <code>counter_passing_thermal_electron_power_density_due_to_collisions</code></td></tr>
+<tr><td>definition-narrower-than-name</td><td>narrower-object</td><td>8</td><td><code>temperature_of_coil_conductor</code>, <code>maximum_of_back_surface_neutron_flux</code>, <code>neutron_flux_maximum_at_first_wall</code>, <code>field_line_length</code>, <code>energy_of_detector_pixel</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>norm</td><td>4</td><td><code>parallel_ion_charge_state_energy_diffusion_coefficient</code>, <code>ion_energy_diffusivity</code>, <code>radial_ion_charge_state_energy_diffusion_coefficient</code>, <code>momentum_flux_due_to_e_cross_b_drift</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>device-part</td><td>2</td><td><code>radius_of_neutral_beam_injector</code>, <code>voltage_of_mass_spectrometer</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>energy-channel</td><td>2</td><td><code>neutral_internal_state_energy_flux_at_wall</code>, <code>deuterium_deuterium_emissivity_due_to_fusion</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>locus</td><td>2</td><td><code>density_at_pedestal_maximum</code>, <code>fast_neutron_flux_of_toroidal_field_coil</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>ref-relative</td><td>2</td><td><code>forward_wave_phase_of_ion_cyclotron_heating_antenna</code>, <code>wave_phase_of_ion_cyclotron_heating_antenna</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>aggregation</td><td>1</td><td><code>total_heating_power_due_to_fusion_reactions</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>complex-angular</td><td>1</td><td><code>alfven_frequency</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>effective</td><td>1</td><td><code>area_of_flux_loop</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>layer-scope</td><td>1</td><td><code>turns_per_metre_of_rogowski_coil</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>phase-scope</td><td>1</td><td><code>pulse_duration</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>res-direction</td><td>1</td><td><code>current_due_to_fusion_reactions</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>res-selection</td><td>1</td><td><code>parallel_peak_launched_refractive_index_of_lower_hybrid_antenna</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>spectral-band</td><td>1</td><td><code>surface_emissivity</code></td></tr>
+<tr><td>qualifier-missing-from-name</td><td>vector</td><td>1</td><td><code>refractive_index</code></td></tr>
+<tr><td>unit-does-not-fit-name</td><td>unit-dimension</td><td>1</td><td><code>incident_neutral_particle_flux_at_wall</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sdbc-name-definition-count-sample">The draw</h2>
+<p>Seed <strong>20261112</strong>, drawn by
+<code>name-definition-sample-run.py</code> beside this file, which re-draws the sample from the
+catalog revision alone.</p>
+<table id="sdbc-name-definition-count-alloc">
+<thead><tr><th>Domain file</th><th>Published</th><th>Allocated</th><th>Sampled</th></tr></thead>
+<tbody>
+<tr><td>auxiliary_heating</td><td>118</td><td>18</td><td>18</td></tr>
+<tr><td>core_plasma_physics</td><td>3</td><td>3</td><td>3</td></tr>
+<tr><td>current_drive</td><td>2</td><td>2</td><td>2</td></tr>
+<tr><td>divertor_physics</td><td>59</td><td>10</td><td>10</td></tr>
+<tr><td>edge_plasma_physics</td><td>204</td><td>31</td><td>31</td></tr>
+<tr><td>electromagnetic_wave_diagnostics</td><td>34</td><td>10</td><td>10</td></tr>
+<tr><td>equilibrium</td><td>145</td><td>22</td><td>22</td></tr>
+<tr><td>fast_particles</td><td>2</td><td>2</td><td>2</td></tr>
+<tr><td>fueling</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>general</td><td>19</td><td>10</td><td>11</td></tr>
+<tr><td>gyrokinetics</td><td>11</td><td>10</td><td>10</td></tr>
+<tr><td>machine_operations</td><td>2</td><td>2</td><td>2</td></tr>
+<tr><td>magnetic_field_diagnostics</td><td>30</td><td>10</td><td>10</td></tr>
+<tr><td>magnetic_field_systems</td><td>89</td><td>14</td><td>15</td></tr>
+<tr><td>magnetohydrodynamics</td><td>93</td><td>14</td><td>15</td></tr>
+<tr><td>mechanical_measurement_diagnostics</td><td>15</td><td>10</td><td>10</td></tr>
+<tr><td>neutronics</td><td>7</td><td>7</td><td>7</td></tr>
+<tr><td>particle_measurement_diagnostics</td><td>55</td><td>10</td><td>10</td></tr>
+<tr><td>plant_systems</td><td>104</td><td>16</td><td>17</td></tr>
+<tr><td>plasma_initiation</td><td>1</td><td>1</td><td>1</td></tr>
+<tr><td>plasma_wall_interactions</td><td>89</td><td>14</td><td>14</td></tr>
+<tr><td>radiation_measurement_diagnostics</td><td>110</td><td>17</td><td>19</td></tr>
+<tr><td>runaway_electrons</td><td>2</td><td>2</td><td>2</td></tr>
+<tr><td>spectroscopy</td><td>5</td><td>5</td><td>5</td></tr>
+<tr><td>structural_components</td><td>36</td><td>10</td><td>10</td></tr>
+<tr><td>transport</td><td>698</td><td>106</td><td>107</td></tr>
+<tr><td>turbulence</td><td>35</td><td>10</td><td>11</td></tr>
+<tr><td>waves</td><td>6</td><td>6</td><td>6</td></tr>
+</tbody>
+</table>
+
+<h2 id="sdbc-name-definition-count-second-reader">The second reading</h2>
+<p>A 60-name subset was drawn with seed 7714 across all 28 files and left
+unlabelled for a reader who has not seen this record's labels. <strong>That reading is not in this
+record.</strong> A second reading taken by this node would not be independent, so it is left for a
+separately dispatched reader, and the agreement between the two is to be recorded with it.</p>
+
+<h2 id="sdbc-name-definition-count-rows">The labelled rows</h2>
+<details>
+<summary>All 381 rows</summary>
+<table id="sdbc-name-definition-count-row-table">
+<thead><tr><th>Name</th><th>Unit</th><th>File</th><th>Class</th><th>Wording</th></tr></thead>
+<tbody>
+<tr><td><code>current_of_antenna_strap</code></td><td><code>A</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>fast_ion_charge_state_power_density</code></td><td><code>W.m^-3</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>first_local_tangential_coordinate_of_neutral_beam_injector</code></td><td><code>m</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>forward_power_of_ion_cyclotron_heating_antenna</code></td><td><code>W</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>forward_wave_phase_of_ion_cyclotron_heating_antenna</code></td><td><code>rad</code></td><td>auxiliary_heating</td><td>qualifier-missing-from-name</td><td>ref-relative</td></tr>
+<tr><td><code>net_power_due_to_ion_cyclotron_heating</code></td><td><code>W</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>parallel_peak_launched_refractive_index_of_lower_hybrid_antenna</code></td><td><code>1</code></td><td>auxiliary_heating</td><td>qualifier-missing-from-name</td><td>res-selection</td></tr>
+<tr><td><code>per_toroidal_mode_thermal_ion_charge_state_power_density</code></td><td><code>W.m^-3</code></td><td>auxiliary_heating</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>poloidal_launched_wave_index_of_lower_hybrid_antenna</code></td><td><code>1</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>power_due_to_electron_cyclotron_heating</code></td><td><code>W</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_coordinate_of_electron_cyclotron_launcher_mirror</code></td><td><code>m</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>radius_of_neutral_beam_injector</code></td><td><code>m</code></td><td>auxiliary_heating</td><td>qualifier-missing-from-name</td><td>device-part</td></tr>
+<tr><td><code>straight_field_line_angle</code></td><td><code>rad</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_coordinate_of_lower_hybrid_antenna_row</code></td><td><code>rad</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>total_power_due_to_electron_cyclotron_heating</code></td><td><code>W</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_coordinate_of_lower_hybrid_antenna_row</code></td><td><code>m</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_focal_length_of_beamlet_group</code></td><td><code>m</code></td><td>auxiliary_heating</td><td>agrees</td><td></td></tr>
+<tr><td><code>wave_phase_of_ion_cyclotron_heating_antenna</code></td><td><code>rad</code></td><td>auxiliary_heating</td><td>qualifier-missing-from-name</td><td>ref-relative</td></tr>
+<tr><td><code>electron_temperature_at_pellet_path</code></td><td><code>eV</code></td><td>core_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>helium_3_density_at_pedestal_top</code></td><td><code>m^-3</code></td><td>core_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>line_averaged_tungsten_density</code></td><td><code>m^-3</code></td><td>core_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>current_density_due_to_bootstrap_current_drive</code></td><td><code>A.m^-2</code></td><td>current_drive</td><td>agrees</td><td></td></tr>
+<tr><td><code>current_due_to_fusion_reactions</code></td><td><code>A</code></td><td>current_drive</td><td>qualifier-missing-from-name</td><td>res-direction</td></tr>
+<tr><td><code>current_of_divertor</code></td><td><code>A</code></td><td>divertor_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>electron_power_at_outer_divertor_target</code></td><td><code>W</code></td><td>divertor_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>ion_fluence_at_divertor_target</code></td><td><code>m^-2</code></td><td>divertor_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>oxygen_density_at_divertor_target</code></td><td><code>m^-3</code></td><td>divertor_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>plasma_power_at_divertor_target_due_to_recombination</code></td><td><code>W</code></td><td>divertor_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>power_due_to_recombination</code></td><td><code>W</code></td><td>divertor_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>power_of_divertor_due_to_convection</code></td><td><code>W</code></td><td>divertor_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>power_of_divertor_due_to_recombination</code></td><td><code>W</code></td><td>divertor_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>tungsten_density_at_divertor_target</code></td><td><code>m^-3</code></td><td>divertor_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>vertical_length_of_divertor_target</code></td><td><code>m</code></td><td>divertor_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>boron_density</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>density_at_pedestal_maximum</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>locus</td></tr>
+<tr><td><code>density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>deuterium_tritium_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>edge_localized_mode_frequency</code></td><td><code>Hz</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>electron_heat_decay_length_over_scrape_off_layer</code></td><td><code>m</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>flux_surface_averaged_ion_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>flux_surface_averaged_total_ion_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>flux_surface_averaged_xenon_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>helium_4_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>hydrogen_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>iron_density</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>lithium_density_at_pedestal_top</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>lithium_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>momentum_flux_limiter_coefficient</code></td><td><code>1</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>neutral_state_momentum_flux_due_to_diamagnetic_drift</code></td><td><code>kg.m^-1.s^-2</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>nitrogen_density_at_pedestal_top</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>parallel_ion_charge_state_energy_diffusion_coefficient</code></td><td><code>m^2.s^-1</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>norm</td></tr>
+<tr><td><code>parallel_neutral_momentum_flux_limiter_coefficient</code></td><td><code>1</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>particle_diffusivity</code></td><td><code>m^2.s^-1</code></td><td>edge_plasma_physics</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>toroidal_argon_velocity_at_plasma_boundary</code></td><td><code>m.s^-1</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>toroidal_helium_3_velocity_at_pedestal_top</code></td><td><code>m.s^-1</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>toroidal_ion_charge_state_momentum_source</code></td><td><code>kg.m^-1.s^-2</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_iron_velocity_at_pedestal_top</code></td><td><code>m.s^-1</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>toroidal_momentum_flux_limiter_coefficient</code></td><td><code>1</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_neon_velocity_at_plasma_boundary</code></td><td><code>m.s^-1</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>total_ion_decay_length_over_scrape_off_layer</code></td><td><code>m</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>tritium_density_at_pedestal_top</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>tritium_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>tungsten_density_at_separatrix</code></td><td><code>m^-3</code></td><td>edge_plasma_physics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>vertical_neutral_momentum_flux_limiter_coefficient</code></td><td><code>1</code></td><td>edge_plasma_physics</td><td>agrees</td><td></td></tr>
+<tr><td><code>calibration_polarization_angle_of_optical_element</code></td><td><code>rad</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>length_variation_of_interferometer_beam</code></td><td><code>m</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>line_averaged_electron_density</code></td><td><code>m^-3</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>parallel_wave_electric_field_real_part</code></td><td><code>V.m^-1</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>perpendicular_refractive_index</code></td><td><code>1</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radiative_temperature_at_ece_channel</code></td><td><code>eV</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>refractive_index</code></td><td><code>1</code></td><td>electromagnetic_wave_diagnostics</td><td>qualifier-missing-from-name</td><td>vector</td></tr>
+<tr><td><code>total_electron_count</code></td><td><code>1</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_wave_electric_field</code></td><td><code>V.m^-1</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_wave_vector_of_beam_tracing_beam</code></td><td><code>m^-1</code></td><td>electromagnetic_wave_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>current_weighted_average_external_magnetic_flux</code></td><td><code>Wb</code></td><td>equilibrium</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate</code></td><td><code>m^2</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>external_magnetic_flux</code></td><td><code>Wb</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>flux_surface_averaged_inverse_of_square_of_major_radius</code></td><td><code>m^-2</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>flux_surface_averaged_square_of_magnetic_field_magnitude</code></td><td><code>T^2</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>flux_surface_averaged_toroidal_current_density</code></td><td><code>A.m^-2</code></td><td>equilibrium</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>height_of_plasma_filament</code></td><td><code>m</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>inner_squareness_of_flux_surface</code></td><td><code>1</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>inverse_of_square_of_magnetic_field_magnitude</code></td><td><code>T^-2</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>inverse_of_square_of_major_radius</code></td><td><code>m^-2</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>lower_inner_squareness_of_plasma_boundary</code></td><td><code>1</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>magnetic_field</code></td><td><code>T</code></td><td>equilibrium</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>magnetic_field_at_pedestal_top_high_field_side</code></td><td><code>T</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_toroidal_flux_coordinate</code></td><td><code>1</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_beta</code></td><td><code>1</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_derivative_of_poloidal_magnetic_flux</code></td><td><code>Wb.m^-1</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>squareness_of_flux_surface</code></td><td><code>1</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>surface_area_of_flux_surface</code></td><td><code>m^2</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_magnetic_flux_due_to_diamagnetic_drift</code></td><td><code>Wb</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>triangularity_of_flux_surface</code></td><td><code>1</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_coordinate_of_strike_point</code></td><td><code>m</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>volume_of_flux_surface</code></td><td><code>m^3</code></td><td>equilibrium</td><td>agrees</td><td></td></tr>
+<tr><td><code>fast_particle_pressure</code></td><td><code>Pa</code></td><td>fast_particles</td><td>agrees</td><td></td></tr>
+<tr><td><code>total_counter_passing_particle_pressure</code></td><td><code>Pa</code></td><td>fast_particles</td><td>agrees</td><td></td></tr>
+<tr><td><code>voltage_of_valve</code></td><td><code>V</code></td><td>fueling</td><td>agrees</td><td></td></tr>
+<tr><td><code>accumulated_deuterated_methane_prefill_count</code></td><td><code>1</code></td><td>general</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>accumulated_total_prefill_gas_count</code></td><td><code>1</code></td><td>general</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>argon_density_at_internal_transport_barrier</code></td><td><code>m^-3</code></td><td>general</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>argon_density_at_separatrix</code></td><td><code>m^-3</code></td><td>general</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>flux_surface_averaged_krypton_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>general</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>ipb98y2_confinement_time</code></td><td><code>s</code></td><td>general</td><td>agrees</td><td></td></tr>
+<tr><td><code>magnetic_field_at_pedestal_top_low_field_side</code></td><td><code>T</code></td><td>general</td><td>agrees</td><td></td></tr>
+<tr><td><code>neon_density</code></td><td><code>m^-3</code></td><td>general</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>normalized_toroidal_flux_coordinate_at_pedestal_top</code></td><td><code>1</code></td><td>general</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_toroidal_flux_coordinate_at_separatrix</code></td><td><code>1</code></td><td>general</td><td>agrees</td><td></td></tr>
+<tr><td><code>oxygen_density_at_plasma_boundary</code></td><td><code>m^-3</code></td><td>general</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>logarithm_of_density</code></td><td><code>1</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_effective_particle_energy</code></td><td><code>1</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_perturbed_parallel_gyrocenter_heat_flux_bessel_1</code></td><td><code>1</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_perturbed_parallel_magnetic_field_magnitude</code></td><td><code>1</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_e_cross_b_drift</code></td><td><code>1</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>perturbed_vacuum_magnetic_vector_potential</code></td><td><code>T.m</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_perturbed_vacuum_magnetic_vector_potential</code></td><td><code>T.m</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_perturbed_vacuum_magnetic_vector_potential_imaginary_part</code></td><td><code>T.m</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_perturbed_vacuum_magnetic_vector_potential_real_part</code></td><td><code>T.m</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude</code></td><td><code>1</code></td><td>gyrokinetics</td><td>agrees</td><td></td></tr>
+<tr><td><code>breakdown_initial_time</code></td><td><code>s</code></td><td>machine_operations</td><td>agrees</td><td></td></tr>
+<tr><td><code>pulse_duration</code></td><td><code>s</code></td><td>machine_operations</td><td>qualifier-missing-from-name</td><td>phase-scope</td></tr>
+<tr><td><code>area_of_flux_loop</code></td><td><code>m^2</code></td><td>magnetic_field_diagnostics</td><td>qualifier-missing-from-name</td><td>effective</td></tr>
+<tr><td><code>calibration_reference_magnetic_field_of_poloidal_magnetic_field_probe</code></td><td><code>T</code></td><td>magnetic_field_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>length_of_poloidal_magnetic_field_probe</code></td><td><code>m</code></td><td>magnetic_field_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_angle_of_toroidal_magnetic_field_probe</code></td><td><code>rad</code></td><td>magnetic_field_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_coordinate_of_flux_loop</code></td><td><code>m</code></td><td>magnetic_field_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_coordinate_of_rogowski_coil</code></td><td><code>m</code></td><td>magnetic_field_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>stray_breakdown_magnetic_field_magnitude</code></td><td><code>T</code></td><td>magnetic_field_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>turns_per_metre_of_rogowski_coil</code></td><td><code>m^-1</code></td><td>magnetic_field_diagnostics</td><td>qualifier-missing-from-name</td><td>layer-scope</td></tr>
+<tr><td><code>vertical_coordinate_of_flux_loop</code></td><td><code>m</code></td><td>magnetic_field_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>voltage_of_toroidal_magnetic_field_probe</code></td><td><code>V</code></td><td>magnetic_field_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>area_of_passive_loop</code></td><td><code>m^2</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>area_of_poloidal_field_coil</code></td><td><code>m^2</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>effective_turn_count_of_coil_conductor_element</code></td><td><code>1</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>fast_neutron_flux_of_toroidal_field_coil</code></td><td><code>m^-2.s^-1</code></td><td>magnetic_field_systems</td><td>qualifier-missing-from-name</td><td>locus</td></tr>
+<tr><td><code>height_of_correction_coil</code></td><td><code>m</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>normal_coordinate_of_correction_coil</code></td><td><code>m</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>outer_radius_of_ferritic_element</code></td><td><code>m</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>outer_radius_of_poloidal_field_coil</code></td><td><code>m</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>temperature_of_coil_conductor</code></td><td><code>K</code></td><td>magnetic_field_systems</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>thickness_of_iron_core_segment</code></td><td><code>m</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_magnetization_of_ferritic_element</code></td><td><code>A.m^-2</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_coordinate_of_annulus_center</code></td><td><code>m</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_force_of_poloidal_field_coil</code></td><td><code>N</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>width_of_correction_coil</code></td><td><code>m</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>width_of_toroidal_field_coil</code></td><td><code>m</code></td><td>magnetic_field_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>alfven_frequency</code></td><td><code>s^-1</code></td><td>magnetohydrodynamics</td><td>qualifier-missing-from-name</td><td>complex-angular</td></tr>
+<tr><td><code>perturbed_plasma_mass_density_real_part</code></td><td><code>kg.m^-3</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>plasma_temperature</code></td><td><code>eV</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>plasma_velocity</code></td><td><code>m.s^-1</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_magnetic_flux_at_halo_boundary</code></td><td><code>Wb</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_perturbed_plasma_magnetic_vector_potential</code></td><td><code>T.m</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_perturbed_vacuum_magnetic_field_imaginary_part</code></td><td><code>T</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_perturbed_vacuum_magnetic_field_real_part</code></td><td><code>T</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_perturbed_plasma_magnetic_field_imaginary_part</code></td><td><code>T</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_perturbed_plasma_magnetic_vector_potential</code></td><td><code>T.m</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_perturbed_plasma_velocity</code></td><td><code>m.s^-1</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_perturbed_plasma_velocity_real_part</code></td><td><code>m.s^-1</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_halo_current</code></td><td><code>A</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_perturbed_plasma_velocity_imaginary_part</code></td><td><code>m.s^-1</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>volume_averaged_runaway_electron_kinetic_energy_density</code></td><td><code>J.m^-3</code></td><td>magnetohydrodynamics</td><td>agrees</td><td></td></tr>
+<tr><td><code>coolant_absorbed_power_of_calorimetry_component</code></td><td><code>W</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>displacement_of_passive_structure</code></td><td><code>m</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>temperature_of_sensor</code></td><td><code>K</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_coordinate_of_reciprocating_probe</code></td><td><code>rad</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>x_first_measurement_direction_unit_vector_of_strain_gauge</code></td><td><code>1</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>x_second_measurement_direction_unit_vector_of_strain_gauge</code></td><td><code>1</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>y_coordinate_of_sensor_attachment_point</code></td><td><code>m</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>y_second_measurement_direction_unit_vector_of_strain_gauge</code></td><td><code>1</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>z_first_measurement_direction_unit_vector_of_strain_gauge</code></td><td><code>1</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>z_second_measurement_direction_unit_vector_of_strain_gauge</code></td><td><code>1</code></td><td>mechanical_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>back_surface_neutron_flux</code></td><td><code>W.m^-2</code></td><td>neutronics</td><td>agrees</td><td></td></tr>
+<tr><td><code>first_local_tangential_width_of_neutron_detector</code></td><td><code>m</code></td><td>neutronics</td><td>agrees</td><td></td></tr>
+<tr><td><code>maximum_of_back_surface_neutron_flux</code></td><td><code>W.m^-2</code></td><td>neutronics</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>neutron_flux_at_first_wall</code></td><td><code>W.m^-2</code></td><td>neutronics</td><td>agrees</td><td></td></tr>
+<tr><td><code>neutron_flux_maximum_at_first_wall</code></td><td><code>W.m^-2</code></td><td>neutronics</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>neutron_response_function_of_neutron_detector</code></td><td><code>1</code></td><td>neutronics</td><td>agrees</td><td></td></tr>
+<tr><td><code>total_neutron_rate</code></td><td><code>Hz</code></td><td>neutronics</td><td>agrees</td><td></td></tr>
+<tr><td><code>difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line</code></td><td><code>m</code></td><td>particle_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>floating_electrostatic_potential</code></td><td><code>V</code></td><td>particle_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>line_averaged_argon_density</code></td><td><code>m^-3</code></td><td>particle_measurement_diagnostics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>line_averaged_boron_density</code></td><td><code>m^-3</code></td><td>particle_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>line_averaged_oxygen_density</code></td><td><code>m^-3</code></td><td>particle_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>line_averaged_total_ion_temperature</code></td><td><code>eV</code></td><td>particle_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>line_averaged_tritium_density</code></td><td><code>m^-3</code></td><td>particle_measurement_diagnostics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>neutral_pressure_of_mass_spectrometer_channel</code></td><td><code>Pa</code></td><td>particle_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>oxygen_density</code></td><td><code>m^-3</code></td><td>particle_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>voltage_of_mass_spectrometer</code></td><td><code>V</code></td><td>particle_measurement_diagnostics</td><td>qualifier-missing-from-name</td><td>device-part</td></tr>
+<tr><td><code>accumulated_ammonia_count</code></td><td><code>1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>accumulated_ammonia_deuterated_count</code></td><td><code>1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>accumulated_helium_3_prefill_count_due_to_gas_injection</code></td><td><code>1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>accumulated_particle_count_at_pellet_path_due_to_pellet_injection</code></td><td><code>1</code></td><td>plant_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>accumulated_silane_count_due_to_gas_injection</code></td><td><code>1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>accumulated_tritium_count_due_to_gas_injection</code></td><td><code>1</code></td><td>plant_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>accumulated_xenon_count_due_to_gas_injection</code></td><td><code>1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>argon_source_rate_due_to_gas_injection</code></td><td><code>s^-1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>ethane_source_rate</code></td><td><code>s^-1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>minimum_gas_flow</code></td><td><code>Pa.m^3.s^-1</code></td><td>plant_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>molecular_neutral_species_flow_at_outlet</code></td><td><code>Pa.m^3.s^-1</code></td><td>plant_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>neon_prefill_count</code></td><td><code>1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>power_of_plant_system</code></td><td><code>W</code></td><td>plant_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_coordinate_of_pellet_fragment</code></td><td><code>rad</code></td><td>plant_systems</td><td>agrees</td><td></td></tr>
+<tr><td><code>total_heating_power_due_to_fusion_reactions</code></td><td><code>W</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>aggregation</td></tr>
+<tr><td><code>total_neutral_source_rate_due_to_gas_injection</code></td><td><code>s^-1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>xenon_source_rate_due_to_gas_injection</code></td><td><code>s^-1</code></td><td>plant_systems</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>field_line_length</code></td><td><code>m</code></td><td>plasma_initiation</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>boron_density_at_limiter</code></td><td><code>m^-3</code></td><td>plasma_wall_interactions</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>electron_kinetic_energy_flux_at_wall_due_to_surface_emission</code></td><td><code>W.m^-2</code></td><td>plasma_wall_interactions</td><td>agrees</td><td></td></tr>
+<tr><td><code>electron_source_rate_due_to_surface_emission</code></td><td><code>s^-1</code></td><td>plasma_wall_interactions</td><td>qualifier-missing-from-name</td><td>eq-electron-weight</td></tr>
+<tr><td><code>flux_at_limiter</code></td><td><code>W.m^-2</code></td><td>plasma_wall_interactions</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>incident_neutral_particle_flux_at_wall</code></td><td><code>s^-1</code></td><td>plasma_wall_interactions</td><td>unit-does-not-fit-name</td><td>unit-dimension</td></tr>
+<tr><td><code>kinetic_energy_flux_at_wall_due_to_surface_emission</code></td><td><code>W.m^-2</code></td><td>plasma_wall_interactions</td><td>agrees</td><td></td></tr>
+<tr><td><code>neutral_internal_state_energy_flux_at_wall</code></td><td><code>W.m^-2</code></td><td>plasma_wall_interactions</td><td>qualifier-missing-from-name</td><td>energy-channel</td></tr>
+<tr><td><code>power_at_wall_due_to_convection</code></td><td><code>W</code></td><td>plasma_wall_interactions</td><td>agrees</td><td></td></tr>
+<tr><td><code>ratio_of_iron_density_to_electron_density</code></td><td><code>1</code></td><td>plasma_wall_interactions</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>ratio_of_volume_averaged_boron_density_to_volume_averaged_electron_density</code></td><td><code>1</code></td><td>plasma_wall_interactions</td><td>agrees</td><td></td></tr>
+<tr><td><code>ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density</code></td><td><code>1</code></td><td>plasma_wall_interactions</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>surface_emissivity</code></td><td><code>1</code></td><td>plasma_wall_interactions</td><td>qualifier-missing-from-name</td><td>spectral-band</td></tr>
+<tr><td><code>y_coordinate_of_diagnostic_aperture</code></td><td><code>m</code></td><td>plasma_wall_interactions</td><td>agrees</td><td></td></tr>
+<tr><td><code>y_image_up_unit_vector_of_camera</code></td><td><code>1</code></td><td>plasma_wall_interactions</td><td>agrees</td><td></td></tr>
+<tr><td><code>bremsstrahlung_power</code></td><td><code>W</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>cold_neutral_velocity</code></td><td><code>m.s^-1</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>deuterium_deuterium_emissivity_due_to_fusion</code></td><td><code>m^-3.s^-1</code></td><td>radiation_measurement_diagnostics</td><td>qualifier-missing-from-name</td><td>energy-channel</td></tr>
+<tr><td><code>energy_of_detector_pixel</code></td><td><code>eV</code></td><td>radiation_measurement_diagnostics</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>etendue_of_hard_xray_detector</code></td><td><code>m^2.sr</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>extent_of_soft_xray_detector</code></td><td><code>m</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>first_local_tangential_coordinate_of_soft_xray_detector</code></td><td><code>m</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>hard_xray_brightness</code></td><td><code>m^-2.s^-1.sr^-1</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>height_of_hard_xray_detector</code></td><td><code>m</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>lower_bound_energy_of_detector_pixel</code></td><td><code>eV</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>outer_hard_xray_half_width_at_emissivity_peak</code></td><td><code>1</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>power_due_to_synchrotron_radiation</code></td><td><code>W</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>second_local_tangential_coordinate_of_bragg_crystal</code></td><td><code>m</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>second_local_tangential_coordinate_of_optical_element</code></td><td><code>m</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>spectral_wavelength_of_optical_element</code></td><td><code>m</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_angular_width_of_camera</code></td><td><code>rad</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_coordinate_of_reflector</code></td><td><code>rad</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_coordinate_of_soft_xray_detector</code></td><td><code>rad</code></td><td>radiation_measurement_diagnostics</td><td>agrees</td><td></td></tr>
+<tr><td><code>tritium_density</code></td><td><code>m^-3</code></td><td>radiation_measurement_diagnostics</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>runaway_electron_kinetic_energy_density</code></td><td><code>J.m^-3</code></td><td>runaway_electrons</td><td>agrees</td><td></td></tr>
+<tr><td><code>volume_averaged_total_runaway_electron_source_rate</code></td><td><code>m^-3.s^-1</code></td><td>runaway_electrons</td><td>agrees</td><td></td></tr>
+<tr><td><code>focal_length_of_line_of_sight</code></td><td><code>m</code></td><td>spectroscopy</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>radius_of_detector</code></td><td><code>m</code></td><td>spectroscopy</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>radius_of_reflector</code></td><td><code>m</code></td><td>spectroscopy</td><td>definition-narrower-than-name</td><td>narrower-object</td></tr>
+<tr><td><code>surface_area_of_detector</code></td><td><code>m^2</code></td><td>spectroscopy</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_coordinate_of_polarizer</code></td><td><code>m</code></td><td>spectroscopy</td><td>agrees</td><td></td></tr>
+<tr><td><code>nuclear_heating_power_of_limiter_tile</code></td><td><code>W</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>nuclear_power_density_of_breeder_blanket_layer</code></td><td><code>W.m^-3</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>nuclear_power_density_of_limiter_tile</code></td><td><code>W.m^-3</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>radiated_power_of_breeder_blanket_module</code></td><td><code>W</code></td><td>structural_components</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>thickness_of_breeder_blanket_layer</code></td><td><code>m</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>upper_thickness_of_breeder_blanket_module</code></td><td><code>m</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_outline_of_plasma_facing_component</code></td><td><code>m</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_volumetric_force</code></td><td><code>N.m^-3</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>volumetric_force</code></td><td><code>N.m^-3</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>volumetric_fraction_of_breeder_blanket_layer</code></td><td><code>1</code></td><td>structural_components</td><td>agrees</td><td></td></tr>
+<tr><td><code>beryllium_density_at_magnetic_axis</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>boron_density_at_internal_transport_barrier</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>boron_density_at_magnetic_axis</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>bulk_neutral_internal_state_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>carbon_density_at_magnetic_axis</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>co_passing_fast_current_density</code></td><td><code>A.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>co_passing_fast_ion_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>co_passing_thermal_ion_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>counter_passing_fast_electron_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>counter_passing_fast_ion_charge_state_power_density_due_to_collisions</code></td><td><code>W.m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>counter_passing_power_density</code></td><td><code>W.m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>counter_passing_thermal_electron_power_density_due_to_collisions</code></td><td><code>W.m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>counter_passing_thermal_electron_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>counter_passing_thermal_ion_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>current_density_due_to_parallel_viscosity</code></td><td><code>A.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>density_at_magnetic_axis</code></td><td><code>m^-3</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>effective_thermal_ion_charge_state_energy_velocity_due_to_convection</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>electron_diffusion_coefficient</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>electron_particle_flux_limiter_coefficient</code></td><td><code>1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>electron_pressure</code></td><td><code>Pa</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>electron_temperature_at_magnetic_axis</code></td><td><code>eV</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>electron_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>fast_ion_power_density_due_to_collisions</code></td><td><code>W.m^-3</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>fast_particle_torque_due_to_j_cross_b_force</code></td><td><code>N.m</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>helium_4_density_at_magnetic_axis</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>hydrogen_density</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>implicit_electron_particle_source_rate</code></td><td><code>s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>implicit_ion_momentum_source_rate</code></td><td><code>s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>ion_charge_state_diffusivity</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>ion_charge_state_momentum_flux_due_to_diamagnetic_drift</code></td><td><code>kg.m^-1.s^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>ion_charge_state_particle_flux</code></td><td><code>m^-2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>ion_charge_state_temperature</code></td><td><code>eV</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>ion_charge_state_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>ion_energy_diffusivity</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>norm</td></tr>
+<tr><td><code>ion_energy_flux_limiter_coefficient</code></td><td><code>1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>iron_density_at_internal_transport_barrier</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>krypton_density_at_internal_transport_barrier</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>lithium_density_at_internal_transport_barrier</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>magnetic_shear_at_internal_transport_barrier</code></td><td><code>1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>momentum</code></td><td><code>kg.m^-1.s^-2</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>neutral_diffusion_coefficient</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>neutral_internal_state_energy_flux_limiter_coefficient</code></td><td><code>1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>neutral_internal_state_momentum_velocity_due_to_convection</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>neutral_internal_state_temperature</code></td><td><code>eV</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>neutral_species_atomic_mass</code></td><td><code>u</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>nitrogen_density_at_internal_transport_barrier</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>oxygen_density_at_magnetic_axis</code></td><td><code>m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>parallel_conductivity</code></td><td><code>m^-1.ohm^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>parallel_counter_passing_fast_particle_pressure</code></td><td><code>Pa</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>parallel_current_density_due_to_parallel_viscosity</code></td><td><code>A.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>parallel_ion_charge_state_energy_diffusivity</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>parallel_ion_momentum_flux</code></td><td><code>kg.m^-1.s^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>parallel_total_ion_energy_convection_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>particle_density</code></td><td><code>m^-3</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>particle_torque_due_to_j_cross_b_force</code></td><td><code>N.m</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>particle_velocity_due_to_convection</code></td><td><code>m.s^-1</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>perpendicular_co_passing_fast_particle_pressure</code></td><td><code>Pa</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>perpendicular_trapped_fast_particle_pressure</code></td><td><code>Pa</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_electron_particle_flux</code></td><td><code>m^-2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_flux_limiter_coefficient</code></td><td><code>1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_ion_charge_state_momentum_convection_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_ion_charge_state_particle_flux</code></td><td><code>m^-2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_ion_charge_state_velocity_due_to_e_cross_b_drift</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>poloidal_neutral_internal_state_energy_diffusion_coefficient</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>power_density_due_to_collisions</code></td><td><code>W.m^-3</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>radial_conductivity</code></td><td><code>m^-1.ohm^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_diamagnetic_current_density</code></td><td><code>A.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_effective_electron_diffusivity</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_effective_ion_diffusivity</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_ion_charge_state_diffusion_coefficient</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_ion_charge_state_energy_diffusion_coefficient</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>norm</td></tr>
+<tr><td><code>radial_ion_charge_state_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_ion_diffusion_coefficient</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_ion_momentum_flux_over_edge_region</code></td><td><code>kg.m^-1.s^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_neutral_internal_state_energy_diffusion_coefficient</code></td><td><code>m^2.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>radial_neutral_internal_state_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>runaway_electron_density</code></td><td><code>m^-3</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>runaway_electron_source_rate_due_to_hot_tail</code></td><td><code>m^-3.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>suprathermal_neutral_internal_state_pressure</code></td><td><code>Pa</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>thermal_ion_charge_state_energy_velocity_due_to_convection</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>thermal_ion_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_argon_velocity_at_internal_transport_barrier</code></td><td><code>m.s^-1</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>pop-ion-only</td></tr>
+<tr><td><code>toroidal_co_passing_thermal_electron_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_co_passing_thermal_ion_torque_density_due_to_collisions</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_co_passing_torque_density</code></td><td><code>N.m^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_fast_ion_charge_state_torque_due_to_collisions</code></td><td><code>N.m</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_ion_charge_state_torque_density</code></td><td><code>kg.m^-1.s^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_ion_momentum_damping_rate</code></td><td><code>s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_neutral_internal_state_torque_density</code></td><td><code>kg.m^-1.s^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>torque_density</code></td><td><code>N.m^-2</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>total_ion_density_at_magnetic_axis</code></td><td><code>m^-3</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>total_ion_particle_source_rate</code></td><td><code>s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>total_trapped_particle_density</code></td><td><code>m^-3</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>trapped_fast_particle_pressure</code></td><td><code>Pa</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>trapped_thermal_ion_charge_state_power_density_due_to_collisions</code></td><td><code>W.m^-3</code></td><td>transport</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>vertical_electron_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_ion_charge_state_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_ion_charge_state_velocity_due_to_diamagnetic_drift</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_neutral_internal_state_momentum_flux</code></td><td><code>kg.m^-1.s^-2</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_neutral_velocity</code></td><td><code>m.s^-1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>volume_averaged_effective_charge</code></td><td><code>1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>volume_averaged_helium_4_density</code></td><td><code>m^-3</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>volume_averaged_ion_charge</code></td><td><code>1</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>volume_averaged_ion_density</code></td><td><code>m^-3</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>volume_averaged_total_ion_temperature</code></td><td><code>eV</code></td><td>transport</td><td>agrees</td><td></td></tr>
+<tr><td><code>volume_integrated_particle_source_rate</code></td><td><code>s^-1</code></td><td>transport</td><td>abstract-parent-as-quantity</td><td>parent</td></tr>
+<tr><td><code>electron_density_at_outboard_midplane</code></td><td><code>m^-3</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>momentum_flux_due_to_e_cross_b_drift</code></td><td><code>1</code></td><td>turbulence</td><td>qualifier-missing-from-name</td><td>norm</td></tr>
+<tr><td><code>normalized_collisionality</code></td><td><code>1</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_gyrocenter_perturbed_density</code></td><td><code>1</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_particle_charge</code></td><td><code>1</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_particle_perturbed_energy</code></td><td><code>1</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>normalized_perturbed_parallel_gyrocenter_current_density_bessel_1</code></td><td><code>1</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>perpendicular_normalized_particle_perturbed_energy</code></td><td><code>1</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>perpendicular_normalized_perturbed_pressure_bessel_1</code></td><td><code>1</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>ratio_of_particle_temperature_to_particle_reference_temperature</code></td><td><code>1</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>toroidal_reference_magnetic_field</code></td><td><code>T</code></td><td>turbulence</td><td>agrees</td><td></td></tr>
+<tr><td><code>left_hand_circularly_polarized_wave_electric_field</code></td><td><code>V.m^-1</code></td><td>waves</td><td>agrees</td><td></td></tr>
+<tr><td><code>per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude</code></td><td><code>V.m^-1</code></td><td>waves</td><td>qualifier-missing-from-name</td><td>weight</td></tr>
+<tr><td><code>right_hand_circularly_polarized_wave_electric_field_amplitude</code></td><td><code>V.m^-1</code></td><td>waves</td><td>agrees</td><td></td></tr>
+<tr><td><code>total_absorbed_wave_power</code></td><td><code>W</code></td><td>waves</td><td>agrees</td><td></td></tr>
+<tr><td><code>total_absorbed_wave_power_at_inside_flux_surface</code></td><td><code>W</code></td><td>waves</td><td>agrees</td><td></td></tr>
+<tr><td><code>vertical_coordinate_of_beam_tracing_beam</code></td><td><code>m</code></td><td>waves</td><td>agrees</td><td></td></tr>
+</tbody>
+</table>
+</details>
+</main>
+</body>
+</html>

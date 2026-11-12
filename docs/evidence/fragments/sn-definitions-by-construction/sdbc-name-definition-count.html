@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-definitions-by-construction">
+<meta name="node-id" content="sdbc-name-definition-count">
+<title>Landing record — sdbc-name-definition-count</title>
+</head>
+<body>
+<main>
+
+<h1 id="sdbc-name-definition-count-landing-title">A reader labelled 381 published names against their definitions; 111 do not agree</h1>
+
+<p id="sdbc-name-definition-count-landing-summary">
+The sample is 381 names drawn from the 1975 published at catalog <code>v0.4.0rc8</code>
+(<code>4a48c6c5</code>): 371 drawn with seed 20261112 across all 28 domain files in proportion to
+each file's published count, with a floor of 10 per file that has that many, plus the ten names the
+plan's opening census cites. Each name was labelled by reading its name, description,
+documentation and unit together. <strong>270 agree and 111 carry one of four defects.</strong>
+Projected per file onto the published set, the qualifier family alone accounts for about 461 names.
+</p>
+
+<h2 id="sdbc-name-definition-count-landing-classes">The four defect classes</h2>
+
+<table id="sdbc-name-definition-count-landing-class-table">
+<thead><tr><th>Class</th><th>In sample</th><th>Share</th><th>Projected (stratified)</th></tr></thead>
+<tbody>
+<tr><td>qualifier-missing-from-name</td><td>83</td><td>21.8&#8201;%</td><td>460.5</td></tr>
+<tr><td>abstract-parent-as-quantity</td><td>19</td><td>5.0&#8201;%</td><td>116.3</td></tr>
+<tr><td>definition-narrower-than-name</td><td>8</td><td>2.1&#8201;%</td><td>17.7</td></tr>
+<tr><td>unit-does-not-fit-name</td><td>1</td><td>0.3&#8201;%</td><td>6.4</td></tr>
+<tr><td>agrees</td><td>270</td><td>70.9&#8201;%</td><td>1374.1</td></tr>
+</tbody>
+</table>
+
+<p id="sdbc-name-definition-count-landing-projection">
+The stratified projection applies each file's class share to that file's own published count and
+sums over the files, so the per-file floor cannot pull the estimate: a file drawn at 10 of 34
+contributes its own rate rather than the sample's. The same shares applied flat to 1975 give
+430.2 / 98.5 / 41.5 / 5.2, which overstates the narrower class and understates the qualifier class
+because the over-sampled small files are not representative of the large ones.
+</p>
+
+<h2 id="sdbc-name-definition-count-landing-patterns">The wordings that produced them</h2>
+
+<table id="sdbc-name-definition-count-landing-pattern-table">
+<thead><tr><th>Count</th><th>Class</th><th>Wording</th><th>Examples</th></tr></thead>
+<tbody>
+<tr><td>40</td><td>qualifier-missing-from-name</td><td>pop-ion-only — the name states an element or species, the definition states the ion population only</td><td><code>helium_3_density_at_pedestal_top</code>, <code>line_averaged_tungsten_density</code>, <code>oxygen_density_at_divertor_target</code></td></tr>
+<tr><td>19</td><td>abstract-parent-as-quantity</td><td>parent — the definition declares an umbrella quantity whose specialised forms fix population, component or averaging</td><td><code>density_at_plasma_boundary</code>, <code>particle_diffusivity</code>, <code>current_weighted_average_external_magnetic_flux</code></td></tr>
+<tr><td>13</td><td>qualifier-missing-from-name</td><td>eq-electron-weight — a molecular species count is defined as an equivalent-electron inventory, so 10 or 18 electrons stand for one molecule</td><td><code>accumulated_deuterated_methane_prefill_count</code>, <code>accumulated_total_prefill_gas_count</code>, <code>accumulated_ammonia_count</code></td></tr>
+<tr><td>9</td><td>qualifier-missing-from-name</td><td>weight — the definition adds a weighting factor the name does not state</td><td><code>per_toroidal_mode_thermal_ion_charge_state_power_density</code>, <code>flux_surface_averaged_toroidal_current_density</code></td></tr>
+<tr><td>8</td><td>definition-narrower-than-name</td><td>narrower-object — the definition restricts a family name to one member or surface</td><td><code>temperature_of_coil_conductor</code>, <code>maximum_of_back_surface_neutron_flux</code>, <code>neutron_flux_maximum_at_first_wall</code></td></tr>
+<tr><td>4</td><td>qualifier-missing-from-name</td><td>norm — the definition normalises the quantity (per charge state, per mode, per ion) where the name states a total</td><td><code>parallel_ion_charge_state_energy_diffusion_coefficient</code>, <code>ion_energy_diffusivity</code></td></tr>
+<tr><td>2</td><td>qualifier-missing-from-name</td><td>device-part — the name names a device, the definition names one of its parts</td><td><code>radius_of_neutral_beam_injector</code>, <code>voltage_of_mass_spectrometer</code></td></tr>
+<tr><td>2</td><td>qualifier-missing-from-name</td><td>energy-channel — the definition selects a channel or reaction the name leaves open</td><td><code>neutral_internal_state_energy_flux_at_wall</code>, <code>deuterium_deuterium_emissivity_due_to_fusion</code></td></tr>
+<tr><td>2</td><td>qualifier-missing-from-name</td><td>locus — the definition pins a location the name leaves implicit</td><td><code>density_at_pedestal_maximum</code>, <code>fast_neutron_flux_of_toroidal_field_coil</code></td></tr>
+<tr><td>2</td><td>qualifier-missing-from-name</td><td>ref-relative — the definition states a value relative to a reference the name does not mention</td><td><code>forward_wave_phase_of_ion_cyclotron_heating_antenna</code>, <code>wave_phase_of_ion_cyclotron_heating_antenna</code></td></tr>
+<tr><td>1 each</td><td>qualifier-missing-from-name</td><td>aggregation, complex-angular (a complex or angular form of a quantity the name states as real or scalar), effective, layer-scope, phase-scope, res-direction, res-selection, spectral-band, vector</td><td><code>total_heating_power_due_to_fusion_reactions</code>, <code>alfven_frequency</code>, <code>area_of_flux_loop</code>, <code>turns_per_metre_of_rogowski_coil</code>, <code>pulse_duration</code>, <code>refractive_index</code></td></tr>
+<tr><td>1</td><td>unit-does-not-fit-name</td><td>unit-dimension — a rate whose name states a flux</td><td><code>incident_neutral_particle_flux_at_wall</code></td></tr>
+</tbody>
+</table>
+
+<h2 id="sdbc-name-definition-count-landing-cited">The ten names the opening census cites</h2>
+
+<p id="sdbc-name-definition-count-landing-cited-text">
+Nine of the ten carry the class the census gave them. The tenth,
+<code>incident_neutral_particle_flux_at_wall</code>, is recorded as
+<em>unit-does-not-fit-name</em> rather than under the census's qualifier row: the census's reading
+is not wrong, but the discriminating evidence is the unit (<code>s^-1</code>, a rate, on a name that
+states a flux), and the unit census already committed in this directory independently lists the
+same name under <code>particle_flux s^-1</code>. Recording it by the unit keeps this class readable
+as one instrument's verdict, and gives the near-zero unit count its positive control — the check
+demonstrably fires on a conflict that is known to be present.
+</p>
+
+<h2 id="sdbc-name-definition-count-landing-files">Where the work is least</h2>
+
+<p>Read per file, the defect share is not evenly spread, and each pattern is local to a particular
+domain vocabulary. The pop-ion-only convention is carried by
+<code>edge_plasma_physics</code> (14 of that file's 18 defects, 58&#8201;% of its 31 drawn) and
+<code>transport</code> (12 of its 32, 30&#8201;% of 107 drawn), and the parent pattern is almost
+entirely <code>transport</code>'s (12 of 19). The eq-electron-weight convention belongs to
+<code>plant_systems</code>, which holds 10 of its 13 and runs at 65&#8201;% defects against a
+sample-wide 29&#8201;%. <code>equilibrium</code>, the third largest file at 145 published, sits at
+14&#8201;%, so the defect population is not a property of the catalog as a whole but of the
+conventions two or three domain vocabularies adopted. Small files drawn whole (1–5 names) show
+shares of 50–100&#8201;% that are one or two records, not a rate.
+</p>
+
+<h2 id="sdbc-name-definition-count-landing-second-reader">The second reading is not in this record</h2>
+
+<p id="sdbc-name-definition-count-landing-second-reader-text">
+A 60-name subset was drawn with seed 7714, covering all 28 files, and left unlabelled for a reader
+who has not seen this record's labels; its indices are recorded in the JSON beside this file.
+<strong>No agreement figure is reported, because no independent second reading exists.</strong> A
+nested agent cannot be dispatched inside this run, and labelling the subset a second time here
+would produce agreement between a reader and itself. The done-when clause is left unmet for a
+separately dispatched reader, and the disagreement between the two readings is what the later check
+should be calibrated on.
+</p>
+
+<h2 id="sdbc-name-definition-count-landing-method">Method and limits</h2>
+
+<ul>
+<li id="sdbc-name-definition-count-landing-method-source">Read-only over the published catalog YAML at
+<code>/home/ITER/mcintos/Code/imas-standard-names-catalog/standard_names/*.yml</code>, tag
+<code>v0.4.0rc8</code>, commit <code>4a48c6c5</code>. No graph query was made.</li>
+<li id="sdbc-name-definition-count-landing-method-labels">Every label was produced by one reader
+reading name, description, documentation and unit together. No model judge, review check or
+<code>decide_batch</code> produced any label, so the record can serve as the reference the later
+check is measured against.</li>
+<li id="sdbc-name-definition-count-landing-method-classes">No class was added beyond the four the
+brief names and <em>agrees</em>: no single wording family outside them reached five names as a
+distinct defect kind.</li>
+<li id="sdbc-name-definition-count-landing-method-limits">The classes are a reader's judgement on
+prose, so a re-reading would move a few borderline records between qualifier-missing and
+narrower-than-name; the aggregate shares are the robust part, the per-name class of a handful of
+records is not. The projection assumes the sample is representative within each file, which the
+seeded uniform draw supports.</li>
+</ul>
+
+<h2 id="sdbc-name-definition-count-landing-artifacts">Artifacts</h2>
+
+<ul>
+<li id="sdbc-name-definition-count-landing-artifact-labels"><code>name-definition-labels.json</code>
+— every labelled row, the per-file counts and allocation, the class shares, both projections, the
+pattern groups, the cited names and the second-reader subset.</li>
+<li id="sdbc-name-definition-count-landing-artifact-labels-html"><code>name-definition-labels.html</code>
+— the same record as a page.</li>
+<li id="sdbc-name-definition-count-landing-artifact-script"><code>name-definition-sample-run.py</code>
+— re-draws the sample from the catalog revision and composes the record from the labels.</li>
+</ul>
+
+</main>
+</body>
+</html>
