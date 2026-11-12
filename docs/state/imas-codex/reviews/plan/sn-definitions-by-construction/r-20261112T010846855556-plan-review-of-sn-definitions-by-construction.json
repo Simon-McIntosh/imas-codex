@@ -33,7 +33,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a71 row two now reads '14 of the 20 families have a different wording for every member', the census's own figure",
+      "reason": "",
+      "when": "2026-11-12T01:30:01.173378+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "note": "\u00a71 row two now reads '14 of the 20 families have a different wording for every member', the census's own figure",
+      "reason": "",
+      "when": "2026-11-12T01:30:01.173378+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261112T010846855556-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261112T010846855556-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "750f924545af84651ef969579ab9e480bf644b02",
   "rubric": "content",
