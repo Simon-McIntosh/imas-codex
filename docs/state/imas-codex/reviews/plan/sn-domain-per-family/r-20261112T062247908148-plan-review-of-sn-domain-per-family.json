@@ -25,7 +25,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 4,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "ceb662906aaf26968dbabbff472a79ac0f1b68df",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75 now draws the 60 at random from every domain file that holds a single name and measures the three named names apart, outside the draw",
+      "reason": "",
+      "when": "2026-11-12T07:17:21.708383+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "ceb662906aaf26968dbabbff472a79ac0f1b68df",
+      "commit_basis": "edit",
+      "note": "\u00a75 now draws the 60 at random from every domain file that holds a single name and measures the three named names apart, outside the draw",
+      "reason": "",
+      "when": "2026-11-12T07:17:21.708383+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T062247908148-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T062247908148-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "ad0cec0fa993cf3e5e64597bdfb3ec53c8c1c9af",
   "rubric": "content",
