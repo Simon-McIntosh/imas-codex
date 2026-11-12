@@ -57,7 +57,30 @@
   "plan_slug": "serve-answers-inside-the-connect-limit",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "\u00a72's guard is now stated at the boundary the client sees: no discovery, language-model client or schema-runtime package is imported before initialize is answered; the lazy command table is the brief's method",
+      "reason": "",
+      "when": "2026-11-12T02:04:18.181633+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72's guard is now stated at the boundary the client sees: no discovery, language-model client or schema-runtime package is imported before initialize is answered; the lazy command table is the brief's method",
+      "reason": "",
+      "when": "2026-11-12T02:04:18.181633+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/serve-answers-inside-the-connect-limit/r-20261112T014428877348-plan-review-of-serve-answers-inside-the-connect-limit.json",
   "review_run_id": "r-20261112T014428877348-plan-review-of-serve-answers-inside-the-connect-limit",
   "reviewed_blob_sha": "c7a20ed2e5cea480aeba48e854421c66a1516be0",
   "rubric": "design",
