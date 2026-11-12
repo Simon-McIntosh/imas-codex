@@ -15,10 +15,8 @@ EVIDENCE = ROOT / "docs/evidence/fragments/sn-review-through-jev"
 
 def main():
     thresholds = json.loads(calibration.THRESHOLDS_PATH.read_text())
-    for axis, path in (
-        ("name", calibration.DEFAULT_NAME_RECEIPTS),
-        ("docs", calibration.DEFAULT_DOCS_RECEIPTS),
-    ):
+    for axis in ("name", "docs"):
+        path = Path(thresholds[axis]["source_receipts"])
         print(
             json.dumps(
                 {

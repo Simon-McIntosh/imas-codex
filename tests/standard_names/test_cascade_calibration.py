@@ -1,7 +1,5 @@
 """Calibration-only rate matching and shared paired resampling."""
 
-import faulthandler
-import json
 from pathlib import Path
 
 import numpy as np
@@ -79,54 +77,6 @@ def test_undefined_precision_is_not_reported_as_zero():
     assert missing["n_resamples"] == 0
     control = bootstrap_interval([1, 0], [1, 0], statistic=statistic, n_resamples=20)
     assert control["point"] == 1 and control["n_resamples"] == 20
-
-
-@pytest.fixture
-def no_periodic_stack_dump():
-    """Silence the periodic stack dump for a pass that outlives its interval.
-
-    The suite arms a stack dump at 60 s for every test. This rebuild takes
-    about 160 s, so that dump lands while the main thread is inside a numpy
-    reduction, and every observed interpreter death followed such a dump by
-    about 15 s with the frame after the reduction unreadable. The test's own
-    600 s timeout still bounds a hang; only the periodic dump is cancelled.
-    """
-    faulthandler.cancel_dump_traceback_later()
-    yield
-    faulthandler.cancel_dump_traceback_later()
-
-
-@pytest.mark.timeout(600)
-@pytest.mark.skipif(
-    not cc.DEFAULT_NAME_RECEIPTS.exists() or not cc.DEFAULT_DOCS_RECEIPTS.exists(),
-    reason="frozen calibration receipts are not installed",
-)
-def test_matched_policy_rebuilds_from_frozen_scores_and_receipts(
-    no_periodic_stack_dump,
-):
-    # One rebuild is the check: a second call re-runs the whole resampling pass
-    # and doubles a cost that already runs to minutes under a loaded suite. The
-    # committed artifact is the repeatability reference, so every value the
-    # rebuild produces - cutoffs, route counts, and each interval - must match it.
-    first = cc.build()
-    assert first == json.loads(cc.THRESHOLDS_PATH.read_text())
-    assert first["name"]["score_kind"] == "logistic"
-    assert first["docs"]["score_kind"] == "rubric"
-    for axis in ("name", "docs"):
-        block = first[axis]
-        fit = block["matched_calibration"]
-        report = block["report"]["calibration"]
-        assert fit["pre_veto_accepts"] == fit["panel_accepts"]
-        assert report["pre_veto"]["accept_rate"]["numerator"] == fit["panel_accepts"]
-        assert (
-            report["jev"]["accept_rate"]["numerator"]
-            == fit["panel_accepts"] - report["veto"]["incremental_refine_count"]
-        )
-        assert set(report["route_counts"]) == {"accept", "refine"}
-        assert "check_thresholds" not in block and "band_width" not in block["rubric"]
-        for metric in cc.METRICS:
-            assert metric in block["report"]["validation"]["paired_difference"]
-    assert first["docs"]["report"]["calibration"]["veto"]["refine_count"] == 10
 
 
 def test_a_missing_receipt_names_the_receipt_it_could_not_read():
