@@ -148,3 +148,65 @@ def test_extraction_leaves_a_dimensionally_different_spelling_alone() -> None:
 
     assert unit == "rad.s^-1"
     assert meta is None
+
+
+@pytest.mark.graph
+def test_catalog_write_takes_the_recorded_spelling_on_a_disposable_graph(
+    disposable_neo4j_empty: str,
+    seed_dd_resolutions,
+) -> None:
+    """A written name takes its quantity's spelling whatever the dictionary says.
+
+    The dictionary leaf records ``kg.m^-1.s^-2`` for a torque density. The
+    extraction path rewrites it to the recorded spelling, and the catalog write
+    is driven through the package-bound entry point, whose wrapper supplies the
+    wired graph root when the caller passes none. The name is read back from the
+    empty graph this test was given.
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
+    from imas_codex.standard_names.graph_store.graph_catalog import (
+        write_standard_names,
+    )
+    from imas_codex.standard_names.sources.dd import _apply_unit_overrides
+
+    dd_path = "core_profiles/profiles_1d/ion/torque_density_tor"
+    rows = [
+        {
+            "path": dd_path,
+            "unit": "kg.m^-1.s^-2",
+            "description": "torque density from the data dictionary",
+        }
+    ]
+    kept = _apply_unit_overrides(rows, write_skipped=False)
+    assert kept[0]["unit"] == "N.m^-2"
+
+    seed_dd_resolutions([{"path": dd_path, "effective": "kg.m^-1.s^-2"}])
+
+    with GraphClient() as gc:
+        write_standard_names(
+            [
+                {
+                    "id": "ion_torque_density",
+                    "unit": kept[0]["unit"],
+                    "source_types": ["dd"],
+                    "source_id": dd_path,
+                    "description": rows[0]["description"],
+                    "name_stage": "drafted",
+                }
+            ],
+            gc=gc,
+        )
+        written = list(
+            gc.query(
+                "MATCH (sn:StandardName {id: $id}) RETURN sn.unit AS unit",
+                id="ion_torque_density",
+            )
+        )
+        dd_unit = list(
+            gc.query("MATCH (dd:IMASNode {id: $id}) RETURN dd.unit AS unit", id=dd_path)
+        )
+
+    assert [str(row["unit"]) for row in dd_unit] == ["kg.m^-1.s^-2"]
+    assert [str(row["unit"]) for row in written] == ["N.m^-2"]
+    assert disposable_neo4j_empty.startswith("bolt://")
