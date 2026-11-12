@@ -836,6 +836,12 @@ _OPERATOR_TOKENS: frozenset[str] | None = None
 # a different claim.
 _PARAPHRASE_OVERLAP = 0.75
 
+# A written sentence that shares this much wording with a stored sentence is
+# taken to state the same shared part in other words. The renderer removes it
+# and the conformance check reports one it could not remove, so there is no
+# band of paraphrase that is neither removed nor reported.
+_COMPETING_OVERLAP = 0.45
+
 
 def _operator_tokens() -> frozenset[str]:
     """The tokens the operator registry defines."""
@@ -1055,6 +1061,31 @@ def shared_part_findings(
     for anchor, sentence in parts:
         stored = _collapsed(sentence)
         if stored in written:
+            # The stored sentence is present. A second sentence that states the
+            # same part in other words was not removed by the renderer, so it
+            # is reported here rather than left standing beside the wording.
+            competing = next(
+                (
+                    candidate
+                    for candidate in sentences
+                    if stored not in _collapsed(candidate)
+                    and _sentence_overlap(candidate, stored) >= _COMPETING_OVERLAP
+                ),
+                None,
+            )
+            if competing is not None:
+                findings.append(
+                    HouseStyleFinding(
+                        finding_class=HouseStyleFindingClass.SHARED_PART_ALTERED,
+                        registry_entry=anchor,
+                        detail=(
+                            f"the definition states the shared part in other words "
+                            f"beside the stored wording "
+                            f"({_collapsed(competing)[:160]!r})"
+                        ),
+                        sentence=stored,
+                    )
+                )
             continue
         altered = next(
             (
@@ -1108,8 +1139,8 @@ def replace_altered_shared_parts(
             kept = [
                 candidate
                 for candidate in _prose_sentences(line)
-                if stored in _collapsed(line)
-                or _sentence_overlap(candidate, stored) < _PARAPHRASE_OVERLAP
+                if _collapsed(candidate) == stored
+                or _sentence_overlap(candidate, stored) < _COMPETING_OVERLAP
             ]
             kept_lines.append(" ".join(kept))
         lines = kept_lines
