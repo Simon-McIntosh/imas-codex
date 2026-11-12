@@ -24,6 +24,8 @@
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
   <main class="plan-doc">
@@ -130,26 +132,31 @@
     </ul>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="species-population" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which population does a bare species density such as <code>neon_density</code> count?</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="ions-all-charge-states">Ions, summed over all charge states, neutral atoms excluded</button>
-          <button class="r-opt" data-value="element-neutrals-and-ions">The element: neutral atoms and all charge states</button>
-          <button class="r-opt" data-value="follow-dd-per-source">Whatever the Data Dictionary source states, with the name qualified where sources differ</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="species-population" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Which population does a bare species density such as neon_density count?</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="ions-all-charge-states">Ions, summed over all charge states, neutral atoms excluded</button>
+      <button class="r-opt" data-value="element-neutrals-and-ions">The element: neutral atoms and all charge states</button>
+      <button class="r-opt" data-value="follow-dd-per-source">Whatever the Data Dictionary source states, with the name qualified where sources differ</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-sdbc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-12">
-        <h4 class="r-fu-title">Build the rendered wording, the unit rule and the mismatch count together</h4>
-        <div class="r-fu-body"><p>§2, §3 and §4 are independent and ready; §2 needs the species-population decision first. §5 follows §4. §6 writes the live graph and waits for §2 to §5. §7 waits for §6 and for the domain repair in <code>sn-domain-per-family</code> §3.</p></div>
-        <pre class="r-fu-prompt">/reckon-build sn-definitions-by-construction</pre>
-      </article>
-    </section>
-  </main>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-sdbc-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-12" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the rendered wording, the unit rule and the mismatch count together</h4>
+    <div class="r-fu-body"><p>§2, §3 and §4 are independent and ready; §2 needs the species-population decision first. §5 follows §4. §6 writes the live graph and waits for §2 to §5. §7 waits for §6 and for the domain repair in <code>sn-domain-per-family</code> §3.</p></div>
+    <pre class="r-fu-prompt">/reckon-build sn-definitions-by-construction</pre>
+    </article>
+</section>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-20261112-registry-conformance" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T02:20:00Z">
+    <div class="r-comment-body"><p>Measured after this section was written: the documentation conformance check the writer already runs, applied to all 1,975 published names, reports at least one finding on 548 of them. 150 are a density opening that departs from its template, 16 a line-average equation and 13 a flux-surface-average equation that is not the canonical one, 12 a volume-average equation, and 30 a plasma-boundary definition or gloss the registry forbids. 243 published names select no registry entry at all. The check exists and passes none of this to the export, which is why names written before a wording was settled were published unchanged. Output and script: <code>docs/evidence/fragments/sn-definitions-by-construction/published-registry-conformance.txt</code>.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>
