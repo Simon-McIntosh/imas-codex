@@ -1,9 +1,9 @@
 {
-  "census_total": 18,
+  "census_total": 21,
   "classifier_populations": {
     "derived_parent": 1,
     "dropped_edge": 7,
-    "held_in_chain": 7,
+    "held_in_chain": 10,
     "never_bound": 2,
     "unchained_holder": 1
   },
@@ -11,7 +11,7 @@
     "beta"
   ],
   "dormant_exhausted_sourceless": 4,
-  "generated_at": "2026-11-11T22:24:42.218471+00:00",
+  "generated_at": "2026-11-12T00:12:44.844452+00:00",
   "graph_writes": 0,
   "holder_positive_control": [
     "electron_temperature"
@@ -32,6 +32,25 @@
   "live_draft_sourceless": 3,
   "live_population": 5,
   "llm_calls": 0,
+  "planted_control": {
+    "classifier_listed": [
+      "planted_sourceless_name"
+    ],
+    "classifier_populations": {
+      "never_bound": 1
+    },
+    "endpoint": "bolt://127.0.0.1:42943",
+    "generated_at": "2026-11-12T00:13:03.195650+00:00",
+    "graph_writes": 1,
+    "graph_writes_note": "disposable Neo4j only; the live graph is untouched",
+    "invariant_bound_excluded": true,
+    "invariant_listed": [
+      "planted_sourceless_name"
+    ],
+    "invariant_planted_listed": true,
+    "planted_bound_excluded": true,
+    "planted_sourceless_listed": true
+  },
   "recorded_nine": [
     "electrostatic_potential_at_outboard_midplane",
     "electrostatic_potential_at_wall",

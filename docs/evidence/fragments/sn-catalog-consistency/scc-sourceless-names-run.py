@@ -35,7 +35,6 @@ from typing import Any
 
 HERE = Path(__file__).resolve().parent
 OUT = HERE / "scc-sourceless-names.json"
-CONTROL = HERE / "scc-sourceless-names-control.json"
 PAGE = HERE / "scc-sourceless-names.html"
 
 #: The nine accepted names carried from ``q-sib-nine-unsourced-names``, as the
@@ -461,8 +460,12 @@ def run_fixture() -> dict[str, Any]:
                     Counter(row["population"] for row in classified)
                 ),
             }
-        CONTROL.write_text(
-            json.dumps(result, indent=2, sort_keys=True) + "\n", encoding="utf-8"
+        # The control lives in the population file, so the read and the check
+        # that the read can see anything are one artifact.
+        data = json.loads(OUT.read_text(encoding="utf-8"))
+        data["planted_control"] = result
+        OUT.write_text(
+            json.dumps(data, indent=2, sort_keys=True) + "\n", encoding="utf-8"
         )
         return result
     finally:
@@ -681,9 +684,24 @@ def main() -> None:
     elif command == "fixture":
         result = run_fixture()
         print(json.dumps(result, indent=2, sort_keys=True))
+        # A control that cannot fail proves nothing, so a failed predicate is
+        # a non-zero exit rather than a value on the page.
+        failed = [
+            key
+            for key in (
+                "planted_sourceless_listed",
+                "planted_bound_excluded",
+                "invariant_planted_listed",
+                "invariant_bound_excluded",
+            )
+            if result.get(key) is not True
+        ]
+        if failed:
+            print(f"CONTROL FAILED: {', '.join(failed)}", file=sys.stderr)
+            raise SystemExit(1)
     else:
         data = json.loads(OUT.read_text(encoding="utf-8"))
-        control = json.loads(CONTROL.read_text(encoding="utf-8"))
+        control = data["planted_control"]
         validate(data)
         PAGE.write_text(render(data, control), encoding="utf-8")
         print(f"rows={data['live_population']} page={PAGE}")
