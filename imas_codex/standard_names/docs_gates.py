@@ -1121,7 +1121,10 @@ def replace_altered_shared_parts(
 
     The writer's own sentences are kept; a sentence that restates a shared part
     in other words is removed and the stored sentence is appended, so the
-    definition carries one wording per shared part rather than two.
+    definition carries one wording per shared part rather than two. Text that
+    already states the part in its stored wording is left untouched: the
+    presence test below skips that part, so the per-sentence filter only ever
+    has paraphrases to drop.
     """
 
     lines = documentation.splitlines()
@@ -1139,8 +1142,7 @@ def replace_altered_shared_parts(
             kept = [
                 candidate
                 for candidate in _prose_sentences(line)
-                if _collapsed(candidate) == stored
-                or _sentence_overlap(candidate, stored) < _COMPETING_OVERLAP
+                if _sentence_overlap(candidate, stored) < _COMPETING_OVERLAP
             ]
             kept_lines.append(" ".join(kept))
         lines = kept_lines

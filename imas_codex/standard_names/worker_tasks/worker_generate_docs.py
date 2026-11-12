@@ -680,6 +680,38 @@ class SharedPartAltered(ValueError):
     """A definition departed from a shared part's stored wording."""
 
 
+def _mark_generate_docs_exhausted(*, sn_id: str, token: str, error_msg: str) -> None:
+    """Move a refused first draft to the terminal docs state.
+
+    A draft whose shared part was altered or contradicted is refused before it
+    is stored. The same item is asked the same question on every pass, so a
+    model that contradicts the settled population contradicts it again:
+    releasing the claim leaves the name at ``pending`` to be re-claimed and
+    re-charged indefinitely. One refused attempt is the bound, and the name
+    then sits where a human reads it rather than being retried unseen.
+    """
+
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        gc.query(
+            """
+            MATCH (sn:StandardName {id: $sn_id})
+            WHERE sn.claim_token = $token
+              AND sn.docs_stage = 'pending'
+            SET sn.updated_at = datetime(), sn.docs_stage = 'exhausted',
+                sn.claim_token = null,
+                sn.claimed_at = null,
+                sn.reviewer_comments_docs =
+                    coalesce(sn.reviewer_comments_docs, '')
+                    + ' [docs_generate_refusal] ' + $error_msg
+            """,
+            sn_id=sn_id,
+            token=token,
+            error_msg=error_msg[:300],
+        )
+
+
 def _refuse_altered_shared_parts(
     name: str,
     documentation: str,
@@ -1006,14 +1038,29 @@ async def process_generate_docs_batch(
                     "— will retry on a later pass",
                     sn_id,
                 )
+            elif isinstance(_doc_exc, SharedPartAltered):
+                logger.warning(
+                    "generate_docs refused a definition that contradicts the "
+                    "settled wording (marking docs exhausted) for %s: %s",
+                    sn_id,
+                    str(_doc_exc)[:200],
+                )
             else:
                 logger.exception("generate_docs failed for %s", sn_id)
             try:
-                await _asyncio.to_thread(
-                    release_generate_docs_failed_claims,
-                    sn_ids=[sn_id],
-                    claim_token=claim_token,
-                )
+                if isinstance(_doc_exc, SharedPartAltered):
+                    await _asyncio.to_thread(
+                        _mark_generate_docs_exhausted,
+                        sn_id=sn_id,
+                        token=claim_token,
+                        error_msg=str(_doc_exc),
+                    )
+                else:
+                    await _asyncio.to_thread(
+                        release_generate_docs_failed_claims,
+                        sn_ids=[sn_id],
+                        claim_token=claim_token,
+                    )
             except Exception:
                 logger.debug(
                     "release_generate_docs_failed_claims also failed for %s",
