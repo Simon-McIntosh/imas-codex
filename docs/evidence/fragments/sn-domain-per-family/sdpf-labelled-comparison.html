@@ -1,0 +1,96 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="docs-project" content="imas-codex">
+  <title>Labelled comparison and calibration regression for the per-family domain decision</title>
+</head>
+<body>
+<article id="sdpf-labelled-comparison" data-reckon="evidence" data-plan="sn-domain-per-family" data-node="sdpf-labelled-comparison">
+  <h2 id="sdpf-labelled-comparison-title">The per-family domain decision measured against blind readers</h2>
+
+  <p id="sdpf-labelled-comparison-method">Two readings, both over the decision as it landed
+  (<code>decide_family_domain</code>), run read-only against the live graph with nothing written to it:
+  1,247 live families scanned, every family decided once and every member reading that one decision.
+  The reference labels are the items two readers agreed on in
+  <code>docs/evidence/fragments/sn-domain-family-labels/</code> (reader one <code>labels.json</code>,
+  reader two <code>labels-second-reader.json</code>), read without sight of any stored domain. They agreed on
+  37 of 40 families and 64 of 73 single names (61 drawn, 3 named). The per-name arm is the domain each name
+  already carries in the graph, not a fresh per-name decision: the per-name path is what the per-family
+  decision replaces, so the comparison is per-family decision against stored domains. The seat was
+  <code>typesafe/jev-1.14</code> at confidence floor 0.68, and 209 judgments were paid for 218 families
+  decided at USD 0.0297 — one judgment per family, not per member.</p>
+
+  <h3 id="sdpf-labelled-comparison-families">Families of three or more members</h3>
+  <p id="sdpf-labelled-comparison-families-headline">On the 35 agreed families that map to a single decision
+  family and hold three or more live members (2,835 member names), the per-family decision files
+  <strong>48.64&nbsp;%</strong> of member names under the reader's domain against <strong>43.17&nbsp;%</strong>
+  for the stored per-name domains. Fourteen families score higher under the per-family decision, seven lower,
+  and fourteen are equal. A family the decision leaves undecided keeps its stored domains, so those families
+  contribute the same numerator to both arms.</p>
+  <table id="sdpf-labelled-comparison-family-table">
+    <thead><tr><th>Sheet family (species as X)</th><th>Live members</th><th>Reader's domain</th><th>Decision</th><th>Per-family share</th><th>Stored share</th></tr></thead>
+    <tbody>
+      <tr><td><code>&lt;X&gt;_density</code></td><td>48</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>1.00</td><td>0.00</td></tr>
+      <tr><td><code>ratio_of_volume_averaged_&lt;X&gt;_density_to_volume_averaged_electron_density</code></td><td>24</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>1.00</td><td>0.08</td></tr>
+      <tr><td><code>&lt;X&gt;_density_at_internal_transport_barrier</code></td><td>21</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>1.00</td><td>0.00</td></tr>
+      <tr><td><code>&lt;X&gt;_density_at_pedestal_top</code></td><td>21</td><td>edge_plasma_physics</td><td>edge_plasma_physics</td><td>1.00</td><td>0.90</td></tr>
+      <tr><td><code>line_averaged_&lt;X&gt;_density</code></td><td>21</td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>1.00</td><td>0.05</td></tr>
+    </tbody>
+  </table>
+  <p id="sdpf-labelled-comparison-section-one">Five of the eight families §1 measured split carry an agreed
+  label and were measured; all five read 1.00 against the reader's domain. Two of the remaining three
+  (<code>&lt;X&gt;_density_at_plasma_boundary</code>, <code>flux_surface_averaged_&lt;X&gt;_density_at_plasma_boundary</code>)
+  are among the items the readers disagree on — reader one says core_plasma_physics, reader two
+  edge_plasma_physics — and are listed for the lead, not resolved here.
+  <code>toroidal_&lt;X&gt;_velocity_at_magnetic_axis</code> is not on the blind sheet and so carries no
+  reference label.</p>
+
+  <h3 id="sdpf-labelled-comparison-singles">Agreed single names</h3>
+  <p id="sdpf-labelled-comparison-singles-headline">On the 61 drawn single names, the per-family decision files
+  <strong>63.93&nbsp;%</strong> under the reader's domain against <strong>54.10&nbsp;%</strong> for the stored
+  domains; 11 of the 61 were left below the confidence floor and counted at their stored domain. The three
+  names §5 singles out are reported apart:</p>
+  <table id="sdpf-labelled-comparison-named-table">
+    <thead><tr><th>Name</th><th>Reader's domain</th><th>Decision</th><th>Stored domain</th></tr></thead>
+    <tbody>
+      <tr><td><code>safety_factor</code></td><td>equilibrium</td><td>equilibrium</td><td>transport</td></tr>
+      <tr><td><code>greenwald_density</code></td><td>core_plasma_physics</td><td>core_plasma_physics</td><td>transport</td></tr>
+      <tr><td><code>voltage_of_valve</code></td><td>fueling</td><td>fueling</td><td>fueling</td></tr>
+    </tbody>
+  </table>
+  <p id="sdpf-labelled-comparison-singles-note">Two of the three move off <code>transport</code> to the reader's
+  domain under the family decision, on the options the sources supply; <code>voltage_of_valve</code> already
+  read <code>fueling</code>.</p>
+
+  <h3 id="sdpf-labelled-comparison-calibration">Calibration regression</h3>
+  <p id="sdpf-labelled-comparison-calibration-headline">On the 169 calibration names of
+  <code>sn-catalog-grouping</code> that are live and labelled (20 lead-approved, 149 from the drawn sample), the
+  per-family decision reaches <strong>72.19&nbsp;%</strong> accuracy against <strong>54.44&nbsp;%</strong> for the
+  stored domains read from <code>scg-domain-incumbent.json</code>. It is not lower, so the regression passes.
+  36 of the 169 were left below the floor and counted as wrong. 92 of the 169 sit in a single-member family; the
+  rest are members of families of up to seven, decided once for the family.</p>
+
+  <h3 id="sdpf-labelled-comparison-undecided">Families left undecided</h3>
+  <p id="sdpf-labelled-comparison-undecided-headline">42 of the 218 families decided came back below the floor;
+  30 of them hold two or more members and 12 are single names, each listed with its members and its two leading
+  domains in <code>labelled-comparison.json</code>. The largest is a family of 33 members whose leading domains
+  are general (0.63-banded answer) and fueling. No member of an undecided family was written — this node writes
+  nothing at all.</p>
+
+  <h3 id="sdpf-labelled-comparison-for-lead">Where the decision and the agreed reader differ</h3>
+  <p id="sdpf-labelled-comparison-for-lead-note">Listed for the lead; none is settled here. Six families the
+  readers agreed on edge_plasma_physics were decided transport (<code>&lt;X&gt;_neutral_momentum_flux</code>,
+  <code>&lt;X&gt;_neutral_particle_flux</code>, and four <code>*_momentum_flux_limiter_coefficient</code>
+  families), and <code>&lt;X&gt;_neutral_velocity</code> was decided core_plasma_physics. Two sheet families map
+  to more than one decision family: <code>&lt;X&gt;_current_density_due_to_&lt;X&gt;_viscosity</code> splits on
+  the viscosity process, and <code>&lt;X&gt;_coordinate_of_&lt;X&gt;_magnetic_field_probe</code> across three.</p>
+
+  <h3 id="sdpf-labelled-comparison-gate">Gate</h3>
+  <p id="sdpf-labelled-comparison-gate-note">The gate ran on the <code>all_debug</code> partition over the
+  family-decision, domain-decision and single-writer tests at the revision named in its header; its log is
+  <code>sdpf-labelled-comparison-gate.log</code> beside this fragment. The measurement is
+  <code>labelled-comparison-run.py</code> and its output <code>labelled-comparison.json</code>.</p>
+</article>
+</body>
+</html>
