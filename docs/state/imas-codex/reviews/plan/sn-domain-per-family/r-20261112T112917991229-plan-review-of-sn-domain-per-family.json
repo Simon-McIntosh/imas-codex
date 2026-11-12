@@ -25,7 +25,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 19,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "66d9279c15f3f1bca1c7b9381f8eea3e302294f0",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75's second bullet now measures on the 35 agreed families that map to one decision family and lists the two that straddle",
+      "reason": "",
+      "when": "2026-11-12T11:56:50.235267+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "66d9279c15f3f1bca1c7b9381f8eea3e302294f0",
+      "commit_basis": "edit",
+      "note": "\u00a75's second bullet now measures on the 35 agreed families that map to one decision family and lists the two that straddle",
+      "reason": "",
+      "when": "2026-11-12T11:56:50.235267+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T112917991229-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T112917991229-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "49e51f0c267a4c52f17b03673cbcb9cdafa11505",
   "rubric": "content",
