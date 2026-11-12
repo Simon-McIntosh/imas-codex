@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T03:00:43.052Z",
+  "dispatched_at": "2026-11-12T02:53:58Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:22",
+      "id": "wiring-1",
+      "reason": "\u00a73 exists so \u00a74 starts from a checkpoint that covers the cohort work; as wired, the one ordering that makes the checkpoint useful is the one the plan does not require, and a restore after \u00a74 would silently lose \u00a72's produced sources.",
+      "text": "plan-section-depends-on gives s3 only sn-integrity-backlog#s52 and not s2, so \u00a73's checkpoint can legally be taken before \u00a72 writes the graph; \u00a73's done-when requires only that the checkpoint postdate \"the last graph write of every \u00a752 run\", so a checkpoint taken between \u00a72's dispatch and its run would satisfy \u00a73 and still predate every name \u00a72 produced",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:56",
+      "id": "reasoning-1",
+      "reason": "at the measured yield the run could spend its whole limit, exhaust all 828 sources, land near +180 and have no stated outcome, leaving the node blocked with unspent budget and the coordinator to rediscover the sizing the plan should have stated.",
+      "text": "the required accepted count of 5,503 is +300 over the 5,203 baseline, drawn from at most 828 sources (the 920 unaccepted less the 92 excluded vocabulary-gap class), a required yield of 36.2%; the census's own cost basis records the full run creating 284 accepted names over 1,308 eligible sources, a yield of 21.7%, and the 828 are that run's leftovers rather than a fresh population; \u00a74 states an escalation only for a run that \"would need more\" (spend), not for exhausting the advanceable classes short of the floor",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "single_goal-1",
+      "reason": "the diagnosis can be delivered while the restoration is unfunded (\"\u00a75 is expected to need the lead's spend ruling\"), and vice versa, so one node cannot close on one verdict and its gate proves neither half; splitting the diagnosis as its own sized node would let it land without the spend ruling.",
+      "text": "\u00a75's done-when binds two independent deliverables into one verdict: restoring accepted documentation to at least 2,368 among accepted names, and naming \"the mechanism that lowered accepted documentation during the 2026-11-11 drain ... with evidence\", which the section's own text says \u00a752 is separately investigating and which \u00a75 may have to derive itself",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c8113cdfdf4f7e65cdff47ff48608346ddaebf4f",
+  "plan_fingerprint": "400a291d551667e18c2b719f5a180417fbd807963967f2203f2d76dd8d4dfca6",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 12,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T025302361524-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "26ef1df34dd6958f2191adbfb4e6d9459937225c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-integrity-backlog \u00a751/\u00a752, sn-catalog-consistency \u00a72, and the cited sib-docs-drain-after-admission.html all resolve; the plan carries no hrefs needing the .html convention.",
+    "done_when": "pass \u2014 all four buildable sections declare a negative control that can fail (\u00a72 planted unproduced source, \u00a73 truncated archive, \u00a74 planted out-of-class source, \u00a75 planted pending-documentation name plus a before/after demotion read), and each measure is a count or a receipt identity.",
+    "evidence_paths": "pass \u2014 every section records under docs/evidence/fragments/sn-full-dd-continuation/, the repository's existing fragment convention, and no gate writes to a scratchpad or node-local path.",
+    "naming": "pass \u2014 the plan names no new symbol, file or function, and carries no plan labels, ticket numbers or changelog prose into code.",
+    "reasoning": "a finding \u2014 \u00a74's accepted-count floor requires a per-source yield 1.7x the rate the same census measured on a fresh population, and the plan names no outcome for exhausting the advanceable sources short of it.",
+    "single_goal": "a finding \u2014 \u00a75's done-when carries both a documentation-restoration threshold and a separate causal diagnosis of the drain.",
+    "wiring": "a finding \u2014 the section-dependency map gives \u00a73 no dependency on \u00a72, so the checkpoint can be taken before \u00a72's graph writes."
+  },
+  "section_digests": {
+    "_document": "687ba927f5bd26f8820871ab346e1dd7924dd0b95f506110a32751e1da3d0a39",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "bb1dab2780e535f42b616684910da0afcff6cbcff4989de929f0dcfe4369a9ad",
+    "s5": "f412afd0e74791b644f3e9723c368c69963d5325f9d96a011840354d41ff9aed"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T03:06:32.638153+00:00",
+  "total": null
+}
