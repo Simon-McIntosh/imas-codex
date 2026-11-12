@@ -110,7 +110,8 @@ restore write and no receipt. Partition (a) is empty, so the control is drawn fr
 <code>restore-documentation-from-revision</code> row from the second — and no receipt of either
 kind, and it is re-read after the restore: it is absent from <code>restore_plan</code>, it still
 carries <code>docs_stage=pending</code>, and it has zero restore receipts (log:
-<code>negative-control.log</code>, which exits 0 only when all three hold). The
+<code>negative-control.log</code>, which records <code>EXIT=1</code> when all three hold and 0
+when any is violated, the required outcome being that nothing was written). The
 instrument's authority rows are composed only from <code>restore_plan</code>, which is partition
 (c) alone.</p>
 
