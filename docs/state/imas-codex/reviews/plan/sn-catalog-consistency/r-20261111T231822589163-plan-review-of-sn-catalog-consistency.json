@@ -33,7 +33,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 8,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75 now requires the census to count a family planted divergent on physics_domain in a disposable graph.",
+      "reason": "",
+      "when": "2026-11-12T00:01:15.484815+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75 now requires the census to count a family planted divergent on physics_domain in a disposable graph.",
+      "reason": "",
+      "when": "2026-11-12T00:01:15.484815+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261111T231822589163-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261111T231822589163-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "70b7fcc72df6628034c66eed5589b84bd481edb6",
   "rubric": "content",
