@@ -98,6 +98,13 @@
       "finding": "duplicate_owner-1",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the existing fresh-interpreter import-order test and the tool-name test)",
       "when": "2026-11-12T02:05:20.127769+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "duplicate_owner-2",
+      "reason": "how the evidence script obtains the spawn recipe is the worker's method; the brief tells it to read the committed configuration",
+      "when": "2026-11-12T02:05:35.972749+00:00"
     }
   ],
   "responses": {
@@ -115,6 +122,12 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the existing fresh-interpreter import-order test and the tool-name test)",
       "when": "2026-11-12T02:05:20.127769+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "how the evidence script obtains the spawn recipe is the worker's method; the brief tells it to read the committed configuration",
+      "when": "2026-11-12T02:05:35.972749+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
