@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -110,10 +110,13 @@
     <div class="r-comment-body"><p>§2 closed (<code>sph-corrects-schema</code>, commits <code>9f4b800b3</code> and <code>09f49e776</code>, review 110). <code>StandardNameSourceRetry.corrects</code> is declared with relationship type <code>CORRECTS</code>; the generated relationships carry the pair; a new endpoint assertion in <code>tests/graph/test_schema_compliance.py</code> passes on the live graph's 20 <code>CORRECTS</code> edges (one declared label pair, none mislabelled) and fails on a <code>StandardNameSource</code>→<code>StandardName</code> edge planted in a disposable graph. Outside scope: the correction records also carry an undeclared <code>correction_of</code> property. <a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261111T221906013871-sph-corrects-schema" data-who="reckon-build" data-when="2026-11-11T23:03:03.725Z">
-    <div class="r-comment-body"><p>Declared StandardNameSourceRetry.corrects (range StandardNameSourceRetry, relationship_type CORRECTS); generated RELATIONSHIPS now carries (&#x27;StandardNameSourceRetry&#x27;,&#x27;CORRECTS&#x27;,&#x27;StandardNameSourceRetry&#x27;,&#x27;one&#x27;); new test_corrects_edges_join_declared_endpoints passes on the live graph&#x27;s 20 CORRECTS edges across 1 declared label pair with 0 mislabelled, and fails on a CORRECTS edge planted StandardNameSource-&gt;StandardName in a disposable graph.</p></div>
+    <div class="r-comment-body"><p>Declared StandardNameSourceRetry.corrects (range StandardNameSourceRetry, relationship_type CORRECTS); generated RELATIONSHIPS now carries ('StandardNameSourceRetry','CORRECTS','StandardNameSourceRetry','one'); new test_corrects_edges_join_declared_endpoints passes on the live graph's 20 CORRECTS edges across 1 declared label pair with 0 mislabelled, and fails on a CORRECTS edge planted StandardNameSource-&gt;StandardName in a disposable graph.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-12T00:45:00Z">
     <div class="r-comment-body"><p>§3 closed (<code>sph-pin-test</code>, commits <code>05e3ad0bc</code> and <code>47bec63c4</code>, review 109). The existing pin-agreement test now also compares the pin with the installed package, and a graph-tier test compares it with the active grammar snapshot; all three read 0.11.1, and a planted installed-version mismatch turns the default-tier test red. <a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-pin-test.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261111T222030410508-sph-pin-test" data-who="reckon-build" data-when="2026-11-11T23:17:03.022Z">
+    <div class="r-comment-body"><p>§3 — the ISN pin is now compared with the installed package (default tier) and with the graph&#x27;s active grammar snapshot (graph tier); all three read 0.11.1 at head, and each comparison refuses a planted mismatch (2 passed default-tier, 1 passed graph-tier, 1 failed / 1 passed under the planted installed-version mismatch).</p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-11-11T22:40:00Z">
     <div class="r-comment-body"><p>§6 closed: the defect is carried on reckon as <code>reckon:a-promotion-reads-the-evidence-it-is-given#s18</code> with followup <code>@f-aprteig-018</code>, citing both landings; no imas-codex test was changed. <a href="/imas-codex/evidence/archive/sn-pipeline-hygiene-landed.html#s6-raised-on-reckon">evidence</a></p></div>
