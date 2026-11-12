@@ -43,9 +43,28 @@
       "note": "\u00a75's ceiling is now computed once at \u00a74's dispatch from the backlog then, \u00a74 reserves that same figure, and any larger starting backlog goes to the lead before \u00a75 spends it.",
       "reason": "",
       "when": "2026-11-12T00:03:08.731301+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75's control now requires the planted name to be reported as pending, not accepted.",
+      "reason": "",
+      "when": "2026-11-12T00:03:48.122687+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75's control now requires the planted name to be reported as pending, not accepted.",
+      "reason": "",
+      "when": "2026-11-12T00:03:48.122687+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
