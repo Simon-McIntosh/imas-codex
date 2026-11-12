@@ -255,6 +255,21 @@ class _SilentPublisher:
         return SimpleNamespace(errors=[], files_copied=0, commit_sha=None)
 
 
+class _CommittingPublisher:
+    """Publish a change, so the cut has a commit of its own to deliver."""
+
+    def __init__(self) -> None:
+        self.relpath = "RELEASED.md"
+
+    def __call__(self, *, isnc_path, **kwargs):
+        path = Path(isnc_path)
+        (path / self.relpath).write_text("catalog\n", encoding="utf-8")
+        _git("add", self.relpath, cwd=path)
+        _git("commit", "-qm", "release catalog", cwd=path)
+        sha = _git("rev-parse", "HEAD", cwd=path).stdout.strip()
+        return SimpleNamespace(errors=[], files_copied=1, commit_sha=sha)
+
+
 class _SilentGitHub:
     def create_pull_request(self, **_kwargs):
         raise AssertionError("an RC cut must not open a pull request")
@@ -310,6 +325,40 @@ def test_a_release_cut_from_a_detached_worktree_creates_the_tag(
     assert _git("tag", "-l", "v1.0.0rc1", cwd=wt).stdout.strip() == "v1.0.0rc1"
     pushed = _git("ls-remote", "--tags", "origin", "refs/tags/v1.0.0rc1", cwd=wt)
     assert pushed.stdout.strip(), "the tag reached the stand-in remote"
+
+
+def test_a_release_cut_that_commits_delivers_its_commit_to_the_remote_main(
+    tagged_repo, tmp_path, monkeypatch
+):
+    """The commit the cut made is what lands on main, and what the tag names."""
+    remote = _stand_in_remote(tagged_repo, tmp_path)
+    wt = _detached_worktree(tagged_repo, tmp_path)
+    staging = _staging_with_catalog(tmp_path)
+    _prepare_cut(tagged_repo, monkeypatch)
+
+    report = run_release(
+        wt,
+        "candidate",
+        bump="minor",
+        remote="origin",
+        skip_export=True,
+        staging_dir=staging,
+        publisher=_CommittingPublisher(),
+        github_client=_SilentGitHub(),
+    )
+
+    assert report.errors == []
+    released = report.commit_sha
+    assert released, "the publisher reported the commit it made"
+    assert _git("rev-parse", "HEAD", cwd=wt).stdout.strip() == released
+
+    remote_main = _git("rev-parse", "refs/heads/main", cwd=remote).stdout.strip()
+    assert remote_main == released, "the release commit reached the remote's main"
+
+    tagged = _git(
+        "rev-parse", "refs/tags/v1.0.0rc1^{commit}", cwd=remote
+    ).stdout.strip()
+    assert tagged == released, "the tag names the release commit"
 
 
 def test_a_release_cut_from_an_unmerged_detached_head_is_refused(

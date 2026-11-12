@@ -1465,9 +1465,11 @@ def run_release(
     logger.info("Created tag %s", git_tag)
 
     # ── Push commit + tag ──────────────────────────────────
-    # Push main branch first (if there's a new commit)
+    # Push the released commit onto the remote's main (if there's a new one).
+    # Pushing the literal ref would publish whatever local `main` holds, which
+    # on a detached head is not the commit this cut just made.
     if report.commit_sha:
-        push_result = _run_git("push", effective_remote, "main", cwd=isnc_path)
+        push_result = _run_git("push", effective_remote, "HEAD:main", cwd=isnc_path)
         if push_result.returncode != 0:
             # Roll back the tag on push failure
             _run_git("tag", "-d", git_tag, cwd=isnc_path)
