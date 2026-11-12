@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run armed no baseline_suite or after_suite: the brief declares light work with no test run, and its only measurement is gate_domain_labels.py, whose log records EXIT=0 at the base revision and whose negative control records EXIT=1. No suite delta exists, so no failure can be added or removed. As a head arm this review re-ran that same gate script at the landed head, on the sheet plus the two committed label files extracted from a0462193f, and it printed entries=113 distinct_ids=113 ids_match_sheet_order=True bad_domains=0 bad_second_choices=0 with EXIT=0, so the head arm fails no test either.",
+  "call_sites": [],
+  "completed_at": "2026-11-12T08:14:52.540Z",
+  "dispatched_at": "2026-11-12T08:06:26Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-domain-family-labels/labels-second-reader-notes.md",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "non-blocking: the notes state that anything on a divertor target structure, including nuclear heating, belongs to divertor_physics, but item-095 at labels-second-reader.json:661 labels nuclear_heating_power_of_divertor as neutronics, so the documented rule and the applied labels disagree and a reader comparing the two readers cannot tell which rule was used."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-family-labels/labels-second-reader-notes.md",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "non-blocking: the notes file is 331 words (320 excluding the title) against the brief's under-300 limit, and the run manifest states the file is under 300 words, so the record overstates a constraint the gate never measures."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T073025939315-sdpf-blind-domain-reader-two/gate_domain_labels.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "non-blocking: the only guard over the delivered labels lives in the run directory and not in the repository, so any later edit to labels-second-reader.json \u2014 including one made when the two readers are compared \u2014 is unchecked; the node's write scope forbade adding an in-repo test, so this is recorded rather than repaired here."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none \u2014 the two files are evidence data under docs/evidence/fragments/; the only repository references to labels-second-reader.json are in second-reader-brief.md, which is a brief and not runtime code.",
+    "diff": "Read commit by commit against 55fb002df; one commit a0462193f adds two new files, 839 lines, with a conventional subject and a body stating the quantity judged and the independence rule; no test, source or plan file is touched.",
+    "done_when": "The done_when asks for exactly one entry per one of the 113 ids with every domain a key of the sheet's domains and the file parsing; gate_domain_labels.py asserts entries==113, distinct==113, ids in sheet order, zero bad domains, zero bad second choices, confidence in set and no missing reason, and its log records those figures with EXIT=0.",
+    "goal": "The node's goal is one independent physics-domain label per blind-sheet item; the landed labels-second-reader.json carries 113 entries, one domain key each, in sheet order, so the goal is met.",
+    "manifest": "Read; it records status complete, the gate log path, the red negative-control log at EXIT=1, the full list of files opened, and a rubric line per dimension, and its stated counts (113 entries, high 60 / medium 52 / low 1, 53 second choices, 25 domains) all reproduce against the committed file.",
+    "write_paths": "Read the declared paths from the review dispatch and the source manifest; git show --stat a0462193f lists only docs/evidence/fragments/sn-domain-family-labels/labels-second-reader.json and labels-second-reader-notes.md, both inside the declared pair."
+  },
+  "justifications": {
+    "durability": "gate_domain_labels.py:26-34 compares each label against the sheet's own domain keys and id order rather than against a value the gate supplied, so a drifted domain or a dropped id reddens it; the guard nonetheless lives only in the run directory, so nothing in the repository re-checks the file.",
+    "evidence": "gate-domain-labels.log records entries=113 distinct_ids=113 ids_match_sheet_order=True bad_domains=0 with EXIT=0, and gate-negative-control.log records bad_domains=1 bad_second_choices=1 GATE=FAIL EXIT=1, so the gate measures the done_when and is shown to fire.",
+    "fit": "labels-second-reader.json:1 follows the list-of-entries shape of its sibling reader artefact and labels-second-reader-notes.md:1 records rules in the same prose style as labels-notes.md, with no plan, stage, version or ticket identifier in either name or content.",
+    "goal_fidelity": "labels-second-reader.json:1-793 labels all 113 sheet ids with a sheet domain key, but item-095 at labels-second-reader.json:661 carries neutronics where labels-second-reader-notes.md:17 states nuclear heating on a divertor goes to divertor_physics.",
+    "reuse": "No code was added; a capability search for a labels-comparison owner found only the unrelated study scripts under docs/evidence/fragments/sn-review-through-jev/, which this change neither extends nor duplicates.",
+    "scope_discipline": "git show --stat a0462193f touches only the two declared fragment paths; the generator, gate and landing record live in the run directory and scratch, not in the repository."
+  },
+  "notes": "Counts in the run manifest were re-derived from the committed file rather than taken on trust: 113 entries, 113 distinct ids, sheet order preserved, confidence high 60 / medium 52 / low 1, 53 second choices, 25 of 32 domains used, general unused \u2014 all reproduce. The first reader's labels.json and labels-notes.md were not opened, so the two readings were not compared here; that comparison is the use of this artefact, not a step in reviewing it.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261112T080534913286-review-of-sdpf-blind-domain-reader-two-a0462193ffe0",
+  "reviewed_base_sha": "55fb002dfa0cfea56cadeaea0a6a8475ccabe215",
+  "reviewed_files": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T073025939315-sdpf-blind-domain-reader-two/brief.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T073025939315-sdpf-blind-domain-reader-two/manifest.md",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T073025939315-sdpf-blind-domain-reader-two/gate-domain-labels.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T073025939315-sdpf-blind-domain-reader-two/gate-negative-control.log",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T073025939315-sdpf-blind-domain-reader-two/gate_domain_labels.py",
+    "docs/evidence/fragments/sn-domain-family-labels/blind-sheet.json",
+    "docs/evidence/fragments/sn-domain-family-labels/labels-second-reader.json (from a0462193f)",
+    "docs/evidence/fragments/sn-domain-family-labels/labels-second-reader-notes.md (from a0462193f)",
+    "docs/evidence/fragments/sn-domain-family-labels/second-reader-brief.md"
+  ],
+  "reviewed_head_sha": "a0462193ffe062c9e96fef7b10b3aaed54410f6f",
+  "reviewed_run_id": "r-20261112T073025939315-sdpf-blind-domain-reader-two",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:22:53.912802+00:00",
+  "total": 107
+}
