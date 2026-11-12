@@ -19,12 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-catalog-consistency">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s5&quot;:[&quot;sn-definitions-by-construction#s4&quot;],&quot;s6&quot;:[&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-definitions-by-construction#s4&quot;,&quot;sn-definitions-by-construction#s5&quot;],&quot;s7&quot;:[&quot;sn-definitions-by-construction#s6&quot;,&quot;sn-domain-per-family#s3&quot;]}">
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
+<meta name="plan-version" content="7">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -81,7 +81,7 @@
     </ul>
 
     <h2 id="s4">§4 — Every published definition counted against its name</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p>The last three rows of §1 were found by reading a sample. This section counts them. It is a read-only measurement over the published set, and its labelled cases become the reference §5 is checked against.</p>
     <p>Done when:</p>
     <ul>
@@ -164,6 +164,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261112T021004189810-sdbc-name-definition-count" data-who="reckon-build" data-when="2026-11-12T08:02:39Z">
     <div class="r-comment-body"><p>381 published names read against their definitions: under the species ruling 310 agree and 71 carry a defect (233.5 qualifier, 116.3 abstract parent, 17.7 narrower, 6.4 unit projected over 1,975), against 270 and 111 as first recorded; a separate blind reader put the same class on 45 of the 60-name subset (kappa 0.472 mismatch versus agreement) and the 15 disagreements are listed unresolved</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-11-12T08:35:00Z">
+    <div class="r-comment-body"><p>§4 closed (<code>sdbc-name-definition-count</code>, commits <code>096610f40</code> and <code>c95592d08</code>, reviewed at the final head). 381 published names of <code>v0.4.0rc8</code>, drawn across all 28 domain files, were read against their definitions. Under the lead's ruling that a bare species name counts ions, 310 agree and 71 (19 %) do not: 43 lack a qualifier the definition carries, 19 publish an abstract parent as a quantity, 8 are narrower than their name and 1 has a unit that does not fit. As first recorded, before the ruling, the count was 111, of which 40 were an ion-only population under a bare species name. Projected over the 1,975 published names: about 234 missing a qualifier, 116 abstract parents, 18 narrower, 6 unit. The largest patterns after the ruling are an equivalent-electron count the name does not state (13) and an unstated weighting (9). A separate blind reader, told the ruling, put the same class on 45 of a 60-name subset; on mismatch against agreement the two readers agree on 47 of 60, kappa 0.47, and the second reader flags more (21 against 12). The 15 names they disagree on are listed in the record and resolved by neither. The ten names §1 cites are in the record. The second reader's labels landed separately (<code>sdbc-second-reading</code>). Record: <code>docs/evidence/fragments/sn-definitions-by-construction/name-definition-labels.json</code> and <code>sdbc-name-definition-count.html</code>.</p></div>
 </div>
 </section>
 </main>
