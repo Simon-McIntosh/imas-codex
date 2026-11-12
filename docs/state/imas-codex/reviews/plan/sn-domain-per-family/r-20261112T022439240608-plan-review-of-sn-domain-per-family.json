@@ -68,9 +68,22 @@
       "note": "\u00a73 now routes a family \u00a72 reports undecided to the lead, whose recorded correction naming the family gives it one domain or holds it split, so the existing exception covers it",
       "reason": "",
       "when": "2026-11-12T05:57:06.226141+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "done_when-1",
+      "reason": "the label set is produced by a separate reader node the coordinator dispatches, which sees neither decision; the building node does not label, and the done-when already requires the producer to be committed with the evidence",
+      "when": "2026-11-12T05:57:24.447251+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "the label set is produced by a separate reader node the coordinator dispatches, which sees neither decision; the building node does not label, and the done-when already requires the producer to be committed with the evidence",
+      "when": "2026-11-12T05:57:24.447251+00:00"
+    },
     "done_when-2": {
       "action": "noted",
       "by": "plan-review-reflex",
