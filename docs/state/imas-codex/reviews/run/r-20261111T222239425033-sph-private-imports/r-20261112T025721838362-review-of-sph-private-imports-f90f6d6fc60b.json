@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T03:09:15.646Z",
+  "dispatched_at": "2026-11-12T03:00:22Z",
+  "evidence_inputs": "The reuse finding from the previous review is answered: the second copy is deleted, one implementation remains in catalog_release.py with public delegations, and the no-second-copy check has a negative control that reddens at the pre-repair revision 611ba81d3 (read from ~/.cache/imas-codex-s19/sph-private-imports-reuse-control.log, FAILED ... EXIT=1). The two actioned items in the coordinator's message (remove the copies, fix the tests: line) are both done. What the delta does not do is collapse promote.py's own _git invocation, which is still a second git runner in the package and is what the fragment's 'one git invocation' sentence overstates.",
+  "findings": [
+    {
+      "blocks": false,
+      "category": "evidence",
+      "file": "docs/evidence/fragments/sn-pipeline-hygiene/sph-private-imports.html",
+      "line": 83,
+      "severity": "non-blocking",
+      "text": "The fragment says 'the package holds one github-slug parser and one git invocation instead of three'. The tree at this head holds two git-invocation helpers in the package: imas_codex/standard_names/catalog_release.py:401 (_run_git, exported as run_git) and imas_codex/standard_names/promote.py:176 (_git), and release_notes.py:133 imports promote._git for its diff/show reads, so a reader is told a consolidation landed that did not. The 'three' is also unsupported for slug parsers: at 611ba81d3 the package held two (catalog_release._github_slug and release_notes._github_slug); promote.parse_pull_request_url parses a PR URL, not a remote slug. The landed repair is correct and the copy is genuinely gone; only the evidence prose overstates its reach. File the count as two helpers is unchanged and delete the 'one ... instead of three' claim, or fold the promote._git consumer onto run_git in the continuation node that closes release_notes' remaining exemptions."
+    },
+    {
+      "blocks": false,
+      "category": "fit",
+      "file": "tests/standard_names/test_release_import_locality.py",
+      "line": 36,
+      "severity": "non-blocking",
+      "text": "The docstring still says 'release_notes imports _github_slug and _run_git from catalog_release at module level'. After this delta release_notes.py:29 imports the public spellings github_slug and run_git, so the comment names two private names that no longer cross that boundary and would mislead the next reader of the guard it documents. The test body is unaffected; only the prose is stale, and the delta is what made it stale."
+    },
+    {
+      "blocks": false,
+      "category": "evidence",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222239425033-sph-private-imports/manifest.md",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "The baseline_suite and after_suite command fields carry angle-bracket placeholders ('PYTHONPATH=<base tree> ... <the 14 files of the first round's gate>' and '<the 17 files named on the tests line>'), which the record contract forbids in a command field. The literal commands are recoverable from each log's own 'rev:'/'cmd:' header and from the manifest's now-exact tests: line, so nothing is lost; the two JSON blocks simply cannot be re-run as written. Substitute each log's header command."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/release_notes.py:410 and :412 (reviewing_guide_url), imas_codex/standard_names/promote.py:1994-1997 (resolve_tag_remote), reached from imas_codex/cli/sn.py:5397 and :5500 and imas_codex/standard_names/promote.py:411",
+    "diff": "Read commit by commit: 5f7ccade3 (48 lines in catalog_release.py, 4 in promote.py, 24 removed from release_notes.py, one exemption entry deleted, plus the evidence run script and fragment) and f90f6d6fc (a five-line correction to the fragment's closure description); the merge 2f7186bca contributes no content of this node's own.",
+    "done_when": "The measure is that the private-name rule passes at head, fails when a closed import is restored, and tests/standard_names adds no failure id against the stated base; the manifest records a two-arm gate (base 709 passed/1 skipped at 6f9eb556, head 831 passed at 5f7ccade3) both EXIT=0, plus two negative-control logs that each fail by name, and I read both arms' summary lines and both controls' assertions in the logs rather than the manifest's account.",
+    "goal": "The reviewed delta's goal is to remove the duplicated git helpers the previous review named, give them one owner exported under public names, close promote.py's private-name exemption, and correct the fragment's closure count; imas_codex/standard_names/catalog_release.py:412 exports run_git and :1527 exports github_slug as delegations over the existing private implementations, release_notes.py:29 and promote.py:1994 import them, and the promote.py exemption entry is deleted at tests/standard_names/test_package_import_boundaries.py:43.",
+    "manifest": "Read; it states the repair gate at 5f7ccade3 as 831 passed with EXIT=0 against a 709-passed base arm, records both negative controls with their own logs, and its tests: line now names the exact 17-file command the head arm ran, repairing the previous review's receipt finding.",
+    "write_paths": "Four of the six changed paths (test_package_import_boundaries.py, release_notes.py and the two evidence files) are inside the dispatch's declared scope; catalog_release.py and promote.py are outside the original list and were granted in the repair round, which the manifest's scope_note and the coordinator's message ('catalog_release.py is now in your write paths ... closing the promote.py:1994 exemption too') record."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261112T025721838362-review-of-sph-private-imports-f90f6d6fc60b",
+  "reviewed_base_sha": "611ba81d3197474abf0f11979f634d4dcc53a5e7",
+  "reviewed_head_sha": "f90f6d6fc60b3214c0bb9935eeee2f5b6f8b07cf",
+  "reviewed_run_id": "r-20261111T222239425033-sph-private-imports",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T03:11:01.457882+00:00",
+  "total": 107
+}
