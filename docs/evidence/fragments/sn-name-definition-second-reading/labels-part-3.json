@@ -486,7 +486,7 @@
   "id": "p3-070",
   "class": "agrees",
   "confidence": "high",
-  "evidence": "the aggregation includes Li$^+$, Li$^{2+}$, and Li$^{3+}$ and excludes neutral lithium",
+  "evidence": "The aggregation includes Li$^+$, Li$^{2+}$, and Li$^{3+}$ and excludes neutral lithium",
   "reason": "A bare species name counts ions, and the definition is the local charge-state-summed lithium ion density at the pedestal top the name states."
  },
  {
@@ -516,5 +516,236 @@
   "confidence": "high",
   "evidence": "the rate at which the signed poloidal magnetic flux changes across nested equilibrium magnetic flux surfaces",
   "reason": "The radial derivative of poloidal magnetic flux, in Wb.m^-1, is what the name states."
+ },
+ {
+  "id": "p3-075",
+  "class": "unit-does-not-fit-name",
+  "confidence": "medium",
+  "evidence": "The quantity is defined by the surface maximum of the local neutron energy-flux field",
+  "reason": "The name states a neutron flux, which is a particle rate per area, but the unit W.m^-2 and the definition are an energy flux, a different quantity."
+ },
+ {
+  "id": "p3-076",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the scalar component, along the local magnetic-field direction, of an effective convection velocity for transport of momentum carried by a neutral population in one resolved internal state",
+  "reason": "The parallel effective neutral internal-state momentum convection velocity is exactly what the name states, in m.s^-1."
+ },
+ {
+  "id": "p3-077",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent does not specify fast, thermal, impurity, neutral, or other particle populations and does not by itself select any coordinate-component projection",
+  "reason": "The name reads as a concrete particle torque, but the definition declares an unresolved parent whose population and component forms are fixed by more specific instances."
+ },
+ {
+  "id": "p3-078",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "This coefficient governs advective, non-diffusive transport of poloidal [momentum](name:momentum) carried by ions of one specified species and charge state",
+  "reason": "A charge-state-resolved poloidal momentum convection velocity coefficient is what the name states."
+ },
+ {
+  "id": "p3-079",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "At this parent level, no poloidal or toroidal projection, spatial locus, or averaging weight is imposed",
+  "reason": "The name states one magnetic flux, but the definition declares a source-separated parent whose projection and averaging forms are fixed by its specializations."
+ },
+ {
+  "id": "p3-080",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local rate per unit volume at which Coulomb scattering transfers angular momentum to the bulk, near-Maxwellian thermal electron population, restricted to collisions with counter-passing fast particles",
+  "reason": "Counter-passing thermal electron collisional torque density, in N.m^-2, is what the name states."
+ },
+ {
+  "id": "p3-081",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the natural logarithm of a selected plasma density after normalization by a reference value for the same density quantity",
+  "reason": "The logarithm of density is the logarithmic density variable the name states; normalization by a reference is inherent in taking a logarithm of a dimensionful density."
+ },
+ {
+  "id": "p3-082",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "Recombination power is the heat load delivered to plasma-facing materials when ions recover electrons and transition to neutral states",
+  "reason": "Power due to recombination over plasma-facing materials, in watts, is what the name states."
+ },
+ {
+  "id": "p3-083",
+  "class": "unit-does-not-fit-name",
+  "confidence": "medium",
+  "evidence": "the signed projection of the effective magnetization assigned to a discrete ferritic element onto the toroidal basis direction of the right-handed cylindrical $(R, \\phi, Z)$ frame",
+  "reason": "Magnetization has dimensions of current per length (A.m^-1), so the stated A.m^-2 contradicts the quantity the name states."
+ },
+ {
+  "id": "p3-084",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the number of unbound electrons contained within the plasma volume, aggregated over all electron populations",
+  "reason": "A total electron count, dimensionless, is exactly what the name states."
+ },
+ {
+  "id": "p3-085",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The numerator is summed over ionized oxygen charge states $O^{1+}$ through $O^{8+}$ and excludes neutral oxygen",
+  "reason": "A bare species name counts ions, and the definition is the ratio of volume-averaged oxygen ion density to volume-averaged electron density that the name states."
+ },
+ {
+  "id": "p3-086",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "The accumulated equivalent-electron count is defined by $$ N_{\\mathrm{eq}}(t) = \\sum_s \\int_{t_0}^{\\min(t,t_1)} \\dot{N}_{s,\\mathrm{eq}}(t')\\,dt' $$",
+  "reason": "The name says accumulated prefill gas count, but the definition is an equivalent-electron inventory summed over species, a count convention the name lacks."
+ },
+ {
+  "id": "p3-087",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "quantifies gradient-driven diffusive transport of thermal energy carried by ions in one specified charge state",
+  "reason": "A radial, charge-state-resolved energy diffusion coefficient in m^2.s^-1 is what the name states."
+ },
+ {
+  "id": "p3-088",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the coefficient of $i$ in the toroidal component of the first-order plasma velocity perturbation for a single toroidal Fourier harmonic",
+  "reason": "The imaginary part of the toroidal perturbed plasma velocity, in m.s^-1, is exactly what the name states."
+ },
+ {
+  "id": "p3-089",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "The outer [radius](name:radius) is the larger of the two radii bounding the annular conductor cross-section of one poloidal field coil",
+  "reason": "Outer radius of a poloidal field coil's annular cross-section, in metres, is what the name states."
+ },
+ {
+  "id": "p3-090",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The quantity named here is $\\operatorname{Im}\\{\\delta B_{\\theta}^{(V)}\\}$",
+  "reason": "The imaginary part of the poloidal perturbed vacuum magnetic field, in tesla, is exactly what the name states."
+ },
+ {
+  "id": "p3-091",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local volumetric energy deposition rate within the material of one limiter tile caused by neutron interactions and associated gamma-radiation absorption",
+  "reason": "Nuclear power density in a limiter tile, in W.m^-3, is what the name states."
+ },
+ {
+  "id": "p3-092",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the instantaneous neutral-gas throughput supplied to the vessel by gas injection, expressed as an equivalent-electron rate",
+  "reason": "The name says total neutral source rate, but the definition is an equivalent-electron rate summed over species, a count convention the name lacks."
+ },
+ {
+  "id": "p3-093",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The normalized toroidal flux coordinate evaluated at the pedestal top is the dimensionless magnetic-surface label assigned to the top of the H-mode edge pedestal",
+  "reason": "The normalized toroidal flux coordinate at the pedestal top, dimensionless, is what the name states."
+ },
+ {
+  "id": "p3-094",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the signed first local tangential coordinate of a point on a neutral beam injector source outline",
+  "reason": "The first local tangential coordinate of the injector's source outline is what the name states, in metres."
+ },
+ {
+  "id": "p3-095",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the species-resolved zeroth velocity-space moment of the perturbed gyrocenter distribution divided by a positive reference density",
+  "reason": "A normalized gyrocenter perturbed density, dimensionless, is exactly what the name states."
+ },
+ {
+  "id": "p3-096",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local electromagnetic Lorentz force density acting on plasma and current-carrying conducting or structural material",
+  "reason": "Volumetric force as electromagnetic body-force density, in N.m^-3, is what the name states."
+ },
+ {
+  "id": "p3-097",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "T_{e,\\mathrm{axis}} = \\frac{2}{3}\\left\\langle E_{e,\\mathrm{random}}\\right\\rangle_{\\mathrm{axis}}",
+  "reason": "The local electron kinetic temperature at the magnetic axis, in eV, is what the name states."
+ },
+ {
+  "id": "p3-098",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The sum includes all positive tungsten ionization states and excludes neutral tungsten",
+  "reason": "A bare species name counts ions, and the line average of the charge-state-summed tungsten ion density is what the name states."
+ },
+ {
+  "id": "p3-099",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "quantifies the local concentration of hydrogen-3 fuel ions in the plasma",
+  "reason": "A bare species name counts ions, and the local tritium ion density is what the name states."
+ },
+ {
+  "id": "p3-100",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "The numerator includes neutral boron and every ionic boron charge state, while the denominator represents the complete electron population",
+  "reason": "A bare species name denotes ions only, but the definition's numerator is elemental boron including neutral boron, a population the name does not state."
+ },
+ {
+  "id": "p3-101",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity represents the energy-weighted parallel motion carried by the perturbed gyrocenter population.",
+  "reason": "The normalized first-Bessel-weighted parallel gyrocenter heat-flux moment, dimensionless, is what the name states."
+ },
+ {
+  "id": "p3-102",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed conventional charge-flux density carried by fast particles on co-passing, untrapped guiding-center orbits",
+  "reason": "Co-passing fast-particle current density in A.m^-2 is what the name states, with the orbit class the name carries."
+ },
+ {
+  "id": "p3-103",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "each is an instance of this parent quantity with $s$ fixed to the corresponding vertical extremum",
+  "reason": "The name states one triangularity, but the unqualified definition covers either vertical extremum and its branch is fixed only by the upper and lower instance names."
+ },
+ {
+  "id": "p3-104",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "without selecting a transport direction or implying isotropic transport. For a chosen physical transport direction, the defining Fickian closure is",
+  "reason": "The name states one ion energy diffusivity, but the definition leaves both the transport direction and the ion population to be fixed by more specific instances."
+ },
+ {
+  "id": "p3-105",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "represented using an equivalent-electron accounting convention",
+  "reason": "The name says accumulated ammonia count, but the quantity is an equivalent-electron count with ten units per molecule, a count convention the name omits."
+ },
+ {
+  "id": "p3-106",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the state-resolved anisotropic kinetic pressure of suprathermal neutral atoms or molecules occupying a specified internal quantum or excitation state",
+  "reason": "The name states a scalar pressure, but the definition is the full anisotropic pressure tensor of the selected state, an identifying attribute the name lacks."
+ },
+ {
+  "id": "p3-107",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The inverse square of total magnetic-field strength is a local magnetic-geometry factor",
+  "reason": "The reciprocal square of the total magnetic field magnitude, in T^-2, is exactly what the name states."
  }
 ]
