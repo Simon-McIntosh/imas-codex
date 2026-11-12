@@ -53,6 +53,16 @@
       "note": "\u00a75 now names its rate: spend per name whose documentation reached accepted under the drain's own run id (USD 11.14 over 105 names, about USD 0.11).",
       "reason": "",
       "when": "2026-11-12T02:34:03.135120+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "\u00a75's ceiling is now read when \u00a75 starts, after \u00a74, so it covers the names \u00a74 adds; \u00a74 no longer reserves it, and if the approval's balance is below the ceiling \u00a75 goes to the lead before running.",
+      "reason": "",
+      "when": "2026-11-12T02:34:11.600173+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "\u00a75 now names its rate: spend per name whose documentation reached accepted under the drain's own run id (USD 11.14 over 105 names, about USD 0.11).",
       "reason": "",
       "when": "2026-11-12T02:34:03.135120+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75's ceiling is now read when \u00a75 starts, after \u00a74, so it covers the names \u00a74 adds; \u00a74 no longer reserves it, and if the approval's balance is below the ceiling \u00a75 goes to the lead before running.",
+      "reason": "",
+      "when": "2026-11-12T02:34:11.600173+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T014840801961-plan-review-of-sn-full-dd-continuation.json",
