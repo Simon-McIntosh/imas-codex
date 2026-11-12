@@ -35,6 +35,13 @@
       "note": "\u00a75's second bullet now compares against the share the decision reaches on the same families under \u00a72's options, measured in the same run",
       "reason": "",
       "when": "2026-11-12T10:11:48.630360+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "reasoning-1",
+      "reason": "both option sets run through the same per-family decision over the same families in one pass, and the eighth bullet records the judgments paid and their cost for that pass",
+      "when": "2026-11-12T10:12:15.026715+00:00"
     }
   ],
   "responses": {
@@ -46,6 +53,12 @@
       "note": "\u00a75's second bullet now compares against the share the decision reaches on the same families under \u00a72's options, measured in the same run",
       "reason": "",
       "when": "2026-11-12T10:11:48.630360+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "both option sets run through the same per-family decision over the same families in one pass, and the eighth bullet records the judgments paid and their cost for that pass",
+      "when": "2026-11-12T10:12:15.026715+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T093536586768-plan-review-of-sn-domain-per-family.json",
