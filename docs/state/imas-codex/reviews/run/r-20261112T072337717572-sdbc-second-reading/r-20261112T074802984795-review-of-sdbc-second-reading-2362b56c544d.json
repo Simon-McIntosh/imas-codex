@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": null,
+  "call_sites": [],
+  "completed_at": "2026-11-12T08:02:48.432Z",
+  "dispatched_at": "2026-11-12T07:55:19Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-name-definition-second-reading/labels.json",
+      "line": "342",
+      "severity": "non-blocking",
+      "text": "non-blocking: item-49's evidence quotes a sentence about the shared linear-momentum concept, which is the ground for abstract-parent-as-quantity, not for the class actually recorded; unit-does-not-fit-name is decided by the unit kg.m^-1.s^-2 against momentum's kg.m.s^-1, and no phrase in the item's description or documentation can decide it, so this entry's evidence field does not carry the deciding evidence the brief asked for."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T072337717572-sdbc-second-reading/manifest.md",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest asserts that every evidence field was verified to be an exact substring of its definition text (\"final check: 0 non-verbatim\") but records no command or log for that check \u2014 the tests line carries only the count gate \u2014 so the strongest claim the run makes is not reproducible from its own record, even though my independent re-run confirms it is true."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "three commits each extend labels.json by one twenty-item block and the last tightens three evidence quotes to exact substrings plus adds items 41-60; the final file parses as 60 well-formed entries with no duplicate ids",
+    "done_when": "the done_when is a one-line python check printing 60 entries, 60 distinct ids matching the sheet and 0 classes outside its keys, plus a manifest stating the files opened; gate.log records exactly those three figures over a bare EXIT=0 and my re-run reproduces them",
+    "goal": "the goal is a second independent reading of 60 standard names into labels.json; the landed docs/evidence/fragments/sn-name-definition-second-reading/labels.json holds 60 entries in sheet order, each with id, class, confidence, a quoted deciding phrase and a one-sentence reason",
+    "manifest": "read; its tests line carries the literal one-line gate command, test_logs names gate.log ending in EXIT=0, and its files_opened list matches the worker's tool inputs in stream.jsonl, with no forbidden source in any tool input",
+    "write_paths": "the manifest declares the single path docs/evidence/fragments/sn-name-definition-second-reading/labels.json and the diff against the base changes that file and nothing else"
+  },
+  "justifications": {
+    "durability": "no committed test or validator covers the fragment, so the only guard against a regression is the ad-hoc `python3 -c` gate recorded in the manifest's tests line, which would fail if an entry were dropped or a class key misspelled but does not run anywhere on its own.",
+    "evidence": "gate.log records `entries 60 distinct_ids 60 ids_match_sheet True outside_classes 0` over a bare `EXIT=0`, and my independent re-run of that count plus a verbatim-evidence check against the committed file returned the same figures.",
+    "fit": "the landed file follows the sibling second-reading fragment's idiom in docs/evidence/fragments/sn-domain-family-labels/labels.json \u2014 a top-level JSON array of one flat object per item keyed by id, class/domain, confidence and reason.",
+    "goal_fidelity": "docs/evidence/fragments/sn-name-definition-second-reading/labels.json holds 60 entries in sheet order, each with exactly the five brief-mandated keys, so the second reading is the deliverable the goal names.",
+    "reuse": "the diff adds no function, class or module; a search over docs/evidence/fragments and tests/ for a shared labels validator found none, so there is no owner this change could have extended or forked.",
+    "scope_discipline": "`git diff --stat 0dd85e271f9c 2362b56c544d` reports one file changed, 422 insertions, and that file is the single path the manifest declares."
+  },
+  "project": "imas-codex",
+  "provenance": {
+    "added_failure_derivation": "the reviewed run's manifest carries no baseline_suite or after_suite arms \u2014 it was dispatched as a light docs-only node with 'no test run' \u2014 so no suite delta exists; its single gate log ends in EXIT=0 and records no failing test id, so added_failure_count is 0 with an empty id list.",
+    "gate_log_read": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T072337717572-sdbc-second-reading/gate.log",
+    "reviewer_recheck": "re-ran the count gate and an independent evidence-verbatim check over git show 2362b56c5:docs/evidence/fragments/sn-name-definition-second-reading/{labels,blind-sheet}.json in /tmp/reckon-crew-scratch/r-20261112T074802984795-review-of-sdbc-second-reading-2362b56c544d; result: entries 60, distinct 60, match True, outside_classes 0, nonverbatim 0, order_match True."
+  },
+  "raw_text": "VERDICT goal: the goal is a second independent reading of 60 standard names into labels.json; the landed docs/evidence/fragments/sn-name-definition-second-reading/labels.json holds 60 entries in sheet order, each with id, class, confidence, a quoted deciding phrase and a one-sentence reason.\nVERDICT done_when: the done_when is a one-line python check printing 60 entries, 60 distinct ids matching the sheet and 0 classes outside its keys, plus a manifest stating the files opened; gate.log records exactly `entries 60 distinct_ids 60 ids_match_sheet True outside_classes 0` over a bare `EXIT=0` and my re-run of that count plus a verbatim-evidence check reproduces it.\nVERDICT write_paths: the manifest declares the single path docs/evidence/fragments/sn-name-definition-second-reading/labels.json, and `git diff --stat 0dd85e271f9c 2362b56c544d` shows that file alone, 422 insertions.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T072337717572-sdbc-second-reading/manifest.md; its tests line carries the literal one-line gate command, test_logs names gate.log ending in `EXIT=0`, and its files_opened list matches the worker's tool inputs in stream.jsonl, with no forbidden source in any tool input.\nVERDICT diff: read commit by commit against 0dd85e271f9c \u2014 4c5e45ee2, 1d1e4f4fd and 2362b56c5 each extend labels.json by one twenty-item block, the last also tightening three evidence quotes to exact substrings; the final file parses as 60 well-formed entries with no duplicate ids.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-name-definition-second-reading/labels.json holds 60 entries in sheet order, each with exactly the five brief-mandated keys, so the second reading is the deliverable the goal names.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate.log records `entries 60 distinct_ids 60 ids_match_sheet True outside_classes 0` over a bare `EXIT=0`, and my independent re-run of that count plus a verbatim-evidence check against the committed file returned the same figures.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: `git diff --stat 0dd85e271f9c 2362b56c544d` reports one file changed, 422 insertions, and that file is the single path the manifest declares.\nSCORE durability: 13\nJUSTIFICATION durability: no committed test or validator covers the fragment, so the only guard against a regression is the ad-hoc `python3 -c` gate in the manifest's tests line, which fails if an entry is dropped or a class key misspelled but never runs on its own.\nSCORE fit: 18\nJUSTIFICATION fit: the landed file follows the sibling second-reading fragment's idiom in docs/evidence/fragments/sn-domain-family-labels/labels.json, a top-level JSON array of one flat object per item keyed by id, class, confidence and reason.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module, and a search over docs/evidence/fragments and tests/ for a shared labels validator found none, so there is no owner this change could have extended or forked.\nFINDING docs/evidence/fragments/sn-name-definition-second-reading/labels.json:342 non-blocking: item-49's evidence quotes a sentence about the shared linear-momentum concept, which is the ground for abstract-parent-as-quantity, not for the class actually recorded; unit-does-not-fit-name is decided by the unit kg.m^-1.s^-2 against momentum's kg.m.s^-1, so this entry's evidence field does not carry the deciding evidence the brief asked for.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T072337717572-sdbc-second-reading/manifest.md:19 non-blocking: the manifest asserts that every evidence field was verified to be an exact substring of its definition text (\"final check: 0 non-verbatim\") but records no command or log for that check, so the strongest claim the run makes is not reproducible from its own record, even though my independent re-run confirms it is true.",
+  "review_run_id": "r-20261112T074802984795-review-of-sdbc-second-reading-2362b56c544d",
+  "reviewed_base_sha": "0dd85e271f9c100c41f493212a6f25bb0d254b77",
+  "reviewed_head_sha": "2362b56c544d4bb8e583268b920288f9ad39790a",
+  "reviewed_run_id": "r-20261112T072337717572-sdbc-second-reading",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:07:07.653181+00:00",
+  "total": 105
+}
