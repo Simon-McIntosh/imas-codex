@@ -33,9 +33,21 @@
   <code>docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.json</code>,
   produced by <code>sph-worktree-release-run.py</code>.</p>
 
-  <p id="sph-worktree-release-gate">Gate: 77 tests pass across
+  <p id="sph-worktree-release-delivery">The cut delivers its own commit. A
+  non-dry-run candidate cut that publishes a change commits on the checked-out
+  HEAD, and the push then sent the literal <code>main</code> ref — which on a
+  detached worktree is the shared local branch, so the release commit never
+  reached the remote and the tag named a commit the remote's main lacked. The
+  push now sends <code>HEAD</code> to the remote's <code>main</code>, the same
+  ref the main checkout pushes. A test publishes a real commit from the cut and
+  checks the stand-in remote's main and the tag both resolve to it.</p>
+
+  <p id="sph-worktree-release-gate">Gate: 78 tests pass across
   <code>tests/standard_names/test_catalog_release.py</code> and
-  <code>tests/standard_names/test_cli_release.py</code>, including six new
-  tests. Removing the ancestry branch from either guard (restoring the
-  branch-name check) turns all six red, the cut test among them.</p>
+  <code>tests/standard_names/test_cli_release.py</code>, including seven new
+  tests, run on an <code>all_debug</code> node. Three arms were run red, each
+  reverting one part of the change alone: the catalog guard to its branch-name
+  check (3 tests fail), the CLI guard likewise (2 fail), and the push ref back
+  to <code>main</code> (the delivery test fails). Evidence:
+  <code>negative-control.log</code>.</p>
 </section>
