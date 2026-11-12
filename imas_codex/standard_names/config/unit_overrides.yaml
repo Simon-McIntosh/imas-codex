@@ -223,3 +223,71 @@ overrides:
     strategy: skip
     skip_reason: "dd_unit_context_dependent"
     reason: "pulse_schedule reference_waveform/data unit=1 is a sentinel; true unit is inherited from parent controlled quantity"
+
+# ---------------------------------------------------------------------------
+# One recorded unit spelling per quantity (read by resolve_unit)
+# ---------------------------------------------------------------------------
+
+version: 1
+
+spellings:
+  - quantity: torque
+    canonical: "N.m"
+    dd_path_patterns:
+      - "**/*torque*"
+    reason: >-
+      torque is a moment of force; N.m is the coherent derived spelling and
+      kg.m^2.s^-2 is the same dimension written in base units
+
+  - quantity: torque_density
+    canonical: "N.m^-2"
+    dd_path_patterns:
+      - "**/*torque_density*"
+    reason: >-
+      torque per unit volume; N.m^-2 is the spelling the majority of published
+      names carry and kg.m^-1.s^-2 is the same dimension in base units
+
+  - quantity: source_rate
+    canonical: "s^-1"
+    dd_path_patterns:
+      - "**/*source_rate*"
+    reason: >-
+      a volume-integrated production rate is a count per second; s^-1 states the
+      dimension where Hz names the unit of a periodic phenomenon
+
+  - quantity: rate
+    canonical: "s^-1"
+    dd_path_patterns:
+      - "**/*rate"
+    reason: >-
+      a rate is a count per second; Hz names the unit of a periodic
+      phenomenon, so a counting rate is stated in s^-1
+
+exceptions:
+  - quantity: temperature
+    spellings:
+      - "K"
+      - "eV"
+    reason: >-
+      a material or detector temperature is thermodynamic and stated in K; a
+      plasma kinetic temperature is stated in eV as an energy per particle. The
+      two are different quantities, not two spellings of one.
+
+  - quantity: frequency
+    spellings:
+      - "Hz"
+      - "s^-1"
+      - "rad.s^-1"
+    reason: >-
+      a cycle frequency is stated in Hz or s^-1; an angular frequency is stated
+      in rad.s^-1 and differs from it by 2*pi, so the two carry different
+      meaning.
+
+  - quantity: particle_flux
+    spellings:
+      - "s^-1"
+      - "m^-2.s^-1"
+    reason: >-
+      s^-1 is a wall-integrated arrival rate and m^-2.s^-1 is an areal flux.
+      Whether a wall-integrated rate should be renamed or re-united is settled
+      outside this record.

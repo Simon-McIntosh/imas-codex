@@ -1,0 +1,42 @@
+<h2 id="sdbc-unit-spelling-landing">One unit spelling per quantity</h2>
+<section data-reckon="section" data-id="sdbc-unit-spelling-landing">
+  <p>A quantity now has one recorded unit spelling, and the extraction path writes that spelling whatever the Data Dictionary spells. The census over every live name runs from the same record, so the rule, the write path and the measurement cannot drift apart.</p>
+
+  <h3 id="sdbc-unit-spelling-what-changed">What changed</h3>
+  <ul>
+    <li>The <code>spellings:</code> section of <code>config/unit_overrides.yaml</code> records one canonical spelling per quantity (torque, torque density, source rate, rate) and the differences that carry meaning (temperature K beside eV, frequency Hz beside rad.s^-1, particle flux s^-1 beside m^-2.s^-1) with the reason each stands.</li>
+    <li><code>unit_overrides.resolve_unit</code> rewrites a Data Dictionary unit to the recorded spelling when the path belongs to a recorded quantity and the two spellings are dimensionally equal. Every other row passes through untouched.</li>
+    <li><code>audits.unit_spelling_census</code> groups live names by quantity, partitions each quantity's spellings by dimension, and reports duplicates, divergences and name-versus-quantity dimension mismatches.</li>
+    <li><code>audits.name_unit_consistency_check</code> carries the name-versus-unit rule for a quantity head, so the pipeline audit and the census read one table in one place. <code>unit_audit</code> adds only the quantity reading the census groups by: <code>quantity_of_name</code>, <code>unit_dimension</code>, <code>units_are_dimensionally_equal</code>.</li>
+  </ul>
+
+  <h3 id="sdbc-unit-spelling-before">The count before the rewrite, over 3,264 live names</h3>
+  <table>
+    <thead><tr><th>Quantity</th><th>Spellings carried now</th><th>Names</th><th>Recorded spelling</th></tr></thead>
+    <tbody>
+      <tr><td>torque</td><td><code>N.m</code> 23, <code>kg.m^2.s^-2</code> 6</td><td>29</td><td><code>N.m</code></td></tr>
+      <tr><td>torque density</td><td><code>N.m^-2</code> 77, <code>kg.m^-1.s^-2</code> 9</td><td>86</td><td><code>N.m^-2</code></td></tr>
+      <tr><td>source rate</td><td><code>s^-1</code> 48, <code>Hz</code> 11</td><td>59</td><td><code>s^-1</code></td></tr>
+      <tr><td>rate</td><td><code>Hz</code> 6, <code>s^-1</code> 21</td><td>27</td><td><code>s^-1</code></td></tr>
+    </tbody>
+  </table>
+  <p>The three cases §1 named are here and are resolved by the record: torque, torque density and the source rate. The fourth, <code>rate</code>, is the same dispute under a shorter head and takes the same spelling.</p>
+  <p>Zero quantities remain carried in two dimensionally equal spellings without a recorded spelling. 3 names carry no unit at all.</p>
+
+  <h3 id="sdbc-unit-spelling-stands">Differences that carry meaning and stand</h3>
+  <ul>
+    <li><strong>temperature</strong> in <code>K</code> beside <code>eV</code>: a material or detector temperature is thermodynamic; a plasma kinetic temperature is an energy per particle.</li>
+    <li><strong>frequency</strong> in <code>Hz</code> or <code>s^-1</code> beside <code>rad.s^-1</code>: a cycle frequency and an angular frequency differ by 2*pi.</li>
+    <li><strong>particle flux</strong> in <code>s^-1</code> beside <code>m^-2.s^-1</code>: a wall-integrated arrival rate beside an areal flux. Whether such a name is renamed or re-united is not settled here and is passed to §5; the census lists it, the record does not unify it.</li>
+  </ul>
+
+  <h3 id="sdbc-unit-spelling-mismatched">Names whose unit does not fit the quantity they state</h3>
+  <p>41 names carry a unit whose dimension does not fit the quantity their head states — <code>name_unit_consistency_check</code> is the one check that decides this, so the census and the pipeline audit cannot disagree. 43 further quantities carry more than one dimension under one head without a recorded exception. The census carries every one of them with its unit, quantity and domain in <code>unit-spelling-census.json</code>, over 3,264 names in 1,608 quantities. They are passed to §5 as names that do not say what they are: changing a live name's unit is not changed here.</p>
+
+  <h3 id="sdbc-unit-spelling-graph-write">A catalog write takes the spelling on a disposable graph</h3>
+  <p>The write is shown end to end on an empty disposable Neo4j instance, never on the live graph. A leaf is planted carrying <code>kg.m^-1.s^-2</code> for a torque density, and that recorded spelling is the test input: it is read back from the graph and handed to the extraction path. The catalog write — driven through its package-bound entry point, which supplies the wired graph root itself — stores the name with <code>N.m^-2</code> while the leaf is read back still carrying <code>kg.m^-1.s^-2</code>. A second name, for a quantity with no recorded spelling, keeps the <code>eV</code> the dictionary carries, so the write is shown storing what the pipeline decided rather than rewriting its input. The test asserts every reading, and it fails if the rewrite is removed. Gate log: <code>~/.cache/imas-codex-sdbc-unit-spelling/gate.log</code>, 590 passed at revision <code>738740a40</code> on job 1311574; the census artifact was regenerated on job 1311536 and agrees with the record.</p>
+
+  <h3 id="sdbc-unit-spelling-evidence">The census firing on planted cases</h3>
+  <p>The census counts a quantity planted with two dimensionally equal spellings, counts a name planted with a mismatched dimension, is silent on a planted clean pair, and reports a meaning-carrying difference under the record rather than unifying it. The declared mutation — a quantity planted with two dimensionally equal unit spellings is not counted by the census — turns the census suite red, naming the duplicate spelling test among its failures.</p>
+  <p>Census data: <a href="/imas-codex/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json">unit-spelling-census.json</a>.</p>
+</section>

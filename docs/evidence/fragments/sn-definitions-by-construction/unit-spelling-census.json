@@ -1,0 +1,2406 @@
+{
+ "name_count": 3264,
+ "quantity_count": 1608,
+ "duplicate_quantities": [
+  {
+   "quantity": "rate",
+   "spellings": [
+    {
+     "unit": "Hz",
+     "names": [
+      "neutron_rate_due_to_beam_beam_fusion",
+      "per_toroidal_mode_growth_rate",
+      "rate_due_to_beam_beam_fusion",
+      "rate_due_to_beam_thermal_fusion",
+      "total_neutron_rate",
+      "total_rate_due_to_fusion"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "diamagnetic_momentum_damping_rate",
+      "incident_electron_particle_rate_at_wall",
+      "ion_charge_state_diamagnetic_momentum_damping_rate",
+      "ion_charge_state_momentum_damping_rate",
+      "ion_diamagnetic_momentum_damping_rate",
+      "ion_momentum_damping_rate",
+      "momentum_damping_rate",
+      "neutron_rate_of_neutron_detector",
+      "neutron_spectral_rate_of_neutron_detector",
+      "parallel_ion_charge_state_momentum_damping_rate",
+      "parallel_ion_momentum_damping_rate",
+      "poloidal_ion_charge_state_momentum_damping_rate",
+      "poloidal_ion_momentum_damping_rate",
+      "radial_ion_charge_state_momentum_damping_rate",
+      "radial_ion_momentum_damping_rate",
+      "rate_due_to_pumping",
+      "rate_of_neutron_detector",
+      "spectral_rate_of_neutron_detector",
+      "spectral_rate_of_spectrometer_channel",
+      "toroidal_ion_charge_state_momentum_damping_rate",
+      "toroidal_ion_momentum_damping_rate"
+     ]
+    }
+   ],
+   "name_count": 27,
+   "equal_dimension": true,
+   "resolved": true,
+   "canonical": "s^-1"
+  },
+  {
+   "quantity": "source_rate",
+   "spellings": [
+    {
+     "unit": "Hz",
+     "names": [
+      "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+      "deuterium_deuterium_neutron_source_rate_due_to_fusion",
+      "deuterium_deuterium_neutron_source_rate_due_to_thermal_fusion",
+      "deuterium_tritium_neutron_source_rate_due_to_thermal_fusion",
+      "neutron_source_rate_due_to_beam_beam_fusion",
+      "neutron_source_rate_due_to_thermal_fusion",
+      "source_rate_due_to_beam_beam_fusion",
+      "source_rate_due_to_thermal_fusion",
+      "total_neutron_source_rate_due_to_thermal_fusion",
+      "tritium_tritium_neutron_source_rate_due_to_fusion",
+      "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "ammonia_deuterated_source_rate",
+      "ammonia_source_rate",
+      "argon_source_rate_due_to_gas_injection",
+      "beryllium_source_rate_due_to_gas_injection",
+      "carbon_source_rate_due_to_gas_injection",
+      "cumulative_inside_flux_surface_electron_particle_source_rate",
+      "cumulative_inside_flux_surface_ion_charge_state_source_rate",
+      "cumulative_inside_flux_surface_total_ion_particle_source_rate",
+      "deuterated_methane_source_rate",
+      "deuterium_source_rate_due_to_injection",
+      "electron_source_rate_due_to_injection",
+      "electron_source_rate_due_to_surface_emission",
+      "ethane_source_rate",
+      "ethylene_source_rate",
+      "helium_3_source_rate_due_to_gas_injection",
+      "helium_4_source_rate_due_to_gas_injection",
+      "hydrogen_source_rate_due_to_gas_injection",
+      "implicit_electron_energy_source_rate",
+      "implicit_electron_particle_source_rate",
+      "implicit_ion_energy_source_rate",
+      "implicit_ion_momentum_source_rate",
+      "implicit_ion_particle_source_rate",
+      "implicit_ion_state_energy_source_rate",
+      "implicit_ion_state_particle_source_rate",
+      "ion_momentum_source_rate",
+      "ion_particle_source_rate",
+      "krypton_source_rate_due_to_gas_injection",
+      "lithium_source_rate_due_to_gas_injection",
+      "methane_carbon_13_source_rate",
+      "methane_source_rate",
+      "momentum_source_rate",
+      "neon_source_rate",
+      "nitrogen_source_rate",
+      "oxygen_source_rate_due_to_gas_injection",
+      "propane_source_rate",
+      "silane_source_rate",
+      "source_rate_due_to_gas_injection",
+      "source_rate_due_to_injection",
+      "toroidal_implicit_ion_momentum_source_rate",
+      "total_electron_source_rate",
+      "total_implicit_ion_energy_source_rate",
+      "total_implicit_ion_particle_source_rate",
+      "total_ion_particle_source_rate",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "total_particle_source_rate_due_to_neutral_beam_shinethrough",
+      "tritium_source_rate_due_to_gas_injection",
+      "volume_integrated_particle_source_rate",
+      "xenon_source_rate_due_to_gas_injection"
+     ]
+    }
+   ],
+   "name_count": 59,
+   "equal_dimension": true,
+   "resolved": true,
+   "canonical": "s^-1"
+  },
+  {
+   "quantity": "torque",
+   "spellings": [
+    {
+     "unit": "N.m",
+     "names": [
+      "electron_torque_due_to_collisions",
+      "fast_ion_charge_state_torque_due_to_collisions",
+      "fast_particle_torque_due_to_j_cross_b_force",
+      "fast_torque_due_to_collisions",
+      "ion_torque_due_to_collisions",
+      "particle_torque_due_to_j_cross_b_force",
+      "thermal_electron_torque_due_to_collisions",
+      "thermal_ion_charge_state_torque_due_to_collisions",
+      "thermal_ion_torque_due_to_collisions",
+      "thermal_particle_torque_due_to_thermalization",
+      "toroidal_fast_ion_charge_state_torque_due_to_collisions",
+      "toroidal_fast_particle_torque_due_to_j_cross_b_force",
+      "toroidal_fast_torque_due_to_collisions",
+      "toroidal_thermal_electron_torque_due_to_collisions",
+      "toroidal_thermal_ion_charge_state_torque_due_to_collisions",
+      "toroidal_thermal_ion_torque_due_to_collisions",
+      "toroidal_torque_due_to_neutral_beam_shinethrough",
+      "toroidal_total_torque",
+      "torque_due_to_collisions",
+      "torque_due_to_j_cross_b_force",
+      "torque_due_to_neutral_beam_shinethrough",
+      "total_ion_charge_state_torque_due_to_collisions",
+      "total_torque"
+     ]
+    },
+    {
+     "unit": "kg.m^2.s^-2",
+     "names": [
+      "cumulative_inside_flux_surface_torque",
+      "explicit_ion_torque",
+      "ion_torque",
+      "toroidal_cumulative_inside_flux_surface_torque",
+      "toroidal_explicit_ion_torque",
+      "torque_of_neoclassical_tearing_mode"
+     ]
+    }
+   ],
+   "name_count": 29,
+   "equal_dimension": true,
+   "resolved": true,
+   "canonical": "N.m"
+  },
+  {
+   "quantity": "torque_density",
+   "spellings": [
+    {
+     "unit": "N.m^-2",
+     "names": [
+      "co_passing_fast_electron_torque_density_due_to_collisions",
+      "co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "co_passing_fast_ion_torque_density_due_to_collisions",
+      "co_passing_thermal_electron_torque_density_due_to_collisions",
+      "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "co_passing_thermal_ion_torque_density_due_to_collisions",
+      "co_passing_torque_density",
+      "co_passing_torque_density_due_to_j_cross_b_force",
+      "counter_passing_fast_electron_torque_density_due_to_collisions",
+      "counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "counter_passing_fast_ion_torque_density_due_to_collisions",
+      "counter_passing_thermal_electron_torque_density_due_to_collisions",
+      "counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "counter_passing_torque_density",
+      "counter_passing_torque_density_due_to_j_cross_b_force",
+      "electron_torque_density_due_to_collisions",
+      "fast_electron_torque_density_due_to_collisions",
+      "fast_ion_charge_state_torque_density_due_to_collisions",
+      "fast_ion_torque_density_due_to_collisions",
+      "fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "ion_torque_density_due_to_collisions",
+      "ion_torque_density_due_to_thermalization",
+      "particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "thermal_electron_torque_density_due_to_collisions",
+      "thermal_ion_charge_state_torque_density_due_to_collisions",
+      "thermal_ion_torque_density_due_to_collisions",
+      "thermal_ion_torque_density_due_to_thermalization",
+      "toroidal_co_passing_fast_electron_torque_density_due_to_collisions",
+      "toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+      "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions",
+      "toroidal_co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions",
+      "toroidal_co_passing_torque_density",
+      "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+      "toroidal_counter_passing_fast_electron_torque_density_due_to_collisions",
+      "toroidal_counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions",
+      "toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions",
+      "toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "toroidal_counter_passing_torque_density",
+      "toroidal_counter_passing_torque_density_due_to_j_cross_b_force",
+      "toroidal_fast_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_fast_ion_torque_density_due_to_collisions",
+      "toroidal_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "toroidal_thermal_electron_torque_density_due_to_collisions",
+      "toroidal_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_thermal_ion_torque_density_due_to_collisions",
+      "toroidal_thermal_ion_torque_density_due_to_thermalization",
+      "toroidal_torque_density",
+      "toroidal_torque_density_due_to_j_cross_b_force",
+      "toroidal_trapped_fast_electron_torque_density_due_to_collisions",
+      "toroidal_trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_trapped_fast_ion_torque_density_due_to_collisions",
+      "toroidal_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "toroidal_trapped_thermal_electron_torque_density_due_to_collisions",
+      "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+      "toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_trapped_thermal_ion_torque_density_due_to_collisions",
+      "toroidal_trapped_torque_density",
+      "toroidal_trapped_torque_density_due_to_j_cross_b_force",
+      "torque_density",
+      "torque_density_due_to_collisions",
+      "torque_density_due_to_coulomb_collisions_with_electrons",
+      "torque_density_due_to_j_cross_b_force",
+      "torque_density_due_to_thermalization",
+      "trapped_fast_electron_torque_density_due_to_collisions",
+      "trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+      "trapped_fast_ion_torque_density_due_to_collisions",
+      "trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "trapped_thermal_electron_torque_density_due_to_collisions",
+      "trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "trapped_thermal_ion_torque_density_due_to_collisions",
+      "trapped_torque_density",
+      "trapped_torque_density_due_to_j_cross_b_force"
+     ]
+    },
+    {
+     "unit": "kg.m^-1.s^-2",
+     "names": [
+      "ion_charge_state_torque_density",
+      "ion_torque_density",
+      "neutral_internal_state_torque_density",
+      "neutral_torque_density",
+      "toroidal_ion_charge_state_torque_density",
+      "toroidal_ion_torque_density",
+      "toroidal_neutral_internal_state_torque_density",
+      "toroidal_neutral_torque_density",
+      "toroidal_torque_density_due_to_diamagnetic_drift"
+     ]
+    }
+   ],
+   "name_count": 86,
+   "equal_dimension": true,
+   "resolved": true,
+   "canonical": "N.m^-2"
+  }
+ ],
+ "divergences": [
+  {
+   "quantity": "bandwidth",
+   "spellings": [
+    {
+     "unit": "Hz",
+     "names": [
+      "bandwidth_of_ece_channel"
+     ]
+    },
+    {
+     "unit": "m",
+     "names": [
+      "bandwidth_of_filter"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "calibration_factor",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "calibration_factor_of_thomson_scattering_detector"
+     ]
+    },
+    {
+     "unit": "m^-2.s^-1.sr^-1",
+     "names": [
+      "calibration_factor_of_visible_camera"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "count",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "count_of_toroidal_field_coil",
+      "count_of_working_fluid"
+     ]
+    },
+    {
+     "unit": "count.s^-1",
+     "names": [
+      "count_at_detector_pixel"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "current_density",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "normalized_gyrocenter_perturbed_current_density",
+      "normalized_particle_perturbed_current_density",
+      "parallel_normalized_gyrocenter_perturbed_current_density",
+      "parallel_normalized_particle_perturbed_current_density"
+     ]
+    },
+    {
+     "unit": "A.m^-2",
+     "names": [
+      "co_passing_fast_current_density",
+      "counter_passing_current_density",
+      "counter_passing_fast_current_density",
+      "current_density",
+      "current_density_due_to_anomalous_transport",
+      "current_density_due_to_bootstrap_current_drive",
+      "current_density_due_to_diamagnetic_drift",
+      "current_density_due_to_distribution_function_driven",
+      "current_density_due_to_fast_ion",
+      "current_density_due_to_heat_viscosity",
+      "current_density_due_to_ion_inertia",
+      "current_density_due_to_ion_neutral_friction",
+      "current_density_due_to_non_inductive_current_drive",
+      "current_density_due_to_parallel_viscosity",
+      "current_density_due_to_perpendicular_viscosity",
+      "current_density_due_to_wave_driven_current_drive",
+      "diamagnetic_current_density",
+      "diamagnetic_current_density_due_to_heat_viscosity",
+      "diamagnetic_current_density_due_to_ion_inertia",
+      "diamagnetic_current_density_due_to_ion_neutral_friction",
+      "diamagnetic_current_density_due_to_parallel_viscosity",
+      "diamagnetic_current_density_due_to_perpendicular_viscosity",
+      "fast_current_density",
+      "fluctuating_ion_current_density",
+      "fluctuating_saturated_ion_current_density",
+      "flux_surface_averaged_current_density_due_to_wave_driven_current_drive",
+      "flux_surface_averaged_parallel_current_density",
+      "flux_surface_averaged_parallel_current_density_at_constraint_position",
+      "flux_surface_averaged_parallel_current_density_due_to_wave_driven_current_drive",
+      "flux_surface_averaged_parallel_inductive_current_density",
+      "flux_surface_averaged_toroidal_current_density",
+      "inductive_current_density",
+      "inertial_current_density_due_to_diamagnetic_drift",
+      "ion_current_density",
+      "parallel_current_density",
+      "parallel_current_density_at_constraint_position",
+      "parallel_current_density_due_to_anomalous_transport",
+      "parallel_current_density_due_to_bootstrap_current_drive",
+      "parallel_current_density_due_to_diamagnetic_drift",
+      "parallel_current_density_due_to_heat_viscosity",
+      "parallel_current_density_due_to_ion_inertia",
+      "parallel_current_density_due_to_ion_neutral_friction",
+      "parallel_current_density_due_to_non_inductive_current_drive",
+      "parallel_current_density_due_to_ohmic_current_drive",
+      "parallel_current_density_due_to_parallel_viscosity",
+      "parallel_current_density_due_to_perpendicular_viscosity",
+      "parallel_current_density_due_to_wave_driven_current_drive",
+      "parallel_diamagnetic_current_density",
+      "parallel_fluctuating_ion_current_density",
+      "parallel_inductive_current_density",
+      "parallel_ion_current_density",
+      "parallel_pfirsch_schlueter_current_density",
+      "parallel_pfirsch_schlueter_current_density_due_to_diamagnetic_drift",
+      "parallel_runaway_electron_current_density",
+      "parallel_total_current_density",
+      "pfirsch_schlueter_current_density",
+      "pfirsch_schlueter_current_density_due_to_diamagnetic_drift",
+      "poloidal_current_density_due_to_anomalous_transport",
+      "poloidal_current_density_due_to_collisions",
+      "poloidal_current_density_due_to_diamagnetic_drift",
+      "poloidal_current_density_due_to_heat_viscosity",
+      "poloidal_current_density_due_to_ion_inertia",
+      "poloidal_current_density_due_to_ion_neutral_friction",
+      "poloidal_current_density_due_to_parallel_viscosity",
+      "poloidal_current_density_due_to_perpendicular_viscosity",
+      "poloidal_current_density_due_to_viscosity",
+      "poloidal_pfirsch_schlueter_current_density",
+      "poloidal_total_current_density",
+      "radial_current_density",
+      "radial_current_density_due_to_anomalous_transport",
+      "radial_current_density_due_to_heat_viscosity",
+      "radial_current_density_due_to_ion_inertia",
+      "radial_current_density_due_to_ion_neutral_friction",
+      "radial_current_density_due_to_parallel_viscosity",
+      "radial_current_density_due_to_perpendicular_viscosity",
+      "radial_diamagnetic_current_density",
+      "radial_pfirsch_schlueter_current_density",
+      "radial_total_current_density",
+      "radial_total_current_density_at_wall",
+      "runaway_electron_current_density",
+      "saturated_ion_current_density",
+      "toroidal_co_passing_fast_current_density",
+      "toroidal_counter_passing_current_density",
+      "toroidal_counter_passing_fast_current_density",
+      "toroidal_current_density",
+      "toroidal_current_density_due_to_anomalous_transport",
+      "toroidal_current_density_due_to_diamagnetic_drift",
+      "toroidal_current_density_due_to_distribution_function_driven",
+      "toroidal_current_density_due_to_fast_ion",
+      "toroidal_current_density_due_to_heat_viscosity",
+      "toroidal_current_density_due_to_ion_inertia",
+      "toroidal_current_density_due_to_ion_neutral_friction",
+      "toroidal_current_density_due_to_parallel_viscosity",
+      "toroidal_current_density_due_to_perpendicular_viscosity",
+      "toroidal_pfirsch_schlueter_current_density",
+      "toroidal_total_current_density",
+      "toroidal_trapped_current_density",
+      "toroidal_trapped_fast_current_density",
+      "total_current_density",
+      "total_current_density_due_to_diamagnetic_drift",
+      "total_diamagnetic_current_density",
+      "trapped_current_density",
+      "trapped_fast_current_density",
+      "vertical_current_density",
+      "vertical_current_density_due_to_anomalous_transport",
+      "vertical_current_density_due_to_heat_viscosity",
+      "vertical_current_density_due_to_ion_inertia",
+      "vertical_current_density_due_to_ion_neutral_friction",
+      "vertical_current_density_due_to_parallel_viscosity",
+      "vertical_current_density_due_to_perpendicular_viscosity",
+      "vertical_diamagnetic_current_density",
+      "vertical_pfirsch_schlueter_current_density",
+      "vertical_total_current_density",
+      "volume_averaged_parallel_runaway_electron_current_density"
+     ]
+    }
+   ],
+   "name_count": 118,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface",
+   "spellings": [
+    {
+     "unit": "Wb^-1.m^2",
+     "names": [
+      "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+     ]
+    },
+    {
+     "unit": "m",
+     "names": [
+      "derivative_of_poloidal_plane_cross_sectional_area_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "derivative_of_volume_of_flux_surface",
+   "spellings": [
+    {
+     "unit": "Wb^-1.m^3",
+     "names": [
+      "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+     ]
+    },
+    {
+     "unit": "m^2",
+     "names": [
+      "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "difference",
+   "spellings": [
+    {
+     "unit": "T.m",
+     "names": [
+      "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function"
+     ]
+    },
+    {
+     "unit": "W",
+     "names": [
+      "difference_of_total_plasma_heating_power_and_time_derivative_of_plasma_stored_energy"
+     ]
+    },
+    {
+     "unit": "Wb",
+     "names": [
+      "difference_of_poloidal_magnetic_flux_and_toroidal_magnetic_flux"
+     ]
+    },
+    {
+     "unit": "m",
+     "names": [
+      "difference_of_fast_neutral_beam_motional_stark_wavelength_and_fast_neutral_beam_reference_wavelength_of_spectral_line",
+      "difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line"
+     ]
+    }
+   ],
+   "name_count": 5,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "electron_number_density",
+   "spellings": [
+    {
+     "unit": "m^-2",
+     "names": [
+      "electron_number_density"
+     ]
+    },
+    {
+     "unit": "m^-3",
+     "names": [
+      "electron_number_density_over_scrape_off_layer"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "electron_particle_flux_at_wall",
+   "spellings": [
+    {
+     "unit": "m^-2.s^-1",
+     "names": [
+      "electron_particle_flux_at_wall_due_to_surface_emission"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "electron_particle_flux_at_wall_due_to_pumping"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "energy_flux",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "flux_surface_averaged_time_averaged_normalized_energy_flux_due_to_e_cross_b_drift",
+      "time_averaged_normalized_energy_flux_due_to_e_cross_b_drift"
+     ]
+    },
+    {
+     "unit": "W.m^-2",
+     "names": [
+      "electron_energy_flux",
+      "energy_flux_at_divertor_target",
+      "energy_flux_at_limiter",
+      "energy_flux_due_to_eddy_current",
+      "energy_flux_due_to_radiation",
+      "incident_electron_kinetic_energy_flux_at_wall",
+      "incident_energy_flux_at_wall",
+      "incident_ion_charge_state_kinetic_energy_flux_at_wall",
+      "ion_charge_state_energy_flux",
+      "ion_energy_flux",
+      "ion_kinetic_energy_flux_at_wall",
+      "ion_state_energy_flux",
+      "neutral_energy_flux",
+      "neutral_internal_state_energy_flux",
+      "neutral_internal_state_energy_flux_at_wall",
+      "neutral_species_energy_flux",
+      "parallel_electron_energy_flux",
+      "parallel_ion_charge_state_energy_flux",
+      "parallel_ion_energy_flux",
+      "parallel_neutral_energy_flux",
+      "parallel_neutral_internal_state_energy_flux",
+      "parallel_total_ion_energy_flux",
+      "poloidal_electron_energy_flux",
+      "poloidal_ion_energy_flux",
+      "poloidal_ion_state_energy_flux",
+      "poloidal_neutral_internal_state_energy_flux",
+      "poloidal_neutral_species_energy_flux",
+      "poloidal_total_ion_energy_flux",
+      "radial_electron_energy_flux",
+      "radial_ion_charge_state_energy_flux",
+      "radial_ion_energy_flux",
+      "radial_ion_state_energy_flux",
+      "radial_neutral_energy_flux",
+      "radial_neutral_state_energy_flux",
+      "radial_total_ion_energy_flux",
+      "total_incident_neutral_energy_flux_at_wall",
+      "total_ion_energy_flux"
+     ]
+    }
+   ],
+   "name_count": 39,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "factor",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "factor_at_limiter"
+     ]
+    },
+    {
+     "unit": "m^-3.sr^-1",
+     "names": [
+      "factor_of_spectrometer_channel"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "flux",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "flux_due_to_e_cross_b_drift"
+     ]
+    },
+    {
+     "unit": "W.m^-2",
+     "names": [
+      "flux_at_divertor_target",
+      "flux_at_first_wall",
+      "flux_at_limiter",
+      "flux_due_to_eddy_current",
+      "flux_due_to_radiation",
+      "flux_due_to_surface_emission"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "flux_due_to_pumping"
+     ]
+    }
+   ],
+   "name_count": 8,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "flux_at_wall",
+   "spellings": [
+    {
+     "unit": "W.m^-2",
+     "names": [
+      "flux_at_wall_due_to_eddy_current",
+      "flux_at_wall_due_to_radiation",
+      "flux_at_wall_due_to_recombination",
+      "flux_at_wall_due_to_surface_emission"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "flux_at_wall_due_to_pumping"
+     ]
+    }
+   ],
+   "name_count": 5,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "flux_surface_averaged_inverse",
+   "spellings": [
+    {
+     "unit": "T^-2",
+     "names": [
+      "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude"
+     ]
+    },
+    {
+     "unit": "m^-1",
+     "names": [
+      "flux_surface_averaged_inverse_of_major_radius"
+     ]
+    },
+    {
+     "unit": "m^-2",
+     "names": [
+      "flux_surface_averaged_inverse_of_square_of_major_radius"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "flux_surface_averaged_ratio",
+   "spellings": [
+    {
+     "unit": "T^-2",
+     "names": [
+      "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude"
+     ]
+    },
+    {
+     "unit": "m^-2",
+     "names": [
+      "flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "flux_surface_averaged_square",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude"
+     ]
+    },
+    {
+     "unit": "T^2",
+     "names": [
+      "flux_surface_averaged_square_of_magnetic_field_magnitude"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "frequency",
+   "spellings": [
+    {
+     "unit": "Hz",
+     "names": [
+      "edge_localized_mode_frequency",
+      "frequency_at_reflectometer_cutoff_position",
+      "frequency_of_electron_cyclotron_beam",
+      "frequency_of_ion_cyclotron_heating_antenna",
+      "frequency_of_lower_hybrid_antenna",
+      "frequency_of_neoclassical_tearing_mode",
+      "frequency_of_wave_diagnostic_channel",
+      "per_toroidal_mode_mhd_frequency",
+      "reference_frequency_of_wave_beam",
+      "wave_frequency"
+     ]
+    },
+    {
+     "unit": "rad.s^-1",
+     "names": [
+      "gyrocenter_frequency",
+      "ion_charge_state_rotation_frequency",
+      "ion_rotation_frequency",
+      "poloidal_gyrocenter_frequency",
+      "rotation_frequency_of_neoclassical_tearing_mode",
+      "toroidal_gyrocenter_frequency",
+      "toroidal_ion_charge_state_rotation_frequency",
+      "toroidal_ion_rotation_frequency"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "alfven_frequency",
+      "rotation_frequency_due_to_e_cross_b_drift",
+      "toroidal_rotation_frequency_due_to_e_cross_b_drift"
+     ]
+    }
+   ],
+   "name_count": 21,
+   "recorded_exception": true,
+   "reason": "a cycle frequency is stated in Hz or s^-1; an angular frequency is stated in rad.s^-1 and differs from it by 2*pi, so the two carry different meaning."
+  },
+  {
+   "quantity": "gradient",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "gradient_of_normalized_effective_energy"
+     ]
+    },
+    {
+     "unit": "Pa",
+     "names": [
+      "gradient_of_electron_pressure"
+     ]
+    },
+    {
+     "unit": "m^-3",
+     "names": [
+      "gradient_of_radial_electron_density"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "inverse",
+   "spellings": [
+    {
+     "unit": "T^-2",
+     "names": [
+      "inverse_of_square_of_magnetic_field_magnitude"
+     ]
+    },
+    {
+     "unit": "m^-1",
+     "names": [
+      "inverse_of_major_radius"
+     ]
+    },
+    {
+     "unit": "m^-2",
+     "names": [
+      "inverse_of_square_of_major_radius"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "logarithm",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "logarithm_of_density"
+     ]
+    },
+    {
+     "unit": "dB",
+     "names": [
+      "logarithm_of_fluctuating_electron_spectral_power"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "magnetic_field",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "ratio_of_poloidal_magnetic_field_at_outboard_midplane_separatrix_to_poloidal_magnetic_field_at_strike_point"
+     ]
+    },
+    {
+     "unit": "T",
+     "names": [
+      "binormal_wave_magnetic_field",
+      "breakdown_magnetic_field",
+      "calibration_reference_magnetic_field_of_poloidal_magnetic_field_probe",
+      "flux_surface_averaged_poloidal_magnetic_field_at_pedestal_top",
+      "magnetic_field",
+      "magnetic_field_at_pedestal_top_high_field_side",
+      "magnetic_field_at_pedestal_top_low_field_side",
+      "maximum_magnetic_field",
+      "non_axisymmetric_magnetic_field",
+      "normal_non_axisymmetric_magnetic_field",
+      "normal_wave_magnetic_field",
+      "parallel_magnetic_field",
+      "parallel_wave_magnetic_field",
+      "perturbed_plasma_magnetic_field",
+      "perturbed_vacuum_magnetic_field",
+      "plasma_magnetic_field",
+      "poloidal_magnetic_field",
+      "poloidal_magnetic_field_at_pedestal_top",
+      "poloidal_magnetic_field_at_pedestal_top_high_field_side",
+      "poloidal_magnetic_field_at_pedestal_top_low_field_side",
+      "poloidal_magnetic_field_of_magnetic_field_probe",
+      "poloidal_perturbed_plasma_magnetic_field",
+      "poloidal_perturbed_vacuum_magnetic_field",
+      "radial_magnetic_field",
+      "radial_magnetic_field_at_ferritic_element_centroid",
+      "radial_non_axisymmetric_magnetic_field",
+      "radial_perturbed_plasma_magnetic_field",
+      "radial_perturbed_vacuum_magnetic_field",
+      "reference_magnetic_field",
+      "reference_magnetic_field_of_iron_core_segment",
+      "stray_breakdown_magnetic_field",
+      "toroidal_magnetic_field",
+      "toroidal_magnetic_field_at_ferritic_element_centroid",
+      "toroidal_magnetic_field_at_flux_surface",
+      "toroidal_magnetic_field_at_magnetic_axis",
+      "toroidal_magnetic_field_at_pedestal_top",
+      "toroidal_magnetic_field_at_pedestal_top_high_field_side",
+      "toroidal_non_axisymmetric_magnetic_field",
+      "toroidal_perturbed_plasma_magnetic_field",
+      "toroidal_perturbed_vacuum_magnetic_field",
+      "toroidal_reference_magnetic_field",
+      "toroidal_vacuum_magnetic_field",
+      "vacuum_magnetic_field",
+      "vertical_magnetic_field",
+      "vertical_magnetic_field_at_ferritic_element_centroid",
+      "vertical_magnetic_field_at_wall",
+      "vertical_magnetic_field_of_fiber_optic_current_sensor",
+      "vertical_non_axisymmetric_magnetic_field"
+     ]
+    }
+   ],
+   "name_count": 49,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "maximum",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "maximum_of_poloidal_halo_fraction"
+     ]
+    },
+    {
+     "unit": "A",
+     "names": [
+      "maximum_of_toroidal_runaway_electron_current"
+     ]
+    },
+    {
+     "unit": "W.m^-2",
+     "names": [
+      "maximum_of_back_surface_neutron_flux"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "momentum",
+   "spellings": [
+    {
+     "unit": "kg.m^-1.s^-1",
+     "names": [
+      "momentum_due_to_avalanche"
+     ]
+    },
+    {
+     "unit": "kg.m^-1.s^-2",
+     "names": [
+      "momentum"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "momentum_flux",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "momentum_flux_due_to_e_cross_b_drift",
+      "momentum_flux_due_to_perturbed_parallel_magnetic_field",
+      "momentum_flux_due_to_perturbed_parallel_vector_potential"
+     ]
+    },
+    {
+     "unit": "kg.m^-1.s^-2",
+     "names": [
+      "momentum_flux",
+      "momentum_flux_due_to_diamagnetic_drift"
+     ]
+    }
+   ],
+   "name_count": 5,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "neutral_particle_flux_at_wall",
+   "spellings": [
+    {
+     "unit": "m^-2.s^-1",
+     "names": [
+      "neutral_particle_flux_at_wall_due_to_recombination",
+      "neutral_particle_flux_at_wall_due_to_surface_emission"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "neutral_particle_flux_at_wall_due_to_pumping"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "neutron_emissivity",
+   "spellings": [
+    {
+     "unit": "m^-2.s^-1",
+     "names": [
+      "neutron_emissivity"
+     ]
+    },
+    {
+     "unit": "m^-3.s^-1",
+     "names": [
+      "neutron_emissivity_due_to_fusion"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "neutron_flux",
+   "spellings": [
+    {
+     "unit": "Hz",
+     "names": [
+      "neutron_flux_due_to_beam_thermal_fusion"
+     ]
+    },
+    {
+     "unit": "W.m^-2",
+     "names": [
+      "neutron_flux_at_first_wall"
+     ]
+    },
+    {
+     "unit": "m^-2.s^-1",
+     "names": [
+      "neutron_flux_of_neutron_detector"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "particle_flux",
+   "spellings": [
+    {
+     "unit": "m^-2.s^-1",
+     "names": [
+      "electron_particle_flux",
+      "flux_surface_normal_ion_charge_state_particle_flux",
+      "incident_ion_particle_flux_at_wall",
+      "ion_charge_state_particle_flux",
+      "ion_charge_state_particle_flux_at_wall",
+      "ion_particle_flux",
+      "neutral_internal_state_particle_flux",
+      "neutral_internal_state_particle_flux_at_wall",
+      "neutral_particle_flux",
+      "neutral_state_particle_flux",
+      "parallel_electron_particle_flux",
+      "parallel_ion_charge_state_particle_flux",
+      "parallel_ion_particle_flux",
+      "parallel_neutral_internal_state_particle_flux",
+      "parallel_neutral_particle_flux",
+      "perpendicular_runaway_electron_particle_flux",
+      "poloidal_electron_particle_flux",
+      "poloidal_ion_charge_state_particle_flux",
+      "poloidal_ion_particle_flux",
+      "poloidal_neutral_internal_state_particle_flux",
+      "poloidal_neutral_particle_flux",
+      "radial_electron_particle_flux",
+      "radial_ion_particle_flux",
+      "radial_neutral_internal_state_particle_flux",
+      "radial_neutral_particle_flux",
+      "runaway_electron_particle_flux"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "incident_neutral_particle_flux_at_wall"
+     ]
+    }
+   ],
+   "name_count": 27,
+   "recorded_exception": true,
+   "reason": "s^-1 is a wall-integrated arrival rate and m^-2.s^-1 is an areal flux. Whether a wall-integrated rate should be renamed or re-united is settled outside this record."
+  },
+  {
+   "quantity": "perpendicular_wave_vector",
+   "spellings": [
+    {
+     "unit": "V.m^-1",
+     "names": [
+      "perpendicular_wave_vector"
+     ]
+    },
+    {
+     "unit": "m^-1",
+     "names": [
+      "perpendicular_wave_vector_of_ion_cyclotron_heating_antenna"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "power",
+   "spellings": [
+    {
+     "unit": "W",
+     "names": [
+      "power_at_divertor_target",
+      "power_at_inside_flux_surface",
+      "power_due_to_collisions",
+      "power_due_to_conduction",
+      "power_due_to_convection",
+      "power_due_to_electron_cyclotron_heating",
+      "power_due_to_first_orbit_loss",
+      "power_due_to_fusion",
+      "power_due_to_line_radiation",
+      "power_due_to_neutral_beam_shinethrough",
+      "power_due_to_recombination",
+      "power_due_to_synchrotron_radiation",
+      "power_of_beam_tracing_beam",
+      "power_of_bolometer",
+      "power_of_breeder_blanket_module",
+      "power_of_lower_hybrid_antenna",
+      "power_of_neutral_beam_injector",
+      "power_of_plant_component_port",
+      "power_of_plant_subsystem",
+      "power_of_plant_system",
+      "power_of_soft_xray_detector"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "power_due_to_fusion_reactions"
+     ]
+    }
+   ],
+   "name_count": 22,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "power_density",
+   "spellings": [
+    {
+     "unit": "W",
+     "names": [
+      "volume_integrated_electron_power_density"
+     ]
+    },
+    {
+     "unit": "W.m^-3",
+     "names": [
+      "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "co_passing_fast_ion_power_density_due_to_collisions",
+      "co_passing_fast_particle_power_density_due_to_collisions",
+      "co_passing_power_density",
+      "co_passing_thermal_electron_power_density_due_to_collisions",
+      "co_passing_thermal_ion_charge_state_power_density_due_to_collisions",
+      "co_passing_thermal_ion_power_density_due_to_collisions",
+      "counter_passing_fast_electron_power_density_due_to_collisions",
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "counter_passing_fast_ion_power_density_due_to_collisions",
+      "counter_passing_fast_particle_power_density_due_to_collisions",
+      "counter_passing_power_density",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "counter_passing_thermal_ion_charge_state_power_density_due_to_collisions",
+      "counter_passing_thermal_ion_power_density_due_to_collisions",
+      "deposited_power_density_due_to_fast_particle_source",
+      "deuterium_deuterium_power_density_due_to_fusion",
+      "deuterium_tritium_power_density_due_to_fusion",
+      "electron_power_density",
+      "electron_power_density_due_to_collisions",
+      "fast_electron_absorbed_wave_power_density",
+      "fast_ion_charge_state_power_density",
+      "fast_ion_charge_state_power_density_due_to_collisions",
+      "fast_ion_power_density",
+      "fast_ion_power_density_due_to_collisions",
+      "fast_particle_power_density_due_to_collisions",
+      "flux_surface_averaged_total_absorbed_wave_power_density",
+      "ion_charge_state_power_density",
+      "ion_charge_state_power_density_due_to_collisions",
+      "ion_power_density",
+      "ion_power_density_due_to_collisions",
+      "neutral_power_density",
+      "neutral_state_power_density",
+      "nuclear_power_density_of_breeder_blanket_layer",
+      "nuclear_power_density_of_breeder_blanket_module",
+      "nuclear_power_density_of_limiter_tile",
+      "per_toroidal_mode_fast_electron_power_density",
+      "per_toroidal_mode_fast_ion_charge_state_power_density",
+      "per_toroidal_mode_fast_ion_power_density",
+      "per_toroidal_mode_flux_surface_average_total_absorbed_power_density",
+      "per_toroidal_mode_thermal_electron_power_density",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "per_toroidal_mode_thermal_ion_power_density",
+      "per_toroidal_mode_total_absorbed_wave_power_density",
+      "power_density_due_to_collisions",
+      "power_density_due_to_fusion",
+      "power_density_due_to_radiation",
+      "radiated_power_density",
+      "thermal_electron_power_density",
+      "thermal_electron_power_density_due_to_collisions",
+      "thermal_ion_absorbed_wave_power_density",
+      "thermal_ion_charge_state_power_density",
+      "thermal_ion_charge_state_power_density_due_to_collisions",
+      "thermal_ion_power_density_due_to_collisions",
+      "thermal_particle_power_density_due_to_thermalization",
+      "total_absorbed_wave_power_density",
+      "total_ion_power_density",
+      "total_thermal_power_density_due_to_conductive_losses",
+      "trapped_fast_electron_power_density_due_to_collisions",
+      "trapped_fast_ion_charge_state_power_density_due_to_collisions",
+      "trapped_fast_ion_power_density_due_to_collisions",
+      "trapped_power_density",
+      "trapped_thermal_electron_power_density_due_to_collisions",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "trapped_thermal_ion_power_density_due_to_collisions"
+     ]
+    }
+   ],
+   "name_count": 66,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "pressure",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "gyrocenter_pressure",
+      "normalized_particle_perturbed_pressure",
+      "normalized_perturbed_pressure",
+      "parallel_normalized_particle_perturbed_pressure",
+      "perpendicular_normalized_gyrocenter_perturbed_pressure",
+      "perpendicular_normalized_particle_perturbed_pressure",
+      "perpendicular_normalized_perturbed_pressure"
+     ]
+    },
+    {
+     "unit": "Pa",
+     "names": [
+      "co_passing_fast_particle_pressure",
+      "coolant_pressure",
+      "coolant_pressure_at_cooling_circuit_inlet",
+      "counter_passing_fast_particle_pressure",
+      "derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate",
+      "electron_pressure",
+      "electron_pressure_at_pedestal_top",
+      "electron_pressure_at_plasma_boundary",
+      "electron_pressure_over_scrape_off_layer",
+      "fast_electron_pressure",
+      "fast_ion_charge_state_pressure",
+      "fast_ion_pressure",
+      "fast_neutral_pressure",
+      "fast_particle_pressure",
+      "ion_charge_state_pressure",
+      "ion_pressure",
+      "maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate",
+      "neutral_gas_pressure_of_gauge",
+      "neutral_internal_state_pressure",
+      "neutral_pressure_of_mass_spectrometer_channel",
+      "neutral_pressure_over_scrape_off_layer",
+      "parallel_co_passing_fast_particle_pressure",
+      "parallel_counter_passing_fast_particle_pressure",
+      "parallel_fast_electron_pressure",
+      "parallel_fast_ion_charge_state_pressure",
+      "parallel_fast_ion_pressure",
+      "parallel_fast_ion_state_pressure",
+      "parallel_fast_neutral_internal_state_pressure",
+      "parallel_fast_neutral_pressure",
+      "parallel_fast_neutral_state_pressure",
+      "parallel_fast_particle_pressure",
+      "parallel_plasma_pressure",
+      "parallel_total_fast_ion_pressure",
+      "parallel_trapped_fast_particle_pressure",
+      "pedestal_electron_pressure",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "perpendicular_counter_passing_fast_particle_pressure",
+      "perpendicular_fast_electron_pressure",
+      "perpendicular_fast_ion_charge_state_pressure",
+      "perpendicular_fast_ion_pressure",
+      "perpendicular_fast_neutral_pressure",
+      "perpendicular_fast_particle_pressure",
+      "perpendicular_plasma_pressure",
+      "perpendicular_plasma_pressure_at_post_sawtooth_crash",
+      "perpendicular_suprathermal_neutral_internal_state_pressure",
+      "perpendicular_total_fast_ion_pressure",
+      "perpendicular_trapped_fast_particle_pressure",
+      "plasma_pressure",
+      "prefill_gas_pressure",
+      "pressure_at_pedestal_top",
+      "pressure_of_ion_cyclotron_heating_antenna",
+      "pressure_of_lower_hybrid_antenna",
+      "pressure_over_scrape_off_layer",
+      "suprathermal_neutral_internal_state_pressure",
+      "thermal_electron_pressure_at_post_sawtooth_crash",
+      "thermal_ion_charge_state_pressure",
+      "thermal_ion_pressure",
+      "thermal_neutral_internal_state_pressure",
+      "thermal_neutral_pressure",
+      "thermal_plasma_pressure",
+      "total_co_passing_particle_pressure",
+      "total_counter_passing_particle_pressure",
+      "total_electron_pressure",
+      "total_fast_ion_pressure",
+      "total_ion_pressure",
+      "total_neutral_internal_state_pressure",
+      "total_neutral_pressure",
+      "total_particle_pressure",
+      "total_plasma_pressure",
+      "total_thermal_ion_pressure",
+      "total_trapped_particle_pressure",
+      "trapped_fast_particle_pressure",
+      "vacuum_pressure_of_lower_hybrid_antenna"
+     ]
+    },
+    {
+     "unit": "Pa.Wb^-1",
+     "names": [
+      "derivative_of_plasma_pressure_with_respect_to_poloidal_magnetic_flux_coordinate"
+     ]
+    }
+   ],
+   "name_count": 81,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "radial_derivative",
+   "spellings": [
+    {
+     "unit": "Wb.m^-1",
+     "names": [
+      "radial_derivative_of_poloidal_magnetic_flux"
+     ]
+    },
+    {
+     "unit": "m^-3",
+     "names": [
+      "radial_derivative_of_pedestal_electron_density"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "radial_magnetization",
+   "spellings": [
+    {
+     "unit": "A.m^-2",
+     "names": [
+      "radial_magnetization_of_ferritic_element"
+     ]
+    },
+    {
+     "unit": "T",
+     "names": [
+      "radial_magnetization_of_iron_core_segment"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "ratio",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "ratio_of_helium_confinement_time_to_hydrogenic_confinement_time",
+      "ratio_of_hydrogen_density_to_electron_density",
+      "ratio_of_ion_density_to_electron_density",
+      "ratio_of_iron_density_to_electron_density",
+      "ratio_of_left_hand_circularly_polarized_wave_power_to_right_hand_circularly_polarized_wave_power",
+      "ratio_of_line_averaged_electron_density_to_greenwald_density",
+      "ratio_of_line_averaged_hydrogen_density_to_line_averaged_total_hydrogenic_density",
+      "ratio_of_lithium_density_to_electron_density",
+      "ratio_of_neutral_density_of_isotope_to_difference_of_total_neutral_density_and_neutral_density_of_isotope",
+      "ratio_of_neutral_state_density_to_total_hydrogenic_density",
+      "ratio_of_nuclear_energy_to_incident_neutron_energy",
+      "ratio_of_particle_count_to_particle_simulated_count",
+      "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "ratio_of_total_ion_density_to_electron_density",
+      "ratio_of_tritium_density_to_deuterium_density",
+      "ratio_of_volume_averaged_argon_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_beryllium_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_boron_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_carbon_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_deuterium_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_deuterium_tritium_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_helium_3_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_helium_4_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_hydrogen_density_to_volume_averaged_total_hydrogenic_density",
+      "ratio_of_volume_averaged_krypton_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_neon_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_nitrogen_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_tritium_density_to_volume_averaged_electron_density",
+      "ratio_of_volume_averaged_tungsten_density_to_volume_averaged_electron_density"
+     ]
+    },
+    {
+     "unit": "T^-1.m.s^-1",
+     "names": [
+      "ratio_of_parallel_plasma_velocity_to_magnetic_field_magnitude"
+     ]
+    },
+    {
+     "unit": "T^-2",
+     "names": [
+      "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude"
+     ]
+    },
+    {
+     "unit": "m.s^-1",
+     "names": [
+      "ratio_of_parallel_ion_velocity_to_magnetic_field_magnitude",
+      "ratio_of_radial_ion_velocity_to_magnetic_field_magnitude",
+      "ratio_of_toroidal_ion_velocity_to_magnetic_field_magnitude"
+     ]
+    },
+    {
+     "unit": "m^-1.s^-1",
+     "names": [
+      "ratio_of_diamagnetic_vorticity_to_major_radius",
+      "ratio_of_plasma_vorticity_to_major_radius",
+      "ratio_of_vertical_vorticity_to_major_radius",
+      "ratio_of_vorticity_to_major_radius"
+     ]
+    },
+    {
+     "unit": "m^-2",
+     "names": [
+      "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius"
+     ]
+    }
+   ],
+   "name_count": 40,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "source_rate",
+   "spellings": [
+    {
+     "unit": "Hz",
+     "names": [
+      "deuterium_deuterium_neutron_source_rate_due_to_beam_beam_fusion",
+      "deuterium_deuterium_neutron_source_rate_due_to_fusion",
+      "deuterium_deuterium_neutron_source_rate_due_to_thermal_fusion",
+      "deuterium_tritium_neutron_source_rate_due_to_thermal_fusion",
+      "neutron_source_rate_due_to_beam_beam_fusion",
+      "neutron_source_rate_due_to_thermal_fusion",
+      "source_rate_due_to_beam_beam_fusion",
+      "source_rate_due_to_thermal_fusion",
+      "total_neutron_source_rate_due_to_thermal_fusion",
+      "tritium_tritium_neutron_source_rate_due_to_fusion",
+      "tritium_tritium_neutron_source_rate_due_to_thermal_fusion"
+     ]
+    },
+    {
+     "unit": "m^-3.s^-1",
+     "names": [
+      "co_passing_thermal_particle_source_rate",
+      "counter_passing_thermal_particle_source_rate",
+      "electron_volumetric_source_rate",
+      "explicit_ion_particle_source_rate",
+      "fast_electron_source_rate_due_to_dreicer",
+      "ion_source_rate",
+      "ion_state_source_rate",
+      "neutral_internal_state_source_rate",
+      "neutral_source_rate",
+      "particle_source_rate_due_to_distribution_function_driven",
+      "runaway_electron_source_rate_due_to_compton_scattering",
+      "runaway_electron_source_rate_due_to_dreicer",
+      "runaway_electron_source_rate_due_to_hot_tail",
+      "thermal_particle_source_rate",
+      "total_explicit_ion_particle_source_rate",
+      "total_ion_particle_volumetric_source_rate",
+      "total_runaway_electron_source_rate",
+      "trapped_thermal_particle_source_rate",
+      "volume_averaged_runaway_electron_source_rate",
+      "volume_averaged_runaway_electron_source_rate_due_to_compton_scattering",
+      "volume_averaged_runaway_electron_source_rate_due_to_dreicer",
+      "volume_averaged_runaway_electron_source_rate_due_to_hot_tail",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ]
+    },
+    {
+     "unit": "s^-1",
+     "names": [
+      "ammonia_deuterated_source_rate",
+      "ammonia_source_rate",
+      "argon_source_rate_due_to_gas_injection",
+      "beryllium_source_rate_due_to_gas_injection",
+      "carbon_source_rate_due_to_gas_injection",
+      "cumulative_inside_flux_surface_electron_particle_source_rate",
+      "cumulative_inside_flux_surface_ion_charge_state_source_rate",
+      "cumulative_inside_flux_surface_total_ion_particle_source_rate",
+      "deuterated_methane_source_rate",
+      "deuterium_source_rate_due_to_injection",
+      "electron_source_rate_due_to_injection",
+      "electron_source_rate_due_to_surface_emission",
+      "ethane_source_rate",
+      "ethylene_source_rate",
+      "helium_3_source_rate_due_to_gas_injection",
+      "helium_4_source_rate_due_to_gas_injection",
+      "hydrogen_source_rate_due_to_gas_injection",
+      "implicit_electron_energy_source_rate",
+      "implicit_electron_particle_source_rate",
+      "implicit_ion_energy_source_rate",
+      "implicit_ion_momentum_source_rate",
+      "implicit_ion_particle_source_rate",
+      "implicit_ion_state_energy_source_rate",
+      "implicit_ion_state_particle_source_rate",
+      "ion_momentum_source_rate",
+      "ion_particle_source_rate",
+      "krypton_source_rate_due_to_gas_injection",
+      "lithium_source_rate_due_to_gas_injection",
+      "methane_carbon_13_source_rate",
+      "methane_source_rate",
+      "momentum_source_rate",
+      "neon_source_rate",
+      "nitrogen_source_rate",
+      "oxygen_source_rate_due_to_gas_injection",
+      "propane_source_rate",
+      "silane_source_rate",
+      "source_rate_due_to_gas_injection",
+      "source_rate_due_to_injection",
+      "toroidal_implicit_ion_momentum_source_rate",
+      "total_electron_source_rate",
+      "total_implicit_ion_energy_source_rate",
+      "total_implicit_ion_particle_source_rate",
+      "total_ion_particle_source_rate",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "total_particle_source_rate_due_to_neutral_beam_shinethrough",
+      "tritium_source_rate_due_to_gas_injection",
+      "volume_integrated_particle_source_rate",
+      "xenon_source_rate_due_to_gas_injection"
+     ]
+    }
+   ],
+   "name_count": 82,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "spectral_calibration_factor",
+   "spellings": [
+    {
+     "unit": "m",
+     "names": [
+      "spectral_calibration_factor_of_spectrometer_channel"
+     ]
+    },
+    {
+     "unit": "m^-2.rad^-1",
+     "names": [
+      "spectral_calibration_factor_at_line_of_sight"
+     ]
+    },
+    {
+     "unit": "m^-3.sr^-1",
+     "names": [
+      "spectral_calibration_factor_of_spectrometer"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "square",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "square_of_ion_charge_number",
+      "square_of_ion_charge_state_charge_number",
+      "square_of_toroidal_flux_coordinate_gradient_magnitude"
+     ]
+    },
+    {
+     "unit": "J",
+     "names": [
+      "square_of_poloidal_magnetic_field"
+     ]
+    },
+    {
+     "unit": "T^-2",
+     "names": [
+      "square_of_magnetic_field_magnitude"
+     ]
+    },
+    {
+     "unit": "e",
+     "names": [
+      "square_of_ion_state_charge_number"
+     ]
+    },
+    {
+     "unit": "m^-2",
+     "names": [
+      "square_of_major_radius"
+     ]
+    }
+   ],
+   "name_count": 7,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "temperature",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "ratio_of_electron_temperature_at_magnetic_axis_to_volume_averaged_electron_temperature",
+      "ratio_of_ion_temperature_at_magnetic_axis_to_volume_averaged_ion_temperature"
+     ]
+    },
+    {
+     "unit": "K",
+     "names": [
+      "coolant_temperature_at_inlet",
+      "coolant_temperature_at_outlet",
+      "coolant_temperature_of_plant_component_port",
+      "gas_temperature_at_shattering_position",
+      "gas_temperature_of_pellet_injector",
+      "maximum_surface_temperature",
+      "surface_temperature",
+      "temperature_at_wall",
+      "temperature_of_coil_conductor",
+      "temperature_of_neutron_detector",
+      "temperature_of_sensor",
+      "temperature_of_soft_xray_detector"
+     ]
+    },
+    {
+     "unit": "eV",
+     "names": [
+      "average_temperature_over_scrape_off_layer",
+      "cold_neutral_temperature",
+      "electron_critical_temperature_at_pedestal_top",
+      "electron_field_line_average_temperature_over_scrape_off_layer",
+      "electron_temperature",
+      "electron_temperature_at_divertor_target",
+      "electron_temperature_at_internal_transport_barrier",
+      "electron_temperature_at_limiter",
+      "electron_temperature_at_magnetic_axis",
+      "electron_temperature_at_outboard_midplane",
+      "electron_temperature_at_pedestal_top",
+      "electron_temperature_at_pellet_path",
+      "electron_temperature_at_plasma_boundary",
+      "electron_temperature_over_scrape_off_layer",
+      "field_line_average_temperature_over_scrape_off_layer",
+      "flux_surface_averaged_bulk_electron_temperature_at_plasma_boundary",
+      "hot_neutral_temperature_at_plasma_boundary",
+      "ion_average_temperature",
+      "ion_average_temperature_at_internal_transport_barrier",
+      "ion_average_temperature_at_limiter",
+      "ion_average_temperature_at_magnetic_axis",
+      "ion_average_temperature_at_pedestal_top",
+      "ion_average_temperature_at_post_sawtooth_crash",
+      "ion_charge_state_temperature",
+      "ion_field_line_average_temperature_over_scrape_off_layer",
+      "ion_temperature",
+      "ion_temperature_at_divertor_target",
+      "ion_temperature_at_separatrix",
+      "line_averaged_electron_temperature",
+      "line_averaged_total_ion_temperature",
+      "neutral_internal_state_temperature",
+      "neutral_temperature",
+      "plasma_temperature",
+      "radiative_extraordinary_mode_temperature_at_ece_channel",
+      "radiative_ordinary_mode_temperature_at_ece_channel",
+      "radiative_temperature_at_ece_channel",
+      "radiative_temperature_at_magnetic_axis",
+      "temperature_at_divertor_target",
+      "temperature_at_magnetic_axis",
+      "temperature_over_scrape_off_layer",
+      "total_ion_temperature",
+      "volume_averaged_electron_temperature",
+      "volume_averaged_ion_temperature",
+      "volume_averaged_neutral_temperature",
+      "volume_averaged_total_ion_temperature"
+     ]
+    }
+   ],
+   "name_count": 59,
+   "recorded_exception": true,
+   "reason": "a material or detector temperature is thermodynamic and stated in K; a plasma kinetic temperature is stated in eV as an energy per particle. The two are different quantities, not two spellings of one."
+  },
+  {
+   "quantity": "time_derivative",
+   "spellings": [
+    {
+     "unit": "W",
+     "names": [
+      "time_derivative_of_diamagnetic_energy",
+      "time_derivative_of_total_thermal_plasma_internal_energy"
+     ]
+    },
+    {
+     "unit": "m^-3.s^-1",
+     "names": [
+      "time_derivative_of_electron_density"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "toroidal_angle",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "toroidal_angle_of_active_limiter_point"
+     ]
+    },
+    {
+     "unit": "rad",
+     "names": [
+      "toroidal_angle",
+      "toroidal_angle_of_antenna_strap",
+      "toroidal_angle_of_aperture",
+      "toroidal_angle_of_beamlet_group",
+      "toroidal_angle_of_coil_conductor_element",
+      "toroidal_angle_of_control_surface",
+      "toroidal_angle_of_detector",
+      "toroidal_angle_of_electron_cyclotron_beam",
+      "toroidal_angle_of_grating",
+      "toroidal_angle_of_launching_position",
+      "toroidal_angle_of_measurement_position",
+      "toroidal_angle_of_outlet",
+      "toroidal_angle_of_poloidal_magnetic_field_probe",
+      "toroidal_angle_of_thomson_scattering_channel_position",
+      "toroidal_angle_of_toroidal_magnetic_field_probe"
+     ]
+    }
+   ],
+   "name_count": 16,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "torque_density",
+   "spellings": [
+    {
+     "unit": "N.m",
+     "names": [
+      "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions"
+     ]
+    },
+    {
+     "unit": "N.m^-2",
+     "names": [
+      "co_passing_fast_electron_torque_density_due_to_collisions",
+      "co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "co_passing_fast_ion_torque_density_due_to_collisions",
+      "co_passing_thermal_electron_torque_density_due_to_collisions",
+      "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "co_passing_thermal_ion_torque_density_due_to_collisions",
+      "co_passing_torque_density",
+      "co_passing_torque_density_due_to_j_cross_b_force",
+      "counter_passing_fast_electron_torque_density_due_to_collisions",
+      "counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "counter_passing_fast_ion_torque_density_due_to_collisions",
+      "counter_passing_thermal_electron_torque_density_due_to_collisions",
+      "counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "counter_passing_torque_density",
+      "counter_passing_torque_density_due_to_j_cross_b_force",
+      "electron_torque_density_due_to_collisions",
+      "fast_electron_torque_density_due_to_collisions",
+      "fast_ion_charge_state_torque_density_due_to_collisions",
+      "fast_ion_torque_density_due_to_collisions",
+      "fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "ion_torque_density_due_to_collisions",
+      "ion_torque_density_due_to_thermalization",
+      "particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "thermal_electron_torque_density_due_to_collisions",
+      "thermal_ion_charge_state_torque_density_due_to_collisions",
+      "thermal_ion_torque_density_due_to_collisions",
+      "thermal_ion_torque_density_due_to_thermalization",
+      "toroidal_co_passing_fast_electron_torque_density_due_to_collisions",
+      "toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+      "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions",
+      "toroidal_co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions",
+      "toroidal_co_passing_torque_density",
+      "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+      "toroidal_counter_passing_fast_electron_torque_density_due_to_collisions",
+      "toroidal_counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions",
+      "toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions",
+      "toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "toroidal_counter_passing_torque_density",
+      "toroidal_counter_passing_torque_density_due_to_j_cross_b_force",
+      "toroidal_fast_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_fast_ion_torque_density_due_to_collisions",
+      "toroidal_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "toroidal_thermal_electron_torque_density_due_to_collisions",
+      "toroidal_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_thermal_ion_torque_density_due_to_collisions",
+      "toroidal_thermal_ion_torque_density_due_to_thermalization",
+      "toroidal_torque_density",
+      "toroidal_torque_density_due_to_j_cross_b_force",
+      "toroidal_trapped_fast_electron_torque_density_due_to_collisions",
+      "toroidal_trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_trapped_fast_ion_torque_density_due_to_collisions",
+      "toroidal_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "toroidal_trapped_thermal_electron_torque_density_due_to_collisions",
+      "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+      "toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "toroidal_trapped_thermal_ion_torque_density_due_to_collisions",
+      "toroidal_trapped_torque_density",
+      "toroidal_trapped_torque_density_due_to_j_cross_b_force",
+      "torque_density",
+      "torque_density_due_to_collisions",
+      "torque_density_due_to_coulomb_collisions_with_electrons",
+      "torque_density_due_to_j_cross_b_force",
+      "torque_density_due_to_thermalization",
+      "trapped_fast_electron_torque_density_due_to_collisions",
+      "trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+      "trapped_fast_ion_torque_density_due_to_collisions",
+      "trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+      "trapped_thermal_electron_torque_density_due_to_collisions",
+      "trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+      "trapped_thermal_ion_torque_density_due_to_collisions",
+      "trapped_torque_density",
+      "trapped_torque_density_due_to_j_cross_b_force"
+     ]
+    },
+    {
+     "unit": "kg.m^-1.s^-2",
+     "names": [
+      "ion_charge_state_torque_density",
+      "ion_torque_density",
+      "neutral_internal_state_torque_density",
+      "neutral_torque_density",
+      "toroidal_ion_charge_state_torque_density",
+      "toroidal_ion_torque_density",
+      "toroidal_neutral_internal_state_torque_density",
+      "toroidal_neutral_torque_density",
+      "toroidal_torque_density_due_to_diamagnetic_drift"
+     ]
+    }
+   ],
+   "name_count": 87,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "vertical_magnetization",
+   "spellings": [
+    {
+     "unit": "A.m^-2",
+     "names": [
+      "vertical_magnetization_of_ferritic_element"
+     ]
+    },
+    {
+     "unit": "T",
+     "names": [
+      "vertical_magnetization_of_iron_core_segment"
+     ]
+    }
+   ],
+   "name_count": 2,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "x_direction_unit_vector",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "x_direction_unit_vector_of_camera",
+      "x_direction_unit_vector_of_electron_cyclotron_launcher_mirror"
+     ]
+    },
+    {
+     "unit": "m",
+     "names": [
+      "x_direction_unit_vector_of_neutron_detector"
+     ]
+    }
+   ],
+   "name_count": 3,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "y_direction_unit_vector",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "y_direction_unit_vector_of_camera",
+      "y_direction_unit_vector_of_electron_cyclotron_launcher_mirror",
+      "y_direction_unit_vector_of_shatter_cone"
+     ]
+    },
+    {
+     "unit": "m",
+     "names": [
+      "y_direction_unit_vector_of_neutron_detector"
+     ]
+    }
+   ],
+   "name_count": 4,
+   "recorded_exception": false,
+   "reason": null
+  },
+  {
+   "quantity": "z_direction_unit_vector",
+   "spellings": [
+    {
+     "unit": "1",
+     "names": [
+      "z_direction_unit_vector_of_camera",
+      "z_direction_unit_vector_of_electron_cyclotron_launcher_mirror",
+      "z_direction_unit_vector_of_pellet_injector"
+     ]
+    },
+    {
+     "unit": "m",
+     "names": [
+      "z_direction_unit_vector_of_neutron_detector"
+     ]
+    }
+   ],
+   "name_count": 4,
+   "recorded_exception": false,
+   "reason": null
+  }
+ ],
+ "unresolved_duplicate_count": 0,
+ "unrecorded_divergence_count": 43,
+ "dimension_mismatches": [
+  {
+   "name": "effective_energy",
+   "unit": "1",
+   "quantity": "effective_energy",
+   "domain": "gyrokinetics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'energy' but unit is dimensionless ('1'); expected one of ['GeV', 'J', 'MeV', 'eV', 'keV']"
+   ]
+  },
+  {
+   "name": "electron_spectral_power",
+   "unit": "dB",
+   "quantity": "electron_spectral_power",
+   "domain": "turbulence",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'power' but unit='dB' is not in expected set ['MW', 'W', 'kW']"
+   ]
+  },
+  {
+   "name": "gyrocenter_pressure_bessel_0",
+   "unit": "1",
+   "quantity": "gyrocenter_pressure_bessel_0",
+   "domain": "gyrokinetics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "logarithm_of_fluctuating_electron_spectral_power",
+   "unit": "dB",
+   "quantity": "logarithm",
+   "domain": "electromagnetic_wave_diagnostics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'power' but unit='dB' is not in expected set ['MW', 'W', 'kW']"
+   ]
+  },
+  {
+   "name": "perturbed_gyrocenter_pressure_bessel_0",
+   "unit": "1",
+   "quantity": "perturbed_gyrocenter_pressure_bessel_0",
+   "domain": "gyrokinetics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "perturbed_pressure_bessel_1",
+   "unit": "1",
+   "quantity": "perturbed_pressure_bessel_1",
+   "domain": "turbulence",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "plasma_internal_energy",
+   "unit": "W",
+   "quantity": "plasma_internal_energy",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'energy' but unit='W' is not in expected set ['GeV', 'J', 'MeV', 'eV', 'keV']"
+   ]
+  },
+  {
+   "name": "power_due_to_fusion_reactions",
+   "unit": "s^-1",
+   "quantity": "power",
+   "domain": "radiation_measurement_diagnostics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'power' but unit='s^-1' is not in expected set ['MW', 'W', 'kW']"
+   ]
+  },
+  {
+   "name": "derivative_of_plasma_pressure_with_respect_to_poloidal_magnetic_flux_coordinate",
+   "unit": "Pa.Wb^-1",
+   "quantity": "pressure",
+   "domain": "core_plasma_physics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit='Pa.Wb^-1' is not in expected set ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "gyrocenter_pressure",
+   "unit": "1",
+   "quantity": "pressure",
+   "domain": "gyrokinetics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "pressure_bessel_1",
+   "unit": "1",
+   "quantity": "pressure_bessel_1",
+   "domain": "turbulence",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "runaway_electron_pitch_angle",
+   "unit": "1",
+   "quantity": "runaway_electron_pitch_angle",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'angle' but unit is dimensionless ('1'); expected one of ['deg', 'rad', 'sr']"
+   ]
+  },
+  {
+   "name": "co_passing_thermal_particle_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "counter_passing_thermal_particle_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "electron_volumetric_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "explicit_ion_particle_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "fast_electron_source_rate_due_to_dreicer",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "ion_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "ion_state_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "neutral_internal_state_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "neutral_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "particle_source_rate_due_to_distribution_function_driven",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "runaway_electron_source_rate_due_to_compton_scattering",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "runaway_electron_source_rate_due_to_dreicer",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "runaway_electron_source_rate_due_to_hot_tail",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "thermal_particle_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "total_explicit_ion_particle_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "total_ion_particle_volumetric_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "total_runaway_electron_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "trapped_thermal_particle_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "volume_averaged_runaway_electron_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "magnetohydrodynamics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "volume_averaged_runaway_electron_source_rate_due_to_compton_scattering",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "volume_averaged_runaway_electron_source_rate_due_to_dreicer",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "volume_averaged_runaway_electron_source_rate_due_to_hot_tail",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "volume_averaged_total_runaway_electron_source_rate",
+   "unit": "m^-3.s^-1",
+   "quantity": "source_rate",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "spectral_power",
+   "unit": "dB",
+   "quantity": "spectral_power",
+   "domain": "turbulence",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'power' but unit='dB' is not in expected set ['MW', 'W', 'kW']"
+   ]
+  },
+  {
+   "name": "thermal_plasma_internal_energy",
+   "unit": "W",
+   "quantity": "thermal_plasma_internal_energy",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'energy' but unit='W' is not in expected set ['GeV', 'J', 'MeV', 'eV', 'keV']"
+   ]
+  },
+  {
+   "name": "toroidal_angle_of_active_limiter_point",
+   "unit": "1",
+   "quantity": "toroidal_angle",
+   "domain": "edge_plasma_physics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'angle' but unit is dimensionless ('1'); expected one of ['deg', 'rad', 'sr']"
+   ]
+  },
+  {
+   "name": "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions",
+   "unit": "N.m",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque_density' but unit='N.m' is not in expected set ['N.m^-2', 'Pa.m^-1']"
+   ]
+  },
+  {
+   "name": "total_thermal_plasma_internal_energy",
+   "unit": "W",
+   "quantity": "total_thermal_plasma_internal_energy",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'energy' but unit='W' is not in expected set ['GeV', 'J', 'MeV', 'eV', 'keV']"
+   ]
+  },
+  {
+   "name": "volume_averaged_runaway_electron_pitch_angle",
+   "unit": "1",
+   "quantity": "volume_averaged_runaway_electron_pitch_angle",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'angle' but unit is dimensionless ('1'); expected one of ['deg', 'rad', 'sr']"
+   ]
+  }
+ ],
+ "unit_missing": [
+  "ion_charge_state_torque_density_due_to_collisions",
+  "outline",
+  "particle_temperature"
+ ],
+ "clean": false,
+ "source": "live graph: StandardName nodes with name_stage != superseded",
+ "names_scanned": 3267
+}

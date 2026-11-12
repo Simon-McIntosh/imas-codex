@@ -24,6 +24,11 @@ from typing import Any
 import numpy as np
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
+from imas_codex.standard_names.unit_audit import (
+    QUANTITY_HEADS,
+    quantity_of_name,
+    units_are_dimensionally_equal,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -326,6 +331,15 @@ _NAME_TOKEN_UNIT_EXPECTATIONS: dict[str, set[str]] = {
     "mass": {"kg", "u"},
     # Frequency implies Hz.
     "frequency": {"Hz", "kHz", "MHz", "GHz", "rad.s^-1", "s^-1"},
+    # Quantity heads, judged as a whole through ``quantity_of_name``: a compound
+    # head commits to the unit of the whole quantity, so a torque density is not
+    # a torque, and the words inside the head are not judged on their own.
+    "torque": {"N.m", "J"},
+    "torque_density": {"N.m^-2", "Pa.m^-1"},
+    "source_rate": {"s^-1", "Hz"},
+    "rate": {"s^-1", "Hz"},
+    "energy_flux": {"W.m^-2"},
+    "particle_flux": {"s^-1", "m^-2.s^-1"},
 }
 
 
@@ -1518,6 +1532,28 @@ def name_unit_consistency_check(
 
     name_tokens = set(re.findall(r"[a-z]+", name))
 
+    # A registered quantity head is judged once, as a whole: the same table
+    # entry read through ``quantity_of_name``, so a qualifier inside the head
+    # cannot make a torque density answer to the torque expectation.
+    quantity = quantity_of_name(name)
+    if quantity in QUANTITY_HEADS and unit:
+        expected = _NAME_TOKEN_UNIT_EXPECTATIONS.get(quantity) or set()
+        if expected and not any(
+            units_are_dimensionally_equal(unit, allowed) for allowed in expected
+        ):
+            if dimensionless:
+                issues.append(
+                    f"audit:name_unit_consistency_check: name contains "
+                    f"'{quantity}' but unit is dimensionless ('{unit}'); "
+                    f"expected one of {sorted(expected)}"
+                )
+            else:
+                issues.append(
+                    f"audit:name_unit_consistency_check: name contains "
+                    f"'{quantity}' but unit='{unit}' is not in expected set "
+                    f"{sorted(expected)}"
+                )
+
     # Time-suffix compound names: the head noun is time, not the qualifier
     # token. ``energy_confinement_time``, ``particle_confinement_time``,
     # ``energy_decay_time``, ``current_diffusion_time`` etc. all have time
@@ -1541,6 +1577,19 @@ def name_unit_consistency_check(
         return issues
 
     for token, expected_units in _NAME_TOKEN_UNIT_EXPECTATIONS.items():
+        # A registered quantity head is judged by the branch above, which
+        # compares dimensions. Any word of that head — the head itself, or a
+        # component of a longer compound such as ``torque`` in
+        # ``torque_density`` — belongs to the head and is not judged again by
+        # spelling, which would fail the compound's own recorded unit. A head
+        # word appearing in a name of another quantity (``temperature`` inside a
+        # ratio) is not part of that name's head and is still judged here.
+        if (
+            token in QUANTITY_HEADS
+            and quantity in QUANTITY_HEADS
+            and token in quantity.split("_")
+        ):
+            continue
         if token not in name_tokens:
             continue
         # Skip if name also contains a qualifier that shifts the head noun
@@ -5011,3 +5060,167 @@ def repair_structural_cocos_transformation_metadata(
     finally:
         if owns:
             client.close()
+
+
+def unit_spelling_census(names: list[dict[str, Any]]) -> dict[str, Any]:
+    """Count every quantity carried in more than one unit spelling.
+
+    Each entry of *names* supplies ``id`` (or ``name``), ``unit``, an optional
+    ``description`` and an optional physics domain. Names are grouped by the
+    quantity they state, as ``unit_audit.quantity_of_name`` reads it, and within
+    a quantity by the unit spelling they carry.
+
+    A quantity is a duplicate when its names carry more than one spelling and
+    every pair of them is dimensionally equal. It is resolved when the spelling
+    record names the canonical unit that the duplicates are rewritten to, and
+    unresolved otherwise. A quantity whose spellings are not all dimensionally
+    equal is reported under ``divergences``: a recorded exception stands with its
+    reason, and an unrecorded divergence is a defect.
+
+    Names whose unit does not fit the dimension their quantity has are listed
+    under ``dimension_mismatches``. A clean quantity contributes nothing to
+    either list, so a census over clean names reports no duplicates, no
+    divergences and no mismatches.
+    """
+    from imas_codex.standard_names.unit_audit import unit_dimension
+    from imas_codex.standard_names.unit_overrides import (
+        quantity_spelling,
+        spelling_exception,
+    )
+
+    grouped: dict[str, dict[str, list[str]]] = {}
+    unit_missing: list[str] = []
+    dimension_mismatches: list[dict[str, str]] = []
+    for row in names:
+        name = str(row.get("id") or row.get("name") or "").strip()
+        unit = str(row.get("unit") or "").strip()
+        if not name:
+            continue
+        if not unit:
+            unit_missing.append(name)
+            continue
+        quantity = quantity_of_name(name)
+        grouped.setdefault(quantity, {}).setdefault(unit, []).append(name)
+        issues = name_unit_consistency_check({"id": name, "unit": unit})
+        if issues:
+            dimension_mismatches.append(
+                {
+                    "name": name,
+                    "unit": unit,
+                    "quantity": quantity,
+                    "domain": str(row.get("physics_domain") or row.get("domain") or ""),
+                    "issues": issues,
+                }
+            )
+
+    duplicates: list[dict[str, Any]] = []
+    divergences: list[dict[str, Any]] = []
+    for quantity in sorted(grouped):
+        spellings = grouped[quantity]
+        units = sorted(spellings)
+        if len(units) < 2:
+            continue
+        by_dimension: dict[str, list[str]] = {}
+        for unit in units:
+            dimension = unit_dimension(unit)
+            by_dimension.setdefault(
+                "__unparsed__" if dimension is None else dimension, []
+            ).append(unit)
+        equal_clusters = [
+            cluster for cluster in by_dimension.values() if len(cluster) > 1
+        ]
+        canonical = quantity_spelling(quantity)
+        exception = spelling_exception(quantity)
+        for cluster in equal_clusters:
+            if exception is not None and set(cluster) <= set(exception.spellings):
+                # The record states these spellings carry different meaning, so
+                # a dimensionally equal pair here is a recorded exception rather
+                # than two spellings of one quantity.
+                divergences.append(
+                    {
+                        "quantity": quantity,
+                        "spellings": [
+                            {"unit": unit, "names": sorted(spellings[unit])}
+                            for unit in cluster
+                        ],
+                        "name_count": sum(len(spellings[unit]) for unit in cluster),
+                        "recorded_exception": True,
+                        "reason": exception.reason,
+                    }
+                )
+                continue
+            duplicates.append(
+                {
+                    "quantity": quantity,
+                    "spellings": [
+                        {"unit": unit, "names": sorted(spellings[unit])}
+                        for unit in cluster
+                    ],
+                    "name_count": sum(len(spellings[unit]) for unit in cluster),
+                    "equal_dimension": True,
+                    "resolved": canonical is not None,
+                    "canonical": canonical,
+                }
+            )
+        if len(by_dimension) < 2:
+            continue
+        entry = {
+            "quantity": quantity,
+            "spellings": [
+                {"unit": unit, "names": sorted(spellings[unit])} for unit in units
+            ],
+            "name_count": sum(len(names) for names in spellings.values()),
+            "recorded_exception": exception is not None,
+            "reason": exception.reason if exception is not None else None,
+        }
+        divergences.append(entry)
+
+    return {
+        "name_count": sum(
+            len(names) for spellings in grouped.values() for names in spellings.values()
+        ),
+        "quantity_count": len(grouped),
+        "duplicate_quantities": duplicates,
+        "divergences": divergences,
+        "unresolved_duplicate_count": sum(
+            1 for entry in duplicates if not entry["resolved"]
+        ),
+        "unrecorded_divergence_count": sum(
+            1 for entry in divergences if not entry["recorded_exception"]
+        ),
+        "dimension_mismatches": sorted(
+            dimension_mismatches, key=lambda row: (row["quantity"], row["name"])
+        ),
+        "unit_missing": sorted(unit_missing),
+        "clean": not duplicates
+        and not divergences
+        and not dimension_mismatches
+        and not unit_missing,
+    }
+
+
+LIVE_NAME_CENSUS_QUERY = """
+MATCH (sn:StandardName)
+WHERE coalesce(sn.name_stage, '') <> 'superseded'
+OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
+RETURN sn.id AS id,
+       coalesce(u.id, sn.unit) AS unit,
+       sn.description AS description,
+       sn.physics_domain AS physics_domain,
+       sn.kind AS kind
+ORDER BY sn.id
+"""
+
+
+def live_unit_spelling_census(graph: Any) -> dict[str, Any]:
+    """Read every live standard name from *graph* and census its spellings.
+
+    The committed census artifact is reproducible from this function alone, so
+    a later reader regenerates it from the revision it was taken at instead of
+    trusting the numbers in the artifact.
+    """
+    rows = [dict(row) for row in graph.query(LIVE_NAME_CENSUS_QUERY)]
+    census = unit_spelling_census(rows)
+    census["source"] = "live graph: StandardName nodes with name_stage != superseded"
+    census["names_scanned"] = len(rows)
+    return census
