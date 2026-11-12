@@ -5193,3 +5193,30 @@ def unit_spelling_census(names: list[dict[str, Any]]) -> dict[str, Any]:
         and not dimension_mismatches
         and not unit_missing,
     }
+
+
+LIVE_NAME_CENSUS_QUERY = """
+MATCH (sn:StandardName)
+WHERE coalesce(sn.name_stage, '') <> 'superseded'
+OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
+RETURN sn.id AS id,
+       coalesce(u.id, sn.unit) AS unit,
+       sn.description AS description,
+       sn.physics_domain AS physics_domain,
+       sn.kind AS kind
+ORDER BY sn.id
+"""
+
+
+def live_unit_spelling_census(graph: Any) -> dict[str, Any]:
+    """Read every live standard name from *graph* and census its spellings.
+
+    The committed census artifact is reproducible from this function alone, so
+    a later reader regenerates it from the revision it was taken at instead of
+    trusting the numbers in the artifact.
+    """
+    rows = [dict(row) for row in graph.query(LIVE_NAME_CENSUS_QUERY)]
+    census = unit_spelling_census(rows)
+    census["source"] = "live graph: StandardName nodes with name_stage != superseded"
+    census["names_scanned"] = len(rows)
+    return census

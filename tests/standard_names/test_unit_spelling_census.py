@@ -162,6 +162,39 @@ def test_a_compound_head_is_judged_once_and_its_words_not_separately() -> None:
     assert issues and "torque_density" in issues[0]
 
 
+def test_the_committed_census_is_reproducible_from_the_repository() -> None:
+    """The live read and the census are one committed path, so the artifact
+    can be regenerated from the revision it was taken at."""
+    from imas_codex.standard_names.audits import (
+        LIVE_NAME_CENSUS_QUERY,
+        live_unit_spelling_census,
+        unit_spelling_census,
+    )
+
+    rows = [
+        {"id": "ion_torque_density", "unit": "N.m^-2", "physics_domain": "core"},
+        {"id": "electron_temperature", "unit": "eV", "physics_domain": "core"},
+        {"id": "ion_temperature", "unit": "eV", "physics_domain": "core"},
+    ]
+
+    class _Graph:
+        def query(self, statement: str) -> list[dict]:
+            assert statement is LIVE_NAME_CENSUS_QUERY
+            return [dict(row) for row in rows]
+
+    assert "superseded" in LIVE_NAME_CENSUS_QUERY
+    census = live_unit_spelling_census(_Graph())
+    assert census["names_scanned"] == 3
+    assert census["name_count"] == 3
+    assert census["clean"] is True
+    assert census["source"].startswith("live graph")
+    assert {
+        key: value
+        for key, value in census.items()
+        if key not in ("source", "names_scanned")
+    } == unit_spelling_census(rows)
+
+
 @pytest.mark.graph
 def test_catalog_write_takes_the_recorded_spelling_on_a_disposable_graph(
     disposable_neo4j_empty: str,
