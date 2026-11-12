@@ -6982,6 +6982,586 @@ def _verify_recovery_unbind_postcondition(
     require_producing_sources(query, name_ids, exhausted_exempt_ids=name_ids)
 
 
+_DOCS_RESTORE_ADAPTER = "docs-revision-restore"
+_DOCS_RESTORE_SCHEMA = "imas-codex.docs-revision-restore.v1"
+_DOCS_RESTORE_RECEIPT_SCHEMA = "imas-codex.signed-docs-revision-restore.v1"
+_DOCS_RESTORE_MUTATION = "restore-documentation-from-revision"
+_DOCS_RESTORE_OPERATION = "restore_documentation_from_revision"
+_DOCS_RESTORE_ORIGIN = "docs_revision_restore"
+_DOCS_RESTORE_GUARDS = (
+    "named-docs-revision-snapshot",
+    "documentation-only-payload",
+    _COLLATERAL_IMMUTABILITY,
+)
+# The only properties a docs restore may write. Anything else in a row's
+# payload names structure or scoring the snapshot does not own, and is refused
+# rather than silently dropped.
+_DOCUMENTATION_ONLY_FIELDS = frozenset(
+    {
+        "documentation",
+        "description",
+        "docs_model",
+        "reviewer_score_docs",
+        "docs_chain_length",
+        "docs_stage",
+        "edit_status",
+    }
+)
+
+
+class DocsRestoreConflict(SignedManifestConflict):
+    """A docs-restore row's target kept its id but changed around it."""
+
+
+def _docs_restore_geometry(query: _Query, sn_id: str) -> dict[str, Any] | None:
+    """Read the target's identity and its whole relationship closure."""
+    rows = query.query(
+        """
+        MATCH (target:StandardName {id: $sn_id})
+        OPTIONAL MATCH (target)-[r]-(other)
+        RETURN elementId(target) AS element_id,
+               target.id AS id,
+               target.name AS name,
+               target.unit AS unit,
+               target.kind AS kind,
+               target.physical_base AS physical_base,
+               target.name_stage AS name_stage,
+               [entry IN collect(CASE WHEN r IS NULL THEN null ELSE {
+                   type: type(r),
+                   direction: CASE
+                     WHEN elementId(startNode(r)) = elementId(target) THEN 'out'
+                     ELSE 'in'
+                   END,
+                   counterpart: elementId(other)
+                 } END) WHERE entry IS NOT NULL] AS relationships
+        """,
+        sn_id=sn_id,
+    )
+    return dict(rows[0]) if rows else None
+
+
+def _docs_restore_geometry_digest(state: Mapping[str, Any]) -> str:
+    """Digest the fields a restore may never change, including every edge."""
+    relationships = sorted(
+        (
+            {
+                "type": str(entry["type"]),
+                "direction": str(entry["direction"]),
+                "counterpart": str(entry["counterpart"]),
+            }
+            for entry in state.get("relationships") or ()
+        ),
+        key=lambda entry: (
+            entry["type"],
+            entry["direction"],
+            entry["counterpart"],
+        ),
+    )
+    return _digest(
+        {
+            "id": state.get("id"),
+            "name": state.get("name"),
+            "unit": state.get("unit"),
+            "kind": state.get("kind"),
+            "physical_base": state.get("physical_base"),
+            "name_stage": state.get("name_stage"),
+            "relationships": relationships,
+        }
+    )
+
+
+def _docs_restore_snapshot(
+    query: _Query, sn_id: str, snapshot_id: str
+) -> dict[str, Any] | None:
+    """Read the named snapshot only when it is this target's own revision."""
+    rows = query.query(
+        """
+        MATCH (target:StandardName {id: $sn_id})
+              -[:DOCS_REVISION_OF]->(rev:DocsRevision {id: $snapshot_id})
+        RETURN rev.id AS snapshot_id,
+               rev.documentation AS documentation,
+               rev.description AS description,
+               rev.revision_number AS revision_number,
+               rev.reviewer_score_docs AS reviewer_score_docs,
+               rev.model AS snapshot_model
+        """,
+        sn_id=sn_id,
+        snapshot_id=snapshot_id,
+    )
+    return dict(rows[0]) if rows else None
+
+
+def _docs_restore_properties(snapshot: Mapping[str, Any]) -> dict[str, Any]:
+    """The snapshot's own documentation fields, plus the accepted stage."""
+    properties: dict[str, Any] = {
+        "documentation": snapshot.get("documentation") or "",
+        "docs_stage": "accepted",
+        "edit_status": "applied",
+        "docs_chain_length": int(snapshot.get("revision_number") or 0) + 1,
+    }
+    if snapshot.get("description") is not None:
+        properties["description"] = snapshot["description"]
+    if snapshot.get("reviewer_score_docs") is not None:
+        properties["reviewer_score_docs"] = float(snapshot["reviewer_score_docs"])
+    if snapshot.get("snapshot_model") is not None:
+        properties["docs_model"] = snapshot["snapshot_model"]
+    return properties
+
+
+def _load_docs_restore_rows(
+    path: str | Path,
+    *,
+    expected_file_sha256: str,
+    expected_payload_sha256: str,
+) -> tuple[str, str, list[dict[str, Any]]]:
+    """Read one signed docs-restore authority.
+
+    A row names a ``StandardName`` and the ``DocsRevision`` snapshot its
+    documentation comes from. An optional ``properties`` payload is carried so
+    a caller can declare what it meant to write; it is validated against the
+    documentation-only allowlist and against the snapshot itself, so a payload
+    that names structure is refused rather than ignored.
+    """
+    _require_sha256(expected_file_sha256, "authority_file_sha256")
+    _require_sha256(expected_payload_sha256, "authority_payload_sha256")
+    raw = Path(path).expanduser().read_bytes()
+    file_sha256 = hashlib.sha256(raw).hexdigest()
+    if file_sha256 != expected_file_sha256:
+        raise SignedManifestAuthorityError(
+            "docs-restore authority file SHA-256 mismatch"
+        )
+    try:
+        authority = json.loads(raw)
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
+        raise SignedManifestAuthorityError(
+            "docs-restore authority is not JSON"
+        ) from exc
+    if not isinstance(authority, dict):
+        raise SignedManifestAuthorityError("docs-restore authority must be an object")
+    if authority.get("schema") != _DOCS_RESTORE_SCHEMA:
+        raise SignedManifestAuthorityError(
+            "docs restore requires its own authority schema"
+        )
+    if authority.get("operation_id") != _DOCS_RESTORE_OPERATION:
+        raise SignedManifestAuthorityError("docs-restore operation mismatch")
+    digest = signed_payload_sha256(authority)
+    if digest != expected_payload_sha256 or authority.get("signature") != {
+        "canonicalization": SIGNED_AUTHORITY_CANONICALIZATION,
+        "sha256": digest,
+    }:
+        raise SignedManifestAuthorityError("docs-restore authority signature mismatch")
+    selection = authority.get("selection")
+    if not isinstance(selection, dict) or selection.get("predicate") != "artifact-rows":
+        raise SignedManifestAuthorityError("docs restore requires exact artifact rows")
+    raw_rows = authority.get("rows")
+    if not isinstance(raw_rows, list) or not raw_rows:
+        raise SignedManifestAuthorityError("docs restore requires signed rows")
+    rows: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for item in raw_rows:
+        if not isinstance(item, dict):
+            raise SignedManifestAuthorityError("docs-restore row must be an object")
+        if item.get("selection") != selection:
+            raise SignedManifestAuthorityError("docs-restore row selection mismatch")
+        row_id = item.get("id")
+        sn_id = item.get("sn_id")
+        snapshot_id = item.get("snapshot_id")
+        if (
+            not isinstance(row_id, str)
+            or not row_id
+            or not isinstance(sn_id, str)
+            or not sn_id
+            or not isinstance(snapshot_id, str)
+            or not snapshot_id
+        ):
+            raise SignedManifestAuthorityError(
+                "docs-restore row requires id, sn_id and snapshot_id"
+            )
+        if row_id in seen:
+            raise SignedManifestAuthorityError("docs-restore row ids must be unique")
+        seen.add(row_id)
+        properties = item.get("properties")
+        if properties is not None and not isinstance(properties, dict):
+            raise SignedManifestAuthorityError(
+                "docs-restore row properties must be an object"
+            )
+        rows.append(
+            {
+                "id": row_id,
+                "sn_id": sn_id,
+                "snapshot_id": snapshot_id,
+                "properties": dict(properties or {}),
+            }
+        )
+    return file_sha256, digest, rows
+
+
+def _docs_restore_preview(
+    query: _Query,
+    rows: Sequence[dict[str, Any]],
+    *,
+    authority_file_sha256: str,
+    authority_payload_sha256: str,
+) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
+    """Admit the rows whose snapshot, payload and identity all hold."""
+    admitted: list[dict[str, Any]] = []
+    refusals: list[dict[str, str]] = []
+    for row in rows:
+        sn_id = str(row["sn_id"])
+        snapshot_id = str(row["snapshot_id"])
+        state = _docs_restore_geometry(query, sn_id)
+        if state is None:
+            refusals.append({"row_id": row["id"], "reason": "target does not exist"})
+            continue
+        snapshot = _docs_restore_snapshot(query, sn_id, snapshot_id)
+        if snapshot is None:
+            refusals.append(
+                {
+                    "row_id": row["id"],
+                    "reason": "named snapshot is not a DocsRevision of the target",
+                }
+            )
+            continue
+        derived = _docs_restore_properties(snapshot)
+        if not derived["documentation"]:
+            refusals.append(
+                {
+                    "row_id": row["id"],
+                    "reason": "named snapshot carries no documentation",
+                }
+            )
+            continue
+        payload = dict(row.get("properties") or {})
+        foreign = sorted(set(payload) - _DOCUMENTATION_ONLY_FIELDS)
+        if foreign:
+            refusals.append(
+                {
+                    "row_id": row["id"],
+                    "reason": "restore payload carries a non-documentation field: "
+                    + ", ".join(foreign),
+                }
+            )
+            continue
+        declared = payload.get("documentation")
+        if declared is not None and declared != derived["documentation"]:
+            refusals.append(
+                {
+                    "row_id": row["id"],
+                    "reason": (
+                        "restore payload documentation disagrees with the named "
+                        "snapshot"
+                    ),
+                }
+            )
+            continue
+        admitted.append(
+            {
+                "row": row,
+                "element_id": state["element_id"],
+                "geometry_sha256": _docs_restore_geometry_digest(state),
+                "properties": derived,
+            }
+        )
+    manifest = {
+        "schema": _DOCS_RESTORE_SCHEMA,
+        "operation_id": _DOCS_RESTORE_OPERATION,
+        "mutation_kind": _DOCS_RESTORE_MUTATION,
+        "authority_file_sha256": authority_file_sha256,
+        "authority_payload_sha256": authority_payload_sha256,
+        "admitted": [
+            {
+                "row_id": action["row"]["id"],
+                "sn_id": action["row"]["sn_id"],
+                "snapshot_id": action["row"]["snapshot_id"],
+                "element_id": action["element_id"],
+                "geometry_sha256": action["geometry_sha256"],
+                "properties": sorted(action["properties"]),
+            }
+            for action in admitted
+        ],
+        "refusals": refusals,
+    }
+    return manifest, admitted, refusals
+
+
+def _docs_restore_event_id(
+    authority_payload_sha256: str, row_id: str, snapshot_id: str
+) -> str:
+    return (
+        "sn-change:docs-revision-restore:"
+        + hashlib.sha256(
+            f"{authority_payload_sha256}\0{row_id}\0{snapshot_id}".encode()
+        ).hexdigest()
+    )
+
+
+def _docs_restore_replay(
+    query: _Query,
+    rows: Sequence[dict[str, Any]],
+    *,
+    manifest_sha256: str,
+    authority_payload_sha256: str,
+) -> dict[str, Any] | None:
+    """Return the prior receipt when this authority already applied."""
+    change_ids = [
+        _docs_restore_event_id(
+            authority_payload_sha256, str(row["id"]), str(row["snapshot_id"])
+        )
+        for row in rows
+    ]
+    found_rows = query.query(
+        """
+        MATCH (change:StandardNameChange)
+        WHERE change.id IN $change_ids
+          AND change.manifest_sha256 = $manifest_sha256
+        RETURN change.id AS change_id
+        """,
+        change_ids=change_ids,
+        manifest_sha256=manifest_sha256,
+    )
+    found = sorted(str(row["change_id"]) for row in found_rows or ())
+    if not found:
+        return None
+    if found != sorted(change_ids):
+        raise DocsRestoreConflict("docs-restore replay found a partial receipt set")
+    return {
+        "schema": _DOCS_RESTORE_RECEIPT_SCHEMA,
+        "outcome": "already_applied",
+        "changed": 0,
+        "counts": {
+            "authority_rows": len(rows),
+            "admitted": len(rows),
+            "refused": 0,
+        },
+        "manifest_sha256": manifest_sha256,
+        "authority_payload_sha256": authority_payload_sha256,
+        "change_ids": found,
+    }
+
+
+def _apply_docs_restore(
+    authority_path: str | Path,
+    *,
+    authority_file_sha256: str | None,
+    authority_payload_sha256: str | None,
+    mutation_kind: str | None,
+    guard_set: tuple[str, ...] | None,
+    reason: str,
+    apply: bool = False,
+    manifest_sha256: str | None = None,
+    run_id: str | None = None,
+    gc: Any | None = None,
+) -> dict[str, Any]:
+    """Restore documentation from each row's own ``DocsRevision`` snapshot.
+
+    The mutation writes the documentation fields the snapshot carries and
+    ``docs_stage='accepted'``, and nothing else. Because it can name neither a
+    structural property nor a relationship, it is admitted on a name that owns
+    a live structural child, which the ``set_properties`` path refuses. A write
+    is refused when the target's id, name, unit, kind, physical base, lifecycle
+    stage or relationship closure differs before or after it.
+    """
+    if mutation_kind != _DOCS_RESTORE_MUTATION:
+        raise SignedManifestAuthorityError(
+            "docs restore requires its exact mutation kind"
+        )
+    if guard_set != _DOCS_RESTORE_GUARDS:
+        raise SignedManifestAuthorityError(
+            "docs restore requires its exact signed guard set"
+        )
+    if not reason.strip():
+        raise ValueError("docs restore requires a non-empty reason")
+    if apply and manifest_sha256 is None:
+        raise ValueError("docs restore apply requires manifest_sha256")
+    if manifest_sha256 is not None:
+        _require_sha256(manifest_sha256, "manifest_sha256")
+    if authority_file_sha256 is None or authority_payload_sha256 is None:
+        raise SignedManifestAuthorityError(
+            "docs restore requires file and payload digests"
+        )
+
+    file_sha256, payload_sha256, rows = _load_docs_restore_rows(
+        authority_path,
+        expected_file_sha256=authority_file_sha256,
+        expected_payload_sha256=authority_payload_sha256,
+    )
+    own_client = gc is None
+    client: Any = GraphClient() if own_client else gc
+    try:
+        with client.session() as session:
+            transaction = session.begin_transaction()
+            query = _TransactionQuery(transaction)
+            try:
+                if manifest_sha256 is not None:
+                    replay = _docs_restore_replay(
+                        query,
+                        rows,
+                        manifest_sha256=manifest_sha256,
+                        authority_payload_sha256=payload_sha256,
+                    )
+                    if replay is not None:
+                        transaction.rollback()
+                        return replay
+                manifest, admitted, refusals = _docs_restore_preview(
+                    query,
+                    rows,
+                    authority_file_sha256=file_sha256,
+                    authority_payload_sha256=payload_sha256,
+                )
+                computed_sha256 = _digest(manifest)
+                counts = {
+                    "authority_rows": len(rows),
+                    "admitted": len(admitted),
+                    "refused": len(refusals),
+                }
+                if not apply:
+                    transaction.rollback()
+                    return {
+                        "schema": _DOCS_RESTORE_RECEIPT_SCHEMA,
+                        "outcome": "would_apply"
+                        if admitted and not refusals
+                        else "refused",
+                        "changed": 0,
+                        "would_change": len(admitted) if not refusals else 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest": manifest,
+                        "manifest_sha256": computed_sha256,
+                        "authority_file_sha256": file_sha256,
+                        "authority_payload_sha256": payload_sha256,
+                    }
+                if refusals:
+                    transaction.rollback()
+                    return {
+                        "schema": _DOCS_RESTORE_RECEIPT_SCHEMA,
+                        "outcome": "refused",
+                        "changed": 0,
+                        "counts": counts,
+                        "refusals": refusals,
+                        "manifest_sha256": computed_sha256,
+                    }
+                if computed_sha256 != manifest_sha256:
+                    raise DocsRestoreConflict(
+                        "fresh docs-restore closure does not match manifest SHA-256"
+                    )
+
+                change_ids: list[str] = []
+                for action in admitted:
+                    sn_id = str(action["row"]["sn_id"])
+                    snapshot_id = str(action["row"]["snapshot_id"])
+                    before = _docs_restore_geometry(query, sn_id)
+                    if (
+                        before is None
+                        or _docs_restore_geometry_digest(before)
+                        != action["geometry_sha256"]
+                    ):
+                        raise DocsRestoreConflict(
+                            "docs-restore target geometry changed before the write"
+                        )
+                    changed = query.query(
+                        """
+                        // DOCS_RESTORE_MUTATION
+                        MATCH (target:StandardName {id: $sn_id})
+                        WHERE elementId(target) = $element_id
+                        SET target += $properties
+                        RETURN count(target) AS changed
+                        """,
+                        sn_id=sn_id,
+                        element_id=action["element_id"],
+                        properties=action["properties"],
+                    )
+                    if int(changed[0].get("changed") or 0) != 1:
+                        raise DocsRestoreConflict(
+                            "docs-restore compare-and-set changed"
+                        )
+                    after = _docs_restore_geometry(query, sn_id)
+                    if (
+                        after is None
+                        or _docs_restore_geometry_digest(after)
+                        != action["geometry_sha256"]
+                    ):
+                        raise DocsRestoreConflict(
+                            "docs-restore would change target structure"
+                        )
+                    change_ids.append(
+                        _docs_restore_event_id(
+                            payload_sha256, str(action["row"]["id"]), snapshot_id
+                        )
+                    )
+
+                receipt_rows = [
+                    {
+                        "change_id": change_id,
+                        "row_id": str(action["row"]["id"]),
+                        "sn_id": str(action["row"]["sn_id"]),
+                        "snapshot_id": str(action["row"]["snapshot_id"]),
+                    }
+                    for change_id, action in zip(change_ids, admitted, strict=True)
+                ]
+                receipts = query.query(
+                    """
+                    // DOCS_RESTORE_RECEIPT
+                    UNWIND $rows AS row
+                    CREATE (change:StandardNameChange {id: row.change_id})
+                    SET change.from_name = row.sn_id,
+                        change.to_name = row.sn_id,
+                        change.operation = $operation,
+                        change.reason = $reason,
+                        change.origin = $origin,
+                        change.run_id = $run_id,
+                        change.changed_at = datetime(),
+                        change.internal = true,
+                        change.row_id = row.row_id,
+                        change.docs_revision_id = row.snapshot_id,
+                        change.manifest_sha256 = $manifest_sha256,
+                        change.authority_payload_sha256 = $authority_payload_sha256
+                    WITH row, change
+                    MATCH (target:StandardName {id: row.sn_id})
+                    MERGE (target)-[:HAS_INTERNAL_CHANGE]->(change)
+                    RETURN DISTINCT change.id AS change_id
+                    ORDER BY change_id
+                    """,
+                    rows=receipt_rows,
+                    operation=_DOCS_RESTORE_OPERATION,
+                    reason=reason,
+                    origin=_DOCS_RESTORE_ORIGIN,
+                    run_id=run_id,
+                    manifest_sha256=computed_sha256,
+                    authority_payload_sha256=payload_sha256,
+                )
+                written = sorted(str(row["change_id"]) for row in receipts or ())
+                if written != sorted(change_ids):
+                    raise DocsRestoreConflict(
+                        "docs-restore receipt cardinality changed"
+                    )
+                transaction.commit()
+                return {
+                    "schema": _DOCS_RESTORE_RECEIPT_SCHEMA,
+                    "outcome": "applied",
+                    "changed": len(admitted),
+                    "mutations": len(admitted),
+                    "receipt_rows": len(written),
+                    "persistent_writes": 2 * len(admitted),
+                    "counts": counts,
+                    "manifest": manifest,
+                    "manifest_sha256": computed_sha256,
+                    "authority_file_sha256": file_sha256,
+                    "authority_payload_sha256": payload_sha256,
+                    "change_ids": written,
+                    "docs_revision_ids": {
+                        str(action["row"]["sn_id"]): str(action["row"]["snapshot_id"])
+                        for action in admitted
+                    },
+                }
+            except BaseException:
+                if not transaction.closed:
+                    transaction.rollback()
+                raise
+    finally:
+        if own_client:
+            client.close()
+
+
 def _load_source_exchange_rows(
     authority_path: str | Path,
     *,
@@ -9376,6 +9956,23 @@ def apply_signed_manifest(
     authorizes only the hash: participant closure, collateral rows, and counter
     baselines are always read again inside this invocation.
     """
+    if authority_adapter == _DOCS_RESTORE_ADAPTER:
+        if legacy_args or not isinstance(authority_path, str | Path):
+            raise SignedManifestAuthorityError(
+                "docs restore requires a signed authority file"
+            )
+        return _apply_docs_restore(
+            authority_path,
+            authority_file_sha256=authority_file_sha256,
+            authority_payload_sha256=authority_payload_sha256,
+            mutation_kind=mutation_kind,
+            guard_set=guard_set,
+            reason=reason,
+            apply=apply,
+            manifest_sha256=manifest_sha256,
+            run_id=run_id,
+            gc=gc,
+        )
     if authority_adapter == _SOURCE_EXCHANGE_ADAPTER:
         if legacy_args or not isinstance(authority_path, str | Path):
             raise SignedManifestAuthorityError(
