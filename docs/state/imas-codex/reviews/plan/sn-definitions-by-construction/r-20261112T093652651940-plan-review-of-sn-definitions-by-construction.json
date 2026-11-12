@@ -33,7 +33,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 12,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "f6d13f20fd623ab1fd3522a3495666fefca29aa6",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a72 now requires the refusal shown through the writer's own entry point, with a model answer that alters or contradicts a shared part and a read that nothing was stored",
+      "reason": "",
+      "when": "2026-11-12T10:12:27.602862+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "f6d13f20fd623ab1fd3522a3495666fefca29aa6",
+      "commit_basis": "edit",
+      "note": "\u00a72 now requires the refusal shown through the writer's own entry point, with a model answer that alters or contradicts a shared part and a read that nothing was stored",
+      "reason": "",
+      "when": "2026-11-12T10:12:27.602862+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261112T093652651940-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261112T093652651940-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "ed631212a4769c7d1a72c8f46752be2d9dcf4812",
   "rubric": "content",
