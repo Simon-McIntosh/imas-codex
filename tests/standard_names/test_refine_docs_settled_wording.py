@@ -61,7 +61,7 @@ def _refine_patches(answer, *, terminal_stage: dict, calls: list, exhausted: Mag
         patch("imas_codex.settings.get_model", return_value="model-x"),
         patch(
             "imas_codex.standard_names.graph_store.graph_claim_release."
-            "_mark_refine_docs_exhausted",
+            "_mark_docs_exhausted",
             exhausted,
         ),
         patch(
@@ -229,8 +229,8 @@ async def test_refused_first_draft_reaches_the_terminal_state():
         ),
         patch("imas_codex.settings.get_model", return_value="model-x"),
         patch(
-            "imas_codex.standard_names.worker_tasks.worker_generate_docs."
-            "_mark_generate_docs_exhausted",
+            "imas_codex.standard_names.graph_store.graph_claim_release."
+            "_mark_docs_exhausted",
             exhausted,
         ),
         patch(

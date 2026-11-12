@@ -164,7 +164,7 @@ _OWNERS_BY_MODULE = {
         "_READ_REFINE_CLAIM_RELEASE_QUERY",
         "_TERMINAL_REFINE_STOP_REASONS",
         "_WRITE_REFINE_CLAIM_RELEASE_QUERY",
-        "_mark_refine_docs_exhausted",
+        "_mark_docs_exhausted",
         "_predicted_refine_claim_release_state",
         "_project_refine_claim_release_state",
         "_refine_claim_no_change_receipt",

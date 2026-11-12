@@ -55,7 +55,7 @@ async def process_refine_docs_batch(
         DEFAULT_REFINE_ROTATIONS,
     )
     from imas_codex.standard_names.graph_store.graph_claim_release import (
-        _mark_refine_docs_exhausted,
+        _mark_docs_exhausted,
     )
     from imas_codex.standard_names.graph_store.graph_docs_persistence import (
         persist_refined_docs,
@@ -386,10 +386,12 @@ async def process_refine_docs_batch(
             try:
                 if is_terminal:
                     await _asyncio.to_thread(
-                        _mark_refine_docs_exhausted,
+                        _mark_docs_exhausted,
                         sn_id=sn_id,
                         token=claim_token,
                         error_msg=str(exc)[:500],
+                        eligible_stage="refining",
+                        tag="docs_refine_exhaust",
                     )
                 else:
                     await _asyncio.to_thread(
