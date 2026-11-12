@@ -1,0 +1,96 @@
+<!-- fragment for sph-corrects-schema -->
+<section id="sph-corrects-schema">
+  <h3 id="sph-corrects-schema-title">CORRECTS declared in the schema, with an endpoint check that fails on a mislabelled edge</h3>
+
+  <p id="sph-corrects-schema-what">
+    The receipt-correction records written on 2026-11-10 link to the retry
+    receipts they correct through a <code>CORRECTS</code> edge the schema did
+    not declare. The declaration records existing graph state; it creates no
+    edge. The slot is declared on the class both endpoints belong to:
+    <code>StandardNameSourceRetry.corrects</code>, range
+    <code>StandardNameSourceRetry</code>, scalar, annotated
+    <code>relationship_type: CORRECTS</code>. Regenerating the models carries it
+    into the generated schema data as
+    <code>('StandardNameSourceRetry', 'CORRECTS', 'StandardNameSourceRetry', 'one')</code>
+    and into the generated Pydantic model as a <code>corrects</code> field.
+  </p>
+
+  <p id="sph-corrects-schema-check">
+    The existing relationship test compares type names alone, so it passes on a
+    <code>CORRECTS</code> edge between any two labels. The new assertion
+    <code>test_corrects_edges_join_declared_endpoints</code> in
+    <code>tests/graph/test_schema_compliance.py</code> reads every live
+    <code>CORRECTS</code> edge with both endpoint label sets and requires each
+    pair to be one the generated declaration names. It derives the declared pair
+    from the generated <code>RELATIONSHIPS</code> rather than restating it, so a
+    stale generated file fails the check rather than passing it.
+  </p>
+
+  <table id="sph-corrects-schema-live">
+    <thead>
+      <tr><th>measure</th><th>figure</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>declared endpoint pairs</td><td>1 — <code>StandardNameSourceRetry -&gt; StandardNameSourceRetry</code></td></tr>
+      <tr><td>live <code>CORRECTS</code> edges</td><td>20</td></tr>
+      <tr><td>label pairs those edges join</td><td>1</td></tr>
+      <tr><td>edges joining an undeclared pair</td><td>0</td></tr>
+      <tr><td>live gate result</td><td>1 passed, exit 0</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sph-corrects-schema-negative">
+    Negative control. The declared mutation is "a <code>CORRECTS</code> edge
+    planted between labels the declaration does not name in a disposable graph
+    makes the endpoint assertion fail". An empty Neo4j was started through the
+    repository's own disposable-graph helper, and the delivered test was run
+    twice against it with <code>-m graph</code>. Clean arm: only
+    <code>StandardNameSourceRetry -&gt; StandardNameSourceRetry</code> planted,
+    <strong>1 passed</strong>, exit 0. Red arm: a
+    <code>StandardNameSource -&gt; StandardName</code> edge added, the same test
+    reported <strong>1 failed</strong>, exit 1:
+  </p>
+
+  <pre id="sph-corrects-schema-red-assertion">E   AssertionError: CORRECTS edges join labels the schema does not name (checked 2 edge(s) across 2 label pair(s)):
+E       ['StandardNameSource']-[:CORRECTS]->['StandardName'] (1 edge(s)); declared [('StandardNameSourceRetry', 'StandardNameSourceRetry')]
+FAILED tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_corrects_edges_join_declared_endpoints
+=================== 1 failed, 1 warning in 63.77s (0:01:03) ====================</pre>
+
+  <p id="sph-corrects-schema-positive">
+    The red arm's own message shows the instrument read both planted edges
+    ("checked 2 edge(s) across 2 label pair(s)"), so the passing clean arm is
+    not an artifact of seeing nothing: the check reads the declared pair and
+    still rejects the undeclared one in the same graph.
+  </p>
+
+  <h4 id="sph-corrects-schema-commands">Commands and logs</h4>
+  <ul id="sph-corrects-schema-logs">
+    <li id="sph-corrects-schema-log-live">
+      Live gate, run on the allocation node
+      <code>98dci4-clu-2023</code>:
+      <code>uv run --no-sync pytest -p no:cacheprovider -m graph tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_corrects_edges_join_declared_endpoints</code>
+      — log <code>gate-live.log</code>.
+    </li>
+    <li id="sph-corrects-schema-log-nc">
+      Negative control:
+      <code>python docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema-run.py negative-control</code>
+      — clean arm <code>nc-clean.log</code>, red arm
+      <code>negative-control.log</code>.
+    </li>
+    <li id="sph-corrects-schema-log-build">
+      Model regeneration:
+      <code>uv run --no-sync build-models --force</code> — log
+      <code>build-models.log</code>, exit 0, after which
+      <code>schema_context_data.py:2501</code> carries the tuple above and the
+      generated model carries the <code>corrects</code> field.
+    </li>
+  </ul>
+
+  <p id="sph-corrects-schema-outside">
+    Outside this node's scope: the correction records also carry a
+    <code>correction_of</code> property that no class declares, so the
+    undeclared-property check in the same file covers it separately. That is a
+    property declaration, not the relationship this node was asked to declare,
+    and it is left for the coordinator to place.
+  </p>
+</section>
