@@ -373,21 +373,27 @@ def _source_domain(graph: GraphClient, sn_id: str) -> str | None:
     return rows[0]["domain"] if rows else None
 
 
+OWN_DOMAIN = {
+    "electron": MEMBER_DOMAINS[0],
+    "argon": MEMBER_DOMAINS[1],
+    "krypton": MEMBER_DOMAINS[2],
+}
+
+
 def _split_batch(seen: list[str]) -> Any:
     """The family question falls below the floor; each per-name question decides.
 
     Each member is answered with the domain its own source sits in, which is
     what makes the split a per-name decision rather than a second family one.
     """
-    answers = iter(MEMBER_DOMAINS)
-
     async def decide(states, questions, **_kwargs):  # noqa: ANN001
         family_question = "family of" in str(questions)
         seen.append("family" if family_question else "name")
         if family_question:
             return [(_answer("transport", 0.4), 0.0)], 0.0
         options = list(questions[dd.QUESTION]["criteria"])
-        wanted = next(answers, options[0])
+        subject = str(states[0]["name"]).rsplit(":", 1)[-1]
+        wanted = OWN_DOMAIN[subject]
         return [(_answer(wanted if wanted in options else options[0], 0.9), 0.0)], 0.0
 
     return decide
@@ -397,15 +403,28 @@ def _split_batch(seen: list[str]) -> Any:
 def test_a_family_below_the_floor_is_held_split_across_its_members(
     graph: GraphClient, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    """A family the floor refuses is split: each member is decided on its own."""
+    """A family the floor refuses is split: each member is asked on its own."""
     members = _plant_family(
         graph,
         {"physical_base": "ion_temperature"},
         ["electron", "argon", "krypton"],
         "sn:e2e-floor",
+        domains=MEMBER_DOMAINS,
     )
     seen: list[str] = []
+    recorded: list[tuple[str, str | None, tuple[str, ...]]] = []
+
+    class _Write:
+        def __init__(self, sn_id: str, domain: str | None) -> None:
+            self.sn_id = sn_id
+            self.physics_domain = domain
+
+    def _record(gc, sn_id, decision, **_kwargs):  # noqa: ANN001
+        recorded.append((sn_id, decision.choice, tuple(decision.candidates)))
+        return _Write(sn_id, decision.choice)
+
     monkeypatch.setattr(dd, "decide_batch", _split_batch(seen))
+    monkeypatch.setattr(dd, "write_name_domain", _record)
     outcome = dd.decide_and_write_family(graph, members[0], IDS_MAP, model="test-model")
     assert outcome.decision.decided is False, (
         "the family itself is still below the floor; the split is held, not decided"
@@ -414,17 +433,26 @@ def test_a_family_below_the_floor_is_held_split_across_its_members(
     assert record is not None and record.choice is None
     assert "floor" in (record.undecided_reason or "")
     assert seen.count("name") == len(members), (
-        "each member is put to the per-name form once, on its own sources: "
-        f"{seen}"
+        f"each member is put to the per-name form once: {seen}"
     )
     assert set(outcome.unwritten) == set(), (
-        f"no member is left unwritten when its own sources place it: {outcome.unwritten}"
+        f"no member is left unwritten: {outcome.unwritten}"
     )
-    assert set(_physics_domains(graph, members).values()) == {
-        "transport",
-        "edge_plasma_physics",
-        "radiation_measurement_diagnostics",
-    }, "every member carries the domain its own sources place it in"
+    assert len(recorded) == len(members), recorded
+    offered = {
+        sn_id: candidates for sn_id, _choice, candidates in recorded
+    }
+    for member in members:
+        own = _source_domain(graph, member)
+        assert own in offered[member], (
+            "each member is offered the domain its own sources carry, not the "
+            f"family's union: {member} offered {offered[member]}"
+        )
+    for sn_id, choice, _candidates in recorded:
+        assert choice == OWN_DOMAIN[sn_id.rsplit(":", 1)[-1]], (
+            "each member is decided on its own sources rather than the "
+            f"family's single answer: {sn_id} settled on {choice}"
+        )
 
 
 @pytest.mark.graph
