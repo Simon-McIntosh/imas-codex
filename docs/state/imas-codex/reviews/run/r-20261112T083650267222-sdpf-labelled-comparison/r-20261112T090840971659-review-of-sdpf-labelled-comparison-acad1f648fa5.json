@@ -3,6 +3,13 @@
   "added_failure_ids": [],
   "call_sites": [],
   "completed_at": "2026-11-12T09:24:33.008Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-sdpf-labelled-comparison-acad1f648fa5",
+      "recorded_at": "2026-11-12T09:46:43.848023+00:00"
+    }
+  },
   "dispatched_at": "2026-11-12T09:13:29Z",
   "finding_dispositions": {
     "0": {
