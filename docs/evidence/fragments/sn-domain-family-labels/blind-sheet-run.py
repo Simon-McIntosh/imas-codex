@@ -14,7 +14,7 @@ import sys
 
 rows = json.load(open(sys.argv[1]))
 sys.path.insert(0, sys.argv[2])
-from imas_standard_names.grammar.tag_types import (
+from imas_standard_names.grammar.tag_types import (  # noqa: E402
     PHYSICS_DOMAIN_DESCRIPTIONS,  # noqa: E402
 )
 
