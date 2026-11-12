@@ -204,9 +204,30 @@
 
   <p>
     The judgment was also run on the 15 names where the two readers disagree,
-    scored on the first reader's ruling column: it flags <strong>4 of 15</strong>
-    (3 of the 4 the first reader calls mismatched), naming five
-    <code>family-of-quantities</code> and ten <code>agrees</code>. Under the
-    delivered union 4 of 15 are flagged.
+    scored on the first reader's ruling column. That column calls
+    <strong>4</strong> of the 15 mismatched and the judgment finds
+    <strong>2</strong> of those 4 (<code>density_at_magnetic_axis</code>,
+    <code>momentum</code>); it misses <code>pulse_duration</code>, which the
+    deterministic pass catches, and <code>particle_density</code>. Altogether the
+    judgment flags <strong>6 of 15</strong>, answering six
+    <code>family-of-quantities</code> and nine <code>agrees</code>, and the
+    delivered union flags <strong>7 of 15</strong> (3 of the 4 the first reader
+    calls mismatched). Per-name verdicts are in
+    <code>readers_disagree</code> in the results file.
+  </p>
+
+  <p>
+    The four extra flags are the interesting half. Each is a name the first reader
+    called agreeing and the second reader called mismatched, so on those the
+    judgment sides with the dissent — <code>straight_field_line_angle</code>,
+    <code>current_density_due_to_bootstrap_current_drive</code>,
+    <code>bulk_neutral_internal_state_velocity</code> and
+    <code>fast_ion_charge_state_power_density</code>. Of the two names the first
+    reader alone calls umbrellas, <code>momentum</code> agrees with it and
+    <code>density_at_magnetic_axis</code> does too, while the second reader called
+    the latter agreeing and the former a unit mismatch. Fifteen adversarial names
+    cannot settle which reader is right; what they show is that the judgment is
+    not anchored to either, and that the first reader's ruling column is what the
+    held-out recall figure is scored against.
   </p>
 </section>

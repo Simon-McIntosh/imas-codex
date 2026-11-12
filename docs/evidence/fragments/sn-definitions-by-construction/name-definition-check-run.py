@@ -34,7 +34,12 @@ SECOND_READING = (
 )
 CATALOG = Path("/home/ITER/mcintos/Code/imas-standard-names-catalog/standard_names")
 OUT = Path(__file__).with_name("name-definition-check-results.json")
-JUDGMENT_ANSWERS = Path(__file__).with_name("name-definition-judgment-answers.json")
+# The seat's per-name verdicts, recorded beside the run's logs. The results file
+# also carries them, so the arms can be recomputed from the repository alone
+# once the seat has been paid for; the cache copy is the seat's own output.
+JUDGMENT_ANSWERS = Path.home() / (
+    ".cache/imas-codex-sdbc-name-definition-check/name-definition-judgment-answers.json"
+)
 
 # The split seed and the stratified draw. Committed before the check was
 # shaped, so the held-out names were fixed before any rule was written.
@@ -253,6 +258,11 @@ async def judge(rows: list[dict], *, concurrency: int = 8) -> dict[str, dict]:
     return {"answers": answers, "cost_usd": cost}
 
 
+def _judgment_flags(answers: dict[str, dict], row: dict) -> bool:
+    verdict = (answers.get(row["name"]) or {}).get("choice")
+    return verdict not in (None, "agrees")
+
+
 def judgment_arm(rows: list[dict], answers: dict[str, dict]) -> dict:
     """Score the judgment's verdicts against one arm of the labels."""
 
@@ -370,7 +380,10 @@ def main() -> None:
     # shaped on the development third, frozen, then scored on the held-out two
     # thirds -- the second time those rows were scored, after the lexical check
     # whose first scoring is why the judgment exists.
-    recorded = json.loads(JUDGMENT_ANSWERS.read_text())["by_name"]
+    if JUDGMENT_ANSWERS.exists():
+        recorded = json.loads(JUDGMENT_ANSWERS.read_text())["by_name"]
+    else:
+        recorded = json.loads(OUT.read_text())["judgment_verdicts"]
     judgment = {name: value for name, value in recorded.items()}
     dev_judgment = judgment_arm(dev, judgment)
     held_judgment = judgment_arm(held, judgment)
@@ -442,9 +455,17 @@ def main() -> None:
         "development_arm_judgment": dev_judgment,
         "held_out_arm_judgment": held_judgment,
         "held_out_arm_union": _union(held, judgment),
+        "judgment_verdicts": recorded,
         "readers_disagree": {
             "names_scored": len(disagreeing),
             "flagged": [row["name"] for row in disagreeing if flag(row)],
+            "judgment_flagged": [
+                row["name"] for row in disagreeing if _judgment_flags(judgment, row)
+            ],
+            "judgment_verdicts": {
+                row["name"]: judgment.get(row["name"], {}).get("choice")
+                for row in disagreeing
+            },
         },
         "catalog_arm": {
             "catalog_path": str(CATALOG),
