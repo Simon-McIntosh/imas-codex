@@ -1,0 +1,1469 @@
+{
+ "domains": {
+  "equilibrium": "MHD equilibrium, flux surfaces, magnetic geometry, coordinate systems",
+  "transport": "Transport coefficients, fluxes, neoclassical and anomalous transport modeling",
+  "core_plasma_physics": "Core plasma profiles, kinetic quantities, global parameters, integrated quantities",
+  "turbulence": "Turbulence physics, fluctuations, turbulent transport, correlation analysis",
+  "magnetohydrodynamics": "MHD stability, disruptions, instabilities, sawteeth, tearing modes",
+  "auxiliary_heating": "Auxiliary heating systems including neutral beam, electron cyclotron, ion cyclotron, and lower hybrid",
+  "current_drive": "Non-inductive current drive physics, efficiency, and profile control",
+  "waves": "Wave propagation, RF physics, wave-particle interactions, dispersion",
+  "edge_plasma_physics": "Scrape-off layer, divertor physics, plasma-wall interactions, recycling",
+  "plasma_wall_interactions": "First wall, plasma-facing components, erosion, deposition, material migration",
+  "divertor_physics": "Divertor target loads, detachment, particle and heat exhaust",
+  "fueling": "Gas injection, pellet injection, shattered pellet injection, fueling systems",
+  "fast_particles": "Fast ion and electron distributions, energetic particles, slowing-down",
+  "runaway_electrons": "Runaway electron physics, avalanche generation, loss mechanisms",
+  "particle_measurement_diagnostics": "Thomson scattering and particle-based diagnostic measurements",
+  "electromagnetic_wave_diagnostics": "Interferometry, polarimetry, reflectometry, and wave-based diagnostics",
+  "radiation_measurement_diagnostics": "Bolometry, X-ray diagnostics, bremsstrahlung, imaging systems",
+  "magnetic_field_diagnostics": "Magnetic diagnostics, flux loops, Rogowski coils, diamagnetic measurements",
+  "mechanical_measurement_diagnostics": "Mechanical and structural measurement diagnostics, strain, vibration",
+  "plasma_measurement_diagnostics": "General plasma parameter measurement diagnostics",
+  "spectroscopy": "Emission spectroscopy, charge exchange, motional Stark effect, impurity diagnostics",
+  "neutronics": "Neutron diagnostics, fusion product measurements, activation",
+  "plasma_control": "Plasma position and shape control, feedback systems, electromagnetic coupling",
+  "machine_operations": "Pulse scheduling, workflow management, operational metadata",
+  "plasma_initiation": "Plasma startup, breakdown, initiation physics, early heating phase",
+  "magnetic_field_systems": "Magnetic coil systems, superconducting magnets, field generation infrastructure",
+  "structural_components": "Vacuum vessel, cryostat, structural support systems",
+  "plant_systems": "Power supplies, cooling systems, vacuum systems, plant infrastructure",
+  "data_management": "Summary data products, integrated analysis results, data archival",
+  "computational_workflow": "Auxiliary data, atomic and molecular data, geometry definitions, computational tools",
+  "general": "Universal plasma physics quantities appearing across multiple IDS",
+  "gyrokinetics": "Gyrokinetic theory, simulation, and turbulence modeling"
+ },
+ "items": [
+  {
+   "kind": "family",
+   "pattern": "<X>_density_at_internal_transport_barrier",
+   "member_count": 18,
+   "examples": [
+    {
+     "name": "tungsten_density_at_internal_transport_barrier",
+     "description": "Particle number density of tungsten ions evaluated on the flux surface\nassigned to an internal transport barrier, summed over all tungsten ion\ncharge states and excluding neutral tungsten.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "deuterium_tritium_density_at_internal_transport_barrier",
+     "description": "Particle number density of the combined deuterium-tritium fuel-ion\npseudo-species evaluated on the flux surface assigned to an internal\ntransport barrier, where locally reduced cross-field turbulent transport can\nsustain steep fuel-density gradients; deuterium and tritium ions are treated\nas one effective population.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "beryllium_density_at_internal_transport_barrier",
+     "description": "Particle number density of beryllium ions evaluated on the flux surface\nassigned to an internal transport barrier, summed over all beryllium ion\ncharge states and excluding neutral beryllium.",
+     "unit": "m^-3"
+    }
+   ],
+   "id": "item-001"
+  },
+  {
+   "kind": "single",
+   "name": "ion_energy_diffusion_coefficient",
+   "description": "Effective coefficient relating an ion population's density-normalized\ndiffusive energy flux to its temperature gradient, without selecting a\ntransport direction.",
+   "unit": "m^2.s^-1",
+   "id": "item-002"
+  },
+  {
+   "kind": "single",
+   "name": "breakdown_initial_time",
+   "description": "Timestamp at which plasma breakdown begins and discharge current starts to\nflow.",
+   "unit": "s",
+   "id": "item-003"
+  },
+  {
+   "kind": "single",
+   "name": "vertical_non_axisymmetric_magnetic_field",
+   "description": "Vertical magnetic field on a control surface is the signed axial component\nof the external-coil vacuum field remaining after its toroidal mean is\nremoved.",
+   "unit": "T",
+   "id": "item-004"
+  },
+  {
+   "kind": "single",
+   "name": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+   "description": "Geometric rate of change of the cumulative volume enclosed by a nested\nmagnetic flux surface as its signed poloidal flux coordinate varies.",
+   "unit": "Wb^-1.m^3",
+   "id": "item-005"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_density_at_plasma_boundary",
+   "member_count": 16,
+   "examples": [
+    {
+     "name": "helium_4_density_at_plasma_boundary",
+     "description": "Number density of helium-4 ions at the plasma boundary, evaluated locally on\nthe last closed magnetic flux surface and summed over all charge states.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "hydrogen_density_at_plasma_boundary",
+     "description": "Number density of hydrogen ions at the plasma boundary, evaluated locally on\nthe last closed magnetic flux surface and summed over all hydrogen ion\ncharge states.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "tritium_density_at_plasma_boundary",
+     "description": "Number density of tritium ions at the plasma boundary, evaluated as the\nlocal, intensive particle count per physical volume on the last closed\nmagnetic flux surface.",
+     "unit": "m^-3"
+    }
+   ],
+   "id": "item-006"
+  },
+  {
+   "kind": "single",
+   "name": "vertical_coordinate_of_annulus_center",
+   "description": "Vertical coordinate of the annulus center specifies its signed height from\nthe zero-height plane, parallel to the symmetry axis in the right-handed\ncylindrical (R, \u03c6, Z) frame.",
+   "unit": "m",
+   "id": "item-007"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_conductivity",
+   "member_count": 5,
+   "examples": [
+    {
+     "name": "parallel_conductivity",
+     "description": "Local electrical response coefficient relating the electric field along the\nmagnetic field to the conductive current density it drives in plasma.",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "name": "poloidal_conductivity",
+     "description": "Local electrical response coefficient relating a poloidal electric field to\nconductive current density along the flux-surface tangent in a\nconstant-toroidal-angle plane.",
+     "unit": "m^-1.ohm^-1"
+    },
+    {
+     "name": "vertical_conductivity",
+     "description": "Local electrical conductivity relating an electric field along the toroidal\nsymmetry axis to the conductive current density induced in that same\ndirection.",
+     "unit": "m^-1.ohm^-1"
+    }
+   ],
+   "id": "item-008"
+  },
+  {
+   "kind": "single",
+   "name": "thickness_of_plasma_facing_component",
+   "description": "Through-material geometric separation between a plasma-facing component\u2019s\nexposed surface and its opposite material boundary, evaluated at the\ncomponent midplane.",
+   "unit": "m",
+   "id": "item-009"
+  },
+  {
+   "kind": "single",
+   "name": "total_neutron_source_rate_due_to_thermal_fusion",
+   "description": "Total neutron production rate from thermonuclear neutron-producing\ndeuterium-deuterium, deuterium-tritium, and tritium-tritium reaction\nbranches among Maxwellian bulk ions, excluding beam-target and beam-beam\nfast-ion contributions.",
+   "unit": "Hz",
+   "id": "item-010"
+  },
+  {
+   "kind": "single",
+   "name": "electrostatic_potential_imaginary_part",
+   "description": "Electrostatic potential imaginary part is the signed quadrature component\nthat multiplies the imaginary unit in a complex representation of an\nelectrostatic potential. It denotes only that imaginary component, not the\nfull complex potential or its real part.",
+   "unit": "V",
+   "id": "item-011"
+  },
+  {
+   "kind": "single",
+   "name": "lower_bound_energy_of_detector_pixel",
+   "description": "The lower bound energy of a detector pixel is the minimum photon energy\naccepted by that pixel's spectral bandpass in an X-ray crystal spectrometer.",
+   "unit": "eV",
+   "id": "item-012"
+  },
+  {
+   "kind": "single",
+   "name": "flux_due_to_surface_emission",
+   "description": "Flux of any physical quantity emanating from a material surface through\nemission processes such as particle recycling, sputtering, or secondary\nelectron and photon emission.",
+   "unit": "W.m^-2",
+   "id": "item-013"
+  },
+  {
+   "kind": "single",
+   "name": "voltage_of_mass_spectrometer_channel",
+   "description": "Signed bias potential applied between the photomultiplier detector electrode\nand its electronics reference for one mass-resolved channel, setting\nion-signal gain.",
+   "unit": "V",
+   "id": "item-014"
+  },
+  {
+   "kind": "single",
+   "name": "toroidal_implicit_ion_momentum_source_rate",
+   "description": "Toroidal implicit ion momentum source rate is the signed coefficient\nmultiplying one ion species\u2019 toroidal momentum, with negative values\ndescribing proportional damping.",
+   "unit": "s^-1",
+   "id": "item-015"
+  },
+  {
+   "kind": "single",
+   "name": "ion_charge_state_momentum_flux",
+   "description": "Vector of linear-momentum transport rate per unit area for ions in a\nspecific charge state, with directional projections characterizing\ncharge-state-resolved momentum transport across magnetic flux surfaces.",
+   "unit": "kg.m^-1.s^-2",
+   "id": "item-016"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_wave_electric_field",
+   "member_count": 4,
+   "examples": [
+    {
+     "name": "radial_wave_electric_field",
+     "description": "Complex phasor of the wave electric field projected onto the R direction of\nthe right-handed cylindrical (R, \u03c6, Z) frame, preserving local amplitude,\nphase, and radial polarization.",
+     "unit": "V.m^-1"
+    },
+    {
+     "name": "toroidal_wave_electric_field",
+     "description": "Complex phasor component of an electromagnetic-wave electric field projected\nonto the toroidal direction, preserving local amplitude, phase, and toroidal\npolarization.",
+     "unit": "V.m^-1"
+    },
+    {
+     "name": "parallel_wave_electric_field",
+     "description": "Complex phasor of the wave electric field projected along the local\nequilibrium magnetic-field direction in a magnetized plasma.",
+     "unit": "V.m^-1"
+    }
+   ],
+   "id": "item-017"
+  },
+  {
+   "kind": "single",
+   "name": "current_due_to_ion_cyclotron_current_drive",
+   "description": "Net toroidal plasma current generated non-inductively by ion-cyclotron wave\nabsorption and integrated over the plasma cross-section.",
+   "unit": "A",
+   "id": "item-018"
+  },
+  {
+   "kind": "single",
+   "name": "alpha_angle_of_plasma_filament",
+   "description": "Signed inclination of the first side of a plasma-filament oblique\ncross-section, measured counterclockwise from the outward radial direction\nin the poloidal plane.",
+   "unit": "rad",
+   "id": "item-019"
+  },
+  {
+   "kind": "single",
+   "name": "reference_phase",
+   "description": "Reference phase is the signed angular offset that fixes the phase origin of\na complex oscillatory perturbation relative to a chosen zero-phase\nreference.",
+   "unit": "rad",
+   "id": "item-020"
+  },
+  {
+   "kind": "single",
+   "name": "toroidal_thermal_ion_charge_state_torque_due_to_collisions",
+   "description": "Toroidal component of the volume-integrated Coulomb-collisional torque on\nthermal ions of a selected charge state, giving the net rate of toroidal\nangular momentum transfer to that ion population by collisions.",
+   "unit": "N.m",
+   "id": "item-021"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_perturbed_plasma_magnetic_field_real_part",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "toroidal_perturbed_plasma_magnetic_field_real_part",
+     "description": "Toroidal perturbed plasma magnetic-field real part is the in-phase \u03c6\ncomponent, in the right-handed cylindrical (R, \u03c6, Z) frame, of the complex\nfirst-order plasma magnetic-field perturbation eigenfunction for one\nspecified toroidal Fourier harmonic. In this frame, R is major radius, \u03c6 is\ntoroidal angle, and Z is vertical height.",
+     "unit": "T"
+    },
+    {
+     "name": "poloidal_perturbed_plasma_magnetic_field_real_part",
+     "description": "Real part of the complex poloidal component of the first-order plasma\nmagnetic-field perturbation eigenfunction for a specified toroidal Fourier\nmode in linear MHD stability analysis.",
+     "unit": "T"
+    },
+    {
+     "name": "radial_perturbed_plasma_magnetic_field_real_part",
+     "description": "Radial perturbed plasma magnetic field real part is the in-phase radial\ncomponent of the complex first-order plasma magnetic-field perturbation for\none toroidal Fourier harmonic. The radial direction is the R component in\nthe right-handed cylindrical (R, \u03c6, Z) frame.",
+     "unit": "T"
+    }
+   ],
+   "id": "item-022"
+  },
+  {
+   "kind": "family",
+   "pattern": "accumulated_<X>_count",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "accumulated_krypton_count",
+     "description": "Cumulative number of krypton atoms injected into the machine since plasma\nbreakdown, expressed as 36 equivalent electrons for each krypton atom.",
+     "unit": "1"
+    },
+    {
+     "name": "accumulated_neon_count",
+     "description": "Cumulative number of neon atoms from gas injection accumulated since plasma\nbreakdown, expressed in equivalent electrons; each injected neon atom\ncontributes ten equivalent electrons.",
+     "unit": "1"
+    },
+    {
+     "name": "accumulated_argon_count",
+     "description": "Accumulated argon count is the cumulative equivalent-electron inventory of\nargon atoms delivered by gas injection after plasma breakdown. Each argon\natom contributes 18 equivalent electrons, equal to its atomic number; this\nis delivered inventory, not plasma electron content or ionization state.",
+     "unit": "1"
+    }
+   ],
+   "id": "item-023"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_ion_momentum_damping_rate",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "toroidal_ion_momentum_damping_rate",
+     "description": "Effective inverse relaxation time for dissipative decay of the toroidal\nbulk-flow momentum of a specified ion species, aggregated over its ionic\ncharge states.",
+     "unit": "s^-1"
+    },
+    {
+     "name": "radial_ion_momentum_damping_rate",
+     "description": "Effective inverse relaxation time for collisional and neoclassical decay of\na specified ion species' ordered momentum along increasing distance from the\ntoroidal symmetry axis.",
+     "unit": "s^-1"
+    },
+    {
+     "name": "parallel_ion_momentum_damping_rate",
+     "description": "Effective inverse relaxation time for collisional or neoclassical decay of\nmagnetic-field-aligned bulk-flow momentum in an ion species, including all\nits ionic charge states.",
+     "unit": "s^-1"
+    }
+   ],
+   "id": "item-024"
+  },
+  {
+   "kind": "single",
+   "name": "neutron_flux_maximum_at_first_wall",
+   "description": "Maximum neutron flux at the first wall of a breeding-blanket module is the\nlargest local neutron energy flux on that module first-wall surface,\nidentifying the highest local neutron loading relevant to material damage\nand blanket lifetime.",
+   "unit": "W.m^-2",
+   "id": "item-025"
+  },
+  {
+   "kind": "single",
+   "name": "power_of_soft_xray_detector",
+   "description": "Band-integrated radiant power received by a soft X-ray detector channel over\nits selected photon-energy band or bands.",
+   "unit": "W",
+   "id": "item-026"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_ion_momentum_flux",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "vertical_ion_momentum_flux",
+     "description": "Vertical ion momentum flux is the transport rate per unit area of the\nvertical component of linear momentum for the total ion population through a\nsurface whose normal is parallel to the Z direction in the right-handed\ncylindrical (R, \u03c6, Z) frame, summed over all ion species and charge states.",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "name": "parallel_ion_momentum_flux",
+     "description": "Parallel ion momentum flux is the rate per unit area at which the\nmagnetic-field-aligned momentum of an ion species crosses an oriented\nsurface.",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "name": "toroidal_ion_momentum_flux",
+     "description": "Toroidal ion momentum flux is the area-averaged transport of toroidal linear\nmomentum across a magnetic flux surface for one ion species, summed over\nionic charge states.",
+     "unit": "kg.m^-1.s^-2"
+    }
+   ],
+   "id": "item-027"
+  },
+  {
+   "kind": "single",
+   "name": "current_due_to_fusion_reactions",
+   "description": "Net parallel plasma current generated by fusion reactions, associated with\nfast alpha particles produced by deuterium\u2013tritium reactions and distinct\nfrom other non-inductive current-drive mechanisms.",
+   "unit": "A",
+   "id": "item-028"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_neutral_momentum_flux_limiter_coefficient",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "parallel_neutral_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless factor scaling the collisionless free-streaming cap on the\nmagnetic-field-parallel component of neutral momentum flux in edge-fluid\ntransport closures.",
+     "unit": "1"
+    },
+    {
+     "name": "poloidal_neutral_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless coefficient scaling the free-streaming bound on poloidal\nneutral momentum flux, limiting its magnitude without reversing its\ndirection.",
+     "unit": "1"
+    },
+    {
+     "name": "vertical_neutral_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless vertical momentum flux-limiter coefficient that scales the\nfree-streaming upper bound on neutral-particle momentum-flux density in\nedge-plasma transport closures.",
+     "unit": "1"
+    }
+   ],
+   "id": "item-029"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_neutral_velocity",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "vertical_neutral_velocity",
+     "description": "Mean directed motion of a selected neutral species along the vertical\nsymmetry-axis direction, averaged over contributing internal states with\nnumber-density weighting.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "radial_neutral_velocity",
+     "description": "Major-radius component of a neutral species' mean flow in the right-handed\ncylindrical (R, \u03c6, Z) frame, with number-density-weighted averaging over\ncontributing internal states.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "parallel_neutral_velocity",
+     "description": "Signed component of a neutral species' mean translational flow along the\nlocal magnetic field, density-weighted over contributing internal states.",
+     "unit": "m.s^-1"
+    }
+   ],
+   "id": "item-030"
+  },
+  {
+   "kind": "single",
+   "name": "length_of_fiber_optic_current_sensor",
+   "description": "Total physical arclength of the optical fiber centerline in a fiber-optic\ncurrent sensor, defining its optical propagation distance and distributed\nmagneto-optic interaction length.",
+   "unit": "m",
+   "id": "item-031"
+  },
+  {
+   "kind": "single",
+   "name": "voltage_of_flux_loop",
+   "description": "Terminal voltage of a flux loop is the signed, unintegrated electrical\npotential difference at the loop terminals. It is induced by the time\nvariation of the oriented magnetic flux linked by the loop and is related to\nthat flux by Faraday's law.",
+   "unit": "V",
+   "id": "item-032"
+  },
+  {
+   "kind": "single",
+   "name": "greenwald_density",
+   "description": "Greenwald density is the empirical electron number-density limit associated\nwith a confined plasma, set by the magnitude of plasma current and the\neffective minor radius. It is the density reference used by Greenwald\nfractions, not the fraction itself.",
+   "unit": "m^-3",
+   "id": "item-033"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_neutral_momentum_flux",
+   "member_count": 4,
+   "examples": [
+    {
+     "name": "toroidal_neutral_momentum_flux",
+     "description": "Toroidal neutral momentum flux measures signed toroidal linear-momentum\ntransfer per unit area and time across an oriented surface in the edge\nplasma, summed over neutral species and internal states.",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "name": "poloidal_neutral_momentum_flux",
+     "description": "Poloidal neutral momentum flux is linear momentum transported per unit area\nand time in the local poloidal direction by the represented neutral\npopulation.",
+     "unit": "kg.m^-1.s^-2"
+    },
+    {
+     "name": "parallel_neutral_momentum_flux",
+     "description": "Parallel neutral momentum flux is the signed rate per area at which\nmagnetic-field-parallel momentum carried by neutral atoms and molecules\ncrosses an oriented surface, summed over species and internal states.",
+     "unit": "kg.m^-1.s^-2"
+    }
+   ],
+   "id": "item-034"
+  },
+  {
+   "kind": "single",
+   "name": "particle_torque_density_due_to_coulomb_collisions_with_electrons",
+   "description": "Local vector rate of angular-momentum transfer per unit volume delivered to\na specified particle population by Coulomb collisions with electrons.",
+   "unit": "N.m^-2",
+   "id": "item-035"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_<X>_velocity_at_pedestal_top",
+   "member_count": 16,
+   "examples": [
+    {
+     "name": "toroidal_lithium_velocity_at_pedestal_top",
+     "description": "Toroidal component of the lithium impurity ion fluid velocity evaluated at\nthe H-mode pedestal top. It represents the local azimuthal rotation of\nlithium impurity ions at the steep-gradient edge transport barrier, not a\npedestal-region average.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "toroidal_xenon_velocity_at_pedestal_top",
+     "description": "Density-weighted toroidal bulk-flow velocity of xenon ions, averaged over\nall ionization states at the core-side shoulder of the H-mode edge transport\nbarrier.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "toroidal_nitrogen_velocity_at_pedestal_top",
+     "description": "Density-weighted toroidal flow velocity of ionized nitrogen across its\ncharge states, evaluated at the core-side shoulder of the H-mode edge\ntransport barrier.",
+     "unit": "m.s^-1"
+    }
+   ],
+   "id": "item-036"
+  },
+  {
+   "kind": "single",
+   "name": "neutral_gas_pressure_of_gauge",
+   "description": "Neutral gas pressure of a gage is the pressure indicated by a barometry gage\nfor residual neutral gas in the vacuum vessel or surrounding vacuum system.\nIt represents local vacuum conditions rather than a kinetic neutral-particle\npressure moment.",
+   "unit": "Pa",
+   "id": "item-037"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_magnetization_of_ferritic_element",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "radial_magnetization_of_ferritic_element",
+     "description": "Signed radial component of the effective magnetization vector assigned to a\nferritic element in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "vertical_magnetization_of_ferritic_element",
+     "description": "Signed vertical component of the effective magnetization vector assigned to\na ferritic element in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "toroidal_magnetization_of_ferritic_element",
+     "description": "Toroidal component of the ferritic-element magnetization vector: the signed\nprojection of the effective magnetization assigned to a discrete ferritic\nelement onto the positive toroidal direction in the right-handed cylindrical\n(R, \u03c6, Z) frame. This is the element-level convention, not a pointwise\nbulk-material magnetization field.",
+     "unit": "A.m^-2"
+    }
+   ],
+   "id": "item-038"
+  },
+  {
+   "kind": "single",
+   "name": "runaway_electron_kinetic_energy_density",
+   "description": "Kinetic energy per unit volume carried by the runaway-electron population,\nincluding relativistic motion and excluding rest-mass energy.",
+   "unit": "J.m^-3",
+   "id": "item-039"
+  },
+  {
+   "kind": "single",
+   "name": "surface_area_of_detector",
+   "description": "Geometric surface area of the detector face defining the physical extent of\none diagnostic detector.",
+   "unit": "m^2",
+   "id": "item-040"
+  },
+  {
+   "kind": "single",
+   "name": "y_unit_vector_of_pellet_injector",
+   "description": "Cartesian y component of the unit vector aligned with the unshattered pellet\nvelocity direction immediately before shattering.",
+   "unit": "1",
+   "id": "item-041"
+  },
+  {
+   "kind": "single",
+   "name": "current_of_passive_loop",
+   "description": "Signed conventional electric current circulating in one axisymmetric passive\nconducting loop, induced by changing linked magnetic flux and\nelectromagnetic coupling.",
+   "unit": "A",
+   "id": "item-042"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_ion_momentum_diffusivity",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "radial_ion_momentum_diffusivity",
+     "description": "Diffusion coefficient relating the diffusive radial ion momentum flux to the\nlocal radial ion momentum gradient, expressing down-gradient redistribution\nwithin the total ion population summed over charge states.",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "name": "poloidal_ion_momentum_diffusivity",
+     "description": "Effective kinematic coefficient governing diffusive redistribution of an ion\nspecies\u2019 poloidal bulk-flow momentum, with all ionic charge states included.",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "name": "parallel_ion_momentum_diffusivity",
+     "description": "Effective kinematic coefficient for field-aligned diffusion of an ion\nspecies\u2019 momentum, driven by gradients of its charge-state-averaged parallel\nflow velocity.",
+     "unit": "m^2.s^-1"
+    }
+   ],
+   "id": "item-043"
+  },
+  {
+   "kind": "single",
+   "name": "non_axisymmetric_magnetic_field",
+   "description": "Non-axisymmetric magnetic-field vector of the local vacuum induction\ngenerated by external coils, with its toroidally averaged component removed.",
+   "unit": "T",
+   "id": "item-044"
+  },
+  {
+   "kind": "single",
+   "name": "thermal_neutral_density",
+   "description": "Number density of neutral particles in the thermal population of a specified\natomic or molecular species, including all internal states but excluding\nions and nonthermal neutrals.",
+   "unit": "m^-3",
+   "id": "item-045"
+  },
+  {
+   "kind": "single",
+   "name": "left_hand_circularly_polarized_wave_electric_field_imaginary_part",
+   "description": "Signed imaginary quadrature of the left-hand circular E-plus wave\nelectric-field phasor along a beam or ray path, relative to a specified\nphase reference.",
+   "unit": "V.m^-1",
+   "id": "item-046"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_electron_particle_flux",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "radial_electron_particle_flux",
+     "description": "Radial electron particle flux is the signed net electron-number transport\nacross magnetic flux surfaces per unit area normal to a surface. It includes\ndiffusive and convective contributions to electron-density transport.",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "name": "poloidal_electron_particle_flux",
+     "description": "Poloidal electron particle flux is the signed net electron crossing rate per\nunit area perpendicular to the local poloidal direction around a plasma\ncross-section.",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "name": "parallel_electron_particle_flux",
+     "description": "Parallel electron particle flux is the net electron crossing rate per unit\narea perpendicular to the local magnetic field, signed along that field.",
+     "unit": "m^-2.s^-1"
+    }
+   ],
+   "id": "item-047"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_current_density_due_to_ion_neutral_friction",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "vertical_current_density_due_to_ion_neutral_friction",
+     "description": "Vertical current density due to ion\u2013neutral friction is the signed\nelectric-charge flux contribution along the symmetry axis arising from\nmomentum exchange between plasma ions and neutrals.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "toroidal_current_density_due_to_ion_neutral_friction",
+     "description": "Toroidal current density due to ion\u2013neutral friction is the signed\nelectric-charge flux contribution along the toroidal direction arising from\nmomentum exchange between ions and neutrals.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "poloidal_current_density_due_to_ion_neutral_friction",
+     "description": "Poloidal current density due to ion\u2013neutral friction is the signed\nelectric-charge flux contribution along the local poloidal tangent arising\nfrom momentum exchange between ions and neutrals.",
+     "unit": "A.m^-2"
+    }
+   ],
+   "id": "item-048"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_volumetric_force",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "radial_volumetric_force",
+     "description": "Radial component of the electromagnetic body-force density vector, projected\nonto the direction of increasing major radius R in the right-handed\ncylindrical (R, \u03c6, Z) frame.",
+     "unit": "N.m^-3"
+    },
+    {
+     "name": "vertical_volumetric_force",
+     "description": "Vertical component of the electromagnetic body-force density vector acting\non plasma volumes or conducting wall and structural elements, projected onto\nincreasing vertical height Z in the right-handed cylindrical (R, \u03c6, Z)\nframe.",
+     "unit": "N.m^-3"
+    },
+    {
+     "name": "toroidal_volumetric_force",
+     "description": "Toroidal component of the electromagnetic body-force density vector acting\non plasma volumes or conducting wall and structural elements, projected onto\nincreasing toroidal angle \u03c6 in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "unit": "N.m^-3"
+    }
+   ],
+   "id": "item-049"
+  },
+  {
+   "kind": "single",
+   "name": "thermal_ion_pressure",
+   "description": "Pressure of thermal ions is the isotropic kinetic stress from random motion,\nsummed over ionic charge states and excluding fast-ion and bulk-flow\ncontributions.",
+   "unit": "Pa",
+   "id": "item-050"
+  },
+  {
+   "kind": "single",
+   "name": "toroidal_width_of_antenna_strap",
+   "description": "Toroidal width of the antenna strap is its full edge-to-edge physical extent\nin the direction around the toroidal symmetry axis.",
+   "unit": "m",
+   "id": "item-051"
+  },
+  {
+   "kind": "family",
+   "pattern": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "member_count": 14,
+   "examples": [
+    {
+     "name": "ratio_of_volume_averaged_boron_density_to_volume_averaged_electron_density",
+     "description": "Dimensionless global boron abundance ratio using separately volume-averaged\nboron and electron number densities, with neutral boron and every ionic\ncharge state included.",
+     "unit": "1"
+    },
+    {
+     "name": "ratio_of_volume_averaged_tritium_density_to_volume_averaged_electron_density",
+     "description": "Ratio of volume-averaged tritium density to volume-averaged electron density\nis the volume-averaged tritium number density, summed over all charge\nstates, divided by the volume-averaged electron number density.",
+     "unit": "1"
+    },
+    {
+     "name": "ratio_of_volume_averaged_helium_4_density_to_volume_averaged_electron_density",
+     "description": "Helium-4 abundance ratio formed from mean densities inside the last closed\nflux surface, comparing the charge-state-summed helium-4 ion density with\nthe electron density after each density is volume averaged.",
+     "unit": "1"
+    }
+   ],
+   "id": "item-052"
+  },
+  {
+   "kind": "family",
+   "pattern": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "member_count": 16,
+   "examples": [
+    {
+     "name": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+     "description": "Number density of helium-3 ions averaged over the plasma boundary, summed\nover all helium-3 ion charge states and excluding neutral helium-3.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+     "description": "Number density of hydrogen ions averaged over the plasma-boundary flux\nsurface, with all hydrogen ion charge states summed and neutral hydrogen\nexcluded.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "flux_surface_averaged_argon_density_at_plasma_boundary",
+     "description": "Number density of argon ions averaged over the last closed magnetic flux\nsurface, summed over all argon ion charge states and excluding neutral\nargon.",
+     "unit": "m^-3"
+    }
+   ],
+   "id": "item-053"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_density_at_pedestal_top",
+   "member_count": 18,
+   "examples": [
+    {
+     "name": "carbon_density_at_pedestal_top",
+     "description": "Carbon ion number density at the top of the H-mode edge pedestal is the\nlocal concentration of carbon ions, summed over all ionization states and\nexcluding neutral carbon.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "tritium_density_at_pedestal_top",
+     "description": "Tritium ion number density at the top of the H-mode edge pedestal, summed\nover all tritium charge states.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "lithium_density_at_pedestal_top",
+     "description": "Local number density of charged lithium ions at the top of the H-mode edge\npedestal, summed over all lithium ionization states and excluding neutral\nlithium.",
+     "unit": "m^-3"
+    }
+   ],
+   "id": "item-054"
+  },
+  {
+   "kind": "single",
+   "name": "field_line_length",
+   "description": "Arclength of an individually traced magnetic field line during plasma\ninitiation, resolving the field-line length distribution rather than\nreporting an average connection length.",
+   "unit": "m",
+   "id": "item-055"
+  },
+  {
+   "kind": "single",
+   "name": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+   "description": "Geometric rate at which the cumulative volume enclosed by a nested magnetic\nflux surface changes with its dimensionful toroidal-flux coordinate.",
+   "unit": "m^2",
+   "id": "item-056"
+  },
+  {
+   "kind": "single",
+   "name": "neutral_species_atomic_mass",
+   "description": "Neutral-species atomic mass is the neutral-atom reference mass per atom of a\nselected elemental or isotopic constituent, including its bound electrons.",
+   "unit": "u",
+   "id": "item-057"
+  },
+  {
+   "kind": "single",
+   "name": "incident_ion_particle_flux_at_wall",
+   "description": "Areal arrival rate of particles from a selected ion species at a wall\nsurface, summed over all ionization states.",
+   "unit": "m^-2.s^-1",
+   "id": "item-058"
+  },
+  {
+   "kind": "single",
+   "name": "neutral_power_at_divertor_target",
+   "description": "Net rate of energy deposited on one divertor target by incident neutral\nparticles, including charge-exchange neutrals and neutral products of volume\nrecombination.",
+   "unit": "W",
+   "id": "item-059"
+  },
+  {
+   "kind": "single",
+   "name": "parallel_ion_particle_diffusivity",
+   "description": "Effective Fickian coefficient governing down-gradient ion particle transport\nalong the local magnetic-field direction in the ion continuity equation.",
+   "unit": "m^2.s^-1",
+   "id": "item-060"
+  },
+  {
+   "kind": "single",
+   "name": "voltage_of_valve",
+   "description": "Voltage applied to a gas-injection valve to drive its opening, serving as\nthe electrical input to the valve's gas-flow response.",
+   "unit": "V",
+   "id": "item-061"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_ion_charge_state_momentum_diffusion_coefficient",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "poloidal_ion_charge_state_momentum_diffusion_coefficient",
+     "description": "Effective kinematic coefficient relating diffusive transport of poloidal\nflow momentum to flow shear for ions of one species in a specified charge\nstate.",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "name": "radial_ion_charge_state_momentum_diffusion_coefficient",
+     "description": "Effective kinematic diffusion coefficient for redistribution of the\nmajor-radius component of momentum carried by ions of one specified species\nand charge state.",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "name": "parallel_ion_charge_state_momentum_diffusion_coefficient",
+     "description": "Kinematic diffusion coefficient governing down-gradient transport along the\nmagnetic field of flow momentum carried by ions of one species in a\nspecified charge state.",
+     "unit": "m^2.s^-1"
+    }
+   ],
+   "id": "item-062"
+  },
+  {
+   "kind": "single",
+   "name": "density_at_magnetic_axis",
+   "description": "Local particle concentration of a specified plasma population at the\nmagnetic axis, with ion charge states aggregated and compound fuel mixtures\ntreated as defined populations.",
+   "unit": "m^-3",
+   "id": "item-063"
+  },
+  {
+   "kind": "single",
+   "name": "fast_particle_pressure",
+   "description": "Fast-particle pressure is the isotropic scalar pressure contribution of the\ntotal suprathermal (nonthermal) particle population, combining its\nfield-parallel and transverse stress contributions.",
+   "unit": "Pa",
+   "id": "item-064"
+  },
+  {
+   "kind": "single",
+   "name": "ethane_source_rate",
+   "description": "Instantaneous ethane-gas injection rate into the plasma vessel, expressed as\nequivalent electrons per second, with 18 equivalent electrons assigned to\neach neutral C2H6 molecule.",
+   "unit": "s^-1",
+   "id": "item-065"
+  },
+  {
+   "kind": "single",
+   "name": "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_e_cross_b_drift",
+   "description": "Normalized parallel gyrocenter toroidal angular-momentum flux of a\ngyrokinetic eigenmode due to E\u00d7B drift is the rotating-frame spectral\ncontribution from the perturbed electrostatic potential\u2019s E\u00d7B drift to the\nmode\u2019s parallel gyrocenter momentum transport.",
+   "unit": "1",
+   "id": "item-066"
+  },
+  {
+   "kind": "single",
+   "name": "brightness_of_visible_camera",
+   "description": "Visible-camera brightness is band-integrated photon radiance along a\nspecified viewing direction over the wavelengths admitted by a visible\npassband. It gives the photon rate per projected collecting area and\naccepted solid angle, with the spectral dependence integrated over that\nband.",
+   "unit": "m^-2.s^-1.sr^-1",
+   "id": "item-067"
+  },
+  {
+   "kind": "single",
+   "name": "momentum_source",
+   "description": "Directed rate of momentum transfer to or from a plasma population,\nrepresented as a source density resolved by species, internal state, or\nspatial direction.",
+   "unit": "kg.m^-1.s^-2",
+   "id": "item-068"
+  },
+  {
+   "kind": "single",
+   "name": "radial_ion_charge_state_diffusion_coefficient",
+   "description": "Effective Fickian coefficient relating major-radius-directed diffusive\nparticle flux to the opposing number-density gradient for ions of one\nspecies and charge state.",
+   "unit": "m^2.s^-1",
+   "id": "item-069"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_perturbed_vacuum_magnetic_field_imaginary_part",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "radial_perturbed_vacuum_magnetic_field_imaginary_part",
+     "description": "Imaginary part of the complex radial component of the linearized\nmagnetic-field perturbation eigenfunction in the current-free vacuum region\noutside the plasma, for a specified toroidal Fourier mode in linear MHD\nstability analysis.",
+     "unit": "T"
+    },
+    {
+     "name": "poloidal_perturbed_vacuum_magnetic_field_imaginary_part",
+     "description": "Imaginary component of the complex poloidal projection, along the\nincreasing-\u03b8 tangent in flux coordinates (\u03c1, \u03b8, \u03c6), of the first-order\nmagnetic-field perturbation eigenfunction in the current-free vacuum region\noutside the plasma boundary for a specified toroidal Fourier mode.",
+     "unit": "T"
+    },
+    {
+     "name": "toroidal_perturbed_vacuum_magnetic_field_imaginary_part",
+     "description": "Imaginary part of the complex toroidal component of the first-order\nmagnetic-field perturbation eigenfunction in the current-free vacuum region,\nfor a specified toroidal mode number in linear MHD stability analysis.",
+     "unit": "T"
+    }
+   ],
+   "id": "item-070"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_<X>_current_density",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "parallel_diamagnetic_current_density",
+     "description": "Parallel component of the diamagnetic current density, obtained by\nprojecting the magnetic-field\u2013pressure-gradient drift current onto the local\nmagnetic-field direction.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "radial_diamagnetic_current_density",
+     "description": "Radial diamagnetic current density is the signed major-radius projection of\npressure-gradient-driven electric current in the edge plasma.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "vertical_diamagnetic_current_density",
+     "description": "Vertical diamagnetic current density is the signed projection of\npressure-gradient-driven electric current per unit area along the toroidal\nsymmetry axis in edge plasma.",
+     "unit": "A.m^-2"
+    }
+   ],
+   "id": "item-071"
+  },
+  {
+   "kind": "single",
+   "name": "current_density_due_to_heat_viscosity",
+   "description": "Vector electric current density arising from heat-viscosity terms in the\ncollisional plasma fluid closure, where the divergence of the heat-viscosity\nstress tensor drives net charge transport in a magnetized plasma.",
+   "unit": "A.m^-2",
+   "id": "item-072"
+  },
+  {
+   "kind": "family",
+   "pattern": "line_averaged_<X>_density",
+   "member_count": 16,
+   "examples": [
+    {
+     "name": "line_averaged_tungsten_density",
+     "description": "Line-of-sight average of the number density of positively charged tungsten\nions, summed over all ionization states and excluding neutral tungsten.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "line_averaged_xenon_density",
+     "description": "Number density of xenon ions averaged along a chord through the plasma,\nsummed over all ionization states from singly ionized through fully stripped\nxenon and excluding neutral xenon atoms.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "line_averaged_helium_3_density",
+     "description": "Line-averaged helium-3 density is the chord-length average of local ionized\nhelium-3 density along a specified viewing path, excluding neutral atoms.",
+     "unit": "m^-3"
+    }
+   ],
+   "id": "item-073"
+  },
+  {
+   "kind": "single",
+   "name": "radial_ion_charge_state_diffusivity",
+   "description": "Radial ion charge-state diffusivity is the effective Fickian particle\ndiffusivity for ions in a specified ionization state along the radial\ndirection.",
+   "unit": "m^2.s^-1",
+   "id": "item-074"
+  },
+  {
+   "kind": "single",
+   "name": "radial_coordinate_of_closest_wall_point",
+   "description": "Major-radius coordinate R of the first-wall point nearest the plasma\nboundary, measured from the toroidal symmetry axis in the right-handed\ncylindrical (R, \u03c6, Z) frame.",
+   "unit": "m",
+   "id": "item-075"
+  },
+  {
+   "kind": "single",
+   "name": "wave_phase_of_antenna_strap",
+   "description": "Phase angle of the radio-frequency current phasor carried by one\nion-cyclotron-heating antenna strap, defined relative to a specified RF\nphase reference.",
+   "unit": "rad",
+   "id": "item-076"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_current_density_due_to_<X>_viscosity",
+   "member_count": 6,
+   "examples": [
+    {
+     "name": "poloidal_current_density_due_to_parallel_viscosity",
+     "description": "Poloidal current density due to parallel viscosity is the signed local\npoloidal projection of the electric current contribution associated with\nmagnetic-field-aligned viscous stress.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "radial_current_density_due_to_parallel_viscosity",
+     "description": "Radial current density due to parallel viscosity is the signed major-radius\nprojection of the electric current contribution associated with\nmagnetic-field-aligned viscous stress.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "vertical_current_density_due_to_perpendicular_viscosity",
+     "description": "Vertical current density due to perpendicular viscosity is the signed\nsymmetry-axis projection of electric current generated by the divergence of\nperpendicular viscous stress.",
+     "unit": "A.m^-2"
+    }
+   ],
+   "id": "item-077"
+  },
+  {
+   "kind": "single",
+   "name": "total_momentum_flux",
+   "description": "Rate of transport of linear momentum per unit area across an oriented\nsurface in the plasma, combining convective, isotropic pressure, and viscous\nstress contributions from any species or population.",
+   "unit": "kg.m^-1.s^-2",
+   "id": "item-078"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_current_density_due_to_anomalous_transport",
+   "member_count": 4,
+   "examples": [
+    {
+     "name": "parallel_current_density_due_to_anomalous_transport",
+     "description": "Parallel current density due to anomalous transport is the signed\nconventional-charge flux along the local magnetic field attributed to\nturbulent, nonclassical plasma transport.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "radial_current_density_due_to_anomalous_transport",
+     "description": "Radial current density due to anomalous transport is the signed\nconventional-charge flux along the major-radius direction attributed to\nturbulent, nonclassical plasma transport.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "vertical_current_density_due_to_anomalous_transport",
+     "description": "Vertical current density due to anomalous transport is the signed\nconventional-charge flux along the toroidal symmetry axis attributed to\nturbulent, nonclassical plasma transport.",
+     "unit": "A.m^-2"
+    }
+   ],
+   "id": "item-079"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_total_current_density",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "parallel_total_current_density",
+     "description": "Parallel total current density is the flux-surface average of the total\ncurrent\u2013magnetic-field dot product divided by the reference vacuum toroidal\nfield.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "toroidal_total_current_density",
+     "description": "Toroidal total current density is the net conventional charge flux per unit\narea around the symmetry axis, formed by algebraically summing all included\ncurrent contributions.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "vertical_total_current_density",
+     "description": "Vertical total current density is the net conventional electric-charge flux\nper unit area along the toroidal symmetry axis, summed algebraically over\nall included contributions.",
+     "unit": "A.m^-2"
+    }
+   ],
+   "id": "item-080"
+  },
+  {
+   "kind": "single",
+   "name": "runaway_electron_density",
+   "description": "Number density of runaway electrons, the suprathermal electron population\nfor which electric-field acceleration can overcome collisional drag.",
+   "unit": "m^-3",
+   "id": "item-081"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_neutral_particle_flux",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "poloidal_neutral_particle_flux",
+     "description": "Poloidal neutral particle flux is the net particle crossing rate per unit\narea normal to the poloidal direction for one neutral species, summed over\ninternal states.",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "name": "radial_neutral_particle_flux",
+     "description": "Radial neutral particle flux is the signed net number flow per unit area and\ntime toward increasing major radius for one neutral atomic or molecular\nspecies, summed over its internal states. It is the cylindrical major-radius\ncomponent, not the flux-surface-normal component.",
+     "unit": "m^-2.s^-1"
+    },
+    {
+     "name": "parallel_neutral_particle_flux",
+     "description": "Parallel neutral particle flux is the signed net number flow of one neutral\nspecies along the local magnetic field per unit perpendicular area and time,\nsummed over internal states.",
+     "unit": "m^-2.s^-1"
+    }
+   ],
+   "id": "item-082"
+  },
+  {
+   "kind": "single",
+   "name": "total_heating_power_due_to_fusion_reactions",
+   "description": "Gross thermal power delivered to a fusion power plant\u2019s thermal-to-electric\nconversion cycle from fusion reactions, including blanket energy\nmultiplication.",
+   "unit": "W",
+   "id": "item-083"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_coordinate_of_<X>_magnetic_field_probe",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "vertical_coordinate_of_toroidal_magnetic_field_probe",
+     "description": "Vertical position of the geometric center of a toroidal magnetic-field probe\ncoil, expressed as the signed Z coordinate in the right-handed cylindrical\n(R, \u03c6, Z) frame.",
+     "unit": "m"
+    },
+    {
+     "name": "radial_coordinate_of_poloidal_magnetic_field_probe",
+     "description": "Major-radius coordinate locating the center of a poloidal magnetic-field\nprobe in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "unit": "m"
+    },
+    {
+     "name": "vertical_coordinate_of_poloidal_magnetic_field_probe",
+     "description": "Vertical position of the geometric center of a poloidal magnetic-field\nprobe, expressed as its signed Z coordinate in the right-handed cylindrical\n(R, \u03c6, Z) frame.",
+     "unit": "m"
+    }
+   ],
+   "id": "item-084"
+  },
+  {
+   "kind": "single",
+   "name": "deuterated_methane_source_rate",
+   "description": "Instantaneous injection rate of deuterated methane (CD4), counted as\nequivalent electrons rather than molecules.",
+   "unit": "s^-1",
+   "id": "item-085"
+  },
+  {
+   "kind": "single",
+   "name": "ion_charge_state_average_charge_number",
+   "description": "Concentration-weighted mean ionic charge number within a specified\ncharge-state bundle of one ion species, expressing the bundle's mean\nionization state.",
+   "unit": "1",
+   "id": "item-086"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_ion_momentum_flux_limiter_coefficient",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "parallel_ion_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless factor setting the collisionless free-streaming upper bound on\nfield-aligned ion momentum flux without reversing the flux direction.",
+     "unit": "1"
+    },
+    {
+     "name": "radial_ion_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless coefficient scaling the collisionless free-streaming bound on\nion momentum flux along the major-radius direction, limiting flux magnitude\nwithout reversing its direction.",
+     "unit": "1"
+    },
+    {
+     "name": "poloidal_ion_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless coefficient scaling the free-streaming bound on poloidal ion\nmomentum flux in edge-plasma transport, limiting its magnitude without\nreversing its direction.",
+     "unit": "1"
+    }
+   ],
+   "id": "item-087"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_neutral_state_velocity_due_to_<X>_drift",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "parallel_neutral_state_velocity_due_to_diamagnetic_drift",
+     "description": "Field-aligned velocity attributed to an effective diamagnetic\npressure-gradient contribution for one internal state of a neutral species\nin the edge plasma.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "radial_neutral_state_velocity_due_to_diamagnetic_drift",
+     "description": "Signed major-radius component of the effective pressure-gradient transport\nvelocity assigned to one neutral species in a specified internal state,\ndistinct from direct magnetic drift of neutral particles.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "toroidal_neutral_state_velocity_due_to_diamagnetic_drift",
+     "description": "Particle-flow velocity component assigned to a neutral species state and\nprojected in the toroidal direction in the right-handed cylindrical (R, \u03c6,\nZ) frame, attributed to effective diamagnetic pressure-gradient transport.",
+     "unit": "m.s^-1"
+    }
+   ],
+   "id": "item-088"
+  },
+  {
+   "kind": "single",
+   "name": "ratio_of_particle_temperature_to_particle_reference_temperature",
+   "description": "Dimensionless ratio comparing a particle species\u2019 kinetic temperature with\nthe positive reference temperature on the same magnetic flux surface.",
+   "unit": "1",
+   "id": "item-089"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_ion_charge_state_velocity_due_to_e_cross_b_drift",
+   "member_count": 5,
+   "examples": [
+    {
+     "name": "radial_ion_charge_state_velocity_due_to_e_cross_b_drift",
+     "description": "Signed major-radius component of the E\u00d7B guiding-center drift for one ion\ncharge state in the edge plasma, positive away from the toroidal symmetry\naxis.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "toroidal_ion_charge_state_velocity_due_to_e_cross_b_drift",
+     "description": "Signed toroidal projection of the mass- and charge-independent E\u00d7B\nguiding-center drift of one ion charge state in the edge plasma.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "poloidal_ion_charge_state_velocity_due_to_e_cross_b_drift",
+     "description": "Signed poloidal projection of the E\u00d7B guiding-center drift for one ion\ncharge state in the edge plasma, along a specified local poloidal direction.",
+     "unit": "m.s^-1"
+    }
+   ],
+   "id": "item-090"
+  },
+  {
+   "kind": "single",
+   "name": "parallel_neutral_species_particle_diffusivity",
+   "description": "Effective particle diffusivity for an ion species along the magnetic field,\nrelating its diffusive particle flux to its parallel number-density\ngradient.",
+   "unit": "m^2.s^-1",
+   "id": "item-091"
+  },
+  {
+   "kind": "single",
+   "name": "thermal_particle_power_density_due_to_thermalization",
+   "description": "Local volumetric heating rate delivered to thermal particles when fast or\nsuprathermal particles lose kinetic energy through Coulomb thermalization.",
+   "unit": "W.m^-3",
+   "id": "item-092"
+  },
+  {
+   "kind": "family",
+   "pattern": "accumulated_<X>_prefill_count_due_to_gas_injection",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "accumulated_lithium_prefill_count_due_to_gas_injection",
+     "description": "Cumulative equivalent-electron inventory of lithium introduced by gas\ninjection during plasma prefill, assigning three count units to each lithium\natom.",
+     "unit": "1"
+    },
+    {
+     "name": "accumulated_helium_3_prefill_count_due_to_gas_injection",
+     "description": "Cumulative equivalent-electron inventory of helium-3 atoms introduced by gas\ninjection during plasma prefill before plasma breakdown, with two count\nunits assigned per atom.",
+     "unit": "1"
+    },
+    {
+     "name": "accumulated_oxygen_prefill_count_due_to_gas_injection",
+     "description": "Cumulative oxygen gas introduced during the prefill phase by gas injection,\nexpressed as an equivalent-electron count where each oxygen atom contributes\n8 count units equal to its atomic number.",
+     "unit": "1"
+    }
+   ],
+   "id": "item-093"
+  },
+  {
+   "kind": "single",
+   "name": "fast_ion_charge_state_torque_density_due_to_collisions",
+   "description": "Collisional torque density is the local angular-momentum transfer rate per\nplasma volume delivered to a specified fast ion charge state through Coulomb\ncollisions.",
+   "unit": "N.m^-2",
+   "id": "item-094"
+  },
+  {
+   "kind": "single",
+   "name": "nuclear_heating_power_of_divertor",
+   "description": "Nuclear energy deposition rate integrated throughout the material volume of\none divertor structure, including neutron and other nuclear heating sources.",
+   "unit": "W",
+   "id": "item-095"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_current_density_due_to_heat_viscosity",
+   "member_count": 4,
+   "examples": [
+    {
+     "name": "poloidal_current_density_due_to_heat_viscosity",
+     "description": "Poloidal current density due to heat viscosity is the signed local charge\nflux in the poloidal direction generated by heat-viscosity stresses in a\ncollisional magnetized plasma.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "toroidal_current_density_due_to_heat_viscosity",
+     "description": "Toroidal current density due to heat viscosity is the signed charge flux\naround the symmetry axis generated by heat-viscosity stresses in a\ncollisional magnetized plasma.",
+     "unit": "A.m^-2"
+    },
+    {
+     "name": "parallel_current_density_due_to_heat_viscosity",
+     "description": "Parallel current density due to heat viscosity is the signed charge flux\nalong the local magnetic field generated by heat-viscosity stresses in a\ncollisional magnetized plasma.",
+     "unit": "A.m^-2"
+    }
+   ],
+   "id": "item-096"
+  },
+  {
+   "kind": "single",
+   "name": "inner_radius_of_antenna_strap",
+   "description": "Inner radius of an antenna strap is the perpendicular distance from the\nstrap conductor axis to the inner cylindrical boundary of its annular\ncross-section.",
+   "unit": "m",
+   "id": "item-097"
+  },
+  {
+   "kind": "single",
+   "name": "height_of_correction_coil",
+   "description": "Full non-negative extent of a rectangular correction-coil conductor\ncross-section measured along the local Frenet\u2013Serret binormal.",
+   "unit": "m",
+   "id": "item-098"
+  },
+  {
+   "kind": "single",
+   "name": "safety_factor",
+   "description": "Safety factor is the signed number of toroidal turns made by a magnetic\nfield line per complete poloidal circuit on a toroidal magnetic flux\nsurface.",
+   "unit": "1",
+   "id": "item-099"
+  },
+  {
+   "kind": "single",
+   "name": "ion_charge_state_particle_convection_velocity",
+   "description": "Effective velocity multiplying the density of a specified ion charge state\nin its convective cross-field particle transport.",
+   "unit": "m.s^-1",
+   "id": "item-100"
+  },
+  {
+   "kind": "single",
+   "name": "flux_at_wall_due_to_recombination",
+   "description": "Flux at a plasma-facing wall due to recombination is the wall-area density\nof a recombination-caused transfer rate at the wall. It fixes the wall locus\nand recombination cause; a more specific quantity specifies what is\ntransported, such as energy, and how incident populations, charge states,\nchannels, and products are aggregated.",
+   "unit": "W.m^-2",
+   "id": "item-101"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_ion_charge_state_momentum_flux_limiter_coefficient",
+   "member_count": 4,
+   "examples": [
+    {
+     "name": "toroidal_ion_charge_state_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless toroidal ion charge-state momentum flux-limiter coefficient\nthat scales the free-streaming bound on toroidal momentum transport for a\nspecified ion charge state.",
+     "unit": "1"
+    },
+    {
+     "name": "vertical_ion_charge_state_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless vertical ion charge-state momentum flux-limiter coefficient\nthat scales the free-streaming bound on vertical momentum transport for a\nspecified ion charge state.",
+     "unit": "1"
+    },
+    {
+     "name": "poloidal_ion_charge_state_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless poloidal ion charge-state momentum flux-limiter coefficient\nthat scales the free-streaming bound on poloidal momentum transport for a\nspecified ion charge state.",
+     "unit": "1"
+    }
+   ],
+   "id": "item-102"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_neutral_state_momentum_flux_limiter_coefficient",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "radial_neutral_state_momentum_flux_limiter_coefficient",
+     "description": "Coefficient scaling the free-streaming cap on the flux of cylindrical radial\nmomentum carried by one neutral species in a specified internal state in\nedge-plasma transport.",
+     "unit": "1"
+    },
+    {
+     "name": "parallel_neutral_state_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless parallel flux-limiter coefficient that scales the\nfree-streaming bound on the parallel momentum-flux-density magnitude,\nprojected along the local magnetic-field unit vector, for a specified\nneutral particle state in edge-plasma transport closures.",
+     "unit": "1"
+    },
+    {
+     "name": "vertical_neutral_state_momentum_flux_limiter_coefficient",
+     "description": "Dimensionless flux-limiter coefficient that scales the free-streaming bound\non the vertical (Z) momentum-flux-density component in the right-handed\ncylindrical (R, \u03c6, Z) frame for a specified neutral particle state in\nedge-plasma transport closures.",
+     "unit": "1"
+    }
+   ],
+   "id": "item-103"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_<X>_velocity_at_magnetic_axis",
+   "member_count": 17,
+   "examples": [
+    {
+     "name": "toroidal_argon_velocity_at_magnetic_axis",
+     "description": "Density-weighted toroidal bulk-flow velocity of argon ions at the magnetic\naxis, combining all ionization states in the right-handed cylindrical (R, \u03c6,\nZ) frame.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "toroidal_helium_4_velocity_at_magnetic_axis",
+     "description": "Toroidal helium-4 velocity at the magnetic axis is the signed bulk-flow\nvelocity of helium-4 ions projected onto the toroidal \u03c6 direction of the\nright-handed cylindrical (R, \u03c6, Z) frame at the magnetic axis.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "toroidal_tritium_velocity_at_magnetic_axis",
+     "description": "Signed toroidal fluid velocity of the tritium-ion population evaluated at\nthe magnetic axis and resolved in the direction of increasing toroidal\nangle.",
+     "unit": "m.s^-1"
+    }
+   ],
+   "id": "item-104"
+  },
+  {
+   "kind": "single",
+   "name": "total_absorbed_wave_power",
+   "description": "Total coherent electromagnetic-wave power transferred directly to all plasma\nparticle populations and integrated over all spatial locations.",
+   "unit": "W",
+   "id": "item-105"
+  },
+  {
+   "kind": "single",
+   "name": "thermal_electron_pressure_at_post_sawtooth_crash",
+   "description": "Pressure of thermal electrons at the post-sawtooth-crash locus is the\nisotropic stress from random electron motion in the plasma edge and\nscrape-off layer.",
+   "unit": "Pa",
+   "id": "item-106"
+  },
+  {
+   "kind": "single",
+   "name": "electron_temperature_at_pellet_path",
+   "description": "Background-plasma electron temperature evaluated locally along the pellet\u2019s\nablation trajectory, describing the thermal state encountered by the pellet\nduring transit.",
+   "unit": "eV",
+   "id": "item-107"
+  },
+  {
+   "kind": "single",
+   "name": "parallel_neutral_internal_state_energy_flux",
+   "description": "Field-parallel neutral energy flux is the signed thermal-energy transport\nper unit area and time along the local magnetic field by one neutral species\nin one specified internal state.",
+   "unit": "W.m^-2",
+   "id": "item-108"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_ion_charge_state_energy_diffusion_coefficient",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "radial_ion_charge_state_energy_diffusion_coefficient",
+     "description": "Fick's-law proportionality coefficient relating the density-normalized\nradial diffusive thermal energy flux of a specified ion charge state to its\nlocal temperature gradient.",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "name": "poloidal_ion_charge_state_energy_diffusion_coefficient",
+     "description": "Fick's-law proportionality coefficient relating the density-normalized\npoloidal diffusive thermal-energy flux of one ion charge state to its local\ntemperature gradient.",
+     "unit": "m^2.s^-1"
+    },
+    {
+     "name": "parallel_ion_charge_state_energy_diffusion_coefficient",
+     "description": "Fick's-law proportionality coefficient relating the density-normalized\nparallel diffusive thermal energy flux of a specified ion charge state to\nits local temperature gradient.",
+     "unit": "m^2.s^-1"
+    }
+   ],
+   "id": "item-109"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_center_of_mass_velocity",
+   "member_count": 3,
+   "examples": [
+    {
+     "name": "toroidal_center_of_mass_velocity",
+     "description": "Signed flow around the symmetry axis, equal to the mass-density-weighted\nmean of the toroidal velocities of all constituent plasma species.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "parallel_center_of_mass_velocity",
+     "description": "Signed plasma flow along the local magnetic field, equal to the\nmass-density-weighted mean of the field-parallel velocities of all\nconstituent species.",
+     "unit": "m.s^-1"
+    },
+    {
+     "name": "radial_center_of_mass_velocity",
+     "description": "Signed major-radius component of plasma flow, equal to the\nmass-density-weighted mean of that component over all constituent species.",
+     "unit": "m.s^-1"
+    }
+   ],
+   "id": "item-110"
+  },
+  {
+   "kind": "single",
+   "name": "momentum_flux_due_to_perturbed_parallel_vector_potential",
+   "description": "Momentum flux due to a perturbed parallel vector potential is the\ndimensionless signed contribution to plasma momentum transport produced by\nturbulent fluctuations of the electromagnetic vector potential component\nparallel to the magnetic field. It is expressed relative to a positive\nreference momentum-flux scale.",
+   "unit": "1",
+   "id": "item-111"
+  },
+  {
+   "kind": "single",
+   "name": "parallel_electric_field_at_separatrix",
+   "description": "Parallel electric field at the separatrix is the electric field projected\nalong the local magnetic field on the separatrix. It fixes the field-aligned\nprojection and separatrix locus, while more specific names may add an\naggregation over that locus.",
+   "unit": "V.m^-1",
+   "id": "item-112"
+  },
+  {
+   "kind": "family",
+   "pattern": "<X>_density",
+   "member_count": 17,
+   "examples": [
+    {
+     "name": "beryllium_density",
+     "description": "Local number density of beryllium impurity ions per unit plasma volume,\nsummed over all ionization states from singly ionized to fully stripped\n(Be1+ through Be4+), excluding neutral beryllium atoms.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "tritium_density",
+     "description": "Local number density of tritium ions in the plasma, the foundational\nfuel-ion parameter underlying chord-averaged, volume-averaged, and isotopic\nratio child quantities.",
+     "unit": "m^-3"
+    },
+    {
+     "name": "deuterium_density",
+     "description": "Deuterium density is the number density of ionized deuterium in the fuel-ion\npopulation. It is the local density of deuterons, excluding neutral atoms,\nmolecules, and line- or volume-averaged deuterium densities.",
+     "unit": "m^-3"
+    }
+   ],
+   "id": "item-113"
+  }
+ ]
+}
