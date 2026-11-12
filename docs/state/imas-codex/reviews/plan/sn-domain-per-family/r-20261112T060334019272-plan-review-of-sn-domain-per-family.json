@@ -59,9 +59,28 @@
       "note": "\u00a73 now routes to the lead any family undecided under the options \u00a75 gives it, whatever it read under \u00a72's narrower options",
       "reason": "",
       "when": "2026-11-12T06:20:57.724817+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "75ea58b386bc47cbdaddb7c20bf2e2ff75918075",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75 gains a done-when re-reading the sn-catalog-grouping calibration labels under the widened options, not lower than \u00a72's regression reading",
+      "reason": "",
+      "when": "2026-11-12T06:21:12.940622+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "75ea58b386bc47cbdaddb7c20bf2e2ff75918075",
+      "commit_basis": "edit",
+      "note": "\u00a75 gains a done-when re-reading the sn-catalog-grouping calibration labels under the widened options, not lower than \u00a72's regression reading",
+      "reason": "",
+      "when": "2026-11-12T06:21:12.940622+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
