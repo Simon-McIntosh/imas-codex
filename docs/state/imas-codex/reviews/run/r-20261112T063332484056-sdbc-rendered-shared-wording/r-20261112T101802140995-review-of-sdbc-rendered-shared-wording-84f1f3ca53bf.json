@@ -11,6 +11,13 @@
     "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:285 _documentation_with_registry_form"
   ],
   "completed_at": "2026-11-12T10:32:47.404Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-sdbc-rendered-shared-wording-84f1f3ca53bf",
+      "recorded_at": "2026-11-12T11:05:29.104425+00:00"
+    }
+  },
   "dispatched_at": "2026-11-12T10:18:48Z",
   "finding_dispositions": {
     "0": {
