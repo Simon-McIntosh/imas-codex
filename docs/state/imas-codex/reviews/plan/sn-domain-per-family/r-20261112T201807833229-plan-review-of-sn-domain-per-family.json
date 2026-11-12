@@ -1,0 +1,45 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T20:31:21.034Z",
+  "dispatched_at": "2026-11-12T20:21:45Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-domain-per-family/r-20261112T201807833229-plan-review-of-sn-domain-per-family/plan.html:71",
+      "id": "reasoning-1",
+      "reason": "the clause's two live readings differ on options (unbounded domains versus the member's own source domains) for exactly the families the section writes, and the plan's own measure is blind to the difference, so the author must say which rule governs those members before a node writes them.",
+      "text": "the changed clause says each member of a held-split family \"is written the domain decided on its own sources\", but the section's own paragraph at plan.html:67 states \"The options every family is offered are those of \u00a75, so this section applies \u00a75's decision\", and \u00a75's widened options are by definition not bounded by a name's sources; a worker reading \"on its own sources\" can bound each member's options to its own DD sources, which is the source-bounded rule \u00a72 carried and \u00a75 replaces; the 24 held-split families are the largest families in the catalog (47, 33, 31, 30 members) so this is where the two readings diverge most, and widened-options.json:readings shows the two arms score 0.4864 and 0.4875 on the family member share, so a gate on that share cannot distinguish them",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0f48acbac878cfa8b8a5f560135787f3aa8bc172",
+  "plan_fingerprint": "a026b993292374595f75ccd548f3344418e772fb94488359d3d5de773c2008bf",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 31,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T201807833229-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "e4974669b7b1f98e3f0cd9c40ec5a9b4755562e3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/evidence/fragments/sn-domain-per-family/ exists; the cross-plan claim about sn-catalog-consistency \u00a75 resolves (its depends-on names sn-domain-per-family#s3 and its \u00a75 keeps the domain-audit endpoint, with imas_codex/standard_names/domain_audit.py as that instrument); the gate's prose-form evidence link follows the repository's r-gate-evidence convention (10 of 11 existing gate links are prose, not paths), so it is not reported.",
+    "done_when": "pass \u2014 every \u00a73 bullet states a checkable reading (split-family count before and beside after, \u00a71 families named, transport/general share with twenty largest moves, spend ceiling, audit delta) and bullet 4 is a negative control that plants a split family and a whole one against the read-back.",
+    "evidence_paths": "pass \u2014 the paragraph names docs/evidence/fragments/sn-domain-per-family/ as the section's evidence directory, and the new bullet 6 puts the live pass and read-back on the all_debug partition with the gate log committed there.",
+    "naming": "pass \u2014 the changed text introduces no plan label, stage name or ticket number into anything a node would write, and \u00a75's listing is cited by capability (\"the undecided families \u00a75 lists\") rather than by a deliverable id.",
+    "reasoning": "a finding \u2014 \u00a73's held-split clause writes each member \"the domain decided on its own sources\" while the same section's paragraph fixes the options every family is offered as \u00a75's widened set, so the clause admits a source-bounded reading that \u00a75 exists to retire and no gate can tell the two apart.",
+    "single_goal": "pass \u2014 \u00a73 carries one deliverable, the live names brought to one domain per family; its remaining bullets are measures and controls on that deliverable.",
+    "wiring": "pass \u2014 \u00a73's depends-on (s2, s5) both resolve, s4 depends on s3, sn-catalog-consistency#s5 declares the wait on s3 that \u00a73's paragraph asserts, and the gate g-sdpf-disputed-items is now closed with its required evidence satisfied (disputed-items.json carries lead_ruling on 12 of 12 items, commit 398238a33, rulings matching the lead comment at plan.html:105)."
+  },
+  "section_digests": {
+    "_document": "8ba5abe5fb9469b36db90fd02aee5c928806ced85275d589c976a8daa3fe7fe9",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "36f79261483201fc87399cfc9ae9111f704aeb1edf03a15218520bd076eae534",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "b0855588bfef32ef9c6c0877b91f163c6cdcdcabff891b65286989af595edb8e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T21:01:11.884866+00:00",
+  "total": null
+}
