@@ -23,7 +23,7 @@
   <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -138,6 +138,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261111T233804207585-review-of-scc-chaincap-remeasure-a248fc354ddc" data-who="reckon-build" data-when="2026-11-11T23:58:08.878Z">
     <div class="r-comment-body"><p>review-of-scc-chaincap-remeasure-a248fc354ddc — reviewed r-20261111T221330771121-scc-chaincap-remeasure at base fc99c61f0 / head a248fc354, scored goal_fidelity 19, evidence 16, scope_discipline 20, durability 15, fit 18, reuse 19 (total 107), status parsed, verdict SOUND with five non-blocking findings and added_failure_count 0 because the run declares no suite arms and its control/capture gate reads PASS at EXIT=0.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-20261112-root-cause-hold" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T01:20:00Z">
+    <div class="r-comment-body"><p>The lead asked on 2026-11-12 for the published release candidate's inconsistencies to be traced to their causes and gave that work priority. Its finding for this section: the batches regenerate each name through the model one at a time, which is how the divergence arose, so a regenerated member is again free to differ. <code>sn-definitions-by-construction</code> §2 makes the shared part of a definition a rendered wording, and its §6 rewrites the live catalog. Run <code>r-20261112T001832467275-scc-batch-1-pilot</code> is held in the queue, not dropped. After that plan's §6 lands, re-run the census: only families still divergent return to this section's batches. The grouping half of §5 is met by <code>sn-domain-per-family</code> §3; §5 keeps its domain-audit endpoint. §4, §6 and §7 are untouched.</p></div>
 </div>
 </section>
 </main>
