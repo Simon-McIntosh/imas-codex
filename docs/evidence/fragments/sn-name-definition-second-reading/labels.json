@@ -1,0 +1,422 @@
+[
+ {
+  "id": "item-01",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "locally or averaged over a magnetic flux surface",
+  "reason": "The name states a local volumetric quantity, but the definition also admits a flux-surface-averaged form and restricts the power to direct RF wave absorption by the fast population."
+ },
+ {
+  "id": "item-02",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "defined relative to the first module",
+  "reason": "The name states a forward-wave phase, but the quantity is reference-relative: the phase of each module against the forward-wave phasor of the first reference module."
+ },
+ {
+  "id": "item-03",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "is the poloidal specialization of this general coordinate concept",
+  "reason": "The definition presents an umbrella coordinate concept whose concrete forms are supplied by specialisations such as the poloidal angle."
+ },
+ {
+  "id": "item-04",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net radiofrequency power absorbed by the plasma from all electron-cyclotron wave sources",
+  "reason": "The name states total power due to electron-cyclotron heating, and the definition sums the absorbed power of all such sources, which is the same scope."
+ },
+ {
+  "id": "item-05",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the projection of that row reference point onto $\\hat{Z}$",
+  "reason": "A vertical coordinate of an antenna row is naturally the Z-projection of the same row's reference point, matching what the name denotes."
+ },
+ {
+  "id": "item-06",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent quantity denotes the full vector bootstrap-current-density contribution. Component or projection quantities are more specific descendants",
+  "reason": "The definition declares an umbrella vector quantity whose components and projections are fixed by more specific descendant names."
+ },
+ {
+  "id": "item-07",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "It represents the parallel current contribution rather than the total plasma current",
+  "reason": "The name states a current from fusion reactions, but the definition adds the identifying qualifier that this is the field-parallel contribution only."
+ },
+ {
+  "id": "item-08",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "sums the number densities of all positive oxygen ionization states, counting each ion once. Neutral oxygen atoms are excluded",
+  "reason": "Under the catalog convention a bare species name counts ions summed over charge states with neutrals excluded, which is exactly what the definition states."
+ },
+ {
+  "id": "item-09",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "by applying inverse-poloidal-flux-gradient weighting over the surface",
+  "reason": "The name already states a flux-surface average of ion density at the plasma boundary, and the inverse-flux-gradient weighting is the standard meaning of that average."
+ },
+ {
+  "id": "item-10",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is charge-state-summed over xenon ions and is not a local point value, a volume average, or a density that includes neutral xenon",
+  "reason": "A bare species name counts ions, and the name already states the flux-surface average at the plasma boundary, so the definition's scope matches it."
+ },
+ {
+  "id": "item-11",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity applies specifically to ionized tritium and excludes neutral tritium",
+  "reason": "Under the catalog convention a bare species name counts ions, and the definition states the local density of tritium ions on the last closed flux surface."
+ },
+ {
+  "id": "item-12",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity applies to tungsten ions evaluated at the plasma boundary and sums over all positive ionization states. It excludes neutral tungsten",
+  "reason": "The name states a tungsten density at the separatrix, and the definition is the charge-state-summed ion density there, matching the bare-species convention."
+ },
+ {
+  "id": "item-13",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the equivalent blackbody temperature associated with the detected electron cyclotron emission intensity at that channel's selected frequency",
+  "reason": "Radiative temperature is the brightness temperature of the detected ECE intensity, which is the quantity the name denotes at the specified channel."
+ },
+ {
+  "id": "item-14",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "The refractive-index vector describes electromagnetic phase propagation relative to propagation in vacuum",
+  "reason": "The name states a scalar refractive index, but the definition is a vector retaining propagation direction and signed components."
+ },
+ {
+  "id": "item-15",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent quantity does not specify a particular magnetic-flux component or surface orientation. Concrete component names supply that specialization",
+  "reason": "The definition declares an umbrella quantity whose component and surface-orientation forms are fixed by concrete child names."
+ },
+ {
+  "id": "item-16",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "The reference scale is defined by a whole-plasma, current-based normalization rather than by the poloidal field at a particular point",
+  "reason": "Poloidal beta is the current-based pressure ratio standard for that name, so the definition states the scope the name denotes."
+ },
+ {
+  "id": "item-17",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "flux-surface-averaged isotropic part of the kinetic stress carried by the thermal and nonthermal populations of a specified species",
+  "reason": "The name states a particle pressure, but the definition adds the identifying qualifier that it is a flux-surface-averaged isotropic stress of a specified species."
+ },
+ {
+  "id": "item-18",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron inventory",
+  "reason": "The definition states the inventory in units of ten equivalent electrons per molecule rather than as a molecular count, which the name does not convey."
+ },
+ {
+  "id": "item-19",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the global energy-confinement timescale predicted by the IPB98(y,2) empirical scaling law",
+  "reason": "The name names the IPB98(y,2) scaling, and the definition is the empirical prediction of global energy confinement time, which is that scaling's quantity."
+ },
+ {
+  "id": "item-20",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the radial projection of a first-order, complex perturbed magnetic vector-potential eigenfunction in the vacuum region",
+  "reason": "The name states the radial perturbed vacuum magnetic vector potential, which is exactly the radial projection the definition describes."
+ },
+ {
+  "id": "item-21",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the time-averaged scalar amplitude of the component of a magnetic-field perturbation parallel to the local equilibrium magnetic field, normalized by a reference magnetic-field magnitude",
+  "reason": "Time averaging, normalisation, the parallel projection and the magnitude are all stated in the name, so the definition denotes the same quantity."
+ },
+ {
+  "id": "item-22",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "Elapsed duration from plasma breakdown until termination of auxiliary heating in a single discharge",
+  "reason": "A pulse duration covers the whole discharge, whereas the definition restricts the interval to the heated confined-plasma phase between breakdown and heating termination."
+ },
+ {
+  "id": "item-23",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the major-radius coordinate of the designated geometric point representing the coil position",
+  "reason": "A radial coordinate of a coil is naturally the major-radius coordinate of the point that locates it, which is what the definition states."
+ },
+ {
+  "id": "item-24",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the non-negative cross-sectional area of the solid conducting material of a passive conducting loop element",
+  "reason": "The bare name suggests the enclosed loop area, but the definition is the conductor material cross-section on a plane normal to the current path, excluding the aperture."
+ },
+ {
+  "id": "item-25",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net electromagnetic Lorentz force on an individual poloidal-field-coil conductor projected onto the vertical axis",
+  "reason": "The name states a vertical force of a poloidal-field coil, and the definition is exactly the signed vertical component of that coil's electromagnetic force."
+ },
+ {
+  "id": "item-26",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Full non-negative extent of a non-axisymmetric correction-coil conductor cross-section measured along its local normal axis",
+  "reason": "The name states a coil width, but the definition is the transverse size of the conductor cross-section, a different quantity from the coil's overall spatial width."
+ },
+ {
+  "id": "item-27",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "a fundamental thermodynamic state variable in fluid and single-fluid MHD models, quantifying the mean random kinetic energy of the charged particle population",
+  "reason": "The plasma temperature in a fluid description is the effective single-population temperature the name denotes, with species-resolved forms carrying their own qualified names."
+ },
+ {
+  "id": "item-28",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the value of the [poloidal magnetic flux](name:poloidal_magnetic_flux) function on the outermost magnetic flux surface of the halo-current region",
+  "reason": "The name states the poloidal flux at the halo boundary, and the definition is that flux value on the halo region's outermost surface."
+ },
+ {
+  "id": "item-29",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "obtained by integrating the local relativistic kinetic energy density over the total confined plasma volume $V$ and dividing by $V$",
+  "reason": "The name states a volume-averaged runaway-electron kinetic energy density, which is exactly the volume mean of the local energy density the definition gives."
+ },
+ {
+  "id": "item-30",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "is the x-directed component of a sensor",
+  "reason": "The name states the x component of the first measurement-direction unit vector, and the definition is its x-direction cosine."
+ },
+ {
+  "id": "item-31",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Full transverse extent of the rectangular collimating aperture associated with a neutron detector",
+  "reason": "The name states a width of the neutron detector, but the definition is the opening width of its collimating aperture, explicitly not the detector body or shielding."
+ },
+ {
+  "id": "item-32",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the aggregate number of neutrons emitted per unit time by fusion reactions in the plasma",
+  "reason": "The name states a total neutron rate, and the definition sums the neutron emission of the three listed fusion channels, which is that total."
+ },
+ {
+  "id": "item-33",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "It includes neutral boron and all ionization states of boron, so it represents the chord-averaged elemental boron impurity content",
+  "reason": "A bare species name counts ions with neutrals excluded, so a definition that includes neutral boron carries an elemental-population qualifier the name does not."
+ },
+ {
+  "id": "item-34",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron count",
+  "reason": "The count is the injected atom number multiplied by two equivalent electrons per atom, an equivalence the name's plain count does not convey."
+ },
+ {
+  "id": "item-35",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "It counts particles removed from the pellet up to the specified trajectory position, rather than particles remaining in the pellet",
+  "reason": "The name does not say whether the accumulated count is material released or material remaining, and the definition fixes it to the released ablated particles."
+ },
+ {
+  "id": "item-36",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The sum includes boron ions from B$^{+}$ through fully stripped B$^{5+}$ and excludes neutral boron atoms",
+  "reason": "Under the catalog convention a bare species name counts ions summed over charge states with neutrals excluded, which the definition states."
+ },
+ {
+  "id": "item-37",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "The ratio applies to the specified spectral band and angular averaging; it is not a wavelength- and direction-resolved emissivity",
+  "reason": "The bare name suggests a total hemispherical emissivity, but the definition is an effective ratio bound to a stated spectral band and angular averaging."
+ },
+ {
+  "id": "item-38",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is its projection onto the Cartesian y-axis",
+  "reason": "The name states the y component of the camera image-up unit vector, and the definition is exactly that projection."
+ },
+ {
+  "id": "item-39",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the complete end-to-end linear size of the soft X-ray detector along one specified detector-plane direction",
+  "reason": "The name states the detector extent, and the definition is its full end-to-end size along the chosen detector-plane direction."
+ },
+ {
+  "id": "item-40",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Each value denotes a spectral evaluation point, not a response amplitude or wavelength interval",
+  "reason": "The name states a spectral wavelength of an optical element, and the definition is the vacuum wavelength at which its properties are evaluated."
+ },
+ {
+  "id": "item-41",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the spatial average, over the plasma volume, of the local total rate at which electrons enter the runaway population",
+  "reason": "The name states a volume-averaged total runaway source rate, and the definition is the plasma-volume mean of the summed local production rate."
+ },
+ {
+  "id": "item-42",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the geometric area of the specified detector surface associated with one diagnostic channel",
+  "reason": "The name states the surface area of a detector, and the definition is the geometric area of its specified face."
+ },
+ {
+  "id": "item-43",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "It applies to the complete beryllium-ion population at that location and is summed over all beryllium ionic charge states. It excludes neutral beryllium",
+  "reason": "Under the catalog convention a bare species name counts ions summed over charge states with neutrals excluded, which the definition states at the magnetic axis."
+ },
+ {
+  "id": "item-44",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "This is the direction-agnostic vector parent for component projections of the same bulk neutral population in the same resolved internal state",
+  "reason": "The definition declares the quantity as a parent vector whose directional forms are fixed by component children such as the vertical bulk velocity."
+ },
+ {
+  "id": "item-45",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "is the local torque per unit volume transferred to the bulk thermal ion population by Coulomb collisions with contributing charged-particle populations",
+  "reason": "Co-passing, thermal-ion, collisional and torque density are all present in the name, and the definition adds only that the full vector rather than a spatial component is meant."
+ },
+ {
+  "id": "item-46",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net rate at which Coulomb scattering transfers angular momentum per unit volume to the counter-passing suprathermal electron population",
+  "reason": "The name states a counter-passing fast-electron collisional torque density, and the definition is exactly that volumetric angular-momentum transfer rate."
+ },
+ {
+  "id": "item-47",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the local number of particles of a specified plasma population per physical volume at the innermost location of nested closed poloidal magnetic-flux surfaces",
+  "reason": "A density at the magnetic axis of a stated population is what the name denotes, and the species conventions stated are what the catalog applies to a bare species name."
+ },
+ {
+  "id": "item-48",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the mean translational velocity of ions in a specified ionization charge state",
+  "reason": "The name states an ion charge-state velocity, and the definition is that charge state's bulk flow from the first velocity moment."
+ },
+ {
+  "id": "item-49",
+  "class": "unit-does-not-fit-name",
+  "confidence": "medium",
+  "evidence": "denotes the common linear-momentum concept shared by concrete momentum-content and momentum-transport quantities, not a single fully specified observable",
+  "reason": "The name states momentum, whose dimension is kg.m.s^-1, but the assigned unit kg.m^-1.s^-2 is that of momentum flux density, a different physical dimension."
+ },
+ {
+  "id": "item-50",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local parallel-parallel component of the plasma electrical-conductivity response, with both projections taken along the local magnetic-field direction",
+  "reason": "The name states a parallel conductivity, and the definition is the field-aligned component of the conductivity tensor relating parallel field to parallel current."
+ },
+ {
+  "id": "item-51",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the effective transport coefficient for local diffusive smoothing of the thermal-energy density of one specified ionization stage along the magnetic-field direction",
+  "reason": "The name states a field-aligned diffusivity for one ion charge state and its quantity (the standard name for thermal energy transport) matches the definition's scope."
+ },
+ {
+  "id": "item-52",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the local concentration of particles belonging to a selected species or population",
+  "reason": "A generic particle number density of a selected species is what the name denotes, and the definition's charge-state and thermal conventions follow the catalog."
+ },
+ {
+  "id": "item-53",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a multiplicative factor that scales the collisionless free-streaming upper bound on poloidal momentum-flux density in a transport closure",
+  "reason": "The name states a poloidal flux-limiter coefficient, and the definition is that factor for the poloidal momentum-flux component."
+ },
+ {
+  "id": "item-54",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "This quantity applies locally to one specified charge state of one ion species in the edge plasma",
+  "reason": "The E cross B drift exists across the plasma, but the definition restricts this quantity to the edge region, a subset of the plasma volume the name covers."
+ },
+ {
+  "id": "item-55",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the scalar poloidal diffusivity for energy transport by neutral particles in a specified internal state",
+  "reason": "The name states the poloidal neutral internal-state energy diffusion coefficient, and the Fickian poloidal coefficient the definition gives is that quantity."
+ },
+ {
+  "id": "item-56",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the toroidal component of the local collisional angular-momentum transfer delivered to the bulk thermal electron population by co-passing particles",
+  "reason": "Every qualifier in the name is carried by the definition, which is the toroidal projection of that collisional torque density."
+ },
+ {
+  "id": "item-57",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the perpendicular kinetic-pressure moment of a perturbed gyrocenter distribution in a linear gyrokinetic eigenmode, normalized to a reference thermal pressure and weighted by the first-order Bessel function",
+  "reason": "Perpendicular, normalized, perturbed pressure, Bessel-1 and the unitless normalisation are all in the name, matching the definition."
+ },
+ {
+  "id": "item-58",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the E-plus complex phasor obtained by projecting the electromagnetic-wave electric-field phasor onto the circular polarization basis transverse to the local equilibrium magnetic field",
+  "reason": "The name states the left-hand circularly polarized wave electric field, and the definition is that polarization component's complex phasor."
+ },
+ {
+  "id": "item-59",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "after power-deposition-weighted averaging over a magnetic flux surface",
+  "reason": "The name states a mode-resolved polarized field amplitude, but the definition adds the identifying power-deposition-weighted flux-surface average that the name does not convey."
+ },
+ {
+  "id": "item-60",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the amplitude-form representation of the right-hand circularly polarized E-minus contribution to a coherent electromagnetic-wave electric field",
+  "reason": "The name states the right-hand circularly polarized wave electric field amplitude, exactly the amplitude representation the definition describes."
+ }
+]
