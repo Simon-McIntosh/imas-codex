@@ -1,0 +1,45 @@
+# revision: 0428c0876425784635ff00e281c3b44fb759aca5
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-labelled-comparison
+# command: uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_family_domain_decision.py tests/standard_names/test_domain_decision.py tests/standard_names/test_name_domain_single_writer.py
+# module: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-labelled-comparison/imas_codex/standard_names/domain_decision.py
+# cwd: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-labelled-comparison
+============================= test session starts ==============================
+collected 31 items / 6 deselected / 25 selected
+
+tests/standard_names/test_family_domain_decision.py ....                 [ 16%]
+tests/standard_names/test_domain_decision.py ........                    [ 48%]
+tests/standard_names/test_name_domain_single_writer.py .............     [100%]
+
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+5.85s call     tests/standard_names/test_name_domain_single_writer.py::test_writer_carries_its_own_writes
+1.05s setup    tests/standard_names/test_family_domain_decision.py::test_domain_family_key_holds_the_locus_fixed
+0.06s call     tests/standard_names/test_family_domain_decision.py::test_family_options_are_the_union_across_members
+
+(7 durations < 0.005s hidden.  Use -vv to show these durations.)
+================= 25 passed, 6 deselected, 1 warning in 12.69s =================
+EXIT=0
+
+
+# --- negative control: the fragment's claims checked against its artifact ---
+# command: python labelled-comparison-run.py --check-fragment <fragment> --output <artifact>
+# state: repair applied (fragment and artifact at HEAD)
+check:undecided-largest claim=51 artifact=51 ok=True
+check:calibration-strict claim=60.36% artifact=60.36% contradicted_basis=False ok=True
+exit=0
+# state: fragment and artifact from acad1f648, parent of the repair, both checks together
+check:undecided-largest claim=33 artifact=None ok=False
+check:calibration-strict claim=absent% artifact=absent% contradicted_basis=True ok=False
+exit=1
+# state: the parent fragment against the repaired artifact, isolating the size claim
+check:undecided-largest claim=33 artifact=51 ok=False
+check:calibration-strict claim=60.36% artifact=60.36% contradicted_basis=True ok=False
+exit=1
+# the gate run's own status is unchanged: no product source or test differs from revision 0428c0876
+EXIT=0
