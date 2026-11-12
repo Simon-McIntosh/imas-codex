@@ -1,0 +1,47 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T10:23:16.208Z",
+  "dispatched_at": "2026-11-12T10:15:38Z",
+  "findings": [
+    {
+      "anchor": "plan.html:65",
+      "id": "reasoning-1",
+      "reason": "the node would be aimed at the wrong actor, and the only way to make the test read \"nothing was stored\" is a writer-side refusal the same section forbids, so the section must settle whether the endpoint is a review hold or a writer repair and site the control on the path that actually refuses.",
+      "text": "the done-when places the refusal at the writer's own entry point (\"reads that nothing was stored\"), yet the writer's conformance path repairs the departure in place \u2014 substituting the canonical equation, the template opening and the locus sentence before persistence \u2014 and stores the result, while the refusal \u00a72's prose describes is the documentation review's registry_conformance hold, which runs after the writer has already rewritten and stored the text; a node following this done-when must either rebuild the writer to refuse, which has no home in the plan since line 58 states \"no new refusal family is added beside them\", or watch the test read a stored, repaired definition and fail.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f6d13f20fd623ab1fd3522a3495666fefca29aa6",
+  "plan_fingerprint": "6a2501a6651a90c3afe693d4f7fe734e6a7959924876b66b9cef339a95f82fc6",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 13,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T101417154074-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "4b8e63656e8309f59bacc5dff11a87977544077f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the \u00a71 and \u00a74 citations in \u00a72 resolve to sections of this plan and the cited evidence directory exists; \u00a72 carries no href to resolve.",
+    "done_when": "pass \u2014 every \u00a72 bullet states an observable record, and the section declares two negative controls: a family planted with a divergent member and a model answer that alters a shared part.",
+    "evidence_paths": "pass \u2014 the wording census and the gate log are committed under docs/evidence/fragments/sn-definitions-by-construction/, a durable repository path, on a compute partition.",
+    "naming": "pass \u2014 \u00a72 introduces no code-facing name, and its text carries no ticket number, version tag or stage label.",
+    "reasoning": "a finding \u2014 \u00a72 line 65 requires a definition whose shared part was altered to be refused before storage by a test driving the writer's own entry point, but the writer's conformance path rewrites the shared part and then persists it, so nothing is refused on that path.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, definitions rendered from one stored wording; the ten-name review control validates that same deliverable rather than adding a second.",
+    "wiring": "pass \u2014 \u00a72 is declared in plan-section-depends-on as a dependency of s6, and the species-population decision it waits on is recorded in the plan's Decisions block."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "7d51e6ec2c9f29b40e9920ebc4c881c09395ba0c0bc910e8f4584d98619f54e7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "87e587eb4a25dafd61a783961966692c2c164331ce6bd9b665b27bf3ec18c746",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "3bf8397e4c0fcbca018b6aee9f5b466ded384549e74817c22de7ef17c95be780"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T11:27:15.572410+00:00",
+  "total": null
+}
