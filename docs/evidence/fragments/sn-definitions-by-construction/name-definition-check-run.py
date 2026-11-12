@@ -34,6 +34,7 @@ SECOND_READING = (
 )
 CATALOG = Path("/home/ITER/mcintos/Code/imas-standard-names-catalog/standard_names")
 OUT = Path(__file__).with_name("name-definition-check-results.json")
+JUDGMENT_ANSWERS = Path(__file__).with_name("name-definition-judgment-answers.json")
 
 # The split seed and the stratified draw. Committed before the check was
 # shaped, so the held-out names were fixed before any rule was written.
@@ -169,6 +170,156 @@ def abstract_parent_census(names: list[dict]) -> dict:
     }
 
 
+JUDGMENT_CHECK = "definition_qualifier_absent_from_name"
+
+
+def judgment_items(rows: list[dict]) -> list[dict]:
+    """One judgment item per labelled name, carrying the evidence it reads."""
+
+    return [
+        {
+            "id": row["name"],
+            "description": row["description"],
+            "documentation": row["documentation"],
+            "unit": row["unit"],
+        }
+        for row in rows
+    ]
+
+
+def derived_children(names: set[str]) -> dict[str, list[str]]:
+    """The pipeline's own derived-parent state, read from the graph.
+
+    A derived parent abstracts over its accepted ``HAS_PARENT`` children, so
+    the parent relation is read here rather than inferred from the definition's
+    prose. One bounded query over the named cohort; a name with no children is
+    absent from the mapping, which is observed-and-empty rather than unknown.
+    """
+
+    from imas_codex.graph.client import GraphClient
+
+    rows = GraphClient().query(
+        "MATCH (parent:StandardName)<-[:HAS_PARENT]-(child:StandardName) "
+        "WHERE parent.id IN $names "
+        "RETURN parent.id AS id, collect(child.id) AS children",
+        names=sorted(names),
+    )
+    return {row["id"]: row["children"] for row in rows}
+
+
+async def judge(rows: list[dict], *, concurrency: int = 8) -> dict[str, dict]:
+    """Ask the taxonomy's judgment question of each name on the review seat.
+
+    The state is the one the review builds: the name with its grammar parse
+    (``decomposition``) and segments, the description, the documentation and
+    the unit, plus the derived-parent evidence the pipeline already carries.
+    The question is the taxonomy's own, rendered by the review's helper, so the
+    measurement asks exactly what review asks.
+    """
+
+    from imas_codex.discovery.base.judgment import decide_batch
+    from imas_codex.settings import get_model
+    from imas_codex.standard_names.review.checks import load_review_checks
+    from imas_codex.standard_names.review.jev_review import (
+        SERVICE,
+        _question_def,
+        build_name_state,
+        neighbourhood_fields,
+    )
+
+    checks = load_review_checks()[0]
+    checks = list(checks) if not isinstance(checks, list) else checks
+    check = next(c for c in checks if c.id == JUDGMENT_CHECK)
+    questions = {f"check:{JUDGMENT_CHECK}": _question_def(check.question)}
+
+    extra = ("derived_children", "parent_description")
+    neighbourhood = tuple(neighbourhood_fields(checks)) + extra
+    items = judgment_items(rows)
+    derived = derived_children({item["id"] for item in items})
+    for item in items:
+        item["derived_children"] = derived.get(item["id"], [])
+    states = [build_name_state(item, neighbourhood=neighbourhood) for item in items]
+
+    results, cost = await decide_batch(
+        states,
+        questions,
+        model=get_model("sn-judge"),
+        service=SERVICE,
+        concurrency=concurrency,
+    )
+    answers: dict[str, dict] = {}
+    for row, result in zip(rows, results, strict=True):
+        answers[row["name"]] = (result[0] and result[0].get(f"check:{JUDGMENT_CHECK}")) or None
+    return {"answers": answers, "cost_usd": cost}
+
+
+def judgment_arm(rows: list[dict], answers: dict[str, dict]) -> dict:
+    """Score the judgment's verdicts against one arm of the labels."""
+
+    mismatched = [row for row in rows if row["class_under_ruling"] != "agrees"]
+    agreeing = [row for row in rows if row["class_under_ruling"] == "agrees"]
+
+    def verdict(row: dict) -> str | None:
+        answer = answers.get(row["name"])
+        if not answer:
+            return None
+        return answer.get("choice")
+
+    def flagged(row: dict) -> bool:
+        return verdict(row) not in (None, "agrees")
+
+    caught = [row for row in mismatched if flagged(row)]
+    flagged_agreeing = [row for row in agreeing if flagged(row)]
+    unanswered = [row["name"] for row in rows if verdict(row) is None]
+    by_pattern: dict[str, dict] = {}
+    for row in mismatched:
+        bucket = by_pattern.setdefault(
+            row.get("pattern") or "-", {"mismatched": 0, "found": 0}
+        )
+        bucket["mismatched"] += 1
+        if flagged(row):
+            bucket["found"] += 1
+    return {
+        "names": len(rows),
+        "answered": len(rows) - len(unanswered),
+        "unanswered": unanswered,
+        "mismatched": len(mismatched),
+        "mismatched_found": len(caught),
+        "recall": round(len(caught) / len(mismatched), 3) if mismatched else None,
+        "agreeing": len(agreeing),
+        "agreeing_flagged": len(flagged_agreeing),
+        "false_flag_rate": (
+            round(len(flagged_agreeing) / len(agreeing), 3) if agreeing else None
+        ),
+        "by_pattern": dict(sorted(by_pattern.items())),
+        "mismatched_missed": [
+            {
+                "name": row["name"],
+                "pattern": row.get("pattern"),
+                "verdict": verdict(row),
+            }
+            for row in mismatched
+            if not flagged(row)
+        ],
+        "agreeing_flagged_names": [
+            {"name": row["name"], "verdict": verdict(row)} for row in flagged_agreeing
+        ],
+    }
+
+
+def derived_parent_census(names: list[dict]) -> dict:
+    """How many published names are derived parents, from the graph state."""
+
+    try:
+        children = derived_children({name["id"] for name in names})
+    except Exception as exc:  # noqa: BLE001 - the census is not a gate
+        return {"unavailable": f"{type(exc).__name__}: {exc}"}
+    return {
+        "published_names_with_derived_children": len(children),
+        "names": sorted(children),
+    }
+
+
 def disposition(row: dict) -> str:
     """The disposition a flagged name is given, from its qualifier family."""
 
@@ -182,6 +333,30 @@ def disposition(row: dict) -> str:
     return "rewrite-the-definition"
 
 
+def _union(rows: list[dict], judgment: dict[str, dict]) -> dict:
+    """The delivered check: the deterministic pass or the judgment, whichever fires."""
+
+    def flagged(row: dict) -> bool:
+        verdict = (judgment.get(row["name"]) or {}).get("choice")
+        return bool(name_definition_agreement_check(row)) or verdict not in (
+            None,
+            "agrees",
+        )
+
+    mismatched = [row for row in rows if row["class_under_ruling"] != "agrees"]
+    agreeing = [row for row in rows if row["class_under_ruling"] == "agrees"]
+    found = sum(1 for row in mismatched if flagged(row))
+    flagged_agreeing = sum(1 for row in agreeing if flagged(row))
+    return {
+        "mismatched": len(mismatched),
+        "mismatched_found": found,
+        "recall": round(found / len(mismatched), 3),
+        "agreeing": len(agreeing),
+        "agreeing_flagged": flagged_agreeing,
+        "false_flag_rate": round(flagged_agreeing / len(agreeing), 3),
+    }
+
+
 def main() -> None:
     labelled = json.loads(LABELS.read_text())
     rows = labelled["rows"]
@@ -190,6 +365,15 @@ def main() -> None:
 
     dev_arm = arm(dev)
     held_arm = arm(held)
+
+    # The frozen judgment's verdicts, scored against the same splits. It was
+    # shaped on the development third, frozen, then scored on the held-out two
+    # thirds -- the second time those rows were scored, after the lexical check
+    # whose first scoring is why the judgment exists.
+    recorded = json.loads(JUDGMENT_ANSWERS.read_text())["by_name"]
+    judgment = {name: value for name, value in recorded.items()}
+    dev_judgment = judgment_arm(dev, judgment)
+    held_judgment = judgment_arm(held, judgment)
 
     # The names the two readers disagree on, scored separately on the first
     # reader's ruling column. The second reading joins through the draw's
@@ -255,6 +439,9 @@ def main() -> None:
         },
         "development_arm": dev_arm,
         "held_out_arm": held_arm,
+        "development_arm_judgment": dev_judgment,
+        "held_out_arm_judgment": held_judgment,
+        "held_out_arm_union": _union(held, judgment),
         "readers_disagree": {
             "names_scored": len(disagreeing),
             "flagged": [row["name"] for row in disagreeing if flag(row)],
@@ -270,15 +457,23 @@ def main() -> None:
         "gate": {
             "recall_floor": RECALL_FLOOR,
             "false_flag_ceiling": FALSE_FLAG_CEILING,
-            "recall": held_arm["recall"],
-            "false_flag_rate": held_arm["false_flag_rate"],
-            "met": bool(
-                held_arm["recall"] is not None
-                and held_arm["recall"] >= RECALL_FLOOR
-                and held_arm["false_flag_rate"] is not None
-                and held_arm["false_flag_rate"] <= FALSE_FLAG_CEILING
+            "deterministic_arm": {
+                "recall": held_arm["recall"],
+                "false_flag_rate": held_arm["false_flag_rate"],
+            },
+            "judgment_arm": {
+                "recall": held_judgment["recall"],
+                "false_flag_rate": held_judgment["false_flag_rate"],
+            },
+            "delivered_check_union": _union(held, judgment),
+            "met": False,
+            "met_reason": (
+                "the delivered check is the deterministic first pass or the "
+                "frozen judgment, whichever fires; neither reaches the 80 % "
+                "recall floor on the held-out third"
             ),
         },
+        "abstract_parent_state": derived_parent_census(catalog),
     }
     OUT.write_text(json.dumps(result, indent=1) + "\n")
     print(json.dumps({k: result[k] for k in ("development_arm", "held_out_arm", "gate")}, indent=1))

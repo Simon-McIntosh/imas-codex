@@ -146,4 +146,74 @@
     check so the planted normalisation is not read; two tests fail and the gate
     log records <code>EXIT=1</code>.
   </p>
+<h3>The judgment, and the second scoring of the held-out third</h3>
+
+  <p>
+    The section's decision was to make this a judgment rather than a lexical
+    rule, so the taxonomy now carries a second entry beside the deterministic
+    one: <code>definition_qualifier_absent_from_name</code>, a typed Choice read
+    by the configured review seat (<code>sn-judge</code>) over the name with its
+    grammar parse and segments, the one-line description, the documentation, the
+    unit and the pipeline's own derived-parent evidence
+    (<code>derived_children</code>, read from <code>HAS_PARENT</code>). Its
+    options are the six forms the definition can add plus <code>agrees</code>. A
+    name is flagged by the delivered check when the cheap deterministic pass
+    finds a qualifier or the judgment answers anything but <code>agrees</code>.
+  </p>
+
+  <p>
+    <strong>The held-out third was scored twice, deliberately.</strong> The first
+    scoring measured the frozen lexical check and is what showed a lexical rule
+    cannot carry the umbrella and narrowed-object classes. The lead then directed
+    that the check become a judgment, so the same held-out rows were scored a
+    second time — against a judgment shaped on the development third only, frozen
+    before that second scoring, with no held-out row read while the question was
+    written. The second scoring is therefore a genuine hold-out result for the
+    judgment, and not a tuning set: the judgment's question text was never
+    changed after the first held-out reading.
+  </p>
+
+  <table>
+    <thead><tr><th>Arm, held-out two thirds</th><th>Mismatched found</th><th>Recall</th><th>Agreeing flagged</th><th>False-flag rate</th></tr></thead>
+    <tbody>
+      <tr><td>deterministic first pass</td><td>14 / 47</td><td>0.298</td><td>11 / 207</td><td>0.053</td></tr>
+      <tr><td>frozen judgment</td><td>16 / 47</td><td>0.340</td><td>17 / 207</td><td>0.082</td></tr>
+      <tr><td><strong>delivered check (either fires)</strong></td><td><strong>28 / 47</strong></td><td><strong>0.596</strong></td><td><strong>27 / 207</strong></td><td><strong>0.130</strong></td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    The floor of 80 % recall is <strong>not met</strong> by any arm and the
+    union's false-flag rate is above the 10 % ceiling. What the judgment can and
+    cannot read is the per-pattern table at
+    <code>held_out_arm_judgment.by_pattern</code> in the results file: it finds
+    <strong>9 of 13</strong> umbrella parents — the class the lexical rule could
+    not read at all — and <strong>0 of 5</strong> definitions narrowed to one
+    object, 2 of 7 unstated weightings, 1 of 8 equivalent-electron counts and 0
+    of 2 device-part restrictions. The lexical pass is the stronger reader of
+    equivalent-electron conventions; the judgment is the stronger reader of
+    umbrellas; neither reads a restriction to one object or one layer.
+  </p>
+
+  <h3>Abstract parents, from the pipeline's state</h3>
+
+  <p>
+    Read from <code>HAS_PARENT</code> rather than from prose,
+    <strong>546 of 1,975</strong> published names are derived parents (they have
+    at least one accepted child). Of the 381 labelled names, 107 are derived
+    parents and the judgment finds 9 of the 13 that §4 labelled as umbrellas. The
+    section's requirement — that an abstract parent be published with a
+    definition stating one quantity, or not published — is measurable from this
+    state, and it is what the blocked manifest asks the lead to adjudicate.
+  </p>
+
+  <h3>The names the two readers disagree on</h3>
+
+  <p>
+    The judgment was also run on the 15 names where the two readers disagree,
+    scored on the first reader's ruling column: it flags <strong>4 of 15</strong>
+    (3 of the 4 the first reader calls mismatched), naming five
+    <code>family-of-quantities</code> and ten <code>agrees</code>. Under the
+    delivered union 4 of 15 are flagged.
+  </p>
 </section>
