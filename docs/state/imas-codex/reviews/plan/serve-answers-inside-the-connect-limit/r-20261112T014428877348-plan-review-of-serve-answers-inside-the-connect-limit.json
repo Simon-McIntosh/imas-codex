@@ -74,6 +74,13 @@
       "finding": "reuse_search-2",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the existing warm-up deferral, which the brief tells the node to keep as the only deferral path)",
       "when": "2026-11-12T02:04:38.577825+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "reuse_search-3",
+      "reason": "the named import sites are inputs to the 90 % attribution record \u00a72 already requires; they go in the brief",
+      "when": "2026-11-12T02:04:50.840044+00:00"
     }
   ],
   "responses": {
@@ -91,6 +98,12 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the existing warm-up deferral, which the brief tells the node to keep as the only deferral path)",
       "when": "2026-11-12T02:04:38.577825+00:00"
+    },
+    "reuse_search-3": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "the named import sites are inputs to the 90 % attribution record \u00a72 already requires; they go in the brief",
+      "when": "2026-11-12T02:04:50.840044+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/serve-answers-inside-the-connect-limit/r-20261112T014428877348-plan-review-of-serve-answers-inside-the-connect-limit.json",
