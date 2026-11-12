@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T06:35:28.632Z",
+  "dispatched_at": "2026-11-12T06:23:55Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-1",
+      "reason": "the sampling clause and the gate population must be reworded (for example, draw across every domain file that holds a name other than the three, and report the three as additional labelled items) or the node cannot satisfy its own gate.",
+      "text": "the first bullet reads \"on at least 60 single-member names drawn across every domain file, safety_factor, greenwald_density and voltage_of_valve among them\", then requires \"the three named names are reported apart from the drawn ones, and the share is higher on the drawn names alone\"; the two clauses disagree about membership of the 60, and under the drawn-only reading the requirement to span every domain file is unsatisfiable because `voltage_of_valve` is the only published name under fueling (\u00a71 of the same plan says it \"stays alone in fueling\", and the operator census records `fueling: 1`), so that domain file has no drawn name it could contribute \u2014 a worker either breaks the span requirement or counts the excluded name in the gate it was told to exclude",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-2",
+      "reason": "the section that changes the option set must record the resulting undecided-family count beside \u00a72's, or \u00a73's gate is exposed to a cost the plan attributes nowhere.",
+      "text": "every gate in \u00a75 reads accuracy and population shares, and none reads how many families fall below the confidence floor once every family is offered every catalog domain, although \u00a72's rule (plan.html:59) reports a below-floor family as undecided and \u00a73 (plan.html:67) routes each undecided family to the lead for a named correction before it can reach the zero-split gate; widening a choice from roughly five candidates to every catalog domain flattens the answer distribution, so \u00a75 can pass all eight bullets while making \u00a73's zero-split endpoint unreachable one lead ruling at a time",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "75ea58b386bc47cbdaddb7c20bf2e2ff75918075",
+  "plan_fingerprint": "bcf9f2761e7e3c0548b8b92f6c78f8d02664c8bca31912dcf0162e60cd58ba0a",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T062247908148-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "ad0cec0fa993cf3e5e64597bdfb3ec53c8c1c9af",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-catalog-grouping`'s calibration set resolves at `docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet.json` (150 sampled rows, 73 calibration), and \"698 of the 1,975\" resolves in `docs/evidence/fragments/sn-definitions-by-construction/published-operator-census.txt` (`names 1975`, `transport: 698`).",
+    "done_when": "two findings \u2014 the widened-option gate on plan.html:92 excludes the three named names from the drawn set while requiring that set to span every domain file, which fueling cannot supply; and no bullet reads how many families fall below the confidence floor under the widened options.",
+    "evidence_paths": "pass \u2014 the label set and the gate log are committed under `docs/evidence/fragments/sn-domain-per-family/` (present in the tree), not a scratch or node-local path.",
+    "naming": "pass \u2014 \u00a75 names no file, symbol or function, and carries no plan label, stage name or ticket number.",
+    "reasoning": "pass \u2014 the stated root cause matches the recorded evidence (`safety_factor` carries `source_domains: [\"transport\"]` in docs/evidence/fragments/sn-catalog-grouping/scg-domain-incumbent.json, so bounding the options to its source domains does bind it to transport), the delivered readings are obtainable (single-member families number in the hundreds across 28 occupied domains, and 73 calibration rows exist to re-read), and the section states an option set as its endpoint rather than prescribing a code path or sequence.",
+    "single_goal": "pass \u2014 \u00a75 delivers one change, the option set of the one family decision \u00a72 builds, and states that it adds no second decision.",
+    "wiring": "pass \u2014 \u00a75 declares `depends-on` `sn-domain-per-family#s2` and the followup body (plan.html:98) says \u00a75 waits for \u00a72 and \u00a73 waits for \u00a72 and \u00a75, matching `plan-section-depends-on` where s3 names both; no missing dependency and no wrong target."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "e374d958c4cb02c7ca4fb0bd10cf955e67a2db108246fdce729094bd09570c8c",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "f5f8f9829cd93889855426098bd7a8bac5ff44d99c7c9f2f2d94c1e4197f26cc"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T07:16:10.013794+00:00",
+  "total": null
+}
