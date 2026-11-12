@@ -97,6 +97,39 @@ EXIT=0</pre>
 <li>The two regimes differ in kind: the written scores are Jev-deciding decisions, the earlier scores are quorum means from the reviewer chain. Only the six graded written scores are compared, and even those were decided by one judgment rather than a quorum.</li>
 <li>The writer run reported twelve of the fifteen names present in the published catalog; the other three were seeded from the name alone, so their descriptions are not the catalog's.</li>
 </ul>
+<h4>Two arms under one review context</h4>
+
+<p>The first review ran on a disposable graph that carried only the fifteen names, which is why the earlier record called its verdicts a lower bound. That context is now built: a disposable Neo4j was seeded read-only from the project graph with the catalog slice the review reads — 5,497 <code>StandardName</code> rows with their scored review scores and physical bases, 10,158 <code>StandardNameSource</code> rows and 6,733 <code>PRODUCED_NAME</code> edges — and two arms ran in that one instance under the same route: the fifteen definitions this change rendered, and the fifteen definitions the catalog publishes for the same names. The project graph was not written.</p>
+
+<table>
+<thead><tr><th>Arm</th><th>Reviewed</th><th>Accept</th><th>Refine</th><th>Neither</th></tr></thead>
+<tbody>
+<tr><td>Rendered definitions</td><td>15</td><td>6</td><td>9</td><td>0</td></tr>
+<tr><td>Published definitions (control)</td><td>15</td><td>11</td><td>0</td><td>4</td></tr>
+</tbody>
+</table>
+
+<p>The four names the published arm does not decide are the three with no published row plus <code>line_integrated_electron_density</code>; the cascade recorded <code>single_review</code> for each rather than accept or refine.</p>
+
+<p><strong>The rendered arm passes fewer names than the control, so every shortfall is listed with the review's stated reason.</strong> Six names are accepted on their published definition and refined on their rendered one:</p>
+
+<table>
+<thead><tr><th>Name</th><th>Rendered route</th><th>physics_accuracy</th><th>completeness</th><th>documentation_quality</th><th>Hold</th></tr></thead>
+<tbody>
+<tr><td><code>argon_density</code></td><td>refine</td><td>0.9</td><td>2.8</td><td>15.7</td><td>—</td></tr>
+<tr><td><code>boron_density</code></td><td>refine</td><td>1.5</td><td>5.6</td><td>16.5</td><td>—</td></tr>
+<tr><td><code>iron_density</code></td><td>refine</td><td>2.2</td><td>6.2</td><td>16.4</td><td>—</td></tr>
+<tr><td><code>line_averaged_argon_density</code></td><td>refine</td><td>4.1</td><td>4.0</td><td>11.5</td><td><code>DD source text unavailable</code></td></tr>
+<tr><td><code>neon_density</code></td><td>refine</td><td>1.2</td><td>5.9</td><td>16.9</td><td>—</td></tr>
+<tr><td><code>volume_averaged_argon_density</code></td><td>refine</td><td>1.5</td><td>2.6</td><td>15.5</td><td><code>DD source text unavailable</code></td></tr>
+</tbody>
+</table>
+
+<p><strong>Grouping.</strong> None of the nine refined names states a reason that names the rendered shared sentence. The review returns numeric dimension scores rather than prose, and on all six shortfalls the low dimensions are <code>physics_accuracy</code> (0.6 to 4.1) and <code>completeness</code> (2.6 to 6.2), while <code>documentation_quality</code> stays between 11.5 and 17.0. Two names also carry a <code>documentation_contradiction</code> hold whose stated reason is <q>DD source text unavailable</q>, which is a limit of this context build rather than a finding about the definition.</p>
+
+<p><strong>What that does and does not settle.</strong> A numeric dimension score neither names the shared sentence nor clears it. The six shortfalls are exactly the six species densities, and the population sentence is the only text this change added to them, so the shortfall is consistent with that sentence being judged a physics inaccuracy — but that is an inference from which names moved, not something the review said. The remaining three refined names (<code>flux_surface_averaged_electron_density</code>, <code>flux_surface_averaged_electron_temperature</code>, <code>helium_density</code>) are refined in both arms or have no published row, so they are not shortfalls against the control.</p>
+
+<p><strong>Context still missing, in both arms.</strong> None of the fifteen rows carries <code>source_paths</code>, so no <code>IMASNode</code> was copied and the Data Dictionary path context is absent; the DD resolution manifest is absent, which is what produced the two <q>DD source text unavailable</q> holds; and a disposable instance has no vector index, so vector neighbours were empty. Same-base and same-path neighbours and the scored review examples were served from the copied catalog. Both arms review the same names under the same missing context, so the comparison between them holds even though neither matches a fully provisioned live review.</p>
 <h4>Cost of writing one family member</h4>
 
 <table>
@@ -110,7 +143,7 @@ EXIT=0</pre>
 </tbody>
 </table>
 
-<p>Writing one family member costs about USD 0.012, against a published all-axis median of USD 0.152 per name and USD 0.073 for documentation review alone. Total metered spend for the node is USD 0.208 — USD 0.207 of writing and USD 0.0017 of review — against the node's USD 5 ceiling.</p>
+<p>Writing one family member costs about USD 0.012, against a published all-axis median of USD 0.152 per name and USD 0.073 for documentation review alone. Total metered spend for the node is USD 0.331 — USD 0.207 of writing, USD 0.0017 for the first review and USD 0.123 for the two-arm review under the built context — against the node's USD 5 ceiling.</p>
 
 <h3 id="sdbc-rendered-shared-wording-proposal">Wording proposed to the grammar library</h3>
 
