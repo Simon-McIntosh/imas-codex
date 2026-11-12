@@ -41,7 +41,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 11,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "1f83ca4e2eb25922b620b279006e7ee19a7ecee7",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75 now measures on the agreed items by number: 61 of the 70 drawn single names and 37 of the 40 families, with the count left out recorded beside each share",
+      "reason": "",
+      "when": "2026-11-12T09:10:18.984831+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "1f83ca4e2eb25922b620b279006e7ee19a7ecee7",
+      "commit_basis": "edit",
+      "note": "\u00a75 now measures on the agreed items by number: 61 of the 70 drawn single names and 37 of the 40 families, with the count left out recorded beside each share",
+      "reason": "",
+      "when": "2026-11-12T09:10:18.984831+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T083402344519-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T083402344519-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "f1c82b7645b4a1d43941cc57ea007d0fb653647d",
   "rubric": "content",
