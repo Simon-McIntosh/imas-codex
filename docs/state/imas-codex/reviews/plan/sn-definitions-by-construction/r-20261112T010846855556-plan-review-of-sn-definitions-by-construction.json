@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T01:19:53.690Z",
+  "dispatched_at": "2026-11-12T01:11:06Z",
+  "findings": [
+    {
+      "anchor": "plan.html:37",
+      "id": "reasoning-1",
+      "reason": "the divergence \u00a72 exists to remove is twice the stated size, so the claim's basis must be corrected or stated, and a node sizing \u00a72's rewrite from \"seven\" plans for half the work the catalog actually needs.",
+      "text": "\u00a71's second row states \"Seven families have a different wording for every member\", but the cited census (docs/evidence/fragments/sn-definitions-by-construction/published-family-census.txt) lists 14 families whose distinct description templates equal their member count \u2014 pedestal_top 18/18, volume_averaged_density 18/18, <X>_density 17/17, three toroidal-velocity families 17/17 and 16/16, line_averaged_density 16/16 \u2014 and the string \"seven\" occurs nowhere in the census or its script; only an unstated cut at 16 or more members yields exactly seven, so a reader cannot reproduce the number the plan reports",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:23",
+      "id": "wiring-1",
+      "reason": "s5 cannot be measured without s4's labels, and the queue orders only what the plan declares, so the missing edge sends a node to run against an absent input.",
+      "text": "`plan-section-depends-on` declares only s6 on s2\u2013s5 and s5 points at \u00a74 solely through `data-links`, while \u00a75's done-when measures entirely on \"\u00a74's labelled names, with the labels held out\", so the queue has no declaration to order it and a dispatch may launch s5 against labels that do not exist yet",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:87",
+      "id": "done_when-1",
+      "reason": "the done-when is unsatisfiable as written, and a node will either report the plan wrong or count a unit token as an eleventh name and mislabel the record.",
+      "text": "\u00a74's second done-when requires \"the eleven names cited in the last three rows of \u00a71\" to appear in the record, but those three rows cite ten names (five in the qualifier row, three in the narrower-than-name row, two in the abstract-parent row); the eleventh `<code>` token is the unit `s^-1`, so the gate as written asks for a name that does not exist",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+  "plan_fingerprint": "447ee953ee9a5b4a6426740e761a4cdc910bffea070cbc315bfdf60203b1da68",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T010846855556-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "750f924545af84651ef969579ab9e480bf644b02",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the evidence directory resolves with all three wanted scripts present, sn-catalog-consistency \u00a72 resolves and its evidence json carries batch_count 279, and sn-domain-per-family \u00a73 resolves as \"The live names brought to one domain per family\".",
+    "done_when": "a finding \u2014 \u00a74's done-when at plan.html:87 accounts for \"the eleven names cited in the last three rows of \u00a71\", where \u00a71 cites ten names.",
+    "evidence_paths": "pass \u2014 every census and gate log is committed under docs/evidence/fragments/sn-definitions-by-construction/, which exists in the tree with three census scripts and their outputs, and \u00a72's gate names a compute partition.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag appears in a symbol or comment the plan would create, and the prose states mechanisms rather than carrying changelog history.",
+    "reasoning": "a finding \u2014 \u00a71's \"Seven families have a different wording for every member\" is not what the cited family census reports, which is 14 of 20.",
+    "single_goal": "pass \u2014 each of \u00a72\u2013\u00a77 names one deliverable: rendered wording, unit spelling, mismatch census, name-definition check, live rewrite, recut export; \u00a71 is the done measurement section and carries none.",
+    "wiring": "a finding \u2014 \u00a75 is measured on \u00a74's labels and says so in prose, but `plan-section-depends-on` at plan.html:23 carries only s6 and s7, so s5 can be released before s4 lands."
+  },
+  "section_digests": {
+    "_document": "6137bf2a00f8c854d849980be426768756640a93944d09dbce2033f098859522",
+    "s1": "8eb5eab521d38d72938f58ee9893cc5f180419cf4235eac778bbd17b34f80788",
+    "s2": "f018f5aba1222185832b583d13b02418cc9024ea0c1fd7d3dbc11a565daaaeca",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4e56d912c416bef13be65d2a35308cabd86f1f2cd7fa00b3ca4850fe25988876",
+    "s5": "cb6310d0d68b4d5b28e01e9d8721ce31ce9b5971be4d2154ae4addded8d016d4",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "487caa067a5300d4edd98d6b575f9349795e840db7e391456751affd9a862a5c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:25:31.410032+00:00",
+  "total": null
+}
