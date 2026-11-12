@@ -49,7 +49,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 2,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "75ea58b386bc47cbdaddb7c20bf2e2ff75918075",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a73 now routes to the lead any family undecided under the options \u00a75 gives it, whatever it read under \u00a72's narrower options",
+      "reason": "",
+      "when": "2026-11-12T06:20:57.724817+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "75ea58b386bc47cbdaddb7c20bf2e2ff75918075",
+      "commit_basis": "edit",
+      "note": "\u00a73 now routes to the lead any family undecided under the options \u00a75 gives it, whatever it read under \u00a72's narrower options",
+      "reason": "",
+      "when": "2026-11-12T06:20:57.724817+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T060334019272-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T060334019272-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "1452e208aebe00b90df616d6d9a84e6a8305a1d3",
   "rubric": "content",
