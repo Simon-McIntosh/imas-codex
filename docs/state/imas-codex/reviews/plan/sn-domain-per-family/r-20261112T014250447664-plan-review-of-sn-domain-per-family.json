@@ -122,6 +122,16 @@
       "note": "\u00a74 now says the refusal is one more check in the export's existing gate set and adds no command option or second traversal",
       "reason": "",
       "when": "2026-11-12T02:03:05.148556+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "\u00a72 now requires one judgment paid per family, counted, and one stored decision the members read",
+      "reason": "",
+      "when": "2026-11-12T02:03:17.481356+00:00"
     }
   ],
   "responses": {
@@ -160,6 +170,15 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the existing pattern-family assembly)",
       "when": "2026-11-12T02:02:31.446282+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72 now requires one judgment paid per family, counted, and one stored decision the members read",
+      "reason": "",
+      "when": "2026-11-12T02:03:17.481356+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T014250447664-plan-review-of-sn-domain-per-family.json",
