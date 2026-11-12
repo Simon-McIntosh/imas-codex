@@ -1,0 +1,47 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T09:20:06.693Z",
+  "dispatched_at": "2026-11-12T09:15:28Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:66",
+      "id": "done_when-1",
+      "reason": "two capable workers would compute two different verdicts from the same review output, and at n=10 one undecided name is enough to flip \"at least as often\", so the node's only prose-quality measure is not a single measurable condition until the third outcome has a stated treatment.",
+      "text": "the comparison \"the documentation review accepts the written definitions at least as often as the control\" is defined only for accepted-versus-sent-back, but the pipeline's documentation review also returns no judgment at all (`no usable judgment for documentation review`, `imas_codex/standard_names/review/cascade.py:605`) and an export-side quorum shortfall is a recorded outcome (`imas_codex/standard_names/export.py:946`); at ten names per arm a single undecided outcome decides the comparison, and a worker has no rule for whether an undecided name counts against acceptance, is excluded from the denominator, or invalidates the run",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1f83ca4e2eb25922b620b279006e7ee19a7ecee7",
+  "plan_fingerprint": "14a6c457bc70a9492c344a66a6adb7ce012b5848a68202559e8aeae614446491",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 9,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T091416860815-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "f7ddd221623e9cc41a2a4182cc5d34623ff09882",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every evidence path s2 and its neighbours cite exists in that directory, `sn-domain-per-family#s3` resolves, the family census's own counts reconcile with \u00a71, and the species-population decision key resolves.",
+    "done_when": "a finding \u2014 line 66's acceptance comparison names only two review outcomes, while the pipeline's documentation review has a third.",
+    "evidence_paths": "pass \u2014 the wording census and its gate log land in `docs/evidence/fragments/sn-definitions-by-construction/`, a committed repository path, with the gate itself on a compute partition.",
+    "naming": "pass \u2014 the changed bullet introduces no plan label, stage name, ticket number or version tag, and its prose states the mechanism (a rendered shared sentence, a held-out control copy) rather than a tracker reference.",
+    "reasoning": "pass \u2014 the stated cause matches the cited census (restating a canonical phrase, not rendering it, is what the 150 density openings and the 13 non-canonical flux-surface-average equations show), the endpoint is obtainable from the pipeline that exists, and the section prescribes no implementation.",
+    "single_goal": "pass \u2014 s2 delivers one thing, definitions whose shared parts come from one stored wording; the census, the planted-defection test, the review comparison and the cost figure are measures of that one delivery, not a second deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s6 waiting on s2 and s7 on s6, so s2's output is ordered into the write and cut sections, and s2's only external precondition (the species population) is recorded as a ruled decision on the plan rather than left dangling."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "062137d2abde2dd2c5dd9909143f29ac7dd566aaba952aa478be95b8640cb669",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "87e587eb4a25dafd61a783961966692c2c164331ce6bd9b665b27bf3ec18c746",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "3bf8397e4c0fcbca018b6aee9f5b466ded384549e74817c22de7ef17c95be780"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T09:33:17.726173+00:00",
+  "total": null
+}
