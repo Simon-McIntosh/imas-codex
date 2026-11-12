@@ -25,7 +25,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 24,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "68dc7c24382956755071c13c8009035be444dcb4",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 5 now names the listing: the 24 families the chosen option set leaves undecided, in docs/evidence/fragments/sn-domain-per-family/widened-options.json, which the section's node commits.",
+      "reason": "",
+      "when": "2026-11-12T18:17:08.685077+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "68dc7c24382956755071c13c8009035be444dcb4",
+      "commit_basis": "edit",
+      "note": "Section 5 now names the listing: the 24 families the chosen option set leaves undecided, in docs/evidence/fragments/sn-domain-per-family/widened-options.json, which the section's node commits.",
+      "reason": "",
+      "when": "2026-11-12T18:17:08.685077+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T175336956692-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T175336956692-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "62cd064a2cca74a79f9e1b72d5d4c68afabea3ae",
   "rubric": "content",
