@@ -15,6 +15,11 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
+from imas_codex.standard_names.graph_store.graph_claim_release import (
+    _mark_docs_exhausted,
+)
+from tests.recording_graph_client import RecordingGraphClient
+
 #: (eligible_stage, tag) for each writer that reaches the marker.
 WRITERS = [
     ("pending", "docs_generate_refusal"),
@@ -22,9 +27,8 @@ WRITERS = [
 ]
 
 
-class _FakeGraphClient:
-    def __init__(self, calls: list[tuple[str, dict]]):
-        self._calls = calls
+class _ClientContext(RecordingGraphClient):
+    """The shared statement recorder, opened the way the marker opens one."""
 
     def __enter__(self):
         return self
@@ -32,33 +36,27 @@ class _FakeGraphClient:
     def __exit__(self, *exc):
         return False
 
-    def query(self, statement: str, **params):
-        self._calls.append((statement, params))
-        return []
 
+class _RecordingServices:
+    """Services whose graph client is the shared recorder."""
 
-class _FakeServices:
     def __init__(self):
-        self.calls: list[tuple[str, dict]] = []
+        self.client = _ClientContext()
+
+    @property
+    def calls(self) -> list[tuple[str, dict]]:
+        return self.client.calls
 
     def GraphClient(self):  # noqa: N802 - mirrors the services attribute
-        return _FakeGraphClient(self.calls)
-
-
-def _marker(**kwargs):
-    from imas_codex.standard_names.graph_store.graph_claim_release import (
-        _mark_docs_exhausted,
-    )
-
-    return _mark_docs_exhausted
+        return self.client
 
 
 @pytest.mark.parametrize(("eligible_stage", "tag"), WRITERS)
 def test_marker_statement_fences_the_writers_stage_and_records_its_tag(
     eligible_stage: str, tag: str
 ) -> None:
-    services = _FakeServices()
-    _marker()(
+    services = _RecordingServices()
+    _mark_docs_exhausted(
         sn_id="argon_density",
         token="tok-abc",
         error_msg="refused: contradicts the settled wording",
@@ -86,6 +84,11 @@ def test_marker_statement_fences_the_writers_stage_and_records_its_tag(
     assert "sn.docs_hint IS NOT NULL" in statement
     assert "THEN 'exhausted'" in statement
 
+    # The values must be bound to the statement's own parameter names, so a
+    # marker that stopped parameterising a clause cannot pass on the values.
+    for name in ("$sn_id", "$token", "$eligible_stage", "$tag", "$error_msg"):
+        assert name in statement, name
+
     assert params["sn_id"] == "argon_density"
     assert params["token"] == "tok-abc"
     assert params["eligible_stage"] == eligible_stage
@@ -93,9 +96,15 @@ def test_marker_statement_fences_the_writers_stage_and_records_its_tag(
     assert params["error_msg"] == "refused: contradicts the settled wording"
 
 
+def test_statement_capture_is_the_shared_recorder() -> None:
+    """The capture is the shared owner, not a second recorder beside it."""
+
+    assert isinstance(_RecordingServices().client, RecordingGraphClient)
+
+
 def test_marker_bounds_the_recorded_reason() -> None:
-    services = _FakeServices()
-    _marker()(
+    services = _RecordingServices()
+    _mark_docs_exhausted(
         sn_id="argon_density",
         token="tok-abc",
         error_msg="x" * 900,
@@ -180,7 +189,7 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
     async def _answer(model, messages, response_model, service, **kwargs):
         return (answer, 0.01, 100)
 
-    services = _FakeServices()
+    services = _RecordingServices()
     mgr = MagicMock()
     mgr.reserve = MagicMock(return_value=MagicMock())
 
