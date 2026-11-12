@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T08:39:48.303Z",
+  "dispatched_at": "2026-11-12T08:35:45Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:66",
+      "id": "done_when-1",
+      "reason": "the comparison is the section's only quality control, and with the review unnamed a node can pick the circular one, producing a confident pass that measures the change against itself rather than against an independent review.",
+      "text": "the rewritten bullet drops the reference to a named review and to the acceptance vocabulary, saying only that ten names \"are reviewed\" and that the written definitions \"are accepted at least as often as the control\"; the plan's own \u00a76 (line 116) speaks of a \"documentation review score\" against a \"publishing threshold\", so the vocabulary exists and the section no longer uses it, leaving a node free to treat \u00a72's own conformance class \u2014 the check this change introduces \u2014 as the review, which would pass the written definitions and refuse the published ones by construction",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:66",
+      "id": "reasoning-1",
+      "reason": "a node cannot construct the control as written and will either compare against a definition it has already overwritten or stall on a decision the plan does not settle, so the gate either measures nothing or blocks.",
+      "text": "the control is \"the published definition of the same name reviewed in the same run, on the same graph and by the same route\", while \u00a72's preceding bullets write that name's definition by the pipeline on a disposable graph; a definition is stored per name, so writing the new one replaces the published text the control is to be read from, and the section names no snapshot or second seeded copy that would hold both at review time",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "affc144c12b109c6c901c0f926a800f144790b11",
+  "plan_fingerprint": "3fe9ac88d04055f6025ffd36815d9f21da07b7ae9fb4bdb91a01676d97db4d04",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 8,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T083506685090-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "8246aade312439012efa819b842c735487972fa2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited evidence directory and its census files resolve in the worktree, and the plan's extensionless internal links resolve as `<path>.html`.",
+    "done_when": "a finding \u2014 \u00a72's rewritten review bullet says only that ten names \"are reviewed\" and that the written definitions \"are accepted at least as often\", naming neither the review nor what acceptance is, so the review to be run is undefined.",
+    "evidence_paths": "pass \u2014 \u00a72 commits its census and gate log under `docs/evidence/fragments/sn-definitions-by-construction/`, which exists and already holds `published-operator-census.txt` and `published-family-census.txt`.",
+    "naming": "pass \u2014 \u00a72's `flux_surface_averaged`, `volume_averaged`, `line_averaged`, `line_integrated` and `time_derivative` are standard-name operators, and no plan label, ticket number or version tag reaches a symbol or a comment.",
+    "reasoning": "a finding \u2014 the control requires the published definition of a name and the newly written definition of that same name to be reviewed on one graph, but the write that produces the written definition occupies the same slot the published definition was read from, so the named control is not obtainable without a step the plan does not state.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, that the shared parts of a definition are rendered from one stored wording; its operator, family, census, refusal, review and cost bullets all measure that one thing.",
+    "wiring": "pass \u2014 `plan-section-depends-on` declares s5 on s4, s6 on s2\u2013s5 and s7 on s6 plus `sn-domain-per-family#s3`, and every one of those nodes exists in this plan."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "3ef4bef00579155dcec070e7d21225f292e338c8f6da2c43697e90e94985c85f",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "87e587eb4a25dafd61a783961966692c2c164331ce6bd9b665b27bf3ec18c746",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "3bf8397e4c0fcbca018b6aee9f5b466ded384549e74817c22de7ef17c95be780"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:45:59.231225+00:00",
+  "total": null
+}
