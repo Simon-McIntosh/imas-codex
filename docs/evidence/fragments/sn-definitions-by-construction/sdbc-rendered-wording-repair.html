@@ -1,0 +1,58 @@
+<section id="sdbc-rendered-wording-repair" data-node="sdbc-rendered-wording-repair">
+<h2>Repairing the rendered shared wording: terminal states, a tested description, a dead branch</h2>
+
+<p>The shared-wording machinery landed with four gaps: a refusal that never reached a terminal state, a reported class that held nothing, a refine repair with no test of its own, and an unreachable clause in the renderer's removal filter. Each is repaired here; nothing else is added.</p>
+
+<h3 id="sdbc-rendered-wording-repair-terminal">1. A contradiction now ends the attempt</h3>
+
+<p>A definition whose shared part contradicted the settled population was refused before storage — and then both writers released the claim. The refine path reverted the name to <code>reviewed</code>, and the generate path cleared the token and left the name at <code>pending</code>, so a model that contradicted the stored wording on every pass was re-claimed and re-charged on every pass. Both writers now move the name to the terminal <code>docs_stage = 'exhausted'</code> the refine path already uses for a deterministic failure. No second counter is introduced: the terminal state is the existing one, and the bound is one refused answer per name, which is inside the rotation cap the refine pool admits on.</p>
+
+<pre># command: uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_refine_docs_settled_wording.py::test_contradicting_answer_reaches_terminal_state_within_the_bound
+# assertion: stage == 'exhausted' after one model call (bound 3)
+1 passed</pre>
+
+<p>The same contradicting answer fed through three passes reaches the terminal state on the first, costing <b>1 model call</b> against an attempt bound of 3.</p>
+
+<h3 id="sdbc-rendered-wording-repair-hold">2. The class does not hold a name at review — the pre-storage refusal is the guard</h3>
+
+<p><code>shared_part_altered</code> and <code>contradicted_shared_part</code> are raised by <code>conformance_findings</code> and acted on by <code>_refuse_altered_shared_parts</code> before <code>persist_*</code> runs. The set of classes that hold a name at a documentation review is the <code>barring</code> set inside <code>_documentation_conformance_note</code> (<code>worker_tasks/worker_review_docs.py</code>), which carries <code>template_opening</code>, <code>forbidden_equation_variant</code>, <code>forbidden_locus_gloss</code>, <code>locus_definition</code> and <code>non_canonical_equation</code>; the two shared-part classes are not in it, so nothing in the review barring set presents them as a hold.</p>
+
+<p>This node takes the second branch the brief allows and says why: <b>the class does not hold a name at review, and the report does not present it as one.</b> Two reasons. The refusal is pre-storage on this repository's only documentation-writing paths, so text that contradicts a shared part is never stored and cannot arrive at review from them; a review hold would only fire for text another writer produced, and would then hold a name whose stored text this change did not write. And the hold set lives in <code>worker_review_docs.py</code>, outside this node's granted write paths — recorded under <code>outside_scope</code> for the coordinator rather than reached into.</p>
+
+<h3 id="sdbc-rendered-wording-repair-description">3. The refine description repair is tested</h3>
+
+<p>The refine test planted documentation that contradicts the population whatever the description says, so the description repair could be deleted and the test stayed green. A refinement is now driven through <code>process_refine_docs_batch</code> with a description that omits the population and documentation that conforms, and the test reads back what was stored:</p>
+
+<pre># command: uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_refine_docs_settled_wording.py::test_refined_description_carries_the_settled_population
+# stored description: "Number density of argon ions in the plasma. The ions of the
+#   species are counted over all charge states, with neutral atoms excluded."
+1 passed</pre>
+
+<p>Removing the repair from the worker leaves the stored description without either clause and turns this test red.</p>
+
+<h3 id="sdbc-rendered-wording-repair-dead">4. The unreachable clause is removed, and its behaviour pinned</h3>
+
+<p><code>replace_altered_shared_parts</code> skipped a part the text already carried, then filtered each sentence with <code>_collapsed(candidate) == stored or overlap &lt; _COMPETING_OVERLAP</code>. A candidate equal to the stored sentence implies the stored sentence is present in its line, which the skip above has already handled, so the first disjunct can never decide anything. It is removed.</p>
+
+<p>Removal is measured rather than asserted: restoring the clause and re-running the two renderer tests leaves both green (<code>gap4-clause-restored-unchanged.log</code>, <code>EXIT=0</code>), which is what an unreachable branch looks like. The behaviour the clause claimed — a part already stated in its stored wording is left alone rather than re-appended or dropped, and a paraphrase beside it is removed — is pinned by <code>test_a_definition_already_carries_the_stored_wording_is_unchanged</code> and <code>test_a_definition_already_in_the_stored_wording_is_left_untouched</code>.</p>
+
+<h3 id="sdbc-rendered-wording-repair-gate">Gate and negative control</h3>
+
+<pre># command: uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_generate_docs.py tests/standard_names/test_docs_gates.py tests/standard_names/test_refine_docs_settled_wording.py tests/standard_names/test_refine_docs_chain.py tests/standard_names/test_pool_batch_processors.py
+================== 107 passed, 1 warning in 213.61s (0:03:33) ==================
+EXIT=0
+</pre>
+
+<table>
+<thead><tr><th>Mutation (repair removed)</th><th>Test</th><th>Log</th></tr></thead>
+<tbody>
+<tr><td>refusal released to review instead of exhausted</td><td><code>test_contradicting_answer_reaches_terminal_state_within_the_bound</code> <code>FAILED</code></td><td><code>negative-control-refusal-released.log</code></td></tr>
+<tr><td>refine description repair deleted</td><td><code>test_refined_description_carries_the_settled_population</code> <code>FAILED</code></td><td><code>negative-control-description-repair-removed.log</code></td></tr>
+<tr><td>generate-path terminal state deleted</td><td><code>test_refused_first_draft_reaches_the_terminal_state</code> <code>FAILED</code></td><td><code>negative-control-generate-terminal.log</code></td></tr>
+</tbody>
+</table>
+
+<p>Every new test fails with its own repair removed. The section's two-arm documentation review is not re-run here.</p>
+
+<p>The terminal-state repair was first written with the refusal class imported beside the writer it guards, so a provider error raised before that import read an unbound name and the release a transient failure owes the name never ran. The existing release-on-failure test caught it and the class is now imported in the failure handler; that defect and its repair are in the record because the gate above is green only after it.</p>
+</section>
