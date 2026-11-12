@@ -1006,6 +1006,12 @@ def persist_refined_name(
                                  AS predecessor_correction_reason,
                                [source_id IN collect(DISTINCT source.id)
                                 WHERE source_id IS NOT NULL] AS source_ids,
+                               [entry IN collect(DISTINCT {{
+                                  id: source.id, status: source.status
+                                }})
+                                WHERE entry.id IS NOT NULL
+                                  AND coalesce(entry.status, '') = 'stale'
+                                | entry.id] AS stale_source_ids,
                                old.edit_mode AS source_edit_mode,
                                old.name_hint AS source_name_hint,
                                old.docs_hint AS source_docs_hint,
@@ -1074,6 +1080,28 @@ def persist_refined_name(
                 candidate_source_ids = sorted(
                     set(preflight_row.get("source_ids") or [])
                 )
+                # A source whose DD node is removed from the current data
+                # dictionary carries a stale status and can never satisfy a
+                # migration's compare-and-set, so it is excluded from the
+                # cohort rather than blocking a rename of the name's live
+                # sources. It keeps its stale status and its edge to the
+                # retired predecessor; the rename reports it instead. A rename
+                # whose every binding is stale keeps the full cohort, so the
+                # compare-and-set still refuses it with the binding it names.
+                stale_source_ids = sorted(
+                    set(preflight_row.get("stale_source_ids") or [])
+                    & set(candidate_source_ids)
+                )
+                if stale_source_ids and len(stale_source_ids) == len(
+                    candidate_source_ids
+                ):
+                    stale_source_ids = []
+                else:
+                    candidate_source_ids = [
+                        source_id
+                        for source_id in candidate_source_ids
+                        if source_id not in stale_source_ids
+                    ]
                 edit_mode = preflight_row.get("effective_edit_mode", edit_mode)
                 name_hint = preflight_row.get("effective_name_hint", name_hint)
                 docs_hint = preflight_row.get("effective_docs_hint", docs_hint)
@@ -1238,7 +1266,14 @@ def persist_refined_name(
                             // 'applied', mirroring supersede_prior_source_names.
                             old.edit_status = CASE
                                 WHEN coalesce(old.edit_status, '') = 'open'
-                                THEN 'applied' ELSE old.edit_status END
+                                THEN 'applied' ELSE old.edit_status END,
+                            // A source whose DD node is gone from the current
+                            // data dictionary is history rather than a live
+                            // binding: it keeps its stale status and its edge
+                            // to the retired name, and the successor records
+                            // which sources that left behind so a reader of
+                            // the live name can see them.
+                            new.stale_source_ids = $stale_source_ids
 
                         // 4. Migrate inbound HAS_PARENT edges
                         // (child)-[:HAS_PARENT]->(old) → (child)-[:HAS_PARENT]->(new)
@@ -1305,6 +1340,7 @@ def persist_refined_name(
                         edit_requested_at=edit_requested_at,
                         edit_override_edits=edit_override_edits,
                         edit_include_accepted=edit_include_accepted,
+                        stale_source_ids=stale_source_ids,
                         **{
                             f"source_{field}": value
                             for field, value in source_edit_state.items()
@@ -1429,6 +1465,7 @@ def persist_refined_name(
 
     if result:
         row = dict(result[0])
+        row["stale_source_ids"] = list(stale_source_ids)
         logger.debug(
             "persist_refined_name: %s → %s (chain_length=%d)",
             old_name,

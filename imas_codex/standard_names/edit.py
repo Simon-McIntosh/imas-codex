@@ -1895,6 +1895,25 @@ def _bound_source_ids(gc: GraphClient, sn_id: str) -> list[str]:
     return sorted({row["source_id"] for row in rows if row.get("source_id")})
 
 
+#: Marked readback of which bound sources the current data dictionary no
+#: longer realises. A source goes stale when the DD path it points at is
+#: removed, and such a binding can never satisfy a migration's
+#: compare-and-set, so a rename that carried it would refuse a rename that has
+#: nothing wrong with it.
+_STALE_SOURCE_IDS_QUERY = """
+// EDIT_FETCH_STALE_SOURCE_IDS
+MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn:StandardName {id: $id})
+WHERE coalesce(source.status, '') = 'stale'
+RETURN source.id AS source_id
+"""
+
+
+def _stale_source_ids(gc: GraphClient, sn_id: str) -> set[str]:
+    """The stale bound sources of ``sn_id`` at read time."""
+    rows = gc.query(_STALE_SOURCE_IDS_QUERY, id=sn_id)
+    return {row["source_id"] for row in rows if row.get("source_id")}
+
+
 def _carry_rename_sources(
     gc: GraphClient,
     *,
@@ -1932,9 +1951,38 @@ def _carry_rename_sources(
     names is its own defect, so the predecessor must claim none of them.
 
     Returns the receipt line describing what was carried.
+
+    A binding whose data-dictionary path has been removed carries a stale
+    status and can never satisfy a migration's compare-and-set. It is not
+    carried and does not count as a shortfall: it stays recorded against the
+    predecessor it produced, with the status that says its path is gone, and
+    the receipt names it so the reader of the live name knows what the
+    dictionary took away.
     """
     if not expected_source_ids:
         return f"no producing source bound to {old_name!r} — nothing to carry"
+
+    # A binding whose DD path the current data dictionary no longer realises
+    # cannot be carried: the migration's compare-and-set refuses a stale
+    # source, and refusing every rename of a name that once sat on a removed
+    # path would punish the name for the dictionary's history. It stays where
+    # it is — recorded against the retired spelling with its stale status —
+    # and the receipt names it.
+    stale = sorted(_stale_source_ids(gc, old_name) & set(expected_source_ids))
+    stale_note = (
+        f"; {len(stale)} stale binding(s) stay with {old_name!r}, their "
+        f"data-dictionary path removed: {', '.join(stale)}"
+        if stale
+        else ""
+    )
+    expected_source_ids = [
+        source_id for source_id in expected_source_ids if source_id not in stale
+    ]
+    if not expected_source_ids:
+        return (
+            f"no live producing source bound to {old_name!r} — nothing to carry"
+            f"{stale_note}"
+        )
 
     held = set(_bound_source_ids(gc, new_name))
     stranded = [source_id for source_id in expected_source_ids if source_id not in held]
@@ -1983,9 +2031,12 @@ def _carry_rename_sources(
     if carried:
         return (
             f"carried {len(expected_source_ids)} producing source(s) to "
-            f"{new_name!r} ({carried} by explicit migration)"
+            f"{new_name!r} ({carried} by explicit migration){stale_note}"
         )
-    return f"verified {len(expected_source_ids)} producing source(s) on {new_name!r}"
+    return (
+        f"verified {len(expected_source_ids)} producing source(s) on "
+        f"{new_name!r}{stale_note}"
+    )
 
 
 def _fold_target_paths(
