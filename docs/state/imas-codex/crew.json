@@ -1,5 +1,5 @@
 {
-  "updated": "2026-11-12T08:29:51",
+  "updated": "2026-11-12T19:11:09",
   "project": "imas-codex",
   "doc": "crew",
   "data": {
@@ -187295,16 +187295,16 @@
         "backend": "codex",
         "purpose": "dispatch",
         "opened_at": "2026-11-12T07:29:46Z",
-        "closed_at": null,
-        "held_seconds": null,
+        "closed_at": "2026-11-12T18:11:06Z",
+        "held_seconds": 38480,
         "utilisation_pct": 100.0,
         "resets_at": "2026-11-14T15:28:13Z",
         "effective_ceiling_pct": 100.0,
         "reason": "utilisation 100% with burn multiple 1.5x and projected exhaustion 2026-11-13T20:49:13Z is at or above the 100.0% ceiling for a dispatch; the account surface was read at 2026-11-12T07:29:44Z and is the operative reading Resolve with `reckon crew budget --check`, then `reckon crew dispatch`; for an existing blocked run, use `reckon crew resume --ready`.",
-        "closed_by_purpose": null,
+        "closed_by_purpose": "resume",
         "resumption_fired": false
       }
     ],
-    "_version": 2520
+    "_version": 2521
   }
 }
