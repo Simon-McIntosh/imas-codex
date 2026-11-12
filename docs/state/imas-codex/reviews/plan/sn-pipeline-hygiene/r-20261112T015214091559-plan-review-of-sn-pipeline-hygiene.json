@@ -35,9 +35,28 @@
       "note": "\u00a71's opening now says thirteen ids were recorded as failing on main on 2026-11-11 and that re-measurement found some already green at base and one skipping.",
       "reason": "",
       "when": "2026-11-12T02:34:18.744768+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "9e021e9829894702aa400d9bd06ae75f1c0d307f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a71's reconstruction branch now requires every calibrated value of the committed thresholds to rebuild unchanged, with the recorded source path exempt.",
+      "reason": "",
+      "when": "2026-11-12T02:34:26.377771+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "9e021e9829894702aa400d9bd06ae75f1c0d307f",
+      "commit_basis": "edit",
+      "note": "\u00a71's reconstruction branch now requires every calibrated value of the committed thresholds to rebuild unchanged, with the recorded source path exempt.",
+      "reason": "",
+      "when": "2026-11-12T02:34:26.377771+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
