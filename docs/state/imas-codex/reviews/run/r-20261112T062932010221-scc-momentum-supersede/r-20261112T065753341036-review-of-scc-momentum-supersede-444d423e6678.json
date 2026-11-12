@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T07:16:43.960Z",
+  "dispatched_at": "2026-11-12T07:01:50Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/scc-momentum-supersede/docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede-run.py",
+      "line": "447",
+      "severity": "non-blocking",
+      "text": "main() prints EXIT=<code> but never calls sys.exit, so the process always exits 0 and the sbatch wrapper's EXIT= line reads 0 even after an assertion or CLI failure, as fold-064016.log shows with EXIT=1 followed by EXIT=0."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062932010221-scc-momentum-supersede/manifest.md",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "the tests line carries the unsubstituted placeholder cd <worktree> and lists --phase census-before and --phase assemble, neither present in the cited logs, so the gate receipt promotion derives from it names a command that never ran."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/scc-momentum-supersede/docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede-run.py",
+      "line": "124",
+      "severity": "non-blocking",
+      "text": "snapshot() re-implements the nodes, sources and reviews graph reads that live_records() already provides at scc-momentum-tip-run.py:59 in the sibling instrument this file already imports, rather than extending that owner."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/scc-momentum-supersede/docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede-run.py",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "the module docstring names phases --pre, --preview, --apply, --post, --census and --control, which are not the implemented --phase values (pre, unblock-preview, unblock, baseline, preview, apply, post, census-before, census-after, control, assemble), so the reproduction note misleads a reader re-running it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062932010221-scc-momentum-supersede/manifest.md",
+      "line": "62",
+      "severity": "non-blocking",
+      "text": "the node applied sn remove-lineage to clear an unbacked successor edge, a signed write the plan's section 4 ruling does not authorise; it is disclosed for coordinator ratification and reversing it restores the edge that blocks the fold."
+    },
+    {
+      "file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/scc-momentum-supersede/docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede.html",
+      "line": "51",
+      "severity": "non-blocking",
+      "text": "the prose \"one edge before the fold, none between the fold and the write\" inverts the recorded order, since the lineage removal preceded the fold and checks.json records loser_incoming_successors_before as the empty set at the baseline reading."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit (0a8dad849 instrument, 8acae47ec unblock arm, 444d423e6 assembled evidence) against base 561b7380f792e6e29ba7605e0197f220eb84352c: 947 added lines across the three declared files, no product source and no test file is touched.",
+    "done_when": "the done_when names a previewed signed supersede with one receipt-stamped successor edge, the loser's sources and paid reviews kept, a census reporting one live tip and no new cycle, and a planted two-tip control; the gate logs record all four (fold3-064649.log: CONTROL two_tip live_tips=2; scc-momentum-supersede.json census.after lineage_live_tip_count=1, cycle_components=0).",
+    "goal": "the reviewed goal is to supersede toroidal_momentum_diffusion_coefficient onto toroidal_plasma_momentum_diffusivity under the lead's ruling; scc-momentum-supersede.json:130-160 records the applied fold with writer=edit.supersede_into and the survivor carrying the loser's core_transport/model/profiles_1d/momentum_phi/d binding.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062932010221-scc-momentum-supersede/manifest.md; it states status complete, names fold3-064649.log and fold-064016.log, and records the fold, the carried binding, the kept reviews and both census readings, but carries no baseline_suite or after_suite block and its tests line at line 31 is not the command either cited log ran.",
+    "write_paths": "the declared paths are scc-momentum-supersede-run.py, scc-momentum-supersede.json, scc-momentum-supersede.html and docs/figures/sn-catalog-consistency/scc-momentum-supersede; git diff --stat 561b7380f..444d423e6 touches exactly the first three and no figure, so every changed path is inside the declaration."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed goal is to supersede toroidal_momentum_diffusion_coefficient onto toroidal_plasma_momentum_diffusivity under the lead's ruling; scc-momentum-supersede.json:130-160 records the applied fold with writer=edit.supersede_into and the survivor carrying the loser's core_transport/model/profiles_1d/momentum_phi/d binding.\nVERDICT done_when: the done_when names a previewed signed supersede with one receipt-stamped successor edge, the loser's sources and paid reviews kept, a census reporting one live tip and no new cycle, and a planted two-tip control; the gate logs record all four (fold3-064649.log: CONTROL two_tip live_tips=2; scc-momentum-supersede.json census.after lineage_live_tip_count=1, cycle_components=0).\nVERDICT write_paths: the declared paths are scc-momentum-supersede-run.py, scc-momentum-supersede.json, scc-momentum-supersede.html and docs/figures/sn-catalog-consistency/scc-momentum-supersede; git diff --stat 561b7380f..444d423e6 touches exactly the first three and no figure, so every changed path is inside the declaration.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062932010221-scc-momentum-supersede/manifest.md; it states status complete, names fold3-064649.log and fold-064016.log, and records the fold, the carried binding, the kept reviews and both census readings, but carries no baseline_suite or after_suite block and its tests line at line 31 is not the command either cited log ran.\nVERDICT diff: read commit by commit (0a8dad849 instrument, 8acae47ec unblock arm, 444d423e6 assembled evidence) against base 561b7380f792e6e29ba7605e0197f220eb84352c: 947 added lines across the three declared files, no product source and no test file is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede.json:104-160 shows the fold applied with the sealed receipt, one edge stamped edit.supersede_into, the survivor at three DD paths and the loser's four reviews intact.\nSCORE evidence: 14\nJUSTIFICATION evidence: the gate's own logs reconcile with the fragment (fold3-064649.log: census-after CAPTURE names=5497 edges=1770 and CONTROL two_tip live_tips=2), but the manifest's tests line at manifest.md:31 carries an unsubstituted <worktree> placeholder and lists phases no cited log contains, and no log records the assemble phase that produced the committed JSON.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat 561b7380f..444d423e6 lists only the three declared fragment files, and the figure directory the scope permits is correctly left unwritten because the done-when names no artifact.\nSCORE durability: 10\nJUSTIFICATION durability: run.py:169-218 asserts the post-fold graph state and the reused disposable control at run.py:383 plants a planted two-tip lineage, but run.py:447 prints EXIT=<code> without exiting with it, so fold-064016.log ends with a script EXIT=1 followed by a wrapper EXIT=0 and a failing run reports success to any reader of the last line.\nSCORE fit: 15\nJUSTIFICATION fit: element ids in scc-momentum-supersede.html:8-12 are node-prefixed and the fragment follows the sibling evidence convention, but run.py:13 documents phase names (--pre, --census) that no --phase value implements.\nSCORE reuse: 12\nJUSTIFICATION reuse: the census instrument and the tip control are imported from their owners rather than re-derived (run.py:221-231), but snapshot() at run.py:124-165 re-reads the StandardName, source and review state that live_records() already provides in docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip-run.py:59.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/scc-momentum-supersede/docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede-run.py:447 non-blocking: main() prints EXIT=<code> but never calls sys.exit, so the process always exits 0 and the sbatch wrapper's EXIT= line reads 0 even after an assertion or CLI failure, as fold-064016.log shows with EXIT=1 followed by EXIT=0.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062932010221-scc-momentum-supersede/manifest.md:31 non-blocking: the tests line carries the unsubstituted placeholder cd <worktree> and lists --phase census-before and --phase assemble, neither present in the cited logs, so the gate receipt promotion derives from it names a command that never ran.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/scc-momentum-supersede/docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede-run.py:124 non-blocking: snapshot() re-implements the nodes, sources and reviews graph reads that live_records() already provides at scc-momentum-tip-run.py:59 in the sibling instrument this file already imports, rather than extending that owner.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/scc-momentum-supersede/docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede-run.py:13 non-blocking: the module docstring names phases --pre, --preview, --apply, --post, --census and --control, which are not the implemented --phase values (pre, unblock-preview, unblock, baseline, preview, apply, post, census-before, census-after, control, assemble), so the reproduction note misleads a reader re-running it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T062932010221-scc-momentum-supersede/manifest.md:62 non-blocking: the node applied sn remove-lineage to clear an unbacked successor edge, a signed write the plan's section 4 ruling does not authorise; it is disclosed for coordinator ratification and reversing it restores the edge that blocks the fold.\nFINDING /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/scc-momentum-supersede/docs/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede.html:51 non-blocking: the prose \"one edge before the fold, none between the fold and the write\" inverts the recorded order, since the lineage removal preceded the fold and checks.json records loser_incoming_successors_before as the empty set at the baseline reading.",
+  "review_run_id": "r-20261112T065753341036-review-of-scc-momentum-supersede-444d423e6678",
+  "reviewed_base_sha": "561b7380f792e6e29ba7605e0197f220eb84352c",
+  "reviewed_head_sha": "444d423e6678b8d60af99ca9a255dc4fc65d9961",
+  "reviewed_run_id": "r-20261112T062932010221-scc-momentum-supersede",
+  "scores": {
+    "durability": 10,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T07:19:52.503893+00:00",
+  "total": 87
+}
