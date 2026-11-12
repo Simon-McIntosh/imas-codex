@@ -1,0 +1,2298 @@
+{
+ "note": "Each sampled name with the first reader class under the species ruling and the second reader class. consensus_mismatch is true when both readers flag the name; consensus_agrees when neither does; the rest are disputed.",
+ "counts": {
+  "names": 381,
+  "both_flag": 55,
+  "first_only": 16,
+  "second_only": 52,
+  "neither": 258
+ },
+ "rows": [
+  {
+   "name": "fast_ion_charge_state_power_density",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "ref-relative"
+  },
+  {
+   "name": "straight_field_line_angle",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "total_power_due_to_electron_cyclotron_heating",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_coordinate_of_lower_hybrid_antenna_row",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "current_density_due_to_bootstrap_current_drive",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "current_due_to_fusion_reactions",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "res-direction"
+  },
+  {
+   "name": "oxygen_density_at_divertor_target",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "flux_surface_averaged_ion_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "tritium_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "tungsten_density_at_separatrix",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "radiative_temperature_at_ece_channel",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "refractive_index",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "vector"
+  },
+  {
+   "name": "current_weighted_average_external_magnetic_flux",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "poloidal_beta",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "total_counter_passing_particle_pressure",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "accumulated_deuterated_methane_prefill_count",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "ipb98y2_confinement_time",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_perturbed_vacuum_magnetic_vector_potential",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "pulse_duration",
+   "first": "qualifier-missing-from-name",
+   "second": "definition-narrower-than-name",
+   "pattern": "phase-scope"
+  },
+  {
+   "name": "radial_coordinate_of_rogowski_coil",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "area_of_passive_loop",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_force_of_poloidal_field_coil",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "width_of_correction_coil",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "plasma_temperature",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_magnetic_flux_at_halo_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "volume_averaged_runaway_electron_kinetic_energy_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "x_first_measurement_direction_unit_vector_of_strain_gauge",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "first_local_tangential_width_of_neutron_detector",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "total_neutron_rate",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "line_averaged_boron_density",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "accumulated_helium_3_prefill_count_due_to_gas_injection",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "accumulated_particle_count_at_pellet_path_due_to_pellet_injection",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "boron_density_at_limiter",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "surface_emissivity",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "spectral-band"
+  },
+  {
+   "name": "y_image_up_unit_vector_of_camera",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "extent_of_soft_xray_detector",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "spectral_wavelength_of_optical_element",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "volume_averaged_total_runaway_electron_source_rate",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "surface_area_of_detector",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "beryllium_density_at_magnetic_axis",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "bulk_neutral_internal_state_velocity",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "co_passing_thermal_ion_torque_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "counter_passing_fast_electron_torque_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "density_at_magnetic_axis",
+   "first": "abstract-parent-as-quantity",
+   "second": "agrees",
+   "pattern": "parent"
+  },
+  {
+   "name": "ion_charge_state_velocity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "momentum",
+   "first": "abstract-parent-as-quantity",
+   "second": "unit-does-not-fit-name",
+   "pattern": "parent"
+  },
+  {
+   "name": "parallel_conductivity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "parallel_ion_charge_state_energy_diffusivity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "particle_density",
+   "first": "abstract-parent-as-quantity",
+   "second": "agrees",
+   "pattern": "parent"
+  },
+  {
+   "name": "poloidal_flux_limiter_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_ion_charge_state_velocity_due_to_e_cross_b_drift",
+   "first": "agrees",
+   "second": "definition-narrower-than-name",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_neutral_internal_state_energy_diffusion_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "perpendicular_normalized_perturbed_pressure_bessel_1",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "left_hand_circularly_polarized_wave_electric_field",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "weight"
+  },
+  {
+   "name": "right_hand_circularly_polarized_wave_electric_field_amplitude",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "xenon_source_rate_due_to_gas_injection",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "parallel_wave_electric_field_real_part",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "ion_fluence_at_divertor_target",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_perturbed_plasma_velocity",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "helium_4_density_at_magnetic_axis",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "vertical_wave_vector_of_beam_tracing_beam",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "total_ion_density_at_magnetic_axis",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "volume_averaged_effective_charge",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "current_density_due_to_parallel_viscosity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "ion_charge_state_particle_flux",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_coordinate_of_polarizer",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_angular_width_of_camera",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "breakdown_initial_time",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "total_ion_decay_length_over_scrape_off_layer",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_coordinate_of_lower_hybrid_antenna_row",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "implicit_ion_momentum_source_rate",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_launched_wave_index_of_lower_hybrid_antenna",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "deuterium_deuterium_emissivity_due_to_fusion",
+   "first": "qualifier-missing-from-name",
+   "second": "definition-narrower-than-name",
+   "pattern": "energy-channel"
+  },
+  {
+   "name": "floating_electrostatic_potential",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_co_passing_torque_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "field_line_length",
+   "first": "definition-narrower-than-name",
+   "second": "definition-narrower-than-name",
+   "pattern": "narrower-object"
+  },
+  {
+   "name": "neutral_diffusion_coefficient",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_perturbed_parallel_magnetic_field_magnitude",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "minimum_gas_flow",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_electron_velocity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "neutral_internal_state_temperature",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "momentum_flux_due_to_e_cross_b_drift",
+   "first": "qualifier-missing-from-name",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "norm"
+  },
+  {
+   "name": "radial_neutral_internal_state_velocity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "parallel_current_density_due_to_parallel_viscosity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "outer_radius_of_ferritic_element",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "y_coordinate_of_diagnostic_aperture",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "argon_source_rate_due_to_gas_injection",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "boron_density",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "line_averaged_electron_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "parallel_neutral_momentum_flux_limiter_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "volume_averaged_ion_density",
+   "first": "abstract-parent-as-quantity",
+   "second": "agrees",
+   "pattern": "parent"
+  },
+  {
+   "name": "parallel_counter_passing_fast_particle_pressure",
+   "first": "qualifier-missing-from-name",
+   "second": "agrees",
+   "pattern": "weight"
+  },
+  {
+   "name": "volume_of_flux_surface",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "accumulated_ammonia_deuterated_count",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "implicit_electron_particle_source_rate",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_particle_perturbed_energy",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "boron_density_at_magnetic_axis",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "power_density_due_to_collisions",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "tritium_density_at_pedestal_top",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "edge_localized_mode_frequency",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "accumulated_silane_count_due_to_gas_injection",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "y_second_measurement_direction_unit_vector_of_strain_gauge",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "focal_length_of_line_of_sight",
+   "first": "definition-narrower-than-name",
+   "second": "agrees",
+   "pattern": "narrower-object"
+  },
+  {
+   "name": "hard_xray_brightness",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_effective_ion_diffusivity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "displacement_of_passive_structure",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_perturbed_plasma_magnetic_field_imaginary_part",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "lower_inner_squareness_of_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "line_averaged_tritium_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "toroidal_ion_charge_state_momentum_source",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "effective_turn_count_of_coil_conductor_element",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "current_of_antenna_strap",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "volume_averaged_total_ion_temperature",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "etendue_of_hard_xray_detector",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "flux_surface_averaged_inverse_of_square_of_major_radius",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "weight"
+  },
+  {
+   "name": "toroidal_ion_charge_state_torque_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "neutron_flux_at_first_wall",
+   "first": "agrees",
+   "second": "unit-does-not-fit-name",
+   "pattern": "-"
+  },
+  {
+   "name": "second_local_tangential_coordinate_of_bragg_crystal",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "oxygen_density_at_magnetic_axis",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "z_second_measurement_direction_unit_vector_of_strain_gauge",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "flux_at_limiter",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "neutral_pressure_of_mass_spectrometer_channel",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "energy_of_detector_pixel",
+   "first": "definition-narrower-than-name",
+   "second": "agrees",
+   "pattern": "narrower-object"
+  },
+  {
+   "name": "area_of_flux_loop",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "effective"
+  },
+  {
+   "name": "power_at_wall_due_to_convection",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "plasma_velocity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "runaway_electron_kinetic_energy_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "outer_hard_xray_half_width_at_emissivity_peak",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_perturbed_plasma_magnetic_vector_potential",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "lower_bound_energy_of_detector_pixel",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "alfven_frequency",
+   "first": "qualifier-missing-from-name",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "complex-angular"
+  },
+  {
+   "name": "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "weight"
+  },
+  {
+   "name": "toroidal_iron_velocity_at_pedestal_top",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "krypton_density_at_internal_transport_barrier",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "radial_neutral_internal_state_energy_diffusion_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "temperature_of_sensor",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "line_averaged_oxygen_density",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "flux_surface_averaged_toroidal_current_density",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "weight"
+  },
+  {
+   "name": "nitrogen_density_at_pedestal_top",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "magnetic_shear_at_internal_transport_barrier",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_ion_diffusion_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "counter_passing_power_density",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "weight"
+  },
+  {
+   "name": "total_heating_power_due_to_fusion_reactions",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "aggregation"
+  },
+  {
+   "name": "vertical_ion_charge_state_velocity_due_to_diamagnetic_drift",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "density_at_plasma_boundary",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "back_surface_neutron_flux",
+   "first": "agrees",
+   "second": "unit-does-not-fit-name",
+   "pattern": "-"
+  },
+  {
+   "name": "density_at_pedestal_maximum",
+   "first": "qualifier-missing-from-name",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "locus"
+  },
+  {
+   "name": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "line_averaged_total_ion_temperature",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "neutral_internal_state_energy_flux_at_wall",
+   "first": "qualifier-missing-from-name",
+   "second": "agrees",
+   "pattern": "energy-channel"
+  },
+  {
+   "name": "radial_perturbed_plasma_magnetic_vector_potential",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_focal_length_of_beamlet_group",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_toroidal_flux_coordinate_at_separatrix",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_wave_electric_field",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_coordinate_of_beam_tracing_beam",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "perturbed_vacuum_magnetic_vector_potential",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_coordinate_of_annulus_center",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "particle_velocity_due_to_convection",
+   "first": "abstract-parent-as-quantity",
+   "second": "qualifier-missing-from-name",
+   "pattern": "parent"
+  },
+  {
+   "name": "net_power_due_to_ion_cyclotron_heating",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "neutral_state_momentum_flux_due_to_diamagnetic_drift",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "boron_density_at_internal_transport_barrier",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "oxygen_density",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "parallel_total_ion_energy_convection_velocity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_toroidal_flux_coordinate",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "neutral_internal_state_momentum_velocity_due_to_convection",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_neon_velocity_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "electron_diffusion_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_coordinate_of_reflector",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "deuterium_tritium_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_coordinate_of_flux_loop",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "perturbed_plasma_mass_density_real_part",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "thermal_ion_torque_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "helium_3_density_at_pedestal_top",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "carbon_density_at_magnetic_axis",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "parallel_gyrocenter_momentum_flux_normalized_of_gyrokinetic_eigenmode_due_to_e_cross_b_drift",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "magnetic_field",
+   "first": "abstract-parent-as-quantity",
+   "second": "agrees",
+   "pattern": "parent"
+  },
+  {
+   "name": "ion_charge_state_temperature",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_ion_charge_state_particle_flux",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "neon_density",
+   "first": "abstract-parent-as-quantity",
+   "second": "agrees",
+   "pattern": "parent"
+  },
+  {
+   "name": "total_ion_particle_source_rate",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "ratio_of_iron_density_to_electron_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "inverse_of_square_of_major_radius",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "fast_neutron_flux_of_toroidal_field_coil",
+   "first": "qualifier-missing-from-name",
+   "second": "definition-narrower-than-name",
+   "pattern": "locus"
+  },
+  {
+   "name": "toroidal_coordinate_of_soft_xray_detector",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "fast_particle_pressure",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "perpendicular_trapped_fast_particle_pressure",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "fast_particle_torque_due_to_j_cross_b_force",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "length_variation_of_interferometer_beam",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "argon_density_at_internal_transport_barrier",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "perpendicular_normalized_particle_perturbed_energy",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "oxygen_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "cold_neutral_velocity",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "y_coordinate_of_sensor_attachment_point",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "voltage_of_valve",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "runaway_electron_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "electron_source_rate_due_to_surface_emission",
+   "first": "qualifier-missing-from-name",
+   "second": "agrees",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "electron_power_at_outer_divertor_target",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "thickness_of_iron_core_segment",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_neutral_internal_state_momentum_flux",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "accumulated_tritium_count_due_to_gas_injection",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_ion_charge_state_velocity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "total_absorbed_wave_power",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "per_toroidal_mode_thermal_ion_charge_state_power_density",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "weight"
+  },
+  {
+   "name": "height_of_hard_xray_detector",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "neutral_species_atomic_mass",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "current_of_divertor",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radius_of_detector",
+   "first": "definition-narrower-than-name",
+   "second": "agrees",
+   "pattern": "narrower-object"
+  },
+  {
+   "name": "electron_heat_decay_length_over_scrape_off_layer",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "electron_temperature_at_pellet_path",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "maximum_of_back_surface_neutron_flux",
+   "first": "definition-narrower-than-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "narrower-object"
+  },
+  {
+   "name": "forward_power_of_ion_cyclotron_heating_antenna",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_argon_velocity_at_internal_transport_barrier",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "parallel_peak_launched_refractive_index_of_lower_hybrid_antenna",
+   "first": "qualifier-missing-from-name",
+   "second": "agrees",
+   "pattern": "res-selection"
+  },
+  {
+   "name": "lithium_density_at_internal_transport_barrier",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "power_due_to_synchrotron_radiation",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "perpendicular_co_passing_fast_particle_pressure",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "weight"
+  },
+  {
+   "name": "toroidal_halo_current",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_perturbed_plasma_velocity_real_part",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_neutral_momentum_flux_limiter_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "power_of_divertor_due_to_convection",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "coolant_absorbed_power_of_calorimetry_component",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_outline_of_plasma_facing_component",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "calibration_polarization_angle_of_optical_element",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_conductivity",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "normal_coordinate_of_correction_coil",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_coordinate_of_strike_point",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "voltage_of_mass_spectrometer",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "device-part"
+  },
+  {
+   "name": "volume_averaged_helium_4_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "co_passing_fast_ion_torque_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "power_of_plant_system",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "height_of_correction_coil",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "counter_passing_thermal_ion_torque_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "power_of_divertor_due_to_recombination",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "thickness_of_breeder_blanket_layer",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "perpendicular_refractive_index",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_coordinate_of_flux_loop",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "hydrogen_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "total_absorbed_wave_power_at_inside_flux_surface",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "counter_passing_thermal_electron_power_density_due_to_collisions",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "weight"
+  },
+  {
+   "name": "toroidal_helium_3_velocity_at_pedestal_top",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "first_local_tangential_coordinate_of_soft_xray_detector",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "bremsstrahlung_power",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "flux_surface_averaged_square_of_magnetic_field_magnitude",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_reference_magnetic_field",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "iron_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "toroidal_momentum_flux_limiter_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_angle_of_toroidal_magnetic_field_probe",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "power_due_to_electron_cyclotron_heating",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "ion_energy_flux_limiter_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "thermal_ion_charge_state_energy_velocity_due_to_convection",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "nuclear_heating_power_of_limiter_tile",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "electron_density_at_outboard_midplane",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_collisionality",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "runaway_electron_source_rate_due_to_hot_tail",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "inner_squareness_of_flux_surface",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "electron_pressure",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "x_second_measurement_direction_unit_vector_of_strain_gauge",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_effective_electron_diffusivity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "neon_prefill_count",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "radiated_power_of_breeder_blanket_module",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "second_local_tangential_coordinate_of_optical_element",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "torque_density",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "volume_integrated_particle_source_rate",
+   "first": "abstract-parent-as-quantity",
+   "second": "agrees",
+   "pattern": "parent"
+  },
+  {
+   "name": "fast_ion_power_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "incident_neutral_particle_flux_at_wall",
+   "first": "unit-does-not-fit-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "unit-dimension"
+  },
+  {
+   "name": "kinetic_energy_flux_at_wall_due_to_surface_emission",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_neutral_internal_state_torque_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_coordinate_of_reciprocating_probe",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_argon_velocity_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "ratio_of_particle_temperature_to_particle_reference_temperature",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "upper_thickness_of_breeder_blanket_module",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "parallel_ion_charge_state_energy_diffusion_coefficient",
+   "first": "qualifier-missing-from-name",
+   "second": "agrees",
+   "pattern": "norm"
+  },
+  {
+   "name": "length_of_poloidal_magnetic_field_probe",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "iron_density_at_internal_transport_barrier",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "normalized_particle_charge",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_electron_particle_flux",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "plasma_power_at_divertor_target_due_to_recombination",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "ethane_source_rate",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "toroidal_coordinate_of_pellet_fragment",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "magnetic_field_at_pedestal_top_low_field_side",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "width_of_toroidal_field_coil",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "accumulated_xenon_count_due_to_gas_injection",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "magnetic_field_at_pedestal_top_high_field_side",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_coordinate_of_electron_cyclotron_launcher_mirror",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_diamagnetic_current_density",
+   "first": "agrees",
+   "second": "definition-narrower-than-name",
+   "pattern": "-"
+  },
+  {
+   "name": "hydrogen_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "momentum_flux_limiter_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_perturbed_vacuum_magnetic_field_real_part",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "squareness_of_flux_surface",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "tungsten_density_at_divertor_target",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "neutral_internal_state_energy_flux_limiter_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "z_first_measurement_direction_unit_vector_of_strain_gauge",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "particle_diffusivity",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "neutron_response_function_of_neutron_detector",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "temperature_of_coil_conductor",
+   "first": "definition-narrower-than-name",
+   "second": "definition-narrower-than-name",
+   "pattern": "narrower-object"
+  },
+  {
+   "name": "parallel_ion_momentum_flux",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_fast_ion_charge_state_torque_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "stray_breakdown_magnetic_field_magnitude",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "total_trapped_particle_density",
+   "first": "abstract-parent-as-quantity",
+   "second": "qualifier-missing-from-name",
+   "pattern": "parent"
+  },
+  {
+   "name": "volume_averaged_ion_charge",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "calibration_reference_magnetic_field_of_poloidal_magnetic_field_probe",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_length_of_divertor_target",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_effective_particle_energy",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_ion_charge_state_velocity",
+   "first": "agrees",
+   "second": "definition-narrower-than-name",
+   "pattern": "-"
+  },
+  {
+   "name": "helium_4_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "radial_ion_momentum_flux_over_edge_region",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radius_of_reflector",
+   "first": "definition-narrower-than-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "narrower-object"
+  },
+  {
+   "name": "nitrogen_density_at_internal_transport_barrier",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "volumetric_fraction_of_breeder_blanket_layer",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "electron_particle_flux_limiter_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "line_averaged_argon_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "molecular_neutral_species_flow_at_outlet",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "surface_area_of_flux_surface",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radius_of_neutral_beam_injector",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "device-part"
+  },
+  {
+   "name": "height_of_plasma_filament",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "area_of_poloidal_field_coil",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "lithium_density_at_plasma_boundary",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "trapped_fast_particle_pressure",
+   "first": "abstract-parent-as-quantity",
+   "second": "agrees",
+   "pattern": "parent"
+  },
+  {
+   "name": "vertical_volumetric_force",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_ion_momentum_damping_rate",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_ion_charge_state_diffusion_coefficient",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "ion_charge_state_diffusivity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "wave_phase_of_ion_cyclotron_heating_antenna",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "ref-relative"
+  },
+  {
+   "name": "nuclear_power_density_of_breeder_blanket_layer",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "argon_density_at_separatrix",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "electron_kinetic_energy_flux_at_wall_due_to_surface_emission",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "radial_perturbed_vacuum_magnetic_vector_potential_imaginary_part",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "vertical_neutral_velocity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "lithium_density_at_pedestal_top",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "voltage_of_toroidal_magnetic_field_probe",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "electron_torque_density_due_to_collisions",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "turns_per_metre_of_rogowski_coil",
+   "first": "qualifier-missing-from-name",
+   "second": "definition-narrower-than-name",
+   "pattern": "layer-scope"
+  },
+  {
+   "name": "radial_derivative_of_poloidal_magnetic_flux",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "neutron_flux_maximum_at_first_wall",
+   "first": "definition-narrower-than-name",
+   "second": "unit-does-not-fit-name",
+   "pattern": "narrower-object"
+  },
+  {
+   "name": "parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "particle_torque_due_to_j_cross_b_force",
+   "first": "abstract-parent-as-quantity",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "parent"
+  },
+  {
+   "name": "poloidal_ion_charge_state_momentum_convection_velocity",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "external_magnetic_flux",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "counter_passing_thermal_electron_torque_density_due_to_collisions",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "logarithm_of_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "power_due_to_recombination",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "toroidal_magnetization_of_ferritic_element",
+   "first": "agrees",
+   "second": "unit-does-not-fit-name",
+   "pattern": "-"
+  },
+  {
+   "name": "total_electron_count",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "accumulated_total_prefill_gas_count",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "radial_ion_charge_state_energy_diffusion_coefficient",
+   "first": "qualifier-missing-from-name",
+   "second": "agrees",
+   "pattern": "norm"
+  },
+  {
+   "name": "toroidal_perturbed_plasma_velocity_imaginary_part",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "outer_radius_of_poloidal_field_coil",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "poloidal_perturbed_vacuum_magnetic_field_imaginary_part",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "nuclear_power_density_of_limiter_tile",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "total_neutral_source_rate_due_to_gas_injection",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "normalized_toroidal_flux_coordinate_at_pedestal_top",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "first_local_tangential_coordinate_of_neutral_beam_injector",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_gyrocenter_perturbed_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "volumetric_force",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "electron_temperature_at_magnetic_axis",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "line_averaged_tungsten_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "tritium_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "pop-ion-only"
+  },
+  {
+   "name": "ratio_of_volume_averaged_boron_density_to_volume_averaged_electron_density",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "normalized_perturbed_parallel_gyrocenter_heat_flux_bessel_1",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "co_passing_fast_current_density",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  },
+  {
+   "name": "triangularity_of_flux_surface",
+   "first": "agrees",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "-"
+  },
+  {
+   "name": "ion_energy_diffusivity",
+   "first": "qualifier-missing-from-name",
+   "second": "abstract-parent-as-quantity",
+   "pattern": "norm"
+  },
+  {
+   "name": "accumulated_ammonia_count",
+   "first": "qualifier-missing-from-name",
+   "second": "qualifier-missing-from-name",
+   "pattern": "eq-electron-weight"
+  },
+  {
+   "name": "suprathermal_neutral_internal_state_pressure",
+   "first": "agrees",
+   "second": "qualifier-missing-from-name",
+   "pattern": "-"
+  },
+  {
+   "name": "inverse_of_square_of_magnetic_field_magnitude",
+   "first": "agrees",
+   "second": "agrees",
+   "pattern": "-"
+  }
+ ]
+}
