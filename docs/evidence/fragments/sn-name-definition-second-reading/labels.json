@@ -138,5 +138,145 @@
   "confidence": "high",
   "evidence": "the radial projection of a first-order, complex perturbed magnetic vector-potential eigenfunction in the vacuum region",
   "reason": "The name states the radial perturbed vacuum magnetic vector potential, which is exactly the radial projection the definition describes."
+ },
+ {
+  "id": "item-21",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the time-averaged scalar amplitude of the component of a magnetic-field perturbation parallel to the local equilibrium magnetic field, normalized by a reference magnetic-field magnitude",
+  "reason": "Time averaging, normalisation, the parallel projection and the magnitude are all stated in the name, so the definition denotes the same quantity."
+ },
+ {
+  "id": "item-22",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "Elapsed duration from plasma breakdown until termination of auxiliary heating in a single discharge",
+  "reason": "A pulse duration covers the whole discharge, whereas the definition restricts the interval to the heated confined-plasma phase between breakdown and heating termination."
+ },
+ {
+  "id": "item-23",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the major-radius coordinate of the designated geometric point representing the coil position",
+  "reason": "A radial coordinate of a coil is naturally the major-radius coordinate of the point that locates it, which is what the definition states."
+ },
+ {
+  "id": "item-24",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the non-negative cross-sectional area of the solid conducting material of a passive conducting loop element",
+  "reason": "The bare name suggests the enclosed loop area, but the definition is the conductor material cross-section on a plane normal to the current path, excluding the aperture."
+ },
+ {
+  "id": "item-25",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net electromagnetic Lorentz force on an individual poloidal-field-coil conductor projected onto the vertical axis",
+  "reason": "The name states a vertical force of a poloidal-field coil, and the definition is exactly the signed vertical component of that coil's electromagnetic force."
+ },
+ {
+  "id": "item-26",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Full non-negative extent of a non-axisymmetric correction-coil conductor cross-section measured along its local normal axis",
+  "reason": "The name states a coil width, but the definition is the transverse size of the conductor cross-section, a different quantity from the coil's overall spatial width."
+ },
+ {
+  "id": "item-27",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "a fundamental thermodynamic state variable in fluid and single-fluid MHD models, quantifying the mean random kinetic energy of the charged particle population",
+  "reason": "The plasma temperature in a fluid description is the effective single-population temperature the name denotes, with species-resolved forms carrying their own qualified names."
+ },
+ {
+  "id": "item-28",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the value of the [poloidal magnetic flux](name:poloidal_magnetic_flux) function on the outermost magnetic flux surface of the halo-current region",
+  "reason": "The name states the poloidal flux at the halo boundary, and the definition is that flux value on the halo region's outermost surface."
+ },
+ {
+  "id": "item-29",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "obtained by integrating the local relativistic kinetic energy density over the total confined plasma volume $V$ and dividing by $V$",
+  "reason": "The name states a volume-averaged runaway-electron kinetic energy density, which is exactly the volume mean of the local energy density the definition gives."
+ },
+ {
+  "id": "item-30",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the x-directed component of a sensor's oriented measurement-direction vector",
+  "reason": "The name states the x component of the first measurement-direction unit vector, and the definition is its x-direction cosine."
+ },
+ {
+  "id": "item-31",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the full transverse width of the neutron detector's collimating aperture along its first local tangential direction",
+  "reason": "The name states a width of the neutron detector, but the definition is the opening width of its collimating aperture, explicitly not the detector body or shielding."
+ },
+ {
+  "id": "item-32",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the aggregate number of neutrons emitted per unit time by fusion reactions in the plasma",
+  "reason": "The name states a total neutron rate, and the definition sums the neutron emission of the three listed fusion channels, which is that total."
+ },
+ {
+  "id": "item-33",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "It includes neutral boron and all ionization states of boron, so it represents the chord-averaged elemental boron impurity content",
+  "reason": "A bare species name counts ions with neutrals excluded, so a definition that includes neutral boron carries an elemental-population qualifier the name does not."
+ },
+ {
+  "id": "item-34",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron count",
+  "reason": "The count is the injected atom number multiplied by two equivalent electrons per atom, an equivalence the name's plain count does not convey."
+ },
+ {
+  "id": "item-35",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "It counts particles removed from the pellet up to the specified trajectory position, rather than particles remaining in the pellet",
+  "reason": "The name does not say whether the accumulated count is material released or material remaining, and the definition fixes it to the released ablated particles."
+ },
+ {
+  "id": "item-36",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The sum includes boron ions from B$^{+}$ through fully stripped B$^{5+}$ and excludes neutral boron atoms",
+  "reason": "Under the catalog convention a bare species name counts ions summed over charge states with neutrals excluded, which the definition states."
+ },
+ {
+  "id": "item-37",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "The ratio applies to the specified spectral band and angular averaging; it is not a wavelength- and direction-resolved emissivity",
+  "reason": "The bare name suggests a total hemispherical emissivity, but the definition is an effective ratio bound to a stated spectral band and angular averaging."
+ },
+ {
+  "id": "item-38",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is its projection onto the Cartesian y-axis",
+  "reason": "The name states the y component of the camera image-up unit vector, and the definition is exactly that projection."
+ },
+ {
+  "id": "item-39",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the complete end-to-end linear size of the soft X-ray detector along one specified detector-plane direction",
+  "reason": "The name states the detector extent, and the definition is its full end-to-end size along the chosen detector-plane direction."
+ },
+ {
+  "id": "item-40",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Each value denotes a spectral evaluation point, not a response amplitude or wavelength interval",
+  "reason": "The name states a spectral wavelength of an optical element, and the definition is the vacuum wavelength at which its properties are evaluated."
  }
 ]
