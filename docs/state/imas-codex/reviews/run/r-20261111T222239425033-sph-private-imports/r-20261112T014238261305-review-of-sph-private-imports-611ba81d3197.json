@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T02:12:39.450Z",
+  "dispatched_at": "2026-11-12T01:47:46Z",
+  "evidence_inputs": "Section 8's own done_when asks for zero private-name imports between top-level modules; this node deliberately reaches 24 live sites behind an explicit exemption list, so section 8 cannot be collapsed on this head and owes at least one continuation node for the 24 entries. The rule keys exemptions on (module, name) and fails on a stale entry, so the list can only shrink. Independent census at 611ba81d3 reproduces the fragment's census exactly: 24 names across 18 statements, matching the exemption set one-for-one.",
+  "findings": [
+    {
+      "blocks": false,
+      "category": "reuse",
+      "disposition": "folded",
+      "file": "imas_codex/standard_names/release_notes.py",
+      "fold_into": "sn-pipeline-hygiene section 8 continuation closing the remaining 24 exemptions",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "release_notes.py:34 (_run_git) and :41 (_github_slug) are a near-verbatim copy of catalog_release.py:401 and :1502, so the package now holds two github-slug parsers that will drift; the plan's done-when allows closure 'either by moving the caller or through a public name the owning module exports', and a copy is neither, while the parallel-agent ruling says a peer-touched file never blocks an edit. The remaining exemption promote.py:1994 _github_slug forces a later node to give catalog_release.py a public spelling, which is where this copy should be deleted; fold into the section's remaining-exemption node."
+    },
+    {
+      "blocks": false,
+      "category": "evidence",
+      "disposition": "exempted",
+      "exempt_reason": "The two-arm result is real and recorded under the log's own command header, which the contract accepts as the fallback when the tests line is absent; promotion re-running the narrower command still passes.",
+      "file": "manifest.md",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "The manifest's tests: line names test_package_import_boundaries.py::test_no_private_name_imports_between_top_level_modules plus the 13 sibling files, but the recorded head arm ran the whole test_package_import_boundaries.py file (test_logs header: 'pytest ... tests/standard_names/test_package_import_boundaries.py ...'), so the receipt promotion reads names a command neither arm actually ran; both pass, so this is a receipt-accuracy defect, not a gate result."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "imas_codex/standard_names/export.py:3607, imas_codex/standard_names/legacy_authority.py:103, imas_codex/standard_names/review_triage.py:368, imas_codex/standard_names/release_notes.py:476",
+    "diff": "Read commit by commit against 6f9eb556: 5c4516e8c adds the rule, the 24-entry exemption list and the public aliases, cd75db23b adds the landing fragment, 611ba81d3 adds the gate outcome to the fragment; 13 files, no production logic changed beyond name exposure and the release_notes.py helper copy.",
+    "done_when": "The node's measure is a gate over tests/standard_names; the manifest records a 14-file two-arm run at head (710 passed, EXIT=0) against the base revision (709 passed, 1 skipped, EXIT=0), plus a negative control naming the restored site, and an independent AST census I ran re-derives the recorded 31 names/24 statements at base and 24 names/18 statements at head.",
+    "goal": "The node's goal is to add a private-name rule over imas_codex/standard_names' top-level modules and close the six module-level statements in export.py, legacy_authority.py, near_duplicates.py, release_notes.py and review_triage.py; tests/standard_names/test_package_import_boundaries.py:110-186 adds the rule and each caller now imports a public name, except release_notes.py:34,41 which copies the two catalog_release.py git helpers instead.",
+    "manifest": "Read; it states a 14-file head gate of 710 passed at cd75db23b with EXIT=0, a base arm of 709 passed/1 skipped with EXIT=0, a negative-control log with EXIT=1 naming legacy_authority.py:17, and it honestly records that the full tests/standard_names suite was started at both heads but not completed.",
+    "write_paths": "Read the manifest's declared paths; tests/standard_names/test_package_import_boundaries.py, the six imas_codex/standard_names closing modules and docs/evidence/fragments/sn-pipeline-hygiene/sph-private-imports.{py,html} are all inside them, and the five extra owning-module edits (edit.py, segments.py, unit_overrides.py, audits.py, promote.py) are authorised by the brief's 'changing their owning modules as needed' and listed in changed_paths."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261112T014238261305-review-of-sph-private-imports-611ba81d3197",
+  "reviewed_base_sha": "6f9eb556abc3e91d90fca2d7280f6ceb7e488fb2",
+  "reviewed_head_sha": "611ba81d3197474abf0f11979f634d4dcc53a5e7",
+  "reviewed_run_id": "r-20261111T222239425033-sph-private-imports",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T02:16:02.204191+00:00",
+  "total": 95
+}
