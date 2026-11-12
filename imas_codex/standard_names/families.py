@@ -1246,7 +1246,9 @@ WHERE {_segment_equality("m", DOMAIN_FAMILY_SEGMENTS)}
   AND coalesce(m.name_stage, '') <> $superseded
 OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(m)
 OPTIONAL MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
-WITH m, collect({{
+WITH
+{_segment_projection("m", DOMAIN_FAMILY_SEGMENTS)},
+     m, collect({{
        path: src.id,
        domain: dd.physics_domain
      }}) AS sources
@@ -1255,7 +1257,7 @@ RETURN m.id AS id,
        m.physics_domain AS physics_domain,
        m.domain_correction AS domain_correction,
        sources,
-       {", ".join(f"{seg} AS {seg}" for seg in DOMAIN_FAMILY_SEGMENTS)}
+       {", ".join(DOMAIN_FAMILY_SEGMENTS)}
 ORDER BY m.id
 """
 
