@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T01:50:30.721Z",
+  "dispatched_at": "2026-11-12T01:42:34Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/docs_gates.py:1114",
+      "id": "reuse_search-1",
+      "reason": "the plan describes an endpoint and names no module, so the reuse belongs in the node brief; it changes what the first node is told to do, not the plan text.",
+      "text": "\u00a72 proposes to render the shared parts of a definition from one stored wording and to refuse a definition whose shared part was altered after rendering, but `_template_findings` (docs_gates.py:1114), `registry_template_texts` (docs_gates.py:669), `locus_definition_sentence` (docs_gates.py:759), `_canonical_equation_pattern`/`_is_canonical_equation` (docs_gates.py:976, 1011), `_non_canonical_equation_findings` (docs_gates.py:1036) and `_forbidden_variant_findings` (docs_gates.py:711) already compare a written definition against the grammar registry's template opening, note, canonical equation and forbidden variants, and classify each finding as one of seven `HouseStyleFindingClass` values; a plan that proposes a new \"shared part altered after rendering\" refusal without noting that the comparison is already built will rebuild it",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:572",
+      "id": "deep_module-1",
+      "reason": "the plan's endpoint is sound and it names no module; the risk is that three per-part renderers get built, so the brief must say \"extend the registry renderer\" \u2014 an instruction, not a plan change.",
+      "text": "\u00a72's design must land as the single renderer `_documentation_with_registry_form` already is: it takes the name, the written documentation and the applied conventions, instantiates the selected template sentences with `_fill_template_sentence` (worker_generate_docs.py:511) and `_instantiated_template_sentences` (worker_generate_docs.py:528), and re-derives the canonical forms through docs_gates; if the brief instead builds one table or wrapper per shared part (operator, population, locus) the same substitution logic is written three times over one registry",
+      "type": "deep_module",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/standard_names/export.py:2966",
+      "id": "thin_wrapper-1",
+      "reason": "the endpoint (an export that refuses divergence) is right; only the mechanism's placement changes, and placement belongs to the brief.",
+      "text": "\u00a77 asks the export to \"report, and fail on\" four defects, but `run_export` already owns a blocking gate set \u2014 `_run_gate_a` (export.py:995), `_run_gate_b` (export.py:1066), `_run_gate_c` (export.py:1177), `_run_exclusion_accounting_gate` (export.py:1363), `detect_divergence` (export.py:1433) and `_catalog_semantic_failures` (export.py:1766) \u2014 all reported through `GateResult` (export.py:293); a separate \"dry run\" that re-implements the four checks is a thin layer over that set, and the honest change is four more checks inside the existing gates, in which case the plan's \"the export gate's blocking set is 0\" is already the existing contract and needs no new surface",
+      "type": "thin_wrapper",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/standard_names/harmonize.py:76",
+      "id": "duplicate_owner-1",
+      "reason": "the plan's endpoints survive and it correctly names no module; what changes is the node brief, which must route each endpoint at the owner above rather than fork it.",
+      "text": "this is a census of every mechanism the plan would duplicate rather than extend: (a) `harmonize.py:76` `doc_sig`, `harmonize.py:89` `drift` and `harmonize.py:107` `group_signature` already own \"one wording per family\" and already compute the divergence \u00a72/\u00a76 ask a new census to count, with `_top_divergent_member` (harmonize.py:124) and `mark_members_for_regen` (harmonize.py:689) owning the repair path; (b) `harmonize.py:850` `measure_doc_call_cost` already owns \u00a72's \"cost of writing one family member recorded beside the present per-name documentation cost\"; (c) `worker_generate_docs.py:572` `_documentation_with_registry_form` owns \u00a72's rendering, with `_instantiated_template_sentences` (worker_generate_docs.py:528) doing the substitution; (d) `audits.py:1429` `unit_dimension_check` and `audits.py:1458` `name_unit_consistency_check` own \u00a73's \"a name's unit has the dimension its quantity has\", built on pint normalisation in `audits.py:570` `_dimension_sets_equivalent` and `audits.py:615` `_ir_unit_dimensions`, with `unit_audit.py:47` `check_unit_sanity` owning the name-then-unit structural rules; (e) `docs_gates.py:1198` `score_documentation` and `docs_gates.py:1156` `house_style_findings` own \u00a75's check that a definition and its name agree, and `docs_gates.py:1036` already refuses a non-canonical equation restatement; (f) `docs_holdout_eval.py:395` `evaluate_docs_holdout` owns \u00a75's held-out label evaluation and its cost ceiling; (g) `export.py:293` `GateResult` and `export.py:2966` `run_export` own \u00a77's blocking set and the export's defect reporting; (h) the three ad-hoc scripts already committed under `docs/evidence/fragments/sn-definitions-by-construction/` re-read published YAML directly and repeat slices of (a) and (d) outside the package",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/standard_names/harmonize.py:76",
+      "id": "duplicate_owner-2",
+      "reason": "the plan's \u00a73 endpoint (\"the choice is recorded per quantity\") already names the record; the brief must place the record beside the owner and route the equality test at pint.",
+      "text": "the only endpoint with no owner, \"one unit spelling per quantity\", is still partly owned: dimensional equality of two spellings is `audits.py:570` `_dimension_sets_equivalent` (pint-backed, matching the pint-normalised `Unit` nodes created by `imas_codex/graph/build_dd.py:3406`), and DD-side unit rewriting is `unit_overrides.py` (config `standard_names/config/unit_overrides.yaml`); the new work is a policy record choosing one spelling per quantity, which should be a table the existing overrides mechanism reads rather than a fourth unit module",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "sn-definitions-by-construction#s2",
+      "id": "interface_budget-1",
+      "reason": "the plan's own interface budget is zero on every family, so each adding section must record in its text which existing refusal it absorbs (the conformance classes in `docs_gates.py:609` and the gates in `export.py` are the candidates) or say why the new surface cannot be merged into them.",
+      "text": "\u00a72 adds a refusal family (\"a written definition whose shared part was altered by the model after rendering is refused before it is stored\") and \u00a75 adds a second (\"a name that the check flags is not accepted by review without a recorded reason\") while the current `refusal_families` count is 0, and \u00a77 adds four more refusals inside the export; none of the three sections names anything it retires or merges, and none states why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4a7c953bb89f511fd172eac662055195230624c4",
+  "plan_fingerprint": "e4a41ff3bed91f3ee79923df04058656bd418cdbb40b81d4b7c92e4d0a9d6db1",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T014132041727-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "26c6d5f06c9d4bf9ede308fff2ff91dfcd31e3a5",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a72's \"each shared part has one stored wording\" would spread into three parallel substitution points (operator, population, locus) unless the brief targets the one registry renderer `worker_generate_docs.py::_documentation_with_registry_form` that already substitutes a name's segments into the grammar's selected sentences.",
+    "duplicate_owner": "a finding \u2014 each of the plan's censuses and checks has an owning file that already implements it: family wording divergence in `harmonize.py`, registry-form rendering in `worker_generate_docs.py`, unit\u2194quantity dimension in `audits.py`, divergence/conformance refusal in `docs_gates.py`, blocking export gates in `export.py`, held-out label evaluation in `docs_holdout_eval.py`, and per-name documentation cost in `harmonize.py`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds a stored-wording refusal, \u00a75 adds a name-definition check refusal, and \u00a77 adds four export-gate refusals, and no one of them names what it retires or merges, or states why nothing can be.",
+    "reuse_search": "a finding \u2014 the plan's five endpoints each name machinery that already exists and it does not account for any of it: registry template rendering (`imas_codex/standard_names/worker_tasks/worker_generate_docs.py`), family wording divergence (`imas_codex/standard_names/harmonize.py`), unit\u2194quantity dimension checks (`imas_codex/standard_names/audits.py`), documentation conformance gates (`imas_codex/standard_names/docs_gates.py`) and the export gate set (`imas_codex/standard_names/export.py`).",
+    "thin_wrapper": "a finding \u2014 \u00a77's \"export dry run\" is a thin layer that re-expresses four checks beside the gate set that already blocks an export (`imas_codex/standard_names/export.py`), and the plan says nothing about why the existing gates cannot take them."
+  },
+  "section_digests": {
+    "_document": "6137bf2a00f8c854d849980be426768756640a93944d09dbce2033f098859522",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f018f5aba1222185832b583d13b02418cc9024ea0c1fd7d3dbc11a565daaaeca",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "cb6310d0d68b4d5b28e01e9d8721ce31ce9b5971be4d2154ae4addded8d016d4",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "487caa067a5300d4edd98d6b575f9349795e840db7e391456751affd9a862a5c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:56:43.577412+00:00",
+  "total": null
+}
