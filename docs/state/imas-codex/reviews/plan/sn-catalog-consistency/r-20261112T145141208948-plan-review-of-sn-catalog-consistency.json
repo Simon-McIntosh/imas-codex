@@ -53,6 +53,16 @@
       "note": "dropped the claim that definitions \u00a76 does not reach these rows; \u00a72 re-reads each row after \u00a76 lands and takes only rows still standing, recording any \u00a76 already settled",
       "reason": "",
       "when": "2026-11-12T15:18:42.577519+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "batch-272 now named as three names across the momentum and rate families, with the beam-beam fusion source rate named",
+      "reason": "",
+      "when": "2026-11-12T15:18:49.965835+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "dropped the claim that definitions \u00a76 does not reach these rows; \u00a72 re-reads each row after \u00a76 lands and takes only rows still standing, recording any \u00a76 already settled",
       "reason": "",
       "when": "2026-11-12T15:18:42.577519+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+      "commit_basis": "edit",
+      "note": "batch-272 now named as three names across the momentum and rate families, with the beam-beam fusion source rate named",
+      "reason": "",
+      "when": "2026-11-12T15:18:49.965835+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261112T145141208948-plan-review-of-sn-catalog-consistency.json",
