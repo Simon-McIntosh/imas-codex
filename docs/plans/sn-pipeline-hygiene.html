@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="32">
+<meta name="plan-version" content="33">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -165,6 +165,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261111T222239425033-sph-private-imports" data-who="reckon-build" data-when="2026-11-12T02:55:18Z">
     <div class="r-comment-body"><p>Private-name import rule added over the package's top-level modules; seven statements closed (31 to 23 names, 24 to 17 statements, including promote.py's git-slug import); five product names plus two git helpers exported from their owning modules, with the git helpers keeping one implementation that release_notes.py and promote.py both import; the repair gate passes with no failure id and both negative controls fail when their guard is reverted.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s1-lead-ruling-retire-rebuild-check" data-who="Simon McIntosh" data-when="2026-11-12T16:40:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-12: the rebuild check is retired. Its calibration inputs were deleted with old run directories; the shipped cutoffs stand unchanged and the calibration is not regenerated.</p></div>
 </div>
 </section>
 </main>
