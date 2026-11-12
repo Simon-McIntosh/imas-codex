@@ -18,19 +18,19 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
   <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="25">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
   <main class="plan-doc">
     <h2 id="s1">§1 — The 13 tests red on main are fixed or owned</h2>
     <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
-    <p>Thirteen tests in <code>tests/standard_names</code> failed at every base measured on 2026-11-11. They block no landing, but they hide regressions in every one. By 2026-11-12 twelve pass at head; the cascade-calibration id instead skips, because the frozen receipt files it reads were deleted with the reckon run directories that held them, so it measures nothing. The ids:</p>
+    <p>Thirteen ids in <code>tests/standard_names</code> were recorded as failing on main on 2026-11-11. Re-measured by the nodes that took them, some were already green at base and one skipped rather than failed. They block no landing, but they hide regressions in every one. By 2026-11-12 twelve pass at head; the cascade-calibration id instead skips, because the frozen receipt files it reads were deleted with the reckon run directories that held them, so it measures nothing. The ids:</p>
     <ul>
       <li><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></li>
       <li><code>test_catalog_layout_hierarchy.py::TestOrderingCycleDetection::test_export_ledgers_cycle_and_writes_packet</code></li>
@@ -40,7 +40,7 @@
       <li><code>test_manifest_generability.py</code>: <code>test_a_cut_refuses_a_manifest_it_cannot_generate_rather_than_counting</code>, <code>test_a_manifest_whose_sources_all_reach_a_name_is_not_refused</code> and <code>test_every_manifest_source_is_carried_or_names_its_blocking_mechanism</code></li>
     </ul>
     <p>Each is diagnosed first: a product defect, a stale test, or an ISN vocabulary change the test predates. The fix follows the diagnosis; a test is never weakened to pass.</p>
-    <p><strong>Done when:</strong> the default <code>tests/standard_names</code> run on a compute partition reports none of the 13 ids failing at the merged head, and the cascade-calibration id runs without skipping from inputs committed in the repository, reconstructed only if the committed calibration thresholds rebuild from them unchanged; if they cannot be, the lead's ruling between regenerating the calibration and retiring the rebuild check is recorded on this section and applied instead; each id's diagnosis is recorded in the landing evidence; each product fix is shown to matter by the test failing again when that fix alone is reverted; at most three of the 13 ids may instead be marked strict expected failures, each naming an open section of a live plan that exists when the mark lands, and none is skipped or deleted; the suite adds no failure id against the stated base.</p>
+    <p><strong>Done when:</strong> the default <code>tests/standard_names</code> run on a compute partition reports none of the 13 ids failing at the merged head, and the cascade-calibration id runs without skipping from inputs committed in the repository, reconstructed only if every calibrated value in the committed calibration thresholds rebuilds from them unchanged, the recorded source path aside; if they cannot be, the lead's ruling between regenerating the calibration and retiring the rebuild check is recorded on this section and applied instead; each id's diagnosis is recorded in the landing evidence; each product fix is shown to matter by the test failing again when that fix alone is reverted; at most three of the 13 ids may instead be marked strict expected failures, each naming an open section of a live plan that exists when the mark lands, and none is skipped or deleted; the suite adds no failure id against the stated base.</p>
 
     <h2 id="s2">§2 — The receipt-correction link declared in the graph schema</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
@@ -59,7 +59,7 @@
     <p><strong>Done when:</strong> a whole-catalog release against a stand-in fork remote opens one review pull request on the fork, whose body uses markdown links rather than bare URLs; the same run against an upstream remote refuses before any push; tests cover both, and the batch path is unchanged.</p>
 
     <h2 id="s5">§5 — A release can run from a fenced worker</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s5" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
     <p>Releases have so far been cut only by a coordinator from the main checkout, on the understanding that the release path needs a checked-out branch, while every worker runs in a detached worktree. Whether a cut from a worktree works today has not been measured. A release is ordinary pipeline work and should be dispatchable.</p>
     <p><strong>Done when:</strong> a release dry run inside a detached worktree completes and reports the tag it would cut; the real cut from such a worktree succeeds against a stand-in remote; the main-checkout path is unchanged; the guard that stops a release cut from an unmerged revision still fires.</p>
 
@@ -142,11 +142,14 @@
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261111T222140784389-sph-worktree-release" data-who="reckon-build" data-when="2026-11-12T01:01:33Z">
     <div class="r-comment-body"><p>§5 — both on-main release guards admit a detached worktree head proven merged into main (`merge-base --is-ancestor HEAD main`) and still refuse an unmerged one, and a candidate cut that commits now pushes HEAD to the remote main so the tag never names a commit main lacks; measure: 7 new tests, 78 pass across the two release suites (EXIT=0), the cut created tag v1.0.0rc1 on a local bare stand-in remote with that remote's main and the tag both resolving to the release commit, and three separate red arms failed 3, 2 and 1 tests — the catalog guard restored, the CLI guard restored, and the push ref restored to `main`</p></div>
 </div>
+<div class="r-comment" data-section="s5" data-id="c-close-s5" data-who="reckon-build" data-when="2026-11-12T02:45:00Z">
+    <div class="r-comment-body"><p>§5 closed (<code>sph-worktree-release</code>, commits <code>9a5965792</code>, <code>bfac8317a</code>, <code>d5cf1d817</code>, <code>91daceb20</code>; reviewed at the final head). Both on-main release guards, in the release module and in the CLI pre-flight, admit a detached worktree head proven merged into main and still refuse an unmerged one. A candidate cut that commits now pushes <code>HEAD</code> to the remote's main, so the tag never names a commit main lacks; the first review caught that the original change pushed the literal <code>main</code> ref. 78 release tests pass; the cut created a tag on a bare stand-in remote with that remote's main and the tag on the release commit; restoring each guard separately, and the old push, each turns tests red. <a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.html">evidence</a></p></div>
+</div>
 <div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-11-11T22:40:00Z">
     <div class="r-comment-body"><p>§6 closed: the defect is carried on reckon as <code>reckon:a-promotion-reads-the-evidence-it-is-given#s18</code> with followup <code>@f-aprteig-018</code>, citing both landings; no imas-codex test was changed. <a href="/imas-codex/evidence/archive/sn-pipeline-hygiene-landed.html#s6-raised-on-reckon">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261112T014238261305-review-of-sph-private-imports-611ba81d3197" data-who="reckon-build" data-when="2026-11-12T02:12:39.450Z">
-    <div class="r-comment-body"><p>Review of sph-private-imports stored: goal_fidelity 17, evidence 19, scope_discipline 18, durability 18, fit 18, reuse 5, with two non-blocking findings (a duplicated github-slug helper in release_notes.py, and a receipt line naming a narrower command than the arm that ran) and added_failure_count 0 against the reviewed run&#x27;s own base and after suite logs.</p></div>
+    <div class="r-comment-body"><p>Review of sph-private-imports stored: goal_fidelity 17, evidence 19, scope_discipline 18, durability 18, fit 18, reuse 5, with two non-blocking findings (a duplicated github-slug helper in release_notes.py, and a receipt line naming a narrower command than the arm that ran) and added_failure_count 0 against the reviewed run's own base and after suite logs.</p></div>
 </div>
 </section>
 </main>
