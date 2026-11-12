@@ -1,0 +1,75 @@
+# revision: c401f591214588cf34794c020230eb10b16b9434
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-family-decision
+# host: 98dci4-clu-3141
+# cwd: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-family-decision
+# module.__file__: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-family-decision/imas_codex/standard_names/domain_decision.py
+===== negative control: per-name path substituted per member =====
+mutated
+# command: uv run --no-sync pytest tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain -p no:cacheprovider --timeout=300 -m graph --tb=line
+============================= test session starts ==============================
+collected 1 item
+
+tests/standard_names/test_family_domain_decision.py F                    [100%]
+
+=================================== FAILURES ===================================
+E   AssertionError: the family receives one domain, got {'sn:e2e-disjoint:electron': 'transport', 'sn:e2e-disjoint:krypton': 'edge_plasma_physics'}
+    assert {'edge_plasma..., 'transport'} == {'transport'}
+      
+      Extra items in the left set:
+      'edge_plasma_physics'
+      Use -v to get more diff
+---------------------------- Captured stdout setup -----------------------------
+  Starting temp Neo4j instance...
+/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-family-decision/tests/standard_names/test_family_domain_decision.py:361: AssertionError: the family receives one domain, got {'sn:e2e-disjoint:electron': 'transport', 'sn:e2e-disjoint:krypton': 'edge_plasma_physics'}
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+13.37s setup    tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+10.45s teardown tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+2.28s call     tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+=========================== short test summary info ============================
+FAILED tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+======================== 1 failed, 1 warning in 31.12s =========================
+EXIT=1
+# restored: 0 dirty paths
+===== label set =====
+families=197 members=2086
+split_by_per_name=97
+LABELSET_EXIT=0
+===== head gate, graph tests included =====
+# command: uv run --no-sync pytest tests/standard_names/test_family_domain_decision.py tests/standard_names/test_name_domain_single_writer.py tests/standard_names/test_name_domain_writer_catalog_sites.py tests/standard_names/test_name_domain_writer_lineage_sites.py tests/standard_names/test_domain_writer_routing.py tests/standard_names/test_domain_decision.py -p no:cacheprovider --timeout=300 -m "graph or not graph" --tb=short
+============================= test session starts ==============================
+collected 57 items
+
+tests/standard_names/test_family_domain_decision.py .........            [ 15%]
+tests/standard_names/test_name_domain_single_writer.py .............     [ 38%]
+tests/standard_names/test_name_domain_writer_catalog_sites.py ....       [ 45%]
+tests/standard_names/test_name_domain_writer_lineage_sites.py ....       [ 52%]
+tests/standard_names/test_domain_writer_routing.py ..................    [ 84%]
+tests/standard_names/test_domain_decision.py .........                   [100%]
+
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+12.83s setup    tests/standard_names/test_family_domain_decision.py::test_domain_family_key_holds_the_locus_fixed
+10.40s teardown tests/standard_names/test_domain_decision.py::test_writer_sets_the_three_together_on_a_disposable_graph
+6.59s call     tests/standard_names/test_name_domain_single_writer.py::test_writer_carries_its_own_writes
+3.64s call     tests/standard_names/test_family_domain_decision.py::test_every_member_reads_the_one_stored_family_decision
+2.59s call     tests/standard_names/test_name_domain_writer_catalog_sites.py::test_persist_refined_name_writes_the_domain_for_a_client_that_is_not_a_graph_client
+2.12s call     tests/standard_names/test_name_domain_writer_catalog_sites.py::test_write_standard_names_leaves_the_domain_to_the_one_writer
+0.55s call     tests/standard_names/test_name_domain_writer_lineage_sites.py::test_single_materializer_writes_the_domain_through_the_one_writer
+0.44s call     tests/standard_names/test_name_domain_writer_lineage_sites.py::test_batched_materializer_writes_the_domain_through_the_one_writer
+0.35s call     tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+0.29s call     tests/standard_names/test_family_domain_decision.py::test_the_census_groups_by_the_same_signature_as_the_seeded_read
+======================== 57 passed, 1 warning in 47.88s ========================
+EXIT=0
