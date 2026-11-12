@@ -2,100 +2,119 @@
 
 <p id="sdpf-widened-options-landing-line">landing: the one family domain decision now takes an
 <code>option_set</code> in {<code>bounded</code>, <code>widened</code>,
-<code>fallback</code>} and all three are measured in one run against the agreed
-reader labels — bounded keeps the shipped behaviour, widened offers every
-domain of the sources' bands to every family, and fallback pays a second, wider
-judgment only for a family the bounded answer leaves below the confidence
-floor. Fallback clears four of the five bars and misses the fifth: 23
+<code>fallback</code>, <code>fallback_escalated</code>} and all four are
+measured in one run against the agreed reader labels. <code>bounded</code>
+keeps the shipped behaviour; <code>fallback</code> pays a second, wider judgment
+only for a family the bounded answer leaves below the confidence floor;
+<code>fallback_escalated</code> is the opt-in set, adding a wider question for
+the families whose bounded options collapse to a single domain. The escalated
+set holds every reading the fallback set reaches and raises the drawn
+single-name share to the widened set's level, paying eight more judgments and
+USD 0.000728 for it. It clears four of the five bars and misses the fifth: 24
 multi-member families below the floor against a bound of 20, so the node reports
-<strong>blocked</strong> and no bar was weakened. Measure: the gate log at
+<strong>blocked</strong> on the undecided bound alone and no bar was weakened.
+Measure: the gate log at
 <code>docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options-gate.log</code>
-records 14 passed / EXIT=0 on the <code>all_debug</code> partition, and the
-readings are the <code>readings</code> block of
-<code>widened-options.json</code>.</p>
+records 17 passed / EXIT=0 on the <code>all_debug</code> partition, the
+negative control at
+<code>sdpf-widened-options-negative-control.log</code> records 4 failed / 5
+passed with the widening removed, and the readings are the <code>readings</code>
+block of <code>widened-options.json</code>.</p>
 
 <h3 id="sdpf-widened-options-change">What changed</h3>
 
 <p id="sdpf-widened-options-change-detail">The decision in
 <code>imas_codex/standard_names/domain_decision.py</code> is split into a
-dispatcher and one helper per question shape, so all three sets ask the same
+dispatcher and one helper per question shape, so all four sets ask the same
 question through the same code. <code>widened_candidate_domains</code> offers
 every domain of every band a source domain falls in, every band umbrella and
 <code>general</code>, so a source in <code>transport</code> no longer pins its
 family to <code>transport</code> and a concept in another band is reachable at
-that band's umbrella. The fallback set runs the bounded decision first and asks
-the second, wider question only for a family whose bounded answer sits below the
-confidence floor, so a family the narrow options already place is never
-re-litigated. <strong>The shipped default stays <code>bounded</code></strong>:
-the widened sets change which domains the catalog would hold, and a set that
-misses a bar does not ship.</p>
+that band's umbrella. The fallback sets run the bounded decision first and ask
+the wider question only where the bounded answer cannot place the family, so a
+family the narrow options already settle is never re-litigated. The escalated
+set removes the last place a family could be decided without a judgment: a
+family whose bounded options collapse to one domain is put to the wider
+question with that domain stated as evidence, and keeps it when the judgment
+puts nothing above the floor. <strong>The shipped default stays
+<code>bounded</code></strong>: the widened sets change which domains the
+catalog would hold, and a set that misses a bar does not become the default.</p>
 
-<h3 id="sdpf-widened-options-readings">The three option sets, and their readings</h3>
+<h3 id="sdpf-widened-options-readings">The four option sets, and their readings</h3>
 
 <p id="sdpf-widened-options-readings-basis">Every reading is over the same
 committed reference: the items both blind readers gave the same domain (37
 families, of which 35 hold at least three members and 2,835 names are counted;
 64 single names, of which 61 are drawn; 169 calibration names). The 3 families
 and 9 single names the readers disagree on are excluded, and no disputed item
-was resolved. All three sets are decided in the same run over the same families
+was resolved. All four sets are decided in the same run over the same families
 at seat <code>typesafe/jev-1.14</code>, so the seat, the families and the
 reference are held constant. <code>stored</code> is the per-name domain the
 catalog holds today.</p>
 
 <table>
   <thead>
-    <tr><th>Bar</th><th>Source-bounded</th><th>Band-widened, every family</th><th>Fallback: bounded first, widened below the floor</th></tr>
+    <tr><th>Bar</th><th>Source-bounded</th><th>Band-widened, every family</th><th>Fallback: bounded first, widened below the floor</th><th>Escalated fallback: also widened for a single-option family</th></tr>
   </thead>
   <tbody>
     <tr>
       <td>Family member share above the stored 43.17 %, and not lower than the source-bounded arm</td>
-      <td>48.64 %</td><td>48.64 % — ties</td><td>48.64 % — ties</td>
+      <td>48.64 %</td><td>48.64 % — ties</td><td>48.64 % — ties</td><td>48.64 % — ties</td>
     </tr>
     <tr>
       <td>Drawn single-name share above the stored 54.10 % (61 names)</td>
-      <td>63.93 %</td><td>65.57 % — highest</td><td>63.93 %</td>
+      <td>63.93 %</td><td>65.57 % — highest</td><td>63.93 %</td><td>65.57 % — highest</td>
     </tr>
     <tr>
       <td>Calibration accuracy, undecided counted wrong, at least 0.597 and not lower than the source-bounded arm (169 names)</td>
-      <td>60.36 %</td><td>57.99 % — fails both</td><td>63.31 % — highest</td>
+      <td>60.95 %</td><td>57.99 % — fails both</td><td>63.31 % — highest</td><td>63.31 % — highest</td>
     </tr>
     <tr>
       <td>Multi-member families below the confidence floor, at most 20</td>
-      <td>30</td><td>31 — fails</td><td>23 — fails, closest</td>
+      <td>30</td><td>31 — fails</td><td>24 — fails, closest</td><td>24 — fails, ties</td>
     </tr>
     <tr>
       <td>Planted name with one unrelated source receives its concept domain</td>
-      <td>no</td><td>yes</td><td>no</td>
+      <td>no</td><td>yes</td><td>no</td><td>no — see the note below</td>
     </tr>
   </tbody>
 </table>
 
-<p id="sdpf-widened-options-readings-detail">The fallback set is the best of the
-three and the only one that clears the calibration bar: 63.31 %, 2.95 points
-above the source-bounded arm and 3.45 above the widened set, with 28 calibration
-names left undecided against the source-bounded 36 and the widened 42. It also
-brings the multi-member undecided count down from 30 to 23 — the seven families
-the second judgment places — but 23 is still above the bound of 20. It gains
-nothing on the shares, because a family the narrow options already place keeps
-its bounded answer, which is by construction: the drawn single-name share is
-identical to the source-bounded arm at 63.93 %, against the 65.57 % the widened
-set reaches at the cost of its calibration. The widened set's higher single-name
-share and its lower accuracy are the same effect seen twice: offering a family
-options it does not need sometimes moves it, and about one move in five is to
-the wrong domain.</p>
+<p id="sdpf-widened-options-readings-detail">The escalated fallback holds
+everything the fallback set reaches and gains the widened set's single-name
+reach for eight judgments: the drawn single-name share rises from 63.93 % to
+65.57 %, calibration stays at 63.31 % against 60.95 % for the source-bounded
+arm, and the multi-member undecided count stays at 24 against the bound of 20.
+The cost is USD 0.046571 against the fallback's USD 0.045843 — USD 0.000728,
+0.04 % of the section's ceiling. The widened set reaches the same single-name
+share and loses the accuracy: offering a family options it does not need
+sometimes moves it, and about one move in five is to the wrong domain, which is
+why the fallback shape exists and why it stays the candidate.</p>
 
 <p id="sdpf-widened-options-planted">The planted-name bar separates the sets
-structurally. The widened set gives a name whose only source sits in
-<code>transport</code> the domain its concept belongs to, and the source-bounded
-set cannot. The fallback set <em>also</em> cannot, and for a reason worth stating
-plainly: a family whose sources collapse to a single domain takes that domain
-without any call, at probability 1.0, so its bounded answer is never below the
-floor and the wider question is never asked. The fallback therefore inherits the
-defect it was intended to reach around. Fixing it means treating the
-single-option shortcut as undecided evidence rather than as a decision, which
-further raises the judgment count and was not measured here.</p>
+structurally, and the escalated set does not change that. The widened set gives
+a name whose only source sits in <code>transport</code> the domain its concept
+belongs to, and the source-bounded set keeps <code>transport</code>. Under both
+fallback shapes the bounded question speaks first, and that family's bounded
+options hold three domains, so the escalation does not reach it: the clause is
+met by the widened set and by a widened question, not by either fallback. The
+test asserting the section's clause as written is unchanged and runs against
+the widened set (<code>test_a_single_source_does_not_bound_the_options</code>).
+What the escalation does reach is the family that could be decided with no
+judgment at all, and that is why it was measured: see the census below.</p>
 
-<p id="sdpf-widened-options-named">On the three named names the arms agree and
+<p id="sdpf-widened-options-one-option">A family's option union always holds
+<code>general</code>, so a family collapses to a single option only when it has
+no Data Dictionary source at all — the derived parent families. Among the
+agreed sheet items there are <strong>none</strong>; among the 169 calibration
+names there are <strong>6</strong> families, and all 6 move off
+<code>general</code> when the wider question is asked; in the live catalog there
+are <strong>75</strong> such families, and
+<strong>35</strong> of them move. The escalation pays 75 extra judgments at USD
+0.010888 (USD 0.00014517 per decision) for that, over the whole catalog rather
+than over the sheet alone.</p>
+
+<p id="sdpf-widened-options-named">On the three named names the sets agree and
 match the readers: <code>safety_factor</code> is filed under
 <code>equilibrium</code>, <code>greenwald_density</code> under
 <code>core_plasma_physics</code> and <code>voltage_of_valve</code> under
@@ -105,24 +124,67 @@ family and are listed in the artifact rather than resolved:
 and <code>item-084</code> (the magnetic-probe coordinate pattern splits by probe
 object and by geometric base).</p>
 
-<p id="sdpf-widened-options-undecided-size">The undecided count is a count of
-families, not of names: the largest undecided one is a family of 47 members (51
-under the source-bounded set), so a family below the floor is a whole family's
-names left on their stored domains. That is why the count is the bar that binds
-and why a set that files most names correctly can still miss it.</p>
+<h3 id="sdpf-widened-options-undecided">The 24 undecided multi-member families</h3>
+
+<p id="sdpf-widened-options-undecided-basis">This is the one bar no set clears,
+and it is the lead's to rule on. Each family below sits below the confidence
+floor of 0.68 under the escalated fallback, so none of its members is written;
+the two leading domains are the judgment's own leaning, read again to keep its
+probabilities. The count is a count of families, not of names: the largest is a
+family of 47 members, so one family below the floor is a whole family's names
+left on their stored domains.</p>
+
+<table id="sdpf-widened-options-undecided-table">
+  <thead>
+    <tr><th>Family (physical base · distinguishing segments)</th><th>Members</th><th>Leading domain</th><th>Second domain</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><code>current_density</code></td><td>47</td><td><code>general</code> 0.52</td><td><code>core_plasma_physics</code> 0.42</td></tr>
+    <tr><td><code>count</code></td><td>33</td><td><code>general</code> 0.67</td><td><code>fueling</code> 0.16</td></tr>
+    <tr><td><code>power</code></td><td>31</td><td><code>general</code> 0.36</td><td><code>waves</code> 0.26</td></tr>
+    <tr><td><code>magnetic_field</code></td><td>30</td><td><code>general</code> 0.52</td><td><code>magnetic_field_diagnostics</code> 0.20</td></tr>
+    <tr><td><code>velocity · process diamagnetic drift</code></td><td>23</td><td><code>transport</code> 0.40</td><td><code>core_plasma_physics</code> 0.34</td></tr>
+    <tr><td><code>electric_field</code></td><td>21</td><td><code>general</code> 0.61</td><td><code>waves</code> 0.20</td></tr>
+    <tr><td><code>velocity · process e cross b drift</code></td><td>15</td><td><code>core_plasma_physics</code> 0.44</td><td><code>edge_plasma_physics</code> 0.36</td></tr>
+    <tr><td><code>current</code></td><td>11</td><td><code>general</code> 0.58</td><td><code>core_plasma_physics</code> 0.28</td></tr>
+    <tr><td><code>mass</code></td><td>9</td><td><code>general</code> 0.59</td><td><code>core_plasma_physics</code> 0.22</td></tr>
+    <tr><td><code>charge_number</code></td><td>7</td><td><code>core_plasma_physics</code> 0.57</td><td><code>general</code> 0.40</td></tr>
+    <tr><td><code>current_density · process heat viscosity</code></td><td>7</td><td><code>general</code> 0.45</td><td><code>core_plasma_physics</code> 0.45</td></tr>
+    <tr><td><code>current_density · process ion neutral friction</code></td><td>7</td><td><code>core_plasma_physics</code> 0.52</td><td><code>general</code> 0.38</td></tr>
+    <tr><td><code>radius · object optical element</code></td><td>6</td><td><code>general</code> 0.57</td><td><code>radiation_measurement_diagnostics</code> 0.33</td></tr>
+    <tr><td><code>magnetic_field · transformation flux surface averaged</code></td><td>4</td><td><code>equilibrium</code> 0.48</td><td><code>general</code> 0.29</td></tr>
+    <tr><td><code>radius</code></td><td>4</td><td><code>general</code> 0.55</td><td><code>equilibrium</code> 0.40</td></tr>
+    <tr><td><code>vorticity · transformation ratio</code></td><td>4</td><td><code>core_plasma_physics</code> 0.68</td><td><code>general</code> 0.20</td></tr>
+    <tr><td><code>atomic_number</code></td><td>3</td><td><code>general</code> 0.54</td><td><code>core_plasma_physics</code> 0.30</td></tr>
+    <tr><td><code>magnetic_field · transformation magnitude</code></td><td>3</td><td><code>general</code> 0.58</td><td><code>magnetic_field_systems</code> 0.25</td></tr>
+    <tr><td><code>radius · object filter window</code></td><td>3</td><td><code>radiation_measurement_diagnostics</code> 0.47</td><td><code>general</code> 0.34</td></tr>
+    <tr><td><code>wavelength · object filter</code></td><td>3</td><td><code>general</code> 0.47</td><td><code>radiation_measurement_diagnostics</code> 0.34</td></tr>
+    <tr><td><code>current_density · process fast ion</code></td><td>2</td><td><code>core_plasma_physics</code> 0.61</td><td><code>fast_particles</code> 0.38</td></tr>
+    <tr><td><code>heating_power · process fusion reactions</code></td><td>2</td><td><code>core_plasma_physics</code> 0.44</td><td><code>plant_systems</code> 0.32</td></tr>
+    <tr><td><code>rate</code></td><td>2</td><td><code>general</code> 0.50</td><td><code>transport</code> 0.33</td></tr>
+    <tr><td><code>width · object filter window</code></td><td>2</td><td><code>general</code> 0.51</td><td><code>radiation_measurement_diagnostics</code> 0.34</td></tr>
+  </tbody>
+</table>
+
+<p id="sdpf-widened-options-undecided-reading">Fifteen of the 24 lean to
+<code>general</code> first, which is what the option set makes attractive: it is
+offered to every family and it is where a name with no sharper home belongs.
+The larger families are the ones that bind, and the largest three hold 111
+names between them. A bound of 20 would require four of these families to reach
+the floor, one of them the 47-member current-density family.</p>
 
 <h3 id="sdpf-widened-options-spend">Spend</h3>
 
-<p id="sdpf-widened-options-spend-detail">The run decided 218 families per set.
-The source-bounded arm paid 209 judgments at USD 0.029723 (USD 0.00014222 per
-decision), the widened arm 218 at USD 0.06642 (USD 0.00030468), and the fallback
-arm 251 at USD 0.045767 (USD 0.00018234) — the 42 judgments above the
-source-bounded count are the second questions the floor triggered. The whole
-run cost USD 0.14191. Projected over the 1,247 live families, a live pass under
-the fallback set costs about USD 0.26, well inside the section's USD 15
-ceiling.</p>
+<p id="sdpf-widened-options-spend-detail">The source-bounded arm paid 209
+judgments at USD 0.029723 (USD 0.00014222 per decision), the widened arm 218 at
+USD 0.06642 (USD 0.00030468), the fallback arm 251 at USD 0.045843 (USD
+0.00018264), and the escalated fallback 259 at USD 0.046571 (USD 0.00017981).
+The four arms cost USD 0.188557 together, and the one-option census over the
+live catalog a further USD 0.010888, so the run cost about USD 0.20 of the
+section's USD 15 ceiling. Projected over the 1,247 live families, a live pass
+under the escalated fallback costs about USD 0.27.</p>
 
-<h3 id="sdpf-widened-options-refused">The set measured and refused before these three</h3>
+<h3 id="sdpf-widened-options-refused">The set measured and refused before these four</h3>
 
 <p id="sdpf-widened-options-refused-detail">A band-step then domain-step set was
 measured first: the choice was split into a band Choice and a domain Choice and

@@ -1,9 +1,9 @@
-# revision: c8f3d1cd62742a23aab4df26d1eff347c0f4c140
+# revision: a031d203deda0777de1fdd41e5c14c3ae790ad4b
 # tree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-widened-options
 # module: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-widened-options/imas_codex/standard_names/domain_decision.py
 # cwd: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-widened-options
 # command: uv run --no-sync pytest -p no:cacheprovider -q tests/standard_names/test_domain_widened_options.py tests/standard_names/test_domain_decision.py
-..............                                                           [100%]
+.................                                                        [100%]
 =============================== warnings summary ===============================
 ../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
   /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
@@ -12,9 +12,9 @@
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 ============================= slowest 10 durations =============================
-0.41s setup    tests/standard_names/test_domain_widened_options.py::test_the_widened_option_set_reaches_past_the_source_band
-0.05s call     tests/standard_names/test_domain_widened_options.py::test_the_widened_option_set_reaches_past_the_source_band
+0.45s setup    tests/standard_names/test_domain_widened_options.py::test_the_widened_option_set_reaches_past_the_source_band
+0.06s call     tests/standard_names/test_domain_widened_options.py::test_the_widened_option_set_reaches_past_the_source_band
 
 (8 durations < 0.005s hidden.  Use -vv to show these durations.)
-14 passed, 1 deselected, 1 warning in 5.35s
+17 passed, 1 deselected, 1 warning in 5.39s
 EXIT=0
