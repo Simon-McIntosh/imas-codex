@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T07:51:19.934Z",
+  "dispatched_at": "2026-11-12T07:44:51Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "reasoning-1",
+      "reason": "without one stated rule the \u00a73 node either sends every below-floor single name to the lead, spending lead attention s5 deliberately refused, or silently departs from \u00a73's routing, and neither outcome is reviewable.",
+      "text": "s5 now says \"a single name below the floor keeps its stored domain, is counted, and is not sent to the lead\", while \u00a73 (plan.html:67) says \"A family the decision reports undecided under the options \u00a75 gives it ... is not left split unseen\", and \u00a72 (plan.html:53) defines \"A name with no siblings is its own family\", so the two rules give opposite instructions for the same name and a \u00a73 node must break one of them",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-1",
+      "reason": "the gate can fail while the widened options work on every name they actually decided, or pass with the rise carried by a handful of names, so the node cannot tell which happened; recording the share over decided names beside the full draw makes the measure attributable.",
+      "text": "bullet 1 compares the share the decision files under the reader's domain against the share the stored domains reach, but s5's own rule leaves a below-floor single name at its stored domain, so those names contribute the stored share to both arms and the measured rise is diluted by an unrecorded count, and widening to 32 domains spreads the probability mass so this count grows rather than shrinks",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5734ae0e1335c5cb436fb6c36e4706e8eca6cc8f",
+  "plan_fingerprint": "8852c0f373f0b83d630c8b464f9bef0f2150eb5ba00ab960160d58de9b1dfcbf",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 9,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T074343591126-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "1e5fecdaaa81fdcaed27c8fc8076bdffadee9b25",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-catalog-grouping.html:415,424 carry 0.560 as 84 of 150 labelled names against the 0.597 floor over all 32 domains, and the evidence directory resolves.",
+    "done_when": "a finding \u2014 bullet 1's share comparison counts single names the decision left at their stored domain as agreement with that stored domain, so the gate cannot attribute a rise to the widened options.",
+    "evidence_paths": "pass \u2014 the label set and gate logs go to docs/evidence/fragments/sn-domain-per-family/, which exists and already holds family-label-set.json, the gate log and the negative-control log.",
+    "naming": "pass \u2014 s5 introduces no plan label, ticket number or version tag; \u00a72/\u00a73/\u00a75 are intra-plan section references, not code names.",
+    "reasoning": "a finding \u2014 s5's rule for a below-floor single name contradicts \u00a73's rule that every undecided family goes to the lead, and a single name is defined as a family.",
+    "single_goal": "pass \u2014 s5 delivers one endpoint, the widened option set clearing the 0.597 bar, with no second deliverable.",
+    "wiring": "pass \u2014 s5's depends-on sn-domain-per-family#s2 is declared at plan.html:23 and matches the followup body, and s3 declares its wait on s5."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "e374d958c4cb02c7ca4fb0bd10cf955e67a2db108246fdce729094bd09570c8c",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "6c0600ae7e6f76805a59a8f079654965bc5afe2ecb03b540d3ff53f3e15d31c6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:12:39.863223+00:00",
+  "total": null
+}
