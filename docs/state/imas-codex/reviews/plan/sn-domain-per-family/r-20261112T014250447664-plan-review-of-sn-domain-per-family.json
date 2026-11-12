@@ -112,6 +112,16 @@
       "finding": "duplicate_owner-3",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the family-agreement count is added to the existing domain audit)",
       "when": "2026-11-12T02:02:51.795290+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-4",
+      "note": "\u00a74 now says the refusal is one more check in the export's existing gate set and adds no command option or second traversal",
+      "reason": "",
+      "when": "2026-11-12T02:03:05.148556+00:00"
     }
   ],
   "responses": {
@@ -135,6 +145,15 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the family-agreement count is added to the existing domain audit)",
       "when": "2026-11-12T02:02:51.795290+00:00"
+    },
+    "duplicate_owner-4": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a74 now says the refusal is one more check in the export's existing gate set and adds no command option or second traversal",
+      "reason": "",
+      "when": "2026-11-12T02:03:05.148556+00:00"
     },
     "reuse_search-1": {
       "action": "declined",
