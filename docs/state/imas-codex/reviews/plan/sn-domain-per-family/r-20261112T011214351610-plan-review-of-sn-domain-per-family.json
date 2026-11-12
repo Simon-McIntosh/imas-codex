@@ -41,7 +41,30 @@
   "plan_slug": "sn-domain-per-family",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a73 now lets a family remain split only under a recorded lead correction naming it, and counts those",
+      "reason": "",
+      "when": "2026-11-12T01:38:33.119202+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "note": "\u00a73 now lets a family remain split only under a recorded lead correction naming it, and counts those",
+      "reason": "",
+      "when": "2026-11-12T01:38:33.119202+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T011214351610-plan-review-of-sn-domain-per-family.json",
   "review_run_id": "r-20261112T011214351610-plan-review-of-sn-domain-per-family",
   "reviewed_blob_sha": "fd37b4a25ddedfa190eb283e4de176acd31d7510",
   "rubric": "content",
