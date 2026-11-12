@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T14:58:10.001Z",
+  "dispatched_at": "2026-11-12T14:54:23Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "done_when-1",
+      "reason": "without a floor on names reaching accepted documentation the node can close having drained nothing, which is precisely the outcome the stalled drain it inherits already produced, so the section would be recorded done on no evidence that the backlog moved.",
+      "text": "the done-when closes on \"each has reached accepted documentation or is listed with its stage and the recorded reason it stands\", so a drain that moves zero names to accepted documentation and lists every name in the start backlog satisfies it; the section's measure cannot fail, and this is the same shape the earlier review had repaired in \u00a74 by adding a yield floor",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "reasoning-1",
+      "reason": "these numbers are what the plan uses to retire the old 2,368 floor, so they need the path a reader can open and wording that reconciles with the drain fragment the section already cites; as written a reader recomputing the chain from the plan's own figures gets a count that appears to contradict it.",
+      "text": "\"After that restoration the record reads 2,497 accepted names with accepted documentation and 721 with pending documentation\" names no path, and the sentence attributes the whole move from the drain's 2,028 to 2,497 to \u00a752's restoration; the restoration record `docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html` reads before `accepted 2107, pending 1108` and after `accepted 2497, pending 721`, i.e. the restoration moved 390 from a base of 2,107, so 2,028 + 391 = 2,419 matches neither figure",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+  "plan_fingerprint": "6730d1478175ae15b93a7cd525dfb9eaf383414ab1e02b3b94fa631f13b8cddc",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 22,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T145320376824-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "4db573906ecb14cb8fb8e57d99f872e8e5515506",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html` and `sib-restore-reset-docs.html` both exist and carry the figures cited, and the `sn-integrity-backlog#s52` link resolves to a section that exists and is `done`.",
+    "done_when": "a finding \u2014 \u00a75's endpoint is satisfiable by a drain that accepts no name's documentation, as long as every name is listed with a stage and a reason.",
+    "evidence_paths": "pass \u2014 the before/after counts by stage, the spend, the ceiling and the remaining balance all land under `docs/evidence/fragments/sn-full-dd-continuation/`, a committed path a later reader can open; nothing is placed in a scratchpad or node-local temporary.",
+    "naming": "pass \u2014 s5 states counts, stages and spend, and names no code symbol, gate id, ticket number or version tag.",
+    "reasoning": "a finding \u2014 the new post-restoration counts name no source and do not reconcile with the drain's own figures by the arithmetic the sentence invites.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable, draining the documentation backlog it reads at its start under a stated ceiling, with the loss guard as its negative control rather than a second goal.",
+    "wiring": "pass \u2014 s5's `plan-section-depends-on` lists `sn-integrity-backlog#s52` and `sn-full-dd-continuation#s4`, so the drain starts after \u00a74's single post-run reading, and both resolve (`docs/plans/sn-integrity-backlog.html` carries a `data-id=\"s52\"` section, status `done`)."
+  },
+  "section_digests": {
+    "_document": "16ae1c71c9e5740bc6d2aa601f5df44baba94934b41f3f8c6736012e92b11e2d",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "5744cc83050583629c2f3f175e2174793aadf280f7db5c92a9a320d71df0aada",
+    "s5": "1fe5a822c8eb69c242a747091d0035295efe9ffcbc8017e45d4e2340380de39f",
+    "s6": "b69f4c480a9cf3a5bb789f9ec172fd784a2950de5ff28f25eb6162d59232fd0e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T15:17:30.487546+00:00",
+  "total": null
+}
