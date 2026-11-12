@@ -1,9 +1,9 @@
-# revision: a031d203deda0777de1fdd41e5c14c3ae790ad4b
+# revision: c8ac96807b55a0aa45283cecd1dfa03eb604b8f3
 # tree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-widened-options
 # module: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-widened-options/imas_codex/standard_names/domain_decision.py
 # cwd: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdpf-widened-options
 # command: uv run --no-sync pytest -p no:cacheprovider -q tests/standard_names/test_domain_widened_options.py tests/standard_names/test_domain_decision.py
-.................                                                        [100%]
+..................                                                       [100%]
 =============================== warnings summary ===============================
 ../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
   /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
@@ -12,9 +12,31 @@
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 ============================= slowest 10 durations =============================
-0.45s setup    tests/standard_names/test_domain_widened_options.py::test_the_widened_option_set_reaches_past_the_source_band
-0.06s call     tests/standard_names/test_domain_widened_options.py::test_the_widened_option_set_reaches_past_the_source_band
+0.38s setup    tests/standard_names/test_domain_widened_options.py::test_the_widened_option_set_reaches_past_the_source_band
+0.05s call     tests/standard_names/test_domain_widened_options.py::test_the_widened_option_set_reaches_past_the_source_band
 
 (8 durations < 0.005s hidden.  Use -vv to show these durations.)
-17 passed, 1 deselected, 1 warning in 5.39s
+18 passed, 1 deselected, 1 warning in 4.82s
+EXIT=0
+# command: uv run --no-sync pytest -p no:cacheprovider -q tests/standard_names/test_family_domain_decision.py -m graph
+......                                                                   [100%]
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+10.45s teardown tests/standard_names/test_family_domain_decision.py::test_the_census_groups_by_the_same_signature_as_the_seeded_read
+8.88s setup    tests/standard_names/test_family_domain_decision.py::test_every_member_reads_the_one_stored_family_decision
+2.76s call     tests/standard_names/test_family_domain_decision.py::test_every_member_reads_the_one_stored_family_decision
+0.28s call     tests/standard_names/test_family_domain_decision.py::test_a_planted_disjoint_family_receives_one_domain
+0.21s call     tests/standard_names/test_family_domain_decision.py::test_the_census_groups_by_the_same_signature_as_the_seeded_read
+0.14s call     tests/standard_names/test_family_domain_decision.py::test_a_family_below_the_floor_is_held_split_across_its_members
+0.06s call     tests/standard_names/test_family_domain_decision.py::test_the_fan_out_goes_through_the_one_writer
+0.06s call     tests/standard_names/test_family_domain_decision.py::test_removing_the_split_leaves_the_members_unwritten
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+6 passed, 4 deselected, 1 warning in 27.91s
 EXIT=0
