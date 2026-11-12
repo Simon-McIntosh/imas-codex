@@ -71,6 +71,16 @@
       "finding": "deep_module-1",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the one registry renderer in the docs worker)",
       "when": "2026-11-12T02:01:19.851932+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "\u00a77 now says the four refusals are checks inside the export's existing gate set, reported through its existing result, with no new command option",
+      "reason": "",
+      "when": "2026-11-12T02:01:32.631435+00:00"
     }
   ],
   "responses": {
@@ -85,6 +95,15 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the existing registry conformance comparison in docs_gates)",
       "when": "2026-11-12T02:01:09.244422+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a77 now says the four refusals are checks inside the export's existing gate set, reported through its existing result, with no new command option",
+      "reason": "",
+      "when": "2026-11-12T02:01:32.631435+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261112T014132041727-plan-review-of-sn-definitions-by-construction.json",
