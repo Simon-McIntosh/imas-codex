@@ -4,6 +4,13 @@
   "call_sites": [],
   "completed_at": "2026-11-12T09:24:33.008Z",
   "dispatched_at": "2026-11-12T09:13:29Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sdpf-labelled-comparison-acad1f648fa5",
+      "recorded_at": "2026-11-12T09:46:40.462160+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html",
