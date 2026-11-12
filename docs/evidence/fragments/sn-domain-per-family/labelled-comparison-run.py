@@ -22,6 +22,7 @@ import argparse
 import asyncio
 import json
 from collections import Counter
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -245,6 +246,126 @@ async def _leading_domains(
     return [{"domain": domain, "probability": round(p, 4)} for domain, p in ranked[:2]]
 
 
+def _strict_reading(
+    calibration_rows: list[dict[str, Any]], stored_hits: int
+) -> dict[str, Any]:
+    """The calibration accuracy that counts every undecided name as wrong.
+
+    An undecided family writes nothing, so a name in one keeps its stored
+    domain and can land on the label without the decision having earned it.
+    The landed reading keeps that accident, because it describes what the
+    measurement leaves the catalog holding; this reading removes it, so the
+    two together say how much of the accuracy is the decision's own.
+    """
+    total = len(calibration_rows)
+    strict_hits = sum(
+        1 for row in calibration_rows if row["decided"] and row["family_match"]
+    )
+    carried = sum(
+        1 for row in calibration_rows if not row["decided"] and row["family_match"]
+    )
+    return {
+        "family_accuracy_strict": round(strict_hits / total, 4) if total else 0.0,
+        "family_hits_strict": strict_hits,
+        "stored_hits": stored_hits,
+        "undecided_landing_on_label": carried,
+    }
+
+
+def _undecided_summary(rows: list[dict[str, Any]]) -> dict[str, Any]:
+    """The undecided families by size, naming the largest with its members."""
+    ordered = sorted(rows, key=lambda row: row["member_count"], reverse=True)
+    largest = ordered[0] if ordered else None
+    return {
+        "families": len(ordered),
+        "with_two_or_more_members": sum(
+            1 for row in ordered if row["member_count"] >= 2
+        ),
+        "sizes_descending": [row["member_count"] for row in ordered],
+        "largest": (
+            {
+                "family_key": largest["family_key"],
+                "member_count": largest["member_count"],
+                "members": largest["members"],
+                "leading": largest["leading"],
+            }
+            if largest
+            else None
+        ),
+    }
+
+
+def _provenance(seat: str) -> dict[str, Any]:
+    """What a later reader needs to re-run or audit this measurement."""
+    import subprocess
+
+    def git(*args: str) -> str:
+        return subprocess.run(
+            ["git", *args], cwd=ROOT, capture_output=True, text=True, check=False
+        ).stdout.strip()
+
+    return {
+        "revision": git("rev-parse", "HEAD"),
+        "tree": str(ROOT),
+        "module": "imas_codex/standard_names/domain_decision.py",
+        "seat": seat,
+        "confidence_floor": CONFIDENCE_FLOOR,
+        "generated_at": datetime.now(UTC).isoformat(),
+        "command": (
+            "uv run --no-sync python "
+            "docs/evidence/fragments/sn-domain-per-family/"
+            "labelled-comparison-run.py --output "
+            "docs/evidence/fragments/sn-domain-per-family/labelled-comparison.json"
+        ),
+        "reproduce": (
+            "re-running spends one judgment per family again; --from-existing "
+            "re-derives every reading from the committed rows without spending any"
+        ),
+        "writes_to_graph": False,
+        "graph_access": "read-only",
+    }
+
+
+def _derive_from_existing(path: Path, revision: str = "") -> int:
+    """Re-derive the strict reading and the undecided summary from committed rows.
+
+    Used to repair an artifact whose rows are sound but whose derived fields
+    or prose were wrong: it spends no judgments and changes no measurement.
+    """
+    with path.open() as handle:
+        payload = json.load(handle)
+    stored_hits = sum(1 for row in payload["calibration_rows"] if row["stored_match"])
+    payload["calibration"].update(_strict_reading(payload["calibration_rows"], stored_hits))
+    payload["calibration"].setdefault(
+        "accuracy_basis",
+        "family_accuracy files an undecided name at its stored domain, which is "
+        "what the landed decision leaves it holding; family_accuracy_strict "
+        "counts every undecided name as wrong",
+    )
+    payload["undecided_summary"] = _undecided_summary(payload["undecided"])
+    payload.setdefault("provenance", {})
+    payload["provenance"].update(
+        {
+            "revised_at": datetime.now(UTC).isoformat(),
+            "revision": revision
+            or payload.get("provenance", {}).get("revision", ""),
+            "module": "imas_codex/standard_names/domain_decision.py",
+            "writes_to_graph": False,
+            "graph_access": "read-only",
+            "note": (
+                "strict reading and undecided summary re-derived from the "
+                "committed rows; no judgment was spent and no row changed"
+            ),
+        }
+    )
+    with path.open("w") as handle:
+        json.dump(payload, handle, indent=1)
+        handle.write("\n")
+    print(json.dumps(payload["calibration"], indent=1))
+    print(json.dumps(_undecided_summary(payload["undecided"])["largest"]["member_count"]))
+    return 0
+
+
 def _filed_domain(decision: Any, member: dict) -> str:
     """The domain a member is filed under: the family's choice, else its stored."""
     if decision is not None and decision.decided:
@@ -255,8 +376,16 @@ def _filed_domain(decision: Any, member: dict) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
-    parser.add_argument("--only-families", action="store_true")
+    parser.add_argument("--from-existing", action="store_true")
+    parser.add_argument(
+        "--revision",
+        default="",
+        help="the revision the measurement ran at, when deriving from existing rows",
+    )
     args = parser.parse_args()
+
+    if args.from_existing:
+        return _derive_from_existing(args.output, revision=args.revision)
 
     seat = get_model(SEAT)
     agreement = _reader_agreement()
@@ -449,6 +578,12 @@ def main() -> int:
         "family_accuracy": round(family_hits / total_cal, 4) if total_cal else 0.0,
         "stored_accuracy": round(stored_hits / total_cal, 4) if total_cal else 0.0,
         "undecided": undecided_calibration,
+        "accuracy_basis": (
+            "family_accuracy files an undecided name at its stored domain, which "
+            "is what the landed decision leaves it holding; family_accuracy_strict "
+            "counts every undecided name as wrong"
+        ),
+        **_strict_reading(calibration_rows, stored_hits),
     }
 
     # ---- undecided families, with their two leading domains -------------
@@ -474,6 +609,7 @@ def main() -> int:
     payload = {
         "seat": seat,
         "confidence_floor": CONFIDENCE_FLOOR,
+        "provenance": _provenance(seat),
         "reader_agreement": agreement,
         "sheet_families_mapping_to_more_than_one_decision_family": multi_mapped,
         "judgments": {
@@ -490,6 +626,7 @@ def main() -> int:
         "calibration": calibration_reading,
         "calibration_rows": calibration_rows,
         "undecided": undecided_rows,
+        "undecided_summary": _undecided_summary(undecided_rows),
     }
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("w") as handle:

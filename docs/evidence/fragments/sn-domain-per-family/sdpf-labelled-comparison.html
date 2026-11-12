@@ -68,15 +68,20 @@
   <code>sn-catalog-grouping</code> that are live and labelled (20 lead-approved, 149 from the drawn sample), the
   per-family decision reaches <strong>72.19&nbsp;%</strong> accuracy against <strong>54.44&nbsp;%</strong> for the
   stored domains read from <code>scg-domain-incumbent.json</code>. It is not lower, so the regression passes.
-  36 of the 169 were left below the floor and counted as wrong. 92 of the 169 sit in a single-member family; the
-  rest are members of families of up to seven, decided once for the family.</p>
+  That reading files an undecided name at the stored domain it keeps, which is what the landed decision leaves
+  the catalog holding; 36 of the 169 were left below the floor, and 20 of those 36 land on the label that way
+  rather than by the decision's own choice. Counting every undecided name as wrong, the accuracy is
+  <strong>60.36&nbsp;%</strong> (102 of 169) — still above the stored reading, so the regression passes on
+  either basis and both are recorded apart in <code>labelled-comparison.json</code>. 92 of the 169 sit in a
+  single-member family; the rest are members of families of up to seven, decided once for the family.</p>
 
   <h3 id="sdpf-labelled-comparison-undecided">Families left undecided</h3>
   <p id="sdpf-labelled-comparison-undecided-headline">42 of the 218 families decided came back below the floor;
   30 of them hold two or more members and 12 are single names, each listed with its members and its two leading
-  domains in <code>labelled-comparison.json</code>. The largest is a family of 33 members whose leading domains
-  are general (0.63-banded answer) and fueling. No member of an undecided family was written — this node writes
-  nothing at all.</p>
+  domains in <code>labelled-comparison.json</code>. By size they begin 51, 47, 33, 31, 30, 24. The largest is a
+  family of <strong>51</strong> members — the ion charge-state torque density due to collisions, across fast and
+  thermal, co- and counter-passing species — whose two leading domains are <code>transport</code> and
+  <code>fast_particles</code>. No member of an undecided family was written — this node writes nothing at all.</p>
 
   <h3 id="sdpf-labelled-comparison-for-lead">Where the decision and the agreed reader differ</h3>
   <p id="sdpf-labelled-comparison-for-lead-note">Listed for the lead; none is settled here. Six families the
@@ -85,6 +90,15 @@
   families), and <code>&lt;X&gt;_neutral_velocity</code> was decided core_plasma_physics. Two sheet families map
   to more than one decision family: <code>&lt;X&gt;_current_density_due_to_&lt;X&gt;_viscosity</code> splits on
   the viscosity process, and <code>&lt;X&gt;_coordinate_of_&lt;X&gt;_magnetic_field_probe</code> across three.</p>
+
+  <h3 id="sdpf-labelled-comparison-reproduce">Reproducing it</h3>
+  <p id="sdpf-labelled-comparison-reproduce-note">Every number above is emitted by
+  <code>labelled-comparison-run.py</code>, which records the revision it ran at, the seat, the confidence floor
+  and the graph access in the artifact's <code>provenance</code> block. Re-running re-spends one judgment per
+  family; <code>--from-existing</code> re-derives each reading from the committed rows and spends none, which is
+  how the strict reading and the undecided summary were added to an artifact whose rows were already measured.
+  <code>python labelled-comparison-run.py --from-existing --output labelled-comparison.json</code> reproduces
+  them exactly, because they are functions of the rows.</p>
 
   <h3 id="sdpf-labelled-comparison-gate">Gate</h3>
   <p id="sdpf-labelled-comparison-gate-note">The gate ran on the <code>all_debug</code> partition over the

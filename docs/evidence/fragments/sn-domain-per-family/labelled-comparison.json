@@ -1976,7 +1976,12 @@
   "single_member_families": 92,
   "family_accuracy": 0.7219,
   "stored_accuracy": 0.5444,
-  "undecided": 36
+  "undecided": 36,
+  "family_accuracy_strict": 0.6036,
+  "family_hits_strict": 102,
+  "stored_hits": 92,
+  "undecided_landing_on_label": 20,
+  "accuracy_basis": "family_accuracy files an undecided name at its stored domain, which is what the landed decision leaves it holding; family_accuracy_strict counts every undecided name as wrong"
  },
  "calibration_rows": [
   {
@@ -5316,5 +5321,128 @@
     }
    ]
   }
- ]
+ ],
+ "undecided_summary": {
+  "families": 42,
+  "with_two_or_more_members": 30,
+  "sizes_descending": [
+   51,
+   47,
+   33,
+   31,
+   30,
+   24,
+   23,
+   21,
+   15,
+   14,
+   11,
+   10,
+   9,
+   7,
+   7,
+   7,
+   7,
+   6,
+   6,
+   4,
+   4,
+   3,
+   3,
+   3,
+   3,
+   2,
+   2,
+   2,
+   2,
+   2,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   1
+  ],
+  "largest": {
+   "family_key": "physical_base=torque_density|geometric_base=|transformation=|process=collisions|object=|position=|geometry=|region=",
+   "member_count": 51,
+   "members": [
+    "co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+    "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+    "counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "fast_ion_charge_state_torque_density_due_to_collisions",
+    "thermal_ion_charge_state_torque_density_due_to_collisions",
+    "ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_fast_ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_co_passing_fast_electron_torque_density_due_to_collisions",
+    "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+    "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions",
+    "toroidal_counter_passing_fast_electron_torque_density_due_to_collisions",
+    "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions",
+    "toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions",
+    "toroidal_counter_passing_thermal_ion_torque_density_due_to_collisions",
+    "toroidal_fast_ion_torque_density_due_to_collisions",
+    "toroidal_thermal_electron_torque_density_due_to_collisions",
+    "toroidal_thermal_ion_torque_density_due_to_collisions",
+    "toroidal_trapped_fast_electron_torque_density_due_to_collisions",
+    "toroidal_trapped_fast_ion_torque_density_due_to_collisions",
+    "toroidal_trapped_thermal_electron_torque_density_due_to_collisions",
+    "toroidal_trapped_thermal_ion_torque_density_due_to_collisions",
+    "toroidal_trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+    "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions",
+    "co_passing_thermal_electron_torque_density_due_to_collisions",
+    "thermal_electron_torque_density_due_to_collisions",
+    "electron_torque_density_due_to_collisions",
+    "trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+    "trapped_thermal_ion_torque_density_due_to_collisions",
+    "thermal_ion_torque_density_due_to_collisions",
+    "ion_torque_density_due_to_collisions",
+    "trapped_thermal_electron_torque_density_due_to_collisions",
+    "trapped_fast_ion_torque_density_due_to_collisions",
+    "fast_ion_torque_density_due_to_collisions",
+    "fast_electron_torque_density_due_to_collisions",
+    "counter_passing_thermal_ion_torque_density_due_to_collisions",
+    "counter_passing_thermal_electron_torque_density_due_to_collisions",
+    "counter_passing_fast_ion_torque_density_due_to_collisions",
+    "counter_passing_fast_electron_torque_density_due_to_collisions",
+    "co_passing_thermal_ion_torque_density_due_to_collisions",
+    "co_passing_fast_ion_torque_density_due_to_collisions",
+    "torque_density_due_to_collisions",
+    "co_passing_fast_electron_torque_density_due_to_collisions",
+    "trapped_fast_electron_torque_density_due_to_collisions"
+   ],
+   "leading": [
+    {
+     "domain": "transport",
+     "probability": 0.65
+    },
+    {
+     "domain": "fast_particles",
+     "probability": 0.33
+    }
+   ]
+  }
+ },
+ "provenance": {
+  "revised_at": "2026-11-12T09:41:32.549522+00:00",
+  "revision": "0428c0876425784635ff00e281c3b44fb759aca5",
+  "note": "strict reading and undecided summary re-derived from the committed rows; no judgment was spent and no row changed",
+  "module": "imas_codex/standard_names/domain_decision.py",
+  "writes_to_graph": false,
+  "graph_access": "read-only"
+ }
 }
