@@ -1,0 +1,115 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:927 process_generate_docs_batch",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:604 conformance_findings",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:285 _documentation_with_registry_form"
+  ],
+  "completed_at": "2026-11-12T10:32:47.404Z",
+  "dispatched_at": "2026-11-12T10:18:48Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_generate_docs.py",
+      "line": "738",
+      "severity": "blocking",
+      "text": "the refusal is asserted only by calling _refuse_altered_shared_parts directly at :738 and :773, never through process_generate_docs_batch, and nothing asserts that persist_generated_docs was not called, so moving the call at worker_generate_docs.py:951 to after the persist would leave both tests green; the done_when requires the refusal be reached on the path the pipeline takes and not only when called directly."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_generate_docs.py",
+      "line": "951",
+      "severity": "blocking",
+      "text": "the refusal can never fire for an altered part on the pipeline path: _documentation_with_registry_form appends every stored sentence at :674 through replace_altered_shared_parts, and shared_part_findings at docs_gates.py:1074 only reports SHARED_PART_ALTERED when the stored sentence is absent, so a paraphrase whose overlap falls below 0.75 is kept beside the appended sentence and is neither removed nor refused nor reported."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_refine_docs.py",
+      "line": "285",
+      "severity": "blocking",
+      "text": "the refine stage renders through _documentation_with_registry_form and stores normalize_description_text(result_obj.description) with neither description_with_population nor _refuse_altered_shared_parts, so a refinement can drop the settled population clause from a description and store a definition that contradicts the population; this file is outside the node's declared fence, so the repair needs a scope grant."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/rendered-wording-census.json",
+      "line": "45",
+      "severity": "non-blocking",
+      "text": "the operators table pairs line_integrated_electron_density with line_integrated_radiance (:45) and time_derivative_of_electron_density with time_derivative_of_magnetic_field (:57), and neither of those two names appears among the fifteen written names the same file reports at written_names.names, so a reader cannot tell which population each table was measured over; the census has no committed script beside its three sibling censuses either, so it cannot be re-run."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "1001",
+      "severity": "non-blocking",
+      "text": "_word_set and _sentence_overlap re-implement the Jaccard ratio that imas_codex/standard_names/review/audits.py:529 _token_overlap already owns, and harmonize.py:107 computes it a third time at a 0.5 threshold while this module uses 0.75, so the census counts a 0.6-overlap restatement as the same form while the gate does not call it altered."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_generate_docs.py",
+      "line": "572",
+      "severity": "non-blocking",
+      "text": "_joined_opening turns a colon-terminated opening into a sentence: 'Its continuum definition is:' has the colon stripped by rstrip(',;:') and is rejoined as 'Its continuum definition is. <note>', breaking the link the colon makes to the text that follows, and the same fragment repair is applied again at :675 by open_without_fragment at docs_gates.py:983, which does treat a colon as a terminator."
+    },
+    {
+      "file": "tests/standard_names/test_harmonize.py",
+      "line": "605",
+      "severity": "non-blocking",
+      "text": "assert len(agreed) == 1 holds when every member omits the wording, because written_part_form returns '<omitted>' for each and one omitted form is still one form, so deleting the population installation keeps this test green and it cannot distinguish one wording from no wording."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-shared-wording.html",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "the gate section publishes the head arm as '94 passed' from gate-head-1311463.log, a log whose header names revision 60654017d -- the base commit, written before the change -- while the 97-pass head log on disk is gate-final-103004.log with no revision or command header at all, and the manifest's test_logs and artifacts cite a gate-final-1311570.log that does not exist."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_generate_docs.py",
+      "line": "951",
+      "severity": "non-blocking",
+      "text": "SharedPartAltered is raised inside the batch's try and caught by the generic except Exception at :989, which calls release_generate_docs_failed_claims and returns the name to pending with no attempt counter, so a name whose model answer keeps contradicting the population is rewritten on every pass at metered cost with no terminal state."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-shared-wording.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the fragment carries no figure -- no img, svg or figure element -- so the two-arm comparison and the per-part form counts are text only, and the figures write path declared in the fence stayed unused."
+    }
+  ],
+  "head_log_revision": "84f1f3ca53bf949b60d5d1abb532ff50833b6865",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified loop.py:927 process_generate_docs_batch, worker_review_docs.py:604 conformance_findings and worker_refine_docs.py:285 _documentation_with_registry_form; harmonize.py:107 and :131 have no production caller.",
+    "diff": "read commit by commit against base 60654017d; f15e8bb55 carries the renderer, the contradiction refusal, the conformance classes and the census helpers with their tests, e82509aba adds the settled-parts prompt block and the paraphrase repair, and 6f0fd181c, 018b0cb80, 3fc2991d9 and 84f1f3ca5 carry the evidence fragment, the census JSON and the re-measured two arms, +2104/-21 across eight files.",
+    "done_when": "read the clause list against the artefacts; clauses 1, 2, 3, 5 and 6 are recorded and the two-arm review now reads 11 accept of 15 against 11 accept of 15 at rendered-wording-census.json:1129, while clause 4's refusal is proved only by calling _refuse_altered_shared_parts directly at test_generate_docs.py:738 and :773, never through process_generate_docs_batch, and clause 7's committed gate log is absent from the evidence directory.",
+    "goal": "the node's goal is that a definition's shared parts -- operator sentence and equation, species population, locus -- come from one stored wording; worker_generate_docs.py:674 installs the stored sentence for each part after the model writes and :876 shows the same text to the model before it writes, but a paraphrase below the 0.75 overlap threshold at docs_gates.py:1074 survives beside the appended stored sentence and is neither removed nor refused.",
+    "manifest": "read; status complete, blockers none, six commits and eight changed paths, and its numbers reconcile with the artefacts except that test_logs and artifacts both cite gate-final-1311570.log, which is not on disk.",
+    "write_paths": "read the manifest's eleven declared paths; git diff 60654017d..84f1f3ca5 touches eight files -- docs_gates.py, harmonize.py, worker_generate_docs.py, generate_docs_user.md, test_generate_docs.py, test_harmonize.py, rendered-wording-census.json and sdbc-rendered-shared-wording.html -- every one of them inside that fence, and test_docs_gates.py and generate_docs_system.md inside the fence were left untouched."
+  },
+  "justifications": {
+    "durability": "test_generate_docs.py:738 and :773 call _refuse_altered_shared_parts on un-rendered text, so removing the pipeline call at worker_generate_docs.py:951 leaves both green, and harmonize.py:131 is exercised only by a test whose assertion is satisfied by total omission.",
+    "evidence": "gate-final-103004.log records 97 passed EXIT=0 and negative-control-1311469.log records 1 failed EXIT=1 on the census test, but the manifest cites a gate-final-1311570.log that does not exist and the on-disk head log carries no revision header.",
+    "fit": "docs_gates.py:905 and harmonize.py:107 follow the surrounding module idiom and introduce no plan, version or ticket name, though worker_generate_docs.py:572 duplicates the fragment-joining rule that docs_gates.py:983 already applies to the same text.",
+    "goal_fidelity": "worker_generate_docs.py:674 appends the stored wording for every shared part, but docs_gates.py:1074 keeps a restatement whose overlap falls below 0.75, and worker_refine_docs.py:285 renders and stores a definition without either the population clause or the refusal.",
+    "reuse": "harmonize.py:107 and docs_gates.py:1001 each implement the word-set Jaccard that imas_codex/standard_names/review/audits.py:529 already owns, at thresholds of 0.5 and 0.75, so two modules disagree about when a definition states the same part.",
+    "scope_discipline": "every path in git diff 60654017d..84f1f3ca5 is inside the manifest's declared fence, no live graph was written and no plan file was edited."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a definition's shared parts -- operator sentence and equation, species population, locus -- come from one stored wording; worker_generate_docs.py:674 installs the stored sentence for each part after the model writes and :876 shows the same text to the model before it writes, but a paraphrase below the 0.75 overlap threshold at docs_gates.py:1074 survives beside the appended stored sentence and is neither removed nor refused.\nVERDICT done_when: read the clause list against the artefacts; clauses 1, 2, 3, 5 and 6 are recorded and the two-arm review now reads 11 accept of 15 against 11 accept of 15 at rendered-wording-census.json:1129, while clause 4's refusal is proved only by calling _refuse_altered_shared_parts directly at test_generate_docs.py:738 and :773, never through process_generate_docs_batch, and clause 7's committed gate log is absent from the evidence directory.\nVERDICT write_paths: read the manifest's eleven declared paths; git diff 60654017d..84f1f3ca5 touches eight files -- docs_gates.py, harmonize.py, worker_generate_docs.py, generate_docs_user.md, test_generate_docs.py, test_harmonize.py, rendered-wording-census.json and sdbc-rendered-shared-wording.html -- every one of them inside that fence, and test_docs_gates.py and generate_docs_system.md inside the fence were left untouched.\nVERDICT manifest: read; status complete, blockers none, six commits and eight changed paths, and its numbers reconcile with the artefacts except that test_logs and artifacts both cite gate-final-1311570.log, which is not on disk.\nVERDICT diff: read commit by commit against base 60654017d; f15e8bb55 carries the renderer, the contradiction refusal, the conformance classes and the census helpers with their tests, e82509aba adds the settled-parts prompt block and the paraphrase repair, and 6f0fd181c, 018b0cb80, 3fc2991d9 and 84f1f3ca5 carry the evidence fragment, the census JSON and the re-measured two arms, +2104/-21 across eight files.\nCALL_SITES: imas_codex/standard_names/loop.py:927 process_generate_docs_batch via the generate_docs pool, imas_codex/standard_names/worker_tasks/worker_review_docs.py:604 conformance_findings, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:285 _documentation_with_registry_form\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: worker_generate_docs.py:674 appends the stored wording for every shared part, but docs_gates.py:1074 keeps a restatement whose overlap falls below 0.75, and worker_refine_docs.py:285 renders and stores a definition without either the population clause or the refusal.\nSCORE evidence: 11\nJUSTIFICATION evidence: gate-final-103004.log records 97 passed EXIT=0 and negative-control-1311469.log records 1 failed EXIT=1 on the census test, but the manifest cites a gate-final-1311570.log that does not exist and the on-disk head log carries no revision header.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff 60654017d..84f1f3ca5 is inside the manifest's declared fence, no live graph was written and no plan file was edited.\nSCORE durability: 9\nJUSTIFICATION durability: test_generate_docs.py:738 and :773 call _refuse_altered_shared_parts on un-rendered text, so removing the pipeline call at worker_generate_docs.py:951 leaves both green, and harmonize.py:131 is exercised only by a test whose assertion is satisfied by total omission.\nSCORE fit: 15\nJUSTIFICATION fit: docs_gates.py:905 and harmonize.py:107 follow the surrounding module idiom and introduce no plan, version or ticket name, though worker_generate_docs.py:572 duplicates the fragment-joining rule that docs_gates.py:983 already applies to the same text.\nSCORE reuse: 12\nJUSTIFICATION reuse: harmonize.py:107 and docs_gates.py:1001 each implement the word-set Jaccard that imas_codex/standard_names/review/audits.py:529 already owns, at thresholds of 0.5 and 0.75, so two modules disagree about when a definition states the same part.\nFINDING tests/standard_names/test_generate_docs.py:738 blocking: the refusal is asserted only by calling _refuse_altered_shared_parts directly at :738 and :773, never through process_generate_docs_batch, and nothing asserts that persist_generated_docs was not called, so moving the call at worker_generate_docs.py:951 to after the persist would leave both tests green; the done_when requires the refusal be reached on the path the pipeline takes and not only when called directly.\nFINDING imas_codex/standard_names/worker_tasks/worker_generate_docs.py:951 blocking: the refusal can never fire for an altered part on the pipeline path: _documentation_with_registry_form appends every stored sentence at :674 through replace_altered_shared_parts, and shared_part_findings at docs_gates.py:1074 only reports SHARED_PART_ALTERED when the stored sentence is absent, so a paraphrase whose overlap falls below 0.75 is kept beside the appended sentence and is neither removed nor refused nor reported.\nFINDING imas_codex/standard_names/worker_tasks/worker_refine_docs.py:285 blocking: the refine stage renders through _documentation_with_registry_form and stores normalize_description_text(result_obj.description) with neither description_with_population nor _refuse_altered_shared_parts, so a refinement can drop the settled population clause from a description and store a definition that contradicts the population; this file is outside the node's declared fence, so the repair needs a scope grant.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/rendered-wording-census.json:45 non-blocking: the operators table pairs line_integrated_electron_density with line_integrated_radiance (:45) and time_derivative_of_electron_density with time_derivative_of_magnetic_field (:57), and neither of those two names appears among the fifteen written names the same file reports at written_names.names, so a reader cannot tell which population each table was measured over; the census has no committed script beside its three sibling censuses either, so it cannot be re-run.\nFINDING imas_codex/standard_names/docs_gates.py:1001 non-blocking: _word_set and _sentence_overlap re-implement the Jaccard ratio that imas_codex/standard_names/review/audits.py:529 _token_overlap already owns, and harmonize.py:107 computes it a third time at a 0.5 threshold while this module uses 0.75, so the census counts a 0.6-overlap restatement as the same form while the gate does not call it altered.\nFINDING imas_codex/standard_names/worker_tasks/worker_generate_docs.py:572 non-blocking: _joined_opening turns a colon-terminated opening into a sentence: 'Its continuum definition is:' has the colon stripped by rstrip(',;:') and is rejoined as 'Its continuum definition is. <note>', breaking the link the colon makes to the text that follows, and the same fragment repair is applied again at :675 by open_without_fragment at docs_gates.py:983, which does treat a colon as a terminator.\nFINDING tests/standard_names/test_harmonize.py:605 non-blocking: assert len(agreed) == 1 holds when every member omits the wording, because written_part_form returns '<omitted>' for each and one omitted form is still one form, so deleting the population installation keeps this test green and it cannot distinguish one wording from no wording.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-shared-wording.html:43 non-blocking: the gate section publishes the head arm as '94 passed' from gate-head-1311463.log, a log whose header names revision 60654017d -- the base commit, written before the change -- while the 97-pass head log on disk is gate-final-103004.log with no revision or command header at all, and the manifest's test_logs and artifacts cite a gate-final-1311570.log that does not exist.\nFINDING imas_codex/standard_names/worker_tasks/worker_generate_docs.py:951 non-blocking: SharedPartAltered is raised inside the batch's try and caught by the generic except Exception at :989, which calls release_generate_docs_failed_claims and returns the name to pending with no attempt counter, so a name whose model answer keeps contradicting the population is rewritten on every pass at metered cost with no terminal state.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-shared-wording.html:1 non-blocking: the fragment carries no figure -- no img, svg or figure element -- so the two-arm comparison and the per-part form counts are text only, and the figures write path declared in the fence stayed unused.",
+  "review_run_id": "r-20261112T101802140995-review-of-sdbc-rendered-shared-wording-84f1f3ca53bf",
+  "reviewed_base_sha": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+  "reviewed_head_sha": "84f1f3ca53bf949b60d5d1abb532ff50833b6865",
+  "reviewed_run_id": "r-20261112T063332484056-sdbc-rendered-shared-wording",
+  "reviewer": "independent review node review-of-sdbc-rendered-shared-wording-84f1f3ca53bf",
+  "reviewer_run_id": "r-20261112T101802140995-review-of-sdbc-rendered-shared-wording-84f1f3ca53bf",
+  "scores": {
+    "durability": 9,
+    "evidence": 11,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 12,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T10:40:21.051263+00:00",
+  "total": 78
+}

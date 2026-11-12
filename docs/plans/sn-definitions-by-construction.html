@@ -24,7 +24,7 @@
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -158,6 +158,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T085541527625-review-of-sdbc-rendered-shared-wording-3fc2991d9dfb" data-who="reckon-build" data-when="2026-11-12T09:16:49.415Z">
     <div class="r-comment-body"><p>Reviewed r-20261112T063332484056-sdbc-rendered-shared-wording at 60654017d..3fc2991d9 and stored a parsed record at both declared review-records paths: scores goal_fidelity 12, evidence 9, scope_discipline 19, durability 6, fit 16, reuse 13, added_failure_count 0, with four blocking findings (the refusal is unreachable in the pipeline, its test bypasses the pipeline, the review_arms grouping denies a reason that quotes the rendered sentence, and the rendered arm passes 6 of 15 against the control's 11 of 15) and four non-blocking ones.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261112T101802140995-review-of-sdbc-rendered-shared-wording-84f1f3ca53bf" data-who="reckon-build" data-when="2026-11-12T10:32:47.404Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261112T063332484056-sdbc-rendered-shared-wording at head 84f1f3ca53bf949b60d5d1abb532ff50833b6865 against base 60654017d5a358945583eeb69862cbfa0ed10ec9: scores goal_fidelity 13, evidence 11, scope_discipline 18, durability 9, fit 15, reuse 12 (total 78); three blocking findings — the refusal is proved only by calling _refuse_altered_shared_parts directly rather than through process_generate_docs_batch, the altered-part refusal cannot fire on the pipeline path because the renderer appends every stored sentence first, and worker_refine_docs.py renders and stores without the population clause or the refusal.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261112T075018136012-review-of-sdbc-unit-spelling-723d44eabf52" data-who="reckon-build" data-when="2026-11-12T08:11:23.275Z">
     <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at head 723d44eab scores goal_fidelity 17, evidence 13, scope_discipline 18, durability 15, fit 16, reuse 5, with added_failure_count 0 and five non-blocking findings (evidence fragment says 43 divergences against the artifact's 44; manifest says 1630 quantities against the artifact's 1608; gate logs are headed revision 043171ac2 whose tree lacks the graph test they run; the disposable-graph write assertion echoes a value the code under test produced; quantity_dimension_issues duplicates the name-vs-unit owner in audits.py)</p></div>
