@@ -14,7 +14,7 @@ from imas_codex.standard_names.dd_resolutions import (
     DDResolutionRecord,
     effective_active_dd_resolutions,
 )
-from imas_codex.standard_names.unit_overrides import _load_rules
+from imas_codex.standard_names.unit_overrides import load_rules as _load_rules
 from imas_codex.units.dd_unit_exceptions import (
     canonical_or_none,
     load_exceptions,

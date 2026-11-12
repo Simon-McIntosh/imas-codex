@@ -20,7 +20,10 @@ import yaml
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.edit import EditPlan, apply_edit
-from imas_codex.standard_names.promote import _contest, parse_pull_request_url
+from imas_codex.standard_names.promote import (
+    contest as _contest,
+    parse_pull_request_url,
+)
 
 
 class CommentClass(StrEnum):

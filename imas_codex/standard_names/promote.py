@@ -922,6 +922,10 @@ def _contest(
     )
 
 
+# Public export so sibling modules use a public name for the contest write.
+contest = _contest
+
+
 def list_contested(gc: GraphClient | None = None) -> list[dict[str, Any]]:
     """Return all names in the 'contested' stage with their failing verdict."""
     owns = gc is None
@@ -1987,10 +1991,10 @@ def resolve_tag_remote(
         return default
     want = (m[1], m[2])
 
-    from imas_codex.standard_names.catalog_release import _github_slug
+    from imas_codex.standard_names.catalog_release import github_slug
 
     for remote in ("upstream", "origin"):
-        if _github_slug(Path(isnc_dir), remote) == want:
+        if github_slug(Path(isnc_dir), remote) == want:
             return remote
     return default
 

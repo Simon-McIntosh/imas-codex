@@ -1327,6 +1327,10 @@ def _synonym_matches(
     return matches
 
 
+# Public export so sibling modules use a public name for the raw match pairs.
+synonym_matches = _synonym_matches
+
+
 def placeholder_check(candidate: dict[str, Any]) -> list[str]:
     """Detect unfilled prompt placeholders leaking into name/description/documentation.
 

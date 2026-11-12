@@ -409,6 +409,15 @@ def _run_git(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess
     )
 
 
+def run_git(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    """Run a git command in a checkout, for any module that needs one.
+
+    This module owns the git invocation so consumers share it instead of each
+    holding a copy that can drift in flags or timeout.
+    """
+    return _run_git(*args, cwd=cwd)
+
+
 def _closed_pr_heads(
     isnc_path: Path, branch: str, *, github_client: Any | None = None
 ) -> set[str]:
@@ -1515,6 +1524,17 @@ def _github_slug(isnc_path: Path, remote: str) -> tuple[str, str] | None:
     return (m[1], m[2]) if m else None
 
 
+def github_slug(checkout: Path, remote: str) -> tuple[str, str] | None:
+    """The catalog's remote ``owner/repo`` pair, for any module that needs it.
+
+    The parsing has one implementation in this module, so a second copy in a
+    consumer cannot drift from it. The private spelling stays the
+    implementation and the point tests replace, which is why this delegates
+    rather than aliasing the function object.
+    """
+    return _github_slug(checkout, remote)
+
+
 @dataclass
 class ReviewReleaseReport:
     """Result of a review-batch release."""
@@ -1852,11 +1872,11 @@ def run_review_release(
         )
         return report
     if pr_title is not None and pr_body is not None:
-        # Deferred import: release_notes imports _github_slug and _run_git from
-        # this module at module level, so importing from release_notes here at
-        # module scope would create a circular dependency. Function-local import
-        # breaks the cycle by deferring resolution until after catalog_release
-        # has finished initializing.
+        # Deferred import: release_notes imports this module at module level,
+        # so importing from release_notes here at module scope would create a
+        # circular dependency. Function-local import breaks the cycle by
+        # deferring resolution until after this module has finished
+        # initializing.
         from imas_codex.standard_names.release_notes import validate_pr_text
 
         try:
@@ -1928,11 +1948,10 @@ def run_review_release(
     # DD-gap lifecycle evidence is a read-only release caveat, never an export
     # gate. The canonical reader owns graph queries and exact batch-name
     # filtering; this orchestrator only normalizes its projection for reports.
-    # Deferred import: release_notes imports _github_slug and _run_git from
-    # this module at module level, so importing from release_notes here at
-    # module scope would create a circular dependency. Function-local import
-    # breaks the cycle by deferring resolution until after catalog_release
-    # has finished initializing.
+    # Deferred import: release_notes imports this module at module level,
+    # so importing from release_notes here at module scope would create a
+    # circular dependency. Function-local import breaks the cycle by deferring
+    # resolution until after this module has finished initializing.
     from imas_codex.standard_names.release_notes import (
         summarize_dd_gap_facts,
         unavailable_dd_gap_summary,
@@ -2205,11 +2224,10 @@ def run_review_release(
     # per-domain catalog diff) when enabled; deterministic static body
     # otherwise. notes_builder is injectable for tests; the LLM path never
     # raises (it falls back to the static form internally).
-    # Deferred import: release_notes imports _github_slug and _run_git from
-    # this module at module level, so importing from release_notes here at
-    # module scope would create a circular dependency. Function-local import
-    # breaks the cycle by deferring resolution until after catalog_release
-    # has finished initializing.
+    # Deferred import: release_notes imports this module at module level,
+    # so importing from release_notes here at module scope would create a
+    # circular dependency. Function-local import breaks the cycle by deferring
+    # resolution until after this module has finished initializing.
     from imas_codex.standard_names.release_notes import (
         build_pr_notes,
         collect_catalog_changes,
