@@ -56,6 +56,7 @@ AUDIT_FINDING_CLASSES: frozenset[str] = frozenset(
         *(member.value for member in HouseStyleFindingClass),
         "duplicate_component",
         "name_definition_disagreement",
+        "name_definition_probe_disagreement",
     }
 )
 

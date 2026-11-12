@@ -597,6 +597,16 @@ checks:
   - documentation
   retrieval: false
   audit_finding_class: name_definition_disagreement
+- id: definition_slot_disagrees_with_name
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - id
+  - description
+  - documentation
+  - unit
+  retrieval: false
+  audit_finding_class: name_definition_probe_disagreement
 - id: template_note
   axis: docs
   dimension: documentation_quality

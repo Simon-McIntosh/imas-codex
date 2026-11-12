@@ -1,0 +1,32 @@
+# revision: 66b6a3fec88357d8b1c3eb6e683c68d32fdd4468
+# tree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes
+# module: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes/imas_codex/standard_names/review/name_definition_probes.py
+# cwd: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes
+# command: cd /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes && uv run --no-sync python -m pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes/tests/standard_names/test_name_definition_probes.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes/tests/standard_names/test_review_checks.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-probes/tests/standard_names/test_name_definition_agreement.py -p no:cacheprovider --no-header --timeout=180
+
+============================= test session starts ==============================
+collected 30 items
+
+tests/standard_names/test_name_definition_probes.py .........            [ 30%]
+tests/standard_names/test_review_checks.py .............                 [ 73%]
+tests/standard_names/test_name_definition_agreement.py ........          [100%]
+
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+3.57s call     tests/standard_names/test_name_definition_agreement.py::test_a_flagged_name_is_refused_without_a_recorded_reason
+0.74s setup    tests/standard_names/test_name_definition_probes.py::test_definition_states_a_normalisation_the_name_lacks
+0.09s setup    tests/standard_names/test_review_checks.py::test_every_check_is_decided_exactly_once
+0.08s setup    tests/standard_names/test_name_definition_agreement.py::test_a_flagged_name_is_refused_without_a_recorded_reason
+0.04s call     tests/standard_names/test_review_checks.py::test_evidence_fields_are_carried_by_the_review_state
+0.03s call     tests/standard_names/test_review_checks.py::test_negative_control_unplanted_field_is_rejected
+0.01s call     tests/standard_names/test_name_definition_agreement.py::test_a_flagged_verdict_raises_a_hold_naming_the_qualifier
+
+(3 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================== 30 passed, 1 warning in 15.85s ========================
+EXIT=0
