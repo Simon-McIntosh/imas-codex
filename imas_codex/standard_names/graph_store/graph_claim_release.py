@@ -1227,22 +1227,31 @@ def stop_refine_name_attempt(
     return stage
 
 
-def _mark_refine_docs_exhausted(
-    *, sn_id: str, token: str, error_msg: str, services: Any
+def _mark_docs_exhausted(
+    *,
+    sn_id: str,
+    token: str,
+    error_msg: str,
+    eligible_stage: str,
+    tag: str,
+    services: Any,
 ) -> None:
-    """Mark a name's docs exhausted when refine_docs fails deterministically.
+    """Mark a name's docs exhausted after a deterministic documentation refusal.
 
-    A docs-validation failure (e.g. the LLM consistently returns docs that
-    violate the ``RefinedDocs`` length constraints) is deterministic for a
-    given item — reverting ``docs_stage`` to 'reviewed' would re-claim and
-    re-burn budget forever.  Move to 'exhausted' instead and record the reason.
+    Both documentation writers reach this state: ``refine_docs`` on a
+    ``RefinedDocs`` validation failure or a refusal of the settled wording,
+    ``generate_docs`` on a first draft that same wording refused. The failure
+    is deterministic for a given item — the same item is asked the same
+    question on every pass, so reverting ``docs_stage`` would re-claim and
+    re-burn budget forever. The fence is the stage the calling writer holds,
+    and *tag* records which writer wrote the reason.
     """
     with services.GraphClient() as gc:
         gc.query(
             """
             MATCH (sn:StandardName {id: $sn_id})
             WHERE sn.claim_token = $token
-              AND sn.docs_stage = 'refining'
+              AND sn.docs_stage = $eligible_stage
             SET sn.updated_at = datetime(), sn.docs_stage = 'exhausted',
                 sn.claim_token = null,
                 sn.claimed_at = null,
@@ -1253,10 +1262,12 @@ def _mark_refine_docs_exhausted(
                                       ELSE sn.edit_status END,
                 sn.reviewer_comments_docs =
                     coalesce(sn.reviewer_comments_docs, '')
-                    + ' [docs_refine_exhaust] ' + $error_msg
+                    + ' [' + $tag + '] ' + $error_msg
             """,
             sn_id=sn_id,
             token=token,
+            eligible_stage=eligible_stage,
+            tag=tag,
             error_msg=error_msg[:300],
         )
 

@@ -686,3 +686,25 @@ def test_a_definition_that_already_carries_the_stored_wording_is_unchanged() -> 
     )
 
     assert replace_altered_shared_parts(documentation, _argon_parts()) == documentation
+
+
+def test_both_documentation_writers_share_one_docs_exhaust_transition() -> None:
+    """The docs-exhaust transition has one implementation, in the graph store.
+
+    Both writers end at the same terminal state, so a copy in a worker module
+    makes two owners of one transition: a change to either stops reaching the
+    other, and the two fences drift apart. The scan is over the package rather
+    than over a named pair, so a third copy is caught wherever it is written.
+    """
+
+    root = Path(__file__).resolve().parents[2] / "imas_codex" / "standard_names"
+    owners = {
+        path.relative_to(root).as_posix()
+        for path in root.rglob("*.py")
+        if "docs_stage = 'exhausted'" in path.read_text(encoding="utf-8")
+    }
+
+    assert owners == {"graph_store/graph_claim_release.py"}
+    for worker in ("worker_generate_docs", "worker_refine_docs"):
+        source = (root / "worker_tasks" / f"{worker}.py").read_text(encoding="utf-8")
+        assert "_mark_docs_exhausted" in source, worker
