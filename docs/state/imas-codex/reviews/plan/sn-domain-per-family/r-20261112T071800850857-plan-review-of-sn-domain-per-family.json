@@ -35,9 +35,28 @@
       "note": "\u00a75 now records the refused flat choice over 32 domains (0.560 against a 0.597 floor) and requires the calibration accuracy to reach that floor, not only to match \u00a72",
       "reason": "",
       "when": "2026-11-12T07:43:00.365333+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "5734ae0e1335c5cb436fb6c36e4706e8eca6cc8f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a75 now bounds undecided families of two or more members at 20 by count; a single name below the floor keeps its stored domain, is counted, and is not sent to the lead",
+      "reason": "",
+      "when": "2026-11-12T07:43:17.093918+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "5734ae0e1335c5cb436fb6c36e4706e8eca6cc8f",
+      "commit_basis": "edit",
+      "note": "\u00a75 now bounds undecided families of two or more members at 20 by count; a single name below the floor keeps its stored domain, is counted, and is not sent to the lead",
+      "reason": "",
+      "when": "2026-11-12T07:43:17.093918+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
