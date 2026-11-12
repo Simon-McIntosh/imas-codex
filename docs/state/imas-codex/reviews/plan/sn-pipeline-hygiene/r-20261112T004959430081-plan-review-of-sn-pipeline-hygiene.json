@@ -1,0 +1,72 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T01:03:59.193Z",
+  "dispatched_at": "2026-11-12T00:55:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:33",
+      "id": "reasoning-1",
+      "reason": "the section's premise and status are stale against its own recorded arms, so a dispatched node re-diagnoses already-repaired tests instead of closing the section, and the followup that recommends building \u00a71 first steers the whole plan at it.",
+      "text": "\u00a71 asserts \"Thirteen tests in tests/standard_names fail at every base and head measured on 2026-11-11\", but the two \u00a71 comments record otherwise: the gap-rules arm measured base `12 failed / 8639 passed` and head `1 failed / 8654 passed`, and the other arm records that four of the remaining ids (catalog-layout ordering-cycle and the three manifest-generability ids) \"were already green at base and needed no change\", that the cascade-calibration id \"does not fail, it skips\", and that the one real failure (NC-25) closed at head `276 passed, 2 skipped, EXIT=0`. The section is therefore complete in fact while still declared `implementable`, and its summary meta line still reads \"Fix or own the 13 tests red on main\". A node dispatched on \u00a71 as written mounts a compute-partition suite run to hunt thirteen failures of which the plan's own evidence shows at most seven ever failed and none fail now",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:39",
+      "id": "anchors_resolve-1",
+      "reason": "a worker greps a test id that does not exist and cannot tell whether the test was renamed, deleted, or never had that name, which is a blocker-shaped detour on the first of the plan's sections.",
+      "text": "\u00a71 lists `test_geometry_enumeration_collapse.py::test_unregistered_arc_endpoint_rejects_the_ordinal_compound`, which resolves to no test: the file defines `test_unregistered_locus_rejects_the_ordinal_compound` (`tests/standard_names/test_geometry_enumeration_collapse.py:226`), and the plan's own closure comment names that locus id as one of the seven ids that pass. The `arc_endpoint` spelling appears nowhere in the tree",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:43",
+      "id": "done_when-1",
+      "reason": "without a stated endpoint for the fixture-absence skip, the node would close \u00a71 having verified eleven of thirteen ids and leave the twelfth unmeasured, which is precisely the regeneration state \u00a71 exists to remove.",
+      "text": "\u00a71's measure is \"the default tests/standard_names run on a compute partition reports none of the 13 ids failing at the merged head\", which is satisfied by non-execution: the cascade-calibration id skips because its two frozen receipt files are absent from the reckon store, so its greenness in the gate comes from the `skipif`, not from the behaviour the test was written to assert. The same done-when forbids an id being \"skipped or deleted\" but offers no endpoint for a skip that comes from a missing fixture rather than from the node's own choice, so the section can close green over a guard that no longer runs",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:71",
+      "id": "done_when-2",
+      "reason": "the section is deferred and its rows are explicitly re-homed as sections of their own once the first upstream catalog release is cut, so no node dispatches against this text and the gap costs nothing until that release lands.",
+      "text": "\u00a77 carries eight hours of repair rows and an explicit re-confirmation rule, but no \"Done when\" line and no negative control, so the section has no checkable endpoint of its own and its status can only move by the prose sentence that each row becomes a section",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "",
+  "plan_fingerprint": "466b5c762138d37c9062b5aec82f9083fbb1edb1b9a29cdb9ba2fe23580be68b",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 15,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T004959430081-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "61873bba6a0fff21df41f60350964049600c65e1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a71 cites a `test_geometry_enumeration_collapse.py` id that does not exist; the section's own closure comment names the id that does.",
+    "done_when": "a finding \u2014 \u00a71's done-when is met by an id that never executes, so it cannot distinguish a repaired test from a guard that stopped measuring; \u00a77 carries no done-when at all.",
+    "evidence_paths": "pass \u2014 every evidence reference the plan cites (three fragments, one archive anchor, one reckon plan section) is a tracked path in `HEAD`, not a scratchpad or node-local directory.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach code; the ids the plan quotes are test names and a graph relationship type.",
+    "reasoning": "a finding \u2014 \u00a71's stated premise, that thirteen tests fail at every base and head measured on 2026-11-11, is contradicted by the base and head arms recorded in the plan's own \u00a71 comments.",
+    "single_goal": "pass \u2014 each of \u00a71\u2013\u00a78 names one deliverable, and \u00a74's several checks (one pull request, a refusal on an upstream remote, the batch path unchanged) all bound that one endpoint.",
+    "wiring": "pass \u2014 the plan declares `plan-standalone` with a reason, declares no section dependency, and both ways it reaches outside itself resolve: \u00a77's `sn-integrity-backlog#s17` exists and is descoped straight back to this plan's \u00a77, and \u00a76's `reckon:a-promotion-reads-the-evidence-it-is-given#s18` (with followup `f-aprteig-018`) exists in the reckon tree."
+  },
+  "section_digests": {
+    "_document": "e887bb3cd3aabc5d770baee9b75d62f9060b3acd8cf9ce6521b85731ecb3d369",
+    "s1": "81850637644a27e1d1a1e816ca2493b35e973174c72a47df456d0ccf8ad2dfa6",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:14:37.647868+00:00",
+  "total": null
+}
