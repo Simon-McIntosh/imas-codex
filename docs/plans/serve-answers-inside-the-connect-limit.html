@@ -23,7 +23,7 @@
   <title>The MCP Server Answers Inside The Client's Connect Limit | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -71,7 +71,10 @@
     <div class="r-comment-body"><p>Reviewed run r-20261112T021222770704-saicl-lazy-command-group at head 8365c9c9e7f2 against base 980fa78b5d18: the deferred command table delivers lazy resolution and the timing goal on the debug node, but the new import-boundary test stops at litellm and the fourteen command modules, so the done_when clause naming the schema runtime has no guard while linkml_runtime is on the initialize path through imas_codex/llm/server.py, and the ten-consecutive-run stability clause is unrecorded; five non-blocking findings, no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T082559342115-review-of-saicl-lazy-command-group-0aac4db7b6c8" data-who="reckon-build" data-when="2026-11-12T08:37:55.266Z">
-    <div class="r-comment-body"><p>Reviewed run r-20261112T021222770704-saicl-lazy-command-group at head 0aac4db7b against base 8365c9c9e: the schema runtime is off the initialize path, the guard now asserts it and holds over twenty runs, and the parts record is committed, but the attribution&#x27;s 7.11 s figure does not follow from the record&#x27;s own steps (which sum to 7.587 s), the twenty-run &quot;warm&quot; arm does not heat the child interpreter it inspects, and the --help guard still asserts the command modules only; nine non-blocking findings, no blocking finding.</p></div>
+    <div class="r-comment-body"><p>Reviewed run r-20261112T021222770704-saicl-lazy-command-group at head 0aac4db7b against base 8365c9c9e: the schema runtime is off the initialize path, the guard now asserts it and holds over twenty runs, and the parts record is committed, but the attribution's 7.11 s figure does not follow from the record's own steps (which sum to 7.587 s), the twenty-run "warm" arm does not heat the child interpreter it inspects, and the --help guard still asserts the command modules only; nine non-blocking findings, no blocking finding.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261112T021222770704-saicl-lazy-command-group" data-who="reckon-build" data-when="2026-11-12T08:21:02Z">
+    <div class="r-comment-body"><p>imas-codex serve answers initialize in 3.34 s median (base 7.25 s) on the debug node and 10.46 s median with a 11.71 s worst start (base 35.88 s) on the fleet node, by deferring every command module import to invocation and the query builder&#x27;s graph import to its own use.</p></div>
 </div>
 </section>
 </main>
