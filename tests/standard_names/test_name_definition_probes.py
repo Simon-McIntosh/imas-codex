@@ -7,6 +7,7 @@ import pytest
 from imas_codex.standard_names.review.name_definition_probes import (
     SLOT_BY_KEY,
     compare_slots,
+    name_closure,
     name_slots,
     probe_check,
 )
@@ -31,9 +32,7 @@ def test_definition_states_a_normalisation_the_name_lacks():
     """A quantity defined per unit volume under a name that states no scale."""
 
     item = {"id": "particle_source", "description": "Particles per unit volume."}
-    found = probe_check(
-        item, answers(normalisation=("per unit volume", 0.9))
-    )
+    found = probe_check(item, answers(normalisation=("per unit volume", 0.9)))
     assert found, "an unnormalised name whose definition divides by a volume must flag"
     assert found[0]["slot"] == "normalisation"
     assert found[0]["direction"] == "definition states more"
@@ -102,6 +101,15 @@ def test_name_token_table_reads_the_slots(name, slot, value):
         assert all(entry is None for entry in stated.values())
         return
     assert stated[slot] == value
+
+
+def test_an_object_name_does_not_imply_a_part_of_it():
+    """Naming the injector is not naming its ion source, so restriction is free."""
+
+    closure = name_closure("neutral_beam_injector_power")
+    assert all(implication.slot != "restriction" for implication in closure), (
+        "an object token must not suppress a restriction onto one part of it"
+    )
 
 
 def record_id(item: dict) -> str:

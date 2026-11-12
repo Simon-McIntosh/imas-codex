@@ -16,7 +16,7 @@ from __future__ import annotations
 import asyncio
 import json
 import logging
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import Any
 
 from pydantic import BaseModel, Field
@@ -199,7 +199,12 @@ SLOTS: tuple[Slot, ...] = (
             "another distribution, rather than leaving it unweighted? Answer "
             "with the option stated, or 'none stated'."
         ),
-        options=("weighted by velocity", "weighted by energy", "unweighted", NONE_STATED),
+        options=(
+            "weighted by velocity",
+            "weighted by energy",
+            "unweighted",
+            NONE_STATED,
+        ),
         tokens=(("weighted by energy", ("weighted", "weight", "moment")),),
     ),
 )
@@ -387,7 +392,9 @@ async def _probe_batch(
         answers.append(
             {
                 "ref": _item_ref(item),
-                "option": answer.option if answer.option in slot.options else NONE_STATED,
+                "option": answer.option
+                if answer.option in slot.options
+                else NONE_STATED,
                 "phrase": answer.phrase,
                 "probability": float(answer.probability or 0.0),
                 "answered": True,
@@ -484,9 +491,7 @@ def compare_slots(
         option = answer.get("option") or NONE_STATED
         probability = float(answer.get("probability") or 0.0)
         stated = name_slots_stated.get(slot.key)
-        asserted = (
-            option not in slot.negative_options and probability >= slot.threshold
-        )
+        asserted = option not in slot.negative_options and probability >= slot.threshold
 
         if asserted and option == slot.default_option:
             continue
@@ -507,9 +512,7 @@ def compare_slots(
 
         if apply_conventions and direction == "definition states more":
             if any(
-                _convention_suppresses(
-                    convention, name=name, definition_option=option
-                )
+                _convention_suppresses(convention, name=name, definition_option=option)
                 and convention.slot == slot.key
                 for convention in CONVENTIONS
             ):
@@ -558,29 +561,113 @@ def probe_check(
         finding["pattern"] = finding["slot"]
     return found
 
+
+JEV_SLOT_QUESTION = "definition_slot"
+
+
+async def probe_definitions_jev(
+    items: list[dict[str, Any]],
+    *,
+    slots: tuple[Slot, ...] = SLOTS,
+    model: str,
+    concurrency: int = 6,
+) -> tuple[dict[str, dict[str, Any]], float]:
+    """The same extraction probes, asked of the judge instead of the chat model.
+
+    One closed choice per slot, the slot's own options offered as the criteria,
+    and the name withheld exactly as the chat probe withholds it. The answers
+    come back in the shape :func:`probe_definitions` produces, so the
+    comparison, the conventions and the closure read either arm unchanged.
+    """
+
+    from imas_codex.discovery.base.judgment import decide_batch
+
+    answers: dict[str, dict[str, Any]] = {}
+    total_cost = 0.0
+    for slot in slots:
+        criteria = {f"c{i}": option for i, option in enumerate(slot.options)}
+        option_of = dict(criteria)
+        states = [
+            {
+                "unit": item.get("unit") or "",
+                "definition": _definition_text(item),
+            }
+            for item in items
+        ]
+        results, cost = await decide_batch(
+            states,
+            {
+                JEV_SLOT_QUESTION: {
+                    "type": "choice",
+                    "text": slot.question,
+                    "criteria": criteria,
+                }
+            },
+            model=model,
+            service=SERVICE,
+            concurrency=concurrency,
+            step="sn_judge",
+        )
+        total_cost += cost
+        for item, outcome in zip(items, results, strict=False):
+            ref = _item_ref(item)
+            answer = (outcome[0] if isinstance(outcome, tuple) else outcome) or {}
+            bucket = answer.get(JEV_SLOT_QUESTION) or {}
+            choice = str(bucket.get("choice") or "")
+            probabilities = {
+                str(key): float(value)
+                for key, value in (bucket.get("probabilities") or {}).items()
+            }
+            answers.setdefault(ref, {})[slot.key] = {
+                "ref": ref,
+                "option": option_of.get(choice, NONE_STATED),
+                "phrase": "",
+                "probability": probabilities.get(choice, 0.0),
+                "answered": bool(choice),
+            }
+    return answers, total_cost
+
+
 # ---------------------------------------------------------------------------
 # What a name already implies
 # ---------------------------------------------------------------------------
-# A name states more than its slot tokens spell out. A density is per unit volume
-# and a local value; a power is the integral over its natural extent; a species
-# name counts that species' ions summed over charge states; a name at a locus is
-# local there; an object name restricts to that object as a whole. Each of these
-# is data, so a slot value a name already implies is never a candidate.
+# A name states more than its slot tokens spell out, and only the exact
+# implications are recorded here: a density or an m^-3 unit is per unit volume,
+# a power is the integral over its natural extent, a species name counts that
+# species' own ions, a name at a locus is local there. Anything narrower — a
+# restriction to a part, an effective or equivalent form, a weighting, a band, a
+# channel, a layer, a branch — is not implied by any name token and goes to the
+# confirming question.
 
 SPECIES_TOKENS: tuple[str, ...] = (
-    "hydrogen", "deuterium", "tritium", "helium", "helium_4", "helium_3",
-    "beryllium", "boron", "carbon", "nitrogen", "oxygen", "neon", "argon",
-    "krypton", "xenon", "iron", "nickel", "silicon", "lithium", "tungsten",
-    "electron", "ion", "ion_charge_state", "alpha", "impurity", "neutral",
-    "ammonia", "deuterated",
-)
-
-# Objects a name can restrict to as a whole: the name already says the quantity
-# belongs to that object, so a definition restating the same object adds nothing.
-OBJECT_TOKENS: tuple[str, ...] = (
-    "coil", "limiter", "divertor", "antenna", "strap", "detector", "element",
-    "lens", "mirror", "gauge", "camera", "reflector", "injector", "target",
-    "wall", "loop", "row", "segment",
+    "hydrogen",
+    "deuterium",
+    "tritium",
+    "helium",
+    "helium_4",
+    "helium_3",
+    "beryllium",
+    "boron",
+    "carbon",
+    "nitrogen",
+    "oxygen",
+    "neon",
+    "argon",
+    "krypton",
+    "xenon",
+    "iron",
+    "nickel",
+    "silicon",
+    "lithium",
+    "tungsten",
+    "electron",
+    "ion",
+    "ion_charge_state",
+    "alpha",
+    "impurity",
+    "neutral",
+    "ammonia",
+    "deuterated",
 )
 
 # Locus prepositions: a name that places its quantity at a locus states a local
@@ -590,13 +677,33 @@ LOCUS_PREPOSITIONS: tuple[str, ...] = ("at", "in", "near")
 # Bases whose natural extent is integrated: a definition that says the quantity
 # is integrated over a volume or a surface adds nothing to such a name.
 EXTENSIVE_BASES: tuple[str, ...] = (
-    "power", "current", "energy", "count", "force", "torque", "rate", "mass",
-    "charge", "voltage", "momentum", "fluence", "fluence_rate",
+    "power",
+    "current",
+    "energy",
+    "count",
+    "force",
+    "torque",
+    "rate",
+    "mass",
+    "charge",
+    "voltage",
+    "momentum",
+    "fluence",
+    "fluence_rate",
 )
 
 # Unit prefixes that carry an extensive quantity, read on the unit string.
 EXTENSIVE_UNIT_PREFIXES: tuple[str, ...] = (
-    "W", "A", "J", "C", "N", "kg", "V", "N.m", "A.m", "W.m",
+    "W",
+    "A",
+    "J",
+    "C",
+    "N",
+    "kg",
+    "V",
+    "N.m",
+    "A.m",
+    "W.m",
 )
 
 INTEGRAL_AGGREGATIONS: tuple[str, ...] = (
@@ -678,23 +785,6 @@ def name_closure(name: str, unit: str = "") -> list[Implication]:
                 ("particles or ions",),
                 "a species name counts that species' ions summed over charge "
                 "states, with neutrals excluded",
-            )
-        )
-        implied.append(
-            Implication(
-                "restriction",
-                ("one particle population",),
-                "a species name is already restricted to that species",
-            )
-        )
-
-    objects = token_set & set(OBJECT_TOKENS)
-    if objects:
-        implied.append(
-            Implication(
-                "restriction",
-                ("one device part or component",),
-                "an object name is already restricted to that object as a whole",
             )
         )
 
@@ -780,10 +870,11 @@ async def confirm_candidates(
     *,
     model: str,
 ) -> tuple[dict[str, list[dict[str, Any]]], float, dict[str, int]]:
-    """Keep only the candidates the confirming question flags.
+    """Grade every candidate with the judge's probability that it flags.
 
-    Returns the surviving findings, the run's cost, and the count of each
-    relation the judge chose, so a relation that fires on everything is visible.
+    The judgment is graded, not a hard class: ``p_flag`` is the judge's
+    probability that the phrase is a narrower part or a different form, and the
+    slot threshold is chosen on the development split rather than here.
     """
 
     from imas_codex.discovery.base.judgment import decide_batch
@@ -793,36 +884,50 @@ async def confirm_candidates(
         return {}, 0.0, {}
     results, cost = await decide_batch(
         states,
-        {CONFIRM_QUESTION_NAME: {
-            "type": "choice",
-            "text": (
-                "The definition of a physics quantity contains a phrase. The "
-                "standard name withholds some of what it already means. Decide "
-                "what the phrase is relative to the name and the implications "
-                "listed."
-            ),
-            "criteria": CONFIRM_CRITERIA,
-        }},
+        {
+            CONFIRM_QUESTION_NAME: {
+                "type": "choice",
+                "text": (
+                    "The definition of a physics quantity contains a phrase. The "
+                    "standard name withholds some of what it already means. Decide "
+                    "what the phrase is relative to the name and the implications "
+                    "listed."
+                ),
+                "criteria": CONFIRM_CRITERIA,
+            }
+        },
         model=model,
         service=SERVICE,
         concurrency=6,
         step="sn_judge",
     )
     relation_counts: dict[str, int] = {}
-    kept: dict[str, list[dict[str, Any]]] = {}
+    graded: dict[str, list[dict[str, Any]]] = {}
     for (name, position), outcome in zip(index, results, strict=False):
         finding = findings[name][position]
         if outcome is None:
             finding["confirmation"] = "unanswered"
-            kept.setdefault(name, []).append(finding)
+            finding["p_flag"] = 1.0
+            graded.setdefault(name, []).append(finding)
             continue
         answers = outcome[0] if isinstance(outcome, tuple) else outcome
-        relation = str((answers or {}).get(CONFIRM_QUESTION_NAME, {}).get("choice") or "")
+        answer = (answers or {}).get(CONFIRM_QUESTION_NAME, {}) or {}
+        relation = str(answer.get("choice") or "")
+        probabilities = {
+            str(key): float(value)
+            for key, value in (answer.get("probabilities") or {}).items()
+        }
         finding["confirmation"] = relation or "unanswered"
+        finding["p_flag"] = round(
+            sum(
+                probabilities.get(relation_name, 0.0)
+                for relation_name in FLAGGING_RELATIONS
+            ),
+            4,
+        )
         relation_counts[relation] = relation_counts.get(relation, 0) + 1
-        if relation in FLAGGING_RELATIONS or not relation:
-            kept.setdefault(name, []).append(finding)
-    return kept, cost, relation_counts
+        graded.setdefault(name, []).append(finding)
+    return graded, cost, relation_counts
 
 
 def pair_of(finding: dict[str, Any]) -> str:
