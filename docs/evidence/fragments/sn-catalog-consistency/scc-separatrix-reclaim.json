@@ -1,0 +1,229 @@
+{
+ "node": "scc-separatrix-reclaim",
+ "revision": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+ "observed_at": "2026-11-12T07:11:19+00:00",
+ "cases": [
+  [
+   "normalized_toroidal_flux_coordinate_at_separatrix",
+   "normalized_toroidal_flux_coordinate_at_plasma_boundary"
+  ],
+  [
+   "toroidal_lithium_velocity_at_separatrix",
+   "toroidal_lithium_velocity_at_plasma_boundary"
+  ],
+  [
+   "toroidal_total_plasma_momentum_at_separatrix",
+   "toroidal_total_plasma_momentum_at_plasma_boundary"
+  ],
+  [
+   "tungsten_density_at_separatrix",
+   "tungsten_density_at_plasma_boundary"
+  ]
+ ],
+ "reason": "the boundary locus is spelled at_plasma_boundary under the lead's ruling; the spelling's former holder's history moves to an archived identity so it travels with the quantity it records",
+ "run_id": "sn-edit-20261112T071118",
+ "probe": [
+  {
+   "id": "normalized_toroidal_flux_coordinate_at_separatrix",
+   "target": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+   "applied": false,
+   "blocked": null,
+   "actions": [
+    "[dry-run] would archive tombstone 'normalized_toroidal_flux_coordinate_at_plasma_boundary' beside its live holder(s) 'flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary', carrying its history, reviews and lineage off the spelling before the rename takes the freed id",
+    "[dry-run] would carry 1 producing source(s) to 'normalized_toroidal_flux_coordinate_at_plasma_boundary'",
+    "[dry-run] would rename 'normalized_toroidal_flux_coordinate_at_separatrix' \u2192 'normalized_toroidal_flux_coordinate_at_plasma_boundary'"
+   ]
+  },
+  {
+   "id": "toroidal_lithium_velocity_at_separatrix",
+   "target": "toroidal_lithium_velocity_at_plasma_boundary",
+   "applied": false,
+   "blocked": null,
+   "actions": [
+    "[dry-run] would archive tombstone 'toroidal_lithium_velocity_at_plasma_boundary' beside its live holder(s) 'flux_surface_averaged_toroidal_lithium_velocity_at_plasma_boundary', carrying its history, reviews and lineage off the spelling before the rename takes the freed id",
+    "[dry-run] would carry 2 producing source(s) to 'toroidal_lithium_velocity_at_plasma_boundary'",
+    "[dry-run] would rename 'toroidal_lithium_velocity_at_separatrix' \u2192 'toroidal_lithium_velocity_at_plasma_boundary'"
+   ]
+  },
+  {
+   "id": "toroidal_total_plasma_momentum_at_separatrix",
+   "target": "toroidal_total_plasma_momentum_at_plasma_boundary",
+   "applied": false,
+   "blocked": null,
+   "actions": [
+    "[dry-run] would archive tombstone 'toroidal_total_plasma_momentum_at_plasma_boundary' beside its live holder(s) no live holder, carrying its history, reviews and lineage off the spelling before the rename takes the freed id",
+    "[dry-run] would carry 1 producing source(s) to 'toroidal_total_plasma_momentum_at_plasma_boundary'",
+    "[dry-run] would rename 'toroidal_total_plasma_momentum_at_separatrix' \u2192 'toroidal_total_plasma_momentum_at_plasma_boundary'"
+   ]
+  },
+  {
+   "id": "tungsten_density_at_separatrix",
+   "target": "tungsten_density_at_plasma_boundary",
+   "applied": false,
+   "blocked": null,
+   "actions": [
+    "[dry-run] would archive tombstone 'tungsten_density_at_plasma_boundary' beside its live holder(s) 'flux_surface_averaged_tungsten_density_at_plasma_boundary', carrying its history, reviews and lineage off the spelling before the rename takes the freed id",
+    "[dry-run] would carry 1 producing source(s) to 'tungsten_density_at_plasma_boundary'",
+    "[dry-run] would rename 'tungsten_density_at_separatrix' \u2192 'tungsten_density_at_plasma_boundary'"
+   ]
+  }
+ ],
+ "applied": [
+  {
+   "id": "normalized_toroidal_flux_coordinate_at_separatrix",
+   "target": "normalized_toroidal_flux_coordinate_at_plasma_boundary",
+   "applied": true,
+   "blocked": null,
+   "run_id": null,
+   "actions": [],
+   "already_applied": true,
+   "live": {
+    "name_stage": "drafted",
+    "status": "draft",
+    "unit": "1",
+    "docs_stage": "accepted",
+    "reviews": 0,
+    "sources": [
+     "summary/local/separatrix/position/rho_tor_norm"
+    ],
+    "closes_cycle": false
+   },
+   "archive": {
+    "id": "archived:normalized_toroidal_flux_coordinate_at_plasma_boundary:bcb477e7ef56",
+    "name_stage": "archived",
+    "reviews": 8,
+    "holders": [
+     "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary"
+    ]
+   },
+   "retired": {
+    "name_stage": "superseded",
+    "status": "draft",
+    "unit": "1",
+    "docs_stage": "accepted",
+    "reviews": 4,
+    "sources": [],
+    "closes_cycle": false
+   }
+  },
+  {
+   "id": "toroidal_lithium_velocity_at_separatrix",
+   "target": "toroidal_lithium_velocity_at_plasma_boundary",
+   "applied": false,
+   "blocked": "RuntimeError: source migration compare-and-set failed: dd:summary/local/separatrix/velocity_tor/lithium/value(exists=True, status='stale', claimed=False, bindings=['toroidal_lithium_velocity_at_separatrix'], scalar='toroidal_lithium_velocity_at_separatrix')",
+   "actions": []
+  },
+  {
+   "id": "toroidal_total_plasma_momentum_at_separatrix",
+   "target": "toroidal_total_plasma_momentum_at_plasma_boundary",
+   "applied": true,
+   "blocked": null,
+   "run_id": "sn-edit-20261112T070537Z",
+   "actions": [
+    "archived the history of tombstone 'toroidal_total_plasma_momentum_at_plasma_boundary' as 'archived:toroidal_total_plasma_momentum_at_plasma_boundary:f2b9aa4a2896', linked to its live holder(s) no live holder (receipt sn-change:archive-reclaim-history:d27d90a27203467faeff5e77adce3b3c)",
+    "verified 1 producing source(s) on 'toroidal_total_plasma_momentum_at_plasma_boundary'",
+    "renamed 'toroidal_total_plasma_momentum_at_separatrix' \u2192 'toroidal_total_plasma_momentum_at_plasma_boundary', entering name review (edit_status=open, run_id=sn-edit-20261112T070537Z)"
+   ],
+   "live": {
+    "name_stage": "drafted",
+    "status": "draft",
+    "unit": "kg.m.s^-1",
+    "docs_stage": "reviewed",
+    "reviews": 0,
+    "sources": [
+     "summary/local/separatrix/momentum_phi/value"
+    ],
+    "closes_cycle": false
+   },
+   "archive": {
+    "id": "archived:toroidal_total_plasma_momentum_at_plasma_boundary:f2b9aa4a2896",
+    "name_stage": "archived",
+    "reviews": 4,
+    "holders": []
+   },
+   "retired": {
+    "name_stage": "superseded",
+    "status": "draft",
+    "unit": "kg.m.s^-1",
+    "docs_stage": "reviewed",
+    "reviews": 22,
+    "sources": [],
+    "closes_cycle": false
+   }
+  },
+  {
+   "id": "tungsten_density_at_separatrix",
+   "target": "tungsten_density_at_plasma_boundary",
+   "applied": true,
+   "blocked": null,
+   "run_id": "sn-edit-20261112T070540Z",
+   "actions": [
+    "archived the history of tombstone 'tungsten_density_at_plasma_boundary' as 'archived:tungsten_density_at_plasma_boundary:1ce128f7b37d', linked to its live holder(s) 'flux_surface_averaged_tungsten_density_at_plasma_boundary' (receipt sn-change:archive-reclaim-history:259bb50b31744151907f94d809209862)",
+    "verified 1 producing source(s) on 'tungsten_density_at_plasma_boundary'",
+    "renamed 'tungsten_density_at_separatrix' \u2192 'tungsten_density_at_plasma_boundary', entering name review (edit_status=open, run_id=sn-edit-20261112T070540Z)"
+   ],
+   "live": {
+    "name_stage": "drafted",
+    "status": "draft",
+    "unit": "m^-3",
+    "docs_stage": "accepted",
+    "reviews": 0,
+    "sources": [
+     "summary/local/separatrix/n_i/tungsten/value"
+    ],
+    "closes_cycle": false
+   },
+   "archive": {
+    "id": "archived:tungsten_density_at_plasma_boundary:1ce128f7b37d",
+    "name_stage": "archived",
+    "reviews": 22,
+    "holders": [
+     "flux_surface_averaged_tungsten_density_at_plasma_boundary"
+    ]
+   },
+   "retired": {
+    "name_stage": "superseded",
+    "status": "draft",
+    "unit": "m^-3",
+    "docs_stage": "accepted",
+    "reviews": 4,
+    "sources": [],
+    "closes_cycle": false
+   }
+  }
+ ],
+ "census": {
+  "live_names_in_graph": 3282,
+  "superseded_stage_with_live_status": 15,
+  "population": 110,
+  "out_of_line": [
+   {
+    "id": "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+    "locus": "separatrix_average",
+    "paths": [
+     "summary/local/separatrix_average/n_i/deuterium_tritium/value"
+    ],
+    "target": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+   },
+   {
+    "id": "flux_surface_averaged_deuterium_tritium_density_at_separatrix",
+    "locus": "separatrix_average",
+    "paths": [
+     "summary/local/separatrix_average/n_i/deuterium_tritium/value"
+    ],
+    "target": "flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary"
+   },
+   {
+    "id": "toroidal_lithium_velocity_at_separatrix",
+    "locus": "separatrix",
+    "paths": [
+     "summary/local/separatrix/velocity_phi/lithium/value",
+     "summary/local/separatrix/velocity_tor/lithium/value"
+    ],
+    "target": "toroidal_lithium_velocity_at_plasma_boundary"
+   }
+  ],
+  "out_of_line_count": 3,
+  "conforming_count": 107
+ }
+}
