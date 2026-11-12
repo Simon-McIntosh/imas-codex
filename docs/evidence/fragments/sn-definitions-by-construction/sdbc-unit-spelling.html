@@ -4,7 +4,7 @@
 
   <h3 id="sdbc-unit-spelling-what-changed">What changed</h3>
   <ul>
-    <li><code>config/unit_spellings.yaml</code> records one canonical spelling per quantity (torque, torque density, source rate, rate) and the differences that carry meaning (temperature K beside eV, frequency Hz beside rad.s^-1, particle flux s^-1 beside m^-2.s^-1) with the reason each stands.</li>
+    <li>The <code>spellings:</code> section of <code>config/unit_overrides.yaml</code> records one canonical spelling per quantity (torque, torque density, source rate, rate) and the differences that carry meaning (temperature K beside eV, frequency Hz beside rad.s^-1, particle flux s^-1 beside m^-2.s^-1) with the reason each stands.</li>
     <li><code>unit_overrides.resolve_unit</code> rewrites a Data Dictionary unit to the recorded spelling when the path belongs to a recorded quantity and the two spellings are dimensionally equal. Every other row passes through untouched.</li>
     <li><code>audits.unit_spelling_census</code> groups live names by quantity, partitions each quantity's spellings by dimension, and reports duplicates, divergences and name-versus-quantity dimension mismatches.</li>
     <li><code>unit_audit</code> gains the quantity reading the census uses: <code>quantity_of_name</code>, <code>unit_dimension</code>, <code>units_are_dimensionally_equal</code>, <code>quantity_dimension_issues</code>.</li>

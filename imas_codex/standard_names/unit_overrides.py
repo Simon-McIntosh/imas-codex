@@ -197,7 +197,7 @@ def _reload_rules_for_tests() -> None:
 # Recorded unit spelling per quantity
 # ---------------------------------------------------------------------------
 
-_SPELLINGS = Path(__file__).parent / "config" / "unit_spellings.yaml"
+_SPELLINGS = _CONFIG
 
 
 @dataclass(frozen=True)
@@ -227,7 +227,7 @@ def _load_spelling_record() -> tuple[
     tuple[QuantitySpelling, ...], tuple[SpellingException, ...]
 ]:
     """Load and validate the per-quantity spelling record."""
-    if not _SPELLINGS.exists():
+    if not _CONFIG.exists():
         return (), ()
     from imas_codex.units import unit_registry
 
@@ -238,14 +238,14 @@ def _load_spelling_record() -> tuple[
             unit_registry.Unit(entry["canonical"])
         except Exception as exc:
             raise ValueError(
-                "unit_spellings.yaml: canonical unit "
+                "unit_overrides.yaml: canonical unit "
                 f"{entry.get('canonical')!r} for quantity {entry.get('quantity')!r} "
                 f"does not parse: {exc}"
             ) from exc
         patterns = tuple(entry.get("dd_path_patterns") or ())
         if not patterns:
             raise ValueError(
-                "unit_spellings.yaml: quantity "
+                "unit_overrides.yaml: quantity "
                 f"{entry.get('quantity')!r} declares no dd_path_patterns"
             )
         for pattern in patterns:
