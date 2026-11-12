@@ -53,6 +53,16 @@
       "note": "\u00a75's control now requires the planted name to be reported as pending, not accepted.",
       "reason": "",
       "when": "2026-11-12T00:03:48.122687+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "\u00a75 now cites docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html, which lands with that run.",
+      "reason": "",
+      "when": "2026-11-12T00:04:27.495271+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "\u00a75's control now requires the planted name to be reported as pending, not accepted.",
       "reason": "",
       "when": "2026-11-12T00:03:48.122687+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75 now cites docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html, which lands with that run.",
+      "reason": "",
+      "when": "2026-11-12T00:04:27.495271+00:00"
     },
     "reasoning-1": {
       "action": "acted",
