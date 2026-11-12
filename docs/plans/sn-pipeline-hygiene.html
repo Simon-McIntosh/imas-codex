@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -111,6 +111,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261111T233920401776-review-of-sph-red-gap-rules-686015aec42c" data-who="reckon-build" data-when="2026-11-12T00:01:29.383Z">
     <div class="r-comment-body"><p>review of r-20261111T221653916562-sph-red-gap-rules at 686015aec scores goal_fidelity 17, evidence 15, scope_discipline 18, durability 16, fit 18, reuse 19, records added_failure_count 0 against base 5e28aa87, and raises two non-blocking findings (two plan-named test ids renamed; four base-only failures mis-attributed as unchanged)</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261112T000041202436-review-of-sph-red-other-ac3fd53b6219" data-who="reckon-build" data-when="2026-11-12T00:14:39.023Z">
+    <div class="r-comment-body"><p>independent review of r-20261111T221757003667-sph-red-other at head ac3fd53b6219b45a43bdc727ec99e53b163a565b against base a5e781f6c07de8997b7fa9c48d6c53ac9c35a77f — scores goal_fidelity 15, evidence 15, scope_discipline 20, durability 17, fit 19, reuse 20 (total 106), added_failure_count 0 with an empty id list, two non-blocking findings (a landing-fragment claim the gate logs refute, and an after_suite block missing completed/failure_count/failure_ids); status parsed.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-12T00:45:00Z">
     <div class="r-comment-body"><p>§2 closed (<code>sph-corrects-schema</code>, commits <code>9f4b800b3</code> and <code>09f49e776</code>, review 110). <code>StandardNameSourceRetry.corrects</code> is declared with relationship type <code>CORRECTS</code>; the generated relationships carry the pair; a new endpoint assertion in <code>tests/graph/test_schema_compliance.py</code> passes on the live graph's 20 <code>CORRECTS</code> edges (one declared label pair, none mislabelled) and fails on a <code>StandardNameSource</code>→<code>StandardName</code> edge planted in a disposable graph. Outside scope: the correction records also carry an undeclared <code>correction_of</code> property. <a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html">evidence</a></p></div>

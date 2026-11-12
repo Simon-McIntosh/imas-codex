@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-12T00:14:39.023Z",
+  "dispatched_at": "2026-11-12T00:01:26Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.html",
+      "line": 117,
+      "severity": "non-blocking",
+      "text": "The landing fragment states the second skip is 'pre-existing in the catalog-layout file', but both gate logs show the two skips in test_cascade_calibration.py and test_compose_prompt_examples_round_trip.py (the vocab-gap pytest.skip at line 113) and none in test_catalog_layout_hierarchy.py; a reader checking the fragment against the logs finds a claim the logs refute."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T221757003667-sph-red-other/manifest.md",
+      "line": 15,
+      "severity": "non-blocking",
+      "text": "The after_suite object carries only revision, command, exit_status and log_path; it omits completed, failure_count and failure_ids, which the arm contract treats as unreadable, so a promotion reading the structured field rather than head-arm.log cannot tell the head arm ran to its summary line (276 passed, 2 skipped, EXIT=0)."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "Read commit ac3fd53b against base a5e781f6c: two files, +138 lines, being one entry in _SEMANTIC_NEGATIVE_EXAMPLES and the 137-line evidence fragment; no product file is touched and no test is skipped, deleted or relaxed.",
+    "done_when": "The done_when names a tests/standard_names run on a compute partition with no added failure id against the base; the manifest records that command run in place on node 98dci4-clu-2023 job 1291586, base-arm.log 1 failed EXIT=1 and head-arm.log 276 passed EXIT=0, so zero failure ids are added, while the cascade id's required pass is unmet because it skips.",
+    "goal": "The goal is to make the six red ids in section 1 pass; the diff adds one declaration entry at tests/standard_names/test_compose_prompt_examples_round_trip.py:181 which repairs the only genuinely failing id (NC-25) at its cause, five of the other ids were already green at base, and test_cascade_calibration.py:100 still skips, so one of the six does not pass.",
+    "manifest": "Read; it records status complete, commits ac3fd53b, the literal gate command, the three log paths, an empty failure_attribution and the outside_scope note on the missing frozen receipts; its after_suite object carries no completed, failure_count or failure_ids key.",
+    "write_paths": "Every path in the diff is inside the declared write paths: the added line is in the declared test_compose_prompt_examples_round_trip.py and the new file is the declared docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.html; the declared json and run.py were not needed."
+  },
+  "justifications": {
+    "durability": "removing the added declaration at tests/standard_names/test_compose_prompt_examples_round_trip.py:181 makes the existing parametrized assertion at line 213 fail with `assert True is False`, as negctl-nc25.log records, so the guard reddens on the regression it was added to prevent.",
+    "evidence": "base-arm.log records 1 failed EXIT=1 and head-arm.log 276 passed EXIT=0 over the same four files, and the negative control negctl-nc25.log reddens on the reverted line, though the base arm is a revert-in-place rather than a clean checkout of a5e781f6c.",
+    "fit": "the repair extends the existing _SEMANTIC_NEGATIVE_EXAMPLES declaration set in the same idiom as its six neighbours and introduces no new name.",
+    "goal_fidelity": "tests/standard_names/test_compose_prompt_examples_round_trip.py:181 classifies NC-25 correctly, but test_cascade_calibration.py:100 leaves one of the six named ids unexecuted, so the six-id goal is only partly met.",
+    "reuse": "no new function, fixture or module is added; the change extends the test's own existing declaration set rather than forking a capability the repository owns.",
+    "scope_discipline": "the two changed paths, tests/standard_names/test_compose_prompt_examples_round_trip.py and docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.html, are both declared write paths and no product source is modified."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal / done_when / write_paths / manifest / diff emitted; six SCORE lines and one CALL_SITES: none; two non-blocking findings.",
+  "review_run_id": "r-20261112T000041202436-review-of-sph-red-other-ac3fd53b6219",
+  "reviewed_base_sha": "a5e781f6c07de8997b7fa9c48d6c53ac9c35a77f",
+  "reviewed_head_sha": "ac3fd53b6219b45a43bdc727ec99e53b163a565b",
+  "reviewed_run_id": "r-20261111T221757003667-sph-red-other",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 19,
+    "goal_fidelity": 15,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:03:24.008146+00:00",
+  "total": 106
+}
