@@ -652,6 +652,11 @@ def _registered_physical_bases() -> frozenset[str]:
     )
 
 
+# Public export so sibling modules use a public name for the grammar's
+# physical-base vocabulary.
+registered_physical_bases = _registered_physical_bases
+
+
 class _RegisteredPhysicalBaseSet(Set[str]):
     """Read-only view over ISN's public physical-base vocabulary."""
 

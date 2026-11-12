@@ -18,6 +18,7 @@ from __future__ import annotations
 
 import logging
 import re
+import subprocess
 from collections import Counter
 from collections.abc import Mapping
 from pathlib import Path
@@ -26,9 +27,26 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 from imas_codex.graph.models import DDGapStatus
-from imas_codex.standard_names.catalog_release import _github_slug, _run_git
 
 logger = logging.getLogger(__name__)
+
+
+def _run_git(*args: str, cwd: Path | None = None) -> subprocess.CompletedProcess[str]:
+    """Run a git command in a checkout."""
+    return subprocess.run(
+        ["git", *args], cwd=cwd, capture_output=True, text=True, timeout=30
+    )
+
+
+def _github_slug(checkout: Path, remote: str) -> tuple[str, str] | None:
+    """Parse a github ``owner/repo`` pair from *remote* of *checkout*."""
+    result = _run_git("remote", "get-url", remote, cwd=checkout)
+    if result.returncode != 0:
+        return None
+    match = re.search(
+        r"github\.com[:/]([\w.-]+)/([\w.-]+?)(?:\.git)?/?$", result.stdout.strip()
+    )
+    return (match[1], match[2]) if match else None
 
 
 class PrNotes(BaseModel):

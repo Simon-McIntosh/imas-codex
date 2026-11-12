@@ -922,6 +922,10 @@ def _contest(
     )
 
 
+# Public export so sibling modules use a public name for the contest write.
+contest = _contest
+
+
 def list_contested(gc: GraphClient | None = None) -> list[dict[str, Any]]:
     """Return all names in the 'contested' stage with their failing verdict."""
     owns = gc is None

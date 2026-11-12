@@ -36,14 +36,14 @@ from imas_codex.standard_names.canonical import (
     reorder_entry_dict,
 )
 from imas_codex.standard_names.catalog_ordering import order_entries_by_hierarchy
-from imas_codex.standard_names.edit import _base_token
+from imas_codex.standard_names.edit import base_token
 from imas_codex.standard_names.protection import PROTECTED_FIELDS
 from imas_codex.standard_names.provenance_lifecycle import (
     fetch_public_semantic_sources,
 )
 from imas_codex.standard_names.segments import (
-    _registered_physical_bases,
     grammar_token_index,
+    registered_physical_bases,
 )
 
 logger = logging.getLogger(__name__)
@@ -1620,7 +1620,7 @@ def _identity_token_segments() -> tuple[dict[str, tuple[str, ...]], frozenset[st
     for token in locus_tokens:
         segments[token] = ("locus",)
 
-    quantity_tokens = frozenset(set(_registered_physical_bases()) | geometry_carriers)
+    quantity_tokens = frozenset(set(registered_physical_bases()) | geometry_carriers)
     return segments, quantity_tokens
 
 
@@ -1681,10 +1681,9 @@ def _identity_token_collision_gate(
             # A process token spells a cause: "due to X" names the quantity X as
             # its cause, so an identity the grammar parses with a physical base
             # is that quantity, not the process token standing in for a name.
-            process_base = _base_token(identity)
+            process_base = base_token(identity)
             process_is_quantity = (
-                process_base is not None
-                and process_base in _registered_physical_bases()
+                process_base is not None and process_base in registered_physical_bases()
             )
             for segment in segments:
                 if segment == "process" and process_is_quantity:

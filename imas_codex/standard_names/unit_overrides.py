@@ -119,6 +119,10 @@ def _load_rules() -> tuple[OverrideRule, ...]:
     return tuple(rules)
 
 
+# Public export so sibling modules use a public name for the rule set.
+load_rules = _load_rules
+
+
 def _active_resolution_retires_rule(
     path: str,
     rule: OverrideRule,

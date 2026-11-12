@@ -8,7 +8,7 @@ from collections.abc import Mapping, Sequence
 from typing import Any
 
 from imas_codex.discovery.base.judgment import decide_batch
-from imas_codex.standard_names.audits import _synonym_matches
+from imas_codex.standard_names.audits import synonym_matches
 from imas_codex.standard_names.grammar_adapter import parse_canonical_name
 
 SEGMENTS = {
@@ -147,7 +147,7 @@ def build_worklist(
     worklist: dict[str, list[dict[str, Any]]] = {"west": [], "other": []}
     members.sort(key=lambda row: row["name"])
     for index, candidate in enumerate(members):
-        for existing, cosine in _synonym_matches(
+        for existing, cosine in synonym_matches(
             {"id": candidate["name"], **candidate},
             members[index + 1 :],
             same_unit_only=True,

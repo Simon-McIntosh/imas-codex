@@ -628,6 +628,11 @@ def _base_token(name: str) -> str | None:
         return None
 
 
+# Public export so sibling modules use a public name; the private spelling
+# stays the implementation and remains the patch point in tests.
+base_token = _base_token
+
+
 def _grammar_segment_props(name: str) -> dict[str, str]:
     """Parsed ISN segment properties for a grammar-valid name.
 
