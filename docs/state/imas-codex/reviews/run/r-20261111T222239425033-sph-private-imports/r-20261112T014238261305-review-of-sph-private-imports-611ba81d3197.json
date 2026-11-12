@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-12T02:12:39.450Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-sph-private-imports-611ba81d3197",
+      "recorded_at": "2026-11-12T03:01:14.447227+00:00"
+    }
+  },
   "dispatched_at": "2026-11-12T01:47:46Z",
   "evidence_inputs": "Section 8's own done_when asks for zero private-name imports between top-level modules; this node deliberately reaches 24 live sites behind an explicit exemption list, so section 8 cannot be collapsed on this head and owes at least one continuation node for the 24 entries. The rule keys exemptions on (module, name) and fails on a stale entry, so the list can only shrink. Independent census at 611ba81d3 reproduces the fragment's census exactly: 24 names across 18 statements, matching the exemption set one-for-one.",
   "findings": [
