@@ -103,5 +103,253 @@
     "flux_surface_averaged_forms": 8,
     "flux_surface_averaged_names": 32,
     "species_families_with_more_than_one_wording": "20 of 20 (published-family-census.txt)"
+  },
+  "written_names": {
+    "how": "The fifteen names were written by the documentation seat (openrouter/openai/gpt-6.1-sol, reasoning effort high) through process_generate_docs_batch against a disposable Neo4j seeded from the published rows, read read-only; the definition was rendered and stored through the same path the writer takes, then reviewed by process_review_docs_batch on the same disposable graph. The project graph was never written.",
+    "logs": {
+      "writer": "/home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/writer-proof-1311509.log",
+      "review": "/home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/review-proof2-1311514.log"
+    },
+    "names": [
+      {
+        "name": "argon_density",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": 0.86875,
+        "live_review_mean_score": 0.8445312500000001,
+        "written_cost_usd": 0.0119869,
+        "written_review_cost_usd": 0.000104916,
+        "live_llm_cost_usd": 0.53652158,
+        "live_llm_cost_review_docs_usd": 0.51751636
+      },
+      {
+        "name": "boron_density",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": 0.8625,
+        "live_review_mean_score": 0.8803571428571428,
+        "written_cost_usd": 0.0096665,
+        "written_review_cost_usd": 0.000104748,
+        "live_llm_cost_usd": 0.3681398,
+        "live_llm_cost_review_docs_usd": 0.3681398
+      },
+      {
+        "name": "flux_surface_averaged_electron_density",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": null,
+        "live_review_mean_score": null,
+        "written_cost_usd": 0.0158139,
+        "written_review_cost_usd": 0.000136206,
+        "live_llm_cost_usd": null,
+        "live_llm_cost_review_docs_usd": null
+      },
+      {
+        "name": "flux_surface_averaged_electron_temperature",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": null,
+        "live_review_mean_score": null,
+        "written_cost_usd": 0.0153042,
+        "written_review_cost_usd": 0.000120162,
+        "live_llm_cost_usd": null,
+        "live_llm_cost_review_docs_usd": null
+      },
+      {
+        "name": "helium_density",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": null,
+        "live_review_mean_score": null,
+        "written_cost_usd": 0.0142339,
+        "written_review_cost_usd": 0.000113652,
+        "live_llm_cost_usd": null,
+        "live_llm_cost_review_docs_usd": null
+      },
+      {
+        "name": "iron_density",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": 1.0,
+        "live_review_mean_score": 0.8916666666666667,
+        "written_cost_usd": 0.0111773,
+        "written_review_cost_usd": 9.6306e-05,
+        "live_llm_cost_usd": 0.08054942000000001,
+        "live_llm_cost_review_docs_usd": 0.025722049999999996
+      },
+      {
+        "name": "line_averaged_argon_density",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": 0.8875,
+        "live_review_mean_score": 0.94375,
+        "written_cost_usd": 0.01519,
+        "written_review_cost_usd": 0.00010731,
+        "live_llm_cost_usd": 0.07894795,
+        "live_llm_cost_review_docs_usd": 0.0589262
+      },
+      {
+        "name": "line_averaged_electron_temperature",
+        "written_review_score": 0.9579291100211671,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_accept",
+        "live_reviewer_score_docs": 0.94375,
+        "live_review_mean_score": 0.9156249999999999,
+        "written_cost_usd": 0.0119314,
+        "written_review_cost_usd": 0.00010563,
+        "live_llm_cost_usd": 0.2578361,
+        "live_llm_cost_review_docs_usd": 0.2329094
+      },
+      {
+        "name": "line_averaged_time_derivative_of_electron_density",
+        "written_review_score": 0.9302204826782654,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_accept",
+        "live_reviewer_score_docs": 0.90793360603552,
+        "live_review_mean_score": null,
+        "written_cost_usd": 0.0193721,
+        "written_review_cost_usd": 0.0001344,
+        "live_llm_cost_usd": 0.000312228,
+        "live_llm_cost_review_docs_usd": 0.000182658
+      },
+      {
+        "name": "line_integrated_electron_density",
+        "written_review_score": 0.8953809388446626,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_accept",
+        "live_reviewer_score_docs": null,
+        "live_review_mean_score": null,
+        "written_cost_usd": 0.0125275,
+        "written_review_cost_usd": 0.00011298,
+        "live_llm_cost_usd": 0.026139853799999998,
+        "live_llm_cost_review_docs_usd": null
+      },
+      {
+        "name": "line_integrated_electron_number_density",
+        "written_review_score": 0.864567895940144,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_accept",
+        "live_reviewer_score_docs": 0.8732275377674048,
+        "live_review_mean_score": 0.895,
+        "written_cost_usd": 0.0144782,
+        "written_review_cost_usd": 0.000122472,
+        "live_llm_cost_usd": 0.8119226378888889,
+        "live_llm_cost_review_docs_usd": 0.187591304
+      },
+      {
+        "name": "neon_density",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": 0.8687499999999999,
+        "live_review_mean_score": 0.8687499999999999,
+        "written_cost_usd": 0.0115669,
+        "written_review_cost_usd": 0.000104496,
+        "live_llm_cost_usd": 0.0732636,
+        "live_llm_cost_review_docs_usd": 0.0732636
+      },
+      {
+        "name": "time_derivative_of_electron_density",
+        "written_review_score": 0.8771305886427117,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_accept",
+        "live_reviewer_score_docs": 0.9875,
+        "live_review_mean_score": 0.8500000000000001,
+        "written_cost_usd": 0.0186989,
+        "written_review_cost_usd": 0.000112308,
+        "live_llm_cost_usd": 0.30006879,
+        "live_llm_cost_review_docs_usd": 0.0482176
+      },
+      {
+        "name": "volume_averaged_argon_density",
+        "written_review_score": 0.8499999999999999,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_refine",
+        "live_reviewer_score_docs": 0.91875,
+        "live_review_mean_score": 0.959375,
+        "written_cost_usd": 0.0152288,
+        "written_review_cost_usd": 0.000115332,
+        "live_llm_cost_usd": 0.122619,
+        "live_llm_cost_review_docs_usd": 0.0710162
+      },
+      {
+        "name": "volume_averaged_electron_temperature",
+        "written_review_score": 0.9584415746356039,
+        "written_review_model": "typesafe/jev-1.14",
+        "written_review_cycles": 0,
+        "written_review_method": "jev_cascade_accept",
+        "live_reviewer_score_docs": 0.9361560140294722,
+        "live_review_mean_score": 0.9833333333333333,
+        "written_cost_usd": 0.009571,
+        "written_review_cost_usd": 9.7566e-05,
+        "live_llm_cost_usd": 0.181598286,
+        "live_llm_cost_review_docs_usd": 0.156524286
+      }
+    ],
+    "operator_form_counts": {
+      "flux_surface_averaged": 1,
+      "volume_averaged": 1,
+      "line_averaged": 1,
+      "line_integrated": 1,
+      "time_derivative": 1
+    },
+    "family_form_count": 1,
+    "family_forms": {
+      "the density counts ions summed over all charge states neutral atoms are excluded": [
+        "argon_density",
+        "iron_density",
+        "boron_density",
+        "neon_density",
+        "helium_density"
+      ]
+    },
+    "review_scores": {
+      "written_median": 0.8499999999999999,
+      "written_count": 15,
+      "live_reviewer_score_docs_median": 0.90793360603552,
+      "live_count": 11,
+      "live_review_mean_score_median": 0.8933333333333333,
+      "verdict": "LOWER",
+      "why": "The fifteen written names were reviewed by the Jev-deciding cascade, which records the acceptance floor (0.85) when a decision passes and grades only the four names routed to the chat reviewer. The live counterparts carry quorum means from the graded reviewer chain. The two medians measure different scoring regimes, so this comparison cannot show the written documentation is worse; it can only show the regimes differ. A like-for-like comparison needs the same review regime on both sides.",
+      "graded_written_scores": [
+        0.9579291100211671,
+        0.9302204826782654,
+        0.8953809388446626,
+        0.864567895940144,
+        0.8771305886427117,
+        0.9584415746356039
+      ]
+    },
+    "cost": {
+      "written_per_name_usd": 0.013783166666666668,
+      "written_family_member_usd": 0.0117263,
+      "written_total_usd": 0.2067475,
+      "written_review_per_name_usd": 0.00011256559999999999,
+      "written_review_total_usd": 0.0016884839999999999,
+      "live_llm_cost_median_usd": 0.152108643,
+      "live_llm_cost_review_docs_median_usd": 0.0732636,
+      "note": "The written figure covers documentation writing only; the live llm_cost covers name generation, documentation and its review together, and the live llm_cost_review_docs covers documentation review. Writing one family member costs USD 0.0117 against a live all-axis median of USD 0.152 and a live documentation-review median of USD 0.0733."
+    }
   }
 }

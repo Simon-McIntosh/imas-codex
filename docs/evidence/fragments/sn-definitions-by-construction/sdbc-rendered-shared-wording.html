@@ -45,12 +45,59 @@ EXIT=0</pre>
 
 <p>The tests that carry this section's measure are <code>test_two_quantities_carry_one_operator_sentence</code> (five operators, two quantities each), <code>test_species_family_carries_one_population_statement</code>, <code>test_altered_shared_part_is_refused_before_it_is_stored</code> and <code>test_shared_part_census_counts_one_wording_per_family</code>.</p>
 
-<h3 id="sdbc-rendered-shared-wording-unmeasured">Not measured by this node</h3>
+<h3 id="sdbc-rendered-shared-wording-written">The model-written proof on a disposable graph</h3>
 
-<ul>
-<li>The names above are rendered by the writer's own renderer with fixed input prose, not written by the documentation model on a disposable graph. No model call was made, so the node's metered spend is USD 0 against the USD 5 ceiling.</li>
-<li>The documentation review scores of names written this way, beside their previous scores, and the cost of writing one family member beside the present per-name cost, are therefore not recorded here. Both need the model on the disposable graph.</li>
-</ul>
+<p>Fifteen names — two per operator and the five-member species family — were written by the documentation seat (<code>openrouter/openai/gpt-6.1-sol</code>, reasoning effort <code>high</code>) through the writer's own entry point, <code>process_generate_docs_batch</code>, against a disposable Neo4j seeded from the published rows read read-only, and then reviewed by <code>process_review_docs_batch</code> on the same disposable graph. Nothing was written to the project graph. The runs were <code>all_debug</code> jobs; the writer run is <code>writer-proof-1311509.log</code> and the review run is <code>review-proof2-1311514.log</code>, under <code>~/.cache/imas-codex-sdbc-rendered-shared-wording/</code>.</p>
+
+<p>All fifteen were written and all fifteen reviewed. The census over the <em>written</em> definitions — the same measure as above, run over what the model produced rather than over a fixed input — counts one form for every operator and one wording for the family, agreeing with the rendered arm:</p>
+
+<table>
+<thead><tr><th>Group</th><th>Wording forms on written names</th></tr></thead>
+<tbody>
+<tr><td><code>flux_surface_averaged</code></td><td>1</td></tr>
+<tr><td><code>volume_averaged</code></td><td>1</td></tr>
+<tr><td><code>line_averaged</code></td><td>1</td></tr>
+<tr><td><code>line_integrated</code></td><td>1</td></tr>
+<tr><td><code>time_derivative</code></td><td>1</td></tr>
+<tr><td>species family of five</td><td>1</td></tr>
+</tbody>
+</table>
+
+<h4>Review score beside the score the published name carries</h4>
+
+<table>
+<thead><tr><th>Name</th><th>Written review score</th><th>Published <code>reviewer_score_docs</code></th><th>Published <code>review_mean_score</code></th></tr></thead>
+<tbody>
+<tr><td><code>argon_density</code></td><td>0.850</td><td>0.869</td><td>0.845</td></tr>
+<tr><td><code>boron_density</code></td><td>0.850</td><td>0.863</td><td>0.880</td></tr>
+<tr><td><code>iron_density</code></td><td>0.850</td><td>1.000</td><td>0.892</td></tr>
+<tr><td><code>line_averaged_argon_density</code></td><td>0.850</td><td>0.888</td><td>0.944</td></tr>
+<tr><td><code>line_averaged_electron_temperature</code></td><td>0.958</td><td>0.944</td><td>0.916</td></tr>
+<tr><td><code>line_averaged_time_derivative_of_electron_density</code></td><td>0.930</td><td>0.908</td><td>—</td></tr>
+<tr><td><code>line_integrated_electron_number_density</code></td><td>0.865</td><td>0.873</td><td>0.895</td></tr>
+<tr><td><code>neon_density</code></td><td>0.850</td><td>0.869</td><td>0.869</td></tr>
+<tr><td><code>time_derivative_of_electron_density</code></td><td>0.877</td><td>0.988</td><td>0.850</td></tr>
+<tr><td><code>volume_averaged_argon_density</code></td><td>0.850</td><td>0.919</td><td>0.959</td></tr>
+<tr><td><code>volume_averaged_electron_temperature</code></td><td>0.958</td><td>0.936</td><td>0.983</td></tr>
+</tbody>
+</table>
+
+<p><strong>The median is lower, and the comparison cannot be read as a quality drop.</strong> Written median 0.850 over fifteen names against a published <code>reviewer_score_docs</code> median of 0.908 over the eleven that exist live. The written names were reviewed by the Jev-deciding cascade, which records the acceptance floor (0.85 exactly, from <code>DEFAULT_MIN_SCORE</code>) when a decision passes and grades only the four names it routed to the chat reviewer; the published scores are quorum means from the graded reviewer chain. Nine of the fifteen written names carry the floor, so the medians measure two scoring regimes rather than two qualities. A like-for-like comparison needs one regime on both sides, and this node does not have it.</p>
+
+<h4>Cost of writing one family member</h4>
+
+<table>
+<thead><tr><th>Measure</th><th>USD</th></tr></thead>
+<tbody>
+<tr><td>Writing one family member (this run, mean of five)</td><td>0.0117</td></tr>
+<tr><td>Writing one name (this run, mean of fifteen)</td><td>0.0138</td></tr>
+<tr><td>Reviewing one name (this run)</td><td>0.00011</td></tr>
+<tr><td>Published <code>llm_cost</code>, median of the eleven live names — name, documentation and its review together</td><td>0.152</td></tr>
+<tr><td>Published <code>llm_cost_review_docs</code>, median — documentation review alone</td><td>0.0733</td></tr>
+</tbody>
+</table>
+
+<p>Writing one family member costs about USD 0.012, against a published all-axis median of USD 0.152 per name and USD 0.073 for documentation review alone. Total metered spend for the two runs was USD 0.209 — USD 0.207 of writing and USD 0.0017 of review — against the node's USD 5 ceiling.</p>
 
 <h3 id="sdbc-rendered-shared-wording-proposal">Wording proposed to the grammar library</h3>
 
