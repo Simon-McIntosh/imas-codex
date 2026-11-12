@@ -53,9 +53,28 @@
       "note": "\u00a75 now names docs/evidence/fragments/sn-domain-per-family/ as its evidence directory, gate log included",
       "reason": "",
       "when": "2026-11-12T09:35:03.075379+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "11a84b946514102f6698a2529bab9d23fa1f9e74",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "the twelve disputed items are committed as docs/evidence/fragments/sn-domain-family-labels/disputed-items.json and \u00a75 cites that file",
+      "reason": "",
+      "when": "2026-11-12T09:35:14.486004+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "11a84b946514102f6698a2529bab9d23fa1f9e74",
+      "commit_basis": "edit",
+      "note": "the twelve disputed items are committed as docs/evidence/fragments/sn-domain-family-labels/disputed-items.json and \u00a75 cites that file",
+      "reason": "",
+      "when": "2026-11-12T09:35:14.486004+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
