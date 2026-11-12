@@ -865,3 +865,162 @@ def test_rendered_text_does_not_open_with_a_bare_fragment():
         "Number density of argon\n\nIts continuum definition is:\n\n$$n = N/V$$"
     )
     assert completed.startswith("Number density of argon. Its continuum definition is:")
+
+
+# A restatement of the population whose wording overlaps the stored sentence
+# enough to name the same part, but not enough for the renderer's exact-match
+# removal. It sat for a while in neither band: kept beside the appended
+# sentence, and never reported.
+MID_BAND_PARAPHRASE = (
+    "The density counts ions summed over all charge states and excludes neutral "
+    "atoms from the tally."
+)
+
+
+def test_paraphrase_below_the_exact_match_band_is_removed():
+    """A restatement in different words is dropped, not kept beside the wording."""
+
+    from imas_standard_names.grammar.terms import select_conventions
+
+    from imas_codex.standard_names.docs_gates import (
+        SPECIES_POPULATION_SENTENCE,
+        replace_altered_shared_parts,
+        shared_part_sentences,
+    )
+
+    parts = shared_part_sentences("argon_density", select_conventions("argon_density"))
+    rendered = replace_altered_shared_parts(
+        f"Argon line emission is used for spectroscopy.\n\n{MID_BAND_PARAPHRASE}",
+        parts,
+    )
+
+    assert MID_BAND_PARAPHRASE not in rendered
+    assert rendered.count(SPECIES_POPULATION_SENTENCE) == 1
+
+
+def test_paraphrase_left_beside_the_stored_wording_is_reported():
+    """Text the renderer could not remove is a finding, not silently kept."""
+
+    from imas_codex.standard_names.docs_gates import (
+        SPECIES_POPULATION_SENTENCE,
+        HouseStyleFindingClass,
+        conformance_findings,
+    )
+
+    findings = conformance_findings(
+        "argon_density",
+        documentation=f"{SPECIES_POPULATION_SENTENCE}\n\n{MID_BAND_PARAPHRASE}",
+    )
+
+    assert any(
+        finding.finding_class is HouseStyleFindingClass.SHARED_PART_ALTERED
+        and finding.registry_entry == "population:species"
+        for finding in findings
+    ), findings
+
+
+@pytest.mark.asyncio
+async def test_pipeline_refuses_a_contradicting_definition_before_persist():
+    """The refusal is reached on the pipeline path, and nothing is stored."""
+
+    from imas_codex.standard_names.models import GeneratedDocs
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        process_generate_docs_batch,
+    )
+
+    async def _fake_acall(model, messages, response_model, service, **kwargs):
+        return (
+            GeneratedDocs(
+                description=(
+                    "Argon density summed over all charge states, including "
+                    "neutral atoms and ions."
+                ),
+                documentation=ARGON_DENSITY_CONTRADICTION,
+            ),
+            0.001,
+            100,
+        )
+
+    mgr = MagicMock()
+    mgr.reserve = MagicMock(return_value=MagicMock())
+    persist = MagicMock(return_value="drafted")
+
+    with (
+        patch(
+            "imas_codex.settings.get_model",
+            return_value="test-language-model",
+        ),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=_fake_acall,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "persist_generated_docs",
+            persist,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        ),
+        patch("asyncio.to_thread", new=AsyncMock(return_value="drafted")),
+    ):
+        processed = await process_generate_docs_batch(
+            [_make_docs_item(sn_id="argon_density")], mgr, asyncio.Event()
+        )
+
+    assert processed == 0
+    persist.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_refine_refuses_a_contradicting_definition_before_persist():
+    """A refinement is held to the settled population exactly as a first draft."""
+
+    from imas_codex.standard_names.models import RefinedDocs
+    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+        process_refine_docs_batch,
+    )
+    from tests.standard_names.test_refine_docs_chain import _make_refine_docs_item
+
+    refined = RefinedDocs(
+        description=(
+            "Argon density summed over all charge states, including neutral atoms."
+        ),
+        documentation=ARGON_DENSITY_CONTRADICTION,
+        links=[],
+    )
+    mock_mgr = MagicMock()
+    mock_mgr.reserve = MagicMock(return_value=MagicMock())
+    persist = MagicMock(return_value={"docs_chain_length": 1})
+
+    with (
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            return_value=(refined, 0.05, {"input_tokens": 10, "output_tokens": 5}),
+        ),
+        patch(
+            "imas_codex.llm.prompt_loader.render_prompt",
+            return_value="test prompt",
+        ),
+        patch("imas_codex.settings.get_model", return_value="model-x"),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "persist_refined_docs",
+            persist,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "release_refine_docs_failed_claims",
+            return_value=1,
+        ),
+        patch(
+            "asyncio.to_thread",
+            new=AsyncMock(side_effect=lambda fn, *a, **k: fn(*a, **k)),
+        ),
+    ):
+        count = await process_refine_docs_batch(
+            [_make_refine_docs_item(sn_id="argon_density")], mock_mgr, asyncio.Event()
+        )
+
+    assert count == 0
+    persist.assert_not_called()
