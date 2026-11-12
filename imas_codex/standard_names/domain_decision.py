@@ -55,9 +55,7 @@ __all__ = [
     "all_domains",
     "band_domains",
     "band_of",
-    "band_text",
     "band_umbrella",
-    "build_family_band_question",
     "build_family_domain_question",
     "build_family_question",
     "build_family_state",
@@ -83,8 +81,6 @@ __all__ = [
 
 SEAT = "sn-domain-tree"
 QUESTION = "physics_domain"
-#: The first-stage Choice of the widened decision: which band the concept is in.
-BAND_QUESTION = "physics_domain_band"
 CONCURRENCY = 8
 
 #: The confidence floor a name's chosen probability must clear to be decided.
@@ -143,14 +139,6 @@ def band_domains(umbrella: str) -> tuple[str, ...]:
         if band["umbrella"] == umbrella:
             return tuple(band["domains"])
     return ()
-
-
-def band_text(umbrella: str) -> str:
-    """One band's rationale, for the first-stage Choice."""
-    for band in _guidance().get("precedence") or ():
-        if band["umbrella"] == umbrella:
-            return " ".join(str(band.get("rationale") or "").split())
-    return ""
 
 
 def option_text(domain: str) -> str:
@@ -668,47 +656,6 @@ def build_family_state(
         "source_path_count_by_candidate_domain": {
             domain: counts.get(domain, 0) for domain in options
         },
-        "source_path_count_by_band": _band_counts(counts),
-    }
-
-
-def _band_counts(counts: Mapping[str, int]) -> dict[str, int]:
-    """The family's source-path counts rolled up to band umbrellas."""
-    banded: Counter[str] = Counter()
-    for domain, count in counts.items():
-        umbrella = band_umbrella(domain)
-        if umbrella:
-            banded[umbrella] += count
-    return {band: banded.get(band, 0) for band in domain_bands()}
-
-
-def build_family_band_question(member_count: int) -> dict[str, Any]:
-    """The first stage of the widened Choice: which band the concept belongs to.
-
-    The options are the band umbrellas rather than domains, so the model picks
-    the subject area on a short list and the domain within it is chosen next.
-    A flat choice over all thirty-two domains dilutes a confident answer below
-    the confidence floor; the band split keeps each stage's option list short
-    enough for a decided probability.
-    """
-    instructions = (
-        f"Choose the one physics band that best describes this family of "
-        f"{member_count} standard names, which measure the same quantity at "
-        "the same locus and differ only in species, charge state, component or "
-        "device. Judge what the quantity measures, not which IDS carries it: "
-        "the family's source domains are evidence of where the data lives, not "
-        "a bound on where the member names belong. Every band is offered, so a "
-        "band none of the sources' domains falls in may be the right one. The "
-        "physics of the plasma itself outranks the system that measures it or "
-        "acts on it; choose general only when no narrower band fits."
-    )
-    order = list(domain_bands())
-    return {
-        BAND_QUESTION: {
-            "type": "choice",
-            "instructions": instructions,
-            "criteria": {band: band_text(band) for band in order},
-        }
     }
 
 
@@ -722,9 +669,10 @@ def build_family_domain_question(
         "the same locus and differ only in species, charge state, component or "
         "device. Judge the concept the family names, not which IDS carries any "
         "one member's sources: every member receives the domain you choose. "
-        "These are every domain of the band this family was judged to belong "
-        "to, so a domain none of its sources’ paths lives in may be the right "
-        "one: the sources' stored domains are evidence, not a bound. Prefer "
+        "These options are every domain of the bands this family's source "
+        "domains fall in, together with every band umbrella, so a domain none "
+        "of its sources' paths lives in may be the right one: the sources' "
+        "stored domains are evidence, not a bound. Prefer "
         "the most specific option that plainly fits the quantity; choose the "
         "band umbrella only when no narrower option fits. The options are "
         "listed most specific first."
@@ -804,6 +752,27 @@ def _probabilities(answer: Mapping[str, Any]) -> dict[str, float]:
     }
 
 
+def widened_candidate_domains(
+    members: Sequence[Mapping[str, Any]], ids_map: Mapping[str, str]
+) -> tuple[str, ...]:
+    """The domains a family is offered when its sources do not bound it.
+
+    Every domain of every band a source domain falls in, so a source in
+    ``transport`` no longer pins the family to ``transport``; every band
+    umbrella, so a concept in another band can be reached at that band's
+    umbrella; and ``general``. The sources' stored domains stay in the set as
+    evidence of where the data lives, not as its limit.
+    """
+    found = set(family_candidate_domains(members, ids_map))
+    for domain in list(found):
+        umbrella = band_umbrella(domain)
+        if umbrella:
+            found |= set(band_domains(umbrella))
+    found |= set(domain_bands())
+    found.add("general")
+    return tuple(sorted(found))
+
+
 async def _decide_widened(
     family_id: str,
     member_ids: tuple[str, ...],
@@ -811,16 +780,13 @@ async def _decide_widened(
     ids_map: Mapping[str, str],
     model: str,
 ) -> FamilyDomainDecision:
-    """The widened decision: which band, then which domain of that band.
+    """One Choice over the band-widened option set.
 
-    The option set is every domain of the band the concept is judged to belong
-    to, not the domains the family's sources supply. A family sourced entirely
-    from one part of the Data Dictionary can therefore receive a domain none of
-    its sources lives in, which the source-bounded set makes impossible. The
-    band stage keeps each Choice short enough that a confident answer stays
-    above :data:`CONFIDENCE_FLOOR`; the stored probability is the band's
-    probability times the domain's probability within the band, because both
-    have to be right for the chosen domain to be right.
+    A family sourced entirely from one part of the Data Dictionary is no
+    longer offered only that part's domains: the whole band the source sits in
+    is offered, so the concept's own domain can be chosen even where no source
+    lives. A single call keeps the option list short enough that a decided
+    answer stays above :data:`CONFIDENCE_FLOOR`.
     """
     if not members:
         return FamilyDomainDecision(
@@ -833,17 +799,13 @@ async def _decide_widened(
             decided_at=None,
             undecided_reason="the family has no members",
         )
-    everything = all_domains()
-    state = build_family_state(family_id, members, ids_map, everything)
-    bands = domain_bands()
+    options = widened_candidate_domains(members, ids_map)
 
-    def held(
-        reason: str, cost: float, candidates: Sequence[str]
-    ) -> FamilyDomainDecision:
+    def held(reason: str, cost: float) -> FamilyDomainDecision:
         return FamilyDomainDecision(
             family_id=family_id,
             members=member_ids,
-            candidates=tuple(candidates),
+            candidates=options,
             choice=None,
             probability=None,
             model=model,
@@ -852,56 +814,27 @@ async def _decide_widened(
             cost=cost,
         )
 
-    band_results, band_cost = await decide_batch(
-        [state],
-        build_family_band_question(len(members)),
+    results, cost = await decide_batch(
+        [build_family_state(family_id, members, ids_map, options)],
+        build_family_domain_question(options, len(members)),
         model=model,
         service=SERVICE_TAG,
         concurrency=CONCURRENCY,
     )
-    band_answer = _answer_of(band_results, BAND_QUESTION)
-    if not isinstance(band_answer, dict):
-        return held("the Jev call returned no band answer", band_cost, everything)
-    band = band_answer.get("choice")
-    band_probability = _probabilities(band_answer).get(_pretty(str(band)))
-    if band not in bands:
+    answer = _answer_of(results, QUESTION)
+    if not isinstance(answer, dict):
+        return held("the Jev call returned no answer", cost)
+    choice = answer.get("choice")
+    probability = _probabilities(answer).get(_pretty(str(choice)))
+    if choice not in options:
+        return held(f"the choice {choice!r} is not one of the candidates", cost)
+    if probability is None:
+        return held("the answer carried no probability", cost)
+    if probability < CONFIDENCE_FLOOR:
         return held(
-            f"the band {band!r} is not one of the candidates", band_cost, everything
-        )
-    if band_probability is None:
-        return held("the band answer carried no probability", band_cost, everything)
-
-    options = band_domains(str(band))
-    cost = band_cost
-    if len(options) == 1:
-        choice, probability = options[0], band_probability
-    else:
-        results, domain_cost = await decide_batch(
-            [state],
-            build_family_domain_question(options, len(members)),
-            model=model,
-            service=SERVICE_TAG,
-            concurrency=CONCURRENCY,
-        )
-        cost = band_cost + domain_cost
-        answer = _answer_of(results, QUESTION)
-        if not isinstance(answer, dict):
-            return held("the Jev call returned no domain answer", cost, options)
-        choice = answer.get("choice")
-        chosen = _probabilities(answer).get(_pretty(str(choice)))
-        if choice not in options:
-            return held(
-                f"the choice {choice!r} is not one of the candidates", cost, options
-            )
-        if chosen is None:
-            return held("the domain answer carried no probability", cost, options)
-        probability = band_probability * chosen
-    if probability is None or probability < CONFIDENCE_FLOOR:
-        return held(
-            f"chosen probability {float(probability or 0.0):.3f} is below the floor "
+            f"chosen probability {probability:.3f} is below the floor "
             + f"{CONFIDENCE_FLOOR:.2f}",
             cost,
-            options,
         )
     return FamilyDomainDecision(
         family_id=family_id,
@@ -921,16 +854,15 @@ async def decide_family_domain(
     ids_map: Mapping[str, str],
     *,
     model: str,
-    bounded_by_sources: bool = False,
+    bounded_by_sources: bool = True,
 ) -> FamilyDomainDecision:
     """Ask Jev one domain Choice for the whole family and return the decision.
 
-    The options are every domain of the band the concept is judged to belong
-    to, not the domains its sources supply: the sources' stored domains are
-    evidence, and a domain none of them lives in can be chosen. Passing
-    ``bounded_by_sources=True`` restricts the options to the family's source
-    domains as the earlier option set did; it exists to measure the two sets
-    against each other in one run and is not the shipped behaviour.
+    Passing
+    ``bounded_by_sources=True`` keeps the options to the family's source
+    domains, which is the shipped behaviour until a widened set clears the
+    measured accuracy and confidence bars; the widened set is opt-in so the
+    two can be measured against each other in one run.
 
     A family whose options collapse to one domain takes it without a call. A
     recorded lead correction wins over the Choice and applies to the whole

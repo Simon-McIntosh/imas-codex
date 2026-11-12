@@ -1,0 +1,105 @@
+<h2 id="sdpf-widened-options">Widening a family's domain options past its sources</h2>
+
+<p id="sdpf-widened-options-outcome"><strong>Blocked.</strong> Two option sets that
+lift the sources' bound were built and measured against the agreed reader labels
+in one run each. Neither clears the section's bars: the calibration accuracy with
+an undecided name counted wrong falls below the 0.597 floor in both, and the
+count of multi-member families below the confidence floor rises instead of
+falling to at most 20. No bar was weakened and no name was added to or removed
+from the measurement basis.</p>
+
+<h3 id="sdpf-widened-options-change">What changed</h3>
+
+<p id="sdpf-widened-options-change-detail">The one family decision in
+<code>imas_codex/standard_names/domain_decision.py</code> gained a widened option
+set and an explicit <code>bounded_by_sources</code> switch, so both sets are
+measured through the same decision in the same run rather than through a second
+decision. <code>widened_candidate_domains</code> offers every domain of every band
+a source domain falls in, every band umbrella, and <code>general</code>; a source
+in <code>transport</code> therefore no longer pins the family to
+<code>transport</code>, and a concept in another band is reachable at that band's
+umbrella. The source-bounded set stays the shipped default because the widened
+sets regress the calibration reading; the widening is opt-in until a set clears
+the bars.</p>
+
+<h3 id="sdpf-widened-options-readings">The two option sets tried, and their readings</h3>
+
+<p id="sdpf-widened-options-readings-basis">Every reading is over the same
+committed reference: the items both blind readers gave the same domain (37
+families, 64 single names; the 3 families and 9 single names they disagree on are
+excluded and no disputed item was resolved). The source-bounded arm is decided in
+the same run, so the comparison holds the seat, the families and the run
+constant. <code>stored</code> is the per-name domain the catalog holds today.</p>
+
+<table>
+  <thead>
+    <tr><th>Bar</th><th>Source-bounded</th><th>Band-split, two-stage</th><th>Band-widened, one stage</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Family member share above the stored 43.17 %, and not lower than the source-bounded arm (35 families, 2,835 names)</td>
+      <td>48.64 %</td><td>47.80 % — fails, lower</td><td>48.64 % — ties</td>
+    </tr>
+    <tr>
+      <td>Drawn single-name share above the stored 54.10 % (61 names)</td>
+      <td>63.93 %</td><td>62.30 %</td><td>67.21 % — highest</td>
+    </tr>
+    <tr>
+      <td>Calibration accuracy, undecided counted wrong, at least 0.597 and not lower than the source-bounded arm (169 names)</td>
+      <td>60.36 %</td><td>45.56 % — fails</td><td>57.40 % — fails</td>
+    </tr>
+    <tr>
+      <td>Multi-member families below the confidence floor, at most 20</td>
+      <td>30</td><td>39 — fails</td><td>32 — fails</td>
+    </tr>
+    <tr>
+      <td>Planted name with one unrelated source receives its concept domain</td>
+      <td>no</td><td>not reached</td><td>yes</td>
+    </tr>
+  </tbody>
+</table>
+
+<p id="sdpf-widened-options-readings-detail">The band-widened set is the better of
+the two: it ties the family member share, raises the drawn single-name share by
+3.3 points over the source-bounded arm and 13.1 points over the stored domains,
+and gives the planted name its concept domain. It still fails two bars. Its
+calibration accuracy is 2.96 points below the source-bounded arm and 2.3 points
+below the 0.597 floor, and it leaves 32 multi-member families below the floor
+against the bound of 20 — two more than the source-bounded arm. The two-stage set
+is strictly worse: splitting the choice into a band step and a domain step and
+multiplying the two probabilities drives 39 families below the floor and the
+calibration reading to 45.56 %, because the product of two decided probabilities
+is usually below the floor even when both stages are confident.</p>
+
+<p id="sdpf-widened-options-named">On the three named names the two arms agree and
+both match the readers: <code>safety_factor</code> is filed under
+<code>equilibrium</code>, <code>greenwald_density</code> under
+<code>core_plasma_physics</code> and <code>voltage_of_valve</code> under
+<code>fueling</code>. The drawn single names leave 11 of 61 below the floor under
+both arms, and they keep their stored domain there, so the drawn share is given
+over all 61. Two agreed sheet families straddle more than one decision family and
+are listed in the artifact rather than resolved: <code>item-077</code> (the
+current-density pattern splits by viscosity process) and <code>item-084</code>
+(the magnetic-probe coordinate pattern splits by probe object and by geometric
+base).</p>
+
+<h3 id="sdpf-widened-options-spend">Spend</h3>
+
+<p id="sdpf-widened-options-spend-detail">Two hundred and eighteen families were
+decided per arm; the widened arm paid 218 judgments and the source-bounded
+arm 209, the difference being families whose source domains already collapsed to
+one option and so needed no call. The band-widened run cost USD 0.0664 at
+USD 0.000305 per decision; the two-stage run cost USD 0.0618 at USD 0.000285; the
+source-bounded arm costs USD 0.0297 at USD 0.000142. Projected over the 1,247 live
+families, a live pass under the band-widened set costs about USD 0.38, well inside
+the section's USD 15 ceiling.</p>
+
+<h3 id="sdpf-widened-options-unmet">What is not measured, and why</h3>
+
+<p id="sdpf-widened-options-unmet-detail">The catalog-wide transport and general
+share, with the twenty largest moves by family, was not measured: it needs a
+decision over all 1,247 live families and the node's time budget did not allow it
+after two option sets had been measured. The catalog was never written and no
+disposable-copy write pass ran, so this is a missing measurement rather than a
+write left half done. The section's node also owes the lead's ruling on the twelve
+disputed sheet items; no disputed item was used here.</p>

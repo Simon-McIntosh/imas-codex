@@ -202,12 +202,16 @@ def _incumbent() -> dict[str, str]:
 
 
 async def _decide_all(
-    families: dict[str, dict], model: str, *, bounded: bool
+    families: dict[str, dict],
+    model: str,
+    *,
+    bounded: bool,
+    concurrency: int = 16,
 ) -> dict[str, Any]:
     """Decide every family once under one option set, one judgment per family."""
     ids_map = ids_domain_map()
     decisions: dict[str, Any] = {}
-    semaphore = asyncio.Semaphore(16)
+    semaphore = asyncio.Semaphore(concurrency)
 
     async def one(key: str) -> None:
         family = families[key]
@@ -637,10 +641,106 @@ def _filed_domain(decision: Any, member: dict) -> str:
     return str(member.get("physics_domain") or "")
 
 
+def _all_live(output: Path, seat: str) -> int:
+    """The transport and general share over every live family, never written.
+
+    Every live family is decided under the widened options in memory; a name
+    in an undecided family keeps its stored domain, which is what a live pass
+    would leave it holding. The twenty largest moves between domains are
+    listed by family so a physicist can read what the widening would change.
+    """
+    from collections import Counter
+
+    with GraphClient() as gc:
+        families = fetch_domain_families(gc, min_size=1)
+    indexed = {family["key"]: family for family in families}
+    decisions = asyncio.run(
+        _decide_all(indexed, seat, bounded=False, concurrency=32)
+    )
+    stored_counts: Counter[str] = Counter()
+    filed_counts: Counter[str] = Counter()
+    moves: Counter[tuple[str, str]] = Counter()
+    family_moves: dict[tuple[str, str], list[str]] = {}
+    total = 0
+    for family in families:
+        decision = decisions[family["key"]]
+        for member in family["members"]:
+            total += 1
+            stored = str(member.get("physics_domain") or "unset")
+            stored_counts[stored] += 1
+            filed = str(decision.choice) if decision.decided else stored
+            filed_counts[filed] += 1
+            if filed != stored:
+                moves[(stored, filed)] += 1
+                family_moves.setdefault((stored, filed), []).append(family["key"])
+    judged = [d for d in decisions.values() if len(d.candidates) > 1]
+    payload = {
+        "seat": seat,
+        "provenance": _provenance(seat),
+        "families": len(families),
+        "names": total,
+        "writes_to_graph": False,
+        "graph_access": "read-only",
+        "stored_domain_counts": dict(stored_counts.most_common()),
+        "widened_domain_counts": dict(filed_counts.most_common()),
+        "transport": {
+            "stored": stored_counts.get("transport", 0),
+            "widened": filed_counts.get("transport", 0),
+        },
+        "general": {
+            "stored": stored_counts.get("general", 0),
+            "widened": filed_counts.get("general", 0),
+        },
+        "judgments": {
+            "families_decided": len(decisions),
+            "judgments_paid": len(judged),
+            "cost_usd": round(
+                sum(float(d.cost or 0.0) for d in decisions.values()), 6
+            ),
+            "cost_per_decision_usd": round(
+                sum(float(d.cost or 0.0) for d in decisions.values()) / len(judged), 8
+            )
+            if judged
+            else 0.0,
+        },
+        "largest_moves": [
+            {
+                "from": pair[0],
+                "to": pair[1],
+                "names": count,
+                "families": family_moves[pair][:5],
+            }
+            for pair, count in moves.most_common(20)
+        ],
+    }
+    output.parent.mkdir(parents=True, exist_ok=True)
+    with output.open("w") as handle:
+        json.dump(payload, handle, indent=1)
+        handle.write("\n")
+    print(
+        json.dumps(
+            {
+                "families": len(families),
+                "names": total,
+                "transport": payload["transport"],
+                "general": payload["general"],
+                "judgments": payload["judgments"],
+            },
+            indent=1,
+        )
+    )
+    return 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--from-existing", action="store_true")
+    parser.add_argument(
+        "--all-live",
+        action="store_true",
+        help="decide every live family and record the transport and general share",
+    )
     parser.add_argument(
         "--check-fragment",
         type=Path,
@@ -659,6 +759,9 @@ def main() -> int:
 
     if args.from_existing:
         return _derive_from_existing(args.output, revision=args.revision)
+
+    if args.all_live:
+        return _all_live(args.output, get_model(SEAT))
 
     seat = get_model(SEAT)
     agreement = _reader_agreement()

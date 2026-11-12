@@ -22,7 +22,6 @@ from imas_codex.standard_names import domain_decision as dd
 #: A concept in the heating band whose only Data Dictionary source sits in
 #: transport: the family's sources cannot reach the domain the concept needs.
 CONCEPT = "auxiliary_heating"
-CONCEPT_BAND = "auxiliary_heating"
 SOURCE_DOMAIN = "transport"
 PLANTED = [
     {
@@ -37,23 +36,14 @@ PLANTED = [
 ]
 
 
-def _stub(
-    concept: str, band: str, *, domain_probability: float = 0.9, fallback: str = ""
-) -> Any:
-    """A stub that answers the band choice and the domain choice as the model would.
+def _stub(concept: str, *, domain_probability: float = 0.9, fallback: str = "") -> Any:
+    """A stub that picks *concept* when it is offered and *fallback* otherwise.
 
-    The domain stage picks *concept* when it is offered and otherwise falls back
-    to the first option, which is what makes the two option sets differ here.
+    Which options the decision is offered is the subject of these tests, so the
+    stub plays a model that would choose the concept's domain whenever it can.
     """
 
     async def decide(states, questions, **_kwargs):  # noqa: ANN001
-        if dd.BAND_QUESTION in questions:
-            return [
-                (
-                    {dd.BAND_QUESTION: {"choice": band, "probabilities": {band: 0.95}}},
-                    0.0,
-                )
-            ], 0.0
         options = list(questions[dd.QUESTION]["criteria"])
         if concept in options:
             choice = concept
@@ -63,12 +53,7 @@ def _stub(
             choice = options[0]
         return [
             (
-                {
-                    dd.QUESTION: {
-                        "choice": choice,
-                        "probabilities": {choice: domain_probability},
-                    }
-                },
+                {dd.QUESTION: {"choice": choice, "probabilities": {choice: domain_probability}}},
                 0.0,
             )
         ], 0.0
@@ -76,22 +61,26 @@ def _stub(
     return decide
 
 
-def test_the_widened_option_set_is_every_domain_of_the_band() -> None:
-    """All thirty-two domains are reachable, grouped into the seven bands."""
-    everything = dd.all_domains()
-    bands = dd.domain_bands()
-    assert len(everything) == 32, "the guidance defines thirty-two domains"
-    assert len(bands) == 7, "the guidance groups them into seven bands"
-    reachable = {domain for band in bands for domain in dd.band_domains(band)}
-    assert reachable == set(everything), "every domain sits in exactly one band"
-    assert all(len(dd.band_domains(band)) <= 8 for band in bands)
+def test_the_widened_option_set_reaches_past_the_source_band() -> None:
+    """A source in transport no longer pins the family to transport's band alone."""
+    options = dd.widened_candidate_domains(PLANTED, {})
+    assert {"equilibrium", "core_plasma_physics"} <= set(options), (
+        "every domain of the source's band is offered"
+    )
+    assert {"auxiliary_heating", "edge_plasma_physics"} <= set(options), (
+        "every band umbrella is offered, so another band is reachable"
+    )
+    assert "current_drive" not in options, (
+        "a specific domain in an unrelated band is reached through that band's "
+        "umbrella, not offered directly"
+    )
 
 
 def test_a_single_source_does_not_bound_the_options(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """The concept's domain is offered though no source lives in it."""
-    monkeypatch.setattr(dd, "decide_batch", _stub(CONCEPT, CONCEPT_BAND))
+    monkeypatch.setattr(dd, "decide_batch", _stub(CONCEPT))
 
     bounded = dd.family_candidate_domains(PLANTED, {})
     assert CONCEPT not in bounded, (
@@ -100,7 +89,9 @@ def test_a_single_source_does_not_bound_the_options(
     )
 
     decision = asyncio.run(
-        dd.decide_family_domain("planted-family", PLANTED, {}, model="stub")
+        dd.decide_family_domain(
+            "planted-family", PLANTED, {}, model="stub", bounded_by_sources=False
+        )
     )
     assert decision.decided, decision.undecided_reason
     assert decision.choice == CONCEPT, (
@@ -108,8 +99,8 @@ def test_a_single_source_does_not_bound_the_options(
         "domain under the widened options"
     )
     assert CONCEPT in decision.candidates
-    assert set(decision.candidates) == set(dd.band_domains(CONCEPT_BAND))
-    assert decision.probability == pytest.approx(0.95 * 0.9)
+    assert set(decision.candidates) == set(dd.widened_candidate_domains(PLANTED, {}))
+    assert decision.probability == pytest.approx(0.9)
 
 
 def test_the_same_name_offered_only_its_sources_does_not(
@@ -117,7 +108,7 @@ def test_the_same_name_offered_only_its_sources_does_not(
 ) -> None:
     """The comparison arm keeps the source domain, which is the defect."""
     monkeypatch.setattr(
-        dd, "decide_batch", _stub(CONCEPT, CONCEPT_BAND, fallback=SOURCE_DOMAIN)
+        dd, "decide_batch", _stub(CONCEPT, fallback=SOURCE_DOMAIN)
     )
 
     decision = asyncio.run(
@@ -135,10 +126,12 @@ def test_a_band_below_the_floor_leaves_the_family_undecided(
 ) -> None:
     """A family none of whose options clears the floor writes nothing."""
     monkeypatch.setattr(
-        dd, "decide_batch", _stub(CONCEPT, CONCEPT_BAND, domain_probability=0.4)
+        dd, "decide_batch", _stub(CONCEPT, domain_probability=0.4)
     )
     decision = asyncio.run(
-        dd.decide_family_domain("planted-family", PLANTED, {}, model="stub")
+        dd.decide_family_domain(
+            "planted-family", PLANTED, {}, model="stub", bounded_by_sources=False
+        )
     )
     assert not decision.decided
     assert decision.choice is None
