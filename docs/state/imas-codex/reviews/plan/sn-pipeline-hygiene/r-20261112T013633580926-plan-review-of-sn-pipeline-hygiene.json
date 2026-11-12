@@ -35,6 +35,16 @@
       "note": "\u00a71 now says the receipts may be reconstructed only if the committed cascade_thresholds.json rebuilds unchanged; otherwise the lead rules between regenerating the calibration and retiring the rebuild check, and the ruling is recorded and applied.",
       "reason": "",
       "when": "2026-11-12T01:50:35.795659+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ef8840040b0baf3c7dbe94e4a4840f3636a3865b",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The opening now says the thirteen failed at every base measured on 2026-11-11.",
+      "reason": "",
+      "when": "2026-11-12T01:50:59.251555+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "\u00a71 now says the receipts may be reconstructed only if the committed cascade_thresholds.json rebuilds unchanged; otherwise the lead rules between regenerating the calibration and retiring the rebuild check, and the ruling is recorded and applied.",
       "reason": "",
       "when": "2026-11-12T01:50:35.795659+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "ef8840040b0baf3c7dbe94e4a4840f3636a3865b",
+      "commit_basis": "edit",
+      "note": "The opening now says the thirteen failed at every base measured on 2026-11-11.",
+      "reason": "",
+      "when": "2026-11-12T01:50:59.251555+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261112T013633580926-plan-review-of-sn-pipeline-hygiene.json",
