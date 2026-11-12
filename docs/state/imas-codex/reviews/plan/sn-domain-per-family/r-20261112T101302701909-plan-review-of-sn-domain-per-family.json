@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T10:20:51.785Z",
+  "dispatched_at": "2026-11-12T10:13:55Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:99",
+      "id": "wiring-1",
+      "reason": "a node dispatched from the followup as written would rebuild landed work and re-pay its gate, and the plan either collapses \u00a72 to done and re-points the followup at \u00a75, or states that the six open non-blocking findings keep \u00a72 open.",
+      "text": "\u00a72 is declared `implementable` (line 52) and the plan's sole followup prompts `/reckon-build sn-domain-per-family \u00a72`, yet the plan's own comment at line 107 records the family decision landed with \"gate on all_debug is 57 passed, 0 failed, EXIT=0 at c401f5912\", `imas_codex/standard_names/families.py` and `domain_decision.py` exist, `docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log` ends `57 passed` / `EXIT=0`, and the labelled comparison is reviewed at line 112-113 with zero blocking findings \u2014 so the followup dispatches work that is already done.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "wiring-2",
+      "reason": "without a wired gate the \u00a73 node starts its write pass with the 12 disputed items unresolved \u2014 the review is also told (line 92) the ruling must precede \u00a73, so the plan needs a followup or a done-when bullet that makes \u00a73 wait on it.",
+      "text": "\u00a75 requires \"the lead's ruling on each [disagreed sheet item] is recorded on this plan before \u00a73 writes\", but `docs/evidence/fragments/sn-domain-family-labels/disputed-items.json` still carries `lead_ruling: null` on all 12 items, and no followup, declaration or done-when represents that gate: \u00a73's `depends-on` is `[sn-domain-per-family#s2, sn-domain-per-family#s5]`, and neither \u00a75's nor \u00a73's done-when names the ruling, so the plan's machine-readable state lets \u00a73 be dispatched and write while the rulings are absent.",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f6d13f20fd623ab1fd3522a3495666fefca29aa6",
+  "plan_fingerprint": "a0820a462f139a363e466b1804ee1349edfc11fddcbaa6921104c7576d71886a",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 16,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T101302701909-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "efe3a83ff1a7a3c36a9ce4b3e9dc5f2b6c7367b2",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited path exists on disk, the \"98 of 125\" census resolves to `sn-catalog-consistency` \u00a71 (\"125 families diverge: \u2026 98 on physics_domain grouping\"), the \"0.560 against a floor of 0.597\" resolves verbatim in `sn-catalog-grouping`, and `sn-catalog-consistency` \u00a75 carries the reciprocal `sn-domain-per-family#s3` dependency \u00a73 claims.",
+    "done_when": "pass \u2014 each of \u00a72, \u00a73, \u00a74 and \u00a75 carries a negative control that must fail on the old path (\u00a72 planted disjoint family must yield two domains per-name; \u00a73 read-back must count a planted split family and stay silent on a planted whole one; \u00a74 removing the correction must make the dry run fail; \u00a75 a name with an unrelated source domain must not receive that domain).",
+    "evidence_paths": "pass \u2014 every gate log and evidence fragment is committed under `docs/evidence/fragments/sn-domain-per-family/`, a durable repository path, and \u00a72/\u00a75 name the partition their gate runs on.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags appear in the plan's declared records or the symbols it names.",
+    "reasoning": "pass \u2014 the \u00a71 root cause is verified in the code the plan describes (`candidate_domains()` draws options only from a name's own DD sources' domains and their umbrellas, and a single candidate is taken with no judgment, exactly as \u00a71 states), the \u00a71 table reproduces the cited census exactly, and the one suspected cross-plan contradiction was tested and refuted (see below).",
+    "single_goal": "pass \u2014 \u00a72 decides one family once, \u00a73 brings the live names to it, \u00a74 gates a later cut, \u00a75 widens the option set of \u00a72's one decision; each names one deliverable and its measurements are of that deliverable.",
+    "wiring": "a finding \u2014 the plan declares \u00a72 `implementable` and its only followup dispatches `/reckon-build sn-domain-per-family \u00a72`, while the plan's own comments and committed gate log record \u00a72 landed, so the followup would re-dispatch finished work."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "81754c7454a907e859184cc5850ebc11c5882110ed5cca5b1b19629460c1cb2b",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "9d613186883439372024df798c168969456f782cea0efaf018684c448f3399d4"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T11:26:12.825408+00:00",
+  "total": null
+}
