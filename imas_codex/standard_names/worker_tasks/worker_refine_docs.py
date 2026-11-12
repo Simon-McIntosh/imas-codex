@@ -284,7 +284,6 @@ async def process_refine_docs_batch(
                 description_with_population,
             )
             from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
-                SharedPartAltered,
                 _refuse_altered_shared_parts,
             )
 
@@ -366,6 +365,13 @@ async def process_refine_docs_batch(
             # contradicts it again. Releasing the claim would return the name
             # to review and re-charge it on every pass, so it takes the same
             # terminal state a deterministic ``RefinedDocs`` failure takes.
+            # A refusal raised by the writer above is imported here rather
+            # than beside it: a failure raised before that import runs must not
+            # read an unbound name and lose the release path.
+            from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+                SharedPartAltered,
+            )
+
             is_terminal = _is_refine_docs_failure(exc) or isinstance(
                 exc, SharedPartAltered
             )
