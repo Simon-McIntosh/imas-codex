@@ -49,7 +49,7 @@
       <li>five starts on the fleet node, where sessions run, each answer in under 15 s, with the node's load average recorded beside each and the base revision timed in the same sitting;</li>
       <li>the record attributes at least 90 % of the base revision's wall time to first answer to named parts, so the 7.6 s §1 leaves unexplained is accounted for;</li>
       <li><code>imas-codex serve --help</code> returns in under 10 s on the debug-partition node by the same measure;</li>
-      <li>a test fails when starting the server imports the language-model client library, and that test is shown failing at the base revision;</li>
+      <li>a test fails when any of the discovery commands, the language-model client library or the schema runtime is imported before the server answers <code>initialize</code>, or by the time <code>imas-codex --help</code> exits, and that test is shown failing at the base revision;</li>
       <li>the tool list the server answers with is identical, by name, to the list at the base revision in each of its three serve modes;</li>
       <li><code>imas-codex --help</code> still lists every command it lists at the base revision, and the command-line test files pass with no added failure.</li>
     </ul>
