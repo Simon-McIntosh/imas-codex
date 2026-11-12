@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T06:54:00.084Z",
+  "dispatched_at": "2026-11-12T06:47:59Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "done_when-1",
+      "reason": "a done-when whose threshold is met before the node starts measures nothing about the node, so \u00a75 would close on a count the plan's own cited record already satisfies rather than on its restoration.",
+      "text": "\u00a75 requires \"among accepted names, the count with accepted documentation is at least the 2,368 read before the drain\", but the paragraph above it records that \u00a752 \"restored 391 names to their own accepted documentation\", and the record \u00a75 cites for that restoration (`docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html`, section \"Accepted-name docs_stage counts\") reads `accepted 2497, pending 721` after the restore, against a 2,368 floor \u2014 so the floor is already cleared by work this section attributes to \u00a752, and the clause can hold however little \u00a75 does",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:74",
+      "id": "wiring-1",
+      "reason": "a coordinator reading the followups dispatches \u00a72 again, spending a node on work the plan states is already closed.",
+      "text": "followup `f-sfdc-001` still carries `data-status=\"open\"` and `data-recommends-skill=\"/reckon-build sn-full-dd-continuation \u00a72\"` while its rewritten body opens \"\u00a72 is done\" and the declarations set `s2` to `done`, so the plan's own next action points at a completed section",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+  "plan_fingerprint": "22c550c54f9f85c5b5340db10301f8bad13722979a132205dd7b75c535c8c9fc",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 20,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T063914291107-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "57029d41a40e53e299ac0963f925763b5c8daf3e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/plans/sn-definitions-by-construction.html` has `s2` and `s3`, `docs/plans/sn-domain-per-family.html` has `s2`, `sn-integrity-backlog` has `s52` (status `done`), and `sib-docs-drain-after-admission.html`, `cohort-143.json` and the `sfdc-cohort-floor.html` href all resolve.",
+    "done_when": "a finding \u2014 \u00a75's numeric floor of 2,368 accepted documents is already exceeded by the restoration \u00a75 itself credits to \u00a752.",
+    "evidence_paths": "pass \u2014 \u00a74 and \u00a75 write to `docs/evidence/fragments/sn-full-dd-continuation/...,` a committed repository path, never a scratchpad or node-local temporary directory.",
+    "naming": "pass \u2014 the changed units introduce no plan labels, stage names, ticket numbers or version tags into any symbol, and no changelog prose.",
+    "reasoning": "pass \u2014 \u00a75's stated cause (the drain's own drift refresh resetting documentation) matches the cited `sib-docs-regression-diagnosis` and `sib-restore-reset-docs` evidence, including the 400-of-405 attribution and the 1,061\u219284 correction.",
+    "single_goal": "pass \u2014 each node carries one deliverable; \u00a75's demotion-diagnosis half has been removed to the descoped \u00a76, leaving \u00a75 the restoration alone.",
+    "wiring": "a finding \u2014 `_document` leaves followup `f-sfdc-001` open and pointed at \u00a72, which the same unit declares done."
+  },
+  "section_digests": {
+    "_document": "16ae1c71c9e5740bc6d2aa601f5df44baba94934b41f3f8c6736012e92b11e2d",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "5744cc83050583629c2f3f175e2174793aadf280f7db5c92a9a320d71df0aada",
+    "s5": "a3cc33c4a6107bd8479ca0dc53c4f4a67d9267732b78b725092899b6cb438a20",
+    "s6": "b69f4c480a9cf3a5bb789f9ec172fd784a2950de5ff28f25eb6162d59232fd0e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T14:44:25.700690+00:00",
+  "total": null
+}
