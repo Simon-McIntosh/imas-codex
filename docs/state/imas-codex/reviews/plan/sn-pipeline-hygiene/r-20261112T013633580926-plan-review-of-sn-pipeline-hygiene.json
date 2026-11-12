@@ -25,7 +25,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 22,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ef8840040b0baf3c7dbe94e4a4840f3636a3865b",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a71 now says the receipts may be reconstructed only if the committed cascade_thresholds.json rebuilds unchanged; otherwise the lead rules between regenerating the calibration and retiring the rebuild check, and the ruling is recorded and applied.",
+      "reason": "",
+      "when": "2026-11-12T01:50:35.795659+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ef8840040b0baf3c7dbe94e4a4840f3636a3865b",
+      "commit_basis": "edit",
+      "note": "\u00a71 now says the receipts may be reconstructed only if the committed cascade_thresholds.json rebuilds unchanged; otherwise the lead rules between regenerating the calibration and retiring the rebuild check, and the ruling is recorded and applied.",
+      "reason": "",
+      "when": "2026-11-12T01:50:35.795659+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261112T013633580926-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261112T013633580926-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "8311691f02b5540362bf571fa75513a0c04cca56",
   "rubric": "content",
