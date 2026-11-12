@@ -33,7 +33,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 9,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a75's ceiling is now computed once at \u00a74's dispatch from the backlog then, \u00a74 reserves that same figure, and any larger starting backlog goes to the lead before \u00a75 spends it.",
+      "reason": "",
+      "when": "2026-11-12T00:03:08.731301+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75's ceiling is now computed once at \u00a74's dispatch from the backlog then, \u00a74 reserves that same figure, and any larger starting backlog goes to the lead before \u00a75 spends it.",
+      "reason": "",
+      "when": "2026-11-12T00:03:08.731301+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261111T231528503862-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261111T231528503862-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "5419c436c632e2dc5f43ca3860cd351aa907ff79",
   "rubric": "content",
