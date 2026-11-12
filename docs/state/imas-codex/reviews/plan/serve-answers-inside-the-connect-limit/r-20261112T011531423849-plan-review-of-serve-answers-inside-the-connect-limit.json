@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T01:23:53.632Z",
+  "dispatched_at": "2026-11-12T01:17:17Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/serve-answers-inside-the-connect-limit.html:48",
+      "id": "done_when-1",
+      "reason": "the plan exists to fix a loaded node's session start, and without a loaded-condition arm the node can satisfy its gate while the reported symptom still occurs.",
+      "text": "the gate measures \"the median of five cold starts on a debug-partition node\" while \u00a71 measured the failure at load average 73 on the fleet node; the done-when records the node's load but requires no comparable load, so a pass on a quiet node cannot show that a session on a loaded node now answers inside the client's 30 s limit",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/serve-answers-inside-the-connect-limit.html:48",
+      "id": "evidence_paths-1",
+      "reason": "the done-when's whole content is a recorded measurement, and a later reader cannot open a measurement that has no path; other plans in this repository carry theirs under `docs/evidence/<topic>/`.",
+      "text": "nothing in the plan names a durable location for the five cold-start timings, the node's load, the base-revision measurements or the base failure the negative control is shown at, so the evidence the gate rests on survives only inside one run's manifest",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/serve-answers-inside-the-connect-limit.html:49",
+      "id": "reasoning-1",
+      "reason": "the profile the plan cites accounts for 19.9 s of 27.5 s and therefore does not show that cutting those imports meets a 5 s target; stating the residual's composition, or measuring it, is what makes the target checkable rather than a guess a node may miss for an unrelated reason.",
+      "text": "the cited numbers leave 7.6 s of the 27.5 s `--help` wall time outside the 19.9 s import profile, while \u00a72 asks `imas-codex serve --help` to return in under 5 s; spawn overhead measured on this node is 0.84\u20131.32 s (`uv run --no-sync --project . python -c pass`) against 0.23 s for the interpreter alone, so the residual is not process spawn and the plan never says what it is made of; the section names no measure of it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+  "plan_fingerprint": "3a4ab67ffe1951c300a08517170c93cd2645eb1499268fe2bd937bedef5a398f",
+  "plan_slug": "serve-answers-inside-the-connect-limit",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T011531423849-plan-review-of-serve-answers-inside-the-connect-limit",
+  "reviewed_blob_sha": "e402123b228b5776709e6c0f9a21f7c8eaabc982",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `.mcp.json` exists and spawns `imas-codex serve` through `uv run --no-sync --project`, `imas_codex/cli/serve.py` carries the `--read-only` and `--dd-only` options that make three serve modes real, and the plan file itself resolves in `docs/plans/`.",
+    "done_when": "a finding \u2014 \u00a72's timing gate measures on a debug-partition node at whatever load it happens to carry, while \u00a71 measures the defect at load average 73.",
+    "evidence_paths": "a finding \u2014 \u00a72 requires five timings, the node's load, the base-revision arms and the negative control's base failure recorded, and no durable path is named anywhere in the plan.",
+    "naming": "pass \u2014 no symbol, filename or comment is named, so nothing carries a plan label, stage name or ticket identifier, and the prose states mechanisms (\"the server command pays for every other command's imports\") rather than changelog.",
+    "reasoning": "a finding \u2014 the plan's own decomposition leaves 7.6 s of the 27.5 s `--help` wall time unattributed and \u00a72 targets under 5 s, so the cited profile does not show the target is reachable; the root-cause claim itself (imports dominate: 19.9 s of 27.5 s) does match the cited profile, and no section prescribes an implementation.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, cutting the server's start-up cost, with the tool-list and command-list checks reading as regression guards rather than second goals.",
+    "wiring": "pass \u2014 the plan is standalone as declared, sprint S19 carries it, no other plan references its slug, and both sections' data-status match plan-section-declarations."
+  },
+  "section_digests": {
+    "_document": "5e2c783815e69924c53eb2d6d4d73623b019a3ec61c110aef2ee43e3849cb0b6",
+    "s1": "1e307543da7d211092dfc32106c5d827014090616be875508b71eb667bcad013",
+    "s2": "d583010d94eb2ba7997b32918f4419b69e2539420478c2ed89d4fae49578ed4f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:36:27.773666+00:00",
+  "total": null
+}
