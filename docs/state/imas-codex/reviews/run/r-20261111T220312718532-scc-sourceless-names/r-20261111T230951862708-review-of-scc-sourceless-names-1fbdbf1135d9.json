@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run declares neither a baseline_suite nor an after_suite arm (suite_gate unarmed): its measure is an evidence runner, not a pytest suite, and its only recorded gate log carries no EXIT= line and no test ids at all, so no failing test id exists on either side and the pair is 0 and [] as an unmeasured absence, not a measured zero.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-11T23:42:19.514Z",
+  "dispatched_at": "2026-11-11T23:21:08Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T220312718532-scc-sourceless-names/scc-sourceless-names-gate.log",
+      "line": "4",
+      "severity": "blocking",
+      "text": "blocking: the log is a later re-run that failed at the first arm ('/bin/bash: line 1: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv: No such file or directory') because the env prefixes were stored in a variable and expanded into command position, the fixture arm stops at 'Starting temp Neo4j instance...', and the process was killed (exit 137) with no EXIT= line; the successful live/fixture/render runs exist only in the worker's stream, so the manifest's test_logs cannot show the done_when was measured."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-control.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the change adds a file outside the node's four declared write paths, and the run's own manifest check refuses the manifest for it; it is an evidence artifact in the same directory with no runtime effect, so ratification rather than repair is the remedy."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py",
+      "line": "476",
+      "severity": "non-blocking",
+      "text": "non-blocking: validate() never checks that a rebind target is one of the row's recorded_paths, so a rebind to an independent DD path passes the guard the module docstring says refuses a proposal breaking its own rule; ratio_of_diamagnetic_vorticity_to_major_radius names only dd:edge_profiles/ggd/vorticity_over_r/diamagnetic in its target while its reason requires both recorded paths."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py",
+      "line": "464",
+      "severity": "non-blocking",
+      "text": "non-blocking: run_fixture writes the control result and main() at :656 only prints its four booleans, so the planted control is displayed rather than enforced - a predicate that failed to list the planted name would still deliver EXIT=0 and only a human reading the page would notice."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py",
+      "line": "533",
+      "severity": "non-blocking",
+      "text": "non-blocking: render() prints the literal 'live' when dd.lifecycle_status is null, so the page's claim that each recorded DD path is live rests on an absent property; all four recorded paths in scc-sourceless-names.json carry lifecycle_status null, and the code cannot distinguish a live node from one whose status was never set."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the census paragraph accounts for 11 of the 18 classified names (5 live, 4 exhausted, 1 derived parent, 1 unchained_holder) and never names the 7 held_in_chain names, so a reader cannot reconcile census_total=18 from the page or confirm that no live name was left out of the population."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T220312718532-scc-sourceless-names/manifest.md",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest omits the messages_received line its own check requires, so the delivered record is refused for shape as well as for the gate log and the out-of-scope path."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to propose an action for every live name with no producing DD source; docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html lists all five such names (3 pending drafts, 2 accepted) each with a proposed action, and scc-sourceless-names.json:live_population records 5 with 0 invariant disagreements.\nVERDICT done_when: the done_when asks for each such name with its live holder, spend, history and proposed action, a sourceless name planted in a disposable graph being listed, no live-graph write and USD 0; the page carries all five rows, scc-sourceless-names-control.json records planted_sourceless_listed=true and planted_bound_excluded=true under both predicates, graph_writes=0 and spend_usd=0, but the gate log the manifest cites is a killed re-run with no EXIT= line, so the measure is recorded in the artifacts and not in the receipt.\nVERDICT write_paths: the node was fenced to scc-sourceless-names.html, scc-sourceless-names.json, scc-sourceless-names-run.py and docs/figures/sn-catalog-consistency/scc-sourceless-names; git show --stat 1fbdbf113 lists those three plus scc-sourceless-names-control.json, which lies outside the declared paths and which the run's own manifest check refuses.\nVERDICT manifest: read; status complete, commits 1fbdbf113, changed_paths naming four fragment files including the out-of-scope control JSON, tests naming only the live subcommand, test_logs naming a gate log that ends at 'Starting temp Neo4j instance...' with no EXIT= line, and neither a baseline_suite nor an after_suite arm.\nVERDICT diff: read the single commit 1fbdbf113 against fc99c61f0; it adds a 693-line read-only instrument, its population JSON, its control JSON and a one-line page, and imports the export gate's predicates instead of restating them.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html names all five sourceless live names with an action, but the page's census paragraph rendered from scc-sourceless-names-run.py:596 accounts for only 11 of the 18 classified names.\nSCORE evidence: 8\nJUSTIFICATION evidence: scc-sourceless-names-gate.log is a killed re-run whose first arm fails at line 4 and which carries no EXIT= line, so the receipt the manifest cites does not show the done_when's measure even though the committed artifacts do.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: the change adds docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-control.json, outside the four declared write paths, which the run's own manifest check reports as an out-of-scope changed path.\nSCORE durability: 12\nJUSTIFICATION durability: scc-sourceless-names-run.py:476 validate() refuses a proposal that lacks an action, reason or live successor, but the fixture's four control booleans written at :464 are only printed by main() at :656, so a control reading False still exits 0.\nSCORE fit: 17\nJUSTIFICATION fit: scc-sourceless-names-run.py follows the sibling evidence-runner shape and its read() at :139 enforces the project's ten-second live-query ceiling, though :533 prints a null lifecycle_status as 'live'.\nSCORE reuse: 18\nJUSTIFICATION reuse: scc-sourceless-names-run.py:198-205 imports classify_sourceless_standard_names, find_sourceless_live_names and the export gate's _RELEASE_IDENTITY_HOLDS rather than re-deriving any predicate.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T220312718532-scc-sourceless-names/scc-sourceless-names-gate.log:4 blocking: the log is a later re-run that failed at the first arm ('/bin/bash: line 1: UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv: No such file or directory') because the env prefixes were stored in a variable and expanded into command position, the fixture arm stops at 'Starting temp Neo4j instance...', and the process was killed (exit 137) with no EXIT= line; the successful live/fixture/render runs exist only in the worker's stream, so the manifest's test_logs cannot show the done_when was measured.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-control.json:1 non-blocking: the change adds a file outside the node's four declared write paths, and the run's own manifest check refuses the manifest for it; it is an evidence artifact in the same directory with no runtime effect, so ratification rather than repair is the remedy.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py:476 non-blocking: validate() never checks that a rebind target is one of the row's recorded_paths, so a rebind to an independent DD path passes the guard the module docstring says refuses a proposal breaking its own rule; ratio_of_diamagnetic_vorticity_to_major_radius names only dd:edge_profiles/ggd/vorticity_over_r/diamagnetic in its target while its reason requires both recorded paths.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py:464 non-blocking: run_fixture writes the control result and main() at :656 only prints its four booleans, so the planted control is displayed rather than enforced - a predicate that failed to list the planted name would still deliver EXIT=0 and only a human reading the page would notice.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py:533 non-blocking: render() prints the literal 'live' when dd.lifecycle_status is null, so the page's claim that each recorded DD path is live rests on an absent property; all four recorded paths in scc-sourceless-names.json carry lifecycle_status null, and the code cannot distinguish a live node from one whose status was never set.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html:1 non-blocking: the census paragraph accounts for 11 of the 18 classified names (5 live, 4 exhausted, 1 derived parent, 1 unchained_holder) and never names the 7 held_in_chain names, so a reader cannot reconcile census_total=18 from the page or confirm that no live name was left out of the population.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T220312718532-scc-sourceless-names/manifest.md:1 non-blocking: the manifest omits the messages_received line its own check requires, so the delivered record is refused for shape as well as for the gate log and the out-of-scope path.\n",
+  "review_run_id": "r-20261111T230951862708-review-of-scc-sourceless-names-1fbdbf1135d9",
+  "reviewed_base_sha": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "reviewed_head_sha": "1fbdbf1135d9410fe3ae6db8799e998f1f2ce427",
+  "reviewed_run_id": "r-20261111T220312718532-scc-sourceless-names",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261111T230951862708-review-of-scc-sourceless-names-1fbdbf1135d9"
+  },
+  "reviewer_run_id": "r-20261111T230951862708-review-of-scc-sourceless-names-1fbdbf1135d9",
+  "scores": {
+    "durability": 12,
+    "evidence": 8,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T00:07:23.034328+00:00",
+  "total": 85
+}
