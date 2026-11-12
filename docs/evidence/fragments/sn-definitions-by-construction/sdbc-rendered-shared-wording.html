@@ -177,6 +177,21 @@ EXIT=0</pre>
 
 <p>Spend on the repair: USD 0.268 of writing (the fifteen-name run, of which two were refused and re-written in a USD 0.032 two-name run) and USD 0.143 for the two-arm review under the built context. Total metered spend for the node is USD 0.774 of the USD 5 ceiling, against USD 0.331 before this repair.</p>
 
+<h3 id="sdbc-rendered-shared-wording-durability">The guarantee holds on the path every definition takes</h3>
+
+<p>A refusal is only a guarantee if the pipeline actually reaches it, and a shared wording is only shared if every stage that writes a definition is held to it. Three gaps were found and closed; each is pinned by a control that disarms the change and watches the named check go red.</p>
+
+<table>
+<thead><tr><th>Gap</th><th>Repair</th><th>Control</th></tr></thead>
+<tbody>
+<tr><td>The refusal was asserted by calling the guard directly, so moving it below the persist would have left the tests green</td><td><code>test_pipeline_refuses_a_contradicting_definition_before_persist</code> drives <code>process_generate_docs_batch</code> and asserts <code>persist_generated_docs</code> was not called</td><td>refusal disarmed on the generate path: <code>1 failed</code></td></tr>
+<tr><td>A paraphrase whose wording agreed with the stored sentence at 0.45 to 0.75 was kept beside the appended sentence — neither removed, nor refused, nor reported</td><td>the renderer removes at <code>_COMPETING_OVERLAP</code>, and <code>shared_part_findings</code> reports a restatement that survives beside the stored wording</td><td>removal band restored to exact match: <code>2 failed</code></td></tr>
+<tr><td>The refine stage stored a refinement with neither the population clause nor the refusal</td><td><code>process_refine_docs_batch</code> applies <code>description_with_population</code> and <code>_refuse_altered_shared_parts</code></td><td>refine stage disarmed: <code>1 failed</code></td></tr>
+</tbody>
+</table>
+
+<p>The negative-control job is <code>negative-control-round-1311671.log</code>. Each disarm is applied to the worktree, the named test is run, and the file is restored, so the run leaves the tree clean. The gate over the three suites is <code>gate-repair-round-1311668.log</code>: 101 passed, EXIT=0.</p>
+
 <h3 id="sdbc-rendered-shared-wording-proposal">Wording proposed to the grammar library</h3>
 
 <p>The species population rule has no sentence in the grammar library's <code>concepts.yml</code>. It is stored in this repository as <code>docs_gates.SPECIES_POPULATION_SENTENCE</code> and proposed upstream as a population entry so that one stored wording serves every species name.</p>
