@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T14:58:27.012Z",
+  "dispatched_at": "2026-11-12T14:52:46Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:51",
+      "id": "done_when-1",
+      "reason": "a witness whose second clause is true at the start measures nothing, and the worker would need the partner set (momentum, rate_due_to_beam_beam_fusion) named for the check to bear on the rename at all.",
+      "text": "the witness requires \"no name in the unit-pair rename batch, or its partner in the `momentum_flux` or `momentum_source` family\" to carry a unit-pair advisory, but the artifact puts every partner elsewhere: batch-272's rows are `momentum_flux`, `momentum_source` and `source_rate_due_to_beam_beam_fusion`, whose partners are `momentum` (in family batch-101, family `momentum`) and `rate_due_to_beam_beam_fusion` (in batch-136, family `rate`), and `rc8_advisories.unit_pairs` lists only those three names as advisory subjects at all, so no partner carries one before the rename and the clause cannot fail",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:44",
+      "id": "reasoning-1",
+      "reason": "if \u00a76 reaches these three names, \u00a72's row list is stale before it starts and the two plans rename the same name independently.",
+      "text": "the section asserts the release-candidate repair rows are \"not definition divergence and which \u00a76 does not reach\", but `sn-definitions-by-construction` \u00a73's done-when lists every name whose unit dimension does not fit its stated quantity and either corrects it or passes it to \u00a75, whose dispositions include \"rename\", and \u00a76 applies \"\u00a75's dispositions\" and reports \"every renamed identity\"\u2014 the unit-pair rows are the dimension-mismatch class \u00a73 names, so \u00a76 may already perform a rename this section claims to own",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:44",
+      "id": "reasoning-2",
+      "reason": "the family attribution is what the witness and the \"one family, one definition\" framing are read against, and it under-scopes a rename that lands in a family this section otherwise never touches.",
+      "text": "the batch is described as \"the unit-pair rename batch (`batch-272`, 3 rows, in the `momentum_flux` and `momentum_source` families)\", but the artifact records batch-272 with `domain: \"momentum\"`, three rows spanning three families, and the note \"each pair's partner stays in its family batch\"; its third row `source_rate_due_to_beam_beam_fusion` sits in the `rate` family, outside both named families",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+  "plan_fingerprint": "e344e8dc0dbc36b6bbbed500491f18dbf60dc1e2d2f99efabe21b515ef52b8d5",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 30,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T145141208948-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "a22d5e7dd27671ef542594746abb656670939801",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sib-consistency-batches.json` resolves, `batch-272`/`batch-274`\u2013`batch-279` all exist with 3 and 147 rows, and the two evidence hrefs in the snapshot (`scc-momentum-supersede.html`, `scc-chaincap-remeasure.html`) resolve on disk.",
+    "done_when": "a finding \u2014 the new unit-pair witness at line 51 names a partner population the sizing artifact does not put there, so the clause holds before any work is done.",
+    "evidence_paths": "pass \u2014 the section cites a durable input artifact under `docs/evidence/fragments/sn-integrity-backlog/` and its sibling sections write into `docs/evidence/fragments/sn-catalog-consistency/`.",
+    "naming": "pass \u2014 the changed text names artifact batch ids, which are committed data identifiers, and carries no plan labels, stage names or changelog prose.",
+    "reasoning": "a finding \u2014 the new claim that `sn-definitions-by-construction` \u00a76 \"does not reach\" the unit-pair renames is contradicted by that plan's own \u00a73 \u2192 \u00a75 \u2192 \u00a76 routing for exactly this defect class.",
+    "single_goal": "pass \u2014 the added release-candidate rows are the same sizing artifact's repair rows, so \"apply the sized batches\" remains one deliverable with one endpoint.",
+    "wiring": "pass \u2014 s2's `depends-on` resolves on both entries (`sn-integrity-backlog#s52` is present in that plan's 52 sections, `sn-definitions-by-construction#s6` is present), and `s3` still waits on `sn-catalog-consistency#s2` for its unit measure."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "54c3053b33629df963c0e0333ebc1fb9b94b9720334b6261bf403b3ceca58ef7",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T15:16:30.294875+00:00",
+  "total": null
+}
