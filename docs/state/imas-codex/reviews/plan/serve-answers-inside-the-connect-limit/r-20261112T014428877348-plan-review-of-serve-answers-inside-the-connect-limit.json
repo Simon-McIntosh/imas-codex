@@ -81,9 +81,28 @@
       "finding": "reuse_search-3",
       "reason": "the named import sites are inputs to the 90 % attribution record \u00a72 already requires; they go in the brief",
       "when": "2026-11-12T02:04:50.840044+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "\u00a72's guard now covers the whole heavy set at the initialize boundary and at help, and is shown failing at the base revision",
+      "reason": "",
+      "when": "2026-11-12T02:05:04.729922+00:00"
     }
   ],
   "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72's guard now covers the whole heavy set at the initialize boundary and at help, and is shown failing at the base revision",
+      "reason": "",
+      "when": "2026-11-12T02:05:04.729922+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
