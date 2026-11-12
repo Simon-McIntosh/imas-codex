@@ -5007,3 +5007,142 @@ def repair_structural_cocos_transformation_metadata(
     finally:
         if owns:
             client.close()
+
+
+def unit_spelling_census(names: list[dict[str, Any]]) -> dict[str, Any]:
+    """Count every quantity carried in more than one unit spelling.
+
+    Each entry of *names* supplies ``id`` (or ``name``), ``unit``, an optional
+    ``description`` and an optional physics domain. Names are grouped by the
+    quantity they state, as ``unit_audit.quantity_of_name`` reads it, and within
+    a quantity by the unit spelling they carry.
+
+    A quantity is a duplicate when its names carry more than one spelling and
+    every pair of them is dimensionally equal. It is resolved when the spelling
+    record names the canonical unit that the duplicates are rewritten to, and
+    unresolved otherwise. A quantity whose spellings are not all dimensionally
+    equal is reported under ``divergences``: a recorded exception stands with its
+    reason, and an unrecorded divergence is a defect.
+
+    Names whose unit does not fit the dimension their quantity has are listed
+    under ``dimension_mismatches``. A clean quantity contributes nothing to
+    either list, so a census over clean names reports no duplicates, no
+    divergences and no mismatches.
+    """
+    from imas_codex.standard_names.unit_audit import (
+        quantity_dimension_issues,
+        quantity_of_name,
+        unit_dimension,
+    )
+    from imas_codex.standard_names.unit_overrides import (
+        quantity_spelling,
+        spelling_exception,
+    )
+
+    grouped: dict[str, dict[str, list[str]]] = {}
+    unit_missing: list[str] = []
+    dimension_mismatches: list[dict[str, str]] = []
+    for row in names:
+        name = str(row.get("id") or row.get("name") or "").strip()
+        unit = str(row.get("unit") or "").strip()
+        if not name:
+            continue
+        if not unit:
+            unit_missing.append(name)
+            continue
+        quantity = quantity_of_name(name)
+        grouped.setdefault(quantity, {}).setdefault(unit, []).append(name)
+        if quantity_dimension_issues(name, unit):
+            dimension_mismatches.append(
+                {
+                    "name": name,
+                    "unit": unit,
+                    "quantity": quantity,
+                    "domain": str(row.get("physics_domain") or row.get("domain") or ""),
+                }
+            )
+
+    duplicates: list[dict[str, Any]] = []
+    divergences: list[dict[str, Any]] = []
+    for quantity in sorted(grouped):
+        spellings = grouped[quantity]
+        units = sorted(spellings)
+        if len(units) < 2:
+            continue
+        by_dimension: dict[str, list[str]] = {}
+        for unit in units:
+            dimension = unit_dimension(unit)
+            by_dimension.setdefault(
+                "__unparsed__" if dimension is None else dimension, []
+            ).append(unit)
+        equal_clusters = [
+            cluster for cluster in by_dimension.values() if len(cluster) > 1
+        ]
+        canonical = quantity_spelling(quantity)
+        exception = spelling_exception(quantity)
+        for cluster in equal_clusters:
+            if exception is not None and set(cluster) <= set(exception.spellings):
+                # The record states these spellings carry different meaning, so
+                # a dimensionally equal pair here is a recorded exception rather
+                # than two spellings of one quantity.
+                divergences.append(
+                    {
+                        "quantity": quantity,
+                        "spellings": [
+                            {"unit": unit, "names": sorted(spellings[unit])}
+                            for unit in cluster
+                        ],
+                        "name_count": sum(len(spellings[unit]) for unit in cluster),
+                        "recorded_exception": True,
+                        "reason": exception.reason,
+                    }
+                )
+                continue
+            duplicates.append(
+                {
+                    "quantity": quantity,
+                    "spellings": [
+                        {"unit": unit, "names": sorted(spellings[unit])}
+                        for unit in cluster
+                    ],
+                    "name_count": sum(len(spellings[unit]) for unit in cluster),
+                    "equal_dimension": True,
+                    "resolved": canonical is not None,
+                    "canonical": canonical,
+                }
+            )
+        if len(by_dimension) < 2:
+            continue
+        entry = {
+            "quantity": quantity,
+            "spellings": [
+                {"unit": unit, "names": sorted(spellings[unit])} for unit in units
+            ],
+            "name_count": sum(len(names) for names in spellings.values()),
+            "recorded_exception": exception is not None,
+            "reason": exception.reason if exception is not None else None,
+        }
+        divergences.append(entry)
+
+    return {
+        "name_count": sum(
+            len(names) for spellings in grouped.values() for names in spellings.values()
+        ),
+        "quantity_count": len(grouped),
+        "duplicate_quantities": duplicates,
+        "divergences": divergences,
+        "unresolved_duplicate_count": sum(
+            1 for entry in duplicates if not entry["resolved"]
+        ),
+        "unrecorded_divergence_count": sum(
+            1 for entry in divergences if not entry["recorded_exception"]
+        ),
+        "dimension_mismatches": sorted(
+            dimension_mismatches, key=lambda row: (row["quantity"], row["name"])
+        ),
+        "unit_missing": sorted(unit_missing),
+        "clean": not duplicates
+        and not divergences
+        and not dimension_mismatches
+        and not unit_missing,
+    }

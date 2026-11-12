@@ -185,9 +185,142 @@ def resolve_unit(
                     "original_unit": dd_unit,
                     "path_pattern": rule.path_pattern,
                 }
-    return dd_unit, None
+    return resolve_quantity_spelling(path, dd_unit)
 
 
 def _reload_rules_for_tests() -> None:
     """Clear the rule cache. Only for use in tests."""
     _load_rules.cache_clear()
+
+
+# ---------------------------------------------------------------------------
+# Recorded unit spelling per quantity
+# ---------------------------------------------------------------------------
+
+_SPELLINGS = Path(__file__).parent / "config" / "unit_spellings.yaml"
+
+
+@dataclass(frozen=True)
+class QuantitySpelling:
+    """One quantity's recorded canonical unit spelling."""
+
+    quantity: str
+    canonical: str
+    dd_path_patterns: tuple[str, ...]
+    reason: str
+
+    def matches(self, path: str) -> bool:
+        return any(_glob_match(pattern, path) for pattern in self.dd_path_patterns)
+
+
+@dataclass(frozen=True)
+class SpellingException:
+    """A dimensional difference that carries meaning and therefore stands."""
+
+    quantity: str
+    spellings: tuple[str, ...]
+    reason: str
+
+
+@lru_cache(maxsize=1)
+def _load_spelling_record() -> tuple[
+    tuple[QuantitySpelling, ...], tuple[SpellingException, ...]
+]:
+    """Load and validate the per-quantity spelling record."""
+    if not _SPELLINGS.exists():
+        return (), ()
+    from imas_codex.units import unit_registry
+
+    doc = yaml.safe_load(_SPELLINGS.read_text()) or {}
+    spellings: list[QuantitySpelling] = []
+    for entry in doc.get("spellings", []):
+        try:
+            unit_registry.Unit(entry["canonical"])
+        except Exception as exc:
+            raise ValueError(
+                "unit_spellings.yaml: canonical unit "
+                f"{entry.get('canonical')!r} for quantity {entry.get('quantity')!r} "
+                f"does not parse: {exc}"
+            ) from exc
+        patterns = tuple(entry.get("dd_path_patterns") or ())
+        if not patterns:
+            raise ValueError(
+                "unit_spellings.yaml: quantity "
+                f"{entry.get('quantity')!r} declares no dd_path_patterns"
+            )
+        for pattern in patterns:
+            # Compiling here refuses a malformed pattern at load rather than
+            # silently never matching it.
+            _glob_match(pattern, "")
+        spellings.append(
+            QuantitySpelling(
+                quantity=entry["quantity"],
+                canonical=entry["canonical"],
+                dd_path_patterns=patterns,
+                reason=entry["reason"],
+            )
+        )
+    exceptions = tuple(
+        SpellingException(
+            quantity=entry["quantity"],
+            spellings=tuple(entry["spellings"]),
+            reason=entry["reason"],
+        )
+        for entry in doc.get("exceptions", [])
+    )
+    return tuple(spellings), exceptions
+
+
+def quantity_spelling(quantity: str) -> str | None:
+    """Return the recorded canonical spelling for *quantity*, if any."""
+    spellings, _ = _load_spelling_record()
+    for spelling in spellings:
+        if spelling.quantity == quantity:
+            return spelling.canonical
+    return None
+
+
+def spelling_exception(quantity: str) -> SpellingException | None:
+    """Return the recorded exception for *quantity*, if any."""
+    _, exceptions = _load_spelling_record()
+    for exception in exceptions:
+        if exception.quantity == quantity:
+            return exception
+    return None
+
+
+def resolve_quantity_spelling(path: str, dd_unit: str) -> tuple[str, dict | None]:
+    """Return ``(unit, metadata)`` rewritten to the quantity's recorded spelling.
+
+    A rewrite happens only when the Data Dictionary path belongs to a recorded
+    quantity and the two spellings carry one dimension. A spelling the record
+    does not name, or one it cannot compare, passes through unchanged.
+    """
+    from imas_codex.standard_names.unit_audit import units_are_dimensionally_equal
+    from imas_codex.units.dd_unit_exceptions import canonical_or_none
+
+    spelled = canonical_or_none(dd_unit)
+    if spelled is None:
+        return dd_unit, None
+    for spelling in _load_spelling_record()[0]:
+        if not spelling.matches(path):
+            continue
+        if spelled == canonical_or_none(spelling.canonical):
+            return dd_unit, None
+        if not units_are_dimensionally_equal(dd_unit, spelling.canonical):
+            # A different dimension on a quantity's path is not a spelling
+            # choice; it is left for the dimension check to report.
+            continue
+        return spelling.canonical, {
+            "rule": "override",
+            "spelling_quantity": spelling.quantity,
+            "original_unit": dd_unit,
+            "reason": spelling.reason,
+            "path_pattern": ",".join(spelling.dd_path_patterns),
+        }
+    return dd_unit, None
+
+
+def _reload_spellings_for_tests() -> None:
+    """Clear the spelling record cache. Only for use in tests."""
+    _load_spelling_record.cache_clear()
