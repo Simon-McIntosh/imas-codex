@@ -1125,5 +1125,37 @@
       "caveat": "A numeric dimension score neither names the shared sentence nor clears it. The six shortfalls are exactly the six species densities, and the population sentence is the only text this change added to them, so the shortfall is consistent with that sentence being judged a physics inaccuracy. The record states that as an inference from which names moved, not as something the review said."
     },
     "spend_usd": 0.12306622
+  },
+  "review_arms_settled": {
+    "context_copied": {
+      "names": 5497,
+      "sources": 10158,
+      "edges": 6733,
+      "imas": 0
+    },
+    "spend_usd": 0.142962842,
+    "rendered": {
+      "accept": 11,
+      "refine": 4,
+      "refine_names": [
+        "flux_surface_averaged_electron_density",
+        "flux_surface_averaged_electron_temperature",
+        "line_averaged_time_derivative_of_electron_density",
+        "line_integrated_electron_density"
+      ]
+    },
+    "published": {
+      "accept": 11,
+      "refine": 0,
+      "single_review": 4
+    },
+    "shortfalls": {
+      "line_averaged_time_derivative_of_electron_density": "documentation_contradiction hold: DD source text unavailable at summary/line_average/dn_e_dt/value"
+    },
+    "shared_part_mentioned_in_any_reason": false,
+    "refused_before_storage": {
+      "argon_density": "the written text includes neutral atoms ('with neutral')",
+      "volume_averaged_argon_density": "matched a phrase the text itself negates; detector narrowed"
+    }
   }
 }

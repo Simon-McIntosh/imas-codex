@@ -145,6 +145,38 @@ EXIT=0</pre>
 
 <p>Writing one family member costs about USD 0.012, against a published all-axis median of USD 0.152 per name and USD 0.073 for documentation review alone. Total metered spend for the node is USD 0.331 — USD 0.207 of writing, USD 0.0017 for the first review and USD 0.123 for the two-arm review under the built context — against the node's USD 5 ceiling.</p>
 
+<h3 id="sdbc-rendered-shared-wording-settled">Settled parts, written around rather than appended</h3>
+
+<p>The two arms above measured a renderer that appended the shared sentences after the model had written freely, and the six species densities it refined were exactly the names whose own prose and equations counted neutral atoms while the appended sentence excluded them. Appending is not rendering, so the shared parts are now settled text the model is shown <em>before</em> it writes, and a written text that contradicts them is refused before persistence.</p>
+
+<table>
+<thead><tr><th>Requirement</th><th>Mechanism</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td>The model is given the settled parts before it writes</td><td><code>docs_gates.fixed_shared_parts</code> renders the operator sentence, the population statement and its equation into <code>shared_parts</code>, which <code>sn/generate_docs_user</code> presents as fixed text with the instruction to write only what is specific to the name</td><td>the prompt section, and <code>writer-repair3-1311557.log</code> writing the two argon densities with the sentence present and unrepeated</td></tr>
+<tr><td>A contradiction is refused before storage</td><td><code>docs_gates.population_contradiction</code> reports <code>contradicted_shared_part</code>; <code>_refuse_altered_shared_parts</code> raises <code>SharedPartAltered</code> before <code>persist_generated_docs</code></td><td><code>writer-repair-1311546.log</code>: the first model write of <code>argon_density</code> said <q>… including neutral atoms and ions … from neutral argon at Z=0</q> in prose and a Z=0 sum in its equation, and was refused (<code>SharedPartAltered: the written text includes neutral atoms</code>) rather than stored</td></tr>
+<tr><td>The description states the same population</td><td><code>description_with_population</code>; it leaves a description that already names the population alone</td><td><code>test_description_states_the_settled_population</code></td></tr>
+<tr><td>The text does not open with a bare fragment</td><td><code>open_without_fragment</code> joins <q>Number density of argon</q> to the paragraph that follows</td><td><code>test_rendered_text_does_not_open_with_a_bare_fragment</code></td></tr>
+</tbody>
+</table>
+
+<p>The population rule applies to atomic species only. An electron density counts no ions, so it carries neither the sentence nor the description clause; the earlier renderer stated the ion population on electron densities too, and this change removes it.</p>
+
+<h4>The two arms, re-measured on the repaired definitions</h4>
+
+<table>
+<thead><tr><th>Arm</th><th>Reviewed</th><th>Accept</th><th>Refine</th><th>Neither</th></tr></thead>
+<tbody>
+<tr><td>Rendered definitions</td><td>15</td><td>11</td><td>4</td><td>0</td></tr>
+<tr><td>Published definitions (control)</td><td>15</td><td>11</td><td>0</td><td>4</td></tr>
+</tbody>
+</table>
+
+<p><strong>The rendered arm is accepted as often as the published control: 11 of 15 each, against 6 of 15 before the repair.</strong> One name is accepted on its published definition and refined on its rendered one — <code>line_averaged_time_derivative_of_electron_density</code> — and the review's own stated reason for it is a <code>documentation_contradiction</code> hold reading <q>DD source text unavailable at summary/line_average/dn_e_dt/value</q>, which is a limit of the disposable context rather than a finding about the definition. No refined name states a reason that names a rendered shared part; the grouping script finds none in any of the four.</p>
+
+<p>The three other refinements are refined in both arms or have no published row: <code>flux_surface_averaged_electron_density</code>, <code>flux_surface_averaged_electron_temperature</code> and <code>line_integrated_electron_density</code> are <code>single_review</code> or absent on the published side, so they are not shortfalls against the control.</p>
+
+<p>Spend on the repair: USD 0.268 of writing (the fifteen-name run, of which two were refused and re-written in a USD 0.032 two-name run) and USD 0.143 for the two-arm review under the built context. Total metered spend for the node is USD 0.774 of the USD 5 ceiling, against USD 0.331 before this repair.</p>
+
 <h3 id="sdbc-rendered-shared-wording-proposal">Wording proposed to the grammar library</h3>
 
 <p>The species population rule has no sentence in the grammar library's <code>concepts.yml</code>. It is stored in this repository as <code>docs_gates.SPECIES_POPULATION_SENTENCE</code> and proposed upstream as a population entry so that one stored wording serves every species name.</p>
