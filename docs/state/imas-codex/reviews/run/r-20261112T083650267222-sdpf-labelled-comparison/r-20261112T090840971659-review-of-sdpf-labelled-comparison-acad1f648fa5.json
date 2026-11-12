@@ -1,0 +1,92 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-12T09:24:33.008Z",
+  "dispatched_at": "2026-11-12T09:13:29Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html",
+      "line": "77",
+      "severity": "blocking",
+      "text": "blocking: it says the largest undecided family holds 33 members, but the node's own labelled-comparison.json lists undecided families of 51, 47 and 33 members, so the claim is contradicted by its own committed data."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html",
+      "line": "71",
+      "severity": "blocking",
+      "text": "blocking: it says the 36 undecided calibration names were \"counted as wrong\", but labelled-comparison-run.py:424 through _filed_domain at :248-252 files an undecided name at its stored domain and 20 of those 36 have filed == label; counted truly as wrong the family accuracy would read 0.6036, not 0.7219."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py",
+      "line": "221",
+      "severity": "non-blocking",
+      "text": "non-blocking: _leading_domains re-drives decide_batch with build_family_state and build_family_question to recover probabilities decide_family_domain already holds and discards, duplicating the owner's call instead of extending it to return the distribution."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py",
+      "line": "483",
+      "severity": "non-blocking",
+      "text": "non-blocking: cost_usd sums only decision.cost and judgments_paid counts multi-candidate families, so the 42 undecided re-reads are neither counted nor paid for in the record, understating the judgments and spend the brief asks to report (209 and USD 0.0297 recorded against at least 251 calls)."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: the constant SECTION_ONE_PATTERNS and the JSON key section_one name the plan's \u00a71 by its label rather than by the species families the catalog files across more than one domain, which the repository naming rule forbids in source."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html",
+      "line": "41",
+      "severity": "non-blocking",
+      "text": "non-blocking: only five of \u00a71's eight measured families carry an agreed reference label, so the done_when clause placing the eight among the 30 is unmet at 5 of 8; the shortfall is disclosed and inherent to the two-reader agreement rule the brief imposed, and is the coordinator's call."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T083650267222-sdpf-labelled-comparison/manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests line records a direct-interpreter command while sdpf-labelled-comparison-gate.log:3 records the uv run --no-sync form that actually ran, so the gate receipt taken from this line is not the literal command in the log."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production runtime path reaches a docs evidence script; the change touches no product code.",
+    "diff": "two commits, 5,961 insertions across the measurement script, its JSON output, the fragment and the gate log; no product code.",
+    "done_when": "the done_when's 30-family comparison and the calibration regression are measured and recorded with both arms; the eight-in-\u00a71 clause is met at 5 of 8.",
+    "goal": "the node's goal is to measure the landed per-family domain decision against the blind readers' agreed labels with the calibration regression \u2014 delivered by labelled-comparison-run.py:1-22 and its committed JSON.",
+    "manifest": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T083650267222-sdpf-labelled-comparison/manifest.md reads complete, commits f61985da2 and acad1f648, with a landing line matching the JSON.",
+    "write_paths": "git diff --stat 0428c0876..acad1f648 touches exactly the four declared evidence paths."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion; the gate log's 25 passed are pre-existing tests, so nothing reddens if the measurement regresses.",
+    "evidence": "recomputed from labelled-comparison.json: 35 families / 2,835 members at 0.4864 and 0.4317, 61 drawn singles at 0.6393 and 0.5410, calibration 169 at 0.7219 and 0.5444; but sdpf-labelled-comparison.html:71 and :77 misdescribe the method and the undecided population, and run.py:483 under-records the paid count and spend.",
+    "fit": "labelled-comparison-run.py:50 names the plan's \u00a71 label in a symbol and :258 declares an --only-families flag nothing reads.",
+    "goal_fidelity": "labelled-comparison-run.py:355-480 runs the family, single-name and calibration readings and its output reconciles line for line with the committed JSON at every headline figure.",
+    "reuse": "the readings call domain_decision.decide_family_domain and families.fetch_domain_families rather than reimplementing the decision; labelled-comparison-run.py:221 re-drives decide_batch to recover probabilities the owner discards.",
+    "scope_discipline": "git diff --stat 0428c0876..acad1f648 lists only the four declared evidence paths, all inside the node's fence."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to measure the landed per-family domain decision against the blind readers' agreed labels with the calibration regression; docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py:1-22 measures exactly those two readings from decide_family_domain and fetch_domain_families, and every headline number it reports reconciles with the committed labelled-comparison.json.\nVERDICT done_when: the dispatched done_when asks for the family share beside the per-name share on at least 30 families of three or more members with \u00a71's eight among them, plus the calibration regression not lower; the fragment's 35 families / 2,835 members at 0.4864 vs 0.4317 and calibration 169 names at 0.7219 vs 0.5444 assert the first two clauses, but only five of \u00a71's eight carry an agreed label (sdpf-labelled-comparison.html:41), so the \"eight among them\" clause reads 5 of 8.\nVERDICT write_paths: the declared write paths were docs/evidence/fragments/sn-domain-per-family/labelled-comparison-{run.py,json}.html and the gate log under that fragment; git diff --stat 0428c0876..acad1f648 touches exactly those four paths and nothing else.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T083650267222-sdpf-labelled-comparison/manifest.md; status complete, commits f61985da2 and acad1f648, changed_paths the four evidence files, and a landing line whose figures match the JSON, though its tests line records a different literal command than the gate log's own command header.\nVERDICT diff: read both commits against base 0428c0876 \u2014 f61985da2 adds the 518-line measurement script, its 5,320-line output and the 96-line fragment; acad1f648 only renames the fragment's comparison sections; no product source or test is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: labelled-comparison-run.py:355-480 runs the family, single-name and calibration readings and its output reconciles line for line with the committed JSON at every headline figure.\nSCORE evidence: 14\nJUSTIFICATION evidence: the variables measured reconcile (recomputed from labelled-comparison.json: 35 families / 2,835 members at 0.4864 and 0.4317), but sdpf-labelled-comparison.html:71 and :77 misdescribe the method and the undecided population, and run.py:483 sums only decision.cost so the paid count and spend are under-recorded.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 0428c0876..acad1f648 lists only the four declared evidence paths, all inside the node's fence, with no product code or test changed.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no assertion \u2014 the gate log's 25 passed are pre-existing tests \u2014 so nothing reddens if the measurement regresses and reproducibility rests entirely on labelled-comparison-run.py, which no test exercises.\nSCORE fit: 15\nJUSTIFICATION fit: most helpers are named by what they measure, but labelled-comparison-run.py:50 names the plan's \u00a71 label rather than the mechanism and :258 declares an --only-families flag nothing reads.\nSCORE reuse: 17\nJUSTIFICATION reuse: the readings call domain_decision.decide_family_domain and families.fetch_domain_families rather than reimplementing the decision, but labelled-comparison-run.py:221 re-drives decide_batch to recover probabilities the owner discards.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html:77 blocking: it says the largest undecided family holds 33 members, but the node's own labelled-comparison.json lists undecided families of 51, 47 and 33 members, so the claim is contradicted by its own committed data.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html:71 blocking: it says the 36 undecided calibration names were \"counted as wrong\", but run.py:229-236 files an undecided name at its stored domain, and 20 of those 36 have filed == label, so the stated method is not the one measured; counted truly as wrong the family accuracy would read 0.6036, not 0.7219.\nFINDING docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py:221 non-blocking: _leading_domains re-drives decide_batch with build_family_state and build_family_question to recover probabilities decide_family_domain already holds and discards, duplicating the owner's call instead of extending it to return the distribution.\nFINDING docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py:483 non-blocking: cost_usd sums only decision.cost and judgments_paid counts multi-candidate families, so the 42 undecided re-reads are neither counted nor paid for in the record, understating the judgments and spend the brief asks to report (209 and USD 0.0297 recorded against at least 251 calls).\nFINDING docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py:50 non-blocking: the constant SECTION_ONE_PATTERNS and the JSON key section_one name the plan's \u00a71 by its label rather than by the species families the catalog files across more than one domain, which the repository naming rule forbids in source.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html:41 non-blocking: only five of \u00a71's eight measured families carry an agreed reference label, so the done_when clause placing the eight among the 30 is unmet at 5 of 8; the shortfall is disclosed and inherent to the two-reader agreement rule the brief imposed, and is the coordinator's call.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T083650267222-sdpf-labelled-comparison/manifest.md:11 non-blocking: the tests line records a direct-interpreter command while sdpf-labelled-comparison-gate.log:3 header records the uv run --no-sync form that actually ran, so the gate receipt taken from this line is not the literal command in the log.\n",
+  "review_run_id": "r-20261112T090840971659-review-of-sdpf-labelled-comparison-acad1f648fa5",
+  "reviewed_base_sha": "0428c0876425784635ff00e281c3b44fb759aca5",
+  "reviewed_head_sha": "acad1f648fa5ab7388bd916ab9156ae0e710a595",
+  "reviewed_run_id": "r-20261112T083650267222-sdpf-labelled-comparison",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261112T090840971659-review-of-sdpf-labelled-comparison-acad1f648fa5"
+  },
+  "reviewer_run_id": "r-20261112T090840971659-review-of-sdpf-labelled-comparison-acad1f648fa5",
+  "scores": {
+    "durability": 8,
+    "evidence": 14,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T09:27:41.982934+00:00",
+  "total": 93
+}

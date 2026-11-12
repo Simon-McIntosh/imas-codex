@@ -24,7 +24,7 @@
   <title>A Family Shares One Domain: Domain Decided Per Concept, Not Per Source | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -105,6 +105,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T021115157173-sdpf-family-decision" data-who="reckon-build" data-when="2026-11-12T06:49:21.489Z">
     <div class="r-comment-body"><p>Family domain decision landed: families.py groups by invariant+locus segments (fetch_domain_family, fetch_domain_families, domain_family_key) and domain_decision.py decides one family once (decide_family_domain, store_family_decision, read_family_decision, fan_out_family_decision, decide_and_write_family), with a StandardNameDomainFamily record and StandardName.domain_family_id in the schema; gate on all_debug is 57 passed, 0 failed, EXIT=0 at c401f5912, and the label set is 197 families of 3+ members / 2086 names, 97 of them split under the per-name path.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261112T090840971659-review-of-sdpf-labelled-comparison-acad1f648fa5" data-who="reckon-build" data-when="2026-11-12T09:24:33.008Z">
+    <div class="r-comment-body"><p>Reviewed r-20261112T083650267222-sdpf-labelled-comparison at acad1f648fa5ab7388bd916ab9156ae0e710a595 against base 0428c0876425784635ff00e281c3b44fb759aca5: goal_fidelity 19, evidence 14, scope_discipline 20, durability 8, fit 15, reuse 17; 7 findings, 2 blocking (the evidence fragment misstates the largest undecided family as 33 members where its own JSON holds 51, and says undecided calibration names were counted wrong when 20 of the 36 count correct at their stored domain).</p></div>
 </div>
 </section>
 </main>
