@@ -43,6 +43,16 @@
       "note": "\u00a75's done-when now requires the mechanism that lowered accepted documentation during the drain to be named with evidence, and a read before and after one scoped sn run to show no accepted documentation demoted without a recorded reason.",
       "reason": "",
       "when": "2026-11-12T02:33:54.695316+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a75 now names its rate: spend per name whose documentation reached accepted under the drain's own run id (USD 11.14 over 105 names, about USD 0.11).",
+      "reason": "",
+      "when": "2026-11-12T02:34:03.135120+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "\u00a75's done-when now requires the mechanism that lowered accepted documentation during the drain to be named with evidence, and a read before and after one scoped sn run to show no accepted documentation demoted without a recorded reason.",
       "reason": "",
       "when": "2026-11-12T02:33:54.695316+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75 now names its rate: spend per name whose documentation reached accepted under the drain's own run id (USD 11.14 over 105 names, about USD 0.11).",
+      "reason": "",
+      "when": "2026-11-12T02:34:03.135120+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T014840801961-plan-review-of-sn-full-dd-continuation.json",
