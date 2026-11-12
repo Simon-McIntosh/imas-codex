@@ -69,6 +69,16 @@
       "note": "\u00a75 gains a done-when re-reading the sn-catalog-grouping calibration labels under the widened options, not lower than \u00a72's regression reading",
       "reason": "",
       "when": "2026-11-12T06:21:12.940622+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "75ea58b386bc47cbdaddb7c20bf2e2ff75918075",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "\u00a75 now reports the three named names apart and gates on the drawn names alone",
+      "reason": "",
+      "when": "2026-11-12T06:21:27.519188+00:00"
     }
   ],
   "responses": {
@@ -80,6 +90,15 @@
       "note": "\u00a75 gains a done-when re-reading the sn-catalog-grouping calibration labels under the widened options, not lower than \u00a72's regression reading",
       "reason": "",
       "when": "2026-11-12T06:21:12.940622+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "75ea58b386bc47cbdaddb7c20bf2e2ff75918075",
+      "commit_basis": "edit",
+      "note": "\u00a75 now reports the three named names apart and gates on the drawn names alone",
+      "reason": "",
+      "when": "2026-11-12T06:21:27.519188+00:00"
     },
     "reasoning-1": {
       "action": "acted",
