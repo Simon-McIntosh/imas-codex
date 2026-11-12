@@ -51,9 +51,47 @@
       "note": "\u00a71's prose now records the 2026-11-12 state: twelve of the thirteen ids pass at head after the two landed nodes, and the cascade-calibration id skips on missing frozen receipts, which is the remaining work.",
       "reason": "",
       "when": "2026-11-12T01:31:47.475359+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ec806af3d73129d215938fb4a08bd8b0ee285cb",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The geometry id now reads test_unregistered_locus_rejects_the_ordinal_compound, the name the test carries.",
+      "reason": "",
+      "when": "2026-11-12T01:32:21.913206+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ec806af3d73129d215938fb4a08bd8b0ee285cb",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a71's done-when now requires the cascade-calibration id to run without skipping from inputs committed in the repository, so a fixture-absence skip cannot close the section.",
+      "reason": "",
+      "when": "2026-11-12T01:32:58.207201+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ec806af3d73129d215938fb4a08bd8b0ee285cb",
+      "commit_basis": "edit",
+      "note": "The geometry id now reads test_unregistered_locus_rejects_the_ordinal_compound, the name the test carries.",
+      "reason": "",
+      "when": "2026-11-12T01:32:21.913206+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ec806af3d73129d215938fb4a08bd8b0ee285cb",
+      "commit_basis": "edit",
+      "note": "\u00a71's done-when now requires the cascade-calibration id to run without skipping from inputs committed in the repository, so a fixture-absence skip cannot close the section.",
+      "reason": "",
+      "when": "2026-11-12T01:32:58.207201+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
