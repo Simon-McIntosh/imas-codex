@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-12T08:11:23.275Z",
+  "dispatched_at": "2026-11-12T07:58:47Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html:34 non-blocking: the fragment states 43 further quantities carry more than one dimension under one head, while the committed census it cites records 44 unrecorded divergences, so the evidence prose and the artifact disagree by one."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T020847184170-sdbc-unit-spelling/manifest.md",
+      "line": 0,
+      "severity": "non-blocking",
+      "text": "manifest.md:23 non-blocking: the reviewed manifest reports 1630 quantities in unit-spelling-census.json, but the committed artifact records quantity_count 1608, so a headline figure in the node's own report does not reconcile with the data file it names."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/imas-codex-sdbc-unit-spelling/suite.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "/home/ITER/mcintos/.cache/imas-codex-sdbc-unit-spelling/suite.log:1 non-blocking: the gate logs are headed revision 043171ac2, whose tree carries 9 test definitions and does not contain the graph test the same log runs; the recorded revision therefore does not identify the tree measured, and the landed head 723d44eab is named by no gate log."
+    },
+    {
+      "file": "tests/standard_names/test_unit_spelling_census.py",
+      "line": 191,
+      "severity": "non-blocking",
+      "text": "tests/standard_names/test_unit_spelling_census.py:191 non-blocking: the disposable-graph test passes kept[0][\"unit\"] \u2014 a value the extraction path under test produced \u2014 into write_standard_names and then asserts the read-back equals a literal, so the write half shows that the catalog write echoes its input rather than independently that the write takes the recorded spelling; the extraction half is pinned by the literal assertion at line 182."
+    },
+    {
+      "file": "imas_codex/standard_names/unit_audit.py",
+      "line": 210,
+      "severity": "non-blocking",
+      "text": "imas_codex/standard_names/unit_audit.py:210 non-blocking: quantity_dimension_issues duplicates the name-versus-unit consistency capability the repository already owns in imas_codex/standard_names/audits.py:1462 name_unit_consistency_check and audits.py:1433 unit_dimension_check, which the brief's reuse map named; it adds a second QUANTITY_EXPECTED_UNITS table and a second issue vocabulary rather than extending that owner."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass \u2014 resolve_unit's new tail is reached from sources/dd.py:254, worker_tasks/worker_extraction_and_enrichment.py:878 and graph_store/graph_audits.py:1397, all read.",
+    "call_sites_list": "pass \u2014 read three production call sites of the changed resolve_unit.",
+    "diff": "pass \u2014 four commits read one by one against 4b14dd935: the spelling record, the resolve_unit rewrite, the census, and the disposable-graph test, with a config file added then removed inside the same node.",
+    "done_when": "pass \u2014 the done-when's clauses are each exercised: audits.py:5012 computes zero unresolved duplicates, and tests/standard_names/test_unit_spelling_census.py plants each required case; the disposable-graph clause is the graph-marked test at test_unit_spelling_census.py:147.",
+    "goal": "pass \u2014 the node goal is to give every quantity one unit spelling with a committed census proving it on a disposable graph; imas_codex/standard_names/config/unit_overrides.yaml records four quantities' spellings and imas_codex/standard_names/audits.py:5012 computes the census those records resolve.",
+    "manifest": "pass \u2014 the reviewed manifest reports 16 tests passed, a red negative control naming test_census_counts_a_quantity_planted_in_two_equal_spellings, and a graph arm of 1 passed; the gate logs it names are present on disk.",
+    "write_paths": "pass \u2014 every path in the four-commit diff is one of the eight declared write paths; graph_catalog.py was declared and needed no change, which is inside the grant."
+  },
+  "node": "sdbc-unit-spelling",
+  "plan": "imas-codex:sn-definitions-by-construction \u00a73",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to give every quantity one unit spelling with a committed census that proves it on a disposable graph; imas_codex/standard_names/config/unit_overrides.yaml records the spellings and imas_codex/standard_names/audits.py:5012 computes the census over them.\nVERDICT done_when: the done-when names a census over every live name, the three \u00a71 cases resolved, mismatches passed to \u00a75, and a disposable-graph write; the gate the worker ran is tests/standard_names/test_unit_spelling_census.py, 16 passed in suite.log, which asserts each planted case and the graph write.\nVERDICT write_paths: the diff touches seven files and every one is inside the eight declared write paths; graph_catalog.py was declared and left unchanged.\nVERDICT manifest: read; it reports 15 and 16 test passes, a red negative control naming test_census_counts_a_quantity_planted_in_two_equal_spellings, and a graph arm of 1 passed.\nVERDICT diff: read commit by commit against 4b14dd935; four commits add the spelling record, the resolve_unit rewrite, the census and the graph test, and remove the superseded config file they replaced.\nCALL_SITES: imas_codex/standard_names/sources/dd.py:254, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:878, imas_codex/standard_names/graph_store/graph_audits.py:1397\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/unit_overrides.py:292 rewrites a DD unit to the recorded spelling on a recorded quantity's path, and audits.py:5012 measures it, though only four quantities carry a record.\nSCORE evidence: 13\nJUSTIFICATION evidence: /home/ITER/mcintos/.cache/imas-codex-sdbc-unit-spelling/suite.log:1 is headed revision 043171ac2, whose tree lacks the graph test the log runs, and manifest.md:23 reports 1630 quantities against the artifact's 1608.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in the diff (audits.py, unit_audit.py, unit_overrides.py, unit_overrides.yaml, the test, the fragment and the census JSON) is one of the manifest's declared write paths.\nSCORE durability: 15\nJUSTIFICATION durability: the negative control reddens test_census_counts_a_quantity_planted_in_two_equal_spellings and the extraction assertion at tests/standard_names/test_unit_spelling_census.py:182 pins a literal, but the write assertion at line 191 echoes a value the code under test produced.\nSCORE fit: 16\nJUSTIFICATION fit: the added module code follows the frozen-dataclass and lru_cache idiom of imas_codex/standard_names/unit_overrides.py and carries no plan or ticket label, with a minor aliasing nit at unit_overrides.py:200.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/standard_names/unit_audit.py:210 adds quantity_dimension_issues, a second name-versus-unit check beside the owner at imas_codex/standard_names/audits.py:1462 that the brief named.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-unit-spelling.html:34 non-blocking: the fragment states 43 further quantities carry more than one dimension, while the committed census records 44 unrecorded divergences.\nFINDING manifest.md:23 non-blocking: the manifest reports 1630 quantities in unit-spelling-census.json, but the committed artifact records quantity_count 1608.\nFINDING /home/ITER/mcintos/.cache/imas-codex-sdbc-unit-spelling/suite.log:1 non-blocking: the gate logs are headed revision 043171ac2, whose tree does not contain the graph test the same log runs, so the recorded revision does not identify the tree measured.\nFINDING tests/standard_names/test_unit_spelling_census.py:191 non-blocking: the graph test passes kept[0][\"unit\"] into write_standard_names and asserts the read-back, so the write half shows only that the write echoes its input; the extraction half is pinned by a literal at line 182.\nFINDING imas_codex/standard_names/unit_audit.py:210 non-blocking: quantity_dimension_issues duplicates the name-versus-unit consistency owned by imas_codex/standard_names/audits.py:1462 and audits.py:1433, which the brief's reuse map named.",
+  "review_run_id": "r-20261112T075018136012-review-of-sdbc-unit-spelling-723d44eabf52",
+  "reviewed_base": "4b14dd935ca9c58218cce9d8145baa11a2bfa8fd",
+  "reviewed_base_sha": "4b14dd935ca9c58218cce9d8145baa11a2bfa8fd",
+  "reviewed_head": "723d44eabf527e6408106171c1ad3530f62f26ef",
+  "reviewed_head_sha": "723d44eabf527e6408106171c1ad3530f62f26ef",
+  "reviewed_run_id": "r-20261112T020847184170-sdbc-unit-spelling",
+  "scores": {
+    "durability": 15,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:13:46.684672+00:00",
+  "total": 84
+}
