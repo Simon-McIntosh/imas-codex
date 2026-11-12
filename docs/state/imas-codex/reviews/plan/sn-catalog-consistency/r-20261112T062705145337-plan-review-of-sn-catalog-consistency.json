@@ -25,7 +25,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 22,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9bb92262465b7aa0fd59efb77064bec6ffd096e",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a72 now owns the release-candidate rename batch (batch-272) and the six unexported-reference advisory batches (274\u2013279) independently of definitions \u00a76; a done-when item requires each of their 150 rows applied through sn edit or declined with its reason",
+      "reason": "",
+      "when": "2026-11-12T14:45:11.689402+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9bb92262465b7aa0fd59efb77064bec6ffd096e",
+      "commit_basis": "edit",
+      "note": "\u00a72 now owns the release-candidate rename batch (batch-272) and the six unexported-reference advisory batches (274\u2013279) independently of definitions \u00a76; a done-when item requires each of their 150 rows applied through sn edit or declined with its reason",
+      "reason": "",
+      "when": "2026-11-12T14:45:11.689402+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261112T062705145337-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261112T062705145337-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "e2010a7496aaa10bc20fea388dbab47d00ab7ccd",
   "rubric": "content",
