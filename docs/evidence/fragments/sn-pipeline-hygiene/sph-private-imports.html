@@ -17,8 +17,8 @@
   <table id="sph-private-imports-census">
     <thead><tr><th>measure</th><th>before</th><th>at this head</th></tr></thead>
     <tbody>
-      <tr><td>private names imported between top-level modules</td><td>31</td><td>24</td></tr>
-      <tr><td>import statements</td><td>24</td><td>18</td></tr>
+      <tr><td>private names imported between top-level modules</td><td>31</td><td>23</td></tr>
+      <tr><td>import statements</td><td>24</td><td>17</td></tr>
       <tr><td>closed module-level statements</td><td>&mdash;</td><td>6</td></tr>
     </tbody>
   </table>
@@ -71,17 +71,22 @@
     </tbody>
   </table>
   <p>
-    In <code>release_notes.py</code> the git helpers moved into the consumer
-    rather than being made public: <code>catalog_release.py</code> is a
-    concurrent peer's write path, so the private aliases there could not be
-    touched.
+    The two git helpers have one owner rather than a public name per
+    consumer. <code>catalog_release.py</code> keeps the implementations as
+    <code>_run_git</code> and <code>_github_slug</code> — the names its tests
+    replace — and exports <code>run_git</code> and <code>github_slug</code>,
+    thin delegations with no logic of their own.
+    <code>release_notes.py</code> and <code>promote.py</code> import those, so
+    the package holds one github-slug parser and one git invocation instead of
+    three. <code>promote.py</code>'s exemption entry for
+    <code>_github_slug</code> is closed with it.
   </p>
 </section>
 
 <section id="sph-private-imports-exemptions">
   <h3>The remaining exemption list</h3>
   <p>
-    Eighteen statements (24 names) are exempt until later nodes close them:
+    Seventeen statements (23 names) are exempt until later nodes close them:
     <code>attachment_audit.py</code> (2), <code>benchmark_roles.py</code>,
     <code>campaign_pricing.py</code>, <code>catalog_reconcile.py</code>,
     <code>docs_gates.py</code>, <code>edit.py</code>, <code>export.py</code>,
@@ -104,9 +109,11 @@
   <p>
     The reachable test files (the boundary rule plus the files exercising the
     five exported names, the six closed imports and the edited modules) pass at
-    both heads with no failure: 710 passed at this head against 709 passed and
-    1 skipped at <code>6f9eb556</code>, the extra pass being the new rule. No
-    test id fails at either head, so the delta is zero. The whole of
+    both heads with no failure, and the repair round adds the three files
+    that reach the helpers' new owner and the reuse check the review named. Two
+    negative controls fire: restoring a closed private import makes the rule
+    name that site, and the pre-repair revision makes the no-second-copy check
+    fail because <code>release_notes.py</code> defined both helpers there. The whole of
     <code>tests/standard_names</code> was started at both heads but not
     completed within this node's time fence; the focused gate above is the
     selected one, per the repository's gate-from-what-changed policy.

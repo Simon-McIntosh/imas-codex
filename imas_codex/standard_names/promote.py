@@ -1991,10 +1991,10 @@ def resolve_tag_remote(
         return default
     want = (m[1], m[2])
 
-    from imas_codex.standard_names.catalog_release import _github_slug
+    from imas_codex.standard_names.catalog_release import github_slug
 
     for remote in ("upstream", "origin"):
-        if _github_slug(Path(isnc_dir), remote) == want:
+        if github_slug(Path(isnc_dir), remote) == want:
             return remote
     return default
 

@@ -40,7 +40,6 @@ PRIVATE_NAME_EXEMPTIONS: frozenset[tuple[str, int, str]] = frozenset(
         ("edit.py", 98, "_isn_round_trip_ok"),
         ("export.py", 682, "_live_child_cypher"),
         ("harmonize.py", 40, "_pattern_family_rows_query"),
-        ("promote.py", 1994, "_github_slug"),
         ("protection.py", 185, "_pull_request_call"),
         ("protection.py", 185, "_pull_request_state"),
         ("provenance_lifecycle.py", 27, "_load_signed_stale_source_rows"),
