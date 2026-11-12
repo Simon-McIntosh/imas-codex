@@ -1,0 +1,330 @@
+{
+  "census_total": 21,
+  "classifier_populations": {
+    "derived_parent": 1,
+    "dropped_edge": 7,
+    "held_in_chain": 10,
+    "never_bound": 2,
+    "unchained_holder": 1
+  },
+  "derived_parent_exempt": [
+    "beta"
+  ],
+  "dormant_exhausted_sourceless": 4,
+  "generated_at": "2026-11-12T00:15:32.973714+00:00",
+  "graph_writes": 0,
+  "holder_positive_control": [
+    "electron_temperature"
+  ],
+  "invariant_confirmed": [
+    "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+    "line_averaged_neon_density",
+    "radius_of_soft_xray_detector",
+    "ratio_of_diamagnetic_vorticity_to_major_radius",
+    "volume_averaged_electron_number_density_over_scrape_off_layer"
+  ],
+  "invariant_disagreements": [],
+  "live_accepted_not_in_recorded_nine": [
+    "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+    "volume_averaged_electron_number_density_over_scrape_off_layer"
+  ],
+  "live_accepted_sourceless": 2,
+  "live_draft_sourceless": 3,
+  "live_population": 5,
+  "llm_calls": 0,
+  "planted_control": {
+    "classifier_listed": [
+      "planted_sourceless_name"
+    ],
+    "classifier_populations": {
+      "never_bound": 1
+    },
+    "endpoint": "bolt://127.0.0.1:35279",
+    "generated_at": "2026-11-12T00:15:49.251624+00:00",
+    "graph_writes": 1,
+    "graph_writes_note": "disposable Neo4j only; the live graph is untouched",
+    "invariant_bound_excluded": true,
+    "invariant_listed": [
+      "planted_sourceless_name"
+    ],
+    "invariant_planted_listed": true,
+    "planted_bound_excluded": true,
+    "planted_sourceless_listed": true
+  },
+  "recorded_nine": [
+    "electrostatic_potential_at_outboard_midplane",
+    "electrostatic_potential_at_wall",
+    "fast_ion_charge_state_power_at_inside_flux_surface",
+    "neutron_flux_due_to_fusion",
+    "radial_neutral_internal_state_momentum_flux",
+    "root_mean_square_spectral_width_of_spectrometer_channel",
+    "toroidal_coordinate_of_field_map_grid",
+    "voltage_of_diagnostic_antenna",
+    "voltage_of_ece_channel"
+  ],
+  "recorded_nine_absent": [
+    "electrostatic_potential_at_outboard_midplane",
+    "electrostatic_potential_at_wall",
+    "fast_ion_charge_state_power_at_inside_flux_surface",
+    "neutron_flux_due_to_fusion",
+    "radial_neutral_internal_state_momentum_flux",
+    "root_mean_square_spectral_width_of_spectrometer_channel",
+    "toroidal_coordinate_of_field_map_grid",
+    "voltage_of_diagnostic_antenna",
+    "voltage_of_ece_channel"
+  ],
+  "recorded_nine_present": [],
+  "rows": [
+    {
+      "classification": {
+        "docs_stage": "accepted",
+        "model": "sn-edit",
+        "origin": "pipeline",
+        "population": "never_bound",
+        "recorded_source_ids": [],
+        "stage": "accepted",
+        "status": "draft",
+        "unchained_holders": [],
+        "unresolved_tokens": []
+      },
+      "invariant_confirms": true,
+      "name": "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+      "record": {
+        "description": "Cumulative energy transferred from a plasma-facing component into its coolant over the pulse, excluding energy retained in the component or transferred elsewhere.",
+        "docs_chain_length": 0,
+        "docs_stage": "accepted",
+        "documentation_chars": 1466,
+        "exported_at": null,
+        "physics_domain": "plasma_wall_interactions",
+        "reviewed_docs_at": "2026-09-10T04:22:29.424000000+00:00",
+        "reviewed_name_at": "2026-09-05T15:25:14.581000000+00:00",
+        "reviewer_score_docs": 0.9625,
+        "reviewer_score_name": 0.96875,
+        "spend_usd": 0.14930600000000002,
+        "stage": "accepted",
+        "status": "draft",
+        "unit": "J"
+      },
+      "recorded_paths": [],
+      "recorded_source_holders": [],
+      "release_hold": {
+        "detail": "no Data Dictionary path measures the quantity",
+        "reason": "release_hold_no_dd_source"
+      },
+      "stage_ships": true
+    },
+    {
+      "classification": {
+        "docs_stage": "pending",
+        "model": "openrouter/deepseek/deepseek-v4-flash",
+        "origin": null,
+        "population": "dropped_edge",
+        "recorded_source_ids": [
+          "dd:summary/line_average/n_i/neon/value"
+        ],
+        "stage": "pending",
+        "status": "draft",
+        "unchained_holders": [],
+        "unresolved_tokens": []
+      },
+      "invariant_confirms": true,
+      "name": "line_averaged_neon_density",
+      "record": {
+        "description": null,
+        "docs_chain_length": 0,
+        "docs_stage": "pending",
+        "documentation_chars": 0,
+        "exported_at": null,
+        "physics_domain": "general",
+        "reviewed_docs_at": null,
+        "reviewed_name_at": null,
+        "reviewer_score_docs": null,
+        "reviewer_score_name": null,
+        "spend_usd": 0.002089,
+        "stage": "pending",
+        "status": "draft",
+        "unit": "m^-3"
+      },
+      "recorded_paths": [
+        {
+          "dd_documentation": "Value",
+          "dd_unit": "m^-3",
+          "lifecycle_status": null,
+          "live_holders": [],
+          "path": "summary/line_average/n_i/neon/value",
+          "recorded_sources": [
+            {
+              "id": "dd:summary/line_average/n_i/neon/value",
+              "mirror": null,
+              "status": "extracted"
+            }
+          ]
+        }
+      ],
+      "recorded_source_holders": [],
+      "release_hold": null,
+      "stage_ships": false
+    },
+    {
+      "classification": {
+        "docs_stage": "pending",
+        "model": "openrouter/deepseek/deepseek-v4-flash",
+        "origin": null,
+        "population": "dropped_edge",
+        "recorded_source_ids": [
+          "dd:soft_x_rays/channel/detector/radius"
+        ],
+        "stage": "pending",
+        "status": "draft",
+        "unchained_holders": [],
+        "unresolved_tokens": []
+      },
+      "invariant_confirms": true,
+      "name": "radius_of_soft_xray_detector",
+      "record": {
+        "description": null,
+        "docs_chain_length": 0,
+        "docs_stage": "pending",
+        "documentation_chars": 0,
+        "exported_at": null,
+        "physics_domain": "radiation_measurement_diagnostics",
+        "reviewed_docs_at": null,
+        "reviewed_name_at": null,
+        "reviewer_score_docs": null,
+        "reviewer_score_name": null,
+        "spend_usd": 0.009812,
+        "stage": "pending",
+        "status": "draft",
+        "unit": "m"
+      },
+      "recorded_paths": [
+        {
+          "dd_documentation": "Radius of the circle, used only if geometry_type = 2",
+          "dd_unit": "m",
+          "lifecycle_status": null,
+          "live_holders": [],
+          "path": "soft_x_rays/channel/detector/radius",
+          "recorded_sources": [
+            {
+              "id": "dd:soft_x_rays/channel/detector/radius",
+              "mirror": null,
+              "status": "extracted"
+            }
+          ]
+        }
+      ],
+      "recorded_source_holders": [],
+      "release_hold": null,
+      "stage_ships": false
+    },
+    {
+      "classification": {
+        "docs_stage": "pending",
+        "model": "openrouter/deepseek/deepseek-v4-flash",
+        "origin": null,
+        "population": "dropped_edge",
+        "recorded_source_ids": [
+          "dd:edge_profiles/ggd/vorticity_over_r/diamagnetic",
+          "dd:plasma_profiles/ggd/vorticity_over_r/diamagnetic"
+        ],
+        "stage": "pending",
+        "status": "draft",
+        "unchained_holders": [],
+        "unresolved_tokens": []
+      },
+      "invariant_confirms": true,
+      "name": "ratio_of_diamagnetic_vorticity_to_major_radius",
+      "record": {
+        "description": null,
+        "docs_chain_length": 0,
+        "docs_stage": "pending",
+        "documentation_chars": 0,
+        "exported_at": null,
+        "physics_domain": "transport",
+        "reviewed_docs_at": null,
+        "reviewed_name_at": null,
+        "reviewer_score_docs": null,
+        "reviewer_score_name": null,
+        "spend_usd": 0.0061530000000000005,
+        "stage": "pending",
+        "status": "draft",
+        "unit": "m^-1.s^-1"
+      },
+      "recorded_paths": [
+        {
+          "dd_documentation": "Diamagnetic component, one scalar value is provided per element in the grid subset.",
+          "dd_unit": "m^-1.s^-1",
+          "lifecycle_status": null,
+          "live_holders": [],
+          "path": "edge_profiles/ggd/vorticity_over_r/diamagnetic",
+          "recorded_sources": [
+            {
+              "id": "dd:edge_profiles/ggd/vorticity_over_r/diamagnetic",
+              "mirror": null,
+              "status": "extracted"
+            }
+          ]
+        },
+        {
+          "dd_documentation": "Diamagnetic component, one scalar value is provided per element in the grid subset.",
+          "dd_unit": "m^-1.s^-1",
+          "lifecycle_status": null,
+          "live_holders": [],
+          "path": "plasma_profiles/ggd/vorticity_over_r/diamagnetic",
+          "recorded_sources": [
+            {
+              "id": "dd:plasma_profiles/ggd/vorticity_over_r/diamagnetic",
+              "mirror": null,
+              "status": "extracted"
+            }
+          ]
+        }
+      ],
+      "recorded_source_holders": [],
+      "release_hold": null,
+      "stage_ships": false
+    },
+    {
+      "classification": {
+        "docs_stage": "accepted",
+        "model": "openrouter/openai/gpt-5.5",
+        "origin": "pipeline",
+        "population": "dropped_edge",
+        "recorded_source_ids": [],
+        "stage": "accepted",
+        "status": "draft",
+        "unchained_holders": [],
+        "unresolved_tokens": []
+      },
+      "invariant_confirms": true,
+      "name": "volume_averaged_electron_number_density_over_scrape_off_layer",
+      "record": {
+        "description": "Volume-averaged electron number density in the scrape-off layer, equal to the total number of free electrons in the averaging region divided by its volume.",
+        "docs_chain_length": 0,
+        "docs_stage": "accepted",
+        "documentation_chars": 956,
+        "exported_at": null,
+        "physics_domain": "edge_plasma_physics",
+        "reviewed_docs_at": "2026-11-07T23:10:46.742000000+00:00",
+        "reviewed_name_at": "2026-10-16T11:16:25.980000000+00:00",
+        "reviewer_score_docs": 0.9660918719467996,
+        "reviewer_score_name": 1.0,
+        "spend_usd": 0.40804199999999996,
+        "stage": "accepted",
+        "status": "draft",
+        "unit": "m^-3"
+      },
+      "recorded_paths": [],
+      "recorded_source_holders": [],
+      "release_hold": {
+        "detail": "no Data Dictionary path measures the quantity",
+        "reason": "release_hold_no_dd_source"
+      },
+      "stage_ships": true
+    }
+  ],
+  "spend_usd": 0,
+  "unchained_holder_names": [
+    "diamagnetic_momentum_flux_limiter_coefficient"
+  ]
+}
