@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T01:22:43.883Z",
+  "dispatched_at": "2026-11-12T01:14:35Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:67",
+      "id": "done_when-1",
+      "reason": "without a stated criterion for an acceptable reason (the sibling \u00a75 says \"the source-domain reason its members differ\"), the node can close on a graph it did not change.",
+      "text": "the first bullet reads \"zero families whose members carry more than one `physics_domain`, or lists each remaining family with the recorded reason it stands\": the second branch has no criterion for the reason, so a pass that changes no name and writes a reason on every divergent family satisfies it, and only the eight \u00a71 families are pinned to a single domain",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:55",
+      "id": "done_when-2",
+      "reason": "the one accuracy bar in the plan measures the case that was never broken.",
+      "text": "the per-family decision's accuracy is to be compared against the per-name decision's \"on the labelled names the domain decision was calibrated on in `sn-catalog-grouping`\", a set that files 73 calibration rows into ~70 families (3 groups hold more than one row, and the one group with differing labels \u2014 `poloidal_perturbed_vacuum_magnetic_field` with `breakdown_magnetic_field` \u2014 is not a family at all): on near-singleton families the per-family decision is the per-name decision, so \"not lower\" holds however badly the method behaves on the split families the plan exists for",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:32",
+      "id": "evidence_paths-1",
+      "reason": "a done section whose measurement has no durable path leaves the next reader to re-derive it before trusting any of the plan.",
+      "text": "\u00a71 is the plan's whole evidence base (the eight-family table, transport holding 698 of 1,975, 8 of 20 species families split) and cites no artifact; a search of `docs/` for `X_density_at_pedestal_top` returns only this plan, so the census behind the root cause cannot be opened or re-run",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:64",
+      "id": "wiring-1",
+      "reason": "a one-sided handoff leaves \u00a75's builder re-doing \u00a73's work or closing \u00a75 on \u00a73's evidence, and neither plan records which.",
+      "text": "\u00a73 states \"This absorbs the grouping half of `sn-catalog-consistency` \u00a75: that section keeps its domain-audit endpoint, and its family-agreement endpoint is met here\", but this plan declares no `informs`, `gates` or `depends-on` link to that plan, and \u00a75 still says \"This section also owns grouping across each family\" with its own census done-when intact",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+  "plan_fingerprint": "bb3a87ad4eb6f66f80c7fdd207bb521e461151da4616cb1ce04c80a5f7cc38ce",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T011214351610-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "fd37b4a25ddedfa190eb283e4de176acd31d7510",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-catalog-consistency` \u00a71 and \u00a75 carry the quoted counts and the domain-audit endpoint; the calibration label set resolves at `docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet.json` with 73 calibration of 150 rows; the one-writer guard resolves to a package-wide static scan, which is why \"passing unchanged\" is a meaningful claim for a new in-package write site; the domain audit exists at `imas_codex/standard_names/domain_audit.py`. The gate directory `docs/evidence/fragments/sn-domain-per-family/` is a destination the node creates, not a citation.",
+    "done_when": "a finding \u2014 \u00a73's read-back passes on \"each remaining family with the recorded reason it stands\", an escape with no criterion, and \u00a72's accuracy comparison is run on a labelled set that is almost entirely one name per family, so \"not lower\" cannot fail.",
+    "evidence_paths": "a finding \u2014 \u00a71's census table and the 698-of-1,975 and 98-of-125 counts cite no artifact; the only place `X_density_at_pedestal_top` appears is the plan text itself.",
+    "naming": "pass \u2014 section ids are structure, and the plan-named evidence directory is the repo's house convention for every peer plan; the only version string is the catalog release the measurement is taken on.",
+    "reasoning": "pass \u2014 the stated root cause matches the cited evidence and the code: a name is offered only its own source paths' and IDSs' domains, the band umbrellas and `general` (`imas_codex/standard_names/domain_decision.py:6-8,134-148`), a single candidate is taken with no call (line 258), and `export.py` carries no family/domain agreement check, so \"the export does not check it\" holds. Each section states records and tolerances rather than a code path.",
+    "single_goal": "pass \u2014 \u00a72 delivers one domain decision per family, \u00a73 brings the live families to it, \u00a74 makes a cut refuse a split family; each node's bullets serve its one deliverable.",
+    "wiring": "a finding \u2014 \u00a73 declares it absorbs the family-agreement endpoint of `sn-catalog-consistency` \u00a75, but no relationship is declared to that plan and \u00a75 still declares the same endpoint as its own done-when."
+  },
+  "section_digests": {
+    "_document": "fc8bb2b9fba57a22437498ce10408777db562f95d00bb7d3c9c0470e75dcc979",
+    "s1": "2b7112e6079c440847cac618754581c234043c0ed6061b04b06c4b78a07d833e",
+    "s2": "125e6eed5fdefbbbcb90cbc67a4f0619e63bd56478f3e0ad936b913d5b75b6d6",
+    "s3": "d5e3944405e0da869f0ea20a650065b6bf5ee95f524d0c4a680ae9c0c152d012",
+    "s4": "9c65ea3f96f60b0e2f86f32c281678300d7942396e8b6ac630992ff65e4b18d2"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:33:37.619987+00:00",
+  "total": null
+}
