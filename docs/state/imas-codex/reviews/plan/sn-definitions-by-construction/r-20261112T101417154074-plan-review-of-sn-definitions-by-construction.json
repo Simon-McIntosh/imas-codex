@@ -17,7 +17,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 13,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "b7aadf360c7ed7fec853060f40655af695f541e3",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a72 now states the guarantee as what is stored: the settled wording or nothing, read back through the writer's own entry point, so a writer that restores the wording in place satisfies it",
+      "reason": "",
+      "when": "2026-11-12T11:29:06.151209+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "b7aadf360c7ed7fec853060f40655af695f541e3",
+      "commit_basis": "edit",
+      "note": "\u00a72 now states the guarantee as what is stored: the settled wording or nothing, read back through the writer's own entry point, so a writer that restores the wording in place satisfies it",
+      "reason": "",
+      "when": "2026-11-12T11:29:06.151209+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261112T101417154074-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261112T101417154074-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "4b8e63656e8309f59bacc5dff11a87977544077f",
   "rubric": "content",
