@@ -59,7 +59,7 @@
   "id": "item-09",
   "class": "agrees",
   "confidence": "medium",
-  "evidence": "The average is formed from the local ion density at the plasma boundary by applying inverse-poloidal-flux-gradient weighting over the surface",
+  "evidence": "by applying inverse-poloidal-flux-gradient weighting over the surface",
   "reason": "The name already states a flux-surface average of ion density at the plasma boundary, and the inverse-flux-gradient weighting is the standard meaning of that average."
  },
  {
@@ -206,14 +206,14 @@
   "id": "item-30",
   "class": "agrees",
   "confidence": "high",
-  "evidence": "the x-directed component of a sensor's oriented measurement-direction vector",
+  "evidence": "is the x-directed component of a sensor",
   "reason": "The name states the x component of the first measurement-direction unit vector, and the definition is its x-direction cosine."
  },
  {
   "id": "item-31",
   "class": "qualifier-missing-from-name",
   "confidence": "medium",
-  "evidence": "the full transverse width of the neutron detector's collimating aperture along its first local tangential direction",
+  "evidence": "Full transverse extent of the rectangular collimating aperture associated with a neutron detector",
   "reason": "The name states a width of the neutron detector, but the definition is the opening width of its collimating aperture, explicitly not the detector body or shielding."
  },
  {
@@ -278,5 +278,145 @@
   "confidence": "high",
   "evidence": "Each value denotes a spectral evaluation point, not a response amplitude or wavelength interval",
   "reason": "The name states a spectral wavelength of an optical element, and the definition is the vacuum wavelength at which its properties are evaluated."
+ },
+ {
+  "id": "item-41",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the spatial average, over the plasma volume, of the local total rate at which electrons enter the runaway population",
+  "reason": "The name states a volume-averaged total runaway source rate, and the definition is the plasma-volume mean of the summed local production rate."
+ },
+ {
+  "id": "item-42",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the geometric area of the specified detector surface associated with one diagnostic channel",
+  "reason": "The name states the surface area of a detector, and the definition is the geometric area of its specified face."
+ },
+ {
+  "id": "item-43",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "It applies to the complete beryllium-ion population at that location and is summed over all beryllium ionic charge states. It excludes neutral beryllium",
+  "reason": "Under the catalog convention a bare species name counts ions summed over charge states with neutrals excluded, which the definition states at the magnetic axis."
+ },
+ {
+  "id": "item-44",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "This is the direction-agnostic vector parent for component projections of the same bulk neutral population in the same resolved internal state",
+  "reason": "The definition declares the quantity as a parent vector whose directional forms are fixed by component children such as the vertical bulk velocity."
+ },
+ {
+  "id": "item-45",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "is the local torque per unit volume transferred to the bulk thermal ion population by Coulomb collisions with contributing charged-particle populations",
+  "reason": "Co-passing, thermal-ion, collisional and torque density are all present in the name, and the definition adds only that the full vector rather than a spatial component is meant."
+ },
+ {
+  "id": "item-46",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net rate at which Coulomb scattering transfers angular momentum per unit volume to the counter-passing suprathermal electron population",
+  "reason": "The name states a counter-passing fast-electron collisional torque density, and the definition is exactly that volumetric angular-momentum transfer rate."
+ },
+ {
+  "id": "item-47",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the local number of particles of a specified plasma population per physical volume at the innermost location of nested closed poloidal magnetic-flux surfaces",
+  "reason": "A density at the magnetic axis of a stated population is what the name denotes, and the species conventions stated are what the catalog applies to a bare species name."
+ },
+ {
+  "id": "item-48",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the mean translational velocity of ions in a specified ionization charge state",
+  "reason": "The name states an ion charge-state velocity, and the definition is that charge state's bulk flow from the first velocity moment."
+ },
+ {
+  "id": "item-49",
+  "class": "unit-does-not-fit-name",
+  "confidence": "medium",
+  "evidence": "denotes the common linear-momentum concept shared by concrete momentum-content and momentum-transport quantities, not a single fully specified observable",
+  "reason": "The name states momentum, whose dimension is kg.m.s^-1, but the assigned unit kg.m^-1.s^-2 is that of momentum flux density, a different physical dimension."
+ },
+ {
+  "id": "item-50",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local parallel-parallel component of the plasma electrical-conductivity response, with both projections taken along the local magnetic-field direction",
+  "reason": "The name states a parallel conductivity, and the definition is the field-aligned component of the conductivity tensor relating parallel field to parallel current."
+ },
+ {
+  "id": "item-51",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the effective transport coefficient for local diffusive smoothing of the thermal-energy density of one specified ionization stage along the magnetic-field direction",
+  "reason": "The name states a field-aligned diffusivity for one ion charge state and its quantity (the standard name for thermal energy transport) matches the definition's scope."
+ },
+ {
+  "id": "item-52",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the local concentration of particles belonging to a selected species or population",
+  "reason": "A generic particle number density of a selected species is what the name denotes, and the definition's charge-state and thermal conventions follow the catalog."
+ },
+ {
+  "id": "item-53",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a multiplicative factor that scales the collisionless free-streaming upper bound on poloidal momentum-flux density in a transport closure",
+  "reason": "The name states a poloidal flux-limiter coefficient, and the definition is that factor for the poloidal momentum-flux component."
+ },
+ {
+  "id": "item-54",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "This quantity applies locally to one specified charge state of one ion species in the edge plasma",
+  "reason": "The E cross B drift exists across the plasma, but the definition restricts this quantity to the edge region, a subset of the plasma volume the name covers."
+ },
+ {
+  "id": "item-55",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the scalar poloidal diffusivity for energy transport by neutral particles in a specified internal state",
+  "reason": "The name states the poloidal neutral internal-state energy diffusion coefficient, and the Fickian poloidal coefficient the definition gives is that quantity."
+ },
+ {
+  "id": "item-56",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the toroidal component of the local collisional angular-momentum transfer delivered to the bulk thermal electron population by co-passing particles",
+  "reason": "Every qualifier in the name is carried by the definition, which is the toroidal projection of that collisional torque density."
+ },
+ {
+  "id": "item-57",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the perpendicular kinetic-pressure moment of a perturbed gyrocenter distribution in a linear gyrokinetic eigenmode, normalized to a reference thermal pressure and weighted by the first-order Bessel function",
+  "reason": "Perpendicular, normalized, perturbed pressure, Bessel-1 and the unitless normalisation are all in the name, matching the definition."
+ },
+ {
+  "id": "item-58",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the E-plus complex phasor obtained by projecting the electromagnetic-wave electric-field phasor onto the circular polarization basis transverse to the local equilibrium magnetic field",
+  "reason": "The name states the left-hand circularly polarized wave electric field, and the definition is that polarization component's complex phasor."
+ },
+ {
+  "id": "item-59",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "after power-deposition-weighted averaging over a magnetic flux surface",
+  "reason": "The name states a mode-resolved polarized field amplitude, but the definition adds the identifying power-deposition-weighted flux-surface average that the name does not convey."
+ },
+ {
+  "id": "item-60",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the amplitude-form representation of the right-hand circularly polarized E-minus contribution to a coherent electromagnetic-wave electric field",
+  "reason": "The name states the right-hand circularly polarized wave electric field amplitude, exactly the amplitude representation the definition describes."
  }
 ]
