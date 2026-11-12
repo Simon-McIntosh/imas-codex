@@ -19,11 +19,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="mcp-server">
   <meta name="plan-standalone" content="A startup-time repair of the MCP server entry point; no other plan waits on it or feeds it.">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;}">
   <title>The MCP Server Answers Inside The Client's Connect Limit | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="5">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -43,7 +43,7 @@
     <p>The client's connect limit was raised to 180 s in the user's Claude Code settings on 2026-11-12 as a stopgap. That hides the delay and does not remove it: every session still waits half a minute for its tools, and any client without that setting still fails. The <code>reckon mcp</code> half belongs to the reckon repository and is not in this plan.</p>
 
     <h2 id="s2">§2 — First answer in under ten seconds</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="2.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="2.75" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>Starting the server costs what the server needs and nothing else. The other commands keep working and keep their own import cost. Every timing, the load it was taken at, the base-revision readings and the control's failure at the base revision are committed under <code>docs/evidence/fragments/serve-answers-inside-the-connect-limit/</code>.</p>
     <p>Done when:</p>
     <ul>
@@ -60,10 +60,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-saicl-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-12" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-saicl-001" data-status="resolved" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-12" data-recommends-skill="" data-resolved-at="2026-11-12T09:02:53+00:00" data-resolved-by="reckon-build">
     <h4 class="r-fu-title">Cut the server&#x27;s start-up time</h4>
     <div class="r-fu-body"><p>§2 is ready and independent of every other plan.</p></div>
     <pre class="r-fu-prompt">/reckon-build serve-answers-inside-the-connect-limit §2</pre>
+    <p class="r-fu-outcome">§2 landed; first answer 3.34 s on a debug node and 10.46 s on the fleet node.</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
@@ -74,7 +75,10 @@
     <div class="r-comment-body"><p>Reviewed run r-20261112T021222770704-saicl-lazy-command-group at head 0aac4db7b against base 8365c9c9e: the schema runtime is off the initialize path, the guard now asserts it and holds over twenty runs, and the parts record is committed, but the attribution's 7.11 s figure does not follow from the record's own steps (which sum to 7.587 s), the twenty-run "warm" arm does not heat the child interpreter it inspects, and the --help guard still asserts the command modules only; nine non-blocking findings, no blocking finding.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T021222770704-saicl-lazy-command-group" data-who="reckon-build" data-when="2026-11-12T08:21:02Z">
-    <div class="r-comment-body"><p>imas-codex serve answers initialize in 3.34 s median (base 7.25 s) on the debug node and 10.46 s median with a 11.71 s worst start (base 35.88 s) on the fleet node, by deferring every command module import to invocation and the query builder&#x27;s graph import to its own use.</p></div>
+    <div class="r-comment-body"><p>imas-codex serve answers initialize in 3.34 s median (base 7.25 s) on the debug node and 10.46 s median with a 11.71 s worst start (base 35.88 s) on the fleet node, by deferring every command module import to invocation and the query builder's graph import to its own use.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-12T09:05:00Z">
+    <div class="r-comment-body"><p>§2 closed (<code>saicl-lazy-command-group</code>, commits <code>8365c9c9e</code>, <code>9a1c18b3d</code> and <code>0aac4db7b</code>, reviewed at the final head). <code>imas-codex serve</code> answers <code>initialize</code> in 3.34 s as the median of five cold starts on a debug-partition node, against 7.25 s at the base revision, and in 10.46 s median with an 11.71 s worst start on the fleet node, against 35.88 s. Command modules are resolved only when their command runs, and the schema runtime is deferred off the handshake path; a guard fails when either is imported there and gives the same verdict over ten runs in each warm-up state. Read from the main checkout after landing, <code>imas-codex --help</code> returned in 1.2 s at a load average of 37. Limits the review recorded: the fleet-node five met the 15 s bound at a load of about 30, and an earlier five at a load of 37 to 48 had one 15.61 s start; the attribution table's named-parts row reads 7.11 s where its rows sum to 7.61 s; and the timing scripts point at trees that have since been reclaimed, so the figures can be read but not re-run as committed. The client's 180 s connect limit set as a stopgap can now return to its default. <a href="/imas-codex/evidence/fragments/serve-answers-inside-the-connect-limit/saicl-lazy-command-group.html">evidence</a></p></div>
 </div>
 </section>
 </main>
