@@ -33,7 +33,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 30,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "witness now reads the release-candidate unit-pair advisory list, which names the three batch-272 names today, so it fails before the work",
+      "reason": "",
+      "when": "2026-11-12T15:18:33.354364+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+      "commit_basis": "edit",
+      "note": "witness now reads the release-candidate unit-pair advisory list, which names the three batch-272 names today, so it fails before the work",
+      "reason": "",
+      "when": "2026-11-12T15:18:33.354364+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261112T145141208948-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261112T145141208948-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "a22d5e7dd27671ef542594746abb656670939801",
   "rubric": "content",
