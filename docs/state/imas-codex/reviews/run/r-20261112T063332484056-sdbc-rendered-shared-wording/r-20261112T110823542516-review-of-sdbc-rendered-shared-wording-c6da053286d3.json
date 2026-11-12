@@ -1,0 +1,103 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-rendered-shared-wording uv run --no-sync python -m pytest -p no:cacheprovider tests/standard_names/test_generate_docs.py tests/standard_names/test_docs_gates.py tests/standard_names/test_harmonize.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/gate-round-120005.log",
+    "revision": "c6da053286d3943b8559a1ac2b1e091dfe1dd3c2"
+  },
+  "base_log_revision": "84f1f3ca53bf949b60d5d1abb532ff50833b6865",
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-rendered-shared-wording uv run --no-sync python -m pytest -p no:cacheprovider tests/standard_names/test_generate_docs.py tests/standard_names/test_docs_gates.py tests/standard_names/test_harmonize.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/gate-final-103004.log",
+    "revision": "84f1f3ca53bf949b60d5d1abb532ff50833b6865"
+  },
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:927 process_generate_docs_batch",
+    "imas_codex/standard_names/loop.py:965 process_refine_docs_batch",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:604 conformance_findings"
+  ],
+  "completed_at": "2026-11-12T11:24:31.559Z",
+  "dispatched_at": "2026-11-12T11:15:01Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_generate_docs.py",
+      "line": "976",
+      "severity": "non-blocking",
+      "text": "test_refine_refuses_a_contradicting_definition_before_persist pins only the refusal: the planted documentation contradicts the population whatever the description says, so deleting description_with_population at worker_refine_docs.py:293 while keeping the refusal leaves both assertions green, and half of the refine repair has no failing test."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "1142",
+      "severity": "non-blocking",
+      "text": "the 'or _collapsed(candidate) == stored' clause can never be true, because present at :1131 already returned when the stored sentence occurs in the line; the condition reads as a guard that keeps the stored sentence but nothing depends on it, and a reader checking that the stored wording survives is reading a clause that never runs."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_refine_docs.py",
+      "line": "296",
+      "severity": "non-blocking",
+      "text": "SharedPartAltered raised at :296 is caught by the generic handler at :343, which is not _is_refine_docs_failure, so release_refine_docs_failed_claims returns the name to review and a model that repeatedly contradicts the settled population is re-claimed and re-charged every pass with no terminal state; the repair extends this retry-cost loop to the refine path."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_review_docs.py",
+      "line": "596",
+      "severity": "non-blocking",
+      "text": "SHARED_PART_ALTERED is absent from the barring set, so the restatement that docs_gates.py:1076-1088 now reports through conformance_findings is listed in the note text but never holds a name at review; the only caller that acts on it is the pre-persist refusal."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-shared-wording.html",
+      "line": "180",
+      "severity": "non-blocking",
+      "text": "the added durability section is a table and three paragraphs with no figure, so the removal band, the three disarm arms and the two-arm acceptance counts are readable only as prose; the user mandate asks that a claim about a mechanism this comparative be illustrated."
+    }
+  ],
+  "head_log_revision": "c6da053286d3943b8559a1ac2b1e091dfe1dd3c2",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified loop.py:927 process_generate_docs_batch, loop.py:965 process_refine_docs_batch and worker_review_docs.py:604 conformance_findings; no other production caller of the changed functions exists.",
+    "diff": "read commit by commit against 84f1f3ca5; four files, 231 insertions, 6 deletions, all answering the previous review's three blocking findings.",
+    "done_when": "tests/standard_names/test_generate_docs.py:905 and :976 reach the refusal through process_generate_docs_batch and process_refine_docs_batch and assert persist was not called; gate-round-120005.log records 101 passed EXIT=0.",
+    "goal": "worker_refine_docs.py:290-301 now renders a refinement through the one renderer and refuses it before persist; the refine stage the previous review found storing an unrendered refinement is closed.",
+    "manifest": "read; commits, the literal test command, both log paths and the three disarm arms are recorded and the logs on disk match them.",
+    "write_paths": "every diff path is inside the fence declared in manifest.md; nothing outside was touched."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_generate_docs.py:976 fails when worker_refine_docs.py:296 is disarmed (control 2) and :885 fails when the removal band is restored (control 1), but removing only description_with_population at worker_refine_docs.py:293 leaves the refine test green.",
+    "evidence": "gate-round-120005.log ends '101 passed, 1 warning in 61.11s' with EXIT=0 and negative-control-round-120129.log ends ARMS_FAILED_AS_INTENDED=3 of 3 with EXIT=1, but neither log header names the revision it ran at and the reviewed manifest carries no baseline_suite/after_suite block.",
+    "fit": "the new constant and comment at docs_gates.py:839-843 follow the surrounding _PARAPHRASE_OVERLAP idiom and introduce no plan, version or ticket name, though the 'or _collapsed(candidate) == stored' half of docs_gates.py:1142 is unreachable.",
+    "goal_fidelity": "worker_refine_docs.py:290-301 now renders through the injected _documentation_with_registry_form and refuses a contradicting refinement before persist_refined_docs, and docs_gates.py:1139-1144 closes the 0.45-0.75 paraphrase band the previous review found open.",
+    "reuse": "worker_refine_docs.py:38 resolves _documentation_with_registry_form from worker_tasks/__init__.py:203-210 to the one renderer in worker_generate_docs.py:586, so the stage reuses the owner rather than forking it, while the added threshold again rests on _sentence_overlap that review/audits.py:529 _token_overlap already duplicates.",
+    "scope_discipline": "every path in git diff 84f1f3ca5..c6da05328 -- docs_gates.py, worker_refine_docs.py, tests/standard_names/test_generate_docs.py and the evidence fragment -- is inside the fence declared at manifest.md orientation_write_paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is that a definition's shared parts -- operator sentence and equation, species population, locus -- come from one stored wording on every stage that writes a definition; worker_refine_docs.py:290-301 now renders a refinement through the same single renderer and refuses it before persistence, closing the stage that previously stored an unrendered refinement beside the settled wording.\nVERDICT done_when: the done_when is that the guarantee holds on the path the pipeline takes, not only when the guard is called directly; tests/standard_names/test_generate_docs.py:905 drives process_generate_docs_batch and :976 drives process_refine_docs_batch, each asserting persist was not called, and the recorded gate gate-round-120005.log shows 101 passed EXIT=0.\nVERDICT write_paths: declared paths were worker_generate_docs.py, docs_gates.py, harmonize.py, the two prompt files, the three test modules, the evidence fragment, the census JSON and a figures directory; every path in 84f1f3ca5..c6da05328 is among them (docs_gates.py, worker_refine_docs.py, test_generate_docs.py, the evidence fragment).\nVERDICT manifest: read; it records commits f15e8bb55..c6da05328, tests as the literal three-suite pytest command, test_logs gate-round-120005.log and negative-control-round-120129.log, and negative_control_note naming three disarms; both named logs exist and their contents match what the manifest claims.\nVERDICT diff: read commit by commit against 84f1f3ca5; 700e39f36 tightens the removal band to _COMPETING_OVERLAP 0.45 and reports a surviving restatement, 0fddf4152 adds the two pipeline tests, 8e55338a6 and c6da05328 record the guarantees and the log names in the evidence fragment, 231 insertions and 6 deletions across four files.",
+  "review_run_id": "r-20261112T110823542516-review-of-sdbc-rendered-shared-wording-c6da053286d3",
+  "reviewed_base_sha": "84f1f3ca53bf949b60d5d1abb532ff50833b6865",
+  "reviewed_head_sha": "c6da053286d3943b8559a1ac2b1e091dfe1dd3c2",
+  "reviewed_run_id": "r-20261112T063332484056-sdbc-rendered-shared-wording",
+  "reviewer": "independent review node review-of-sdbc-rendered-shared-wording-c6da053286d3",
+  "reviewer_run_id": "r-20261112T110823542516-review-of-sdbc-rendered-shared-wording-c6da053286d3",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T11:26:55.962707+00:00",
+  "total": 102
+}

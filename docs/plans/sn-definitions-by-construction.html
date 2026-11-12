@@ -24,7 +24,7 @@
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -161,6 +161,9 @@
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T101802140995-review-of-sdbc-rendered-shared-wording-84f1f3ca53bf" data-who="reckon-build" data-when="2026-11-12T10:32:47.404Z">
     <div class="r-comment-body"><p>Independent review of run r-20261112T063332484056-sdbc-rendered-shared-wording at head 84f1f3ca53bf949b60d5d1abb532ff50833b6865 against base 60654017d5a358945583eeb69862cbfa0ed10ec9: scores goal_fidelity 13, evidence 11, scope_discipline 18, durability 9, fit 15, reuse 12 (total 78); three blocking findings — the refusal is proved only by calling _refuse_altered_shared_parts directly rather than through process_generate_docs_batch, the altered-part refusal cannot fire on the pipeline path because the renderer appends every stored sentence first, and worker_refine_docs.py renders and stores without the population clause or the refusal.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261112T110823542516-review-of-sdbc-rendered-shared-wording-c6da053286d3" data-who="reckon-build" data-when="2026-11-12T11:24:31.559Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261112T063332484056-sdbc-rendered-shared-wording over the commits it gained since its 84f1f3ca5 review — 700e39f36, 0fddf4152, 8e55338a6, c6da05328 (base 84f1f3ca53bf949b60d5d1abb532ff50833b6865, head c6da053286d3943b8559a1ac2b1e091dfe1dd3c2): scores goal_fidelity 18, evidence 16, scope_discipline 20, durability 15, fit 17, reuse 16 (total 102), added_failure_count 0. All three blocking findings from the previous review are answered — the refusal is now proved through process_generate_docs_batch and process_refine_docs_batch with persist asserted uncalled, the 0.45-0.75 paraphrase band is closed at docs_gates.py:1139-1144 and reported at :1076-1088, and the refine stage renders through the one renderer and refuses before persist. Five non-blocking findings remain, none holding the node: the refine population clause has no test of its own, one clause of the removal band is unreachable, a contradicting refinement is treated as retryable, SHARED_PART_ALTERED is not in the review barring set, and the evidence section carries no figure.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261112T075018136012-review-of-sdbc-unit-spelling-723d44eabf52" data-who="reckon-build" data-when="2026-11-12T08:11:23.275Z">
     <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at head 723d44eab scores goal_fidelity 17, evidence 13, scope_discipline 18, durability 15, fit 16, reuse 5, with added_failure_count 0 and five non-blocking findings (evidence fragment says 43 divergences against the artifact's 44; manifest says 1630 quantities against the artifact's 1608; gate logs are headed revision 043171ac2 whose tree lacks the graph test they run; the disposable-graph write assertion echoes a value the code under test produced; quantity_dimension_issues duplicates the name-vs-unit owner in audits.py)</p></div>
