@@ -53,6 +53,16 @@
       "note": "\u00a75's done-when now names the consistency census's grouping axis as the family counter.",
       "reason": "",
       "when": "2026-11-12T00:01:27.321422+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a75's comparison now holds both the families and their member names to those live when the section starts.",
+      "reason": "",
+      "when": "2026-11-12T00:01:56.614849+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "\u00a75's done-when now names the consistency census's grouping axis as the family counter.",
       "reason": "",
       "when": "2026-11-12T00:01:27.321422+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75's comparison now holds both the families and their member names to those live when the section starts.",
+      "reason": "",
+      "when": "2026-11-12T00:01:56.614849+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261111T231822589163-plan-review-of-sn-catalog-consistency.json",
