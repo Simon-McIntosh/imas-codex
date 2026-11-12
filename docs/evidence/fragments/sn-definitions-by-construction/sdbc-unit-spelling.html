@@ -7,10 +7,10 @@
     <li>The <code>spellings:</code> section of <code>config/unit_overrides.yaml</code> records one canonical spelling per quantity (torque, torque density, source rate, rate) and the differences that carry meaning (temperature K beside eV, frequency Hz beside rad.s^-1, particle flux s^-1 beside m^-2.s^-1) with the reason each stands.</li>
     <li><code>unit_overrides.resolve_unit</code> rewrites a Data Dictionary unit to the recorded spelling when the path belongs to a recorded quantity and the two spellings are dimensionally equal. Every other row passes through untouched.</li>
     <li><code>audits.unit_spelling_census</code> groups live names by quantity, partitions each quantity's spellings by dimension, and reports duplicates, divergences and name-versus-quantity dimension mismatches.</li>
-    <li><code>unit_audit</code> gains the quantity reading the census uses: <code>quantity_of_name</code>, <code>unit_dimension</code>, <code>units_are_dimensionally_equal</code>, <code>quantity_dimension_issues</code>.</li>
+    <li><code>audits.name_unit_consistency_check</code> carries the name-versus-unit rule for a quantity head, so the pipeline audit and the census read one table in one place. <code>unit_audit</code> adds only the quantity reading the census groups by: <code>quantity_of_name</code>, <code>unit_dimension</code>, <code>units_are_dimensionally_equal</code>.</li>
   </ul>
 
-  <h3 id="sdbc-unit-spelling-before">The count before the rewrite, over 3,265 live names</h3>
+  <h3 id="sdbc-unit-spelling-before">The count before the rewrite, over 3,264 live names</h3>
   <table>
     <thead><tr><th>Quantity</th><th>Spellings carried now</th><th>Names</th><th>Recorded spelling</th></tr></thead>
     <tbody>
@@ -31,10 +31,10 @@
   </ul>
 
   <h3 id="sdbc-unit-spelling-mismatched">Names whose unit does not fit the quantity they state</h3>
-  <p>26 names carry a unit whose dimension does not fit the quantity their head states. 43 further quantities carry more than one dimension under one head without a recorded exception. The census carries every one of them with its unit, quantity and domain in <code>unit-spelling-census.json</code>. They are passed to §5 as names that do not say what they are: changing a live name's unit is not changed here.</p>
+  <p>128 names carry a unit whose dimension does not fit the quantity their head states — <code>name_unit_consistency_check</code> is the one check that decides this, so the census and the pipeline audit cannot disagree. 44 further quantities carry more than one dimension under one head without a recorded exception. The census carries every one of them with its unit, quantity and domain in <code>unit-spelling-census.json</code>, over 3,264 names in 1,607 quantities. They are passed to §5 as names that do not say what they are: changing a live name's unit is not changed here.</p>
 
   <h3 id="sdbc-unit-spelling-graph-write">A catalog write takes the spelling on a disposable graph</h3>
-  <p>The write is shown end to end on an empty disposable Neo4j instance, never on the live graph. A leaf is planted carrying <code>kg.m^-1.s^-2</code> for a torque density. The extraction path rewrites its row to <code>N.m^-2</code>, and the catalog write — driven through its package-bound entry point, which supplies the wired graph root itself — stores the name with <code>N.m^-2</code>. The leaf is read back still carrying <code>kg.m^-1.s^-2</code>, so the stored name disagrees with the dictionary spelling by design and agrees with the record. The test asserts both readings, and it fails if the rewrite is removed. Suite log: <code>~/.cache/imas-codex-sdbc-unit-spelling/suite.log</code>, 16 passed on job 1311501.</p>
+  <p>The write is shown end to end on an empty disposable Neo4j instance, never on the live graph. A leaf is planted carrying <code>kg.m^-1.s^-2</code> for a torque density, and that recorded spelling is the test input: it is read back from the graph and handed to the extraction path. The catalog write — driven through its package-bound entry point, which supplies the wired graph root itself — stores the name with <code>N.m^-2</code> while the leaf is read back still carrying <code>kg.m^-1.s^-2</code>. A second name, for a quantity with no recorded spelling, keeps the <code>eV</code> the dictionary carries, so the write is shown storing what the pipeline decided rather than rewriting its input. The test asserts every reading, and it fails if the rewrite is removed. Suite log: <code>~/.cache/imas-codex-sdbc-unit-spelling/suite.log</code>, 16 passed on job 1311501.</p>
 
   <h3 id="sdbc-unit-spelling-evidence">The census firing on planted cases</h3>
   <p>The census counts a quantity planted with two dimensionally equal spellings, counts a name planted with a mismatched dimension, is silent on a planted clean pair, and reports a meaning-carrying difference under the record rather than unifying it. The declared mutation — a quantity planted with two dimensionally equal unit spellings is not counted by the census — turns the census suite red, naming the duplicate spelling test among its failures.</p>

@@ -1,6 +1,6 @@
 {
- "name_count": 3265,
- "quantity_count": 1608,
+ "name_count": 3264,
+ "quantity_count": 1607,
  "duplicate_quantities": [
   {
    "quantity": "rate",
@@ -2077,160 +2077,1156 @@
  "unrecorded_divergence_count": 44,
  "dimension_mismatches": [
   {
-   "name": "flux_surface_averaged_time_averaged_normalized_energy_flux_due_to_e_cross_b_drift",
+   "name": "effective_energy",
    "unit": "1",
-   "quantity": "energy_flux",
-   "domain": "gyrokinetics"
+   "quantity": "effective_energy",
+   "domain": "gyrokinetics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'energy' but unit is dimensionless ('1'); expected one of ['GeV', 'J', 'MeV', 'eV', 'keV']"
+   ]
   },
   {
-   "name": "time_averaged_normalized_energy_flux_due_to_e_cross_b_drift",
+   "name": "electron_spectral_power",
+   "unit": "dB",
+   "quantity": "electron_spectral_power",
+   "domain": "turbulence",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'power' but unit='dB' is not in expected set ['MW', 'W', 'kW']"
+   ]
+  },
+  {
+   "name": "gyrocenter_pressure_bessel_0",
    "unit": "1",
-   "quantity": "energy_flux",
-   "domain": "gyrokinetics"
+   "quantity": "gyrocenter_pressure_bessel_0",
+   "domain": "gyrokinetics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "logarithm_of_fluctuating_electron_spectral_power",
+   "unit": "dB",
+   "quantity": "logarithm",
+   "domain": "electromagnetic_wave_diagnostics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'power' but unit='dB' is not in expected set ['MW', 'W', 'kW']"
+   ]
+  },
+  {
+   "name": "perturbed_gyrocenter_pressure_bessel_0",
+   "unit": "1",
+   "quantity": "perturbed_gyrocenter_pressure_bessel_0",
+   "domain": "gyrokinetics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "perturbed_pressure_bessel_1",
+   "unit": "1",
+   "quantity": "perturbed_pressure_bessel_1",
+   "domain": "turbulence",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "plasma_internal_energy",
+   "unit": "W",
+   "quantity": "plasma_internal_energy",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'energy' but unit='W' is not in expected set ['GeV', 'J', 'MeV', 'eV', 'keV']"
+   ]
+  },
+  {
+   "name": "power_due_to_fusion_reactions",
+   "unit": "s^-1",
+   "quantity": "power",
+   "domain": "radiation_measurement_diagnostics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'power' but unit='s^-1' is not in expected set ['MW', 'W', 'kW']"
+   ]
+  },
+  {
+   "name": "derivative_of_plasma_pressure_with_respect_to_poloidal_magnetic_flux_coordinate",
+   "unit": "Pa.Wb^-1",
+   "quantity": "pressure",
+   "domain": "core_plasma_physics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit='Pa.Wb^-1' is not in expected set ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "gyrocenter_pressure",
+   "unit": "1",
+   "quantity": "pressure",
+   "domain": "gyrokinetics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "pressure_bessel_1",
+   "unit": "1",
+   "quantity": "pressure_bessel_1",
+   "domain": "turbulence",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'pressure' but unit is dimensionless ('1'); expected one of ['J.m^-3', 'MPa', 'Pa', 'bar', 'kPa']"
+   ]
+  },
+  {
+   "name": "coolant_mass_flow_rate",
+   "unit": "kg.s^-1",
+   "quantity": "rate",
+   "domain": "mechanical_measurement_diagnostics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'rate' but unit='kg.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "runaway_electron_pitch_angle",
+   "unit": "1",
+   "quantity": "runaway_electron_pitch_angle",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'angle' but unit is dimensionless ('1'); expected one of ['deg', 'rad', 'sr']"
+   ]
   },
   {
    "name": "co_passing_thermal_particle_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "counter_passing_thermal_particle_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "electron_volumetric_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "explicit_ion_particle_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "fast_electron_source_rate_due_to_dreicer",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "ion_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "ion_state_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "neutral_internal_state_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "neutral_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "particle_source_rate_due_to_distribution_function_driven",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "runaway_electron_source_rate_due_to_compton_scattering",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "runaway_electron_source_rate_due_to_dreicer",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "runaway_electron_source_rate_due_to_hot_tail",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "thermal_particle_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "total_explicit_ion_particle_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "total_ion_particle_volumetric_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "total_runaway_electron_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "runaway_electrons"
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "trapped_thermal_particle_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "volume_averaged_runaway_electron_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "magnetohydrodynamics"
+   "domain": "magnetohydrodynamics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "volume_averaged_runaway_electron_source_rate_due_to_compton_scattering",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "runaway_electrons"
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "volume_averaged_runaway_electron_source_rate_due_to_dreicer",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "runaway_electrons"
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "volume_averaged_runaway_electron_source_rate_due_to_hot_tail",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "runaway_electrons"
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
   },
   {
    "name": "volume_averaged_total_runaway_electron_source_rate",
    "unit": "m^-3.s^-1",
    "quantity": "source_rate",
-   "domain": "runaway_electrons"
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'source_rate' but unit='m^-3.s^-1' is not in expected set ['Hz', 's^-1']"
+   ]
+  },
+  {
+   "name": "spectral_power",
+   "unit": "dB",
+   "quantity": "spectral_power",
+   "domain": "turbulence",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'power' but unit='dB' is not in expected set ['MW', 'W', 'kW']"
+   ]
+  },
+  {
+   "name": "thermal_plasma_internal_energy",
+   "unit": "W",
+   "quantity": "thermal_plasma_internal_energy",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'energy' but unit='W' is not in expected set ['GeV', 'J', 'MeV', 'eV', 'keV']"
+   ]
+  },
+  {
+   "name": "toroidal_angle_of_active_limiter_point",
+   "unit": "1",
+   "quantity": "toroidal_angle",
+   "domain": "edge_plasma_physics",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'angle' but unit is dimensionless ('1'); expected one of ['deg', 'rad', 'sr']"
+   ]
+  },
+  {
+   "name": "co_passing_fast_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "fast_particles",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "co_passing_fast_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "co_passing_thermal_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "co_passing_thermal_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "co_passing_torque_density",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "co_passing_torque_density_due_to_j_cross_b_force",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "counter_passing_fast_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "counter_passing_fast_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "counter_passing_thermal_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "counter_passing_thermal_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "counter_passing_torque_density",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "counter_passing_torque_density_due_to_j_cross_b_force",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "fast_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "fast_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "fast_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "ion_charge_state_torque_density",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "ion_torque_density",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "ion_torque_density_due_to_thermalization",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "neutral_internal_state_torque_density",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "neutral_torque_density",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "particle_torque_density_due_to_coulomb_collisions_with_electrons",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "thermal_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "thermal_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "thermal_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "thermal_ion_torque_density_due_to_thermalization",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_co_passing_fast_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "fast_particles",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_co_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_co_passing_fast_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_co_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_co_passing_torque_density",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_co_passing_torque_density_due_to_j_cross_b_force",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_fast_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_fast_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_fast_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_thermal_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_thermal_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_thermal_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_torque_density",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_counter_passing_torque_density_due_to_j_cross_b_force",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_fast_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_fast_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_ion_charge_state_torque_density",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_ion_torque_density",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_neutral_internal_state_torque_density",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_neutral_torque_density",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_thermal_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_thermal_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_thermal_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_thermal_ion_torque_density_due_to_thermalization",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_torque_density",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_torque_density_due_to_diamagnetic_drift",
+   "unit": "kg.m^-1.s^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='kg.m^-1.s^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_torque_density_due_to_j_cross_b_force",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_fast_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "fast_particles",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_fast_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "fast_particles",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_thermal_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_thermal_electron_torque_density_due_to_coulomb_collisions_with_electrons",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_thermal_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_torque_density",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "toroidal_trapped_torque_density_due_to_j_cross_b_force",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "torque_density",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "torque_density_due_to_coulomb_collisions_with_electrons",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "torque_density_due_to_j_cross_b_force",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "torque_density_due_to_thermalization",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_fast_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "fast_particles",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_fast_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_fast_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_fast_particle_torque_density_due_to_coulomb_collisions_with_electrons",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "fast_particles",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_thermal_electron_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_thermal_ion_charge_state_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_thermal_ion_torque_density_due_to_collisions",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_torque_density",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
+  },
+  {
+   "name": "trapped_torque_density_due_to_j_cross_b_force",
+   "unit": "N.m^-2",
+   "quantity": "torque_density",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque' but unit='N.m^-2' is not in expected set ['J', 'N.m']"
+   ]
   },
   {
    "name": "volume_integrated_toroidal_fast_electron_torque_density_due_to_collisions",
    "unit": "N.m",
    "quantity": "torque_density",
-   "domain": "transport"
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'torque_density' but unit='N.m' is not in expected set ['N.m^-2', 'Pa.m^-1']"
+   ]
+  },
+  {
+   "name": "total_thermal_plasma_internal_energy",
+   "unit": "W",
+   "quantity": "total_thermal_plasma_internal_energy",
+   "domain": "transport",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'energy' but unit='W' is not in expected set ['GeV', 'J', 'MeV', 'eV', 'keV']"
+   ]
+  },
+  {
+   "name": "volume_averaged_runaway_electron_pitch_angle",
+   "unit": "1",
+   "quantity": "volume_averaged_runaway_electron_pitch_angle",
+   "domain": "runaway_electrons",
+   "issues": [
+    "audit:name_unit_consistency_check: name contains 'angle' but unit is dimensionless ('1'); expected one of ['deg', 'rad', 'sr']"
+   ]
   }
  ],
  "unit_missing": [
@@ -2240,5 +3236,5 @@
  ],
  "clean": false,
  "source": "live graph: StandardName nodes with name_stage != superseded",
- "names_scanned": 3268
+ "names_scanned": 3267
 }

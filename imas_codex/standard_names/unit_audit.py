@@ -103,7 +103,7 @@ def check_unit_sanity(name: str, unit: str) -> list[str]:
 
 # Quantities whose head is more than one token, longest first so that
 # ``torque_density`` is read before ``density`` and ``torque``.
-_COMPOUND_QUANTITY_HEADS: tuple[str, ...] = (
+QUANTITY_HEADS: tuple[str, ...] = (
     "torque_density",
     "torque",
     "source_rate",
@@ -135,16 +135,6 @@ _QUALIFIER_MARKERS: tuple[str, ...] = (
     "_per_",
 )
 
-# Unit spellings the dimension of a quantity admits. Only quantities that carry
-# a dimensional commitment are listed; an unlisted quantity is not judged.
-QUANTITY_EXPECTED_UNITS: dict[str, tuple[str, ...]] = {
-    "torque": ("N.m", "J"),
-    "torque_density": ("N.m^-2", "Pa.m^-1"),
-    "source_rate": ("s^-1", "Hz"),
-    "energy_flux": ("W.m^-2",),
-    "particle_flux": ("s^-1", "m^-2.s^-1"),
-}
-
 
 def quantity_of_name(name: str) -> str:
     """Return the quantity a standard name states.
@@ -169,7 +159,7 @@ def quantity_of_name(name: str) -> str:
             index = lowered.find(marker, index + 1)
         if head is not lowered:
             break
-    for compound in _COMPOUND_QUANTITY_HEADS:
+    for compound in QUANTITY_HEADS:
         if head == compound or head.endswith("_" + compound):
             return compound
     return head
@@ -205,16 +195,3 @@ def units_are_dimensionally_equal(left: str, right: str) -> bool | None:
     if left_dimension is None or right_dimension is None:
         return None
     return left_dimension == right_dimension
-
-
-def quantity_dimension_issues(name: str, unit: str) -> list[str]:
-    """Return issue tags where *unit* does not fit the quantity *name* states."""
-    quantity = quantity_of_name(name)
-    expected = QUANTITY_EXPECTED_UNITS.get(quantity)
-    if not expected or not unit:
-        return []
-    if any(units_are_dimensionally_equal(unit, candidate) for candidate in expected):
-        return []
-    return [
-        f"unit_mismatch:quantity_dimension:{quantity}",
-    ]

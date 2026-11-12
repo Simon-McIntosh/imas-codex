@@ -24,6 +24,11 @@ from typing import Any
 import numpy as np
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
+from imas_codex.standard_names.unit_audit import (
+    QUANTITY_HEADS,
+    quantity_of_name,
+    units_are_dimensionally_equal,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -326,6 +331,15 @@ _NAME_TOKEN_UNIT_EXPECTATIONS: dict[str, set[str]] = {
     "mass": {"kg", "u"},
     # Frequency implies Hz.
     "frequency": {"Hz", "kHz", "MHz", "GHz", "rad.s^-1", "s^-1"},
+    # Quantity heads, judged as a whole through ``quantity_of_name``: a compound
+    # head commits to the unit of the whole quantity, so a torque density is not
+    # a torque, and the words inside the head are not judged on their own.
+    "torque": {"N.m", "J"},
+    "torque_density": {"N.m^-2", "Pa.m^-1"},
+    "source_rate": {"s^-1", "Hz"},
+    "rate": {"s^-1", "Hz"},
+    "energy_flux": {"W.m^-2"},
+    "particle_flux": {"s^-1", "m^-2.s^-1"},
 }
 
 
@@ -1514,6 +1528,28 @@ def name_unit_consistency_check(
 
     name_tokens = set(re.findall(r"[a-z]+", name))
 
+    # A registered quantity head is judged once, as a whole: the same table
+    # entry read through ``quantity_of_name``, so a qualifier inside the head
+    # cannot make a torque density answer to the torque expectation.
+    quantity = quantity_of_name(name)
+    if quantity in QUANTITY_HEADS and unit:
+        expected = _NAME_TOKEN_UNIT_EXPECTATIONS.get(quantity) or set()
+        if expected and not any(
+            units_are_dimensionally_equal(unit, allowed) for allowed in expected
+        ):
+            if dimensionless:
+                issues.append(
+                    f"audit:name_unit_consistency_check: name contains "
+                    f"'{quantity}' but unit is dimensionless ('{unit}'); "
+                    f"expected one of {sorted(expected)}"
+                )
+            else:
+                issues.append(
+                    f"audit:name_unit_consistency_check: name contains "
+                    f"'{quantity}' but unit='{unit}' is not in expected set "
+                    f"{sorted(expected)}"
+                )
+
     # Time-suffix compound names: the head noun is time, not the qualifier
     # token. ``energy_confinement_time``, ``particle_confinement_time``,
     # ``energy_decay_time``, ``current_diffusion_time`` etc. all have time
@@ -1537,6 +1573,15 @@ def name_unit_consistency_check(
         return issues
 
     for token, expected_units in _NAME_TOKEN_UNIT_EXPECTATIONS.items():
+        # A registered quantity head is judged by the branch above, which
+        # compares dimensions; judging it again here by spelling would let a
+        # dimensionally equal spelling such as ``kg.m^2.s^-2`` fail ``N.m``. A
+        # head word merely appearing somewhere in a name of another quantity
+        # (``temperature`` inside a ratio) is not that name's head and stays here.
+        if token in QUANTITY_HEADS and (
+            quantity == token or quantity.endswith("_" + token)
+        ):
+            continue
         if token not in name_tokens:
             continue
         # Skip if name also contains a qualifier that shifts the head noun
@@ -5029,11 +5074,7 @@ def unit_spelling_census(names: list[dict[str, Any]]) -> dict[str, Any]:
     either list, so a census over clean names reports no duplicates, no
     divergences and no mismatches.
     """
-    from imas_codex.standard_names.unit_audit import (
-        quantity_dimension_issues,
-        quantity_of_name,
-        unit_dimension,
-    )
+    from imas_codex.standard_names.unit_audit import unit_dimension
     from imas_codex.standard_names.unit_overrides import (
         quantity_spelling,
         spelling_exception,
@@ -5052,13 +5093,15 @@ def unit_spelling_census(names: list[dict[str, Any]]) -> dict[str, Any]:
             continue
         quantity = quantity_of_name(name)
         grouped.setdefault(quantity, {}).setdefault(unit, []).append(name)
-        if quantity_dimension_issues(name, unit):
+        issues = name_unit_consistency_check({"id": name, "unit": unit})
+        if issues:
             dimension_mismatches.append(
                 {
                     "name": name,
                     "unit": unit,
                     "quantity": quantity,
                     "domain": str(row.get("physics_domain") or row.get("domain") or ""),
+                    "issues": issues,
                 }
             )
 

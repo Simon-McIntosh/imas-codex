@@ -155,13 +155,14 @@ def test_catalog_write_takes_the_recorded_spelling_on_a_disposable_graph(
     disposable_neo4j_empty: str,
     seed_dd_resolutions,
 ) -> None:
-    """A written name takes its quantity's spelling whatever the dictionary says.
+    """A name written for a recorded quantity takes its spelling from the DD one.
 
-    The dictionary leaf records ``kg.m^-1.s^-2`` for a torque density. The
-    extraction path rewrites it to the recorded spelling, and the catalog write
-    is driven through the package-bound entry point, whose wrapper supplies the
-    wired graph root when the caller passes none. The name is read back from the
-    empty graph this test was given.
+    The dictionary leaf records ``kg.m^-1.s^-2`` for a torque density. That
+    recorded spelling is the test input: it is read back from the graph, handed
+    to the extraction path, and the name it produces is written through the
+    catalog. The second name is a quantity with no recorded spelling, and it
+    keeps the spelling the dictionary carries — so the write is shown to store
+    what the pipeline decided rather than to rewrite it.
     """
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names import graph_store  # noqa: F401 (binds services)
@@ -170,43 +171,78 @@ def test_catalog_write_takes_the_recorded_spelling_on_a_disposable_graph(
     )
     from imas_codex.standard_names.sources.dd import _apply_unit_overrides
 
-    dd_path = "core_profiles/profiles_1d/ion/torque_density_tor"
-    rows = [
-        {
-            "path": dd_path,
-            "unit": "kg.m^-1.s^-2",
-            "description": "torque density from the data dictionary",
-        }
-    ]
-    kept = _apply_unit_overrides(rows, write_skipped=False)
-    assert kept[0]["unit"] == "N.m^-2"
-
-    seed_dd_resolutions([{"path": dd_path, "effective": "kg.m^-1.s^-2"}])
+    torque_path = "core_profiles/profiles_1d/ion/torque_density_tor"
+    temperature_path = "core_profiles/profiles_1d/electron_temperature"
+    seed_dd_resolutions(
+        [
+            {"path": torque_path, "effective": "kg.m^-1.s^-2"},
+            {"path": temperature_path, "effective": "eV"},
+        ]
+    )
 
     with GraphClient() as gc:
+        # The dictionary's own spelling, as the extraction stage receives it.
+        leaves = list(
+            gc.query(
+                "MATCH (dd:IMASNode)-[:HAS_UNIT]->(u:Unit) "
+                "WHERE dd.id IN $paths RETURN dd.id AS path, u.id AS unit",
+                paths=[torque_path, temperature_path],
+            )
+        )
+        dd_units = {row["path"]: str(row["unit"]) for row in leaves}
+        assert dd_units == {
+            torque_path: "kg.m^-1.s^-2",
+            temperature_path: "eV",
+        }
+
+        rows = [
+            {"path": torque_path, "unit": dd_units[torque_path]},
+            {"path": temperature_path, "unit": dd_units[temperature_path]},
+        ]
+        kept = _apply_unit_overrides(rows, write_skipped=False)
+        by_path = {row["path"]: row["unit"] for row in kept}
+        assert by_path[torque_path] == "N.m^-2"
+        assert by_path[temperature_path] == "eV"
+
         write_standard_names(
             [
                 {
                     "id": "ion_torque_density",
-                    "unit": kept[0]["unit"],
+                    "unit": by_path[torque_path],
                     "source_types": ["dd"],
-                    "source_id": dd_path,
-                    "description": rows[0]["description"],
+                    "source_id": torque_path,
+                    "description": "torque density from the data dictionary",
                     "name_stage": "drafted",
-                }
+                },
+                {
+                    "id": "electron_temperature",
+                    "unit": by_path[temperature_path],
+                    "source_types": ["dd"],
+                    "source_id": temperature_path,
+                    "description": "electron temperature from the data dictionary",
+                    "name_stage": "drafted",
+                },
             ],
             gc=gc,
         )
-        written = list(
-            gc.query(
-                "MATCH (sn:StandardName {id: $id}) RETURN sn.unit AS unit",
-                id="ion_torque_density",
+        stored = {
+            str(row["id"]): str(row["unit"])
+            for row in gc.query(
+                "MATCH (sn:StandardName) WHERE sn.id IN $ids "
+                "RETURN sn.id AS id, sn.unit AS unit",
+                ids=["ion_torque_density", "electron_temperature"],
             )
-        )
-        dd_unit = list(
-            gc.query("MATCH (dd:IMASNode {id: $id}) RETURN dd.unit AS unit", id=dd_path)
-        )
+        }
+        leaves_after = {
+            str(row["path"]): str(row["unit"])
+            for row in gc.query(
+                "MATCH (dd:IMASNode)-[:HAS_UNIT]->(u:Unit) "
+                "WHERE dd.id IN $paths RETURN dd.id AS path, u.id AS unit",
+                paths=[torque_path, temperature_path],
+            )
+        }
 
-    assert [str(row["unit"]) for row in dd_unit] == ["kg.m^-1.s^-2"]
-    assert [str(row["unit"]) for row in written] == ["N.m^-2"]
+    assert leaves_after[torque_path] == "kg.m^-1.s^-2"
+    assert stored["ion_torque_density"] == "N.m^-2"
+    assert stored["electron_temperature"] == "eV"
     assert disposable_neo4j_empty.startswith("bolt://")
