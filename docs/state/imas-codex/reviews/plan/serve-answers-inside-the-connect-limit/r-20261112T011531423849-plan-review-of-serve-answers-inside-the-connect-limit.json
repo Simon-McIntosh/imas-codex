@@ -33,7 +33,30 @@
   "plan_slug": "serve-answers-inside-the-connect-limit",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a72 now times five starts on the fleet node with its load average recorded beside the base revision measured in the same sitting, in addition to the quiet-node median",
+      "reason": "",
+      "when": "2026-11-12T01:39:17.533335+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "note": "\u00a72 now times five starts on the fleet node with its load average recorded beside the base revision measured in the same sitting, in addition to the quiet-node median",
+      "reason": "",
+      "when": "2026-11-12T01:39:17.533335+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/serve-answers-inside-the-connect-limit/r-20261112T011531423849-plan-review-of-serve-answers-inside-the-connect-limit.json",
   "review_run_id": "r-20261112T011531423849-plan-review-of-serve-answers-inside-the-connect-limit",
   "reviewed_blob_sha": "e402123b228b5776709e6c0f9a21f7c8eaabc982",
   "rubric": "content",
