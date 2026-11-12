@@ -200,6 +200,73 @@
     umbrellas; neither reads a restriction to one object or one layer.
   </p>
 
+  <h3>The chat review seat, scored on the names both readers labelled alike</h3>
+
+  <p>
+    The instrument is a chat review seat, not the lexical and judgment union. It
+    is one of the named checks a name already passes through: the docs review
+    calls <code>judge_name_definitions</code> in
+    <code>imas_codex/standard_names/review/name_definition_seat.py</code>, and a
+    flagged verdict becomes a review hold raised by
+    <code>name-definition-seat</code> beside the registry-conformance, banned-prose
+    and contradiction holds. An unanswered call holds the candidate rather than
+    accepting it. It calls the configured docs review seat through the shared call
+    layer — <code>get_sn_review_docs_models()[0]</code>, which is
+    <code>openrouter/anthropic/claude-sonnet-5</code> — and reads the name, its
+    description, its documentation, its unit and the child names where the graph
+    records any.
+  </p>
+
+  <p>
+    <strong>Score.</strong> The scored set is every name both readers labelled
+    alike in <code>two-reader-labels.json</code>: <strong>55</strong> both-flag and
+    <strong>258</strong> both-pass, with the <strong>68</strong> disputed names
+    excluded because neither reading settles them. The prompt was written from the
+    qualifier classes before those labels were scored and has not been changed
+    since.
+  </p>
+
+  <table>
+    <thead><tr><th>Instrument</th><th>Flagged found</th><th>Recall</th><th>Passed flagged</th><th>False-flag rate</th></tr></thead>
+    <tbody>
+      <tr><td>chat review seat</td><td>41 / 55</td><td>0.745</td><td>15 / 258</td><td>0.058</td></tr>
+      <tr><td>seat + lexical pass</td><td>46 / 55</td><td>0.836</td><td>31 / 258</td><td>0.120</td></tr>
+      <tr><td><em>bar</em></td><td>—</td><td>≥ 0.80</td><td>—</td><td>≤ 0.10</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    <strong>The bars do not hold for the seat, and the lexical pass is not
+    kept.</strong> The seat misses 14 of the 55 names both readers flag, so it
+    sits at 74.5 % against an 80 % floor: <code>current_due_to_fusion_reactions</code>,
+    <code>refractive_index</code>, <code>area_of_flux_loop</code>,
+    <code>alfven_frequency</code>, <code>density_at_pedestal_maximum</code>,
+    <code>radius_of_reflector</code>, <code>electron_torque_density_due_to_collisions</code>
+    and eight more, all recorded in the results file. The lexical pass finds five
+    of those 14, which would carry recall to 83.6 % — and it also flags 16 names
+    the seat passes, taking the false-flag rate to 12.0 %, above the ceiling. The
+    rule was to keep it only if it adds recall without breaking the ceiling, so
+    the delivered instrument is the seat alone.
+  </p>
+
+  <p>
+    What the seat does read well is the class: 17 restrictions to one object, 13
+    counting conventions, 11 families of quantities, 9 integrations, 3 weightings,
+    3 normalisations across its 56 flags. Its 15 false flags are concentrated in
+    names whose unit or locus makes the definition look narrowed —
+    <code>plasma_temperature</code>, <code>vertical_electron_velocity</code>,
+    <code>iron_density</code>, <code>total_ion_particle_source_rate</code> — which
+    is the same boundary the two readers disputed. No catalog run was made, because
+    the ruling gates it on the bars holding.
+  </p>
+
+  <p>
+    <strong>Cost.</strong> USD 2.2711 for the 313-name score — about USD 0.0073 per
+    name, which projects to about USD 14 for all 1,975 published names, inside the
+    USD 25 ceiling. Spend to date on this node is USD 0.045 for the earlier
+    judgment seat plus this USD 2.2711.
+  </p>
+
   <h3>The names the two readers disagree on</h3>
 
   <p>

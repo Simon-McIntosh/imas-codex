@@ -1,0 +1,1949 @@
+{
+ "arm": {
+  "false_flag_ceiling": 0.1,
+  "false_flag_rate": 0.058,
+  "flagged_found": 41,
+  "flagged_total": 55,
+  "met": false,
+  "pass_flagged": 15,
+  "pass_total": 258,
+  "recall": 0.745,
+  "recall_floor": 0.8
+ },
+ "by_qualifier": {
+  "counting-convention": 13,
+  "family-of-quantities": 11,
+  "integration": 9,
+  "normalisation": 3,
+  "restriction-to-one-object": 17,
+  "weighting": 3
+ },
+ "cost_usd": 2.2711,
+ "false_flags": [
+  "plasma_temperature",
+  "extent_of_soft_xray_detector",
+  "poloidal_flux_limiter_coefficient",
+  "ion_fluence_at_divertor_target",
+  "vertical_electron_velocity",
+  "effective_turn_count_of_coil_conductor_element",
+  "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+  "total_ion_particle_source_rate",
+  "accumulated_tritium_count_due_to_gas_injection",
+  "iron_density",
+  "power_due_to_electron_cyclotron_heating",
+  "radial_effective_electron_diffusivity",
+  "area_of_poloidal_field_coil",
+  "logarithm_of_density",
+  "toroidal_perturbed_plasma_velocity_imaginary_part"
+ ],
+ "labels": {
+  "both_flag": 55,
+  "both_pass": 258,
+  "disputed_excluded": 68,
+  "path": "/home/ITER/mcintos/Code/imas-codex/docs/evidence/fragments/sn-name-definition-second-reading/two-reader-labels.json",
+  "produced_by": "Each sampled name with the first reader class under the species ruling and the second reader class. consensus_mismatch is true when both readers flag the name; consensus_agrees when neither does; the rest are disputed."
+ },
+ "missed": [
+  "current_due_to_fusion_reactions",
+  "refractive_index",
+  "current_weighted_average_external_magnetic_flux",
+  "area_of_flux_loop",
+  "alfven_frequency",
+  "density_at_pedestal_maximum",
+  "particle_velocity_due_to_convection",
+  "maximum_of_back_surface_neutron_flux",
+  "incident_neutral_particle_flux_at_wall",
+  "radius_of_reflector",
+  "radius_of_neutral_beam_injector",
+  "electron_torque_density_due_to_collisions",
+  "particle_torque_due_to_j_cross_b_force",
+  "ion_energy_diffusivity"
+ ],
+ "model": "openrouter/anthropic/claude-sonnet-5",
+ "schema": "name-definition-seat",
+ "scored": {
+  "items": 313,
+  "missing_from_catalog": [],
+  "unanswered": []
+ },
+ "verdicts": {
+  "accumulated_ammonia_count": {
+   "name": "accumulated_ammonia_count",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The documentation restricts the quantity to 'the post-breakdown component of the total ammonia count', excluding the prefill phase, a phase restriction the bare name 'accumulated_ammonia_count' does not state.",
+   "verdict": "flag"
+  },
+  "accumulated_ammonia_deuterated_count": {
+   "name": "accumulated_ammonia_deuterated_count",
+   "qualifier": "counting-convention",
+   "reasoning": "Definition expresses the count 'as an equivalent-electron count with ten count units per molecule,' a weighting/counting convention the bare 'count' in the name does not specify.",
+   "verdict": "flag"
+  },
+  "accumulated_deuterated_methane_prefill_count": {
+   "name": "accumulated_deuterated_methane_prefill_count",
+   "qualifier": "counting-convention",
+   "reasoning": "The definition states the inventory is 'weighted by ten equivalent electrons per molecule rather than reported as a molecular count', an equivalent-electron counting convention the bare name 'count' does not state.",
+   "verdict": "flag"
+  },
+  "accumulated_helium_3_prefill_count_due_to_gas_injection": {
+   "name": "accumulated_helium_3_prefill_count_due_to_gas_injection",
+   "qualifier": "counting-convention",
+   "reasoning": "The definition specifies 'with two count units assigned per atom' (equivalent-electron count via Z=2), a counting convention the name's plain 'count' does not state.",
+   "verdict": "flag"
+  },
+  "accumulated_silane_count_due_to_gas_injection": {
+   "name": "accumulated_silane_count_due_to_gas_injection",
+   "qualifier": "counting-convention",
+   "reasoning": "Definition states the count is 'expressed as an equivalent-electron count with 18 equivalent electrons per neutral SiH4 molecule,' a convention not indicated by the bare 'count' in the name.",
+   "verdict": "flag"
+  },
+  "accumulated_total_prefill_gas_count": {
+   "name": "accumulated_total_prefill_gas_count",
+   "qualifier": "counting-convention",
+   "reasoning": "The definition states the quantity as an 'equivalent-electron inventory...summed over species' while the name only says 'count' without specifying the equivalent-electron weighting convention.",
+   "verdict": "flag"
+  },
+  "accumulated_tritium_count_due_to_gas_injection": {
+   "name": "accumulated_tritium_count_due_to_gas_injection",
+   "qualifier": "counting-convention",
+   "reasoning": "The definition states the count 'expressed as an equivalent-electron count where each tritium atom corresponds to one equivalent electron,' a counting convention the bare 'count' in the name does not state.",
+   "verdict": "flag"
+  },
+  "accumulated_xenon_count_due_to_gas_injection": {
+   "name": "accumulated_xenon_count_due_to_gas_injection",
+   "qualifier": "counting-convention",
+   "reasoning": "Definition expresses the count 'as an equivalent-electron count with 54 count units assigned to each xenon atom' (N_Xe,eq = 54 N_Xe), a weighted counting convention the name's bare 'count' does not state.",
+   "verdict": "flag"
+  },
+  "alfven_frequency": {
+   "name": "alfven_frequency",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the full complex local shear-Alfv\u00e9n continuum angular frequency at a radial position for a single toroidal mode number; the documentation explicitly keeps real and imaginary parts together rather than selecting one.",
+   "verdict": "pass"
+  },
+  "area_of_flux_loop": {
+   "name": "area_of_flux_loop",
+   "qualifier": "agrees",
+   "reasoning": "Both state the effective field-to-flux sensitivity area of the loop (aperture, turns, calibration) converting averaged normal field to linked flux; no extra qualifier beyond the name's 'area of flux loop'.",
+   "verdict": "pass"
+  },
+  "area_of_poloidal_field_coil": {
+   "name": "area_of_poloidal_field_coil",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The documentation states the quantity is 'per coil element, not a sum over multiple elements or over a complete coil,' restricting the unrestricted 'area_of_poloidal_field_coil' to one element of the coil.",
+   "verdict": "flag"
+  },
+  "argon_density_at_internal_transport_barrier": {
+   "name": "argon_density_at_internal_transport_barrier",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the particle number density of argon ions at the internal transport barrier; summing over charge states while excluding neutrals is the standard species-density convention, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "argon_density_at_separatrix": {
+   "name": "argon_density_at_separatrix",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the local argon ion number density (m^-3) at the separatrix; charge-state summation excluding neutrals is the standard convention for a species ion density, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "argon_source_rate_due_to_gas_injection": {
+   "name": "argon_source_rate_due_to_gas_injection",
+   "qualifier": "counting-convention",
+   "reasoning": "Definition states an 'equivalent-electron argon source rate...each injected argon atom with Z = 18 contributes 18 equivalent-electron counts,' a convention absent from the plain 'source_rate' name.",
+   "verdict": "flag"
+  },
+  "beryllium_density_at_magnetic_axis": {
+   "name": "beryllium_density_at_magnetic_axis",
+   "qualifier": "agrees",
+   "reasoning": "Definition states beryllium-ion number density (summed over charge states, per standard species-density convention) at the magnetic axis, matching the name's quantity exactly.",
+   "verdict": "pass"
+  },
+  "boron_density_at_internal_transport_barrier": {
+   "name": "boron_density_at_internal_transport_barrier",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition state the local number density of boron ions at the ITB flux surface; the summation over ionization states is the standard species-density convention, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "boron_density_at_limiter": {
+   "name": "boron_density_at_limiter",
+   "qualifier": "agrees",
+   "reasoning": "The definition sums over boron ion charge states excluding neutrals, which is the standard charge-state convention for a species density at a locus; both describe boron ion density at the limiter.",
+   "verdict": "pass"
+  },
+  "boron_density_at_magnetic_axis": {
+   "name": "boron_density_at_magnetic_axis",
+   "qualifier": "agrees",
+   "reasoning": "Summing boron ion density over all ionic charge states is the standard counting convention for an ion species density, not an added qualifier; the quantity is boron density at the magnetic axis as named.",
+   "verdict": "pass"
+  },
+  "breakdown_initial_time": {
+   "name": "breakdown_initial_time",
+   "qualifier": "agrees",
+   "reasoning": "Both state the timestamp at which plasma breakdown begins and discharge current starts to flow.",
+   "verdict": "pass"
+  },
+  "bremsstrahlung_power": {
+   "name": "bremsstrahlung_power",
+   "qualifier": "agrees",
+   "reasoning": "Power is inherently a volume- and spectrum-integrated quantity; 'total electromagnetic power emitted by free-free bremsstrahlung' is the same total quantity the name states, not an added integration qualifier.",
+   "verdict": "pass"
+  },
+  "calibration_polarization_angle_of_optical_element": {
+   "name": "calibration_polarization_angle_of_optical_element",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the signed angle between the reference transverse polarization direction and the selected polarization axis of the optical element, the same single angular quantity.",
+   "verdict": "pass"
+  },
+  "calibration_reference_magnetic_field_of_poloidal_magnetic_field_probe": {
+   "name": "calibration_reference_magnetic_field_of_poloidal_magnetic_field_probe",
+   "qualifier": "agrees",
+   "reasoning": "The definition describes the signed poloidal field value assigned to the probe's linear calibration reference axis, matching the named calibration reference field for the probe without added restriction beyond what the name already implies.",
+   "verdict": "pass"
+  },
+  "carbon_density_at_magnetic_axis": {
+   "name": "carbon_density_at_magnetic_axis",
+   "qualifier": "agrees",
+   "reasoning": "Both state the carbon-ion number density at the magnetic axis; the charge-state summation is the standard species-density convention.",
+   "verdict": "pass"
+  },
+  "co_passing_fast_current_density": {
+   "name": "co_passing_fast_current_density",
+   "qualifier": "agrees",
+   "reasoning": "The name already restricts to the co-passing orbit class of fast-particle current density; the definition's charge-weighted velocity moment restricted to the co-passing orbit class, excluding other orbit classes and return currents, describes exactly this same restricted quantity.",
+   "verdict": "pass"
+  },
+  "co_passing_fast_ion_torque_density_due_to_collisions": {
+   "name": "co_passing_fast_ion_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition state the collisional torque density (full vector) restricted to the co-passing fast-ion population, matching the name's own restriction.",
+   "verdict": "pass"
+  },
+  "co_passing_thermal_ion_torque_density_due_to_collisions": {
+   "name": "co_passing_thermal_ion_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the local vector torque density on thermal ions from Coulomb collisions restricted to the co-passing orbit class, which is exactly what the name states via 'co_passing_..._due_to_collisions'.",
+   "verdict": "pass"
+  },
+  "coolant_absorbed_power_of_calorimetry_component": {
+   "name": "coolant_absorbed_power_of_calorimetry_component",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the instantaneous thermal power removed from one named calorimetry component via coolant enthalpy rise, matching the singular 'of_calorimetry_component' scope in the name.",
+   "verdict": "pass"
+  },
+  "counter_passing_fast_electron_torque_density_due_to_collisions": {
+   "name": "counter_passing_fast_electron_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the local vector torque density on fast electrons from Coulomb collisions restricted to the counter-passing orbit class, matching the name's own stated restriction.",
+   "verdict": "pass"
+  },
+  "counter_passing_fast_ion_charge_state_power_density_due_to_collisions": {
+   "name": "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+   "qualifier": "integration",
+   "reasoning": "The definition states the quantity is 'Flux-surface-averaged rate of Coulomb-collisional kinetic-energy transfer', adding a flux-surface average that the name, lacking a 'flux_surface_averaged_' prefix, does not state.",
+   "verdict": "flag"
+  },
+  "counter_passing_power_density": {
+   "name": "counter_passing_power_density",
+   "qualifier": "integration",
+   "reasoning": "The definition specifies a 'Flux-surface-averaged volumetric energy source rate', imposing a flux-surface average that the bare name 'counter_passing_power_density' does not state.",
+   "verdict": "flag"
+  },
+  "counter_passing_thermal_electron_power_density_due_to_collisions": {
+   "name": "counter_passing_thermal_electron_power_density_due_to_collisions",
+   "qualifier": "integration",
+   "reasoning": "The definition states the quantity is 'averaged over a magnetic flux surface', adding a flux-surface average that the name (a power density) does not state.",
+   "verdict": "flag"
+  },
+  "counter_passing_thermal_electron_torque_density_due_to_collisions": {
+   "name": "counter_passing_thermal_electron_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "The restriction to counter-passing fast-particle collisions is already stated in the name ('counter_passing'), and the definition states the same local torque density quantity.",
+   "verdict": "pass"
+  },
+  "counter_passing_thermal_ion_torque_density_due_to_collisions": {
+   "name": "counter_passing_thermal_ion_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "The definition's restriction to the counter-passing orbit class and retention of the full torque vector matches the name's own counter-passing restriction.",
+   "verdict": "pass"
+  },
+  "current_density_due_to_parallel_viscosity": {
+   "name": "current_density_due_to_parallel_viscosity",
+   "qualifier": "agrees",
+   "reasoning": "The quantity is the full current-density vector from the divergence of the parallel viscous stress tensor; its physical perpendicularity to B (via the J\u00d7B/B\u00b2 force-balance relation) is inherent to this drift-current quantity, not an added restriction, matching the name's unqualified 'current density due to parallel viscosity'.",
+   "verdict": "pass"
+  },
+  "current_due_to_fusion_reactions": {
+   "name": "current_due_to_fusion_reactions",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the net parallel plasma current generated by fusion reactions (fast-alpha driven current), the standard way such a current is defined via j\u00b7b integrated over the cross-section.",
+   "verdict": "pass"
+  },
+  "current_of_antenna_strap": {
+   "name": "current_of_antenna_strap",
+   "qualifier": "agrees",
+   "reasoning": "The current-density flux through the strap's cross-section I_s(t) matches exactly the quantity named, current of antenna strap, with no additional qualifier.",
+   "verdict": "pass"
+  },
+  "current_of_divertor": {
+   "name": "current_of_divertor",
+   "qualifier": "agrees",
+   "reasoning": "The name 'current_of_divertor' refers to the whole divertor assembly, and the definition's 'all divertor target surfaces' is the assembly-integrated current, matching the unrestricted scope of the name.",
+   "verdict": "pass"
+  },
+  "current_weighted_average_external_magnetic_flux": {
+   "name": "current_weighted_average_external_magnetic_flux",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'current_weighted_average' and 'external', and the definition gives the single precise weighted-average formula for the external flux component, matching the name's stated weighting and scope exactly.",
+   "verdict": "pass"
+  },
+  "density_at_pedestal_maximum": {
+   "name": "density_at_pedestal_maximum",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the selected particle density evaluated precisely at the pedestal-maximum locus, n(\u03c8_N,ped); though species-generic like the name, the aggregation convention (sum over charge states) is explicitly fixed, so it states one quantity.",
+   "verdict": "pass"
+  },
+  "density_at_plasma_boundary": {
+   "name": "density_at_plasma_boundary",
+   "qualifier": "family-of-quantities",
+   "reasoning": "The documentation states the population 'is intentionally unspecified by this parent quantity' and that aggregation (charge-state summation, neutral inclusion) 'is not fixed by this subject-less parent quantity', describing an umbrella over child quantities rather than one bindable quantity.",
+   "verdict": "flag"
+  },
+  "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate": {
+   "name": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives dV/d\\rho_tor, the geometric derivative of the flux-surface enclosed volume with respect to the toroidal-flux coordinate, matching the name exactly with consistent units (m^2).",
+   "verdict": "pass"
+  },
+  "deuterium_deuterium_emissivity_due_to_fusion": {
+   "name": "deuterium_deuterium_emissivity_due_to_fusion",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "Documentation restricts the quantity to 'the neutron-emitting D-D branch' and explicitly excludes 'the proton-emitting D-D branch,' narrowing to one reaction branch not stated in the name.",
+   "verdict": "flag"
+  },
+  "deuterium_tritium_density_at_plasma_boundary": {
+   "name": "deuterium_tritium_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "Both state the local number density of the effective DT pseudo-species at the last closed flux surface; treating DT as one effective species is the stated convention, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line": {
+   "name": "difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the signed wavelength difference between the Doppler-shifted neutral-beam line and its reference wavelength due to bulk line-of-sight motion.",
+   "verdict": "pass"
+  },
+  "edge_localized_mode_frequency": {
+   "name": "edge_localized_mode_frequency",
+   "qualifier": "agrees",
+   "reasoning": "The event rate N_ELM/\u0394t over the ELMing phase is simply the ELM frequency as named; restricting counting to the ELMing phase is inherent to the quantity, not an added restriction.",
+   "verdict": "pass"
+  },
+  "effective_thermal_ion_charge_state_energy_velocity_due_to_convection": {
+   "name": "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the effective convective velocity for thermal energy transport by ions in one specified charge state, matching the name's charge-state restriction already stated.",
+   "verdict": "pass"
+  },
+  "effective_turn_count_of_coil_conductor_element": {
+   "name": "effective_turn_count_of_coil_conductor_element",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The documentation restricts the quantity to 'an individual poloidal-field coil conductor element' and excludes probe coils, whereas the name 'coil_conductor_element' states no such restriction to the poloidal-field coil type.",
+   "verdict": "flag"
+  },
+  "electron_density_at_outboard_midplane": {
+   "name": "electron_density_at_outboard_midplane",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition state electron number density at the outboard (low-field-side) midplane intersection of a flux surface; no extra qualifier added.",
+   "verdict": "pass"
+  },
+  "electron_diffusion_coefficient": {
+   "name": "electron_diffusion_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the scalar Fickian coefficient relating diffusive electron flux to the density gradient, matching the name's stated quantity with no direction or extra weighting added.",
+   "verdict": "pass"
+  },
+  "electron_heat_decay_length_over_scrape_off_layer": {
+   "name": "electron_heat_decay_length_over_scrape_off_layer",
+   "qualifier": "agrees",
+   "reasoning": "Both state the radial e-folding decay length of electron heat flux in the SOL via the inverse logarithmic gradient; no extra qualifier beyond the name's stated channel and locus.",
+   "verdict": "pass"
+  },
+  "electron_kinetic_energy_flux_at_wall_due_to_surface_emission": {
+   "name": "electron_kinetic_energy_flux_at_wall_due_to_surface_emission",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the kinetic-energy flux density (W\u00b7m^-2) carried by electrons emitted from the wall, matching the 'due_to_surface_emission' mechanism already stated in the name.",
+   "verdict": "pass"
+  },
+  "electron_particle_flux_limiter_coefficient": {
+   "name": "electron_particle_flux_limiter_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the dimensionless multiplier L_e scaling the free-streaming bound on electron particle flux, matching the 'coefficient' the name states with no further qualifier.",
+   "verdict": "pass"
+  },
+  "electron_power_at_outer_divertor_target": {
+   "name": "electron_power_at_outer_divertor_target",
+   "qualifier": "agrees",
+   "reasoning": "Power deposited on a target is inherently the total integrated energy-transfer rate over the wetted surface (unit W, not W/m^2), matching the name's quantity of electron power at the outer divertor target.",
+   "verdict": "pass"
+  },
+  "electron_temperature_at_magnetic_axis": {
+   "name": "electron_temperature_at_magnetic_axis",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the local mean random kinetic energy per electron at the magnetic axis, the same local temperature quantity the name specifies; particle-number weighting is inherent to the definition of temperature, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "electron_temperature_at_pellet_path": {
+   "name": "electron_temperature_at_pellet_path",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the local electron temperature evaluated along the pellet trajectory, explicitly excluding path-averaging, matching the name's locus exactly.",
+   "verdict": "pass"
+  },
+  "electron_torque_density_due_to_collisions": {
+   "name": "electron_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the collisional angular-momentum transfer rate per unit volume to the electron population (\\tau_{e,coll} = \\partial \\dot L_{e,coll}/\\partial V), the total electron torque density the name states.",
+   "verdict": "pass"
+  },
+  "etendue_of_hard_xray_detector": {
+   "name": "etendue_of_hard_xray_detector",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the geometric optical throughput (A*\u03a9) of the hard X-ray detector's optical system; no extra qualifier is added.",
+   "verdict": "pass"
+  },
+  "ethane_source_rate": {
+   "name": "ethane_source_rate",
+   "qualifier": "counting-convention",
+   "reasoning": "The definition expresses the rate 'as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule', a counting convention the bare 'source_rate' in the name does not state.",
+   "verdict": "flag"
+  },
+  "extent_of_soft_xray_detector": {
+   "name": "extent_of_soft_xray_detector",
+   "qualifier": "family-of-quantities",
+   "reasoning": "The definition states the extent is 'along the applicable horizontal or vertical detector-plane direction', meaning it describes two distinct possible quantities (horizontal extent or vertical extent) without pinning down a single one, which the bare name 'extent' does not disambiguate.",
+   "verdict": "flag"
+  },
+  "fast_ion_power_density_due_to_collisions": {
+   "name": "fast_ion_power_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "The documentation explicitly states the quantity is 'summed over all ionic charge states' and 'includes all guiding-center orbit classes,' matching the unrestricted name rather than narrowing it.",
+   "verdict": "pass"
+  },
+  "fast_neutron_flux_of_toroidal_field_coil": {
+   "name": "fast_neutron_flux_of_toroidal_field_coil",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The definition restricts the quantity to 'the inboard-facing surface of a toroidal field coil', explicitly excluding the outboard-facing surface and whole-coil combination, a restriction the name 'fast_neutron_flux_of_toroidal_field_coil' does not state.",
+   "verdict": "flag"
+  },
+  "fast_particle_pressure": {
+   "name": "fast_particle_pressure",
+   "qualifier": "agrees",
+   "reasoning": "Both state the isotropic scalar pressure of the total suprathermal population; combining parallel and perpendicular stresses into one-third the trace is the standard scalar-pressure definition, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "fast_particle_torque_due_to_j_cross_b_force": {
+   "name": "fast_particle_torque_due_to_j_cross_b_force",
+   "qualifier": "agrees",
+   "reasoning": "Torque is inherently a volume-integrated quantity (moment of a force density), analogous to how total energy or total force already carries integration; both name and definition describe the same total torque vector on the fast-particle population from the j\u00d7B force.",
+   "verdict": "pass"
+  },
+  "field_line_length": {
+   "name": "field_line_length",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "Definition restricts the quantity to a field line 'traced during plasma initiation,' a single discharge phase the name does not mention.",
+   "verdict": "flag"
+  },
+  "first_local_tangential_coordinate_of_neutral_beam_injector": {
+   "name": "first_local_tangential_coordinate_of_neutral_beam_injector",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the signed first local tangential coordinate of a point (the source-outline vertex) in the injector's local frame, consistent with the coordinate the name states for describing the injector geometry.",
+   "verdict": "pass"
+  },
+  "first_local_tangential_coordinate_of_soft_xray_detector": {
+   "name": "first_local_tangential_coordinate_of_soft_xray_detector",
+   "qualifier": "agrees",
+   "reasoning": "Both state the signed coordinate of an outline vertex along the detector-local X1 tangential axis; no extra qualifier is added.",
+   "verdict": "pass"
+  },
+  "floating_electrostatic_potential": {
+   "name": "floating_electrostatic_potential",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the electrostatic potential of a floating Langmuir-probe collector, defined by the zero-net-current condition, matching the name directly.",
+   "verdict": "pass"
+  },
+  "flux_at_limiter": {
+   "name": "flux_at_limiter",
+   "qualifier": "family-of-quantities",
+   "reasoning": "Documentation describes the quantity as a 'structural parent' that 'fixes the limiter locus...while each more specific name states the particular energy channel being deposited,' an umbrella over unspecified energy-flux children rather than one single quantity.",
+   "verdict": "flag"
+  },
+  "flux_surface_averaged_inverse_of_square_of_major_radius": {
+   "name": "flux_surface_averaged_inverse_of_square_of_major_radius",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives g_m1 = <1/R^2>_psi, exactly the flux-surface average of the reciprocal square of major radius stated by the name.",
+   "verdict": "pass"
+  },
+  "flux_surface_averaged_ion_density_at_plasma_boundary": {
+   "name": "flux_surface_averaged_ion_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'flux_surface_averaged', and the definition's inverse-poloidal-flux-gradient weighted average over the boundary surface is exactly that integration, with charge-state summing following the standard ion-density convention.",
+   "verdict": "pass"
+  },
+  "flux_surface_averaged_krypton_density_at_plasma_boundary": {
+   "name": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'flux_surface_averaged', and the definition's average over the complete separatrix with charge-state-summed krypton density matches that same averaged quantity at the plasma boundary.",
+   "verdict": "pass"
+  },
+  "flux_surface_averaged_square_of_magnetic_field_magnitude": {
+   "name": "flux_surface_averaged_square_of_magnetic_field_magnitude",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'flux_surface_averaged_square_of_magnetic_field_magnitude' and the documentation's <B^2>_psi formula is exactly that averaged quantity.",
+   "verdict": "pass"
+  },
+  "flux_surface_averaged_toroidal_current_density": {
+   "name": "flux_surface_averaged_toroidal_current_density",
+   "qualifier": "weighting",
+   "reasoning": "Beyond the ordinary flux-surface average implied by the name, the documentation adds 'additional inverse-major-radius weighting' and explicitly distinguishes this from the ordinary flux-surface average \u27e8j_\u03c6\u27e9, a weighting the name does not state.",
+   "verdict": "flag"
+  },
+  "flux_surface_averaged_total_ion_density_at_plasma_boundary": {
+   "name": "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The name already states flux-surface-averaged total ion density at the plasma boundary, and the definition states exactly that averaged, charge-state-summed quantity.",
+   "verdict": "pass"
+  },
+  "flux_surface_averaged_xenon_density_at_plasma_boundary": {
+   "name": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The name states 'flux_surface_averaged', and the definition's flux-surface average with inverse-poloidal-flux-gradient weighting matches exactly, with charge-state summation following the standard ion-density convention.",
+   "verdict": "pass"
+  },
+  "forward_power_of_ion_cyclotron_heating_antenna": {
+   "name": "forward_power_of_ion_cyclotron_heating_antenna",
+   "qualifier": "agrees",
+   "reasoning": "The name already specifies a single antenna, and the definition's restriction to 'one ion-cyclotron heating antenna, not a sum over an antenna set' matches this singular scope.",
+   "verdict": "pass"
+  },
+  "forward_wave_phase_of_ion_cyclotron_heating_antenna": {
+   "name": "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+   "qualifier": "normalisation",
+   "reasoning": "The definition states the phase as 'referenced to the first module for inter-module toroidal phasing' and explicitly excludes absolute phase ('no absolute phase relative to a generator or external reference is implied'), making it a phase difference relative to a reference module rather than the plain phase the name states.",
+   "verdict": "flag"
+  },
+  "height_of_plasma_filament": {
+   "name": "height_of_plasma_filament",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the vertical extent Z_upper - Z_lower of the filament's cross-section, matching the single discrete filament the name already denotes.",
+   "verdict": "pass"
+  },
+  "helium_3_density_at_pedestal_top": {
+   "name": "helium_3_density_at_pedestal_top",
+   "qualifier": "agrees",
+   "reasoning": "Both state the helium-3 ion number density at the pedestal top; summing over charge states is the standard convention for an ion species density, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "helium_4_density_at_magnetic_axis": {
+   "name": "helium_4_density_at_magnetic_axis",
+   "qualifier": "agrees",
+   "reasoning": "Summation over helium-4 ionic charge states is the standard convention for an ion density count, and the definition otherwise matches the name's locus (magnetic axis) and species (helium-4) exactly.",
+   "verdict": "pass"
+  },
+  "helium_4_density_at_plasma_boundary": {
+   "name": "helium_4_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the local, charge-state-summed helium-4 ion number density at the last closed flux surface, matching the named species density at the plasma boundary under standard counting convention.",
+   "verdict": "pass"
+  },
+  "hydrogen_density": {
+   "name": "hydrogen_density",
+   "qualifier": "agrees",
+   "reasoning": "The definition specifies the standard convention of ion number density per unit volume (count of H+ per unit volume), the same quantity the broad name 'hydrogen_density' denotes in plasma context.",
+   "verdict": "pass"
+  },
+  "hydrogen_density_at_plasma_boundary": {
+   "name": "hydrogen_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "Summing hydrogen ion density over charge states at the plasma boundary is the standard convention for a species density, matching the name's hydrogen density at the boundary.",
+   "verdict": "pass"
+  },
+  "implicit_electron_particle_source_rate": {
+   "name": "implicit_electron_particle_source_rate",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the coefficient (units s^-1) multiplying electron density to give the implicit contribution to the electron particle source, the same single quantity in the standard's implicit/explicit decomposition convention.",
+   "verdict": "pass"
+  },
+  "incident_neutral_particle_flux_at_wall": {
+   "name": "incident_neutral_particle_flux_at_wall",
+   "qualifier": "agrees",
+   "reasoning": "Both state the incident (arriving, not wall-emitted) neutral particle flux at the wall for one species, with the wall-integrated rate matching the surface-flux meaning already carried by 'flux at wall'.",
+   "verdict": "pass"
+  },
+  "inverse_of_square_of_magnetic_field_magnitude": {
+   "name": "inverse_of_square_of_magnetic_field_magnitude",
+   "qualifier": "agrees",
+   "reasoning": "The name states the reciprocal square of the magnetic-field magnitude; the definition states B^{-2}=1/|B|^2 as a local quantity with no flux-surface or volume aggregation, matching the same unweighted, unintegrated quantity.",
+   "verdict": "pass"
+  },
+  "inverse_of_square_of_major_radius": {
+   "name": "inverse_of_square_of_major_radius",
+   "qualifier": "agrees",
+   "reasoning": "The documentation clarifies the quantity is the unaggregated 1/R^2 coefficient and that any flux-surface average is a separate, differently-named quantity, matching the bare name.",
+   "verdict": "pass"
+  },
+  "ion_charge_state_diffusivity": {
+   "name": "ion_charge_state_diffusivity",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the scalar, direction-unspecified Fickian diffusivity (m^2\u00b7s^-1) for a single ionization state, matching the name exactly, including the explicit absence of spatial projection.",
+   "verdict": "pass"
+  },
+  "ion_charge_state_momentum_flux_due_to_diamagnetic_drift": {
+   "name": "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the momentum flux for one ion charge state attributed to diamagnetic drift, exactly matching the name's charge-state-resolved, mechanism-attributed momentum flux with no extra narrowing.",
+   "verdict": "pass"
+  },
+  "ion_charge_state_particle_flux": {
+   "name": "ion_charge_state_particle_flux",
+   "qualifier": "agrees",
+   "reasoning": "The name already specifies 'charge_state', and the definition restricts to one species and one ionic charge state through an oriented surface, matching that stated restriction exactly.",
+   "verdict": "pass"
+  },
+  "ion_charge_state_temperature": {
+   "name": "ion_charge_state_temperature",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the energy-equivalent random kinetic-energy temperature of ions in a specified charge state ('T_s = 2/3<E_rand>_s'), the bundle-averaging note applies only to a different, bundled selection.",
+   "verdict": "pass"
+  },
+  "ion_charge_state_velocity": {
+   "name": "ion_charge_state_velocity",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the mean bulk-flow velocity of ions in one specified charge state, which is exactly the charge-state-resolved velocity the name states.",
+   "verdict": "pass"
+  },
+  "ion_energy_diffusivity": {
+   "name": "ion_energy_diffusivity",
+   "qualifier": "agrees",
+   "reasoning": "The density-normalized flux/gradient ratio is the standard Fickian definition of diffusivity itself ('Q/n = -k_B D dT/dl'), not an added qualifier beyond the physics meaning already carried by 'diffusivity'.",
+   "verdict": "pass"
+  },
+  "ion_energy_flux_limiter_coefficient": {
+   "name": "ion_energy_flux_limiter_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the multiplicative factor bounding ion energy-flux magnitude relative to the free-streaming reference, 'with no particular spatial direction or plasma region prescribed.'",
+   "verdict": "pass"
+  },
+  "ion_fluence_at_divertor_target": {
+   "name": "ion_fluence_at_divertor_target",
+   "qualifier": "counting-convention",
+   "reasoning": "The definition states 'each ion counted once across all species and charge states,' an explicit cross-species/cross-charge-state counting convention that the bare name 'ion_fluence' does not state (c.f. ion_particle_flux, which by convention sums only charge states within one species).",
+   "verdict": "flag"
+  },
+  "ipb98y2_confinement_time": {
+   "name": "ipb98y2_confinement_time",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the same single quantity: the IPB98(y,2) empirical scaling prediction for global energy confinement time, used as the H98 denominator.",
+   "verdict": "pass"
+  },
+  "iron_density": {
+   "name": "iron_density",
+   "qualifier": "family-of-quantities",
+   "reasoning": "Documentation states it 'may refer to a local point value or a spatially averaged quantity depending on the sampling convention,' declining to pin a single quantity, with separate flux-surface/line/volume-averaged and position-specific siblings listed.",
+   "verdict": "flag"
+  },
+  "iron_density_at_internal_transport_barrier": {
+   "name": "iron_density_at_internal_transport_barrier",
+   "qualifier": "agrees",
+   "reasoning": "Summing over all iron ionic charge states while excluding neutrals is the standard charge-state convention for an ion density, matching the name's 'iron density' without adding a new qualifier.",
+   "verdict": "pass"
+  },
+  "kinetic_energy_flux_at_wall_due_to_surface_emission": {
+   "name": "kinetic_energy_flux_at_wall_due_to_surface_emission",
+   "qualifier": "agrees",
+   "reasoning": "Both state the outward kinetic-energy flux density from surface emission, aggregated over all emitted species as the name's unqualified 'due_to_surface_emission' implies; no extra restriction beyond that stated.",
+   "verdict": "pass"
+  },
+  "krypton_density_at_internal_transport_barrier": {
+   "name": "krypton_density_at_internal_transport_barrier",
+   "qualifier": "agrees",
+   "reasoning": "Both state the particle number density of krypton ions at the internal-transport-barrier flux surface; summing over charge states while excluding neutrals is the standard elemental-ion density convention.",
+   "verdict": "pass"
+  },
+  "left_hand_circularly_polarized_wave_electric_field": {
+   "name": "left_hand_circularly_polarized_wave_electric_field",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the complex E-plus circular-polarization phasor component of the wave electric field; no extra ratio, integration, or weighting is added.",
+   "verdict": "pass"
+  },
+  "length_of_poloidal_magnetic_field_probe": {
+   "name": "length_of_poloidal_magnetic_field_probe",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the physical extent of the probe's sensing coil along its sensing axis, which is the same single geometric length quantity the name designates for the probe.",
+   "verdict": "pass"
+  },
+  "line_averaged_argon_density": {
+   "name": "line_averaged_argon_density",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the chord-averaged argon ion density summed over charge states, matching 'line_averaged_argon_density' with charge-state summation being the standard density convention.",
+   "verdict": "pass"
+  },
+  "line_averaged_electron_density": {
+   "name": "line_averaged_electron_density",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'line_averaged' and the definition's equal path-length chord average matches this exactly without introducing additional weighting.",
+   "verdict": "pass"
+  },
+  "line_averaged_total_ion_temperature": {
+   "name": "line_averaged_total_ion_temperature",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the line average along a chord of the total (density-weighted, all species/charge states combined) ion temperature, matching the name's 'line_averaged_total_ion_temperature'.",
+   "verdict": "pass"
+  },
+  "line_averaged_tritium_density": {
+   "name": "line_averaged_tritium_density",
+   "qualifier": "agrees",
+   "reasoning": "The chord-averaged tritium density definition matches the name's line_averaged qualifier exactly, with no additional narrowing.",
+   "verdict": "pass"
+  },
+  "line_averaged_tungsten_density": {
+   "name": "line_averaged_tungsten_density",
+   "qualifier": "agrees",
+   "reasoning": "The name states a line average, and the definition integrates the charge-state-summed tungsten ion density along the line divided by its length, matching the line-averaged tungsten density; exclusion of neutrals follows the standard ion-density convention.",
+   "verdict": "pass"
+  },
+  "lithium_density_at_internal_transport_barrier": {
+   "name": "lithium_density_at_internal_transport_barrier",
+   "qualifier": "agrees",
+   "reasoning": "The name 'lithium density' with no charge state specified matches the definition's sum over ionization states, consistent with the broader density-at-ITB family convention.",
+   "verdict": "pass"
+  },
+  "lithium_density_at_pedestal_top": {
+   "name": "lithium_density_at_pedestal_top",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the local lithium ion number density (m^-3) at the pedestal top; charge-state summation excluding neutrals is the standard convention for a species ion density, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "lithium_density_at_plasma_boundary": {
+   "name": "lithium_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the local lithium ion density on the last closed flux surface summed over charge states, matching the name's 'density at plasma boundary' with the standard charge-state summation convention.",
+   "verdict": "pass"
+  },
+  "logarithm_of_density": {
+   "name": "logarithm_of_density",
+   "qualifier": "normalisation",
+   "reasoning": "The definition defines the quantity as ln(n/n_ref), dividing the density by a reference value before the log, a normalisation the bare name 'logarithm_of_density' does not state.",
+   "verdict": "flag"
+  },
+  "lower_bound_energy_of_detector_pixel": {
+   "name": "lower_bound_energy_of_detector_pixel",
+   "qualifier": "agrees",
+   "reasoning": "Both state the minimum photon energy of a single pixel's spectral bandpass; mention of the X-ray crystal spectrometer is diagnostic context, not a narrowing of the quantity.",
+   "verdict": "pass"
+  },
+  "lower_inner_squareness_of_plasma_boundary": {
+   "name": "lower_inner_squareness_of_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The Luce squareness coefficient for the lower-inboard quadrant matches the name's explicit lower_inner restriction with no further narrowing.",
+   "verdict": "pass"
+  },
+  "magnetic_field_at_pedestal_top_high_field_side": {
+   "name": "magnetic_field_at_pedestal_top_high_field_side",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the local total magnetic-field vector at the high-field-side pedestal top, matching the name's quantity exactly, with no component selection or averaging added.",
+   "verdict": "pass"
+  },
+  "magnetic_field_at_pedestal_top_low_field_side": {
+   "name": "magnetic_field_at_pedestal_top_low_field_side",
+   "qualifier": "agrees",
+   "reasoning": "The definition retains the full vector magnetic field (B_R, B_phi, B_Z) at the specified low-field-side pedestal-top locus, matching the name's unrestricted vector field at that locus without reduction to magnitude or component.",
+   "verdict": "pass"
+  },
+  "magnetic_shear_at_internal_transport_barrier": {
+   "name": "magnetic_shear_at_internal_transport_barrier",
+   "qualifier": "agrees",
+   "reasoning": "Both state the local magnetic shear (normalized logarithmic derivative of q with radius) evaluated at the internal-transport-barrier flux surface, the standard definition of magnetic shear at a locus.",
+   "verdict": "pass"
+  },
+  "maximum_of_back_surface_neutron_flux": {
+   "name": "maximum_of_back_surface_neutron_flux",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition state the maximum local neutron energy flux escaping through the module's rear surface, defined as max over the back surface.",
+   "verdict": "pass"
+  },
+  "minimum_gas_flow": {
+   "name": "minimum_gas_flow",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the smallest controllable pressure-volume gas throughput a valve can deliver, matching the name's 'minimum gas flow' directly.",
+   "verdict": "pass"
+  },
+  "molecular_neutral_species_flow_at_outlet": {
+   "name": "molecular_neutral_species_flow_at_outlet",
+   "qualifier": "agrees",
+   "reasoning": "The definition states Q = p_out * S_out, the pressure-volume throughput at the outlet for one molecular species, matching the 'flow at outlet' the name states.",
+   "verdict": "pass"
+  },
+  "momentum": {
+   "name": "momentum",
+   "qualifier": "family-of-quantities",
+   "reasoning": "The documentation explicitly states the parent 'denotes the common linear-momentum concept shared by concrete momentum-content and momentum-transport quantities, not a single fully specified observable', covering distinct quantity types (content vs. flux) rather than one quantity.",
+   "verdict": "flag"
+  },
+  "momentum_flux_due_to_e_cross_b_drift": {
+   "name": "momentum_flux_due_to_e_cross_b_drift",
+   "qualifier": "normalisation",
+   "reasoning": "Definition states the quantity is 'dimensionless...expressed relative to a reference momentum-flux scale,' a normalisation the name does not indicate (unit given is 1, not a flux unit).",
+   "verdict": "flag"
+  },
+  "momentum_flux_limiter_coefficient": {
+   "name": "momentum_flux_limiter_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the same dimensionless coefficient that caps momentum-flux magnitude; the edge-plasma context is explanatory, not a narrowing to a sub-instance distinct from the generic coefficient.",
+   "verdict": "pass"
+  },
+  "neon_prefill_count": {
+   "name": "neon_prefill_count",
+   "qualifier": "counting-convention",
+   "reasoning": "The definition expresses the count 'as an equivalent-electron count with 10 equivalent electrons per atom', a counting convention the bare 'count' in the name does not state.",
+   "verdict": "flag"
+  },
+  "neutral_internal_state_energy_flux_limiter_coefficient": {
+   "name": "neutral_internal_state_energy_flux_limiter_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Definition describes the same dimensionless limiter coefficient for the energy flux of neutrals in one specified internal state, matching the name exactly.",
+   "verdict": "pass"
+  },
+  "neutral_internal_state_momentum_velocity_due_to_convection": {
+   "name": "neutral_internal_state_momentum_velocity_due_to_convection",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the bulk-flow velocity coefficient in the state-resolved neutral momentum convective flux, matching the name's stated quantity without additional qualifiers.",
+   "verdict": "pass"
+  },
+  "neutral_internal_state_temperature": {
+   "name": "neutral_internal_state_temperature",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the random translational temperature of neutrals restricted to one specified internal state, matching exactly.",
+   "verdict": "pass"
+  },
+  "neutral_pressure_of_mass_spectrometer_channel": {
+   "name": "neutral_pressure_of_mass_spectrometer_channel",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the calibrated neutral-gas pressure equivalent assigned to one mass-to-charge channel, matching the channel-resolved neutral pressure named.",
+   "verdict": "pass"
+  },
+  "neutral_species_atomic_mass": {
+   "name": "neutral_species_atomic_mass",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the reference mass per atom of a neutral elemental/isotopic constituent including bound electrons, matching 'atomic mass' with no added restriction (explicitly not limited to beam atoms).",
+   "verdict": "pass"
+  },
+  "neutron_flux_maximum_at_first_wall": {
+   "name": "neutron_flux_maximum_at_first_wall",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "Definition restricts the quantity to 'a single breeding-blanket module' first-wall surface ('the scope is a single breeding-blanket module'), i.e. one module of a system, beyond what the name states.",
+   "verdict": "flag"
+  },
+  "neutron_response_function_of_neutron_detector": {
+   "name": "neutron_response_function_of_neutron_detector",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the Green-function coefficient mapping neutron emission in a voxel/energy bin to detector counts, which is precisely what a 'response function of a neutron detector' means; no additional weighting, normalisation or aggregation beyond the quantity itself is added.",
+   "verdict": "pass"
+  },
+  "nitrogen_density_at_internal_transport_barrier": {
+   "name": "nitrogen_density_at_internal_transport_barrier",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the local nitrogen ion number density at the ITB radial position, summed over ionization states as the standard convention for an ion density, consistent with the parent density_at_internal_transport_barrier quantity the name states.",
+   "verdict": "pass"
+  },
+  "nitrogen_density_at_pedestal_top": {
+   "name": "nitrogen_density_at_pedestal_top",
+   "qualifier": "agrees",
+   "reasoning": "Both state the local nitrogen-ion number density at the pedestal top; summing over all charge states while excluding neutrals is the standard elemental-ion density convention.",
+   "verdict": "pass"
+  },
+  "normal_coordinate_of_correction_coil": {
+   "name": "normal_coordinate_of_correction_coil",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the signed displacement of a cross-section outline vertex along the local Frenet-Serret normal axis measured from the conductor centerline, the same coordinate quantity.",
+   "verdict": "pass"
+  },
+  "normalized_effective_particle_energy": {
+   "name": "normalized_effective_particle_energy",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'normalized', and the definition gives the ratio of effective particle energy to a reference thermal-energy scale, matching the stated normalisation.",
+   "verdict": "pass"
+  },
+  "normalized_gyrocenter_perturbed_density": {
+   "name": "normalized_gyrocenter_perturbed_density",
+   "qualifier": "agrees",
+   "reasoning": "The name already carries 'normalized', and the definition states the zeroth moment of the perturbed gyrocenter distribution divided by a reference density, matching that normalization without adding weighting.",
+   "verdict": "pass"
+  },
+  "normalized_particle_charge": {
+   "name": "normalized_particle_charge",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'normalized', and the definition's division by a positive reference charge (q/q_ref) is exactly that stated normalization, so they describe the same quantity.",
+   "verdict": "pass"
+  },
+  "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1": {
+   "name": "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+   "qualifier": "agrees",
+   "reasoning": "The name already specifies normalized, parallel, and bessel_1 weighting; the definition's charge-weighted J1 parallel current-density moment matches exactly these stated qualifiers.",
+   "verdict": "pass"
+  },
+  "normalized_perturbed_parallel_gyrocenter_heat_flux_bessel_1": {
+   "name": "normalized_perturbed_parallel_gyrocenter_heat_flux_bessel_1",
+   "qualifier": "agrees",
+   "reasoning": "The name already states normalization, parallel direction, perturbed gyrocenter heat flux, and Bessel-1 weighting; the definition's energy-weighted parallel heat-flux moment with J1 weighting and normalization factor N_q matches exactly these stated qualifiers without adding new ones.",
+   "verdict": "pass"
+  },
+  "normalized_toroidal_flux_coordinate": {
+   "name": "normalized_toroidal_flux_coordinate",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the same dimensionless surface label equal to the square root of the toroidal-flux fraction between axis and boundary, with no added integral, weighting, or restriction.",
+   "verdict": "pass"
+  },
+  "normalized_toroidal_flux_coordinate_at_pedestal_top": {
+   "name": "normalized_toroidal_flux_coordinate_at_pedestal_top",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the axis-to-LCFS normalized toroidal flux coordinate evaluated at the pedestal top, matching the name's normalized coordinate at that locus.",
+   "verdict": "pass"
+  },
+  "normalized_toroidal_flux_coordinate_at_separatrix": {
+   "name": "normalized_toroidal_flux_coordinate_at_separatrix",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the normalized toroidal flux coordinate evaluated at the separatrix locus, matching the 'at_separatrix' locus already in the name.",
+   "verdict": "pass"
+  },
+  "nuclear_heating_power_of_limiter_tile": {
+   "name": "nuclear_heating_power_of_limiter_tile",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the nuclear heating power deposited within one limiter tile, matching the name's already-singular 'of limiter tile' scope.",
+   "verdict": "pass"
+  },
+  "nuclear_power_density_of_breeder_blanket_layer": {
+   "name": "nuclear_power_density_of_breeder_blanket_layer",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the local volumetric nuclear heating rate (W\u00b7m^-3) within one breeder blanket layer, matching the 'of_breeder_blanket_layer' restriction already in the name.",
+   "verdict": "pass"
+  },
+  "nuclear_power_density_of_limiter_tile": {
+   "name": "nuclear_power_density_of_limiter_tile",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the local volumetric rate of nuclear energy deposition in the limiter tile, the same nuclear power density the name specifies.",
+   "verdict": "pass"
+  },
+  "outer_hard_xray_half_width_at_emissivity_peak": {
+   "name": "outer_hard_xray_half_width_at_emissivity_peak",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the outward extent in normalized toroidal flux from the emissivity peak to the outer half-maximum point, matching the name's own 'outer' and 'half_width_at_emissivity_peak' terms.",
+   "verdict": "pass"
+  },
+  "outer_radius_of_ferritic_element": {
+   "name": "outer_radius_of_ferritic_element",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the outer radial boundary of the annular cross-section representing the ferritic element, the same single geometric quantity.",
+   "verdict": "pass"
+  },
+  "outer_radius_of_poloidal_field_coil": {
+   "name": "outer_radius_of_poloidal_field_coil",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the outer radius bounding the annular conductor cross-section of a single poloidal field coil; no extra normalisation, integration, or aggregation is added.",
+   "verdict": "pass"
+  },
+  "oxygen_density_at_divertor_target": {
+   "name": "oxygen_density_at_divertor_target",
+   "qualifier": "agrees",
+   "reasoning": "Summing oxygen ion charge states while excluding neutrals is the standard charge-state convention for species density at this locus, matching the established 'density_at_divertor_target' family convention rather than an added qualifier.",
+   "verdict": "pass"
+  },
+  "oxygen_density_at_magnetic_axis": {
+   "name": "oxygen_density_at_magnetic_axis",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the local oxygen-ion number density at the magnetic axis summed over charge states, which is the standard charge-state-summed convention already implied by a species density, matching the name.",
+   "verdict": "pass"
+  },
+  "oxygen_density_at_plasma_boundary": {
+   "name": "oxygen_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the local number density of oxygen ions at the plasma boundary; the charge-state summation is the standard ion-density convention, matching the name's quantity.",
+   "verdict": "pass"
+  },
+  "parallel_conductivity": {
+   "name": "parallel_conductivity",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the local parallel-parallel conductivity coefficient relating E_parallel to j_parallel, matching the bare quantity named.",
+   "verdict": "pass"
+  },
+  "parallel_current_density_due_to_parallel_viscosity": {
+   "name": "parallel_current_density_due_to_parallel_viscosity",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the field-aligned projection of the current-density contribution from parallel viscous stress, explicitly excluding flux-surface averaging or totals.",
+   "verdict": "pass"
+  },
+  "parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection": {
+   "name": "parallel_effective_neutral_internal_state_momentum_velocity_due_to_convection",
+   "qualifier": "agrees",
+   "reasoning": "The name already specifies 'parallel', and the definition states exactly the field-aligned projection of the convection velocity for one internal state, matching the name.",
+   "verdict": "pass"
+  },
+  "parallel_ion_charge_state_energy_diffusivity": {
+   "name": "parallel_ion_charge_state_energy_diffusivity",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the field-aligned Fickian energy diffusivity for one specified ion charge state, matching the name's own charge-state and parallel qualifiers.",
+   "verdict": "pass"
+  },
+  "parallel_ion_momentum_flux": {
+   "name": "parallel_ion_momentum_flux",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the magnetic-field-aligned momentum flux of an ion species across an oriented surface, summed over charge states as is standard species convention; this matches the named quantity without added qualifiers.",
+   "verdict": "pass"
+  },
+  "parallel_neutral_momentum_flux_limiter_coefficient": {
+   "name": "parallel_neutral_momentum_flux_limiter_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the dimensionless coefficient scaling the free-streaming cap on the parallel neutral momentum flux, matching the same quantity.",
+   "verdict": "pass"
+  },
+  "parallel_total_ion_energy_convection_velocity": {
+   "name": "parallel_total_ion_energy_convection_velocity",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the effective field-aligned velocity relating the combined ion population's parallel convective energy flux to its energy density, matching the 'total_ion' and 'parallel' terms in the name exactly.",
+   "verdict": "pass"
+  },
+  "parallel_wave_electric_field_real_part": {
+   "name": "parallel_wave_electric_field_real_part",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the local, pointwise real (in-phase) quadrature of the field projected along B, matching the name with no integration or extra aggregation.",
+   "verdict": "pass"
+  },
+  "particle_diffusivity": {
+   "name": "particle_diffusivity",
+   "qualifier": "family-of-quantities",
+   "reasoning": "Documentation states the parent 'does not specify a particle population, charge-state aggregation, transport direction, or microscopic mechanism' and points to direction/population-specific instances, leaving the quantity unresolved among several children.",
+   "verdict": "flag"
+  },
+  "particle_torque_due_to_j_cross_b_force": {
+   "name": "particle_torque_due_to_j_cross_b_force",
+   "qualifier": "agrees",
+   "reasoning": "Torque is inherently a volume-integrated quantity (moment of force over the body); 'volume-integrated Lorentz-force torque exerted on a represented particle distribution' states the same torque the name names, with no species or projection narrowing beyond what the name already leaves unspecified.",
+   "verdict": "pass"
+  },
+  "particle_velocity_due_to_convection": {
+   "name": "particle_velocity_due_to_convection",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the generic particle-channel effective convective velocity without selecting a species or component, matching the name's generality exactly.",
+   "verdict": "pass"
+  },
+  "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude": {
+   "name": "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+   "qualifier": "integration",
+   "reasoning": "The definition computes the amplitude as a 'power-deposition-weighted flux-surface amplitude', i.e. a flux-surface average, which the name (stating only per-mode, polarization, and amplitude) does not state.",
+   "verdict": "flag"
+  },
+  "per_toroidal_mode_thermal_ion_charge_state_power_density": {
+   "name": "per_toroidal_mode_thermal_ion_charge_state_power_density",
+   "qualifier": "integration",
+   "reasoning": "The definition states the quantity is 'flux-surface-averaged' and explicitly excludes 'a local deposition value before flux-surface averaging', adding a flux-surface integral/average that the bare name (a power density) does not state.",
+   "verdict": "flag"
+  },
+  "perpendicular_co_passing_fast_particle_pressure": {
+   "name": "perpendicular_co_passing_fast_particle_pressure",
+   "qualifier": "integration",
+   "reasoning": "The documentation explicitly states 'the quantity is a surface average, not a local stress at one point', adding a flux-surface averaging the name (a pressure) does not state.",
+   "verdict": "flag"
+  },
+  "perpendicular_normalized_perturbed_pressure_bessel_1": {
+   "name": "perpendicular_normalized_perturbed_pressure_bessel_1",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the perpendicular, Bessel-J1-weighted, reference-pressure-normalized perturbed pressure moment, matching all qualifiers already present in the name.",
+   "verdict": "pass"
+  },
+  "perpendicular_refractive_index": {
+   "name": "perpendicular_refractive_index",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the magnitude of the wave-vector component perpendicular to the background magnetic field, normalized by the vacuum wave number, matching the name's stated quantity.",
+   "verdict": "pass"
+  },
+  "perturbed_plasma_mass_density_real_part": {
+   "name": "perturbed_plasma_mass_density_real_part",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the real (in-phase) component of the complex first-order mass-density eigenfunction, exactly matching the name's stated quantity.",
+   "verdict": "pass"
+  },
+  "perturbed_vacuum_magnetic_vector_potential": {
+   "name": "perturbed_vacuum_magnetic_vector_potential",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the complete vector perturbation of the vacuum magnetic vector potential from external sources, explicitly 'not a single directional component.'",
+   "verdict": "pass"
+  },
+  "plasma_power_at_divertor_target_due_to_recombination": {
+   "name": "plasma_power_at_divertor_target_due_to_recombination",
+   "qualifier": "agrees",
+   "reasoning": "The name's 'plasma_power' token already denotes the ion/plasma channel (distinct from the separately named 'neutral_power'), and the definition's exclusion of the neutral-particle channel matches this same single-target plasma-ion recombination power.",
+   "verdict": "pass"
+  },
+  "plasma_temperature": {
+   "name": "plasma_temperature",
+   "qualifier": "weighting",
+   "reasoning": "Documentation states 'an effective plasma temperature may be obtained as a density-weighted combination of electron and ion contributions,' adding a weighting the bare name 'plasma_temperature' does not state.",
+   "verdict": "flag"
+  },
+  "plasma_velocity": {
+   "name": "plasma_velocity",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the mass-weighted center-of-mass bulk velocity of the plasma fluid, which is the standard physical meaning of 'plasma velocity' in fluid descriptions, matching the name.",
+   "verdict": "pass"
+  },
+  "poloidal_beta": {
+   "name": "poloidal_beta",
+   "qualifier": "agrees",
+   "reasoning": "Beta is inherently a dimensionless pressure-to-magnetic-pressure ratio using volume-averaged pressure by standard physics convention; this is not an added qualifier beyond what 'beta' already means.",
+   "verdict": "pass"
+  },
+  "poloidal_electron_particle_flux": {
+   "name": "poloidal_electron_particle_flux",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the signed electron number flux per unit area normal to the local poloidal direction, with no extra weighting or integration added.",
+   "verdict": "pass"
+  },
+  "poloidal_flux_limiter_coefficient": {
+   "name": "poloidal_flux_limiter_coefficient",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The definition restricts the generic 'flux limiter coefficient' to specifically the poloidal 'momentum-flux density' bound ('scales the collisionless free-streaming upper bound on poloidal momentum-flux density'... 'a component-specific child of the flux limiter coefficient'), narrowing to one flux type (momentum) not stated in the name.",
+   "verdict": "flag"
+  },
+  "poloidal_ion_charge_state_momentum_convection_velocity": {
+   "name": "poloidal_ion_charge_state_momentum_convection_velocity",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the effective coefficient relating convective poloidal-momentum flux to poloidal momentum density for one charge state, the same quantity the name states.",
+   "verdict": "pass"
+  },
+  "poloidal_ion_charge_state_particle_flux": {
+   "name": "poloidal_ion_charge_state_particle_flux",
+   "qualifier": "agrees",
+   "reasoning": "Both state the poloidal-projected particle flux for one species/charge state, local and not summed or integrated ('poloidal projection of the state's particle-flux vector').",
+   "verdict": "pass"
+  },
+  "poloidal_launched_wave_index_of_lower_hybrid_antenna": {
+   "name": "poloidal_launched_wave_index_of_lower_hybrid_antenna",
+   "qualifier": "agrees",
+   "reasoning": "A 'wave index' is inherently the refractive-index ratio k/k0; the definition's normalization by k0 is intrinsic to the term 'index', not an added qualifier.",
+   "verdict": "pass"
+  },
+  "poloidal_magnetic_flux_at_halo_boundary": {
+   "name": "poloidal_magnetic_flux_at_halo_boundary",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the poloidal magnetic flux evaluated at the outermost flux surface of the halo-current region (the halo boundary); no extra qualifier is added.",
+   "verdict": "pass"
+  },
+  "poloidal_neutral_internal_state_energy_diffusion_coefficient": {
+   "name": "poloidal_neutral_internal_state_energy_diffusion_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the Fickian poloidal energy diffusion coefficient for neutrals in one specified internal state, matching the name's own internal-state and poloidal qualifiers.",
+   "verdict": "pass"
+  },
+  "poloidal_perturbed_vacuum_magnetic_field_imaginary_part": {
+   "name": "poloidal_perturbed_vacuum_magnetic_field_imaginary_part",
+   "qualifier": "agrees",
+   "reasoning": "The definition states exactly the imaginary part of the poloidal vacuum perturbation component for a specified toroidal mode, matching the name term for term.",
+   "verdict": "pass"
+  },
+  "poloidal_perturbed_vacuum_magnetic_field_real_part": {
+   "name": "poloidal_perturbed_vacuum_magnetic_field_real_part",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the real, in-phase poloidal projection of the complex vacuum perturbation, exactly matching the name's stated quantity.",
+   "verdict": "pass"
+  },
+  "power_at_wall_due_to_convection": {
+   "name": "power_at_wall_due_to_convection",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the convective power deposited on the plasma-facing wall (including divertor as part of the wall surface) due to convection, matching the named quantity; the surface integral is inherent to 'power at a surface', not an added qualifier.",
+   "verdict": "pass"
+  },
+  "power_density_due_to_collisions": {
+   "name": "power_density_due_to_collisions",
+   "qualifier": "family-of-quantities",
+   "reasoning": "Definition says the target 'may be a broad population...a species, ion charge state, internal state, or electron population,' describing an umbrella over multiple possible target quantities rather than one specific quantity.",
+   "verdict": "flag"
+  },
+  "power_due_to_electron_cyclotron_heating": {
+   "name": "power_due_to_electron_cyclotron_heating",
+   "qualifier": "family-of-quantities",
+   "reasoning": "Documentation says 'source aggregation is scope-dependent,' leaving open whether the quantity is a single source's or multiple sources' absorbed power, distinct from the explicitly summed 'total_power_due_to_electron_cyclotron_heating.'",
+   "verdict": "flag"
+  },
+  "power_due_to_recombination": {
+   "name": "power_due_to_recombination",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the heat/power deposited on plasma-facing materials from recombination processes, explicitly stated as 'without restriction to a particular surface location.'",
+   "verdict": "pass"
+  },
+  "power_due_to_synchrotron_radiation": {
+   "name": "power_due_to_synchrotron_radiation",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the total emitted synchrotron power (volume-integrated emissivity), consistent with 'power' as a total quantity rather than a density, matching the name with no added restriction.",
+   "verdict": "pass"
+  },
+  "power_of_divertor_due_to_convection": {
+   "name": "power_of_divertor_due_to_convection",
+   "qualifier": "agrees",
+   "reasoning": "Power deposited on 'all divertor targets' is the whole-divertor realization implied by the generic name 'power_of_divertor', consistent with power being an inherently integrated quantity (as with the sibling single-target name existing separately).",
+   "verdict": "pass"
+  },
+  "power_of_divertor_due_to_recombination": {
+   "name": "power_of_divertor_due_to_recombination",
+   "qualifier": "agrees",
+   "reasoning": "The total power over the whole divertor assembly (summing plasma-ion and neutral channels) is the natural extensive meaning of 'power of divertor', consistent with the name.",
+   "verdict": "pass"
+  },
+  "pulse_duration": {
+   "name": "pulse_duration",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The documentation narrows the end point to 'termination of auxiliary heating', restricting the generic discharge/pulse duration to one specific phase boundary not stated in the name.",
+   "verdict": "flag"
+  },
+  "radial_coordinate_of_electron_cyclotron_launcher_mirror": {
+   "name": "radial_coordinate_of_electron_cyclotron_launcher_mirror",
+   "qualifier": "agrees",
+   "reasoning": "The mirror's radial coordinate is naturally its defining sphere-center location; the definition pins this single geometric point without restricting to one of several instances.",
+   "verdict": "pass"
+  },
+  "radial_coordinate_of_flux_loop": {
+   "name": "radial_coordinate_of_flux_loop",
+   "qualifier": "agrees",
+   "reasoning": "Definition gives the major-radius coordinate R of each point defining the flux-loop geometry, matching the name's stated geometric quantity with no aggregation or restriction added.",
+   "verdict": "pass"
+  },
+  "radial_coordinate_of_rogowski_coil": {
+   "name": "radial_coordinate_of_rogowski_coil",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the major-radius coordinate of the coil's single designated point, explicitly not an average or integral over the coil extent.",
+   "verdict": "pass"
+  },
+  "radial_derivative_of_poloidal_magnetic_flux": {
+   "name": "radial_derivative_of_poloidal_magnetic_flux",
+   "qualifier": "agrees",
+   "reasoning": "The name is a broad 'radial derivative' and the definition pins it precisely as d(psi)/d(rho_tor), a single well-defined quantity consistent with the stated Wb.m^-1 unit.",
+   "verdict": "pass"
+  },
+  "radial_effective_electron_diffusivity": {
+   "name": "radial_effective_electron_diffusivity",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The documentation restricts the quantity to 'edge-plasma transport' and states 'the scope is electron particles in the edge plasma,' a locus restriction not present in the name 'radial_effective_electron_diffusivity'.",
+   "verdict": "flag"
+  },
+  "radial_effective_ion_diffusivity": {
+   "name": "radial_effective_ion_diffusivity",
+   "qualifier": "agrees",
+   "reasoning": "Charge-state summation to total ion density is the standard convention for an 'ion' diffusivity; the radial Fickian coefficient D_i,r^eff matches the named quantity.",
+   "verdict": "pass"
+  },
+  "radial_ion_charge_state_diffusion_coefficient": {
+   "name": "radial_ion_charge_state_diffusion_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the radial (R-direction) Fickian diffusion coefficient (m^2\u00b7s^-1) for one ion species and charge state; the radial-radial diagonal specification matches the 'radial' term already in the name.",
+   "verdict": "pass"
+  },
+  "radial_ion_diffusion_coefficient": {
+   "name": "radial_ion_diffusion_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Both state the effective radial Fickian diffusivity relating ion particle flux to the ion density gradient; using charge-state-summed ion density is the standard elemental-ion convention, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "radial_ion_momentum_flux_over_edge_region": {
+   "name": "radial_ion_momentum_flux_over_edge_region",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the total (convective+pressure+viscous/turbulent) radial momentum flux of a specified ion species across a flux surface within the edge region; no extra qualifier is added beyond the 'edge region' restriction already stated in the name.",
+   "verdict": "pass"
+  },
+  "radial_neutral_internal_state_energy_diffusion_coefficient": {
+   "name": "radial_neutral_internal_state_energy_diffusion_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "Both state the radial Fickian diffusion coefficient for energy transport of neutrals in one internal state; the Fickian/radial specification is inherent to a diffusion coefficient already named 'radial' and 'internal_state'.",
+   "verdict": "pass"
+  },
+  "radial_neutral_internal_state_velocity": {
+   "name": "radial_neutral_internal_state_velocity",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the major-radius component of bulk velocity for neutrals in one specified internal state, with no added qualifier.",
+   "verdict": "pass"
+  },
+  "radial_perturbed_plasma_velocity_real_part": {
+   "name": "radial_perturbed_plasma_velocity_real_part",
+   "qualifier": "agrees",
+   "reasoning": "Both state the real-part (in-phase) radial component of the perturbed plasma-velocity eigenfunction, matching the name's explicit 'real_part' token.",
+   "verdict": "pass"
+  },
+  "radial_perturbed_vacuum_magnetic_vector_potential": {
+   "name": "radial_perturbed_vacuum_magnetic_vector_potential",
+   "qualifier": "agrees",
+   "reasoning": "Documentation clarifies the quantity 'includes both quadratures; it is not restricted to either the real or imaginary coefficient alone,' matching the complex radial coefficient the name states.",
+   "verdict": "pass"
+  },
+  "radial_perturbed_vacuum_magnetic_vector_potential_imaginary_part": {
+   "name": "radial_perturbed_vacuum_magnetic_vector_potential_imaginary_part",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the imaginary coefficient of the radial component of the perturbed vacuum vector-potential eigenfunction (T\u00b7m); single-mode scope is inherent to the term 'eigenfunction' already implied by 'perturbed'.",
+   "verdict": "pass"
+  },
+  "radial_perturbed_vacuum_magnetic_vector_potential_real_part": {
+   "name": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The documentation restricts the quantity to 'one toroidal Fourier mode; it is not summed over modes,' a toroidal-mode restriction the name does not state.",
+   "verdict": "flag"
+  },
+  "radiated_power_of_breeder_blanket_module": {
+   "name": "radiated_power_of_breeder_blanket_module",
+   "qualifier": "family-of-quantities",
+   "reasoning": "The documentation calls it 'the umbrella scalar for the incident photon power ... and the absorbed photon power', describing two distinct child quantities rather than one single quantity.",
+   "verdict": "flag"
+  },
+  "radiative_temperature_at_ece_channel": {
+   "name": "radiative_temperature_at_ece_channel",
+   "qualifier": "agrees",
+   "reasoning": "The name 'radiative_temperature' already implies a radiation-based (brightness) temperature rather than kinetic electron temperature; the definition states exactly this equivalent-blackbody temperature for one channel.",
+   "verdict": "pass"
+  },
+  "radius_of_neutral_beam_injector": {
+   "name": "radius_of_neutral_beam_injector",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the radius of the injector's circular ion-source/extraction surface (r_s = ||x - x_c||), the single quantity named, applied to one injector as the name already implies.",
+   "verdict": "pass"
+  },
+  "radius_of_reflector": {
+   "name": "radius_of_reflector",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the geometric radius of the reflector, here precisely pinned as the aperture radius (A = \\pi r^2), the one quantity shared.",
+   "verdict": "pass"
+  },
+  "ratio_of_iron_density_to_electron_density": {
+   "name": "ratio_of_iron_density_to_electron_density",
+   "qualifier": "agrees",
+   "reasoning": "Both state the dimensionless ratio of iron-ion density to electron density; the ratio form is already named, and charge-state summation is the standard iron-density convention.",
+   "verdict": "pass"
+  },
+  "ratio_of_particle_temperature_to_particle_reference_temperature": {
+   "name": "ratio_of_particle_temperature_to_particle_reference_temperature",
+   "qualifier": "agrees",
+   "reasoning": "The name itself states 'ratio_of... to... reference_temperature,' and the definition's dimensionless ratio T_p/T_ref states exactly that same normalised quantity.",
+   "verdict": "pass"
+  },
+  "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density": {
+   "name": "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+   "qualifier": "agrees",
+   "reasoning": "The name already states the ratio of volume-averaged oxygen density to volume-averaged electron density, and the definition states exactly that same quantity.",
+   "verdict": "pass"
+  },
+  "refractive_index": {
+   "name": "refractive_index",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the refractive-index vector n = k/k0 relating wave phase propagation to vacuum propagation; the vector/directional nature is the defining quantity itself, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "right_hand_circularly_polarized_wave_electric_field_amplitude": {
+   "name": "right_hand_circularly_polarized_wave_electric_field_amplitude",
+   "qualifier": "agrees",
+   "reasoning": "The name itself states 'amplitude', and the definition gives the amplitude (magnitude with polarization direction, phase removed) of the E-minus component, matching exactly; documentation explicitly denies added toroidal-mode, flux-surface, or weighting operations.",
+   "verdict": "pass"
+  },
+  "runaway_electron_density": {
+   "name": "runaway_electron_density",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the number density of the runaway-electron population, unweighted and unaveraged.",
+   "verdict": "pass"
+  },
+  "runaway_electron_kinetic_energy_density": {
+   "name": "runaway_electron_kinetic_energy_density",
+   "qualifier": "agrees",
+   "reasoning": "Both state the local kinetic energy per unit volume of the runaway-electron population (relativistic, excluding rest mass); the particle-number-weighted average is simply how the local energy density is computed, not an added integration or weighting beyond the name's quantity.",
+   "verdict": "pass"
+  },
+  "runaway_electron_source_rate_due_to_hot_tail": {
+   "name": "runaway_electron_source_rate_due_to_hot_tail",
+   "qualifier": "agrees",
+   "reasoning": "Both state the volumetric (per unit volume and time) runaway-electron production rate attributable to the hot-tail mechanism; no additional integration, normalisation, or restriction is added.",
+   "verdict": "pass"
+  },
+  "second_local_tangential_coordinate_of_bragg_crystal": {
+   "name": "second_local_tangential_coordinate_of_bragg_crystal",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the signed coordinate along the second tangential axis (X2) of the crystal-local frame for an outline vertex, the standard use of such local coordinates for crystal geometry.",
+   "verdict": "pass"
+  },
+  "second_local_tangential_coordinate_of_optical_element": {
+   "name": "second_local_tangential_coordinate_of_optical_element",
+   "qualifier": "agrees",
+   "reasoning": "Both state the signed position along the second local tangential axis of a fiber center or outline vertex at an optical element, matching without added qualifiers.",
+   "verdict": "pass"
+  },
+  "spectral_wavelength_of_optical_element": {
+   "name": "spectral_wavelength_of_optical_element",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the vacuum wavelength at which the optical element's properties are evaluated; no additional qualifier is introduced.",
+   "verdict": "pass"
+  },
+  "squareness_of_flux_surface": {
+   "name": "squareness_of_flux_surface",
+   "qualifier": "agrees",
+   "reasoning": "The definition pins the broad name 'squareness_of_flux_surface' to one precise shape coefficient (the Luce 2013 corner-sector departure from a reference ellipse) per flux surface, matching the single quantity the name denotes.",
+   "verdict": "pass"
+  },
+  "stray_breakdown_magnetic_field_magnitude": {
+   "name": "stray_breakdown_magnetic_field_magnitude",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the magnitude of the residual (stray) magnetic field at the plasma position during breakdown; no extra qualifier is added.",
+   "verdict": "pass"
+  },
+  "surface_area_of_detector": {
+   "name": "surface_area_of_detector",
+   "qualifier": "agrees",
+   "reasoning": "The definition describes the geometric area of one detector's face, matching the singular 'detector' in the name with no added restriction beyond what 'detector' already implies.",
+   "verdict": "pass"
+  },
+  "surface_area_of_flux_surface": {
+   "name": "surface_area_of_flux_surface",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the full surface-integral area of a complete flux surface, matching 'surface_area_of_flux_surface' with no additional integration beyond what the name already implies for an area.",
+   "verdict": "pass"
+  },
+  "surface_emissivity": {
+   "name": "surface_emissivity",
+   "qualifier": "weighting",
+   "reasoning": "The definition restricts the ratio to 'the stated spectral and angular averaging', explicitly noting it is 'not a wavelength- and direction-resolved emissivity', adding a spectral/angular weighting not stated in the bare name.",
+   "verdict": "flag"
+  },
+  "temperature_of_coil_conductor": {
+   "name": "temperature_of_coil_conductor",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "Definition restricts the quantity to 'the conductor of one active coil' limited to poloidal-field or central-solenoid coils, i.e. one coil of a set, beyond the unrestricted 'coil_conductor' the name states.",
+   "verdict": "flag"
+  },
+  "temperature_of_sensor": {
+   "name": "temperature_of_sensor",
+   "qualifier": "agrees",
+   "reasoning": "Both state the thermodynamic temperature of a selected sensor; specifying that the sensor is a thermocouple junction is diagnostic detail about how the temperature is sensed, not a different quantity.",
+   "verdict": "pass"
+  },
+  "thermal_ion_charge_state_energy_velocity_due_to_convection": {
+   "name": "thermal_ion_charge_state_energy_velocity_due_to_convection",
+   "qualifier": "agrees",
+   "reasoning": "Both state the effective convective velocity for thermal energy carried by a specified ion charge state, v_E,conv = q_E,conv/w_th.",
+   "verdict": "pass"
+  },
+  "thermal_ion_torque_density_due_to_collisions": {
+   "name": "thermal_ion_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "Both state the local vector torque density on the thermal-ion population from Coulomb collisions, with no restriction of orbit class or direction ('without restricting orbit class or spatial direction').",
+   "verdict": "pass"
+  },
+  "thickness_of_breeder_blanket_layer": {
+   "name": "thickness_of_breeder_blanket_layer",
+   "qualifier": "agrees",
+   "reasoning": "Both state the geometric separation between inner and outer interfaces of a single breeder blanket layer along the thickness direction.",
+   "verdict": "pass"
+  },
+  "time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude": {
+   "name": "time_averaged_normalized_perturbed_parallel_magnetic_field_magnitude",
+   "qualifier": "agrees",
+   "reasoning": "The name already states time-averaging, normalization, and parallel-field magnitude, and the definition states exactly these without adding flux-surface or other spatial aggregation.",
+   "verdict": "pass"
+  },
+  "toroidal_angular_width_of_camera": {
+   "name": "toroidal_angular_width_of_camera",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the full toroidal angular span of the camera's field of view, defined as the difference between the extreme toroidal viewing angles.",
+   "verdict": "pass"
+  },
+  "toroidal_argon_velocity_at_internal_transport_barrier": {
+   "name": "toroidal_argon_velocity_at_internal_transport_barrier",
+   "qualifier": "agrees",
+   "reasoning": "The name is the elemental argon bulk velocity (no charge state specified), and the density-weighted mean over charge states is the standard aggregation needed to define a bulk flow for an element, matching the analogous carbon velocity convention.",
+   "verdict": "pass"
+  },
+  "toroidal_argon_velocity_at_plasma_boundary": {
+   "name": "toroidal_argon_velocity_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The density-weighted aggregation over argon charge states is the standard convention for defining a species' bulk-flow velocity, matching 'toroidal argon velocity' at the boundary without an extra qualifier.",
+   "verdict": "pass"
+  },
+  "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions": {
+   "name": "toroidal_co_passing_thermal_electron_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "Definition states the toroidal projection of the collisional torque density on thermal electrons from co-passing particles, matching the name's own toroidal and co-passing qualifiers.",
+   "verdict": "pass"
+  },
+  "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions": {
+   "name": "toroidal_co_passing_thermal_ion_torque_density_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "Definition gives the toroidal component of the co-passing collisional torque density delivered to thermal ions, matching the name's quantity precisely via the stated dot product with the toroidal unit vector.",
+   "verdict": "pass"
+  },
+  "toroidal_co_passing_torque_density": {
+   "name": "toroidal_co_passing_torque_density",
+   "qualifier": "agrees",
+   "reasoning": "The name already specifies the toroidal component of co-passing torque density, and the definition states exactly this local source density, R f_phi,co.",
+   "verdict": "pass"
+  },
+  "toroidal_coordinate_of_lower_hybrid_antenna_row": {
+   "name": "toroidal_coordinate_of_lower_hybrid_antenna_row",
+   "qualifier": "agrees",
+   "reasoning": "Both state the toroidal angle locating the antenna row's reference position; 'middle reference position' identifies the row's single location point, not an added restriction.",
+   "verdict": "pass"
+  },
+  "toroidal_coordinate_of_pellet_fragment": {
+   "name": "toroidal_coordinate_of_pellet_fragment",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the toroidal angle (phi) of the pellet fragment's center of mass in the cylindrical (R,phi,Z) frame, with no additional qualifier.",
+   "verdict": "pass"
+  },
+  "toroidal_coordinate_of_reflector": {
+   "name": "toroidal_coordinate_of_reflector",
+   "qualifier": "agrees",
+   "reasoning": "The toroidal angle of the sphere center defining the reflector's mirror surface is the natural reference point for the reflector's toroidal position, matching the name's quantity.",
+   "verdict": "pass"
+  },
+  "toroidal_coordinate_of_soft_xray_detector": {
+   "name": "toroidal_coordinate_of_soft_xray_detector",
+   "qualifier": "agrees",
+   "reasoning": "Both state the toroidal angle of the detector's geometric center, computed via atan2 of its Cartesian coordinates.",
+   "verdict": "pass"
+  },
+  "toroidal_fast_ion_charge_state_torque_due_to_collisions": {
+   "name": "toroidal_fast_ion_charge_state_torque_due_to_collisions",
+   "qualifier": "agrees",
+   "reasoning": "The torque's unit (N.m) confirms it is inherently a total (volume-integrated) torque, consistent with the name's 'torque' designation; the definition states the same toroidal collisional torque on one fast-ion charge state.",
+   "verdict": "pass"
+  },
+  "toroidal_halo_current": {
+   "name": "toroidal_halo_current",
+   "qualifier": "agrees",
+   "reasoning": "Both state the toroidal component of the halo-current vector carried by halo plasma on open field lines during a disruption; the name's 'toroidal' is exactly the component extracted in the documentation.",
+   "verdict": "pass"
+  },
+  "toroidal_helium_3_velocity_at_pedestal_top": {
+   "name": "toroidal_helium_3_velocity_at_pedestal_top",
+   "qualifier": "agrees",
+   "reasoning": "The density-weighted mean over helium-3 charge states is the standard convention for a species fluid velocity, matching the name's toroidal helium-3 velocity at the pedestal top.",
+   "verdict": "pass"
+  },
+  "toroidal_ion_charge_state_torque_density": {
+   "name": "toroidal_ion_charge_state_torque_density",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the toroidal projection of the net torque density on a specified ion charge state, matching the name; 'total over all contributing processes' is the default unrestricted scope, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "toroidal_ion_momentum_damping_rate": {
+   "name": "toroidal_ion_momentum_damping_rate",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the toroidal damping-rate coefficient (s^-1) for one ion species; the charge-state-summed bulk flow is the standard convention for an ion-species-level quantity, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "toroidal_iron_velocity_at_pedestal_top": {
+   "name": "toroidal_iron_velocity_at_pedestal_top",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the toroidal bulk-flow velocity of iron ions at the pedestal top; the density-weighted combination over charge states is the standard convention for an elemental-species bulk velocity, analogous to the accepted charge-state-summed density convention.",
+   "verdict": "pass"
+  },
+  "toroidal_magnetic_flux_due_to_diamagnetic_drift": {
+   "name": "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the toroidal flux contribution attributable to diamagnetic drift, computed relative to a reference field without that response, which is the standard way to express a 'due_to' mechanism already named; both describe the same diamagnetic-drift toroidal flux.",
+   "verdict": "pass"
+  },
+  "toroidal_momentum_flux_limiter_coefficient": {
+   "name": "toroidal_momentum_flux_limiter_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "The dimensionless, non-negative capping coefficient on toroidal momentum-flux magnitude is the same 'limiter coefficient' concept the name names, not an added normalisation.",
+   "verdict": "pass"
+  },
+  "toroidal_neon_velocity_at_plasma_boundary": {
+   "name": "toroidal_neon_velocity_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "The density-weighted mean over charge states is the standard convention for an elemental (charge-state-unspecified) species velocity, analogous to the accepted summation convention for species density, and the toroidal component at the boundary matches the name.",
+   "verdict": "pass"
+  },
+  "toroidal_neutral_internal_state_torque_density": {
+   "name": "toroidal_neutral_internal_state_torque_density",
+   "qualifier": "agrees",
+   "reasoning": "The name already specifies 'internal_state,' and the definition restricts to 'neutral particles in a specified internal state,' the same quantity without added narrowing.",
+   "verdict": "pass"
+  },
+  "toroidal_perturbed_plasma_velocity_imaginary_part": {
+   "name": "toroidal_perturbed_plasma_velocity_imaginary_part",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The documentation restricts the quantity to 'a single toroidal Fourier harmonic' with 'contributions from other toroidal harmonics... excluded,' a mode-number restriction the name does not state.",
+   "verdict": "flag"
+  },
+  "toroidal_reference_magnetic_field": {
+   "name": "toroidal_reference_magnetic_field",
+   "qualifier": "agrees",
+   "reasoning": "Both state the signed toroidal (phi) component of the equilibrium magnetic field at the reference point with reference major radius.",
+   "verdict": "pass"
+  },
+  "torque_density": {
+   "name": "torque_density",
+   "qualifier": "family-of-quantities",
+   "reasoning": "The definition describes 'population-, orbit-class-, mechanism-, and component-specific forms' and lists multiple instances (ion, neutral, trapped/passing, toroidal) rather than pinning one quantity.",
+   "verdict": "flag"
+  },
+  "total_absorbed_wave_power": {
+   "name": "total_absorbed_wave_power",
+   "qualifier": "agrees",
+   "reasoning": "The name's 'total' already signals species-summation and the quantity is power (W, not W/m^3), so volume integration is inherent to 'power' as opposed to a power density; both describe the same globally-summed absorbed wave power.",
+   "verdict": "pass"
+  },
+  "total_absorbed_wave_power_at_inside_flux_surface": {
+   "name": "total_absorbed_wave_power_at_inside_flux_surface",
+   "qualifier": "agrees",
+   "reasoning": "The cumulative absorbed power enclosed by the flux surface matches the name's 'total' and 'at_inside_flux_surface' locus, which inherently denotes an enclosed-volume aggregate.",
+   "verdict": "pass"
+  },
+  "total_electron_count": {
+   "name": "total_electron_count",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the volume-integrated inventory of free electrons, matching the plain meaning of 'total_electron_count' with the standard exclusion of bound electrons.",
+   "verdict": "pass"
+  },
+  "total_heating_power_due_to_fusion_reactions": {
+   "name": "total_heating_power_due_to_fusion_reactions",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The definition restricts the quantity to the 'gross thermal input delivered to a fusion power plant\u2019s thermal-to-electric conversion cycle', a specific plant-level system boundary (including blanket multiplication) that the generic name 'total_heating_power_due_to_fusion_reactions' does not specify.",
+   "verdict": "flag"
+  },
+  "total_ion_decay_length_over_scrape_off_layer": {
+   "name": "total_ion_decay_length_over_scrape_off_layer",
+   "qualifier": "agrees",
+   "reasoning": "The name's 'total_ion' already implies summation over species and charge states; the definition's decay length of total ion density in the SOL matches this directly.",
+   "verdict": "pass"
+  },
+  "total_ion_density_at_magnetic_axis": {
+   "name": "total_ion_density_at_magnetic_axis",
+   "qualifier": "agrees",
+   "reasoning": "The name explicitly states 'total_ion', and the definition's sum over all ion species and charge states matches that stated aggregation exactly.",
+   "verdict": "pass"
+  },
+  "total_ion_particle_source_rate": {
+   "name": "total_ion_particle_source_rate",
+   "qualifier": "integration",
+   "reasoning": "The documentation states the quantity is 'integrated over a specified plasma volume' and is the 'volume-integrated specialization of ion particle source rate', an integration the bare name 'total_ion_particle_source_rate' does not state (no volume_integrated_ marker).",
+   "verdict": "flag"
+  },
+  "total_neutral_source_rate_due_to_gas_injection": {
+   "name": "total_neutral_source_rate_due_to_gas_injection",
+   "qualifier": "counting-convention",
+   "reasoning": "The documentation defines the rate via equivalent-electron weighting ($\\dot{N}_{eq}=\\sum Z_s\\dot{N}_s$), an equivalent-electron convention not stated in the name, which only says 'source rate'.",
+   "verdict": "flag"
+  },
+  "total_neutron_rate": {
+   "name": "total_neutron_rate",
+   "qualifier": "agrees",
+   "reasoning": "The name states 'total' and the definition sums DT, DD, and TT neutron emission rates, consistent with a total aggregate rate with no additional restriction.",
+   "verdict": "pass"
+  },
+  "total_power_due_to_electron_cyclotron_heating": {
+   "name": "total_power_due_to_electron_cyclotron_heating",
+   "qualifier": "agrees",
+   "reasoning": "The definition sums absorbed EC power 'from all electron-cyclotron wave sources', matching the 'total' already stated in the name with no additional qualifier.",
+   "verdict": "pass"
+  },
+  "total_trapped_particle_density": {
+   "name": "total_trapped_particle_density",
+   "qualifier": "integration",
+   "reasoning": "Definition states the quantity as 'the flux-surface-averaged concentration' with angle brackets denoting 'the differential-volume-weighted average over a magnetic flux surface', an averaging the bare 'density' name does not state.",
+   "verdict": "flag"
+  },
+  "trapped_thermal_ion_charge_state_power_density_due_to_collisions": {
+   "name": "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+   "qualifier": "integration",
+   "reasoning": "Definition specifies the quantity is 'flux-surface-averaged,' an averaging/integration operation the name does not state.",
+   "verdict": "flag"
+  },
+  "tritium_density": {
+   "name": "tritium_density",
+   "qualifier": "agrees",
+   "reasoning": "The definition's core quantity is the local number density of tritium ions in the plasma, matching the bare name; the mention of chord- and volume-averaged children is contextual, not a redefinition of the named quantity.",
+   "verdict": "pass"
+  },
+  "tritium_density_at_pedestal_top": {
+   "name": "tritium_density_at_pedestal_top",
+   "qualifier": "agrees",
+   "reasoning": "Charge-state summation is the standard convention for tritium ion density (and reduces trivially since tritium has one charge state); the quantity matches tritium density at the pedestal top.",
+   "verdict": "pass"
+  },
+  "tritium_density_at_plasma_boundary": {
+   "name": "tritium_density_at_plasma_boundary",
+   "qualifier": "agrees",
+   "reasoning": "Both state local tritium-ion number density at the last closed flux surface, explicitly local with no averaging and no charge-state aggregation beyond the single ionization state.",
+   "verdict": "pass"
+  },
+  "tungsten_density_at_divertor_target": {
+   "name": "tungsten_density_at_divertor_target",
+   "qualifier": "agrees",
+   "reasoning": "The charge-state sum over positive tungsten ions is the standard convention for an ion species density and matches the name's quantity without added weighting or normalisation.",
+   "verdict": "pass"
+  },
+  "tungsten_density_at_separatrix": {
+   "name": "tungsten_density_at_separatrix",
+   "qualifier": "agrees",
+   "reasoning": "Summing over all positive ionization states is the standard convention for total ion density of a multiply-ionized species like tungsten; the definition states the same local, unaveraged density at the separatrix as the name.",
+   "verdict": "pass"
+  },
+  "turns_per_metre_of_rogowski_coil": {
+   "name": "turns_per_metre_of_rogowski_coil",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "Definition states 'for a multilayer winding, it refers to one winding layer rather than the combined count of all layers', restricting to one layer of a set that the name's unqualified 'turns_per_metre' does not state.",
+   "verdict": "flag"
+  },
+  "upper_thickness_of_breeder_blanket_module": {
+   "name": "upper_thickness_of_breeder_blanket_module",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the non-negative normal thickness of the upper cap of one breeder blanket module, with no additional ratio, weighting, or aggregation introduced.",
+   "verdict": "pass"
+  },
+  "vertical_coordinate_of_annulus_center": {
+   "name": "vertical_coordinate_of_annulus_center",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the signed vertical (Z) coordinate of the annulus center, applying to one annular cross-section as the name states.",
+   "verdict": "pass"
+  },
+  "vertical_coordinate_of_beam_tracing_beam": {
+   "name": "vertical_coordinate_of_beam_tracing_beam",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the vertical Z coordinate of a beam-tracing beam position along its propagation path, with no aggregation implied.",
+   "verdict": "pass"
+  },
+  "vertical_coordinate_of_flux_loop": {
+   "name": "vertical_coordinate_of_flux_loop",
+   "qualifier": "agrees",
+   "reasoning": "Both state the vertical Z coordinate of a position point associated with one flux loop in the cylindrical frame.",
+   "verdict": "pass"
+  },
+  "vertical_coordinate_of_lower_hybrid_antenna_row": {
+   "name": "vertical_coordinate_of_lower_hybrid_antenna_row",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the vertical Z-coordinate of the antenna row's reference point in the cylindrical frame, with no added integration, normalisation, or restriction.",
+   "verdict": "pass"
+  },
+  "vertical_coordinate_of_polarizer": {
+   "name": "vertical_coordinate_of_polarizer",
+   "qualifier": "agrees",
+   "reasoning": "Both state the vertical (Z) coordinate of the polarizer's reference point; the 'geometric center' simply identifies the single-point location of the object, not an added restriction.",
+   "verdict": "pass"
+  },
+  "vertical_coordinate_of_strike_point": {
+   "name": "vertical_coordinate_of_strike_point",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the signed vertical (Z) coordinate of a single identified strike point, with the documentation explicitly leaving the generic quantity unrestricted to a specific branch.",
+   "verdict": "pass"
+  },
+  "vertical_electron_velocity": {
+   "name": "vertical_electron_velocity",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The definition restricts the quantity to 'the local electron-fluid bulk flow in the edge plasma' (repeated in the documentation), confining the generic vertical electron velocity to one plasma region (the edge) that the name does not specify, unlike the sibling radial/toroidal components which are described without this restriction.",
+   "verdict": "flag"
+  },
+  "vertical_focal_length_of_beamlet_group": {
+   "name": "vertical_focal_length_of_beamlet_group",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the along-beam distance from the ion source to the point of minimum vertical envelope extent for one beamlet group, as the name already restricts to a beamlet group.",
+   "verdict": "pass"
+  },
+  "vertical_force_of_poloidal_field_coil": {
+   "name": "vertical_force_of_poloidal_field_coil",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the signed vertical component of the net Lorentz force on one poloidal-field coil, matching exactly.",
+   "verdict": "pass"
+  },
+  "vertical_ion_charge_state_velocity": {
+   "name": "vertical_ion_charge_state_velocity",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the vertical (toroidal-axis) component of bulk flow velocity for one specified ion species and ionization charge state; the bundling note is conditional and does not change the default single-charge-state quantity.",
+   "verdict": "pass"
+  },
+  "vertical_ion_charge_state_velocity_due_to_diamagnetic_drift": {
+   "name": "vertical_ion_charge_state_velocity_due_to_diamagnetic_drift",
+   "qualifier": "agrees",
+   "reasoning": "Both state the vertical projection of the diamagnetic fluid drift velocity for one specified ion charge state, with no averaging over charge states or species.",
+   "verdict": "pass"
+  },
+  "vertical_length_of_divertor_target": {
+   "name": "vertical_length_of_divertor_target",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the vertical span (Zmax-Zmin) of the divertor target surface; no extra qualifier is introduced.",
+   "verdict": "pass"
+  },
+  "vertical_neutral_internal_state_momentum_flux": {
+   "name": "vertical_neutral_internal_state_momentum_flux",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the vertical transport of vertical momentum (the ZZ diagonal component) for the state-resolved neutral population, consistent with the naming convention used for its radial/toroidal/parallel siblings.",
+   "verdict": "pass"
+  },
+  "vertical_neutral_momentum_flux_limiter_coefficient": {
+   "name": "vertical_neutral_momentum_flux_limiter_coefficient",
+   "qualifier": "agrees",
+   "reasoning": "A 'flux-limiter coefficient' is inherently a dimensionless ratio to the free-streaming bound; the documentation's ratio formula for the vertical component matches the name's vertical neutral momentum flux-limiter coefficient without adding a qualifier beyond what 'coefficient' already implies.",
+   "verdict": "pass"
+  },
+  "vertical_neutral_velocity": {
+   "name": "vertical_neutral_velocity",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the vertical (Z) component of the bulk neutral-species velocity (m\u00b7s^-1); the number-density weighting over internal states follows the same aggregation convention used for species-level flow quantities, not an added qualifier.",
+   "verdict": "pass"
+  },
+  "vertical_outline_of_plasma_facing_component": {
+   "name": "vertical_outline_of_plasma_facing_component",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the pointwise signed vertical (Z) coordinate of each boundary-outline point of the plasma-facing component, with no averaging or integration added.",
+   "verdict": "pass"
+  },
+  "vertical_volumetric_force": {
+   "name": "vertical_volumetric_force",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the local Z-projection of the electromagnetic body-force density (N\u00b7m^-3), with no volume integration or aggregation implied.",
+   "verdict": "pass"
+  },
+  "vertical_wave_electric_field": {
+   "name": "vertical_wave_electric_field",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the vertical (Z) projection of the wave electric field phasor, preserving amplitude and phase, matching the name exactly.",
+   "verdict": "pass"
+  },
+  "vertical_wave_vector_of_beam_tracing_beam": {
+   "name": "vertical_wave_vector_of_beam_tracing_beam",
+   "qualifier": "agrees",
+   "reasoning": "The definition gives the local, signed vertical projection of the wave vector along the beam path, matching the name with no path integration, averaging, or normalization added.",
+   "verdict": "pass"
+  },
+  "voltage_of_mass_spectrometer": {
+   "name": "voltage_of_mass_spectrometer",
+   "qualifier": "restriction-to-one-object",
+   "reasoning": "The definition restricts the generic instrument 'voltage' to specifically the 'detector electrode or electron-multiplying stage' bias potential, one component of the instrument, rather than any device voltage.",
+   "verdict": "flag"
+  },
+  "voltage_of_toroidal_magnetic_field_probe": {
+   "name": "voltage_of_toroidal_magnetic_field_probe",
+   "qualifier": "agrees",
+   "reasoning": "Both state the terminal voltage induced in one toroidal-field probe coil by Faraday induction, with no aggregation or calibration beyond that single probe.",
+   "verdict": "pass"
+  },
+  "voltage_of_valve": {
+   "name": "voltage_of_valve",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the voltage applied to drive the valve's opening as the electrical input signal.",
+   "verdict": "pass"
+  },
+  "volume_averaged_effective_charge": {
+   "name": "volume_averaged_effective_charge",
+   "qualifier": "agrees",
+   "reasoning": "The name explicitly states 'volume_averaged', and the definition's volume integral/average of the local effective charge over the confined plasma matches that stated integration exactly.",
+   "verdict": "pass"
+  },
+  "volume_averaged_helium_4_density": {
+   "name": "volume_averaged_helium_4_density",
+   "qualifier": "agrees",
+   "reasoning": "Both state the volume average of the local helium-4 ion number density over the confined plasma volume, matching the name's explicit 'volume_averaged' qualifier.",
+   "verdict": "pass"
+  },
+  "volume_averaged_runaway_electron_kinetic_energy_density": {
+   "name": "volume_averaged_runaway_electron_kinetic_energy_density",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'volume_averaged' and the definition describes exactly the volume average of the local runaway-electron kinetic energy density; no unstated qualifier is added.",
+   "verdict": "pass"
+  },
+  "volume_averaged_total_ion_temperature": {
+   "name": "volume_averaged_total_ion_temperature",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the volume average of the density-weighted combined thermal ion temperature, matching the name's 'volume_averaged_total_ion_temperature'; density-weighting across species/charge-states is the standard convention already implied by 'total_ion_temperature'.",
+   "verdict": "pass"
+  },
+  "volume_averaged_total_runaway_electron_source_rate": {
+   "name": "volume_averaged_total_runaway_electron_source_rate",
+   "qualifier": "agrees",
+   "reasoning": "The name already states 'volume_averaged' and 'total', and the definition describes the volume average of the summed Dreicer, avalanche, hot-tail, Compton, and tritium-decay source rates, matching the stated quantity.",
+   "verdict": "pass"
+  },
+  "volume_of_flux_surface": {
+   "name": "volume_of_flux_surface",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the total volume enclosed from the magnetic axis to the selected flux surface, explicitly not a shell or average.",
+   "verdict": "pass"
+  },
+  "volumetric_force": {
+   "name": "volumetric_force",
+   "qualifier": "agrees",
+   "reasoning": "Although 'volumetric_force' is a broad bare-noun name, the definition pins it precisely to the electromagnetic Lorentz force density (\u03c1_e E + J\u00d7B), which per the broad-name rule counts as agreement rather than an added qualifier.",
+   "verdict": "pass"
+  },
+  "volumetric_fraction_of_breeder_blanket_layer": {
+   "name": "volumetric_fraction_of_breeder_blanket_layer",
+   "qualifier": "agrees",
+   "reasoning": "The definition states f_i = V_i/V_layer, the part-to-whole volume ratio, which is exactly the 'volumetric fraction' the name already states as a normalized quantity.",
+   "verdict": "pass"
+  },
+  "wave_phase_of_ion_cyclotron_heating_antenna": {
+   "name": "wave_phase_of_ion_cyclotron_heating_antenna",
+   "qualifier": "family-of-quantities",
+   "reasoning": "Documentation says 'the excitation quantity, reference excitation, reference planes, and temporal phasor convention must be specified' and presents strap/module forward-wave and strap-phase variants as specializations, leaving the named antenna-level phase unresolved among child quantities.",
+   "verdict": "flag"
+  },
+  "width_of_toroidal_field_coil": {
+   "name": "width_of_toroidal_field_coil",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the full boundary-to-boundary transverse extent (width) of the coil cross-section; no additional normalisation, integration, or restriction is introduced.",
+   "verdict": "pass"
+  },
+  "x_first_measurement_direction_unit_vector_of_strain_gauge": {
+   "name": "x_first_measurement_direction_unit_vector_of_strain_gauge",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the x-axis direction cosine of the sensor's measurement-direction unit vector; the definition matches the name's stated quantity exactly.",
+   "verdict": "pass"
+  },
+  "x_second_measurement_direction_unit_vector_of_strain_gauge": {
+   "name": "x_second_measurement_direction_unit_vector_of_strain_gauge",
+   "qualifier": "agrees",
+   "reasoning": "Both state the signed x-direction cosine of the strain gauge's second measurement-direction unit vector; the definition only elaborates the sign convention and frame, matching the name.",
+   "verdict": "pass"
+  },
+  "xenon_source_rate_due_to_gas_injection": {
+   "name": "xenon_source_rate_due_to_gas_injection",
+   "qualifier": "counting-convention",
+   "reasoning": "Definition states an 'equivalent-electron source rate...assigning 54 equivalent electrons to each xenon atom,' a counting convention the name (plain 'source_rate') does not state.",
+   "verdict": "flag"
+  },
+  "y_coordinate_of_diagnostic_aperture": {
+   "name": "y_coordinate_of_diagnostic_aperture",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the signed y-coordinate of the aperture center in the camera frame, the same single quantity.",
+   "verdict": "pass"
+  },
+  "y_coordinate_of_sensor_attachment_point": {
+   "name": "y_coordinate_of_sensor_attachment_point",
+   "qualifier": "agrees",
+   "reasoning": "Both state the signed Cartesian y coordinate of the sensor attachment point in the machine frame.",
+   "verdict": "pass"
+  },
+  "y_image_up_unit_vector_of_camera": {
+   "name": "y_image_up_unit_vector_of_camera",
+   "qualifier": "agrees",
+   "reasoning": "Both describe the y-axis component of the camera's image-up orientation unit vector; no additional qualifier is present.",
+   "verdict": "pass"
+  },
+  "y_second_measurement_direction_unit_vector_of_strain_gauge": {
+   "name": "y_second_measurement_direction_unit_vector_of_strain_gauge",
+   "qualifier": "agrees",
+   "reasoning": "The y-axis direction cosine d_y = d2\u00b7y matches exactly the quantity named, the y-component of the second measurement direction unit vector.",
+   "verdict": "pass"
+  },
+  "z_first_measurement_direction_unit_vector_of_strain_gauge": {
+   "name": "z_first_measurement_direction_unit_vector_of_strain_gauge",
+   "qualifier": "agrees",
+   "reasoning": "Both name and definition describe the signed z-component of the unit vector along a strain gauge's first measurement direction; no extra qualifier is introduced.",
+   "verdict": "pass"
+  },
+  "z_second_measurement_direction_unit_vector_of_strain_gauge": {
+   "name": "z_second_measurement_direction_unit_vector_of_strain_gauge",
+   "qualifier": "agrees",
+   "reasoning": "The definition states the z-axis direction cosine of the second measurement-direction unit vector, exactly the quantity named.",
+   "verdict": "pass"
+  }
+ }
+}

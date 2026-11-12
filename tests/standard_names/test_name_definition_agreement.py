@@ -118,6 +118,54 @@ def _review(candidate, checks):
     return aggregate_docs_review(state, checks, answers, audit_report=report)
 
 
+def test_a_flagged_verdict_raises_a_hold_naming_the_qualifier() -> None:
+    from imas_codex.standard_names.review.name_definition_seat import (
+        name_definition_note,
+    )
+
+    note = name_definition_note(
+        {"id": "momentum"},
+        {
+            "name": "momentum",
+            "verdict": "flag",
+            "qualifier": "family-of-quantities",
+            "reasoning": "the definition lists three distinct momenta",
+        },
+    )
+    assert note is not None
+    assert "family-of-quantities" in note
+    assert "three distinct momenta" in note
+
+
+def test_a_passing_verdict_raises_no_hold() -> None:
+    from imas_codex.standard_names.review.name_definition_seat import (
+        name_definition_note,
+    )
+
+    assert (
+        name_definition_note(
+            {"id": "electron_temperature"},
+            {"name": "electron_temperature", "verdict": "pass", "qualifier": "agrees"},
+        )
+        is None
+    )
+
+
+def test_an_unanswered_verdict_holds_rather_than_accepting() -> None:
+    """A seat call that returned nothing must not read as an acceptance."""
+
+    from imas_codex.standard_names.review.name_definition_seat import (
+        name_definition_note,
+    )
+
+    note = name_definition_note(
+        {"id": "momentum"},
+        {"name": "momentum", "verdict": "unanswered", "qualifier": None},
+    )
+    assert note is not None
+    assert "did not answer" in note
+
+
 def test_a_flagged_name_is_refused_without_a_recorded_reason(checks) -> None:
     """A normalised quantity planted under an unnormalised name is refused.
 
