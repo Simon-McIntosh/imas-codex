@@ -1,0 +1,12 @@
+{
+  "pinned": "0.11.1",
+  "installed": "0.11.1",
+  "active_snapshot_versions": [
+    "0.11.1"
+  ],
+  "active_snapshot_digest": "sha256:5c1be483371f7c08d555c032d8067adaf808a139ce4c2fe3e519ae7552ba916c",
+  "snapshot_writer_module": "imas_codex.standard_names.grammar_sync",
+  "active_snapshot_writer_file": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/sph-pin-test/imas_codex/standard_names/grammar_sync.py",
+  "planted_installed_mismatch": "pyproject pins imas-standard-names==0.11.1 but the installed package is 0.11.2; bump the pin with the package",
+  "planted_snapshot_mismatch": "pyproject pins imas-standard-names==0.11.1 but the graph's active grammar snapshot is 0.11.0; re-sync the grammar or bump the pin"
+}
