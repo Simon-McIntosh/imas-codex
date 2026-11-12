@@ -41,7 +41,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 14,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "96e111b851e3f8ef0d61cf946b931f7064b2d1b2",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a76 is descoped: sib-docs-regression-diagnosis attributed the fall to the drain's own drift refresh (400 of 405 names), sib-drift-refresh-rename-lineage fixed the comparison (1,061 to 84 drifted), and sib-restore-reset-docs restored 391 names; nothing is left for \u00a76.",
+      "reason": "",
+      "when": "2026-11-12T06:34:12.802717+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "96e111b851e3f8ef0d61cf946b931f7064b2d1b2",
+      "commit_basis": "edit",
+      "note": "\u00a76 is descoped: sib-docs-regression-diagnosis attributed the fall to the drain's own drift refresh (400 of 405 names), sib-drift-refresh-rename-lineage fixed the comparison (1,061 to 84 drifted), and sib-restore-reset-docs restored 391 names; nothing is left for \u00a76.",
+      "reason": "",
+      "when": "2026-11-12T06:34:12.802717+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T031001986440-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261112T031001986440-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "4895d6f417e2d2cedc2c397dcfc4ddd3b6691ae4",
   "rubric": "content",
