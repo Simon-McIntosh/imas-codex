@@ -1,0 +1,122 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T02:10:10.713Z",
+  "dispatched_at": "2026-11-12T01:52:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "reasoning-1",
+      "reason": "a repair whose own evidence shows an unidentified live mechanism removing its target needs either a precondition that the \u00a752 investigation has named that mechanism or a done-when clause requiring its guard, and the plan carries neither.",
+      "text": "\u00a75 opens \"The cause of the stall and of the fall is under investigation in \u00a752, so this section starts once no \u00a752 run is writing the graph\", but the stated gate is only that writers stop, while neither the precondition nor the done-when requires the demotion mechanism to be identified or guarded; the record \u00a75 cites separates the two quantities, reporting 105 names with accepted documentation under the run's exact ID against a net fall of 340, so something other than the drain is actively removing accepted documentation while \u00a75 restores it, and \u00a75's done-when would pass on a count that falls again at the next read",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "reasoning-2",
+      "reason": "the ceiling is a number a later node must invent from an undefined term, and the two defensible choices differ enough to decide whether \u00a74 can run at all.",
+      "text": "\u00a75 fixes its ceiling as \"the measured documentation rate times the backlog read then, plus a quarter\" without saying which measured rate, and the drain record it cites supports two bases five times apart: 105 names with accepted documentation under the run's exact ID for USD 11.14, or the 21 of those the record says \"lacked accepted documentation at the baseline\"; at a backlog of 926 names the high basis puts the ceiling above the whole remaining USD 350 approval, and because \u00a74's limit subtracts \u00a75's ceiling, that reading can size \u00a74 to nothing",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:66",
+      "id": "reasoning-3",
+      "reason": "the escalation path itself is stated and correct, so a larger starting backlog still reaches the lead; the clause reads as exceptional when it will be routine, which is wording rather than mechanism.",
+      "text": "\u00a75 reserves spend at \u00a74's dispatch from \"the backlog read then\", which by construction cannot contain the roughly 300 accepted names \u00a74 itself creates and each of which needs documentation, so a starting backlog larger than the one the ceiling was cut on is the ordinary case rather than the exception its escalation clause is written as",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+  "plan_fingerprint": "366c7b475022b559b9f03e33193b491e5906adb49bfef60648f43ef254aa9030",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 10,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a75's done-when now requires the mechanism that lowered accepted documentation during the drain to be named with evidence, and a read before and after one scoped sn run to show no accepted documentation demoted without a recorded reason.",
+      "reason": "",
+      "when": "2026-11-12T02:33:54.695316+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "\u00a75 now names its rate: spend per name whose documentation reached accepted under the drain's own run id (USD 11.14 over 105 names, about USD 0.11).",
+      "reason": "",
+      "when": "2026-11-12T02:34:03.135120+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "\u00a75's ceiling is now read when \u00a75 starts, after \u00a74, so it covers the names \u00a74 adds; \u00a74 no longer reserves it, and if the approval's balance is below the ceiling \u00a75 goes to the lead before running.",
+      "reason": "",
+      "when": "2026-11-12T02:34:11.600173+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75's done-when now requires the mechanism that lowered accepted documentation during the drain to be named with evidence, and a read before and after one scoped sn run to show no accepted documentation demoted without a recorded reason.",
+      "reason": "",
+      "when": "2026-11-12T02:33:54.695316+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75 now names its rate: spend per name whose documentation reached accepted under the drain's own run id (USD 11.14 over 105 names, about USD 0.11).",
+      "reason": "",
+      "when": "2026-11-12T02:34:03.135120+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75's ceiling is now read when \u00a75 starts, after \u00a74, so it covers the names \u00a74 adds; \u00a74 no longer reserves it, and if the approval's balance is below the ceiling \u00a75 goes to the lead before running.",
+      "reason": "",
+      "when": "2026-11-12T02:34:11.600173+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T014840801961-plan-review-of-sn-full-dd-continuation.json",
+  "review_run_id": "r-20261112T014840801961-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "132bdb6a82d2a44b2826bd22d1c049b8f6d8c17b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited drain fragment exists, is committed, and every figure \u00a75 quotes from it is exact.",
+    "done_when": "pass \u2014 \u00a75 names a measurable target (accepted names with accepted documentation back to at least the 2,368 read before the drain), a recorded before/after by stage, and a negative control that a name planted with pending documentation in a disposable graph is reported as pending rather than accepted.",
+    "evidence_paths": "pass \u2014 the before/after counts and the spend beside the ceiling and the remaining balance all land under `docs/evidence/fragments/sn-full-dd-continuation/`, and the drain record \u00a75 cites is tracked and resolves (`git ls-files` names it).",
+    "naming": "pass \u2014 \u00a75 introduces no symbol, no file name and no comment, and carries no plan label, stage name or ticket number.",
+    "reasoning": "a finding \u2014 \"the measured documentation rate\" that fixes \u00a75's ceiling has no stated basis, and the record \u00a75 cites affords two readings five times apart, which changes \u00a74's budget by hundreds of dollars.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable, the name-level documentation backlog the stalled drain left.",
+    "wiring": "pass \u2014 \u00a75 declares `depends-on` on `sn-integrity-backlog#s52` and `sn-full-dd-continuation#s4` (plan.html:22), its section `data-links` names \u00a752, and the followup says \"\u00a75 follows \u00a74\"; no relationship points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "687ba927f5bd26f8820871ab346e1dd7924dd0b95f506110a32751e1da3d0a39",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "22de508ea21eb877a5d802a38abcf10b3d39dab3150af74debb327371bd1f25a",
+    "s5": "7c0260b58c5122730f1472fe30b11ff0cd8da6af7f5c819af84b5ae76c617f25"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T02:31:20.320651+00:00",
+  "total": null
+}

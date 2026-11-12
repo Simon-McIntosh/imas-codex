@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "8466f0e0c6ea3e1e8b34c369952139a9225e47d2",
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/signed_manifest.py:apply_signed_manifest (accepts the docs-revision-restore adapter)",
+    "imas_codex/standard_names/provenance_lifecycle.py:1367 apply_signed_manifest import site",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:2124 apply_signed_manifest import site",
+    "imas_codex/standard_names/graph_store/graph_audits.py:2974 apply_signed_manifest import site",
+    "imas_codex/standard_names/graph_store/graph_lineage.py:1039 apply_signed_manifest import site"
+  ],
+  "completed_at": "2026-11-12T01:13:35.260Z",
+  "dispatched_at": "2026-11-12T00:54:14Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html",
+      "line": "122",
+      "severity": "non-blocking",
+      "text": "the reconciliation sentence says 176 pending, one reviewed and one exhausted name became accepted beside the whole before-to-after counts, but those counts show pending fell 387 (1108 to 721) and accepted rose 390 (2107 to 2497); 176 is the second pass's pending share alone, so the sentence misattributes the delta a reader is meant to check."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/manifest.md",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "the manifest's status is complete with 391 of 391 restored, while the run's own final message reports blocked with 212 of 391; the evidence logs at 01:17 and 01:41 corroborate the manifest, so the final message is the stale one, but a coordinator reading only the final message would treat a landed node as blocked."
+    },
+    {
+      "file": "tests/standard_names/test_signed_docs_restore.py",
+      "line": "154",
+      "severity": "non-blocking",
+      "text": "the gate the manifest names collects this file but deselects all three of its tests because each carries @pytest.mark.graph (154, 233, 315), so the recorded 272 passed with 61 deselected exercises none of the new adapter; the review re-ran the file under -m graph and read 3 passed, so the tests work but the node's own recorded gate never showed it."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/verify_docs_partition.py",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "the script exits 0 unconditionally (as does apply_docs_restore.py:181), so the EXIT=0 in verify-docs-partition.log and docs-restore-gate.log records nothing about whether the measure held; only the printed figures carry it, and a run that read back 300 of 391 would still exit 0."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html",
+      "line": "17",
+      "severity": "non-blocking",
+      "text": "the instrument joins snapshots over 17:28:00Z-17:29:00Z (census.json instrument.reset_window) while the done_when names the 17:28:08-17:28:35Z reset window; the wider window is disclosed, but the artifact carries no per-snapshot creation time, so the claim that every selected snapshot is the reset's own cannot be checked from what landed."
+    }
+  ],
+  "head_log_revision": "748927474661a6e796a9ee686ab15b7d09ace6c6",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified the adapter dispatch in apply_signed_manifest and the four production importers of that entry point; none of them selects the new adapter, so the new kind is reachable only by a caller that names docs-revision-restore.",
+    "diff": "read commit by commit against 8466f0e0c6; 1465 insertions in four files: a 586-line docs-revision-restore adapter plus its dispatch branch in signed_manifest.py, a 344-line test file, and the evidence fragment with its instrument; no deletion and no edit to an existing mutation kind.",
+    "done_when": "the done_when is a five-part measure; census.json records attribution left_accepted 405 / reset_names 508, partition a=0 b=9 c=391 with partition_sum 400, drift_dry_run dry_run true detected 84 requires_steering_among_attributed 9, and docs-restore-gate.log records accepted_names_before 2107 and after 2497 with equals_snapshot 391 of 391 and accepted_all_equal true.",
+    "goal": "the node's goal is to restore the accepted documentation the 2026-11-11 drift refresh reset from its DocsRevision snapshots; docs-restore.json's readback records 391 of 391 partition-(c) names at docs_stage accepted with documentation equal to their own snapshot, and verify-docs-partition.log re-reads partition_c 391 accepted 391 not_accepted 0.",
+    "manifest": "read; status complete, six commits 8fee17e92..748927474, changed_paths the four landed files, a 31-file tests line recorded at 272 passed on both the head (gate-head-focused.log) and base (gate-base-focused.log) arms, and the whole measure stated quantitatively in its checkpoint.",
+    "write_paths": "the run record's write_paths are the fragment, the run.py, a figures directory, imas_codex/standard_names/signed_manifest.py and tests/standard_names/test_signed_docs_restore.py; the diff touches four of those five (no figure was written) and nothing outside them, and the two source paths were explicitly granted in the resumed attempt's advice before attempt 2 began."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_signed_docs_restore.py:161 and :240 fail if the restore stops being admitted on a live-structural-child name or if set_properties starts being admitted there; I re-ran the file with -m graph on a disposable Neo4j and read 3 passed.",
+    "evidence": "docs-restore-gate.log and verify-docs-partition.log are receipts carrying the measure's own figures (391 of 391 accepted and equal, counts 2107 to 2497), but both scripts exit 0 unconditionally, so their EXIT=0 is not the evidence and the named pytest gate deselects the three tests that exercise the new adapter.",
+    "fit": "signed_manifest.py:6985-6998 declares the adapter constants in the same shape as the thirteen adapters above it, and the module-private _docs_restore_* names describe the mechanism with no plan or ticket label.",
+    "goal_fidelity": "docs-restore.json's readback re-reads each of the 391 partition-(c) targets against its own DocsRevision and finds equals_snapshot true for 391, which is the goal's deliverable.",
+    "reuse": "the addition extends the adapter family owned by signed_manifest.py; I searched for an existing restore-from-revision owner (DOCS_REVISION_OF across imas_codex/, graph_store/graph_docs_persistence.py's persist_generated_docs, persist_refined_docs and reset_standard_name_docs) and each writes documentation forward only, so no restore owner existed to extend.",
+    "scope_discipline": "git diff 8466f0e0c6..748927474 touches only the fragment, its run.py, signed_manifest.py and test_signed_docs_restore.py, all inside the five paths the run record declares and the resumed attempt's advice explicitly granted."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to restore the accepted documentation the 2026-11-11 drift refresh reset from its DocsRevision snapshots; docs-restore.json's readback records 391 of 391 partition-(c) names at docs_stage accepted with documentation equal to their own snapshot, and verify-docs-partition.log re-reads partition_c 391 accepted 391 not_accepted 0.\nVERDICT done_when: the done_when is a five-part measure; census.json records attribution left_accepted 405 / reset_names 508, partition a=0 b=9 c=391 with partition_sum 400, drift_dry_run dry_run true detected 84 requires_steering_among_attributed 9, and docs-restore-gate.log records accepted_names_before 2107 and after 2497 with equals_snapshot 391 of 391 and accepted_all_equal true.\nVERDICT write_paths: the run record's write_paths are the fragment, the run.py, a figures directory, imas_codex/standard_names/signed_manifest.py and tests/standard_names/test_signed_docs_restore.py; the diff touches four of those five (no figure was written) and nothing outside them, and the two source paths were explicitly granted in the resumed attempt's advice before attempt 2 began.\nVERDICT manifest: read; status complete, six commits 8fee17e92..748927474, changed_paths the four landed files, a 31-file tests line recorded at 272 passed on both the head (gate-head-focused.log) and base (gate-base-focused.log) arms, and the whole measure stated quantitatively in its checkpoint.\nVERDICT diff: read commit by commit against 8466f0e0c6; 1465 insertions in four files: a 586-line docs-revision-restore adapter plus its dispatch branch in signed_manifest.py, a 344-line test file, and the evidence fragment with its instrument; no deletion and no edit to an existing mutation kind.\nCALL_SITES: imas_codex/standard_names/signed_manifest.py:apply_signed_manifest (accepts the docs-revision-restore adapter), imas_codex/standard_names/provenance_lifecycle.py:1367 apply_signed_manifest import site, imas_codex/standard_names/graph_store/graph_supersession.py:2124 apply_signed_manifest import site, imas_codex/standard_names/graph_store/graph_audits.py:2974 apply_signed_manifest import site, imas_codex/standard_names/graph_store/graph_lineage.py:1039 apply_signed_manifest import site\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: docs-restore.json's readback re-reads each of the 391 partition-(c) targets against its own DocsRevision and finds equals_snapshot true for 391, which is the goal's deliverable.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs-restore-gate.log and verify-docs-partition.log are receipts carrying the measure's own figures (391 of 391 accepted and equal, counts 2107 to 2497), but both scripts exit 0 unconditionally, so their EXIT=0 is not the evidence and the named pytest gate deselects the three tests that exercise the new adapter.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 8466f0e0c6..748927474 touches only the fragment, its run.py, signed_manifest.py and test_signed_docs_restore.py, all inside the five paths the run record declares and the resumed attempt's advice explicitly granted.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_signed_docs_restore.py:161 and :240 fail if the restore stops being admitted on a live-structural-child name or if set_properties starts being admitted there; I re-ran the file with -m graph on a disposable Neo4j and read 3 passed.\nSCORE fit: 18\nJUSTIFICATION fit: signed_manifest.py:6985-6998 declares the adapter constants in the same shape as the thirteen adapters above it, and the module-private _docs_restore_* names describe the mechanism with no plan or ticket label.\nSCORE reuse: 18\nJUSTIFICATION reuse: the addition extends the adapter family owned by signed_manifest.py; I searched for an existing restore-from-revision owner (DOCS_REVISION_OF across imas_codex/, graph_store/graph_docs_persistence.py's persist_generated_docs, persist_refined_docs and reset_standard_name_docs) and each writes documentation forward only, so no restore owner existed to extend.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html:122 non-blocking: the reconciliation sentence says 176 pending, one reviewed and one exhausted name became accepted beside the whole before-to-after counts, but those counts show pending fell 387 (1108 to 721) and accepted rose 390 (2107 to 2497); 176 is the second pass's pending share alone, so the sentence misattributes the delta a reader is meant to check.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/manifest.md:5 non-blocking: the manifest's status is complete with 391 of 391 restored, while the run's own final message reports blocked with 212 of 391; the evidence logs at 01:17 and 01:41 corroborate the manifest, so the final message is the stale one, but a coordinator reading only the final message would treat a landed node as blocked.\nFINDING tests/standard_names/test_signed_docs_restore.py:154 non-blocking: the gate the manifest names collects this file but deselects all three of its tests because each carries @pytest.mark.graph (154, 233, 315), so the recorded 272 passed with 61 deselected exercises none of the new adapter; the review re-ran the file under -m graph and read 3 passed, so the tests work but the node's own recorded gate never showed it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222612732717-sib-restore-reset-docs/verify_docs_partition.py:17 non-blocking: the script exits 0 unconditionally (as does apply_docs_restore.py:181), so the EXIT=0 in verify-docs-partition.log and docs-restore-gate.log records nothing about whether the measure held; only the printed figures carry it, and a run that read back 300 of 391 would still exit 0.\nFINDING docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html:17 non-blocking: the instrument joins snapshots over 17:28:00Z-17:29:00Z (census.json instrument.reset_window) while the done_when names the 17:28:08-17:28:35Z reset window; the wider window is disclosed, but the artifact carries no per-snapshot creation time, so the claim that every selected snapshot is the reset's own cannot be checked from what landed.\n",
+  "review_run_id": "r-20261112T004840874471-review-of-sib-restore-reset-docs-748927474661",
+  "reviewed_base_sha": "8466f0e0c6ea3e1e8b34c369952139a9225e47d2",
+  "reviewed_head_sha": "748927474661a6e796a9ee686ab15b7d09ace6c6",
+  "reviewed_run_id": "r-20261111T222612732717-sib-restore-reset-docs",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261112T004840874471-review-of-sib-restore-reset-docs-748927474661"
+  },
+  "reviewer_run_id": "r-20261112T004840874471-review-of-sib-restore-reset-docs-748927474661",
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 20,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:15:15.082948+00:00",
+  "total": 110
+}

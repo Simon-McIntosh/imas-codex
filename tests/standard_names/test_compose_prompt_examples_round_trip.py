@@ -178,6 +178,7 @@ _SEMANTIC_NEGATIVE_EXAMPLES = {
     ("NC-1", "area_of_flux_surface"),
     ("NC-13", "radial_outline"),
     ("NC-13", "vertical_outline"),
+    ("NC-25", "neutral_beam_injector_beam_tangency_radius"),
     ("NC-28", "plasma_current_reference_waveform"),
     ("NC-30", "emissivity_of_infrared_camera"),
     ("NC-30", "radiance_of_visible_camera"),

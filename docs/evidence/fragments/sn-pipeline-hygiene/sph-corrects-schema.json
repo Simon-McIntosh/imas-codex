@@ -1,0 +1,75 @@
+{
+  "declaration": {
+    "endpoint_pairs": [
+      [
+        "StandardNameSourceRetry",
+        "StandardNameSourceRetry"
+      ]
+    ],
+    "generated_relationships_line": "('StandardNameSourceRetry', 'CORRECTS', 'StandardNameSourceRetry', 'one')",
+    "relationship_type": "CORRECTS",
+    "slot": "StandardNameSourceRetry.corrects"
+  },
+  "live": {
+    "declared_endpoint_pairs": [
+      [
+        "StandardNameSourceRetry",
+        "StandardNameSourceRetry"
+      ]
+    ],
+    "endpoint_pairs_in_graph": [
+      {
+        "declared": true,
+        "edges": 20,
+        "from_labels": [
+          "StandardNameSourceRetry"
+        ],
+        "to_labels": [
+          "StandardNameSourceRetry"
+        ]
+      }
+    ],
+    "mislabelled_edges": 0,
+    "total_edges": 20
+  },
+  "negative_control": {
+    "clean_arm": {
+      "edges": [
+        {
+          "from_labels": [
+            "StandardNameSourceRetry"
+          ],
+          "to_labels": [
+            "StandardNameSourceRetry"
+          ]
+        }
+      ],
+      "exit_status": 0
+    },
+    "clean_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T221906013871-sph-corrects-schema/nc-clean.log",
+    "red_arm": {
+      "edges": [
+        {
+          "from_labels": [
+            "StandardNameSourceRetry"
+          ],
+          "to_labels": [
+            "StandardNameSourceRetry"
+          ]
+        },
+        {
+          "from_labels": [
+            "StandardNameSource"
+          ],
+          "to_labels": [
+            "StandardName"
+          ]
+        }
+      ],
+      "exit_status": 1
+    },
+    "red_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T221906013871-sph-corrects-schema/negative-control.log",
+    "test_id": "tests/graph/test_schema_compliance.py::TestLabelsAndRelationships::test_corrects_edges_join_declared_endpoints"
+  },
+  "node": "sph-corrects-schema"
+}

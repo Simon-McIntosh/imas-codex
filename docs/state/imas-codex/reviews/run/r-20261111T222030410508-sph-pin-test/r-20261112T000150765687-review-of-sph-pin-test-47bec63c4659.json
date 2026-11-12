@@ -1,0 +1,37 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-12T00:12:42.782Z",
+  "dispatched_at": "2026-11-12T00:03:19Z",
+  "findings": [
+    {
+      "file": "tests/core/test_isn_pin_agreement.py:41",
+      "severity": "non-blocking",
+      "text": "pinned_isn_version accepts a pyproject path argument and pyproject_path() exists as a separate helper, but every caller in the tree passes no argument, so the parameter and the indirection are dead API surface."
+    },
+    {
+      "file": "manifest.md:6",
+      "severity": "non-blocking",
+      "text": "the run's manifest records both gate arms green at 47bec63c4 while both gate log headers name rev 05e3ad0bc; the intervening commit is docs-only so the result holds, but the recorded revision is not the one the logs ran at."
+    }
+  ],
+  "project": "imas-codex",
+  "review": "VERDICT goal: the node goal is to hold the ISN pin to the installed package and the graph snapshot by test; tests/core/test_isn_pin_agreement.py:68 adds the installed-package comparison and tests/graph/test_isn_grammar_snapshot_pin.py:57 adds the active-snapshot comparison, both against the same pyproject pin.\nVERDICT done_when: the done_when asks for the installed-package comparison to redden on a planted mismatch and pass at head, a graph-tier comparison with -m graph, and both runs plus the mismatch logged in the fragment; sph-pin-test-negative-control.log records FAILED tests/core/test_isn_pin_agreement.py::test_isn_pin_matches_the_installed_package with EXIT=1, sph-pin-test-head-core.log records 2 passed EXIT=0, sph-pin-test-head-graph.log records 1 passed EXIT=0, and docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test.html tabulates all three.\nVERDICT write_paths: the declared paths are the two test files and three docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test.* files; the diff touches exactly those five and nothing else.\nVERDICT manifest: read; it records both gate arms green, the red negative control on the extended test id, the two commits, the four logs, and its landing line.\nVERDICT diff: read both commits against ce31e565; 05e3ad0bc refactors the pin extraction into pinned_isn_version(), adds installed_isn_version() and test_isn_pin_matches_the_installed_package, and adds the graph-marked snapshot test; 47bec63c adds the evidence fragment, JSON and runner, and is docs-only.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/core/test_isn_pin_agreement.py:68 compares the pyproject pin with importlib.metadata.version and tests/graph/test_isn_grammar_snapshot_pin.py:57 compares the pin with the active ISNGrammarVersion, which is exactly the goal's two comparisons.\nSCORE evidence: 17\nJUSTIFICATION evidence: the three logs record 2 passed, 1 passed and 1 failed with EXIT lines, and sph-pin-test.html tabulates all three, but the gate logs' headers name rev 05e3ad0bc rather than head 47bec63c (docs-only in between) and the graph comparison's fire is shown by sph-pin-test-run.py's direct call rather than by a pytest arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in ce31e565..47bec63c is one of the five declared write paths, with no change to pyproject.toml or imas_codex/standard_names/grammar_sync.py.\nSCORE durability: 18\nJUSTIFICATION durability: tests/core/test_isn_pin_agreement.py:84 fails when the pinned and installed versions differ and the negative-control log shows it reddening, while tests/graph/test_isn_grammar_snapshot_pin.py:67 fails on a differing snapshot version and :43-53 fail on zero, several or versionless active nodes; no assertion compares a value against the same input the test supplied.\nSCORE fit: 17\nJUSTIFICATION fit: the files follow the repo's test conventions, using the graph_client fixture and registered graph/integration markers as tests/graph/test_grammar_graph_compliance.py:42 does, but tests/core/test_isn_pin_agreement.py:41 carries an unused pyproject parameter and a single-caller pyproject_path() helper.\nSCORE reuse: 17\nJUSTIFICATION reuse: the change extends tests/core/test_isn_pin_agreement.py rather than adding a second pin test and shares pinned_isn_version() with the graph tier, but the active-snapshot Cypher at tests/graph/test_isn_grammar_snapshot_pin.py:38 repeats the literal at imas_codex/cli/sn.py:1343 and tests/graph/test_grammar_graph_compliance.py:42; the search over imas_codex/ and tests/ found no public accessor for the active snapshot version to extend.\nFINDING tests/core/test_isn_pin_agreement.py:41 non-blocking: pinned_isn_version accepts a pyproject path argument and pyproject_path() exists as a separate helper, but every caller in the tree passes no argument, so the parameter and the indirection are dead API surface.\nFINDING manifest.md:6 non-blocking: the run's manifest records both gate arms green at 47bec63c4 while both gate log headers name rev 05e3ad0bc; the intervening commit is docs-only so the result holds, but the recorded revision is not the one the logs ran at.",
+  "review_run_id": "r-20261112T000150765687-review-of-sph-pin-test-47bec63c4659",
+  "reviewed_base_sha": "ce31e56595ff8be706137df4e835b4b3530eb024",
+  "reviewed_head_sha": "47bec63c465972b8c46962651b8815db7d6b6db2",
+  "reviewed_run_id": "r-20261111T222030410508-sph-pin-test",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T00:20:00.000Z",
+  "total": 109
+}

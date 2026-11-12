@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T00:58:41.126Z",
+  "dispatched_at": "2026-11-12T00:45:47Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-catalog-consistency/r-20261112T004033280598-plan-review-of-sn-catalog-consistency/plan.html:77",
+      "id": "reasoning-1",
+      "reason": "the endpoint needs the decrease restricted to families whose divergence the sources do not explain (or the recorded reason accepted in place of the decrease), or a node that finds the audit green and the count unchanged has no authorised way to close.",
+      "text": "\u00a75's done-when requires the domain audit to report zero names whose stored domain disagrees with the stored decision AND the census's grouping axis to count strictly fewer multi-domain families; `physics_domain` is derived from DD sources (`sn-catalog-grouping` \u00a73: `select_primary_domain` over `source_domains`), and \u00a75's own prose allows a family to remain multi-domain when its members \"draw on DD sources whose domains differ\" \u2014 so once the audit is green a legitimately multi-domain family is counted at both ends, and the only way to move the count is to write a domain the derivation contradicts, which fails the same done-when's first clause",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-catalog-consistency/r-20261112T004033280598-plan-review-of-sn-catalog-consistency/plan.html:77",
+      "id": "done_when-1",
+      "reason": "as written a node must either invent a second reading the plan does not name or drop the population restriction, and the restriction is exactly what stops the full-DD continuation's new names from moving the comparison, so losing it reinstates the defect an earlier review closed.",
+      "text": "the count is declared \"over the families and member names live when this section starts\" but pinned to \"the consistency census's grouping axis\", and the committed census emits per-family `domain_variants` aggregated over all live members plus a bare member-id list (`sib-consistency-census.json`), with no per-member domain and no population argument \u2014 and \u00a72 line 46 records that the census has \"no way to scope it to a population\" and that a population argument only \"may be added\", so the scoped figure has no sanctioned instrument behind it and \u00a75 does not depend on \u00a72",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "15d1dc677a32787f1af4245fdc5b784b2f926ca8",
+  "plan_fingerprint": "eb6415bdd58a70784f920f97742ddd9f4b92a1d33fdd60d7d0da5f29511b4391",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 17,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T004033280598-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "5198b21992daeb6c5d6140cea1a02a24fc9ea40f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `scc-chaincap-remeasure.html`/`.json` exist, commits `c9bb3c280`, `a248fc354` and `fc99c61f0` resolve, and `sn-integrity-backlog#s52`, `sn-catalog-grouping#s3`, `sn-full-dd-continuation#s4` all resolve.",
+    "done_when": "a finding \u2014 \u00a75's new population-scoped family count is not obtainable from the instrument it names, so its done-when cannot be measured as written.",
+    "evidence_paths": "pass \u2014 every artifact the reviewed units cite is a committed file under `docs/evidence/fragments/` (the chain-cap re-measure, the batch artifact, the census JSON), not a scratch or node-local path.",
+    "naming": "pass \u2014 neither changed unit introduces a plan label, stage name, ticket number or changelog prose; the added text names mechanisms (`the consistency census's grouping axis`, `physics_domain`) rather than identifiers.",
+    "reasoning": "a finding \u2014 \u00a75's two clauses can be jointly unsatisfiable: the audit demands each name's store match its DD derivation, while the family count must fall, and a family whose members derive different domains from different DD sources keeps that count standing.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable (live-name domains agree with the stored decision and with each other across a family); the document unit changes no node's goal.",
+    "wiring": "pass \u2014 \u00a75 declares its wait on `sn-integrity-backlog#s52` (the node that produced `sib-consistency-batches.json`) and its link to `sn-catalog-grouping#s3`; both sections resolve, and the document unit's `plan-section-declarations` now reads `s8: done` in step with \u00a78's `data-status=\"done\"`."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "d6eeae749f1fbb4116cbd68cb82b00351768cf4aeb4fa0b37300fa91b5c170f7",
+    "s3": "fdb01b1d5aaf1af353a55b177f9d2b8b87660bf4648fb8922544d39899e8a2c7",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "93cfd4f8a38e129ad64312fe0b422b5b6208bd7d6f1341a370e99bcbaa6377bf",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:05:57.767901+00:00",
+  "total": null
+}

@@ -6,6 +6,13 @@
   "call_sites": [],
   "completed_at": "2026-11-11T23:42:19.514Z",
   "dispatched_at": "2026-11-11T23:21:08Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "scc-sourceless-names",
+      "recorded_at": "2026-11-12T00:33:19.285443+00:00"
+    }
+  },
   "findings": [
     {
       "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T220312718532-scc-sourceless-names/scc-sourceless-names-gate.log",

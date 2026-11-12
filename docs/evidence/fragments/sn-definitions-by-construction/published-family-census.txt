@@ -1,0 +1,156 @@
+species families (>=3 members): 20 members 281
+
+### families split across domains: 8
+  <X>_density_at_pedestal_top n=18 {'core_plasma_physics': 1, 'edge_plasma_physics': 17}
+  <X>_density_at_internal_transport_barrier n=18 {'general': 2, 'transport': 16}
+  <X>_density n=17 {'edge_plasma_physics': 3, 'general': 1, 'particle_measurement_diagnostics': 7, 'radiation_measurement_diagnostics': 3, 'transport': 3}
+  toroidal_<X>_velocity_at_magnetic_axis n=17 {'general': 1, 'transport': 16}
+  line_averaged_<X>_density n=16 {'core_plasma_physics': 1, 'particle_measurement_diagnostics': 15}
+  <X>_density_at_plasma_boundary n=16 {'edge_plasma_physics': 14, 'general': 2}
+  flux_surface_averaged_<X>_density_at_plasma_boundary n=16 {'edge_plasma_physics': 15, 'general': 1}
+  ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density n=14 {'plasma_wall_interactions': 5, 'radiation_measurement_diagnostics': 3, 'transport': 6}
+
+### description-template variants inside one family
+
+  <X>_density_at_pedestal_top n=18 templates=18 units={'m^-3': 18}
+     [1] <X> ion number density at the top of the H-mode edge pedestal, summed over all <X> ion charge states.
+     [1] Charge-state-summed local number density of <X> ions at the H-mode edge pedestal top, excluding neutral <X>.
+     [1] Local number density of ionized <X> at the top of the H-mode edge pedestal, summed over all <X> ion charge states and excluding neutral <X>.
+     [1] <X> ion number density at the top of the H-mode edge pedestal, summed over all <X> ionization states and excluding neutral <X>.
+
+  <X>_density_at_divertor_target n=18 templates=15 units={'m^-3': 18}
+     [4] Number density of the <X> species at the divertor target is the local particle count per volume for <X> ions at the sheath entrance immediately upstream of the target-facing plasma boundary.
+     [1] Number density of <X> ions at the divertor target is the local particle count per volume at the sheath entrance, summed over positive ionization states and excluding neutral <X>.
+     [1] Number density of <X> ions at the divertor target is the local particle count per volume at the sheath entrance immediately upstream of the target-facing plasma boundary, summed over all positive ionization states.
+     [1] <X> density at the divertor target is the local number density of <X> ions immediately upstream of the electrostatic sheath at the target-facing plasma boundary.
+
+  <X>_density_at_internal_transport_barrier n=18 templates=13 units={'m^-3': 18}
+     [5] Particle number density of <X> ions evaluated on the flux surface assigned to an internal transport barrier, summed over all <X> ion charge states and excluding neutral <X>.
+     [2] Number density of <X> ions at the radial location of the internal transport barrier, where suppressed cross-field turbulent transport enables steep impurity density gradients to develop.
+     [1] Number density of <X> ions at the radial location of the internal transport barrier, where suppressed turbulent cross-field transport enables steep fuel-species density gradients to develop.
+     [1] Particle number density of the combined <X> fuel-ion pseudo-species evaluated on the flux surface assigned to an internal transport barrier, where locally reduced cross-field turbulent transport can sustain steep fuel-density grad
+
+  <X>_density_at_limiter n=18 templates=16 units={'m^-3': 18}
+     [3] <X> ion number density in the boundary plasma immediately adjacent to a plasma-facing limiter surface, summed over all positive ionization states and excluding neutral <X> atoms.
+     [1] <X> ion number density in the boundary plasma immediately adjacent to a plasma-facing limiter surface, summed over all <X> ionization states from Be1+ through Be4+.
+     [1] <X> ion number density in the boundary plasma immediately adjacent to a plasma-facing limiter surface, summed over all <X> ionization states and excluding neutral <X> atoms.
+     [1] <X> ion number density in the boundary plasma immediately adjacent to a plasma-facing limiter surface, evaluated on the plasma side of the magnetic presheath or sheath entrance.
+
+  <X>_density_at_magnetic_axis n=18 templates=14 units={'m^-3': 18}
+     [5] Particle number density of the <X> ion population evaluated at the magnetic axis is the local <X>-ion count per physical volume at that location, summed over all <X> ionic charge states.
+     [1] Particle number density of <X> ions evaluated at the magnetic axis is the local <X>-ion count per physical volume at that location, summed over all <X> ionic charge states.
+     [1] Particle number density of the <X> ion population evaluated at the magnetic axis is the local <X>-ion count per physical volume there, summed over all <X> ionization states.
+     [1] Particle number density of the <X> ion population evaluated at the magnetic axis is the local <X>-ion count per physical volume, summed over all <X> ionic charge states.
+
+  volume_averaged_<X>_density n=18 templates=18 units={'m^-3': 18}
+     [1] Volume-averaged number density of <X> ions over the confined plasma volume, summed over all ionization stages.
+     [1] <X> density is the volume-averaged ion number density of the combined <X> fuel pseudo-species, treating <X> and <X> as one effective species.
+     [1] Volume-averaged number density of <X> (protium) ions in the plasma, giving the mean H+ concentration across the confined plasma volume.
+     [1] Volume-averaged total number density of <X> ions, summed over all charge states from Li+ through fully stripped Li3+, within the confined plasma volume.
+
+  <X>_density n=17 templates=17 units={'m^-3': 17}
+     [1] Elemental <X> number density, summed over neutral atoms and all ionic charge states through fully stripped B5+.
+     [1] <X> density is the local number density of elemental <X> in the plasma, summed over neutral <X> atoms and all ionic charge states through fully stripped C6+.
+     [1] Total number density of <X> impurity ions in the plasma, summed over all ionization states from singly to fully ionized <X> (atomic number Z = 26).
+     [1] Number density of <X> impurity ions, summed over the included ionization states; line-averaged and volume-averaged forms express the same elemental content.
+
+  toroidal_<X>_velocity_at_magnetic_axis n=17 templates=17 units={'m.s^-1': 17}
+     [1] Toroidal <X> velocity at the magnetic axis is the signed bulk-flow velocity of <X> ions projected onto the toroidal φ direction of the right-handed cylindrical (R, φ, Z) frame at the magnetic axis.
+     [1] Density-weighted toroidal bulk-flow velocity of <X> ions at the magnetic axis, combining all ionization states in the right-handed cylindrical (R, φ, Z) frame.
+     [1] Toroidal <X>-ion bulk velocity at the magnetic axis, density-weighted over all <X> ionization states in the right-handed (R, φ, Z) frame.
+     [1] Density-weighted toroidal bulk-flow velocity of <X> impurity ions at the magnetic axis, combining all ionization states.
+
+  toroidal_<X>_velocity_at_internal_transport_barrier n=17 templates=17 units={'m.s^-1': 17}
+     [1] Signed toroidal bulk-flow velocity of <X> ions, density-weighted over charge states and evaluated at the radial location of an internal transport barrier.
+     [1] Density-weighted toroidal bulk-flow velocity of <X> ions at the internal transport barrier, combining all <X> ionization states.
+     [1] Toroidal <X> velocity at an internal transport barrier is the signed toroidal component of the <X> impurity-ion fluid velocity in the right-handed cylindrical (R, φ, Z) frame, evaluated on the barrier flux surface. At species leve
+     [1] Mass-weighted toroidal bulk-flow velocity of the effective <X> fuel species evaluated at the internal transport barrier.
+
+  line_averaged_<X>_density n=16 templates=16 units={'m^-3': 16}
+     [1] Line-of-sight average of the number density of positively charged <X> ions, summed over all ionization states and excluding neutral <X>.
+     [1] Chord-average of the <X> ion number density along a diagnostic line of sight, equal to the path integral of the local <X> density divided by the chord length.
+     [1] Line-averaged <X> density is the chord-length average of local ionized <X> density along a specified viewing path, excluding neutral atoms.
+     [1] Chord-averaged <X> ion number density along a specified line of sight through the plasma, representing the path mean of local fusion-ash concentration.
+
+  <X>_density_at_plasma_boundary n=16 templates=12 units={'m^-3': 16}
+     [3] Number density of <X> ions at the plasma boundary, evaluated as the local, intensive particle count per physical volume on the last closed magnetic flux surface.
+     [2] Number density of <X> ions at the plasma boundary, evaluated locally on the last closed magnetic flux surface and summed over all ionization states.
+     [2] Number density of <X> ions at the plasma boundary, evaluated locally on the last closed magnetic flux surface and summed over all ionization stages.
+     [1] Number density of <X> at the plasma boundary, evaluated as the local, intensive particle count per physical volume on the last closed magnetic flux surface, summed over neutral atoms and all ionization states.
+
+  flux_surface_averaged_<X>_density_at_plasma_boundary n=16 templates=12 units={'m^-3': 16}
+     [3] Number density of <X> ions averaged over the plasma-boundary flux surface, summed over all <X> ion charge states and excluding neutral <X>.
+     [2] Number density of <X> ions averaged over the last closed magnetic flux surface, summed over all <X> ion charge states and excluding neutral <X>.
+     [2] Number density of <X> ions averaged over the plasma boundary, summed over all <X> ion charge states and excluding neutral <X>.
+     [1] Number density of <X> ions averaged over the plasma boundary, summed over all ionization states and excluding neutral <X>.
+
+  toroidal_<X>_velocity_at_pedestal_top n=16 templates=16 units={'m.s^-1': 16}
+     [1] Toroidal <X> velocity at the pedestal top is the φ component, in the right-handed cylindrical (R, φ, Z) frame, of the density-weighted mean bulk flow of <X> impurity ions where the H-mode pedestal transitions to the confined core.
+     [1] Toroidal bulk-flow velocity of <X> ions at the core-side shoulder of the H-mode edge transport barrier, density-weighted over all ionization states.
+     [1] Density-weighted toroidal flow velocity of <X> impurity ions at the core-side shoulder of the H-mode edge transport barrier, resolved along increasing toroidal angle in the right-handed cylindrical (R, φ, Z) frame.
+     [1] Toroidal component of the bulk flow velocity assigned to the effective <X> fuel species at the core-side shoulder of the H-mode edge pedestal.
+
+  toroidal_<X>_velocity_at_plasma_boundary n=14 templates=14 units={'m.s^-1': 14}
+     [1] Toroidal component in the right-handed cylindrical (R, φ, Z) frame of the <X>-ion bulk-flow velocity at the last closed flux surface.
+     [1] Density-weighted toroidal bulk-flow velocity of <X> impurity ions at the last closed magnetic flux surface, resolved along increasing toroidal angle.
+     [1] Toroidal component of the bulk flow velocity of the fictitious <X> single-species (atomic mass 2.5 amu), evaluated at the plasma boundary (last closed flux surface).
+     [1] Density-weighted toroidal bulk-flow velocity of <X> ions at the last closed flux surface, resolved along increasing toroidal angle.
+
+  ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density n=14 templates=14 units={'1': 14}
+     [1] Dimensionless <X> abundance formed by dividing the volume-averaged <X> density by the volume-averaged electron density.
+     [1] Dimensionless global <X> abundance ratio using separately volume-averaged <X> and electron number densities, with neutral <X> and every ionic charge state included.
+     [1] Dimensionless plasma-wide <X> abundance defined as the ratio of volume-averaged <X> number density to volume-averaged electron number density. The <X> density is summed over all <X> charge states.
+     [1] Volume-averaged <X> ion density relative to volume-averaged electron density for the plasma, with <X> summed over ionized charge states and neutral <X> excluded.
+
+  <X>_source_rate_due_to_gas_injection n=11 templates=11 units={'s^-1': 11}
+     [1] Instantaneous equivalent-electron <X> source rate delivered to the plasma vessel by gas injection systems, where each injected <X> atom with Z = 18 contributes 18 equivalent-electron counts.
+     [1] Instantaneous equivalent-electron source rate of <X> atoms introduced by gas injection, with four equivalent electrons assigned to each atom.
+     [1] Instantaneous equivalent-electron <X> source rate delivered to the plasma vessel by gas injection systems, with each injected <X> atom contributing six equivalent-electron counts.
+     [1] Instantaneous equivalent-electron <X> source rate delivered to the plasma vessel by gas injection systems, where each injected <X> atom contributes two equivalent-electron counts.
+
+  accumulated_<X>_count_due_to_gas_injection n=8 templates=8 units={'1': 8}
+     [1] Cumulative post-breakdown <X> inventory from gas injection, expressed as six equivalent-electron counts for every injected neutral <X> atom.
+     [1] Cumulative equivalent-electron inventory of <X> delivered by gas injection after plasma breakdown.
+     [1] Cumulative equivalent-electron inventory of <X> atoms delivered by gas injection after plasma breakdown, assigning two count units to each atom.
+     [1] Cumulative post-breakdown equivalent-electron inventory of neutral <X> delivered by gas injection, with one count unit assigned to each <X> atom.
+
+  <X>_prefill_count n=5 templates=5 units={'1': 5}
+     [1] <X> prefill count is the total amount of neutral <X> (Ar) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 per atom.
+     [1] <X> prefill count is the total amount of neutral <X> introduced before plasma breakdown, expressed as an equivalent-electron count with one count unit per atom.
+     [1] <X> prefill count is the total amount of neutral <X> introduced before plasma breakdown, expressed as an equivalent-electron count with 36 count units per atom.
+     [1] <X> prefill count is the total amount of neutral <X> (Ne) introduced before plasma breakdown, expressed as an equivalent-electron count with 10 equivalent electrons per atom.
+
+  accumulated_<X>_count n=3 templates=3 units={'1': 3}
+     [1] Accumulated <X> count is the cumulative equivalent-electron inventory of <X> atoms delivered by gas injection after plasma breakdown. Each <X> atom contributes 18 equivalent electrons, equal to its atomic number; this is delivered
+     [1] Cumulative number of <X> atoms injected into the machine since plasma breakdown, expressed as 36 equivalent electrons for each <X> atom.
+     [1] Cumulative number of <X> atoms from gas injection accumulated since plasma breakdown, expressed in equivalent electrons; each injected <X> atom contributes ten equivalent electrons.
+
+  accumulated_<X>_prefill_count_due_to_gas_injection n=3 templates=3 units={'1': 3}
+     [1] Cumulative equivalent-electron inventory of <X> atoms introduced by gas injection during plasma prefill before plasma breakdown, with two count units assigned per atom.
+     [1] Cumulative equivalent-electron inventory of <X> introduced by gas injection during plasma prefill, assigning three count units to each <X> atom.
+     [1] Cumulative <X> gas introduced during the prefill phase by gas injection, expressed as an equivalent-electron count where each <X> atom contributes 8 count units equal to its atomic number.
+families with >1 description template or unit: 20 of 20
+
+### unit by trailing/head noun
+  pressure n=53: {'Pa': 51, '1': 2}
+  temperature n=44: {'eV': 35, 'K': 7, '1': 2}
+  density n=432: {'m^-3': 229, 'A.m^-2': 62, 'N.m^-2': 51, 'W.m^-3': 44, '1': 31, 'kg.m^-1.s^-2': 8, 'J.m^-3': 3, 'm^-2': 2, 'kg.m^-3': 1}
+  frequency n=11: {'rad.s^-1': 7, 'Hz': 3, 's^-1': 1}
+  energy n=26: {'J': 16, 'eV': 5, '1': 3, 'W': 2}
+  torque n=20: {'N.m': 18, 'kg.m^2.s^-2': 2}
+  current n=28: {'A': 22, 'Wb': 2, 'W.m^-2': 2, 'W': 1, '1': 1}
+  angle n=27: {'rad': 26, 'sr': 1}
+  flux n=126: {'W.m^-2': 40, 'm^-2.s^-1': 29, 'kg.m^-1.s^-2': 28, 'Wb': 23, 's^-1': 3, '1': 2, 'Wb.m^-1': 1}
+  rate n=78: {'s^-1': 55, 'm^-3.s^-1': 14, 'Hz': 9}
+  time n=9: {'s': 8, '1': 1}
+  momentum n=5: {'kg.m.s^-1': 4, 'kg.m^-1.s^-2': 1}
+  coordinate n=123: {'m': 93, '1': 14, 'rad': 12, 'Wb^-1.m^2': 1, 'T^2.Wb^-1.m^2': 1, 'Wb^-1.m^3': 1, 'm^2': 1}
+  area n=18: {'m^2': 16, 'Wb^-1.m^2': 1, 'm': 1}
+  emissivity n=6: {'m^-3.s^-1': 3, '1': 1, 'm^-3.s^-1.sr^-1': 1, 'W.m^-3': 1}
+  current_density n=66: {'A.m^-2': 62, '1': 4}
+  torque_density n=59: {'N.m^-2': 51, 'kg.m^-1.s^-2': 8}
+  particle_flux n=29: {'m^-2.s^-1': 26, 's^-1': 3}
+  momentum_flux n=30: {'kg.m^-1.s^-2': 28, '1': 2}
+  source_rate n=65: {'s^-1': 45, 'm^-3.s^-1': 14, 'Hz': 6}
+  magnetic_field n=31: {'T': 30, '1': 1}
+  magnetic_flux n=24: {'Wb': 23, 'Wb.m^-1': 1}

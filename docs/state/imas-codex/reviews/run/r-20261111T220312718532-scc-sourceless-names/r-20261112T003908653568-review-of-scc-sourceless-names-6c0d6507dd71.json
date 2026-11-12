@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run declares neither a baseline_suite nor an after_suite arm (suite_gate unarmed): its measure is an evidence runner, not a pytest suite, so there is no failing test id on either side and the pair is 0 and [], an unmeasured absence rather than a measured zero.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-12T00:58:34.469Z",
+  "dispatched_at": "2026-11-12T00:45:40Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gained commit raises census_total from 18 to 21 but the census paragraph still accounts for only 11 names (5 live, 4 exhausted, 1 derived parent, 1 unchained_holder) and never names the 10 held_in_chain rows the same file records, so a reader cannot reconcile 21 from the page."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py",
+      "line": "479",
+      "severity": "non-blocking",
+      "text": "non-blocking: validate() still never constrains a rebind target to the row's recorded_paths, so the folded finding from the prior review is unfulfilled: ratio_of_diamagnetic_vorticity_to_major_radius proposes one edge while its reason requires both recorded paths."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T220312718532-scc-sourceless-names/scc-sourceless-names-control-falsified.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the log's header names revision 1fbdbf113, at which the exit guard is not in git, because the falsification ran against an uncommitted working tree, so the receipt for the durability claim cannot be tied to a committed revision."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to propose an action for every live name with no producing DD source; the delta's `chore` commit re-renders docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html with the same five names (3 drafts, 2 accepted), actions hold 2 / rebind 3, at the second read 2026-11-12T00:15:32.\nVERDICT done_when: the done_when asks for each sourceless live name with holder, spend, history and proposed action, a planted sourceless name listed from a disposable graph, no live-graph write; docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.json carries live_population 5, invariant_confirmed 5, graph_writes 0, spend_usd 0 and planted_control with all four predicates true, and the three arm logs each end EXIT=0 at revision 68af65177.\nVERDICT write_paths: the node was fenced to scc-sourceless-names.html, scc-sourceless-names.json, scc-sourceless-names-run.py and docs/figures/sn-catalog-consistency/scc-sourceless-names; every path in 1fbdbf113..6c0d6507d is one of the first three, and the fourth file that lay outside them (scc-sourceless-names-control.json) is deleted by 68af65177.\nVERDICT manifest: read; status complete, commits 1fbdbf113, 68af65177, 6c0d6507d, test_logs naming three per-arm logs that each carry revision 68af65177 and a bare EXIT=0 line, negative_control_log naming the falsification log, and baseline_suite/after_suite both empty because the run is an evidence runner with no pytest arm.\nVERDICT diff: read both commits against 1fbdbf113; 68af65177 deletes the out-of-scope control JSON, folds the control into the population JSON and adds a four-predicate exit guard to scc-sourceless-names-run.py:689-701, and 6c0d6507d commits only the re-read timestamp and census total 21 into the JSON and page.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html still lists all five sourceless live names with stage, spend and a proposed action, unchanged in substance by the two gained commits.\nSCORE evidence: 17\nJUSTIFICATION evidence: scc-sourceless-names-gate-live.log, -fixture.log and -render.log each carry `# revision: 68af65177`, host and slurm job, the imported module path, the resolved cwd and a bare `EXIT=0`, repairing the killed-log receipt the prior review refused.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the gained diff is inside the declared write paths, and 68af65177 removes the only out-of-scope file (scc-sourceless-names-control.json) the prior review raised.\nSCORE durability: 18\nJUSTIFICATION durability: scc-sourceless-names-run.py:689-701 raises SystemExit(1) when any of the four planted-control predicates is not True, and scc-sourceless-names-control-falsified.log shows the guard firing with both listing predicates forced false.\nSCORE fit: 16\nJUSTIFICATION fit: the guard and the control merge at scc-sourceless-names-run.py:466 and :689 follow the runner's existing dict-and-exit idiom, though the fixture now rewrites the canonical population file mid-gate, an ordering the module does not assert.\nSCORE reuse: 20\nJUSTIFICATION reuse: the gained commits add no capability; the control reuses the existing run_fixture result and main() reuses the existing exit path rather than introducing a second predicate or a separate control module.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html:1 non-blocking: the gained commit raises census_total from 18 to 21 but the census paragraph still accounts for only 11 names (5 live, 4 exhausted, 1 derived parent, 1 unchained_holder) and never names the 10 held_in_chain rows the same file records, so a reader cannot reconcile 21 from the page.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py:479 non-blocking: validate() still never constrains a rebind target to the row's recorded_paths, so the folded finding from the prior review is unfulfilled: ratio_of_diamagnetic_vorticity_to_major_radius proposes one edge while its reason requires both recorded paths.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T220312718532-scc-sourceless-names/scc-sourceless-names-control-falsified.log:1 non-blocking: the log's header names revision 1fbdbf113, at which the exit guard is not in git, because the falsification ran against an uncommitted working tree, so the receipt for the durability claim cannot be tied to a committed revision.\n",
+  "review_run_id": "r-20261112T003908653568-review-of-scc-sourceless-names-6c0d6507dd71",
+  "reviewed_base_sha": "1fbdbf1135d9410fe3ae6db8799e998f1f2ce427",
+  "reviewed_head_sha": "6c0d6507dd71fb748a97d03ab80cb2b808fca277",
+  "reviewed_run_id": "r-20261111T220312718532-scc-sourceless-names",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261112T003908653568-review-of-scc-sourceless-names-6c0d6507dd71"
+  },
+  "reviewer_run_id": "r-20261112T003908653568-review-of-scc-sourceless-names-6c0d6507dd71",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:22:59.201267+00:00",
+  "total": 108
+}

@@ -1,0 +1,89 @@
+names 1975
+per domain {'transport': 698, 'edge_plasma_physics': 204, 'equilibrium': 145, 'auxiliary_heating': 118, 'radiation_measurement_diagnostics': 110, 'plant_systems': 104, 'magnetohydrodynamics': 93, 'magnetic_field_systems': 89, 'plasma_wall_interactions': 89, 'divertor_physics': 59, 'particle_measurement_diagnostics': 55, 'structural_components': 36, 'turbulence': 35, 'electromagnetic_wave_diagnostics': 34, 'magnetic_field_diagnostics': 30, 'general': 19, 'mechanical_measurement_diagnostics': 15, 'gyrokinetics': 11, 'neutronics': 7, 'waves': 6, 'spectroscopy': 5, 'core_plasma_physics': 3, 'current_drive': 2, 'fast_particles': 2, 'machine_operations': 2, 'runaway_electrons': 2, 'fueling': 1, 'plasma_initiation': 1}
+keys Counter({'name': 1975, 'description': 1975, 'documentation': 1975, 'unit': 1975, 'domain': 1975})
+units top [('1', 280), ('m^-3', 229), ('m', 226), ('m.s^-1', 199), ('W', 107), ('m^2.s^-1', 81), ('A.m^-2', 66), ('s^-1', 65), ('kg.m^-1.s^-2', 56), ('Pa', 55), ('rad', 53), ('N.m^-2', 51), ('eV', 46), ('T', 45), ('W.m^-3', 45), ('W.m^-2', 41), ('m^-2.s^-1', 29), ('A', 23), ('Wb', 23), ('T.m', 23), ('V', 20), ('m^-3.s^-1', 18), ('N.m', 18), ('V.m^-1', 17), ('m^2', 17), ('J', 16), ('Hz', 13), ('s', 11), ('m^-2', 8), ('K', 7), ('rad.s^-1', 7), ('m^-1', 6), ('ohm', 6), ('m^-1.ohm^-1', 6), ('m^3', 5), ('N', 5), ('kg.m^-3', 5), ('m^2.sr', 5), ('kg.m.s^-1', 4), ('T^-2', 4)]
+
+== flux_surface_averaged: 32  domains={'edge_plasma_physics': 19, 'equilibrium': 12, 'general': 1}
+
+== volume_averaged: 49  domains={'transport': 37, 'plasma_wall_interactions': 5, 'radiation_measurement_diagnostics': 3, 'edge_plasma_physics': 2, 'magnetohydrodynamics': 1, 'runaway_electrons': 1}
+
+== line_averaged: 23  domains={'particle_measurement_diagnostics': 19, 'transport': 2, 'core_plasma_physics': 1, 'electromagnetic_wave_diagnostics': 1}
+
+== line_integrated: 1  domains={'electromagnetic_wave_diagnostics': 1}
+
+== surface_integrated: 0  domains={}
+
+== volume_integrated: 1  domains={'transport': 1}
+
+== time_derivative: 3  domains={'transport': 3}
+
+== derivative_of: 10  domains={'equilibrium': 6, 'transport': 3, 'gyrokinetics': 1}
+
+== gradient: 9  domains={'equilibrium': 9}
+
+== normalized: 48  domains={'turbulence': 23, 'equilibrium': 7, 'gyrokinetics': 6, 'general': 3, 'magnetohydrodynamics': 3, 'edge_plasma_physics': 2}
+
+== magnitude_of: 0  domains={}
+
+== square_of: 13  domains={'equilibrium': 12, 'transport': 1}
+
+== ratio_of: 35  domains={'transport': 13, 'radiation_measurement_diagnostics': 7, 'plasma_wall_interactions': 6, 'equilibrium': 4, 'edge_plasma_physics': 1, 'magnetohydrodynamics': 1}
+
+== product_of: 1  domains={'equilibrium': 1}
+
+== tendency: 0  domains={}
+
+== change_in: 1  domains={'transport': 1}
+
+== maximum: 10  domains={'edge_plasma_physics': 2, 'neutronics': 2, 'auxiliary_heating': 1, 'equilibrium': 1, 'magnetic_field_systems': 1, 'particle_measurement_diagnostics': 1}
+
+== minimum: 5  domains={'equilibrium': 3, 'magnetic_field_systems': 1, 'plant_systems': 1}
+
+== standard_deviation: 0  domains={}
+
+== _per_: 2  domains={'auxiliary_heating': 1, 'magnetic_field_diagnostics': 1}
+
+== toroidal_component: 0  domains={}
+
+== poloidal_component: 0  domains={}
+
+== radial_component: 0  domains={}
+
+== parallel_component: 0  domains={}
+
+== real_part: 23  domains={'magnetohydrodynamics': 19, 'electromagnetic_wave_diagnostics': 3, 'gyrokinetics': 1}
+
+== imaginary_part: 24  domains={'magnetohydrodynamics': 20, 'electromagnetic_wave_diagnostics': 2, 'auxiliary_heating': 1, 'gyrokinetics': 1}
+
+== amplitude: 7  domains={'turbulence': 3, 'auxiliary_heating': 2, 'waves': 2}
+
+== phase: 10  domains={'magnetohydrodynamics': 5, 'auxiliary_heating': 4, 'electromagnetic_wave_diagnostics': 1}
+
+== flux_surface_average: 32  domains={'edge_plasma_physics': 19, 'equilibrium': 12, 'general': 1}
+
+#### flux surface average notation
+32 [('langle_plain+oint+gradpsi_weight', 17), ('langle_sub+oint+gradpsi_weight', 3), ('langle_sub+oint+Bp_weight', 3), ('langle_plain+gradpsi_weight', 3), ('langle_sub+oint', 2), ('langle_sub+gradpsi_weight', 2), ('langle_sub', 1), ('langle_plain', 1)]
+   langle_plain+oint+gradpsi_weight ['flux_surface_averaged_argon_density_at_plasma_boundary', 'flux_surface_averaged_beryllium_density_at_plasma_boundary', 'flux_surface_averaged_carbon_density_at_plasma_boundary', 'flux_surface_averaged_deuterium_density_at_plasma_boundary']
+   langle_sub+oint+gradpsi_weight ['flux_surface_averaged_boron_density_at_plasma_boundary', 'flux_surface_averaged_inverse_of_major_radius', 'flux_surface_averaged_parallel_current_density']
+   langle_sub+oint+Bp_weight ['flux_surface_averaged_effective_charge_at_plasma_boundary', 'flux_surface_averaged_tungsten_density_at_plasma_boundary', 'flux_surface_averaged_major_radius']
+   langle_sub+oint ['flux_surface_averaged_square_of_magnetic_field_magnitude', 'flux_surface_averaged_magnetic_field_magnitude']
+   langle_sub+gradpsi_weight ['flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude', 'flux_surface_averaged_square_of_toroidal_flux_coordinate_gradient_magnitude']
+   langle_sub ['flux_surface_averaged_inverse_of_square_of_major_radius']
+   langle_plain+gradpsi_weight ['flux_surface_averaged_toroidal_flux_coordinate_gradient_magnitude', 'flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_magnetic_field_magnitude', 'flux_surface_averaged_ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius']
+   langle_plain ['flux_surface_averaged_krypton_density_at_plasma_boundary']
+
+no display equation: 55 {'magnetic_field_systems': 11, 'radiation_measurement_diagnostics': 8, 'auxiliary_heating': 7, 'equilibrium': 6, 'magnetic_field_diagnostics': 5, 'transport': 5, 'machine_operations': 2, 'plant_systems': 2}
+no documentation: 0
+
+#### operator token in name but not reflected in description+documentation
+flux_surface_averaged: 14/32 descriptions lack it; e.g. ['flux_surface_averaged_argon_density_at_plasma_boundary', 'flux_surface_averaged_beryllium_density_at_plasma_boundary', 'flux_surface_averaged_carbon_density_at_plasma_boundary', 'flux_surface_averaged_deuterium_density_at_plasma_boundary', 'flux_surface_averaged_helium_3_density_at_plasma_boundary']
+volume_averaged: 15/49 descriptions lack it; e.g. ['volume_averaged_neutral_species_density', 'volume_averaged_runaway_electron_kinetic_energy_density', 'ratio_of_volume_averaged_neon_density_to_volume_averaged_electron_density', 'ratio_of_volume_averaged_nitrogen_density_to_volume_averaged_electron_density', 'volume_averaged_ion_charge_state_average_charge_number']
+line_averaged: 13/23 descriptions lack it; e.g. ['line_averaged_electron_density', 'line_averaged_beryllium_density', 'line_averaged_helium_4_density', 'line_averaged_lithium_density', 'line_averaged_total_ion_density']
+line_integrated: 0/1 descriptions lack it; e.g. []
+time_derivative: 0/3 descriptions lack it; e.g. []
+normalized: 11/48 descriptions lack it; e.g. ['normalized_toroidal_flux_coordinate_at_ece_channel_emission_position', 'normalized_toroidal_flux_coordinate_at_internal_transport_barrier', 'normalized_toroidal_flux_coordinate_at_pedestal_top', 'normalized_toroidal_flux_coordinate_of_neoclassical_tearing_mode_center', 'momentum_flux_normalized_due_to_perturbed_parallel_vector_potential']
+magnitude_of: 0/0 descriptions lack it; e.g. []
+toroidal_component: 0/0 descriptions lack it; e.g. []
+poloidal_component: 0/0 descriptions lack it; e.g. []
+parallel_component: 0/0 descriptions lack it; e.g. []
+radial_component: 0/0 descriptions lack it; e.g. []

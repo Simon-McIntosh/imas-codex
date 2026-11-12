@@ -19,11 +19,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-integrity-backlog#s52&quot;],&quot;s3&quot;:[&quot;sn-catalog-consistency#s2&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-definitions-by-construction#s6&quot;],&quot;s3&quot;:[&quot;sn-catalog-consistency#s2&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-domain-per-family#s3&quot;]}">
   <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -115,6 +115,9 @@
     </div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s2" data-id="c-20261112-root-cause-hold" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T01:20:00Z">
+    <div class="r-comment-body"><p>The lead asked on 2026-11-12 for the published release candidate's inconsistencies to be traced to their causes and gave that work priority. Its finding for this section: the batches regenerate each name through the model one at a time, which is how the divergence arose, so a regenerated member is again free to differ. <code>sn-definitions-by-construction</code> §2 makes the shared part of a definition a rendered wording, and its §6 rewrites the live catalog. Run <code>r-20261112T001832467275-scc-batch-1-pilot</code> is held in the queue, not dropped. After that plan's §6 lands, re-run the census: only families still divergent return to this section's batches. The grouping half of §5 is met by <code>sn-domain-per-family</code> §3; §5 keeps its domain-audit endpoint. §4, §6 and §7 are untouched.</p></div>
+</div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261111T215736217347-scc-momentum-tip" data-who="reckon-build" data-when="2026-11-11T22:43:31.705Z">
     <div class="r-comment-body"><p>scc-momentum-tip: records both names' DD sources, units, scores, review history and stored spend, the four-member lineage with its tombstones and receipts, and proposes toroidal_plasma_momentum_diffusivity as survivor with toroidal_momentum_diffusion_coefficient superseded into it; census re-run at fc99c61f0 reads 5497 names, 0 cycle components, 19 multi-tip components and 2 live tips for this lineage, and the same classifier reports 2 live tips and 1 cycle on plants in a disposable graph and 1 tip after a fold.</p></div>
 </div>
@@ -129,6 +132,12 @@
 </div>
 <div class="r-comment" data-section="s7" data-id="c-run-r-20261111T230951862708-review-of-scc-sourceless-names-1fbdbf1135d9" data-who="reckon-build" data-when="2026-11-11T23:42:19.514Z">
     <div class="r-comment-body"><p>review of scc-sourceless-names (r-20261111T220312718532) at 1fbdbf113 over fc99c61f0: scores goal_fidelity 17, evidence 8, scope_discipline 13, durability 12, fit 17, reuse 18; one blocking finding — the cited gate log is a killed re-run of the three-arm gate that failed at the first arm and carries no EXIT= line, so the receipt does not show the done-when was measured even though the committed control/population/page artifacts do — plus six non-blocking findings (out-of-scope control.json, rebind target not validated against recorded paths, fixture control not asserted, null lifecycle_status rendered "live", census 18 not reconciled against the 7 held_in_chain names, manifest missing messages_received). added_failure_count 0 over an unarmed suite pair.</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261111T220312718532-scc-sourceless-names" data-who="reckon-build" data-when="2026-11-12T00:17:02Z">
+    <div class="r-comment-body"><p>§7 read-back: 5 live names with no producing DD source — 3 pending drafts (line_averaged_neon_density, radius_of_soft_xray_detector, ratio_of_diamagnetic_vorticity_to_major_radius) whose recorded source is present, live and unit-matched with only the PRODUCED_NAME edge dropped, each proposed for a signed rebind, and 2 accepted names (volume_averaged_electron_number_density_over_scrape_off_layer, coolant_absorbed_energy_accumulated_of_plasma_facing_component) with no source at all and already under the gate's release_* holds, proposed hold; none of the nine recorded accepted names is still sourceless; planted control lists a planted sourceless name and excludes its bound control under both predicates in a disposable graph; live graph not written; spend USD 0</p></div>
+</div>
+<div class="r-comment" data-section="s7" data-id="c-run-r-20261112T003908653568-review-of-scc-sourceless-names-6c0d6507dd71" data-who="reckon-build" data-when="2026-11-12T00:58:34.469Z">
+    <div class="r-comment-body"><p>Review of r-20261111T220312718532-scc-sourceless-names at 6c0d6507dd71 (delta 1fbdbf113..6c0d6507d, two commits): scores goal_fidelity 18, evidence 17, scope_discipline 19, durability 18, fit 16, reuse 20; the prior blocking finding is repaired — three per-arm gate logs at revision 68af65177 each carry host, imported module, resolved cwd and a bare EXIT=0 — and the out-of-scope control file is deleted; three non-blocking findings remain (census paragraph accounts for 11 of 21, validate() still does not bind a rebind target to recorded_paths, the falsification log&#x27;s header names a revision that has no guard); added_failure_count 0 with added_failure_ids empty because the reviewed run declares no baseline_suite or after_suite arm.</p></div>
 </div>
 <div class="r-comment" data-section="s8" data-id="c-close-s8" data-who="reckon-build" data-when="2026-11-12T00:30:00Z">
     <div class="r-comment-body"><p>§8 closed on its re-measure (<code>scc-chaincap-remeasure</code>, commits <code>c9bb3c280</code> and <code>a248fc354</code>, review 107). The committed instrument reads 179 chain-cap identities, 93 unsourced, 20 of them with a sourced ancestor and 73 with none, and 0 of the 73 among the 1,681 identities a whole-catalog cut publishes. A planted identity in a disposable graph is counted. No lead choice between rebuilding provenance and holding identities is needed while none is published. Question <code>q-scc-regeneration-scope</code> is moot on this reading. <a href="/imas-codex/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html">evidence</a></p></div>

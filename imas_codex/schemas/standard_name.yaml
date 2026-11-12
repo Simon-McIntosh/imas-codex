@@ -3586,6 +3586,18 @@ classes:
         required: true
         range: datetime
         description: Timestamp when the source was returned to extracted.
+      corrects:
+        description: >-
+          The earlier retry receipt this record corrects. Direction:
+          (correction)-[:CORRECTS]->(original). A receipt is append-only, so a
+          correction is written as a second receipt stating what the record it
+          names reported wrongly; the original is never edited. The slot is
+          scalar: a correction names exactly one original, while an original
+          may be corrected by several later records.
+        range: StandardNameSourceRetry
+        inlined: false
+        annotations:
+          relationship_type: CORRECTS
 
   StandardNameSourceClaimAttempt:
     description: >-

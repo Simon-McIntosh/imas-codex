@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="sn-domain-per-family">
+  <meta name="plan-title" content="A Family Shares One Domain: Domain Decided Per Concept, Not Per Source">
+  <meta name="plan-summary" content="Decide a standard name's physics domain once per concept family, so siblings stop landing in different catalog files, and repair the live names.">
+  <meta name="plan-status" content="active">
+  <meta name="plan-roi" content="high">
+  <meta name="plan-effort-hours" content="9.5">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="orchestrator">
+  <meta name="plan-capability-reasoning" content="deep">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-sprint" content="S19">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="standard-names,catalog-release">
+  <meta name="plan-blocks" content="sn-catalog-consistency">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-domain-per-family#s2&quot;],&quot;s4&quot;:[&quot;sn-domain-per-family#s3&quot;]}">
+  <title>A Family Shares One Domain: Domain Decided Per Concept, Not Per Source | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <h2 id="s1">§1 — What the release candidate shows, and why</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
+    <p>The catalog release candidate <code>v0.4.0rc8</code> files each name under one physics domain. A reader looking for the argon density at the plasma boundary expects to find it beside the krypton one. They are in different files. Measured on 2026-11-12 over the 1,975 published names, by grouping names that differ only in their species token. The table and the per-domain counts are in <code>docs/evidence/fragments/sn-definitions-by-construction/published-family-census.txt</code> and <code>published-operator-census.txt</code>, with the scripts that produced them beside each:</p>
+    <table>
+      <thead><tr><th>Family (species written as X)</th><th>Members</th><th>Domains its members are filed under</th></tr></thead>
+      <tbody>
+        <tr><td><code>X_density</code></td><td>17</td><td>particle_measurement_diagnostics 7, edge_plasma_physics 3, radiation_measurement_diagnostics 3, transport 3, general 1</td></tr>
+        <tr><td><code>ratio_of_volume_averaged_X_density_to_volume_averaged_electron_density</code></td><td>14</td><td>transport 6, plasma_wall_interactions 5, radiation_measurement_diagnostics 3</td></tr>
+        <tr><td><code>X_density_at_internal_transport_barrier</code></td><td>18</td><td>transport 16, general 2</td></tr>
+        <tr><td><code>X_density_at_pedestal_top</code></td><td>18</td><td>edge_plasma_physics 17, core_plasma_physics 1</td></tr>
+        <tr><td><code>line_averaged_X_density</code></td><td>16</td><td>particle_measurement_diagnostics 15, core_plasma_physics 1</td></tr>
+        <tr><td><code>X_density_at_plasma_boundary</code></td><td>16</td><td>edge_plasma_physics 14, general 2</td></tr>
+        <tr><td><code>flux_surface_averaged_X_density_at_plasma_boundary</code></td><td>16</td><td>edge_plasma_physics 15, general 1</td></tr>
+        <tr><td><code>toroidal_X_velocity_at_magnetic_axis</code></td><td>17</td><td>transport 16, general 1</td></tr>
+      </tbody>
+    </table>
+    <p>Eight of the twenty species families with three or more members are split this way. The same defect shows outside species families: two camera unit vectors are filed under plasma_wall_interactions, <code>voltage_of_valve</code> is alone in fueling while the gas-injection names sit in plant_systems, <code>safety_factor</code> and <code>greenwald_density</code> are filed under transport, and transport holds 698 of the 1,975 names. The earlier census in <code>sn-catalog-consistency</code> §1 counted 98 of 125 divergent families diverging on domain.</p>
+    <p>The cause is in how the domain is decided, not in any one answer. The decision is made one name at a time, and the options offered for a name are only the domains of that name's own Data Dictionary sources, the umbrella of those, and <code>general</code>. Two siblings sourced from different parts of the Data Dictionary are therefore offered different options and cannot agree. A name whose answer falls below the confidence floor keeps whatever domain it had, and a name with a single candidate takes it without a judgment. Nothing compares a name's answer with its siblings', and the export does not check it. The domain a name receives describes where its sources live, which is the grouping <code>sn-catalog-grouping</code> set out to remove.</p>
+
+    <h2 id="s2">§2 — One domain decision per family</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>A name's domain is decided for the concept it names, and every member of a family receives that one decision. A family here is the pattern family the repository already defines for documentation, with the locus held fixed: live names that share a quantity, operator, process and locus and differ only in the species, the charge state or population qualifier, the component axis, or the device object a geometric property belongs to. The species-token grouping measured in §1 is a subset of it. Holding the locus fixed is deliberate: a density at the pedestal top and the same density at the magnetic axis may belong to different domains. The options a family is offered are drawn from all of its members' sources together, so a member with one unusual source no longer narrows or widens the choice alone. A name with no siblings is its own family and is decided as now. The decision is recorded once for the family, with its key, options, choice, probability and model, and each member reads that one record. A recorded lead correction still overrides, and applies to the family. The per-family decision replaces the per-name one as the way a domain is decided; it does not stand beside it.</p>
+    <p>Done when:</p>
+    <ul>
+      <li>for every family, every member reads the same single stored decision, read back from a disposable graph seeded with the eight families in §1, and the number of judgments paid equals the number of families decided, not the number of members;</li>
+      <li>on at least 30 families of three or more members, the eight in §1 among them, each given one domain by a reader who has not seen either decision, the share of member names the per-family decision files under the reader's domain is recorded beside the share the per-name decision does, and is higher; the label set and who produced it are committed with the evidence;</li>
+      <li>on the labelled names the domain decision was calibrated on in <code>sn-catalog-grouping</code>, almost all of them single-member families, the accuracy is recorded as a regression reading and is not lower;</li>
+      <li>a family whose answer does not clear the confidence floor is reported undecided as a family, with its members listed, and none of its members is written;</li>
+      <li>a family planted with two members whose sources carry disjoint domains receives one domain, and the same two names decided by the per-name path, kept only as the test's comparison, receive two;</li>
+      <li>every domain write still goes through the one writer, shown by the existing guard test passing unchanged;</li>
+      <li>the node's gate runs on a compute partition and its log is committed under <code>docs/evidence/fragments/sn-domain-per-family/</code>.</li>
+    </ul>
+
+    <h2 id="s3">§3 — The live names brought to one domain per family</h2>
+    <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <p>The per-family decision is applied to every live family. <code>sn-catalog-consistency</code> §5 declares a wait on this section: its family-agreement endpoint reads the same grouping census this section moves, and its domain-audit endpoint stays its own. A graph checkpoint is taken before the first write, with every graph-touching worker at rest.</p>
+    <p>Done when:</p>
+    <ul>
+      <li>a read-back over every live name lists zero families whose members carry more than one <code>physics_domain</code>, apart from families held split by a recorded lead correction that names the family; those are listed with the correction, their count is recorded, and the count of split families before the first write is recorded beside both;</li>
+      <li>the eight families in §1 each read one domain, named in the evidence;</li>
+      <li>the share of published names filed under transport and under general is recorded before and after, with the twenty largest moves between domains listed by family so a physicist can read them;</li>
+      <li>the read-back counts a family planted split in a disposable graph, and stays silent on a family planted whole;</li>
+      <li>spend on domain decisions is recorded, and is at most USD 15;</li>
+      <li>the domain audit of <code>sn-catalog-consistency</code> §5 reports no more disagreeing names after the pass than before it.</li>
+    </ul>
+
+    <h2 id="s4">§4 — A cut refuses a split family</h2>
+    <section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p>The agreement holds for names created later. A name that joins an existing family takes the family's stored domain, and a catalog export reports any family it would publish across more than one domain file. That report is one more check in the export's existing blocking gates and uses the exclusion vocabulary the export already carries; it adds no command option and no second pass over the candidates.</p>
+    <p>Done when:</p>
+    <ul>
+      <li>a name composed into a family that already has a stored decision is written with that decision and no new judgment is paid for, shown on a disposable graph;</li>
+      <li>an export dry run of a catalog with one family planted across two domains names that family and exits non-zero, and the same dry run on the repaired live graph reports none;</li>
+      <li>a family held split by a recorded lead correction in §3 is reported as an accepted exception rather than a failure, and removing the correction makes the dry run fail.</li>
+    </ul>
+
+    <section data-reckon="decisions" id="decisions" class="r-decisions">
+      <h2><span class="sec">§</span> Decisions</h2>
+    </section>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-sdpf-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-12">
+        <h4 class="r-fu-title">Build the per-family domain decision</h4>
+        <div class="r-fu-body"><p>§2 is ready. §3 writes the live graph and waits for §2; §4 waits for §3.</p></div>
+        <pre class="r-fu-prompt">/reckon-build sn-domain-per-family §2</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>

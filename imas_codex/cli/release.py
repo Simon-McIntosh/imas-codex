@@ -320,16 +320,37 @@ def _show_release_status() -> None:
 # ============================================================================
 
 
-def _check_on_main() -> None:
+def _check_on_main(base_ref: str = "main") -> None:
+    """Require main, or a detached head whose commits are already merged.
+
+    A worktree has no checked-out branch, so ``branch --show-current`` prints
+    nothing there. Admitting a detached head only when it is contained in
+    ``base_ref`` keeps the real cut away from unreviewed revisions.
+    """
     result = subprocess.run(
         ["git", "branch", "--show-current"], capture_output=True, text=True
     )
     branch = result.stdout.strip()
-    if branch != "main":
-        raise click.ClickException(
-            f"Not on main branch (current: {branch}). Switch first: git checkout main"
+    if branch == base_ref:
+        click.echo(f"  ✓ On {base_ref} branch")
+        return
+    if not branch:
+        merged = subprocess.run(
+            ["git", "merge-base", "--is-ancestor", "HEAD", base_ref],
+            capture_output=True,
+            text=True,
         )
-    click.echo("  ✓ On main branch")
+        if merged.returncode != 0:
+            raise click.ClickException(
+                "Detached head is not merged into "
+                f"{base_ref}. Switch first: git checkout {base_ref}"
+            )
+        click.echo(f"  ✓ Detached head merged into {base_ref}")
+        return
+    raise click.ClickException(
+        f"Not on {base_ref} branch (current: {branch}). "
+        f"Switch first: git checkout {base_ref}"
+    )
 
 
 def _check_remote_exists(remote: str) -> None:

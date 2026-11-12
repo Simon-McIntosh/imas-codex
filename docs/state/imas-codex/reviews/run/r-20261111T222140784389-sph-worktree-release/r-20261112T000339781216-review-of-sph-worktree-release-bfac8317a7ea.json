@@ -1,0 +1,67 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run filed an after_suite but no baseline_suite (implement role, not an armed test node). Its after_suite at bfac8317a records exit_status 0, completed true, failure_count 0, failure_ids [] in /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/gate-release-suites.log ('77 passed, 1 warning', EXIT=0), so no failure was added. The six failures in negative-control.log are the worker's declared mutation (both guards restored to the branch-name check), not added failures of the landed change.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/catalog_release.py:1273 run_release pre-flight",
+    "imas_codex/standard_names/catalog_release.py:1960 run_review_release pre-flight",
+    "imas_codex/cli/release.py:1417 release command pre-flight"
+  ],
+  "completed_at": "2026-11-12T00:16:17.561Z",
+  "dispatched_at": "2026-11-12T00:04:48Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/catalog_release.py",
+      "line": 1470,
+      "severity": "non-blocking",
+      "text": "A non-dry-run RC cut from a detached worktree that creates a commit pushes the literal `main` ref (`_run_git(\"push\", effective_remote, \"main\")`), so the release commit made on the detached HEAD never reaches the remote's main and the tag points at a commit main does not contain; the cut test hides this because `_SilentPublisher` returns commit_sha=None, and the worker disclosed the gap; the plan does not settle whether such a cut should push HEAD:main or refuse."
+    },
+    {
+      "file": "tests/standard_names/test_catalog_release.py",
+      "line": 309,
+      "severity": "non-blocking",
+      "text": "The declared negative control says restoring *either* on-main guard makes the detached-worktree cut test fail, but the cut test calls run_release from catalog_release, so restoring only the CLI guard leaves it green; the logged mutation restored both guards at once, which demonstrates the combined regression but not the per-guard claim."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/negative-control.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The negative-control log's header names revision 8466f0e0 (the pre-change base) although the six detached-worktree tests it runs were introduced at 9a5965792, so a reader checking the log would conclude it ran where those tests do not exist; the manifest records 9a5965792, and the log's body proves the tests ran, but the provenance line misstates the revision."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits (9a5965792 the guard fix, bfac8317a the evidence fragment): 392 insertions, 9 deletions across six files, with no change outside the declared scope and no unrelated edit folded in.",
+    "done_when": "The done_when asks for a cut from a merged detached head against a stand-in remote that asserts the tag is created, a cut from an unmerged head that is refused, both guards accepting the merged head, and the existing release tests passing; tests/standard_names/test_catalog_release.py:272-391 provides exactly those six tests and the gate log records 77 passed, EXIT=0.",
+    "goal": "The goal is 'let a release be cut from a detached worktree'; imas_codex/standard_names/catalog_release.py:802 and imas_codex/cli/release.py:323 now admit a detached head whose commits are contained in main, and the evidence fragment records both guards admitting a merged head and refusing an unmerged one.",
+    "manifest": "The manifest records status complete, both commits, the after_suite gate at bfac8317a with failure_count 0, the negative-control log, and it discloses that the commit-creating publish path in a detached worktree was not exercised.",
+    "write_paths": "The node declared seven write paths; `git diff --stat 8466f0e0..bfac8317a` shows six changed files and every one is inside the declared set (test_cli_release.py was declared and correctly left unchanged)."
+  },
+  "justifications": {
+    "durability": "the negative-control log shows six FAILED ids at EXIT=1 with both guards restored to the branch-name check; the cut test's `report.git_tag == \"v1.0.0rc1\"` at tests/standard_names/test_catalog_release.py:293,308 compares against the tag string its own `_prepare_cut` stub injected, so the independent evidence is the git-state assertions at :294,310,311, and the stubbed publisher leaves the commit-creating arm untested.",
+    "evidence": "tests/standard_names/test_catalog_release.py:280-312 cuts a real release from a detached worktree against a local bare stand-in remote and asserts the tag exists in `git tag -l` and in `ls-remote`, and the run records 77 passed at EXIT=0 in the after_suite log at revision bfac8317a.",
+    "fit": "the two guards keep their existing idiom (click.ClickException in imas_codex/cli/release.py:347, ValueError in imas_codex/standard_names/catalog_release.py:824), their docstrings state the ancestry mechanism, and no plan, sprint, or ticket identifier appears in source, symbols, or comments.",
+    "goal_fidelity": "imas_codex/standard_names/catalog_release.py:802 and imas_codex/cli/release.py:323 admit a detached head only when `merge-base --is-ancestor HEAD main` succeeds and refuse an unmerged one, so the pre-flight that blocked a cut from a worktree now passes; the commit-creating publish path at catalog_release.py:1470 still pushes the literal `main` ref.",
+    "reuse": "no new function or module was added: both additions extend the pre-existing `_check_on_main` guards, and the ancestry idiom they use is the one already present in `_prepare_release_branch` at imas_codex/standard_names/catalog_release.py:474.",
+    "reuse_note": "the ancestry test is now written out a third time (catalog_release.py:474, catalog_release.py:822, cli/release.py:339); the guard pair was already duplicated before this change, so the change extends rather than forks an owned capability, and no shared helper for it exists in the repository.",
+    "scope_discipline": "every path in the two commits (catalog_release.py, cli/release.py, test_catalog_release.py, and the three files under docs/evidence/fragments/sn-pipeline-hygiene/) is inside the node's declared write paths; the declared test_cli_release.py needed no change."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is 'let a release be cut from a detached worktree'; imas_codex/standard_names/catalog_release.py:802 and imas_codex/cli/release.py:323 now admit a detached head whose commits are contained in main.\nVERDICT done_when: tests/standard_names/test_catalog_release.py:272-391 provides the cut, the refusal, and both direct guard tests, and the gate log records 77 passed at EXIT=0.\nVERDICT write_paths: every changed path in the diff is inside the seven declared write paths.\nVERDICT manifest: read; it records both commits, the after_suite result and the negative-control log, and discloses the unexercised commit-creating publish path.\nVERDICT diff: read commit by commit; 392 insertions and 9 deletions across six files, all inside the declared scope.\nCALL_SITES: imas_codex/standard_names/catalog_release.py:1273 run_release pre-flight, imas_codex/standard_names/catalog_release.py:1960 run_review_release pre-flight, imas_codex/cli/release.py:1417 release command pre-flight\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/catalog_release.py:802 and imas_codex/cli/release.py:323 admit a detached head merged into main and refuse an unmerged one, but catalog_release.py:1470 still pushes the literal main ref after a commit.\nSCORE evidence: 17\nJUSTIFICATION evidence: tests/standard_names/test_catalog_release.py:280-312 creates the tag in a real detached worktree against a stand-in remote and reads it back from git and ls-remote, with 77 passed at EXIT=0 recorded.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the two commits is inside the declared write paths in the manifest.\nSCORE durability: 17\nJUSTIFICATION durability: the negative-control log shows six FAILED ids at EXIT=1; tests/standard_names/test_catalog_release.py:293,308 compare the tag against the string the test's own stub injected, so the independent evidence is the git-state assertions at :294,310,311, and the commit-creating publish arm is stubbed out.\nSCORE fit: 19\nJUSTIFICATION fit: each guard keeps its own error type and idiom at imas_codex/cli/release.py:347 and imas_codex/standard_names/catalog_release.py:824, and the comments state the ancestry mechanism.\nSCORE reuse: 17\nJUSTIFICATION reuse: both additions extend the existing _check_on_main guards and reuse the ancestry idiom of _prepare_release_branch at imas_codex/standard_names/catalog_release.py:474; no new definition forks an owned capability.\nFINDING imas_codex/standard_names/catalog_release.py:1470 non-blocking: a commit-creating RC cut from a detached worktree still pushes the literal main ref, so the tagged commit does not reach the remote's main.\nFINDING tests/standard_names/test_catalog_release.py:309 non-blocking: the declared negative control claims either guard restored makes the cut test fail, but that test exercises only the catalog guard and the log mutates both at once.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/negative-control.log:1 non-blocking: the header names base revision 8466f0e0 although the six tests it runs were introduced at 9a5965792.",
+  "review_run_id": "r-20261112T000339781216-review-of-sph-worktree-release-bfac8317a7ea",
+  "reviewed_base_sha": "8466f0e0c6ea3e1e8b34c369952139a9225e47d2",
+  "reviewed_head_sha": "bfac8317a7ea3282f0175a9873b4487a7fa32c95",
+  "reviewed_run_id": "r-20261111T222140784389-sph-worktree-release",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 15,
+    "reuse": 17,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:10:49.204025+00:00",
+  "total": 105
+}

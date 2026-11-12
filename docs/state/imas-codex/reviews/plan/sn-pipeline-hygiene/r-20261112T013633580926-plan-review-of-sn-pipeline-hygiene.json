@@ -1,0 +1,98 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T01:47:26.853Z",
+  "dispatched_at": "2026-11-12T01:40:11Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261112T013633580926-plan-review-of-sn-pipeline-hygiene/plan.html:43",
+      "id": "reasoning-1",
+      "reason": "",
+      "text": "\u2014 \u00a71 now requires `test_matched_policy_rebuilds_from_frozen_scores_and_receipts` to run without skipping \"from inputs committed in the repository\", but those inputs are unrecoverable: the test reads two absolute paths into the reckon run store (`imas_codex/standard_names/review/cascade_calibration.py:34-41`), both run directories are gone from disk, and \u00a71's own node evidence records \"Neither directory exists any more \u2026 This node cannot restore them: they are outside its write scope and outside the repository\" (`docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.html:97-103`). The clause states an outcome whose only named source does not exist, so the node dispatched on it must decide unaided whether to re-derive the receipts \u2014 and a re-derivation changes the calibrated cutoffs, because the test asserts `build() == json.loads(THRESHOLDS_PATH.read_text())` against the committed `cascade_thresholds.json`, so new receipts force a regenerated thresholds artifact and silently move a shipped calibration the plan never mentions changing. WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: without saying whether the receipts are re-derived (and that the shipped thresholds are then regenerated) or the id is dropped, the \u00a71 node either engages unbounded LLM spend to reproduce deleted run outputs or lands a regenerated production calibration under a section whose stated purpose is test hygiene.",
+      "type": "reasoning",
+      "would_change": null
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261112T013633580926-plan-review-of-sn-pipeline-hygiene/plan.html:33",
+      "id": "reasoning-2",
+      "reason": "",
+      "text": "\u2014 the opening sentence still says the thirteen \"failed at every base and head measured on 2026-11-11, including both arms of the last landing\", while \u00a71's own two arm comments record the gap-rules head at `1 failed / 8654 passed` on 2026-11-11 and seven of these ids green there (`plan.html:107`, `:110`), so \"every head\" is false for the heads measured that day. WOULD_CHANGE_THE_PLAN: no \u2014 REASON: the sentence immediately after states the 2026-11-12 state (twelve pass, one skips), which is what a dispatched node acts on; the historical account is loose about which heads were measured, not about the work remaining.",
+      "type": "reasoning",
+      "would_change": null
+    }
+  ],
+  "plan_commit": "e80e3d88051b96a8d7d2b2adb9eb4e838769f703",
+  "plan_fingerprint": "137e518fe7d5901222dc8b926394880372e52340d2ae73ab66fed44969910d19",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 22,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ef8840040b0baf3c7dbe94e4a4840f3636a3865b",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a71 now says the receipts may be reconstructed only if the committed cascade_thresholds.json rebuilds unchanged; otherwise the lead rules between regenerating the calibration and retiring the rebuild check, and the ruling is recorded and applied.",
+      "reason": "",
+      "when": "2026-11-12T01:50:35.795659+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ef8840040b0baf3c7dbe94e4a4840f3636a3865b",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The opening now says the thirteen failed at every base measured on 2026-11-11.",
+      "reason": "",
+      "when": "2026-11-12T01:50:59.251555+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ef8840040b0baf3c7dbe94e4a4840f3636a3865b",
+      "commit_basis": "edit",
+      "note": "\u00a71 now says the receipts may be reconstructed only if the committed cascade_thresholds.json rebuilds unchanged; otherwise the lead rules between regenerating the calibration and retiring the rebuild check, and the ruling is recorded and applied.",
+      "reason": "",
+      "when": "2026-11-12T01:50:35.795659+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "ef8840040b0baf3c7dbe94e4a4840f3636a3865b",
+      "commit_basis": "edit",
+      "note": "The opening now says the thirteen failed at every base measured on 2026-11-11.",
+      "reason": "",
+      "when": "2026-11-12T01:50:59.251555+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261112T013633580926-plan-review-of-sn-pipeline-hygiene.json",
+  "review_run_id": "r-20261112T013633580926-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "8311691f02b5540362bf571fa75513a0c04cca56",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every one of the thirteen ids resolves: `test_cascade_calibration.py:104`, `test_catalog_layout_hierarchy.py:755`, `test_compose_prompt_examples_round_trip.py:207`, five defs in `test_gap_rule_verdicts.py` (the two ordinal cases are its parametrization), `test_geometry_enumeration_collapse.py:226`, and three in `test_manifest_generability.py`.",
+    "done_when": "pass \u2014 \u00a71's done-when (plan.html:43) names a declared negative control (\"each product fix is shown to matter by the test failing again when that fix alone is reverted\"), bounds its escape to at most three strict expected failures naming a live plan section, and measures a delta against a stated base; the reachability of its cascade clause is filed under reasoning.",
+    "evidence_paths": "pass \u2014 the landing evidence and per-id diagnoses land in committed evidence (`docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.html` and `sph-red-gap-rules`), not in a session scratchpad.",
+    "naming": "pass \u2014 \u00a71's prose and its ids carry no plan label, stage name, ticket number or version tag.",
+    "reasoning": "a finding \u2014 \u00a71's new done-when clause requires the cascade-calibration id to run \"from inputs committed in the repository\", but the section's own cited evidence records that the two receipt inputs no longer exist anywhere and cannot be restored inside the node's scope.",
+    "single_goal": "pass \u2014 \u00a71 carries one deliverable: the thirteen named test ids are either repaired or owned, with no second subsystem in the section.",
+    "wiring": "pass \u2014 \u00a71 declares no `depends-on`, `informs` or `gates` edge (`data-links=\"\"` at plan.html:32) and its followup states \u00a71\u2013\u00a76 and \u00a78 are independent, so no relationship is missing or mis-pointed for this unit."
+  },
+  "section_digests": {
+    "_document": "e887bb3cd3aabc5d770baee9b75d62f9060b3acd8cf9ce6521b85731ecb3d369",
+    "s1": "81512bc62a9f99bf1f2f7b6969c1d0ec4e334449ae5dc841d33cf1a219de244a",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:47:26.003321+00:00",
+  "total": null
+}

@@ -1,0 +1,263 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T01:53:11.385Z",
+  "dispatched_at": "2026-11-12T01:44:07Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/families.py:986",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a72's acceptance set and \u00a71's table must be restated on the family key the decision actually uses, or the node is asked to hit a count of families that does not exist.",
+      "text": "the repository already defines \"a family\" as one pattern signature: `pattern_signature` (families.py:986) over `PATTERN_INVARIANT_SEGMENTS` (families.py:422: physical_base, geometric_base, transformation, process, object) and `PATTERN_VARIATION_AXES` (families.py:440: subject, component, coordinate, position, geometry, region, device), and its own docstring (families.py:429-439) says \"position, geometry and region carry the locus variation axis \u2026 so `electron_temperature` and `electron_temperature_at_magnetic_axis` are family-mates\". That is wider than the plan's \u00a72 definition, and the plan's \u00a71 figures are grouped by a different key: the census script `docs/evidence/fragments/sn-definitions-by-construction/published-family-census-run.py:19-31` builds families by a regex that substitutes a species token for `<X>` and nothing else. Under the repository's key `X_density`, `X_density_at_plasma_boundary`, `X_density_at_pedestal_top` and `X_density_at_internal_transport_barrier` are ONE family, where \u00a71 lists four rows of 17, 16, 18 and 18 members; the same collapse applies to `flux_surface_averaged_X_density_at_plasma_boundary` and `line_averaged_X_density` if `line_averaged` and `flux_surface_averaged` parse as `transformation` (invariant). So \u00a72's done-when \"on at least 30 families of three or more members, the eight in \u00a71 among them\" cross-references a family population produced by a key the endpoint would not use, and \u00a71's eight-row table is not a census of families under the key that would decide them",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/families.py:1115",
+      "id": "reuse_search-1",
+      "reason": "a node briefed on \u00a72 alone will write the grouping again, and a fifth spelling of the signature is exactly the divergence \u00a71 complains about.",
+      "text": "`fetch_pattern_families` already returns every live family as `(invariant segment tuple, members)`, and `_family_member_collect` (families.py:1041) already collects `physics_domain` on every member row, so a split family is visible from one call today with no new query; `fetch_pattern_family` (families.py:999), `count_pattern_families` (families.py:1021) and `_pattern_family_rows_query` (families.py:1071) are the same grouping for one seed, a count, and a filtered population. The plan's \u00a72 \"options drawn from all of its members' sources together\" is new behaviour, but the family assembly it needs exists",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/domain_decision.py:456",
+      "id": "duplicate_owner-2",
+      "reason": "the brief must say the extension point is `candidate_domains`/`build_state` and the write funnel, so the node does not fork a writer that the repository refuses at test time.",
+      "text": "the domain decision and its writer are single-owner and the repository enforces it: `write_name_domain` (domain_decision.py:456) sets `physics_domain`, `source_domains` and the `HAS_PHYSICS_DOMAIN` edges in one transaction, and `tests/standard_names/test_name_domain_single_writer.py:1-25` reads every module under `imas_codex/standard_names/` and refuses any `SET` of those properties or any `MERGE`/`CREATE`/`DELETE` of the edge made outside that function. Four site audits already constrain the callers (`test_name_domain_writer_catalog_sites.py`, `test_name_domain_writer_lineage_sites.py`, `test_domain_writer_routing.py`, `test_name_domain_routing_reconcile.py`). The family path must therefore extend `domain_decision.py` \u2014 `candidate_domains` (domain_decision.py:134) and `build_state` (domain_decision.py:157) both take ONE name's source mapping, which is precisely the limitation \u00a71 diagnoses \u2014 and must route every member's write through `write_name_domain`; a new module that sets domains directly fails the existing guard",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/domain_audit.py:365",
+      "id": "duplicate_owner-3",
+      "reason": "the brief should add the family-agreement check to the existing audit so \u00a73's before/after counts come from one instrument, and the plan's evidence fragment then cites one result object.",
+      "text": "\u00a73's \"a read-back over every live name lists zero families whose members carry more than one `physics_domain`\" is a fifth check on an instrument while `audit_domains` (domain_audit.py:365) already reads every live name and reports four property checks (`physics_domain` set, equal to the stored decision, `source_domains` expected, edges equal), and its module docstring (domain_audit.py:1-37) states it is the \"measuring instrument the repair node runs against, so its counts now are the 'before' figure\". A separate split-family read-back script would give the repository two instruments over the same population with two exclusion rules (`LIVE_NAME_STAGES`, domain_audit.py:55) and two definitions of \"live\"",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/export.py:3423",
+      "id": "duplicate_owner-4",
+      "reason": "the check belongs in the exporter's existing validation stage beside `invalid_candidates`, and the plan must say whether the refusal reuses that exclusion vocabulary or adds a new one, because that decides \u00a74's interface surface.",
+      "text": "\u00a74's export refusal re-implements routing the exporter already performs: `_candidate_physics_domains` (export.py:1554) and the candidate loop at export.py:3423 already enumerate a candidate once per domain it carries and route it to a primary domain at export.py:3450, with the dedup note at export.py:3652 spelling out that multi-domain candidates are enumerated per domain and counted once; `_domain_edges` (export.py:1940) already reads in-domain and cross-domain `HAS_PARENT`/`HAS_ERROR` edges with `s.physics_domain <> $domain` predicates (export.py:1958-1995). A second traversal or a new \"families\" pass would be a forked owner of the same question. \u00a74 also asks for an \"export dry run\", and `export.py` carries no `dry_run` flag \u2014 the CLI's dry-run at `imas_codex/cli/sn.py:361,944` belongs to the pipeline, not the exporter",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-domain-per-family.html#s2",
+      "id": "thin_wrapper-1",
+      "reason": "the brief must require one stored decision object fanned out to the members, and a negative control that plants a family whose members' sources would pull apart and shows one written value, since the plan's done-when for this is otherwise satisfiable by an implementation that does not do it.",
+      "text": "the plan's endpoint is one decision per family, but nothing in \u00a72 forbids the obvious implementation of calling `decide_domain` (domain_decision.py:314) once per member with the unioned candidate list: that is a thin wrapper over the existing per-name call, it pays the model once per member rather than once per family (against \u00a73's USD 15 ceiling), and because each call is independent it can return different choices, which fails \u00a72's first done-when (\"the decision one member stores equals the decision every other member stores\")",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/harmonize.py:197",
+      "id": "duplicate_owner-5",
+      "reason": "\u00a72's definition has to be pinned to one of the two existing routes in its own words, or the family the decision is made over and the family the read-back counts will be assembled by different rules.",
+      "text": "`assemble_family` (harmonize.py:197) is the second live spelling of \"the family of a seed\": it prefers the seed's `HAS_PARENT` parent with a family-eligible operator (harmonize.py:51-55) and falls back to `fetch_pattern_family` (harmonize.py:308), and `harmonize.py:338-341` enumerates families by both routes together. `families.py:1104-1112 states that its two spellings \"cannot disagree about what makes a family\", but the parent route is not obviously equal to the signature route (a parentless name with a shared pattern and a parented name with a different pattern are grouped differently), and the plan's \u00a72 definition matches neither exactly (\"the device object a geometric property belongs to\" is the `device` axis; \"the component axis\" is `component`/`coordinate`; \"the species, charge state or population qualifier\" is `subject`)",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-domain-per-family.html#s2",
+      "id": "deep_module-1",
+      "reason": "the plan should either record the decision once per family with the members pointing at it, or state that the member's stored key is the join and that one function answers \"the family's domain\", because otherwise the schema grows a property and three callers each re-derive the lookup.",
+      "text": "the plan stores the decision on each member (\"the family key, the options, the choice, its probability and the model are recorded on each member\") and gives the family no record of its own, but \u00a74 requires a newly composed name to \"take the family's stored domain\" \u2014 a lookup that, with no family-level record, is a scan of members joined on a key that must then also be a new `StandardName` property (the stored decision fields are schema scalars, `imas_codex/graph/schema_context_data.py:1286-1290`, generated into `graph/models.py` and `graph/dd_models.py`). So the same join is performed by the writer, by \u00a73's read-back and by \u00a74's compose path, in three places and over the generated-model surface, with nothing hiding it",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-domain-per-family.html#s4",
+      "id": "interface_budget-1",
+      "reason": "a zero budget means every section that adds surface must name its retirement or justify the addition in its own text, and \u00a74 adds two families at once without doing either: either the refusal folds into the existing exclusion vocabulary the exporter already carries (`ExclusionRecord` / `invalid_candidates`, export.py:3423,3652) or the plan owes an account of the new exit path.",
+      "text": "this week's figures are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 adds a catalog-export refusal that must \"exit non-zero\" on a family published across two domain files and an export dry-run mode that reaches it, which adds both a CLI option and a refusal family, and \u00a72's per-family path adds public definitions to `domain_decision`'s `__all__` (domain_decision.py:43-64); the section says nothing it retires or merges and does not say why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4a7c953bb89f511fd172eac662055195230624c4",
+  "plan_fingerprint": "90be933e95d4360baa7d9d60e7fa31900e1ad9ea6cacb65bc8c28a9e141f9a22",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "\u00a72 now defines a family as the repository's existing pattern family with the locus held fixed, so the one signature is reused and the narrower scope is stated; \u00a71 says its species-token grouping is a subset of that",
+      "reason": "",
+      "when": "2026-11-12T02:02:18.370621+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "reuse_search-1",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the existing pattern-family assembly)",
+      "when": "2026-11-12T02:02:31.446282+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "duplicate_owner-2",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the single domain writer and its guard tests; \u00a72's done-when already requires the guard test to pass unchanged)",
+      "when": "2026-11-12T02:02:39.961179+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "duplicate_owner-3",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the family-agreement count is added to the existing domain audit)",
+      "when": "2026-11-12T02:02:51.795290+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-4",
+      "note": "\u00a74 now says the refusal is one more check in the export's existing gate set and adds no command option or second traversal",
+      "reason": "",
+      "when": "2026-11-12T02:03:05.148556+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "\u00a72 now requires one judgment paid per family, counted, and one stored decision the members read",
+      "reason": "",
+      "when": "2026-11-12T02:03:17.481356+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-5",
+      "note": "\u00a72's family definition now names the pattern family, not the parent-edge family, as the grouping, with the locus held fixed",
+      "reason": "",
+      "when": "2026-11-12T02:03:34.147117+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "\u00a72 now records the decision once for the family, and each member and a newly composed name read that one record",
+      "reason": "",
+      "when": "2026-11-12T02:03:51.223511+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "\u00a74 now states the refusal joins the export's existing gates and exclusion vocabulary and adds no option; \u00a72 states the per-family path replaces the per-name entry rather than standing beside it",
+      "reason": "",
+      "when": "2026-11-12T02:04:04.724811+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72 now records the decision once for the family, and each member and a newly composed name read that one record",
+      "reason": "",
+      "when": "2026-11-12T02:03:51.223511+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72 now defines a family as the repository's existing pattern family with the locus held fixed, so the one signature is reused and the narrower scope is stated; \u00a71 says its species-token grouping is a subset of that",
+      "reason": "",
+      "when": "2026-11-12T02:02:18.370621+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the single domain writer and its guard tests; \u00a72's done-when already requires the guard test to pass unchanged)",
+      "when": "2026-11-12T02:02:39.961179+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the family-agreement count is added to the existing domain audit)",
+      "when": "2026-11-12T02:02:51.795290+00:00"
+    },
+    "duplicate_owner-4": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a74 now says the refusal is one more check in the export's existing gate set and adds no command option or second traversal",
+      "reason": "",
+      "when": "2026-11-12T02:03:05.148556+00:00"
+    },
+    "duplicate_owner-5": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72's family definition now names the pattern family, not the parent-edge family, as the grouping, with the locus held fixed",
+      "reason": "",
+      "when": "2026-11-12T02:03:34.147117+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a74 now states the refusal joins the export's existing gates and exclusion vocabulary and adds no option; \u00a72 states the per-family path replaces the per-name entry rather than standing beside it",
+      "reason": "",
+      "when": "2026-11-12T02:04:04.724811+00:00"
+    },
+    "reuse_search-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the existing pattern-family assembly)",
+      "when": "2026-11-12T02:02:31.446282+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "4a7c953bb89f511fd172eac662055195230624c4",
+      "commit_basis": "edit",
+      "note": "\u00a72 now requires one judgment paid per family, counted, and one stored decision the members read",
+      "reason": "",
+      "when": "2026-11-12T02:03:17.481356+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-domain-per-family/r-20261112T014250447664-plan-review-of-sn-domain-per-family.json",
+  "review_run_id": "r-20261112T014250447664-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "cae8fec2d9d9c7ef60e946f64fcfc041e94cc6e6",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the plan stores the decision on each member and leaves the family itself without a record, so \u00a73's read-back and \u00a74's compose-time lookup each have to re-derive the family\u2192domain join (`families.py:1115`) instead of asking the module that decided it; one function that takes a family and answers for every member hides the assembly, the option union, the single call and the fan-out.",
+    "duplicate_owner": "a finding \u2014 a census of the family key is already spelled four ways in this repository (`families.py:986`, `harmonize.py:197`, the plan's own census script, and the graph query at `families.py:1115`), and \u00a73's read-back duplicates the instrument at `domain_audit.py:365` while \u00a74 duplicates the export domain routing at `export.py:3423`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a74 adds a catalog-export refusal (a non-zero exit on a split family) and the dry-run mode that reaches it, and names nothing it retires or merges, nor why nothing can be.",
+    "reuse_search": "a finding \u2014 the corpus already owns both halves of the endpoint: the family key is `imas_codex/standard_names/families.py:986` (`pattern_signature` over `PATTERN_INVARIANT_SEGMENTS`/`PATTERN_VARIATION_AXES`, populated by `fetch_pattern_families` at `families.py:1115`), and the per-name domain decision plus its single writer are `imas_codex/standard_names/domain_decision.py:314` (`decide_domain`) and `domain_decision.py:456` (`write_name_domain`). \u00a72 needs no new grouping and no new writer; it needs a family-shaped entry into those two.",
+    "thin_wrapper": "a finding \u2014 the shortest implementation of \u00a72 is a loop calling `decide_domain` (`domain_decision.py:314`) once per member with the unioned candidate list, which is a wrapper over the existing call that produces as many decisions as there are members and can disagree between them, defeating \u00a72's first done-when."
+  },
+  "section_digests": {
+    "_document": "fc8bb2b9fba57a22437498ce10408777db562f95d00bb7d3c9c0470e75dcc979",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "72806aeced93e3e77254cc413248c41b97a7ceab7e1f30552f54d5397bbdbfd9",
+    "s3": "3679109edb483b133d52c25167f059913caae3ee06bde728a279b71ef3e7bce1",
+    "s4": "7e77567fa62a410f787c9e48f067ae039673dba0d8b16e81dfc343043c58cda5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T01:58:07.942188+00:00",
+  "total": null
+}

@@ -1,0 +1,53 @@
+<section id="sph-worktree-release" data-reckon="evidence">
+  <h2>§5 — A release can run from a detached worktree</h2>
+
+  <p>Both on-main pre-flight guards read <code>git branch --show-current</code>,
+  which prints nothing on a detached head, so every release cut from a worker's
+  worktree was refused before any other check ran. Measured on the pre-change
+  tree: a detached worktree whose head is the tip of <code>main</code> was
+  refused by both guards with <em>"current: "</em> in the message.</p>
+
+  <p>Each guard now admits a detached head only when
+  <code>git merge-base --is-ancestor HEAD main</code> succeeds, the same
+  ancestry test the release-branch preparation already uses. A named branch
+  other than <code>main</code> is still refused, and a detached head carrying a
+  commit <code>main</code> has never seen is refused before the version is
+  computed, so the tag cannot land on an unreviewed revision. The clean-tree
+  and synced checks are unchanged.</p>
+
+  <table id="sph-worktree-release-verdicts">
+    <thead>
+      <tr><th>worktree head</th><th>catalog guard</th><th>CLI guard</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>detached at the tip of main</td><td>admitted</td><td>admitted</td></tr>
+      <tr><td>detached with an unmerged commit</td><td>refused</td><td>refused</td></tr>
+    </tbody>
+  </table>
+
+  <p id="sph-worktree-release-cut">A release cut run from a real detached
+  worktree against a local bare stand-in remote rehearses the tag it would cut
+  (<code>v1.0.0rc1</code>) and then creates it: the tag exists in the worktree
+  and on the stand-in remote. The same cut from an unmerged detached head is
+  refused with one error and no tag. Evidence:
+  <code>docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.json</code>,
+  produced by <code>sph-worktree-release-run.py</code>.</p>
+
+  <p id="sph-worktree-release-delivery">The cut delivers its own commit. A
+  non-dry-run candidate cut that publishes a change commits on the checked-out
+  HEAD, and the push then sent the literal <code>main</code> ref — which on a
+  detached worktree is the shared local branch, so the release commit never
+  reached the remote and the tag named a commit the remote's main lacked. The
+  push now sends <code>HEAD</code> to the remote's <code>main</code>, the same
+  ref the main checkout pushes. A test publishes a real commit from the cut and
+  checks the stand-in remote's main and the tag both resolve to it.</p>
+
+  <p id="sph-worktree-release-gate">Gate: 78 tests pass across
+  <code>tests/standard_names/test_catalog_release.py</code> and
+  <code>tests/standard_names/test_cli_release.py</code>, including seven new
+  tests, run on an <code>all_debug</code> node. Three arms were run red, each
+  reverting one part of the change alone: the catalog guard to its branch-name
+  check (3 tests fail), the CLI guard likewise (2 fail), and the push ref back
+  to <code>main</code> (the delivery test fails). Evidence:
+  <code>negative-control.log</code>.</p>
+</section>

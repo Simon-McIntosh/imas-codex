@@ -14,7 +14,21 @@ import pytest
 from imas_codex.graph.client import EXPECTED_RELATIONSHIP_TYPES
 from imas_codex.graph.schema import GraphSchema
 
+try:
+    from imas_codex.graph.schema_context_data import RELATIONSHIPS
+except ImportError:  # generated models absent: the endpoint check reports it
+    RELATIONSHIPS = []
+
 pytestmark = pytest.mark.graph
+
+
+def _declared_endpoint_pairs(relationship_type: str) -> set[tuple[str, str]]:
+    """Endpoint label pairs the schema declares for one relationship type."""
+    return {
+        (from_label, to_label)
+        for from_label, rel_type, to_label, _cardinality in RELATIONSHIPS
+        if rel_type == relationship_type
+    }
 
 
 class TestLabelsAndRelationships:
@@ -45,6 +59,48 @@ class TestLabelsAndRelationships:
         assert not unexpected, (
             f"Graph contains relationship types not in schema: {unexpected}. "
             f"Add them as slots with relationship_type annotation in LinkML schemas."
+        )
+
+    def test_corrects_edges_join_declared_endpoints(self, graph_client):
+        """Every CORRECTS edge must join the label pair the schema declares.
+
+        ``test_all_relationship_types_in_schema`` compares type names alone, so
+        it passes on a ``CORRECTS`` edge between any two labels. This compares
+        the labels at each end against the pair the declaration names, which is
+        the fact a receipt-correction edge asserts: one retry receipt correcting
+        an earlier retry receipt.
+        """
+        declared = _declared_endpoint_pairs("CORRECTS")
+        assert declared, (
+            "the schema declares no CORRECTS relationship: add a slot carrying "
+            "relationship_type: CORRECTS and regenerate the models"
+        )
+
+        rows = graph_client.query(
+            "MATCH (a)-[:CORRECTS]->(b) "
+            "RETURN labels(a) AS from_labels, labels(b) AS to_labels, "
+            "count(*) AS edges"
+        )
+
+        violations = []
+        checked_edges = 0
+        for row in rows:
+            checked_edges += row["edges"]
+            from_labels = set(row["from_labels"])
+            to_labels = set(row["to_labels"])
+            if not any(
+                from_label in from_labels and to_label in to_labels
+                for from_label, to_label in declared
+            ):
+                violations.append(
+                    f"{sorted(from_labels)}-[:CORRECTS]->{sorted(to_labels)} "
+                    f"({row['edges']} edge(s)); declared {sorted(declared)}"
+                )
+
+        assert not violations, (
+            f"CORRECTS edges join labels the schema does not name "
+            f"(checked {checked_edges} edge(s) across {len(rows)} label pair(s)):\n  "
+            + "\n  ".join(violations)
         )
 
     def test_no_undeclared_properties(self, graph_client, graph_labels, schema):

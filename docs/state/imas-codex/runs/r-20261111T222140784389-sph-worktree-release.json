@@ -1,0 +1,5350 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "clive",
+  "base_sha": "8466f0e0c6ea3e1e8b34c369952139a9225e47d2",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/brief.md",
+    "sha256": "090f71256b839adeb261f056778a210cbad7b20c558d714321b213f0b1293814"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 8326785,
+      "input_tokens_cumulative": 8326785,
+      "output_tokens": 32657,
+      "output_tokens_cumulative": 32657,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 457,
+    "files": 6,
+    "removed": 11
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 186,
+        "name": "test_show_reports_exact_paths_and_is_read_only",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 94,
+        "name": "test_multiletter_si_units_round_trip",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_leading_named_unit_is_preserved",
+        "path": "tests/core/test_dd_unit_resolution.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 767,
+        "name": "test_python_tcvpy_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 786,
+        "name": "test_matlab_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 804,
+        "name": "test_fortran_mds_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_idl_mdsvalue_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 838,
+        "name": "test_python_mdsplus_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 856,
+        "name": "test_tdi_function_template_structure",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 150,
+        "name": "test_calls_graph_with_underspecified_status",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "test_graph_error_returns_zero",
+        "path": "tests/discovery/test_context_quality.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_rescan_refreshes_scanner_fields_without_replacing_enrichment",
+        "path": "tests/discovery/test_edas_data_classes.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 792,
+        "name": "test_uddb_table_rows_are_emitted",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 883,
+        "name": "remote_run",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_claim_returns_source_node_field",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "test_tree_context_injected_into_prompt",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 166,
+        "name": "test_rescoring_preserves_enriched_metadata",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 185,
+        "name": "query",
+        "path": "tests/discovery/test_path_judgments.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 9,
+        "name": "__init__",
+        "path": "tests/discovery/test_signal_underspecified_members.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_enrichment_calls_llm",
+        "path": "tests/graph/test_dd_enrichment.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_enriches_nodes_with_llm",
+        "path": "tests/graph/test_dd_identifier_enrichment.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_public_name_claims_are_exactly_scope_owned",
+        "path": "tests/graph/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_returns_mapping_with_bindings",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_parses_mapping_fields",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_cocos_warning_for_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "test_no_cocos_warning_for_non_sensitive_path",
+        "path": "tests/ids/test_graph_ops.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 284,
+        "name": "test_returns_field_details",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 405,
+        "name": "test_existing_mapping",
+        "path": "tests/ids/test_mapping_e2e.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 109,
+        "name": "_query",
+        "path": "tests/ids/test_mapping_edge_ownership.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "query",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 77,
+        "name": "sample_subtree",
+        "path": "tests/ids/test_mapping_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_mmsys_pattern_reads_the_member_from_the_facility_config",
+        "path": "tests/ids/test_member_identifier_patterns.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 72,
+        "name": "query",
+        "path": "tests/ids/test_member_identifier_patterns.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "_make_ctx",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1354,
+        "name": "test_code_results_formatted",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1495,
+        "name": "test_hybrid_text_boost",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1536,
+        "name": "test_data_refs_shown",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1564,
+        "name": "test_code_fence_uses_chunk_language",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1940,
+        "name": "test_wiki_page_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1977,
+        "name": "test_code_file_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 2000,
+        "name": "test_image_fetch",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 2050,
+        "name": "test_wiki_page_format",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 2071,
+        "name": "test_code_format_with_line_numbers",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 2090,
+        "name": "test_cross_references_aggregated",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 2126,
+        "name": "test_page_includes_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 2161,
+        "name": "test_code_includes_source_file_fetch_hint",
+        "path": "tests/llm/test_search_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_plan",
+        "path": "tests/llm/test_sn_edit_cascade_reporting.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 326,
+        "name": "sample_standard_names",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_ctx",
+        "path": "tests/standard_names/fanout/test_refine_baseline_noop.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 181,
+        "name": "_persist",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 316,
+        "name": "test_open_edit_propagation_uses_only_the_atomic_transaction",
+        "path": "tests/standard_names/test_atomic_refined_name_persistence.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1225,
+        "name": "test_template_renders",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1680,
+        "name": "test_user_prompt_renders_fixture_item",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "_stub_item",
+        "path": "tests/standard_names/test_budget_lease_release.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_byte_stable_round_trip",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 431,
+        "name": "test_idempotent_re_emit",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 555,
+        "name": "test_check_catalog_list_root",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "_full_item",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 430,
+        "name": "_review_item",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_reviewer_report",
+        "path": "tests/standard_names/test_dd_gap_evidence_rule.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 59,
+        "name": "_transition_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 258,
+        "name": "test_release_reconcile_resolves_only_proven_unit_correction",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 291,
+        "name": "test_registered_exception_resolution_reports_stale_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 313,
+        "name": "test_unsupported_predicate_remains_manual_and_never_mutates",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 343,
+        "name": "test_missing_release_path_is_not_proof",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 40,
+        "name": "_evidence",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 60,
+        "name": "_registry_fact",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 530,
+        "name": "test_registry_inventory_backfills_structured_unit_facts",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1573,
+        "name": "test_get_exact_gap_includes_observations_and_state_history",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1708,
+        "name": "test_reconcile_fails_closed_when_evidence_changes_after_preflight",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 1719,
+        "name": "query",
+        "path": "tests/standard_names/test_dd_gap_reporting.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 721,
+        "name": "test_from_signal_row",
+        "path": "tests/standard_names/test_dd_qualifier.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 152,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 586,
+        "name": "test_pending_single_child_shadow_is_retired_with_deletion_ledger",
+        "path": "tests/standard_names/test_derived_parent_lifecycle_repair.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 118,
+        "name": "test_docs_prompt_renders_cocos_section",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 333,
+        "name": "test_generate_docs_user_template_renders_source_paths",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 404,
+        "name": "test_generate_docs_user_template_renders_without_dd_context",
+        "path": "tests/standard_names/test_docs_context_injection.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 242,
+        "name": "_add_related_context",
+        "path": "tests/standard_names/test_docs_holdout_eval.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 23,
+        "name": "_make_name",
+        "path": "tests/standard_names/test_docs_review_content_gate.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "_rename_plan",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 238,
+        "name": "_accepted_docs_node",
+        "path": "tests/standard_names/test_edit_parity.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "_generate_name_dd_item",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "_refine_name_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 163,
+        "name": "_review_names_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 182,
+        "name": "_review_docs_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "_review_docs_parent_context",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 274,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 456,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 938,
+        "name": "_enriched",
+        "path": "tests/standard_names/test_enrichment.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 165,
+        "name": "test_header_omits_catalog_sha",
+        "path": "tests/standard_names/test_export_determinism.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_graph_entry_carries_physics_domain_into_initial_validation",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 35,
+        "name": "test_fixture_cohort_round_trips_through_resolved_entry_factory",
+        "path": "tests/standard_names/test_export_pinned_schema.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 445,
+        "name": "test_candidate_stage_reserves_missing_target_under_source_fence",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "sample_candidates",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 98,
+        "name": "test_mock_extraction_returns_gyrokinetics",
+        "path": "tests/standard_names/test_gyrokinetics_extraction.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_state_carries_name_segments_kind_unit_description",
+        "path": "tests/standard_names/test_jev_name_review.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 184,
+        "name": "test_scoped_review_restage_is_atomic_in_seed_expand_and_readback",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 803,
+        "name": "test_review_docs_comment_not_clipped",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 282,
+        "name": "test_claim_review_docs_returns_scalar_physics_domain",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 355,
+        "name": "test_claim_compose_returns_scalar_physics_domain_from_imas",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 55,
+        "name": "test_accepted_catalog_edit_persists_actor_from_pull_request_evidence",
+        "path": "tests/standard_names/test_promote_reviewer_actor.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 84,
+        "name": "_claim_state",
+        "path": "tests/standard_names/test_refine_claim_recovery.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 22,
+        "name": "_make_name_context",
+        "path": "tests/standard_names/test_refine_prompts.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 314,
+        "name": "test_reclaim_mutation_boundary",
+        "path": "tests/standard_names/test_refined_from_cycle_guard.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "test_rename_successor_uses_unanimous_dd_source_unit",
+        "path": "tests/standard_names/test_rename_unit_derivation.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "_review_entry",
+        "path": "tests/standard_names/test_review_axis_scoped_writes.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "_make_item",
+        "path": "tests/standard_names/test_review_feedback_render.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 10,
+        "name": "test_fetch_review_feedback_includes_suggested_name",
+        "path": "tests/standard_names/test_review_feedback_suggested_name.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 198,
+        "name": "test_review_single_batch_no_explicit_temperature",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "_full_review_item",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 67,
+        "name": "test_audit_duplicate_candidates",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_review_cli_dry_run",
+        "path": "tests/standard_names/test_review_pipeline.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 244,
+        "name": "test_docs_prompt_scores_docs_dimensions_only",
+        "path": "tests/standard_names/test_review_rubrics.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_empty_query_segment_filter_hits_backing",
+        "path": "tests/standard_names/test_search_facility_smoke.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_mode_vector_skips_keyword_and_grammar",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_search_post_filter_kind",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 226,
+        "name": "test_search_empty_query_with_filters_uses_catalog_query",
+        "path": "tests/standard_names/test_search_streams.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_kind_reclassification_defaults_to_an_exact_zero_write_preview",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 192,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "run",
+        "path": "tests/standard_names/test_source_claim_counter_fencing.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 353,
+        "name": "test_public_refresh_restamps_raw_convergence_without_steering",
+        "path": "tests/standard_names/test_source_refresh.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 171,
+        "name": "test_accepts_dd_source_type",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 292,
+        "name": "test_reseed_existing_pinned_source_without_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 320,
+        "name": "test_reseed_version_mismatch_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 345,
+        "name": "test_new_source_without_version_raises",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_new_source_pinned_from_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 398,
+        "name": "test_reseed_ignores_batch_default_version",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 15,
+        "name": "_group",
+        "path": "tests/standard_names/test_stranded_identity_census.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 651,
+        "name": "_label",
+        "path": "tests/standard_names/test_tombstone_supersede.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_review_prompt_includes_validation_context",
+        "path": "tests/standard_names/test_validate_persistence.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 821,
+        "name": "test_active_editorial_decisions_project_into_triage",
+        "path": "tests/standard_names/test_vocab_gap_persistence.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 339,
+        "name": "test_hybrid_boost_dual_match",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 388,
+        "name": "test_text_only_match_included",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_full_searchhit_metadata",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 503,
+        "name": "test_vector_query_includes_node_category_filter",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 571,
+        "name": "test_ids_coverage_in_summary",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 882,
+        "name": "test_code_example_chunks_merged",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 920,
+        "name": "test_code_example_boost_on_overlap",
+        "path": "tests/test_imas_search_scoring.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_format_path_context_report_renders_cocos_kin_and_badges",
+        "path": "tests/tools/test_dd_search_quality.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 79,
+        "name": "test_existing_path_returns_true",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_existing_path_no_dd_version",
+        "path": "tests/tools/test_dd_tools.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_render_with_unit_changes",
+        "path": "tests/tools/test_migration_guide.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 290,
+        "name": "test_rename_lineage_attached_when_present",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_rename_lineage_absent_when_none",
+        "path": "tests/tools/test_rename_lineage.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 222,
+        "name": "mock_query",
+        "path": "tests/tools/test_version_tool_rename_chains.py"
+      },
+      "run_function": {
+        "line": 921,
+        "name": "_push_all_graph_variants",
+        "path": "imas_codex/cli/release.py"
+      },
+      "window_line": 1062
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_stage_manifest",
+        "path": "tests/standard_names/test_catalog_layout_hierarchy.py"
+      },
+      "run_function": {
+        "line": 67,
+        "name": "test_manifest_stamps_the_loaded_grammar_checkout_identity",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "_write",
+        "path": "tests/standard_names/test_export_determinism.py"
+      },
+      "run_function": {
+        "line": 67,
+        "name": "test_manifest_stamps_the_loaded_grammar_checkout_identity",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_no_commit_uses_stable_unversioned_timestamp",
+        "path": "tests/standard_names/test_export_determinism.py"
+      },
+      "run_function": {
+        "line": 67,
+        "name": "test_manifest_stamps_the_loaded_grammar_checkout_identity",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_manifest_has_no_codex_only_keys",
+        "path": "tests/standard_names/test_export_manifest_accounting.py"
+      },
+      "run_function": {
+        "line": 67,
+        "name": "test_manifest_stamps_the_loaded_grammar_checkout_identity",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 87
+    },
+    {
+      "existing_function": {
+        "line": 391,
+        "name": "_staging",
+        "path": "tests/standard_names/test_export_sidecar_surface.py"
+      },
+      "run_function": {
+        "line": 67,
+        "name": "test_manifest_stamps_the_loaded_grammar_checkout_identity",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 89
+    },
+    {
+      "existing_function": {
+        "line": 467,
+        "name": "test_upstream_dry_run_reports_failed_grammar_findings_without_blocking",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 149,
+        "name": "test_each_public_grammar_assertion_reports_its_own_failure",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 160
+    },
+    {
+      "existing_function": {
+        "line": 330,
+        "name": "test_a_release_cut_that_commits_delivers_its_commit_to_the_remote_main",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 285,
+        "name": "test_a_release_cut_from_a_detached_worktree_creates_the_tag",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 296
+    },
+    {
+      "existing_function": {
+        "line": 364,
+        "name": "test_a_release_cut_from_an_unmerged_detached_head_is_refused",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 285,
+        "name": "test_a_release_cut_from_a_detached_worktree_creates_the_tag",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 296
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_a_release_cut_from_a_detached_worktree_creates_the_tag",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "test_a_release_cut_that_commits_delivers_its_commit_to_the_remote_main",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 339
+    },
+    {
+      "existing_function": {
+        "line": 364,
+        "name": "test_a_release_cut_from_an_unmerged_detached_head_is_refused",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 330,
+        "name": "test_a_release_cut_that_commits_delivers_its_commit_to_the_remote_main",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 337
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_a_release_cut_from_a_detached_worktree_creates_the_tag",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 364,
+        "name": "test_a_release_cut_from_an_unmerged_detached_head_is_refused",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 377
+    },
+    {
+      "existing_function": {
+        "line": 330,
+        "name": "test_a_release_cut_that_commits_delivers_its_commit_to_the_remote_main",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 364,
+        "name": "test_a_release_cut_from_an_unmerged_detached_head_is_refused",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 375
+    },
+    {
+      "existing_function": {
+        "line": 149,
+        "name": "test_each_public_grammar_assertion_reports_its_own_failure",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 467,
+        "name": "test_upstream_dry_run_reports_failed_grammar_findings_without_blocking",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 478
+    },
+    {
+      "existing_function": {
+        "line": 115,
+        "name": "test_candidate_selection_passes_focus_to_the_stage",
+        "path": "tests/cli/test_discover_candidates_focus.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_map_command_builds_options_and_delegates",
+        "path": "tests/cli/test_discover_candidates_stage.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 89,
+        "name": "test_command_builds_options_and_calls_the_stage",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 157,
+        "name": "test_topic_limit_focus_and_path_gate_reach_the_engine",
+        "path": "tests/cli/test_discover_code_stage.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 155,
+        "name": "test_command_is_a_thin_wrapper_that_builds_the_options",
+        "path": "tests/cli/test_discover_documents_stage.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 371,
+        "name": "test_map_command_builds_the_engine_state",
+        "path": "tests/cli/test_discover_map.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_command_builds_options_and_calls_stage",
+        "path": "tests/cli/test_discover_paths_stage.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 875,
+        "name": "test_repeated_category_and_scanner_options_all_reach_the_run",
+        "path": "tests/cli/test_discover_sequence.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 342,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_signals_stage.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 282,
+        "name": "test_click_command_is_a_thin_wrapper",
+        "path": "tests/cli/test_discover_wiki_stage.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_validate_records_only_a_pass",
+        "path": "tests/cli/test_map_promotion.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 24,
+        "name": "test_human_flag_dry_run_routes_through_instrument",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_list_uses_exact_read_filters_and_does_not_call_writers",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 289,
+        "name": "test_human_transition_requires_explicit_apply",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 310,
+        "name": "test_human_transition_requires_reviewed_evidence_token",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_human_transition_forwards_only_governed_disposition_fields",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 383,
+        "name": "test_stale_expected_state_is_a_clear_operator_failure",
+        "path": "tests/cli/test_sn_ddgap_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 114,
+        "name": "test_signals_reset_preflights_before_reset_mutation",
+        "path": "tests/cli/test_sn_embed_preflight.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_help_shows_new_flags",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_since_plumbs_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_below_score_and_tier_plumb_to_reset",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 174,
+        "name": "test_before_plumbs_to_clear",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_reset_to_extracted_runs_clear_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 237,
+        "name": "test_reset_to_drafted_runs_reset_on_dd_pool_path",
+        "path": "tests/cli/test_sn_generate_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_cluster_embeddings_creates_clusters",
+        "path": "tests/clusters/test_clustering.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 159,
+        "name": "test_read_only_fewer_tools",
+        "path": "tests/core/test_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 11,
+        "name": "test_all_graph_commands_registered",
+        "path": "tests/core/test_graph_cli_package.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 624,
+        "name": "test_a_login_node_runs_the_same_script_over_ssh",
+        "path": "tests/core/test_tunnel_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_rejudge_asks_every_content_question",
+        "path": "tests/discovery/test_code_ingested_rejudge.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 964,
+        "name": "test_all_templates_have_required_fields",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 1537,
+        "name": "test_code_cli_forwards_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 1606,
+        "name": "test_code_cli_reset_receives_path_prefixes",
+        "path": "tests/discovery/test_code_pipeline.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 536,
+        "name": "test_content_arm_asks_every_content_question",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 1576,
+        "name": "test_all_roles_have_system_codes",
+        "path": "tests/discovery/test_device_xml_scanner.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 385,
+        "name": "test_facility_records_every_database_route_and_loader",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 420,
+        "name": "test_every_database_signal_has_a_persisted_access_method",
+        "path": "tests/discovery/test_edas_scanner.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 569,
+        "name": "test_heartbeat_loop_backs_off_when_steady",
+        "path": "tests/discovery/test_rate_governor.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_get_valid_targets_code",
+        "path": "tests/discovery/test_reset.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 36,
+        "name": "test_container_with_zero_scores",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 538,
+        "name": "test_hardware_functions_excluded",
+        "path": "tests/discovery/test_signal_checking.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_cli_category_routes_to_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_cocos_labels_are_valid",
+        "path": "tests/graph/test_data_quality.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 506,
+        "name": "test_change_types_are_valid",
+        "path": "tests/graph/test_dd_build.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 598,
+        "name": "test_context_keys_present",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 1220,
+        "name": "test_all_domains_are_valid_physics_domains",
+        "path": "tests/graph/test_dd_domain_classifier.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 12,
+        "name": "test_resolution_schema_has_typed_lifecycle_and_immutable_receipt",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "test_resolution_graph_record_carries_bridge_provenance",
+        "path": "tests/graph/test_dd_resolution_schema.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_structural_authority_contract_is_schema_declared",
+        "path": "tests/graph/test_sn_accept_authority.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 306,
+        "name": "test_graph_mode_registers_all_tools",
+        "path": "tests/graph_mcp/test_graph_search.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_builder_expands_members_and_carries_cocos_labels",
+        "path": "tests/ids/test_mapping_handoff.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_each_slot_retains_value_authority_and_evidence",
+        "path": "tests/ids/test_mapping_slots.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 124,
+        "name": "test_all_deterministic_paths",
+        "path": "tests/ids/test_metadata.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 207,
+        "name": "test_state_prefixes_enumerated",
+        "path": "tests/llm/test_prompt_rendering.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 26,
+        "name": "test_dd_only_true_suppresses_standard_name_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 47,
+        "name": "test_dd_only_false_registers_sn_tools",
+        "path": "tests/llm/test_sn_mcp_tools.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 16,
+        "name": "matcher",
+        "path": "tests/search/test_fuzzy_matcher.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 717,
+        "name": "test_electron_temp_not_dominated_by_accessors",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 749,
+        "name": "test_electron_temp_finds_core_profiles",
+        "path": "tests/search/test_search_benchmarks.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 401,
+        "name": "test_new_abbreviations_recognized",
+        "path": "tests/search/test_search_strategy.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 130,
+        "name": "test_explicit_operators_force_lexical",
+        "path": "tests/services/test_search_mode.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 29,
+        "name": "test_writes_node_with_correct_shape",
+        "path": "tests/standard_names/fanout/test_telemetry_node.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 51,
+        "name": "test_name_mode_sets_name_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_name_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_docs_mode_sets_docs_axis_only",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_docs_mode_does_not_write_shared_slots",
+        "path": "tests/standard_names/review/test_axis_split_schema.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 595
+    },
+    {
+      "existing_function": {
+        "line": 285,
+        "name": "test_cli_compose_writes_an_authority_the_loader_accepts",
+        "path": "tests/standard_names/test_archive_reconstruction_entry_point.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 956,
+        "name": "test_audit_covers_every_attachment_writer",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 1299,
+        "name": "test_ordinary_retry_omits_terminal_recovery_metadata",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_pass_universal_constants_skipped",
+        "path": "tests/standard_names/test_audits.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 167,
+        "name": "test_normalize_prose_against_disposable_graph",
+        "path": "tests/standard_names/test_bare_doc_link_normalize.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 160,
+        "name": "test_all_values_non_empty",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 1198,
+        "name": "_get_review_context",
+        "path": "tests/standard_names/test_benchmark.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 728,
+        "name": "test_operation_order_within_a_batch",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 933,
+        "name": "test_audit_runs_before_prose_requarantine",
+        "path": "tests/standard_names/test_campaign.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 210,
+        "name": "test_payload_keys_enrich",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 256,
+        "name": "test_payload_keys_refine_name",
+        "path": "tests/standard_names/test_claim_atomic.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 46,
+        "name": "test_release_refine_claim_default_emits_json_dry_run",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 99,
+        "name": "test_release_refine_claim_apply_requires_scope_and_manifest",
+        "path": "tests/standard_names/test_cli_flags.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 93,
+        "name": "test_port_forwarded",
+        "path": "tests/standard_names/test_cli_preview.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 225,
+        "name": "test_batch_label_and_labelled_version_are_reported",
+        "path": "tests/standard_names/test_cli_release.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_seed_parent_sources_routes_derived_through_review",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_names_mode_minimal_item_renders_without_context_sections",
+        "path": "tests/standard_names/test_compose_names_context.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 535,
+        "name": "test_ordinal_geometry_never_changes_the_physical_carrier",
+        "path": "tests/standard_names/test_compose_prompt_examples_round_trip.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_all_pools_have_cost_and_count",
+        "path": "tests/standard_names/test_cost_attribution.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 21,
+        "name": "test_schema_separates_identity_history_from_lifecycle_history",
+        "path": "tests/standard_names/test_dd_gap_lifecycle.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 132,
+        "name": "test_schema_exposes_only_schema_owned_dd_gap_kinds",
+        "path": "tests/standard_names/test_dd_gap_response_contracts.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 104,
+        "name": "test_schema_declares_resolution_provenance_and_surviving_gates",
+        "path": "tests/standard_names/test_dd_resolution_graph.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 37,
+        "name": "test_only_proven_empty_stop_reason_succeeds",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 53,
+        "name": "test_flush_membership_is_explicit",
+        "path": "tests/standard_names/test_display_wiring.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 198,
+        "name": "test_documentation_gate_names_are_exact",
+        "path": "tests/standard_names/test_docs_gates.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 142,
+        "name": "test_pending_count_and_claim_use_the_same_atomic_predicate",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_two_mode_flags_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "test_blank_reason_is_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 105,
+        "name": "test_scope_self_maps_to_only_self",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 129,
+        "name": "test_scope_family_and_subtree_pass_through",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 153,
+        "name": "test_default_scope_is_none",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_dry_run_banner_rendered",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 216,
+        "name": "test_blocked_plan_exits_2_with_message",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 240,
+        "name": "test_successful_apply_prints_successor_and_followthrough_hint",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 268,
+        "name": "test_cascade_table_rendered_for_family_scope",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 299,
+        "name": "test_value_error_from_engine_becomes_usage_error",
+        "path": "tests/standard_names/test_edit_cli.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 203,
+        "name": "query",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 613,
+        "name": "_tx_run",
+        "path": "tests/standard_names/test_edit_engine.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 286,
+        "name": "test_default_invokes_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 318,
+        "name": "test_cost_limit_passthrough",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 347,
+        "name": "test_stage_only_skips_inline_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 377,
+        "name": "test_no_review_alias",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 402,
+        "name": "test_failed_inline_review_exits_3",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 447,
+        "name": "test_dry_run_does_not_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 469,
+        "name": "test_blocked_exits_2_before_review",
+        "path": "tests/standard_names/test_edit_inline_review.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 57,
+        "name": "test_fields_present_on_model",
+        "path": "tests/standard_names/test_edit_schema.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_leaf_family_scope_never_lifts_across_locus_parent",
+        "path": "tests/standard_names/test_edit_scope.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 266,
+        "name": "test_exact_name_dry_run_splits_values_and_uses_zero_write_helper",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 328,
+        "name": "test_live_exact_scope_routes_to_ordinary_pools_with_edit_intersection",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 369,
+        "name": "test_exact_name_review_action_routes_to_one_pool",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 410,
+        "name": "test_exact_parent_enrich_routes_only_enrichment_pool_flags",
+        "path": "tests/standard_names/test_exact_name_scope.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 101,
+        "name": "test_parent_requires_null_pending_lifecycle_and_no_other_relationship",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 193,
+        "name": "test_normalized_parent_allows_only_writer_owned_outgoing_edges",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 263,
+        "name": "test_reset_only_dry_run_reports_exact_cleanup_count",
+        "path": "tests/standard_names/test_exact_reset_parent_cleanup.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 332,
+        "name": "test_review_returns_same_structure",
+        "path": "tests/standard_names/test_example_loader.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 1023,
+        "name": "test_existing_stable_same_id_is_provenance_only",
+        "path": "tests/standard_names/test_generate_name_persist.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_signals_source_routes_to_single_pass",
+        "path": "tests/standard_names/test_generate_scope_routing.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "test_oblique_groups_all_eight_shape_fields",
+        "path": "tests/standard_names/test_geometry_family.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 20,
+        "name": "test_grammar_context_contract",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "test_build_compose_context_has_isn_keys",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 178,
+        "name": "test_extract_segments_all_keys_present",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 301,
+        "name": "test_write_standard_names_persists_grammar_segments",
+        "path": "tests/standard_names/test_grammar_contract.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 375,
+        "name": "test_secondary_edge_cypher_never_merges_standard_name_endpoints",
+        "path": "tests/standard_names/test_graph_edge_writers.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 1080,
+        "name": "_make_mock_state",
+        "path": "tests/standard_names/test_graph_state_machine.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 194,
+        "name": "test_build_with_none_fields_preserves_graph",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 440,
+        "name": "test_merge_cypher_sets_cost_fields",
+        "path": "tests/standard_names/test_integration.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_canonical_pools_are_six",
+        "path": "tests/standard_names/test_llm_cost_recording.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_dropped_fields_absent",
+        "path": "tests/standard_names/test_loop_display_integration.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 661,
+        "name": "test_progress_generate_count_requires_actionable_scope",
+        "path": "tests/standard_names/test_manifest_drain.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 30,
+        "name": "test_all_pools_budget_saturated_fires_at_threshold",
+        "path": "tests/standard_names/test_no_turn_shutdown.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 201,
+        "name": "test_shared_format_keeps_normative_positive_content",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 251,
+        "name": "test_variation_axes_are_the_non_locus_owner_segments",
+        "path": "tests/standard_names/test_pattern_families.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 49,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_persist_segment_edges.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_retry_cli_reports_dry_run_eligibility",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 321,
+        "name": "test_retry_cli_dispatches_exact_skipped_dry_run",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 579,
+        "name": "test_cli_pending_progress_uses_the_same_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 433,
+        "name": "test_pool_labels_are_correct",
+        "path": "tests/standard_names/test_pool_display.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 370,
+        "name": "test_physics_domain_passes_to_extract_only",
+        "path": "tests/standard_names/test_pool_orchestrator_integration.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 52,
+        "name": "test_all_pools_registered",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 476,
+        "name": "test_run_sn_pools_wires_health_to_display",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_name_pipeline_seats_share_one_endpoint_identity_rule",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 271,
+        "name": "test_all_expected_segments_present",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 441,
+        "name": "test_prompt_describes_structured_chain",
+        "path": "tests/standard_names/test_prompt_completeness.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 197,
+        "name": "test_expected_fields",
+        "path": "tests/standard_names/test_protection.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 547,
+        "name": "test_source_reset_writes_only_source_state_and_non_lifecycle_name_cache",
+        "path": "tests/standard_names/test_provenance_lifecycle.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 103,
+        "name": "test_normalize_pool_idempotent",
+        "path": "tests/standard_names/test_refine_cap.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 631,
+        "name": "test_terminal_query_preserves_identity_provenance_and_counters",
+        "path": "tests/standard_names/test_refine_name_chain.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 44,
+        "name": "_wipe",
+        "path": "tests/standard_names/test_removal_follows_renames.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 78,
+        "name": "test_canonical_authority_fields_cover_the_recorded_extensions",
+        "path": "tests/standard_names/test_repair_authority_schema.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 180,
+        "name": "test_quality_score_model_dump",
+        "path": "tests/standard_names/test_review.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 140,
+        "name": "test_name_only_wire_schema_has_no_open_ended_revised_fields",
+        "path": "tests/standard_names/test_review_model_compat.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 206,
+        "name": "test_review_prompt_minimal_item_no_orphan_headers",
+        "path": "tests/standard_names/test_review_names_context.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 148,
+        "name": "test_name_review_prompts_reject_non_line_of_sight_geometry_collapse",
+        "path": "tests/standard_names/test_review_source_context.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 45,
+        "name": "test_ordinary_arguments_survive",
+        "path": "tests/standard_names/test_run_invocation.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 69,
+        "name": "test_sn_edit_launch_reaches_the_pool_orchestrator_without_global_maintenance",
+        "path": "tests/standard_names/test_scoped_edit_keeps_its_scope.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 143,
+        "name": "_configured_paid_routes",
+        "path": "tests/standard_names/test_seat_exposure_calibration.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 475,
+        "name": "test_live_repair_is_exact_fail_closed_audited_and_idempotent",
+        "path": "tests/standard_names/test_semantic_source_repair.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 111,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_approve.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 80,
+        "name": "test_approval_keeps_frozen_review_artifact_byte_exact",
+        "path": "tests/standard_names/test_sn_approve_contested_provenance.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 31,
+        "name": "test_ineligible_edit_exits_before_graph_or_catalog_mutation",
+        "path": "tests/standard_names/test_sn_approve_preflight.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 127,
+        "name": "test_all_six_pipeline_labels_deleted",
+        "path": "tests/standard_names/test_sn_clear.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 192,
+        "name": "test_cli_kind_mode_is_preview_first_and_requires_apply_to_mutate",
+        "path": "tests/standard_names/test_sn_edit_kind.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "test_dry_run_prints_plan_without_writes_claims_or_llm_calls",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 116,
+        "name": "test_source_hint_cas_sets_only_steering_fields",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 230,
+        "name": "test_source_hint_decision_query_has_every_cas_refusal",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 303,
+        "name": "test_claim_readback_returns_both_source_and_name_steering",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 385,
+        "name": "test_source_hint_prompt_is_conditional_and_non_authoritative",
+        "path": "tests/standard_names/test_source_compose_hint.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 71,
+        "name": "_wipe",
+        "path": "tests/standard_names/test_source_revival.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_status_enum_importable",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 39,
+        "name": "test_source_has_expected_fields",
+        "path": "tests/standard_names/test_standard_name_source.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 308,
+        "name": "_plant_states",
+        "path": "tests/standard_names/test_stranded_identity_admission.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 32,
+        "name": "_mock_synced_segments",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 135,
+        "name": "test_all_ten_typed_edges_in_cypher",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 175,
+        "name": "test_delete_covers_all_typed_labels",
+        "path": "tests/standard_names/test_typed_segment_edges.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 183,
+        "name": "test_the_routed_consumers_no_longer_read_it",
+        "path": "tests/standard_names/test_vocab_consumers_see_operators.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 598
+    },
+    {
+      "existing_function": {
+        "line": 646,
+        "name": "test_fallback_version_passed_to_cypher",
+        "path": "tests/standard_names/test_vocab_gaps.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 90,
+        "name": "test_report_has_section_per_domain_and_global_summary",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 277,
+        "name": "mock_graph_ops",
+        "path": "tests/wiki/conftest.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 139,
+        "name": "test_previously_missing_ids",
+        "path": "tests/wiki/test_entity_extraction.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 33,
+        "name": "test_ingestable_types",
+        "path": "tests/wiki/test_graph_ops_unit.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "test_page_type_classification",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 144,
+        "name": "test_scoring_output_format",
+        "path": "tests/wiki/test_scoring.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 25,
+        "name": "test_judgment_question_set_and_storage_slots",
+        "path": "tests/wiki/test_wiki_judgments.py"
+      },
+      "run_function": {
+        "line": 594,
+        "name": "test_malformed_tags_are_rejected",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 596
+    },
+    {
+      "existing_function": {
+        "line": 195,
+        "name": "test_discover_preflight_probes_the_environment_once",
+        "path": "tests/cli/test_tools_status_environment.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 839
+    },
+    {
+      "existing_function": {
+        "line": 261,
+        "name": "test_sweep_and_census_share_one_predicate",
+        "path": "tests/discovery/test_signal_role_store.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 842
+    },
+    {
+      "existing_function": {
+        "line": 17,
+        "name": "__init__",
+        "path": "tests/graph/test_dd_path_domain_upsert.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 842
+    },
+    {
+      "existing_function": {
+        "line": 121,
+        "name": "_authority",
+        "path": "tests/standard_names/test_archive_reconstruction.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 841
+    },
+    {
+      "existing_function": {
+        "line": 247,
+        "name": "test_signed_archive_reconstruction_creates_allowlisted_counterparts",
+        "path": "tests/standard_names/test_archive_reconstruction.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 839
+    },
+    {
+      "existing_function": {
+        "line": 406,
+        "name": "test_archive_reconstruction_refuses_nonidentical_existing_counterpart",
+        "path": "tests/standard_names/test_archive_reconstruction.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 840
+    },
+    {
+      "existing_function": {
+        "line": 851,
+        "name": "test_create_reports_what_github_refused",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 829
+    },
+    {
+      "existing_function": {
+        "line": 925,
+        "name": "test_docs_prompt_renders_parent_section",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 840
+    },
+    {
+      "existing_function": {
+        "line": 983,
+        "name": "test_docs_prompt_omits_parent_child_when_absent",
+        "path": "tests/standard_names/test_component_system.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 842
+    },
+    {
+      "existing_function": {
+        "line": 152,
+        "name": "test_source_refresh_persists_published_bridge_provenance",
+        "path": "tests/standard_names/test_dd_resolution_consumers.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 840
+    },
+    {
+      "existing_function": {
+        "line": 141,
+        "name": "test_docs_prompt_omits_cocos_when_absent",
+        "path": "tests/standard_names/test_docs_cocos_injection.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 842
+    },
+    {
+      "existing_function": {
+        "line": 56,
+        "name": "_generate_name_dd_item",
+        "path": "tests/standard_names/test_edit_prompt_injection.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 840
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_export_emits_generic_source_bindings_and_preserves_accounting",
+        "path": "tests/standard_names/test_export_exclusion_ledger.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 840
+    },
+    {
+      "existing_function": {
+        "line": 128,
+        "name": "test_generation_and_refinement_prompts_enforce_normative_boundary",
+        "path": "tests/standard_names/test_normative_documentation_policy.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 842
+    },
+    {
+      "existing_function": {
+        "line": 119,
+        "name": "test_renders_previous_name",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 840
+    },
+    {
+      "existing_function": {
+        "line": 145,
+        "name": "test_accepted_warning",
+        "path": "tests/standard_names/test_regeneration_context.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 840
+    },
+    {
+      "existing_function": {
+        "line": 83,
+        "name": "__init__",
+        "path": "tests/standard_names/test_sn_approve.py"
+      },
+      "run_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 842
+    },
+    {
+      "existing_function": {
+        "line": 815,
+        "name": "test_create_posts_the_pull_request_and_returns_number_and_url",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "run_function": {
+        "line": 851,
+        "name": "test_create_reports_what_github_refused",
+        "path": "tests/standard_names/test_catalog_release.py"
+      },
+      "window_line": 863
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "9a5965792de821ac28666d5e0a69662585a08bab",
+    "bfac8317a7ea3282f0175a9873b4487a7fa32c95",
+    "d5cf1d817baefb184d0f589ee1a2e04a2597c430",
+    "91daceb206cc5025f764b1207b71241394249f40"
+  ],
+  "completed_at": "2026-11-12T01:01:33Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-11T22:29:41Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv UV_NO_SYNC=1 uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_catalog_release.py tests/standard_names/test_cli_release.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/gate-release-suites.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.0,
+    "plan": "sn-pipeline-hygiene",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-11T23:28:44.410041+00:00",
+    "horizon_seconds": 3600,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-11T22:28:44Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 2,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 11,
+    "headroom": 1,
+    "mean_context": 115000,
+    "observed_at": "2026-11-11T22:28:42Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 2,
+      "aggregate_tokens_per_second": 433.965,
+      "detail": "",
+      "mean_tokens_per_second": 52.923,
+      "observed_at": "2026-11-11T22:28:42Z",
+      "runs": 8.2,
+      "state": "measured"
+    },
+    "waiting": 0
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-12T01:01:33Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/manifest.md",
+  "member": "disposable-r-20261111T222140784389-sph-worktree-release",
+  "model_key": "flash",
+  "negative_control": {
+    "added_failure_ids": [
+      "tests/standard_names/test_catalog_release.py::test_a_release_cut_from_a_detached_worktree_creates_the_tag",
+      "tests/standard_names/test_catalog_release.py::test_a_release_cut_that_commits_delivers_its_commit_to_the_remote_main",
+      "tests/standard_names/test_catalog_release.py::test_the_catalog_guard_accepts_a_detached_head_merged_into_main",
+      "tests/standard_names/test_catalog_release.py::test_the_catalog_guard_refuses_an_unmerged_detached_head",
+      "tests/standard_names/test_catalog_release.py::test_the_cli_guard_accepts_a_detached_head_merged_into_main",
+      "tests/standard_names/test_catalog_release.py::test_the_cli_guard_refuses_an_unmerged_detached_head"
+    ],
+    "baseline_failure_ids": [],
+    "comparison_arm": "after_suite",
+    "control_exit_status": 1,
+    "control_failure_ids": [
+      "tests/standard_names/test_catalog_release.py::test_a_release_cut_from_a_detached_worktree_creates_the_tag",
+      "tests/standard_names/test_catalog_release.py::test_a_release_cut_that_commits_delivers_its_commit_to_the_remote_main",
+      "tests/standard_names/test_catalog_release.py::test_the_catalog_guard_accepts_a_detached_head_merged_into_main",
+      "tests/standard_names/test_catalog_release.py::test_the_catalog_guard_refuses_an_unmerged_detached_head",
+      "tests/standard_names/test_catalog_release.py::test_the_cli_guard_accepts_a_detached_head_merged_into_main",
+      "tests/standard_names/test_catalog_release.py::test_the_cli_guard_refuses_an_unmerged_detached_head"
+    ],
+    "control_run_failed": true,
+    "declaration": "restoring either on-main guard to its branch-name check makes the detached-worktree cut test fail",
+    "head_failure_ids": [],
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/negative-control.log",
+    "resolved_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/negative-control.log",
+    "test_paths": [
+      "tests/standard_names/test_catalog_release.py",
+      "tests/standard_names/test_cli_release.py"
+    ],
+    "verdict": "matched"
+  },
+  "no_commit": null,
+  "node": "sph-worktree-release",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/steering.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/brief.md",
+    "brief_sha256": "090f71256b839adeb261f056778a210cbad7b20c558d714321b213f0b1293814",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "elevated",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "4f5c460d-ed3a-4460-943c-233208992958"
+    },
+    "done_when": "a test cuts a release from a detached worktree whose head is merged into main against a stand-in remote and asserts the tag is created; a second test asserts a cut from a detached head not merged into main is refused; both on-main guards accept the merged detached head; the existing release tests still pass; nothing is pushed anywhere",
+    "estimated_hours": 2.0,
+    "goal": "let a release be cut from a detached worktree",
+    "id": "sph-worktree-release",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-11T22:28:44Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 2,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 11,
+      "headroom": 1,
+      "mean_context": 115000,
+      "observed_at": "2026-11-11T22:28:42Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 2,
+        "aggregate_tokens_per_second": 433.965,
+        "detail": "",
+        "mean_tokens_per_second": 52.923,
+        "observed_at": "2026-11-11T22:28:42Z",
+        "runs": 8.2,
+        "state": "measured"
+      },
+      "waiting": 0
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T222140784389-sph-worktree-release/manifest.md",
+    "negative_control": "restoring either on-main guard to its branch-name check makes the detached-worktree cut test fail",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "scc-chaincap-remeasure": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.json",
+        "docs/figures/sn-catalog-consistency/scc-chaincap-remeasure"
+      ],
+      "scc-momentum-tip": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip-run.py",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.html",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip.json",
+        "docs/figures/sn-catalog-consistency/scc-momentum-tip"
+      ],
+      "scc-separatrix-remainder": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder-run.py",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.json",
+        "docs/figures/sn-catalog-consistency/scc-separatrix-remainder"
+      ],
+      "scc-sourceless-names": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names-run.py",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.html",
+        "docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.json",
+        "docs/figures/sn-catalog-consistency/scc-sourceless-names"
+      ],
+      "sib-docs-drain-after-admission": [
+        "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission-run.py",
+        "docs/evidence/fragments/sn-integrity-backlog/sib-docs-drain-after-admission.html",
+        "docs/figures/sn-integrity-backlog/sib-docs-drain-after-admission"
+      ],
+      "sib-restore-reset-docs": [
+        "docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs-run.py",
+        "docs/evidence/fragments/sn-integrity-backlog/sib-restore-reset-docs.html",
+        "docs/figures/sn-integrity-backlog/sib-restore-reset-docs"
+      ],
+      "sph-corrects-schema": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.json",
+        "docs/figures/sn-pipeline-hygiene/sph-corrects-schema",
+        "imas_codex/schemas/standard_name.yaml",
+        "tests/graph/test_schema_compliance.py"
+      ],
+      "sph-pin-test": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test.json",
+        "tests/core/test_isn_pin_agreement.py",
+        "tests/graph/test_isn_grammar_snapshot_pin.py"
+      ],
+      "sph-private-imports": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-private-imports-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-private-imports.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-private-imports.json",
+        "imas_codex/standard_names/export.py",
+        "imas_codex/standard_names/legacy_authority.py",
+        "imas_codex/standard_names/near_duplicates.py",
+        "imas_codex/standard_names/release_notes.py",
+        "imas_codex/standard_names/review_triage.py",
+        "tests/standard_names/test_package_import_boundaries.py"
+      ],
+      "sph-rc-fork-pr": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-rc-fork-pr.json",
+        "imas_codex/cli/release.py",
+        "imas_codex/standard_names/catalog_release.py",
+        "tests/standard_names/test_catalog_release.py",
+        "tests/standard_names/test_cli_release.py"
+      ],
+      "sph-red-gap-rules": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-gap-rules-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-gap-rules.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-gap-rules.json",
+        "docs/figures/sn-pipeline-hygiene/sph-red-gap-rules",
+        "tests/standard_names/test_gap_rule_verdicts.py",
+        "tests/standard_names/test_geometry_enumeration_collapse.py"
+      ],
+      "sph-red-other": [
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other-run.py",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.html",
+        "docs/evidence/fragments/sn-pipeline-hygiene/sph-red-other.json",
+        "docs/figures/sn-pipeline-hygiene/sph-red-other",
+        "tests/standard_names/test_cascade_calibration.py",
+        "tests/standard_names/test_catalog_layout_hierarchy.py",
+        "tests/standard_names/test_compose_prompt_examples_round_trip.py",
+        "tests/standard_names/test_manifest_generability.py"
+      ]
+    },
+    "plan": "sn-pipeline-hygiene",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§5",
+    "spec_level": "guided",
+    "time_budget": "60m",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "imas_codex/standard_names/catalog_release.py",
+      "imas_codex/cli/release.py",
+      "tests/standard_names/test_catalog_release.py",
+      "tests/standard_names/test_cli_release.py",
+      "docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.html",
+      "docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release.json",
+      "docs/evidence/fragments/sn-pipeline-hygiene/sph-worktree-release-run.py",
+      "docs/figures/sn-pipeline-hygiene/sph-worktree-release"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 1599039.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sph-worktree-release",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-11T22:28:51.255332+00:00",
+    "score": 0.7375,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5000.892,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.0,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "91daceb206cc5025f764b1207b71241394249f40",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 848808,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261111T222140784389-sph-worktree-release",
+    "scratch_removed": false,
+    "scratch_removed_paths": [],
+    "scratch_withheld": "/tmp/reckon-crew-scratch/r-20261111T222140784389-sph-worktree-release: [Errno 2] No such file or directory: PosixPath('/tmp/reckon-crew-scratch/r-20261111T222140784389-sph-worktree-release')",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/4f5c460d-ed3a-4460-943c-233208992958/sph-worktree-release",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "bfac8317a7ea3282f0175a9873b4487a7fa32c95",
+    "reviewed_head_sha": "91daceb206cc5025f764b1207b71241394249f40",
+    "scores": {
+      "durability": 18,
+      "evidence": 16,
+      "fit": 19,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 110
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261111T222140784389-sph-worktree-release",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§5",
+  "session": "4f5c460d-ed3a-4460-943c-233208992958",
+  "session_harness": "claude",
+  "session_id": "74b0241e-2281-4b65-bc86-9513735d4cf2",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": true,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 14517298,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 1320.917,
+    "generated_tokens": 65809,
+    "generation_seconds": 612.54,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 76.5,
+    "machine_seconds": 708.377,
+    "peak_input_tokens": 176154,
+    "tokens_per_second": 107.44,
+    "wall_tokens_per_second": 49.82
+  },
+  "time_budget": "60m",
+  "tool_steps": 76.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 9112,
+  "watch_override": {
+    "arming_line": "reckon crew watch --project imas-codex",
+    "attach_line": "/home/ITER/mcintos/Code/reckon/.venv/bin/reckon crew follow --project imas-codex --session 4f5c460d-ed3a-4460-943c-233208992958",
+    "requested": true,
+    "session_attached": true,
+    "watcher_live": true
+  },
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-12T01:01:43Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-12T00:39:05Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261111T222140784389-sph-worktree-release",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 9725,
+    "worker_pid": 1434608
+  },
+  "worker_seconds": 3023,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
