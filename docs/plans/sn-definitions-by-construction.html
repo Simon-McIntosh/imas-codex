@@ -24,7 +24,7 @@
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -160,7 +160,7 @@
     <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at head 723d44eab scores goal_fidelity 17, evidence 13, scope_discipline 18, durability 15, fit 16, reuse 5, with added_failure_count 0 and five non-blocking findings (evidence fragment says 43 divergences against the artifact's 44; manifest says 1630 quantities against the artifact's 1608; gate logs are headed revision 043171ac2 whose tree lacks the graph test they run; the disposable-graph write assertion echoes a value the code under test produced; quantity_dimension_issues duplicates the name-vs-unit owner in audits.py)</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261112T084907653486-review-of-sdbc-unit-spelling-d626ee372e4f" data-who="reckon-build" data-when="2026-11-12T09:00:59.600Z">
-    <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at d626ee372: total 11+12+19+9+13+18; the reuse repair landed (quantity_dimension_issues deleted, one table read by the census), but the token-loop skip at audits.py:1581 still judges &#x27;torque&#x27; inside &#x27;torque_density&#x27;, so 87 of the census&#x27;s 128 dimension_mismatches are false positives and the html:34 headline must be regenerated</p></div>
+    <div class="r-comment-body"><p>independent review of r-20261112T020847184170-sdbc-unit-spelling at d626ee372: total 11+12+19+9+13+18; the reuse repair landed (quantity_dimension_issues deleted, one table read by the census), but the token-loop skip at audits.py:1581 still judges 'torque' inside 'torque_density', so 87 of the census's 128 dimension_mismatches are false positives and the html:34 headline must be regenerated</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261112T080434867556-review-of-sdbc-name-definition-count-c95592d087d3" data-who="reckon-build" data-when="2026-11-12T08:14:11.199Z">
     <div class="r-comment-body"><p>independent review of r-20261112T021004189810-sdbc-name-definition-count at head c95592d087d3bc3781ea6d51dcf53f9cb6f5b47c from base 4b14dd935ca9c58218cce9d8145baa11a2bfa8fd: scores goal_fidelity 19, evidence 14, scope_discipline 20, durability 9, fit 16, reuse 18 (total 97); three non-blocking findings - the landing page's draw arithmetic does not reconcile (373 allocated + 8 added, stated as 371 + 10), the only gate log is stamped at the first commit 096610f40 rather than the landed head, and a plan-document reference sits in the sampler's docstring</p></div>
@@ -170,6 +170,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-11-12T08:35:00Z">
     <div class="r-comment-body"><p>§4 closed (<code>sdbc-name-definition-count</code>, commits <code>096610f40</code> and <code>c95592d08</code>, reviewed at the final head). 381 published names of <code>v0.4.0rc8</code>, drawn across all 28 domain files, were read against their definitions. Under the lead's ruling that a bare species name counts ions, 310 agree and 71 (19 %) do not: 43 lack a qualifier the definition carries, 19 publish an abstract parent as a quantity, 8 are narrower than their name and 1 has a unit that does not fit. As first recorded, before the ruling, the count was 111, of which 40 were an ion-only population under a bare species name. Projected over the 1,975 published names: about 234 missing a qualifier, 116 abstract parents, 18 narrower, 6 unit. The largest patterns after the ruling are an equivalent-electron count the name does not state (13) and an unstated weighting (9). A separate blind reader, told the ruling, put the same class on 45 of a 60-name subset; on mismatch against agreement the two readers agree on 47 of 60, kappa 0.47, and the second reader flags more (21 against 12). The 15 names they disagree on are listed in the record and resolved by neither. The ten names §1 cites are in the record. The second reader's labels landed separately (<code>sdbc-second-reading</code>). Record: <code>docs/evidence/fragments/sn-definitions-by-construction/name-definition-labels.json</code> and <code>sdbc-name-definition-count.html</code>.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261112T085541527625-review-of-sdbc-rendered-shared-wording-3fc2991d9dfb" data-who="reckon-build" data-when="2026-11-12T09:16:49.415Z">
+    <div class="r-comment-body"><p>Reviewed r-20261112T063332484056-sdbc-rendered-shared-wording at 60654017d..3fc2991d9 and stored a parsed record at both declared review-records paths: scores goal_fidelity 12, evidence 9, scope_discipline 19, durability 6, fit 16, reuse 13, added_failure_count 0, with four blocking findings (the refusal is unreachable in the pipeline, its test bypasses the pipeline, the review_arms grouping denies a reason that quotes the rendered sentence, and the rendered arm passes 6 of 15 against the control&#x27;s 11 of 15) and four non-blocking ones.</p></div>
 </div>
 </section>
 </main>

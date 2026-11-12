@@ -1,0 +1,96 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:process_generate_docs_batch",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:604 conformance_findings"
+  ],
+  "completed_at": "2026-11-12T09:16:49.415Z",
+  "dispatched_at": "2026-11-12T09:00:49Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_generate_docs.py",
+      "line": "950",
+      "severity": "blocking",
+      "text": "the refusal cannot fire in the pipeline: replace_altered_shared_parts at :672 appends every stored sentence before _refuse_altered_shared_parts inspects the text, so shared_part_findings always returns [] and a definition altered after rendering is neither refused nor reported, which is the done_when's clause 4."
+    },
+    {
+      "file": "tests/standard_names/test_generate_docs.py",
+      "line": "760",
+      "severity": "blocking",
+      "text": "the test asserts the refusal on text that never went through the renderer, so it passes while the pipeline path is unguarded; deleting the call at worker_generate_docs.py:950 would leave it green."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/rendered-wording-census.json",
+      "line": "1111",
+      "severity": "blocking",
+      "text": "grouping.defect_of_this_change is empty and its finding states none of the nine names the rendered shared sentence, yet the same record's claim_contradicts_source reasons for argon_density, iron_density and helium_density each quote that sentence verbatim."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/rendered-wording-census.json",
+      "line": "487",
+      "severity": "blocking",
+      "text": "the rendered arm passes 6 of 15 against the published control's 11 of 15, so the plan's condition that the written definitions be accepted at least as often as the control is unmet, and the manifest nevertheless reports blockers none."
+    },
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "107",
+      "severity": "non-blocking",
+      "text": "written_part_form and shared_part_form_counts are added to a production module with no production caller, and the census JSON has no committed script beside its three sibling censuses, so the measurement cannot be reproduced."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-shared-wording.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the fragment carries no figure, so the two-arm comparison and per-part form counts are text only and the declared figures write path stayed unused."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/gate-head-1311463.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "the gate log's revision header reads 60654017d5a, the base commit, while it was written before f15e8bb55, so the log names a revision that does not contain the change it proves."
+    }
+  ],
+  "head_log_revision": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified worker_generate_docs.py:process_generate_docs_batch and worker_review_docs.py:604 conformance_findings.",
+    "diff": "four commits against base 60654017d; f15e8bb55 carries the mechanism and tests, the other three carry only the evidence fragment and census JSON, +1730/-12 across seven files.",
+    "done_when": "clause 4 (refused before stored) is unmet because the refusal at worker_generate_docs.py:950 runs after the renderer re-installs the stored sentence; clause 5 is recorded unmet at rendered-wording-census.json:487, 6 of 15 against 11 of 15.",
+    "goal": "the node's goal is to render the shared operator, population and locus parts from one stored wording; worker_generate_docs.py:672 renders them, but a divergent model population sentence survives beside the stored one.",
+    "manifest": "read; status in-progress, blockers none, and the claim that all seven clauses are met through its second branch is contradicted by rendered-wording-census.json:487 and :1111.",
+    "write_paths": "the manifest declares eleven paths; git diff 60654017d..3fc2991d9 touches seven files, all inside that fence."
+  },
+  "justifications": {
+    "durability": "test_generate_docs.py:760 calls _refuse_altered_shared_parts on un-rendered text, so removing the pipeline call at worker_generate_docs.py:950 leaves all three added tests green.",
+    "evidence": "gate-head-1311463.log records 94 passed EXIT=0 but its header names revision 60654017d, which predates the change commit f15e8bb55, and the manifest carries no baseline_suite or after_suite key.",
+    "fit": "docs_gates.py:893 and harmonize.py:107 follow the surrounding module idiom and introduce no plan, version or ticket name, though harmonize.py:107 adds a production function with no production caller.",
+    "goal_fidelity": "worker_generate_docs.py:672 renders each shared part from the registry, but a model restatement below the opening line is kept beside the appended stored sentence, so a stored definition carries two contradicting population statements.",
+    "reuse": "harmonize.py:107 reuses the module's _TOKEN_RE, but docs_gates.py:801 and harmonize.py:107 each implement their own word-set Jaccard for the same judgement with different tokenizers and thresholds.",
+    "scope_discipline": "every path in git diff 60654017d..3fc2991d9 is inside the declared fence, no live graph was written and no plan file was edited."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to render the shared operator, population and locus parts of a definition from one stored wording; imas_codex/standard_names/worker_tasks/worker_generate_docs.py:672 does render them, but a divergent model-written population sentence survives beside the stored one in the same definition.\nVERDICT done_when: read the dispatch's nine-clause measure; the render, family, census and cost clauses are met and recorded, clause 4 (a shared part altered after rendering is refused before it is stored) is not met because the refusal at worker_generate_docs.py:950 runs after the renderer has already re-installed the stored sentence, and clause 5 (accepted at least as often as the control) is recorded unmet at rendered-wording-census.json:487, 6 of 15 against 11 of 15.\nVERDICT write_paths: read the manifest's eleven declared paths; git diff 60654017d..3fc2991d9 touches seven files, every one of them inside that fence.\nVERDICT manifest: read; status in-progress with blockers \"none\", and its claim that all seven clauses are met \"through its second branch\" is contradicted by its own census record at rendered-wording-census.json:487 and by its review_arms grouping at :1111.\nVERDICT diff: read the four commits against base 60654017d; f15e8bb55 adds the renderer, refusal, conformance class and census helpers with their tests, and 6f0fd181c, 018b0cb80 and 3fc2991d9 add only the evidence fragment and the census JSON, +1730/-12 across seven files.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_generate_docs.py:process_generate_docs_batch, imas_codex/standard_names/worker_tasks/worker_review_docs.py:604 (conformance_findings)\nSCORE goal_fidelity: 12\nJUSTIFICATION goal_fidelity: worker_generate_docs.py:672 renders each shared part from the registry, but a model restatement below the opening line is kept beside the appended stored sentence, so a stored definition carries two contradicting population statements.\nSCORE evidence: 9\nJUSTIFICATION evidence: gate-head-1311463.log records 94 passed EXIT=0 but its own header names revision 60654017d, which predates the change commit f15e8bb55 at 08:12, and the manifest carries no baseline_suite or after_suite key.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 60654017d..3fc2991d9 is inside the declared fence, no live graph was written and no plan file was edited.\nSCORE durability: 6\nJUSTIFICATION durability: test_generate_docs.py:760 calls _refuse_altered_shared_parts on un-rendered text, so removing the pipeline call at worker_generate_docs.py:950 leaves all three added tests green.\nSCORE fit: 16\nJUSTIFICATION fit: docs_gates.py:893 and harmonize.py:107 follow the surrounding module idiom and introduce no plan, version or ticket name, though harmonize.py:107 adds a production function with no production caller.\nSCORE reuse: 13\nJUSTIFICATION reuse: harmonize.py:107 reuses the module's _TOKEN_RE, but docs_gates.py:801 and harmonize.py:107 each implement their own word-set Jaccard for the same \"same wording\" judgement with different tokenizers and thresholds.\nFINDING imas_codex/standard_names/worker_tasks/worker_generate_docs.py:950 blocking: the refusal cannot fire in the pipeline \u2014 replace_altered_shared_parts at :672 appends every stored sentence before _refuse_altered_shared_parts inspects the text, so shared_part_findings always returns [] and a definition altered after rendering is neither refused nor reported, which is the done_when's clause 4.\nFINDING tests/standard_names/test_generate_docs.py:760 blocking: the test asserts the refusal on text that never went through the renderer, so it passes while the pipeline path is unguarded; deleting the call at worker_generate_docs.py:950 would leave it green, which is not a durability guard for the change it claims to cover.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/rendered-wording-census.json:1111 blocking: grouping.defect_of_this_change is empty and its finding states none of the nine names the rendered shared sentence, yet the same record's claim_contradicts_source reasons for argon_density, iron_density and helium_density each read \"contradicts source: The density counts ions summed over all charge states; neutral atoms are excluded.\", so the search that produced the grouping missed its own evidence.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/rendered-wording-census.json:487 blocking: the rendered arm passes 6 of 15 against the published control's 11 of 15, so the plan's condition that the written definitions be accepted at least as often as the control is unmet, and the manifest's blockers line nevertheless reports it met.\nFINDING imas_codex/standard_names/harmonize.py:107 non-blocking: written_part_form and shared_part_form_counts are added to a production module with no production caller, and the census JSON they produce has no committed script beside its three sibling censuses, so the measurement cannot be reproduced by a reader.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-shared-wording.html:1 non-blocking: the fragment carries no figure (no img, svg or figure element), so the rendered-versus-published two-arm comparison and the per-part form counts are stated as text only, and the figures write path declared in the fence stayed unused.\nFINDING /home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/gate-head-1311463.log:1 non-blocking: the gate log's revision header reads 60654017d5a, the base commit, while it was written at 08:04 before f15e8bb55 at 08:12, so the log names a revision that does not contain the change it proves.",
+  "review_run_id": "r-20261112T085541527625-review-of-sdbc-rendered-shared-wording-3fc2991d9dfb",
+  "reviewed_base_sha": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+  "reviewed_head_sha": "3fc2991d9dfbc1dc4b23ab085f104a5eac67d77c",
+  "reviewed_run_id": "r-20261112T063332484056-sdbc-rendered-shared-wording",
+  "reviewer": "independent review node review-of-sdbc-rendered-shared-wording-3fc2991d9dfb",
+  "reviewer_run_id": "r-20261112T085541527625-review-of-sdbc-rendered-shared-wording-3fc2991d9dfb",
+  "scores": {
+    "durability": 6,
+    "evidence": 9,
+    "fit": 16,
+    "goal_fidelity": 12,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T09:22:55.408867+00:00",
+  "total": 75
+}
