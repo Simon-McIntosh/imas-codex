@@ -12,6 +12,13 @@
   ],
   "completed_at": "2026-11-12T10:32:47.404Z",
   "dispatched_at": "2026-11-12T10:18:48Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sdbc-rendered-shared-wording-84f1f3ca53bf",
+      "recorded_at": "2026-11-12T11:05:15.405223+00:00"
+    }
+  },
   "findings": [
     {
       "file": "tests/standard_names/test_generate_docs.py",
