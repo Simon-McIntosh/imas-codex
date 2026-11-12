@@ -926,7 +926,9 @@ def main() -> int:
             "judgments": {
                 "families_decided": len(decisions),
                 "judgments_paid": calls,
-                "no_call_families": len(decisions) - calls,
+                "no_call_families": sum(
+                    1 for decision in decisions.values() if not decision.cost
+                ),
                 "cost_usd": cost,
                 "cost_per_decision_usd": round(cost / calls, 8) if calls else 0.0,
                 "live_families_scanned": len(families),
