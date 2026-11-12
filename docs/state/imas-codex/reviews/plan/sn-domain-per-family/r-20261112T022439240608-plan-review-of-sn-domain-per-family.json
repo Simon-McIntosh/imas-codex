@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T02:36:29.935Z",
+  "dispatched_at": "2026-11-12T02:29:34Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:51",
+      "id": "reasoning-1",
+      "reason": "\u00a74's \"the same dry run on the repaired live graph reports none\" then cannot pass, because the repair \u00a72 sanctions leaves exactly those locus-different siblings on different domains, and the plan does not say the export gate uses the decision family.",
+      "text": "\u00a72 defines the family as \"the pattern family the repository already defines for documentation, with the locus held fixed\", but the definition it names (imas_codex/standard_names/families.py:422-447, documented at docs/evidence/fragments/sn-catalog-grouping/scg-family-definition.html) holds only the entity locus invariant and lists `position`, `geometry` and `region` as variation axes, keeping `electron_temperature` and `electron_temperature_at_magnetic_axis` family-mates; the narrowing is stated once, in \u00a72's prose, while \u00a73's read-back (\"over every live name lists zero families whose members carry more than one `physics_domain`\", line 68) and \u00a74's export gate (\"any family it would publish across more than one domain file\", line 78, with the done-when at line 82 requiring the repaired graph to report none) speak of \"family\" without it \u2014 so a node reading \u00a73 or \u00a74 alone, or reaching for the repository's own `fetch_pattern_family`, groups locus-different siblings into one family and then demands they share a domain, which \u00a72 explicitly forbids (\"a density at the pedestal top and the same density at the magnetic axis may belong to different domains\").",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:57",
+      "id": "reasoning-2",
+      "reason": "\u00a73's primary done-when fails on any family \u00a72 reports undecided unless the plan says an undecided family is resolved by a lead correction or is itself an accepted exception, and neither section says it.",
+      "text": "\u00a72 leaves an undecided family's members unwritten (\"none of its members is written\"), so members keep the incumbent domains that were split, while \u00a73's zero-split gate allows only one exception, \"families held split by a recorded lead correction that names the family\" (line 68); an undecided family is therefore a family \u00a73 must list as split and has no exception covering it, and \u00a72 expands each family's option set by unioning its members' sources, which is a change that makes the confidence floor harder to clear.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:55",
+      "id": "done_when-1",
+      "reason": "the node either blocks awaiting a labeller or self-labels and the plan's headline accuracy comparison stops measuring anything, so the plan needs to name who labels (as it already names the lead for corrections) or state a fallback arm.",
+      "text": "the accuracy measure is taken \"on at least 30 families of three or more members ... each given one domain by a reader who has not seen either decision\", and no reader is assigned; a worker has necessarily seen the per-name decision (it is live) and will see the per-family one it builds, so it cannot label its own set without destroying the blindness the item exists to buy.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:59",
+      "id": "done_when-2",
+      "reason": "it misdirects no node's mechanism and costs one bullet, so it is worth keeping as a no-regress line even though it measures nothing about this section's change.",
+      "text": "\"every domain write still goes through the one writer, shown by the existing guard test passing unchanged\" is a done-when that holds however the code behaves, since the guard test is already green on the unfixed code and the item asks for nothing new.",
+      "type": "done_when",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "fdf3617086c2eb3b2c533c7f9810ff80b71a4be7",
+  "plan_fingerprint": "468dbf79c321258d74b23e3e367b40831383fd3793796b4da7baf1e3bdcec43c",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "done_when-2",
+      "reason": "it misdirects no node's mechanism and costs one bullet, so it is worth keeping as a no-regress line even though it measures nothing about this section's change.",
+      "when": "2026-11-12T02:42:42.495679+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-2": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "it misdirects no node's mechanism and costs one bullet, so it is worth keeping as a no-regress line even though it measures nothing about this section's change.",
+      "when": "2026-11-12T02:42:42.495679+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-sn-domain-per-family.v0.at-9e65b606-r-20261112T022439240608-plan-review-of-s.json",
+  "review_run_id": "r-20261112T022439240608-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "9e65b6068dc6c14ce45786a63820afec4524c379",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-catalog-grouping` resolves as a plan, the pattern-family definition \u00a72 leans on resolves at imas_codex/standard_names/families.py:422-447 and docs/evidence/fragments/sn-catalog-grouping/scg-family-definition.html, and \u00a71's counts reconcile against the committed census (20 species families of >=3, 8 split, transport 698 of 1975).",
+    "done_when": "a finding \u2014 \u00a72's principal accuracy measure requires labels from a reader who has not seen either decision, and the plan assigns no such reader, so the node cannot produce its own measure without destroying the blindness.",
+    "evidence_paths": "pass \u2014 the gate log is committed under `docs/evidence/fragments/sn-domain-per-family/`, which exists, and \u00a71's two census files and their run scripts resolve under `docs/evidence/fragments/sn-definitions-by-construction/`.",
+    "naming": "pass \u2014 \u00a72's text carries no plan label, stage name, ticket number or changelog prose; the followup id `f-sdpf-001` is a plan record, not a code name.",
+    "reasoning": "a finding \u2014 \u00a72 narrows the family by holding the locus fixed but \u00a73 and \u00a74's gates, which read \"every live family\" and \"any family\", do not carry that definition, and under the family the repository actually defines the narrowing is violated by the repair those gates check.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable, one decision stored per family and read by every member; the accuracy comparison and the planted-family arm are its gate, not a second endpoint.",
+    "wiring": "pass \u2014 \u00a73 declares `depends-on sn-domain-per-family#s2`, \u00a74 declares `#s3`, and `sn-catalog-consistency` \u00a75 declares `sn-domain-per-family#s3` in its own `plan-section-depends-on` (verified at docs/plans/sn-catalog-consistency.html:22), so \u00a73's absorption claim resolves."
+  },
+  "section_digests": {
+    "_document": "fc8bb2b9fba57a22437498ce10408777db562f95d00bb7d3c9c0470e75dcc979",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "3679109edb483b133d52c25167f059913caae3ee06bde728a279b71ef3e7bce1",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T02:42:08.432559+00:00",
+  "total": null
+}
