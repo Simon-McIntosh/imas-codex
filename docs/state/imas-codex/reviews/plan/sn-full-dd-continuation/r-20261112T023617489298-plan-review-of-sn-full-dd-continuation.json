@@ -35,6 +35,16 @@
       "note": "\u00a75's rate is now the spend per name that newly reached accepted documentation in the drain (USD 11.14 over 21, about USD 0.53); at that rate the backlog exceeds the approval's balance, so \u00a75 states it needs the lead's spend ruling before it runs.",
       "reason": "",
       "when": "2026-11-12T02:52:02.337371+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c31a9b9781a224d9b2af24dec869e340e3c89a82",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a75 now names the demotion mechanism itself, citing \u00a752's finding where \u00a752 has recorded one and deriving it otherwise.",
+      "reason": "",
+      "when": "2026-11-12T02:52:10.266819+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "\u00a75's rate is now the spend per name that newly reached accepted documentation in the drain (USD 11.14 over 21, about USD 0.53); at that rate the backlog exceeds the approval's balance, so \u00a75 states it needs the lead's spend ruling before it runs.",
       "reason": "",
       "when": "2026-11-12T02:52:02.337371+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c31a9b9781a224d9b2af24dec869e340e3c89a82",
+      "commit_basis": "edit",
+      "note": "\u00a75 now names the demotion mechanism itself, citing \u00a752's finding where \u00a752 has recorded one and deriving it otherwise.",
+      "reason": "",
+      "when": "2026-11-12T02:52:10.266819+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T023617489298-plan-review-of-sn-full-dd-continuation.json",
