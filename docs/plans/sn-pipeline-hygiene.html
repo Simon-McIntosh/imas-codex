@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -105,6 +105,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s6" data-id="c-close-s6" data-who="reckon-build" data-when="2026-11-11T22:40:00Z">
     <div class="r-comment-body"><p>§6 closed: the defect is carried on reckon as <code>reckon:a-promotion-reads-the-evidence-it-is-given#s18</code> with followup <code>@f-aprteig-018</code>, citing both landings; no imas-codex test was changed. <a href="/imas-codex/evidence/archive/sn-pipeline-hygiene-landed.html#s6-raised-on-reckon">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261111T221653916562-sph-red-gap-rules" data-who="reckon-build" data-when="2026-11-11T23:32:39.579Z">
+    <div class="r-comment-body"><p>sph-red-gap-rules: the six test_gap_rule_verdicts.py ids and test_unregistered_locus_rejects_the_ordinal_compound pass on a compute partition (head arm 1 failed / 8654 passed against base 12 failed / 8639 passed), each diagnosed as a stale expectation against grammar-registered tokens and repaired in the tests alone</p></div>
 </div>
 </section>
 </main>
