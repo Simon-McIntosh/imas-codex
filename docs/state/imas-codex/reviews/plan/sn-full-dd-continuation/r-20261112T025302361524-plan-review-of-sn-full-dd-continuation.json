@@ -33,7 +33,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 12,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c8113cdfdf4f7e65cdff47ff48608346ddaebf4f",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "\u00a73 now waits on \u00a72 as well as on the \u00a752 writers, so the checkpoint covers the cohort's produced sources.",
+      "reason": "",
+      "when": "2026-11-12T03:08:06.010959+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c8113cdfdf4f7e65cdff47ff48608346ddaebf4f",
+      "commit_basis": "edit",
+      "note": "\u00a73 now waits on \u00a72 as well as on the \u00a752 writers, so the checkpoint covers the cohort's produced sources.",
+      "reason": "",
+      "when": "2026-11-12T03:08:06.010959+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T025302361524-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261112T025302361524-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "26ef1df34dd6958f2191adbfb4e6d9459937225c",
   "rubric": "content",
