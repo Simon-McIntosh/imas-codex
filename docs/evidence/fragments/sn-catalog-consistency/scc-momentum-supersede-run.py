@@ -17,6 +17,7 @@ Phases run in order inside one job: --pre, --preview, --apply, --post,
 from __future__ import annotations
 
 import argparse
+import hashlib
 import importlib.util
 import json
 import subprocess
@@ -28,6 +29,8 @@ ROOT = Path(__file__).resolve().parents[4]
 sys.path.insert(0, str(ROOT))
 
 from imas_codex.graph.client import GraphClient  # noqa: E402
+
+STEM = Path(__file__).stem.removesuffix("-run")
 
 CENSUS = (
     ROOT
@@ -226,6 +229,144 @@ def census(run_dir: Path, tag: str) -> dict:
     return reading
 
 
+SEALED = (
+    "receipt_type",
+    "schema_version",
+    "mechanism",
+    "run_id",
+    "change_id",
+    "old_id",
+    "into_id",
+    "predecessor_stage",
+    "source_count",
+    "source_ids",
+    "projection_count",
+    "backing_ids",
+)
+PROFILE = (
+    "stage",
+    "unit",
+    "name_score",
+    "review_count",
+    "review_mean_score",
+    "llm_cost",
+    "description",
+)
+
+
+def load(path: Path) -> dict:
+    return json.loads(path.read_text())
+
+
+def node_of(state: dict, name: str) -> dict:
+    return next(row for row in state["nodes"] if row["id"] == name)
+
+
+def rows_of(state: dict, key: str, name: str) -> list:
+    return [row for row in state[key] if row["name"] == name]
+
+
+def write_arm(record: dict) -> dict:
+    return {
+        "command": record["command"],
+        "returncode": record["returncode"],
+        "stdout": record["stdout"].strip(),
+    }
+
+
+def census_arm(reading: dict) -> dict:
+    lineage = reading["lineage"]
+    return {
+        "observed_at": reading["observed_at"],
+        "revision": reading["revision"],
+        "names": reading["inventory"]["names"],
+        "edges": reading["inventory"]["edges"],
+        "lineage_members": lineage["members"],
+        "live_tips": lineage["live_tips"],
+        "lineage_live_tip_count": reading["lineage_live_tip_count"],
+        "cycle_components": reading["cycle_components"],
+        "multi_tip_components": reading["multi_tip_components"],
+        "tip_cross_check_agrees": reading["tip_cross_check_agrees"],
+        "snapshot": reading["snapshot"],
+    }
+
+
+def assemble(run_dir: Path) -> dict:
+    pre, post = load(run_dir / "pre-state.json"), load(run_dir / "post-state.json")
+    checks = load(run_dir / "checks.json")
+    control = load(run_dir / "disposable-control.json")
+    fold = next(row for row in post["changes"] if row["operation"] == "fold_identity")
+    removal = next(
+        row
+        for row in post["changes"]
+        if row["operation"] == "remove_refined_from_relationship"
+    )
+    receipt = json.loads(fold["reason"])
+    before_read = load(run_dir / "census-before.json")
+    after_read = load(run_dir / "census-after.json")
+    return {
+        "node": STEM,
+        "observed_at": after_read["observed_at"],
+        "revision": after_read["revision"],
+        "spend_usd": 0.0,
+        "spend_note": (
+            "no model call: the fold, the lineage removal and both census "
+            "reads are deterministic graph operations"
+        ),
+        "survivor": SURVIVOR,
+        "loser": LOSER,
+        "before": {
+            "observed_at": pre["observed_at"],
+            "survivor": {k: node_of(pre, SURVIVOR)[k] for k in PROFILE},
+            "loser": {k: node_of(pre, LOSER)[k] for k in PROFILE},
+            "survivor_sources": rows_of(pre, "sources", SURVIVOR),
+            "loser_sources": rows_of(pre, "sources", LOSER),
+            "survivor_reviews": len(rows_of(pre, "reviews", SURVIVOR)),
+            "loser_reviews": len(rows_of(pre, "reviews", LOSER)),
+            "edges": pre["edges"],
+            "lineage_members": pre["lineage_members"],
+        },
+        "signed_writes": {
+            "lineage_removal_preview": write_arm(
+                load(run_dir / "unblock-preview.json")
+            ),
+            "lineage_removal": dict(
+                write_arm(load(run_dir / "unblock.json")),
+                change_id=removal["id"],
+                changed_at=removal["changed_at"],
+                ledger_from=removal["from_name"],
+                ledger_to=removal["to_name"],
+                reason=removal["reason"],
+            ),
+            "supersede_preview": write_arm(load(run_dir / "preview.json")),
+            "supersede": dict(
+                write_arm(load(run_dir / "apply.json")),
+                change_id=fold["id"],
+                changed_at=fold["changed_at"],
+            ),
+        },
+        "receipt": {
+            "sealed": {key: receipt[key] for key in SEALED},
+            "sha256_of_receipt_text": hashlib.sha256(
+                fold["reason"].encode()
+            ).hexdigest(),
+        },
+        "after": checks,
+        "census": {
+            "instrument": str(CENSUS.relative_to(ROOT)),
+            "before": census_arm(before_read),
+            "after": census_arm(after_read),
+        },
+        "disposable_control": {
+            "fixture": control["fixture"],
+            "two_tip": control["arms"]["two_tip"],
+            "two_tip_plus_cycle": control["arms"]["two_tip_plus_cycle"],
+            "one_tip": control["arms"]["one_tip"],
+            "assertions": control["assertions"],
+        },
+    }
+
+
 def dump(path: Path, payload: dict) -> None:
     path.write_text(json.dumps(payload, indent=2, default=str) + "\n")
     print(f"WROTE {path} bytes={path.stat().st_size}", flush=True)
@@ -267,6 +408,13 @@ def main() -> int:
             dump(args.run_dir / "census-before.json", census(args.run_dir, "before"))
         elif phase == "census-after":
             dump(args.run_dir / "census-after.json", census(args.run_dir, "after"))
+        elif phase == "assemble":
+            dump(
+                ROOT
+                / "docs/evidence/fragments/sn-catalog-consistency"
+                / f"{STEM}.json",
+                assemble(args.run_dir),
+            )
         elif phase == "control":
             tip = load_script(TIP, "momentum_tip_control")
             module = load_script(CENSUS, "lineage_census_control")
