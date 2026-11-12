@@ -33,7 +33,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 10,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "\u00a75's done-when now requires the mechanism that lowered accepted documentation during the drain to be named with evidence, and a read before and after one scoped sn run to show no accepted documentation demoted without a recorded reason.",
+      "reason": "",
+      "when": "2026-11-12T02:33:54.695316+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b048061120d3b490fbc3251d40b4b33ac22d0299",
+      "commit_basis": "edit",
+      "note": "\u00a75's done-when now requires the mechanism that lowered accepted documentation during the drain to be named with evidence, and a read before and after one scoped sn run to show no accepted documentation demoted without a recorded reason.",
+      "reason": "",
+      "when": "2026-11-12T02:33:54.695316+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T014840801961-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261112T014840801961-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "132bdb6a82d2a44b2826bd22d1c049b8f6d8c17b",
   "rubric": "content",
