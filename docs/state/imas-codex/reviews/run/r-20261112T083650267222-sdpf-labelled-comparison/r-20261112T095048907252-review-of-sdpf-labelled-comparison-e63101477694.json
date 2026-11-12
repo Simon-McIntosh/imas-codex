@@ -1,0 +1,86 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-12T10:01:31.241Z",
+  "dispatched_at": "2026-11-12T09:53:10Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html",
+      "line": "96",
+      "severity": "non-blocking",
+      "text": "non-blocking: it says the artifact's provenance block records the seat and the confidence floor, but labelled-comparison.json's provenance block holds only revised_at, revision, note, module, writes_to_graph and graph_access; seat (typesafe/jev-1.14) and confidence_floor (0.68) sit at the payload top level, because --from-existing setdefaulted an empty block onto an artifact written before _provenance existed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html",
+      "line": "82",
+      "severity": "non-blocking",
+      "text": "non-blocking: it glosses the largest undecided family as the ion charge-state torque density due to collisions across fast and thermal, co- and counter-passing species, but 16 of its 51 members are electron species and 12 are trapped, so the description names roughly half the family the repair exists to describe accurately."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py",
+      "line": "51",
+      "severity": "non-blocking",
+      "text": "non-blocking: SECTION_ONE_PATTERNS and the section_one JSON key at :495 name the plan's \u00a71 by its label rather than the species families it measures, and the repair edited this file without renaming them."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py",
+      "line": "365",
+      "severity": "non-blocking",
+      "text": "non-blocking: _derive_from_existing indexes [\"largest\"][\"member_count\"] unconditionally, so re-deriving an artifact that holds no undecided family raises TypeError after it has already rewritten the file."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py",
+      "line": "222",
+      "severity": "non-blocking",
+      "text": "non-blocking: _leading_domains still re-drives decide_batch with build_family_state and build_family_question to recover probabilities decide_family_domain already holds and discards, duplicating the owner's call instead of extending it; carried over from the prior review and not addressed here."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T083650267222-sdpf-labelled-comparison/manifest.md",
+      "line": "11",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tests line records a direct-interpreter pytest command while sdpf-labelled-comparison-gate.log:3 records uv run --no-sync, so the gate receipt promotion fills from this line is not the literal command the log holds."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production runtime path reaches a docs evidence script; the change touches no product code.",
+    "diff": "read ca824d590 and e63101477 against acad1f648; the derived figures, the corrected prose, --from-existing and --check-fragment all landed, and the recorded negative control reproduces on my own run of the mode.",
+    "done_when": "plan \u00a72's third clause asks the calibration accuracy be recorded as a regression reading and not be lower; labelled-comparison.json's 0.7219 and 0.6036 against 0.5444 reconcile exactly with a recomputation from the 169 calibration_rows.",
+    "goal": "the node's goal is to measure the landed per-family decision against the blind readers with the calibration regression, and this repair's share is to make the fragment stop contradicting its own artifact; sdpf-labelled-comparison.html:71-84 does both, with one new inaccuracy at :96.",
+    "manifest": "the reviewed run's manifest reads complete with commits f61985da2, acad1f648, ca824d590 and e63101477 whose figures match the artifact, though its tests line names a different literal command than the gate log's header.",
+    "write_paths": "git diff --name-status acad1f648..e63101477 lists exactly the four declared evidence paths as modified, with no new file and no product source or test changed."
+  },
+  "justifications": {
+    "durability": "--check-fragment at labelled-comparison-run.py:369 would redden on a regressed figure and its refusal is demonstrated, but nothing in the repository invokes it, so a fragment edited back to 33 members fails no automated run.",
+    "evidence": "the negative control recorded in sdpf-labelled-comparison-gate.log reproduces on my own run (exit 1 on the parent fragment, exit 0 at HEAD), but --check-fragment guards only two prose-borne figures and the 25-passed suite at :25 measures no part of the artifact.",
+    "fit": "the added helpers and flags are named by what they do, but SECTION_ONE_PATTERNS at labelled-comparison-run.py:51 and the section_one key at :495 still name the plan's \u00a71 by its label in a file this diff edited.",
+    "goal_fidelity": "both claims the prior review blocked on are corrected against the artifact at sdpf-labelled-comparison.html:71-84, with one new inaccuracy introduced at :96.",
+    "reuse": "a search of docs/evidence and imas_codex/ for an existing provenance emitter and an existing fragment-claim checker found neither, so _provenance and _check_fragment are first owners rather than forks, while the pre-existing _leading_domains duplication at :222 is carried over untouched.",
+    "scope_discipline": "git diff --name-status acad1f648..e63101477 lists only the four declared evidence paths, all modified in place, with no product code or test touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to measure the landed per-family domain decision against the blind readers with the calibration regression, and this repair's share of it is to make the fragment stop contradicting its own artifact; docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html:71-84 now states the landed and strict bases apart and reads the largest undecided family from the measurement, and labelled-comparison-run.py:249-296 computes both from the committed rows.\nVERDICT done_when: plan \u00a72's third clause asks the calibration accuracy be recorded as a regression reading and not be lower; labelled-comparison.json records family_accuracy 0.7219 and family_accuracy_strict 0.6036 against stored 0.5444, and I recomputed all three from the 169 calibration_rows (102 decided-and-matching plus 20 undecided landing on the label, 92 stored) and they reconcile exactly.\nVERDICT write_paths: the node was declared the four evidence paths under docs/evidence/fragments/sn-domain-per-family/; git diff --name-status acad1f648..e63101477 lists exactly those four as modified, no new file, and no product source or test.\nVERDICT manifest: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T083650267222-sdpf-labelled-comparison/manifest.md reads complete and names commits f61985da2, acad1f648, ca824d590 and e63101477; its landing and artifacts lines match labelled-comparison.json, though its tests line still records a direct-interpreter command where sdpf-labelled-comparison-gate.log:3 records the uv run --no-sync form.\nVERDICT diff: read ca824d590 and e63101477 against acad1f648 \u2014 ca824d590 adds _strict_reading, _undecided_summary, _provenance and --from-existing with the corrected prose and the derived fields, e63101477 adds --check-fragment and appends its negative control to the gate log; I re-ran --check-fragment and it prints claim=51 artifact=51 ok=True and exits 0, and against the pre-repair fragment from acad1f648 it prints claim=33 artifact=51 ok=False and exits 1, reproducing the refusal the log records.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: both claims the prior review blocked on are corrected against the artifact at sdpf-labelled-comparison.html:71-84, with one new inaccuracy introduced at :96.\nSCORE evidence: 16\nJUSTIFICATION evidence: the negative control in sdpf-labelled-comparison-gate.log reproduces on my own run (exit 1 on the parent fragment, exit 0 at HEAD), but the gate it guards checks only two prose-borne figures and the run's own suite at :25 passed measures no part of the artifact.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-status acad1f648..e63101477 lists only the four declared evidence paths, all modified in place with no product code or test touched.\nSCORE durability: 11\nJUSTIFICATION durability: --check-fragment at labelled-comparison-run.py:369 would redden on a regressed figure and its refusal is demonstrated, but nothing in the repository invokes it, so a fragment edited back to 33 members fails no automated run.\nSCORE fit: 15\nJUSTIFICATION fit: the added helpers and flags are named by what they do, but SECTION_ONE_PATTERNS at labelled-comparison-run.py:51 and the section_one key at :495 still name the plan's \u00a71 by its label in a file this diff edited.\nSCORE reuse: 19\nJUSTIFICATION reuse: I searched docs/evidence and imas_codex/ for an existing provenance emitter and an existing fragment-claim checker and found neither, so _provenance and _check_fragment are first owners rather than forks, while the pre-existing _leading_domains duplication at :222 is carried over untouched.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html:96 non-blocking: it says the artifact's provenance block records the seat and the confidence floor, but labelled-comparison.json's provenance block holds only revised_at, revision, note, module, writes_to_graph and graph_access \u2014 seat (typesafe/jev-1.14) and confidence_floor (0.68) sit at the payload top level, because --from-existing setdefaulted an empty block onto an artifact written before _provenance existed.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-labelled-comparison.html:82 non-blocking: it glosses the largest undecided family as the ion charge-state torque density due to collisions across fast and thermal, co- and counter-passing species, but 16 of its 51 members are electron species and 12 are trapped, so the description names roughly half the family the repair exists to describe accurately.\nFINDING docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py:51 non-blocking: SECTION_ONE_PATTERNS and the section_one JSON key at :495 name the plan's \u00a71 by its label rather than the species families it measures, and the repair edited this file without renaming them.\nFINDING docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py:365 non-blocking: _derive_from_existing indexes [\"largest\"][\"member_count\"] unconditionally, so re-deriving an artifact that holds no undecided family raises TypeError after it has already rewritten the file.\nFINDING docs/evidence/fragments/sn-domain-per-family/labelled-comparison-run.py:222 non-blocking: _leading_domains still re-drives decide_batch with build_family_state and build_family_question to recover probabilities decide_family_domain already holds and discards, duplicating the owner's call instead of extending it \u2014 carried over from the prior review and not addressed here.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T083650267222-sdpf-labelled-comparison/manifest.md:11 non-blocking: the tests line records a direct-interpreter pytest command while sdpf-labelled-comparison-gate.log:3 records uv run --no-sync, so the gate receipt promotion fills from this line is not the literal command the log holds.\n",
+  "review_run_id": "r-20261112T095048907252-review-of-sdpf-labelled-comparison-e63101477694",
+  "reviewed_base_sha": "acad1f648fa5ab7388bd916ab9156ae0e710a595",
+  "reviewed_head_sha": "e63101477694f349cc0340d2e5625024065199f8",
+  "reviewed_run_id": "r-20261112T083650267222-sdpf-labelled-comparison",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261112T095048907252-review-of-sdpf-labelled-comparison-e63101477694"
+  },
+  "reviewer_run_id": "r-20261112T095048907252-review-of-sdpf-labelled-comparison-e63101477694",
+  "scores": {
+    "durability": 11,
+    "evidence": 16,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T10:04:39.113984+00:00",
+  "total": 99
+}
