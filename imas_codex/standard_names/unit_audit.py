@@ -117,6 +117,9 @@ QUANTITY_HEADS: tuple[str, ...] = (
     "temperature",
     "frequency",
     "pressure",
+    # A flow rate carries the unit of what flows (kg.s^-1, m^3.s^-1) and states
+    # no dimensional commitment of its own, so it is not read as a bare rate.
+    "flow_rate",
     "rate",
 )
 

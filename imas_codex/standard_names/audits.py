@@ -1574,12 +1574,16 @@ def name_unit_consistency_check(
 
     for token, expected_units in _NAME_TOKEN_UNIT_EXPECTATIONS.items():
         # A registered quantity head is judged by the branch above, which
-        # compares dimensions; judging it again here by spelling would let a
-        # dimensionally equal spelling such as ``kg.m^2.s^-2`` fail ``N.m``. A
-        # head word merely appearing somewhere in a name of another quantity
-        # (``temperature`` inside a ratio) is not that name's head and stays here.
-        if token in QUANTITY_HEADS and (
-            quantity == token or quantity.endswith("_" + token)
+        # compares dimensions. Any word of that head — the head itself, or a
+        # component of a longer compound such as ``torque`` in
+        # ``torque_density`` — belongs to the head and is not judged again by
+        # spelling, which would fail the compound's own recorded unit. A head
+        # word appearing in a name of another quantity (``temperature`` inside a
+        # ratio) is not part of that name's head and is still judged here.
+        if (
+            token in QUANTITY_HEADS
+            and quantity in QUANTITY_HEADS
+            and token in quantity.split("_")
         ):
             continue
         if token not in name_tokens:

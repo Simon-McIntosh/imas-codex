@@ -150,6 +150,18 @@ def test_extraction_leaves_a_dimensionally_different_spelling_alone() -> None:
     assert meta is None
 
 
+def test_a_compound_head_is_judged_once_and_its_words_not_separately() -> None:
+    """The longest registered head decides, and its words are not re-judged."""
+    from imas_codex.standard_names.audits import name_unit_consistency_check
+
+    assert (
+        name_unit_consistency_check({"id": "ion_torque_density", "unit": "N.m^-2"})
+        == []
+    )
+    issues = name_unit_consistency_check({"id": "ion_torque_density", "unit": "N.m"})
+    assert issues and "torque_density" in issues[0]
+
+
 @pytest.mark.graph
 def test_catalog_write_takes_the_recorded_spelling_on_a_disposable_graph(
     disposable_neo4j_empty: str,
