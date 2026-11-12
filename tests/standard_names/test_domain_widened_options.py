@@ -293,7 +293,17 @@ def test_the_default_option_set_is_the_escalated_fallback(
     async def decide(states, questions, **_kwargs):  # noqa: ANN001
         asked.append(questions[dd.QUESTION])
         options = list(questions[dd.QUESTION]["criteria"])
-        return [({dd.QUESTION: {"choice": options[0], "probabilities": {options[0]: 0.91}}}, 0.2)], 0.4
+        return [
+            (
+                {
+                    dd.QUESTION: {
+                        "choice": options[0],
+                        "probabilities": {options[0]: 0.91},
+                    }
+                },
+                0.2,
+            )
+        ], 0.4
 
     monkeypatch.setattr(dd, "decide_batch", decide)
     decision = asyncio.run(
@@ -362,3 +372,25 @@ def test_the_fallback_set_still_takes_a_single_option_without_a_judgment(
     assert decision.decided
     assert decision.choice == PRIOR
     assert decision.probability == 1.0
+
+
+def test_the_declared_domain_order_is_read_from_its_one_owner() -> None:
+    """The module holds no second copy of the declared domain precedence.
+
+    ``imas_codex.definitions.physics.load_domain_precedence`` owns that order
+    and validates it against the ISN vocabulary; a flattening kept beside it
+    drifts the moment the loader's validation changes.
+    """
+    from imas_codex.definitions.physics import load_domain_precedence
+
+    shared = tuple(load_domain_precedence())
+    assert not hasattr(dd, "all_domains"), (
+        "the module builds its own flat domain list; the shared loader owns it"
+    )
+    assert "all_domains" not in dd.__all__
+    local = tuple(
+        domain for band in dd.domain_bands() for domain in dd.band_domains(band)
+    )
+    assert local == shared, (
+        "the module's bands read the same declared order the shared loader returns"
+    )

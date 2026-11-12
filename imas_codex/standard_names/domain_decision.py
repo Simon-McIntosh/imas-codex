@@ -52,7 +52,6 @@ __all__ = [
     "FamilyDomainDecision",
     "FamilyDomainOutcome",
     "NameDomainWrite",
-    "all_domains",
     "band_domains",
     "band_of",
     "band_umbrella",
@@ -128,15 +127,6 @@ def band_of(domain: str) -> str | None:
 def band_umbrella(domain: str) -> str | None:
     band = band_of(domain)
     return _bands()[2].get(band) if band else None
-
-
-def all_domains() -> tuple[str, ...]:
-    """Every domain the guidance defines, in precedence order."""
-    return tuple(
-        domain
-        for band in _guidance().get("precedence") or ()
-        for domain in band["domains"]
-    )
 
 
 def domain_bands() -> tuple[str, ...]:
@@ -674,7 +664,6 @@ def build_family_domain_question(
     options: Sequence[str],
     member_count: int,
     *,
-    widened: bool = True,
     prior: str | None = None,
 ) -> dict[str, Any]:
     """The second stage: which domain of the chosen band the family belongs to."""
@@ -691,8 +680,6 @@ def build_family_domain_question(
         "the most specific option that plainly fits the quantity; choose the "
         "band umbrella only when no narrower option fits. The options are "
         "listed most specific first."
-        if widened
-        else build_family_question(options, member_count)[QUESTION]["instructions"]
     )
     if prior is not None:
         instructions += (
@@ -1218,9 +1205,7 @@ def decide_and_write_family(
     if decision.decided:
         writes = fan_out_family_decision(gc, decision)
     else:
-        writes = split_undecided_family(
-            gc, decision, members, ids_map, model=model
-        )
+        writes = split_undecided_family(gc, decision, members, ids_map, model=model)
     written = {entry.sn_id for entry in writes}
     return FamilyDomainOutcome(
         decision=decision,
