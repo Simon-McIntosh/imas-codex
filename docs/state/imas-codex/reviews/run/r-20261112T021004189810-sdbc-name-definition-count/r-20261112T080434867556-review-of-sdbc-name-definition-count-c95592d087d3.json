@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs on disk: it is not an armed test-role node, so its manifest records no baseline_suite/after_suite arms; the single gate gate-compose.log records EXIT=0 with no FAILED line and the manifest's retry_failures reads none, so the added-failure set is empty (0).",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-12T08:14:11.199Z",
+  "dispatched_at": "2026-11-12T08:05:22Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-definition-count.html",
+      "line": "18",
+      "severity": "non-blocking",
+      "text": "non-blocking: the page says 371 names were drawn \"plus the ten names the plan's opening census cites\", but per_file_allocated sums to 373 and only 8 cited names were added outside the draw - field_line_length and incident_neutral_particle_flux_at_wall sit in files whose sampled count equals the allocation yet are flagged added, and name-definition-labels.json:103 lists all ten under added_outside_draw, so the draw and the additions cannot be reconciled with the 381-row sample."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T021004189810-sdbc-name-definition-count/gate-compose.log",
+      "line": "2",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only recorded gate log carries \"# revision: 096610f40\", the first commit, so the recomposition that produced the landed record at c95592d08 - which added the ruling column and the second reading the manifest's headline rests on - has no gate log at the revision it landed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-definition-sample-run.py",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: the module docstring refers to \"the plan's opening census\", carrying a plan-document reference into source that the naming rules require source to stand without."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified none: no runtime code imports the sampler or reads the record at runtime; it is a docs evidence fragment and a standalone script.",
+    "diff": "read both commits against base 4b14dd935ca9c58218cce9d8145baa11a2bfa8fd - 096610f40 adds the sampler and the first record (5,478 insertions), c95592d08 adds the ruling column and the second reading (1,644 insertions, 859 deletions), and no other file is touched.",
+    "done_when": "the five section-4 clauses are all present in the committed record - a 381-name sample, the four classes plus agrees defined per row, the ten cited names with nine carrying section 1's class and incident_neutral_particle_flux_at_wall reclassified with its reason stated, per-class count/share/projection, pattern groups, and the second reading with 45 of 60 exact class agreement and 15 disagreements left unresolved; the gate log records the draw and EXIT=0 but prints none of those figures and names revision 096610f40.",
+    "goal": "the node goal is to label a stratified sample of published names for agreement between name and definition and commit the record; docs/evidence/fragments/sn-definitions-by-construction/name-definition-labels.json carries 381 labelled rows across all 28 domain files, drawn by the committed script from the pinned catalog revision 4a48c6c5 (v0.4.0rc8), so the goal is met.",
+    "manifest": "read; it reports status complete, commits 096610f40 and c95592d08, four changed paths, the compose command and gate-compose.log, and headlines 310 agree / 71 defect at kappa 0.4715; I re-derived class_counts (270/83/19/8/1 summing to 381), the 40 names the ruling moves, and the projection from the committed JSON and they reconcile.",
+    "write_paths": "the source node was fenced to four files under docs/evidence/fragments/sn-definitions-by-construction/ plus docs/figures/sn-definitions-by-construction/sdbc-name-definition-count; the diff touches exactly those four fragment files and leaves the figures directory unused."
+  },
+  "justifications": {
+    "durability": "name-definition-sample-run.py writes name-definition-labels.json and .html in compose() with no assertion comparing the regenerated record to the committed one, so a regression in sampling or tallying changes the artefacts silently while the gate still exits 0.",
+    "evidence": "gate-compose.log:2 names revision 096610f40, so the recomposition that produced the landed record at c95592d08 is recorded only at the earlier revision, and the gate prints no figure that asserts the record's headline counts.",
+    "fit": "the script follows the sibling census scripts in the same directory, but its docstring at name-definition-sample-run.py:13 cites \"the plan's opening census\", a plan-document reference carried into source.",
+    "goal_fidelity": "name-definition-labels.json carries the 381 labelled rows and both committed readings, which is exactly the deliverable the goal names.",
+    "reuse": "a search of imas_codex/standard_names for deterministic stratified sampling found owners at benchmark_roles.py:279 (_stratified_sample) and campaign.py:336 (stratified_pilot), both round-robin balanced rather than allocated in proportion to stratum size with a floor, so this sampler is a different allocation policy and no kappa helper exists at all.",
+    "scope_discipline": "every path in the diff from 4b14dd935 to c95592d08 is one of the four declared fragment paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to label a stratified sample of published names for agreement between name and definition and commit the record; docs/evidence/fragments/sn-definitions-by-construction/name-definition-labels.json carries 381 labelled rows across all 28 domain files, drawn by the committed script from the pinned catalog revision 4a48c6c5 (v0.4.0rc8), so the goal is met.\nVERDICT done_when: the five \u00a74 clauses are all present in the committed record - a 381-name sample (per_file_published and per_file_allocated, every file with 10 or more names sampled at 10 or more), the four classes plus agrees defined at name-definition-labels.json's class_definitions, the ten cited names at cited_names with nine carrying \u00a71's class and incident_neutral_particle_flux_at_wall reclassified with its reason stated, per-class count/share/projection at class_counts and projection, pattern groups at pattern_groups, and the second reading at second_reader with 45 of 60 exact class agreement and 15 disagreements left unresolved; the gate log gate-compose.log records the draw and EXIT=0 but prints none of those figures and its header names revision 096610f40 rather than the landed head.\nVERDICT write_paths: the source node was fenced to four files under docs/evidence/fragments/sn-definitions-by-construction/ plus docs/figures/sn-definitions-by-construction/sdbc-name-definition-count; the diff touches exactly those four fragment files and leaves the figures directory unused.\nVERDICT manifest: the reviewed manifest reports status complete, commits 096610f40 and c95592d08, four changed paths, the compose command and gate-compose.log, and headlines 310 agree / 71 defect at kappa 0.4715; I re-derived class_counts (270/83/19/8/1 summing to 381), the 40 names the ruling moves, and the projection from the committed JSON and they reconcile with the manifest.\nVERDICT diff: read both commits against base 4b14dd935ca9c58218cce9d8145baa11a2bfa8fd - 096610f40 adds the sampler and the first record (5,478 insertions), c95592d08 adds the ruling column and the second reading (1,644 insertions, 859 deletions), and no other file is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: name-definition-labels.json carries the 381 labelled rows and both committed readings, which is exactly the deliverable the goal names.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-compose.log:2 names revision 096610f40, so the recomposition that produced the landed record at c95592d08 is recorded only at the earlier revision, and the gate prints no figure that asserts the record's headline counts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff `git diff --stat 4b14dd935 c95592d08` is one of the four declared fragment paths.\nSCORE durability: 9\nJUSTIFICATION durability: name-definition-sample-run.py writes name-definition-labels.json and .html in compose() with no assertion comparing the regenerated record to the committed one, so a regression in sampling or tallying changes the artefacts silently while the gate still exits 0.\nSCORE fit: 16\nJUSTIFICATION fit: the script follows the sibling census scripts in the same directory, but its docstring at name-definition-sample-run.py:13 cites \"the plan's opening census\", a plan-document reference carried into source.\nSCORE reuse: 18\nJUSTIFICATION reuse: a search of imas_codex/standard_names for deterministic stratified sampling found owners at benchmark_roles.py:279 (_stratified_sample) and campaign.py:336 (stratified_pilot), both round-robin balanced rather than allocated in proportion to stratum size with a floor, so this sampler is a different allocation policy and no kappa helper exists at all.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-definition-count.html:18 non-blocking: the page says 371 names were drawn \"plus the ten names the plan's opening census cites\", but per_file_allocated sums to 373 and only 8 cited names were added outside the draw - field_line_length and incident_neutral_particle_flux_at_wall sit in files whose sampled count equals the allocation yet are flagged added, and name-definition-labels.json:103 lists all ten under added_outside_draw, so the draw and the additions cannot be reconciled with the 381-row sample.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T021004189810-sdbc-name-definition-count/gate-compose.log:2 non-blocking: the only recorded gate log carries \"# revision: 096610f40\", the first commit, so the recomposition that produced the landed record at c95592d08 - which added the ruling column and the second reading the manifest's headline rests on - has no gate log at the revision it landed.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-definition-sample-run.py:13 non-blocking: the module docstring refers to \"the plan's opening census\", carrying a plan-document reference into source that the naming rules require source to stand without.\n",
+  "review_node": "review-of-sdbc-name-definition-count-c95592d087d3",
+  "review_run_id": "r-20261112T080434867556-review-of-sdbc-name-definition-count-c95592d087d3",
+  "reviewed_base_sha": "4b14dd935ca9c58218cce9d8145baa11a2bfa8fd",
+  "reviewed_head_sha": "c95592d087d3bc3781ea6d51dcf53f9cb6f5b47c",
+  "reviewed_run_id": "r-20261112T021004189810-sdbc-name-definition-count",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261112T080434867556-review-of-sdbc-name-definition-count-c95592d087d3"
+  },
+  "scores": {
+    "durability": 9,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:18:18.706872+00:00",
+  "total": 96
+}
