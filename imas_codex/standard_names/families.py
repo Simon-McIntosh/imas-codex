@@ -1353,18 +1353,19 @@ RETURN {", ".join(DOMAIN_FAMILY_SEGMENTS)}, members
         family = families.setdefault(
             key, {"key": key, "segments": segments, "members": []}
         )
-        sources: dict[str, str | None] = {}
-        for entry in row.get("sources") or []:
-            path = entry.get("path")
-            if path:
-                sources[str(path)] = entry.get("domain")
-        family["members"].append(
-            {
-                "id": row.get("id"),
-                "description": row.get("description") or "",
-                "physics_domain": row.get("physics_domain"),
-                "domain_correction": row.get("domain_correction"),
-                "sources": sources,
-            }
-        )
+        for entry in row.get("members") or []:
+            sources: dict[str, str | None] = {}
+            for source in entry.get("sources") or []:
+                path = source.get("path")
+                if path:
+                    sources[str(path)] = source.get("domain")
+            family["members"].append(
+                {
+                    "id": entry.get("id"),
+                    "description": entry.get("description") or "",
+                    "physics_domain": entry.get("physics_domain"),
+                    "domain_correction": entry.get("domain_correction"),
+                    "sources": sources,
+                }
+            )
     return list(families.values())

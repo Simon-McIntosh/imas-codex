@@ -436,9 +436,21 @@ def test_the_census_groups_by_the_same_signature_as_the_seeded_read(
         for index in range(3)
     ]
     families = fam.fetch_domain_families(graph, min_size=3)
-    keys = {family["key"] for family in families}
-    seeded = {fam.fetch_domain_family(seed, graph)["key"] for seed in seeds}
-    assert seeded <= keys, f"the census misses families it must group: {seeded - keys}"
+    by_key = {family["key"]: family for family in families}
+    seeded = [fam.fetch_domain_family(seed, graph) for seed in seeds]
+    assert {family["key"] for family in seeded} <= set(by_key), (
+        "the census misses families it must group"
+    )
     for seed in seeds:
-        assert len(fam.fetch_domain_family(seed, graph)["members"]) == 3
-
+        read = fam.fetch_domain_family(seed, graph)
+        assert len(read["members"]) == 3
+        census = by_key[read["key"]]
+        assert census["segments"] == read["segments"], (
+            "the two reads must agree on the family's signature"
+        )
+        assert {m["id"] for m in census["members"]} >= {
+            m["id"] for m in read["members"]
+        }, "the census must carry every member the seeded read finds"
+        assert all(len(m["sources"]) == 1 for m in census["members"]), (
+            "a census member carries its own sources"
+        )
