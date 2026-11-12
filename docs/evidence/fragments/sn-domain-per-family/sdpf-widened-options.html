@@ -17,10 +17,11 @@ than reading the bar as met. A multi-member family left below the floor is now
 sources, so its names are decided rather than left unwritten, and the family
 record stays undecided. Measure: the gate log at
 <code>docs/evidence/fragments/sn-domain-per-family/sdpf-widened-options-gate.log</code>
-records <code>18 passed / EXIT=0</code> and <code>6 passed / EXIT=0</code> on the
-<code>all_debug</code> partition at revision <code>c8ac96807</code>; the
-negative control records <code>EXIT=1</code> twice, once with the widening
-removed (<code>4 failed, 6 passed</code>) and once with the split removed
+records <code>19 passed / EXIT=0</code> and <code>6 passed / EXIT=0</code> on the
+<code>all_debug</code> partition at revision <code>d91bede9a</code>; the
+negative control records <code>EXIT=1</code> three times, with the duplicate
+domain order put back (<code>1 failed</code>, the reuse test), with the widening
+removed (<code>4 failed, 7 passed</code>) and with the split removed
 (<code>1 failed</code>, the split test).</p>
 
 <h3 id="sdpf-widened-options-change">What changed</h3>
@@ -41,6 +42,14 @@ that domain stated as evidence. <strong>The default is now the escalated
 fallback</strong>, on the lead's ruling that the undecided bound for families of
 two or more members is 24.</p>
 
+<p id="sdpf-widened-options-reuse">The decision reads the declared domain order
+from its one owner. <code>imas_codex.definitions.physics.load_domain_precedence</code>
+already returns the 32 domains in that order and validates them against the ISN
+vocabulary; the module keeps only the band helpers, whose band structure the
+loader does not expose. A test asserts the module holds no second copy of that
+order, and putting the copy back reddens it. The family question builder also
+lost a <code>widened</code> flag whose bounded branch no caller reached.
+
 <p id="sdpf-widened-options-split">A family the floor refuses is no longer left
 whole and unwritten. <code>split_undecided_family</code> puts each member to the
 per-name form with the member's own sources, writes the members it can place,
@@ -49,10 +58,12 @@ stays undecided, so the family is still reported rather than quietly resolved. T
 test <code>test_a_family_below_the_floor_is_held_split_across_its_members</code>
 plants a three-member family whose sources carry three different domains, and
 asserts one per-name judgment per member, every member offered the domain its
-own sources carry, and every member written with that domain. Its control,
-<code>test_removing_the_split_leaves_the_members_unwritten</code>, removes the
-split and finds every member unwritten; the same removal run as a mutation in
-the gate job fails the positive test (<code>EXIT=1</code>).</p>
+own sources carry, and every member written with that domain. Beside it,
+<code>test_a_member_its_own_sources_cannot_place_keeps_its_stored_domain</code>
+drives the real split with per-name answers that also fall below the floor, so
+every member is asked and none is written — the split's own no-write outcome
+rather than a monkeypatched stand-in. Removing the split is the job's mutation,
+and it reddens the positive test (<code>EXIT=1</code>).</p>
 
 <h3 id="sdpf-widened-options-readings">The four option sets, and their readings</h3>
 
@@ -297,5 +308,5 @@ share, with the twenty largest moves by family, was not measured: that pass is
 one of the terms the section asks for over <em>every</em> live family, and this
 node measured only the one-option census over the live catalog. The catalog was
 never written and no disposable-copy write pass ran, so no live name changed
-domain. The graph was read only, at revision <code>c8ac96807</code>, seat
-<code>typesafe/jev-1.14</code>.</p>
+domain. The graph was read only, at revision <code>c8ac96807</code> for the readings and
+<code>d91bede9a</code> for the tests, seat <code>typesafe/jev-1.14</code>.</p>
