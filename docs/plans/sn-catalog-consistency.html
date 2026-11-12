@@ -18,12 +18,12 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-definitions-by-construction#s6&quot;],&quot;s3&quot;:[&quot;sn-catalog-consistency#s2&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-domain-per-family#s3&quot;]}">
   <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="23">
+<meta name="plan-version" content="24">
 <meta name="plan-modified" content="2026-11-12">
 </head>
 <body>
@@ -66,7 +66,7 @@
     </ul>
 
     <h2 id="s4">§4 — One live tip for the momentum-diffusivity lineage</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="1.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
     <p><code>toroidal_plasma_momentum_diffusivity</code> and <code>toroidal_momentum_diffusion_coefficient</code> are both live tips of one lineage. The coordinator brings the lead both names with their DD sources, units, scores and paid history, and a proposed survivor. If the sizing node has placed the pair in a batch, that batch carries the ruling and this section records it.</p>
     <p><strong>Done when:</strong> the lead's ruling is recorded here; the losing name is superseded through the signed path with one receipt-stamped successor edge to the survivor, its sources and paid reviews kept; the lineage census reports one live tip for this lineage and no new cycle, and reports a two-tip lineage planted in a disposable graph; spend is USD 0 beyond any documentation regeneration the ruling asks for.</p>
 
@@ -128,7 +128,10 @@
     <div class="r-comment-body"><p>Lead ruling, 2026-11-12: <code>toroidal_plasma_momentum_diffusivity</code> survives. <code>toroidal_momentum_diffusion_coefficient</code> is superseded onto it through the signed path with one receipt-stamped successor edge, its <code>core_transport</code> source and paid reviews kept. Evidence: <code>scc-momentum-tip</code> (name score 0.934 against 0.908, review mean 0.833 against 0.717, two DD loci against one, both m<sup>2</sup>/s). Cleared with the definitions session: nothing of theirs holds or rewrites the name before <code>sn-definitions-by-construction</code> §6.</p></div>
 </div>
 <div class="r-comment" data-section="s4" data-id="c-run-r-20261112T065753341036-review-of-scc-momentum-supersede-444d423e6678" data-who="reckon-build" data-when="2026-11-12T07:16:43.960Z">
-    <div class="r-comment-body"><p>independent review of run r-20261112T062932010221-scc-momentum-supersede at 444d423e6678 — goal_fidelity 18, evidence 14, scope_discipline 18, durability 10, fit 15, reuse 12 (total 87); six non-blocking findings and no blocking finding; added_failure_count 0 with an empty id list, derived from the reviewed run&#x27;s gate logs because its manifest carries no baseline_suite or after_suite block.</p></div>
+    <div class="r-comment-body"><p>independent review of run r-20261112T062932010221-scc-momentum-supersede at 444d423e6678 — goal_fidelity 18, evidence 14, scope_discipline 18, durability 10, fit 15, reuse 12 (total 87); six non-blocking findings and no blocking finding; added_failure_count 0 with an empty id list, derived from the reviewed run's gate logs because its manifest carries no baseline_suite or after_suite block.</p></div>
+</div>
+<div class="r-comment" data-section="s4" data-id="c-close-s4" data-who="reckon-build" data-when="2026-11-12T07:45:00Z">
+    <div class="r-comment-body"><p>§4 closed under the lead's 2026-11-12 ruling (<code>scc-momentum-supersede</code>, commits <code>0a8dad849</code>, <code>8acae47ec</code>, <code>444d423e6</code>, review 87). <code>toroidal_momentum_diffusion_coefficient</code> is superseded (from accepted) onto <code>toroidal_plasma_momentum_diffusivity</code>, which stays accepted, with one successor edge written by <code>edit.supersede_into</code>; the survivor now holds all three DD paths, the <code>core_transport</code> one carried from the loser; the loser's four paid reviews are kept. The lineage census reads one live tip for this lineage (catalog-wide multi-tip lineages 19 to 18) and no cycle, and its planted two-tip control still reports two. Coordinator ratification: to let the fold run, the node first removed, through the signed <code>sn remove-lineage</code> path, an unbacked successor claim on the loser that carried no receipt; the ruling did not name that step, it serves the ruling's intent, and reversing it would restore the edge that blocked the fold. <a href="/imas-codex/evidence/fragments/sn-catalog-consistency/scc-momentum-supersede.html">evidence</a></p></div>
 </div>
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261111T220724818947-scc-separatrix-remainder" data-who="reckon-build" data-when="2026-11-11T23:03:39.386Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html</p></div>
