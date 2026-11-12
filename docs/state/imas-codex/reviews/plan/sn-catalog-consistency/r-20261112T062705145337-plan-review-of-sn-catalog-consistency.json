@@ -35,9 +35,28 @@
       "note": "\u00a72 now owns the release-candidate rename batch (batch-272) and the six unexported-reference advisory batches (274\u2013279) independently of definitions \u00a76; a done-when item requires each of their 150 rows applied through sn edit or declined with its reason",
       "reason": "",
       "when": "2026-11-12T14:45:11.689402+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9bb92262465b7aa0fd59efb77064bec6ffd096e",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "spend rate is measured on the first batch \u00a72 actually runs, not batch-001; the flux-surface-average witness is replaced by the momentum_flux/momentum_source unit-pair batch, which only \u00a72 writes",
+      "reason": "",
+      "when": "2026-11-12T14:45:22.801482+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9bb92262465b7aa0fd59efb77064bec6ffd096e",
+      "commit_basis": "edit",
+      "note": "spend rate is measured on the first batch \u00a72 actually runs, not batch-001; the flux-surface-average witness is replaced by the momentum_flux/momentum_source unit-pair batch, which only \u00a72 writes",
+      "reason": "",
+      "when": "2026-11-12T14:45:22.801482+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
