@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T06:08:56.368Z",
+  "dispatched_at": "2026-11-12T06:03:14Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/serve-answers-inside-the-connect-limit.html:51",
+      "id": "done_when-1",
+      "reason": "without a load floor the arm's pass and fail are indistinguishable from a quiet-node measurement, so the node can be closed while sessions still time out at session start.",
+      "text": "the fleet-node arm requires each of five starts to answer in under 15 s with only \"the node's load average recorded beside each\"; recording load without requiring the measurement to be taken at a load comparable to \u00a71's 73 leaves the arm satisfiable on an idle node, where a 15 s reading says nothing about the 35.1 s failure the plan exists to remove",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/serve-answers-inside-the-connect-limit.html:54",
+      "id": "single_goal-1",
+      "reason": "the author must either narrow the guard to the path that answers `initialize` or state the top-level help path in scope with its own measure and its effort, otherwise the worker either under-delivers a gate it cannot pass or spends the node's effort on work the section said was out of scope.",
+      "text": "the guard demands that the discovery commands, the language-model client library and the schema runtime be unimported \"by the time `imas-codex --help` exits\", which is a change to the top-level command group's import path, while the section's opening line promises \"The other commands keep working and keep their own import cost\" and no done-when bounds what `imas-codex --help` may cost; the node therefore carries a second deliverable that its own prose disclaims and its measures do not cover",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fe216bc0513978d0a4ef36ecf5c6d1ed71725670",
+  "plan_fingerprint": "cfdfcc5292c712ce8efc9be8a65489c241a2e0763a3459c591aa3837d6152446",
+  "plan_slug": "serve-answers-inside-the-connect-limit",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T060208216495-plan-review-of-serve-answers-inside-the-connect-limit",
+  "reviewed_blob_sha": "e07afa6fe7fde3ddc3db3d02780ea999794b408b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a72 carries no hrefs; its in-plan reference to \u00a71 resolves, `.mcp.json` exists and spawns `uv run --no-sync --project ${HOME}/Code/imas-codex imas-codex serve`, and the \"three serve modes\" it measures against exist in `imas_codex/cli/serve.py:40,46` (default, `--read-only`, `--dd-only`).",
+    "done_when": "a finding \u2014 the fleet-node arm added to \u00a72 (line 51) records the node's load average but sets no floor, so a pass taken on a quiet node does not show the endpoint at the load the failure was measured at.",
+    "evidence_paths": "pass \u2014 \u00a72 names `docs/evidence/fragments/serve-answers-inside-the-connect-limit/`, which exists in the repository (currently holding `briefs/`), a committed in-repo path rather than a scratchpad.",
+    "naming": "pass \u2014 \u00a72 introduces no symbols, and its prose names mechanisms (`the server's deferred background warm-up`) rather than plan labels or ticket numbers; the `\u00a71` reference is plan prose, not a code name.",
+    "reasoning": "pass \u2014 \u00a71's attribution (19.9 s of the 27.5 s help reading inside the command-line package, 18.6 s through the discovery commands) supports the stated cause that the time is spent before the server exists; the endpoint is obtainable (five timed cold starts at the base revision and after the fix, plus a test that fails at the base revision); and \u00a72 names no code path, formula or function to implement.",
+    "single_goal": "a finding \u2014 \u00a72's guard (line 54) requires `imas-codex --help` to exit without the discovery commands, the language-model client library or the schema runtime imported, which is work on the top-level command group that the section's own opening sentence (line 47) says is out of scope, and no done-when measures the top-level help path.",
+    "wiring": "pass \u2014 the plan declares `plan-standalone`, carries no `depends-on`/`informs`/`gates` to resolve, no other plan in `docs/plans/` references it, and \u00a72's only stated input (\u00a71's base measurements) is `data-status=\"done\"`."
+  },
+  "section_digests": {
+    "_document": "5e2c783815e69924c53eb2d6d4d73623b019a3ec61c110aef2ee43e3849cb0b6",
+    "s1": "c6730b0e36fe504894374103bc2c78000f26c890e3b22810d676d6abdb247a70",
+    "s2": "5950b402d405f781ea293c3eea2eb084cfaf28f68327938a546221ec113f44d9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T06:18:54.459189+00:00",
+  "total": null
+}
