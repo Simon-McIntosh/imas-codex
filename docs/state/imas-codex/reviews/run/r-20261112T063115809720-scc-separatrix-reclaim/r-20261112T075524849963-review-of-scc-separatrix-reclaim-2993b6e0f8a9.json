@@ -1,0 +1,87 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/edit.py:_apply_rename",
+    "imas_codex/standard_names/graph_store/graph_refinement.py:persist_refined_name",
+    "imas_codex/cli/sn.py:7137",
+    "imas_codex/standard_names/review_triage.py:340",
+    "imas_codex/standard_names/review_triage.py:349",
+    "imas_codex/standard_names/promote.py:1245",
+    "imas_codex/standard_names/promote.py:1254",
+    "imas_codex/standard_names/source_refresh.py:539",
+    "imas_codex/llm/sn_tools.py:918"
+  ],
+  "completed_at": "2026-11-12T08:11:33.258Z",
+  "dispatched_at": "2026-11-12T08:00:21Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/edit.py",
+      "line": 3495,
+      "severity": "non-blocking",
+      "summary": "the admitted reclaim case is named lead_ruled_locator, an authority attribution rather than a mechanism, and it is persisted into StandardNameChange receipts on the live graph, so the attribution is now data as well as source; a mechanism name (locator_only) says what the case decides"
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_refinement.py",
+      "line": 1276,
+      "severity": "non-blocking",
+      "summary": "new.stale_source_ids is written on every rename, including an empty list when nothing is stale, so a reader cannot tell 'no stale binding recorded' from 'renamed before the field existed'"
+    },
+    {
+      "file": "tests/standard_names/test_reclaim_history_apart.py",
+      "line": 295,
+      "severity": "non-blocking",
+      "summary": "assert plan.successor == LOCATOR_TOMBSTONE and, at line 308, receipt['reason']['reclaiming_name'] == LOCATOR_TARGET compare the writer's echo of the arguments the test passed in; both hold whatever the writer does with them and guard no regression on their own"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T063115809720-scc-separatrix-reclaim/gate-stale5.log",
+      "line": 3,
+      "severity": "non-blocking",
+      "summary": "the gate log's '# command:' line is prose ('/python -m pytest with -m graph over the stale-binding and reclaim suites'), not the literal text handed to a shell, so the gate cannot be re-run from the log; gate-stale2/3/4 carry the same prose header"
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T063115809720-scc-separatrix-reclaim/gate-stale4.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "gate-stale4 reports 8 passed at revision 3c315a1c while gate-stale3 reports test_rename_stale_binding failing at the same revision; the header records the committed revision only, so an uncommitted tree and a committed one are indistinguishable and the base arm for the second commit is ambiguous"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-reclaim.html",
+      "line": 45,
+      "severity": "non-blocking",
+      "summary": "the lead's species-population ruling on tungsten_density_at_plasma_boundary is stored as a docs_hint only; docs-hint.json reads back docs_stage=accepted with the hint unrendered, so the live documentation does not yet state the ion-summed, neutral-excluded population the ruling requires"
+    }
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_rename_stale_binding.py:133 fails at 3c315a1c (gate-stale3.log, 1 failed) and passes at 2993b6e0, and gate-negative-control.log shows the two admission tests reddening when _reclaim_locator_only_case is forced to refuse.",
+    "evidence": "gate-stale5.log ends '8 passed' with EXIT=0 at 2993b6e0 and the negative control at gate-negative-control.log fails the two admission tests, but the log headers name no literal command and two arms at one stated revision disagree.",
+    "fit": "the added Cypher constants and dataclass fields follow edit.py:3267's shape, but edit.py:3495 names the case after the authority that ruled it rather than the locator mechanism it decides.",
+    "goal_fidelity": "edit.py:3998 routes lead_ruled_locator through the same archive-then-rename path, and scc-separatrix-reclaim.json records zero tombstones revived and the 2 remaining names as the lead's concept pair.",
+    "reuse": "the added _dd_loci extends _dd_locus and _ReclaimCase.holders extends the history_apart holder; the census imports the classifier from scc-separatrix-remainder-run.py rather than forking it, and a capability search over imas_codex/standard_names found no existing owner of a boundary-locator equivalence pair (review/consolidation.py:26 lists position suffixes, a different concern).",
+    "scope_discipline": "every changed path is in the manifest's declared list, and the graph_refinement.py change is reached only by the rename writer the reclaim uses."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261112T075524849963-review-of-scc-separatrix-reclaim-2993b6e0f8a9",
+  "reviewed_base_sha": "60654017d5a358945583eeb69862cbfa0ed10ec9",
+  "reviewed_head_sha": "2993b6e0f8a9ddfe6b3919be62d548b260127f71",
+  "reviewed_run_id": "r-20261112T063115809720-scc-separatrix-reclaim",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:13:17.808034+00:00",
+  "total": 95,
+  "verdicts": {
+    "diff": "read both commits against 60654017; 3c315a1c adds the locator-only admission, the multi-holder archive query and the census, 2993b6e0 excludes a stale source binding from the rename cohort and applies the fourth reclaim.",
+    "done_when": "the done_when is a live read-back of the separatrix census; scc-separatrix-reclaim.json records population 111, conforming 109, out_of_line 2 (the deuterium-tritium concept pair), using the classifier imported from scc-separatrix-remainder-run.py.",
+    "goal": "the goal is to reclaim the four ruled boundary spellings through the signed rename path without reviving a tombstone; edit.py:3998 admits the ruled shape and the fragment records all four applied with archive receipts.",
+    "manifest": "read; it reports 8 passed for the two disposable-graph suites with gate-stale5.log and gate-head3.log named, and states the census counts 3283/16/111/109/2.",
+    "write_paths": "read the manifest's declared paths; all seven paths in the diff lie inside them (edit.py, graph_refinement.py, the two test files, the fragment html/json/run.py)."
+  }
+}
