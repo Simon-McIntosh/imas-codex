@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest records neither baseline_suite nor after_suite (both null in its classification record), so the added-failure count is read from its committed gate log: 57 passed, 0 failed, EXIT=0 at c401f5912, with the three later commits documentation-only at head b71f49601; the reviewed run added no failing test.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-12T07:07:05.025Z",
+  "dispatched_at": "2026-11-12T06:55:08Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "line": "911",
+      "severity": "non-blocking",
+      "text": "non-blocking: an absent or superseded seed makes fetch_domain_family return no members, so the option union is empty, decide_family_domain yields choice None with undecided_reason also None, and store_family_decision at :915 merges a StandardNameDomainFamily node keyed '' with no reason, leaving a junk record a later reader cannot distinguish from an undecided family that names its cause."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision.html",
+      "line": "43",
+      "severity": "non-blocking",
+      "text": "non-blocking: the measure table quotes \"43 passed, 13 deselected\" from the run's earlier pre-fix gate, whose own output printed families=197 members=197 split_by_per_name=0 (the broken census read fixed in c401f5912), while the committed gate log records 57 passed, so the table presents a superseded reading beside the corrected ones."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T021115157173-sdpf-family-decision/manifest.md",
+      "line": "9",
+      "severity": "non-blocking",
+      "text": "non-blocking: the commits list omits f210e061a and changed_paths omits the two committed evidence logs, so a coordinator reconciling the manifest against the diff sees fewer commits and paths than the node actually landed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate log and its negative-control twin are committed outside the declared write paths because the done_when requires them under docs/evidence/fragments/ while the fence lists no log path, so the dispatch's scope and its measure disagree and the fence should name the log paths."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision.html",
+      "line": "52",
+      "severity": "non-blocking",
+      "text": "non-blocking: the done-when's headline reading (per-family share of names against per-name share on 30+ independently labelled families) and the sn-catalog-grouping calibration regression are both absent, so the node lands the mechanism without the comparative evidence that the per-family decision files more names under the reader's domain."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all six commits from base 4b14dd93 to head b71f49601, comprising families.py (+188: DOMAIN_FAMILY_HELD_SEGMENTS, domain_family_key, fetch_domain_family, fetch_domain_families and a shared segment-projection refactor), domain_decision.py (+395: the family decision, store, read, fan-out and entry point), the StandardNameDomainFamily class and StandardName.domain_family_id, a new 456-line suite, and evidence; the three commits after the gate revision c401f5912 are documentation only, so the gate result covers the landed code.",
+    "done_when": "the committed gate log docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log records 57 passed and EXIT=0 on host 98dci4-clu-3141 at revision c401f5912, covering the eight-family read-back, the one-judgment-per-family count, the below-floor family that writes none of its members, the planted disjoint-family control and the unchanged single-writer guard, but the two comparative clauses of the measure are not taken: no reader-assigned share reading exists for the 30+ labelled families and no calibration regression over the sn-catalog-grouping labels is recorded.",
+    "goal": "the goal is one stored physics-domain record per family that every member reads, and imas_codex/standard_names/domain_decision.py:890 decide_and_write_family reads the family, decides once, stores one StandardNameDomainFamily record and fans it out through write_name_domain, which test_every_member_reads_the_one_stored_family_decision exercises on eight seeded families with 24 members and one record each.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T021115157173-sdpf-family-decision/manifest.md, which states the gate result 57 passed and the declared mutation's 1 failed / EXIT=1 and names the log paths, but its commits line omits f210e061a and its changed_paths line omits the two committed evidence logs.",
+    "write_paths": "six of the eight changed paths lie inside the declared fence (domain_decision.py, families.py, standard_name.yaml, test_family_domain_decision.py, sdpf-family-decision.html, family-label-set.json), while the two committed gate logs are outside it because the done_when itself requires the gate log under docs/evidence/fragments/... and the fence lists no log path."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_family_domain_decision.py:361 reddens under the declared per-name mutation, proving the disjoint-family guard, though no test covers the empty-family path at domain_decision.py:911 and the census test asserts supersets rather than equality.",
+    "evidence": "docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log:74 records the real gate (57 passed, EXIT=0) and the negative-control log holds a red, but the measure's headline share comparison and calibration regression at sdpf-family-decision.html:52 are unmeasured.",
+    "fit": "imas_codex/standard_names/domain_decision.py:557 follows the module's frozen-dataclass and docstring idiom and every added symbol names its mechanism, with no plan or ticket identifier in source.",
+    "goal_fidelity": "imas_codex/standard_names/domain_decision.py:915 stores exactly one record per family and fan_out_family_decision at :851 writes every member from it, which is the stated deliverable.",
+    "reuse": "imas_codex/standard_names/families.py:454 refactors the existing segment-projection helpers into the shared _segment_projection, and the decision reuses candidate_domains, path_counts and write_name_domain rather than forking them; the StandardNameDomainFamily store is new because imas_codex/schemas/standard_name.yaml held no family record class.",
+    "scope_discipline": "every source and test path is inside the fence, but docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log:1 and its negative-control twin are committed outside it and the declared docs/figures/sn-domain-per-family/sdpf-family-decision path is unused."
+  },
+  "project": "imas-codex",
+  "raw_text": "Reviewed run: r-20261112T021115157173-sdpf-family-decision\nReviewed base: 4b14dd935ca9c58218cce9d8145baa11a2bfa8fd\nReviewed head: b71f496012869c0fa547b5be778e04828d530532\n\nVERDICT goal: the goal is one stored physics-domain record per family that every member reads, and imas_codex/standard_names/domain_decision.py:890 decide_and_write_family reads the family, decides once, stores one StandardNameDomainFamily record and fans it out through write_name_domain, which test_every_member_reads_the_one_stored_family_decision exercises on eight seeded families with 24 members and one record each.\nVERDICT done_when: the committed gate log docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log records 57 passed and EXIT=0 on host 98dci4-clu-3141 at revision c401f5912, covering the eight-family read-back, the one-judgment-per-family count, the below-floor family that writes none of its members, the planted disjoint-family control and the unchanged single-writer guard, but the two comparative clauses of the measure are not taken: no reader-assigned share reading exists for the 30+ labelled families and no calibration regression over the sn-catalog-grouping labels is recorded.\nVERDICT write_paths: six of the eight changed paths lie inside the declared fence (domain_decision.py, families.py, standard_name.yaml, test_family_domain_decision.py, sdpf-family-decision.html, family-label-set.json), while the two committed gate logs are outside it because the done_when itself requires the gate log under docs/evidence/fragments/... and the fence lists no log path.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T021115157173-sdpf-family-decision/manifest.md, which states the gate result 57 passed and the declared mutation's 1 failed / EXIT=1 and names the log paths, but its commits line omits f210e061a and its changed_paths line omits the two committed evidence logs.\nVERDICT diff: read all six commits from base 4b14dd93 to head b71f49601, comprising families.py (+188: DOMAIN_FAMILY_HELD_SEGMENTS, domain_family_key, fetch_domain_family, fetch_domain_families and a shared segment-projection refactor), domain_decision.py (+395: the family decision, store, read, fan-out and entry point), the StandardNameDomainFamily class and StandardName.domain_family_id, a new 456-line suite, and evidence; the three commits after the gate revision c401f5912 are documentation only, so the gate result covers the landed code.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/domain_decision.py:915 stores exactly one record per family and fan_out_family_decision at :851 writes every member from it, which is the stated deliverable.\nSCORE evidence: 12\nJUSTIFICATION evidence: docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log:74 records the real gate (57 passed, EXIT=0) and the negative-control log holds a red, but the measure's headline share comparison and calibration regression at sdpf-family-decision.html:52 are unmeasured.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: every source and test path is inside the fence, but docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log:1 and its negative-control twin are committed outside it and the declared docs/figures/sn-domain-per-family/sdpf-family-decision path is unused.\nSCORE durability: 16\nJUSTIFICATION durability: tests/standard_names/test_family_domain_decision.py:361 reddens under the declared per-name mutation, proving the disjoint-family guard, though no test covers the empty-family path at domain_decision.py:911 and the census test asserts supersets rather than equality.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/standard_names/domain_decision.py:557 follows the module's frozen-dataclass and docstring idiom and every added symbol names its mechanism, with no plan or ticket identifier in source.\nSCORE reuse: 17\nJUSTIFICATION reuse: imas_codex/standard_names/families.py:454 refactors the existing segment-projection helpers into the shared _segment_projection, and the decision reuses candidate_domains, path_counts and write_name_domain rather than forking them; the StandardNameDomainFamily store is new because imas_codex/schemas/standard_name.yaml held no family record class.\nFINDING imas_codex/standard_names/domain_decision.py:911 non-blocking: an absent or superseded seed makes fetch_domain_family return no members, so the option union is empty, decide_family_domain yields choice None with undecided_reason also None, and store_family_decision at :915 merges a StandardNameDomainFamily node keyed '' with no reason, leaving a junk record a later reader cannot distinguish from an undecided family that names its cause.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision.html:43 non-blocking: the measure table quotes \"43 passed, 13 deselected\" from the run's earlier pre-fix gate, whose own output printed families=197 members=197 split_by_per_name=0 (the broken census read fixed in c401f5912), while the committed gate log records 57 passed, so the table presents a superseded reading beside the corrected ones.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T021115157173-sdpf-family-decision/manifest.md:9 non-blocking: the commits list omits f210e061a and changed_paths omits the two committed evidence logs, so a coordinator reconciling the manifest against the diff sees fewer commits and paths than the node actually landed.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision-gate.log:1 non-blocking: the gate log and its negative-control twin are committed outside the declared write paths because the done_when requires them under docs/evidence/fragments/ while the fence lists no log path, so the dispatch's scope and its measure disagree and the fence should name the log paths.\nFINDING docs/evidence/fragments/sn-domain-per-family/sdpf-family-decision.html:52 non-blocking: the done-when's headline reading (per-family share of names against per-name share on 30+ independently labelled families) and the sn-catalog-grouping calibration regression are both absent, so the node lands the mechanism without the comparative evidence that the per-family decision files more names under the reader's domain.",
+  "review_run_id": "r-20261112T065006454620-review-of-sdpf-family-decision-b71f49601286",
+  "reviewed_base_sha": "4b14dd935ca9c58218cce9d8145baa11a2bfa8fd",
+  "reviewed_head_sha": "b71f496012869c0fa547b5be778e04828d530532",
+  "reviewed_run_id": "r-20261112T021115157173-sdpf-family-decision",
+  "scores": {
+    "durability": 16,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T07:09:40.544622+00:00",
+  "total": 95
+}
