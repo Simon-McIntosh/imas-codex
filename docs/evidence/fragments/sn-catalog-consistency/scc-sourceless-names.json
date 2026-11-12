@@ -11,7 +11,7 @@
     "beta"
   ],
   "dormant_exhausted_sourceless": 4,
-  "generated_at": "2026-11-12T00:12:44.844452+00:00",
+  "generated_at": "2026-11-12T00:15:32.973714+00:00",
   "graph_writes": 0,
   "holder_positive_control": [
     "electron_temperature"
@@ -39,8 +39,8 @@
     "classifier_populations": {
       "never_bound": 1
     },
-    "endpoint": "bolt://127.0.0.1:42943",
-    "generated_at": "2026-11-12T00:13:03.195650+00:00",
+    "endpoint": "bolt://127.0.0.1:35279",
+    "generated_at": "2026-11-12T00:15:49.251624+00:00",
     "graph_writes": 1,
     "graph_writes_note": "disposable Neo4j only; the live graph is untouched",
     "invariant_bound_excluded": true,
