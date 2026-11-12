@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:927 generate_docs pool -> process_generate_docs_batch",
+    "imas_codex/standard_names/loop.py:965 refine_docs pool -> process_refine_docs_batch",
+    "imas_codex/standard_names/worker_tasks/__init__.py:203 worker_generate_docs task registry",
+    "imas_codex/standard_names/worker_tasks/__init__.py:212 worker_refine_docs task registry",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:673 replace_altered_shared_parts on the generate path"
+  ],
+  "completed_at": "2026-11-12T12:57:10.580Z",
+  "dispatched_at": "2026-11-12T12:44:54Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_generate_docs.py",
+      "line": "683",
+      "severity": "non-blocking",
+      "text": "non-blocking: `_mark_generate_docs_exhausted` duplicates the capability owned by imas_codex/standard_names/graph_store/graph_claim_release.py:1230 `_mark_refine_docs_exhausted` \u2014 same MATCH, same SET of docs_stage='exhausted' with the claim cleared, differing only in the stage filter ('pending' vs 'refining') and the comment tag \u2014 rather than parameterising the owner's stage; the copy also drops the `edit_status` closing CASE that both existing exhaust paths (graph_claim_release.py:1190-1197 and :1250-1253) carry, so a docs steering edit open on a pending name is left open by the new path. The node was fenced out of the owner's file and records the durable home under outside_scope, so this is for a later node to fold."
+    },
+    {
+      "file": "tests/standard_names/test_refine_docs_settled_wording.py",
+      "line": "129",
+      "severity": "non-blocking",
+      "text": "non-blocking: the recorded negative control for the gap-1 test (negative-control-refusal-released.log) fails by pytest-timeout at the repo's 30 s default with no assertion message, so it does not demonstrate that `assert stage[\"docs_stage\"] == \"exhausted\"` is what catches the regression; the passing arm is already near the limit (the sibling tests took 25.7 s and 38.1 s in the same run directory), so the red is indistinguishable from a slow harness. The assertion would in fact redden \u2014 with the repair removed the stage stays 'refining' through three iterations \u2014 but the evidence on file does not show it doing so."
+    },
+    {
+      "file": "tests/standard_names/test_refine_docs_settled_wording.py",
+      "line": "249",
+      "severity": "non-blocking",
+      "text": "non-blocking: the generate-path test patches `worker_generate_docs._mark_generate_docs_exhausted` with a MagicMock, so it proves only that the worker calls the marker and never that the marker moves the name; a wrong stage filter, a wrong claim token or a malformed reviewer comment in the new Cypher at worker_tasks/worker_generate_docs.py:696-713 leaves every test green."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 5 production call site(s)",
+    "diff": "read commit by commit against base 4cc49b7c0 \u2014 8346104bf adds the generate-path terminal marker and its branch, extends the refine terminal set to the refusal class, drops the dead disjunct at docs_gates.py:1144 and adds the three tests; 199403fc1 moves the refusal-class import into the failure handler after an UnboundLocalError on the transient-failure path; 9542d488d adds the evidence fragment.",
+    "done_when": "the done_when asks for a test that feeds the same contradicting answer on every attempt, reads the terminal state within the existing bound and the model calls it cost, shown failing; tests/standard_names/test_refine_docs_settled_wording.py:124-137 does all of that, but the recorded red (negative-control-refusal-released.log) is a pytest-timeout at 30 s rather than the assertion at :129, so \"shown failing\" is shown by a budget expiry and not by the guard speaking.",
+    "goal": "the node's goal is to close the four gaps an earlier review found in the rendered shared wording; all four are closed \u2014 the terminal state is reached on both writers (imas_codex/standard_names/worker_refine_docs.py:371-377, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:1038-1057), gap 2 takes the brief's second branch with reasons (docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-wording-repair.html:15-19), the description repair is read back from what was stored (tests/standard_names/test_refine_docs_settled_wording.py:141-187), and the unreachable disjunct is gone from imas_codex/standard_names/docs_gates.py:1144-1146.",
+    "manifest": "read; status complete, commits 8346104bf, 199403fc1, 9542d488d, tests naming the five-file pytest gate, test_logs naming gate-settled-wording-repair.log (revision 199403fc1, EXIT=0, 107 passed) and four mutation logs, negative_control_log naming negative-control-refusal-released.log; it records no baseline_suite or after_suite pair, which its brief excused by stating that the section's two-arm control is not re-run here.",
+    "write_paths": "the fence was docs_gates.py, worker_generate_docs.py, worker_refine_docs.py, tests/test_generate_docs.py, tests/test_docs_gates.py, tests/test_refine_docs_settled_wording.py, the evidence fragment and a figures directory; git diff --stat 4cc49b7c0..9542d488d touches six of them \u2014 docs_gates.py, both worker modules, test_docs_gates.py, the new test file and the evidence fragment \u2014 every path inside the fence, with test_generate_docs.py and the figures directory declared but unused."
+  },
+  "justifications": {
+    "durability": "the description and generate-terminal tests each redden on their own removed repair (negative-control-description-repair-removed.log, negative-control-generate-terminal.log), but the refine test reddens by timeout and the only new query, worker_tasks/worker_generate_docs.py:683, is replaced by a MagicMock at tests/standard_names/test_refine_docs_settled_wording.py:236 so no test fails if that Cypher is wrong.",
+    "evidence": "the gate log gate-settled-wording-repair.log carries its revision (199403fc1) and a final EXIT=0 with 107 passed, but the gap-1 negative control at negative-control-refusal-released.log reddens by \"Failed: Timeout (>30.0s) from pytest-timeout\" rather than by the assertion at tests/standard_names/test_refine_docs_settled_wording.py:129.",
+    "fit": "the additions follow their files' idiom \u2014 worker_tasks/worker_generate_docs.py already opens GraphClient directly at :789 and :808, and the new comments state the mechanism (worker_refine_docs.py:359-369) with no plan, ticket or attribution text.",
+    "goal_fidelity": "all four gaps are closed in the landed diff, and imas_codex/standard_names/worker_refine_docs.py:371-377 reaches the pre-existing terminal marker rather than introducing a second counter, exactly as gap 1 asked.",
+    "reuse": "worker_tasks/worker_generate_docs.py:683 re-implements the docs-exhausted transition that graph_claim_release.py:1230 already owns, copying its Cypher nearly verbatim and changing only the eligible stage and comment tag instead of extending the owner.",
+    "scope_discipline": "every path in git diff --stat 4cc49b7c0..9542d488d lies inside the eight declared write paths, and the barring set in worker_tasks/worker_review_docs.py is recorded under outside_scope rather than reached into."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to close the four gaps an earlier review found in the rendered shared wording; all four are closed \u2014 the terminal state is reached on both writers (imas_codex/standard_names/worker_refine_docs.py:371-377, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:1038-1057), gap 2 takes the brief's second branch with reasons (docs/evidence/fragments/sn-definitions-by-construction/sdbc-rendered-wording-repair.html:15-19), the description repair is read back from what was stored (tests/standard_names/test_refine_docs_settled_wording.py:141-187), and the unreachable disjunct is gone from imas_codex/standard_names/docs_gates.py:1144-1146.\nVERDICT done_when: the done_when asks for a test that feeds the same contradicting answer on every attempt, reads the terminal state within the existing bound and the model calls it cost, shown failing; tests/standard_names/test_refine_docs_settled_wording.py:124-137 does all of that, but the recorded red (negative-control-refusal-released.log) is a pytest-timeout at 30 s rather than the assertion at :129, so \"shown failing\" is shown by a budget expiry and not by the guard speaking.\nVERDICT write_paths: the fence was docs_gates.py, worker_generate_docs.py, worker_refine_docs.py, tests/test_generate_docs.py, tests/test_docs_gates.py, tests/test_refine_docs_settled_wording.py, the evidence fragment and a figures directory; git diff --stat 4cc49b7c0..9542d488d touches six of them \u2014 docs_gates.py, both worker modules, test_docs_gates.py, the new test file and the evidence fragment \u2014 every path inside the fence, with test_generate_docs.py and the figures directory declared but unused.\nVERDICT manifest: read; status complete, commits 8346104bf, 199403fc1, 9542d488d, tests naming the five-file pytest gate, test_logs naming gate-settled-wording-repair.log (revision 199403fc1, EXIT=0, 107 passed) and four mutation logs, negative_control_log naming negative-control-refusal-released.log; it records no baseline_suite or after_suite pair, which its brief excused by stating that the section's two-arm control is not re-run here.\nVERDICT diff: read commit by commit against base 4cc49b7c0 \u2014 8346104bf adds the generate-path terminal marker and its branch, extends the refine terminal set to the refusal class, drops the dead disjunct at docs_gates.py:1144 and adds the three tests; 199403fc1 moves the refusal-class import into the failure handler after an UnboundLocalError on the transient-failure path; 9542d488d adds the evidence fragment.\nCALL_SITES: imas_codex/standard_names/loop.py:927 generate_docs pool -> process_generate_docs_batch, imas_codex/standard_names/loop.py:965 refine_docs pool -> process_refine_docs_batch, imas_codex/standard_names/worker_tasks/__init__.py:203 worker_generate_docs task registry, imas_codex/standard_names/worker_tasks/__init__.py:212 worker_refine_docs task registry, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:673 replace_altered_shared_parts on the generate path\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: all four gaps are closed in the landed diff, and imas_codex/standard_names/worker_refine_docs.py:371-377 reaches the pre-existing terminal marker rather than introducing a second counter, exactly as gap 1 asked.\nSCORE evidence: 13\nJUSTIFICATION evidence: the gate log gate-settled-wording-repair.log carries its revision (199403fc1) and a final EXIT=0 with 107 passed, but the gap-1 negative control at negative-control-refusal-released.log reddens by \"Failed: Timeout (>30.0s) from pytest-timeout\" rather than by the assertion at tests/standard_names/test_refine_docs_settled_wording.py:129.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every path in git diff --stat 4cc49b7c0..9542d488d lies inside the eight declared write paths, and the barring set in worker_tasks/worker_review_docs.py is recorded under outside_scope rather than reached into.\nSCORE durability: 13\nJUSTIFICATION durability: the description and generate-terminal tests each redden on their own removed repair (negative-control-description-repair-removed.log, negative-control-generate-terminal.log), but the refine test reddens by timeout and the only new query, worker_tasks/worker_generate_docs.py:683, is replaced by a MagicMock at tests/standard_names/test_refine_docs_settled_wording.py:236 so no test fails if that Cypher is wrong.\nSCORE fit: 18\nJUSTIFICATION fit: the additions follow their files' idiom \u2014 worker_tasks/worker_generate_docs.py already opens GraphClient directly at :789 and :808, and the new comments state the mechanism (worker_refine_docs.py:359-369) with no plan, ticket or attribution text.\nSCORE reuse: 5\nJUSTIFICATION reuse: worker_tasks/worker_generate_docs.py:683 re-implements the docs-exhausted transition that graph_claim_release.py:1230 already owns, copying its Cypher nearly verbatim and changing only the eligible stage and comment tag instead of extending the owner.\nFINDING imas_codex/standard_names/worker_tasks/worker_generate_docs.py:683 non-blocking: `_mark_generate_docs_exhausted` duplicates the capability owned by imas_codex/standard_names/graph_store/graph_claim_release.py:1230 `_mark_refine_docs_exhausted` \u2014 same MATCH, same SET of docs_stage='exhausted' with the claim cleared, differing only in the stage filter ('pending' vs 'refining') and the comment tag \u2014 rather than parameterising the owner's stage; the copy also drops the `edit_status` closing CASE that both existing exhaust paths (graph_claim_release.py:1190-1197 and :1250-1253) carry, so a docs steering edit open on a pending name is left open by the new path. The node was fenced out of the owner's file and records the durable home under outside_scope, so this is for a later node to fold.\nFINDING tests/standard_names/test_refine_docs_settled_wording.py:129 non-blocking: the recorded negative control for the gap-1 test (negative-control-refusal-released.log) fails by pytest-timeout at the repo's 30 s default with no assertion message, so it does not demonstrate that `assert stage[\"docs_stage\"] == \"exhausted\"` is what catches the regression; the passing arm is already near the limit (the sibling tests took 25.7 s and 38.1 s in the same run directory), so the red is indistinguishable from a slow harness. The assertion would in fact redden \u2014 with the repair removed the stage stays 'refining' through three iterations \u2014 but the evidence on file does not show it doing so.\nFINDING tests/standard_names/test_refine_docs_settled_wording.py:249 non-blocking: the generate-path test patches `worker_generate_docs._mark_generate_docs_exhausted` with a MagicMock, so it proves only that the worker calls the marker and never that the marker moves the name; a wrong stage filter, a wrong claim token or a malformed reviewer comment in the new Cypher at worker_tasks/worker_generate_docs.py:696-713 leaves every test green.\n",
+  "review_run_id": "r-20261112T124149332774-review-of-sdbc-rendered-wording-repair-9542d488df56",
+  "reviewed_base_sha": "4cc49b7c0110f7a0487fc396b67b6450d2087bc5",
+  "reviewed_head_sha": "9542d488df56b773f5b11ead0dbfa021b96089df",
+  "reviewed_run_id": "r-20261112T115056502453-sdbc-rendered-wording-repair",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261112T124149332774-review-of-sdbc-rendered-wording-repair-9542d488df56"
+  },
+  "reviewer_run_id": "r-20261112T124149332774-review-of-sdbc-rendered-wording-repair-9542d488df56",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T12:59:41.499049+00:00",
+  "total": 84
+}
