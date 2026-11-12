@@ -46,7 +46,9 @@ RUN = Path(
 )
 CAP_FLOOR = 100
 COST_LIMIT = 10.0
-FRAGMENT = ROOT / "docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor.html"
+FRAGMENT = (
+    ROOT / "docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor.html"
+)
 PLANT_ABSENT = "dd:sfdc_negative_control/planted/attempted/not_produced"
 PLANT_PRESENT = "dd:sfdc_negative_control/planted/produced"
 
@@ -114,7 +116,7 @@ def pipeline(*, dry_run):
             UV_PROJECT_ENVIRONMENT="/home/ITER/mcintos/Code/imas-codex/.venv",
             PYTHONPATH=str(ROOT),
         ),
-        timeout=1500,
+        timeout=660,
     )
     return completed.returncode
 
@@ -190,6 +192,71 @@ def plant():
     return 0 if result.get("ok") else 1
 
 
+def approval():
+    """Read every run under the full-DD approval and the remaining balance."""
+    from imas_codex.graph.client import GraphClient
+
+    approval_cap = 350.0
+    with GraphClient() as gc:
+        runs = gc.query(
+            """MATCH (r:SNRun)
+            RETURN r.id AS id, r.cost_limit AS cost_limit,
+                   r.cost_spent AS cost_spent, r.status AS status,
+                   toString(r.started_at) AS started_at,
+                   r.invocation AS invocation
+            ORDER BY started_at"""
+        )
+    runs = [r for r in runs if (r["started_at"] or "")[:10] >= "2026-11-07"]
+    total = sum(float(r["cost_spent"] or 0) for r in runs)
+    payload = {
+        "approval_cap": approval_cap,
+        "spent_total": total,
+        "remaining": approval_cap - total,
+        "runs": runs,
+    }
+    save("approval", payload)
+    print(
+        json.dumps(
+            {
+                "spent_total": total,
+                "remaining": approval_cap - total,
+                "runs": len(runs),
+            },
+            indent=2,
+        )
+    )
+    return 0
+
+
+def _reason(outcome, pins, receipts):
+    """The recorded reason, naming the missing token when it is a vocab gap."""
+    import re
+
+    source_id = outcome["source_id"]
+    if source_id in pins:
+        return f"refused before the run: {pins[source_id]}"
+    text = outcome.get("after_error") or outcome.get("before_error")
+    if outcome.get("after_status") == "vocab_gap":
+        pass
+    if outcome.get("after_status") == "vocab_gap":
+        match = re.search(r"vocabulary token '([^']+)'", text or "") or re.search(
+            r"vocabulary gap: '([^']+)'", text or ""
+        )
+        return (
+            f"vocab_gap, missing token '{match.group(1)}'"
+            if match
+            else f"vocab_gap: {text or 'no token recorded'}"
+        )
+    if text:
+        return str(text)
+    receipt = receipts.get(source_id)
+    cited = f"; reset receipt {receipt}" if receipt else "; no reset receipt"
+    return (
+        f"{outcome.get('after_status')} with no produced name "
+        f"({outcome.get('after_attempt_count') or 0} attempts{cited})"
+    )
+
+
 def fragment():
     """Write the landed record from the read-back artifacts."""
     from html import escape
@@ -198,6 +265,13 @@ def fragment():
     summary = payload["summary"]
     census_payload = load("census")
     plant_payload = load("plant")
+    approval_payload = load("approval")
+    pin_payload = load("pin")
+    pins = {r["source_id"]: r["reason"] for r in pin_payload["refused"]}
+    receipts = {
+        source_id: (rows["events"][0]["id"] if rows.get("events") else None)
+        for source_id, rows in load("verify-reset")["receipts"].items()
+    }
     outcomes = payload["outcomes"]
     names = {}
     for row in payload["names"]:
@@ -205,6 +279,7 @@ def fragment():
     produced_rows, unproduced_rows = [], []
     for source_id in sorted(outcomes):
         o = outcomes[source_id]
+        o["source_id"] = source_id
         if o["produced"]:
             entries = names.get(source_id) or []
             detail = "<br>".join(
@@ -221,7 +296,7 @@ def fragment():
                 f"<td>{detail}</td></tr>"
             )
         else:
-            reason = o["after_error"] or o["after_status"] or "no recorded reason"
+            reason = _reason(o, pins, receipts)
             unproduced_rows.append(
                 "<tr>"
                 f"<td><code>{escape(source_id)}</code></td>"
@@ -259,11 +334,17 @@ across the 143 were
 
 <p id="sfdc-cohort-floor-rerun-scope">The rerun is one
 <code>sn run --focus cohort-sources.json -c {COST_LIMIT:.0f}</code> over
-{len(load("pin")["eligible"])} sources, run in place on this node's compute
-allocation (SLURM job <code>{escape(str(os.environ.get("SLURM_JOB_ID")))}</code>).
-It recorded run <code>{escape(str(summary["run_id"]))} with status
+{len(load("pin")["eligible"])} sources, run in place on the <code>all_debug</code>
+compute partition (SLURM job <code>{escape(str(os.environ.get("SFDC_PIPELINE_JOB", "unknown")))}</code>).
+It recorded run <code>{escape(str(summary["run_id"]))}</code> with status
 <code>{escape(str(summary["run_status"]))}</code>, spending
-<strong>USD {spend:.6f}</strong> of its USD {COST_LIMIT:.0f} cap.</p>
+<strong>USD {spend:.6f}</strong> of its USD {COST_LIMIT:.0f} cap. Against the
+USD {approval_payload["approval_cap"]:.0f} approval, the USD
+{approval_payload["spent_total"]:.6f} spent by every run since 2026-11-07
+leaves <strong>USD {approval_payload["remaining"]:.6f}</strong> remaining. The
+pipeline was stopped by this node's 11-minute process bound rather than reaching
+its own time limit, so the run record still reads <code>started</code> with no
+end time; its cost is the sum of that run's own per-call receipts.</p>
 
 <table id="sfdc-cohort-floor-summary">
 <caption>Read-back of the cohort after the rerun</caption>
@@ -293,7 +374,7 @@ absent result is the instrument answering rather than an empty graph.</p>
 
 <table id="sfdc-cohort-floor-produced-table">
 <caption>Every cohort source holding a produced name after the run</caption>
-<thead><tr><th>Source</th><th>Status before</th><th>Unused status</th><th>Produced name, stage and review score</th></tr></thead>
+<thead><tr><th>Source</th><th>Status before</th><th>Status after</th><th>Produced name, stage and review score</th></tr></thead>
 <tbody>
 {chr(10).join(produced_rows)}
 </tbody>
@@ -301,9 +382,17 @@ absent result is the instrument answering rather than an empty graph.</p>
 
 <h3 id="sfdc-cohort-floor-unproduced">Sources still unproduced, with a reason</h3>
 
+<p id="sfdc-cohort-floor-receipts">{len(load("verify-reset")["verified"])} sources were
+reset through <code>retry_failed_sources</code> with a written reason and a
+<code>StandardNameSourceRetry</code> receipt each, all verified with the counters
+cleared and no claim; {len(load("verify-reset")["bad"])} were refused by the
+operation. The receipts are in the run directory's
+<code>verify-reset.json</code>, and {len(pins)} sources were refused before the
+run because they carry no provable immutable snapshot.</p>
+
 <table id="sfdc-cohort-floor-unproduced-table">
 <caption>Every cohort source with no produced name after the run</caption>
-<thead><tr><th>Source</th><th>Status before</th><th>Unused status</th><th>Reason</th></tr></thead>
+<thead><tr><th>Source</th><th>Status before</th><th>Status after</th><th>Reason</th></tr></thead>
 <tbody>
 {chr(10).join(unproduced_rows)}
 </tbody>
@@ -339,6 +428,7 @@ def main():
         "run": lambda: pipeline(dry_run=False),
         "readback": lambda: reuse().readback(),
         "plant": plant,
+        "approval": approval,
         "fragment": fragment,
     }
     parser.add_argument("action", choices=list(actions))
