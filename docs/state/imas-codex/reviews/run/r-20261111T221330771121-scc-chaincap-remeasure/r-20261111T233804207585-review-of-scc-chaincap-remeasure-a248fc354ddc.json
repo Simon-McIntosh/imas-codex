@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run declares no baseline_suite or after_suite arm (classification.json records after_suite: null) because it adds no test file; its gate is the instrument's own control and capture pair, whose gate.log reads CONTROL-RESULT PASS, CAPTURE-RESULT PASS and EXIT=0, so there are no failures to subtract.",
+  "completed_at": "2026-11-11T23:58:08.878Z",
+  "dispatched_at": "2026-11-11T23:42:00Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html",
+      "line": 109,
+      "severity": "non-blocking",
+      "text": "The controls table quotes 'live: REFINED_FROM edges 1,771', but the committed capture this record rests on (scc-chaincap-remeasure.json, revision c9bb3c280) records refined_from_edges 1,770 and gate.log prints 1770; the drift paragraph covers only the cut's population and published totals, so a reader comparing the fragment with its own capture meets two unexplained values for a control count."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "The summary states the census was 're-read on the live graph at commit fc99c61f0', but the instrument did not exist at fc99c61f - it was untracked working-tree content there - and the committed capture records revision c9bb3c280, so the record names a revision at which its own measure cannot be reproduced."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py",
+      "line": 441,
+      "severity": "non-blocking",
+      "text": "The publish-boundary assertion tests only that chain_cap_at_publish_boundary is non-empty. The fixture plants ctrl_chaincap_childless precisely to sit in the export population but not the published set, yet nothing asserts the boundary equals {'ctrl_chaincap_unsourced_parent'}, so a regression that intersected the no-ancestor cohort with the population instead of the published set would still pass the control."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py",
+      "line": 519,
+      "severity": "non-blocking",
+      "text": "capture prints 'CONNECTED uri=unknown' because it reads gc._uri, an attribute GraphClient does not expose, so the capture log records no endpoint and the live-graph provenance of the headline numbers rests on the numbers alone; resolving and printing the connected URI would make the log show what it read."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html",
+      "line": 42,
+      "severity": "non-blocking",
+      "text": "The declared figure path docs/figures/sn-catalog-consistency/scc-chaincap-remeasure was never written, so the ancestry split and the publish boundary are presented only as tables where the repository's figure convention asks for a graphic that would carry the same comparison."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read both commits against base fc99c61f0: c9bb3c280 adds the 624-line instrument, the fragment and the summary JSON, and a248fc354 changes only the fragment prose, a new drift paragraph and the summary JSON to the second capture's 3,001/1,682/1,681 at revision c9bb3c280; no production file is touched.",
+    "done_when": "The section's done_when closes when no such identity is among those a cut would publish; gate.log records --mode control then --mode capture at revision c9bb3c280 with CONTROL-RESULT PASS, CAPTURE-RESULT PASS and EXIT=0, and the capture records no_ancestor_publish_eligible=0 and no_ancestor_would_publish=0 inside a cohort of 73, which is that closing condition.",
+    "goal": "The goal is to re-measure chain-cap (chain_length >= 3) identities that no source produces and whose REFINED_FROM lineage reaches no sourced name, record how many a whole-catalog cut would publish, and commit the instrument with a planted disposable-graph control; docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py implements capture, control and verify modes over exactly those predicates, and the accepted reading is 73 with 0 published.",
+    "manifest": "Read the manifest at the run directory; it records commits c9bb3c280 and a248fc354, the same three changed paths, the control-then-capture gate command with gate.log as its log, the scaffolding attribution for the red control arm, and USD 0 spend; its evidence_inputs quotes 1,771 REFINED_FROM edges where the committed capture reads 1,770.",
+    "write_paths": "Read the manifest's four declared paths; git diff fc99c61f0..a248fc354 touches exactly three of them - scc-chaincap-remeasure-run.py, scc-chaincap-remeasure.html and scc-chaincap-remeasure.json - and nothing else, while docs/figures/sn-catalog-consistency/scc-chaincap-remeasure was declared and never written."
+  },
+  "justifications": {
+    "durability": "the planted control at scc-chaincap-remeasure-run.py:421-440 fails if the ancestry predicate or the published set regresses, but its publish-boundary guard at :441 asserts only non-emptiness, so intersecting the no-ancestor cohort with the population rather than the published set would still pass.",
+    "evidence": "gate.log records CONTROL-RESULT PASS and CAPTURE-RESULT PASS with EXIT=0 over the done_when's measure, but the fragment's controls table at scc-chaincap-remeasure.html:109 quotes 1,771 REFINED_FROM edges where the committed capture and gate.log both read 1,770, and the capture log prints CONNECTED uri=unknown.",
+    "fit": "both commits carry conventional subjects with substantive bodies and zero AI attribution, and the instrument follows the evidence-fragment convention of sib-lineage-cycle-census-run.py, with deductions for the unwritten declared figure directory and the literal 0.65 at scc-chaincap-remeasure-run.py:222 restating run_export's default.",
+    "goal_fidelity": "docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py:56-63 carries the ancestry predicate and :244-262 computes the published share, both of which the goal names, with only the fragment's summary at scc-chaincap-remeasure.html:17 naming a revision that predates the instrument.",
+    "reuse": "scc-chaincap-remeasure-run.py:204-225 calls the export gate's own _fetch_export_population, _classify_export_population and _run_gate_c rather than restating them, and a search of imas_codex/standard_names found no owner of sourced-ancestry reachability; the only duplicated thing is the 0.65 score default.",
+    "scope_discipline": "git diff --stat fc99c61f0..a248fc354 reports three files changed, 1,058 insertions, 0 deletions, every one inside the manifest's declared write paths and no generated file staged."
+  },
+  "project": "imas-codex",
+  "raw_text": "Independent review of r-20261111T221330771121-scc-chaincap-remeasure (imas-codex, plan section sn-catalog-consistency 8), base fc99c61f0, head a248fc354.\nVERDICT goal: The goal is to re-measure chain-cap (chain_length >= 3) identities that no source produces and whose REFINED_FROM lineage reaches no sourced name, record how many a whole-catalog cut would publish, and commit the instrument with a planted disposable-graph control; docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py:51-63 implements exactly those predicates in capture, control and verify modes, and the accepted reading is 73 with 0 published.\nVERDICT done_when: The section's done_when closes when no such identity is among those a cut would publish; gate.log records --mode control then --mode capture at revision c9bb3c280 with CONTROL-RESULT PASS, CAPTURE-RESULT PASS and EXIT=0, and the capture records no_ancestor_publish_eligible=0 and no_ancestor_would_publish=0 inside a cohort of 73, which is that closing condition.\nVERDICT write_paths: Read the manifest's four declared paths; git diff fc99c61f0..a248fc354 touches exactly three of them - scc-chaincap-remeasure-run.py, scc-chaincap-remeasure.html and scc-chaincap-remeasure.json - and nothing else, while docs/figures/sn-catalog-consistency/scc-chaincap-remeasure was declared and never written.\nVERDICT manifest: Read the manifest at the run directory; it records commits c9bb3c280 and a248fc354, the same three changed paths, the control-then-capture gate command with gate.log as its log, the scaffolding attribution for the red control arm, and USD 0 spend; its evidence_inputs quotes 1,771 REFINED_FROM edges where the committed capture reads 1,770.\nVERDICT diff: Read both commits against base fc99c61f0: c9bb3c280 adds the 624-line instrument, the fragment and the summary JSON, and a248fc354 changes only the fragment prose, a new drift paragraph and the summary JSON to the second capture's 3,001/1,682/1,681 at revision c9bb3c280; no production file is touched.\nCALL_SITES: imas_codex/standard_names/export.py:_fetch_export_population, imas_codex/standard_names/export.py:_classify_export_population, imas_codex/standard_names/export.py:_run_gate_c, imas_codex/graph/client.py:GraphClient\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: scc-chaincap-remeasure-run.py:56-63 carries the ancestry predicate and :244-262 computes the published share, both of which the goal names, with only the fragment's summary at scc-chaincap-remeasure.html:17 naming a revision that predates the instrument.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate.log records CONTROL-RESULT PASS and CAPTURE-RESULT PASS with EXIT=0 over the done_when's measure, but the fragment's controls table at scc-chaincap-remeasure.html:109 quotes 1,771 REFINED_FROM edges where the committed capture and gate.log both read 1,770, and the capture log prints CONNECTED uri=unknown.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat fc99c61f0..a248fc354 reports three files changed, 1,058 insertions, 0 deletions, every one inside the manifest's declared write paths and no generated file staged.\nSCORE durability: 15\nJUSTIFICATION durability: the planted control at scc-chaincap-remeasure-run.py:421-440 fails if the ancestry predicate or the published set regresses, but its publish-boundary guard at :441 asserts only non-emptiness, so intersecting the no-ancestor cohort with the population rather than the published set would still pass.\nSCORE fit: 18\nJUSTIFICATION fit: both commits carry conventional subjects with substantive bodies and zero AI attribution, and the instrument follows the evidence-fragment convention of sib-lineage-cycle-census-run.py, with deductions for the unwritten declared figure directory and the literal 0.65 at scc-chaincap-remeasure-run.py:222 restating run_export's default.\nSCORE reuse: 19\nJUSTIFICATION reuse: scc-chaincap-remeasure-run.py:204-225 calls the export gate's own _fetch_export_population, _classify_export_population and _run_gate_c rather than restating them, and a search of imas_codex/standard_names found no owner of sourced-ancestry reachability.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html:109 non-blocking: the controls table quotes 1,771 REFINED_FROM edges, but the committed capture this record rests on records refined_from_edges 1,770 and gate.log prints 1770; the drift paragraph covers only the cut's population and published totals.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html:17 non-blocking: the summary states the census was re-read at commit fc99c61f0, where the instrument did not exist, and the committed capture records revision c9bb3c280, so the record names a revision at which its own measure cannot be reproduced.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py:441 non-blocking: the publish-boundary assertion tests only non-emptiness, so a regression that intersected the no-ancestor cohort with the population instead of the published set would still pass the control even though the fixture plants the distinguishing childless identity.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py:519 non-blocking: capture prints CONNECTED uri=unknown because it reads an attribute GraphClient does not expose, so the capture log records no endpoint and the live-graph provenance of the headline numbers rests on the numbers alone.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure.html:42 non-blocking: the declared figure path docs/figures/sn-catalog-consistency/scc-chaincap-remeasure was never written, so the ancestry split and publish boundary are presented only as tables.\nFINAL: SOUND. The re-measure is delivered and the gate recorded: the instrument is committed beside the fragment with capture, control and verify modes, the planted disposable-graph control separates a no-ancestor identity from an ancestry-bearing one and shows a non-zero publish boundary (CONTROL-RESULT PASS), and the live capture reads 179 chain-cap, 93 unsourced, 20 with a sourced ancestor, 73 with none, and 0 of the 73 published (CAPTURE-RESULT PASS, EXIT=0), which is the section's own closing condition. Scope is exactly the three deliverable files inside the declared paths, and the publish half delegates to the export gate's own population read, eligibility classifier and score gate rather than restating them. Five non-blocking findings: a control count that drifted from the committed capture (1,771 vs 1,770), a summary naming a revision that could not reproduce the measure, a publish-boundary assertion that tests only non-emptiness of its set, a capture log that records no endpoint, and an unwritten declared figure path.",
+  "review_run_id": "r-20261111T233804207585-review-of-scc-chaincap-remeasure-a248fc354ddc",
+  "reviewed_base": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "reviewed_base_sha": "fc99c61f0f311bf33b6ca594ba565398169827b9",
+  "reviewed_commit": "a248fc354ddc03872b3353d8c59bfa20ef07b58a",
+  "reviewed_head_sha": "a248fc354ddc03872b3353d8c59bfa20ef07b58a",
+  "reviewed_run_id": "r-20261111T221330771121-scc-chaincap-remeasure",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T00:25:44.251887+00:00",
+  "total": 107,
+  "verdict": "SOUND"
+}
