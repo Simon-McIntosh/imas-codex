@@ -562,6 +562,6 @@ def probe_check(
         apply_conventions=apply_conventions,
     )
     for finding in found:
-        finding["finding_type"] = "name_definition_disagreement"
+        finding["finding_type"] = "name_definition_probe_disagreement"
         finding["pattern"] = finding["slot"]
     return found
