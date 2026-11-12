@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest carries no baseline_suite or after_suite block (both null in the run's classification.json), so no arm delta is recorded; the committed gate log at revision c8ac96807 records 18 passed / 1 deselected / EXIT=0 and 6 passed / 4 deselected / EXIT=0 with no FAILED line, so the head arm fails nothing and the added count is 0.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-12T19:06:56.967Z",
+  "dispatched_at": "2026-11-12T18:58:26Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "line": "133",
+      "severity": "non-blocking",
+      "text": "non-blocking: all_domains() is added and exported but called nowhere in the tree, and it duplicates load_domain_precedence() in imas_codex/definitions/physics/__init__.py:86 (same domains.yaml precedence flattening, cached and validated there); the addition neither extends nor wraps that owner, so it is a dead duplicate that will drift if the loader's validation changes."
+    },
+    {
+      "file": "imas_codex/standard_names/domain_decision.py",
+      "line": "677",
+      "severity": "non-blocking",
+      "text": "non-blocking: build_family_domain_question takes widened: bool = True and delegates to build_family_question for False, but no caller anywhere passes widened=, so the False branch is unreachable and its behaviour is untested."
+    },
+    {
+      "file": "tests/standard_names/test_family_domain_decision.py",
+      "line": "470",
+      "severity": "non-blocking",
+      "text": "non-blocking: the test named as the split's control monkeypatches split_undecided_family to return (), so it hard-codes the regression it claims to guard and cannot fail if the split stops writing; only the positive test at :417 is a guard, which is the one the recorded mutation reddens."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-domain-per-family/widened-options.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the committed evidence file is 1,558,361 bytes, above the landing contract's 300,000-byte limit for an in-repository data file, though the plan's done_when names this path and the dispatch declares it as a write path."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: git grep at d77fb15b3 finds no imas_codex caller of decide_family_domain, decide_and_write_family, split_undecided_family or widened_candidate_domains; the production importers of domain_decision (graph_foundation.py, graph_lineage.py, graph_refinement.py, worker_extraction_and_enrichment.py) use only decide_domain, write_name_domain, DomainDecision and DomainCorrection, none of which this diff changes.",
+    "diff": "read commit by commit from 2fbffc36 to d77fb15b3; ten node commits plus one main merge, the substantive change is +363/-35 in imas_codex/standard_names/domain_decision.py (option-set dispatcher, widened/bounded helpers, split_undecided_family, decide_and_write_family wiring) beside two test files and four evidence artefacts, all inside the declared fence.",
+    "done_when": "the done_when asks for a higher single-name share than stored, a family member share not lower than the source-bounded arm in the same run, calibration at least 0.597 and not lower than the source-bounded arm, at most 24 multi-member families below the floor, a planted unrelated-source name placed correctly under the widened set only, judgments and cost recorded, and a gate log from all_debug; the gate log at c8ac96807 records only the pytest arms, and the readings live in widened-options.json where the family member share reads 0.4864 against the bounded 0.4875 (clears_every_bar false) while every other clause is met.",
+    "goal": "the node goal is that the one family domain decision is offered options not bounded by its sources and is measured against the agreed reader labels; imas_codex/standard_names/domain_decision.py:777 widened_candidate_domains offers every domain of every source band plus every band umbrella, decide_family_domain:963 defaults to fallback_escalated, and widened-options.json records all four sets over the agreed 101-item reference and the 113-item ruled reference, so the goal is met.",
+    "manifest": "read; it reports status complete after a coordinator status repair (manifest.md.asdelivered reads blocked), commits b154adafd..d77fb15b3, 18 passed / 1 deselected / EXIT=0 and 6 passed / 4 deselected / EXIT=0 in the committed gate log, and two mutations at EXIT=1; baseline_suite and after_suite are absent from the manifest, so no arm delta is recorded.",
+    "write_paths": "the declared paths are domain_decision.py, families.py, three test files, the harness, widened-options.json, the fragment and the gate log; the diff from 2fbffc36 touches domain_decision.py, test_domain_widened_options.py, test_family_domain_decision.py (the declared name test_domain_family_decision.py is a dispatch typo for a file that does not exist) and the four evidence files, and families.py and the two untouched test files carry no change."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_domain_widened_options.py:117 reddens when widened_candidate_domains is mutated to return the source domains (negative-control.log: 4 failed, EXIT=1) and tests/standard_names/test_family_domain_decision.py:435 reddens when the split is removed (1 failed, EXIT=1).",
+    "evidence": "docs/evidence/fragments/sn-domain-per-family/widened-options.json readings fallback_escalated records family_match_share 0.4864 against the bounded 0.4875 with clears_every_bar false, so the done_when clause 'not lower than under the source-bounded options in the same run' is unmet on this run and completeness rests on the coordinator's status repair, not on the node's measure.",
+    "fit": "the additions follow the module's existing shape of a private helper per question (imas_codex/standard_names/domain_decision.py:869 _decide_widened, :911 _decide_bounded) and add no plan label, but :677 leaves a widened flag whose False branch no caller reaches.",
+    "goal_fidelity": "imas_codex/standard_names/domain_decision.py:963 defaults option_set to fallback_escalated and :1073-1083 puts a single-source family to the widened question with its source domain as evidence, so the shipped decision can choose a domain no source lives in.",
+    "reuse": "imas_codex/standard_names/domain_decision.py:133 all_domains re-implements the precedence flattening that imas_codex/definitions/physics/__init__.py:86 load_domain_precedence already owns and is called nowhere.",
+    "scope_discipline": "every path in the ten node commits is one of the declared write paths, but docs/evidence/fragments/sn-domain-per-family/widened-options.json is 1,558,361 bytes and the landing contract places a data file above 300,000 bytes in the run directory rather than the repository."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that the one family domain decision is offered options not bounded by its sources and is measured against the agreed reader labels; imas_codex/standard_names/domain_decision.py:777 widened_candidate_domains offers every domain of every source band plus every band umbrella, decide_family_domain:963 defaults to fallback_escalated, and widened-options.json records all four sets over the agreed 101-item reference and the 113-item ruled reference, so the goal is met.\nVERDICT done_when: the done_when asks for a higher single-name share than stored, a family member share not lower than the source-bounded arm in the same run, calibration at least 0.597 and not lower than the source-bounded arm, at most 24 multi-member families below the floor, a planted unrelated-source name placed correctly under the widened set only, judgments and cost recorded, and a gate log from all_debug; the gate log at c8ac96807 records only the pytest arms, and the readings live in widened-options.json where the family member share reads 0.4864 against the bounded 0.4875 (clears_every_bar false) while every other clause is met.\nVERDICT write_paths: the declared paths are domain_decision.py, families.py, three test files, the harness, widened-options.json, the fragment and the gate log; the diff from 2fbffc36 touches domain_decision.py, test_done_widened_options.py, test_family_domain_decision.py (the declared name test_domain_family_decision.py is a dispatch typo for a file that does not exist) and the four evidence files, and families.py and the two untouched test files carry no change.\nVERDICT manifest: read; it reports status complete after a coordinator status repair (manifest.md.asdelivered reads blocked), commits b154adafd..d77fb15b3, 18 passed / 1 deselected / EXIT=0 and 6 passed / 4 deselected / EXIT=0 in the committed gate log, and two mutations at EXIT=1; baseline_suite and after_suite are absent from the manifest, so no arm delta is recorded.\nVERDICT diff: read commit by commit from 2fbffc36 to d77fb15b3; ten node commits plus one main merge, the substantive change is +363/-35 in imas_codex/standard_names/domain_decision.py (option-set dispatcher, widened/bounded helpers, split_undecided_family, decide_and_write_family wiring) beside two test files and four evidence artefacts, all inside the declared fence.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/domain_decision.py:963 defaults option_set to fallback_escalated and :1073-1083 puts a single-source family to the widened question with its source domain as evidence, so the shipped decision can choose a domain no source lives in.\nSCORE evidence: 13\nJUSTIFICATION evidence: docs/evidence/fragments/sn-domain-per-family/widened-options.json readings fallback_escalated records family_match_share 0.4864 against the bounded 0.4875 with clears_every_bar false, so the done_when clause 'not lower than under the source-bounded options in the same run' is unmet on this run and completeness rests on the coordinator's status repair, not on the node's measure.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: every path in the ten node commits is one of the declared write paths, but docs/evidence/fragments/sn-domain-per-family/widened-options.json is 1,558,361 bytes and the landing contract places a data file above 300,000 bytes in the run directory rather than the repository.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_domain_widened_options.py:117 reddens when widened_candidate_domains is mutated to return the source domains (negative-control.log: 4 failed, EXIT=1) and tests/standard_names/test_family_domain_decision.py:435 reddens when the split is removed (1 failed, EXIT=1).\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the module's existing shape of a private helper per question (imas_codex/standard_names/domain_decision.py:869 _decide_widened, :911 _decide_bounded) and add no plan label, but :677 leaves a widened flag whose False branch no caller reaches.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/standard_names/domain_decision.py:133 all_domains re-implements the precedence flattening that imas_codex/definitions/physics/__init__.py:86 load_domain_precedence already owns and is called nowhere.\nFINDING imas_codex/standard_names/domain_decision.py:133 non-blocking: all_domains() is added and exported but called nowhere in the tree, and it duplicates load_domain_precedence() in imas_codex/definitions/physics/__init__.py:86 (same domains.yaml precedence flattening, cached and validated there); the addition neither extends nor wraps that owner, so it is a dead duplicate that will drift if the loader's validation changes.\nFINDING imas_codex/standard_names/domain_decision.py:677 non-blocking: build_family_domain_question takes widened: bool = True and delegates to build_family_question for False, but no caller anywhere passes widened=, so the False branch is unreachable and its behaviour is untested.\nFINDING tests/standard_names/test_family_domain_decision.py:470 non-blocking: the test named as the split's control monkeypatches split_undecided_family to return (), so it hard-codes the regression it claims to guard and cannot fail if the split stops writing; only the positive test at :417 is a guard, which is the one the recorded mutation reddens.\nFINDING docs/evidence/fragments/sn-domain-per-family/widened-options.json:1 non-blocking: the committed evidence file is 1,558,361 bytes, above the landing contract's 300,000-byte limit for an in-repository data file, though the plan's done_when names this path and the dispatch declares it as a write path.\n",
+  "review_node": "review-of-sdpf-widened-options-d77fb15b305e",
+  "review_run_id": "r-20261112T185543254471-review-of-sdpf-widened-options-d77fb15b305e",
+  "reviewed_base_sha": "2fbffc36235daa4a2818213fa3f2ef6d70af42da",
+  "reviewed_head_sha": "d77fb15b305e7f5f4b4b12924e054049cae57d02",
+  "reviewed_run_id": "r-20261112T131929299912-sdpf-widened-options",
+  "reviewer": "deepseek-v4.1-flash",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T19:09:44.302239+00:00",
+  "total": 87
+}
