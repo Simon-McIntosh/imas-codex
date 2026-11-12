@@ -25,7 +25,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 22,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "added a floor: at least half the start backlog reaches accepted documentation, or the count the lead's spend ruling sets if smaller",
+      "reason": "",
+      "when": "2026-11-12T15:19:01.425879+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "36f22faf376d5b7be18189b87dbb6d47ac12bfdd",
+      "commit_basis": "edit",
+      "note": "added a floor: at least half the start backlog reaches accepted documentation, or the count the lead's spend ruling sets if smaller",
+      "reason": "",
+      "when": "2026-11-12T15:19:01.425879+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T145320376824-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261112T145320376824-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "4db573906ecb14cb8fb8e57d99f872e8e5515506",
   "rubric": "content",
