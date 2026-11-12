@@ -81,6 +81,13 @@
       "note": "\u00a77 now says the four refusals are checks inside the export's existing gate set, reported through its existing result, with no new command option",
       "reason": "",
       "when": "2026-11-12T02:01:32.631435+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "duplicate_owner-1",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (harmonize drift and cost measurement, the audits' unit-dimension check, the hold-out evaluation)",
+      "when": "2026-11-12T02:01:45.236457+00:00"
     }
   ],
   "responses": {
@@ -89,6 +96,12 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (the one registry renderer in the docs worker)",
       "when": "2026-11-12T02:01:19.851932+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "the reuse map goes into the node brief, which names this owner as the module to extend; the plan states the endpoint and names no module (harmonize drift and cost measurement, the audits' unit-dimension check, the hold-out evaluation)",
+      "when": "2026-11-12T02:01:45.236457+00:00"
     },
     "reuse_search-1": {
       "action": "declined",
