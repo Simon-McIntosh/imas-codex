@@ -39,6 +39,15 @@ SURVIVOR = "toroidal_plasma_momentum_diffusivity"
 LOSER = "toroidal_momentum_diffusion_coefficient"
 NAMES = [SURVIVOR, LOSER]
 CARRIED_DD_PATH = "core_transport/model/profiles_1d/momentum_phi/d"
+STALE = "toroidal_total_plasma_momentum_diffusivity"
+UNBLOCK_REASON = (
+    "this tombstone's own retirement row records that the census found no "
+    "supersession event for it, and the edge points at a generalized-grid "
+    "momentum diffusion coefficient while the tombstone's meaning, total "
+    "plasma momentum diffusivity, is carried by "
+    "toroidal_plasma_momentum_diffusivity; the unbacked claim blocks the fold "
+    "of the coefficient into that survivor"
+)
 
 
 def load_script(path: Path, name: str):
@@ -125,22 +134,27 @@ def snapshot() -> dict:
 
 
 def supersede(dry_run: bool) -> dict:
-    command = [
-        str(Path(sys.executable).parent / "imas-codex"),
-        "sn",
-        "supersede",
-        LOSER,
-        "--into",
-        SURVIVOR,
-    ]
+    argv = ["sn", "supersede", LOSER, "--into", SURVIVOR]
     if dry_run:
-        command.append("--dry-run")
+        argv.append("--dry-run")
+    return signed(argv)
+
+
+def drop_stale_successor(dry_run: bool) -> dict:
+    argv = ["sn", "remove-lineage", STALE, LOSER, "--reason", UNBLOCK_REASON]
+    if dry_run:
+        argv.append("--dry-run")
+    return signed(argv)
+
+
+def signed(argv: list[str]) -> dict:
+    command = [str(Path(sys.executable).parent / "imas-codex"), *argv]
     done = subprocess.run(command, capture_output=True, text=True, cwd=ROOT)
     print(done.stdout, end="", flush=True)
     if done.stderr:
         print(done.stderr, end="", file=sys.stderr, flush=True)
     if done.returncode != 0:
-        raise RuntimeError(f"supersede exited {done.returncode}")
+        raise RuntimeError(f"{' '.join(argv)} exited {done.returncode}")
     return {
         "command": " ".join(command),
         "returncode": done.returncode,
@@ -163,6 +177,7 @@ def checks(before: dict, after: dict) -> dict:
     ]
     survivor_sources = [s for s in after["sources"] if s["name"] == SURVIVOR]
     carried = [s for s in survivor_sources if CARRIED_DD_PATH in (s["dd_paths"] or [])]
+    stale_after = [e for e in after["edges"] if e["successor"] == STALE]
     loser_reviews_before = {r["id"] for r in before["reviews"] if r["name"] == LOSER}
     loser_reviews_after = {r["id"] for r in after["reviews"] if r["name"] == LOSER}
     result = {
@@ -177,6 +192,7 @@ def checks(before: dict, after: dict) -> dict:
             path for s in survivor_sources for path in (s["dd_paths"] or [])
         ),
         "carried_source_rows": len(carried),
+        "stale_edges_after": stale_after,
         "loser_reviews_before": len(loser_reviews_before),
         "loser_reviews_after": len(loser_reviews_after),
         "loser_reviews_kept": loser_reviews_before == loser_reviews_after,
@@ -191,6 +207,7 @@ def checks(before: dict, after: dict) -> dict:
     assert len(fold_edges) == 1, result
     assert fold_edges[0]["properties"].get("writer") == "edit.supersede_into", result
     assert len(loser_edges) == len(loser_edges_before) + 1, result
+    assert stale_after == [], result
     assert carried, result
     assert result["loser_sources_after"] == [], result
     assert result["loser_reviews_kept"], result
@@ -225,16 +242,26 @@ def main() -> int:
             dump(args.run_dir / "pre-state.json", snapshot())
         elif phase == "preview":
             dump(args.run_dir / "preview.json", supersede(dry_run=True))
+        elif phase == "unblock-preview":
+            dump(
+                args.run_dir / "unblock-preview.json",
+                drop_stale_successor(dry_run=True),
+            )
+        elif phase == "unblock":
+            dump(args.run_dir / "unblock.json", drop_stale_successor(dry_run=False))
         elif phase == "apply":
             dump(args.run_dir / "apply.json", supersede(dry_run=False))
+        elif phase == "baseline":
+            dump(args.run_dir / "baseline-state.json", snapshot())
         elif phase == "post":
             after = snapshot()
+            baseline = args.run_dir / "baseline-state.json"
+            if not baseline.exists():
+                baseline = args.run_dir / "pre-state.json"
             dump(args.run_dir / "post-state.json", after)
             dump(
                 args.run_dir / "checks.json",
-                checks(
-                    json.loads((args.run_dir / "pre-state.json").read_text()), after
-                ),
+                checks(json.loads(baseline.read_text()), after),
             )
         elif phase == "census-before":
             dump(args.run_dir / "census-before.json", census(args.run_dir, "before"))
