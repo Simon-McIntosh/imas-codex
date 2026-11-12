@@ -53,9 +53,28 @@
       "note": "plan-section-depends-on now declares s5 waiting on s4",
       "reason": "",
       "when": "2026-11-12T01:30:23.812740+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "\u00a74's done-when now says 'the ten names cited in the last three rows of \u00a71'",
+      "reason": "",
+      "when": "2026-11-12T01:30:50.292000+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c64c2b4626d27a0b303d3ea8930a5a525e37b9b9",
+      "commit_basis": "edit",
+      "note": "\u00a74's done-when now says 'the ten names cited in the last three rows of \u00a71'",
+      "reason": "",
+      "when": "2026-11-12T01:30:50.292000+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
