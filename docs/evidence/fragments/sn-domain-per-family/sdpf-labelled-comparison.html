@@ -98,7 +98,10 @@
   family; <code>--from-existing</code> re-derives each reading from the committed rows and spends none, which is
   how the strict reading and the undecided summary were added to an artifact whose rows were already measured.
   <code>python labelled-comparison-run.py --from-existing --output labelled-comparison.json</code> reproduces
-  them exactly, because they are functions of the rows.</p>
+  them exactly, because they are functions of the rows. The fragment's two quoted figures — the size of the
+  largest undecided family and the strict calibration accuracy — are checked against the artifact by
+  <code>--check-fragment</code>, which fails on the fragment as it stood before the repair (claiming 33 members
+  against the artifact's 51) and passes on this one; both runs are in the gate log.</p>
 
   <h3 id="sdpf-labelled-comparison-gate">Gate</h3>
   <p id="sdpf-labelled-comparison-gate-note">The gate ran on the <code>all_debug</code> partition over the

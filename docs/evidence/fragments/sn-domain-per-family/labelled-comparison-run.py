@@ -366,6 +366,41 @@ def _derive_from_existing(path: Path, revision: str = "") -> int:
     return 0
 
 
+def _check_fragment(fragment: Path, artifact: Path) -> int:
+    """Check the fragment's numeric claims against the measurement artifact.
+
+    Two claims are read back: the size of the largest undecided family, and
+    the calibration accuracy on the strict basis. A fragment that quotes a
+    figure its own artifact does not hold fails here, which is what the
+    reverted state of the artifact is for.
+    """
+    import re
+
+    html = fragment.read_text()
+    with artifact.open() as handle:
+        data = json.load(handle)
+    largest = ((data.get("undecided_summary") or {}).get("largest") or {})
+    calibration = data.get("calibration") or {}
+
+    claimed = re.search(r"family of (?:<strong>)?(\d+)(?:</strong>)? members", html)
+    claim = int(claimed.group(1)) if claimed else None
+    actual = largest.get("member_count")
+    size_ok = claim is not None and claim == actual
+    print(
+        f"check:undecided-largest claim={claim} artifact={actual} ok={size_ok}"
+    )
+
+    strict = calibration.get("family_accuracy_strict")
+    strict_text = f"{strict * 100:.2f}" if isinstance(strict, (int, float)) else "absent"
+    contradicts = "counted as wrong" in html
+    strict_ok = isinstance(strict, (int, float)) and strict_text in html and not contradicts
+    print(
+        f"check:calibration-strict claim={strict_text}% "
+        f"artifact={strict_text}% contradicted_basis={contradicts} ok={strict_ok}"
+    )
+    return 0 if (size_ok and strict_ok) else 1
+
+
 def _filed_domain(decision: Any, member: dict) -> str:
     """The domain a member is filed under: the family's choice, else its stored."""
     if decision is not None and decision.decided:
@@ -378,11 +413,20 @@ def main() -> int:
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--from-existing", action="store_true")
     parser.add_argument(
+        "--check-fragment",
+        type=Path,
+        default=None,
+        help="check a fragment's numeric claims against the artifact and exit",
+    )
+    parser.add_argument(
         "--revision",
         default="",
         help="the revision the measurement ran at, when deriving from existing rows",
     )
     args = parser.parse_args()
+
+    if args.check_fragment is not None:
+        return _check_fragment(args.check_fragment, args.output)
 
     if args.from_existing:
         return _derive_from_existing(args.output, revision=args.revision)

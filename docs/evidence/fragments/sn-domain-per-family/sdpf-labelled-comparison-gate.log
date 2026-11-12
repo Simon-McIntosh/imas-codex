@@ -25,3 +25,21 @@ tests/standard_names/test_name_domain_single_writer.py .............     [100%]
 (7 durations < 0.005s hidden.  Use -vv to show these durations.)
 ================= 25 passed, 6 deselected, 1 warning in 12.69s =================
 EXIT=0
+
+
+# --- negative control: the fragment's claims checked against its artifact ---
+# command: python labelled-comparison-run.py --check-fragment <fragment> --output <artifact>
+# state: repair applied (fragment and artifact at HEAD)
+check:undecided-largest claim=51 artifact=51 ok=True
+check:calibration-strict claim=60.36% artifact=60.36% contradicted_basis=False ok=True
+exit=0
+# state: fragment and artifact from acad1f648, parent of the repair, both checks together
+check:undecided-largest claim=33 artifact=None ok=False
+check:calibration-strict claim=absent% artifact=absent% contradicted_basis=True ok=False
+exit=1
+# state: the parent fragment against the repaired artifact, isolating the size claim
+check:undecided-largest claim=33 artifact=51 ok=False
+check:calibration-strict claim=60.36% artifact=60.36% contradicted_basis=True ok=False
+exit=1
+# the gate run's own status is unchanged: no product source or test differs from revision 0428c0876
+EXIT=0
