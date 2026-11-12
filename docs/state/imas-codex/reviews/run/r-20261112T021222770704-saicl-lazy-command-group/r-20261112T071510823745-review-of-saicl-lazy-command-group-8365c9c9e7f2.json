@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arm logs on disk: the base arm negative-control.log at 980fa78b5d18256670bafc0c529f300aeefe2fae records 2 failed EXIT=1 \u2014 the two tests this node adds, failing by design at the base tree \u2014 and the head arm head-gate-final.log at 8365c9c9e7f29866af9ab5d611904e59d73117e1 records 21 passed EXIT=0 with no FAILED line, with head-cli-tests.log recording 64 passed EXIT=0; the head set difference is empty.",
+  "call_site_count": 2,
+  "call_sites": [
+    "pyproject.toml:196 (console script imas-codex = imas_codex.cli:main)",
+    "imas_codex/__main__.py:34 (module entry point imports main and calls it at line 38)"
+  ],
+  "completed_at": "2026-11-12T07:43:10.701Z",
+  "dispatched_at": "2026-11-12T07:21:14Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_engine_import_order.py",
+      "line": "105",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion list is litellm plus the fourteen command modules only, so nothing fails when the schema runtime is imported on the initialize path, and a fresh-interpreter probe of that exact path shows linkml_runtime and imas_codex.graph.schema in sys.modules because imas_codex/llm/server.py imports imas_codex.graph.query_builder at module level \u2014 the done_when clause naming the schema runtime therefore has no guard and the condition it forbids is present in the landed code; the repair is to defer the server's own imports, which the manifest already records under outside_scope."
+    },
+    {
+      "file": "tests/discovery/test_engine_import_order.py",
+      "line": "93",
+      "severity": "non-blocking",
+      "text": "non-blocking: the docstring asserts the verdict holds whether or not the deferred warm-up has started, but neither the test nor the record starts the warm-up, and the done_when's ten-consecutive-run clause has no result in the fragment or the manifest, so a claim of stability across warm-up states is made without the measurement that would show it."
+    },
+    {
+      "file": "docs/evidence/fragments/serve-answers-inside-the-connect-limit/saicl-lazy-command-group.html",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "non-blocking: the 94.5 % attribution is stated in prose while startup-timings.json records only whole-run totals, so the part-level figures (15.58 s eager registration, 5.16 s server import, 1.39 s construction, 0.50 s interpreter) cannot be re-derived from anything committed and a later reader has to take them on the author's word."
+    },
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": "7132",
+      "severity": "non-blocking",
+      "text": "non-blocking: the comment explains its function-local import by an import cycle through cli/__init__ register_commands, a function this commit deleted, and the identical stale sentence sits at imas_codex/llm/sn_tools.py:913, so two comments now cite an anchor that does not exist and neither records that the deferred table is what removed the cycle."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/imas-codex-saicl/logs/head-cli-tests.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the header names the base revision 980fa78b while the run was written at 08:13, after the head commit, and executed in the head worktree, so the 64-passed command-line result is stamped with the revision that lacks the change and a reader comparing revisions is pointed at the wrong tree."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call sites",
+    "diff": "read the single commit 8365c9c9e7f2 against base 980fa78b5d18 commit by commit; it is 1217 insertions over six files \u2014 the deferred command table and group replacing register_commands, two import-boundary tests, a hardcoded per-mode tool-name set, and the timing script, JSON record and fragment.",
+    "done_when": "the done_when names eight clauses; the record answers the five-cold-start medians and their loads in startup-timings.json, serve --help at 0.17 s, the three serve modes' tool lists, and the fifteen-command listing, but the clause requiring a test to fail when the schema runtime is imported on the path that answers initialize is unasserted at tests/discovery/test_engine_import_order.py:105, which stops at litellm and the fourteen command modules while linkml_runtime is in sys.modules on that same path, and the ten-consecutive-run warm-up stability clause has no record in the fragment or the manifest.",
+    "goal": "the goal is that imas-codex serve answers initialize in under ten seconds by resolving command modules only when invoked; imas_codex/cli/__init__.py:35 replaces register_commands with the _COMMANDS table and imas_codex/cli/__init__.py:117 adds DeferredCommandGroup.get_command importing a module on first use, measured at 3.80 s median on the debug node and 11.98 s on the fleet node, so the goal holds on the debug node and on the done_when's own 15 s fleet threshold while the fleet node where sessions run still answers above ten seconds.",
+    "manifest": "read; it reports status complete, 21 passed on the head gate and 64 passed on the command-line tests, names the negative-control log, and states the debug-node median 3.80 s (base 8.32 s) and fleet median 11.98 s (base 23.95 s); all four named logs exist on disk and read as stated.",
+    "write_paths": "the manifest declares six paths and git show --stat 8365c9c9 over its single commit touches exactly those six \u2014 imas_codex/cli/__init__.py, tests/discovery/test_engine_import_order.py, tests/llm/test_tool_schemas.py and the three files under docs/evidence/fragments/serve-answers-inside-the-connect-limit/ \u2014 and no seventh path."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_engine_import_order.py:72 and :87 redden at the base revision, which negative-control.log shows quoting the fourteen module names and 'litellm imported', but no assertion covers the schema runtime even though imas_codex/llm/server.py puts linkml_runtime on that very path, so the boundary guard is narrower than the done_when states.",
+    "evidence": "startup-timings.json records five runs per arm with their load averages and head-gate-final.log records 21 passed EXIT=0, but the 94.5 % attribution at docs/evidence/fragments/serve-answers-inside-the-connect-limit/saicl-lazy-command-group.html:20 rests on an importtime profile that is on no log, the schema-runtime clause has no assertion, and the ten-run stability clause is unrecorded.",
+    "fit": "DeferredCommandGroup at imas_codex/cli/__init__.py:92 extends click.Group and follows the module's docstring-and-type-hint idiom, but the help text now has two homes \u2014 the table at imas_codex/cli/__init__.py:37 and each command's own docstring \u2014 which will drift.",
+    "goal_fidelity": "imas_codex/cli/__init__.py:117 resolves each command module in get_command instead of at import, and the measured median is 3.80 s on the debug node and 11.98 s on the fleet node, so the lazy resolution is delivered while the fleet node stays above the goal's headline ten seconds.",
+    "reuse": "a search of imas_codex/cli for a click.Group subclass, a get_command override or a LazyGroup found none and click itself ships none, so the new class fills an unowned gap by extending the click.Group contract rather than duplicating a repository mechanism.",
+    "scope_discipline": "every path in commit 8365c9c9 is one of the six declared write paths, and the only behaviour beyond the goal it carries is that list_commands now sorts alphabetically at imas_codex/cli/__init__.py:99."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is that imas-codex serve answers initialize in under ten seconds by resolving command modules only when invoked; imas_codex/cli/__init__.py:35 replaces register_commands with the _COMMANDS table and imas_codex/cli/__init__.py:117 adds DeferredCommandGroup.get_command importing a module on first use, measured at 3.80 s median on the debug node and 11.98 s on the fleet node, so the goal holds on the debug node and on the done_when's own 15 s fleet threshold while the fleet node where sessions run still answers above ten seconds.\nVERDICT done_when: the done_when names eight clauses; the record answers the five-cold-start medians and their loads in startup-timings.json, serve --help at 0.17 s, the three serve modes' tool lists, and the fifteen-command listing, but the clause requiring a test to fail when the schema runtime is imported on the path that answers initialize is unasserted at tests/discovery/test_engine_import_order.py:105, which stops at litellm and the fourteen command modules while linkml_runtime is in sys.modules on that same path, and the ten-consecutive-run warm-up stability clause has no record in the fragment or the manifest.\nVERDICT write_paths: the manifest declares six paths and git show --stat 8365c9c9 over its single commit touches exactly those six \u2014 imas_codex/cli/__init__.py, tests/discovery/test_engine_import_order.py, tests/llm/test_tool_schemas.py and the three files under docs/evidence/fragments/serve-answers-inside-the-connect-limit/ \u2014 and no seventh path.\nVERDICT manifest: read; it reports status complete, 21 passed on the head gate and 64 passed on the command-line tests, names the negative-control log, and states the debug-node median 3.80 s (base 8.32 s) and fleet median 11.98 s (base 23.95 s); all four named logs exist on disk and read as stated.\nVERDICT diff: read the single commit 8365c9c9e7f2 against base 980fa78b5d18 commit by commit; it is 1217 insertions over six files \u2014 the deferred command table and group replacing register_commands, two import-boundary tests, a hardcoded per-mode tool-name set, and the timing script, JSON record and fragment.\nCALL_SITES: pyproject.toml:196 (console script imas-codex = imas_codex.cli:main), imas_codex/__main__.py:34 (module entry point imports main and calls it at line 38)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/cli/__init__.py:117 resolves each command module in get_command instead of at import, and the measured median is 3.80 s on the debug node and 11.98 s on the fleet node, so the lazy resolution is delivered while the fleet node stays above the goal's headline ten seconds.\nSCORE evidence: 13\nJUSTIFICATION evidence: startup-timings.json records five runs per arm with their load averages and head-gate-final.log records 21 passed EXIT=0, but the 94.5 % attribution at docs/evidence/fragments/serve-answers-inside-the-connect-limit/saicl-lazy-command-group.html:20 rests on an importtime profile that is on no log, the schema-runtime clause has no assertion, and the ten-run stability clause is unrecorded.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in commit 8365c9c9 is one of the six declared write paths, and the only behaviour beyond the goal it carries is that list_commands now sorts alphabetically at imas_codex/cli/__init__.py:99.\nSCORE durability: 14\nJUSTIFICATION durability: tests/discovery/test_engine_import_order.py:72 and :87 redden at the base revision, which negative-control.log shows quoting the fourteen module names and 'litellm imported', but no assertion covers the schema runtime even though imas_codex/llm/server.py puts linkml_runtime on that very path, so the boundary guard is narrower than the done_when states.\nSCORE fit: 17\nJUSTIFICATION fit: DeferredCommandGroup at imas_codex/cli/__init__.py:92 extends click.Group and follows the module's docstring-and-type-hint idiom, but the help text now has two homes \u2014 the table at imas_codex/cli/__init__.py:37 and each command's own docstring \u2014 which will drift.\nSCORE reuse: 18\nJUSTIFICATION reuse: a search of imas_codex/cli for a click.Group subclass, a get_command override or a LazyGroup found none and click itself ships none, so the new class fills an unowned gap by extending the click.Group contract rather than duplicating a repository mechanism.\nFINDING tests/discovery/test_engine_import_order.py:105 non-blocking: the assertion list is litellm plus the fourteen command modules only, so nothing fails when the schema runtime is imported on the initialize path, and a fresh-interpreter probe of that exact path shows linkml_runtime and imas_codex.graph.schema in sys.modules because imas_codex/llm/server.py imports imas_codex.graph.query_builder at module level \u2014 the done_when clause naming the schema runtime therefore has no guard and the condition it forbids is present in the landed code; the repair is to defer the server's own imports, which the manifest already records under outside_scope.\nFINDING tests/discovery/test_engine_import_order.py:93 non-blocking: the docstring asserts the verdict holds whether or not the deferred warm-up has started, but neither the test nor the record starts the warm-up, and the done_when's ten-consecutive-run clause has no result in the fragment or the manifest, so a claim of stability across warm-up states is made without the measurement that would show it.\nFINDING docs/evidence/fragments/serve-answers-inside-the-connect-limit/saicl-lazy-command-group.html:20 non-blocking: the 94.5 % attribution is stated in prose while startup-timings.json records only whole-run totals, so the part-level figures (15.58 s eager registration, 5.16 s server import, 1.39 s construction, 0.50 s interpreter) cannot be re-derived from anything committed and a later reader has to take them on the author's word.\nFINDING imas_codex/cli/sn.py:7132 non-blocking: the comment explains its function-local import by an import cycle through cli/__init__ register_commands, a function this commit deleted, and the identical stale sentence sits at imas_codex/llm/sn_tools.py:913, so two comments now cite an anchor that does not exist and neither records that the deferred table is what removed the cycle.\nFINDING /home/ITER/mcintos/.cache/imas-codex-saicl/logs/head-cli-tests.log:1 non-blocking: the header names the base revision 980fa78b while the run was written at 08:13, after the head commit, and executed in the head worktree, so the 64-passed command-line result is stamped with the revision that lacks the change and a reader comparing revisions is pointed at the wrong tree.\n",
+  "review_node": "review-of-saicl-lazy-command-group-8365c9c9e7f2",
+  "review_run_id": "r-20261112T071510823745-review-of-saicl-lazy-command-group-8365c9c9e7f2",
+  "reviewed_base_sha": "980fa78b5d18256670bafc0c529f300aeefe2fae",
+  "reviewed_head_sha": "8365c9c9e7f29866af9ab5d611904e59d73117e1",
+  "reviewed_run_id": "r-20261112T021222770704-saicl-lazy-command-group",
+  "reviewer": {
+    "backend": "clive",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261112T071510823745-review-of-saicl-lazy-command-group-8365c9c9e7f2"
+  },
+  "scores": {
+    "durability": 14,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T07:47:42.882405+00:00",
+  "total": 98
+}
