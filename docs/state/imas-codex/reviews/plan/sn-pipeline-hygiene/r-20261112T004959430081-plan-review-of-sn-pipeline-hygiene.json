@@ -71,6 +71,23 @@
       "note": "\u00a71's done-when now requires the cascade-calibration id to run without skipping from inputs committed in the repository, so a fixture-absence skip cannot close the section.",
       "reason": "",
       "when": "2026-11-12T01:32:58.207201+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "\u00a77 is deferred and its rows become sections with their own done-whens once the first upstream catalog release is cut, as the review notes; no node dispatches against it.",
+      "when": "2026-11-12T01:33:27.182845+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ec806af3d73129d215938fb4a08bd8b0ee285cb",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The geometry id now reads test_unregistered_locus_rejects_the_ordinal_compound, the name the test carries.",
+      "reason": "",
+      "when": "2026-11-12T01:33:54.654845+00:00"
     }
   ],
   "responses": {
@@ -81,7 +98,7 @@
       "commit_basis": "edit",
       "note": "The geometry id now reads test_unregistered_locus_rejects_the_ordinal_compound, the name the test carries.",
       "reason": "",
-      "when": "2026-11-12T01:32:21.913206+00:00"
+      "when": "2026-11-12T01:33:54.654845+00:00"
     },
     "done_when-1": {
       "action": "acted",
@@ -91,6 +108,12 @@
       "note": "\u00a71's done-when now requires the cascade-calibration id to run without skipping from inputs committed in the repository, so a fixture-absence skip cannot close the section.",
       "reason": "",
       "when": "2026-11-12T01:32:58.207201+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "\u00a77 is deferred and its rows become sections with their own done-whens once the first upstream catalog release is cut, as the review notes; no node dispatches against it.",
+      "when": "2026-11-12T01:33:27.182845+00:00"
     },
     "reasoning-1": {
       "action": "acted",
