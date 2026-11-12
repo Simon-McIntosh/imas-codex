@@ -41,15 +41,15 @@ def test_definition_states_a_normalisation_the_name_lacks():
 
 
 def test_a_convention_suppresses_its_flag():
-    """A bare species counts ions summed over charge states, neutrals excluded."""
+    """The catalog's one sign and reference convention is not an extra qualifier."""
 
-    item = {"id": "iron_density", "description": "Density of iron ions."}
-    definition = answers(counting_unit=("particles or ions", 0.95))
+    item = {"id": "wave_phase", "description": "Phase of the wave."}
+    definition = answers(normalisation=("relative to a reference value", 0.9))
     assert probe_check(item, definition) == [], (
-        "the bare-species convention must suppress the counting-unit candidate"
+        "the recorded reference convention must suppress the normalisation candidate"
     )
     unfiltered = probe_check(item, definition, apply_conventions=False)
-    assert [finding["slot"] for finding in unfiltered] == ["counting_unit"], (
+    assert [finding["slot"] for finding in unfiltered] == ["normalisation"], (
         "removing the convention must leave the candidate, so the suppression "
         "is what the passing test rests on"
     )

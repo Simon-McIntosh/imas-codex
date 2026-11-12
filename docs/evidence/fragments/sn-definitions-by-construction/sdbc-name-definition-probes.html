@@ -53,53 +53,45 @@ names on its own.</p>
 </table>
 
 <h2>Held-out and all-agreed readings</h2>
-<p>Labels are the two readers' agreed classes: 55 both-flag, 258 both-pass,
-68 disputed excluded. The split is the one the earlier deterministic check
-froze (seed 7714, development third). The 29 prototype names are now seen, so
-they are scored apart; the held-out column below excludes them (187 names,
-27 mismatched, 160 agreeing) and the including-them figure is given beside it.
-Cost USD 5.31 for 313 names, USD 0.026 per name.</p>
+<p>Every arm is scored on one held-out population, the same names: 208 held-out
+names of which 36 are labelled mismatched and 172 agree. Labels are the two
+readers' agreed classes (55 both-flag, 258 both-pass, 68 disputed excluded);
+the split is the one the earlier deterministic check froze (seed 7714). The
+probes now apply the name-closure and the confirming question, and the
+(slot, option) pairs whose development precision was at or below chance are
+dropped — 19 of 23 pairs. Cost: probes USD 5.31 in chat calls, the Jev
+confirming judgments USD 0.01, the chat seat USD 2.27.</p>
 
 <table>
 <tr><th>arm</th><th>found</th><th>recall</th><th>false flags</th><th>rate</th></tr>
-<tr><td>probes, held-out (seen names excluded)</td><td>21 / 27</td><td>0.778</td><td>120 / 160</td><td>0.750</td></tr>
-<tr><td>probes, held-out (all 208)</td><td>27 / 36</td><td>0.750</td><td>128 / 172</td><td>0.744</td></tr>
-<tr><td>probes, all 313 agreed</td><td>43 / 55</td><td>0.782</td><td>189 / 258</td><td>0.733</td></tr>
-<tr><td>chat seat, held-out (all 208)</td><td>27 / 36</td><td>0.750</td><td>12 / 172</td><td>0.070</td></tr>
-<tr><td>chat seat, all 313 agreed</td><td>41 / 55</td><td>0.745</td><td>15 / 258</td><td>0.058</td></tr>
-<tr><td>union, held-out (all 208)</td><td>33 / 36</td><td>0.917</td><td>132 / 172</td><td>0.767</td></tr>
-<tr><td>union, all 313 agreed</td><td>51 / 55</td><td>0.927</td><td>194 / 258</td><td>0.752</td></tr>
+<tr><td>probes, held-out</td><td>9 / 36</td><td>0.250</td><td>4 / 172</td><td>0.023</td></tr>
+<tr><td>probes, all 313</td><td>17 / 55</td><td>0.309</td><td>4 / 258</td><td>0.050</td></tr>
+<tr><td>chat seat, held-out</td><td>27 / 36</td><td>0.750</td><td>12 / 172</td><td>0.070</td></tr>
+<tr><td>chat seat, all 313</td><td>41 / 55</td><td>0.745</td><td>15 / 258</td><td>0.058</td></tr>
+<tr><td>union, held-out</td><td>28 / 36</td><td>0.778</td><td>15 / 172</td><td>0.087</td></tr>
+<tr><td>union, all 313</td><td>43 / 55</td><td>0.782</td><td>18 / 258</td><td>0.070</td></tr>
 </table>
 
 <h2>Per slot, held-out</h2>
 <table>
 <tr><th>slot</th><th>found</th><th>recall</th><th>false flags</th><th>rate</th><th>all-agreed flags</th></tr>
-<tr><td>aggregation</td><td>10 / 27</td><td>0.370</td><td>24 / 160</td><td>0.150</td><td>55</td></tr>
-<tr><td>normalisation</td><td>4 / 27</td><td>0.148</td><td>24 / 160</td><td>0.150</td><td>48</td></tr>
-<tr><td>counting unit</td><td>10 / 27</td><td>0.370</td><td>10 / 160</td><td>0.062</td><td>38</td></tr>
-<tr><td>restriction</td><td>10 / 27</td><td>0.370</td><td>81 / 160</td><td>0.506</td><td>145</td></tr>
-<tr><td>weighting</td><td>4 / 27</td><td>0.148</td><td>29 / 160</td><td>0.181</td><td>65</td></tr>
+<tr><td>aggregation</td><td>1 / 36</td><td>0.028</td><td>0 / 172</td><td>0.000</td><td>2</td></tr>
+<tr><td>normalisation</td><td>2 / 36</td><td>0.056</td><td>2 / 172</td><td>0.012</td><td>3</td></tr>
+<tr><td>counting unit</td><td>6 / 36</td><td>0.167</td><td>1 / 172</td><td>0.006</td><td>11</td></tr>
+<tr><td>restriction</td><td>0 / 36</td><td>0.000</td><td>0 / 172</td><td>0.000</td><td>1</td></tr>
+<tr><td>weighting</td><td>1 / 36</td><td>0.028</td><td>0 / 172</td><td>0.000</td><td>1</td></tr>
 </table>
 
-<p>Restriction carries the failure on its own: 81 of 160 agreeing names are
-flagged, which is 145 of the 313 all-agreed names. Counting unit is the one
-slot that behaves: 6 % false flags, the best precision of the five.</p>
-
-<h2>What the readings say to do next</h2>
-<ul>
-<li><strong>The comparison, not the questions, is where the false flags come
-from.</strong> The probe answers inspected in the prototype are mostly right —
-the definition does say "local", it does say "single toroidal mode number".
-The comparison reads each of those as a qualifier the name lacks. A slot
-needs a stated name-side default wider than one option, and restriction needs
-to read the name's own component tokens before the definition's phrase counts
-as extra.</li>
-<li><strong>Counting unit is the slot to keep.</strong> It meets the ceiling
-on its own and its misses are the ones the brief names (equivalent-electron
-counts, atoms per molecule).</li>
-<li><strong>The union is not a repair.</strong> It reaches 0.917 recall but
-carries the probes' false flags with it.</li>
-</ul>
+<h2>What the readings say</h2>
+<p>The closure and the confirming question work as intended on precision: the
+false-flag rate falls from 0.744 to 0.023, and the (slot, option) table drops
+19 of 23 pairs. They also take the recall with them: 249 candidates become 39
+flags, and the judge answers <em>already implied</em> on 182 of the 249. The
+name's implication closure is too generous — a species name is read as
+implying the energy channel or the device part the definition names.</p>
+<p>The union of the seat and the probes reaches 0.778 recall at 0.087 false
+flags on the held-out names, and 0.782 / 0.070 over all 313: the closest any
+arm comes to both bars, short of the 0.80 floor by 0.80 − 0.778.</p>
 
 <p>No bar was weakened and no name moved between splits. The run is reported
 <code>blocked</code> with the per-slot table above.</p>

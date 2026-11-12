@@ -225,23 +225,6 @@ class Convention:
 
 CONVENTIONS: tuple[Convention, ...] = (
     Convention(
-        slot="counting_unit",
-        definition_option="particles or ions",
-        name_tokens=(),
-        reason=(
-            "a bare species name counts ions summed over charge states with "
-            "neutrals excluded"
-        ),
-        subject_tokens=(
-            "density",
-            "temperature",
-            "count",
-            "pressure",
-            "velocity",
-            "source",
-        ),
-    ),
-    Convention(
         slot="aggregation",
         definition_option="local value at a point",
         name_tokens=(),
@@ -483,6 +466,7 @@ def compare_slots(
     *,
     slots: tuple[Slot, ...] = SLOTS,
     apply_conventions: bool = True,
+    unit: str = "",
 ) -> list[dict[str, Any]]:
     """Candidates where the two texts disagree, in both directions.
 
@@ -492,6 +476,7 @@ def compare_slots(
     """
 
     candidates: list[dict[str, Any]] = []
+    closure = name_closure(name, unit)
     for slot in slots:
         answer = definition_answers.get(slot.key) or {}
         if not answer.get("answered", False):
@@ -512,6 +497,12 @@ def compare_slots(
         elif stated is not None and option in slot.negative_options:
             direction = "name states more"
         else:
+            continue
+
+        if any(
+            implication.slot == slot.key and option in implication.options
+            for implication in closure
+        ):
             continue
 
         if apply_conventions and direction == "definition states more":
@@ -560,8 +551,281 @@ def probe_check(
         definition_answers,
         slots=slots,
         apply_conventions=apply_conventions,
+        unit=str(item.get("unit") or ""),
     )
     for finding in found:
         finding["finding_type"] = "name_definition_probe_disagreement"
         finding["pattern"] = finding["slot"]
     return found
+
+# ---------------------------------------------------------------------------
+# What a name already implies
+# ---------------------------------------------------------------------------
+# A name states more than its slot tokens spell out. A density is per unit volume
+# and a local value; a power is the integral over its natural extent; a species
+# name counts that species' ions summed over charge states; a name at a locus is
+# local there; an object name restricts to that object as a whole. Each of these
+# is data, so a slot value a name already implies is never a candidate.
+
+SPECIES_TOKENS: tuple[str, ...] = (
+    "hydrogen", "deuterium", "tritium", "helium", "helium_4", "helium_3",
+    "beryllium", "boron", "carbon", "nitrogen", "oxygen", "neon", "argon",
+    "krypton", "xenon", "iron", "nickel", "silicon", "lithium", "tungsten",
+    "electron", "ion", "ion_charge_state", "alpha", "impurity", "neutral",
+    "ammonia", "deuterated",
+)
+
+# Objects a name can restrict to as a whole: the name already says the quantity
+# belongs to that object, so a definition restating the same object adds nothing.
+OBJECT_TOKENS: tuple[str, ...] = (
+    "coil", "limiter", "divertor", "antenna", "strap", "detector", "element",
+    "lens", "mirror", "gauge", "camera", "reflector", "injector", "target",
+    "wall", "loop", "row", "segment",
+)
+
+# Locus prepositions: a name that places its quantity at a locus states a local
+# value there.
+LOCUS_PREPOSITIONS: tuple[str, ...] = ("at", "in", "near")
+
+# Bases whose natural extent is integrated: a definition that says the quantity
+# is integrated over a volume or a surface adds nothing to such a name.
+EXTENSIVE_BASES: tuple[str, ...] = (
+    "power", "current", "energy", "count", "force", "torque", "rate", "mass",
+    "charge", "voltage", "momentum", "fluence", "fluence_rate",
+)
+
+# Unit prefixes that carry an extensive quantity, read on the unit string.
+EXTENSIVE_UNIT_PREFIXES: tuple[str, ...] = (
+    "W", "A", "J", "C", "N", "kg", "V", "N.m", "A.m", "W.m",
+)
+
+INTEGRAL_AGGREGATIONS: tuple[str, ...] = (
+    "volume integral",
+    "line or surface integral",
+)
+
+
+@dataclass(frozen=True)
+class Implication:
+    """One thing a name states, in words a confirming question can show."""
+
+    slot: str
+    options: tuple[str, ...]
+    reason: str
+
+
+def unit_is_per_volume(unit: str) -> bool:
+    return "m^-3" in unit.replace(" ", "") or "/m^3" in unit.replace(" ", "")
+
+
+def unit_is_extensive(unit: str) -> bool:
+    text = unit.strip()
+    return any(text.startswith(prefix) for prefix in EXTENSIVE_UNIT_PREFIXES)
+
+
+def name_closure(name: str, unit: str = "") -> list[Implication]:
+    """What this name already implies, as data the comparison can read.
+
+    A slot value in this closure is never a candidate: the name states it, so a
+    definition that asserts it says nothing the name lacks.
+    """
+
+    tokens = name_tokens(name)
+    token_set = set(tokens)
+    implied: list[Implication] = []
+
+    intensive = "density" in token_set or unit_is_per_volume(unit)
+    if intensive:
+        implied.append(
+            Implication(
+                "normalisation",
+                ("per unit volume",),
+                "a density or an m^-3 unit is per unit volume",
+            )
+        )
+        implied.append(
+            Implication(
+                "aggregation",
+                ("local value at a point",),
+                "an intensive quantity is a local value",
+            )
+        )
+
+    if "flux" in token_set and "flux_surface" not in tokens:
+        implied.append(
+            Implication(
+                "normalisation",
+                ("per unit area",),
+                "a flux is per unit area",
+            )
+        )
+
+    extensive = bool(token_set & set(EXTENSIVE_BASES)) or unit_is_extensive(unit)
+    if extensive:
+        implied.append(
+            Implication(
+                "aggregation",
+                INTEGRAL_AGGREGATIONS,
+                "an extensive quantity is the integral over its natural extent",
+            )
+        )
+
+    species = token_set & set(SPECIES_TOKENS)
+    if species:
+        implied.append(
+            Implication(
+                "counting_unit",
+                ("particles or ions",),
+                "a species name counts that species' ions summed over charge "
+                "states, with neutrals excluded",
+            )
+        )
+        implied.append(
+            Implication(
+                "restriction",
+                ("one particle population",),
+                "a species name is already restricted to that species",
+            )
+        )
+
+    objects = token_set & set(OBJECT_TOKENS)
+    if objects:
+        implied.append(
+            Implication(
+                "restriction",
+                ("one device part or component",),
+                "an object name is already restricted to that object as a whole",
+            )
+        )
+
+    if token_set & set(LOCUS_PREPOSITIONS) and len(tokens) > 1:
+        implied.append(
+            Implication(
+                "aggregation",
+                ("local value at a point",),
+                "a name that places its quantity at a locus is a local value there",
+            )
+        )
+
+    return implied
+
+
+def closure_words(closure: list[Implication]) -> str:
+    """The closure as one phrase a confirming question shows the judge."""
+
+    if not closure:
+        return "nothing beyond its stated tokens"
+    return "; ".join(f"{imp.slot}: {imp.reason}" for imp in closure)
+
+
+# ---------------------------------------------------------------------------
+# The confirming question
+# ---------------------------------------------------------------------------
+# The probes say what the definition states and the closure says what the name
+# already means. One closed question per surviving candidate separates the two
+# cases that flag from the two that do not.
+
+CONFIRM_QUESTION_NAME = "definition_phrase_relation"
+
+CONFIRM_CRITERIA: dict[str, str] = {
+    "already_implied": (
+        "the phrase states something the name already means, as the name's own "
+        "tokens or the listed implications state it"
+    ),
+    "narrower_part": (
+        "the phrase restricts the quantity to a part, layer, channel, band or "
+        "branch narrower than anything the name states"
+    ),
+    "different_form": (
+        "the phrase states a different aggregation, normalisation, weighting or "
+        "counting unit than the name's own"
+    ),
+    "excludes_or_default": (
+        "the phrase states what the quantity excludes, or a convention of its "
+        "own quantity rather than an extra qualifier"
+    ),
+}
+
+FLAGGING_RELATIONS = ("narrower_part", "different_form")
+
+
+def confirm_states(
+    rows: list[dict[str, Any]], findings: dict[str, list[dict[str, Any]]]
+) -> tuple[list[dict[str, Any]], list[tuple[str, int]]]:
+    """One decision state per candidate, with the row and index it came from."""
+
+    states: list[dict[str, Any]] = []
+    index: list[tuple[str, int]] = []
+    by_name = {str(row.get("id") or row.get("name") or ""): row for row in rows}
+    for name, found in findings.items():
+        row = by_name.get(name, {})
+        closure = closure_words(name_closure(name, str(row.get("unit") or "")))
+        for position, finding in enumerate(found):
+            states.append(
+                {
+                    "standard_name": name,
+                    "slot": finding["slot"],
+                    "definition_phrase": finding["definition_phrase"],
+                    "name_tokens": " ".join(name_tokens(name)),
+                    "name_already_states": closure,
+                }
+            )
+            index.append((name, position))
+    return states, index
+
+
+async def confirm_candidates(
+    rows: list[dict[str, Any]],
+    findings: dict[str, list[dict[str, Any]]],
+    *,
+    model: str,
+) -> tuple[dict[str, list[dict[str, Any]]], float, dict[str, int]]:
+    """Keep only the candidates the confirming question flags.
+
+    Returns the surviving findings, the run's cost, and the count of each
+    relation the judge chose, so a relation that fires on everything is visible.
+    """
+
+    from imas_codex.discovery.base.judgment import decide_batch
+
+    states, index = confirm_states(rows, findings)
+    if not states:
+        return {}, 0.0, {}
+    results, cost = await decide_batch(
+        states,
+        {CONFIRM_QUESTION_NAME: {
+            "type": "choice",
+            "text": (
+                "The definition of a physics quantity contains a phrase. The "
+                "standard name withholds some of what it already means. Decide "
+                "what the phrase is relative to the name and the implications "
+                "listed."
+            ),
+            "criteria": CONFIRM_CRITERIA,
+        }},
+        model=model,
+        service=SERVICE,
+        concurrency=6,
+        step="sn_judge",
+    )
+    relation_counts: dict[str, int] = {}
+    kept: dict[str, list[dict[str, Any]]] = {}
+    for (name, position), outcome in zip(index, results, strict=False):
+        finding = findings[name][position]
+        if outcome is None:
+            finding["confirmation"] = "unanswered"
+            kept.setdefault(name, []).append(finding)
+            continue
+        answers = outcome[0] if isinstance(outcome, tuple) else outcome
+        relation = str((answers or {}).get(CONFIRM_QUESTION_NAME, {}).get("choice") or "")
+        finding["confirmation"] = relation or "unanswered"
+        relation_counts[relation] = relation_counts.get(relation, 0) + 1
+        if relation in FLAGGING_RELATIONS or not relation:
+            kept.setdefault(name, []).append(finding)
+    return kept, cost, relation_counts
+
+
+def pair_of(finding: dict[str, Any]) -> str:
+    """The (slot, option) pair a finding rests on."""
+
+    return f"{finding['slot']}:{finding['definition_option']}"

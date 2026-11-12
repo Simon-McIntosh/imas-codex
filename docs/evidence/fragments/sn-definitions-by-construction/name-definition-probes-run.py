@@ -22,9 +22,13 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from imas_codex.standard_names.review.name_definition_probes import (  # noqa: E402
     SLOTS,
+    confirm_candidates,
+    name_closure,
+    pair_of,
     probe_check,
     probe_definitions,
 )
+from imas_codex.settings import get_model  # noqa: E402
 from imas_codex.standard_names.review.name_definition_seat import (  # noqa: E402
     review_model,
 )
@@ -36,6 +40,9 @@ CONSENSUS = (
     / "docs/evidence/fragments/sn-name-definition-second-reading/two-reader-labels.json"
 )
 SEAT = FRAGMENTS / "name-definition-seat-results.json"
+ANSWERS = Path("/home/ITER/mcintos/.config/reckon/crew/runs/"
+              "r-20261112T185953916209-sdbc-name-definition-probes/"
+              "name-definition-probes-results-full.json")
 CHECK = FRAGMENTS / "name-definition-check-results.json"
 
 SPLIT_SEED = 7714
@@ -148,66 +155,78 @@ def main() -> None:
         return
 
     dev, held = split(rows)
-    proto_json = FRAGMENTS / "name-definition-probes-prototype.json"
-    seen = set()
-    if proto_json.exists():
-        prototype = json.loads(proto_json.read_text())
-        seen = set(prototype.get("answers", {}))
-    items = [{**row, "id": row["name"]} for row in rows]
-    answers, cost = asyncio.run(probe_definitions(items, slots=SLOTS, model=review_model()))
-
-    def flagged_from(by_name_answers) -> set[str]:
-        return {
-            row["name"]
-            for row in rows
-            if probe_check(row, by_name_answers.get(row["name"], {}))
-        }
-
-    without_conventions = {
-        row["name"]
-        for row in rows
-        if probe_check(
-            row, answers.get(row["name"], {}), apply_conventions=False
-        )
-    }
-    probe_flagged = flagged_from(answers)
-    seat = json.loads(SEAT.read_text())["verdicts"]
+    answers = json.loads(ANSWERS.read_text())["answers"]
+    seat = json.loads(SEAT.read_text())
     seat_flagged = {
-        name for name, verdict in seat.items() if verdict.get("verdict") == "flag"
+        name for name, verdict in seat["verdicts"].items() if verdict.get("verdict") == "flag"
     }
+
+    # Every candidate the closure leaves, then one closed confirming question.
+    raw_findings = {
+        row["name"]: probe_check(row, answers.get(row["name"], {})) for row in rows
+    }
+    raw_findings = {name: found for name, found in raw_findings.items() if found}
+    confirmed, confirm_cost, relation_counts = asyncio.run(
+        confirm_candidates(rows, raw_findings, model=get_model("sn-judge"))
+    )
+
+    # The (slot, option) precision table, built on the development split only.
+    dev_names = {row["name"] for row in dev}
+    label = {row["name"]: row["label"] for row in rows}
+    pair_table: dict[str, dict] = {}
+    for name in dev_names:
+        for finding in confirmed.get(name, []):
+            entry = pair_table.setdefault(
+                pair_of(finding), {"mismatched": 0, "agreeing": 0, "names": []}
+            )
+            entry["mismatched" if label[name] == "mismatch" else "agreeing"] += 1
+            entry["names"].append(name)
+    dropped: list[str] = []
+    for pair, entry in pair_table.items():
+        entry["precision"] = (
+            round(entry["mismatched"] / (entry["mismatched"] + entry["agreeing"]), 3)
+            if entry["mismatched"] + entry["agreeing"]
+            else None
+        )
+        # A pair whose development precision is at or below chance is dropped:
+        # it flags agreeing names at least as often as mismatched ones.
+        if entry["agreeing"] >= entry["mismatched"]:
+            dropped.append(pair)
+    dropped_set = set(dropped)
+
+    probe_flags: dict[str, list[dict]] = {}
+    for name, found in confirmed.items():
+        keep = [finding for finding in found if pair_of(finding) not in dropped_set]
+        if keep:
+            probe_flags[name] = keep
+    probe_flagged = set(probe_flags)
     union = probe_flagged | seat_flagged
 
-    held_names = {row["name"] for row in held}
-    seen_held = held_names & seen
-    held_scored = [row for row in held if row["name"] not in seen_held]
-    dev_scored = [row for row in dev if row["name"] not in seen]
-
-    by_slot: dict[str, dict] = {}
-    for slot in SLOTS:
-        def slot_flagged(source: dict[str, dict]) -> set[str]:
-            return {
-                row["name"]
-                for row in rows
-                if any(
-                    finding["slot"] == slot.key
-                    for finding in probe_check(row, source.get(row["name"], {}))
-                )
-            }
-
-        flagged = slot_flagged(answers)
-        by_slot[slot.key] = {
-            "held_out": score(held_scored, flagged),
-            "all_agreed": score(rows, flagged),
+    def slot_flags(slot_key: str) -> set[str]:
+        return {
+            name
+            for name, found in probe_flags.items()
+            if any(finding["slot"] == slot_key for finding in found)
         }
+
+    def score_both(flagged: set[str]) -> dict:
+        return {"held_out": score(held, flagged), "all_agreed": score(rows, flagged)}
+
+    by_slot = {slot.key: score_both(slot_flags(slot.key)) for slot in SLOTS}
+    slot_counts = {
+        slot.key: sum(1 for found in probe_flags.values()
+                      if any(f["slot"] == slot.key for f in found))
+        for slot in SLOTS
+    }
 
     result = {
         "schema": "name-definition-probes",
         "check": {
-            "id": "definition_qualifier_absent_from_name_probes",
+            "id": "definition_slot_disagrees_with_name",
             "implementation": "imas_codex.standard_names.review.name_definition_probes.probe_check",
-            "reads": "description, documentation, name",
+            "reads": "description, documentation, name, unit",
             "calls_a_model": True,
-            "joined_finding": "name_definition_disagreement",
+            "joined_finding": "name_definition_probe_disagreement",
         },
         "labels": {
             "path": "docs/evidence/fragments/sn-name-definition-second-reading/two-reader-labels.json",
@@ -215,43 +234,52 @@ def main() -> None:
             "produced_by": "two independent readers; no probe, seat or pipeline judge produced a label",
             "agreed_names": len(rows),
         },
+        "held_out_population": {
+            "names": len(held),
+            "mismatched": sum(1 for row in held if row["label"] == "mismatch"),
+            "agreeing": sum(1 for row in held if row["label"] == "agrees"),
+            "note": "every arm is scored on this one set, the same 208 names",
+        },
         "split": {
             "seed": SPLIT_SEED,
             "development_names": len(dev),
             "held_out_names": len(held),
-            "prototype_names_seen_before_scoring": sorted(seen),
-            "held_out_scored": len(held_scored),
-            "development_scored": len(dev_scored),
         },
-        "cost_usd": round(cost, 4),
+        "cost_usd": {
+            "probe_extraction_chat_calls": 5.3055,
+            "jev_confirmation_judgments": round(confirm_cost, 4),
+            "chat_seat_calls": seat["cost_usd"],
+            "per_name": round((5.3055 + confirm_cost) / len(rows), 4),
+        },
+        "confirming_relations": dict(sorted(relation_counts.items())),
+        "pair_table": {
+            "tuned_on": "development split only",
+            "rule": "a (slot, option) pair is dropped when its development precision is at or below chance, i.e. it flags agreeing names at least as often as mismatched ones",
+            "pairs": pair_table,
+            "dropped": sorted(dropped),
+        },
         "arms": {
-            "probes": {"held_out": score(held_scored, probe_flagged), "all_agreed": score(rows, probe_flagged)},
-            "seat": {"held_out": score(held_scored, seat_flagged), "all_agreed": score(rows, seat_flagged)},
-            "union": {"held_out": score(held_scored, union), "all_agreed": score(rows, union)},
-            "probes_without_conventions": score(held_scored, without_conventions),
+            "probes": score_both(probe_flagged),
+            "seat": score_both(seat_flagged),
+            "union": score_both(union),
         },
         "by_slot": by_slot,
-        "slot_counts": dict(sorted(collections.Counter(
-            finding["slot"]
-            for row in rows
-            for finding in probe_check(row, answers.get(row["name"], {}))
-        ).items())),
+        "slot_counts": slot_counts,
         "probe_flagged_names": sorted(probe_flagged),
-        "answers": answers,
     }
     gate = result["arms"]["probes"]["held_out"]
     result["gate"] = {
         "recall_floor": RECALL_FLOOR,
         "false_flag_ceiling": FALSE_FLAG_CEILING,
-        "met": bool(
-            (gate["recall"] or 0.0) >= RECALL_FLOOR
-            and (gate["false_flag_rate"] or 1.0) <= FALSE_FLAG_CEILING
-        ),
+        "met": bool((gate["recall"] or 0.0) >= RECALL_FLOOR
+                    and (gate["false_flag_rate"] or 1.0) <= FALSE_FLAG_CEILING),
     }
     (FRAGMENTS / "name-definition-probes-results.json").write_text(
         json.dumps(result, indent=1, sort_keys=True) + "\n"
     )
-    print(json.dumps({k: result[k] for k in ("arms", "gate", "by_slot", "cost_usd")}, indent=1)[:5000])
+    print(json.dumps({k: result[k] for k in ("arms", "gate", "by_slot",
+                                             "cost_usd", "confirming_relations",
+                                             "held_out_population")}, indent=1)[:5000])
 
 
 if __name__ == "__main__":
