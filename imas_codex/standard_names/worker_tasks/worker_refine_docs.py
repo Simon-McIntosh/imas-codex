@@ -284,6 +284,7 @@ async def process_refine_docs_batch(
                 description_with_population,
             )
             from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+                SharedPartAltered,
                 _refuse_altered_shared_parts,
             )
 
@@ -359,7 +360,15 @@ async def process_refine_docs_batch(
             # of reverting to 'reviewed', which would re-claim and re-charge it
             # on a paid model every cycle (an infinite paid loop).  Log such
             # failures at WARNING; only unexpected errors get ERROR + traceback.
-            is_terminal = _is_refine_docs_failure(exc)
+            # A refusal of the settled shared wording is deterministic for a
+            # given item: the same item is asked the same question on every
+            # pass, so a model that contradicts the stored population
+            # contradicts it again. Releasing the claim would return the name
+            # to review and re-charge it on every pass, so it takes the same
+            # terminal state a deterministic ``RefinedDocs`` failure takes.
+            is_terminal = _is_refine_docs_failure(exc) or isinstance(
+                exc, SharedPartAltered
+            )
             if is_terminal:
                 logger.warning(
                     "refine_docs failed (deterministic, marking exhausted) for %s: %s",

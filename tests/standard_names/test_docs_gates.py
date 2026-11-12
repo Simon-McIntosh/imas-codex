@@ -628,3 +628,61 @@ def test_a_coordinate_without_a_frame_states_nothing_checkable() -> None:
     assert (
         result.reason == "coordinate documentation states no coordinate frame or axes"
     )
+
+
+# The stored population sentence, spelled once here so the removal band's two
+# branches are exercised against the wording the registry actually carries.
+ARGON_POPULATION_SENTENCE = (
+    "The density counts ions summed over all charge states; neutral atoms are excluded."
+)
+
+# A restatement of the same population in other words: close enough to be the
+# same claim, too far from the stored wording for an exact match.
+ARGON_POPULATION_PARAPHRASE = (
+    "The density counts ions summed over all charge states and excludes "
+    "neutral atoms from the tally."
+)
+
+
+def _argon_parts():
+    from imas_standard_names.grammar.terms import select_conventions
+
+    from imas_codex.standard_names.docs_gates import shared_part_sentences
+
+    return shared_part_sentences("argon_density", select_conventions("argon_density"))
+
+
+def test_a_definition_already_in_the_stored_wording_is_left_untouched() -> None:
+    """Text that states the part as stored is kept, not re-appended or dropped.
+
+    Here the renderer appends the stored sentence after removing the
+    paraphrase; beside it the writer's own unrelated sentence stays.
+    """
+
+    from imas_codex.standard_names.docs_gates import replace_altered_shared_parts
+
+    unrelated = "Argon line emission is used to diagnose impurity transport."
+    rendered = replace_altered_shared_parts(
+        f"{unrelated}\n\n{ARGON_POPULATION_PARAPHRASE}", _argon_parts()
+    )
+
+    assert rendered.count(ARGON_POPULATION_SENTENCE) == 1
+    assert ARGON_POPULATION_PARAPHRASE not in rendered
+    assert unrelated in rendered
+
+
+def test_a_definition_that_already_carries_the_stored_wording_is_unchanged() -> None:
+    """A part already stated as stored is skipped, so the wording is not doubled.
+
+    The presence test decides this before any sentence is examined, which is
+    why the removal filter only ever has paraphrases to drop: a sentence equal
+    to the stored wording cannot reach it.
+    """
+
+    from imas_codex.standard_names.docs_gates import replace_altered_shared_parts
+
+    documentation = (
+        f"Number density of argon ions in the plasma.\n\n{ARGON_POPULATION_SENTENCE}"
+    )
+
+    assert replace_altered_shared_parts(documentation, _argon_parts()) == documentation
