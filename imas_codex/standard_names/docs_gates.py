@@ -616,6 +616,8 @@ class HouseStyleFindingClass(StrEnum):
     TEMPLATE_OPENING = "template_opening"
     TEMPLATE_NOTE = "template_note"
     NON_CANONICAL_EQUATION = "non_canonical_equation"
+    SHARED_PART_ALTERED = "shared_part_altered"
+    CONTRADICTED_SHARED_PART = "contradicted_shared_part"
 
 
 @dataclass(frozen=True)
@@ -625,6 +627,7 @@ class HouseStyleFinding:
     finding_class: HouseStyleFindingClass
     registry_entry: str
     detail: str
+    sentence: str = ""
 
 
 _TEMPLATE_PLACEHOLDER_RE = re.compile(r"\{[^{}]+\}")
@@ -780,6 +783,372 @@ def locus_definition_sentence(concept: Any) -> str:
     else:
         clause = f"{clause}."
     return f"{definition} {clause}"
+
+
+# The population a bare species density counts is one decision for the
+# catalog: ions, summed over all charge states, with neutral atoms excluded. A
+# name that includes neutral atoms says so in the name. The grammar library
+# carries no sentence for this rule yet, so it is stored here for a reviewer to
+# read and change, and proposed upstream.
+SPECIES_POPULATION_SENTENCE = (
+    "The density counts ions summed over all charge states; neutral atoms are excluded."
+)
+
+
+# A bare species density counts ions only. Free text that includes neutral
+# atoms, or that sums from the neutral charge state, states the opposite
+# population and cannot stand beside the stored sentence.
+_NEUTRAL_MENTION_RE = re.compile(r"\bneutrals?\b|z\s*=\s*0\b", re.IGNORECASE)
+_NEUTRAL_NEGATION_RE = re.compile(
+    r"(?:exclud|exclus|omitt|ignor|except|apart\s+from|instead\s+of"
+    r"|\bno\b|\bnot\b|\bnever\b|\bwithout\b|\bnor\b)",
+    re.IGNORECASE,
+)
+
+
+def population_contradiction(name: str, text: str) -> str | None:
+    """Return the phrase that contradicts the stored population, if any.
+
+    A bare species density counts ions summed over all charge states with
+    neutral atoms excluded. Text that includes neutral atoms, or that starts a
+    sum at the neutral charge state, says the opposite of the stored sentence
+    and is refused rather than published beside it. A mention the text itself
+    negates ("... but excluding neutral atoms") agrees with the stored
+    population and is not a contradiction.
+    """
+
+    if not text or not is_species_density_name(name):
+        return None
+    for mention in _NEUTRAL_MENTION_RE.finditer(text):
+        before = text[max(0, mention.start() - 40) : mention.start()]
+        after = text[mention.end() : mention.end() + 30]
+        if _NEUTRAL_NEGATION_RE.search(before) or _NEUTRAL_NEGATION_RE.search(after):
+            continue
+        start = max(0, mention.start() - 60)
+        return text[start : mention.end() + 30].strip()
+    return None
+
+
+_OPERATOR_TOKENS: frozenset[str] | None = None
+
+# Two sentences whose word sets agree this closely state the same shared part,
+# so the one that is not the stored wording is an alteration of it rather than
+# a different claim.
+_PARAPHRASE_OVERLAP = 0.75
+
+# A written sentence that shares this much wording with a stored sentence is
+# taken to state the same shared part in other words. The renderer removes it
+# and the conformance check reports one it could not remove, so there is no
+# band of paraphrase that is neither removed nor reported.
+_COMPETING_OVERLAP = 0.45
+
+
+def _operator_tokens() -> frozenset[str]:
+    """The tokens the operator registry defines."""
+
+    global _OPERATOR_TOKENS
+    if _OPERATOR_TOKENS is None:
+        from imas_standard_names.grammar.vocab_loaders import load_operators
+
+        _OPERATOR_TOKENS = frozenset(load_operators().operators)
+    return _OPERATOR_TOKENS
+
+
+def operator_definition_sentence(concept: Any) -> str:
+    """Render an operator's defining sentence from its registry entry.
+
+    The registry supplies every word, so two names that apply the operator to
+    different quantities carry this sentence unchanged; only the parts stored
+    in the name are substituted around it.
+    """
+
+    definition = concept.definition.strip()
+    if not definition:
+        return ""
+    if not definition.endswith("."):
+        definition = f"{definition}."
+    phrase = concept.phrase.strip()
+    if not phrase:
+        return definition
+    return f"The {phrase} is {definition[0].lower()}{definition[1:]}"
+
+
+def is_species_density_name(name: str) -> bool:
+    """Whether *name* is a bare species number density."""
+
+    from imas_standard_names.grammar.parser import ParseError, parse
+    from imas_standard_names.grammar.vocab_loaders import load_subjects
+
+    try:
+        ir = parse(name, strict=True).ir
+    except ParseError:
+        return False
+    subjects = [q.token for q in ir.qualifiers if q.token in load_subjects()]
+    if len(subjects) != 1 or name.split("_")[-1] != "density":
+        return False
+    # The population rule counts ions over charge states, which describes an
+    # atomic species rather than a lepton or an aggregate such as a beam.
+    single = {"alpha_particle", "electron", "neutron", "runaway_electron"}
+    aggregate = {
+        "edge_localized_mode",
+        "halo",
+        "hard_xray",
+        "impurity_ion",
+        "impurity_species",
+        "ion",
+        "ion_species",
+        "neutral_beam",
+        "neutral_species",
+        "pellet",
+        "pellet_species",
+        "shattered_pellet",
+        "shattered_pellet_fragment",
+        "shattered_pellet_species",
+    }
+    return subjects[0] not in single | aggregate
+
+
+def shared_part_sentences(
+    name: str, conventions: AppliedConventions
+) -> tuple[tuple[str, str], ...]:
+    """Return the stored wording of each shared part *name* carries.
+
+    Each entry pairs the registry anchor with the sentence every name carrying
+    that part must state.
+    """
+
+    parts: list[tuple[str, str]] = []
+    operators = _operator_tokens()
+    loci = _locus_registry_tokens()
+    for concept in conventions.concepts:
+        if concept.token in operators:
+            sentence = operator_definition_sentence(concept)
+        elif concept.token in loci:
+            sentence = locus_definition_sentence(concept)
+        else:
+            continue
+        if sentence and sentence not in {text for _, text in parts}:
+            parts.append((f"concept:{concept.token}", sentence))
+    if is_species_density_name(name):
+        parts.append(("population:species", SPECIES_POPULATION_SENTENCE))
+    return tuple(parts)
+
+
+def fixed_shared_parts(
+    name: str, conventions: AppliedConventions | dict[str, Any] | None
+) -> tuple[dict[str, str], ...]:
+    """Return the settled text the model must write around, not paraphrase.
+
+    Each entry names the part, the anchor it is registered under, the sentence
+    every name carrying it states, and the equation where the part has one.
+    """
+
+    if not conventions:
+        return ()
+    if isinstance(conventions, dict):
+        conventions = AppliedConventions.model_validate(conventions)
+    equations = {
+        concept.token: concept.equation.strip()
+        for concept in conventions.concepts
+        if concept.equation
+    }
+    parts: list[dict[str, str]] = []
+    for anchor, sentence in shared_part_sentences(name, conventions):
+        token = anchor.split(":", 1)[1]
+        part = {"part": "population" if anchor.startswith("population:") else anchor}
+        parts.append(
+            {
+                "part": part["part"],
+                "anchor": anchor,
+                "sentence": sentence,
+                "equation": equations.get(token, ""),
+            }
+        )
+    return tuple(parts)
+
+
+def description_with_population(name: str, description: str) -> str:
+    """State the settled population in a species density's one-line description."""
+
+    if not is_species_density_name(name):
+        return description
+    text = description.strip().rstrip(".")
+    if not text:
+        return description
+    lowered = text.lower()
+    if "neutral" in lowered or "exclud" in lowered:
+        return description
+    if "charge state" in lowered:
+        return f"{text}, with neutral atoms excluded."
+    return (
+        f"{text}. The ions of the species are counted over all charge states, "
+        "with neutral atoms excluded."
+    )
+
+
+def open_without_fragment(documentation: str) -> str:
+    """Complete a bare opening fragment with the paragraph that follows it.
+
+    A definition that opens with a noun phrase alone ("Number density of
+    argon") and a blank line reads as a truncated heading. The fragment is
+    joined to the next paragraph so the definition opens with a sentence.
+    """
+
+    paragraphs = documentation.split("\n\n")
+    if len(paragraphs) < 2:
+        return documentation
+    head = paragraphs[0].strip()
+    if not head or head.endswith((".", "!", "?", ":")) or head.startswith("$$"):
+        return documentation
+    merged = f"{head.rstrip(',;')}. {paragraphs[1].strip()}"
+    return "\n\n".join([merged, *paragraphs[2:]])
+
+
+def _word_set(text: str) -> set[str]:
+    return set(re.findall(r"[a-z0-9_]+", text.lower()))
+
+
+def _sentence_overlap(left: str, right: str) -> float:
+    a, b = _word_set(left), _word_set(right)
+    if not a or not b:
+        return 0.0
+    return len(a & b) / len(a | b)
+
+
+def _prose_sentences(text: str) -> list[str]:
+    return [
+        sentence.strip()
+        for sentence in re.split(r"(?<=[.!?])\s+|\n+", text)
+        if sentence.strip()
+    ]
+
+
+def shared_part_findings(
+    name: str,
+    conventions: AppliedConventions,
+    documentation: str,
+    description: str = "",
+) -> list[HouseStyleFinding]:
+    """Report a written definition whose shared part departs from its wording.
+
+    A shared part is stated once for the catalog, so a definition carries the
+    stored sentence unchanged. A definition that omits it, or that states the
+    same part in other words, has had the shared wording altered by whoever
+    wrote it, and is reported for that part rather than scored on the prose.
+    Text that states the opposite of a shared part is reported separately: it
+    contradicts the stored wording rather than paraphrasing it.
+    """
+
+    parts = shared_part_sentences(name, conventions)
+    if not parts or not documentation.strip():
+        return []
+    contradiction = population_contradiction(name, f"{description}\n{documentation}")
+    if contradiction is not None:
+        return [
+            HouseStyleFinding(
+                finding_class=HouseStyleFindingClass.CONTRADICTED_SHARED_PART,
+                registry_entry="population:species",
+                detail=(
+                    f"the written text includes neutral atoms ({contradiction!r}) "
+                    f"where the stored wording reads {SPECIES_POPULATION_SENTENCE!r}"
+                ),
+                sentence=SPECIES_POPULATION_SENTENCE,
+            )
+        ]
+    written = _collapsed(documentation)
+    sentences = _prose_sentences(documentation)
+    findings: list[HouseStyleFinding] = []
+    for anchor, sentence in parts:
+        stored = _collapsed(sentence)
+        if stored in written:
+            # The stored sentence is present. A second sentence that states the
+            # same part in other words was not removed by the renderer, so it
+            # is reported here rather than left standing beside the wording.
+            competing = next(
+                (
+                    candidate
+                    for candidate in sentences
+                    if stored not in _collapsed(candidate)
+                    and _sentence_overlap(candidate, stored) >= _COMPETING_OVERLAP
+                ),
+                None,
+            )
+            if competing is not None:
+                findings.append(
+                    HouseStyleFinding(
+                        finding_class=HouseStyleFindingClass.SHARED_PART_ALTERED,
+                        registry_entry=anchor,
+                        detail=(
+                            f"the definition states the shared part in other words "
+                            f"beside the stored wording "
+                            f"({_collapsed(competing)[:160]!r})"
+                        ),
+                        sentence=stored,
+                    )
+                )
+            continue
+        altered = next(
+            (
+                candidate
+                for candidate in sentences
+                if _sentence_overlap(candidate, stored) >= _PARAPHRASE_OVERLAP
+            ),
+            None,
+        )
+        if altered is None:
+            detail = f"the definition omits the stored wording: {stored}"
+        else:
+            detail = (
+                f"the definition states the shared part in other words "
+                f"({_collapsed(altered)[:160]!r}) where the stored wording "
+                f"reads {stored!r}"
+            )
+        findings.append(
+            HouseStyleFinding(
+                finding_class=HouseStyleFindingClass.SHARED_PART_ALTERED,
+                registry_entry=anchor,
+                detail=detail,
+                sentence=stored,
+            )
+        )
+    return findings
+
+
+def replace_altered_shared_parts(
+    documentation: str, parts: tuple[tuple[str, str], ...]
+) -> str:
+    """State each shared part in its stored wording, dropping a paraphrase.
+
+    The writer's own sentences are kept; a sentence that restates a shared part
+    in other words is removed and the stored sentence is appended, so the
+    definition carries one wording per shared part rather than two.
+    """
+
+    lines = documentation.splitlines()
+    added: list[str] = []
+    for _, sentence in parts:
+        stored = _collapsed(sentence)
+        present = any(stored in _collapsed(text) for text in [*lines, *added])
+        if present:
+            continue
+        kept_lines: list[str] = []
+        for line in lines:
+            if not line.strip():
+                kept_lines.append(line)
+                continue
+            kept = [
+                candidate
+                for candidate in _prose_sentences(line)
+                if _collapsed(candidate) == stored
+                or _sentence_overlap(candidate, stored) < _COMPETING_OVERLAP
+            ]
+            kept_lines.append(" ".join(kept))
+        lines = kept_lines
+        added.append(sentence)
+    text = "\n".join(lines).strip()
+    if added:
+        text = "\n\n".join([text, *added])
+    return text
 
 
 def _collapsed(text: str) -> str:
@@ -1188,11 +1557,16 @@ def conformance_findings(
     """Select a name's registry entries and return its conformance findings."""
 
     conventions = select_conventions(name)
-    return house_style_findings(
-        conventions,
-        description=description,
-        documentation=documentation,
-    )
+    return [
+        *house_style_findings(
+            conventions,
+            description=description,
+            documentation=documentation,
+        ),
+        *shared_part_findings(
+            name, conventions, documentation, description=description
+        ),
+    ]
 
 
 def score_documentation(

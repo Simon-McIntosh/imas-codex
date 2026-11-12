@@ -569,6 +569,20 @@ def _instantiated_template_sentences(
     return opening, tuple(notes)
 
 
+def _joined_opening(opening: str | None, notes: list[str]) -> str:
+    """Join the opening to the first note so it never stands as a bare fragment."""
+    block = ([opening] if opening is not None else []) + notes
+    if not block:
+        return ""
+    head = block[0].strip()
+    if len(block) > 1 and not head.endswith((".", "!", "?")):
+        # A fragment such as "Number density of argon" is completed by the
+        # first note in the same paragraph rather than left standing alone.
+        head = f"{head.rstrip(',;:')}. {block[1].strip()}"
+        block = [head, *block[2:]]
+    return "\n\n".join(block)
+
+
 def _documentation_with_registry_form(
     _worker_dependency,
     /,
@@ -591,6 +605,9 @@ def _documentation_with_registry_form(
         _opening_line,
         house_style_findings,
         locus_definition_sentence,
+        open_without_fragment,
+        replace_altered_shared_parts,
+        shared_part_sentences,
     )
 
     written = normalize_prose_spelling(documentation)
@@ -606,13 +623,14 @@ def _documentation_with_registry_form(
             (i for i, line in enumerate(lines) if line.strip() == model_opening), None
         )
         if first is None:
-            written = "\n\n".join(
-                ([opening] if opening is not None else []) + missing_notes
-            )
+            written = _joined_opening(opening, missing_notes)
         else:
-            block = [opening if opening is not None else lines[first], *missing_notes]
-            lines[first : first + 1] = ["\n\n".join(block)]
-            written = "\n".join(lines)
+            block = _joined_opening(
+                opening if opening is not None else lines[first], missing_notes
+            )
+            if block:
+                lines[first : first + 1] = [block]
+                written = "\n".join(lines)
 
     concepts = {f"concept:{concept.token}": concept for concept in applied.concepts}
     for match in reversed(list(_DISPLAY_MATH_RE.finditer(written))):
@@ -652,7 +670,46 @@ def _documentation_with_registry_form(
         if sentence and sentence not in written:
             written = f"{written.rstrip()}\n\n{sentence}"
         break
-    return written
+    written = replace_altered_shared_parts(
+        written, shared_part_sentences(name, applied)
+    )
+    return open_without_fragment(written)
+
+
+class SharedPartAltered(ValueError):
+    """A definition departed from a shared part's stored wording."""
+
+
+def _refuse_altered_shared_parts(
+    name: str,
+    documentation: str,
+    conventions: dict[str, Any] | None,
+    description: str = "",
+) -> None:
+    """Refuse a definition whose shared part was altered after rendering.
+
+    The shared parts are stated once for the catalog. A definition that carries
+    one of them in other words, or that states a population the stored wording
+    excludes, has been written away from the stored wording, and is refused
+    before it is persisted rather than published.
+    """
+
+    if not conventions:
+        return
+    from imas_standard_names.grammar.terms import AppliedConventions
+
+    from imas_codex.standard_names.docs_gates import shared_part_findings
+
+    applied = AppliedConventions.model_validate(conventions)
+    findings = shared_part_findings(
+        name, applied, documentation, description=description
+    )
+    if findings:
+        raise SharedPartAltered(
+            "; ".join(
+                f"{finding.registry_entry}: {finding.detail}" for finding in findings
+            )
+        )
 
 
 async def process_generate_docs_batch(
@@ -794,7 +851,12 @@ async def process_generate_docs_batch(
             conventions_context_for,
             locus_context_for,
         )
+        from imas_codex.standard_names.docs_gates import (
+            description_with_population,
+            fixed_shared_parts,
+        )
 
+        conventions = conventions_context_for(sn_id)
         prompt_context: dict[str, Any] = {
             **build_compose_context(),
             "item": item,
@@ -807,7 +869,11 @@ async def process_generate_docs_batch(
             # normalized_poloidal_flux_coordinate_of_pedestal. None when the name
             # has no locus or the locus carries no gloss/defining quantity.
             "locus_context": locus_context_for(sn_id),
-            "conventions": conventions_context_for(sn_id),
+            "conventions": conventions,
+            # The shared parts are settled text before the model writes: it is
+            # shown the exact sentences and equation forms the renderer will
+            # install, so its own prose, description included, agrees with them.
+            "shared_parts": fixed_shared_parts(sn_id, conventions),
         }
 
         try:
@@ -875,15 +941,25 @@ async def process_generate_docs_batch(
                 )
                 lease.charge_event(cost, _event)
 
-            # ── Persist ───────────────────────────────────────────────
+            # Persist the rendered definition once its shared parts conform
+            rendered_documentation = _documentation_with_registry_form(
+                sn_id, result_obj.documentation, prompt_context["conventions"]
+            )
+            rendered_description = description_with_population(
+                sn_id, result_obj.description
+            )
+            _refuse_altered_shared_parts(
+                sn_id,
+                rendered_documentation,
+                prompt_context["conventions"],
+                description=rendered_description,
+            )
             await _asyncio.to_thread(
                 persist_generated_docs,
                 sn_id=sn_id,
                 claim_token=claim_token,
-                description=normalize_description_text(result_obj.description),
-                documentation=_documentation_with_registry_form(
-                    sn_id, result_obj.documentation, prompt_context["conventions"]
-                ),
+                description=normalize_description_text(rendered_description),
+                documentation=rendered_documentation,
                 model=model,
                 run_id=mgr.run_id,
             )

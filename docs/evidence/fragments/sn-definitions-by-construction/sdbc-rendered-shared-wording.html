@@ -1,0 +1,198 @@
+<section id="sdbc-rendered-shared-wording" data-node="sdbc-rendered-shared-wording">
+<h2>Shared definition parts rendered from one stored wording</h2>
+
+<p>A definition has parts that belong to a concept shared with other names — the operator applied, the population counted, the locus — and parts that belong to this name alone. The writer now emits only the latter. Every shared part is substituted from one stored wording, and a definition that departs from it after rendering is refused before it is stored.</p>
+
+<h3 id="sdbc-rendered-shared-wording-mechanism">The mechanism</h3>
+
+<table>
+<thead><tr><th>Part</th><th>Stored wording</th><th>Where it is rendered</th></tr></thead>
+<tbody>
+<tr><td>Operator</td><td><code>operator_definition_sentence</code>: the grammar library's operator entry, sentence and equation, unchanged for every name that applies it</td><td><code>docs_gates.shared_part_sentences</code>, installed by <code>_documentation_with_registry_form</code></td></tr>
+<tr><td>Population</td><td><code>SPECIES_POPULATION_SENTENCE</code>: <q>The density counts ions summed over all charge states; neutral atoms are excluded.</q> — the catalog decision of 2026-11-12</td><td>same renderer, on every bare species density</td></tr>
+<tr><td>Locus</td><td><code>locus_definition_sentence</code>: the locus registry's definition with its equation and symbols</td><td>same renderer, unchanged by this section</td></tr>
+</tbody>
+</table>
+
+<p>The renderer removes a written sentence that states a shared part in other words and installs the stored sentence, so a definition carries one wording per part rather than two. <code>shared_part_findings</code> reports a definition that still carries a paraphrase or omits the part, as a further class of the documentation conformance findings (<code>shared_part_altered</code>), and <code>_refuse_altered_shared_parts</code> refuses such a definition in the writer before <code>persist_generated_docs</code> runs.</p>
+
+<h3 id="sdbc-rendered-shared-wording-census">The wording census</h3>
+
+<p>Measured by <code>harmonize.shared_part_form_counts</code>, which reads the written definition rather than the stored sentence, so it can report a departure. Over names rendered by the writer's own renderer (<code>rendered-wording-census.json</code>):</p>
+
+<table>
+<thead><tr><th>Group</th><th>Names</th><th>Wording forms</th><th>Published baseline</th></tr></thead>
+<tbody>
+<tr><td><code>flux_surface_averaged</code></td><td>electron density, electron temperature</td><td>1</td><td>8 forms over 32 names</td></tr>
+<tr><td><code>volume_averaged</code></td><td>argon density, electron temperature</td><td>1</td><td>15 of 49 descriptions use no operator phrase</td></tr>
+<tr><td><code>line_averaged</code></td><td>argon density, electron temperature</td><td>1</td><td>13 of 23 descriptions use no operator phrase</td></tr>
+<tr><td><code>line_integrated</code></td><td>electron density, radiance</td><td>1</td><td>one published name</td></tr>
+<tr><td><code>time_derivative</code></td><td>magnetic field, electron density</td><td>1</td><td>3 published names</td></tr>
+<tr><td>species family</td><td>argon, iron, boron, neon, helium density</td><td>1</td><td>20 of 20 published species families carry more than one wording</td></tr>
+<tr><td>species family, one member planted divergent</td><td>same five, last member's population clause flipped</td><td>2</td><td>—</td></tr>
+</tbody>
+</table>
+
+<p>The planted divergence is the census's control: the same measure that counts one form on the rendered family counts two when one member states a different population. The declared mutation — a census that reports the first member's form for every member — turns that test red (<code>test_shared_part_census_counts_one_wording_per_family</code> <code>FAILED</code>, <code>1 failed</code>), while the unmutated head arm is green.</p>
+
+<h3 id="sdbc-rendered-shared-wording-gate">The gate</h3>
+
+<p>Run on <code>all_debug</code> from this node's worktree on 2026-11-12:</p>
+
+<pre># command: uv run --no-sync python -m pytest -p no:cacheprovider tests/standard_names/test_generate_docs.py tests/standard_names/test_docs_gates.py tests/standard_names/test_harmonize.py
+=================== 94 passed, 1 warning in 64.24s (0:01:04) ===================
+EXIT=0</pre>
+
+<p>The tests that carry this section's measure are <code>test_two_quantities_carry_one_operator_sentence</code> (five operators, two quantities each), <code>test_species_family_carries_one_population_statement</code>, <code>test_altered_shared_part_is_refused_before_it_is_stored</code> and <code>test_shared_part_census_counts_one_wording_per_family</code>.</p>
+
+<h3 id="sdbc-rendered-shared-wording-written">The model-written proof on a disposable graph</h3>
+
+<p>Fifteen names — two per operator and the five-member species family — were written by the documentation seat (<code>openrouter/openai/gpt-6.1-sol</code>, reasoning effort <code>high</code>) through the writer's own entry point, <code>process_generate_docs_batch</code>, against a disposable Neo4j seeded from the published rows read read-only, and then reviewed by <code>process_review_docs_batch</code> on the same disposable graph. Nothing was written to the project graph. The runs were <code>all_debug</code> jobs; the writer run is <code>writer-proof-1311509.log</code> and the review run is <code>review-proof2-1311514.log</code>, under <code>~/.cache/imas-codex-sdbc-rendered-shared-wording/</code>.</p>
+
+<p>All fifteen were written and all fifteen reviewed. The census over the <em>written</em> definitions — the same measure as above, run over what the model produced rather than over a fixed input — counts one form for every operator and one wording for the family, agreeing with the rendered arm:</p>
+
+<table>
+<thead><tr><th>Group</th><th>Wording forms on written names</th></tr></thead>
+<tbody>
+<tr><td><code>flux_surface_averaged</code></td><td>1</td></tr>
+<tr><td><code>volume_averaged</code></td><td>1</td></tr>
+<tr><td><code>line_averaged</code></td><td>1</td></tr>
+<tr><td><code>line_integrated</code></td><td>1</td></tr>
+<tr><td><code>time_derivative</code></td><td>1</td></tr>
+<tr><td>species family of five</td><td>1</td></tr>
+</tbody>
+</table>
+
+<h4>Every written name, with the regime that produced each score</h4>
+
+<table>
+<thead><tr><th>Name</th><th>New score</th><th>New regime</th><th>Earlier score</th><th>Earlier regime</th><th>Passed</th></tr></thead>
+<tbody>
+<tr><td><code>argon_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.869</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>boron_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.863</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>flux_surface_averaged_electron_density</code></td><td>0.850</td><td>refinement at the floor</td><td>—</td><td>none published</td><td>no</td></tr>
+<tr><td><code>flux_surface_averaged_electron_temperature</code></td><td>0.850</td><td>refinement at the floor</td><td>—</td><td>none published</td><td>no</td></tr>
+<tr><td><code>helium_density</code></td><td>0.850</td><td>refinement at the floor</td><td>—</td><td>none published</td><td>no</td></tr>
+<tr><td><code>iron_density</code></td><td>0.850</td><td>refinement at the floor</td><td>1.000</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>line_averaged_argon_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.887</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>line_averaged_electron_temperature</code></td><td>0.958</td><td>graded (accept)</td><td>0.944</td><td>graded (quorum mean)</td><td>yes</td></tr>
+<tr><td><code>line_averaged_time_derivative_of_electron_density</code></td><td>0.930</td><td>graded (accept)</td><td>0.908</td><td>graded (quorum mean)</td><td>yes</td></tr>
+<tr><td><code>line_integrated_electron_density</code></td><td>0.895</td><td>graded (accept)</td><td>—</td><td>none published</td><td>yes</td></tr>
+<tr><td><code>line_integrated_electron_number_density</code></td><td>0.865</td><td>graded (accept)</td><td>0.873</td><td>graded (quorum mean)</td><td>yes</td></tr>
+<tr><td><code>neon_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.869</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>time_derivative_of_electron_density</code></td><td>0.877</td><td>graded (accept)</td><td>0.988</td><td>graded (quorum mean)</td><td>yes</td></tr>
+<tr><td><code>volume_averaged_argon_density</code></td><td>0.850</td><td>refinement at the floor</td><td>0.919</td><td>graded (quorum mean)</td><td>no</td></tr>
+<tr><td><code>volume_averaged_electron_temperature</code></td><td>0.958</td><td>graded (accept)</td><td>0.936</td><td>graded (quorum mean)</td><td>yes</td></tr>
+</tbody>
+</table>
+
+<p><strong>6 of 15 written names pass the review they were given.</strong> The criterion is the review's own route: the cascade records accept only for a decision score at or above <code>DEFAULT_MIN_SCORE</code> (0.85), and the other nine carry a decision mapped just below that floor, which is a refinement decision. The new regime column states which measure each new score is; the earlier scores are graded quorum means from the documentation reviewer chain, and three of the fifteen have no published documentation score at all.</p>
+
+<p><strong>The median, over the names graded on both sides.</strong> Five names were graded here and carry a published score. Their new median is 0.9302 and their earlier median is 0.9362, so the new score is lower by 0.0059. The nine floor decisions are excluded rather than blended in, because a decision recorded at the acceptance floor and a graded score are not the same measure.</p>
+
+<h4>Stated limits</h4>
+
+<ul>
+<li>The review ran on a disposable graph carrying only the fifteen names, so it had none of the graph-derived context a live review receives: no Data Dictionary source context, no scored review examples and no catalog neighbours. The nine refinement decisions are therefore a lower bound under degraded context, not a measure of the documentation.</li>
+<li>The two regimes differ in kind: the written scores are Jev-deciding decisions, the earlier scores are quorum means from the reviewer chain. Only the six graded written scores are compared, and even those were decided by one judgment rather than a quorum.</li>
+<li>The writer run reported twelve of the fifteen names present in the published catalog; the other three were seeded from the name alone, so their descriptions are not the catalog's.</li>
+</ul>
+<h4>Two arms under one review context</h4>
+
+<p>The first review ran on a disposable graph that carried only the fifteen names, which is why the earlier record called its verdicts a lower bound. That context is now built: a disposable Neo4j was seeded read-only from the project graph with the catalog slice the review reads — 5,497 <code>StandardName</code> rows with their scored review scores and physical bases, 10,158 <code>StandardNameSource</code> rows and 6,733 <code>PRODUCED_NAME</code> edges — and two arms ran in that one instance under the same route: the fifteen definitions this change rendered, and the fifteen definitions the catalog publishes for the same names. The project graph was not written.</p>
+
+<table>
+<thead><tr><th>Arm</th><th>Reviewed</th><th>Accept</th><th>Refine</th><th>Neither</th></tr></thead>
+<tbody>
+<tr><td>Rendered definitions</td><td>15</td><td>6</td><td>9</td><td>0</td></tr>
+<tr><td>Published definitions (control)</td><td>15</td><td>11</td><td>0</td><td>4</td></tr>
+</tbody>
+</table>
+
+<p>The four names the published arm does not decide are the three with no published row plus <code>line_integrated_electron_density</code>; the cascade recorded <code>single_review</code> for each rather than accept or refine.</p>
+
+<p><strong>The rendered arm passes fewer names than the control, so every shortfall is listed with the review's stated reason.</strong> Six names are accepted on their published definition and refined on their rendered one:</p>
+
+<table>
+<thead><tr><th>Name</th><th>Rendered route</th><th>physics_accuracy</th><th>completeness</th><th>documentation_quality</th><th>Hold</th></tr></thead>
+<tbody>
+<tr><td><code>argon_density</code></td><td>refine</td><td>0.9</td><td>2.8</td><td>15.7</td><td>—</td></tr>
+<tr><td><code>boron_density</code></td><td>refine</td><td>1.5</td><td>5.6</td><td>16.5</td><td>—</td></tr>
+<tr><td><code>iron_density</code></td><td>refine</td><td>2.2</td><td>6.2</td><td>16.4</td><td>—</td></tr>
+<tr><td><code>line_averaged_argon_density</code></td><td>refine</td><td>4.1</td><td>4.0</td><td>11.5</td><td><code>DD source text unavailable</code></td></tr>
+<tr><td><code>neon_density</code></td><td>refine</td><td>1.2</td><td>5.9</td><td>16.9</td><td>—</td></tr>
+<tr><td><code>volume_averaged_argon_density</code></td><td>refine</td><td>1.5</td><td>2.6</td><td>15.5</td><td><code>DD source text unavailable</code></td></tr>
+</tbody>
+</table>
+
+<p><strong>Grouping.</strong> None of the nine refined names states a reason that names the rendered shared sentence. The review returns numeric dimension scores rather than prose, and on all six shortfalls the low dimensions are <code>physics_accuracy</code> (0.6 to 4.1) and <code>completeness</code> (2.6 to 6.2), while <code>documentation_quality</code> stays between 11.5 and 17.0. Two names also carry a <code>documentation_contradiction</code> hold whose stated reason is <q>DD source text unavailable</q>, which is a limit of this context build rather than a finding about the definition.</p>
+
+<p><strong>What that does and does not settle.</strong> A numeric dimension score neither names the shared sentence nor clears it. The six shortfalls are exactly the six species densities, and the population sentence is the only text this change added to them, so the shortfall is consistent with that sentence being judged a physics inaccuracy — but that is an inference from which names moved, not something the review said. The remaining three refined names (<code>flux_surface_averaged_electron_density</code>, <code>flux_surface_averaged_electron_temperature</code>, <code>helium_density</code>) are refined in both arms or have no published row, so they are not shortfalls against the control.</p>
+
+<p><strong>Context still missing, in both arms.</strong> None of the fifteen rows carries <code>source_paths</code>, so no <code>IMASNode</code> was copied and the Data Dictionary path context is absent; the DD resolution manifest is absent, which is what produced the two <q>DD source text unavailable</q> holds; and a disposable instance has no vector index, so vector neighbours were empty. Same-base and same-path neighbours and the scored review examples were served from the copied catalog. Both arms review the same names under the same missing context, so the comparison between them holds even though neither matches a fully provisioned live review.</p>
+<h4>Cost of writing one family member</h4>
+
+<table>
+<thead><tr><th>Measure</th><th>USD</th></tr></thead>
+<tbody>
+<tr><td>Writing one family member (this run, mean of five)</td><td>0.0117</td></tr>
+<tr><td>Writing one name (this run, mean of fifteen)</td><td>0.0138</td></tr>
+<tr><td>Reviewing one name (this run)</td><td>0.00011</td></tr>
+<tr><td>Published <code>llm_cost</code>, median of the eleven live names — name, documentation and its review together</td><td>0.152</td></tr>
+<tr><td>Published <code>llm_cost_review_docs</code>, median — documentation review alone</td><td>0.0733</td></tr>
+</tbody>
+</table>
+
+<p>Writing one family member costs about USD 0.012, against a published all-axis median of USD 0.152 per name and USD 0.073 for documentation review alone. Total metered spend for the node is USD 0.331 — USD 0.207 of writing, USD 0.0017 for the first review and USD 0.123 for the two-arm review under the built context — against the node's USD 5 ceiling.</p>
+
+<h3 id="sdbc-rendered-shared-wording-settled">Settled parts, written around rather than appended</h3>
+
+<p>The two arms above measured a renderer that appended the shared sentences after the model had written freely, and the six species densities it refined were exactly the names whose own prose and equations counted neutral atoms while the appended sentence excluded them. Appending is not rendering, so the shared parts are now settled text the model is shown <em>before</em> it writes, and a written text that contradicts them is refused before persistence.</p>
+
+<table>
+<thead><tr><th>Requirement</th><th>Mechanism</th><th>Evidence</th></tr></thead>
+<tbody>
+<tr><td>The model is given the settled parts before it writes</td><td><code>docs_gates.fixed_shared_parts</code> renders the operator sentence, the population statement and its equation into <code>shared_parts</code>, which <code>sn/generate_docs_user</code> presents as fixed text with the instruction to write only what is specific to the name</td><td>the prompt section, and <code>writer-repair3-1311557.log</code> writing the two argon densities with the sentence present and unrepeated</td></tr>
+<tr><td>A contradiction is refused before storage</td><td><code>docs_gates.population_contradiction</code> reports <code>contradicted_shared_part</code>; <code>_refuse_altered_shared_parts</code> raises <code>SharedPartAltered</code> before <code>persist_generated_docs</code></td><td><code>writer-repair-1311546.log</code>: the first model write of <code>argon_density</code> said <q>… including neutral atoms and ions … from neutral argon at Z=0</q> in prose and a Z=0 sum in its equation, and was refused (<code>SharedPartAltered: the written text includes neutral atoms</code>) rather than stored</td></tr>
+<tr><td>The description states the same population</td><td><code>description_with_population</code>; it leaves a description that already names the population alone</td><td><code>test_description_states_the_settled_population</code></td></tr>
+<tr><td>The text does not open with a bare fragment</td><td><code>open_without_fragment</code> joins <q>Number density of argon</q> to the paragraph that follows</td><td><code>test_rendered_text_does_not_open_with_a_bare_fragment</code></td></tr>
+</tbody>
+</table>
+
+<p>The population rule applies to atomic species only. An electron density counts no ions, so it carries neither the sentence nor the description clause; the earlier renderer stated the ion population on electron densities too, and this change removes it.</p>
+
+<h4>The two arms, re-measured on the repaired definitions</h4>
+
+<table>
+<thead><tr><th>Arm</th><th>Reviewed</th><th>Accept</th><th>Refine</th><th>Neither</th></tr></thead>
+<tbody>
+<tr><td>Rendered definitions</td><td>15</td><td>11</td><td>4</td><td>0</td></tr>
+<tr><td>Published definitions (control)</td><td>15</td><td>11</td><td>0</td><td>4</td></tr>
+</tbody>
+</table>
+
+<p><strong>The rendered arm is accepted as often as the published control: 11 of 15 each, against 6 of 15 before the repair.</strong> One name is accepted on its published definition and refined on its rendered one — <code>line_averaged_time_derivative_of_electron_density</code> — and the review's own stated reason for it is a <code>documentation_contradiction</code> hold reading <q>DD source text unavailable at summary/line_average/dn_e_dt/value</q>, which is a limit of the disposable context rather than a finding about the definition. No refined name states a reason that names a rendered shared part; the grouping script finds none in any of the four.</p>
+
+<p>The three other refinements are refined in both arms or have no published row: <code>flux_surface_averaged_electron_density</code>, <code>flux_surface_averaged_electron_temperature</code> and <code>line_integrated_electron_density</code> are <code>single_review</code> or absent on the published side, so they are not shortfalls against the control.</p>
+
+<p>Spend on the repair: USD 0.268 of writing (the fifteen-name run, of which two were refused and re-written in a USD 0.032 two-name run) and USD 0.143 for the two-arm review under the built context. Total metered spend for the node is USD 0.774 of the USD 5 ceiling, against USD 0.331 before this repair.</p>
+
+<h3 id="sdbc-rendered-shared-wording-durability">The guarantee holds on the path every definition takes</h3>
+
+<p>A refusal is only a guarantee if the pipeline actually reaches it, and a shared wording is only shared if every stage that writes a definition is held to it. Three gaps were found and closed; each is pinned by a control that disarms the change and watches the named check go red.</p>
+
+<table>
+<thead><tr><th>Gap</th><th>Repair</th><th>Control</th></tr></thead>
+<tbody>
+<tr><td>The refusal was asserted by calling the guard directly, so moving it below the persist would have left the tests green</td><td><code>test_pipeline_refuses_a_contradicting_definition_before_persist</code> drives <code>process_generate_docs_batch</code> and asserts <code>persist_generated_docs</code> was not called</td><td>refusal disarmed on the generate path: <code>1 failed</code></td></tr>
+<tr><td>A paraphrase whose wording agreed with the stored sentence at 0.45 to 0.75 was kept beside the appended sentence — neither removed, nor refused, nor reported</td><td>the renderer removes at <code>_COMPETING_OVERLAP</code>, and <code>shared_part_findings</code> reports a restatement that survives beside the stored wording</td><td>removal band restored to exact match: <code>2 failed</code></td></tr>
+<tr><td>The refine stage stored a refinement with neither the population clause nor the refusal</td><td><code>process_refine_docs_batch</code> applies <code>description_with_population</code> and <code>_refuse_altered_shared_parts</code></td><td>refine stage disarmed: <code>1 failed</code></td></tr>
+</tbody>
+</table>
+
+<p>The negative-control job is <code>negative-control-round-120129.log</code> (job 1311675). Each disarm is applied to the worktree, the named test is run, and the file is restored, so the run leaves the tree clean: all three arms failed as intended, and the log closes <code>EXIT=1</code> because a green arm would mean the check does not rest on the change it names. The gate over the three suites is <code>gate-round-120005.log</code> (job 1311674): 101 passed, EXIT=0.</p>
+
+<h3 id="sdbc-rendered-shared-wording-proposal">Wording proposed to the grammar library</h3>
+
+<p>The species population rule has no sentence in the grammar library's <code>concepts.yml</code>. It is stored in this repository as <code>docs_gates.SPECIES_POPULATION_SENTENCE</code> and proposed upstream as a population entry so that one stored wording serves every species name.</p>
+</section>

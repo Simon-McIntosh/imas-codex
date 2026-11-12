@@ -23,11 +23,10 @@ from unittest.mock import AsyncMock, MagicMock, call, patch
 
 import pytest
 
-from tests.standard_names.graph_transaction_doubles import transaction_double
-
 from imas_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
 )
+from tests.standard_names.graph_transaction_doubles import transaction_double
 
 # =============================================================================
 # Path constants
@@ -122,7 +121,6 @@ def _persist_call(gc):
         if _PERSIST_STATEMENT in call_obj.args[0]:
             return call_obj
     raise AssertionError("the docs persist statement was never issued")
-
 
 
 @contextmanager
@@ -652,3 +650,377 @@ def test_generate_docs_prompt_includes_metadata_requirements():
     assert "name:" in system.lower(), (
         "System prompt must instruct LLM to use name: inline link form for cross-refs"
     )
+
+
+# =============================================================================
+# Shared definition parts
+# =============================================================================
+
+
+def _rendered_documentation(name: str) -> str:
+    """Render one name's definition through the writer's own renderer."""
+
+    from imas_codex.standard_names.context import conventions_context_for
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    written = (
+        f"A written note about {name.replace('_', ' ')} that the model supplies, "
+        "specific to this node's name alone and written by the model."
+    )
+    return owning_worker._documentation_with_registry_form(
+        name, written, conventions_context_for(name)
+    )
+
+
+@pytest.mark.parametrize(
+    ("operator", "left", "right"),
+    [
+        (
+            "flux_surface_averaged",
+            "flux_surface_averaged_electron_density",
+            "flux_surface_averaged_electron_temperature",
+        ),
+        (
+            "volume_averaged",
+            "volume_averaged_argon_density",
+            "volume_averaged_electron_temperature",
+        ),
+        (
+            "line_averaged",
+            "line_averaged_argon_density",
+            "line_averaged_electron_temperature",
+        ),
+        (
+            "line_integrated",
+            "line_integrated_electron_density",
+            "line_integrated_radiance",
+        ),
+        (
+            "time_derivative",
+            "time_derivative_of_magnetic_field",
+            "time_derivative_of_electron_density",
+        ),
+    ],
+)
+def test_two_quantities_carry_one_operator_sentence(operator, left, right):
+    """One operator is stated in one wording whichever quantity it is applied to."""
+
+    from imas_standard_names.grammar.terms import select_conventions
+
+    from imas_codex.standard_names.docs_gates import shared_part_sentences
+
+    left_sentences = shared_part_sentences(left, select_conventions(left))
+    right_sentences = shared_part_sentences(right, select_conventions(right))
+    left_operator = next(
+        text for anchor, text in left_sentences if anchor == f"concept:{operator}"
+    )
+    right_operator = next(
+        text for anchor, text in right_sentences if anchor == f"concept:{operator}"
+    )
+
+    assert left_operator == right_operator
+    assert left_operator in _rendered_documentation(left)
+    assert right_operator in _rendered_documentation(right)
+
+
+def test_species_family_carries_one_population_statement():
+    """Every member of a species family states the population identically."""
+
+    from imas_codex.standard_names.docs_gates import SPECIES_POPULATION_SENTENCE
+
+    members = ["argon_density", "iron_density", "boron_density", "neon_density"]
+    for member in members:
+        assert SPECIES_POPULATION_SENTENCE in _rendered_documentation(member)
+
+
+def test_altered_shared_part_is_refused_before_it_is_stored():
+    """A definition that restates the population is refused, not persisted."""
+
+    from imas_codex.standard_names.context import conventions_context_for
+    from imas_codex.standard_names.docs_gates import (
+        HouseStyleFindingClass,
+        conformance_findings,
+    )
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    altered = "The density covers the whole species population."
+    documentation = f"{altered}\n\nA written note specific to this name alone."
+    conventions = conventions_context_for("argon_density")
+
+    findings = conformance_findings("argon_density", documentation=documentation)
+    assert any(
+        finding.finding_class is HouseStyleFindingClass.SHARED_PART_ALTERED
+        for finding in findings
+    )
+
+    with pytest.raises(owning_worker.SharedPartAltered):
+        owning_worker._refuse_altered_shared_parts(
+            "argon_density", documentation, conventions
+        )
+
+
+ARGON_DENSITY_CONTRADICTION = (
+    "The argon density is summed over all charge states, including neutral atoms "
+    "and ions, from neutral argon at Z=0.\n\n"
+    r"$$n_{Ar} = \sum_{Z=0}^{18} n_{Ar^{Z+}}$$"
+)
+
+
+def test_free_text_including_neutrals_is_refused_before_it_is_stored():
+    """The observed contradiction is refused: text that counts neutrals under
+    a stored population that excludes them."""
+
+    from imas_codex.standard_names.context import conventions_context_for
+    from imas_codex.standard_names.docs_gates import (
+        HouseStyleFindingClass,
+        conformance_findings,
+    )
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    findings = conformance_findings(
+        "argon_density",
+        description="Argon density summed over all charge states, including neutral atoms.",
+        documentation=ARGON_DENSITY_CONTRADICTION,
+    )
+    contradictory = [
+        finding
+        for finding in findings
+        if finding.finding_class is HouseStyleFindingClass.CONTRADICTED_SHARED_PART
+    ]
+    assert contradictory, "the neutral-inclusive text was not refused"
+    assert "neutral" in contradictory[0].detail.lower()
+
+    # Text the writer itself negates agrees with the stored population.
+    from imas_codex.standard_names.docs_gates import population_contradiction
+
+    assert (
+        population_contradiction(
+            "argon_density",
+            "The sum runs over all ionic charge states, including every ion but "
+            "excluding neutral atoms.",
+        )
+        is None
+    )
+
+    with pytest.raises(owning_worker.SharedPartAltered):
+        owning_worker._refuse_altered_shared_parts(
+            "argon_density",
+            ARGON_DENSITY_CONTRADICTION,
+            conventions_context_for("argon_density"),
+            description="Argon density summed over all charge states, including neutral atoms.",
+        )
+
+
+def test_description_states_the_settled_population():
+    """The one-line description carries the population the definition counts."""
+
+    from imas_codex.standard_names.docs_gates import description_with_population
+
+    written = description_with_population(
+        "argon_density", "Number density of argon in the plasma."
+    )
+    assert "neutral atoms excluded" in written
+    # A description that already names the population is left as written.
+    assert (
+        description_with_population(
+            "argon_density", "Number density of argon ions, neutral atoms excluded."
+        )
+        == "Number density of argon ions, neutral atoms excluded."
+    )
+    # A quantity that is not a species density carries no species population.
+    assert (
+        description_with_population(
+            "electron_temperature", "Temperature of the electrons in the plasma."
+        )
+        == "Temperature of the electrons in the plasma."
+    )
+
+
+def test_rendered_text_does_not_open_with_a_bare_fragment():
+    """A fragment opening is completed by the first note, not left alone."""
+
+    from imas_codex.standard_names.worker_tasks import (
+        worker_generate_docs as owning_worker,
+    )
+
+    rendered = owning_worker._joined_opening(
+        "Number density of argon",
+        ["The density counts ions summed over all charge states."],
+    )
+    opening, _, rest = rendered.partition("\n\n")
+    assert opening.endswith(".")
+    assert "ions summed over all charge states" in opening
+    assert rest.strip() == ""
+
+    # A fragment the model itself wrote is completed the same way.
+    from imas_codex.standard_names.docs_gates import open_without_fragment
+
+    completed = open_without_fragment(
+        "Number density of argon\n\nIts continuum definition is:\n\n$$n = N/V$$"
+    )
+    assert completed.startswith("Number density of argon. Its continuum definition is:")
+
+
+# A restatement of the population whose wording overlaps the stored sentence
+# enough to name the same part, but not enough for the renderer's exact-match
+# removal. It sat for a while in neither band: kept beside the appended
+# sentence, and never reported.
+MID_BAND_PARAPHRASE = (
+    "The density counts ions summed over all charge states and excludes neutral "
+    "atoms from the tally."
+)
+
+
+def test_paraphrase_below_the_exact_match_band_is_removed():
+    """A restatement in different words is dropped, not kept beside the wording."""
+
+    from imas_standard_names.grammar.terms import select_conventions
+
+    from imas_codex.standard_names.docs_gates import (
+        SPECIES_POPULATION_SENTENCE,
+        replace_altered_shared_parts,
+        shared_part_sentences,
+    )
+
+    parts = shared_part_sentences("argon_density", select_conventions("argon_density"))
+    rendered = replace_altered_shared_parts(
+        f"Argon line emission is used for spectroscopy.\n\n{MID_BAND_PARAPHRASE}",
+        parts,
+    )
+
+    assert MID_BAND_PARAPHRASE not in rendered
+    assert rendered.count(SPECIES_POPULATION_SENTENCE) == 1
+
+
+def test_paraphrase_left_beside_the_stored_wording_is_reported():
+    """Text the renderer could not remove is a finding, not silently kept."""
+
+    from imas_codex.standard_names.docs_gates import (
+        SPECIES_POPULATION_SENTENCE,
+        HouseStyleFindingClass,
+        conformance_findings,
+    )
+
+    findings = conformance_findings(
+        "argon_density",
+        documentation=f"{SPECIES_POPULATION_SENTENCE}\n\n{MID_BAND_PARAPHRASE}",
+    )
+
+    assert any(
+        finding.finding_class is HouseStyleFindingClass.SHARED_PART_ALTERED
+        and finding.registry_entry == "population:species"
+        for finding in findings
+    ), findings
+
+
+@pytest.mark.asyncio
+async def test_pipeline_refuses_a_contradicting_definition_before_persist():
+    """The refusal is reached on the pipeline path, and nothing is stored."""
+
+    from imas_codex.standard_names.models import GeneratedDocs
+    from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+        process_generate_docs_batch,
+    )
+
+    async def _fake_acall(model, messages, response_model, service, **kwargs):
+        return (
+            GeneratedDocs(
+                description=(
+                    "Argon density summed over all charge states, including "
+                    "neutral atoms and ions."
+                ),
+                documentation=ARGON_DENSITY_CONTRADICTION,
+            ),
+            0.001,
+            100,
+        )
+
+    mgr = MagicMock()
+    mgr.reserve = MagicMock(return_value=MagicMock())
+    persist = MagicMock(return_value="drafted")
+
+    with (
+        patch(
+            "imas_codex.settings.get_model",
+            return_value="test-language-model",
+        ),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=_fake_acall,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "persist_generated_docs",
+            persist,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_foundation.GraphClient",
+        ),
+        patch("asyncio.to_thread", new=AsyncMock(return_value="drafted")),
+    ):
+        processed = await process_generate_docs_batch(
+            [_make_docs_item(sn_id="argon_density")], mgr, asyncio.Event()
+        )
+
+    assert processed == 0
+    persist.assert_not_called()
+
+
+@pytest.mark.asyncio
+async def test_refine_refuses_a_contradicting_definition_before_persist():
+    """A refinement is held to the settled population exactly as a first draft."""
+
+    from imas_codex.standard_names.models import RefinedDocs
+    from imas_codex.standard_names.worker_tasks.worker_refine_docs import (
+        process_refine_docs_batch,
+    )
+    from tests.standard_names.test_refine_docs_chain import _make_refine_docs_item
+
+    refined = RefinedDocs(
+        description=(
+            "Argon density summed over all charge states, including neutral atoms."
+        ),
+        documentation=ARGON_DENSITY_CONTRADICTION,
+        links=[],
+    )
+    mock_mgr = MagicMock()
+    mock_mgr.reserve = MagicMock(return_value=MagicMock())
+    persist = MagicMock(return_value={"docs_chain_length": 1})
+
+    with (
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            return_value=(refined, 0.05, {"input_tokens": 10, "output_tokens": 5}),
+        ),
+        patch(
+            "imas_codex.llm.prompt_loader.render_prompt",
+            return_value="test prompt",
+        ),
+        patch("imas_codex.settings.get_model", return_value="model-x"),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "persist_refined_docs",
+            persist,
+        ),
+        patch(
+            "imas_codex.standard_names.graph_store.graph_docs_persistence."
+            "release_refine_docs_failed_claims",
+            return_value=1,
+        ),
+        patch(
+            "asyncio.to_thread",
+            new=AsyncMock(side_effect=lambda fn, *a, **k: fn(*a, **k)),
+        ),
+    ):
+        count = await process_refine_docs_batch(
+            [_make_refine_docs_item(sn_id="argon_density")], mock_mgr, asyncio.Event()
+        )
+
+    assert count == 0
+    persist.assert_not_called()

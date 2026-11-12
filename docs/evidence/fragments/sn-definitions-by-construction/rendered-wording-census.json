@@ -1,0 +1,1161 @@
+{
+  "operators": {
+    "flux_surface_averaged": {
+      "names": [
+        "flux_surface_averaged_electron_density",
+        "flux_surface_averaged_electron_temperature"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the flux surface average is the average of a quantity over a closed magnetic flux surface weighted by the inverse magnitude of the poloidal flux gradient": [
+          "flux_surface_averaged_electron_density",
+          "flux_surface_averaged_electron_temperature"
+        ]
+      }
+    },
+    "volume_averaged": {
+      "names": [
+        "volume_averaged_argon_density",
+        "volume_averaged_electron_temperature"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the volume average is the integral of a quantity over a stated volume divided by that volume": [
+          "volume_averaged_argon_density",
+          "volume_averaged_electron_temperature"
+        ]
+      }
+    },
+    "line_averaged": {
+      "names": [
+        "line_averaged_argon_density",
+        "line_averaged_electron_temperature"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the line average is the integral of a quantity along a stated chord divided by the chord length": [
+          "line_averaged_argon_density",
+          "line_averaged_electron_temperature"
+        ]
+      }
+    },
+    "line_integrated": {
+      "names": [
+        "line_integrated_electron_density",
+        "line_integrated_radiance"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the line integral is the integral of a quantity along a stated path": [
+          "line_integrated_electron_density",
+          "line_integrated_radiance"
+        ]
+      }
+    },
+    "time_derivative": {
+      "names": [
+        "time_derivative_of_magnetic_field",
+        "time_derivative_of_electron_density"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the time derivative is the rate of change of a quantity with time at a fixed point or label": [
+          "time_derivative_of_magnetic_field",
+          "time_derivative_of_electron_density"
+        ]
+      }
+    }
+  },
+  "families": {
+    "species": {
+      "members": [
+        "argon_density",
+        "iron_density",
+        "boron_density",
+        "neon_density",
+        "helium_density"
+      ],
+      "form_count": 1,
+      "forms": {
+        "the density counts ions summed over all charge states neutral atoms are excluded": [
+          "argon_density",
+          "iron_density",
+          "boron_density",
+          "neon_density",
+          "helium_density"
+        ]
+      },
+      "planted_divergent_form_count": 2,
+      "planted_forms": {
+        "the density counts ions summed over all charge states neutral atoms are excluded": [
+          "argon_density",
+          "iron_density",
+          "boron_density",
+          "neon_density"
+        ],
+        "the density counts ions summed over all charge states and neutral atoms are included": [
+          "helium_density"
+        ]
+      }
+    }
+  },
+  "published_baseline": {
+    "flux_surface_averaged_forms": 8,
+    "flux_surface_averaged_names": 32,
+    "species_families_with_more_than_one_wording": "20 of 20 (published-family-census.txt)"
+  },
+  "written_names": {
+    "how": "Fifteen names were written by the documentation seat (openrouter/openai/gpt-6.1-sol, reasoning effort high) through process_generate_docs_batch against a disposable Neo4j seeded from the published rows read read-only; the definition was rendered and stored through the same path the writer takes, then reviewed by process_review_docs_batch on the same disposable graph. The project graph was never written.",
+    "logs": {
+      "writer": "/home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/writer-proof-1311509.log",
+      "review": "/home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/review-proof2-1311514.log"
+    },
+    "names": [
+      {
+        "name": "argon_density",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": 0.86875,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.8445312500000001,
+        "written_cost_usd": 0.0119869,
+        "written_review_cost_usd": 0.000104916,
+        "live_llm_cost_usd": 0.53652158,
+        "live_llm_cost_review_docs_usd": 0.51751636
+      },
+      {
+        "name": "boron_density",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": 0.8625,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.8803571428571428,
+        "written_cost_usd": 0.0096665,
+        "written_review_cost_usd": 0.000104748,
+        "live_llm_cost_usd": 0.3681398,
+        "live_llm_cost_review_docs_usd": 0.3681398
+      },
+      {
+        "name": "flux_surface_averaged_electron_density",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": null,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "no published documentation score",
+        "earlier_review_mean_score": null,
+        "written_cost_usd": 0.0158139,
+        "written_review_cost_usd": 0.000136206,
+        "live_llm_cost_usd": null,
+        "live_llm_cost_review_docs_usd": null
+      },
+      {
+        "name": "flux_surface_averaged_electron_temperature",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": null,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "no published documentation score",
+        "earlier_review_mean_score": null,
+        "written_cost_usd": 0.0153042,
+        "written_review_cost_usd": 0.000120162,
+        "live_llm_cost_usd": null,
+        "live_llm_cost_review_docs_usd": null
+      },
+      {
+        "name": "helium_density",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": null,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "no published documentation score",
+        "earlier_review_mean_score": null,
+        "written_cost_usd": 0.0142339,
+        "written_review_cost_usd": 0.000113652,
+        "live_llm_cost_usd": null,
+        "live_llm_cost_review_docs_usd": null
+      },
+      {
+        "name": "iron_density",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": 1.0,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.8916666666666667,
+        "written_cost_usd": 0.0111773,
+        "written_review_cost_usd": 9.6306e-05,
+        "live_llm_cost_usd": 0.08054942000000001,
+        "live_llm_cost_review_docs_usd": 0.025722049999999996
+      },
+      {
+        "name": "line_averaged_argon_density",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": 0.8875,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.94375,
+        "written_cost_usd": 0.01519,
+        "written_review_cost_usd": 0.00010731,
+        "live_llm_cost_usd": 0.07894795,
+        "live_llm_cost_review_docs_usd": 0.0589262
+      },
+      {
+        "name": "line_averaged_electron_temperature",
+        "new_score": 0.9579291100211671,
+        "new_regime": "accept",
+        "new_regime_note": "graded: the review returned a decision score above the acceptance floor",
+        "passed": true,
+        "earlier_score": 0.94375,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.9156249999999999,
+        "written_cost_usd": 0.0119314,
+        "written_review_cost_usd": 0.00010563,
+        "live_llm_cost_usd": 0.2578361,
+        "live_llm_cost_review_docs_usd": 0.2329094
+      },
+      {
+        "name": "line_averaged_time_derivative_of_electron_density",
+        "new_score": 0.9302204826782654,
+        "new_regime": "accept",
+        "new_regime_note": "graded: the review returned a decision score above the acceptance floor",
+        "passed": true,
+        "earlier_score": 0.90793360603552,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": null,
+        "written_cost_usd": 0.0193721,
+        "written_review_cost_usd": 0.0001344,
+        "live_llm_cost_usd": 0.000312228,
+        "live_llm_cost_review_docs_usd": 0.000182658
+      },
+      {
+        "name": "line_integrated_electron_density",
+        "new_score": 0.8953809388446626,
+        "new_regime": "accept",
+        "new_regime_note": "graded: the review returned a decision score above the acceptance floor",
+        "passed": true,
+        "earlier_score": null,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "no published documentation score",
+        "earlier_review_mean_score": null,
+        "written_cost_usd": 0.0125275,
+        "written_review_cost_usd": 0.00011298,
+        "live_llm_cost_usd": 0.026139853799999998,
+        "live_llm_cost_review_docs_usd": null
+      },
+      {
+        "name": "line_integrated_electron_number_density",
+        "new_score": 0.864567895940144,
+        "new_regime": "accept",
+        "new_regime_note": "graded: the review returned a decision score above the acceptance floor",
+        "passed": true,
+        "earlier_score": 0.8732275377674048,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.895,
+        "written_cost_usd": 0.0144782,
+        "written_review_cost_usd": 0.000122472,
+        "live_llm_cost_usd": 0.8119226378888889,
+        "live_llm_cost_review_docs_usd": 0.187591304
+      },
+      {
+        "name": "neon_density",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": 0.8687499999999999,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.8687499999999999,
+        "written_cost_usd": 0.0115669,
+        "written_review_cost_usd": 0.000104496,
+        "live_llm_cost_usd": 0.0732636,
+        "live_llm_cost_review_docs_usd": 0.0732636
+      },
+      {
+        "name": "time_derivative_of_electron_density",
+        "new_score": 0.8771305886427117,
+        "new_regime": "accept",
+        "new_regime_note": "graded: the review returned a decision score above the acceptance floor",
+        "passed": true,
+        "earlier_score": 0.9875,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.8500000000000001,
+        "written_cost_usd": 0.0186989,
+        "written_review_cost_usd": 0.000112308,
+        "live_llm_cost_usd": 0.30006879,
+        "live_llm_cost_review_docs_usd": 0.0482176
+      },
+      {
+        "name": "volume_averaged_argon_density",
+        "new_score": 0.8499999999999999,
+        "new_regime": "refine",
+        "new_regime_note": "a refinement decision recorded at the acceptance floor (DEFAULT_MIN_SCORE, mapped just below it)",
+        "passed": false,
+        "earlier_score": 0.91875,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.959375,
+        "written_cost_usd": 0.0152288,
+        "written_review_cost_usd": 0.000115332,
+        "live_llm_cost_usd": 0.122619,
+        "live_llm_cost_review_docs_usd": 0.0710162
+      },
+      {
+        "name": "volume_averaged_electron_temperature",
+        "new_score": 0.9584415746356039,
+        "new_regime": "accept",
+        "new_regime_note": "graded: the review returned a decision score above the acceptance floor",
+        "passed": true,
+        "earlier_score": 0.9361560140294722,
+        "earlier_score_property": "reviewer_score_docs",
+        "earlier_regime": "graded quorum mean from the documentation reviewer chain",
+        "earlier_review_mean_score": 0.9833333333333333,
+        "written_cost_usd": 0.009571,
+        "written_review_cost_usd": 9.7566e-05,
+        "live_llm_cost_usd": 0.181598286,
+        "live_llm_cost_review_docs_usd": 0.156524286
+      }
+    ],
+    "passed": {
+      "count": 6,
+      "of": 15,
+      "criterion": "the review route is accept, which the cascade guarantees only for a decision score at or above DEFAULT_MIN_SCORE (0.85)",
+      "failed_names": [
+        "argon_density",
+        "boron_density",
+        "flux_surface_averaged_electron_density",
+        "flux_surface_averaged_electron_temperature",
+        "helium_density",
+        "iron_density",
+        "line_averaged_argon_density",
+        "neon_density",
+        "volume_averaged_argon_density"
+      ],
+      "failed_note": "every one of the nine carries a decision score mapped just below the acceptance floor, so each is a refinement decision rather than a graded near miss"
+    },
+    "operator_form_counts": {
+      "flux_surface_averaged": 1,
+      "volume_averaged": 1,
+      "line_averaged": 1,
+      "line_integrated": 1,
+      "time_derivative": 1
+    },
+    "family_form_count": 1,
+    "family_forms": {
+      "the density counts ions summed over all charge states neutral atoms are excluded": [
+        "argon_density",
+        "iron_density",
+        "boron_density",
+        "neon_density",
+        "helium_density"
+      ]
+    },
+    "review_scores": {
+      "comparable_names": [
+        "line_averaged_electron_temperature",
+        "line_averaged_time_derivative_of_electron_density",
+        "line_integrated_electron_number_density",
+        "time_derivative_of_electron_density",
+        "volume_averaged_electron_temperature"
+      ],
+      "comparable_count": 5,
+      "new_median": 0.9302204826782654,
+      "earlier_median": 0.9361560140294722,
+      "verdict": "lower by -0.0059",
+      "rule": "Medians are compared only over names whose new score is graded and whose earlier score exists, because a decision recorded at the acceptance floor and a graded score are not the same measure.",
+      "all_names_new_median": 0.8499999999999999,
+      "all_names_earlier_median": 0.90793360603552,
+      "why": "The fifteen written names were reviewed by the Jev-deciding cascade: six returned a graded decision above the floor and nine returned a refinement decision recorded at it. The earlier scores are graded quorum means from the documentation reviewer chain. The nine floor decisions carry no grade, so they are excluded from the comparison rather than blended into it."
+    },
+    "cost": {
+      "written_per_name_usd": 0.013783166666666668,
+      "written_family_member_usd": 0.0117263,
+      "written_total_usd": 0.2067475,
+      "written_review_per_name_usd": 0.00011256559999999999,
+      "written_review_total_usd": 0.0016884839999999999,
+      "node_total_usd": 0.33150220399999997,
+      "live_llm_cost_median_usd": 0.152108643,
+      "live_llm_cost_review_docs_median_usd": 0.0732636,
+      "note": "The written figure covers documentation writing only; a published llm_cost covers name generation, documentation and its review together, and llm_cost_review_docs covers documentation review. Writing one family member costs USD 0.0117 against a published all-axis median of USD 0.152 per name and a published documentation-review median of USD 0.0733.",
+      "arms_review_total_usd": 0.12306622
+    },
+    "limits": [
+      "The review ran on a disposable graph carrying only the fifteen names, so it had none of the graph-derived context a live review receives: no Data Dictionary source context, no scored review examples and no catalog neighbours. The nine refinement decisions are therefore a lower bound under degraded context, not a measure of the documentation.",
+      "The two regimes differ in kind: the written scores are Jev-deciding decisions, the earlier scores are quorum means from the reviewer chain. Only the six graded written scores are compared, and even those were decided by one judgment rather than a quorum.",
+      "The writer run reported twelve of the fifteen names present in the published catalog; the other three were seeded from the name alone, so their descriptions are not the catalog's."
+    ]
+  },
+  "review_arms": {
+    "how": "A disposable Neo4j was seeded read-only from the project graph with the catalog slice the documentation review reads: 5,497 StandardName rows (description, documentation, kind, unit, physics_domain, physical_base, source_paths, stage, reviewer_score, reviewer_score_docs, review_mean_score, documentation_score, origin), 10,158 StandardNameSource rows and 6,733 PRODUCED_NAME edges. Two review arms then ran in that one instance under the same route (process_review_docs_batch): the fifteen definitions this change rendered, and the fifteen definitions the catalog publishes for the same names. The project graph was not written.",
+    "log": "/home/ITER/mcintos/.cache/imas-codex-sdbc-rendered-shared-wording/review-context-1311529.log",
+    "context_copied": {
+      "names": 5497,
+      "sources": 10158,
+      "edges": 6733,
+      "imas": 0
+    },
+    "context_missing": [
+      "No IMASNode rows were copied: none of the fifteen rows carries source_paths, so there was no DD path to copy and the DD path context is absent from both arms.",
+      "The DD resolution manifest nodes were absent, so the reviewer's source-grounding read reported \"DD source text unavailable\" on two names in the rendered arm.",
+      "No vector index exists on a disposable instance, so vector neighbours were empty in both arms; same-base and same-path neighbours were served by the copied catalog.",
+      "Scored review examples were served from the copied catalog, which carries reviewer_score, reviewer_score_docs and physics_domain."
+    ],
+    "arms": {
+      "rendered": {
+        "processed": 15,
+        "accept": 6,
+        "refine": 9,
+        "other": 0,
+        "accept_names": [
+          "line_averaged_electron_temperature",
+          "line_averaged_time_derivative_of_electron_density",
+          "line_integrated_electron_density",
+          "line_integrated_electron_number_density",
+          "time_derivative_of_electron_density",
+          "volume_averaged_electron_temperature"
+        ],
+        "refine_names": [
+          "argon_density",
+          "boron_density",
+          "flux_surface_averaged_electron_density",
+          "flux_surface_averaged_electron_temperature",
+          "helium_density",
+          "iron_density",
+          "line_averaged_argon_density",
+          "neon_density",
+          "volume_averaged_argon_density"
+        ]
+      },
+      "published": {
+        "processed": 15,
+        "accept": 11,
+        "refine": 0,
+        "other": 4,
+        "accept_names": [
+          "argon_density",
+          "boron_density",
+          "iron_density",
+          "line_averaged_argon_density",
+          "line_averaged_electron_temperature",
+          "line_averaged_time_derivative_of_electron_density",
+          "line_integrated_electron_number_density",
+          "neon_density",
+          "time_derivative_of_electron_density",
+          "volume_averaged_argon_density",
+          "volume_averaged_electron_temperature"
+        ],
+        "refine_names": [],
+        "other_routes": {
+          "flux_surface_averaged_electron_density": "single_review",
+          "flux_surface_averaged_electron_temperature": "single_review",
+          "helium_density": "single_review",
+          "line_integrated_electron_density": "single_review"
+        }
+      }
+    },
+    "shortfall": {
+      "count": 6,
+      "names": [
+        "argon_density",
+        "boron_density",
+        "iron_density",
+        "line_averaged_argon_density",
+        "neon_density",
+        "volume_averaged_argon_density"
+      ],
+      "rule": "The rendered arm passes 6 names and the published control passes 11, so the rendered arm does not pass at least as many. Every shortfall is listed with the review's stated reason below."
+    },
+    "reasons": {
+      "argon_density": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 2.8181810009295276,
+          "description_quality": 16.3670354188182,
+          "documentation_quality": 15.722433987923884,
+          "physics_accuracy": 0.9420234444121115
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Number density of argon\\n\\nThe charge-state aggregation is\\n\\n$$\\nn_{\\\\mathrm{Ar}} = \\\\sum_{Z=0}^{18} n_{\\\\mathrm{Ar},Z}\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the total argon number density, $Z$ is the charge number, and $n_{\\\\mathrm{Ar},Z}$ is the number density of argon in charge state $Z$. The sum extends from neutral argon at $Z=0$ to fully stripped argon at $Z=18$.\\n\\nThis quantity counts particles per unit volume; it is neither mass density nor charge-weighted density. A charge-state-resolved argon number density contributes one term to the sum rather than representing the species total.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; description='Number density of argon particles, summed over all charge states, including neutral atoms and ions.'",
+            "probability": 0.81,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: The density counts ions summed over all charge states; neutral atoms are excluded.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe charge-state aggregation is\n\n$$\nn_{\\mathrm{Ar}} = \\sum_{Z=0}^{18} n_{\\mathrm{Ar},Z}\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the total argon number density, $Z$ is the charge number"
+          },
+          {
+            "id": "false_equivalence_with_related",
+            "criterion": "Does the documentation equate the quantity with a related one it is not equal to?",
+            "evidence": "documentation='Number density of argon\\n\\nThe charge-state aggregation is\\n\\n$$\\nn_{\\\\mathrm{Ar}} = \\\\sum_{Z=0}^{18} n_{\\\\mathrm{Ar},Z}\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the total argon number density, $Z$ is the charge number, and $n_{\\\\mathrm{Ar},Z}$ is the number density of argon in charge state $Z$. The sum extends from neutral argon at $Z=0$ to fully stripped argon at $Z=18$.\\n\\nThis quantity counts particles per unit volume; it is neither mass density nor charge-weighted density. A charge-state-resolved argon number density contributes one term to the sum rather than representing the species total.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 0.77,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.77
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe charge-state aggregation is\n\n$$\nn_{\\mathrm{Ar}} = \\sum_{Z=0}^{18} n_{\\mathrm{Ar},Z}\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the total argon number density, $Z$ is the charge number"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Number density of argon\\n\\nThe charge-state aggregation is\\n\\n$$\\nn_{\\\\mathrm{Ar}} = \\\\sum_{Z=0}^{18} n_{\\\\mathrm{Ar},Z}\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the total argon number density, $Z$ is the charge number, and $n_{\\\\mathrm{Ar},Z}$ is the number density of argon in charge state $Z$. The sum extends from neutral argon at $Z=0$ to fully stripped argon at $Z=18$.\\n\\nThis quantity counts particles per unit volume; it is neither mass density nor charge-weighted density. A charge-state-resolved argon number density contributes one term to the sum rather than representing the species total.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; physical_base='density'; unit='m^-3'",
+            "probability": 0.87,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.87
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe charge-state aggregation is\n\n$$\nn_{\\mathrm{Ar}} = \\sum_{Z=0}^{18} n_{\\mathrm{Ar},Z}\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the total argon number density, $Z$ is the charge number"
+          },
+          {
+            "id": "relationship_link_missing",
+            "criterion": "relationship_link",
+            "evidence": "documentation='Number density of argon\\n\\nThe charge-state aggregation is\\n\\n$$\\nn_{\\\\mathrm{Ar}} = \\\\sum_{Z=0}^{18} n_{\\\\mathrm{Ar},Z}\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the total argon number density, $Z$ is the charge number, and $n_{\\\\mathrm{Ar},Z}$ is the number density of argon in charge state $Z$. The sum extends from neutral argon at $Z=0$ to fully stripped argon at $Z=18$.\\n\\nThis quantity counts particles per unit volume; it is neither mass density nor charge-weighted density. A charge-state-resolved argon number density contributes one term to the sum rather than representing the species total.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 1.0,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": "[relationship_link] argon_density: relationship_link: documentation contains no standard-name relationship link",
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe charge-state aggregation is\n\n$$\nn_{\\mathrm{Ar}} = \\sum_{Z=0}^{18} n_{\\mathrm{Ar},Z}\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the total argon number density, $Z$ is the charge number"
+          }
+        ],
+        "holds": [],
+        "review_cost_usd": 0.000105084
+      },
+      "boron_density": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 5.594101868515309,
+          "description_quality": 16.44884946230455,
+          "documentation_quality": 16.525372755917015,
+          "physics_accuracy": 1.5297004275208501
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Number density of boron\\n\\nThe charge-state sum is defined by\\n\\n$$\\nn_{\\\\mathrm{B}} = \\\\sum_{z=0}^{5} n_{\\\\mathrm{B},z}\\n$$\\n\\nwhere $n_{\\\\mathrm{B}}$ is the total boron number density, $n_{\\\\mathrm{B},z}$ is the number density of boron in charge state $z$, and $z$ is the ionic charge number. The endpoints $z=0$ and $z=5$ denote neutral and fully stripped boron, respectively.\\n\\nEach boron atom or ion contributes one particle regardless of its charge. This quantity is distinct from an individual charge-state density, a charge-weighted density, and a mass density.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; description='Number density of boron atoms and ions, summed over all charge states from neutral atoms to fully stripped ions.'",
+            "probability": 0.59,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: The density counts ions summed over all charge states; neutral atoms are excluded.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Number density of boron\n\nThe charge-state sum is defined by\n\n$$\nn_{\\mathrm{B}} = \\sum_{z=0}^{5} n_{\\mathrm{B},z}\n$$\n\nwhere $n_{\\mathrm{B}}$ is the total boron number density, $n_{\\mathrm{B},z}$ is the"
+          },
+          {
+            "id": "false_equivalence_with_related",
+            "criterion": "Does the documentation equate the quantity with a related one it is not equal to?",
+            "evidence": "documentation='Number density of boron\\n\\nThe charge-state sum is defined by\\n\\n$$\\nn_{\\\\mathrm{B}} = \\\\sum_{z=0}^{5} n_{\\\\mathrm{B},z}\\n$$\\n\\nwhere $n_{\\\\mathrm{B}}$ is the total boron number density, $n_{\\\\mathrm{B},z}$ is the number density of boron in charge state $z$, and $z$ is the ionic charge number. The endpoints $z=0$ and $z=5$ denote neutral and fully stripped boron, respectively.\\n\\nEach boron atom or ion contributes one particle regardless of its charge. This quantity is distinct from an individual charge-state density, a charge-weighted density, and a mass density.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 0.66,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.66
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of boron\n\nThe charge-state sum is defined by\n\n$$\nn_{\\mathrm{B}} = \\sum_{z=0}^{5} n_{\\mathrm{B},z}\n$$\n\nwhere $n_{\\mathrm{B}}$ is the total boron number density, $n_{\\mathrm{B},z}$ is the"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Number density of boron\\n\\nThe charge-state sum is defined by\\n\\n$$\\nn_{\\\\mathrm{B}} = \\\\sum_{z=0}^{5} n_{\\\\mathrm{B},z}\\n$$\\n\\nwhere $n_{\\\\mathrm{B}}$ is the total boron number density, $n_{\\\\mathrm{B},z}$ is the number density of boron in charge state $z$, and $z$ is the ionic charge number. The endpoints $z=0$ and $z=5$ denote neutral and fully stripped boron, respectively.\\n\\nEach boron atom or ion contributes one particle regardless of its charge. This quantity is distinct from an individual charge-state density, a charge-weighted density, and a mass density.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; physical_base='density'; unit='m^-3'",
+            "probability": 0.82,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.82
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of boron\n\nThe charge-state sum is defined by\n\n$$\nn_{\\mathrm{B}} = \\sum_{z=0}^{5} n_{\\mathrm{B},z}\n$$\n\nwhere $n_{\\mathrm{B}}$ is the total boron number density, $n_{\\mathrm{B},z}$ is the"
+          },
+          {
+            "id": "relationship_link_missing",
+            "criterion": "relationship_link",
+            "evidence": "documentation='Number density of boron\\n\\nThe charge-state sum is defined by\\n\\n$$\\nn_{\\\\mathrm{B}} = \\\\sum_{z=0}^{5} n_{\\\\mathrm{B},z}\\n$$\\n\\nwhere $n_{\\\\mathrm{B}}$ is the total boron number density, $n_{\\\\mathrm{B},z}$ is the number density of boron in charge state $z$, and $z$ is the ionic charge number. The endpoints $z=0$ and $z=5$ denote neutral and fully stripped boron, respectively.\\n\\nEach boron atom or ion contributes one particle regardless of its charge. This quantity is distinct from an individual charge-state density, a charge-weighted density, and a mass density.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 1.0,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": "[relationship_link] boron_density: relationship_link: documentation contains no standard-name relationship link",
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of boron\n\nThe charge-state sum is defined by\n\n$$\nn_{\\mathrm{B}} = \\sum_{z=0}^{5} n_{\\mathrm{B},z}\n$$\n\nwhere $n_{\\mathrm{B}}$ is the total boron number density, $n_{\\mathrm{B},z}$ is the"
+          }
+        ],
+        "holds": [],
+        "review_cost_usd": 0.000104916
+      },
+      "flux_surface_averaged_electron_density": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 8.10078896223337,
+          "description_quality": 16.839678272064607,
+          "documentation_quality": 16.932056734215212,
+          "physics_accuracy": 1.474349313209446
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Number density of electron\\n\\nThe flux-surface average is defined by\\n\\n$$\\n\\\\langle n_e\\\\rangle = \\\\oint n_e\\\\,dS/|\\\\nabla\\\\psi| \\\\,/\\\\, \\\\oint dS/|\\\\nabla\\\\psi|\\n$$\\n\\nwhere $n_e$ is the local [electron number density](name:electron_density), $S$ is the closed magnetic flux surface, $dS$ is its area element, and $\\\\psi$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux). The quantity $|\\\\nabla\\\\psi|$ is the magnitude of the spatial gradient of poloidal magnetic flux, each integral extends over the entire surface, and $\\\\langle n_e\\\\rangle$ denotes the resulting average.\\n\\nThis quantity applies to the electron population on the specified flux surface, not to the plasma volume enclosed by it. It is distinct from an unweighted surface average and from the total electron count inside the surface.\\n\\nFlux-surface averaging preserves the physical dimension of the local number density. The declared unit metadata is inconsistent with this number-density definition.\\n\\nThe flux-surface average is the average of a quantity over a closed magnetic flux surface, weighted by the inverse magnitude of the poloidal flux gradient.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; description='Number density of electrons averaged over a closed magnetic flux surface, weighted by the inverse magnitude of the poloidal magnetic flux gradient.'",
+            "probability": 0.47,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: Flux-surface averaging preserves the physical dimension of the local number density.; The declared unit metadata is inconsistent with this number-density definition.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Number density of electron\n\nThe flux-surface average is defined by\n\n$$\n\\langle n_e\\rangle = \\oint n_e\\,dS/|\\nabla\\psi| \\,/\\, \\oint dS/|\\nabla\\psi|\n$$\n\nwhere $n_e$ is the local [electron number density"
+          },
+          {
+            "id": "equation_physically_incorrect",
+            "criterion": "Are the stated equations physically incorrect or dimensionally inconsistent with the quantity?",
+            "evidence": "documentation='Number density of electron\\n\\nThe flux-surface average is defined by\\n\\n$$\\n\\\\langle n_e\\\\rangle = \\\\oint n_e\\\\,dS/|\\\\nabla\\\\psi| \\\\,/\\\\, \\\\oint dS/|\\\\nabla\\\\psi|\\n$$\\n\\nwhere $n_e$ is the local [electron number density](name:electron_density), $S$ is the closed magnetic flux surface, $dS$ is its area element, and $\\\\psi$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux). The quantity $|\\\\nabla\\\\psi|$ is the magnitude of the spatial gradient of poloidal magnetic flux, each integral extends over the entire surface, and $\\\\langle n_e\\\\rangle$ denotes the resulting average.\\n\\nThis quantity applies to the electron population on the specified flux surface, not to the plasma volume enclosed by it. It is distinct from an unweighted surface average and from the total electron count inside the surface.\\n\\nFlux-surface averaging preserves the physical dimension of the local number density. The declared unit metadata is inconsistent with this number-density definition.\\n\\nThe flux-surface average is the average of a quantity over a closed magnetic flux surface, weighted by the inverse magnitude of the poloidal flux gradient.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; unit='1'",
+            "probability": 0.53,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.53
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of electron\n\nThe flux-surface average is defined by\n\n$$\n\\langle n_e\\rangle = \\oint n_e\\,dS/|\\nabla\\psi| \\,/\\, \\oint dS/|\\nabla\\psi|\n$$\n\nwhere $n_e$ is the local [electron number density"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Number density of electron\\n\\nThe flux-surface average is defined by\\n\\n$$\\n\\\\langle n_e\\\\rangle = \\\\oint n_e\\\\,dS/|\\\\nabla\\\\psi| \\\\,/\\\\, \\\\oint dS/|\\\\nabla\\\\psi|\\n$$\\n\\nwhere $n_e$ is the local [electron number density](name:electron_density), $S$ is the closed magnetic flux surface, $dS$ is its area element, and $\\\\psi$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux). The quantity $|\\\\nabla\\\\psi|$ is the magnitude of the spatial gradient of poloidal magnetic flux, each integral extends over the entire surface, and $\\\\langle n_e\\\\rangle$ denotes the resulting average.\\n\\nThis quantity applies to the electron population on the specified flux surface, not to the plasma volume enclosed by it. It is distinct from an unweighted surface average and from the total electron count inside the surface.\\n\\nFlux-surface averaging preserves the physical dimension of the local number density. The declared unit metadata is inconsistent with this number-density definition.\\n\\nThe flux-surface average is the average of a quantity over a closed magnetic flux surface, weighted by the inverse magnitude of the poloidal flux gradient.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; unit='1'",
+            "probability": 0.74,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.74
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of electron\n\nThe flux-surface average is defined by\n\n$$\n\\langle n_e\\rangle = \\oint n_e\\,dS/|\\nabla\\psi| \\,/\\, \\oint dS/|\\nabla\\psi|\n$$\n\nwhere $n_e$ is the local [electron number density"
+          }
+        ],
+        "holds": [],
+        "review_cost_usd": 0.000136206
+      },
+      "flux_surface_averaged_electron_temperature": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 13.087562777239732,
+          "description_quality": 17.13240566902153,
+          "documentation_quality": 17.00462043156376,
+          "physics_accuracy": 3.5534193893236417
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Temperature of electrons averaged over a closed magnetic flux surface using inverse poloidal-flux-gradient weighting. This flux-surface average characterizes the electron thermal state on that surface rather than throughout an enclosed volume.\\n\\nThe defining average is\\n\\n$$\\n\\\\langle T_e\\\\rangle = \\\\oint T_e\\\\,dS/|\\\\nabla\\\\psi| \\\\,/\\\\, \\\\oint dS/|\\\\nabla\\\\psi|\\n$$\\n\\nwhere $T_e$ is the local [electron temperature](name:electron_temperature), $\\\\langle T_e\\\\rangle$ is its flux-surface average, $S$ is the closed magnetic flux surface, $dS$ is its area element, $\\\\psi$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux), and $|\\\\nabla\\\\psi|$ is the magnitude of its spatial gradient. Both integrals extend over the same surface $S$.\\n\\nThe weighting is geometric, not electron-density weighting, and differs from an unweighted surface average. When the local electron temperature is constant on the surface, its flux-surface average equals that local value.\\n\\nThe declared dimensionless unit is inconsistent with this definition: flux-surface averaging preserves the physical dimension of electron temperature.\\n\\nThe flux-surface average is the average of a quantity over a closed magnetic flux surface, weighted by the inverse magnitude of the poloidal flux gradient.'; description='Temperature of electrons averaged over a closed magnetic flux surface with inverse poloidal-flux-gradient weighting.'",
+            "probability": 0.74,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: The declared dimensionless unit is inconsistent with this definition: flux-surface averaging preserves the physical dimension of electron temperature.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Temperature of electrons averaged over a closed magnetic flux surface using inverse poloidal-flux-gradient weighting. This flux-surface average characterizes the electron thermal state on that surface"
+          },
+          {
+            "id": "equation_physically_incorrect",
+            "criterion": "Are the stated equations physically incorrect or dimensionally inconsistent with the quantity?",
+            "evidence": "documentation='Temperature of electrons averaged over a closed magnetic flux surface using inverse poloidal-flux-gradient weighting. This flux-surface average characterizes the electron thermal state on that surface rather than throughout an enclosed volume.\\n\\nThe defining average is\\n\\n$$\\n\\\\langle T_e\\\\rangle = \\\\oint T_e\\\\,dS/|\\\\nabla\\\\psi| \\\\,/\\\\, \\\\oint dS/|\\\\nabla\\\\psi|\\n$$\\n\\nwhere $T_e$ is the local [electron temperature](name:electron_temperature), $\\\\langle T_e\\\\rangle$ is its flux-surface average, $S$ is the closed magnetic flux surface, $dS$ is its area element, $\\\\psi$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux), and $|\\\\nabla\\\\psi|$ is the magnitude of its spatial gradient. Both integrals extend over the same surface $S$.\\n\\nThe weighting is geometric, not electron-density weighting, and differs from an unweighted surface average. When the local electron temperature is constant on the surface, its flux-surface average equals that local value.\\n\\nThe declared dimensionless unit is inconsistent with this definition: flux-surface averaging preserves the physical dimension of electron temperature.\\n\\nThe flux-surface average is the average of a quantity over a closed magnetic flux surface, weighted by the inverse magnitude of the poloidal flux gradient.'; unit='1'",
+            "probability": 0.53,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.53
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Temperature of electrons averaged over a closed magnetic flux surface using inverse poloidal-flux-gradient weighting. This flux-surface average characterizes the electron thermal state on that surface"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Temperature of electrons averaged over a closed magnetic flux surface using inverse poloidal-flux-gradient weighting. This flux-surface average characterizes the electron thermal state on that surface rather than throughout an enclosed volume.\\n\\nThe defining average is\\n\\n$$\\n\\\\langle T_e\\\\rangle = \\\\oint T_e\\\\,dS/|\\\\nabla\\\\psi| \\\\,/\\\\, \\\\oint dS/|\\\\nabla\\\\psi|\\n$$\\n\\nwhere $T_e$ is the local [electron temperature](name:electron_temperature), $\\\\langle T_e\\\\rangle$ is its flux-surface average, $S$ is the closed magnetic flux surface, $dS$ is its area element, $\\\\psi$ is the [poloidal magnetic flux](name:poloidal_magnetic_flux), and $|\\\\nabla\\\\psi|$ is the magnitude of its spatial gradient. Both integrals extend over the same surface $S$.\\n\\nThe weighting is geometric, not electron-density weighting, and differs from an unweighted surface average. When the local electron temperature is constant on the surface, its flux-surface average equals that local value.\\n\\nThe declared dimensionless unit is inconsistent with this definition: flux-surface averaging preserves the physical dimension of electron temperature.\\n\\nThe flux-surface average is the average of a quantity over a closed magnetic flux surface, weighted by the inverse magnitude of the poloidal flux gradient.'; unit='1'",
+            "probability": 0.62,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.62
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Temperature of electrons averaged over a closed magnetic flux surface using inverse poloidal-flux-gradient weighting. This flux-surface average characterizes the electron thermal state on that surface"
+          }
+        ],
+        "holds": [],
+        "review_cost_usd": 0.000120162
+      },
+      "helium_density": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 3.392890315052984,
+          "description_quality": 16.34183483089688,
+          "documentation_quality": 15.367314784457571,
+          "physics_accuracy": 0.5890383956880169
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Number density of helium\\n\\nThe defining relation is\\n\\n$$\\nn_{\\\\mathrm{He}} = \\\\frac{dN_{\\\\mathrm{He}}}{dV} = \\\\sum_{Z=0}^{2} n_{\\\\mathrm{He},Z}\\n$$\\n\\nwhere $n_{\\\\mathrm{He}}$ is the helium number density, $N_{\\\\mathrm{He}}$ is the number of helium nuclei within physical volume $V$, $Z$ is the ionic charge number, and $n_{\\\\mathrm{He},Z}$ is the number density of helium in charge state $Z$. The neutral contribution corresponds to $Z=0$.\\n\\nThis quantity is not restricted to fully ionized helium or fusion-born alpha particles. It is distinct from helium mass density and relative helium abundance.\\n\\nThe supplied dimensionless assignment is inconsistent with this physical number-density definition.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; description='Number density of helium nuclei, summed over all charge states including neutral atoms, with each nucleus counted once per local volume.'",
+            "probability": 0.69,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: The density counts ions summed over all charge states; neutral atoms are excluded.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Number density of helium\n\nThe defining relation is\n\n$$\nn_{\\mathrm{He}} = \\frac{dN_{\\mathrm{He}}}{dV} = \\sum_{Z=0}^{2} n_{\\mathrm{He},Z}\n$$\n\nwhere $n_{\\mathrm{He}}$ is the helium number density, $N_{\\m"
+          },
+          {
+            "id": "equation_physically_incorrect",
+            "criterion": "Are the stated equations physically incorrect or dimensionally inconsistent with the quantity?",
+            "evidence": "documentation='Number density of helium\\n\\nThe defining relation is\\n\\n$$\\nn_{\\\\mathrm{He}} = \\\\frac{dN_{\\\\mathrm{He}}}{dV} = \\\\sum_{Z=0}^{2} n_{\\\\mathrm{He},Z}\\n$$\\n\\nwhere $n_{\\\\mathrm{He}}$ is the helium number density, $N_{\\\\mathrm{He}}$ is the number of helium nuclei within physical volume $V$, $Z$ is the ionic charge number, and $n_{\\\\mathrm{He},Z}$ is the number density of helium in charge state $Z$. The neutral contribution corresponds to $Z=0$.\\n\\nThis quantity is not restricted to fully ionized helium or fusion-born alpha particles. It is distinct from helium mass density and relative helium abundance.\\n\\nThe supplied dimensionless assignment is inconsistent with this physical number-density definition.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; unit='1'",
+            "probability": 0.69,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.69
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of helium\n\nThe defining relation is\n\n$$\nn_{\\mathrm{He}} = \\frac{dN_{\\mathrm{He}}}{dV} = \\sum_{Z=0}^{2} n_{\\mathrm{He},Z}\n$$\n\nwhere $n_{\\mathrm{He}}$ is the helium number density, $N_{\\m"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Number density of helium\\n\\nThe defining relation is\\n\\n$$\\nn_{\\\\mathrm{He}} = \\\\frac{dN_{\\\\mathrm{He}}}{dV} = \\\\sum_{Z=0}^{2} n_{\\\\mathrm{He},Z}\\n$$\\n\\nwhere $n_{\\\\mathrm{He}}$ is the helium number density, $N_{\\\\mathrm{He}}$ is the number of helium nuclei within physical volume $V$, $Z$ is the ionic charge number, and $n_{\\\\mathrm{He},Z}$ is the number density of helium in charge state $Z$. The neutral contribution corresponds to $Z=0$.\\n\\nThis quantity is not restricted to fully ionized helium or fusion-born alpha particles. It is distinct from helium mass density and relative helium abundance.\\n\\nThe supplied dimensionless assignment is inconsistent with this physical number-density definition.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; unit='1'",
+            "probability": 0.81,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.81
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of helium\n\nThe defining relation is\n\n$$\nn_{\\mathrm{He}} = \\frac{dN_{\\mathrm{He}}}{dV} = \\sum_{Z=0}^{2} n_{\\mathrm{He},Z}\n$$\n\nwhere $n_{\\mathrm{He}}$ is the helium number density, $N_{\\m"
+          },
+          {
+            "id": "relationship_link_missing",
+            "criterion": "relationship_link",
+            "evidence": "documentation='Number density of helium\\n\\nThe defining relation is\\n\\n$$\\nn_{\\\\mathrm{He}} = \\\\frac{dN_{\\\\mathrm{He}}}{dV} = \\\\sum_{Z=0}^{2} n_{\\\\mathrm{He},Z}\\n$$\\n\\nwhere $n_{\\\\mathrm{He}}$ is the helium number density, $N_{\\\\mathrm{He}}$ is the number of helium nuclei within physical volume $V$, $Z$ is the ionic charge number, and $n_{\\\\mathrm{He},Z}$ is the number density of helium in charge state $Z$. The neutral contribution corresponds to $Z=0$.\\n\\nThis quantity is not restricted to fully ionized helium or fusion-born alpha particles. It is distinct from helium mass density and relative helium abundance.\\n\\nThe supplied dimensionless assignment is inconsistent with this physical number-density definition.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 1.0,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": "[relationship_link] helium_density: relationship_link: documentation contains no standard-name relationship link",
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of helium\n\nThe defining relation is\n\n$$\nn_{\\mathrm{He}} = \\frac{dN_{\\mathrm{He}}}{dV} = \\sum_{Z=0}^{2} n_{\\mathrm{He},Z}\n$$\n\nwhere $n_{\\mathrm{He}}$ is the helium number density, $N_{\\m"
+          }
+        ],
+        "holds": [],
+        "review_cost_usd": 0.000113652
+      },
+      "iron_density": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 6.190081208340148,
+          "description_quality": 16.150651339609514,
+          "documentation_quality": 16.38538283867207,
+          "physics_accuracy": 2.233936508180643
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Number density of iron\\n\\nThe charge-state aggregation is defined by\\n\\n$$\\nn_{\\\\mathrm{Fe}} = \\\\sum_{q=0}^{26} n_{\\\\mathrm{Fe}}^{(q)}\\n$$\\n\\nwhere $n_{\\\\mathrm{Fe}}$ is the total iron number density, $n_{\\\\mathrm{Fe}}^{(q)}$ is the number density of iron in charge state $q$, and $q$ is the ionic charge number, from zero for neutral iron to 26 for fully stripped iron.\\n\\nThis quantity includes only iron, not other impurity elements. It is distinct from the density of a single iron charge state, iron mass density, and electric charge density.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; description='Number density of iron particles in the plasma, counting each neutral atom or ion once and summing over all charge states.'",
+            "probability": 0.74,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: The density counts ions summed over all charge states; neutral atoms are excluded.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Number density of iron\n\nThe charge-state aggregation is defined by\n\n$$\nn_{\\mathrm{Fe}} = \\sum_{q=0}^{26} n_{\\mathrm{Fe}}^{(q)}\n$$\n\nwhere $n_{\\mathrm{Fe}}$ is the total iron number density, $n_{\\mathrm"
+          },
+          {
+            "id": "false_equivalence_with_related",
+            "criterion": "Does the documentation equate the quantity with a related one it is not equal to?",
+            "evidence": "documentation='Number density of iron\\n\\nThe charge-state aggregation is defined by\\n\\n$$\\nn_{\\\\mathrm{Fe}} = \\\\sum_{q=0}^{26} n_{\\\\mathrm{Fe}}^{(q)}\\n$$\\n\\nwhere $n_{\\\\mathrm{Fe}}$ is the total iron number density, $n_{\\\\mathrm{Fe}}^{(q)}$ is the number density of iron in charge state $q$, and $q$ is the ionic charge number, from zero for neutral iron to 26 for fully stripped iron.\\n\\nThis quantity includes only iron, not other impurity elements. It is distinct from the density of a single iron charge state, iron mass density, and electric charge density.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 0.54,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.54
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of iron\n\nThe charge-state aggregation is defined by\n\n$$\nn_{\\mathrm{Fe}} = \\sum_{q=0}^{26} n_{\\mathrm{Fe}}^{(q)}\n$$\n\nwhere $n_{\\mathrm{Fe}}$ is the total iron number density, $n_{\\mathrm"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Number density of iron\\n\\nThe charge-state aggregation is defined by\\n\\n$$\\nn_{\\\\mathrm{Fe}} = \\\\sum_{q=0}^{26} n_{\\\\mathrm{Fe}}^{(q)}\\n$$\\n\\nwhere $n_{\\\\mathrm{Fe}}$ is the total iron number density, $n_{\\\\mathrm{Fe}}^{(q)}$ is the number density of iron in charge state $q$, and $q$ is the ionic charge number, from zero for neutral iron to 26 for fully stripped iron.\\n\\nThis quantity includes only iron, not other impurity elements. It is distinct from the density of a single iron charge state, iron mass density, and electric charge density.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; physical_base='density'; unit='m^-3'",
+            "probability": 0.76,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.76
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of iron\n\nThe charge-state aggregation is defined by\n\n$$\nn_{\\mathrm{Fe}} = \\sum_{q=0}^{26} n_{\\mathrm{Fe}}^{(q)}\n$$\n\nwhere $n_{\\mathrm{Fe}}$ is the total iron number density, $n_{\\mathrm"
+          },
+          {
+            "id": "relationship_link_missing",
+            "criterion": "relationship_link",
+            "evidence": "documentation='Number density of iron\\n\\nThe charge-state aggregation is defined by\\n\\n$$\\nn_{\\\\mathrm{Fe}} = \\\\sum_{q=0}^{26} n_{\\\\mathrm{Fe}}^{(q)}\\n$$\\n\\nwhere $n_{\\\\mathrm{Fe}}$ is the total iron number density, $n_{\\\\mathrm{Fe}}^{(q)}$ is the number density of iron in charge state $q$, and $q$ is the ionic charge number, from zero for neutral iron to 26 for fully stripped iron.\\n\\nThis quantity includes only iron, not other impurity elements. It is distinct from the density of a single iron charge state, iron mass density, and electric charge density.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 1.0,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": "[relationship_link] iron_density: relationship_link: documentation contains no standard-name relationship link",
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of iron\n\nThe charge-state aggregation is defined by\n\n$$\nn_{\\mathrm{Fe}} = \\sum_{q=0}^{26} n_{\\mathrm{Fe}}^{(q)}\n$$\n\nwhere $n_{\\mathrm{Fe}}$ is the total iron number density, $n_{\\mathrm"
+          }
+        ],
+        "holds": [],
+        "review_cost_usd": 9.6474e-05
+      },
+      "line_averaged_argon_density": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 3.9993653822625936,
+          "description_quality": 15.701145827280182,
+          "documentation_quality": 11.510744574999501,
+          "physics_accuracy": 4.119457669669324
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Number density of argon\\n\\nThe line average is defined by:\\n\\n$$\\n\\\\bar{n}_{\\\\mathrm{Ar}} = \\\\frac{1}{L}\\\\int_0^L n_{\\\\mathrm{Ar}}\\\\,dl\\n$$\\n\\nwhere $\\\\bar{n}_{\\\\mathrm{Ar}}$ is the chord-averaged argon number density, $n_{\\\\mathrm{Ar}}$ is the local charge-state-summed argon number density, $L$ is the length of the specified chord, and $l$ is distance along that chord.\\n\\nThe integration interval and the dividing chord length must refer to the same path. This quantity is not a single-charge-state density or a volume average; it equals the line-integrated argon number density divided by the chord length.\\n\\nThe line average is the integral of a quantity along a stated chord divided by the chord length.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; description='Number density of argon averaged along a specified plasma chord, with the local density summed over all charge states, including neutral argon.'",
+            "probability": 0.83,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: where [equation] is the chord-averaged argon number density, [equation] is the local charge-state-summed argon number density, [equation] is the length of the specified chord, and [equation] is distance along that chord.; This quantity is not a single-charge-state density or a volume average; it equals the line-integrated argon number density divided by the chord length.; The density counts ions summed over all charge states; neutral atoms are excluded.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe line average is defined by:\n\n$$\n\\bar{n}_{\\mathrm{Ar}} = \\frac{1}{L}\\int_0^L n_{\\mathrm{Ar}}\\,dl\n$$\n\nwhere $\\bar{n}_{\\mathrm{Ar}}$ is the chord-averaged argon number densit"
+          },
+          {
+            "id": "description_false_of_some_binding",
+            "criterion": "Is the description true of every bound source path?",
+            "evidence": "description='Number density of argon averaged along a specified plasma chord, with the local density summed over all charge states, including neutral argon.'; source_paths=['summary/line_average/n_i/argon/value']",
+            "probability": 0.77,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "choice",
+              "choice": "false of at least one binding",
+              "probabilities": {
+                "true of all": 0.23,
+                "narrower than the bindings": 0.01,
+                "false of at least one binding": 0.76
+              },
+              "confidence": 0.64
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe line average is defined by:\n\n$$\n\\bar{n}_{\\mathrm{Ar}} = \\frac{1}{L}\\int_0^L n_{\\mathrm{Ar}}\\,dl\n$$\n\nwhere $\\bar{n}_{\\mathrm{Ar}}$ is the chord-averaged argon number densit"
+          },
+          {
+            "id": "description_not_single_definition",
+            "criterion": "Is the description imprecise, multi-line, or editorial filler rather than a precise single-line physical definition?",
+            "evidence": "description='Number density of argon averaged along a specified plasma chord, with the local density summed over all charge states, including neutral argon.'; documentation='Number density of argon\\n\\nThe line average is defined by:\\n\\n$$\\n\\\\bar{n}_{\\\\mathrm{Ar}} = \\\\frac{1}{L}\\\\int_0^L n_{\\\\mathrm{Ar}}\\\\,dl\\n$$\\n\\nwhere $\\\\bar{n}_{\\\\mathrm{Ar}}$ is the chord-averaged argon number density, $n_{\\\\mathrm{Ar}}$ is the local charge-state-summed argon number density, $L$ is the length of the specified chord, and $l$ is distance along that chord.\\n\\nThe integration interval and the dividing chord length must refer to the same path. This quantity is not a single-charge-state density or a volume average; it equals the line-integrated argon number density divided by the chord length.\\n\\nThe line average is the integral of a quantity along a stated chord divided by the chord length.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 0.55,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.55
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe line average is defined by:\n\n$$\n\\bar{n}_{\\mathrm{Ar}} = \\frac{1}{L}\\int_0^L n_{\\mathrm{Ar}}\\,dl\n$$\n\nwhere $\\bar{n}_{\\mathrm{Ar}}$ is the chord-averaged argon number densit"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Number density of argon\\n\\nThe line average is defined by:\\n\\n$$\\n\\\\bar{n}_{\\\\mathrm{Ar}} = \\\\frac{1}{L}\\\\int_0^L n_{\\\\mathrm{Ar}}\\\\,dl\\n$$\\n\\nwhere $\\\\bar{n}_{\\\\mathrm{Ar}}$ is the chord-averaged argon number density, $n_{\\\\mathrm{Ar}}$ is the local charge-state-summed argon number density, $L$ is the length of the specified chord, and $l$ is distance along that chord.\\n\\nThe integration interval and the dividing chord length must refer to the same path. This quantity is not a single-charge-state density or a volume average; it equals the line-integrated argon number density divided by the chord length.\\n\\nThe line average is the integral of a quantity along a stated chord divided by the chord length.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; physical_base='density'; unit='m^-3'",
+            "probability": 0.76,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.76
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe line average is defined by:\n\n$$\n\\bar{n}_{\\mathrm{Ar}} = \\frac{1}{L}\\int_0^L n_{\\mathrm{Ar}}\\,dl\n$$\n\nwhere $\\bar{n}_{\\mathrm{Ar}}$ is the chord-averaged argon number densit"
+          },
+          {
+            "id": "relationship_link_missing",
+            "criterion": "relationship_link",
+            "evidence": "documentation='Number density of argon\\n\\nThe line average is defined by:\\n\\n$$\\n\\\\bar{n}_{\\\\mathrm{Ar}} = \\\\frac{1}{L}\\\\int_0^L n_{\\\\mathrm{Ar}}\\\\,dl\\n$$\\n\\nwhere $\\\\bar{n}_{\\\\mathrm{Ar}}$ is the chord-averaged argon number density, $n_{\\\\mathrm{Ar}}$ is the local charge-state-summed argon number density, $L$ is the length of the specified chord, and $l$ is distance along that chord.\\n\\nThe integration interval and the dividing chord length must refer to the same path. This quantity is not a single-charge-state density or a volume average; it equals the line-integrated argon number density divided by the chord length.\\n\\nThe line average is the integral of a quantity along a stated chord divided by the chord length.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 1.0,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": "[relationship_link] line_averaged_argon_density: relationship_link: documentation contains no standard-name relationship link",
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe line average is defined by:\n\n$$\n\\bar{n}_{\\mathrm{Ar}} = \\frac{1}{L}\\int_0^L n_{\\mathrm{Ar}}\\,dl\n$$\n\nwhere $\\bar{n}_{\\mathrm{Ar}}$ is the chord-averaged argon number densit"
+          }
+        ],
+        "holds": [
+          "DD source text unavailable at summary/line_average/n_i/argon/value"
+        ],
+        "review_cost_usd": 0.000107982
+      },
+      "neon_density": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 5.87713326668037,
+          "description_quality": 16.51746851938817,
+          "documentation_quality": 16.934719172646844,
+          "physics_accuracy": 1.166015450055696
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Number density of neon\\n\\nThe charge-state aggregation is defined by\\n\\n$$\\nn_{\\\\mathrm{Ne}} = \\\\sum_{z=0}^{10} n_{\\\\mathrm{Ne},z}\\n$$\\n\\nwhere $n_{\\\\mathrm{Ne}}$ is the total neon number density, $n_{\\\\mathrm{Ne},z}$ is the number density of neon in charge state $z$, and $z$ is the integer ionic charge number, from zero for neutral neon to ten for fully stripped neon.\\n\\nThis quantity counts neon particles rather than their mass, electric charge, or released electrons. No line or volume averaging is implied. Ionization and recombination redistribute neon among charge states without changing the number of neon nuclei.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; description='Number density of neon atoms and ions, summed over all charge states and counting each neon nucleus once.'",
+            "probability": 0.74,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: The density counts ions summed over all charge states; neutral atoms are excluded.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Number density of neon\n\nThe charge-state aggregation is defined by\n\n$$\nn_{\\mathrm{Ne}} = \\sum_{z=0}^{10} n_{\\mathrm{Ne},z}\n$$\n\nwhere $n_{\\mathrm{Ne}}$ is the total neon number density, $n_{\\mathrm{Ne}"
+          },
+          {
+            "id": "false_equivalence_with_related",
+            "criterion": "Does the documentation equate the quantity with a related one it is not equal to?",
+            "evidence": "documentation='Number density of neon\\n\\nThe charge-state aggregation is defined by\\n\\n$$\\nn_{\\\\mathrm{Ne}} = \\\\sum_{z=0}^{10} n_{\\\\mathrm{Ne},z}\\n$$\\n\\nwhere $n_{\\\\mathrm{Ne}}$ is the total neon number density, $n_{\\\\mathrm{Ne},z}$ is the number density of neon in charge state $z$, and $z$ is the integer ionic charge number, from zero for neutral neon to ten for fully stripped neon.\\n\\nThis quantity counts neon particles rather than their mass, electric charge, or released electrons. No line or volume averaging is implied. Ionization and recombination redistribute neon among charge states without changing the number of neon nuclei.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 0.76,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.76
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of neon\n\nThe charge-state aggregation is defined by\n\n$$\nn_{\\mathrm{Ne}} = \\sum_{z=0}^{10} n_{\\mathrm{Ne},z}\n$$\n\nwhere $n_{\\mathrm{Ne}}$ is the total neon number density, $n_{\\mathrm{Ne}"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Number density of neon\\n\\nThe charge-state aggregation is defined by\\n\\n$$\\nn_{\\\\mathrm{Ne}} = \\\\sum_{z=0}^{10} n_{\\\\mathrm{Ne},z}\\n$$\\n\\nwhere $n_{\\\\mathrm{Ne}}$ is the total neon number density, $n_{\\\\mathrm{Ne},z}$ is the number density of neon in charge state $z$, and $z$ is the integer ionic charge number, from zero for neutral neon to ten for fully stripped neon.\\n\\nThis quantity counts neon particles rather than their mass, electric charge, or released electrons. No line or volume averaging is implied. Ionization and recombination redistribute neon among charge states without changing the number of neon nuclei.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; physical_base='density'; unit='m^-3'",
+            "probability": 0.83,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.83
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of neon\n\nThe charge-state aggregation is defined by\n\n$$\nn_{\\mathrm{Ne}} = \\sum_{z=0}^{10} n_{\\mathrm{Ne},z}\n$$\n\nwhere $n_{\\mathrm{Ne}}$ is the total neon number density, $n_{\\mathrm{Ne}"
+          },
+          {
+            "id": "relationship_link_missing",
+            "criterion": "relationship_link",
+            "evidence": "documentation='Number density of neon\\n\\nThe charge-state aggregation is defined by\\n\\n$$\\nn_{\\\\mathrm{Ne}} = \\\\sum_{z=0}^{10} n_{\\\\mathrm{Ne},z}\\n$$\\n\\nwhere $n_{\\\\mathrm{Ne}}$ is the total neon number density, $n_{\\\\mathrm{Ne},z}$ is the number density of neon in charge state $z$, and $z$ is the integer ionic charge number, from zero for neutral neon to ten for fully stripped neon.\\n\\nThis quantity counts neon particles rather than their mass, electric charge, or released electrons. No line or volume averaging is implied. Ionization and recombination redistribute neon among charge states without changing the number of neon nuclei.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 1.0,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": "[relationship_link] neon_density: relationship_link: documentation contains no standard-name relationship link",
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of neon\n\nThe charge-state aggregation is defined by\n\n$$\nn_{\\mathrm{Ne}} = \\sum_{z=0}^{10} n_{\\mathrm{Ne},z}\n$$\n\nwhere $n_{\\mathrm{Ne}}$ is the total neon number density, $n_{\\mathrm{Ne}"
+          }
+        ],
+        "holds": [],
+        "review_cost_usd": 0.000104664
+      },
+      "volume_averaged_argon_density": {
+        "route": "jev_cascade_refine",
+        "dimension_scores": {
+          "completeness": 2.6485842495746237,
+          "description_quality": 16.125169725658946,
+          "documentation_quality": 15.549608345230082,
+          "physics_accuracy": 1.5375309123658496
+        },
+        "failed_checks": [
+          {
+            "id": "claim_contradicts_source",
+            "criterion": "Which conflict, if any, does this claim have with the DD definitions the name binds?",
+            "evidence": "documentation='Number density of argon\\n\\nThe volume average is defined by:\\n\\n$$\\n\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V = \\\\frac{1}{V}\\\\int_V n_{\\\\mathrm{Ar}}\\\\,dV\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the local argon number density summed over all charge states, $V$ is the averaging volume, $dV$ is a differential physical volume element, and $\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V$ is the resulting volume-averaged density.\\n\\nThe charge-state sum includes neutral argon and all ionized charge states, rather than a selected ionization stage. This average is distinct from the local density at any particular position. Multiplying it by the averaging volume gives the total number of argon particles within that volume.\\n\\nThe volume average is the integral of a quantity over a stated volume divided by that volume.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; description='Number density of argon summed over all charge states and averaged over the plasma by weighting each region by its physical volume.'",
+            "probability": 0.69,
+            "veto": true,
+            "cutoff": 0.3,
+            "judgment_evidence": "contradicts source: The density counts ions summed over all charge states; neutral atoms are excluded.",
+            "veto_criterion": "choice=contradicts or probability>=cutoff",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe volume average is defined by:\n\n$$\n\\langle n_{\\mathrm{Ar}}\\rangle_V = \\frac{1}{V}\\int_V n_{\\mathrm{Ar}}\\,dV\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the local argon number density su"
+          },
+          {
+            "id": "false_equivalence_with_related",
+            "criterion": "Does the documentation equate the quantity with a related one it is not equal to?",
+            "evidence": "documentation='Number density of argon\\n\\nThe volume average is defined by:\\n\\n$$\\n\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V = \\\\frac{1}{V}\\\\int_V n_{\\\\mathrm{Ar}}\\\\,dV\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the local argon number density summed over all charge states, $V$ is the averaging volume, $dV$ is a differential physical volume element, and $\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V$ is the resulting volume-averaged density.\\n\\nThe charge-state sum includes neutral argon and all ionized charge states, rather than a selected ionization stage. This average is distinct from the local density at any particular position. Multiplying it by the averaging volume gives the total number of argon particles within that volume.\\n\\nThe volume average is the integral of a quantity over a stated volume divided by that volume.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 0.7,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.7
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe volume average is defined by:\n\n$$\n\\langle n_{\\mathrm{Ar}}\\rangle_V = \\frac{1}{V}\\int_V n_{\\mathrm{Ar}}\\,dV\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the local argon number density su"
+          },
+          {
+            "id": "incompatible_physics_qualifier",
+            "criterion": "Does the documentation apply a qualifier the physics of the quantity does not admit?",
+            "evidence": "documentation='Number density of argon\\n\\nThe volume average is defined by:\\n\\n$$\\n\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V = \\\\frac{1}{V}\\\\int_V n_{\\\\mathrm{Ar}}\\\\,dV\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the local argon number density summed over all charge states, $V$ is the averaging volume, $dV$ is a differential physical volume element, and $\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V$ is the resulting volume-averaged density.\\n\\nThe charge-state sum includes neutral argon and all ionized charge states, rather than a selected ionization stage. This average is distinct from the local density at any particular position. Multiplying it by the averaging volume gives the total number of argon particles within that volume.\\n\\nThe volume average is the integral of a quantity over a stated volume divided by that volume.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; physical_base='density'; unit='m^-3'",
+            "probability": 0.82,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.82
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe volume average is defined by:\n\n$$\n\\langle n_{\\mathrm{Ar}}\\rangle_V = \\frac{1}{V}\\int_V n_{\\mathrm{Ar}}\\,dV\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the local argon number density su"
+          },
+          {
+            "id": "raw_dd_reference_in_prose",
+            "criterion": "Does the documentation cite a raw DD path or IDS name as storage context?",
+            "evidence": "documentation='Number density of argon\\n\\nThe volume average is defined by:\\n\\n$$\\n\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V = \\\\frac{1}{V}\\\\int_V n_{\\\\mathrm{Ar}}\\\\,dV\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the local argon number density summed over all charge states, $V$ is the averaging volume, $dV$ is a differential physical volume element, and $\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V$ is the resulting volume-averaged density.\\n\\nThe charge-state sum includes neutral argon and all ionized charge states, rather than a selected ionization stage. This average is distinct from the local density at any particular position. Multiplying it by the averaging volume gives the total number of argon particles within that volume.\\n\\nThe volume average is the integral of a quantity over a stated volume divided by that volume.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'; source_paths=['summary/volume_average/n_i/argon/value']",
+            "probability": 0.77,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": {
+              "type": "noul",
+              "noul": 0.77
+            },
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe volume average is defined by:\n\n$$\n\\langle n_{\\mathrm{Ar}}\\rangle_V = \\frac{1}{V}\\int_V n_{\\mathrm{Ar}}\\,dV\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the local argon number density su"
+          },
+          {
+            "id": "relationship_link_missing",
+            "criterion": "relationship_link",
+            "evidence": "documentation='Number density of argon\\n\\nThe volume average is defined by:\\n\\n$$\\n\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V = \\\\frac{1}{V}\\\\int_V n_{\\\\mathrm{Ar}}\\\\,dV\\n$$\\n\\nwhere $n_{\\\\mathrm{Ar}}$ is the local argon number density summed over all charge states, $V$ is the averaging volume, $dV$ is a differential physical volume element, and $\\\\langle n_{\\\\mathrm{Ar}}\\\\rangle_V$ is the resulting volume-averaged density.\\n\\nThe charge-state sum includes neutral argon and all ionized charge states, rather than a selected ionization stage. This average is distinct from the local density at any particular position. Multiplying it by the averaging volume gives the total number of argon particles within that volume.\\n\\nThe volume average is the integral of a quantity over a stated volume divided by that volume.\\n\\nThe density counts ions summed over all charge states; neutral atoms are excluded.'",
+            "probability": 1.0,
+            "veto": false,
+            "cutoff": 0.5,
+            "judgment_evidence": "[relationship_link] volume_averaged_argon_density: relationship_link: documentation contains no standard-name relationship link",
+            "veto_criterion": "nonconforming check answer",
+            "segment": "",
+            "sentence": "Number density of argon\n\nThe volume average is defined by:\n\n$$\n\\langle n_{\\mathrm{Ar}}\\rangle_V = \\frac{1}{V}\\int_V n_{\\mathrm{Ar}}\\,dV\n$$\n\nwhere $n_{\\mathrm{Ar}}$ is the local argon number density su"
+          }
+        ],
+        "holds": [
+          "DD source text unavailable at summary/volume_average/n_i/argon/value"
+        ],
+        "review_cost_usd": 0.000116046
+      }
+    },
+    "grouping": {
+      "defect_of_this_change": [],
+      "name_specific": [
+        "argon_density",
+        "boron_density",
+        "flux_surface_averaged_electron_density",
+        "flux_surface_averaged_electron_temperature",
+        "helium_density",
+        "iron_density",
+        "line_averaged_argon_density",
+        "neon_density",
+        "volume_averaged_argon_density"
+      ],
+      "method": "Each reason was searched for the rendered shared wording: the species population clause, the operator sentences, the locus sentence, and the words shared part, registry and locus. A reason naming the rendered shared sentence is a defect of this change; one about the name-specific text is not.",
+      "finding": "None of the nine names the rendered shared sentence. The review returns numeric dimension scores rather than prose: physics_accuracy is 0.6 to 4.1 on the six species densities, completeness 2.6 to 6.2, while documentation_quality stays at 11.5 to 17.0. Two names also carry a documentation_contradiction hold whose stated reason is \"DD source text unavailable\", which is a limit of this context build rather than a finding about the definition.",
+      "caveat": "A numeric dimension score neither names the shared sentence nor clears it. The six shortfalls are exactly the six species densities, and the population sentence is the only text this change added to them, so the shortfall is consistent with that sentence being judged a physics inaccuracy. The record states that as an inference from which names moved, not as something the review said."
+    },
+    "spend_usd": 0.12306622
+  },
+  "review_arms_settled": {
+    "context_copied": {
+      "names": 5497,
+      "sources": 10158,
+      "edges": 6733,
+      "imas": 0
+    },
+    "spend_usd": 0.142962842,
+    "rendered": {
+      "accept": 11,
+      "refine": 4,
+      "refine_names": [
+        "flux_surface_averaged_electron_density",
+        "flux_surface_averaged_electron_temperature",
+        "line_averaged_time_derivative_of_electron_density",
+        "line_integrated_electron_density"
+      ]
+    },
+    "published": {
+      "accept": 11,
+      "refine": 0,
+      "single_review": 4
+    },
+    "shortfalls": {
+      "line_averaged_time_derivative_of_electron_density": "documentation_contradiction hold: DD source text unavailable at summary/line_average/dn_e_dt/value"
+    },
+    "shared_part_mentioned_in_any_reason": false,
+    "refused_before_storage": {
+      "argon_density": "the written text includes neutral atoms ('with neutral')",
+      "volume_averaged_argon_density": "matched a phrase the text itself negates; detector narrowed"
+    }
+  }
+}

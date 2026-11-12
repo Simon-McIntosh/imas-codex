@@ -277,14 +277,34 @@ async def process_refine_docs_batch(
                 lease.charge_event(cost, _event)
 
             # ── Persist ───────────────────────────────────────────
+            # A refinement is written under the same settled shared wording as
+            # a first draft: the description states the population, and text
+            # that departs from a shared part is refused before it is stored.
+            from imas_codex.standard_names.docs_gates import (
+                description_with_population,
+            )
+            from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
+                _refuse_altered_shared_parts,
+            )
+
+            refined_documentation = _documentation_with_registry_form(
+                sn_id, result_obj.documentation, prompt_context["conventions"]
+            )
+            refined_description = description_with_population(
+                sn_id, result_obj.description
+            )
+            _refuse_altered_shared_parts(
+                sn_id,
+                refined_documentation,
+                prompt_context["conventions"],
+                description=refined_description,
+            )
             await _asyncio.to_thread(
                 persist_refined_docs,
                 sn_id=sn_id,
                 claim_token=claim_token,
-                description=normalize_description_text(result_obj.description),
-                documentation=_documentation_with_registry_form(
-                    sn_id, result_obj.documentation, prompt_context["conventions"]
-                ),
+                description=normalize_description_text(refined_description),
+                documentation=refined_documentation,
                 model=model,
                 current_description=item.get("description") or "",
                 current_documentation=item.get("documentation") or "",
