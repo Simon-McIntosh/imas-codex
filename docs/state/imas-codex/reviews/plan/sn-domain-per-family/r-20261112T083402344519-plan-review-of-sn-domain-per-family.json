@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T08:39:40.809Z",
+  "dispatched_at": "2026-11-12T08:34:50Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-1",
+      "reason": "a worker can satisfy the gate on either population and report materially different shares, and the 9 names and 3 families the readers could not agree on are excluded from the denominator with nothing counting them.",
+      "text": "the paragraph defines the reference as the items two readers agree on (61 of 70 single names, 37 of 40 families), while bullet 1 gates on \"at least 60 single-member names drawn at random across every domain file that holds one\" and bullet 2 on \"\u00a72's family label set\", so the measured population is left undecided between 70 and 61 (and 40 and 37), the single-name floor of 60 sits one item under the agreed count, and no bullet records how many items the agreement filter removed",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "evidence_paths-1",
+      "reason": "read literally the node pays for a fresh labelling pass into a second directory and never measures against the reference the plan just declared, which is both a spend difference and a different gate population.",
+      "text": "the paragraph declares the reference labels committed under `docs/evidence/fragments/sn-domain-family-labels/`, but bullet 1 still requires \"the label set and who produced it are committed under `docs/evidence/fragments/sn-domain-per-family/`\", so the artifact whose existence the paragraph establishes is not the artifact the done-when names",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-2",
+      "reason": "the exclusion is the mechanism that turns the drawn sheet into the reference, so leaving it uncounted lets the reference shrink silently while every gate still reads as met.",
+      "text": "\"the items they disagree on go to the lead\" gives the 12 disputed items (3 of 40 families, 9 of 70 single names) no measurable duty: no bullet records their count, their path, or the lead's ruling on them, and bullet 5 covers only disagreement between the decision and the reader, not between the two readers",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "reasoning-1",
+      "reason": "a reader cannot check the population the reference was drawn from, and the misattached clause tells a worker something false about where the family sample came from.",
+      "text": "the paragraph says the sheet's 70 single names are \"drawn from the 1,370 published names that share their pattern with no other\", and no committed artifact records 1,370 and no other plan figure supports it: \u00a71's cited census records 1,975 published names and 20 species families holding 281 members, and the sheet's generator prints its single-pattern total only to a stream no fragment captures; the same sentence also reads as though the 40 families were drawn from those single-pattern names, which they are not (each family holds three or more members)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "affc144c12b109c6c901c0f926a800f144790b11",
+  "plan_fingerprint": "2b24723eb3ad0c0139cb8ef4d66da80c0a3c68340463285f2cc9ee96607bf79b",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 11,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T083402344519-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "f1c82b7645b4a1d43941cc57ea007d0fb653647d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-domain-family-labels/` resolves in the tree and holds `blind-sheet.json` (113 items: 40 families, 70 drawn singles, 3 named), `labels.json`, `labels-second-reader.json` and both briefs; `sn-catalog-grouping`'s 0.560/0.597 figures are unchanged by this edit.",
+    "done_when": "a finding \u2014 the new paragraph fixes the reference's composition (61 agreed single names, 37 agreed families) while bullets 1 and 2 still require measurement on \"at least 60 single-member names drawn at random\" and \"\u00a72's family label set\", which are different, larger populations (plan.html:92).",
+    "evidence_paths": "a finding \u2014 the paragraph places the blind sheet and both label files at `docs/evidence/fragments/sn-domain-family-labels/` (verified present and committed), but done-when bullet 1 still requires \"the label set and who produced it are committed under `docs/evidence/fragments/sn-domain-per-family/`\", so the gate names a second location for the same artifact.",
+    "naming": "pass \u2014 the paragraph names no symbol, file or plan label in code-facing terms, and `sn-domain-family-labels` names the artifact by what it holds.",
+    "reasoning": "a finding \u2014 the paragraph's own counts check out (37 of 40 families and 61 of 70 single names agree, and the three named names agree with each other), but the population it draws from, \"the 1,370 published names that share their pattern with no other\", is recorded in no committed artifact and cannot be the population the 40 families came from.",
+    "single_goal": "pass \u2014 the paragraph supplies an evidence input for \u00a75's existing relocation endpoint and adds no second deliverable; each bullet remains a reading of one decision's accuracy against the widened options.",
+    "wiring": "pass \u2014 \u00a75's `plan-section-depends-on` still declares `s5: [sn-domain-per-family#s2]`, \u00a73 depends on \u00a75, and the followup body names \u00a75 waiting on \u00a72 with \u00a73 after both; the added paragraph introduces no new node relationship, so nothing it relies on is missing from the graph."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "81754c7454a907e859184cc5850ebc11c5882110ed5cca5b1b19629460c1cb2b",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "2183771d256ea4de9b35a6c51c4217956735d47356f491afec57489d78f2280e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:39:47.209037+00:00",
+  "total": null
+}
