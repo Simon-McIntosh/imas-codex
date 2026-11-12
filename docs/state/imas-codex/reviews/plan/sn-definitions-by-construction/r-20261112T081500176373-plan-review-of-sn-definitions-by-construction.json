@@ -1,0 +1,47 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T08:23:01.005Z",
+  "dispatched_at": "2026-11-12T08:15:43Z",
+  "findings": [
+    {
+      "anchor": "plan.html:66",
+      "id": "done_when-1",
+      "reason": "without a stated minimum of same-regime pairs (and a definition of what identifies a regime), the gate the plan believes it is placing over the rewritten names can pass vacuously, so \u00a76's non-regression claim would later rest on nothing.",
+      "text": "\u00a72's revised bullet requires \"its score ... recorded beside the score the same name carried before, each with the review regime that produced it\", then makes the only comparison \u2014 \"the median is not lower\" \u2014 apply only \"where both scores come from one regime\", while explicitly excluding \"a score that is only a pass recorded at the acceptance floor\" from comparison; nothing in the plan or the review path supplies a regime identifier (no such field exists in `imas_codex/standard_names/review/`, whose records carry an acceptance cutoff and a cascade probability, not a regime name), and no minimum count of same-regime pairs is set, so a node may satisfy the bullet by reporting a median over one name, or over none, and be closed with no non-regression shown; the bullet's other half, \"every name written this way passes the documentation review it is given\", cannot fail on its own because a name that fails review is not stored and so is never \"a name written this way\"",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "cd74fad6a72735888884e0730339930c21365e8f",
+  "plan_fingerprint": "f29a87b4d00fb9dea8b3973c9df9accacf4c2e9ba1ab8c3be3c5539a1d26cfd9",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T081500176373-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "43dd8930034511c337d06e2c02b85bf1c7efffca",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited directory resolves and contains `published-operator-census.txt` and `published-family-census.txt`, the operator-form and per-family wording censuses the bullet relies on.",
+    "done_when": "a finding \u2014 \u00a72's revised score bullet (plan.html:66) makes the only non-regression measure conditional on \"both scores come[ing] from one regime\", a condition no review record can answer, and sets no floor on how many names that leaves.",
+    "evidence_paths": "pass \u2014 the wording census and the gate log are committed under `docs/evidence/fragments/sn-definitions-by-construction/`, which exists and holds the operator and family census scripts and their output.",
+    "naming": "pass \u2014 \u00a72 introduces no symbol, file or test name, and states its mechanism without a ticket, stage or version label.",
+    "reasoning": "pass \u2014 the mechanism \u00a72 states is the one \u00a71's cited census supports (a family of 18 members carrying 18 description templates), the endpoint it names is obtainable from a disposable-graph run, and the section prescribes no code path, step sequence, formula or function.",
+    "single_goal": "pass \u2014 every done-when in \u00a72 measures one deliverable, that shared definition parts are rendered from one stored wording; the per-member cost line is a measurement of that same pass, not a second deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` (plan.html:23) gives s6 on s2\u2013s5, s5 on s4 and s7 on s6 plus `sn-domain-per-family#s3`, and \u00a72 needs no section dependency because the population input it names is a decision already recorded on this plan (species-population, ions-all-charge-states)."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "7a05b42703ac8f9d56b18da015016ea30701d877efc674388da7b4dd15fb3f34",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "87e587eb4a25dafd61a783961966692c2c164331ce6bd9b665b27bf3ec18c746",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "3bf8397e4c0fcbca018b6aee9f5b466ded384549e74817c22de7ef17c95be780"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T08:32:20.616093+00:00",
+  "total": null
+}
