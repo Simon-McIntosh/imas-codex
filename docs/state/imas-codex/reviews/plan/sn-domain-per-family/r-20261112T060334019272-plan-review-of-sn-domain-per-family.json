@@ -1,0 +1,77 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-12T06:10:34.245Z",
+  "dispatched_at": "2026-11-12T06:04:45Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:67",
+      "id": "reasoning-1",
+      "reason": "the undecided route is the only path by which a family reaches the lead, so binding it to the superseded decision leaves a non-empty set of families with no lawful state under the section's own gate, and the node would discover this only at the read-back.",
+      "text": "\u00a73 says \"A family \u00a72 reports undecided is not left split unseen\", but the same paragraph says \"this section applies \u00a75's decision, not \u00a72's alone\". Widening the offered options from a member's source domains to every catalog domain spreads the probability mass over more candidates, so the set of families whose answer falls below the confidence floor under \u00a75's options is not the set \u00a72 reports. A family that clears the floor under \u00a72's narrow options but not under \u00a75's wide ones is neither carried to the lead nor written, and \u00a73's zero-split read-back has no allowance for it: the read-back admits only \"families held split by a recorded lead correction that names the family\", and this family has no correction because nobody was asked.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-1",
+      "reason": "it adds one free reading on an already-committed label set and closes the only regression path \u00a75 can silently take.",
+      "text": "\u00a75 changes the option set of the one family decision, and \u00a72 done-when bullet 3 guards its regression on \"the labelled names the domain decision was calibrated on in `sn-catalog-grouping`, almost all of them single-member families, the accuracy is recorded as a regression reading and is not lower\". \u00a75 replaces that option set for exactly those single-member families and re-reads only a fresh 60-name draw and \u00a72's multi-member family label set. The calibration set (`scg-domain-label-sheet.json`, 73 rows, the pre-registered bar on which the incumbent reaches 58/73) is the population the widening is most likely to move, and nothing in \u00a75 re-reads it, so a widening that gains on the new draw while losing on the calibration rows ships with every gate green.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:92",
+      "id": "done_when-2",
+      "reason": "the two populations must be reported separately (the planted names and the random draw) or the gate cannot distinguish a widened decision that is better from one that is merely different on the cases already known to be wrong.",
+      "text": "the 60 single-member names are \"drawn across every domain file\" with `safety_factor`, `greenwald_density` and `voltage_of_valve` \"among them\", and the gate is that the decision's share under the reader's domain \"is higher\" than the stored domains'. Those three are named in \u00a71 and \u00a75 precisely because their stored domain is known to be wrong, so their inclusion lowers the incumbent's share by up to 3/60 for free: a decision that agrees with the stored domain on all 57 randomly drawn names and differs only on the three planted ones passes, which is the plan restating \u00a71's own examples rather than measuring the widening.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:98",
+      "id": "wiring-1",
+      "reason": "the followup is the section's dispatch brief, and the only place a coordinator reads what \u00a73 waits on; a stale prerequisite there dispatches \u00a73 against a missing decision.",
+      "text": "the followup body reads \"\u00a72 is ready. \u00a73 writes the live graph and waits for \u00a72; \u00a74 waits for \u00a73\", while `_document`'s `plan-section-depends-on` now declares `\"s3\": [\"sn-domain-per-family#s2\", \"sn-domain-per-family#s5\"]`. \u00a75 is a new unbuilt section, so the followup names `\u00a72` as the whole of \u00a73's prerequisite and omits the section \u00a73 now waits on; a coordinator reading the followup dispatches \u00a73 as soon as \u00a72 lands, and \u00a73's own text then applies a \u00a75 decision that does not exist.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-domain-per-family.html:70",
+      "id": "evidence_paths-1",
+      "reason": "the sibling sections establish the directory and a worker will follow it, so this costs one clause and misdirects no mechanism; recorded so the author can name it in passing.",
+      "text": "\u00a73's read-back, the before/after transport and general shares, the twenty largest moves and the spend are all \"recorded\" with no path named, while \u00a72 and \u00a75 each name `docs/evidence/fragments/sn-domain-per-family/`; \u00a73 is the section whose evidence describes the live graph after a write, so it is the one whose record a later reader most needs to open.",
+      "type": "evidence_paths",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "fe216bc0513978d0a4ef36ecf5c6d1ed71725670",
+  "plan_fingerprint": "4acf991330fcdf65dfbed49e012ec4225d7ca1c5ea5cdb59eed81f232542b966",
+  "plan_slug": "sn-domain-per-family",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261112T060334019272-plan-review-of-sn-domain-per-family",
+  "reviewed_blob_sha": "1452e208aebe00b90df616d6d9a84e6a8305a1d3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited target resolves: `docs/evidence/fragments/sn-definitions-by-construction/published-family-census.txt` and `published-operator-census.txt` exist with their run scripts beside them, `docs/evidence/fragments/sn-domain-per-family/` exists, `docs/evidence/fragments/sn-catalog-grouping/scg-domain-label-sheet.json` and `scg-domain-incumbent.json` exist, and `sn-catalog-consistency` \u00a75 does declare `\"s5\": [..., \"sn-domain-per-family#s3\"]` in its `plan-section-depends-on`, exactly as \u00a73 and the sibling comment state.",
+    "done_when": "a finding \u2014 \u00a75 guards single-member accuracy on a fresh 60-name draw but does not re-read the calibration set \u00a72 guards; and the draw's margin is carried by its three planted known-wrong names.",
+    "evidence_paths": "a finding \u2014 \u00a73 states no evidence directory although \u00a72 and \u00a75 both name one.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach \u00a73 or \u00a75 text; `v0.4.0rc8` in \u00a71 is a release-candidate identifier naming data, not a code symbol.",
+    "reasoning": "a finding \u2014 \u00a73 applies \u00a75's decision but routes to the lead only the families \u00a72 reported undecided, and those are two different sets.",
+    "single_goal": "pass \u2014 \u00a73 delivers one endpoint (the live names at one domain per family), \u00a75 delivers one (the option set widened to every catalog domain), and each section's bullets measure that endpoint.",
+    "wiring": "a finding \u2014 the followup's body and dependency declaration disagree with \u00a73's new `depends-on` (`_document` line 23 vs line 98)."
+  },
+  "section_digests": {
+    "_document": "a51467f2608b0391d702adeb276c2cb877c9a7a8c44801d06b57e4038ee14b5b",
+    "s1": "3d2539102f47a199cec8a14a89d42968505b563a51a390ee64710cc35f227476",
+    "s2": "aa40e5c5659822e9d8c22d4cd2fc0823ad3615e0d88e3bfdd032248dbfce0b3c",
+    "s3": "f035bba3f93c83fc7f128fc49d843d292d57332fd2e95b612731e39af9d4491a",
+    "s4": "02a78d9adf06476e76fb104849bcb4b1b0a2065ec569400e183771b85461eb4c",
+    "s5": "ca45350f279eca048226aff7d7102341dd8a95bb873d859a64f948ebbc99f2bf"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T06:19:43.326423+00:00",
+  "total": null
+}
