@@ -1,0 +1,87 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured: the reviewed run's manifest declares neither a baseline_suite nor an after_suite arm, so no added-failure count can be derived from its own gate logs; 0 with an empty id list is recorded because the delivery contract refuses a null, and it denotes that no suite arm was run rather than a measured zero.",
+  "completed_at": "2026-11-12T04:14:29.271Z",
+  "dispatched_at": "2026-11-12T04:03:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py",
+      "id": "gate-does-not-assert-floor",
+      "line": 308,
+      "severity": "non-blocking",
+      "text": "No assertion anywhere binds produced >= CAP_FLOOR to an exit status: `short = CAP_FLOOR - summary[\"produced\"]` becomes the display string `floor_note`, and readback() returns 0 unconditionally, so the gate the manifest names (drive.sh readback approval) exits green on a read-back of 99 of 143. A regression in source_state that dropped bindings would be caught by the plant, but a genuine shortfall would not be caught by the gate at all."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py",
+      "id": "dead-duplicate-vocab-gap-branch",
+      "line": 239,
+      "severity": "non-blocking",
+      "text": "A duplicated `if outcome.get(\"after_status\") == \"vocab_gap\": pass` sits immediately above the branch that does the work, leaving a dead no-op statement in _reason()."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py",
+      "id": "terse-reason-without-receipt",
+      "line": 250,
+      "severity": "non-blocking",
+      "text": "When a source carries any recorded error text, _reason() returns that text alone and never appends the attempt count or the reset receipt id. Rows such as dd:camera_ir/fibre_bundle/geometry/x1_width therefore read only `compose claim-attempt cap reached`, carrying no receipt and no count, which is thinner than the done_when's requirement that every other source read back 'with its reason and receipts'."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py",
+      "id": "plant-scratch-directory-not-removed",
+      "line": 138,
+      "severity": "non-blocking",
+      "text": "plant() creates its scratch directory with tempfile.mkdtemp and never removes it; stop_temp_neo4j stops the process group only, so the tree the run's own sbatch-cleanup.log records as `2.3M /tmp/sfdc-plant-bli6yp_m` is left on the compute node for an external sweep."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py",
+      "id": "docstring-understates-new-surface",
+      "line": 7,
+      "severity": "non-blocking",
+      "text": "The module docstring says only the cohort path, the artifact home and the negative control are new, but approval(), _reason() and fragment() are also added, and _reason() and fragment() restate the prior module's functions of the same name rather than extending them."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261112T035757070901-review-of-sfdc-cohort-floor-504d281c8b11",
+  "reviewed_base_sha": "d79799257559478c0ed9e677946a81ae1057a061",
+  "reviewed_head_sha": "504d281c8b110c24df9de9b80d1b1be25d71ee3b",
+  "reviewed_run_id": "r-20261112T014614393815-sfdc-cohort-floor",
+  "rubric": "",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-12T04:18:46.994312+00:00",
+  "total": 98,
+  "verdicts": [
+    "VERDICT goal: the node's goal is to bring the rerun cohort to at least 100 of 143 sources produced; readback.log reports 104 of 143 produced from the cohort committed at docs/evidence/fragments/sn-full-dd-continuation/cohort-143.json.",
+    "VERDICT done_when: the done_when asks the fragment to record the read-back, a reason and receipts or a named missing token for every other source, a disposable-graph plant read back as not produced, spend beside the remaining approval, an unchanged export blocking set and unchanged sourceless drafts; sfdc-cohort-floor.html carries all six and I re-derived 104 produced, 39 unproduced and USD 0.084578 from readback.json.",
+    "VERDICT write_paths: the reviewed node was fenced to five paths; git diff --stat d79799257..504d281c8 shows exactly four changed files and every one of them lies inside that set.",
+    "VERDICT manifest: the reviewed run's manifest.md records status complete, 104 of 143 produced, USD 0.084578 spent and names its per-phase logs, and it declares neither a baseline_suite nor an after_suite arm.",
+    "VERDICT diff: both commits read against the base; 9ba293de2 adds cohort-143.json and the 377-line driver, 504d281c8 adds the approval and reason helpers with the fragment HTML and JSON, and the whole change is additive (913 insertions, 0 deletions) inside docs/evidence/fragments/sn-full-dd-continuation/.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 19",
+    "JUSTIFICATION goal_fidelity: readback.log records produced 104 of 143 against the 100 floor, and sfdc-cohort-floor.html renders that floor as met from the same reading.",
+    "SCORE evidence: 15",
+    "JUSTIFICATION evidence: the gate the manifest names prints the produced count but sfdc-cohort-floor-run.py:308 reduces the floor shortfall to a display string, so a 99-of-143 read-back would still exit 0 and no assertion binds the measure to a status.",
+    "SCORE scope_discipline: 19",
+    "JUSTIFICATION scope_discipline: every path in the diff (docs/evidence/fragments/sn-full-dd-continuation/{cohort-143.json,sfdc-cohort-floor-run.py,sfdc-cohort-floor.html,sfdc-cohort-floor.json}) is inside the declared write paths, with no plan, model or peer file touched.",
+    "SCORE durability: 13",
+    "JUSTIFICATION durability: the disposable-graph plant at sfdc-cohort-floor-run.py:180-182 exits 1 when source_state stops reporting bindings and is falsified by its own positive control, but nothing fails if the fragment's recorded counts regress.",
+    "SCORE fit: 16",
+    "JUSTIFICATION fit: the driver follows the per-phase-log-and-EXIT idiom of its owner sib-cohort-rerun-isn-0-11-run.py, but sfdc-cohort-floor-run.py:239-240 leaves a duplicated `if ... pass` statement.",
+    "SCORE reuse: 16",
+    "JUSTIFICATION reuse: the cohort read-back and capped rerun are imported from docs/evidence/fragments/sn-integrity-backlog/sib-cohort-rerun-isn-0-11-run.py and repointed rather than rewritten, though save, load, _reason and fragment are copied rather than imported.",
+    "FINDING docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py:308 non-blocking: no assertion anywhere binds produced >= CAP_FLOOR to an exit status, so the gate named in the manifest reports the floor rather than checking it and would exit 0 on a shortfall.",
+    "FINDING docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py:239 non-blocking: a duplicated `if outcome.get('after_status') == \"vocab_gap\": pass` leaves a dead no-op statement immediately above the branch that does the work.",
+    "FINDING docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py:250 non-blocking: when a source carries any recorded error text the row emits that text alone, so rows such as dd:camera_ir/fibre_bundle/geometry/x1_width read only 'compose claim-attempt cap reached' with no attempt count and no claim-outcome receipt id, which is thinner than the done_when's 'its reason and receipts'.",
+    "FINDING docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py:138 non-blocking: plant() creates its scratch directory with tempfile.mkdtemp and never removes it, and stop_temp_neo4j stops only the process group, so the 2.3M /tmp/sfdc-plant-* tree the run's sbatch-cleanup.log records is left for an external sweep.",
+    "FINDING docs/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor-run.py:7 non-blocking: the module docstring states that only the cohort path, the artifact home and the negative control are new, but approval(), _reason() and fragment() are also added and _reason and fragment restate the prior module's functions instead of extending them."
+  ]
+}
