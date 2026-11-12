@@ -908,10 +908,9 @@ def _edit_standard_name(
             return {"error": f"scope={scope!r} invalid (self|family|subtree)"}
         scope_value = _EDIT_SCOPE_MAP[scope]
 
-    # Function-local import: a module-level import of standard_names.edit
-    # closes an import cycle (edit -> graph_ops -> discovery -> cli.logging
-    # -> cli/__init__ register_commands -> cli.sn) and breaks any
-    # standard_names-first import of the package.
+    # Function-local import: the edit layer pulls the graph package and its
+    # schema runtime, which cost seconds to import and are not needed until an
+    # edit is actually applied.
     from imas_codex.standard_names.edit import apply_edit
 
     try:
