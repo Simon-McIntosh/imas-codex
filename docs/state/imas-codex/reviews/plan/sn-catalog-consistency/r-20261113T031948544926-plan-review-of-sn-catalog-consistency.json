@@ -33,7 +33,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 39,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 6 now says the two deuterium-tritium names are superseded onto the ruled spelling and are not listed as exceptions.",
+      "reason": "",
+      "when": "2026-11-13T03:48:34.434623+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+      "commit_basis": "edit",
+      "note": "Section 6 now says the two deuterium-tritium names are superseded onto the ruled spelling and are not listed as exceptions.",
+      "reason": "",
+      "when": "2026-11-13T03:48:34.434623+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T031948544926-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261113T031948544926-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "8e0f3a64a135dc4118d5bdf624de10837235315b",
   "rubric": "content",
