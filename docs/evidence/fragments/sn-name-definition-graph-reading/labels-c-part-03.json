@@ -642,5 +642,131 @@
 "confidence": "medium",
 "evidence": "the signed projection of the local electron-fluid bulk flow onto the toroidal direction in the edge plasma",
 "reason": "The name states a toroidal electron velocity generally, while the definition restricts it to the edge-plasma regime."
+},
+{
+"id": "item-0093",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the line-of-sight component of the bulk drift vector of a cold neutral particle population",
+"reason": "The name states a velocity vector, but the definition is its projection along a selected line of sight, a reduction the name does not state."
+},
+{
+"id": "item-0094",
+"class": "agrees",
+"confidence": "high",
+"evidence": "the signed component of neutral particle-number transport in the direction of increasing major radius",
+"reason": "The major-radius component of a neutral particle flux for one species is what the name states, and the unit fits a particle flux density."
+},
+{
+"id": "item-0095",
+"class": "agrees",
+"confidence": "high",
+"evidence": "the radial component of the first-order perturbed plasma magnetic vector-potential eigenfunction associated with a linear MHD mode",
+"reason": "The radial component of the perturbed plasma magnetic vector potential is exactly what the name states, and the unit T.m fits."
+},
+{
+"id": "item-0096",
+"class": "agrees",
+"confidence": "high",
+"evidence": "the effective vector coefficient of the density-proportional advective ion particle flux",
+"reason": "An ion particle convection velocity as the vector coefficient of the advective ion flux is what the name states, and it selects no direction, matching the unqualified name."
+},
+{
+"id": "item-0097",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "The orbit restriction applies to the donating fast-particle distribution, not to the receiving thermal electrons.",
+"reason": "The name places co-passing on the thermal electrons, but the definition applies the orbit restriction to the donating fast particles and adds a flux-surface average, attributes the name does not state."
+},
+{
+"id": "item-0098",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "Inner radius of the annular cross-section of a passive conducting loop element",
+"reason": "The name states an inner radius of a passive loop, but the definition adds that it is measured within the annular conductor cross-section, which the name does not identify."
+},
+{
+"id": "item-0099",
+"class": "agrees",
+"confidence": "high",
+"evidence": "the horizontal coordinates of the same position ... no summation, averaging, or weighting is implied",
+"reason": "The major-radius coordinate of a specified measurement position is exactly what the name states."
+},
+{
+"id": "item-0100",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "the non-negative radial distance ... from the geometric center of an annular toroidal-field-coil cross-section to its bore-side inner boundary",
+"reason": "The name states an inner radius of a toroidal-field coil, but the definition fixes it to the bore-side boundary of the conductor cross-section about that section's own centre, a frame the name does not state."
+},
+{
+"id": "item-0101",
+"class": "definition-narrower-than-name",
+"confidence": "high",
+"evidence": "Only the neutron-emitting D-D branch contributes ... It excludes the proton-emitting D-D branch",
+"reason": "The name covers D-D fusion emissivity generally, while the definition restricts it to the neutron-emitting branch of that reaction channel."
+},
+{
+"id": "item-0102",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the major-radius position of its laser-beam endpoint",
+"reason": "The name states a radial coordinate of the Thomson-scattering laser, but the definition fixes it to the beam endpoint, a specific point the name does not identify."
+},
+{
+"id": "item-0103",
+"class": "agrees",
+"confidence": "high",
+"evidence": "the proportionality between the diffusive heat flux and the local temperature gradient in the Fick law sense",
+"reason": "An energy diffusion coefficient relating diffusive heat flux to the temperature gradient is exactly what the name states, and the unit m^2.s^-1 fits."
+},
+{
+"id": "item-0104",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "The quantity is the signed orientation angle of the normal defining a toroidal magnetic-field probe's sensitive axis.",
+"reason": "The name states a poloidal angle of the probe, but the definition fixes it to the orientation of the probe's sensitive-axis normal, an object the name does not identify."
+},
+{
+"id": "item-0105",
+"class": "agrees",
+"confidence": "medium",
+"evidence": "the effectiveness of a material surface in emitting thermal electromagnetic radiation relative to an ideal blackbody at the same temperature",
+"reason": "A dimensionless blackbody-relative surface emissivity is what the name states, and the band and angular averaging are the specification of that ratio rather than a different quantity."
+},
+{
+"id": "item-0106",
+"class": "abstract-parent-as-quantity",
+"confidence": "medium",
+"evidence": "A resolved form is represented by the internal-state velocity, while aggregation over included states gives a bulk form ... Vertical, poloidal, parallel, cold, and hot variants select projections or population subsets of this same mean flow.",
+"reason": "The name states an unqualified neutral velocity, but the definition declares a vector parent whose resolved, aggregated and projected forms are fixed by more specific names."
+},
+{
+"id": "item-0107",
+"class": "agrees",
+"confidence": "medium",
+"evidence": "No particular species, charge state, momentum axis, surface orientation, or plasma region is selected by this general quantity.",
+"reason": "A general diamagnetic-drift momentum flux selecting no population or axis is what the unqualified name states."
+},
+{
+"id": "item-0108",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the signed plasma-induced change in effective optical path length accumulated along an electromagnetic propagation path represented by an interferometer beam",
+"reason": "The name states a beam length variation, but the definition fixes it to an optical path-length change relative to a no-plasma reference, attributes the name does not state."
+},
+{
+"id": "item-0109",
+"class": "abstract-parent-as-quantity",
+"confidence": "high",
+"evidence": "this parent quantity abstracts over its two real-valued projections",
+"reason": "The name states a toroidal perturbed vacuum magnetic field, but the definition declares a complex parent whose real and imaginary projections are fixed by child names."
+},
+{
+"id": "item-0110",
+"class": "agrees",
+"confidence": "high",
+"evidence": "the major-radius component of the net momentum-transfer rate per unit area supplied to or removed from all included particle populations",
+"reason": "The radial component of the total momentum source, area-normalised as the unit states, is what the name denotes."
 }
 ]
