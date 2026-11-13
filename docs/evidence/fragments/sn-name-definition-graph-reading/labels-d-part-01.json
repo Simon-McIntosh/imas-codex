@@ -1,0 +1,772 @@
+[
+ {
+  "id": "item-0001",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The population is not fixed: the quantity may describe ions, neutrals, or a total formed by summing the included population contributions.",
+  "reason": "The name states a poloidal momentum flux with no population or averaging qualifier, and the definition is exactly that projection, so no reader is surprised."
+ },
+ {
+  "id": "item-0002",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Thermal power at a plant-component port is the rate of heat energy transferred from the component into the coolant circuit.",
+  "reason": "Thermal power of a component port is precisely heat removed by the coolant, matching the name."
+ },
+ {
+  "id": "item-0003",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is the electrostatic potential of an electrically floating Langmuir-probe collector relative to a chosen electrical reference.",
+  "reason": "A floating potential is by convention the potential of an electrically isolated collector, so the name denotes exactly what the definition states."
+ },
+ {
+  "id": "item-0004",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Thermal electron absorbed wave power is the plasma-volume integral of the local coherent-wave power deposition density into the bulk thermal electron population.",
+  "reason": "The name's thermal-electron absorbed wave power is the volume-integrated deposition into that population, with no added or narrowed attribute."
+ },
+ {
+  "id": "item-0005",
+  "class": "unit-does-not-fit-name",
+  "confidence": "high",
+  "evidence": "expresses the net electric charge per ion relative to the positive elementary charge",
+  "reason": "The name states an ion charge, whose dimension is charge (coulombs), but the definition is a charge number normalised by the elementary charge and the unit is dimensionless."
+ },
+ {
+  "id": "item-0006",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Neutral-internal-state convection velocity is the effective vector transport coefficient for nondiffusive advection of particles in a specified neutral internal state.",
+  "reason": "The unqualified name denotes the full vector convection coefficient of that population, which is what the definition gives."
+ },
+ {
+  "id": "item-0007",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "This quantity describes the mean launch direction of one beam, not its spatial toroidal position",
+  "reason": "The name reads as the toroidal angle of the beam, but the definition is a launch steering angle out of the poloidal plane, an attribute the name does not state."
+ },
+ {
+  "id": "item-0008",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Electron energy diffusivity is the scalar local transport coefficient for diffusive smoothing of electron thermal-energy density.",
+  "reason": "The name states an electron energy diffusivity and the definition is that coefficient for the electron population, with no scope change."
+ },
+ {
+  "id": "item-0009",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The sum includes all positive charge states of the selected species, not all ion species. Both trapped and passing fast ions are included. Thermal ions and neutral particles are excluded.",
+  "reason": "Under the ruling that a bare species name counts ions, fast_ion_density is the fast nonthermal ion density summed over charge states, exactly as the definition states."
+ },
+ {
+  "id": "item-0010",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed coordinate along the vertical direction in the right-handed cylindrical $(R, \\phi, Z)$ frame",
+  "reason": "The name and the definition both denote the vertical coordinate component of a measurement position."
+ },
+ {
+  "id": "item-0011",
+  "class": "unit-does-not-fit-name",
+  "confidence": "high",
+  "evidence": "The declared unit has the dimensions of momentum flux rather than volumetric momentum source density and is inconsistent with this definition.",
+  "reason": "The name states a momentum source, a volumetric quantity, but the recorded unit kg.m^-1.s^-2 is a momentum flux density, whose dimension contradicts it."
+ },
+ {
+  "id": "item-0012",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "this signed elevation angle is the angle of the beamlet at the center of the injection-unit surface relative to the horizontal plane.",
+  "reason": "A vertical angle of the injector is its beamlet elevation above the horizontal plane, so the definition matches the name."
+ },
+ {
+  "id": "item-0013",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "providing the Fick's-law proportionality between the density-normalized diffusive ion heat flux for that charge state and the local ion temperature gradient",
+  "reason": "The name states a thermal ion charge-state energy diffusion coefficient and the definition is that Fick's-law coefficient for one specified charge state."
+ },
+ {
+  "id": "item-0014",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Ion particle diffusivity is the effective transport coefficient for particle spreading driven by an ion-number-density gradient.",
+  "reason": "The name's ion particle diffusivity is the aggregate charged-ion transport coefficient over density gradients, as defined."
+ },
+ {
+  "id": "item-0015",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Volumetric nuclear heating power density deposited in a breeder blanket module is the local rate of nuclear energy deposition per material volume within the module material.",
+  "reason": "The name states a nuclear power density in a breeder blanket module, which is the local volumetric deposition described."
+ },
+ {
+  "id": "item-0016",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Thermal-electron collisional power density is the local rate at which Coulomb collisions transfer kinetic energy from designated nonthermal particle distributions to bulk thermal electrons.",
+  "reason": "The name states the collisional power density received by thermal electrons, which is what the definition computes."
+ },
+ {
+  "id": "item-0017",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "represents the magnetic environment at the evaluation location without selecting a particular external-coil residual, cylindrical component, or magnitude operation",
+  "reason": "The name claims no source contribution or reduction either, so the definition's unqualified local field at initiation is what the name denotes."
+ },
+ {
+  "id": "item-0018",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is the radial projection of the energy-flux density associated with one specified ion charge state.",
+  "reason": "The name states a radial ion-state energy flux and the definition is exactly that projected component for one charge state."
+ },
+ {
+  "id": "item-0019",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Temperature of a specified ion species averaged over the plasma volume enclosed by the last closed magnetic flux surface is the spatial mean of its local kinetic temperature.",
+  "reason": "Volume-averaged ion temperature is the arithmetic spatial mean of the ion temperature over the plasma volume, as defined."
+ },
+ {
+  "id": "item-0020",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Collisional torque density is the local angular-momentum source associated with Coulomb momentum transfer to trapped fast ions in a specified charge state.",
+  "reason": "Every element of the name (trapped, fast ion, charge state, torque density, collisions) is what the definition states."
+ },
+ {
+  "id": "item-0021",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "It describes directed motion of a neutral species in one specified quantum or energy state along the toroidal symmetry axis.",
+  "reason": "The name states the vertical component of the bulk velocity of a neutral in one internal state, which is what the definition gives."
+ },
+ {
+  "id": "item-0022",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The plasma-boundary gap is the shortest Euclidean separation between the last closed magnetic-flux surface, or separatrix, and any limiter or wall element.",
+  "reason": "The gap at the plasma boundary is that minimum clearance to plasma-facing material, matching the name."
+ },
+ {
+  "id": "item-0023",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Poloidal magnetic flux from external circuits, averaged with toroidal-current-density weighting over the plasma poloidal cross-section, represents the externally generated flux linked by the plasma current.",
+  "reason": "Every qualifier in the name (poloidal, current-weighted average, external, magnetic flux) appears in the definition with the same scope."
+ },
+ {
+  "id": "item-0024",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The axis value $q_0$ is defined by the limit $q_0 = \\lim_{\\rho\\to0}q(\\rho)$, rather than by direct evaluation of the poloidal-angle integral at the axis.",
+  "reason": "Safety factor at the magnetic axis is that limiting value of the safety factor, exactly as named."
+ },
+ {
+  "id": "item-0025",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is the ionic charge number assigned to one ion species.",
+  "reason": "The name states an ion charge number for a species and the definition gives exactly that assigned number with its averaging rule."
+ },
+ {
+  "id": "item-0026",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The radial ion energy diffusion coefficient is the Fick's-law proportionality coefficient for cross-field transport of thermal energy carried by the total ion population.",
+  "reason": "The name states the radial ion energy diffusion coefficient and the definition is that coefficient for the total ion population."
+ },
+ {
+  "id": "item-0027",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Radial electron convection velocity is the effective coefficient of the density-proportional convective electron particle flux along the major-radius direction.",
+  "reason": "The name states the radial component of the electron convection velocity, which is what the definition gives."
+ },
+ {
+  "id": "item-0028",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Neutral internal-state energy flux is the net thermal-energy transport across an oriented surface per unit area and time, carried by neutral particles of one species in one specified internal state.",
+  "reason": "The name and the definition both denote the energy flux of one neutral species in one specified internal state."
+ },
+ {
+  "id": "item-0029",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The radial ion charge-state diffusion coefficient characterizes particle diffusion of one specified ion species and charge state along the major-radius direction.",
+  "reason": "Every qualifier in the name (radial, ion charge state, diffusion coefficient) is what the definition states."
+ },
+ {
+  "id": "item-0030",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "This parent quantity is independent of species and directional component; specific children may resolve it for a selected population or component",
+  "reason": "The name claims a neutral-particle population, but the definition declares the species-independent parent convection velocity whose population is fixed only by more specific instances."
+ },
+ {
+  "id": "item-0031",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Neutron rate of a neutron detector is the time rate of individually accepted neutron-induced detection events registered by that detector.",
+  "reason": "The rate named is the detector's accepted neutron event rate, exactly what the definition counts."
+ },
+ {
+  "id": "item-0032",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "The wall-attributed pumping rate is the global particle-number throughput removed from the plasma through the wall by a pumping process.",
+  "reason": "A rate at the wall due to pumping is that global particle throughput, so the name's quantity is the one defined."
+ },
+ {
+  "id": "item-0033",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "This quantity is the cumulative equivalent-electron inventory of neutral carbon-13-labeled methane introduced by gas injection after plasma breakdown.",
+  "reason": "The name states a count of methane carbon-13, but the definition is an equivalent-electron inventory carrying a factor of ten per molecule, an attribute the name does not state."
+ },
+ {
+  "id": "item-0034",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Parallel ion particle flux is the signed net flow of one specified ion species along the local magnetic field per unit perpendicular area and time, summed over its ionic charge states.",
+  "reason": "The name states a parallel ion particle flux and the definition is that field-parallel species-summed flux."
+ },
+ {
+  "id": "item-0035",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Total ion power density is the net rate at which energy is transferred to or from all included ion species per unit volume.",
+  "reason": "The name's total ion power density is the aggregate volumetric ion energy transfer rate described."
+ },
+ {
+  "id": "item-0036",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Poloidal electron particle flux is the local signed number flow of free electrons along the poloidal direction per unit area perpendicular to that direction.",
+  "reason": "The name states a poloidal electron particle flux and the definition is that projected number flux."
+ },
+ {
+  "id": "item-0037",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "The electron diffusion coefficient characterizes electron particle transport driven by the local electron number-density gradient.",
+  "reason": "An unqualified electron diffusion coefficient conventionally means particle diffusion, which is what the name denotes here."
+ },
+ {
+  "id": "item-0038",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "A straight-field-line angle is an angular coordinate for labeling position along magnetic field lines in a magnetic-flux coordinate description.",
+  "reason": "The name denotes that angular coordinate, which is exactly what the definition gives."
+ },
+ {
+  "id": "item-0039",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "with generation counted positively and internal consumption counted negatively",
+  "reason": "The name's net power of a plant system is that generation-minus-consumption balance."
+ },
+ {
+  "id": "item-0040",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "At a given position and time, the density is the zeroth velocity moment of the state-resolved distribution",
+  "reason": "The name states the number density of neutrals in one internal state, which is the zeroth moment of that state's distribution."
+ },
+ {
+  "id": "item-0041",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is the positive cross-field decay length of heat-flux magnitude in the scrape-off layer.",
+  "reason": "The name states a heat decay length over the scrape-off layer and the definition is that cross-field e-folding length."
+ },
+ {
+  "id": "item-0042",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Poloidal magnetic flux at the constraint position is the signed flux through a horizontal disk centered on the toroidal symmetry axis and bounded by the toroidal circle through that position.",
+  "reason": "The name states the poloidal flux at that location and the definition evaluates exactly that flux there."
+ },
+ {
+  "id": "item-0043",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "The toroidal qualifier denotes the tensor direction of both the transported momentum component and the spatial flux-gradient projection; it is not a cross-flux-surface coefficient for transport of toroidal momentum.",
+  "reason": "The name reads as the usual cross-field transport coefficient for toroidal momentum, but the definition is a same-direction tensor component, an attribute the name does not state."
+ },
+ {
+  "id": "item-0044",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "Energy convection velocity is the effective transport velocity assigned to the convective part of an energy flux.",
+  "reason": "The name claims an ion charge-state population, but the definition states the generic energy convection velocity, leaving the population to a more specific instance."
+ },
+ {
+  "id": "item-0045",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "it describes propagation direction rather than the angular position of trajectory points",
+  "reason": "The name reads as a poloidal angular position of the beam, but the definition is the steering angle of its mean propagation direction."
+ },
+ {
+  "id": "item-0046",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Wave phase at an ion-cyclotron heating antenna describes the relative phase of a coherent radio-frequency excitation at a selected strap or module.",
+  "reason": "The name states a wave phase, but the definition is a reference-relative phase between a selected excitation and a chosen reference, which the name does not say."
+ },
+ {
+  "id": "item-0047",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is the vertical position of the first-wall location closest to the plasma boundary or separatrix.",
+  "reason": "The name states the vertical coordinate of the closest wall point and the definition is that coordinate."
+ },
+ {
+  "id": "item-0048",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The poloidal ion diffusion coefficient is the effective ion particle diffusivity along the poloidal tangent on a magnetic flux surface.",
+  "reason": "The name states a poloidal ion diffusion coefficient and the definition is that poloidal directional particle diffusivity."
+ },
+ {
+  "id": "item-0049",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Poloidal neutral internal-state particle flux is the local number transport of one neutral atomic or molecular species in a specified internal quantum state along the poloidal direction.",
+  "reason": "The name states a poloidal particle flux for one neutral species in one internal state, which is what the definition projects."
+ },
+ {
+  "id": "item-0050",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Total absorbed wave power is the total rate at which coherent electromagnetic waves transfer energy directly to all plasma particle populations, with contributions integrated over the plasma volume.",
+  "reason": "The name's total absorbed wave power is that globally aggregated wave-to-particle transfer rate."
+ },
+ {
+  "id": "item-0051",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Diamagnetic energy is the global plasma stored-energy measure associated with total pressure perpendicular to the local magnetic field.",
+  "reason": "Diamagnetic energy conventionally denotes this perpendicular-pressure stored-energy measure, exactly as defined."
+ },
+ {
+  "id": "item-0052",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "Electron collisional torque is the volume-integrated angular-momentum transfer to an electron population caused by Coulomb collisions with other plasma species.",
+  "reason": "The name claims the thermal electron population, but the definition states the unqualified electron collisional torque whose population is resolved only by its more specific instances."
+ },
+ {
+  "id": "item-0053",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "This quantity is the vertical coordinate of a specified point on the geometric outline of a vacuum-vessel element.",
+  "reason": "The vertical outline of a vacuum vessel is represented by the vertical coordinates of its outline points, which is what the definition gives."
+ },
+ {
+  "id": "item-0054",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The particle pumping rate is the global throughput of particles removed from the plasma at the wall by pumping.",
+  "reason": "The name states a particle removal rate at the wall due to pumping and the definition is that global particle throughput."
+ },
+ {
+  "id": "item-0055",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Cumulative electron particle source rate is the net rate at which source and sink processes add or remove free electrons within the plasma volume enclosed by a magnetic flux surface.",
+  "reason": "The name states the enclosed-volume cumulative electron source rate and the definition is that spatial integral."
+ },
+ {
+  "id": "item-0056",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Neutral energy flux is the signed surface-normal component of energy-flux density carried by neutral atoms and molecules.",
+  "reason": "The name states a neutral energy flux and the definition is that surface-normal energy transport summed over neutral species and states."
+ },
+ {
+  "id": "item-0057",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Runaway-electron source rate due to Dreicer generation is the volumetric rate at which parallel electric acceleration drives electrons from the thermal distribution's suprathermal tail into runaway motion.",
+  "reason": "The name states the Dreicer runaway production rate and the definition is that volumetric source into the runaway population."
+ },
+ {
+  "id": "item-0058",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "The diamagnetic heat-viscosity current density is the local diamagnetic-direction contribution to electric current generated by heat-viscosity stresses in a collisional magnetized-plasma fluid closure.",
+  "reason": "The name already attributes the current to heat viscosity, so the diamagnetic-direction component the definition gives is what it denotes."
+ },
+ {
+  "id": "item-0059",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Parallel electron energy flux represents net kinetic-energy transport by electrons along the local magnetic field.",
+  "reason": "The name states a field-parallel electron energy flux and the definition is that projection."
+ },
+ {
+  "id": "item-0060",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Neutral surface-recombination power at the wall is the rate at which recombination energy from incident neutral particles is deposited in plasma-facing wall material.",
+  "reason": "The name states neutral recombination power at the wall and the definition is that deposited power."
+ },
+ {
+  "id": "item-0061",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "This quantity is the direction-resolved effective Fickian diffusivity for neutral-particle transport.",
+  "reason": "The name reads as a scalar neutral diffusivity, but the definition is a direction-resolved component set with the scalar reading not represented."
+ },
+ {
+  "id": "item-0062",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Ion charge-state power density is the net rate at which energy is transferred to or from ions of a specified species and charge state or charge-state bundle per unit physical volume.",
+  "reason": "The name states a charge-state-resolved ion power density and the definition is that volumetric net energy transfer rate."
+ },
+ {
+  "id": "item-0063",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The parallel ion velocity represents the local magnetic-field-aligned component of the charge-state-averaged ion bulk flow.",
+  "reason": "The name states the parallel ion velocity and the definition is that field-aligned charge-state-averaged flow component."
+ },
+ {
+  "id": "item-0064",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Toroidal flux limiter coefficient is the dimensionless factor that scales the collisionless free-streaming bound on the toroidal component of neutral-particle-state momentum flux in a multi-fluid transport closure.",
+  "reason": "The name states a toroidal flux limiter coefficient and the definition is that dimensionless toroidal limiting factor."
+ },
+ {
+  "id": "item-0065",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is the local source or sink of angular momentum transferred to the thermal plasma when non-thermal particles thermalize.",
+  "reason": "Torque density due to thermalization is exactly the angular-momentum transfer rate the definition gives."
+ },
+ {
+  "id": "item-0066",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Perpendicular trapped fast-particle pressure is the local gyrotropic kinetic-pressure component perpendicular to the magnetic field, carried by suprathermal particles on magnetically trapped orbits.",
+  "reason": "Every element of the name (perpendicular, trapped, fast particle, pressure) is what the definition computes."
+ },
+ {
+  "id": "item-0067",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The quantity is the projection of the image-up unit vector onto the Cartesian x-axis",
+  "reason": "The name states the x component of the camera image-up unit vector and the definition is that projection."
+ },
+ {
+  "id": "item-0068",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Ion heating power quantifies the total power flowing into the collective ion population from all external and internal sources",
+  "reason": "The name's ion heating power is that net power into the ion population, aggregated over species."
+ },
+ {
+  "id": "item-0069",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The radial neutral energy diffusion coefficient characterizes the proportionality between the radial diffusive neutral thermal-energy flux and the major-radius gradient of neutral thermal-energy density in an edge plasma.",
+  "reason": "The name states a radial neutral energy diffusion coefficient and the definition is that Fickian coefficient."
+ },
+ {
+  "id": "item-0070",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "Parallel ion current density at a plasma-facing surface is the signed projection",
+  "reason": "The name carries no surface qualifier, but the definition restricts the quantity to the plasma-facing surface where ion current is collected."
+ },
+ {
+  "id": "item-0071",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Parallel current density due to heat viscosity is the local magnetic-field-aligned component of the electric-current contribution generated by heat-viscosity stresses in a collisional magnetized-plasma fluid closure.",
+  "reason": "The name states the parallel heat-viscosity current density and the definition is that field-aligned projection."
+ },
+ {
+  "id": "item-0072",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Thermal-ion charge-state collisional power density is the local rate at which Coulomb collisions transfer kinetic energy from a fast or non-Maxwellian particle population to thermal ions of one specified species and charge state.",
+  "reason": "Every element of the name is stated in the definition: thermal ions, one charge state, collisional power density."
+ },
+ {
+  "id": "item-0073",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Co-passing fast-ion collisional power density is the local rate at which Coulomb collisions transfer kinetic energy from co-passing fast particles to a specified fast-ion species.",
+  "reason": "The name states the co-passing fast-ion collisional power density and the definition is that local energy-transfer rate summed over charge states."
+ },
+ {
+  "id": "item-0074",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Implicit ion energy source rate is the proportional coefficient in the stiff part of a decomposed ion energy source or sink.",
+  "reason": "The name states the implicit ion energy source rate and the definition is that temperature-proportional coefficient."
+ },
+ {
+  "id": "item-0075",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "Neutral particle diffusivity is the effective transport coefficient for particle spreading driven by a neutral number-density gradient.",
+  "reason": "The name states a neutral particle diffusivity and the definition is that effective coefficient, matching the parent quantity it declares."
+ },
+ {
+  "id": "item-0076",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Poloidal magnetic flux at the magnetic axis is the signed equilibrium flux through a horizontal disk centered on the toroidal symmetry axis and bounded by the toroidal circle",
+  "reason": "The name states the poloidal flux at the magnetic axis and the definition evaluates exactly that flux there."
+ },
+ {
+  "id": "item-0077",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "This quantity is the effective convection-velocity vector assigned to the diamagnetic contribution to momentum transport of a selected neutral species.",
+  "reason": "The name states a neutral velocity assigned to the diamagnetic contribution, which is the effective convection velocity the definition gives."
+ },
+ {
+  "id": "item-0078",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The parallel neutral-state velocity due to diamagnetic drift is the field-aligned projection of an effective pressure-gradient transport contribution assigned to one neutral atomic or molecular internal quantum state in the edge plasma.",
+  "reason": "The name states the parallel projection of the state-resolved diamagnetic velocity contribution, which is what the definition gives."
+ },
+ {
+  "id": "item-0079",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The toroidal ion charge-state diamagnetic-drift velocity is the signed projection of the pressure-gradient-driven fluid velocity for one ion charge state in the edge plasma onto the toroidal direction.",
+  "reason": "The name states the toroidal component of the diamagnetic velocity for one charge state, which is the defined projection."
+ },
+ {
+  "id": "item-0080",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "For each represented charge state, the cumulative energy is the sum of successive ionization energies needed to reach it from the neutral ground state of the same species.",
+  "reason": "The name reads as an ionization potential, but the definition is a concentration-weighted cumulative energy from the neutral ground state that is explicitly not the threshold for the next ionization step."
+ },
+ {
+  "id": "item-0081",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The electron energy diffusion coefficient $D_{e,E}$ quantifies gradient-driven diffusive transport of thermal energy carried by the electron population",
+  "reason": "The name states an electron energy diffusion coefficient and the definition is that Fick's-law coefficient for the electron population."
+ },
+ {
+  "id": "item-0082",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the commanded supply-voltage setpoint",
+  "reason": "A requested voltage of a neutron detector is the commanded supply setpoint, exactly as defined."
+ },
+ {
+  "id": "item-0083",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The total neutron source rate due to thermal fusion is the number of neutrons produced per unit time by the thermal tritium-tritium reaction branch between bulk tritons with locally Maxwellian velocity distributions.",
+  "reason": "The name states the tritium-tritium thermal-fusion neutron source rate and the definition is that volumetric production rate."
+ },
+ {
+  "id": "item-0084",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "Parallel neutral-energy convection velocity is the effective coefficient of the energy-density-proportional advective flux carried by neutral particles along the local magnetic field.",
+  "reason": "The name claims an ion heat convection velocity, but the definition is a neutral-energy convection coefficient acting on neutral energy density, and it explicitly distinguishes itself from the ion quantity."
+ },
+ {
+  "id": "item-0085",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Normalized toroidal flux coordinate at the constraint position labels its magnetic surface by the square root of the axis-to-boundary toroidal-flux fraction.",
+  "reason": "The name states the normalized toroidal flux coordinate evaluated at the constraint position, which is what the definition gives."
+ },
+ {
+  "id": "item-0086",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Trapped thermal-ion collisional power density is the signed rate of kinetic-energy transfer per unit volume from trapped fast or non-Maxwellian particles to thermal ions of a specified species, averaged over a magnetic flux surface.",
+  "reason": "The name gives no averaging, but the defined quantity is a flux-surface average rather than the local power density the name reads as."
+ },
+ {
+  "id": "item-0087",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "It applies to one species and one internal state, without summing or averaging over either.",
+  "reason": "Every element of the name (vertical, neutral, internal state, momentum, convection velocity) is what the definition states."
+ },
+ {
+  "id": "item-0088",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "Effective electron diffusivity is an effective scalar transport coefficient for diffusive electron-particle transport along a specified transport direction in a magnetized plasma.",
+  "reason": "The name states an effective electron diffusivity and the definition is that direction-specific effective coefficient, which is what the effective qualifier conveys."
+ },
+ {
+  "id": "item-0089",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The quantity is the total volume occupied by the lead-lithium coolant/breeder constituent within the complete breeder blanket assembly.",
+  "reason": "The name states the coolant volume of the breeder blanket, which is the volume of that coolant/breeder constituent."
+ },
+ {
+  "id": "item-0090",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The coefficient applies to one ion species and one charge state, without summation or averaging over species or charge states.",
+  "reason": "Every element of the name (parallel, ion, charge state, momentum, damping rate) is what the definition states."
+ },
+ {
+  "id": "item-0091",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The neutral diffusion coefficient characterizes local Fickian particle diffusion of a specified neutral species without selecting a spatial direction.",
+  "reason": "The name states a neutral diffusion coefficient and the definition is that internal-state-summed Fickian coefficient."
+ },
+ {
+  "id": "item-0092",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "Center-of-mass velocity is the mass-weighted barycentric velocity vector of a multicomponent plasma.",
+  "reason": "The name claims a neutral-species quantity, but the definition defines the multicomponent plasma centre-of-mass velocity and only notes that the neutral-species form applies the same weighting."
+ },
+ {
+  "id": "item-0093",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The quantity is the geometric thickness of the cryostat structural vessel at a specified location.",
+  "reason": "The name states a cryostat thickness and the definition is that local through-wall separation."
+ },
+ {
+  "id": "item-0094",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Fast-particle collisional power density is the local net rate at which Coulomb collisions change the kinetic-energy density of a specified nonthermal particle population.",
+  "reason": "The name states fast-particle collisional power density, an orbit-unrestricted aggregate, which is what the definition gives."
+ },
+ {
+  "id": "item-0095",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Total ion energy convection velocity is the effective vector coefficient relating the combined convective energy flux of all ion species to their summed local transported energy density.",
+  "reason": "The name states the total ion energy convection velocity and the definition is that all-ion aggregate coefficient."
+ },
+ {
+  "id": "item-0096",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The radial neutral velocity is the major-radius projection of the mean translational flow of a selected neutral species in the right-handed cylindrical $(R, \\phi, Z)$ frame.",
+  "reason": "The name states the radial component of the neutral-species mean velocity, which is what the definition projects."
+ },
+ {
+  "id": "item-0097",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This quantity is the local toroidal angular-momentum transfer density delivered by Coulomb collisions to the trapped-orbit part of the fast-electron population.",
+  "reason": "Every element of the name (toroidal, trapped, fast electron, torque density, collisions) is what the definition states."
+ },
+ {
+  "id": "item-0098",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Pressure of thermal ions is the isotropic kinetic stress associated with random thermal motion.",
+  "reason": "The name states a thermal ion pressure and the definition is that isotropic charge-state-summed kinetic stress."
+ },
+ {
+  "id": "item-0099",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Poloidal beta compares the total perpendicular plasma pressure, averaged over the whole plasma volume, with a magnetic-pressure scale associated with the poloidal field.",
+  "reason": "The name denotes the standard poloidal beta ratio and the definition gives exactly that volume-averaged pressure ratio."
+ },
+ {
+  "id": "item-0100",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The coefficient applies to aggregate edge-plasma momentum, rather than momentum of a single ion species or charge state",
+  "reason": "The name states a parallel edge-plasma momentum diffusivity and the definition is that field-aligned kinematic coefficient."
+ },
+ {
+  "id": "item-0101",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "A current-density contribution is the local electric current carried by the charged particles included in the specified population or contribution.",
+  "reason": "The name claims a fast-ion contribution, but the definition states the generic current-density contribution whose population is left to the specified case."
+ },
+ {
+  "id": "item-0102",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "Ion atomic mass is the reference mass assigned to one neutral atom of a selected elemental or isotopic constituent of an ion species.",
+  "reason": "An atomic mass is the neutral-atom reference mass, so the quantity the name states is the one defined."
+ },
+ {
+  "id": "item-0103",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "It defines one oblique geometric dimension independently of the component's particular identity or side-label convention.",
+  "reason": "The name claims a poloidal-field-coil length, but the definition declares a structural geometric dimension of a magnetic component whose concrete identity is supplied by more specific instances."
+ },
+ {
+  "id": "item-0104",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "Extent of a detector pixel is the nonnegative linear size of one pixel footprint along a specified in-plane axis of the right-handed local detector frame",
+  "reason": "The name states a detector-pixel extent and the definition is that footprint size along a local axis."
+ },
+ {
+  "id": "item-0105",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Fast-particle energy is the total kinetic energy carried by a specified suprathermal population throughout the plasma volume.",
+  "reason": "The name states a fast-particle energy and the definition is that volume-integrated stored kinetic energy."
+ },
+ {
+  "id": "item-0106",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The radial neutral momentum diffusion coefficient is the effective coefficient for diffusive transport of neutral-particle momentum in the radial direction of the right-handed cylindrical $(R, \\phi, Z)$ frame.",
+  "reason": "The name states a radial neutral momentum diffusion coefficient and the definition is that radial tensor component."
+ },
+ {
+  "id": "item-0107",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Ion absorbed wave power is the total rate of energy transfer from coherent electromagnetic waves to ion populations.",
+  "reason": "The name states ion absorbed wave power and the definition is that volume-integrated transfer to ion populations."
+ },
+ {
+  "id": "item-0108",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "The effective ion energy diffusion coefficient characterizes gradient-driven energy transport carried by a specified ion population.",
+  "reason": "The name states an ion energy diffusion coefficient and the definition is that Fickian coefficient for the ion population."
+ },
+ {
+  "id": "item-0109",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Fast electron absorbed wave power is the total coherent-wave power transferred to the fast, non-thermal electron population throughout the plasma volume.",
+  "reason": "The name states fast-electron absorbed wave power and the definition is that volume integral into the fast-electron population."
+ },
+ {
+  "id": "item-0110",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Neutral-state particle convection velocity is the effective vector coefficient of the density-proportional advective particle flux for a specified internal state of a neutral species in the edge plasma.",
+  "reason": "The name states a neutral-state particle convection velocity and the definition is that state-resolved advective coefficient."
+ }
+]
