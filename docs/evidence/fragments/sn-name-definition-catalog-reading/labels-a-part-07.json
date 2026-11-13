@@ -439,5 +439,152 @@
   "confidence": "medium",
   "evidence": "the upper allowable value of a signed electromagnetic force resultant acting on the coil",
   "reason": "the name states a maximum force while the definition fixes it as an allowable bound on a force resultant selected by one combination-matrix row."
+ },
+ {
+  "id": "item-0682",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "As the direction-agnostic parent, it is distinct from the radial neutral internal-state energy diffusion coefficient",
+  "reason": "the definition declares a direction-agnostic parent coefficient whose directional forms are fixed by more specific instances."
+ },
+ {
+  "id": "item-0683",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the high-voltage supply setpoint that establishes the target detector bias, rather than the actual output voltage",
+  "reason": "the requested voltage of the detector is the commanded bias setpoint the name states."
+ },
+ {
+  "id": "item-0684",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the real component of the toroidal projection of the complex first-order plasma magnetic-field perturbation eigenfunction",
+  "reason": "the real part of the toroidal perturbed plasma magnetic field is exactly what the name states."
+ },
+ {
+  "id": "item-0685",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local source density of angular momentum transferred to or from the trapped fast-ion population by Coulomb collisions",
+  "reason": "the collisional torque density for trapped fast ions is the angular-momentum transfer rate the name states."
+ },
+ {
+  "id": "item-0686",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local rate of electromagnetic energy emission per unit volume, summed over the radiation mechanisms included by the physical model",
+  "reason": "power density due to radiation is the volumetric radiative energy loss rate the name states."
+ },
+ {
+  "id": "item-0687",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed projection of its measurement position onto the vertical direction",
+  "reason": "the vertical coordinate of the ECE channel is the signed Z of its measurement position, as the name states."
+ },
+ {
+  "id": "item-0688",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the Z coordinate of that center in the right-handed cylindrical (R, phi, Z) frame",
+  "reason": "the vertical coordinate of the mirror is the Z coordinate of its geometric centre, as the name states."
+ },
+ {
+  "id": "item-0689",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the local, signed toroidal projection of the net current driven by that orbit class",
+  "reason": "the toroidal current driven by counter-passing particles is the signed toroidal projection of that net current the name states."
+ },
+ {
+  "id": "item-0690",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed major-radius projection of the pressure-gradient-driven fluid drift for one ion charge state",
+  "reason": "the radial diamagnetic-drift velocity of one charge state is the major-radius projection the name states."
+ },
+ {
+  "id": "item-0691",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "summed over all charged argon ion states and excludes neutral argon",
+  "reason": "under the catalog rule a bare species name counts ions, and the flux-surface average is stated in the name."
+ },
+ {
+  "id": "item-0692",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron count with 16 equivalent electrons per molecule",
+  "reason": "the name states an ethylene prefill count, but the definition expresses it as an equivalent-electron count of sixteen per molecule."
+ },
+ {
+  "id": "item-0693",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "This parent quantity selects a specified neutral state and does not aggregate over different neutral states, but it does not specify a transport direction or microscopic mechanism",
+  "reason": "the definition declares a direction-agnostic parent diffusivity whose directional instances carry the actual coefficient."
+ },
+ {
+  "id": "item-0694",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local rate at which external processes change the angular momentum of the combined ion population about the symmetry axis",
+  "reason": "the toroidal ion torque density is the toroidal component of ion torque density summed over species and charge states, as the name states."
+ },
+ {
+  "id": "item-0695",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the conventional electric current circulating in a single passive conducting loop",
+  "reason": "the current of a passive loop is exactly the loop's circulating conventional current the name states."
+ },
+ {
+  "id": "item-0696",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the density-weighted fluid-velocity component of tritium ions evaluated at the magnetic axis",
+  "reason": "the toroidal component of the density-weighted tritium ion fluid velocity at the magnetic axis is what the name states."
+ },
+ {
+  "id": "item-0697",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the value of q at the innermost closed flux surface",
+  "reason": "the safety factor at the magnetic axis is the axis limit of the field-line winding ratio the name states."
+ },
+ {
+  "id": "item-0698",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "The velocity moment is not centered on the fast-particle mean flow, so directed parallel motion contributes in addition to random motion",
+  "reason": "the name states a pressure, but the definition includes directed parallel motion that a random-only pressure would exclude."
+ },
+ {
+  "id": "item-0699",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed local projection of the current contribution associated with the divergence of parallel viscous stress onto the major-radius direction",
+  "reason": "the radial current density due to parallel viscosity is the major-radius projection the name states."
+ },
+ {
+  "id": "item-0700",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the in-phase component of the complex first-order plasma-velocity perturbation amplitude for one toroidal Fourier harmonic with mode number n",
+  "reason": "the real part of the poloidal perturbed plasma velocity is the in-phase amplitude component the name states."
+ },
+ {
+  "id": "item-0701",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the global rate at which neutrons are generated by thermonuclear reactions between plasma ion species whose velocity distributions are Maxwellian",
+  "reason": "the global thermal-fusion neutron production rate is what the name states, whether per channel or aggregated."
+ },
+ {
+  "id": "item-0702",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the flux-surface-averaged volumetric rate at which particles enter or leave one specified internal state of a neutral species",
+  "reason": "the name states a source rate, but the definition fixes it as a flux-surface-averaged volumetric rate."
  }
 ]
