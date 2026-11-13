@@ -12,6 +12,7 @@ from imas_codex.standard_names.graph_store import (
     graph_review_persistence as _owning_graph_review_persistence,
 )
 from imas_codex.standard_names.prose_policy import banned_prose_findings
+from imas_codex.standard_names.review import holds
 from imas_codex.standard_names.worker_tasks import (
     worker_common as _owning_worker_common,
     worker_review_docs as _owning_worker_review_docs,
@@ -178,6 +179,14 @@ def test_clean_documentation_is_accepted() -> None:
     assert stage == "accepted"
     assert persisted["score"] == 1.0
     assert adjudications == []
+
+
+def test_a_name_definition_hold_carries_a_registered_identity():
+    """Persistence keys a hold by its kind, so the kind must be registered."""
+    assert holds.finding_key(
+        "name_definition", "the definition states a weighting the name does not"
+    )
+    assert "name_definition" in holds.HOLD_KINDS
 
 
 def test_unanswered_name_definition_judgment_holds_the_candidate():
