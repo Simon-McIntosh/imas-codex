@@ -240,6 +240,7 @@ _OWNERS_BY_MODULE = {
         "_load_docs_review_examples",
         "_load_docs_review_parent_children",
         "_load_docs_review_source_item",
+        "_name_definition_note",
         "_release_docs_review_claim",
         "_set_docs_review_dd_source_paths",
         "prepare_docs_review_request",
