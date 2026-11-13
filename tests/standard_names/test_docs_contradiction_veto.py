@@ -75,7 +75,9 @@ class _HoldRecorder:
         ("error", "reviewed"),
     ],
 )
-def test_claim_verdict_controls_acceptance(answer, expected_stage):
+def test_claim_verdict_controls_acceptance(
+    answer, expected_stage, passing_name_definition_seat
+):
     item = {
         "id": "magnetic_field",
         "claim_token": "claim",
@@ -216,7 +218,7 @@ def test_claim_verdict_controls_acceptance(answer, expected_stage):
     ids=["no-binding-supports", "one-binding-supports"],
 )
 def test_a_claim_is_held_only_when_no_bound_source_supports_it(
-    readings, expected_stage
+    readings, expected_stage, passing_name_definition_seat
 ):
     """Every bound source is read, and support from any of them releases the hold."""
     import imas_codex.standard_names.graph_ops as graph_ops
@@ -383,7 +385,9 @@ def test_a_claim_is_held_only_when_no_bound_source_supports_it(
     assert source_docs[second] in persisted["comments_per_dim"]["contradicts_source"]
 
 
-def test_stale_docs_claim_cannot_change_winning_holds() -> None:
+def test_stale_docs_claim_cannot_change_winning_holds(
+    passing_name_definition_seat,
+) -> None:
     """A no-op persistence must leave the graph owner's hold state untouched."""
     import imas_codex.standard_names.graph_ops as graph_ops
 

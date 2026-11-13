@@ -707,10 +707,24 @@ async def _name_definition_note(
         name_definition_note,
     )
 
-    verdicts, cost = await judge_name_definitions(
-        [item],
-        reasoning_effort=get_reasoning_effort("sn-review", "low"),
-    )
+    try:
+        verdicts, cost = await judge_name_definitions(
+            [item],
+            reasoning_effort=get_reasoning_effort("sn-review", "low"),
+        )
+    except Exception as exc:
+        # A seat that could not answer must hold the candidate with a recorded
+        # reason: failing the batch leaves the item claimed and re-reviewed
+        # forever, and accepting it would report an unjudged definition as
+        # agreeing with its name.
+        logger.warning(
+            "review_docs: name definition seat failed for %s; holding candidate",
+            item["id"],
+            exc_info=True,
+        )
+        return (
+            f"name-versus-definition review did not answer: {type(exc).__name__}: {exc}"
+        )
     if cost:
         mgr.record_llm_cost_event(
             cost,
@@ -723,7 +737,10 @@ async def _name_definition_note(
             ),
         )
     if not verdicts:
-        return None
+        return (
+            "name-versus-definition review did not answer: "
+            "the review seat returned no verdict"
+        )
     return name_definition_note(item, verdicts[0])
 
 

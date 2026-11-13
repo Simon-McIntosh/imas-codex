@@ -800,7 +800,9 @@ class TestOnEventPayloadsNotTruncated:
         assert comment == _LONG_COMMENT
 
     @pytest.mark.asyncio
-    async def test_review_docs_comment_not_clipped(self) -> None:
+    async def test_review_docs_comment_not_clipped(
+        self, passing_name_definition_seat
+    ) -> None:
         """process_review_docs_batch emits the full comment in on_event."""
         from imas_codex.standard_names.worker_tasks.worker_review_docs import (
             process_review_docs_batch,
