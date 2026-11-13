@@ -523,5 +523,103 @@
   "confidence": "high",
   "evidence": "a dimensionless integer Fourier index that specifies periodic structure around the symmetry axis for a magnetohydrodynamic perturbation",
   "reason": "The toroidal MHD mode number is exactly that dimensionless toroidal Fourier index."
+ },
+ {
+  "id": "item-196",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the normalized toroidal-flux label of the magnetic surface passing through the center of a neoclassical tearing-mode magnetic island",
+  "reason": "The normalized toroidal flux coordinate at the island's resonant surface is what the name states, dimensionless."
+ },
+ {
+  "id": "item-197",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "local abundance per physical volume of one selected neutral species, combining its thermal and nonthermal particle populations",
+  "reason": "The name states a total neutral density, while the definition restricts the sum to one selected species rather than all neutrals."
+ },
+ {
+  "id": "item-198",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the optical phase-space acceptance of one spectrometer channel after weighting its wavelength-dependent collecting area and accepted ray directions by the channel response",
+  "reason": "The name states a spectral etendue, while the definition is an \u00e9tendue additionally weighted by the channel's normalized wavelength response before integration."
+ },
+ {
+  "id": "item-199",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the real part of the cylindrical radial component of a complex first-order plasma magnetic-field perturbation for a selected toroidal Fourier harmonic",
+  "reason": "The real part of the radial perturbed plasma magnetic field is that in-phase R component of the harmonic, in T."
+ },
+ {
+  "id": "item-200",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a magnetic-geometry metric coefficient that characterizes how a toroidal-flux radial coordinate varies across nested magnetic surfaces",
+  "reason": "The name spells out the same flux-surface-averaged ratio of squared flux-coordinate gradient to squared major radius, in m^-2."
+ },
+ {
+  "id": "item-201",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "quantifies gradient-driven diffusive transport of thermal energy carried by ions in one specified charge state",
+  "reason": "A poloidal ion charge-state energy diffusion coefficient is that Fickian diffusivity for one charge state, in m^2.s^-1."
+ },
+ {
+  "id": "item-202",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the effective coefficient describing the advective, non-diffusive transport of momentum for a specified ion species and charge state",
+  "reason": "The momentum convection velocity is exactly that advective momentum-transport coefficient, a velocity in m.s^-1, distinct from bulk flow."
+ },
+ {
+  "id": "item-203",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the effective scalar diffusivity that multiplies the parallel gradient of total ion energy density in a Fickian closure",
+  "reason": "The parallel total ion energy diffusion coefficient is that field-aligned diffusivity summed over species and charge states, in m^2.s^-1."
+ },
+ {
+  "id": "item-204",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the distance of that point from the toroidal symmetry axis",
+  "reason": "A radial outline coordinate of the iron-core segment is the major-radius coordinate of an outline point, in m."
+ },
+ {
+  "id": "item-205",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the empirical electron number-density limit associated with a confined toroidal plasma",
+  "reason": "The Greenwald density is that empirical density limit, in m^-3, which is the quantity the name denotes."
+ },
+ {
+  "id": "item-206",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local rate at which ions of one selected species leave a plasma-facing wall through surface-emission processes, expressed per unit wall area",
+  "reason": "Ion species particle flux at the wall due to surface emission is that emitted areal particle flux, in m^-2.s^-1."
+ },
+ {
+  "id": "item-207",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the signed equilibrium flux through a horizontal disk centered on the toroidal symmetry axis",
+  "reason": "Poloidal magnetic flux at the magnetic axis is that signed equilibrium disk flux evaluated at the axis, in Wb."
+ },
+ {
+  "id": "item-208",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the dimensionless Luce shape coefficient quantifying the departure of the upper inboard corner of the last closed flux surface from a reference ellipse",
+  "reason": "The upper-inner squareness of the plasma boundary is exactly that quadrant-resolved Luce coefficient, dimensionless."
+ },
+ {
+  "id": "item-209",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the major-radius coordinate of the detector center in the right-handed cylindrical $(R, \\phi, Z)$ frame",
+  "reason": "The radial coordinate of a detector is the major-radius coordinate of its center, in m."
  }
 ]
