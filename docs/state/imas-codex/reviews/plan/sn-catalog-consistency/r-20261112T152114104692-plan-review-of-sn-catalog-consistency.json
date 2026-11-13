@@ -35,6 +35,16 @@
       "note": "Done-when item 2 now admits a row recorded as already settled by definitions section 6, with the edit that settled it.",
       "reason": "",
       "when": "2026-11-13T00:13:06.558214+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c9a75e13f79a9041b7e51f1443e4b364e4e0afe4",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Item 2 now lets a unit-pair rename row be declined only when its advisory is cleared another way, named in the reason, so the witness in item 3 still holds.",
+      "reason": "",
+      "when": "2026-11-13T00:13:33.528769+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Done-when item 2 now admits a row recorded as already settled by definitions section 6, with the edit that settled it.",
       "reason": "",
       "when": "2026-11-13T00:13:06.558214+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c9a75e13f79a9041b7e51f1443e4b364e4e0afe4",
+      "commit_basis": "edit",
+      "note": "Item 2 now lets a unit-pair rename row be declined only when its advisory is cleared another way, named in the reason, so the witness in item 3 still holds.",
+      "reason": "",
+      "when": "2026-11-13T00:13:33.528769+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261112T152114104692-plan-review-of-sn-catalog-consistency.json",
