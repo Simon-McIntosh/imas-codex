@@ -313,5 +313,110 @@
     "confidence": "high",
     "evidence": "it counts delivered atoms rather than plasma electron content or ionization state",
     "reason": "For tritium, one delivered atom contributes one equivalent-electron count, so the named gas-injection source rate has the defined scale."
+  },
+  {
+    "id": "item-0870",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "signed, unintegrated electrical potential difference between the designated terminals of a flux loop",
+    "reason": "The definition gives the signed terminal voltage of the flux loop named, distinct from its linked flux."
+  },
+  {
+    "id": "item-0871",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "radial component of effective neutral diffusivity",
+    "reason": "The name and definition both identify the effective neutral-particle diffusion coefficient along the cylindrical radial direction."
+  },
+  {
+    "id": "item-0872",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "power carried by one specified electron-cyclotron beam into the vacuum vessel toward the plasma",
+    "reason": "The definition gives launched power for one electron-cyclotron beam, as the name states."
+  },
+  {
+    "id": "item-0873",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "geometric radius of the inner circular boundary of the annular cross-section",
+    "reason": "The definition is the inner radius of the plasma filament’s annular cross-section stated in the name."
+  },
+  {
+    "id": "item-0874",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "number density of krypton ions",
+    "reason": "The bare krypton-density name means krypton ions summed over charge states, consistent with the definition’s explicit exclusion of neutrals."
+  },
+  {
+    "id": "item-0875",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "real component of the parent eigenfunction perturbed_plasma_pressure evaluated on the poloidal plane",
+    "reason": "The definition describes the real part of the plasma pressure perturbation named."
+  },
+  {
+    "id": "item-0876",
+    "class": "agrees",
+    "confidence": "medium",
+    "evidence": "geometric thickness of the cap that closes the module at its lower end",
+    "reason": "The named lower module thickness is defined as the lower cap’s thickness, distinct from the module’s overall thickness."
+  },
+  {
+    "id": "item-0877",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "flux-surface average",
+    "reason": "The definition averages electron number density over the plasma-boundary flux surface, matching the stated population, locus and aggregation."
+  },
+  {
+    "id": "item-0878",
+    "class": "definition-narrower-than-name",
+    "confidence": "high",
+    "evidence": "in an edge-plasma fluid closure",
+    "reason": "The coefficient’s edge-plasma applicability is narrower than the general parallel ion charge-state scope in the name."
+  },
+  {
+    "id": "item-0879",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "retains the complete torque-vector direction rather than selecting a toroidal component or a particular transfer mechanism",
+    "reason": "The definition makes ion torque density the general vector quantity from which toroidal or mechanism-specific forms can be specialized."
+  },
+  {
+    "id": "item-0880",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "retains the complete torque-vector direction rather than selecting a toroidal component or a particular transfer mechanism",
+    "reason": "The co-passing name denotes the full population torque-density vector, with toroidal projections given by more specific names."
+  },
+  {
+    "id": "item-0881",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "This abstraction covers concrete real-part quantities such as the perturbed plasma mass density real part",
+    "reason": "The definition explicitly treats this as a parent real-quadrature concept whose perturbation-specific instance has a more detailed name."
+  },
+  {
+    "id": "item-0882",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "upper vertical extremum of a nested magnetic flux surface",
+    "reason": "The definition is the upper triangularity of an arbitrary nested flux surface, not the boundary-only variant."
+  },
+  {
+    "id": "item-0883",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "summed over neutral carbon and all ionic charge states",
+    "reason": "The bare carbon-density name denotes carbon ions summed over charge states, but the definition also includes neutral carbon."
+  },
+  {
+    "id": "item-0884",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "three equivalent-electron counts assigned to each lithium atom",
+    "reason": "The accumulated lithium name omits the equivalent-electron weighting, which makes the defined count three times the delivered atom count."
   }
 ]
