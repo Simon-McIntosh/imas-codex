@@ -21,7 +21,9 @@ from unittest.mock import MagicMock, patch
 
 import pytest
 
-from imas_codex.standard_names import graph_ops as _graph_ops  # noqa: F401  (wires the graph services)
+from imas_codex.standard_names import (
+    graph_ops as _graph_ops,  # noqa: F401  (wires the graph services)
+)
 from imas_codex.standard_names.graph_store import (
     graph_catalog as _owning_graph_catalog,
     graph_docs_persistence as _owning_graph_docs_persistence,
@@ -57,13 +59,13 @@ def _persist_gc(readback: list[dict], write: list[dict] | None) -> Any:
         }
     )
 
+
 def _write_call(gc: Any):
     """Return the docs CAS write call among a transaction's statements."""
     for call_obj in gc.query.call_args_list:
         if _WRITE_STATEMENT in call_obj.args[0]:
             return call_obj
     raise AssertionError("the docs write statement was never issued")
-
 
 
 @contextmanager
@@ -337,9 +339,7 @@ class TestPersistReviewedDocsConcurrentWinNoOp:
 class TestPersistToAccepted:
     def test_persist_to_accepted(self):
         """verdict='accept' + score >= min_score → docs_stage='accepted'."""
-        gc = _persist_gc(
-            [{"docs_chain_length": 0}], [{"id": "electron_temperature"}]
-        )
+        gc = _persist_gc([{"docs_chain_length": 0}], [{"id": "electron_temperature"}])
 
         with _patch_gc(gc):
             from imas_codex.standard_names.graph_store.graph_review_persistence import (
@@ -842,7 +842,7 @@ class TestFailedReleaseKeepsDrafted:
 
 
 class TestWorkerStreamsPerItemDocs:
-    def test_worker_streams_per_item(self, mock_llm):
+    def test_worker_streams_per_item(self, mock_llm, passing_name_definition_seat):
         """process_review_docs_batch returns one processed item per SN."""
         from imas_codex.standard_names.models import (
             StandardNameQualityCommentsDocs,

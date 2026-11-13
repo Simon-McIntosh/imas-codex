@@ -1064,11 +1064,15 @@ def shared_part_findings(
             # The stored sentence is present. A second sentence that states the
             # same part in other words was not removed by the renderer, so it
             # is reported here rather than left standing beside the wording.
+            # A stored part that states more than one sentence is split by the
+            # sentence splitter, so its own halves are not competing wordings:
+            # skip any candidate the stored wording contains.
             competing = next(
                 (
                     candidate
                     for candidate in sentences
                     if stored not in _collapsed(candidate)
+                    and _collapsed(candidate) not in stored
                     and _sentence_overlap(candidate, stored) >= _COMPETING_OVERLAP
                 ),
                 None,

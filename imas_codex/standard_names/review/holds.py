@@ -19,6 +19,7 @@ HOLD_KINDS = frozenset(
         "link_target_mismatch",
         "docs_lint_error",
         "cascade_contradiction",
+        "name_definition",
     }
 )
 

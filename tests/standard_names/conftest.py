@@ -1017,6 +1017,37 @@ def _infer_stage(
 
 
 @pytest.fixture()
+def passing_name_definition_seat():
+    """Hold the name-versus-definition seat at pass for tests of another gate.
+
+    The documentation review asks a separate seat whether a definition states a
+    qualifier its name omits. A test that measures a different gate still runs
+    the whole batch, so it needs that seat answered rather than reaching a live
+    model: a real call spends money and its verdict would decide the outcome
+    the test is not measuring.
+    """
+    from imas_codex.standard_names.review import name_definition_seat
+
+    async def judge(items, **_kwargs):
+        return (
+            [
+                {
+                    "name": entry.get("id") or entry.get("name") or "",
+                    "verdict": "pass",
+                    "qualifier": "agrees",
+                    "reasoning": "the definition states the quantity the name does",
+                    "proposed_name": "",
+                }
+                for entry in items
+            ],
+            0.0,
+        )
+
+    with patch.object(name_definition_seat, "judge_name_definitions", judge):
+        yield judge
+
+
+@pytest.fixture()
 def mock_llm():
     """Patch ``acall_llm_structured`` globally and yield a :class:`MockLLM`.
 
