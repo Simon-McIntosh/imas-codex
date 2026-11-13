@@ -3,21 +3,18 @@
  "rule": "Settle each export candidate from the blind readings it has received.\n\nRule, per candidate name:\n\n* label carried from the first two readers and both flag: ``flagged``;\n* label carried and both pass, with no further reading: ``stands``;\n* label carried with a further reading (the two disagreed, or the chat seat\n  flagged a name both passed): ``flagged`` when two of the three readers flag,\n  otherwise ``stands``;\n* text changed since it was read, or never read: two fresh readings decide;\n  both flag is ``flagged``, both pass is ``stands``, a split is ``undecided``\n  until a tie-break reading exists, after which two of three decides.\n\nA flag is any class other than ``agrees``.",
  "candidates": 2044,
  "by_verdict": {
-  "stands": 1542,
-  "flagged": 461,
-  "undecided": 41
+  "stands": 1559,
+  "flagged": 485
  },
  "totals": {
   "label-carried|agreeing|stands": 1303,
   "label-carried|disputed|flagged": 127,
   "label-carried|disputed|stands": 125,
   "label-carried|mismatched|flagged": 316,
-  "never-read|fresh|flagged": 15,
-  "never-read|fresh|stands": 43,
-  "never-read|fresh|undecided": 24,
-  "text-changed|fresh|flagged": 3,
-  "text-changed|fresh|stands": 71,
-  "text-changed|fresh|undecided": 17
+  "never-read|fresh|flagged": 30,
+  "never-read|fresh|stands": 52,
+  "text-changed|fresh|flagged": 12,
+  "text-changed|fresh|stands": 79
  },
  "rows": [
   {
@@ -86,12 +83,14 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "resolved by species or charge state"
+    "resolved by species or charge state",
+    "power transferred directly from coherent waves to a selected plasma particle population, integrated over the plasma volume and resolved by species or charge state"
    ]
   },
   {
@@ -1235,12 +1234,14 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
-    "agrees"
+    "agrees",
+    "abstract-parent-as-quantity"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "without selecting a particular external-coil residual, cylindrical component, or magnitude operation"
+    "without selecting a particular external-coil residual, cylindrical component, or magnitude operation",
+    "This parent is broader than any source-specific or reduction-specific field-strength quantity."
    ]
   },
   {
@@ -1782,11 +1783,13 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
+    "the total volume occupied by the lead-lithium coolant/breeder constituent within the complete breeder blanket assembly",
     "the total volume occupied by the lead-lithium coolant/breeder constituent within the complete breeder blanket assembly"
    ]
   },
@@ -2372,10 +2375,11 @@
    "carried_verdict": "",
    "classes": [
     "agrees",
-    "definition-narrower-than-name"
+    "definition-narrower-than-name",
+    "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "Signed conventional current circulating through a non-axisymmetric correction-coil winding"
    ]
@@ -2594,12 +2598,14 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "Species-specific instances include [hydrogen density at the pedestal top]"
+    "Species-specific instances include [hydrogen density at the pedestal top]",
+    "the concentration of one selected plasma species or effective pseudo-species ... It is not a sum over different species."
    ]
   },
   {
@@ -3204,12 +3210,14 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "an effective scalar transport coefficient for diffusive electron-particle transport along a specified transport direction"
+    "an effective scalar transport coefficient for diffusive electron-particle transport along a specified transport direction",
+    "diffusive electron-particle transport along a specified transport direction"
    ]
   },
   {
@@ -3218,12 +3226,14 @@
    "carried_verdict": "",
    "classes": [
     "agrees",
+    "qualifier-missing-from-name",
     "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "Effective ion diffusivity is the vector of directional effective Fickian coefficients"
+    "Effective ion diffusivity is the vector of directional effective Fickian coefficients",
+    "the vector of directional effective Fickian coefficients for particle transport of the ion population"
    ]
   },
   {
@@ -3553,11 +3563,13 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
-    "agrees"
+    "agrees",
+    "abstract-parent-as-quantity"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
+    "serving as the direction-agnostic parent over its radial and poloidal component forms",
     "serving as the direction-agnostic parent over its radial and poloidal component forms"
    ]
   },
@@ -5721,12 +5733,14 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
-    "agrees"
+    "agrees",
+    "abstract-parent-as-quantity"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "The heat channel is not fixed by this parent quantity ... The [electron heat decay length] and [ion heat decay length] are its species-resolved specializations"
+    "The heat channel is not fixed by this parent quantity ... The [electron heat decay length] and [ion heat decay length] are its species-resolved specializations",
+    "The heat channel is not fixed by this parent quantity, and no particular species sum is implied."
    ]
   },
   {
@@ -6237,10 +6251,11 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the proportional coefficient in the stiff part of a decomposed ion energy source or sink ... It multiplies the temperature of the ion population"
    ]
@@ -6739,12 +6754,14 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "given by a number-density-weighted mean over all charge states when the distribution is explicit"
+    "given by a number-density-weighted mean over all charge states when the distribution is explicit",
+    "the number-density-weighted mean ionic charge number"
    ]
   },
   {
@@ -7234,12 +7251,14 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "providing the Fick's-law proportionality between the density-normalized diffusive ion heat flux for that charge state and the local ion temperature gradient"
+    "providing the Fick's-law proportionality between the density-normalized diffusive ion heat flux for that charge state and the local ion temperature gradient",
+    "relating density-normalized diffusive energy flux carried by ions to their local temperature gradient"
    ]
   },
   {
@@ -7525,12 +7544,14 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
-    "agrees"
+    "agrees",
+    "abstract-parent-as-quantity"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "with directional projections represented by more specific quantities such as [radial ion particle diffusivity]"
+    "with directional projections represented by more specific quantities such as [radial ion particle diffusivity]",
+    "with directional projections represented by more specific quantities"
    ]
   },
   {
@@ -7640,12 +7661,14 @@
    "carried_verdict": "",
    "classes": [
     "agrees",
+    "qualifier-missing-from-name",
     "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "For each represented charge state, the cumulative energy is the sum of successive ionization energies needed to reach it from the neutral ground state of the same species."
+    "For each represented charge state, the cumulative energy is the sum of successive ionization energies needed to reach it from the neutral ground state of the same species.",
+    "for a bundle containing one charge state, it equals that state's cumulative ionization energy, not the threshold for its next ionization step"
    ]
   },
   {
@@ -9446,10 +9469,11 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the real electrical power balance of one plant system, with generation counted positively and internal consumption counted negatively"
    ]
@@ -9560,10 +9584,11 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "This parent quantity denotes the full vector concept; component-resolved quantities such as the [poloidal neutral-internal-state convection velocity] are projections of the same"
    ]
@@ -9748,12 +9773,14 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "the flux-surface-averaged net particle gain or loss per volume in one specified internal state of a neutral species"
+    "the flux-surface-averaged net particle gain or loss per volume in one specified internal state of a neutral species",
+    "the flux-surface-averaged volumetric rate at which particles enter or leave one specified internal state"
    ]
   },
   {
@@ -9902,11 +9929,13 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
-    "agrees"
+    "agrees",
+    "abstract-parent-as-quantity"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
+    "This parent covers directional components such as [parallel neutral particle diffusivity] and [poloidal neutral particle diffusivity]",
     "This parent covers directional components such as [parallel neutral particle diffusivity] and [poloidal neutral particle diffusivity]"
    ]
   },
@@ -10188,10 +10217,11 @@
    "carried_verdict": "",
    "classes": [
     "definition-narrower-than-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the effective vector coefficient of the density-proportional advective particle flux for a specified internal state of a neutral species in the edge plasma"
    ]
@@ -10280,10 +10310,11 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the effective convection-velocity vector assigned to the diamagnetic contribution to momentum transport of a selected neutral species. It is a transport coefficient, not an intrinsic magnetic drift"
    ]
@@ -11447,10 +11478,11 @@
    "carried_verdict": "",
    "classes": [
     "definition-narrower-than-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the net conventional charge flux attributed to heat viscosity in the edge plasma"
    ]
@@ -11909,10 +11941,11 @@
    "carried_verdict": "",
    "classes": [
     "definition-narrower-than-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "This quantity applies locally to one specified charge state of one ion species in the magnetized edge plasma"
    ]
@@ -12110,12 +12143,14 @@
    "carried_verdict": "",
    "classes": [
     "unit-does-not-fit-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "It is a source term in the ion momentum balance, not a [momentum flux]"
+    "It is a source term in the ion momentum balance, not a [momentum flux]",
+    "the area-normalized net rate of momentum transfer to the ion population along the local magnetic field"
    ]
   },
   {
@@ -12286,10 +12321,11 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the field-aligned projection of an effective pressure-gradient transport contribution assigned to one neutral atomic or molecular internal quantum state in the edge plasma"
    ]
@@ -13318,10 +13354,11 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "It excludes electromagnetic-field, rest-mass, and organized bulk-flow energy."
    ]
@@ -13581,12 +13618,14 @@
    "carried_verdict": "",
    "classes": [
     "agrees",
+    "qualifier-missing-from-name",
     "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "it describes propagation direction rather than the angular position of trajectory points"
+    "it describes propagation direction rather than the angular position of trajectory points",
+    "Its reference direction is inward, rather than the magnetic-axis-referenced position angle described by [poloidal angle]"
    ]
   },
   {
@@ -15124,12 +15163,14 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "Major-radius coordinate of a geometric point or reference position, equal to its perpendicular distance from the toroidal symmetry axis"
+    "Major-radius coordinate of a geometric point or reference position, equal to its perpendicular distance from the toroidal symmetry axis",
+    "its perpendicular distance from the toroidal symmetry axis"
    ]
   },
   {
@@ -15697,12 +15738,14 @@
    "carried_verdict": "",
    "classes": [
     "agrees",
+    "qualifier-missing-from-name",
     "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "Radial identifies the transported momentum component, not the direction across which momentum is transported."
+    "Radial identifies the transported momentum component, not the direction across which momentum is transported.",
+    "Radial identifies the transported momentum component, not the direction across which momentum is transported"
    ]
   },
   {
@@ -15762,10 +15805,11 @@
    "carried_verdict": "",
    "classes": [
     "definition-narrower-than-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the effective velocity assigned to the convective component of ion-energy transport in the edge plasma"
    ]
@@ -15960,10 +16004,11 @@
    "carried_verdict": "",
    "classes": [
     "definition-narrower-than-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "characterizes the proportionality between the radial diffusive neutral thermal-energy flux and the radial gradient ... in an edge plasma"
    ]
@@ -16430,12 +16475,14 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "The magnetic-surface-normal projection is distinct from the major-radius projection"
+    "The magnetic-surface-normal projection is distinct from the major-radius projection",
+    "surface-averaged transport of energy carried by the aggregate ion population"
    ]
   },
   {
@@ -18019,12 +18066,14 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
-    "agrees"
+    "agrees",
+    "abstract-parent-as-quantity"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "The [poloidal straight-field-line angle] is the poloidal specialization of this general coordinate concept"
+    "The [poloidal straight-field-line angle] is the poloidal specialization of this general coordinate concept",
+    "The [poloidal straight-field-line angle] is the poloidal specialization of this general coordinate concept."
    ]
   },
   {
@@ -18315,10 +18364,11 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the local rate at which Coulomb collisions transfer kinetic energy from designated nonthermal particle distributions to bulk thermal electrons"
    ]
@@ -18407,12 +18457,14 @@
    "carried_verdict": "",
    "classes": [
     "abstract-parent-as-quantity",
-    "agrees"
+    "agrees",
+    "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "serving as the direction-agnostic parent over directional component forms"
+    "serving as the direction-agnostic parent over directional component forms",
+    "the Fick's-law proportionality between the density-normalized diffusive ion heat flux for that charge state and the local ion temperature gradient"
    ]
   },
   {
@@ -18484,10 +18536,11 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "the local rate at which Coulomb collisions transfer kinetic energy from a fast or non-Maxwellian particle population to thermal ions of one specified species and charge state"
    ]
@@ -18745,10 +18798,11 @@
    "carried_verdict": "",
    "classes": [
     "qualifier-missing-from-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "It is the rate of heat removed from a plant component by coolant, determined by the coolant enthalpy increase"
    ]
@@ -19021,12 +19075,14 @@
    "carried_verdict": "",
    "classes": [
     "agrees",
+    "qualifier-missing-from-name",
     "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "This quantity describes the mean launch direction of one beam, not its spatial toroidal position"
+    "This quantity describes the mean launch direction of one beam, not its spatial toroidal position",
+    "the signed inclination of its mean launch direction out of the local poloidal plane"
    ]
   },
   {
@@ -20198,12 +20254,14 @@
    "carried_verdict": "",
    "classes": [
     "agrees",
+    "qualifier-missing-from-name",
     "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "The toroidal qualifier denotes the tensor direction of both the transported momentum component and the spatial flux-gradient projection; it is not a cross-flux-surface coefficient for transport of toroidal momentum."
+    "The toroidal qualifier denotes the tensor direction of both the transported momentum component and the spatial flux-gradient projection; it is not a cross-flux-surface coefficient for transport of toroidal momentum.",
+    "it is not a cross-flux-surface coefficient for transport of toroidal momentum"
    ]
   },
   {
@@ -23108,10 +23166,11 @@
    "carried_verdict": "",
    "classes": [
     "definition-narrower-than-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "It describes directed motion of a neutral species in one specified quantum or energy state along the toroidal symmetry axis ... in the edge plasma"
    ]
@@ -23649,10 +23708,11 @@
    "carried_verdict": "",
    "classes": [
     "definition-narrower-than-name",
+    "agrees",
     "agrees"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "stands",
    "evidence": [
     "It applies to one ion charge state in the edge plasma"
    ]
@@ -24852,12 +24912,14 @@
    "carried_verdict": "",
    "classes": [
     "agrees",
+    "qualifier-missing-from-name",
     "qualifier-missing-from-name"
    ],
    "seat_flagged": false,
-   "verdict": "undecided",
+   "verdict": "flagged",
    "evidence": [
-    "Wave phase at an ion-cyclotron heating antenna describes the relative phase of a coherent radio-frequency excitation at a selected strap or module."
+    "Wave phase at an ion-cyclotron heating antenna describes the relative phase of a coherent radio-frequency excitation at a selected strap or module.",
+    "the relative angular offset of a coherent radio-frequency excitation at a selected strap or module from a specified reference"
    ]
   },
   {
