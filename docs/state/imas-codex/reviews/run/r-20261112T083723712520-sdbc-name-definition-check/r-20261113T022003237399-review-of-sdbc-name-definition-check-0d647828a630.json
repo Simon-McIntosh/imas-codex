@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded no baseline_suite arm; its after_suite records revision a42c54b8d8bcf63b7b1f343bd203c44e83ec8ce9, exit_status 0, completed true, failure_count 0 and no failure ids, and the committed log's summary line reads '23 passed, 1 warning in 9.08s', so no failure was added. The two commits after a42c54b8d (91f24528f, 0d647828a) touch only docs/evidence files, so the gate covers the product code at the reviewed head.",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/standard_names/review/jev_review.py:940 (build_docs_audit_report calls run_name_definition_checks)",
+    "imas_codex/standard_names/review/cascade.py:608 (docs cascade calls build_docs_audit_report)",
+    "imas_codex/standard_names/review/cascade_calibration.py:275 (calibration calls build_docs_audit_report)",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:967 (docs review batch calls _name_definition_note)",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:980 (batch persists holds via review_holds_from_checks)",
+    "imas_codex/standard_names/loop.py:600 (pool processor is process_review_docs_batch)"
+  ],
+  "completed_at": "2026-11-13T02:56:19.826Z",
+  "dispatched_at": "2026-11-13T02:39:30Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_review_docs.py",
+      "line": "967",
+      "severity": "non-blocking",
+      "text": "the seat's hold reaches the docs review at this line and at :978, but no test exercises process_review_docs_batch with a name-definition hold, so deleting both lines leaves every test green and the seat's reach is guarded only by the pure-function test at tests/standard_names/test_name_definition_agreement.py:213."
+    },
+    {
+      "file": "imas_codex/llm/prompts/sn/review_checks.yaml",
+      "line": "540",
+      "severity": "non-blocking",
+      "text": "definition_qualifier_absent_from_name asks the review model the same seven qualifier options that imas_codex/standard_names/review/name_definition_seat.py:21 asks again through the seat, so each candidate is judged twice by a model on one question with nothing reconciling the two verdicts."
+    },
+    {
+      "file": "tests/standard_names/test_name_definition_agreement.py",
+      "line": "137",
+      "severity": "non-blocking",
+      "text": "the assertion checks that the reasoning string the test itself passed in at :132 appears in the note, and the same shape sits at :230, so both hold only that the function relays its input and survive any regression in the flag judgment that feeds it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-results.json",
+      "line": "495",
+      "severity": "non-blocking",
+      "text": "the record gives the seat's held-out reading as 16 of 47 at 17 of 207 but never reconciles it with the 27 of 36 at 12 of 172 the plan's done_when accepts, so a reader cannot tell whether the plan's later-reading clause fires."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "read commit by commit from 2907b6981 to 0d647828a: eight commits, 19 files, 13,561 insertions and 22 deletions; the product change is a lexical qualifier check in audits.py, a new seat module, its prompts, the taxonomy entry and a hold in the docs review, and the rest is evidence JSON, its drivers and the ledger page.",
+    "done_when": "the done_when names a 80 % recall floor and a 10 % false-flag ceiling plus a refusal test; the recorded arms are 0.596 recall at 0.13 false flags for the union and 0.34 at 0.082 for the seat alone, recorded with counts and met:false at name-definition-check-results.json:495, and the refusal test exists at tests/standard_names/test_name_definition_agreement.py:180, so the gate asserts the refusal but not the recall measure.",
+    "goal": "the node goal is a review check that flags a name whose definition says something the name does not, scored on held-out labels; imas_codex/standard_names/audits.py:1661 adds name_definition_agreement_check, imas_codex/standard_names/review/name_definition_seat.py:158 adds the chat seat, and imas_codex/standard_names/review/jev_review.py:943 wires the deterministic pass into every docs audit report, so the check exists and runs; the seat's held-out reading is 16 of 47 found (name-definition-check-results.json:495) against the 27 of 36 the lead accepted at plan anchor c-s5-lead-ruling-seat-now.",
+    "manifest": "read; it reports status complete, a gate of 23 passed with the negative control failing at EXIT=1, 1,977 names judged with 429 flagged and a disposition each, and names its logs; every claim I opened in the artifacts matched, except that its 'lead ruling of 2026-11-13' is the plan anchor dated 2026-11-12T22:50Z.",
+    "write_paths": "the declared fence is seven paths; the diff writes those six code and evidence files plus imas_codex/standard_names/review/name_definition_seat.py, review/audits.py, review/checks.py, review/jev_review.py, worker_tasks/worker_review_docs.py, the two seat prompts and three seat evidence files, which the manifest's scope_notes declares under the lead ruling rather than repairing."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_name_definition_agreement.py:180 reddens on the neutralised normalisation marker, but no test reddens when imas_codex/standard_names/worker_tasks/worker_review_docs.py:967 stops calling the seat.",
+    "evidence": "docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-gate.txt:27 records 23 passed with the control failing at :58, while the recall measure it does not gate is recorded at name-definition-check-results.json:495 with met:false.",
+    "fit": "imas_codex/standard_names/review/audits.py:731 follows the deferred-import and LintFinding idiom of run_house_style_checks at :690, and no added path, symbol or comment carries a plan or ticket label.",
+    "goal_fidelity": "imas_codex/standard_names/review/jev_review.py:943 makes the check run wherever a name is reviewed, but the delivered seat finds 16 of 47 held-out mismatches against the 27 of 36 the accepted ruling quotes.",
+    "reuse": "imas_codex/standard_names/review/name_definition_seat.py:21 repeats the seven-option qualifier vocabulary that imas_codex/llm/prompts/sn/review_checks.yaml:540 already asks the review model, so one judgment has two owners.",
+    "scope_discipline": "seven of the files written lie outside the declared fence and are disclosed in the manifest's scope_notes rather than narrowed or repaired."
+  },
+  "project": "imas-codex",
+  "raw_text": "Reviewed base: 2907b6981d854b818f8398937c29b32efe7a8a15\nReviewed head: 0d647828a6300efc20c311e00bd6234ea912dbcb\n\nVERDICT goal: the node goal is a review check that flags a name whose definition says something the name does not, scored on held-out labels; imas_codex/standard_names/audits.py:1661 adds name_definition_agreement_check, imas_codex/standard_names/review/name_definition_seat.py:158 adds the chat seat, and imas_codex/standard_names/review/jev_review.py:943 wires the deterministic pass into every docs audit report, so the check exists and runs; the seat's held-out reading is 16 of 47 found (imas_codex/../name-definition-check-results.json:495) against the 27 of 36 the lead accepted at plan anchor c-s5-lead-ruling-seat-now.\nVERDICT done_when: the done_when names a 80 % recall floor and a 10 % false-flag ceiling plus a refusal test; the recorded arms are 0.596 recall at 0.13 false flags for the union and 0.34 at 0.082 for the seat alone, recorded with counts and with met:false at docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-results.json:495, and the refusal test exists at tests/standard_names/test_name_definition_agreement.py:180, so the gate asserts the refusal but not the recall measure.\nVERDICT write_paths: the declared fence is seven paths (review_checks.yaml, audits.py, two test files, three evidence files, one figure dir); the diff writes those six code and evidence files plus imas_codex/standard_names/review/name_definition_seat.py, imas_codex/standard_names/review/audits.py, imas_codex/standard_names/review/checks.py, imas_codex/standard_names/review/jev_review.py, imas_codex/standard_names/worker_tasks/worker_review_docs.py, the two seat prompts and three seat evidence files, which the manifest's scope_notes declares under the lead ruling rather than repairing.\nVERDICT manifest: read; it reports status complete, a gate of 23 passed with the negative control failing at EXIT=1, 1,977 names judged with 429 flagged and a disposition each, and names its logs; every claim I opened in the artifacts matched, except that its \"lead ruling of 2026-11-13\" is the plan anchor dated 2026-11-12T22:50Z.\nVERDICT diff: read commit by commit from 2907b6981 to 0d647828a \u2014 eight commits, 19 files, 13,561 insertions and 22 deletions; the product change is a lexical qualifier check in audits.py, a new seat module, its prompts, the taxonomy entry and a hold in the docs review, and the rest is evidence JSON, its drivers and the ledger page.\nCALL_SITES: imas_codex/standard_names/review/jev_review.py:940 (build_docs_audit_report calls run_name_definition_checks), imas_codex/standard_names/review/cascade.py:608 (docs cascade calls build_docs_audit_report), imas_codex/standard_names/review/cascade_calibration.py:275 (calibration calls build_docs_audit_report), imas_codex/standard_names/worker_tasks/worker_review_docs.py:967 (docs review batch calls _name_definition_note), imas_codex/standard_names/worker_tasks/worker_review_docs.py:980 (batch persists holds via review_holds_from_checks), imas_codex/standard_names/loop.py:600 (pool processor is process_review_docs_batch)\nSCORE goal_fidelity: 14\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/jev_review.py:943 makes the check run wherever a name is reviewed, but the delivered seat finds 16 of 47 held-out mismatches against the 27 of 36 the accepted ruling quotes.\nSCORE evidence: 15\nJUSTIFICATION evidence: docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-gate.txt:27 records 23 passed with the control failing at :58, while the recall measure it does not gate is recorded at name-definition-check-results.json:495 with met:false.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: seven of the files written lie outside the declared fence and are disclosed in the manifest's scope_notes rather than narrowed or repaired.\nSCORE durability: 13\nJUSTIFICATION durability: tests/standard_names/test_name_definition_agreement.py:180 reddens on the neutralised normalisation marker, but no test reddens when imas_codex/standard_names/worker_tasks/worker_review_docs.py:967 stops calling the seat.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/standard_names/review/audits.py:731 follows the deferred-import and LintFinding idiom of run_house_style_checks at :690, and no added path, symbol or comment carries a plan or ticket label.\nSCORE reuse: 11\nJUSTIFICATION reuse: imas_codex/standard_names/review/name_definition_seat.py:21 repeats the seven-option qualifier vocabulary that imas_codex/llm/prompts/sn/review_checks.yaml:540 already asks the review model, so one judgment has two owners.\nFINDING imas_codex/standard_names/worker_tasks/worker_review_docs.py:967 non-blocking: the seat's hold reaches the docs review at this line and at :978, but no test exercises process_review_docs_batch with a name-definition hold, so deleting both lines leaves every test green and the seat's reach is guarded only by the pure-function test at tests/standard_names/test_name_definition_agreement.py:213.\nFINDING imas_codex/llm/prompts/sn/review_checks.yaml:540 non-blocking: definition_qualifier_absent_from_name asks the review model the same seven qualifier options (normalisation, counting-convention, weighting, integration, restriction-to-one-object, family-of-quantities, agrees) that imas_codex/standard_names/review/name_definition_seat.py:21 asks again through the seat, so each candidate is now judged twice by a model on one question with nothing reconciling the two verdicts.\nFINDING tests/standard_names/test_name_definition_agreement.py:137 non-blocking: the assertion checks that the reasoning string the test itself passed in at :132 appears in the note, and the same shape sits at :230, so both hold only that the function relays its input and survive any regression in the flag judgment that feeds it.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-results.json:495 non-blocking: the record gives the seat's held-out reading as 16 of 47 at 17 of 207 but never reconciles it with the 27 of 36 at 12 of 172 the plan's done_when accepts, so a reader cannot tell whether the plan's \"a later reading that finds fewer than 27 of 36 fails this item\" clause fires.\n",
+  "review_run_id": "r-20261113T022003237399-review-of-sdbc-name-definition-check-0d647828a630",
+  "reviewed_base_sha": "2907b6981d854b818f8398937c29b32efe7a8a15",
+  "reviewed_head_sha": "0d647828a6300efc20c311e00bd6234ea912dbcb",
+  "reviewed_run_id": "r-20261112T083723712520-sdbc-name-definition-check",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 14,
+    "reuse": 11,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T03:07:25.786578+00:00",
+  "total": 84
+}
