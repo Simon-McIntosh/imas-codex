@@ -45,7 +45,7 @@
 "id": "item-0007",
 "class": "agrees",
 "confidence": "medium",
-"evidence": "the signed direction cosine of its pointing direction in the band that satisfies $d_x^2+d_y^2+d_z^2=1$",
+"evidence": "the signed direction cosine of its pointing direction in the right-handed Cartesian",
 "reason": "The y axis qualifier in the name selects the y direction cosine of the camera pointing unit vector, which is what the definition gives."
 },
 {
@@ -73,7 +73,7 @@
 "id": "item-0011",
 "class": "qualifier-missing-from-name",
 "confidence": "high",
-"evidence": "the major-radius location of a polarizer's geometric reference point",
+"evidence": "the major-radius location of a polarizer",
 "reason": "The name states the radial coordinate of the polarizer, but the definition fixes it to one reference point (centre or local-plane origin) and to major radius, neither of which the name identifies."
 },
 {
@@ -108,7 +108,7 @@
 "id": "item-0016",
 "class": "agrees",
 "confidence": "medium",
-"evidence": "the pressure-gradient-driven contribution to electric current density in a magnetized plasma",
+"evidence": "It includes the perpendicular diamagnetic drive and the associated field-aligned return current",
 "reason": "The name denotes the current density contribution of diamagnetic drift, and the field-aligned return current is the closure that makes that contribution divergence free rather than an additional quantity."
 },
 {
@@ -213,7 +213,7 @@
 "id": "item-0031",
 "class": "agrees",
 "confidence": "high",
-"evidence": "scales the collisionless free-streaming bound on transport of the magnetic-field-parallel component of momentum carried by one specified ion charge state",
+"evidence": "carried by one specified ion charge state in an edge-plasma fluid closure",
 "reason": "A parallel, charge-state-resolved momentum flux limiter coefficient is what the name states, and the dimensionless unit fits."
 },
 {
@@ -227,7 +227,7 @@
 "id": "item-0033",
 "class": "qualifier-missing-from-name",
 "confidence": "medium",
-"evidence": "the geometric area occupied by conducting material in a cross-section normal to the conductor local centerline",
+"evidence": "the geometric area occupied by conducting material in a cross-section normal to the conductor",
 "reason": "The name states the area of a toroidal-field coil, but the definition fixes it to the conductor material cross-section normal to the local centerline, attributes the name does not state."
 },
 {
@@ -269,7 +269,7 @@
 "id": "item-0039",
 "class": "qualifier-missing-from-name",
 "confidence": "high",
-"evidence": "This quantity denotes the full complex frequency and it is an angular frequency rather than a cyclic frequency.",
+"evidence": "not either component alone, and it is an angular frequency rather than a cyclic frequency",
 "reason": "The name states an Alfven frequency, but the definition is a complex angular continuum frequency for a single toroidal mode number, attributes the name does not state."
 },
 {
@@ -332,7 +332,7 @@
 "id": "item-0048",
 "class": "qualifier-missing-from-name",
 "confidence": "medium",
-"evidence": "by a specified physical deposition channel, integrated over the target wetted strike-zone surface",
+"evidence": "by a specified physical deposition channel",
 "reason": "The name reads as the power deposited on a target, while the definition adds a per-channel resolution and a wetted strike-zone surface, attributes the name does not state."
 },
 {
@@ -353,7 +353,7 @@
 "id": "item-0051",
 "class": "abstract-parent-as-quantity",
 "confidence": "medium",
-"evidence": "It represents the common field-line-averaged quantity instantiated by the name for electron and ion species-specific children.",
+"evidence": "It represents the common field-line-averaged quantity instantiated by the electron and ion species-specific children.",
 "reason": "The name states one temperature, but the definition declares a species-resolved parent whose concrete forms are fixed by the electron and ion children."
 },
 {
@@ -416,14 +416,14 @@
 "id": "item-0060",
 "class": "qualifier-missing-from-name",
 "confidence": "high",
-"evidence": "the normalized spectral contribution, evaluated in the rotating frame, of the perturbed electrostatic potential E-cross-B drift to the parallel gyrocenter part of toroidal angular-momentum flux",
+"evidence": "the normalized spectral contribution, evaluated in the rotating frame, of the perturbed electrostatic potential",
 "reason": "The name states a parallel momentum flux, but the definition is a toroidal angular-momentum flux in the rotating frame for one spectral contribution, attributes the name does not state."
 },
 {
 "id": "item-0061",
 "class": "definition-narrower-than-name",
 "confidence": "medium",
-"evidence": "during plasma initiation. It excludes energy stored in internal excitation or other internal quantum states.",
+"evidence": "The quantity applies to the represented neutral population throughout the volume enclosed by the last closed magnetic flux surface during plasma initiation.",
 "reason": "The name states a volume-averaged neutral temperature generally, while the definition restricts it to the plasma-initiation phase."
 },
 {
@@ -444,7 +444,7 @@
 "id": "item-0064",
 "class": "abstract-parent-as-quantity",
 "confidence": "high",
-"evidence": "This parent quantity abstracts over inner_radius_of_passive_loop and outer_radius_of_passive_loop.",
+"evidence": "This parent quantity abstracts over",
 "reason": "The name states a passive-loop radius, but the definition declares a parent over the inner and outer cross-section radii whose forms are fixed by the specific names."
 },
 {
@@ -458,7 +458,7 @@
 "id": "item-0066",
 "class": "agrees",
 "confidence": "medium",
-"evidence": "the scalar transport coefficient whose multiplication by ion particle density gives the advective part of the ion particle flux in the radial direction",
+"evidence": "the scalar transport velocity whose multiplication by ion particle density gives the advective part of the ion particle flux in the radial direction",
 "reason": "A radial ion particle convection velocity is exactly the coefficient the definition multiplies by ion density, and the charge-state aggregate is the species-level ion population the name states."
 },
 {
@@ -486,7 +486,7 @@
 "id": "item-0070",
 "class": "qualifier-missing-from-name",
 "confidence": "medium",
-"evidence": "the projection of the vacuum vector potential onto the vertical direction, generated exclusively by toroidal-field coil currents",
+"evidence": "generated exclusively by toroidal-field coil currents",
 "reason": "The name states a vacuum magnetic vector potential component, but the definition restricts the source to toroidal-field coil currents, an attribute the name does not state."
 },
 {
@@ -563,7 +563,7 @@
 "id": "item-0081",
 "class": "qualifier-missing-from-name",
 "confidence": "high",
-"evidence": "expressed as an equivalent-electron count rate. Each neutral krypton atom contributes 36 equivalent electrons",
+"evidence": "expressed as an equivalent-electron count rate",
 "reason": "The name states a krypton source rate, but the definition is an equivalent-electron count rate, an added weighting the name does not state."
 },
 {
@@ -612,7 +612,7 @@
 "id": "item-0088",
 "class": "qualifier-missing-from-name",
 "confidence": "medium",
-"evidence": "the full non-negative radial extent of a ferritic element rectangular cross-section",
+"evidence": "the full non-negative radial extent of a ferritic element",
 "reason": "The name states a width, but the definition fixes it to the radial extent between inner and outer boundaries of a rectangular cross-section, a direction the name does not state."
 },
 {
@@ -661,7 +661,7 @@
 "id": "item-0095",
 "class": "agrees",
 "confidence": "high",
-"evidence": "the radial component of the first-order perturbed plasma magnetic vector-potential eigenfunction associated with a linear MHD mode",
+"evidence": "Radial component of the first-order perturbed plasma magnetic vector-potential eigenfunction associated with a linear MHD mode",
 "reason": "The radial component of the perturbed plasma magnetic vector potential is exactly what the name states, and the unit T.m fits."
 },
 {
@@ -717,14 +717,14 @@
 "id": "item-0103",
 "class": "agrees",
 "confidence": "high",
-"evidence": "the proportionality between the diffusive heat flux and the local temperature gradient in the Fick law sense",
+"evidence": "the proportionality between the diffusive heat flux and the local temperature gradient",
 "reason": "An energy diffusion coefficient relating diffusive heat flux to the temperature gradient is exactly what the name states, and the unit m^2.s^-1 fits."
 },
 {
 "id": "item-0104",
 "class": "qualifier-missing-from-name",
 "confidence": "high",
-"evidence": "The quantity is the signed orientation angle of the normal defining a toroidal magnetic-field probe's sensitive axis.",
+"evidence": "the signed orientation angle of the normal defining a toroidal magnetic-field probe",
 "reason": "The name states a poloidal angle of the probe, but the definition fixes it to the orientation of the probe's sensitive-axis normal, an object the name does not identify."
 },
 {
@@ -738,7 +738,7 @@
 "id": "item-0106",
 "class": "abstract-parent-as-quantity",
 "confidence": "medium",
-"evidence": "A resolved form is represented by the internal-state velocity, while aggregation over included states gives a bulk form ... Vertical, poloidal, parallel, cold, and hot variants select projections or population subsets of this same mean flow.",
+"evidence": "while aggregation over included states gives a bulk form",
 "reason": "The name states an unqualified neutral velocity, but the definition declares a vector parent whose resolved, aggregated and projected forms are fixed by more specific names."
 },
 {
