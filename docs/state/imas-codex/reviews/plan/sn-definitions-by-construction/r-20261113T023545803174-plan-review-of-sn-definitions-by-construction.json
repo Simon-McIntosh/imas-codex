@@ -69,6 +69,16 @@
       "note": "Section 7's fourth export refusal now names the name-definition check section 8 leaves standing.",
       "reason": "",
       "when": "2026-11-13T03:13:49.510555+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "5085c54e91420195d631dc47617b966af4211f79",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 8 sets a minimum reference of 240 names with 30 mismatched, below which the seat stands with the shortfall recorded.",
+      "reason": "",
+      "when": "2026-11-13T03:14:11.752052+00:00"
     }
   ],
   "responses": {
@@ -80,6 +90,15 @@
       "note": "Section 7's fourth export refusal now names the name-definition check section 8 leaves standing.",
       "reason": "",
       "when": "2026-11-13T03:13:49.510555+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "5085c54e91420195d631dc47617b966af4211f79",
+      "commit_basis": "edit",
+      "note": "Section 8 sets a minimum reference of 240 names with 30 mismatched, below which the seat stands with the shortfall recorded.",
+      "reason": "",
+      "when": "2026-11-13T03:14:11.752052+00:00"
     },
     "wiring-1": {
       "action": "acted",
