@@ -57,6 +57,7 @@ AUDIT_FINDING_CLASSES: frozenset[str] = frozenset(
         "duplicate_component",
         "name_definition_disagreement",
         "name_definition_probe_disagreement",
+        "name_definition_phrase_disagreement",
     }
 )
 
