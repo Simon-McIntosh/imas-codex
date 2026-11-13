@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-pipeline-hygiene">
+<meta name="node-id" content="sph-cascade-receipts">
+<title>Shipped calibration retained with its recorded provenance</title>
+</head>
+<body><main>
+<h1 id="sph-cascade-receipts-title">Shipped calibration stands with its provenance</h1>
+<p id="sph-cascade-receipts-outcome"><strong>Retirement approved on 2026-11-12.</strong>
+The shipped cutoffs stand unchanged with the source receipt paths, hashes,
+fitted models, interval reports and policy recorded in
+<code>imas_codex/standard_names/review/cascade_thresholds.json</code>.
+The unavailable-input rebuild test, its receipt-dependent skip, periodic-stack-dump
+fixture and dedicated timeout are removed. The production module no longer
+provides an artifact rebuild function, a threshold-writing entry point or
+defaults into deleted run directories. Explicit-input scoring helpers and the
+rate-matching and missing-receipt tests remain.</p>
+<p id="sph-cascade-receipts-reproduction">At base
+<code>c8113cdfdf4f7e65cdff47ff48608346ddaebf4f</code>, the focused calibration file
+completed with <strong>10 passed, 1 skipped, 1 warning in 18.72s; EXIT=0</strong>.
+The target reported <code>SKIPPED [1] tests/standard_names/test_cascade_calibration.py:99: frozen calibration receipts are not installed</code>.
+Both default receipt paths were confirmed absent. A green exit therefore does
+not establish that the rebuild ran.</p>
+<table id="sph-cascade-receipts-survivors">
+<thead><tr><th>Source inspected</th><th>What survives</th><th>Why it cannot restore the original inputs</th></tr></thead>
+<tbody>
+<tr><td><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-results.json">Name evidence result</a></td><td>701 compressed input states; decompressed count agrees with the recorded count</td><td>0 states contain answers. The collector saved answers to the deleted JSONL; its committed result embeds only the states.</td></tr>
+<tr><td><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-measure-results.json">Earlier documentation measurement</a></td><td>540 receipts, all answered</td><td>This is an earlier measurement, not the score-arm package used by the shipped calibration.</td></tr>
+<tr><td><a href="/imas-codex/evidence/fragments/sn-review-through-jev/srtj-docs-score-arm-results.json">Documentation score-arm result</a></td><td>Frozen path and SHA-256</td><td>The package itself is not embedded. Its freezer collected calibration context, validation context and new receipts into the deleted XZ file.</td></tr>
+<tr><td>Live graph, bounded by golden identities</td><td>Name: 720 identities, 702 found, 2126 reviews, 17 with answers. Documentation: 400 identities, all found, 2129 reviews, 294 with answers.</td><td>No answer-bearing review in either cohort is dated from 2026-10-15 inclusive to 2026-10-19 exclusive, the original collection window. Current answers are not the frozen experimental answers.</td></tr>
+<tr><td>Tracked history of the two original receipt filenames and the proposed fixture filenames</td><td>No matching paths</td><td>No tracked copy of either original receipt was found.</td></tr>
+</tbody></table>
+<p id="sph-cascade-receipts-controls">The graph inventory is aimed at
+<code>StandardName.id</code> through <code>HAS_REVIEW</code>, filtered by the
+schema-declared <code>review_axis</code>. Every counted review has an ID, axis and
+review date. Nonzero answer and probability counts on both axes establish that
+the query sees the same fields it reports absent for the historical window.
+The earlier documentation package's 540 answered receipts also establish that
+the decompression and receipt inspection can find answers when present.
+The original name collector calls the review function and writes its returned
+answers to JSONL; it does not persist those experimental answers as graph reviews.</p>
+<p id="sph-cascade-receipts-thresholds">The committed threshold file remains
+SHA-256 <code>a0aa1e74be4b0a50c182de10f6da72e9974e3f04568736e3ddb2c13e3578024a</code>.
+The name cutoff remains <code>0.32447569396775017</code> (logistic), and the
+documentation cutoff remains <code>0.38828828632095647</code> (rubric).
+It expects name receipt hash
+<code>e998be186272ad0be4b4fc66283f194dc3b30c7e3d3f338b317f449b2e729eda</code>
+and documentation receipt hash
+<code>de689527ec16379a32f8f4da09aa954d215b9cfaeb04fb744b34316f41bab892</code>.
+The matched artifact retains aggregate scores and fitted models, which do not
+recover the original per-question probabilities. Its recorded receipt paths are
+historical provenance, not executable defaults. No inferred probabilities,
+replacement scores or calibration regeneration were introduced.</p>
+<p id="sph-cascade-receipts-ruling">The 2026-11-12 ruling chooses retirement,
+preserving the shipped calibration and removing its unavailable-input reproduction
+obligation. Existing artifact-digest and routing tests still verify the committed
+artifact and its consumers. Exact regeneration from the original experiment is
+no longer claimed. Collection and recalibration spend are forbidden for this work.</p>
+<p id="sph-cascade-receipts-record">Reproduction log:
+<code>r-20261112T025432279846-sph-cascade-receipts/base.log</code>.
+Provenance inventory: <code>provenance.log</code>, SLURM job <code>1311310</code>
+on <code>all_debug</code>, <code>EXIT=0</code>.
+Both logs are in the assigned reckon run directory. The committed
+<a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts-run.py">inventory runner</a>
+records the bounded query and source decoding. No LLM calls were made;
+additional LLM spend was USD 0. The declared frozen-row mutation control is
+inapplicable under the retirement ruling: no replacement receipt or reproduction
+check is introduced.</p>
+<p id="sph-cascade-receipts-retirement-gate">The retirement gate ran the focused
+calibration and review-cascade test files at
+<code>c401944d5ded206db2832bd1106f5020b33afd8d</code>:
+<strong>75 passed, 1 warning in 40.66s; EXIT=0</strong>, with no skips.
+The existing digest tests include deliberate in-memory changes to a cutoff and a
+score weight, both refused by the artifact assertion. Static checks confirmed the
+retirement module marker, remaining rate-matching helper and missing-receipt test,
+and byte-for-byte equality of the threshold file against the original revision.
+The inventory runner parses and reads historical receipt locations from the
+shipped artifact. Logs: <code>retirement-head.log</code> and
+<code>retirement-static.log</code> in the assigned run directory, each ending in
+<code>EXIT=0</code>. No receipt collection, graph query, calibration regeneration
+or LLM call was executed during retirement; additional spend remains USD 0.</p>
+</main></body></html>
