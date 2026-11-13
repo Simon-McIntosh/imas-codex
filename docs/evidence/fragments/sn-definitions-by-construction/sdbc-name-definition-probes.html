@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Name-against-definition check as compared slot probes</title>
+<style>
+body { font-family: system-ui, sans-serif; max-width: 62rem; margin: 2rem auto; line-height: 1.5; }
+table { border-collapse: collapse; margin: 1rem 0; }
+th, td { border: 1px solid #ccc; padding: .3rem .5rem; text-align: right; }
+th:first-child, td:first-child { text-align: left; }
+td.left { text-align: left; }
+code { background: #f4f4f4; padding: .1rem .25rem; }
+</style>
+</head>
+<body>
+<h1>Name-against-definition check as compared slot probes</h1>
+
+<p><strong>Outcome: the instrument is built, the bars are not met.</strong> The
+probe check answers the definition slot by slot and compares in code, as the
+design asks, and the two planted tests carry their failing controls. The
+comparison now closes only the name's <em>exact</em> implications, grades the
+confirming judgment instead of bucketing it, and tunes a threshold per slot on
+the development third. On the held-out labels the probes reach 42 % recall at
+a 7.6 % false-flag rate; the union with the chat seat reaches 77.8 % recall at
+13.4 %. The union is the closest any arm comes to both bars: short of the 80 %
+recall floor by 2.2 points and over the 10 % false-flag ceiling by 3.4.</p>
+
+<h2>What changed in this scoring</h2>
+<p>The previous reading closed a name's implications generously — a species
+token was read as implying the energy channel, an object token as implying the
+object as a whole — and then asked the judge for a hard relation class. That
+over-corrected: false flags fell to 0.023 and recall to 0.250. This reading
+narrows the closure to the exact implications only, and converts the
+confirmation into a graded probability.</p>
+<ul>
+<li><strong>Closure.</strong> Recorded as data, and only where the name states
+it exactly: a density or an m⁻³ unit is per unit volume; the species' own ions
+are what a species name counts; the locus a position token names is local; the
+aggregation a transformation token names is the named one; an extensive base is
+its natural integral. <strong>An object token suppresses no restriction</strong>
+— <code>neutral_beam_injector</code> does not imply "only its ion-source
+surface", so every restriction, effective or equivalent form, weighting, band,
+channel, layer and branch goes to the confirming question.</li>
+<li><strong>Confirming judgment.</strong> One closed choice question per
+surviving candidate (name tokens, the closure in words, the definition phrase),
+four options, of which only <em>narrower part</em> and <em>different form</em>
+flag. The finding carries <code>p_flag</code>, the judge's summed probability
+for those two, instead of a hard class.</li>
+<li><strong>Thresholds.</strong> Per slot, and raised <em>jointly</em>: a slot
+threshold that keeps its own slot under the ceiling is not enough, because five
+slots at six percent each clear a third of the agreeing names. The levels rise
+one grid step at a time from the worst-contributing slot until the arm's own
+development false-flag rate is at or under 0.10. Each slot's own curve and the
+joint trace are committed in the results file.</li>
+<li><strong>(slot, option) pairs.</strong> A pair whose development precision is
+at or below chance is dropped even when its finding clears the threshold
+(20 pairs in the chat arm, 21 in the Jev arm). A dropped pair is re-admitted
+when it recovers a development mismatch no admitted finding already recovers
+and the development false-flag rate stays at or under the ceiling (3 pairs in
+each arm).</li>
+<li><strong>A Jev extraction arm.</strong> The same five extraction probes asked
+of the judge through the existing choice-question kind, one closed question per
+slot with the slot's own options as the criteria, the name withheld exactly as
+the chat probe withholds it. Its answers flow through the same comparison,
+closure and confirmation, so nothing downstream differs.</li>
+</ul>
+
+<h2>The held-out names have been scored three times</h2>
+<p>Labels are the two readers' agreed classes (55 both-flag, 258 both-pass, 68
+disputed excluded); the split is the one the earlier deterministic check froze
+(seed 7714, 105 development / 208 held-out). No bar was weakened and no name
+moved between splits.</p>
+<table>
+<tr><th>scoring</th><th class="left">what changed</th></tr>
+<tr><td class="left">1</td><td class="left">first reading: no closure, no confirming question, no pair table; probes 0.333 recall at 0.099 false flags</td></tr>
+<tr><td class="left">2</td><td class="left">full closure (species, object, locus, extensive base and unit) + one hard-class Jev confirmation + pairs dropped below chance; probes 0.250 at 0.023</td></tr>
+<tr><td class="left">3 (this)</td><td class="left">closure narrowed to exact implications, object token no longer suppresses a hard restriction, graded confirmation with joint per-slot thresholds, pairs dropped and re-admitted, Jev extraction arm added</td></tr>
+</table>
+
+<h2>Readings: one held-out population of 208, and all 313 agreed names</h2>
+<table>
+<tr><th>arm</th><th>found / 36</th><th>recall</th><th>false flags / 172</th><th>rate</th><th>all 313: found / 55</th><th>rate</th></tr>
+<tr><td class="left">probes (chat)</td><td>15</td><td>0.417</td><td>13</td><td>0.076</td><td>25 · 0.455</td><td>0.081</td></tr>
+<tr><td class="left">probes (Jev)</td><td>9</td><td>0.250</td><td>9</td><td>0.052</td><td>12 · 0.218</td><td>0.050</td></tr>
+<tr><td class="left">probes (chat or Jev)</td><td>16</td><td>0.444</td><td>16</td><td>0.093</td><td>26 · 0.473</td><td>0.097</td></tr>
+<tr><td class="left">chat seat</td><td>27</td><td>0.750</td><td>12</td><td>0.070</td><td>41 · 0.745</td><td>0.058</td></tr>
+<tr><td class="left">union: probes (chat) + seat</td><td>28</td><td>0.778</td><td>23</td><td>0.134</td><td>44 · 0.800</td><td>0.124</td></tr>
+<tr><td class="left">union: probes (Jev) + seat</td><td>27</td><td>0.750</td><td>23</td><td>0.134</td><td>43 · 0.782</td><td>0.120</td></tr>
+<tr><td class="left">union: every arm</td><td>28</td><td>0.778</td><td>31</td><td>0.180</td><td>45 · 0.818</td><td>0.174</td></tr>
+</table>
+<p>The union arms are tuned on the development split with the chat seat's own
+development flags counted in the instrument they are scored as, so the 0.10
+development ceiling applies to the union rather than to the probes alone. The
+development readings at that tuning are 0.789 recall at 0.093 for the chat
+union and 0.737 at 0.093 for the Jev union.</p>
+
+<h2>Per slot, held-out</h2>
+<table>
+<tr><th rowspan="2">slot</th><th colspan="2">probes (chat)</th><th colspan="2">probes (Jev)</th></tr>
+<tr><th>found / 36</th><th>false flags / 172</th><th>found / 36</th><th>false flags / 172</th></tr>
+<tr><td class="left">aggregation</td><td>6</td><td>2</td><td>4</td><td>4</td></tr>
+<tr><td class="left">normalisation</td><td>0</td><td>0</td><td>1</td><td>0</td></tr>
+<tr><td class="left">counting unit</td><td>11</td><td>10</td><td>5</td><td>5</td></tr>
+<tr><td class="left">restriction</td><td>0</td><td>1</td><td>0</td><td>0</td></tr>
+<tr><td class="left">weighting</td><td>0</td><td>0</td><td>0</td><td>0</td></tr>
+</table>
+
+<h2>Held-out mismatches every arm misses</h2>
+<p>Eight of the 36 held-out mismatches are found by no arm. Each is a
+restriction or a named form the name withholds, and in each case the definition
+phrase states it in words that no slot option names exactly.</p>
+<table>
+<tr><th>name</th><th class="left">definition phrase that carries the mismatch</th></tr>
+<tr><td class="left">density_at_pedestal_maximum</td><td class="left">"evaluated at the pedestal maximum, the steep mid-pedestal locus of maximum pedestal-gradient magnitude"</td></tr>
+<tr><td class="left">ion_energy_diffusivity</td><td class="left">"effective coefficient linking a density-normalized diffusive heat flux to its temperature gradient, without prescribing a transport direction"</td></tr>
+<tr><td class="left">area_of_flux_loop</td><td class="left">"the effective, non-negative field-to-flux sensitivity area of the sensor, including the aperture enclosed by each turn"</td></tr>
+<tr><td class="left">current_due_to_fusion_reactions</td><td class="left">"Net parallel plasma current generated by fusion reactions, associated with fast alpha particles … distinct from other non-inductive sources"</td></tr>
+<tr><td class="left">radius_of_neutral_beam_injector</td><td class="left">"Radius of the circular ion-source surface from which neutral beams are extracted"</td></tr>
+<tr><td class="left">alfven_frequency</td><td class="left">"the complex local shear-Alfvén continuum angular frequency; its real part gives oscillatory …"</td></tr>
+<tr><td class="left">electron_torque_density_due_to_collisions</td><td class="left">"encompassing fast and thermal electrons"</td></tr>
+<tr><td class="left">maximum_of_back_surface_neutron_flux</td><td class="left">"Maximum neutron energy flux escaping through the rear surface of a breeding blanket module toward vessel structures"</td></tr>
+</table>
+<p>The pattern is one thing, not eight: the vocabulary has no option for
+"effective/equivalent form", "real part of a complex quantity", "a named
+sub-population (fast and thermal)", or "the rear surface of the module", so
+each of these arrives as <em>already implied</em> or as <em>none stated</em>.
+Adding an option would need a recorded lead ruling and is not done here.</p>
+
+<h2>Cost</h2>
+<table>
+<tr><th class="left">item</th><th>USD</th></tr>
+<tr><td class="left">chat probe extraction (313 names × 5 slots)</td><td>5.3055</td></tr>
+<tr><td class="left">Jev probe extraction (the same probes on the judge)</td><td>0.0493</td></tr>
+<tr><td class="left">Jev confirming judgments, chat arm (322 candidates)</td><td>0.0071</td></tr>
+<tr><td class="left">Jev confirming judgments, Jev arm (339 candidates)</td><td>0.0072</td></tr>
+<tr><td class="left">chat seat (the arm this check is compared against)</td><td>2.2711</td></tr>
+<tr><td class="left">per name, every arm</td><td>0.0172</td></tr>
+<tr><td class="left">per name, the Jev arm alone</td><td>0.0002</td></tr>
+</table>
+
+<h2>What the readings say</h2>
+<p>The narrowed closure and the graded judgment do put the instrument between
+the two earlier runs: 0.417 recall at 0.076 on the probes alone, against 0.333
+/ 0.099 and 0.250 / 0.023. The Jev arm extracts more conservatively (0.250
+recall, 0.052) and, being two orders of magnitude cheaper per name, is the arm
+to run over a large population; the chat arm is the one that finds more.</p>
+<p>The probes add little to the seat where the seat is already right and little
+where it is wrong: on the held-out mismatches the seat misses, the probes find
+one. Against this, they add 11 false flags to a union that starts at 12. That
+is why the union lands at 0.778 / 0.134 rather than clearing the bars, and why
+the honest report is that the recall floor and the false-flag ceiling are not
+both met by any arm in this reading.</p>
+
+<p>No bar was weakened and no name moved between splits. The run is reported
+<code>blocked</code> with the readings above; the live-graph pass over every
+published name is not started because the bars do not hold.</p>
+
+<p>Evidence: <code>name-definition-probes-results.json</code>,
+<code>name-definition-probes-run.py</code>,
+<code>sdbc-name-definition-probes-gate.log</code>; the Jev answers and the
+per-candidate confirmations are in the run directory.</p>
+</body>
+</html>

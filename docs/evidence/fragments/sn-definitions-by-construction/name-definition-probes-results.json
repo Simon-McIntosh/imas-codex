@@ -1,0 +1,6118 @@
+{
+ "arms": {
+  "probes_chat": {
+   "all_agreed": {
+    "agreeing": 258,
+    "agreeing_flagged": 21,
+    "false_flag_rate": 0.081,
+    "false_flags": [
+     "surface_area_of_detector",
+     "counter_passing_fast_electron_torque_density_due_to_collisions",
+     "parallel_current_density_due_to_parallel_viscosity",
+     "implicit_electron_particle_source_rate",
+     "runaway_electron_kinetic_energy_density",
+     "poloidal_ion_charge_state_particle_flux",
+     "fast_particle_pressure",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "neutral_species_atomic_mass",
+     "counter_passing_thermal_ion_torque_density_due_to_collisions",
+     "runaway_electron_source_rate_due_to_hot_tail",
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "normalized_particle_charge",
+     "poloidal_electron_particle_flux",
+     "neutron_response_function_of_neutron_detector",
+     "normalized_effective_particle_energy",
+     "electron_particle_flux_limiter_coefficient",
+     "surface_area_of_flux_surface",
+     "area_of_poloidal_field_coil",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions"
+    ],
+    "mismatched": 55,
+    "mismatched_found": 25,
+    "mismatched_missed": [
+     "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+     "current_due_to_fusion_reactions",
+     "refractive_index",
+     "current_weighted_average_external_magnetic_flux",
+     "pulse_duration",
+     "surface_emissivity",
+     "momentum",
+     "momentum_flux_due_to_e_cross_b_drift",
+     "power_density_due_to_collisions",
+     "flux_at_limiter",
+     "area_of_flux_loop",
+     "alfven_frequency",
+     "flux_surface_averaged_toroidal_current_density",
+     "total_heating_power_due_to_fusion_reactions",
+     "density_at_plasma_boundary",
+     "density_at_pedestal_maximum",
+     "fast_neutron_flux_of_toroidal_field_coil",
+     "maximum_of_back_surface_neutron_flux",
+     "voltage_of_mass_spectrometer",
+     "radiated_power_of_breeder_blanket_module",
+     "torque_density",
+     "temperature_of_coil_conductor",
+     "total_trapped_particle_density",
+     "radius_of_reflector",
+     "radius_of_neutral_beam_injector",
+     "wave_phase_of_ion_cyclotron_heating_antenna",
+     "electron_torque_density_due_to_collisions",
+     "turns_per_metre_of_rogowski_coil",
+     "neutron_flux_maximum_at_first_wall",
+     "ion_energy_diffusivity"
+    ],
+    "names": 313,
+    "recall": 0.455
+   },
+   "held_out": {
+    "agreeing": 172,
+    "agreeing_flagged": 13,
+    "false_flag_rate": 0.076,
+    "false_flags": [
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "surface_area_of_flux_surface",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions",
+     "surface_area_of_detector",
+     "runaway_electron_source_rate_due_to_hot_tail",
+     "normalized_particle_charge",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "poloidal_ion_charge_state_particle_flux",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "neutron_response_function_of_neutron_detector",
+     "fast_particle_pressure",
+     "implicit_electron_particle_source_rate",
+     "neutral_species_atomic_mass"
+    ],
+    "mismatched": 36,
+    "mismatched_found": 15,
+    "mismatched_missed": [
+     "pulse_duration",
+     "voltage_of_mass_spectrometer",
+     "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+     "density_at_pedestal_maximum",
+     "ion_energy_diffusivity",
+     "area_of_flux_loop",
+     "current_due_to_fusion_reactions",
+     "surface_emissivity",
+     "flux_surface_averaged_toroidal_current_density",
+     "turns_per_metre_of_rogowski_coil",
+     "total_heating_power_due_to_fusion_reactions",
+     "radius_of_neutral_beam_injector",
+     "alfven_frequency",
+     "flux_at_limiter",
+     "momentum",
+     "electron_torque_density_due_to_collisions",
+     "power_density_due_to_collisions",
+     "radiated_power_of_breeder_blanket_module",
+     "torque_density",
+     "neutron_flux_maximum_at_first_wall",
+     "maximum_of_back_surface_neutron_flux"
+    ],
+    "names": 208,
+    "recall": 0.417
+   }
+  },
+  "probes_chat_or_jev": {
+   "all_agreed": {
+    "agreeing": 258,
+    "agreeing_flagged": 25,
+    "false_flag_rate": 0.097,
+    "false_flags": [
+     "surface_area_of_detector",
+     "counter_passing_fast_electron_torque_density_due_to_collisions",
+     "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+     "parallel_current_density_due_to_parallel_viscosity",
+     "implicit_electron_particle_source_rate",
+     "edge_localized_mode_frequency",
+     "effective_turn_count_of_coil_conductor_element",
+     "runaway_electron_kinetic_energy_density",
+     "poloidal_ion_charge_state_particle_flux",
+     "ratio_of_iron_density_to_electron_density",
+     "fast_particle_pressure",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "neutral_species_atomic_mass",
+     "counter_passing_thermal_ion_torque_density_due_to_collisions",
+     "runaway_electron_source_rate_due_to_hot_tail",
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "normalized_particle_charge",
+     "poloidal_electron_particle_flux",
+     "neutron_response_function_of_neutron_detector",
+     "normalized_effective_particle_energy",
+     "electron_particle_flux_limiter_coefficient",
+     "surface_area_of_flux_surface",
+     "area_of_poloidal_field_coil",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions"
+    ],
+    "mismatched": 55,
+    "mismatched_found": 26,
+    "mismatched_missed": [
+     "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+     "current_due_to_fusion_reactions",
+     "refractive_index",
+     "current_weighted_average_external_magnetic_flux",
+     "pulse_duration",
+     "momentum",
+     "momentum_flux_due_to_e_cross_b_drift",
+     "power_density_due_to_collisions",
+     "flux_at_limiter",
+     "area_of_flux_loop",
+     "alfven_frequency",
+     "flux_surface_averaged_toroidal_current_density",
+     "total_heating_power_due_to_fusion_reactions",
+     "density_at_plasma_boundary",
+     "density_at_pedestal_maximum",
+     "fast_neutron_flux_of_toroidal_field_coil",
+     "maximum_of_back_surface_neutron_flux",
+     "voltage_of_mass_spectrometer",
+     "radiated_power_of_breeder_blanket_module",
+     "torque_density",
+     "temperature_of_coil_conductor",
+     "total_trapped_particle_density",
+     "radius_of_reflector",
+     "radius_of_neutral_beam_injector",
+     "wave_phase_of_ion_cyclotron_heating_antenna",
+     "electron_torque_density_due_to_collisions",
+     "turns_per_metre_of_rogowski_coil",
+     "neutron_flux_maximum_at_first_wall",
+     "ion_energy_diffusivity"
+    ],
+    "names": 313,
+    "recall": 0.473
+   },
+   "held_out": {
+    "agreeing": 172,
+    "agreeing_flagged": 16,
+    "false_flag_rate": 0.093,
+    "false_flags": [
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "effective_turn_count_of_coil_conductor_element",
+     "surface_area_of_flux_surface",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions",
+     "surface_area_of_detector",
+     "runaway_electron_source_rate_due_to_hot_tail",
+     "normalized_particle_charge",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "edge_localized_mode_frequency",
+     "poloidal_ion_charge_state_particle_flux",
+     "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "neutron_response_function_of_neutron_detector",
+     "fast_particle_pressure",
+     "implicit_electron_particle_source_rate",
+     "neutral_species_atomic_mass"
+    ],
+    "mismatched": 36,
+    "mismatched_found": 16,
+    "mismatched_missed": [
+     "pulse_duration",
+     "voltage_of_mass_spectrometer",
+     "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+     "density_at_pedestal_maximum",
+     "ion_energy_diffusivity",
+     "area_of_flux_loop",
+     "current_due_to_fusion_reactions",
+     "flux_surface_averaged_toroidal_current_density",
+     "turns_per_metre_of_rogowski_coil",
+     "total_heating_power_due_to_fusion_reactions",
+     "radius_of_neutral_beam_injector",
+     "alfven_frequency",
+     "flux_at_limiter",
+     "momentum",
+     "electron_torque_density_due_to_collisions",
+     "power_density_due_to_collisions",
+     "radiated_power_of_breeder_blanket_module",
+     "torque_density",
+     "neutron_flux_maximum_at_first_wall",
+     "maximum_of_back_surface_neutron_flux"
+    ],
+    "names": 208,
+    "recall": 0.444
+   }
+  },
+  "probes_jev": {
+   "all_agreed": {
+    "agreeing": 258,
+    "agreeing_flagged": 13,
+    "false_flag_rate": 0.05,
+    "false_flags": [
+     "surface_area_of_detector",
+     "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+     "edge_localized_mode_frequency",
+     "effective_turn_count_of_coil_conductor_element",
+     "ratio_of_iron_density_to_electron_density",
+     "fast_particle_pressure",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "counter_passing_thermal_ion_torque_density_due_to_collisions",
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "normalized_effective_particle_energy",
+     "surface_area_of_flux_surface",
+     "area_of_poloidal_field_coil",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions"
+    ],
+    "mismatched": 55,
+    "mismatched_found": 12,
+    "mismatched_missed": [
+     "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+     "current_due_to_fusion_reactions",
+     "refractive_index",
+     "current_weighted_average_external_magnetic_flux",
+     "pulse_duration",
+     "accumulated_helium_3_prefill_count_due_to_gas_injection",
+     "momentum",
+     "deuterium_deuterium_emissivity_due_to_fusion",
+     "momentum_flux_due_to_e_cross_b_drift",
+     "argon_source_rate_due_to_gas_injection",
+     "power_density_due_to_collisions",
+     "accumulated_silane_count_due_to_gas_injection",
+     "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+     "flux_at_limiter",
+     "area_of_flux_loop",
+     "alfven_frequency",
+     "flux_surface_averaged_toroidal_current_density",
+     "counter_passing_power_density",
+     "total_heating_power_due_to_fusion_reactions",
+     "density_at_plasma_boundary",
+     "density_at_pedestal_maximum",
+     "particle_velocity_due_to_convection",
+     "fast_neutron_flux_of_toroidal_field_coil",
+     "per_toroidal_mode_thermal_ion_charge_state_power_density",
+     "maximum_of_back_surface_neutron_flux",
+     "voltage_of_mass_spectrometer",
+     "neon_prefill_count",
+     "radiated_power_of_breeder_blanket_module",
+     "torque_density",
+     "accumulated_xenon_count_due_to_gas_injection",
+     "particle_diffusivity",
+     "temperature_of_coil_conductor",
+     "total_trapped_particle_density",
+     "radius_of_reflector",
+     "radius_of_neutral_beam_injector",
+     "wave_phase_of_ion_cyclotron_heating_antenna",
+     "electron_torque_density_due_to_collisions",
+     "turns_per_metre_of_rogowski_coil",
+     "neutron_flux_maximum_at_first_wall",
+     "particle_torque_due_to_j_cross_b_force",
+     "accumulated_total_prefill_gas_count",
+     "ion_energy_diffusivity",
+     "accumulated_ammonia_count"
+    ],
+    "names": 313,
+    "recall": 0.218
+   },
+   "held_out": {
+    "agreeing": 172,
+    "agreeing_flagged": 9,
+    "false_flag_rate": 0.052,
+    "false_flags": [
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "effective_turn_count_of_coil_conductor_element",
+     "surface_area_of_flux_surface",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions",
+     "surface_area_of_detector",
+     "edge_localized_mode_frequency",
+     "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "fast_particle_pressure"
+    ],
+    "mismatched": 36,
+    "mismatched_found": 9,
+    "mismatched_missed": [
+     "pulse_duration",
+     "voltage_of_mass_spectrometer",
+     "accumulated_total_prefill_gas_count",
+     "accumulated_helium_3_prefill_count_due_to_gas_injection",
+     "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+     "density_at_pedestal_maximum",
+     "ion_energy_diffusivity",
+     "area_of_flux_loop",
+     "current_due_to_fusion_reactions",
+     "flux_surface_averaged_toroidal_current_density",
+     "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+     "neon_prefill_count",
+     "turns_per_metre_of_rogowski_coil",
+     "total_heating_power_due_to_fusion_reactions",
+     "radius_of_neutral_beam_injector",
+     "per_toroidal_mode_thermal_ion_charge_state_power_density",
+     "alfven_frequency",
+     "flux_at_limiter",
+     "momentum",
+     "electron_torque_density_due_to_collisions",
+     "power_density_due_to_collisions",
+     "particle_diffusivity",
+     "particle_velocity_due_to_convection",
+     "radiated_power_of_breeder_blanket_module",
+     "torque_density",
+     "neutron_flux_maximum_at_first_wall",
+     "maximum_of_back_surface_neutron_flux"
+    ],
+    "names": 208,
+    "recall": 0.25
+   }
+  },
+  "seat": {
+   "all_agreed": {
+    "agreeing": 258,
+    "agreeing_flagged": 15,
+    "false_flag_rate": 0.058,
+    "false_flags": [
+     "plasma_temperature",
+     "extent_of_soft_xray_detector",
+     "poloidal_flux_limiter_coefficient",
+     "ion_fluence_at_divertor_target",
+     "vertical_electron_velocity",
+     "effective_turn_count_of_coil_conductor_element",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+     "total_ion_particle_source_rate",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "iron_density",
+     "power_due_to_electron_cyclotron_heating",
+     "radial_effective_electron_diffusivity",
+     "area_of_poloidal_field_coil",
+     "logarithm_of_density",
+     "toroidal_perturbed_plasma_velocity_imaginary_part"
+    ],
+    "mismatched": 55,
+    "mismatched_found": 41,
+    "mismatched_missed": [
+     "current_due_to_fusion_reactions",
+     "refractive_index",
+     "current_weighted_average_external_magnetic_flux",
+     "area_of_flux_loop",
+     "alfven_frequency",
+     "density_at_pedestal_maximum",
+     "particle_velocity_due_to_convection",
+     "maximum_of_back_surface_neutron_flux",
+     "incident_neutral_particle_flux_at_wall",
+     "radius_of_reflector",
+     "radius_of_neutral_beam_injector",
+     "electron_torque_density_due_to_collisions",
+     "particle_torque_due_to_j_cross_b_force",
+     "ion_energy_diffusivity"
+    ],
+    "names": 313,
+    "recall": 0.745
+   },
+   "held_out": {
+    "agreeing": 172,
+    "agreeing_flagged": 12,
+    "false_flag_rate": 0.07,
+    "false_flags": [
+     "effective_turn_count_of_coil_conductor_element",
+     "power_due_to_electron_cyclotron_heating",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "toroidal_perturbed_plasma_velocity_imaginary_part",
+     "total_ion_particle_source_rate",
+     "logarithm_of_density",
+     "iron_density",
+     "radial_effective_electron_diffusivity",
+     "vertical_electron_velocity",
+     "extent_of_soft_xray_detector",
+     "plasma_temperature",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part"
+    ],
+    "mismatched": 36,
+    "mismatched_found": 27,
+    "mismatched_missed": [
+     "density_at_pedestal_maximum",
+     "ion_energy_diffusivity",
+     "area_of_flux_loop",
+     "current_due_to_fusion_reactions",
+     "radius_of_neutral_beam_injector",
+     "alfven_frequency",
+     "electron_torque_density_due_to_collisions",
+     "particle_velocity_due_to_convection",
+     "maximum_of_back_surface_neutron_flux"
+    ],
+    "names": 208,
+    "recall": 0.75
+   }
+  },
+  "union_chat_seat": {
+   "all_agreed": {
+    "agreeing": 258,
+    "agreeing_flagged": 32,
+    "false_flag_rate": 0.124,
+    "false_flags": [
+     "plasma_temperature",
+     "extent_of_soft_xray_detector",
+     "surface_area_of_detector",
+     "counter_passing_fast_electron_torque_density_due_to_collisions",
+     "poloidal_flux_limiter_coefficient",
+     "ion_fluence_at_divertor_target",
+     "vertical_electron_velocity",
+     "implicit_electron_particle_source_rate",
+     "effective_turn_count_of_coil_conductor_element",
+     "runaway_electron_kinetic_energy_density",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+     "poloidal_ion_charge_state_particle_flux",
+     "total_ion_particle_source_rate",
+     "fast_particle_pressure",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "neutral_species_atomic_mass",
+     "counter_passing_thermal_ion_torque_density_due_to_collisions",
+     "iron_density",
+     "power_due_to_electron_cyclotron_heating",
+     "radial_effective_electron_diffusivity",
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "normalized_particle_charge",
+     "poloidal_electron_particle_flux",
+     "neutron_response_function_of_neutron_detector",
+     "normalized_effective_particle_energy",
+     "electron_particle_flux_limiter_coefficient",
+     "surface_area_of_flux_surface",
+     "area_of_poloidal_field_coil",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions",
+     "logarithm_of_density",
+     "toroidal_perturbed_plasma_velocity_imaginary_part"
+    ],
+    "mismatched": 55,
+    "mismatched_found": 44,
+    "mismatched_missed": [
+     "current_due_to_fusion_reactions",
+     "refractive_index",
+     "current_weighted_average_external_magnetic_flux",
+     "area_of_flux_loop",
+     "alfven_frequency",
+     "density_at_pedestal_maximum",
+     "maximum_of_back_surface_neutron_flux",
+     "radius_of_reflector",
+     "radius_of_neutral_beam_injector",
+     "electron_torque_density_due_to_collisions",
+     "ion_energy_diffusivity"
+    ],
+    "names": 313,
+    "recall": 0.8
+   },
+   "held_out": {
+    "agreeing": 172,
+    "agreeing_flagged": 23,
+    "false_flag_rate": 0.134,
+    "false_flags": [
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "effective_turn_count_of_coil_conductor_element",
+     "surface_area_of_flux_surface",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions",
+     "surface_area_of_detector",
+     "normalized_particle_charge",
+     "power_due_to_electron_cyclotron_heating",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "toroidal_perturbed_plasma_velocity_imaginary_part",
+     "poloidal_ion_charge_state_particle_flux",
+     "total_ion_particle_source_rate",
+     "logarithm_of_density",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "iron_density",
+     "neutron_response_function_of_neutron_detector",
+     "radial_effective_electron_diffusivity",
+     "vertical_electron_velocity",
+     "extent_of_soft_xray_detector",
+     "plasma_temperature",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+     "fast_particle_pressure",
+     "implicit_electron_particle_source_rate",
+     "neutral_species_atomic_mass"
+    ],
+    "mismatched": 36,
+    "mismatched_found": 28,
+    "mismatched_missed": [
+     "density_at_pedestal_maximum",
+     "ion_energy_diffusivity",
+     "area_of_flux_loop",
+     "current_due_to_fusion_reactions",
+     "radius_of_neutral_beam_injector",
+     "alfven_frequency",
+     "electron_torque_density_due_to_collisions",
+     "maximum_of_back_surface_neutron_flux"
+    ],
+    "names": 208,
+    "recall": 0.778
+   }
+  },
+  "union_every_arm": {
+   "all_agreed": {
+    "agreeing": 258,
+    "agreeing_flagged": 45,
+    "false_flag_rate": 0.174,
+    "false_flags": [
+     "poloidal_beta",
+     "plasma_temperature",
+     "extent_of_soft_xray_detector",
+     "surface_area_of_detector",
+     "counter_passing_fast_electron_torque_density_due_to_collisions",
+     "poloidal_flux_limiter_coefficient",
+     "ion_fluence_at_divertor_target",
+     "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+     "floating_electrostatic_potential",
+     "vertical_electron_velocity",
+     "implicit_electron_particle_source_rate",
+     "edge_localized_mode_frequency",
+     "effective_turn_count_of_coil_conductor_element",
+     "runaway_electron_kinetic_energy_density",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+     "poloidal_ion_charge_state_particle_flux",
+     "total_ion_particle_source_rate",
+     "fast_particle_pressure",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "voltage_of_valve",
+     "difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "neutral_species_atomic_mass",
+     "vertical_neutral_momentum_flux_limiter_coefficient",
+     "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+     "counter_passing_thermal_ion_torque_density_due_to_collisions",
+     "perpendicular_refractive_index",
+     "iron_density",
+     "power_due_to_electron_cyclotron_heating",
+     "ion_energy_flux_limiter_coefficient",
+     "radial_effective_electron_diffusivity",
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "normalized_particle_charge",
+     "poloidal_electron_particle_flux",
+     "neutron_response_function_of_neutron_detector",
+     "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+     "normalized_effective_particle_energy",
+     "electron_particle_flux_limiter_coefficient",
+     "surface_area_of_flux_surface",
+     "area_of_poloidal_field_coil",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions",
+     "logarithm_of_density",
+     "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+     "toroidal_perturbed_plasma_velocity_imaginary_part",
+     "normalized_gyrocenter_perturbed_density"
+    ],
+    "mismatched": 55,
+    "mismatched_found": 45,
+    "mismatched_missed": [
+     "current_due_to_fusion_reactions",
+     "current_weighted_average_external_magnetic_flux",
+     "area_of_flux_loop",
+     "alfven_frequency",
+     "density_at_pedestal_maximum",
+     "maximum_of_back_surface_neutron_flux",
+     "radius_of_reflector",
+     "radius_of_neutral_beam_injector",
+     "electron_torque_density_due_to_collisions",
+     "ion_energy_diffusivity"
+    ],
+    "names": 313,
+    "recall": 0.818
+   },
+   "held_out": {
+    "agreeing": 172,
+    "agreeing_flagged": 31,
+    "false_flag_rate": 0.18,
+    "false_flags": [
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "effective_turn_count_of_coil_conductor_element",
+     "surface_area_of_flux_surface",
+     "counter_passing_thermal_electron_torque_density_due_to_collisions",
+     "surface_area_of_detector",
+     "perpendicular_refractive_index",
+     "normalized_particle_charge",
+     "power_due_to_electron_cyclotron_heating",
+     "floating_electrostatic_potential",
+     "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+     "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "toroidal_perturbed_plasma_velocity_imaginary_part",
+     "edge_localized_mode_frequency",
+     "poloidal_ion_charge_state_particle_flux",
+     "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+     "total_ion_particle_source_rate",
+     "logarithm_of_density",
+     "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+     "fast_particle_torque_due_to_j_cross_b_force",
+     "iron_density",
+     "neutron_response_function_of_neutron_detector",
+     "radial_effective_electron_diffusivity",
+     "vertical_electron_velocity",
+     "extent_of_soft_xray_detector",
+     "difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line",
+     "plasma_temperature",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+     "fast_particle_pressure",
+     "implicit_electron_particle_source_rate",
+     "neutral_species_atomic_mass"
+    ],
+    "mismatched": 36,
+    "mismatched_found": 28,
+    "mismatched_missed": [
+     "density_at_pedestal_maximum",
+     "ion_energy_diffusivity",
+     "area_of_flux_loop",
+     "current_due_to_fusion_reactions",
+     "radius_of_neutral_beam_injector",
+     "alfven_frequency",
+     "electron_torque_density_due_to_collisions",
+     "maximum_of_back_surface_neutron_flux"
+    ],
+    "names": 208,
+    "recall": 0.778
+   }
+  },
+  "union_jev_seat": {
+   "all_agreed": {
+    "agreeing": 258,
+    "agreeing_flagged": 31,
+    "false_flag_rate": 0.12,
+    "false_flags": [
+     "poloidal_beta",
+     "plasma_temperature",
+     "extent_of_soft_xray_detector",
+     "surface_area_of_detector",
+     "poloidal_flux_limiter_coefficient",
+     "ion_fluence_at_divertor_target",
+     "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+     "floating_electrostatic_potential",
+     "vertical_electron_velocity",
+     "edge_localized_mode_frequency",
+     "effective_turn_count_of_coil_conductor_element",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+     "total_ion_particle_source_rate",
+     "voltage_of_valve",
+     "difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "vertical_neutral_momentum_flux_limiter_coefficient",
+     "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+     "perpendicular_refractive_index",
+     "iron_density",
+     "power_due_to_electron_cyclotron_heating",
+     "ion_energy_flux_limiter_coefficient",
+     "radial_effective_electron_diffusivity",
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+     "surface_area_of_flux_surface",
+     "area_of_poloidal_field_coil",
+     "logarithm_of_density",
+     "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+     "toroidal_perturbed_plasma_velocity_imaginary_part",
+     "normalized_gyrocenter_perturbed_density"
+    ],
+    "mismatched": 55,
+    "mismatched_found": 43,
+    "mismatched_missed": [
+     "current_due_to_fusion_reactions",
+     "current_weighted_average_external_magnetic_flux",
+     "area_of_flux_loop",
+     "alfven_frequency",
+     "density_at_pedestal_maximum",
+     "particle_velocity_due_to_convection",
+     "maximum_of_back_surface_neutron_flux",
+     "radius_of_reflector",
+     "radius_of_neutral_beam_injector",
+     "electron_torque_density_due_to_collisions",
+     "particle_torque_due_to_j_cross_b_force",
+     "ion_energy_diffusivity"
+    ],
+    "names": 313,
+    "recall": 0.782
+   },
+   "held_out": {
+    "agreeing": 172,
+    "agreeing_flagged": 23,
+    "false_flag_rate": 0.134,
+    "false_flags": [
+     "ratio_of_particle_temperature_to_particle_reference_temperature",
+     "effective_turn_count_of_coil_conductor_element",
+     "surface_area_of_flux_surface",
+     "surface_area_of_detector",
+     "perpendicular_refractive_index",
+     "power_due_to_electron_cyclotron_heating",
+     "floating_electrostatic_potential",
+     "toroidal_magnetic_flux_due_to_diamagnetic_drift",
+     "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+     "accumulated_tritium_count_due_to_gas_injection",
+     "toroidal_perturbed_plasma_velocity_imaginary_part",
+     "edge_localized_mode_frequency",
+     "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+     "total_ion_particle_source_rate",
+     "logarithm_of_density",
+     "normalized_perturbed_parallel_gyrocenter_current_density_bessel_1",
+     "iron_density",
+     "radial_effective_electron_diffusivity",
+     "vertical_electron_velocity",
+     "extent_of_soft_xray_detector",
+     "difference_of_neutral_beam_doppler_wavelength_and_reference_wavelength_of_spectral_line",
+     "plasma_temperature",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part"
+    ],
+    "mismatched": 36,
+    "mismatched_found": 27,
+    "mismatched_missed": [
+     "density_at_pedestal_maximum",
+     "ion_energy_diffusivity",
+     "area_of_flux_loop",
+     "current_due_to_fusion_reactions",
+     "radius_of_neutral_beam_injector",
+     "alfven_frequency",
+     "electron_torque_density_due_to_collisions",
+     "particle_velocity_due_to_convection",
+     "maximum_of_back_surface_neutron_flux"
+    ],
+    "names": 208,
+    "recall": 0.75
+   }
+  }
+ },
+ "by_slot": {
+  "chat_arm": {
+   "aggregation": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 4,
+     "false_flag_rate": 0.016,
+     "false_flags": [
+      "surface_area_of_detector",
+      "runaway_electron_kinetic_energy_density",
+      "surface_area_of_flux_surface",
+      "area_of_poloidal_field_coil"
+     ],
+     "mismatched": 55,
+     "mismatched_found": 8,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "accumulated_deuterated_methane_prefill_count",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "surface_emissivity",
+      "momentum",
+      "xenon_source_rate_due_to_gas_injection",
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "accumulated_ammonia_deuterated_count",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "maximum_of_back_surface_neutron_flux",
+      "voltage_of_mass_spectrometer",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "ethane_source_rate",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.145
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 2,
+     "false_flag_rate": 0.012,
+     "false_flags": [
+      "surface_area_of_flux_surface",
+      "surface_area_of_detector"
+     ],
+     "mismatched": 36,
+     "mismatched_found": 6,
+     "mismatched_missed": [
+      "pulse_duration",
+      "ethane_source_rate",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "accumulated_deuterated_methane_prefill_count",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "radius_of_neutral_beam_injector",
+      "xenon_source_rate_due_to_gas_injection",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.167
+    }
+   },
+   "counting_unit": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 15,
+     "false_flag_rate": 0.058,
+     "false_flags": [
+      "counter_passing_fast_electron_torque_density_due_to_collisions",
+      "implicit_electron_particle_source_rate",
+      "poloidal_ion_charge_state_particle_flux",
+      "fast_particle_pressure",
+      "fast_particle_torque_due_to_j_cross_b_force",
+      "accumulated_tritium_count_due_to_gas_injection",
+      "neutral_species_atomic_mass",
+      "counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "normalized_particle_charge",
+      "poloidal_electron_particle_flux",
+      "neutron_response_function_of_neutron_detector",
+      "normalized_effective_particle_energy",
+      "electron_particle_flux_limiter_coefficient",
+      "counter_passing_thermal_electron_torque_density_due_to_collisions"
+     ],
+     "mismatched": 55,
+     "mismatched_found": 19,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "pulse_duration",
+      "surface_emissivity",
+      "momentum",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "field_line_length",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "power_density_due_to_collisions",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "flux_surface_averaged_toroidal_current_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "voltage_of_mass_spectrometer",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "incident_neutral_particle_flux_at_wall",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "ion_energy_diffusivity"
+     ],
+     "names": 313,
+     "recall": 0.345
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 10,
+     "false_flag_rate": 0.058,
+     "false_flags": [
+      "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "counter_passing_thermal_electron_torque_density_due_to_collisions",
+      "normalized_particle_charge",
+      "accumulated_tritium_count_due_to_gas_injection",
+      "poloidal_ion_charge_state_particle_flux",
+      "fast_particle_torque_due_to_j_cross_b_force",
+      "neutron_response_function_of_neutron_detector",
+      "fast_particle_pressure",
+      "implicit_electron_particle_source_rate",
+      "neutral_species_atomic_mass"
+     ],
+     "mismatched": 36,
+     "mismatched_found": 11,
+     "mismatched_missed": [
+      "pulse_duration",
+      "voltage_of_mass_spectrometer",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "field_line_length",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.306
+    }
+   },
+   "normalisation": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 55,
+     "mismatched_found": 0,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "accumulated_deuterated_methane_prefill_count",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "surface_emissivity",
+      "momentum",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "xenon_source_rate_due_to_gas_injection",
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "field_line_length",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "accumulated_ammonia_deuterated_count",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "voltage_of_mass_spectrometer",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "incident_neutral_particle_flux_at_wall",
+      "ethane_source_rate",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.0
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 36,
+     "mismatched_found": 0,
+     "mismatched_missed": [
+      "pulse_duration",
+      "ethane_source_rate",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "accumulated_deuterated_methane_prefill_count",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "xenon_source_rate_due_to_gas_injection",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "field_line_length",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.0
+    }
+   },
+   "restriction": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 2,
+     "false_flag_rate": 0.008,
+     "false_flags": [
+      "parallel_current_density_due_to_parallel_viscosity",
+      "runaway_electron_source_rate_due_to_hot_tail"
+     ],
+     "mismatched": 55,
+     "mismatched_found": 1,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "accumulated_deuterated_methane_prefill_count",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "surface_emissivity",
+      "momentum",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "xenon_source_rate_due_to_gas_injection",
+      "field_line_length",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "accumulated_ammonia_deuterated_count",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "voltage_of_mass_spectrometer",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "incident_neutral_particle_flux_at_wall",
+      "ethane_source_rate",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.018
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 1,
+     "false_flag_rate": 0.006,
+     "false_flags": [
+      "runaway_electron_source_rate_due_to_hot_tail"
+     ],
+     "mismatched": 36,
+     "mismatched_found": 0,
+     "mismatched_missed": [
+      "pulse_duration",
+      "ethane_source_rate",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "accumulated_deuterated_methane_prefill_count",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "xenon_source_rate_due_to_gas_injection",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "field_line_length",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.0
+    }
+   },
+   "weighting": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 55,
+     "mismatched_found": 1,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "accumulated_deuterated_methane_prefill_count",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "surface_emissivity",
+      "momentum",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "xenon_source_rate_due_to_gas_injection",
+      "field_line_length",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "accumulated_ammonia_deuterated_count",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "voltage_of_mass_spectrometer",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "incident_neutral_particle_flux_at_wall",
+      "ethane_source_rate",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.018
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 36,
+     "mismatched_found": 0,
+     "mismatched_missed": [
+      "pulse_duration",
+      "ethane_source_rate",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "accumulated_deuterated_methane_prefill_count",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "xenon_source_rate_due_to_gas_injection",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "field_line_length",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.0
+    }
+   }
+  },
+  "jev_arm": {
+   "aggregation": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 5,
+     "false_flag_rate": 0.019,
+     "false_flags": [
+      "surface_area_of_detector",
+      "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+      "edge_localized_mode_frequency",
+      "surface_area_of_flux_surface",
+      "area_of_poloidal_field_coil"
+     ],
+     "mismatched": 55,
+     "mismatched_found": 5,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "accumulated_deuterated_methane_prefill_count",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "momentum",
+      "xenon_source_rate_due_to_gas_injection",
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "accumulated_ammonia_deuterated_count",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "voltage_of_mass_spectrometer",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "ethane_source_rate",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.091
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 4,
+     "false_flag_rate": 0.023,
+     "false_flags": [
+      "surface_area_of_flux_surface",
+      "surface_area_of_detector",
+      "edge_localized_mode_frequency",
+      "flux_surface_averaged_total_ion_density_at_plasma_boundary"
+     ],
+     "mismatched": 36,
+     "mismatched_found": 4,
+     "mismatched_missed": [
+      "pulse_duration",
+      "ethane_source_rate",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "accumulated_deuterated_methane_prefill_count",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "xenon_source_rate_due_to_gas_injection",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.111
+    }
+   },
+   "counting_unit": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 7,
+     "false_flag_rate": 0.027,
+     "false_flags": [
+      "effective_turn_count_of_coil_conductor_element",
+      "fast_particle_pressure",
+      "fast_particle_torque_due_to_j_cross_b_force",
+      "counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "normalized_effective_particle_energy",
+      "counter_passing_thermal_electron_torque_density_due_to_collisions"
+     ],
+     "mismatched": 55,
+     "mismatched_found": 6,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "accumulated_deuterated_methane_prefill_count",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "surface_emissivity",
+      "momentum",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "field_line_length",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "accumulated_ammonia_deuterated_count",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "voltage_of_mass_spectrometer",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "incident_neutral_particle_flux_at_wall",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.109
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 5,
+     "false_flag_rate": 0.029,
+     "false_flags": [
+      "ratio_of_particle_temperature_to_particle_reference_temperature",
+      "effective_turn_count_of_coil_conductor_element",
+      "counter_passing_thermal_electron_torque_density_due_to_collisions",
+      "fast_particle_torque_due_to_j_cross_b_force",
+      "fast_particle_pressure"
+     ],
+     "mismatched": 36,
+     "mismatched_found": 5,
+     "mismatched_missed": [
+      "pulse_duration",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "accumulated_deuterated_methane_prefill_count",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "field_line_length",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.139
+    }
+   },
+   "normalisation": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 1,
+     "false_flag_rate": 0.004,
+     "false_flags": [
+      "ratio_of_iron_density_to_electron_density"
+     ],
+     "mismatched": 55,
+     "mismatched_found": 2,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "surface_emissivity",
+      "momentum",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "xenon_source_rate_due_to_gas_injection",
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "field_line_length",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "voltage_of_mass_spectrometer",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "incident_neutral_particle_flux_at_wall",
+      "ethane_source_rate",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.036
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 36,
+     "mismatched_found": 1,
+     "mismatched_missed": [
+      "pulse_duration",
+      "ethane_source_rate",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "xenon_source_rate_due_to_gas_injection",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "field_line_length",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.028
+    }
+   },
+   "restriction": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 55,
+     "mismatched_found": 0,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "accumulated_deuterated_methane_prefill_count",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "surface_emissivity",
+      "momentum",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "xenon_source_rate_due_to_gas_injection",
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "field_line_length",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "accumulated_ammonia_deuterated_count",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "voltage_of_mass_spectrometer",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "incident_neutral_particle_flux_at_wall",
+      "ethane_source_rate",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.0
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 36,
+     "mismatched_found": 0,
+     "mismatched_missed": [
+      "pulse_duration",
+      "ethane_source_rate",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "accumulated_deuterated_methane_prefill_count",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "xenon_source_rate_due_to_gas_injection",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "field_line_length",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.0
+    }
+   },
+   "weighting": {
+    "all_agreed": {
+     "agreeing": 258,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 55,
+     "mismatched_found": 0,
+     "mismatched_missed": [
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "current_due_to_fusion_reactions",
+      "refractive_index",
+      "current_weighted_average_external_magnetic_flux",
+      "accumulated_deuterated_methane_prefill_count",
+      "pulse_duration",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "surface_emissivity",
+      "momentum",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "xenon_source_rate_due_to_gas_injection",
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "field_line_length",
+      "momentum_flux_due_to_e_cross_b_drift",
+      "argon_source_rate_due_to_gas_injection",
+      "accumulated_ammonia_deuterated_count",
+      "power_density_due_to_collisions",
+      "accumulated_silane_count_due_to_gas_injection",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "flux_at_limiter",
+      "area_of_flux_loop",
+      "alfven_frequency",
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "flux_surface_averaged_toroidal_current_density",
+      "counter_passing_power_density",
+      "total_heating_power_due_to_fusion_reactions",
+      "density_at_plasma_boundary",
+      "density_at_pedestal_maximum",
+      "particle_velocity_due_to_convection",
+      "fast_neutron_flux_of_toroidal_field_coil",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "maximum_of_back_surface_neutron_flux",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "voltage_of_mass_spectrometer",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "incident_neutral_particle_flux_at_wall",
+      "ethane_source_rate",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "particle_diffusivity",
+      "temperature_of_coil_conductor",
+      "total_trapped_particle_density",
+      "radius_of_reflector",
+      "radius_of_neutral_beam_injector",
+      "wave_phase_of_ion_cyclotron_heating_antenna",
+      "electron_torque_density_due_to_collisions",
+      "turns_per_metre_of_rogowski_coil",
+      "neutron_flux_maximum_at_first_wall",
+      "particle_torque_due_to_j_cross_b_force",
+      "accumulated_total_prefill_gas_count",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "ion_energy_diffusivity",
+      "accumulated_ammonia_count"
+     ],
+     "names": 313,
+     "recall": 0.0
+    },
+    "held_out": {
+     "agreeing": 172,
+     "agreeing_flagged": 0,
+     "false_flag_rate": 0.0,
+     "false_flags": [],
+     "mismatched": 36,
+     "mismatched_found": 0,
+     "mismatched_missed": [
+      "pulse_duration",
+      "ethane_source_rate",
+      "voltage_of_mass_spectrometer",
+      "accumulated_total_prefill_gas_count",
+      "accumulated_helium_3_prefill_count_due_to_gas_injection",
+      "total_neutral_source_rate_due_to_gas_injection",
+      "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "density_at_pedestal_maximum",
+      "ion_energy_diffusivity",
+      "accumulated_deuterated_methane_prefill_count",
+      "area_of_flux_loop",
+      "current_due_to_fusion_reactions",
+      "surface_emissivity",
+      "flux_surface_averaged_toroidal_current_density",
+      "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+      "neon_prefill_count",
+      "turns_per_metre_of_rogowski_coil",
+      "total_heating_power_due_to_fusion_reactions",
+      "perpendicular_co_passing_fast_particle_pressure",
+      "counter_passing_thermal_electron_power_density_due_to_collisions",
+      "radius_of_neutral_beam_injector",
+      "per_toroidal_mode_thermal_ion_charge_state_power_density",
+      "xenon_source_rate_due_to_gas_injection",
+      "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+      "alfven_frequency",
+      "flux_at_limiter",
+      "momentum",
+      "electron_torque_density_due_to_collisions",
+      "power_density_due_to_collisions",
+      "particle_diffusivity",
+      "particle_velocity_due_to_convection",
+      "radiated_power_of_breeder_blanket_module",
+      "torque_density",
+      "neutron_flux_maximum_at_first_wall",
+      "field_line_length",
+      "maximum_of_back_surface_neutron_flux"
+     ],
+     "names": 208,
+     "recall": 0.0
+    }
+   }
+  }
+ },
+ "check": {
+  "calls_a_model": true,
+  "id": "definition_slot_disagrees_with_name",
+  "implementation": "imas_codex.standard_names.review.name_definition_probes.probe_check",
+  "joined_finding": "name_definition_probe_disagreement",
+  "reads": "description, documentation, name, unit"
+ },
+ "confirming_relations": {
+  "chat_arm": {
+   "already_implied": 219,
+   "different_form": 33,
+   "excludes_or_default": 44,
+   "narrower_part": 26
+  },
+  "jev_arm": {
+   "already_implied": 300,
+   "different_form": 2,
+   "excludes_or_default": 37
+  }
+ },
+ "cost_usd": {
+  "chat_probe_extraction": 5.3055,
+  "chat_seat_calls": 2.2711,
+  "jev_confirmation_chat_arm": 0.0071,
+  "jev_confirmation_jev_arm": 0.0072,
+  "jev_probe_extraction": 0.0493,
+  "per_name_all_arms": 0.0172,
+  "per_name_jev_only": 0.0002
+ },
+ "gate": {
+  "arm_gates": {
+   "probes_chat": {
+    "false_flag_ceiling_met": true,
+    "met": false,
+    "recall_met": false
+   },
+   "probes_chat_or_jev": {
+    "false_flag_ceiling_met": true,
+    "met": false,
+    "recall_met": false
+   },
+   "probes_jev": {
+    "false_flag_ceiling_met": true,
+    "met": false,
+    "recall_met": false
+   },
+   "seat": {
+    "false_flag_ceiling_met": true,
+    "met": false,
+    "recall_met": false
+   },
+   "union_chat_seat": {
+    "false_flag_ceiling_met": false,
+    "met": false,
+    "recall_met": false
+   },
+   "union_every_arm": {
+    "false_flag_ceiling_met": false,
+    "met": false,
+    "recall_met": false
+   },
+   "union_jev_seat": {
+    "false_flag_ceiling_met": false,
+    "met": false,
+    "recall_met": false
+   }
+  },
+  "false_flag_ceiling": 0.1,
+  "met": false,
+  "recall_floor": 0.8
+ },
+ "held_out_population": {
+  "agreeing": 172,
+  "mismatched": 36,
+  "names": 208,
+  "note": "every arm is scored on this one set, the same names"
+ },
+ "labels": {
+  "agreed_names": 313,
+  "development_agreeing": 86,
+  "development_mismatched": 19,
+  "path": "docs/evidence/fragments/sn-name-definition-second-reading/two-reader-labels.json",
+  "produced_by": "two independent readers; no probe, seat or pipeline judge produced a label",
+  "rule": "only names both readers agree on score: both-flag is a mismatch, both-pass agrees"
+ },
+ "missed_by_every_arm": {
+  "names": [
+   "density_at_pedestal_maximum",
+   "ion_energy_diffusivity",
+   "area_of_flux_loop",
+   "current_due_to_fusion_reactions",
+   "radius_of_neutral_beam_injector",
+   "alfven_frequency",
+   "electron_torque_density_due_to_collisions",
+   "maximum_of_back_surface_neutron_flux"
+  ],
+  "rows": [
+   {
+    "description": "Density at pedestal maximum is the selected plasma-particle number density evaluated at the pedestal maximum, the steep mid-pedestal locus of maximum pedestal-gradient magnitude. It is a density value at that locus, not a density gradient.",
+    "documentation": "Density at pedestal maximum is the selected plasma-particle number density evaluated at the [normalized poloidal-flux coordinate of the pedestal maximum](name:normalized_poloidal_flux_coordinate_of_pedestal), the steep mid-pedestal locus of maximum pedestal-gradient magnitude. The word maximum identifies the peak-gradient pedestal locus, not a maximum of the density value itself. The defining rela",
+    "name": "density_at_pedestal_maximum",
+    "unit": "m^-3"
+   },
+   {
+    "description": "Effective coefficient linking an ion population's density-normalized diffusive heat flux to its temperature gradient, without prescribing a transport direction.",
+    "documentation": "Ion energy diffusivity characterizes gradient-driven transport of thermal energy carried by an ion population. It specifies the effective proportionality between density-normalized diffusive heat flux and the corresponding temperature gradient, without selecting a transport direction or implying isotropic transport. For a chosen physical transport direction, the defining Fickian closure is: $$ \\fr",
+    "name": "ion_energy_diffusivity",
+    "unit": "m^2.s^-1"
+   },
+   {
+    "description": "The effective area of a flux loop is the non-negative field-to-flux sensitivity area of the sensor, including the aperture enclosed by each turn, the number of turns, and calibration factors. It converts a spatially averaged magnetic-field component normal to the loop aperture into total linked magnetic flux.",
+    "documentation": "The effective area of a flux loop is the non-negative field-to-flux sensitivity factor of the sensor. It represents the aperture area enclosed by each turn, the number of turns, and calibration corrections that make the total linked magnetic flux equivalent to a spatially averaged magnetic-field component normal to the loop aperture. The effective area $A_\\mathrm{eff}$ is defined by the relation b",
+    "name": "area_of_flux_loop",
+    "unit": "m^2"
+   },
+   {
+    "description": "Net parallel plasma current generated by fusion reactions, associated with fast alpha particles produced by deuterium\u2013tritium reactions and distinct from other non-inductive current-drive mechanisms.",
+    "documentation": "This quantity is the net plasma current attributable to fusion reactions within the plasma, associated with fast alpha particles produced by deuterium\u2013tritium reactions. It represents the parallel current contribution rather than the total plasma current. The defining relation is $$ I_{\\mathrm{fus}} = \\int_S \\mathbf{j}_{\\alpha} \\cdot \\mathbf{b}\\, dS $$ where $I_{\\mathrm{fus}}$ is the fusion-reacti",
+    "name": "current_due_to_fusion_reactions",
+    "unit": "A"
+   },
+   {
+    "description": "Radius of the circular ion-source surface from which neutral beams are extracted, defining the radial extent of its extraction aperture.",
+    "documentation": "This quantity is the radius of the circular ion-source surface from which a neutral-beam injector extracts its beam. It defines the radial extent of the extraction aperture. For a circular boundary, the radius is the distance from the surface center to any point on its circumference: $$ r_s = \\left\\lVert \\mathbf{x}-\\mathbf{x}_c \\right\\rVert $$ where $r_s$ is the ion-source-surface radius, $\\mathbf",
+    "name": "radius_of_neutral_beam_injector",
+    "unit": "m"
+   },
+   {
+    "description": "Alfv\u00e9n frequency at a given radial position for a single toroidal mode number is the complex local shear-Alfv\u00e9n continuum angular frequency; its real part gives oscillation and its imaginary part gives growth or damping for the stated time dependence.",
+    "documentation": "Alfv\u00e9n frequency at a given radial position for a single toroidal mode number is the complex local shear-Alfv\u00e9n continuum angular frequency for perturbations propagating along the magnetic field on the flux surface at that radial position. Its [real part](name:alfven_frequency_real_part) is the oscillatory component, and its [imaginary part](name:alfven_frequency_imaginary_part) is the temporal gr",
+    "name": "alfven_frequency",
+    "unit": "s^-1"
+   },
+   {
+    "description": "Torque density due to collisional processes is the angular-momentum transfer rate per unit volume imparted to the electron population, encompassing fast and thermal electrons.",
+    "documentation": "Torque density due to collisional processes is the local rate of angular-momentum transfer to the electron population per unit volume. It is the common parent of the fast- and thermal-electron specializations, which distinguish the electron populations receiving the collisional transfer. Using $\\dot{L}_{e,\\mathrm{coll}}$ for the collisional angular-momentum transfer rate to electrons and $V$ for v",
+    "name": "electron_torque_density_due_to_collisions",
+    "unit": "N.m^-2"
+   },
+   {
+    "description": "Maximum neutron energy flux escaping through the rear surface of a breeding blanket module toward vessel structures.",
+    "documentation": "This quantity is the greatest local neutron energy flux crossing outward through the rear surface of one breeding blanket module. It measures the escaping neutron load relevant to attenuation toward vessel structures. The maximum is defined from the local back-surface neutron energy flux as $$ q_{n,\\max} = \\max_{\\mathbf{x}\\in S_{\\mathrm{back}}} q_n(\\mathbf{x}) $$ where $q_n(\\mathbf{x})$ is the loc",
+    "name": "maximum_of_back_surface_neutron_flux",
+    "unit": "W.m^-2"
+   }
+  ]
+ },
+ "pairs": {
+  "chat_arm": {
+   "dropped": [
+    "normalisation:none stated",
+    "restriction:one particle population",
+    "aggregation:line or surface integral",
+    "weighting:unweighted",
+    "restriction:one device part or component",
+    "counting_unit:not a count",
+    "weighting:weighted by energy",
+    "weighting:none stated",
+    "restriction:none stated",
+    "restriction:one reaction branch",
+    "normalisation:relative to a reference value",
+    "restriction:one spatial layer or region boundary",
+    "aggregation:time-accumulated total",
+    "normalisation:per unit area",
+    "normalisation:per unit length",
+    "restriction:one spectral band or energy channel",
+    "normalisation:logarithm taken",
+    "aggregation:none stated",
+    "aggregation:volume average",
+    "aggregation:volume integral"
+   ],
+   "readmitted": [
+    "aggregation:line or surface integral",
+    "restriction:one reaction branch",
+    "counting_unit:not a count"
+   ],
+   "rows": [
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "accumulated_ammonia_count",
+      "accumulated_ammonia_deuterated_count",
+      "accumulated_silane_count_due_to_gas_injection",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "argon_source_rate_due_to_gas_injection"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "counting_unit:equivalent electrons",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "fast_neutron_flux_of_toroidal_field_coil"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "counting_unit:particles or ions",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "runaway_electron_kinetic_energy_density"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "counter_passing_power_density",
+      "total_trapped_particle_density"
+     ],
+     "development_precision": 0.75,
+     "dropped": false,
+     "pair": "aggregation:flux-surface average",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "poloidal_electron_particle_flux"
+     ],
+     "development_mismatched": [
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "momentum_flux_due_to_e_cross_b_drift"
+     ],
+     "development_precision": 0.667,
+     "dropped": false,
+     "pair": "weighting:weighted by velocity",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "area_of_poloidal_field_coil"
+     ],
+     "development_mismatched": [
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.5,
+     "dropped": true,
+     "pair": "aggregation:line or surface integral",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "parallel_current_density_due_to_parallel_viscosity"
+     ],
+     "development_mismatched": [
+      "deuterium_deuterium_emissivity_due_to_fusion"
+     ],
+     "development_precision": 0.5,
+     "dropped": true,
+     "pair": "restriction:one reaction branch",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "counter_passing_fast_electron_torque_density_due_to_collisions",
+      "counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "electron_particle_flux_limiter_coefficient",
+      "normalized_effective_particle_energy",
+      "poloidal_electron_particle_flux"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "counter_passing_power_density",
+      "particle_torque_due_to_j_cross_b_force"
+     ],
+     "development_precision": 0.375,
+     "dropped": true,
+     "pair": "counting_unit:not a count",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "electron_particle_flux_limiter_coefficient",
+      "ion_energy_flux_limiter_coefficient",
+      "normalized_gyrocenter_perturbed_density",
+      "poloidal_beta",
+      "vertical_neutral_momentum_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [
+      "momentum_flux_due_to_e_cross_b_drift",
+      "refractive_index"
+     ],
+     "development_precision": 0.286,
+     "dropped": true,
+     "pair": "normalisation:relative to a reference value",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "parallel_current_density_due_to_parallel_viscosity",
+      "toroidal_ion_momentum_damping_rate",
+      "tritium_density"
+     ],
+     "development_mismatched": [
+      "accumulated_ammonia_deuterated_count"
+     ],
+     "development_precision": 0.25,
+     "dropped": true,
+     "pair": "normalisation:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "magnetic_shear_at_internal_transport_barrier",
+      "thickness_of_breeder_blanket_layer",
+      "tungsten_density_at_divertor_target"
+     ],
+     "development_mismatched": [
+      "fast_neutron_flux_of_toroidal_field_coil"
+     ],
+     "development_precision": 0.25,
+     "dropped": true,
+     "pair": "restriction:one spatial layer or region boundary",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "fast_ion_power_density_due_to_collisions",
+      "normalized_effective_particle_energy",
+      "thermal_ion_charge_state_energy_velocity_due_to_convection"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions"
+     ],
+     "development_precision": 0.25,
+     "dropped": true,
+     "pair": "weighting:weighted by energy",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+      "parallel_neutral_momentum_flux_limiter_coefficient",
+      "poloidal_ion_charge_state_momentum_convection_velocity",
+      "toroidal_ion_momentum_damping_rate",
+      "vertical_neutral_momentum_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [
+      "current_weighted_average_external_magnetic_flux"
+     ],
+     "development_precision": 0.167,
+     "dropped": true,
+     "pair": "weighting:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "first_local_tangential_coordinate_of_soft_xray_detector",
+      "nitrogen_density_at_pedestal_top",
+      "normalized_toroidal_flux_coordinate_at_pedestal_top",
+      "parallel_neutral_momentum_flux_limiter_coefficient",
+      "vertical_neutral_momentum_flux_limiter_coefficient",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ],
+     "development_mismatched": [
+      "density_at_plasma_boundary"
+     ],
+     "development_precision": 0.143,
+     "dropped": true,
+     "pair": "restriction:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "beryllium_density_at_magnetic_axis",
+      "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "electron_density_at_outboard_midplane",
+      "electron_particle_flux_limiter_coefficient",
+      "fast_ion_power_density_due_to_collisions",
+      "helium_3_density_at_pedestal_top",
+      "hydrogen_density",
+      "hydrogen_density_at_plasma_boundary",
+      "ion_energy_flux_limiter_coefficient",
+      "ion_fluence_at_divertor_target",
+      "line_averaged_tritium_density",
+      "molecular_neutral_species_flow_at_outlet",
+      "neutral_internal_state_energy_flux_limiter_coefficient",
+      "parallel_ion_charge_state_energy_diffusivity",
+      "parallel_ion_momentum_flux",
+      "parallel_total_ion_energy_convection_velocity",
+      "poloidal_electron_particle_flux",
+      "poloidal_ion_charge_state_momentum_convection_velocity",
+      "radial_ion_momentum_flux_over_edge_region",
+      "thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "toroidal_ion_momentum_damping_rate",
+      "toroidal_neutral_internal_state_torque_density",
+      "vertical_neutral_velocity"
+     ],
+     "development_mismatched": [
+      "accumulated_xenon_count_due_to_gas_injection",
+      "argon_source_rate_due_to_gas_injection",
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.115,
+     "dropped": true,
+     "pair": "restriction:one particle population",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "boron_density_at_limiter",
+      "electron_density_at_outboard_midplane",
+      "hydrogen_density_at_plasma_boundary",
+      "ion_fluence_at_divertor_target",
+      "line_averaged_tritium_density",
+      "nitrogen_density_at_pedestal_top",
+      "normalized_gyrocenter_perturbed_density",
+      "parallel_ion_momentum_flux",
+      "poloidal_beta",
+      "radial_ion_momentum_flux_over_edge_region",
+      "ratio_of_iron_density_to_electron_density",
+      "tungsten_density_at_divertor_target",
+      "volume_averaged_runaway_electron_kinetic_energy_density",
+      "volume_averaged_total_runaway_electron_source_rate",
+      "volume_of_flux_surface",
+      "x_first_measurement_direction_unit_vector_of_strain_gauge"
+     ],
+     "development_mismatched": [
+      "density_at_plasma_boundary",
+      "total_trapped_particle_density"
+     ],
+     "development_precision": 0.111,
+     "dropped": true,
+     "pair": "weighting:unweighted",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "parallel_total_ion_energy_convection_velocity",
+      "second_local_tangential_coordinate_of_bragg_crystal"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_fluence_at_divertor_target"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:time-accumulated total",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "poloidal_beta",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:volume average",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "volume_of_flux_surface"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:volume integral",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "magnetic_shear_at_internal_transport_barrier"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:logarithm taken",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_fluence_at_divertor_target"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per unit area",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "line_averaged_tritium_density"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per unit length",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "calibration_reference_magnetic_field_of_poloidal_magnetic_field_probe",
+      "coolant_absorbed_power_of_calorimetry_component",
+      "temperature_of_sensor",
+      "upper_thickness_of_breeder_blanket_module",
+      "vertical_coordinate_of_flux_loop"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one device part or component",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "lower_bound_energy_of_detector_pixel",
+      "power_of_divertor_due_to_convection",
+      "radial_perturbed_vacuum_magnetic_vector_potential_imaginary_part"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one spectral band or energy channel",
+     "readmitted": false
+    }
+   ]
+  },
+  "jev_arm": {
+   "dropped": [
+    "restriction:one particle population",
+    "normalisation:none stated",
+    "aggregation:line or surface integral",
+    "weighting:unweighted",
+    "normalisation:per unit time",
+    "restriction:one device part or component",
+    "counting_unit:none stated",
+    "weighting:weighted by energy",
+    "weighting:none stated",
+    "normalisation:per particle or ion",
+    "counting_unit:atoms or molecules",
+    "normalisation:per unit area",
+    "normalisation:relative to a reference value",
+    "aggregation:time-accumulated total",
+    "restriction:one spectral band or energy channel",
+    "restriction:one spatial layer or region boundary",
+    "aggregation:volume average",
+    "restriction:none stated",
+    "normalisation:per unit length",
+    "weighting:weighted by velocity",
+    "aggregation:volume integral"
+   ],
+   "readmitted": [
+    "aggregation:line or surface integral",
+    "normalisation:none stated",
+    "counting_unit:none stated"
+   ],
+   "rows": [
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "counter_passing_power_density",
+      "total_trapped_particle_density"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "aggregation:flux-surface average",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "accumulated_ammonia_count",
+      "accumulated_ammonia_deuterated_count",
+      "accumulated_silane_count_due_to_gas_injection",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "argon_source_rate_due_to_gas_injection"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "counting_unit:equivalent electrons",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "fast_neutron_flux_of_toroidal_field_coil"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "counting_unit:particles or ions",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "deuterium_deuterium_emissivity_due_to_fusion"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "restriction:one reaction branch",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "counter_passing_fast_electron_torque_density_due_to_collisions"
+     ],
+     "development_mismatched": [
+      "counter_passing_power_density",
+      "particle_torque_due_to_j_cross_b_force"
+     ],
+     "development_precision": 0.667,
+     "dropped": false,
+     "pair": "counting_unit:not a count",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "area_of_poloidal_field_coil"
+     ],
+     "development_mismatched": [
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.5,
+     "dropped": true,
+     "pair": "aggregation:line or surface integral",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "ratio_of_iron_density_to_electron_density"
+     ],
+     "development_mismatched": [
+      "accumulated_ammonia_deuterated_count"
+     ],
+     "development_precision": 0.5,
+     "dropped": true,
+     "pair": "normalisation:none stated",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "molecular_neutral_species_flow_at_outlet",
+      "vertical_neutral_velocity"
+     ],
+     "development_mismatched": [
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.333,
+     "dropped": true,
+     "pair": "counting_unit:atoms or molecules",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "normalized_effective_particle_energy"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions"
+     ],
+     "development_precision": 0.333,
+     "dropped": true,
+     "pair": "counting_unit:none stated",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "ion_energy_flux_limiter_coefficient",
+      "normalized_gyrocenter_perturbed_density",
+      "poloidal_beta",
+      "vertical_neutral_momentum_flux_limiter_coefficient",
+      "voltage_of_valve"
+     ],
+     "development_mismatched": [
+      "momentum_flux_due_to_e_cross_b_drift",
+      "refractive_index"
+     ],
+     "development_precision": 0.286,
+     "dropped": true,
+     "pair": "normalisation:relative to a reference value",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "fast_ion_power_density_due_to_collisions",
+      "parallel_total_ion_energy_convection_velocity",
+      "power_of_divertor_due_to_convection",
+      "thermal_ion_charge_state_energy_velocity_due_to_convection"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions"
+     ],
+     "development_precision": 0.167,
+     "dropped": true,
+     "pair": "weighting:weighted by energy",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "coolant_absorbed_power_of_calorimetry_component",
+      "molecular_neutral_species_flow_at_outlet",
+      "nuclear_heating_power_of_limiter_tile",
+      "power_due_to_synchrotron_radiation",
+      "power_of_divertor_due_to_convection",
+      "total_absorbed_wave_power"
+     ],
+     "development_mismatched": [
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.143,
+     "dropped": true,
+     "pair": "normalisation:per unit time",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "argon_density_at_separatrix",
+      "beryllium_density_at_magnetic_axis",
+      "boron_density_at_limiter",
+      "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "electron_density_at_outboard_midplane",
+      "electron_particle_flux_limiter_coefficient",
+      "electron_temperature_at_magnetic_axis",
+      "helium_3_density_at_pedestal_top",
+      "hydrogen_density",
+      "hydrogen_density_at_plasma_boundary",
+      "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+      "ion_energy_flux_limiter_coefficient",
+      "ion_fluence_at_divertor_target",
+      "line_averaged_tritium_density",
+      "nitrogen_density_at_pedestal_top",
+      "parallel_ion_charge_state_energy_diffusivity",
+      "parallel_neutral_momentum_flux_limiter_coefficient",
+      "parallel_total_ion_energy_convection_velocity",
+      "poloidal_electron_particle_flux",
+      "poloidal_ion_charge_state_momentum_convection_velocity",
+      "radial_effective_ion_diffusivity",
+      "radial_ion_diffusion_coefficient",
+      "thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "toroidal_ion_momentum_damping_rate",
+      "total_ion_density_at_magnetic_axis",
+      "tritium_density",
+      "tritium_density_at_pedestal_top",
+      "vertical_neutral_velocity"
+     ],
+     "development_mismatched": [
+      "accumulated_ammonia_count",
+      "accumulated_ammonia_deuterated_count",
+      "accumulated_silane_count_due_to_gas_injection",
+      "accumulated_xenon_count_due_to_gas_injection"
+     ],
+     "development_precision": 0.125,
+     "dropped": true,
+     "pair": "restriction:one particle population",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+      "parallel_ion_momentum_flux",
+      "parallel_neutral_momentum_flux_limiter_coefficient",
+      "poloidal_ion_charge_state_momentum_convection_velocity",
+      "radial_ion_momentum_flux_over_edge_region",
+      "toroidal_ion_momentum_damping_rate",
+      "vertical_neutral_momentum_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [
+      "current_weighted_average_external_magnetic_flux"
+     ],
+     "development_precision": 0.125,
+     "dropped": true,
+     "pair": "weighting:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "argon_density_at_separatrix",
+      "beryllium_density_at_magnetic_axis",
+      "boron_density_at_limiter",
+      "electron_density_at_outboard_midplane",
+      "helium_3_density_at_pedestal_top",
+      "hydrogen_density",
+      "hydrogen_density_at_plasma_boundary",
+      "ion_fluence_at_divertor_target",
+      "line_averaged_tritium_density",
+      "lithium_density_at_internal_transport_barrier",
+      "nitrogen_density_at_pedestal_top",
+      "normalized_gyrocenter_perturbed_density",
+      "poloidal_beta",
+      "poloidal_electron_particle_flux",
+      "radial_effective_ion_diffusivity",
+      "radial_ion_diffusion_coefficient",
+      "total_ion_density_at_magnetic_axis",
+      "tritium_density_at_pedestal_top",
+      "tungsten_density_at_divertor_target",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ],
+     "development_mismatched": [
+      "density_at_plasma_boundary",
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.091,
+     "dropped": true,
+     "pair": "weighting:unweighted",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_fluence_at_divertor_target"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:time-accumulated total",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "poloidal_beta",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:volume average",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "volume_of_flux_surface"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:volume integral",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "electron_temperature_at_magnetic_axis"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per particle or ion",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "inverse_of_square_of_major_radius",
+      "ion_fluence_at_divertor_target",
+      "parallel_current_density_due_to_parallel_viscosity"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per unit area",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "radial_derivative_of_poloidal_magnetic_flux"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per unit length",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "poloidal_flux_limiter_coefficient",
+      "power_of_divertor_due_to_convection",
+      "toroidal_coordinate_of_reflector",
+      "vertical_neutral_momentum_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "coolant_absorbed_power_of_calorimetry_component",
+      "temperature_of_sensor",
+      "voltage_of_valve"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one device part or component",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "magnetic_shear_at_internal_transport_barrier",
+      "thickness_of_breeder_blanket_layer"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one spatial layer or region boundary",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "lower_bound_energy_of_detector_pixel",
+      "neutral_internal_state_energy_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one spectral band or energy channel",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "vertical_neutral_velocity"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "weighting:weighted by velocity",
+     "readmitted": false
+    }
+   ]
+  },
+  "rule": "a (slot, option) pair the threshold excludes is re-admitted when its development precision is above chance, it recovers a development mismatch and the development false-flag rate stays at or under the ceiling",
+  "union_chat_arm": {
+   "dropped": [
+    "normalisation:none stated",
+    "restriction:one particle population",
+    "aggregation:line or surface integral",
+    "weighting:unweighted",
+    "restriction:one device part or component",
+    "counting_unit:not a count",
+    "weighting:weighted by energy",
+    "weighting:none stated",
+    "restriction:none stated",
+    "restriction:one reaction branch",
+    "normalisation:relative to a reference value",
+    "restriction:one spatial layer or region boundary",
+    "aggregation:time-accumulated total",
+    "normalisation:per unit area",
+    "normalisation:per unit length",
+    "restriction:one spectral band or energy channel",
+    "normalisation:logarithm taken",
+    "aggregation:none stated",
+    "aggregation:volume average",
+    "aggregation:volume integral"
+   ],
+   "readmitted": [
+    "aggregation:line or surface integral",
+    "counting_unit:not a count"
+   ],
+   "rows": [
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "accumulated_ammonia_count",
+      "accumulated_ammonia_deuterated_count",
+      "accumulated_silane_count_due_to_gas_injection",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "argon_source_rate_due_to_gas_injection"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "counting_unit:equivalent electrons",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "fast_neutron_flux_of_toroidal_field_coil"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "counting_unit:particles or ions",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "runaway_electron_kinetic_energy_density"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "counter_passing_power_density",
+      "total_trapped_particle_density"
+     ],
+     "development_precision": 0.75,
+     "dropped": false,
+     "pair": "aggregation:flux-surface average",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "poloidal_electron_particle_flux"
+     ],
+     "development_mismatched": [
+      "deuterium_deuterium_emissivity_due_to_fusion",
+      "momentum_flux_due_to_e_cross_b_drift"
+     ],
+     "development_precision": 0.667,
+     "dropped": false,
+     "pair": "weighting:weighted by velocity",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "area_of_poloidal_field_coil"
+     ],
+     "development_mismatched": [
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.5,
+     "dropped": true,
+     "pair": "aggregation:line or surface integral",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "parallel_current_density_due_to_parallel_viscosity"
+     ],
+     "development_mismatched": [
+      "deuterium_deuterium_emissivity_due_to_fusion"
+     ],
+     "development_precision": 0.5,
+     "dropped": true,
+     "pair": "restriction:one reaction branch",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "counter_passing_fast_electron_torque_density_due_to_collisions",
+      "counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "electron_particle_flux_limiter_coefficient",
+      "normalized_effective_particle_energy",
+      "poloidal_electron_particle_flux"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "counter_passing_power_density",
+      "particle_torque_due_to_j_cross_b_force"
+     ],
+     "development_precision": 0.375,
+     "dropped": true,
+     "pair": "counting_unit:not a count",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "electron_particle_flux_limiter_coefficient",
+      "ion_energy_flux_limiter_coefficient",
+      "normalized_gyrocenter_perturbed_density",
+      "poloidal_beta",
+      "vertical_neutral_momentum_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [
+      "momentum_flux_due_to_e_cross_b_drift",
+      "refractive_index"
+     ],
+     "development_precision": 0.286,
+     "dropped": true,
+     "pair": "normalisation:relative to a reference value",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "parallel_current_density_due_to_parallel_viscosity",
+      "toroidal_ion_momentum_damping_rate",
+      "tritium_density"
+     ],
+     "development_mismatched": [
+      "accumulated_ammonia_deuterated_count"
+     ],
+     "development_precision": 0.25,
+     "dropped": true,
+     "pair": "normalisation:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "magnetic_shear_at_internal_transport_barrier",
+      "thickness_of_breeder_blanket_layer",
+      "tungsten_density_at_divertor_target"
+     ],
+     "development_mismatched": [
+      "fast_neutron_flux_of_toroidal_field_coil"
+     ],
+     "development_precision": 0.25,
+     "dropped": true,
+     "pair": "restriction:one spatial layer or region boundary",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "fast_ion_power_density_due_to_collisions",
+      "normalized_effective_particle_energy",
+      "thermal_ion_charge_state_energy_velocity_due_to_convection"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions"
+     ],
+     "development_precision": 0.25,
+     "dropped": true,
+     "pair": "weighting:weighted by energy",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+      "parallel_neutral_momentum_flux_limiter_coefficient",
+      "poloidal_ion_charge_state_momentum_convection_velocity",
+      "toroidal_ion_momentum_damping_rate",
+      "vertical_neutral_momentum_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [
+      "current_weighted_average_external_magnetic_flux"
+     ],
+     "development_precision": 0.167,
+     "dropped": true,
+     "pair": "weighting:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "first_local_tangential_coordinate_of_soft_xray_detector",
+      "nitrogen_density_at_pedestal_top",
+      "normalized_toroidal_flux_coordinate_at_pedestal_top",
+      "parallel_neutral_momentum_flux_limiter_coefficient",
+      "vertical_neutral_momentum_flux_limiter_coefficient",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ],
+     "development_mismatched": [
+      "density_at_plasma_boundary"
+     ],
+     "development_precision": 0.143,
+     "dropped": true,
+     "pair": "restriction:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "beryllium_density_at_magnetic_axis",
+      "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "electron_density_at_outboard_midplane",
+      "electron_particle_flux_limiter_coefficient",
+      "fast_ion_power_density_due_to_collisions",
+      "helium_3_density_at_pedestal_top",
+      "hydrogen_density",
+      "hydrogen_density_at_plasma_boundary",
+      "ion_energy_flux_limiter_coefficient",
+      "ion_fluence_at_divertor_target",
+      "line_averaged_tritium_density",
+      "molecular_neutral_species_flow_at_outlet",
+      "neutral_internal_state_energy_flux_limiter_coefficient",
+      "parallel_ion_charge_state_energy_diffusivity",
+      "parallel_ion_momentum_flux",
+      "parallel_total_ion_energy_convection_velocity",
+      "poloidal_electron_particle_flux",
+      "poloidal_ion_charge_state_momentum_convection_velocity",
+      "radial_ion_momentum_flux_over_edge_region",
+      "thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "toroidal_ion_momentum_damping_rate",
+      "toroidal_neutral_internal_state_torque_density",
+      "vertical_neutral_velocity"
+     ],
+     "development_mismatched": [
+      "accumulated_xenon_count_due_to_gas_injection",
+      "argon_source_rate_due_to_gas_injection",
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.115,
+     "dropped": true,
+     "pair": "restriction:one particle population",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "boron_density_at_limiter",
+      "electron_density_at_outboard_midplane",
+      "hydrogen_density_at_plasma_boundary",
+      "ion_fluence_at_divertor_target",
+      "line_averaged_tritium_density",
+      "nitrogen_density_at_pedestal_top",
+      "normalized_gyrocenter_perturbed_density",
+      "parallel_ion_momentum_flux",
+      "poloidal_beta",
+      "radial_ion_momentum_flux_over_edge_region",
+      "ratio_of_iron_density_to_electron_density",
+      "tungsten_density_at_divertor_target",
+      "volume_averaged_runaway_electron_kinetic_energy_density",
+      "volume_averaged_total_runaway_electron_source_rate",
+      "volume_of_flux_surface",
+      "x_first_measurement_direction_unit_vector_of_strain_gauge"
+     ],
+     "development_mismatched": [
+      "density_at_plasma_boundary",
+      "total_trapped_particle_density"
+     ],
+     "development_precision": 0.111,
+     "dropped": true,
+     "pair": "weighting:unweighted",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "parallel_total_ion_energy_convection_velocity",
+      "second_local_tangential_coordinate_of_bragg_crystal"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_fluence_at_divertor_target"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:time-accumulated total",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "poloidal_beta",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:volume average",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "volume_of_flux_surface"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:volume integral",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "magnetic_shear_at_internal_transport_barrier"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:logarithm taken",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_fluence_at_divertor_target"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per unit area",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "line_averaged_tritium_density"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per unit length",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "calibration_reference_magnetic_field_of_poloidal_magnetic_field_probe",
+      "coolant_absorbed_power_of_calorimetry_component",
+      "temperature_of_sensor",
+      "upper_thickness_of_breeder_blanket_module",
+      "vertical_coordinate_of_flux_loop"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one device part or component",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "lower_bound_energy_of_detector_pixel",
+      "power_of_divertor_due_to_convection",
+      "radial_perturbed_vacuum_magnetic_vector_potential_imaginary_part"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one spectral band or energy channel",
+     "readmitted": false
+    }
+   ]
+  },
+  "union_jev_arm": {
+   "dropped": [
+    "restriction:one particle population",
+    "normalisation:none stated",
+    "aggregation:line or surface integral",
+    "weighting:unweighted",
+    "normalisation:per unit time",
+    "restriction:one device part or component",
+    "counting_unit:none stated",
+    "weighting:weighted by energy",
+    "weighting:none stated",
+    "normalisation:per particle or ion",
+    "counting_unit:atoms or molecules",
+    "normalisation:per unit area",
+    "normalisation:relative to a reference value",
+    "aggregation:time-accumulated total",
+    "restriction:one spectral band or energy channel",
+    "restriction:one spatial layer or region boundary",
+    "aggregation:volume average",
+    "restriction:none stated",
+    "normalisation:per unit length",
+    "weighting:weighted by velocity",
+    "aggregation:volume integral"
+   ],
+   "readmitted": [
+    "aggregation:line or surface integral",
+    "normalisation:relative to a reference value"
+   ],
+   "rows": [
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+      "counter_passing_power_density",
+      "total_trapped_particle_density"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "aggregation:flux-surface average",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "accumulated_ammonia_count",
+      "accumulated_ammonia_deuterated_count",
+      "accumulated_silane_count_due_to_gas_injection",
+      "accumulated_xenon_count_due_to_gas_injection",
+      "argon_source_rate_due_to_gas_injection"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "counting_unit:equivalent electrons",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "fast_neutron_flux_of_toroidal_field_coil"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "counting_unit:particles or ions",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [],
+     "development_mismatched": [
+      "deuterium_deuterium_emissivity_due_to_fusion"
+     ],
+     "development_precision": 1.0,
+     "dropped": false,
+     "pair": "restriction:one reaction branch",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "counter_passing_fast_electron_torque_density_due_to_collisions"
+     ],
+     "development_mismatched": [
+      "counter_passing_power_density",
+      "particle_torque_due_to_j_cross_b_force"
+     ],
+     "development_precision": 0.667,
+     "dropped": false,
+     "pair": "counting_unit:not a count",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "area_of_poloidal_field_coil"
+     ],
+     "development_mismatched": [
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.5,
+     "dropped": true,
+     "pair": "aggregation:line or surface integral",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "ratio_of_iron_density_to_electron_density"
+     ],
+     "development_mismatched": [
+      "accumulated_ammonia_deuterated_count"
+     ],
+     "development_precision": 0.5,
+     "dropped": true,
+     "pair": "normalisation:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "molecular_neutral_species_flow_at_outlet",
+      "vertical_neutral_velocity"
+     ],
+     "development_mismatched": [
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.333,
+     "dropped": true,
+     "pair": "counting_unit:atoms or molecules",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "counter_passing_thermal_ion_torque_density_due_to_collisions",
+      "normalized_effective_particle_energy"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions"
+     ],
+     "development_precision": 0.333,
+     "dropped": true,
+     "pair": "counting_unit:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_energy_flux_limiter_coefficient",
+      "normalized_gyrocenter_perturbed_density",
+      "poloidal_beta",
+      "vertical_neutral_momentum_flux_limiter_coefficient",
+      "voltage_of_valve"
+     ],
+     "development_mismatched": [
+      "momentum_flux_due_to_e_cross_b_drift",
+      "refractive_index"
+     ],
+     "development_precision": 0.286,
+     "dropped": true,
+     "pair": "normalisation:relative to a reference value",
+     "readmitted": true
+    },
+    {
+     "development_agreeing": [
+      "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "fast_ion_power_density_due_to_collisions",
+      "parallel_total_ion_energy_convection_velocity",
+      "power_of_divertor_due_to_convection",
+      "thermal_ion_charge_state_energy_velocity_due_to_convection"
+     ],
+     "development_mismatched": [
+      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions"
+     ],
+     "development_precision": 0.167,
+     "dropped": true,
+     "pair": "weighting:weighted by energy",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "coolant_absorbed_power_of_calorimetry_component",
+      "molecular_neutral_species_flow_at_outlet",
+      "nuclear_heating_power_of_limiter_tile",
+      "power_due_to_synchrotron_radiation",
+      "power_of_divertor_due_to_convection",
+      "total_absorbed_wave_power"
+     ],
+     "development_mismatched": [
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.143,
+     "dropped": true,
+     "pair": "normalisation:per unit time",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "argon_density_at_separatrix",
+      "beryllium_density_at_magnetic_axis",
+      "boron_density_at_limiter",
+      "effective_thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "electron_density_at_outboard_midplane",
+      "electron_particle_flux_limiter_coefficient",
+      "electron_temperature_at_magnetic_axis",
+      "helium_3_density_at_pedestal_top",
+      "hydrogen_density",
+      "hydrogen_density_at_plasma_boundary",
+      "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+      "ion_energy_flux_limiter_coefficient",
+      "ion_fluence_at_divertor_target",
+      "line_averaged_tritium_density",
+      "nitrogen_density_at_pedestal_top",
+      "parallel_ion_charge_state_energy_diffusivity",
+      "parallel_neutral_momentum_flux_limiter_coefficient",
+      "parallel_total_ion_energy_convection_velocity",
+      "poloidal_electron_particle_flux",
+      "poloidal_ion_charge_state_momentum_convection_velocity",
+      "radial_effective_ion_diffusivity",
+      "radial_ion_diffusion_coefficient",
+      "thermal_ion_charge_state_energy_velocity_due_to_convection",
+      "toroidal_ion_momentum_damping_rate",
+      "total_ion_density_at_magnetic_axis",
+      "tritium_density",
+      "tritium_density_at_pedestal_top",
+      "vertical_neutral_velocity"
+     ],
+     "development_mismatched": [
+      "accumulated_ammonia_count",
+      "accumulated_ammonia_deuterated_count",
+      "accumulated_silane_count_due_to_gas_injection",
+      "accumulated_xenon_count_due_to_gas_injection"
+     ],
+     "development_precision": 0.125,
+     "dropped": true,
+     "pair": "restriction:one particle population",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_charge_state_momentum_flux_due_to_diamagnetic_drift",
+      "parallel_ion_momentum_flux",
+      "parallel_neutral_momentum_flux_limiter_coefficient",
+      "poloidal_ion_charge_state_momentum_convection_velocity",
+      "radial_ion_momentum_flux_over_edge_region",
+      "toroidal_ion_momentum_damping_rate",
+      "vertical_neutral_momentum_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [
+      "current_weighted_average_external_magnetic_flux"
+     ],
+     "development_precision": 0.125,
+     "dropped": true,
+     "pair": "weighting:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "argon_density_at_separatrix",
+      "beryllium_density_at_magnetic_axis",
+      "boron_density_at_limiter",
+      "electron_density_at_outboard_midplane",
+      "helium_3_density_at_pedestal_top",
+      "hydrogen_density",
+      "hydrogen_density_at_plasma_boundary",
+      "ion_fluence_at_divertor_target",
+      "line_averaged_tritium_density",
+      "lithium_density_at_internal_transport_barrier",
+      "nitrogen_density_at_pedestal_top",
+      "normalized_gyrocenter_perturbed_density",
+      "poloidal_beta",
+      "poloidal_electron_particle_flux",
+      "radial_effective_ion_diffusivity",
+      "radial_ion_diffusion_coefficient",
+      "total_ion_density_at_magnetic_axis",
+      "tritium_density_at_pedestal_top",
+      "tungsten_density_at_divertor_target",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ],
+     "development_mismatched": [
+      "density_at_plasma_boundary",
+      "incident_neutral_particle_flux_at_wall"
+     ],
+     "development_precision": 0.091,
+     "dropped": true,
+     "pair": "weighting:unweighted",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "ion_fluence_at_divertor_target"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:time-accumulated total",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "poloidal_beta",
+      "volume_averaged_total_runaway_electron_source_rate"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:volume average",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "volume_of_flux_surface"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "aggregation:volume integral",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "electron_temperature_at_magnetic_axis"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per particle or ion",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "inverse_of_square_of_major_radius",
+      "ion_fluence_at_divertor_target",
+      "parallel_current_density_due_to_parallel_viscosity"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per unit area",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "radial_derivative_of_poloidal_magnetic_flux"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "normalisation:per unit length",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "poloidal_flux_limiter_coefficient",
+      "power_of_divertor_due_to_convection",
+      "toroidal_coordinate_of_reflector",
+      "vertical_neutral_momentum_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:none stated",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "coolant_absorbed_power_of_calorimetry_component",
+      "temperature_of_sensor",
+      "voltage_of_valve"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one device part or component",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "magnetic_shear_at_internal_transport_barrier",
+      "thickness_of_breeder_blanket_layer"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one spatial layer or region boundary",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "lower_bound_energy_of_detector_pixel",
+      "neutral_internal_state_energy_flux_limiter_coefficient"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "restriction:one spectral band or energy channel",
+     "readmitted": false
+    },
+    {
+     "development_agreeing": [
+      "vertical_neutral_velocity"
+     ],
+     "development_mismatched": [],
+     "development_precision": 0.0,
+     "dropped": true,
+     "pair": "weighting:weighted by velocity",
+     "readmitted": false
+    }
+   ]
+  }
+ },
+ "probe_flagged_names": {
+  "chat_arm": [
+   "accumulated_ammonia_count",
+   "accumulated_ammonia_deuterated_count",
+   "accumulated_deuterated_methane_prefill_count",
+   "accumulated_helium_3_prefill_count_due_to_gas_injection",
+   "accumulated_silane_count_due_to_gas_injection",
+   "accumulated_total_prefill_gas_count",
+   "accumulated_tritium_count_due_to_gas_injection",
+   "accumulated_xenon_count_due_to_gas_injection",
+   "area_of_poloidal_field_coil",
+   "argon_source_rate_due_to_gas_injection",
+   "counter_passing_fast_electron_torque_density_due_to_collisions",
+   "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+   "counter_passing_power_density",
+   "counter_passing_thermal_electron_power_density_due_to_collisions",
+   "counter_passing_thermal_electron_torque_density_due_to_collisions",
+   "counter_passing_thermal_ion_torque_density_due_to_collisions",
+   "deuterium_deuterium_emissivity_due_to_fusion",
+   "electron_particle_flux_limiter_coefficient",
+   "ethane_source_rate",
+   "fast_particle_pressure",
+   "fast_particle_torque_due_to_j_cross_b_force",
+   "field_line_length",
+   "implicit_electron_particle_source_rate",
+   "incident_neutral_particle_flux_at_wall",
+   "neon_prefill_count",
+   "neutral_species_atomic_mass",
+   "neutron_response_function_of_neutron_detector",
+   "normalized_effective_particle_energy",
+   "normalized_particle_charge",
+   "parallel_current_density_due_to_parallel_viscosity",
+   "particle_diffusivity",
+   "particle_torque_due_to_j_cross_b_force",
+   "particle_velocity_due_to_convection",
+   "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+   "per_toroidal_mode_thermal_ion_charge_state_power_density",
+   "perpendicular_co_passing_fast_particle_pressure",
+   "poloidal_electron_particle_flux",
+   "poloidal_ion_charge_state_particle_flux",
+   "ratio_of_particle_temperature_to_particle_reference_temperature",
+   "runaway_electron_kinetic_energy_density",
+   "runaway_electron_source_rate_due_to_hot_tail",
+   "surface_area_of_detector",
+   "surface_area_of_flux_surface",
+   "total_neutral_source_rate_due_to_gas_injection",
+   "trapped_thermal_ion_charge_state_power_density_due_to_collisions",
+   "xenon_source_rate_due_to_gas_injection"
+  ],
+  "jev_arm": [
+   "accumulated_ammonia_deuterated_count",
+   "accumulated_deuterated_methane_prefill_count",
+   "area_of_poloidal_field_coil",
+   "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
+   "counter_passing_thermal_electron_power_density_due_to_collisions",
+   "counter_passing_thermal_electron_torque_density_due_to_collisions",
+   "counter_passing_thermal_ion_torque_density_due_to_collisions",
+   "edge_localized_mode_frequency",
+   "effective_turn_count_of_coil_conductor_element",
+   "ethane_source_rate",
+   "fast_particle_pressure",
+   "fast_particle_torque_due_to_j_cross_b_force",
+   "field_line_length",
+   "flux_surface_averaged_total_ion_density_at_plasma_boundary",
+   "incident_neutral_particle_flux_at_wall",
+   "normalized_effective_particle_energy",
+   "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+   "perpendicular_co_passing_fast_particle_pressure",
+   "ratio_of_iron_density_to_electron_density",
+   "ratio_of_particle_temperature_to_particle_reference_temperature",
+   "surface_area_of_detector",
+   "surface_area_of_flux_surface",
+   "surface_emissivity",
+   "total_neutral_source_rate_due_to_gas_injection",
+   "xenon_source_rate_due_to_gas_injection"
+  ]
+ },
+ "schema": "name-definition-probes",
+ "scorings": {
+  "changed_between": [
+   {
+    "change": "first reading: no closure, no confirming question, no pair table",
+    "scoring": 1
+   },
+   {
+    "change": "added a name-implication closure covering species, object, locus, extensive base and unit; one hard-class Jev confirming question; (slot, option) pairs dropped below chance",
+    "scoring": 2
+   },
+   {
+    "change": [
+     "closure narrowed to exact implications only (per-unit-volume, the species' own ions, the named locus, the named transformation, the natural integral); an object token no longer suppresses a restriction; the confirming judgment is graded and each slot's threshold is tuned on development; a Jev extraction arm added"
+    ],
+    "scoring": 3
+   }
+  ],
+  "count": 3,
+  "note": "the held-out names have been scored three times: no closure, then the full closure with a hard relation class and a dropped pair table, and now the narrowed closure with a graded judgment and per-slot thresholds"
+ },
+ "split": {
+  "development_names": 105,
+  "held_out_names": 208,
+  "seed": 7714
+ },
+ "thresholds": {
+  "chat_arm": {
+   "aggregation": {
+    "curve": [
+     {
+      "false_flag_rate": 0.081,
+      "false_flags": 7,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.047,
+      "false_flags": 4,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.047,
+      "false_flags": 4,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 0.05
+   },
+   "counting_unit": {
+    "curve": [
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 8,
+      "recall": 0.421,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 7,
+      "recall": 0.368,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 6,
+      "recall": 0.316,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 6,
+      "recall": 0.316,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 6,
+      "recall": 0.316,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 6,
+      "recall": 0.316,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 6,
+      "recall": 0.316,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 6,
+      "recall": 0.316,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 5,
+      "recall": 0.263,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 5,
+      "recall": 0.263,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 5,
+      "recall": 0.263,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 5,
+      "recall": 0.263,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 5,
+      "recall": 0.263,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 0.05
+   },
+   "joint": {
+    "development_false_flag_rate": 0.093,
+    "development_false_flags": 8,
+    "development_found": 11,
+    "development_recall": 0.579,
+    "thresholds": {
+     "aggregation": 0.45,
+     "counting_unit": 0.25,
+     "normalisation": 0.3,
+     "restriction": 0.75,
+     "weighting": 0.4
+    },
+    "trace": [
+     {
+      "development_false_flag_rate": 0.488,
+      "development_false_flags": 42,
+      "development_found": 16,
+      "slot": "restriction",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.465,
+      "development_false_flags": 40,
+      "development_found": 16,
+      "slot": "weighting",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.465,
+      "development_false_flags": 40,
+      "development_found": 15,
+      "slot": "restriction",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.465,
+      "development_false_flags": 40,
+      "development_found": 15,
+      "slot": "restriction",
+      "threshold": 0.2
+     },
+     {
+      "development_false_flag_rate": 0.407,
+      "development_false_flags": 35,
+      "development_found": 15,
+      "slot": "weighting",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.372,
+      "development_false_flags": 32,
+      "development_found": 15,
+      "slot": "restriction",
+      "threshold": 0.25
+     },
+     {
+      "development_false_flag_rate": 0.349,
+      "development_false_flags": 30,
+      "development_found": 15,
+      "slot": "restriction",
+      "threshold": 0.3
+     },
+     {
+      "development_false_flag_rate": 0.326,
+      "development_false_flags": 28,
+      "development_found": 14,
+      "slot": "normalisation",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.302,
+      "development_false_flags": 26,
+      "development_found": 14,
+      "slot": "restriction",
+      "threshold": 0.35
+     },
+     {
+      "development_false_flag_rate": 0.291,
+      "development_false_flags": 25,
+      "development_found": 14,
+      "slot": "weighting",
+      "threshold": 0.2
+     },
+     {
+      "development_false_flag_rate": 0.256,
+      "development_false_flags": 22,
+      "development_found": 14,
+      "slot": "normalisation",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.256,
+      "development_false_flags": 22,
+      "development_found": 14,
+      "slot": "restriction",
+      "threshold": 0.4
+     },
+     {
+      "development_false_flag_rate": 0.233,
+      "development_false_flags": 20,
+      "development_found": 14,
+      "slot": "aggregation",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.209,
+      "development_false_flags": 18,
+      "development_found": 14,
+      "slot": "weighting",
+      "threshold": 0.25
+     },
+     {
+      "development_false_flag_rate": 0.209,
+      "development_false_flags": 18,
+      "development_found": 14,
+      "slot": "restriction",
+      "threshold": 0.45
+     },
+     {
+      "development_false_flag_rate": 0.209,
+      "development_false_flags": 18,
+      "development_found": 14,
+      "slot": "restriction",
+      "threshold": 0.5
+     },
+     {
+      "development_false_flag_rate": 0.209,
+      "development_false_flags": 18,
+      "development_found": 14,
+      "slot": "restriction",
+      "threshold": 0.55
+     },
+     {
+      "development_false_flag_rate": 0.209,
+      "development_false_flags": 18,
+      "development_found": 14,
+      "slot": "restriction",
+      "threshold": 0.6
+     },
+     {
+      "development_false_flag_rate": 0.186,
+      "development_false_flags": 16,
+      "development_found": 14,
+      "slot": "restriction",
+      "threshold": 0.65
+     },
+     {
+      "development_false_flag_rate": 0.174,
+      "development_false_flags": 15,
+      "development_found": 14,
+      "slot": "weighting",
+      "threshold": 0.3
+     },
+     {
+      "development_false_flag_rate": 0.174,
+      "development_false_flags": 15,
+      "development_found": 14,
+      "slot": "aggregation",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.163,
+      "development_false_flags": 14,
+      "development_found": 14,
+      "slot": "aggregation",
+      "threshold": 0.2
+     },
+     {
+      "development_false_flag_rate": 0.163,
+      "development_false_flags": 14,
+      "development_found": 14,
+      "slot": "normalisation",
+      "threshold": 0.2
+     },
+     {
+      "development_false_flag_rate": 0.163,
+      "development_false_flags": 14,
+      "development_found": 14,
+      "slot": "weighting",
+      "threshold": 0.35
+     },
+     {
+      "development_false_flag_rate": 0.151,
+      "development_false_flags": 13,
+      "development_found": 14,
+      "slot": "restriction",
+      "threshold": 0.7
+     },
+     {
+      "development_false_flag_rate": 0.151,
+      "development_false_flags": 13,
+      "development_found": 13,
+      "slot": "counting_unit",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.14,
+      "development_false_flags": 12,
+      "development_found": 12,
+      "slot": "counting_unit",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.14,
+      "development_false_flags": 12,
+      "development_found": 12,
+      "slot": "aggregation",
+      "threshold": 0.25
+     },
+     {
+      "development_false_flag_rate": 0.14,
+      "development_false_flags": 12,
+      "development_found": 12,
+      "slot": "normalisation",
+      "threshold": 0.25
+     },
+     {
+      "development_false_flag_rate": 0.14,
+      "development_false_flags": 12,
+      "development_found": 12,
+      "slot": "aggregation",
+      "threshold": 0.3
+     },
+     {
+      "development_false_flag_rate": 0.128,
+      "development_false_flags": 11,
+      "development_found": 12,
+      "slot": "normalisation",
+      "threshold": 0.3
+     },
+     {
+      "development_false_flag_rate": 0.128,
+      "development_false_flags": 11,
+      "development_found": 12,
+      "slot": "aggregation",
+      "threshold": 0.35
+     },
+     {
+      "development_false_flag_rate": 0.128,
+      "development_false_flags": 11,
+      "development_found": 12,
+      "slot": "aggregation",
+      "threshold": 0.4
+     },
+     {
+      "development_false_flag_rate": 0.116,
+      "development_false_flags": 10,
+      "development_found": 12,
+      "slot": "weighting",
+      "threshold": 0.4
+     },
+     {
+      "development_false_flag_rate": 0.116,
+      "development_false_flags": 10,
+      "development_found": 11,
+      "slot": "aggregation",
+      "threshold": 0.45
+     },
+     {
+      "development_false_flag_rate": 0.105,
+      "development_false_flags": 9,
+      "development_found": 11,
+      "slot": "restriction",
+      "threshold": 0.75
+     },
+     {
+      "development_false_flag_rate": 0.105,
+      "development_false_flags": 9,
+      "development_found": 11,
+      "slot": "counting_unit",
+      "threshold": 0.2
+     },
+     {
+      "development_false_flag_rate": 0.093,
+      "development_false_flags": 8,
+      "development_found": 11,
+      "slot": "counting_unit",
+      "threshold": 0.25
+     }
+    ]
+   },
+   "normalisation": {
+    "curve": [
+     {
+      "false_flag_rate": 0.116,
+      "false_flags": 10,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.093,
+      "false_flags": 8,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.047,
+      "false_flags": 4,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 0.1
+   },
+   "restriction": {
+    "curve": [
+     {
+      "false_flag_rate": 0.326,
+      "false_flags": 28,
+      "found": 5,
+      "recall": 0.263,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.209,
+      "false_flags": 18,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.209,
+      "false_flags": 18,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.186,
+      "false_flags": 16,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.14,
+      "false_flags": 12,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.116,
+      "false_flags": 10,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.093,
+      "false_flags": 8,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.081,
+      "false_flags": 7,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.081,
+      "false_flags": 7,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.081,
+      "false_flags": 7,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.081,
+      "false_flags": 7,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.081,
+      "false_flags": 7,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.047,
+      "false_flags": 4,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 0.35
+   },
+   "weighting": {
+    "curve": [
+     {
+      "false_flag_rate": 0.244,
+      "false_flags": 21,
+      "found": 5,
+      "recall": 0.263,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.186,
+      "false_flags": 16,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.105,
+      "false_flags": 9,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.081,
+      "false_flags": 7,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.058,
+      "false_flags": 5,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.047,
+      "false_flags": 4,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 2,
+      "recall": 0.105,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 0.2
+   }
+  },
+  "jev_arm": {
+   "aggregation": {
+    "curve": [
+     {
+      "false_flag_rate": 0.058,
+      "false_flags": 5,
+      "found": 3,
+      "recall": 0.158,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 0.05
+   },
+   "counting_unit": {
+    "curve": [
+     {
+      "false_flag_rate": 0.058,
+      "false_flags": 5,
+      "found": 9,
+      "recall": 0.474,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.047,
+      "false_flags": 4,
+      "found": 5,
+      "recall": 0.263,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.035,
+      "false_flags": 3,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 0.05
+   },
+   "joint": {
+    "development_false_flag_rate": 0.07,
+    "development_false_flags": 6,
+    "development_found": 1,
+    "development_recall": 0.053,
+    "thresholds": {
+     "aggregation": 0.1,
+     "counting_unit": 0.15,
+     "normalisation": 0.2,
+     "restriction": 0.2,
+     "weighting": 0.25
+    },
+    "trace": [
+     {
+      "development_false_flag_rate": 0.616,
+      "development_false_flags": 53,
+      "development_found": 13,
+      "slot": "restriction",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.442,
+      "development_false_flags": 38,
+      "development_found": 11,
+      "slot": "weighting",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.384,
+      "development_false_flags": 33,
+      "development_found": 10,
+      "slot": "normalisation",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.349,
+      "development_false_flags": 30,
+      "development_found": 10,
+      "slot": "restriction",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.279,
+      "development_false_flags": 24,
+      "development_found": 10,
+      "slot": "weighting",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.244,
+      "development_false_flags": 21,
+      "development_found": 9,
+      "slot": "normalisation",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.221,
+      "development_false_flags": 19,
+      "development_found": 9,
+      "slot": "weighting",
+      "threshold": 0.2
+     },
+     {
+      "development_false_flag_rate": 0.186,
+      "development_false_flags": 16,
+      "development_found": 9,
+      "slot": "normalisation",
+      "threshold": 0.2
+     },
+     {
+      "development_false_flag_rate": 0.163,
+      "development_false_flags": 14,
+      "development_found": 9,
+      "slot": "aggregation",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.151,
+      "development_false_flags": 13,
+      "development_found": 5,
+      "slot": "counting_unit",
+      "threshold": 0.1
+     },
+     {
+      "development_false_flag_rate": 0.116,
+      "development_false_flags": 10,
+      "development_found": 5,
+      "slot": "weighting",
+      "threshold": 0.25
+     },
+     {
+      "development_false_flag_rate": 0.105,
+      "development_false_flags": 9,
+      "development_found": 1,
+      "slot": "counting_unit",
+      "threshold": 0.15
+     },
+     {
+      "development_false_flag_rate": 0.07,
+      "development_false_flags": 6,
+      "development_found": 1,
+      "slot": "restriction",
+      "threshold": 0.2
+     }
+    ]
+   },
+   "normalisation": {
+    "curve": [
+     {
+      "false_flag_rate": 0.174,
+      "false_flags": 15,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.116,
+      "false_flags": 10,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.07,
+      "false_flags": 6,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.023,
+      "false_flags": 2,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 1.01
+   },
+   "restriction": {
+    "curve": [
+     {
+      "false_flag_rate": 0.43,
+      "false_flags": 37,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.163,
+      "false_flags": 14,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.047,
+      "false_flags": 4,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 1.01
+   },
+   "weighting": {
+    "curve": [
+     {
+      "false_flag_rate": 0.384,
+      "false_flags": 33,
+      "found": 4,
+      "recall": 0.211,
+      "threshold": 0.05
+     },
+     {
+      "false_flag_rate": 0.163,
+      "false_flags": 14,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.1
+     },
+     {
+      "false_flag_rate": 0.081,
+      "false_flags": 7,
+      "found": 1,
+      "recall": 0.053,
+      "threshold": 0.15
+     },
+     {
+      "false_flag_rate": 0.058,
+      "false_flags": 5,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.2
+     },
+     {
+      "false_flag_rate": 0.012,
+      "false_flags": 1,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.25
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.3
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.35
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.4
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.45
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.5
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.55
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.6
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.65
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.7
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.75
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.8
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.85
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.9
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 0.95
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.0
+     },
+     {
+      "false_flag_rate": 0.0,
+      "false_flags": 0,
+      "found": 0,
+      "recall": 0.0,
+      "threshold": 1.01
+     }
+    ],
+    "threshold": 0.15
+   }
+  },
+  "rule": "per slot, the lowest threshold on the judge's probability that the phrase is a narrower part or a different form, raised jointly one grid step at a time from the worst-contributing slot until the arm's own development false-flag rate is at or under the ceiling; each slot's own curve is reported beside the joint trace. The union arms are tuned the same way with the chat seat's own development flags counted in the instrument they are scored as",
+  "union_chat_arm": {
+   "development_false_flag_rate": 0.093,
+   "development_false_flags": 8,
+   "development_found": 15,
+   "development_recall": 0.789,
+   "thresholds": {
+    "aggregation": 0.5,
+    "counting_unit": 0.25,
+    "normalisation": 0.5,
+    "restriction": 0.8,
+    "weighting": 0.45
+   },
+   "trace": [
+    {
+     "development_false_flag_rate": 0.5,
+     "development_false_flags": 43,
+     "development_found": 18,
+     "slot": "restriction",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.477,
+     "development_false_flags": 41,
+     "development_found": 18,
+     "slot": "weighting",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.477,
+     "development_false_flags": 41,
+     "development_found": 18,
+     "slot": "restriction",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.477,
+     "development_false_flags": 41,
+     "development_found": 18,
+     "slot": "restriction",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.419,
+     "development_false_flags": 36,
+     "development_found": 18,
+     "slot": "weighting",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.384,
+     "development_false_flags": 33,
+     "development_found": 18,
+     "slot": "restriction",
+     "threshold": 0.25
+    },
+    {
+     "development_false_flag_rate": 0.36,
+     "development_false_flags": 31,
+     "development_found": 18,
+     "slot": "restriction",
+     "threshold": 0.3
+    },
+    {
+     "development_false_flag_rate": 0.337,
+     "development_false_flags": 29,
+     "development_found": 17,
+     "slot": "normalisation",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.314,
+     "development_false_flags": 27,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.35
+    },
+    {
+     "development_false_flag_rate": 0.302,
+     "development_false_flags": 26,
+     "development_found": 17,
+     "slot": "weighting",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.267,
+     "development_false_flags": 23,
+     "development_found": 17,
+     "slot": "normalisation",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.267,
+     "development_false_flags": 23,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.4
+    },
+    {
+     "development_false_flag_rate": 0.256,
+     "development_false_flags": 22,
+     "development_found": 17,
+     "slot": "aggregation",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.233,
+     "development_false_flags": 20,
+     "development_found": 17,
+     "slot": "weighting",
+     "threshold": 0.25
+    },
+    {
+     "development_false_flag_rate": 0.233,
+     "development_false_flags": 20,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.45
+    },
+    {
+     "development_false_flag_rate": 0.233,
+     "development_false_flags": 20,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.5
+    },
+    {
+     "development_false_flag_rate": 0.233,
+     "development_false_flags": 20,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.55
+    },
+    {
+     "development_false_flag_rate": 0.233,
+     "development_false_flags": 20,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.6
+    },
+    {
+     "development_false_flag_rate": 0.209,
+     "development_false_flags": 18,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.65
+    },
+    {
+     "development_false_flag_rate": 0.198,
+     "development_false_flags": 17,
+     "development_found": 17,
+     "slot": "weighting",
+     "threshold": 0.3
+    },
+    {
+     "development_false_flag_rate": 0.198,
+     "development_false_flags": 17,
+     "development_found": 17,
+     "slot": "aggregation",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.186,
+     "development_false_flags": 16,
+     "development_found": 17,
+     "slot": "aggregation",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.186,
+     "development_false_flags": 16,
+     "development_found": 17,
+     "slot": "normalisation",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.186,
+     "development_false_flags": 16,
+     "development_found": 17,
+     "slot": "weighting",
+     "threshold": 0.35
+    },
+    {
+     "development_false_flag_rate": 0.174,
+     "development_false_flags": 15,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.7
+    },
+    {
+     "development_false_flag_rate": 0.174,
+     "development_false_flags": 15,
+     "development_found": 17,
+     "slot": "counting_unit",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.163,
+     "development_false_flags": 14,
+     "development_found": 16,
+     "slot": "counting_unit",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.163,
+     "development_false_flags": 14,
+     "development_found": 16,
+     "slot": "aggregation",
+     "threshold": 0.25
+    },
+    {
+     "development_false_flag_rate": 0.163,
+     "development_false_flags": 14,
+     "development_found": 16,
+     "slot": "normalisation",
+     "threshold": 0.25
+    },
+    {
+     "development_false_flag_rate": 0.163,
+     "development_false_flags": 14,
+     "development_found": 16,
+     "slot": "aggregation",
+     "threshold": 0.3
+    },
+    {
+     "development_false_flag_rate": 0.163,
+     "development_false_flags": 14,
+     "development_found": 16,
+     "slot": "normalisation",
+     "threshold": 0.3
+    },
+    {
+     "development_false_flag_rate": 0.163,
+     "development_false_flags": 14,
+     "development_found": 16,
+     "slot": "aggregation",
+     "threshold": 0.35
+    },
+    {
+     "development_false_flag_rate": 0.163,
+     "development_false_flags": 14,
+     "development_found": 16,
+     "slot": "aggregation",
+     "threshold": 0.4
+    },
+    {
+     "development_false_flag_rate": 0.151,
+     "development_false_flags": 13,
+     "development_found": 16,
+     "slot": "weighting",
+     "threshold": 0.4
+    },
+    {
+     "development_false_flag_rate": 0.151,
+     "development_false_flags": 13,
+     "development_found": 16,
+     "slot": "aggregation",
+     "threshold": 0.45
+    },
+    {
+     "development_false_flag_rate": 0.14,
+     "development_false_flags": 12,
+     "development_found": 16,
+     "slot": "restriction",
+     "threshold": 0.75
+    },
+    {
+     "development_false_flag_rate": 0.14,
+     "development_false_flags": 12,
+     "development_found": 16,
+     "slot": "counting_unit",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.128,
+     "development_false_flags": 11,
+     "development_found": 16,
+     "slot": "counting_unit",
+     "threshold": 0.25
+    },
+    {
+     "development_false_flag_rate": 0.128,
+     "development_false_flags": 11,
+     "development_found": 16,
+     "slot": "normalisation",
+     "threshold": 0.35
+    },
+    {
+     "development_false_flag_rate": 0.128,
+     "development_false_flags": 11,
+     "development_found": 16,
+     "slot": "normalisation",
+     "threshold": 0.4
+    },
+    {
+     "development_false_flag_rate": 0.128,
+     "development_false_flags": 11,
+     "development_found": 16,
+     "slot": "normalisation",
+     "threshold": 0.45
+    },
+    {
+     "development_false_flag_rate": 0.116,
+     "development_false_flags": 10,
+     "development_found": 15,
+     "slot": "weighting",
+     "threshold": 0.45
+    },
+    {
+     "development_false_flag_rate": 0.105,
+     "development_false_flags": 9,
+     "development_found": 15,
+     "slot": "aggregation",
+     "threshold": 0.5
+    },
+    {
+     "development_false_flag_rate": 0.105,
+     "development_false_flags": 9,
+     "development_found": 15,
+     "slot": "normalisation",
+     "threshold": 0.5
+    },
+    {
+     "development_false_flag_rate": 0.093,
+     "development_false_flags": 8,
+     "development_found": 15,
+     "slot": "restriction",
+     "threshold": 0.8
+    }
+   ]
+  },
+  "union_jev_arm": {
+   "development_false_flag_rate": 0.093,
+   "development_false_flags": 8,
+   "development_found": 14,
+   "development_recall": 0.737,
+   "thresholds": {
+    "aggregation": 0.1,
+    "counting_unit": 0.3,
+    "normalisation": 0.2,
+    "restriction": 0.2,
+    "weighting": 0.25
+   },
+   "trace": [
+    {
+     "development_false_flag_rate": 0.628,
+     "development_false_flags": 54,
+     "development_found": 18,
+     "slot": "restriction",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.453,
+     "development_false_flags": 39,
+     "development_found": 17,
+     "slot": "weighting",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.395,
+     "development_false_flags": 34,
+     "development_found": 17,
+     "slot": "normalisation",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.36,
+     "development_false_flags": 31,
+     "development_found": 17,
+     "slot": "restriction",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.291,
+     "development_false_flags": 25,
+     "development_found": 17,
+     "slot": "weighting",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.256,
+     "development_false_flags": 22,
+     "development_found": 16,
+     "slot": "normalisation",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.233,
+     "development_false_flags": 20,
+     "development_found": 16,
+     "slot": "weighting",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.198,
+     "development_false_flags": 17,
+     "development_found": 16,
+     "slot": "normalisation",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.186,
+     "development_false_flags": 16,
+     "development_found": 16,
+     "slot": "aggregation",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.174,
+     "development_false_flags": 15,
+     "development_found": 16,
+     "slot": "counting_unit",
+     "threshold": 0.1
+    },
+    {
+     "development_false_flag_rate": 0.151,
+     "development_false_flags": 13,
+     "development_found": 16,
+     "slot": "weighting",
+     "threshold": 0.25
+    },
+    {
+     "development_false_flag_rate": 0.14,
+     "development_false_flags": 12,
+     "development_found": 15,
+     "slot": "counting_unit",
+     "threshold": 0.15
+    },
+    {
+     "development_false_flag_rate": 0.105,
+     "development_false_flags": 9,
+     "development_found": 15,
+     "slot": "restriction",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.105,
+     "development_false_flags": 9,
+     "development_found": 15,
+     "slot": "counting_unit",
+     "threshold": 0.2
+    },
+    {
+     "development_false_flag_rate": 0.105,
+     "development_false_flags": 9,
+     "development_found": 15,
+     "slot": "counting_unit",
+     "threshold": 0.25
+    },
+    {
+     "development_false_flag_rate": 0.093,
+     "development_false_flags": 8,
+     "development_found": 14,
+     "slot": "counting_unit",
+     "threshold": 0.3
+    }
+   ]
+  }
+ }
+}
