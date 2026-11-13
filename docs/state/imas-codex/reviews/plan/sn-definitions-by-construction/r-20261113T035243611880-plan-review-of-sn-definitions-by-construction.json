@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T04:04:21.154Z",
+  "dispatched_at": "2026-11-13T03:53:55Z",
+  "findings": [
+    {
+      "anchor": "plan.html:143",
+      "id": "done_when-1",
+      "reason": "the item's measure and its 27-of-36 baseline are only valid on the 208 derived from the agreed-names split, so the plan must name that derivation or a committed list, or a dispatched node measures a different set and the section spuriously refuses to close.",
+      "text": "the seat re-read is specified \"on the 208 held-out names that both of \u00a74's readers labelled alike (36 mismatched, 172 agreeing)\", but \u00a74's held-out arm is 254 names (47 mismatched, 207 agreeing) and its intersection with the 313 agreed names is 204 by exact class or 211 by flag/agree, so the 208 is neither \u00a74's held-out names nor that set's alike subset; only splitting the 313 agreed names independently at a one-third development share yields 208 with 36 and 172, and the plan states neither that derivation nor a record that lists the names \u2014 a node following the stated wording records counts on a different population (the 204/211 derivations give 35 of 176 flagged sub-totals), which then trips the item's own \"fewer than 27 found or more than 12 flagged\" refusal and blocks the section on the lead for a mismatch the plan created",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+  "plan_fingerprint": "0213bf86a1639aa3e3a152a81f9a86c4f7cb52593f7742f3ab7eeed57f7f0d19",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 35,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T035243611880-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "3323d5a30c78b8a1851999390c805c1e8d5f7645",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited evidence directory resolves with 21 committed files, and the \u00a74 and \u00a75 section references resolve.",
+    "done_when": "a finding \u2014 \u00a78's seat re-read is stated to be on \"\u00a74's held-out names that both readers labelled alike\", but the 208-name population it fixes is not that set and no committed record names the derivation that yields it.",
+    "evidence_paths": "pass \u2014 the fresh labels and both readers' label parts sit under `docs/evidence/fragments/sn-name-definition-fresh-labels/`, a committed path a later reader can open, and the seat's committed verdicts sit under `docs/evidence/fragments/sn-definitions-by-construction/`.",
+    "naming": "pass \u2014 the changed units introduce no symbol, filename or comment carrying a plan, stage or ticket label.",
+    "reasoning": "pass \u2014 the reason for fresh names (the held-out names have been scored three times in design selection) matches the lead's recorded ruling and the committed brief, the fresh reference meets the section's own floor (329 alike, 54 flagged against 240 and 30), and the section names no code path or function.",
+    "single_goal": "pass \u2014 \u00a78 has one deliverable, the verdict on which check stands, with the fresh labels and scores as its evidence and the seat re-read as the comparison arm.",
+    "wiring": "pass \u2014 s8 declares a wait on s5 and s7 declares a wait on s8, neither forms a cycle, and s5 no longer names a reading that \u00a78 produces."
+  },
+  "section_digests": {
+    "_document": "188d29937ef57a1aec810a58cf5fa6811e3840933f7818e6d4bffd4aa7c1d8dc",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "f22102f5bee1d009a1ccad79e435abc698fa3838aa5bc5f1d358028f39e2f007",
+    "s8": "ffa7d11208f9d347dd50b9473eaf69f82adadd8969f7a10ec60d22cac37d4905"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T08:00:58.346012+00:00",
+  "total": null
+}
