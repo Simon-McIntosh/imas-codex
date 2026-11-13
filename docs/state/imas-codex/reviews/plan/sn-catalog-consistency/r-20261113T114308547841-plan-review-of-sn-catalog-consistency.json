@@ -25,7 +25,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 45,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c892832318107aab18f1e73bcd27e8712a418489",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause about a name settled by the live rewrite is removed; the section states the end state and lets the node take only what still stands.",
+      "reason": "",
+      "when": "2026-11-13T12:10:11.180582+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c892832318107aab18f1e73bcd27e8712a418489",
+      "commit_basis": "edit",
+      "note": "The clause about a name settled by the live rewrite is removed; the section states the end state and lets the node take only what still stands.",
+      "reason": "",
+      "when": "2026-11-13T12:10:11.180582+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T114308547841-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261113T114308547841-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "fbc55470de2da8a78d9e8bf325bb1202ef575d7a",
   "rubric": "content",
