@@ -586,5 +586,138 @@
   "confidence": "high",
   "evidence": "the flux-surface-averaged volumetric rate at which particles enter or leave one specified internal state of a neutral species",
   "reason": "the name states a source rate, but the definition fixes it as a flux-surface-averaged volumetric rate."
+ },
+ {
+  "id": "item-0703",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the wall-directed energy transfer associated with ions that arrive at a material wall and recombine there",
+  "reason": "the incident ion energy flux at the wall due to recombination is the recombination-energy channel the name states."
+ },
+ {
+  "id": "item-0704",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "resolves the electric-current contribution from ion-fluid inertial acceleration along the local magnetic field",
+  "reason": "the parallel current density due to ion inertia is the field-aligned projection the name states."
+ },
+ {
+  "id": "item-0705",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the total local number density of all included ion populations evaluated at the flux-surface location assigned to the internal transport barrier",
+  "reason": "the charge-state-summed total ion density at the internal transport barrier is exactly what the name states."
+ },
+ {
+  "id": "item-0706",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the poloidal component of the linear-momentum transfer across an oriented surface per unit area and time",
+  "reason": "the poloidal momentum flux is the poloidal component of linear-momentum transfer per unit area, as the name states."
+ },
+ {
+  "id": "item-0707",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the volume-integrated electromagnetic emission from bound-bound transitions of atomic and ionic populations in the plasma",
+  "reason": "power due to line radiation is the total bound-bound line emission the name states."
+ },
+ {
+  "id": "item-0708",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the density-weighted bulk-flow component of helium-4 ions, evaluated on the flux surface identified with the internal transport barrier",
+  "reason": "under the catalog rule a bare species name counts ions, and the density-weighted mean over charge states matches the name."
+ },
+ {
+  "id": "item-0709",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net flux of the toroidal magnetic-field component through the poloidal cross-section enclosed by the plasma boundary",
+  "reason": "the toroidal magnetic flux through the boundary-enclosed poloidal cross-section is exactly what the name states."
+ },
+ {
+  "id": "item-0710",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "local Fickian particle diffusion of a specified ion species along the poloidal tangent",
+  "reason": "the poloidal ion diffusion coefficient is the poloidal diagonal particle transport coefficient the name states."
+ },
+ {
+  "id": "item-0711",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the effective inverse relaxation time for collisional or neoclassical relaxation of an ion species' ordered flow along the local magnetic field",
+  "reason": "the parallel ion momentum damping rate is the field-aligned inverse relaxation time the name states."
+ },
+ {
+  "id": "item-0712",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the optical energy carried by one Thomson-scattering probing laser pulse at the vessel entrance",
+  "reason": "the launched pulse energy of the Thomson-scattering laser is the per-pulse optical energy the name states."
+ },
+ {
+  "id": "item-0713",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local angular-momentum source associated with Coulomb momentum transfer to a specified thermal ion charge state",
+  "reason": "the thermal ion charge-state collisional torque density is the angular-momentum transfer rate the name states."
+ },
+ {
+  "id": "item-0714",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed projection along the toroidal symmetry axis",
+  "reason": "the vertical projection of the E-cross-B guiding-centre drift for one charge state is what the name states."
+ },
+ {
+  "id": "item-0715",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net angular-momentum transfer rate to the trapped-particle population per unit volume",
+  "reason": "the trapped torque density is the volumetric angular-momentum transfer rate for trapped particles the name states."
+ },
+ {
+  "id": "item-0716",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the volume-averaged thermal pressure of neutral atoms and molecules in the open-field-line region",
+  "reason": "pressure over the scrape-off layer conventionally denotes the volume average over that region, which the definition states."
+ },
+ {
+  "id": "item-0717",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the number of neutrons produced per unit time by the neutron-producing thermal ... reaction branches",
+  "reason": "the total channel-summed thermal neutron production rate is exactly what the name states."
+ },
+ {
+  "id": "item-0718",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the non-negative Euclidean length of the beta-side of the segment's oblique poloidal cross-section",
+  "reason": "the minor length of the segment is the beta-side length the definition states, paired with the major-length counterpart."
+ },
+ {
+  "id": "item-0719",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Wavelength specifying either the short-wavelength or long-wavelength edge of a photon-detection response interval",
+  "reason": "the name says only wavelength of the camera while the definition fixes it as one boundary edge of the detection response interval."
+ },
+ {
+  "id": "item-0720",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "characterizes the energy of random translational motion relative to that population's mean flow",
+  "reason": "the neutral temperature is the random translational kinetic temperature the name states."
+ },
+ {
+  "id": "item-0721",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the nonnegative full vertical extent of the rectangular conductor cross-section of an individual active coil element",
+  "reason": "the height of the poloidal field coil is the full vertical cross-sectional extent the name states."
  }
 ]
