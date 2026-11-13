@@ -1,0 +1,107 @@
+[
+ {
+  "id": "item-121",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "This quantity is the azimuthal position of the pellet center of mass around the toroidal symmetry axis",
+  "reason": "The name states a pellet's toroidal coordinate and the definition evaluates that same angle at the pellet center of mass, which is what a coordinate of an extended body denotes."
+ },
+ {
+  "id": "item-122",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "The perpendicular designation refers to the velocity-space channel relative to the equilibrium magnetic field, not to the spatial direction of transport",
+  "reason": "The name's 'perpendicular' reads as the spatial direction of the flux, while the definition makes it a velocity-space channel of the toroidal angular-momentum flux."
+ },
+ {
+  "id": "item-123",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed angular-momentum transfer rate per unit volume delivered to bulk thermal electrons through Coulomb collisions",
+  "reason": "Toroidal projection, thermal-electron recipient, torque density and collisional origin all appear in the name, and the unit N.m^-2 is a torque density."
+ },
+ {
+  "id": "item-124",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the directional transport coefficient that represents neutral-particle spreading driven by a neutral number-density gradient",
+  "reason": "The name states a parallel neutral particle diffusivity and the definition is exactly that field-aligned diffusivity, with the right m^2.s^-1 unit."
+ },
+ {
+  "id": "item-125",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the full geometric extent of an individual rectangular reflector element along its object-local first tangential axis",
+  "reason": "A 'first local tangential width' is a full extent along that local axis, which is what the definition gives; the rectangular element is the reflector member the name denotes."
+ },
+ {
+  "id": "item-126",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "this quantity represents the sum over all positive xenon charge states",
+  "reason": "A bare species name counts ions summed over charge states, so the definition's ion sum excluding neutrals matches the name rather than surprising a reader."
+ },
+ {
+  "id": "item-127",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "It provides a shared parent concept for kinetic temperatures and brightness temperatures",
+  "reason": "The definition declares an umbrella temperature concept with no species, band or aggregation, whose kinetic and radiative forms are fixed by more specific instances."
+ },
+ {
+  "id": "item-128",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The normalization gives zero at the magnetic axis and one at the last closed flux surface.",
+  "reason": "The name states a normalized poloidal flux coordinate at the pedestal and the definition is the standard linear flux fraction evaluated there."
+ },
+ {
+  "id": "item-129",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the rate at which coherent-wave energy is absorbed by fast, suprathermal electrons per unit physical volume for each toroidal mode number",
+  "reason": "Mode-resolved fast-electron absorbed power per volume is precisely the name's per-toroidal-mode fast-electron power density, in W.m^-3."
+ },
+ {
+  "id": "item-130",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "It represents the charge-weighted first velocity moment while preserving its vector character",
+  "reason": "The name's normalized particle perturbed current density is that dimensionless charge-weighted velocity moment; particle-frame and normalized are both stated in the name."
+ },
+ {
+  "id": "item-131",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the real, in-phase component of the first-order plasma-temperature perturbation associated with one toroidal Fourier harmonic",
+  "reason": "The name states the real part of the perturbed plasma temperature, which is the in-phase component of the complex eigenfunction the definition describes."
+ },
+ {
+  "id": "item-132",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the signed height of a point on the geometric boundary of a fiber-optic current sensor",
+  "reason": "A vertical outline coordinate of the sensor is the side-on height of its boundary points, as the definition states, with the same geometric reading as other outline coordinates."
+ },
+ {
+  "id": "item-133",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the phase-independent magnitude of a normalized electrostatic-potential fluctuation about a specified reference field",
+  "reason": "The name states only an amplitude, while the definition adds that it is a fluctuation magnitude normalized to a reference field, so the name denotes a broader quantity."
+ },
+ {
+  "id": "item-134",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "Both parameterizations increase from zero at the magnetic axis to one at the last closed flux surface, but their intermediate values differ.",
+  "reason": "The definition is an umbrella over a linear fraction and its square root, with specific instances selecting the parameterization, so the name alone does not identify one value."
+ },
+ {
+  "id": "item-135",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the field-aligned normal component of the nonthermal electron pressure tensor",
+  "reason": "Parallel fast-electron pressure as the field-aligned normal stress of the suprathermal electrons is exactly what the name states, in Pa."
+ }
+]
