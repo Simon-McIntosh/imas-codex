@@ -19,12 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-catalog-consistency">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s5&quot;:[&quot;sn-definitions-by-construction#s4&quot;],&quot;s6&quot;:[&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-definitions-by-construction#s4&quot;,&quot;sn-definitions-by-construction#s5&quot;],&quot;s7&quot;:[&quot;sn-definitions-by-construction#s6&quot;,&quot;sn-domain-per-family#s3&quot;,&quot;sn-definitions-by-construction#s8&quot;],&quot;s8&quot;:[&quot;sn-definitions-by-construction#s5&quot;]}">
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
+<meta name="plan-version" content="39">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -133,7 +133,7 @@
     </ul>
 
     <h2 id="s8">§8 — A successor name check, scored on names neither check has seen</h2>
-<section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="sn-definitions-by-construction#s5"></section>
+<section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links="sn-definitions-by-construction#s5"></section>
 <p>The chat review seat runs as the check at 27 of 36 mismatched names found, below the 80 % target. The lead ruled on 2026-11-12 that a successor is built beside it: one that reads a definition's narrowing phrases as free text and settles each phrase with one closed question. §4's held-out names were kept from tuning but have now been scored three times in choosing between designs, so they no longer count as unseen and the successor is scored on fresh names. This section delivers those fresh labels, the successor's score on them, and the verdict on which check §7 re-runs.</p>
 <p>Done when:</p>
 <ul>
@@ -180,6 +180,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s8-verdict-seat-stands" data-who="reckon-build" data-when="2026-11-13T08:05:00Z">
     <div class="r-comment-body"><p>Verdict on the fresh reference (331 of 360 names the two readers labelled alike: 56 mismatched, 275 agreeing; 29 disputed): the successor check found 4 of 56 mismatched names and flagged 11 of 275 agreeing ones; the chat seat found 32 of 56 and flagged 19 of 275; their union found 32 of 56 and flagged 28 of 275. No arm reaches 80 % found, so the seat stands. The seat's own share fell from 27 of 36 on the old held-out names to 32 of 56 here. Thresholds were frozen at <code>3a5c3d861</code> before the labels were read. The seat's old-label reading in that pass was re-derived from its committed verdicts, not re-called, so it repeats 27 of 36 and 12 of 172 and is not an independent second reading. Readings: <code>docs/evidence/fragments/sn-definitions-by-construction/name-definition-phrases-results.json</code>; the slot-probe readings before it are in <code>name-definition-probes-results.json</code> there. Spend on the successor USD 12.36 against a USD 12 ceiling.</p><p>Lead rulings, 2026-11-13: the successor and slot-probe check code is not merged, and their result files are kept as evidence; the live rewrite starts on the seat's 429 flags; two blind readers read the other published names on the local lane, and a name both flag joins the rulings recorded on §5 before the recut.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-close-s8" data-who="reckon-build" data-when="2026-11-13T10:30:00Z">
+    <div class="r-comment-body"><p>§8 closed on the verdict recorded above: the seat stands. The fresh labels are on main under <code>docs/evidence/fragments/sn-name-definition-fresh-labels/</code> (360 names, two blind readers, 331 labelled alike: 56 mismatched, 275 agreeing). The successor was scored at <code>dd62487f2</code> with thresholds frozen at <code>3a5c3d861</code>; both commits live only in the unmerged worker tree, by the lead's ruling that the failed check's code is not merged, so the readings can be read from the committed result files but not re-run from main. The seat's fresh share, 32 of 56, is below the 27 of 36 the lead accepted, and the lead's ruling on coverage is recorded: two blind readers read every other published name, and a name both flag joins the rulings on §5. Limits: the scoring pass had no planted reference, and its first run keyed the phrase judgments wrongly and read 0 of 56 before it was corrected to 4 of 56; the seat's counts were not affected by that key.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-20261112-registry-conformance" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T02:20:00Z">
     <div class="r-comment-body"><p>Measured after this section was written: the documentation conformance check the writer already runs, applied to all 1,975 published names, reports at least one finding on 548 of them. 150 are a density opening that departs from its template, 16 a line-average equation and 13 a flux-surface-average equation that is not the canonical one, 12 a volume-average equation, and 30 a plasma-boundary definition or gloss the registry forbids. 243 published names select no registry entry at all. The check exists and passes none of this to the export, which is why names written before a wording was settled were published unchanged. Output and script: <code>docs/evidence/fragments/sn-definitions-by-construction/published-registry-conformance.txt</code>.</p></div>
