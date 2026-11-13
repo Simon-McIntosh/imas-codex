@@ -245,7 +245,8 @@
   "baseline_before_first_write": {
    "flux_surface_average_forms": 8,
    "species_families_divergent": "20 of 20"
-  }
+  },
+  "method": "the project census scripts read the live dump and report species families of >=3 members with domain splits and description-template variants; the re-read script (bulk_census.py) counts species families of >=3 members with divergent documentation text. The two family counts differ in method: 24 is the census script's species-token grouping, 16 is the re-read's stricter family test."
  },
  "outcomes_pending": 470
 }
