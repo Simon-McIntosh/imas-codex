@@ -78,4 +78,4 @@ def test_the_review_batch_resolves_its_name_definition_note() -> None:
     from imas_codex.standard_names.worker_tasks import worker_review_docs
 
     resolved = worker_tasks._resolve_dependency("_name_definition_note")
-    assert resolved is getattr(worker_review_docs, "_name_definition_note")
+    assert resolved is worker_review_docs._name_definition_note

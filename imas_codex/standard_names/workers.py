@@ -45,7 +45,7 @@ _WORKER_DEPENDENCIES: dict[str, Callable[[], object]] = {
     ),
     "SEMANTIC_SIM_GATE_MODEL": lambda: SEMANTIC_SIM_GATE_MODEL,
     "SEMANTIC_SIM_GATE_RESOLUTION_METHOD": lambda: SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
-        "_name_definition_note": lambda: _task_collaborator(
+    "_name_definition_note": lambda: _task_collaborator(
         "worker_review_docs", "_name_definition_note"
     ),
     "asyncio": lambda: asyncio,
