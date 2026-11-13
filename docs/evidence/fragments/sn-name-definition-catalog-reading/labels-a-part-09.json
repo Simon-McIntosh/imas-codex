@@ -418,5 +418,110 @@
     "confidence": "high",
     "evidence": "three equivalent-electron counts assigned to each lithium atom",
     "reason": "The accumulated lithium name omits the equivalent-electron weighting, which makes the defined count three times the delivered atom count."
+  },
+  {
+    "id": "item-0885",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "this parent quantity does not itself select a poloidal, parallel, or surface-normal projection",
+    "reason": "The neutral-species energy-flux name denotes the full state-aggregated vector, with directional projections given by more specific names."
+  },
+  {
+    "id": "item-0886",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "averaged oxygen-ion number density",
+    "reason": "The bare oxygen-density name denotes oxygen ions, and the definition averages those ions over the named plasma-boundary flux surface."
+  },
+  {
+    "id": "item-0887",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "point on a line of sight that approaches the magnetic axis most closely",
+    "reason": "The name does not state that the normalized flux coordinate is evaluated only at the signed closest-approach point."
+  },
+  {
+    "id": "item-0888",
+    "class": "definition-narrower-than-name",
+    "confidence": "medium",
+    "evidence": "This definition applies to an axisymmetric equilibrium",
+    "reason": "The definition limits boundary poloidal flux to axisymmetric equilibria, while the name does not state that restriction."
+  },
+  {
+    "id": "item-0889",
+    "class": "definition-narrower-than-name",
+    "confidence": "high",
+    "evidence": "linearized plasma velocity perturbation eigenfunction",
+    "reason": "The named poloidal plasma-velocity perturbation is restricted to a linear stability eigenmode in the definition."
+  },
+  {
+    "id": "item-0890",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "net angular-momentum transfer to the thermal ion population from Coulomb collisions, integrated over the plasma volume",
+    "reason": "The definition matches the thermal-ion population, collisional mechanism and resulting torque named."
+  },
+  {
+    "id": "item-0891",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "This name is an umbrella for scalar divertor-target deposited-flux quantities",
+    "reason": "The definition makes target flux a general deposited-power surface density, with energy-load and carrier refinements supplied by specific names."
+  },
+  {
+    "id": "item-0892",
+    "class": "qualifier-missing-from-name",
+    "confidence": "medium",
+    "evidence": "within the volume enclosed by a closed magnetic flux surface as that surface approaches the magnetic axis",
+    "reason": "The name sounds like momentum evaluated at the axis, but the definition integrates momentum over an enclosed volume in a limiting surface sequence."
+  },
+  {
+    "id": "item-0893",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "net toroidal plasma current attributable to electron-cyclotron wave-driven current generation",
+    "reason": "The definition gives the toroidal current contribution from electron-cyclotron current drive named."
+  },
+  {
+    "id": "item-0894",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "helium-4 ion density along a specified chord through the plasma",
+    "reason": "The line average applies to the helium-4 ion population denoted by the bare isotope-density name."
+  },
+  {
+    "id": "item-0895",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "ambient water-vapor content expressed relative to the maximum water-vapor content supported at the local air temperature",
+    "reason": "The definition is the detector’s local relative humidity ratio described by the name."
+  },
+  {
+    "id": "item-0896",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "signed vertical Cartesian coordinate of the fixed mechanical attachment point",
+    "reason": "The definition gives the z coordinate at the sensor attachment point named."
+  },
+  {
+    "id": "item-0897",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "specified neutral internal-state population along the poloidal coordinate",
+    "reason": "The neutral-state name, particle-transport quantity and poloidal direction match the defined diffusivity."
+  },
+  {
+    "id": "item-0898",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "effective contribution in a modeled velocity decomposition rather than a direct single-particle Lorentz-force drift",
+    "reason": "The name calls this a diamagnetic drift velocity but omits that for neutrals it is only an effective modeled contribution."
+  },
+  {
+    "id": "item-0899",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "geometric cross-sectional area enclosed by one winding turn",
+    "reason": "The name does not say the area is per turn, which differs from the effective sensing area of the complete winding."
   }
 ]
