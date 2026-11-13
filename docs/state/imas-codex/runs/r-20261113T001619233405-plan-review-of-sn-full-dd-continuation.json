@@ -950,6 +950,44 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "2cc4a0fcf884a71b7de552d0867aaf179d466a83",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "scratch_bytes": 1482,
+    "scratch_host": "98dci4-clu-2023.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261113T001619233405-plan-review-of-sn-full-dd-continuation",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 1482,
+        "path": "/tmp/reckon-crew-scratch/r-20261113T001619233405-plan-review-of-sn-full-dd-continuation"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/plan-review-of-sn-full-dd-continuation",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
