@@ -1,0 +1,217 @@
+{
+  "seed": 5946881972374200591,
+  "catalog_revision": "4a48c6c57d08bc2d77e6e47e456ca10f73996eb0",
+  "catalog_path": "/home/ITER/mcintos/Code/imas-standard-names-catalog",
+  "allocation": "largest remainders weighted by eligible domain size; minimum one for domains with at least five eligible names; alphabetical ties",
+  "randomization": "Python random.Random; sorted domain filenames and names; sample without replacement per domain, then shuffle all selected entries",
+  "labelled_names": 381,
+  "excluded_as_already_labelled": 381,
+  "published": 1975,
+  "eligible": 1594,
+  "drawn": 360,
+  "input_sha256": {
+    "two-reader-labels.json": "2f17d2b4e24d02bcd2632ce780d90b11ff7de7f369ed7de958baa844af5fb19b",
+    "blind-sheet.json": "c8676f6524538f270c1a67dea3d1f40507918b2e8fcb526a13f788bc93016aad",
+    "reader-brief-part-1.md": "79500bdad8e06be6f1563ea0f9a20cff7c3c338289e36d7068efe8f0f505708f",
+    "catalog_domains": {
+      "auxiliary_heating.yml": "e1e5824029aad2391876edbb8e90bdbf8924463e84fbb63807dee6bec3a31b2f",
+      "core_plasma_physics.yml": "2b551382975248ae209786aee1afc56e1f89b0ce2f1dbb37d0d392826685198c",
+      "current_drive.yml": "a9a4aaba825a885c97e06e9bb7c2a77176685d2f009cabcfe4b8abbab8efb1b2",
+      "divertor_physics.yml": "79c5fc0516e0728e1b655ad54dea9c9de4febbf243d6db2122fcbaa73575bad5",
+      "edge_plasma_physics.yml": "b4eaacfa31745250e29bc24dbf57997c3c3c4fb6cfcf77354af4d112f453236e",
+      "electromagnetic_wave_diagnostics.yml": "5ecd0fcf849370a8afa6ee7fbe7e32904f3d38d0ab2770e0dc12077d1af7ef52",
+      "equilibrium.yml": "f03bde8fdacd394c0e179ebe2c6b2bf876d90de4ae1dd0c47b3a670a283490f1",
+      "fast_particles.yml": "9293c34933c2283feca49461b16a0c0c9506dca78ab1ae748b87d35594d06b1e",
+      "fueling.yml": "5d8e2512e5b220d9ecb7f8380cf50a8ddcc1fa1f0d33bf36e5f579de0665bdce",
+      "general.yml": "2afc43b9093894a2583f13ca09b78e24dd43e788316080dd4f5bc23879a26a3a",
+      "gyrokinetics.yml": "8324921c746d3dbf3b426159944b98e780dbdef60f7870a5f710ec916de501e4",
+      "machine_operations.yml": "c18d620ed721eba89caaaa0aafb95012ff25b85e64d718124014b950bd8cb475",
+      "magnetic_field_diagnostics.yml": "1b74e9b4a18ad1cbe02d7821ece723fb539e1db2e557e660cc96d38cdfd55be5",
+      "magnetic_field_systems.yml": "c2c5c6b4f9b3dd034166ce404d356b7a21180cae194dd7b3060a7be4ef393b85",
+      "magnetohydrodynamics.yml": "981e69a23dfaf2f42c27344f9451c3fc9b00c958bd3b68f9967ad8a209ce75c9",
+      "mechanical_measurement_diagnostics.yml": "515495bee4b3d19beba1221fed41eed513656ed594f541fce56b3fdc52199e1d",
+      "neutronics.yml": "c88eb861420f04e875d5874beae3a0cb923c623fd5a1045dc7738ff884d7f99f",
+      "particle_measurement_diagnostics.yml": "116674429b367961fd07bd364a69bf4b992ab71800626a930b0570b1a5a8f2d6",
+      "plant_systems.yml": "9d1c90db6cbda652ff413cfbc2ee35675000fd2d1b8d612dfd34e31bf540e951",
+      "plasma_initiation.yml": "3500580f96cc273d677f09349cca4b1ad0610abf5e56d0f133491920aee25154",
+      "plasma_wall_interactions.yml": "9501dd1b8a3ce91ccf11a01b4484858cc9a0d43cf54ec45503f2899ebd8c5c58",
+      "radiation_measurement_diagnostics.yml": "b01b4f7b6648f3c1855ea96be363e32d3f339608c45892d3908239735186cde1",
+      "runaway_electrons.yml": "34a83e62d6c605fcac832efb61d1ff403686bbf74971cf73af4a697559288f8e",
+      "spectroscopy.yml": "d793cbea9b208095aa08e5ed3e17e3162c7c2e03e4190156dffef30c68a8bf3b",
+      "structural_components.yml": "37d3a851af33a3a67c4abbef2fcec672dad737e273a3612f71035ab4c2d34bf7",
+      "transport.yml": "62854b8276b97f929b8ee4d3a8f79af48da3d5d969f0896fc12521d790e80b29",
+      "turbulence.yml": "2afae5badf74943c0673e968f61b8335145d1e9f758f8182612f67cde6cd13ed",
+      "waves.yml": "ff452aa73c23c09511b1681cc0b38adb835f33270c4cd16e97ab68a4dbc249d2"
+    }
+  },
+  "domains": {
+    "auxiliary_heating.yml": {
+      "published": 118,
+      "excluded_as_already_labelled": 18,
+      "eligible": 100,
+      "drawn": 23
+    },
+    "core_plasma_physics.yml": {
+      "published": 3,
+      "excluded_as_already_labelled": 3,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "current_drive.yml": {
+      "published": 2,
+      "excluded_as_already_labelled": 2,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "divertor_physics.yml": {
+      "published": 59,
+      "excluded_as_already_labelled": 10,
+      "eligible": 49,
+      "drawn": 11
+    },
+    "edge_plasma_physics.yml": {
+      "published": 204,
+      "excluded_as_already_labelled": 31,
+      "eligible": 173,
+      "drawn": 39
+    },
+    "electromagnetic_wave_diagnostics.yml": {
+      "published": 34,
+      "excluded_as_already_labelled": 10,
+      "eligible": 24,
+      "drawn": 5
+    },
+    "equilibrium.yml": {
+      "published": 145,
+      "excluded_as_already_labelled": 22,
+      "eligible": 123,
+      "drawn": 28
+    },
+    "fast_particles.yml": {
+      "published": 2,
+      "excluded_as_already_labelled": 2,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "fueling.yml": {
+      "published": 1,
+      "excluded_as_already_labelled": 1,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "general.yml": {
+      "published": 19,
+      "excluded_as_already_labelled": 11,
+      "eligible": 8,
+      "drawn": 2
+    },
+    "gyrokinetics.yml": {
+      "published": 11,
+      "excluded_as_already_labelled": 10,
+      "eligible": 1,
+      "drawn": 0
+    },
+    "machine_operations.yml": {
+      "published": 2,
+      "excluded_as_already_labelled": 2,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "magnetic_field_diagnostics.yml": {
+      "published": 30,
+      "excluded_as_already_labelled": 10,
+      "eligible": 20,
+      "drawn": 4
+    },
+    "magnetic_field_systems.yml": {
+      "published": 89,
+      "excluded_as_already_labelled": 15,
+      "eligible": 74,
+      "drawn": 17
+    },
+    "magnetohydrodynamics.yml": {
+      "published": 93,
+      "excluded_as_already_labelled": 15,
+      "eligible": 78,
+      "drawn": 18
+    },
+    "mechanical_measurement_diagnostics.yml": {
+      "published": 15,
+      "excluded_as_already_labelled": 10,
+      "eligible": 5,
+      "drawn": 1
+    },
+    "neutronics.yml": {
+      "published": 7,
+      "excluded_as_already_labelled": 7,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "particle_measurement_diagnostics.yml": {
+      "published": 55,
+      "excluded_as_already_labelled": 10,
+      "eligible": 45,
+      "drawn": 10
+    },
+    "plant_systems.yml": {
+      "published": 104,
+      "excluded_as_already_labelled": 17,
+      "eligible": 87,
+      "drawn": 20
+    },
+    "plasma_initiation.yml": {
+      "published": 1,
+      "excluded_as_already_labelled": 1,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "plasma_wall_interactions.yml": {
+      "published": 89,
+      "excluded_as_already_labelled": 14,
+      "eligible": 75,
+      "drawn": 17
+    },
+    "radiation_measurement_diagnostics.yml": {
+      "published": 110,
+      "excluded_as_already_labelled": 19,
+      "eligible": 91,
+      "drawn": 21
+    },
+    "runaway_electrons.yml": {
+      "published": 2,
+      "excluded_as_already_labelled": 2,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "spectroscopy.yml": {
+      "published": 5,
+      "excluded_as_already_labelled": 5,
+      "eligible": 0,
+      "drawn": 0
+    },
+    "structural_components.yml": {
+      "published": 36,
+      "excluded_as_already_labelled": 10,
+      "eligible": 26,
+      "drawn": 6
+    },
+    "transport.yml": {
+      "published": 698,
+      "excluded_as_already_labelled": 107,
+      "eligible": 591,
+      "drawn": 133
+    },
+    "turbulence.yml": {
+      "published": 35,
+      "excluded_as_already_labelled": 11,
+      "eligible": 24,
+      "drawn": 5
+    },
+    "waves.yml": {
+      "published": 6,
+      "excluded_as_already_labelled": 6,
+      "eligible": 0,
+      "drawn": 0
+    }
+  }
+}
