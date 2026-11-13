@@ -17,7 +17,30 @@
   "plan_slug": "sn-full-dd-continuation",
   "plan_version": 23,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c31dbeaa1df882b92c35fd9ea6e9770b5fb19d54",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 5 spend now deducts the unspent part of the consistency section 2 tranche at its start.",
+      "reason": "",
+      "when": "2026-11-13T00:13:46.508440+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c31dbeaa1df882b92c35fd9ea6e9770b5fb19d54",
+      "commit_basis": "edit",
+      "note": "Section 5 spend now deducts the unspent part of the consistency section 2 tranche at its start.",
+      "reason": "",
+      "when": "2026-11-13T00:13:46.508440+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261112T152234757483-plan-review-of-sn-full-dd-continuation.json",
   "review_run_id": "r-20261112T152234757483-plan-review-of-sn-full-dd-continuation",
   "reviewed_blob_sha": "a1796f50d7a9b55c7cd3e5d39661802f2a5ede78",
   "rubric": "content",
