@@ -43,9 +43,28 @@
       "note": "The re-read of the seat on already-scored names is removed; the seat's counts on the fresh reference are its measure.",
       "reason": "",
       "when": "2026-11-13T08:43:13.951188+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "da9d9941f3ee285f00fcb68b358c3044093a02f8",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The floor that compared a record with itself is removed; a fresh-reference share below the accepted one now holds the section for the lead's ruling on coverage.",
+      "reason": "",
+      "when": "2026-11-13T08:43:52.439860+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "da9d9941f3ee285f00fcb68b358c3044093a02f8",
+      "commit_basis": "edit",
+      "note": "The floor that compared a record with itself is removed; a fresh-reference share below the accepted one now holds the section for the lead's ruling on coverage.",
+      "reason": "",
+      "when": "2026-11-13T08:43:52.439860+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
