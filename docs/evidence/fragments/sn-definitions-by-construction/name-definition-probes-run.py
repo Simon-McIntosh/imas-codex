@@ -1155,12 +1155,14 @@ async def fresh() -> None:
         FRESH_SEAT.write_text(json.dumps(seat, indent=1, sort_keys=True) + "\n")
 
     frozen = json.loads(PHRASE_RESULTS.read_text())["thresholds"]["frozen"]["chat_arm"]
+    # the judgments are keyed by the reference id, which for these rows is the
+    # name; a row still carrying its sheet id would read no judgment at all
     phrase_flags = {
-        row["name"]
-        for row in rows
+        item["name"]
+        for item in items
         if phrase_check(
-            row,
-            extracted.get(row["name"]) or [],
+            item,
+            extracted.get(item["name"]) or [],
             judgments["judgments"],
             threshold=frozen,
         )
