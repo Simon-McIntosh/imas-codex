@@ -43,6 +43,16 @@
       "note": "Item 2 now records a unit-pair row as settled or declined only when its advisory is cleared, and says a row held or let stand by definitions section 6 is still this section's.",
       "reason": "",
       "when": "2026-11-13T01:55:59.759744+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The prose now cites the name-against-definition dispositions as the way definitions section 6 can settle a row, not a dimension check.",
+      "reason": "",
+      "when": "2026-11-13T01:56:40.372066+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "Item 2 now records a unit-pair row as settled or declined only when its advisory is cleared, and says a row held or let stand by definitions section 6 is still this section's.",
       "reason": "",
       "when": "2026-11-13T01:55:59.759744+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "note": "The prose now cites the name-against-definition dispositions as the way definitions section 6 can settle a row, not a dimension check.",
+      "reason": "",
+      "when": "2026-11-13T01:56:40.372066+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T001446480117-plan-review-of-sn-catalog-consistency.json",
