@@ -53,9 +53,22 @@
       "note": "Section 6 now requires the reclaim shown refused in a disposable graph when its archive receipt is absent.",
       "reason": "",
       "when": "2026-11-13T08:08:13.704028+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "anchors_resolve-1",
+      "reason": "The comment is a dated record of a review whose run directory was since reclaimed; the durable evidence for it is linked in the neighbouring comment and no node reads the dead path.",
+      "when": "2026-11-13T08:08:51.243767+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "The comment is a dated record of a review whose run directory was since reclaimed; the durable evidence for it is linked in the neighbouring comment and no node reads the dead path.",
+      "when": "2026-11-13T08:08:51.243767+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
