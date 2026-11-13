@@ -502,5 +502,145 @@
 "confidence": "high",
 "evidence": "the local nitrogen-ion count per physical volume at that location, summed over all nitrogen ionic charge states and excluding neutral nitrogen",
 "reason": "Under the bare species convention the name denotes nitrogen ions, so the definition's ion sum with neutrals excluded is the quantity the name states."
+},
+{
+"id": "item-0073",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "the full major-radius extent of a rectangular passive conducting structure element",
+"reason": "The name states a width, but the definition fixes it to the radial extent between inner and outer boundaries, a direction the name does not state."
+},
+{
+"id": "item-0074",
+"class": "abstract-parent-as-quantity",
+"confidence": "medium",
+"evidence": "It applies to electron, ion, charge-state, and orbit-class populations",
+"reason": "The name states one collisional torque density, but the definition is a population-abstract quantity whose electron, ion, charge-state and orbit-class forms are fixed by more specific names."
+},
+{
+"id": "item-0075",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "This member specializes radius of an iron-core segment to the outermost boundary measured from the toroidal symmetry axis",
+"reason": "The name states an outer radius, but the definition adds that it is a major-radius extent measured from the toroidal axis rather than a radius about the cross-section centre."
+},
+{
+"id": "item-0076",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "providing one limiter factor for each selected spatial transport component",
+"reason": "The name states a scalar coefficient, but the definition is a per-component limiter with one factor per selected spatial transport component."
+},
+{
+"id": "item-0077",
+"class": "agrees",
+"confidence": "medium",
+"evidence": "the real part of the complex amplitude of the toroidal component of the first-order plasma velocity perturbation for a single toroidal Fourier harmonic",
+"reason": "The real part of the toroidal component of a perturbed plasma velocity is what the name states, and the eigenfunction context does not change the quantity denoted."
+},
+{
+"id": "item-0078",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "the non-negative cross-sectional area of the solid conducting material of a passive conducting loop element, evaluated on a surface normal to the local current path",
+"reason": "The name states the area of a passive loop, but the definition fixes it to the conductor material cross-section normal to the current path, attributes the name does not state."
+},
+{
+"id": "item-0079",
+"class": "agrees",
+"confidence": "medium",
+"evidence": "the charge-weighted electron-equivalent production rate from ablation and ionization of pellet material at a specified position along the injected pellet trajectory",
+"reason": "A rate of electron production at a position along the pellet path is what the name states, and charge weighting is how an electron source rate is formed from ablated constituents."
+},
+{
+"id": "item-0080",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "the photon radiance of a radiation field along a specified viewing direction after integration over a visible wavelength interval or passband",
+"reason": "The name states a camera brightness, but the definition fixes it as band-integrated photon radiance, photon counting and passband integration being attributes the name does not state."
+},
+{
+"id": "item-0081",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "expressed as an equivalent-electron count rate. Each neutral krypton atom contributes 36 equivalent electrons",
+"reason": "The name states a krypton source rate, but the definition is an equivalent-electron count rate, an added weighting the name does not state."
+},
+{
+"id": "item-0082",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the midpoint of those extrema. . . The extrema are taken over the complete flux surface, and their midpoint is the aggregation convention",
+"reason": "The name states a major-radius coordinate of a flux surface, but the definition adds the min-max extrema midpoint as the aggregation convention, an attribute the name does not state."
+},
+{
+"id": "item-0083",
+"class": "unit-does-not-fit-name",
+"confidence": "medium",
+"evidence": "the local rate of neutron-carried energy delivered per unit surface area",
+"reason": "The name states a neutron flux, which conventionally counts neutrons per area and time, while the definition and the W.m^-2 unit are an energy flux density."
+},
+{
+"id": "item-0084",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the net rate at which Coulomb collisions transfer kinetic energy from the fast, non-Maxwellian particle population to the bulk electron population",
+"reason": "The name states a fast-particle collisional power, but the definition fixes the recipient to the bulk electron population, a recipient the name does not state."
+},
+{
+"id": "item-0085",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "In the edge and scrape-off-layer setting, it is evaluated locally at the outboard equatorial midplane rather than averaged over a flux surface.",
+"reason": "The name states a thermal neutral internal-state pressure, but the definition adds a fixed outboard-midplane evaluation point, a sampling convention the name does not state."
+},
+{
+"id": "item-0086",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the lower allowable value of a signed electromagnetic force resultant acting on the poloidal-field coil system",
+"reason": "The name states a minimum force, but the definition adds that the value is a structural lower bound on a force-combination resultant, attributes the name does not state."
+},
+{
+"id": "item-0087",
+"class": "abstract-parent-as-quantity",
+"confidence": "high",
+"evidence": "It does not select a species, transport channel, or particular decaying quantity.",
+"reason": "The name states a decay length without an operand, but the definition is a parent whose electron, ion and heat-flux forms are fixed by more specific names."
+},
+{
+"id": "item-0088",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "the full non-negative radial extent of a ferritic element rectangular cross-section",
+"reason": "The name states a width, but the definition fixes it to the radial extent between inner and outer boundaries of a rectangular cross-section, a direction the name does not state."
+},
+{
+"id": "item-0089",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "Cumulative wave power absorbed by a specified thermal ion charge state within the plasma volume enclosed by a specified magnetic flux surface",
+"reason": "The name states a charge-state power inside a flux surface, but the definition fixes it to absorbed wave power, a mechanism the name does not state."
+},
+{
+"id": "item-0090",
+"class": "abstract-parent-as-quantity",
+"confidence": "high",
+"evidence": "The unqualified parent does not by itself specify an instantaneous value, phasor, peak amplitude, root-mean-square value, or any aggregation over antenna elements",
+"reason": "The name states an antenna voltage, but the definition declares a parent whose amplitude, phasor and aggregated representations are fixed by qualified child names."
+},
+{
+"id": "item-0091",
+"class": "abstract-parent-as-quantity",
+"confidence": "high",
+"evidence": "It is the umbrella scalar for the incident photon power crossing onto the module surface and the absorbed photon power retained after surface reflection",
+"reason": "The name states a radiated power, but the definition declares an umbrella radiation-channel quantity whose incident and absorbed components are fixed by more specific names."
+},
+{
+"id": "item-0092",
+"class": "definition-narrower-than-name",
+"confidence": "medium",
+"evidence": "the signed projection of the local electron-fluid bulk flow onto the toroidal direction in the edge plasma",
+"reason": "The name states a toroidal electron velocity generally, while the definition restricts it to the edge-plasma regime."
 }
 ]
