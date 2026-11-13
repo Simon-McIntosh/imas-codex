@@ -696,24 +696,24 @@ def run_house_style_checks(names: list[dict[str, Any]]) -> list[LintFinding]:
     name the grammar cannot parse is skipped rather than guessed at.
     """
 
-    from imas_standard_names.grammar.terms import load_conventions, select_conventions
+    from imas_codex.standard_names.docs_gates import conformance_findings
 
-    from imas_codex.standard_names.docs_gates import house_style_findings
-
-    registry = load_conventions()
     findings: list[LintFinding] = []
     for name in names:
         name_id = name.get("id", "")
         try:
-            conventions = select_conventions(name_id, registry=registry)
+            # Conformance covers the selected registry wording and the shared
+            # parts a definition must state in their stored form, so a
+            # departure from either reaches the reviewer as one finding family.
+            conformance = conformance_findings(
+                name_id,
+                description=name.get("description") or "",
+                documentation=name.get("documentation") or "",
+            )
         except Exception:
             logger.debug("no registry selection for '%s'", name_id, exc_info=True)
             continue
-        for finding in house_style_findings(
-            conventions,
-            description=name.get("description") or "",
-            documentation=name.get("documentation") or "",
-        ):
+        for finding in conformance:
             findings.append(
                 LintFinding(
                     name_id=name_id,

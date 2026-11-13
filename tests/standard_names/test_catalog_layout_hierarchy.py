@@ -30,6 +30,12 @@ import yaml
 from imas_codex.standard_names.export import _write_manifest
 
 
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance
+
+
 def _stage_manifest(
     staging: Path,
     name: str,

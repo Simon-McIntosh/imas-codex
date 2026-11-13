@@ -203,6 +203,7 @@ def test_full_source_set_and_ledger_commit_once() -> None:
         assert _persist() == {
             "old_name": "electron_density",
             "new_name": "volume_averaged_electron_density",
+            "stale_source_ids": [],
         }
 
     guard_handle = guard.call_args.args[0]

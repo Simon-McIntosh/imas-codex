@@ -21,6 +21,8 @@ from imas_codex.standard_names.docs_gates import (
     HouseStyleFindingClass,
     conformance_findings,
     house_style_findings,
+    replace_altered_shared_parts,
+    shared_part_sentences,
 )
 from imas_codex.standard_names.review.audits import (
     run_all_audits,
@@ -66,11 +68,17 @@ def _roster_graph(disposable_neo4j_uri):
 
 
 def _documentation(equation: str, *, opening: str = _CANONICAL_OPENING) -> str:
-    return (
+    written = (
         f"{opening}\n\n"
         "The flux-surface average of the local argon number density.\n\n"
         f"{equation}\n\n"
         "See [electron_density](name:electron_density) for the related quantity."
+    )
+    # A definition a writer produced carries each shared part in its stored
+    # wording, because the renderer installs it verbatim. Build the canonical
+    # fixture the same way rather than hand-writing a paraphrase.
+    return replace_altered_shared_parts(
+        written, shared_part_sentences(_ARGON, select_conventions(_ARGON))
     )
 
 
@@ -164,6 +172,31 @@ def test_audit_report_carries_the_conformance_findings() -> None:
         if finding.finding_type == "convention_violation"
     ]
     assert any("forbidden_equation_variant" in f.detail for f in violations)
+
+
+def test_audit_report_carries_a_shared_part_departure() -> None:
+    # A definition that omits a shared part is a conformance finding, and the
+    # audit reports it so a reviewer sees the departure rather than a silently
+    # unrendered sentence.
+    names = [
+        {
+            "id": _ARGON,
+            "description": "Number density of argon ions.",
+            "documentation": (
+                "Number density of argon ions.\n\n"
+                f"{_SURFACE_FORM}\n\n"
+                "See [electron_density](name:electron_density) for the related "
+                "quantity."
+            ),
+        }
+    ]
+    report = run_all_audits(names)
+    violations = [
+        finding
+        for finding in report.lint_findings
+        if finding.finding_type == "convention_violation"
+    ]
+    assert any("shared_part_altered" in finding.detail for finding in violations)
 
 
 def test_house_style_findings_read_the_selected_entries() -> None:

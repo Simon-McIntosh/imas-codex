@@ -283,9 +283,7 @@ async def process_refine_docs_batch(
             # that departs from a shared part is refused before it is stored.
             from imas_codex.standard_names.docs_gates import (
                 description_with_population,
-            )
-            from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
-                _refuse_altered_shared_parts,
+                refuse_altered_shared_parts as _refuse_altered_shared_parts,
             )
 
             refined_documentation = _documentation_with_registry_form(
@@ -369,9 +367,7 @@ async def process_refine_docs_batch(
             # A refusal raised by the writer above is imported here rather
             # than beside it: a failure raised before that import runs must not
             # read an unbound name and lose the release path.
-            from imas_codex.standard_names.worker_tasks.worker_generate_docs import (
-                SharedPartAltered,
-            )
+            from imas_codex.standard_names.docs_gates import SharedPartAltered
 
             is_terminal = _is_refine_docs_failure(exc) or isinstance(
                 exc, SharedPartAltered
