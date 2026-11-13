@@ -1,0 +1,741 @@
+{
+ "schema": "live-rewrite-first-slice/1",
+ "node": "sdbc-live-rewrite-first-slice",
+ "plan_section": "sn-definitions-by-construction \u00a76",
+ "precondition": {
+  "checkpoint": "docs/evidence/fragments/sn-full-dd-continuation/sfdc-graph-checkpoint.json",
+  "verified": true,
+  "archive_sha256": "389e1fffa380d058677ef3c6e9a1a95b077fe0bde5bcff19d4dec3294caeba5a",
+  "checks_passed": 4,
+  "counts_equal_before_after": true
+ },
+ "status": "blocked",
+ "blocker": {
+  "id": "review_docs-worker-dependency-unregistered",
+  "symptom": "every item in the review_docs pool fails immediately and the pool retries forever",
+  "reproduction": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync imas-codex sn edit nitrogen_density --hint '<population wording>' --axis docs --scope self --reason '<population reason>'",
+  "error": "KeyError: '_name_definition_note'",
+  "site": "imas_codex/standard_names/worker_tasks/worker_review_docs.py:891 calls _worker_dependency('_name_definition_note'); imas_codex/standard_names/workers.py:_WORKER_DEPENDENCIES carries no such entry",
+  "introduced_by": "a42c54b8d feat(review): hold a name whose definition states what its name does not",
+  "definition_site": "worker_review_docs.py:699 defines _name_definition_note locally, taking the resolver as its first positional",
+  "observed": "31430+ identical ERROR lines in ~/.local/share/imas-codex/logs/sn_sn-edit.log between 10:00:39 and 10:00:56 host time, one per pool retry, no LLM call made in the loop",
+  "effect": "no documentation edit can reach review, so no live name can be brought to accepted text by any path that reviews documentation",
+  "spend_before_failure_usd": 0.0873
+ },
+ "attempts": [
+  {
+   "kind": "docs-wording",
+   "name": "nitrogen_density",
+   "mode": "hint --axis docs --scope self",
+   "outcome": "blocked",
+   "cause": "review_docs KeyError; the candidate was generated (USD 0.0873) and could not be reviewed",
+   "wrote_graph": false
+  },
+  {
+   "kind": "rename",
+   "name": "accumulated_argon_count",
+   "proposed": "accumulated_argon_equivalent_electron_count",
+   "mode": "rename --scope self",
+   "outcome": "declined-by-pipeline",
+   "cause": "new name fails ISN grammar round-trip: 'accumulated_argon_equivalent_electron_count' does not match any physical_base or geometry_carrier; nearest candidates: (none)",
+   "exit": 2,
+   "wrote_graph": false,
+   "note": "the rename path itself ran; only the spelling was refused. This is a spelling the node may not settle, listed with its reading below."
+  }
+ ],
+ "unsettled": [
+  {
+   "class": "spelling the pipeline will not accept",
+   "name": "accumulated_argon_count",
+   "reading_a": "accumulated_equivalent_electron_count_of_argon (quantity head first, matching names whose head is the counted quantity)",
+   "reading_b": "accumulated_argon_equivalent_electron_count (species first, matching the existing accumulated_<species>_count family)",
+   "why_unsettled": "the grammar rejected reading_b outright; reading_a has not been run and is not established to parse either"
+  }
+ ],
+ "censuses": {
+  "species_family": {
+   "asked": "one bare species density family of at least five members",
+   "family": "<X>_density",
+   "members_read": 15,
+   "population_classes_before": {
+    "ions-only-neutrals-excluded": 8,
+    "neutral-mentioned-unclear": 5,
+    "silent": 2
+   },
+   "distinct_population_wordings_before": 3,
+   "reading": "not one wording: 8 members state ions summed over charge states with neutrals excluded, 5 mention neutral atoms without settling whether they are counted, 2 are silent on the population",
+   "members": {
+    "argon_density": {
+     "description": "Charge-state-summed number density of argon ions, including Ar+ through Ar18+ and excluding neutral argon; local and averaged forms share this definition.",
+     "population_class": "ions-only-neutrals-excluded",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.53652158
+    },
+    "neon_density": {
+     "description": "Number density of neon impurity ions, summed over the included ionization states; line-averaged and volume-averaged forms express the same elemental content.",
+     "population_class": "ions-only-neutrals-excluded",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.0732636
+    },
+    "nitrogen_density": {
+     "description": "Number density of nitrogen ions at a plasma location, summed from singly ionized through fully stripped nitrogen and excluding neutral atoms.",
+     "population_class": "ions-only-neutrals-excluded",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.6195940200000001
+    },
+    "oxygen_density": {
+     "description": "Total number density of oxygen atoms and ions across all charge states, from neutral to fully stripped, giving the local oxygen impurity concentration at a point in the plasma.",
+     "population_class": "neutral-mentioned-unclear",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.054613499999999995
+    },
+    "carbon_density": {
+     "description": "Carbon density is the local number density of elemental carbon in the plasma, summed over neutral carbon atoms and all ionic charge states through fully stripped C6+.",
+     "population_class": "neutral-mentioned-unclear",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.17270704999999997
+    },
+    "beryllium_density": {
+     "description": "Local number density of beryllium impurity ions per unit plasma volume, summed over all ionization states from singly ionized to fully stripped (Be1+ through Be4+), excluding neutral beryllium atoms.",
+     "population_class": "ions-only-neutrals-excluded",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.03914475
+    },
+    "boron_density": {
+     "description": "Elemental boron number density, summed over neutral atoms and all ionic charge states through fully stripped B5+.",
+     "population_class": "neutral-mentioned-unclear",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.3681398
+    },
+    "tungsten_density": {
+     "description": "Number density of tungsten ions summed over all positive ionization states, excluding neutral tungsten, at a specified location or spatial average.",
+     "population_class": "ions-only-neutrals-excluded",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.2560774
+    },
+    "iron_density": {
+     "description": "Total number density of iron impurity ions in the plasma, summed over all ionization states from singly to fully ionized iron (atomic number Z = 26).",
+     "population_class": "silent",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.08054942000000001
+    },
+    "krypton_density": {
+     "description": "Number density of krypton ions at a point in the plasma, summed over all ionized charge states from Kr1+ through fully stripped Kr36+ and excluding neutral krypton atoms.",
+     "population_class": "ions-only-neutrals-excluded",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.62123133
+    },
+    "lithium_density": {
+     "description": "Number density of lithium impurity ions per unit plasma volume, summed over all ionization states from singly ionized to fully stripped, excluding neutral lithium atoms.",
+     "population_class": "ions-only-neutrals-excluded",
+     "unit": "m^-3",
+     "status": "superseded",
+     "review_score": null,
+     "llm_cost": 0.17405808456
+    },
+    "xenon_density": {
+     "description": "Number density of xenon ions at a given point in the plasma, summed over all ionization states from singly ionized through fully stripped xenon, excluding neutral xenon atoms.",
+     "population_class": "neutral-mentioned-unclear",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.24727308
+    },
+    "deuterium_density": {
+     "description": "Deuterium density is the number density of ionized deuterium in the fuel-ion population. It is the local density of deuterons, excluding neutral atoms, molecules, and line- or volume-averaged deuterium densities.",
+     "population_class": "ions-only-neutrals-excluded",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 1.28455238
+    },
+    "tritium_density": {
+     "description": "Local number density of tritium ions in the plasma, the foundational fuel-ion parameter underlying chord-averaged, volume-averaged, and isotopic ratio child quantities.",
+     "population_class": "silent",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.6477435500000001
+    },
+    "hydrogen_density": {
+     "description": "Local number density of hydrogen (protium) ions in the plasma, giving the count of H+ particles per unit volume at a specified spatial position.",
+     "population_class": "neutral-mentioned-unclear",
+     "unit": "m^-3",
+     "status": "draft",
+     "review_score": null,
+     "llm_cost": 0.33905784000000005
+    }
+   }
+  },
+  "operator_family": {
+   "asked": "the flux-surface average applied to at least five names",
+   "names_read": 8,
+   "distinct_operator_sentences_before": 8,
+   "reading": "8 names carry 8 distinct operator sentences, matching the committed 8-form baseline for this operator",
+   "settled_wording": "the flux surface average is the average of a quantity over a closed magnetic flux surface weighted by the inverse magnitude of the poloidal flux gradient",
+   "members": {
+    "flux_surface_averaged_magnetic_field_magnitude": {
+     "operator_sentence": "This quantity is the flux-surface average of the magnitude of the total equilibrium magnetic-field vector.",
+     "description": "Flux-surface average of the local magnetic-field strength, retaining the pointwise modulus before averaging over each magnetic surface.",
+     "unit": "T",
+     "status": "draft",
+     "review_score": null
+    },
+    "flux_surface_averaged_major_radius": {
+     "operator_sentence": "For this flux-surface-averaged quantity, that distance is averaged over each nested magnetic flux surface in the right-handed cylindrical $(R,\\phi,Z)$ frame, wh",
+     "description": "Flux-surface-averaged nonnegative perpendicular distance from the toroidal symmetry axis to points on a nested magnetic flux surface, giving the mean major-radius coordinate in the right-handed cylindrical (R, \u03c6, Z) frame.",
+     "unit": "m",
+     "status": "draft",
+     "review_score": null
+    },
+    "flux_surface_averaged_inverse_of_major_radius": {
+     "operator_sentence": "This quantity is the geometric average of the reciprocal major radius over a complete magnetic flux surface.",
+     "description": "Flux-surface average of reciprocal major radius, providing a geometric equilibrium coefficient for toroidal geometry in flux-coordinate equations.",
+     "unit": "m^-1",
+     "status": "draft",
+     "review_score": null
+    },
+    "flux_surface_averaged_inverse_of_square_of_major_radius": {
+     "operator_sentence": "This quantity is the flux-surface average of the reciprocal square of the major radius on a nested equilibrium magnetic flux surface.",
+     "description": "Flux-surface average of reciprocal squared major radius, providing a geometric metric coefficient for parallel-gradient and neoclassical transport calculations.",
+     "unit": "m^-2",
+     "status": "draft",
+     "review_score": null
+    },
+    "flux_surface_averaged_square_of_magnetic_field_magnitude": {
+     "operator_sentence": "This quantity is the surface-averaged squared strength of the total magnetic field on a nested magnetic flux surface.",
+     "description": "Flux-surface average of the squared magnitude of the total equilibrium magnetic field, providing a geometric coefficient for equilibrium and neoclassical transport relations.",
+     "unit": "T^2",
+     "status": "draft",
+     "review_score": null
+    },
+    "flux_surface_averaged_parallel_current_density": {
+     "operator_sentence": "Flux-surface-averaged parallel current density is the signed field-aligned contribution of the total plasma current density, averaged over a closed magnetic flu",
+     "description": "Flux-surface-averaged parallel current density is the surface average of conventional current density dotted with the magnetic field, divided by a single global reference toroidal field.",
+     "unit": "A.m^-2",
+     "status": "draft",
+     "review_score": null
+    },
+    "flux_surface_averaged_effective_charge_at_plasma_boundary": {
+     "operator_sentence": "This quantity is the flux-surface average of the ion-mixture effective charge over the plasma boundary, identified with the last closed flux surface.",
+     "description": "Flux-surface average of the ion-mixture effective charge over the entire plasma-boundary surface, distinct from the local boundary value.",
+     "unit": "1",
+     "status": "draft",
+     "review_score": null
+    },
+    "flux_surface_averaged_toroidal_current_density": {
+     "operator_sentence": "Flux-surface-averaged toroidal current density is the signed geometric toroidal component of the net plasma current density, averaged over a closed magnetic flu",
+     "description": "Flux-surface-averaged toroidal current density is the net conventional toroidal charge flux per area, averaged over a closed magnetic surface with additional inverse-major-radius weighting.",
+     "unit": "A.m^-2",
+     "status": "draft",
+     "review_score": null
+    }
+   }
+  }
+ },
+ "classes": {
+  "equivalent-electron": {
+   "accumulated_argon_count": {
+    "description": "Accumulated argon count is the cumulative equivalent-electron inventory of argon atoms delivered by gas injection after plasma breakdown. Each argon atom contributes 18 equivalent electrons, equal to its atomic number; this is delivered inventory, not plasma electron content or ionization state.",
+    "unit": "1",
+    "status": "draft",
+    "review_score": null
+   },
+   "accumulated_ammonia_count": {
+    "description": "Cumulative post-breakdown inventory of ammonia molecules introduced into the plasma vessel, expressed as an equivalent-electron count with ten count units assigned to each neutral NH3 molecule.",
+    "unit": "1",
+    "status": "draft",
+    "review_score": null
+   },
+   "accumulated_carbon_count_due_to_gas_injection": {
+    "description": "Cumulative post-breakdown carbon inventory from gas injection, expressed as six equivalent-electron counts for every injected neutral carbon atom.",
+    "unit": "1",
+    "status": "draft",
+    "review_score": null
+   },
+   "accumulated_ethane_count": {
+    "description": "Cumulative equivalent-electron inventory of ethane molecules injected after plasma breakdown, assigning 18 equivalent-electron counts to each neutral C2H6 molecule.",
+    "unit": "1",
+    "status": "draft",
+    "review_score": null
+   },
+   "accumulated_ethylene_count": {
+    "description": "Cumulative ethylene (C2H4) gas injection since plasma breakdown, expressed as an equivalent-electron count where each ethylene molecule contributes 16 equivalent electrons (2 carbon atoms at Z = 6 each, 4 hydrogen atoms at Z = 1 each).",
+    "unit": "1",
+    "status": "draft",
+    "review_score": null
+   }
+  },
+  "operator-omitted": {
+   "co_passing_power_density": {
+    "description": "Flux-surface-averaged volumetric energy source rate for the co-passing orbit population, representing energy transfer to or from particles circulating in the co-current direction.",
+    "unit": "W.m^-3",
+    "status": "draft",
+    "review_score": null
+   },
+   "counter_passing_power_density": {
+    "description": "Flux-surface-averaged volumetric energy source rate for counter-passing particles, representing energy transfer to or from particles circulating opposite to the plasma-current direction.",
+    "unit": "W.m^-3",
+    "status": "draft",
+    "review_score": null
+   },
+   "counter_passing_fast_particle_density": {
+    "description": "Flux-surface-averaged number density of suprathermal particles of a selected species whose untrapped guiding-center orbits circulate opposite to the plasma current.",
+    "unit": "m^-3",
+    "status": "draft",
+    "review_score": null
+   },
+   "ion_average_temperature_at_internal_transport_barrier": {
+    "description": "Kinetic temperature of the charged-ion population at an internal transport barrier, defined as the arithmetic mean of charged-ion species temperatures, excluding electrons and neutral species.",
+    "unit": "eV",
+    "status": "draft",
+    "review_score": null
+   },
+   "poloidal_ion_state_momentum": {
+    "description": "Area-normalized poloidal momentum source term for a single ion charge state, equal to force per unit area projected onto the local poloidal tangent. It is the charge-state-resolved contribution that sums to the total poloidal ion momentum source.",
+    "unit": "kg.m^-1.s^-2",
+    "status": "superseded",
+    "review_score": null
+   }
+  },
+  "generic-name": {
+   "area_of_poloidal_field_coil": {
+    "description": "Non-negative full geometric area of the conducting cross section of one poloidal-field-coil element in a poloidal plane at fixed toroidal angle \u03c6 of the right-handed cylindrical (R, \u03c6, Z) frame, where R is major radius and Z is vertical height.",
+    "unit": "m^2",
+    "status": "draft",
+    "review_score": null
+   },
+   "area_of_neutral_beam_injector": {
+    "description": "Area of a neutral beam injector is the source cross-section of the active ion-source emission face that forms the extracted beam before neutralization. For a multi-aperture source, it is the sum of the contributing aperture areas.",
+    "unit": "m^2",
+    "status": "superseded",
+    "review_score": null
+   },
+   "angle_of_antenna_strap": {
+    "description": "Second inclination angle (\u03b2) of the oblique trapezoidal cross-section of an ICRH antenna strap, giving the signed tilt of the beta-side lateral face relative to the directed strap base edge.",
+    "unit": "rad",
+    "status": "draft",
+    "review_score": null
+   },
+   "accumulated_lithium_count": {
+    "description": "Cumulative lithium delivered by gas injection after plasma breakdown, expressed as an equivalent-electron count with three counts per lithium atom.",
+    "unit": "1",
+    "status": "superseded",
+    "review_score": null
+   },
+   "accumulated_hydrogen_prefill_count": {
+    "description": "Cumulative equivalent-electron inventory of hydrogen atoms introduced by gas injection during prefill before plasma breakdown; hydrogen contributes one count per atom.",
+    "unit": "1",
+    "status": "draft",
+    "review_score": null
+   }
+  },
+  "parent-family": {
+   "alfven_frequency": {
+    "description": "Alfv\u00e9n frequency at a given radial position for a single toroidal mode number is the complex local shear-Alfv\u00e9n continuum angular frequency; its real part gives oscillation and its imaginary part gives growth or damping for the stated time dependence.",
+    "unit": "s^-1",
+    "status": "draft",
+    "review_score": null
+   },
+   "conductivity": {
+    "description": "Local directional electrical conductivity coefficients relating conductive current-density components to corresponding electric-field components in a plasma.",
+    "unit": "m^-1.ohm^-1",
+    "status": "superseded",
+    "review_score": null
+   },
+   "density_at_magnetic_axis": {
+    "description": "Local particle concentration of a specified plasma population at the magnetic axis, with ion charge states aggregated and compound fuel mixtures treated as defined populations.",
+    "unit": "m^-3",
+    "status": "draft",
+    "review_score": null
+   },
+   "density_at_divertor_target": {
+    "description": "Local number density of a specified plasma species or species group immediately upstream of a divertor-target sheath, with ion charge states summed and neutral populations excluded unless explicitly named.",
+    "unit": "m^-3",
+    "status": "draft",
+    "review_score": null
+   },
+   "decay_length_over_scrape_off_layer": {
+    "description": "Characteristic outward distance over which a decaying plasma quantity decreases by one e-folding in the scrape-off layer.",
+    "unit": "m",
+    "status": "draft",
+    "review_score": null
+   }
+  }
+ },
+ "spend": {
+  "ceiling_usd": 10,
+  "spent_usd": 0.170355,
+  "per_kind": {
+   "docs-wording": {
+    "names_completed": 0,
+    "usd": 0.0873,
+    "note": "candidate generated; review refused by the hold-kind defect"
+   },
+   "rename": {
+    "names_completed": 1,
+    "usd": 0.083054704,
+    "note": "radius_of_arc_of_circle_center, applied"
+   },
+   "hint-name-axis": {
+    "names_completed": 0,
+    "usd": 0.0,
+    "note": "refused before any model call"
+   }
+  }
+ },
+ "manifest": {
+  "path": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json",
+  "entries": 316,
+  "totals_by_kind": {
+   "hint": 190,
+   "rename": 28,
+   "docs": 96,
+   "rename-waiting-on-grammar": 2
+  },
+  "totals_by_ruling": {
+   "generic-name-single-object": 190,
+   "name-gains-operator": 9,
+   "parent-family-definition": 96,
+   "unit-does-not-fit-name": 19,
+   "rename-equivalent-electron": 2
+  },
+  "projection": {
+   "rates_beside_even_other": {
+    "docs_only_per_name_usd": 0.012,
+    "full_regeneration_per_name_usd": 0.152,
+    "measured_docs_generation_call_usd": 0.0873
+   },
+   "names": {
+    "graph_export_candidates": 2044,
+    "label_carried": 1871,
+    "mismatched": 316,
+    "attempted_this_pass": 314,
+    "waiting_on_grammar": 2
+   },
+   "projected_spend_by_component_usd": {
+    "seat.rename": 4.26,
+    "seat.hint": 28.88,
+    "seat.docs": 14.59
+   },
+   "projected_total_usd": 47.73,
+   "ceiling_usd": 150,
+   "verdict": "under the ceiling"
+  },
+  "waiting_on_grammar": [
+   "lithium_source_rate_due_to_gas_injection",
+   "vertical_neutral_species_center_of_mass_velocity"
+  ]
+ },
+ "resumed_attempt": {
+  "at": "2026-11-13T13:09:10Z",
+  "review_fix_merged": "64db0f1fa merged into the worktree as a310f6405",
+  "population_corrected": {
+   "rule": "the graph is the single source of truth; the graph export candidates whose two blind readers carried a label and reconciled as mismatched",
+   "candidates": 2044,
+   "label_carried": 1871,
+   "mismatched": 316,
+   "excluded": {
+    "agreeing": 1303,
+    "disputed": 252,
+    "text-changed": 91,
+    "never_read": 82
+   }
+  },
+  "attempts": [
+   {
+    "kind": "docs-wording",
+    "name": "carbon_density",
+    "mode": "hint --axis docs --scope self",
+    "outcome": "blocked",
+    "cause": "ValueError: Unknown review hold kind: name_definition - HOLD_KINDS in imas_codex/standard_names/review/holds.py:16-25 omits the kind the name-definition seat returns",
+    "log": "~/.local/share/imas-codex/logs/sn_sn-edit.log at 14:17:18-14:18:09 host time, one retry every ~17 s",
+    "wrote_graph": false,
+    "spend_usd": 0.0873
+   },
+   {
+    "kind": "rename",
+    "name": "curvature_of_arc_of_circle_center",
+    "proposed": "radius_of_arc_of_circle_center",
+    "outcome": "applied",
+    "detail": "edit_status=applied on radius_of_arc_of_circle_center; 1 producing source carried; the command timed out at 400 s mid-review",
+    "unit_before": "m",
+    "unit_after": "m",
+    "llm_cost_usd": 0.083054704,
+    "reason": "The definition states a geometric length scale and the unit is m; a curvature is the reciprocal of that length and carries m^-1, so the name stated the wrong quantity."
+   },
+   {
+    "kind": "rename",
+    "name": "electron_number_density",
+    "proposed": "electron_column_density",
+    "outcome": "declined-by-pipeline",
+    "cause": "new name fails ISN grammar round-trip: no matching physical_base or geometry_carrier; nearest candidates electrical_conductivity, grating_line_density",
+    "unit": "m^-2",
+    "wrote_graph": false
+   },
+   {
+    "kind": "hint-name-axis",
+    "names": [
+     "electron_number_density",
+     "curvature_of_arc_of_circle_*",
+     "incident_neutral_particle_flux_at_wall",
+     "momentum",
+     "ion_charge_state_momentum_source"
+    ],
+    "outcome": "refused",
+    "cause": "name_stage=accepted cannot re-enter name generation from a hint; requires --rename with a complete spelling",
+    "wrote_graph": false
+   }
+  ],
+  "unit_misfit_findings": {
+   "electron_number_density": "definition is a path-integrated column abundance with unit m^-2; the name says a local per-volume density",
+   "curvature_of_arc_of_circle_center": "definition is a length scale with unit m; the name says its reciprocal",
+   "momentum": "definition is a parent covering both extensive momentum and momentum flux; the unit kg.m^-1.s^-2 is a flux",
+   "incident_neutral_particle_flux_at_wall": "read as unit-misfit by both readers",
+   "ion_charge_state_momentum_source": "read as unit-misfit by both readers"
+  }
+ },
+ "blocker_2": {
+  "id": "review-hold-kind-name-definition-unregistered",
+  "symptom": "ValueError: Unknown review hold kind: name_definition, once per review attempt, in a retry loop",
+  "site": "imas_codex/standard_names/review/holds.py:16-25 HOLD_KINDS omits the kind worker_review_docs.py returns via name_definition_note",
+  "effect": "every documentation edit the name-definition seat flags fails review, which is the whole flagged population",
+  "spend_before_failure_usd": 0.0873
+ },
+ "slice_run": {
+  "classes": [
+   {
+    "class": "species-family-wording",
+    "names_attempted": 5,
+    "outcomes": [
+     {
+      "name": "volume_averaged_boron_density",
+      "unit": "m^-3",
+      "edit_status": "exhausted",
+      "docs_stage": "exhausted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": " [docs_generate_refusal] population:species: the written text includes neutral atoms ('The local population entering the average is related to the neutral-inclusive elemental density b') where the stored wording reads 'The density counts ions summed over all charge states; neutral atoms are excluded.'",
+      "description_now": "Volume-averaged boron density is the elemental boron number density integrated over the plasma volume and divided by that volume, including every boron charge state.",
+      "llm_cost_usd": 0.1274617
+     },
+     {
+      "name": "volume_averaged_carbon_density",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of carbon ions averaged over the confined plasma volume, summed over all positive charge states and excluding neutral carbon.",
+      "llm_cost_usd": 0.08781975399999999
+     },
+     {
+      "name": "volume_averaged_krypton_density",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of krypton ions averaged over the plasma volume, summed over all positive charge states and excluding neutral krypton atoms.",
+      "llm_cost_usd": 0.097061776
+     },
+     {
+      "name": "volume_averaged_neon_density",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of neon ions averaged over the confined plasma volume, summed over all positive charge states and excluding neutral neon atoms.",
+      "llm_cost_usd": 0.12073363200000001
+     },
+     {
+      "name": "volume_averaged_nitrogen_density",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of nitrogen ions averaged over the plasma volume inside the last closed flux surface, summed over all positive charge states and excluding neutral atoms.",
+      "llm_cost_usd": 0.10657672000000001
+     }
+    ]
+   },
+   {
+    "class": "operator-family-wording",
+    "names_attempted": 3,
+    "outcomes": [
+     {
+      "name": "flux_surface_averaged_boron_density_at_plasma_boundary",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.90625,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of boron ions averaged over the plasma boundary, summed over all boron ion charge states and excluding neutral boron.",
+      "llm_cost_usd": 0.7593206480000001
+     },
+     {
+      "name": "flux_surface_averaged_parallel_current_density",
+      "unit": "A.m^-2",
+      "edit_status": "open",
+      "docs_stage": "refining",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a normalisation the name does not: The definition states the quantity as \"normalized by a single global reference toroidal magnetic field\" and gives the formula \\langle j_{\\parallel}|\\mathbf{B}|\\rangle_S/B_0, dividing by a reference B0 rather than returning the plain flux-surface average \\langle j_{\\parallel}\\rangle_S that the name 'flux_surface_averaged_parallel_current_density' implies; the name carries no 'normalized' or 'relative' marker for this division by B0.",
+      "description_now": "Flux-surface-averaged parallel current density is a scalar measure of plasma current along the magnetic field on a closed magnetic flux surface, normalized by a single global reference toroidal magnetic field.",
+      "llm_cost_usd": 0.538572758
+     },
+     {
+      "name": "flux_surface_averaged_toroidal_current_density",
+      "unit": "A.m^-2",
+      "edit_status": "open",
+      "docs_stage": "drafted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": null,
+      "description_now": "Total toroidal plasma current density assigned to a closed magnetic flux surface, defined as the flux-surface average of the local toroidal current density divided by major radius, normalized by the flux-surface average of inverse major radius. It is the effective toroidal current density driving the poloidal magnetic-flux distribution in axisymmetric magnetohydrodynamic equilibrium.",
+      "llm_cost_usd": 0.159941576
+     }
+    ]
+   },
+   {
+    "class": "generic-name-single-object",
+    "names_attempted": 5,
+    "outcomes": [
+     {
+      "name": "accumulated_ammonia_count",
+      "unit": "1",
+      "edit_status": "open",
+      "docs_stage": "reviewed",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.9375,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a counting-convention the name does not: The definition states the count as an 'equivalent-electron count' with 'ten equivalent electrons per molecule' (Z_N + 3Z_H weighting), a specific counting convention not stated by the bare name 'count', which would normally mean a direct molecule count.",
+      "description_now": "Accumulated ammonia count is the cumulative equivalent-electron count of ammonia (NH3) molecules delivered by gas injection after plasma breakdown, with ten equivalent electrons per molecule. By definition the count is restricted to the gas-injection delivery mechanism and to the post-breakdown phase.",
+      "llm_cost_usd": 0.13724735200000002
+     },
+     {
+      "name": "accumulated_argon_count",
+      "unit": "1",
+      "edit_status": "open",
+      "docs_stage": "reviewed",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.9,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a restriction-to-one-object the name does not: The definition restricts the quantity to argon delivered specifically by gas injection and only from the post-breakdown phase onward ('it covers argon delivered by gas injection only, from plasma breakdown onward'), excluding prefill and other fueling mechanisms like pellet or neutral-beam injection, while the name 'accumulated_argon_count' states no such restriction to one delivery mechanism or phase. The definition also layers a counting-convention qualifier (equivalent-electron count, 18 electrons per atom) on top of this restriction.",
+      "description_now": "Accumulated argon count is the cumulative amount of argon delivered by gas injection after plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per atom. Although the name states only an accumulated count, the quantity is by definition restricted to the gas-injection delivery mechanism and the post-breakdown phase, and uses the equivalent-electron counting convention rather than a plain atom count.",
+      "llm_cost_usd": 0.3851595480000001
+     },
+     {
+      "name": "accumulated_neon_count",
+      "unit": "1",
+      "edit_status": "open",
+      "docs_stage": "reviewed",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.94375,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a counting-convention the name does not: The definition states the count as an equivalent-electron count with ten equivalent electrons per atom ('expressed as an equivalent-electron count in which each neon atom contributes ten equivalent electrons'), a weighted counting convention not stated in the name 'accumulated_neon_count'.",
+      "description_now": "Accumulated neon count is the cumulative equivalent-electron count of neutral neon atoms delivered by gas injection after plasma breakdown, with ten equivalent electrons per atom. By definition the count is restricted to the gas-injection delivery mechanism and to the post-breakdown phase.",
+      "llm_cost_usd": 0.6312633300000001
+     },
+     {
+      "name": "boron_density_at_plasma_boundary",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.95625,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of boron ions at the plasma boundary, summed over all positive charge states; each ion is counted once, and neutral boron is excluded.",
+      "llm_cost_usd": 0.29767120124999996
+     },
+     {
+      "name": "electron_density_at_pedestal_maximum",
+      "unit": "m^-3",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": null,
+      "reviewer_comments_docs": "[Primary] Description quality: the single-line definition is precise, correctly identifies the pedestal-maximum locus as the point of maximum gradient magnitude (matching the terminology used by the sibling density_at_pedestal_maximum, 'pedestal location of maximum gradient magnitude'), and proactively disambiguates from the slope quantity, avoiding the ambiguity risk flagged by that very sibling's confusingly generic name. Documentation quality: the defining equation n_e,ped,max = n_e(psi_N,ped) is dimensionally correct (m^-3 on both sides), every symbol is defined by identity via name: links (electron_density, normalized_poloidal_flux_coordinate_of_pedestal), no units appear in prose, and \u2026",
+      "description_now": "Electron density at pedestal maximum is the electron number density evaluated at the pedestal maximum, the steep mid-pedestal location of maximum pedestal-gradient magnitude. It is the density value at that locus, not the slope with respect to normalized poloidal-flux coordinate.",
+      "llm_cost_usd": 0.4617029
+     }
+    ]
+   },
+   {
+    "class": "unit-does-not-fit-name",
+    "names_attempted": 4,
+    "outcomes": [
+     {
+      "name": "square_of_major_radius",
+      "unit": "m^-2",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": null,
+      "reviewer_comments_docs": "[Primary] Generalization: the doc defines a common g/R^2 form that both children (inverse_of_square_of_major_radius with g=1, and the flux-coordinate gradient ratio with g=|\u2207\u03c1_tor|^2) instantiate, correctly abstracting rather than restating either child. Positioning: it explicitly cross-references both children by name, states the general form, and clarifies the quantity is 'not the major radius or its square itself,' correctly distinguishing the parent from a bare R or R^2 quantity; minor deduction for not situating it among broader sibling metric-coefficient families. Physics accuracy: the equation G=g/R^2 is dimensionally consistent with the m^-2 unit and matches both children's units and\u2026",
+      "description_now": "Geometric equilibrium coefficient with inverse-square major-radius scaling, spanning direct reciprocal-square factors and flux-coordinate metric ratios in toroidal plasma geometry.",
+      "llm_cost_usd": 0.1031996
+     },
+     {
+      "name": "incident_neutral_particle_flux_at_wall",
+      "unit": "s^-1",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.98125,
+      "reviewer_comments_docs": "[Primary] Description is a single precise line matching the DD ground truth ('Particle flux from the plasma incident on the wall for a given neutral species') while adding necessary directional precision ('moving from the plasma side toward plasma-facing material') and the exclusion of wall-emitted neutrals, consistent with the unit s^-1 (a wall-integrated total rate, not an areal density like the m^-2.s^-1 sibling incident_neutral_particle_flux_at_wall_due_to_recombination). Documentation supplies a correct surface-integral defining equation, dimensionally consistent (s^-1 = m^-2.s^-1 integrated over m^2), defines every symbol without stating any unit in prose, explicitly scopes the quantit\u2026",
+      "description_now": "Incident neutral particle flux at the wall is the wall-integrated arrival rate of neutral particles of one specified species moving from the plasma side toward plasma-facing material. It excludes neutral particles emitted by the wall.",
+      "llm_cost_usd": 0.5008105300000001
+     },
+     {
+      "name": "neutral_particle_flux_at_wall_due_to_pumping",
+      "unit": "s^-1",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "[Primary] Description quality: the one-line definition ('Rate at which particles of a specified neutral species are removed from the plasma region by wall pumping, giving global neutral-particle exhaust throughput') follows the exact parallel template of the accepted sibling electron_particle_flux_at_wall_due_to_pumping ('Rate at which particles ... are removed from the plasma region by wall pumping, giving global ... exhaust throughput'), swapping only the species-specific token as required by the family parallel-structure rule. Documentation quality: the opening sentence mirrors the sibling's opening ('is the global scalar representation of the wall particle-removal flux ...') and supplies\u2026",
+      "description_now": "Rate at which particles of a specified neutral species are removed from the plasma region by wall pumping, giving global neutral-particle exhaust throughput.",
+      "llm_cost_usd": 0.62951991
+     },
+     {
+      "name": "momentum",
+      "unit": "kg.m^-1.s^-2",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": null,
+      "reviewer_comments_docs": "[Primary] Generalization: the description and documentation correctly identify the shared concept \u2014 mass-weighted linear-velocity content, covering both extensive momentum-content quantities and momentum-flux quantities across an oriented surface \u2014 and explicitly avoid imposing a single governing equation, which is the right move given that plasma_momentum (volume-integrated content) and radial_momentum (flux component) are physically distinct kinds of quantities; a small deduction because the prose leans slightly toward flux-style phrasing ('transport of that content ... across an oriented surface') before balancing it with the content case. Positioning: the parent explicitly cross-referenc\u2026",
+      "description_now": "Linear momentum associated with plasma motion, covering concrete quantities that either represent momentum content in a plasma volume or momentum transported through an oriented surface. The specific child name defines whether the quantity is an extensive momentum or a momentum-flux component.",
+      "llm_cost_usd": 0.2788762
+     }
+    ]
+   }
+  ],
+  "graph_state_llm_cost_total_usd": 5.68136
+ }
+}
