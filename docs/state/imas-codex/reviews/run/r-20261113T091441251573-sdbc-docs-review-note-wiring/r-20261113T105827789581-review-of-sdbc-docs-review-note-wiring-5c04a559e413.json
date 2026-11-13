@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite (dca46400b, base-gate.log) records 33 failed / 227 passed with EXIT=1, after_suite (5c04a559e) records 16 failed / 244 passed with EXIT=1; the head failure set is a strict subset of the base set, so the added set is empty and 17 base failures are repaired, all of them the same KeyError raised at worker_review_docs.py:891 (base-gate.log:48).",
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:891",
+    "imas_codex/standard_names/loop.py:945"
+  ],
+  "completed_at": "2026-11-13T11:24:55.459Z",
+  "dimension_dispositions": {
+    "fit": {
+      "kind": "folded",
+      "node": "repair-of-sdbc-docs-review-note-wiring-5c04a559e413",
+      "recorded_at": "2026-11-13T12:16:42.904787+00:00"
+    },
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-sdbc-docs-review-note-wiring-5c04a559e413",
+      "recorded_at": "2026-11-13T12:16:50.070141+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-13T11:19:44Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sdbc-docs-review-note-wiring-5c04a559e413",
+      "recorded_at": "2026-11-13T12:16:36.193512+00:00"
+    }
+  },
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/workers.py",
+      "line": 63,
+      "severity": "blocking",
+      "text": "`_task_collaborator` is a second lookup mechanism for exactly the capability `imas_codex/standard_names/worker_tasks/__init__.py:273 resolve_owned_name` already owns, and the brief's first deliverable forbids that: the module's own collaborators (`_documentation_conformance_note`, `_documentation_contradiction_note`, `_documentation_banned_prose_note`) are declared in `_OWNERS_BY_MODULE[\"worker_review_docs\"]` at worker_tasks/__init__.py:230-247 and resolved lazily by `resolve_owned_name`, which already does `import_module` at call time and so already solves the circular-import problem the new helper's docstring cites. `_name_definition_note` belongs in that tuple; declaring it in `_WORKER_DEPENDENCIES` (workers.py:48) leaves two declaration points for task-module collaborators and bypasses the owner table for this one name. The correct one-line change sits in worker_tasks/__init__.py, which is outside this node's declared write paths, so the brief's directed form was unreachable inside the fence and the right response was a scope report rather than a second mechanism."
+    },
+    {
+      "file": "tests/standard_names/test_worker_dependency_table.py",
+      "line": 57,
+      "severity": "non-blocking",
+      "text": "the audit admits a name declared in either `worker_tasks._OWNER_BY_NAME` or `workers._WORKER_DEPENDENCIES`, so it cannot distinguish a task collaborator declared in the owner table from one declared in the composition root, and it would stay green if a second task collaborator were added to `_WORKER_DEPENDENCIES` beside `_name_definition_note`; the guard was widened by the mechanism it exists to police."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T091441251573-sdbc-docs-review-note-wiring/manifest.md",
+      "line": 11,
+      "severity": "non-blocking",
+      "text": "the `tests:` line records `UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=... /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest ...` while both gate logs' own `# command:` header records `PYTHONPATH=<tree> uv run --no-sync pytest ...`; promotion fills its receipt from the `tests:` line, so the recorded gate command and the command in the logs it cites are two different invocations of the same selection."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that the documentation review batch stops raising KeyError on its name-versus-definition note; at 5c04a559e imas_codex/standard_names/workers.py:48 registers `_name_definition_note` and worker_review_docs.py:891 resolves it without error, but through a newly added mechanism rather than through the owner table its sibling note builders use at worker_tasks/__init__.py:230-247.\nVERDICT done_when: the done_when asks that the documentation review batch persist a name-versus-definition hold, that the batch test be shown failing at base and failing again with the hold call removed, and that a coverage assertion fail with a table entry removed; tests/standard_names/test_review_docs_name_definition_hold.py:70 drives the batch, base-gate.log:48 shows `KeyError: '_name_definition_note'`, logs/negative_hold_call_removed.log ends `1 failed` on the same test id, and logs/negative_table_entry_removed.log ends `3 failed` with all three audit tests red.\nVERDICT write_paths: the node declared four write paths; `git diff --name-status dca46400b 5c04a559e` lists workers.py modified and the two test files added, all three inside the declared set, and worker_tasks/__init__.py \u2014 the owner table the brief directs \u2014 was not touched.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T091441251573-sdbc-docs-review-note-wiring/manifest.md; status is `complete`, baseline_suite and after_suite are both filled and readable, the gate logs exist and end `EXIT=1`, and the `tests:` line records a different invocation from the logs' `# command:` header.\nVERDICT diff: read e77b82a43 and 5c04a559e against dca46400b commit by commit; workers.py gains `import_module`, one `_WORKER_DEPENDENCIES` entry and `_task_collaborator` at :63, and the two test files add the batch hold test and a three-test dependency-table audit.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_review_docs.py:891, imas_codex/standard_names/loop.py:945\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: the batch's KeyError is gone and the hold persists (worker_review_docs.py:891 resolves, test at test_review_docs_name_definition_hold.py:70 passes), but the brief's stated form \u2014 the one the module already uses \u2014 is not the form used.\nSCORE evidence: 17\nJUSTIFICATION evidence: baseline_suite and after_suite in the manifest name their commands, revisions and logs, both logs end with a bare `EXIT=1`, and the head failure set is a strict subset of the base set, though the manifest's `tests:` line is not the command either log header records.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in `git diff --name-status dca46400b 5c04a559e` is inside the four declared write paths, but workers.py:63 adds a helper the goal does not require for the chosen resolution.\nSCORE durability: 16\nJUSTIFICATION durability: test_worker_dependency_table.py:48 reddens with the entry removed (logs/negative_table_entry_removed.log) and test_review_docs_name_definition_hold.py:158 reddens when the hold is not applied, while its :159 assertion checks a qualifier the mocked seat supplied, so it guards the batch's use of the seat rather than the seat itself.\nSCORE fit: 9\nJUSTIFICATION fit: workers.py:48-72 introduces a module-attribute lookup and a new `import_module` into a table otherwise built from direct lambdas, beside a package that already owns lazy task-symbol resolution at worker_tasks/__init__.py:273.\nSCORE reuse: 5\nJUSTIFICATION reuse: `_task_collaborator` at imas_codex/standard_names/workers.py:63 duplicates the capability `resolve_owned_name` at imas_codex/standard_names/worker_tasks/__init__.py:273 already owns, without extending that owner.\nFINDING imas_codex/standard_names/workers.py:63 blocking: `_task_collaborator` is a second lookup mechanism for a capability `worker_tasks/__init__.py:273 resolve_owned_name` already owns; `_name_definition_note` belongs in `_OWNERS_BY_MODULE[\"worker_review_docs\"]` beside its sibling note builders at worker_tasks/__init__.py:236, which the brief directs and which is outside this node's declared write paths, so the fence conflict should have been reported rather than resolved by adding a mechanism the brief forbids.\nFINDING tests/standard_names/test_worker_dependency_table.py:57 non-blocking: the audit accepts a declaration in either table, so it cannot catch a task collaborator declared in the wrong one and would stay green if a further task-owned name were added to `_WORKER_DEPENDENCIES`.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T091441251573-sdbc-docs-review-note-wiring/manifest.md:11 non-blocking: the `tests:` line records a direct `python -m pytest` invocation while both cited gate logs' `# command:` headers record `uv run --no-sync pytest`, so the receipt promotion derives and the logged run are different invocations.\n",
+  "review_run_id": "r-20261113T105827789581-review-of-sdbc-docs-review-note-wiring-5c04a559e413",
+  "reviewed_base_sha": "dca46400b52e2c08832aa65a2563545abc97a932",
+  "reviewed_head_sha": "5c04a559e413cf6626bf454eabc2f5a11fc6060e",
+  "reviewed_run_id": "r-20261113T091441251573-sdbc-docs-review-note-wiring",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 9,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T11:28:01.599346+00:00",
+  "total": 78
+}

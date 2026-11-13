@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T09:22:03.547Z",
+  "dispatched_at": "2026-11-13T09:15:55Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-catalog-consistency/r-20261113T084635058744-plan-review-of-sn-catalog-consistency/plan.html:83",
+      "id": "done_when-1",
+      "reason": "without the receipt required on the settled path, the section certifies an outcome whose only guard (the archive receipt and its disposable-graph refusal) applies to a route the settle clause explicitly does not require.",
+      "text": "the clause \"a name of the pair that `sn-definitions-by-construction` \u00a76 has already brought onto the ruled spelling is recorded as settled with the edit that settled it\" accepts \"the edit that settled it\" as sufficient, while every other route in this section onto that spelling is required to be \"the history-apart reclaim ... with its archive receipt\"; because the ruled spelling is a live `status: superseded` tombstone holding reviews and lineage, a \u00a76 settle that lands on it by any other write would be recorded as settled while that history is lost, and the \"no other tombstone is revived\" clause cannot catch it since this is that same tombstone",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "da9d9941f3ee285f00fcb68b358c3044093a02f8",
+  "plan_fingerprint": "b6774ba53defe97219c22c468ced8928c483d0b0f4dd5dbea26e1428374c573a",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 43,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "7ca24b0ef5d705489e431030b1abd25bf1ef2a18",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "A name of the pair counts as settled by the live rewrite only where that edit was the history-apart reclaim with its archive receipt; otherwise it is reported to the lead as a revived tombstone.",
+      "reason": "",
+      "when": "2026-11-13T10:34:38.455503+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "7ca24b0ef5d705489e431030b1abd25bf1ef2a18",
+      "commit_basis": "edit",
+      "note": "A name of the pair counts as settled by the live rewrite only where that edit was the history-apart reclaim with its archive receipt; otherwise it is reported to the lead as a revived tombstone.",
+      "reason": "",
+      "when": "2026-11-13T10:34:38.455503+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T084635058744-plan-review-of-sn-catalog-consistency.json",
+  "review_run_id": "r-20261113T084635058744-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "598657bcbd5f550b477899669cd891dafa0ee1e7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the s6 comments cite `scc-separatrix-remainder.html` and `scc-separatrix-reclaim.html`, both present, and the cited counts resolve in `scc-separatrix-reclaim.json` (`population` 111, `conforming_count` 109).",
+    "done_when": "a finding \u2014 the \u00a76-settled clause admits a pair name as settled on \"the edit that settled it\" without requiring that edit to be the receipt-backed reclaim, so tombstone history can be lost through a route the section's own controls cannot see.",
+    "evidence_paths": "pass \u2014 the section's evidence lives in committed fragments under `docs/evidence/fragments/sn-catalog-consistency/` (`scc-separatrix-remainder.*`, `scc-separatrix-reclaim.*`), not a scratch path.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach code; the section speaks of names, spellings and receipts.",
+    "reasoning": "pass \u2014 the root cause matches the cited evidence (the committed read-back reads 111 population and 109 conforming in `scc-separatrix-reclaim.json`, and both residuals carry `blocked_spelling` equal to the ruled spelling in `scc-separatrix-remainder.json`), the endpoint is checkable against the live census with four disposable-graph controls, and the section names no code path, function or file.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, the two deuterium\u2013tritium average names onto the ruled spelling, with its controls and spend bound to it.",
+    "wiring": "pass \u2014 \u00a76 declares `sn-definitions-by-construction#s6` in `plan-section-depends-on` and that section exists and does rename live identities; its `data-links=\"sn-integrity-backlog#s49\"` resolves to a real section."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "a585bc6ab3565e902bb4f2df59e726bf9c7ae7e58fac7eacf85e2987a8bf4a20",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T10:31:58.909763+00:00",
+  "total": null
+}

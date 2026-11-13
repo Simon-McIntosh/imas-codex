@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T12:21:13.084Z",
+  "dispatched_at": "2026-11-13T12:12:54Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "the node would take a green read-back on the very clause that decides whether the second identity was superseded at all, and only a plant of two live names on one DD path makes that clause able to fail.",
+      "text": "the clause \"after the section exactly one live name is bound to `summary/local/separatrix_average/n_i/deuterium_tritium/value`\" is the section's actual endpoint and no plant exercises it; the three declared plants (\"two suffixes\", \"every name ending `_at_separatrix`\", an average planted as `X_flux_surface_averaged_at_plasma_boundary`) all test the spelling classifier, and the cited read-back's own rule counts a node at `name_stage = 'superseded'` as live whenever its `status` is not `'superseded'` (16 such nodes in the 2026-11-12 read, `scc-separatrix-reclaim.html` \"Separatrix census re-read\"), so a read-back that counted the archived tombstone as live would report two bound names and, having no control that must fail, could not be shown to say otherwise",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "reasoning-1",
+      "reason": "if neither write is admitted the node has no permitted way to take the spelling up and blocks before any read-back, so the section needs the lead's ruling extended to the word-order shape or an endpoint that does not depend on which of the two names completes the reclaim.",
+      "text": "the done-when says the ruled spelling \"is taken up only by the history-apart route the lead ruled for the earlier four names\", but the committed evidence states that route's admission as two facts held together: \"the two ids are one quantity under the two locator vocabularies (`_at_separatrix` and `_at_plasma_boundary` strip to the same head), and no live successor other than the renaming name sits at a DD container the renaming name occupies\" (`scc-separatrix-reclaim.html` \"The admission this node added\"). In each of the four earlier cases one live name carried both at once \u2014 it was the tombstone's refined descendant and it stripped to the tombstone's head. This pair splits them: `flux_surface_averaged_deuterium_tritium_density_at_separatrix` strips to the tombstone's head but is not its descendant, while `deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary` is the tombstone's `refined from` descendant (`scc-separatrix-remainder.html`, name table) but strips to `deuterium_tritium_density_flux_surface_averaged`, a different head \u2014 so the operator-order name fails the first fact, and the locator-only name, being a live node at that same DD container alongside a live descendant of the tombstone, sits against the second, and the plan fixes one permitted route without establishing that either live name's write is admitted",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c892832318107aab18f1e73bcd27e8712a418489",
+  "plan_fingerprint": "42070daba451819206dc926f83a9f3f6db9c1645a52f968d48222bbabaf287c0",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 46,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T121118989186-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "5d4889bf1c18432efd446192f30ca29a6278db72",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the s49 link, the `sn-definitions-by-construction#s6` dependency and both cited evidence fragments resolve; the dead run path at line 150 is unchanged by this unit and was declined with a reason, so it is not re-raised.",
+    "done_when": "a finding \u2014 the endpoint clause \"exactly one live name is bound to `summary/local/separatrix_average/n_i/deuterium_tritium/value`\" has no planted control, while all three declared plants exercise only the spelling classifier and the cited read-back's own rule counts 16 superseded-name-stage nodes as live.",
+    "evidence_paths": "pass \u2014 the section names no scratch path; its cited evidence sits in `docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-reclaim.html` and `scc-separatrix-remainder.html`, both committed and openable.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol, and the prose states mechanisms rather than changelog.",
+    "reasoning": "a finding \u2014 the done-when admits only the history-apart route for taking up the tombstoned spelling, and the committed evidence's two admission facts for that route are split across the pair's two live names rather than carried together by one.",
+    "single_goal": "pass \u2014 \u00a76 delivers one concept onto one spelling and one live holder per DD source.",
+    "wiring": "pass \u2014 \u00a76 declares `depends-on` `sn-definitions-by-construction#s6`, which exists at `docs/plans/sn-definitions-by-construction.html:107` and is itself `implementable`, so the read-back genuinely waits on the live rewrite; `data-links` `sn-integrity-backlog#s49` resolves at `docs/plans/sn-integrity-backlog.html:292`."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "d63f67bc3879bc4d70b072b871f0f22aecf98f4fc1e7af3901d9daea17852c72",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T12:45:25.365255+00:00",
+  "total": null
+}

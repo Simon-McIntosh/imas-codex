@@ -1,0 +1,40 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arms: baseline_suite (dca46400b, base-gate.log) records 34 failed / 227 passed / 1 skipped ending EXIT=1, after_suite (b242a204a, head-gate.log) records 15 failed / 246 passed / 1 skipped ending EXIT=1; every head failure id is present in the base set, so the added set is empty and 19 base failures are repaired. This review reads the delta 5c04a559e..b242a204a; the prior review at 5c04a559e recorded 0 added over dca46400b..5c04a559e.",
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:891",
+    "imas_codex/standard_names/worker_tasks/__init__.py:17",
+    "imas_codex/standard_names/loop.py:945",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:976",
+    "imas_codex/standard_names/worker_tasks/worker_compose_batches.py:604"
+  ],
+  "completed_at": "2026-11-13T12:48:21.970Z",
+  "dispatched_at": "2026-11-13T12:31:23Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T091441251573-sdbc-docs-review-note-wiring/manifest.md",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "baseline_suite records exit_status 0 (and after_suite at :18 likewise) while base-gate.log and head-gate.log both end with a bare EXIT=1; promotion reads only completed and failure_ids, so the arm still lands, but a reader reconciling the recorded arm to the log it cites sees a contradiction. The correct value is the code the log's own EXIT= line carries."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is that the documentation review batch resolves its name-versus-definition note the way its sibling collaborators are resolved; at b242a204a the note is declared in imas_codex/standard_names/worker_tasks/__init__.py:243 under _OWNERS_BY_MODULE[\"worker_review_docs\"] beside _documentation_conformance_note and read lazily by resolve_owned_name at __init__.py:274, so worker_review_docs.py:891 resolves it through the one mechanism the module already uses.\nVERDICT done_when: the done_when asks for the batch to run through that owner form, a batch-level hold test failing at base with the KeyError and again with the hold call removed, and a table-coverage test failing with one entry removed; base-gate.log:48 raises \"KeyError: '_name_definition_note'\" and :719 fails the batch hold test, head-gate.log records 0 KeyError and 15 failed against the base's 34, and repair-revert.log:17 shows the coverage test red with ['_name_definition_note'] when the owner entry is removed, ending EXIT=1.\nVERDICT write_paths: the source node declared four write paths at prompt.txt:98-102; git diff --name-status 5c04a559e b242a204a lists workers.py and tests/standard_names/test_worker_dependency_table.py inside that set and imas_codex/standard_names/worker_tasks/__init__.py outside it, which the manifest records under outside_scope as the file the prior review named as the correct one.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T091441251573-sdbc-docs-review-note-wiring/manifest.md; status is complete, both arms are filled with revision, command, completed=true and their failure ids, and the tests: line matches the head log's own \"# command:\" header, but both arms record exit_status 0 while their cited logs end EXIT=1.\nVERDICT diff: read b242a204a against 5c04a559e commit by commit; one commit changes three files - the owner-table entry added at worker_tasks/__init__.py:243, 18 lines removed from workers.py (the _name_definition_note root entry, the unreachable logger entry and the _task_collaborator helper with its import_module), and the audit rewritten so a task-module symbol must be declared for its module and must not be supplied from the root.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_review_docs.py:891, imas_codex/standard_names/worker_tasks/__init__.py:17, imas_codex/standard_names/loop.py:945, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:976, imas_codex/standard_names/worker_tasks/worker_compose_batches.py:604\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: worker_tasks/__init__.py:243 declares the note in the same owner tuple as its siblings and worker_review_docs.py:891 now reaches it through resolve_owned_name, exactly the form the goal names and the form the prior review required.\nSCORE evidence: 16\nJUSTIFICATION evidence: base-gate.log and head-gate.log (both run under all_debug job 1313787) record 34 and 15 failures with the head set a strict subset, so added failures is a derived 0, but manifest.md:17-18 records exit_status 0 for both arms while their cited logs end EXIT=1.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --name-status 5c04a559e b242a204a confines the change to three files and only worker_tasks/__init__.py:243 sits outside the declared four, which the manifest discloses under outside_scope as the prior review's directed change.\nSCORE durability: 19\nJUSTIFICATION durability: reinstating the regression - removing the owner entry at worker_tasks/__init__.py:243 - reddens tests/standard_names/test_worker_dependency_table.py:110 with ['_name_definition_note'] and :134 with the tuple assertion (repair-revert.log:17,31), and :112 would redden if the root entry returned, so each added assertion names a code change that fails it.\nSCORE fit: 19\nJUSTIFICATION fit: worker_tasks/__init__.py:243 keeps the owner tuple's alphabetical order and workers.py:40-55 returns to the table's direct-lambda style with the import_module and _task_collaborator gone, and no plan or ticket label appears in the landed names.\nSCORE reuse: 19\nJUSTIFICATION reuse: the delta removes the duplicated _task_collaborator and extends the existing owner resolve_owned_name at worker_tasks/__init__.py:274; the only added definitions are test helpers, and a capability search found no shared owner, only the test-local _collect_def_names at tests/standard_names/test_public_api_naming.py:88, so the per-file AST helper follows the repository's test idiom.\nFINDING imas_codex/../../.config/reckon/crew/runs/r-20261113T091441251573-sdbc-docs-review-note-wiring/manifest.md:17 non-blocking: baseline_suite (and after_suite at :18) records exit_status 0 while base-gate.log and head-gate.log both end with a bare EXIT=1; promotion reads only completed and failure_ids, so the node still lands, but a reader reconciling the arm to its log sees a contradiction.\n",
+  "review_run_id": "r-20261113T121855147184-review-of-sdbc-docs-review-note-wiring-b242a204a40e",
+  "reviewed_base_sha": "5c04a559e413cf6626bf454eabc2f5a11fc6060e",
+  "reviewed_head_sha": "b242a204a40e6991d4d590d839ebb2f01941e8db",
+  "reviewed_run_id": "r-20261113T091441251573-sdbc-docs-review-note-wiring",
+  "scores": {
+    "durability": 19,
+    "evidence": 16,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T12:48:28.712270+00:00",
+  "total": 111
+}

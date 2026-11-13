@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T11:05:09.320Z",
+  "dispatched_at": "2026-11-13T10:59:24Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "reasoning-1",
+      "reason": "the plan must state which of the two names takes the reclaim (the `_at_separatrix` one, whose head matches after the locator is stripped) and which is superseded onto it, or the node cannot execute the stated sequence through the route the section names.",
+      "text": "the done-when requires \"the first of the pair lands on it through the history-apart reclaim the lead ruled for the earlier four names ... and the second is then superseded onto it\", and the pair is presented in prose order as `deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary` then `flux_surface_averaged_deuterium_tritium_density_at_separatrix`; the reclaim named is the `lead_ruled_locator` route the four earlier renames used, whose admission gate \u2014 as the section's own cited evidence states it \u2014 holds only where \"the two ids are one quantity under the two locator vocabularies (`_at_separatrix` and `_at_plasma_boundary` strip to the same head)\" (`docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-reclaim.html:13`). The first-listed name's head after stripping the locator is `deuterium_tritium_density_flux_surface_averaged`, while the tombstoned ruled spelling's head is `flux_surface_averaged_deuterium_tritium_density`: it differs by operator position, not by locator alone, so that route refuses it. Only the second-listed `_at_separatrix` name shares the tombstone's head and can take the reclaim; the first must be superseded onto it instead. As written, a node that reads \"first of the pair\" as the name listed first is refused at the reclaim and either stalls or reaches for an unsigned path",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7ca24b0ef5d705489e431030b1abd25bf1ef2a18",
+  "plan_fingerprint": "65c8d0ee98970156dbf7279694924245b6b312d755908d606b0c8d05d7136b73",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 44,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "bbe46c0c9c00b9a0e777a544b52aa73e14ff7725",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 6 now names the locator-only name for the reclaim and the operator-order name for the supersede.",
+      "reason": "",
+      "when": "2026-11-13T11:42:02.983542+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "bbe46c0c9c00b9a0e777a544b52aa73e14ff7725",
+      "commit_basis": "edit",
+      "note": "Section 6 now names the locator-only name for the reclaim and the operator-order name for the supersede.",
+      "reason": "",
+      "when": "2026-11-13T11:42:02.983542+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T103545967473-plan-review-of-sn-catalog-consistency.json",
+  "review_run_id": "r-20261113T103545967473-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "b4e2aefaf14dbd1f2f5dc01efffed065e985058a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the two plan anchors resolve, and the committed fragment the prose's 109-of-111 reading rests on exists and carries that reading (`scc-separatrix-reclaim.html:36-40)`, including the two remaining names the prose names.",
+    "done_when": "pass \u2014 the measure is a live read-back over the census population with three planted spelling controls (two suffixes, a uniformly `_at_separatrix` locus, an operator-after-quantity average) and a fourth control on the clause the work most depends on (the reclaim refused when the archive receipt is absent), plus a spend ceiling of USD 2.",
+    "evidence_paths": "pass \u2014 the section names no gate or evidence path, so nothing is written to a scratchpad or a node-local temporary directory; the durable record of the preceding read-back is the committed fragment `docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-reclaim.html`, which opens.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach a symbol, and the section's prose states mechanism rather than changelog.",
+    "reasoning": "a finding \u2014 the done-when's stated order for the pair names a reclaim for the first-listed name that the route it cites does not admit.",
+    "single_goal": "pass \u2014 one deliverable: one separatrix locus carries one spelling, with the last two names brought onto it.",
+    "wiring": "pass \u2014 \u00a76 declares `sn-definitions-by-construction#s6` in `plan-section-depends-on` and that anchor resolves (`sn-definitions-by-construction.html:107`); its `data-links` target `sn-integrity-backlog#s49` resolves (`sn-integrity-backlog.html:292`), and the wait it needs \u2014 the live-catalog rewrite \u2014 is the one it declares."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "a04b49b8cdbe9cc4849caaf6ed77a7bde007dedbd32d7b51f58ecaef01fc6000",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T11:40:23.793728+00:00",
+  "total": null
+}

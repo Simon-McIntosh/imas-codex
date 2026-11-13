@@ -18,12 +18,12 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;descoped&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;descoped&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-full-dd-continuation#s2&quot;],&quot;s4&quot;:[&quot;sn-full-dd-continuation#s2&quot;,&quot;sn-full-dd-continuation#s3&quot;,&quot;sn-integrity-backlog#s52&quot;,&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-domain-per-family#s2&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s6&quot;:[]}">
   <title>The Rest Of The DD Composed: The Full-DD Continuation Run | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="28">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -43,7 +43,7 @@
     <p><strong>Done when:</strong> at least 100 of the 143 cohort sources read back as produced by a read-back of the cohort as a manifest committed in the repository, recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>; the read-back reports a source planted as attempted but not produced in a disposable graph as not produced; every other source reads back failed with its reason and claim-outcome receipts, or <code>vocab_gap</code> with the missing token named; spend is at most USD 10 and recorded in the same fragment beside the remaining cap; the export gate's blocking set stays 0 and sourceless live drafts do not rise.</p>
 
     <h2 id="s3">§3 — A verified graph checkpoint before the run</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links=""></section>
     <p>The run writes thousands of names, so it starts from a checkpoint taken once no <code>sn-integrity-backlog</code> §52 run is writing the graph and no other graph writer is running. The documentation drain under §52 ended on 2026-11-11 without draining its backlog, so the checkpoint waits on the writers stopping, not on the backlog clearing. On 2026-11-11 the newest offsite copy dated from 30 October and the newest local export from 7 November.</p>
     <p><strong>Done when:</strong> one checkpoint exists whose creation time is after the last graph write of every §52 run and of every other graph writer recorded before it, §2's signed resets and rerun of 2026-11-12 included, taken with no graph writer running; its archive passes an integrity test of the whole stream and holds a non-empty <code>graph.dump</code> member, and those checks fail on a deliberately truncated copy and on a copy whose member is empty; the graph is back up, and a read afterwards returns the same node count as the read taken before the stop; the check results and both node counts are recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>.</p>
 
@@ -104,6 +104,9 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261112-waits-on-generator-repair" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T04:20:00Z">
     <div class="r-comment-body"><p>§4 and §5 now wait on the generator repairs. Measured on <code>v0.4.0rc8</code>: every definition is written whole per name and every domain is decided per name, which is why all 20 species families diverge in wording and 8 of 20 are split across domain files. A run started before <code>sn-definitions-by-construction</code> §2 and §3 and <code>sn-domain-per-family</code> §2 land pays for names that the live rewrite then pays for again. §2, §3 and §6 of this plan are unaffected and proceed. Lead instruction 2026-11-12: this repair has priority.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-13T09:00:00Z">
+    <div class="r-comment-body"><p>§3 closed (<code>sfdc-graph-checkpoint</code>, commit <code>16efff658</code>). One checkpoint was taken on 2026-11-13 with no graph writer running, after the last recorded write of 2026-11-12T08:50Z: a 2.7 GB archive whose whole stream passes its integrity test and whose <code>graph.dump</code> member is non-empty, with the integrity test failing on a truncated copy and the member test failing on a copy with an empty member. The graph returned 1,796,679 nodes, 4,700,432 relationships and 5,497 standard names before the stop and after the restart. Limits: the export's own restart failed because it ran inside a SLURM allocation, so the graph was down from about 08:16Z to 08:33Z until the service script was submitted by hand; and the last-write time is read from store file times, not from a write log. The live definition rewrite of <code>sn-definitions-by-construction</code> §6 started after this checkpoint, so §4 needs its own reading of whether a later checkpoint is wanted before the run. <a href="/imas-codex/evidence/fragments/sn-full-dd-continuation/sfdc-graph-checkpoint.html">evidence</a></p></div>
 </div>
 </section>
 </main>

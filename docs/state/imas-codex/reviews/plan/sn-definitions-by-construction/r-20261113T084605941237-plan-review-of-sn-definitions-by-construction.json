@@ -1,0 +1,113 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T09:22:27.179Z",
+  "dispatched_at": "2026-11-13T09:14:59Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:143",
+      "id": "done_when-1",
+      "reason": "without a control the section's only measure is a scoring script whose wrong output, already measured once, reads as a verdict, and adding one changes \u00a78's done-when.",
+      "text": "\u00a78's measure is the seat's share on the fresh reference, computed by a scoring pass over two readers' labels, and nothing in the done-when plants a reference whose correct counts are known; the evidence records the failure this leaves open: `name-definition-phrases-results.json` carries `score_keying_correction`, where the first fresh pass keyed the phrase judgments by sheet id and \"the phrase arm read no judgment and reported 0 of 56\", corrected only because someone noticed \u2014 a planted control would have refused that reading",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:141",
+      "id": "done_when-2",
+      "reason": "the bullet exists to make the score reproducible at a revision, and that condition cannot be checked as written.",
+      "text": "the bullet requires the successor \"built and scored from a committed revision\" with thresholds \"unchanged at the revision that is scored\", but no scored revision is named: the evidence names only `3a5c3d861`, which is the threshold-freeze commit, and the scoring commits after it (`65267a40f`, `5df767349`, `dd62487f2`) are not ancestors of `main` and are not cited, so a later reader cannot resolve the revision the 4-of-56 / 11-of-275 counts were produced at",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:144",
+      "id": "reasoning-1",
+      "reason": "the rule decides which check \u00a77 re-runs and, as written, cannot select the better one in exactly the regime the section has measured.",
+      "text": "the verdict lets the successor replace the seat only at 80 % found and 10 % flagged, an absolute target the plan already records no arm reaching and which it exempted the seat from at \u00a75 (\"accepted \u2026 at 27 of 36 found \u2026 below the 80 % target\"); so a successor that is better than the seat on both measures but still under 80 % (e.g. 60 % found and 5 % flagged against the seat's measured 57.1 % / 6.9 %) leaves the worse check running, contradicting the section's stated purpose (\"the verdict on which check \u00a77 re-runs\") and the ruling it cites at line 176, \"The better check is re-run over the catalog\"",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "da9d9941f3ee285f00fcb68b358c3044093a02f8",
+  "plan_fingerprint": "7b7f21967ca7a0a85de6288c16e6314953f2628c242bd693a9d226c44837cf44",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 38,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "done_when-1",
+      "reason": "The section is closed on a measure already taken; its close comment records that the scoring pass had no planted reference and that its first run mis-keyed the phrase judgments before correction, and that the seat's counts did not depend on that key.",
+      "when": "2026-11-13T10:33:51.154889+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "7ca24b0ef5d705489e431030b1abd25bf1ef2a18",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The close comment names the scored revision dd62487f2 and the freeze commit 3a5c3d861 and states they live only in the unmerged worker tree by the lead's ruling, so the readings cannot be re-run from main.",
+      "reason": "",
+      "when": "2026-11-13T10:34:04.692712+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "reasoning-1",
+      "reason": "The 80 percent and 10 percent rule is the lead's recorded ruling, and the case is moot here: the successor found 4 of 56 against the seat's 32, so it is not the better check on any reading.",
+      "when": "2026-11-13T10:34:22.925985+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "The section is closed on a measure already taken; its close comment records that the scoring pass had no planted reference and that its first run mis-keyed the phrase judgments before correction, and that the seat's counts did not depend on that key.",
+      "when": "2026-11-13T10:33:51.154889+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "7ca24b0ef5d705489e431030b1abd25bf1ef2a18",
+      "commit_basis": "edit",
+      "note": "The close comment names the scored revision dd62487f2 and the freeze commit 3a5c3d861 and states they live only in the unmerged worker tree by the lead's ruling, so the readings cannot be re-run from main.",
+      "reason": "",
+      "when": "2026-11-13T10:34:04.692712+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "The 80 percent and 10 percent rule is the lead's recorded ruling, and the case is moot here: the successor found 4 of 56 against the seat's 32, so it is not the better check on any reading.",
+      "when": "2026-11-13T10:34:22.925985+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T084605941237-plan-review-of-sn-definitions-by-construction.json",
+  "review_run_id": "r-20261113T084605941237-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "94d325b8d606c3ecc7338afe0640a15b6a661515",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-name-definition-fresh-labels/` resolves (sheet-draw.json records 360 drawn and 381 excluded as already labelled, beside three sheets and two readers' labels), `name-definition-phrases-results.json` resolves, and commit `3a5c3d861` exists and predates the labels.",
+    "done_when": "a finding \u2014 \u00a78's whole measure is a share produced by a scoring pass that no planted control can falsify, and the revision the score was taken at is named nowhere.",
+    "evidence_paths": "pass \u2014 the fresh-label directory and the phrase-results file the section and its recorded verdict cite both exist at HEAD and hold the counts quoted.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or changelog prose appears in \u00a78.",
+    "reasoning": "a finding \u2014 the replacement bar measures the successor against an absolute target rather than against the check that runs, so a better arm is discarded.",
+    "single_goal": "pass \u2014 the section's one outcome is the verdict on which check \u00a77 re-runs; the fresh reference and the three arm scores are the inputs that verdict needs, not a second deliverable.",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives s8 `sn-definitions-by-construction#s5` (the accepted seat reading the section quotes), and s7's re-run bullet names the check \u00a78 leaves standing, so the verdict feeds \u00a77 as declared."
+  },
+  "section_digests": {
+    "_document": "188d29937ef57a1aec810a58cf5fa6811e3840933f7818e6d4bffd4aa7c1d8dc",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "f22102f5bee1d009a1ccad79e435abc698fa3838aa5bc5f1d358028f39e2f007",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T10:30:59.257602+00:00",
+  "total": null
+}
