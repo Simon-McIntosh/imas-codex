@@ -23,7 +23,7 @@
   <title>The Rest Of The DD Composed: The Full-DD Continuation Run | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="26">
+<meta name="plan-version" content="27">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -45,7 +45,7 @@
     <h2 id="s3">§3 — A verified graph checkpoint before the run</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="0.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p>The run writes thousands of names, so it starts from a checkpoint taken once no <code>sn-integrity-backlog</code> §52 run is writing the graph and no other graph writer is running. The documentation drain under §52 ended on 2026-11-11 without draining its backlog, so the checkpoint waits on the writers stopping, not on the backlog clearing. On 2026-11-11 the newest offsite copy dated from 30 October and the newest local export from 7 November.</p>
-    <p><strong>Done when:</strong> one checkpoint exists whose creation time is after the last graph write of every §52 run and of every other graph writer recorded before it, §2's signed resets and rerun of 2026-11-12 included, taken with no graph writer running; its archive passes an integrity test of the whole stream, and the same test fails on a deliberately truncated copy, both recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>; the graph is back up, and a read afterwards returns the same node count as the read taken before the stop.</p>
+    <p><strong>Done when:</strong> one checkpoint exists whose creation time is after the last graph write of every §52 run and of every other graph writer recorded before it, §2's signed resets and rerun of 2026-11-12 included, taken with no graph writer running; its archive passes an integrity test of the whole stream and holds a non-empty <code>graph.dump</code> member, and those checks fail on a deliberately truncated copy and on a copy whose member is empty; the graph is back up, and a read afterwards returns the same node count as the read taken before the stop; the check results and both node counts are recorded under <code>docs/evidence/fragments/sn-full-dd-continuation/</code>.</p>
 
     <h2 id="s4">§4 — The continuation run</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s52"></section>
