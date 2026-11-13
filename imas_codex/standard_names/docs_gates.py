@@ -1118,6 +1118,38 @@ def shared_part_findings(
     return findings
 
 
+class SharedPartAltered(ValueError):
+    """A definition departed from a shared part's stored wording."""
+
+
+def refuse_altered_shared_parts(
+    name: str,
+    documentation: str,
+    conventions: Mapping[str, Any] | None,
+    description: str = "",
+) -> None:
+    """Refuse a definition whose shared part was altered after rendering.
+
+    The shared parts are stated once for the catalog. A definition that carries
+    one of them in other words, or that states a population the stored wording
+    excludes, has been written away from the stored wording, and is refused
+    before it is persisted rather than published.
+    """
+
+    if not conventions:
+        return
+    applied = AppliedConventions.model_validate(conventions)
+    findings = shared_part_findings(
+        name, applied, documentation, description=description
+    )
+    if findings:
+        raise SharedPartAltered(
+            "; ".join(
+                f"{finding.registry_entry}: {finding.detail}" for finding in findings
+            )
+        )
+
+
 def replace_altered_shared_parts(
     documentation: str, parts: tuple[tuple[str, str], ...]
 ) -> str:

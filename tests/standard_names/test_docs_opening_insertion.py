@@ -87,8 +87,12 @@ def test_wrong_opening_is_replaced_with_subject_template(writer: str) -> None:
 
     persisted = _persisted_documentation(_AVERAGED, document, writer)
 
-    assert persisted.splitlines()[0] == "Number density of argon"
-    assert "Further documentation remains." in persisted
+    # The subject template is a noun-phrase fragment, and a definition that
+    # opened with it alone reads as a truncated heading, so the writer joins
+    # the fragment to the paragraph that follows it.
+    assert persisted.splitlines()[0] == (
+        "Number density of argon. Further documentation remains."
+    )
     assert "A model-written opening" not in persisted
 
 

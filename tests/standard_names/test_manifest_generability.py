@@ -23,12 +23,20 @@ from contextlib import ExitStack
 from pathlib import Path
 from unittest.mock import patch
 
+import pytest
+
 from imas_codex.standard_names.export import (
     ExportReport,
     SourceDispositionRecord,
     describe_manifest_generability,
     run_export,
 )
+
+
+@pytest.fixture(autouse=True)
+def _pin_export_provenance(pinned_export_provenance):
+    """Drive this module's exports with archive provenance pinned."""
+    return pinned_export_provenance
 
 
 class _ReadOnlyGraphClient:

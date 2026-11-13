@@ -35,8 +35,7 @@ them.
 If a part states the population a quantity counts, your `description` states the
 same population in its own words, and no sentence or equation of yours may
 include anything that population excludes.
-{% endif %}
-{% if locus_context %}
+{% endif %}{% if locus_context %}
 
 ## Locus of this quantity
 

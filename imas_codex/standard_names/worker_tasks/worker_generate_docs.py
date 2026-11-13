@@ -10,6 +10,14 @@ from typing import TYPE_CHECKING, Any
 
 logger = logging.getLogger(__name__)
 
+# The shared-part refusal belongs to the documentation gates that compute the
+# finding, so both documentation writers import it from there rather than one
+# writer reaching into the other.
+from imas_codex.standard_names.docs_gates import (  # noqa: E402
+    SharedPartAltered,
+    refuse_altered_shared_parts as _refuse_altered_shared_parts,
+)
+
 if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
 
@@ -674,42 +682,6 @@ def _documentation_with_registry_form(
         written, shared_part_sentences(name, applied)
     )
     return open_without_fragment(written)
-
-
-class SharedPartAltered(ValueError):
-    """A definition departed from a shared part's stored wording."""
-
-
-def _refuse_altered_shared_parts(
-    name: str,
-    documentation: str,
-    conventions: dict[str, Any] | None,
-    description: str = "",
-) -> None:
-    """Refuse a definition whose shared part was altered after rendering.
-
-    The shared parts are stated once for the catalog. A definition that carries
-    one of them in other words, or that states a population the stored wording
-    excludes, has been written away from the stored wording, and is refused
-    before it is persisted rather than published.
-    """
-
-    if not conventions:
-        return
-    from imas_standard_names.grammar.terms import AppliedConventions
-
-    from imas_codex.standard_names.docs_gates import shared_part_findings
-
-    applied = AppliedConventions.model_validate(conventions)
-    findings = shared_part_findings(
-        name, applied, documentation, description=description
-    )
-    if findings:
-        raise SharedPartAltered(
-            "; ".join(
-                f"{finding.registry_entry}: {finding.detail}" for finding in findings
-            )
-        )
 
 
 async def process_generate_docs_batch(

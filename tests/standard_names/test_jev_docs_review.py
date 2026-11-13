@@ -207,6 +207,7 @@ def _top_answers(table):
         "dimension:documentation_quality": "normative_definition",
         "dimension:completeness": "complete",
         "check:description_false_of_some_binding": "true of all",
+        "check:definition_qualifier_absent_from_name": "agrees",
     }
     answers = {}
     for key, question in table.items():

@@ -219,6 +219,7 @@ def test_a_governed_edit_of_an_unsourced_name_persists_an_unsourced_successor() 
     assert result == {
         "new_name": "volume_averaged_electron_density",
         "old_name": "electron_density",
+        "stale_source_ids": [],
     }
     assert retarget.call_args.args[1] == "electron_density"
     assert retarget.call_args.args[2] == "volume_averaged_electron_density"

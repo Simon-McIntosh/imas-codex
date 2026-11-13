@@ -537,6 +537,20 @@ checks:
   - documentation
   retrieval: false
   audit_finding_class: locus_definition
+- id: shared_part_altered
+  axis: docs
+  dimension: documentation_quality
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: shared_part_altered
+- id: contradicted_shared_part
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - documentation
+  retrieval: false
+  audit_finding_class: contradicted_shared_part
 - id: definition_qualifier_absent_from_name
   axis: docs
   dimension: physics_accuracy

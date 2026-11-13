@@ -156,6 +156,7 @@ def test_shipped_choice_conforming_forms_are_explicit():
         "collapsed_two_quantities": ["one quantity"],
         "description_false_of_some_binding": ["true of all"],
         "claim_contradicts_source": ["supports"],
+        "definition_qualifier_absent_from_name": ["agrees"],
     }
 
 
