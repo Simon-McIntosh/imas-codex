@@ -684,8 +684,6 @@ def _documentation_with_registry_form(
     return open_without_fragment(written)
 
 
-
-
 async def process_generate_docs_batch(
     _worker_dependency,
     /,

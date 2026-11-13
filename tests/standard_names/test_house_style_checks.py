@@ -145,8 +145,16 @@ def test_off_template_opening_is_flagged() -> None:
 
 
 def test_canonical_entry_yields_zero_findings() -> None:
-    findings = conformance_findings(_ARGON, documentation=_documentation(_SURFACE_FORM))
-    assert findings == []
+    documentation = _documentation(_SURFACE_FORM)
+    # Stated literally, and not read back through the renderer that built the
+    # fixture: the registry's sentence is what a written definition carries, so
+    # a renderer and a check that agreed on some other wording would fail here.
+    assert (
+        "The flux-surface average is the average of a quantity over a closed "
+        "magnetic flux surface, weighted by the inverse magnitude of the "
+        "poloidal flux gradient."
+    ) in documentation
+    assert conformance_findings(_ARGON, documentation=documentation) == []
 
 
 def test_findings_name_their_registry_entry() -> None:
@@ -197,6 +205,17 @@ def test_audit_report_carries_a_shared_part_departure() -> None:
         if finding.finding_type == "convention_violation"
     ]
     assert any("shared_part_altered" in finding.detail for finding in violations)
+
+
+def test_a_raising_shared_part_check_is_not_silently_dropped(monkeypatch) -> None:
+    def _boom(*_args, **_kwargs):
+        raise RuntimeError("shared-part check blew up")
+
+    monkeypatch.setattr(
+        "imas_codex.standard_names.docs_gates.shared_part_findings", _boom
+    )
+    with pytest.raises(RuntimeError, match="shared-part check blew up"):
+        run_house_style_checks([{"id": _ARGON, "documentation": _SURFACE_FORM}])
 
 
 def test_house_style_findings_read_the_selected_entries() -> None:
