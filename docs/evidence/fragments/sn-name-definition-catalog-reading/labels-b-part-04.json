@@ -1,0 +1,723 @@
+[
+ {
+  "id": "item-0310",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "for one ion charge state in the edge plasma",
+  "reason": "The name names a toroidal diamagnetic-drift velocity without a location, but the definition restricts it to the edge plasma."
+ },
+ {
+  "id": "item-0311",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the equivalent blackbody temperature associated with radiation emitted in the ordinary polarization mode of electron cyclotron emission",
+  "reason": "The radiative O-mode temperature at an ECE channel is exactly what the name states."
+ },
+ {
+  "id": "item-0312",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "encompassing two physically distinct contributions",
+  "reason": "Total recombination power at the target is the sum over its recombination channels, as the name states."
+ },
+ {
+  "id": "item-0313",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "normalized contribution to toroidal plasma-momentum transport",
+  "reason": "The name states a momentum flux and a perturbation source but not that the transported component is the toroidal one."
+ },
+ {
+  "id": "item-0314",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the charge-weighted electron-equivalent production rate from ablation and ionization of pellet material at a specified position along the injected pellet trajectory",
+  "reason": "An electron source rate at the pellet path due to pellet injection is what the name says."
+ },
+ {
+  "id": "item-0315",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the geometric area occupied by conducting material in a cross-section normal to the conductor\u2019s local centerline",
+  "reason": "The name states the coil's area; the definition adds conducting-material-only, normal to the centerline, excluding void and insulation."
+ },
+ {
+  "id": "item-0316",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron count rate. Every injected atom of atomic number $Z$ contributes $Z$ equivalent electrons per second",
+  "reason": "The name states a gas-injection source rate but the quantity is an equivalent-electron count rate weighted by atomic number."
+ },
+ {
+  "id": "item-0317",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "projected onto the plane perpendicular to the local magnetic-field direction",
+  "reason": "The name's \"effective area\" is defined precisely as the field-projected collection area."
+ },
+ {
+  "id": "item-0318",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the value of the equilibrium flux function at the point where the ray or beam path intersects the plasma",
+  "reason": "Poloidal flux evaluated at a beam-tracing point is exactly the stated quantity."
+ },
+ {
+  "id": "item-0319",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "within the plasma volume enclosed by the last closed flux surface during plasma initiation",
+  "reason": "The name states a volume-averaged neutral density but not that it is taken during plasma initiation only."
+ },
+ {
+  "id": "item-0320",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "delivered to thermal electrons by Coulomb collisions with fast particles",
+  "reason": "The name states collisional torque on thermal electrons generally; the definition restricts the collision partners to fast particles."
+ },
+ {
+  "id": "item-0321",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed local poloidal magnetic-field value represented by a poloidal field probe after its nonlinear response calibration",
+  "reason": "The poloidal field reported by a magnetic probe is what the name states."
+ },
+ {
+  "id": "item-0322",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "along the binormal direction of its local right-handed Frenet\u2013Serret frame",
+  "reason": "The name says height, read as a vertical extent, but the definition measures the extent along the local binormal direction."
+ },
+ {
+  "id": "item-0323",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the geometric center of a rectangular conductor cross-section in the right-handed cylindrical $(R, \\phi, Z)$ frame",
+  "reason": "A vertical coordinate of a conductor cross-section is the stated quantity."
+ },
+ {
+  "id": "item-0324",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the blanket-level ratio of tritium atoms produced inside the breeding regions of a breeder blanket to the incident fusion-neutron count",
+  "reason": "The breeding ratio the name states is defined over the blanket as a whole."
+ },
+ {
+  "id": "item-0325",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Dimensionless vector ratio of plasma flow velocity to the local sound speed, retaining directional components of the flow.",
+  "reason": "The name states a Mach number, normally a scalar, while the definition is a vector retaining directional components."
+ },
+ {
+  "id": "item-0326",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the temperature of a specified plasma species after averaging over a defined domain or path within the scrape-off layer",
+  "reason": "An average temperature over the scrape-off layer is exactly the stated quantity."
+ },
+ {
+  "id": "item-0327",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the unit direction vector assigned to the first measurement direction of an elliptic shatter cone",
+  "reason": "The first measurement-direction unit vector of the shatter cone is what the name states."
+ },
+ {
+  "id": "item-0328",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the charge-squared-weighted sum of ionic number densities divided by the electron number density, evaluated at the plasma boundary",
+  "reason": "Effective charge at the plasma boundary is exactly the stated definition."
+ },
+ {
+  "id": "item-0329",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This name is the structural parent for species- and projection-resolved variants.",
+  "reason": "The name states a damping rate, but the definition declares an umbrella quantity whose resolved forms are separate names."
+ },
+ {
+  "id": "item-0330",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "summed over all ionic charge states of the specified species; neutral particles and other ion species are excluded",
+  "reason": "A bare ion-species flux summed over charge states and excluding neutrals matches the catalog convention the name implies."
+ },
+ {
+  "id": "item-0331",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the mass-weighted toroidal bulk-flow velocity of deuterium\u2013tritium fuel treated as an effective single species at the magnetic axis",
+  "reason": "Toroidal bulk velocity of the DT fuel mixture is what the name states, with mass weighting the natural definition."
+ },
+ {
+  "id": "item-0332",
+  "class": "unit-does-not-fit-name",
+  "confidence": "medium",
+  "evidence": "the global scalar representation of the wall particle-removal flux",
+  "reason": "The name states a flux (per unit area per time) but the unit is s^-1 and the definition is a global particle-removal rate."
+ },
+ {
+  "id": "item-0333",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "This parent covers Fourier harmonic labels of coherent waves",
+  "reason": "The name states a wave mode number; the definition declares a parent whose specific harmonic labels are separate names."
+ },
+ {
+  "id": "item-0334",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "This quantity denotes the component-general vector, not only the toroidal projection.",
+  "reason": "The name states a total current, read as the usual toroidal scalar, while the definition is the full component vector."
+ },
+ {
+  "id": "item-0335",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the vector-valued departure of the plasma magnetic vector potential from its reference state",
+  "reason": "A perturbed vector potential is exactly the stated quantity."
+ },
+ {
+  "id": "item-0336",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent quantity does not specify the transported quantity, resolved component, or spatial region.",
+  "reason": "The name states one limiter coefficient; the definition declares a parent whose transported quantity, component and region are fixed by more specific instances."
+ },
+ {
+  "id": "item-0337",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the coefficient of $+i$ in the poloidal projection of that eigenfunction",
+  "reason": "The imaginary part of the poloidal perturbed field for a toroidal mode is exactly the stated quantity."
+ },
+ {
+  "id": "item-0338",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed projection of the unit vector directed along the minor geometric axis of an elliptic shatter cone onto the Cartesian x direction",
+  "reason": "An x component of the minor-axis unit vector is what the name states."
+ },
+ {
+  "id": "item-0339",
+  "class": "unit-does-not-fit-name",
+  "confidence": "high",
+  "evidence": "the radius is the reciprocal of the magnitude of the surface's normal curvature",
+  "reason": "The name states a curvature (inverse length) but the definition and unit are the radius of curvature, in metres."
+ },
+ {
+  "id": "item-0340",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the cumulative rate at which wave energy from a specified source or source set is deposited into the electron population",
+  "reason": "Cumulative electron wave power within an enclosed flux surface is exactly the stated quantity."
+ },
+ {
+  "id": "item-0341",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a nonnegative factor that sets the relative importance of its line-integrated electron-density residual in an equilibrium objective function",
+  "reason": "An equilibrium weight of an interferometer beam is what the name states."
+ },
+ {
+  "id": "item-0342",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the chord-length average of the local helium-3 ion number density along a specified path",
+  "reason": "A bare helium-3 density line-averaged over ionized charge states matches the catalog convention and the name."
+ },
+ {
+  "id": "item-0343",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the full major-radius extent of a rectangular passive conducting structure element",
+  "reason": "A width of a passive structure element is the radial extent the definition gives."
+ },
+ {
+  "id": "item-0344",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The aggregation includes all positive iron ionization states and excludes neutral iron and ions of every other element.",
+  "reason": "A bare iron density summed over ionization states and excluding neutrals matches the catalog convention."
+ },
+ {
+  "id": "item-0345",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the abundance of neon nuclei relative to free electrons",
+  "reason": "The stated ratio of volume-averaged neon to electron density is exactly the name's ratio."
+ },
+ {
+  "id": "item-0346",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the peak magnitude of the radio-frequency current on an ion-cyclotron-heating antenna strap at a specified position",
+  "reason": "A wave-current amplitude on an antenna strap is what the name states."
+ },
+ {
+  "id": "item-0347",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "It is the [major-radius coordinate](name:radial_coordinate) specialized to this locus",
+  "reason": "A radial coordinate of a conductor cross-section is exactly the stated quantity."
+ },
+ {
+  "id": "item-0348",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the total rate at which coherent wave energy is absorbed by the non-thermal fast electron population within the plasma volume bounded by a specified magnetic flux surface",
+  "reason": "Fast-electron power inside a flux surface is exactly the stated quantity."
+ },
+ {
+  "id": "item-0349",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local net transport of particles of one ion species along the magnetic field, expressed per unit area perpendicular to that field",
+  "reason": "A parallel ion particle flux summed over charge states matches the catalog convention and the name."
+ },
+ {
+  "id": "item-0350",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the effective coefficient describing advective, non-diffusive transport of aggregate ion momentum along the local magnetic field in the edge plasma",
+  "reason": "The definition is an effective parallel convection velocity for ion momentum, as the name states."
+ },
+ {
+  "id": "item-0351",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the incident fusion-neutron number flux on the neutron-sensitive active surface of the detector",
+  "reason": "Neutron flux incident on a neutron detector is what the name states."
+ },
+ {
+  "id": "item-0352",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "It is an orbit-resolved contribution to [current density](name:current_density), with passing and trapped populations represented as distinct contributions.",
+  "reason": "The name states a fast current density; the definition is a parent whose orbit-class forms are separate names."
+ },
+ {
+  "id": "item-0353",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the incoming neutral-particle count flux at a wall attributable to recombination, with neutral product species and internal states aggregated",
+  "reason": "An incident recombination-driven neutral flux at the wall is exactly the stated quantity."
+ },
+ {
+  "id": "item-0354",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the position of an individual reflector-outline vertex projected onto the first axis of the reflector-local orthogonal frame",
+  "reason": "A first local-tangential coordinate of a reflector outline vertex is what the name states."
+ },
+ {
+  "id": "item-0355",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed projection of an electromagnetic wave\u2019s local spatial phase gradient onto the toroidal direction, evaluated on the beam-tracing beam",
+  "reason": "A toroidal wave-vector component on a beam-tracing beam is exactly the stated quantity."
+ },
+ {
+  "id": "item-0356",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the geometric length of a parallelogram-shaped cross-section of a passive conductor element",
+  "reason": "The minor inclined side length of a passive loop element is what the name states."
+ },
+ {
+  "id": "item-0357",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the contribution of one breeder-blanket module to the blanket-level [tritium breeding ratio](name:tritium_breeding_ratio)",
+  "reason": "A module contribution to the tritium breeding ratio is exactly the stated quantity."
+ },
+ {
+  "id": "item-0358",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "does not prescribe a species, orbit class, or directional projection",
+  "reason": "The name states an ion torque density; the definition declares an umbrella quantity whose species-resolved forms are separate names."
+ },
+ {
+  "id": "item-0359",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The total xenon ion density is the sum over all ionic charge states",
+  "reason": "A bare xenon density summed over ionization states and excluding neutral atoms matches the catalog convention."
+ },
+ {
+  "id": "item-0360",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed number of equivalent windings assigned to a passive conducting loop for electromagnetic coupling",
+  "reason": "An effective turn count of a passive loop is exactly the stated quantity."
+ },
+ {
+  "id": "item-0361",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed toroidal orientation of the sensitive-axis normal of a poloidal magnetic-field probe coil",
+  "reason": "A toroidal angle of a poloidal magnetic-field probe is exactly the stated quantity."
+ },
+ {
+  "id": "item-0362",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the real-valued quadrature of a complex electrostatic-potential field or eigenfunction",
+  "reason": "The real part of the electrostatic potential is exactly what the name states."
+ },
+ {
+  "id": "item-0363",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the dimensionless total pressure response of a perturbed gyrocenter distribution in a linear gyrokinetic eigenmode",
+  "reason": "A normalized Bessel-weighted perturbed pressure response is what the name states."
+ },
+ {
+  "id": "item-0364",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "summed over all beryllium ion charge states and excludes neutral beryllium",
+  "reason": "A bare beryllium density summed over charge states and excluding neutrals matches the catalog convention."
+ },
+ {
+  "id": "item-0365",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "This parent quantity does not specify the receiving population",
+  "reason": "The name states a torque density from collisions with electrons; the definition is a parent whose species-specific recipients are separate names."
+ },
+ {
+  "id": "item-0366",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the thermodynamic temperature describing the thermal state of the working fluid at a connection port of a power-conversion component",
+  "reason": "A coolant temperature at a plant-component port is exactly the stated quantity."
+ },
+ {
+  "id": "item-0367",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the effective logarithmic range of impact parameters contributing to cumulative small-angle Coulomb scattering between charged particles at that location",
+  "reason": "The Coulomb logarithm at the pedestal top is exactly the stated quantity."
+ },
+ {
+  "id": "item-0368",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the projection of the deuterium-ion fluid velocity onto the geometric toroidal direction at the flux-surface radius assigned to the internal transport barrier",
+  "reason": "A toroidal deuterium velocity at the internal transport barrier is exactly the stated quantity."
+ },
+ {
+  "id": "item-0369",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local concentration of ionized tungsten at the inner shoulder of the H-mode transport barrier",
+  "reason": "A bare tungsten density summed over charge states and excluding neutrals matches the catalog convention."
+ },
+ {
+  "id": "item-0370",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "As a vector, it encodes the geometric anisotropy of momentum loss in a magnetized plasma",
+  "reason": "The name states a damping rate, normally a scalar, while the definition is a vector of directional rates."
+ },
+ {
+  "id": "item-0371",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the concentration-weighted mean of the cumulative successive ionization energies required to reach, from the neutral ground state, the charge states represented in an ion-state bundle",
+  "reason": "A mean ionization potential of an ion-state bundle is exactly the stated quantity."
+ },
+ {
+  "id": "item-0372",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "the center of the annular cross-section representing one iron-core segment",
+  "reason": "The name names an arc-of-circle centre generically, while the definition applies only to an iron-core segment's annular cross-section."
+ },
+ {
+  "id": "item-0373",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the density-weighted mean of the toroidal fluid velocities of all represented neon ion charge states",
+  "reason": "A toroidal neon-ion velocity aggregated over charge states matches the catalog convention and the name."
+ },
+ {
+  "id": "item-0374",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "represented using an equivalent-electron counting convention",
+  "reason": "The name states a beryllium source rate but the quantity is an equivalent-electron count rate with four electrons per atom."
+ },
+ {
+  "id": "item-0375",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the effective vector coefficient describing convective thermal-energy transport by one neutral species in a specified internal state",
+  "reason": "A neutral internal-state energy convection velocity is exactly the stated quantity."
+ },
+ {
+  "id": "item-0376",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "It excludes neutral lithium and is not a local point value, a volume average, or a line-of-sight average.",
+  "reason": "A bare lithium density averaged over a flux surface and summed over ion states matches the catalog convention."
+ },
+ {
+  "id": "item-0377",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "encompassing neutral carbon atoms and all ionic charge states from singly ionized C+ through fully stripped C6+",
+  "reason": "The name states a carbon density, which under the catalog convention means ions, but the definition includes neutral atoms too."
+ },
+ {
+  "id": "item-0378",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the total interior volume enclosed by the innermost plasma-facing surface of the vacuum vessel",
+  "reason": "The volume enclosed by the first wall is exactly the stated quantity."
+ },
+ {
+  "id": "item-0379",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "summed over all ionic charge states and excluding neutral krypton",
+  "reason": "A bare krypton density at the magnetic axis, summed over charge states and excluding neutrals, matches the catalog convention."
+ },
+ {
+  "id": "item-0380",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "For a scalar standard name it denotes the specified component or projection of that integrated momentum",
+  "reason": "The name states plasma momentum; the definition declares a parent whose component and aggregate forms are fixed by qualified children."
+ },
+ {
+  "id": "item-0381",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the total photon power retained by plasma-facing wall surfaces after reflection losses",
+  "reason": "Absorbed radiated power at the wall is exactly the stated quantity."
+ },
+ {
+  "id": "item-0382",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the field-aligned normal component of their kinetic pressure tensor",
+  "reason": "A parallel fast-neutral pressure is the stated tensor component."
+ },
+ {
+  "id": "item-0383",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net temporal rate at which the aggregate thermal energy of the plasma changes",
+  "reason": "The time derivative of the total thermal internal energy is exactly the stated quantity, with unit W."
+ },
+ {
+  "id": "item-0384",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the in-phase component of the complex eigenfunction projection",
+  "reason": "The real part of the poloidal perturbed field for a toroidal mode is exactly the stated quantity."
+ },
+ {
+  "id": "item-0385",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "summed over all ion charge states from singly ionized Fe$^+$ through fully stripped Fe$^{26+}$",
+  "reason": "A bare iron density at the plasma boundary, summed over charge states and excluding neutrals, matches the catalog convention."
+ },
+ {
+  "id": "item-0386",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local number density of deuterium ions on the flux surface assigned as the barrier reference location",
+  "reason": "A deuterium ion density at the internal transport barrier is exactly the stated quantity."
+ },
+ {
+  "id": "item-0387",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the contribution to electric current density from fast particles whose guiding-center orbits are magnetically trapped",
+  "reason": "A trapped fast current density is exactly the stated quantity."
+ },
+ {
+  "id": "item-0388",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the proportionality coefficient between the signed poloidal diffusive particle flux and the physical poloidal gradient of that state's number density",
+  "reason": "A poloidal neutral internal-state diffusion coefficient is exactly the stated quantity."
+ },
+ {
+  "id": "item-0389",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the equivalent-electron inventory of neutral xenon gas introduced between the start of prefill and plasma breakdown",
+  "reason": "The name states a xenon count but the quantity is an equivalent-electron inventory with 54 count units per atom."
+ },
+ {
+  "id": "item-0390",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the aggregate non-inductive power coupled to the plasma by auxiliary heating systems",
+  "reason": "Total external heating power summed over auxiliary sources is exactly the stated quantity."
+ },
+ {
+  "id": "item-0391",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local, intensive particle count per physical volume for the krypton-ion population evaluated on the last closed magnetic flux surface",
+  "reason": "A bare krypton density at the plasma boundary, summed over charge states, matches the catalog convention."
+ },
+ {
+  "id": "item-0392",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the complex phasor obtained by projecting the electromagnetic-wave electric-field phasor onto the toroidal direction",
+  "reason": "A toroidal wave electric field is exactly the stated quantity."
+ },
+ {
+  "id": "item-0393",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the mean concentration of ionized protium throughout the confined plasma volume",
+  "reason": "A bare hydrogen density volume-averaged over ionized protium matches the catalog convention."
+ },
+ {
+  "id": "item-0394",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "summed over all positive charge states and excluding fast ions and neutral particles",
+  "reason": "A thermal ion density summed over ion charge states and excluding fast and neutral particles is exactly the stated quantity."
+ },
+ {
+  "id": "item-0395",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the arithmetic mean of the kinetic temperatures of all charged ion species on the flux surface assigned to an internal transport barrier",
+  "reason": "An ion average temperature at the internal transport barrier is exactly the stated quantity."
+ },
+ {
+  "id": "item-0396",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net flux of the toroidal magnetic-field component through the poloidal cross-section enclosed by a specified magnetic flux surface",
+  "reason": "A toroidal magnetic flux is exactly the stated quantity."
+ },
+ {
+  "id": "item-0397",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed height relative to the zero-height plane in the right-handed cylindrical (R,\u03c6,Z) frame",
+  "reason": "A vertical coordinate of a detector pixel is exactly the stated quantity."
+ },
+ {
+  "id": "item-0398",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the extent of its plasma-facing surface along the major-radius direction",
+  "reason": "A radial length of the divertor target is exactly the stated quantity."
+ },
+ {
+  "id": "item-0399",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed height relative to the coordinate origin",
+  "reason": "A vertical coordinate of a camera is exactly the stated quantity."
+ },
+ {
+  "id": "item-0400",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "The trapped-orbit restriction applies to the source distribution, not to the recipient thermal ions.",
+  "reason": "The name pairs \"trapped\" with the thermal ions, but the definition's trapped restriction is on the fast-particle source."
+ },
+ {
+  "id": "item-0401",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "this quantity represents the oxygen fluid velocity aggregated over the predominant charge states unless a specific ionization state is separately resolved",
+  "reason": "A bare oxygen toroidal velocity aggregated over its charge states matches the catalog convention and the name."
+ },
+ {
+  "id": "item-0402",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The sum includes singly and doubly ionized helium-4 and excludes neutral helium-4.",
+  "reason": "A bare helium-4 density summed over charge states and excluding neutrals matches the catalog convention."
+ },
+ {
+  "id": "item-0403",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed in-plane coordinate of a neutron-detector outline vertex along the detector's second local tangential direction",
+  "reason": "A second local tangential coordinate of a neutron detector is exactly the stated quantity."
+ },
+ {
+  "id": "item-0404",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed Cartesian y position of the geometric centroid of one ferritic element",
+  "reason": "A y coordinate of a ferritic element centroid is exactly the stated quantity."
+ },
+ {
+  "id": "item-0405",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "governs diffusive redistribution of the poloidal component of momentum carried by ions of one species in a specified ionization state",
+  "reason": "A poloidal ion charge-state momentum diffusion coefficient is exactly the stated quantity."
+ },
+ {
+  "id": "item-0406",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "thermal-energy transport across an oriented surface by neutral particles of one species in one specified internal state",
+  "reason": "A neutral internal-state energy flux is exactly the stated quantity."
+ },
+ {
+  "id": "item-0407",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the effective diagonal transport coefficient for diffusive transport of thermal energy carried by neutral atoms and molecules along the poloidal direction",
+  "reason": "A poloidal neutral energy diffusivity is exactly the stated quantity."
+ },
+ {
+  "id": "item-0408",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "with neutral boron and every ionic charge state included",
+  "reason": "The name states a boron density, which under the catalog convention means ions, but the definition includes neutral boron too."
+ },
+ {
+  "id": "item-0409",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed change in the vertical position of a beamlet-group center when the beamlet geometry is dynamically tilted away from its static configuration",
+  "reason": "A vertical displacement of a beamlet group is exactly the stated quantity."
+ },
+ {
+  "id": "item-0410",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "Each neutral deuterium atom contributes one equivalent electron.",
+  "reason": "With atomic number one the equivalent-electron count equals the deuterium prefill count the name states."
+ },
+ {
+  "id": "item-0411",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a dimensionless ratio bounded in [0, 1] expressing the relative abundance of the cold, low-energy recycled component of a hydrogen-isotope neutral population",
+  "reason": "A cold neutral fraction is exactly the stated quantity."
+ },
+ {
+  "id": "item-0412",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the vector part of the external-coil vacuum [magnetic induction](name:magnetic_field) that varies with toroidal angle after its toroidally averaged component is removed",
+  "reason": "A non-axisymmetric magnetic field is exactly the stated quantity."
+ }
+]
