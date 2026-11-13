@@ -50,6 +50,13 @@
       "note": "The close comment names the scored revision dd62487f2 and the freeze commit 3a5c3d861 and states they live only in the unmerged worker tree by the lead's ruling, so the readings cannot be re-run from main.",
       "reason": "",
       "when": "2026-11-13T10:34:04.692712+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "reasoning-1",
+      "reason": "The 80 percent and 10 percent rule is the lead's recorded ruling, and the case is moot here: the successor found 4 of 56 against the seat's 32, so it is not the better check on any reading.",
+      "when": "2026-11-13T10:34:22.925985+00:00"
     }
   ],
   "responses": {
@@ -67,6 +74,12 @@
       "note": "The close comment names the scored revision dd62487f2 and the freeze commit 3a5c3d861 and states they live only in the unmerged worker tree by the lead's ruling, so the readings cannot be re-run from main.",
       "reason": "",
       "when": "2026-11-13T10:34:04.692712+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "The 80 percent and 10 percent rule is the lead's recorded ruling, and the case is moot here: the successor found 4 of 56 against the seat's 32, so it is not the better check on any reading.",
+      "when": "2026-11-13T10:34:22.925985+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T084605941237-plan-review-of-sn-definitions-by-construction.json",
