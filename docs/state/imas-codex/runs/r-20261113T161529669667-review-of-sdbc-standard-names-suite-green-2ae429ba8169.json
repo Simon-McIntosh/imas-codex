@@ -951,6 +951,72 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "35a2d9a1077a073312809b9d8f2cf5a46fd769aa",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "no terminal manifest was delivered",
+    "scratch_bytes": 23,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261113T161529669667-review-of-sdbc-standard-names-suite-green-2ae429ba8169",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 23,
+        "path": "/tmp/reckon-crew-scratch/r-20261113T161529669667-review-of-sdbc-standard-names-suite-green-2ae429ba8169"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "integrated",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [],
+          "head": "35a2d9a1077a073312809b9d8f2cf5a46fd769aa",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/review-of-sdbc-standard-names-suite-green-2ae429ba8169",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-13T16:28:34.569Z",
+            "session_id": "d3ba6877-90d8-455e-8199-6b81beec5c42",
+            "session_source": "stream",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/review-of-sdbc-standard-names-suite-green-2ae429ba8169"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+          "status_entries": [],
+          "withheld": "this worktree is the working directory of recoverable session d3ba6877-90d8-455e-8199-6b81beec5c42"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-11-13T16:28:34.569Z",
+      "session_id": "d3ba6877-90d8-455e-8199-6b81beec5c42",
+      "session_source": "stream",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/review-of-sdbc-standard-names-suite-green-2ae429ba8169"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session d3ba6877-90d8-455e-8199-6b81beec5c42"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
