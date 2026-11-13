@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T02:53:52.451Z",
+  "dispatched_at": "2026-11-13T02:45:09Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "the node would either certify a locus that violates the ruling or, reading the instrument, invert the two spellings on 44 live names, and the fix is to state the ruled suffix per locus and plant a uniformly mis-spelled locus as the control.",
+      "text": "the endpoint \"one suffix per DD locus\" fixes only that names agree, never which spelling they must agree on, so a locus whose names are unanimously spelled `_at_separatrix` has one suffix and passes although the lead's 2026-11-07 ruling and the committed instrument both call it out of line \u2014 and the read-back a node would re-run carries `suffix_by_locus.separatrix_average.proposed_locator = \"_flux_surface_averaged_at_plasma_boundary\"` (`docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.json`), the trailing order the section's own ruling rules against (`flux_surface_averaged_X_at_plasma_boundary`), so following the instrument would rename the 44 live average-locus names into the wrong order; the planted control exercises only the two-suffix case, so the gate cannot see either failure",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:82",
+      "id": "reasoning-1",
+      "reason": "a node would route a dead tombstone chain to the lead and leave the two live names its endpoint actually fails on unassigned, which are also the pair the lead ruled on 2026-11-12 toward that same target spelling.",
+      "text": "the prose's residual list (\"the exact boundary spelling of the tritium velocity, and the two cases whose tombstone ends on a different live concept, starting with `electron_temperature_at_separatrix` to `thermal_electron_temperature_at_plasma_boundary`\") does not match the read-back it says has landed: `scc-separatrix-reclaim.json` `census` reads population 111, conforming 109 and exactly 2 out of line, both on `summary/local/separatrix_average/n_i/deuterium_tritium/value` and both targeting `flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary`; the two names the prose names are superseded tombstones carrying no live suffix (`scc-separatrix-remainder.json`: `thermal_electron_temperature_at_plasma_boundary` \u2192 `refined_into: [\"electron_temperature_at_separatrix\"]`, which is itself `refined_into: []`), and `toroidal_tritium_velocity_at_plasma_boundary` is not out of line",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:81",
+      "id": "wiring-1",
+      "reason": "without the ordering a node can run \u00a76 beside the rewrite, certify one suffix per locus, and have the certification undone by renames \u00a73's final census does not re-check for this cohort.",
+      "text": "\u00a76 declares no wait on `sn-definitions-by-construction#s6`, though \u00a72 of this same plan states that section \"rewrites the live catalog\" and that \"a name that its name-against-definition dispositions rename\" leaves still-standing rows, and \u00a72 therefore re-reads after \u00a76 lands; \u00a76's endpoint is a property of that same live catalog and a rename landing after it reintroduces the divergence its read-back certified",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "84eec68cb980aacd3f3d51f44589f2e18f1720d3",
+  "plan_fingerprint": "af72285e41be8cf685efb1ba4f359ae1c388c2a552dd76ac2cb7480405f4110b",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 37,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T024042144946-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "2d885e43329653c6f1c9ecf48b5deddeddff16a4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-integrity-backlog#s49` resolves (that plan's `id=\"s49\"`, \"One DD separatrix locus, one name suffix\"), and the cited fragments `scc-separatrix-remainder.html` and `scc-separatrix-reclaim.html` exist in the repository.",
+    "done_when": "a finding \u2014 \u00a76's endpoint measures \"one suffix per DD locus\" without fixing the ruled suffix, and the committed instrument's map carries the wrong suffix for the separatrix-average locus.",
+    "evidence_paths": "pass \u2014 \u00a76 names no scratchpad or node-local path, and the read-back fragments its comments cite sit under `docs/evidence/fragments/sn-catalog-consistency/` on durable storage.",
+    "naming": "pass \u2014 \u00a76 carries no plan labels, stage names, ticket numbers or version tags; its identifiers are catalogue names and DD loci.",
+    "reasoning": "a finding \u2014 \u00a76's \"still out of line\" list names a tombstoned pair as the lead's case and omits the two live names the section's own post-reclaim read-back reports out of line.",
+    "single_goal": "pass \u2014 \u00a76 names one deliverable, one suffix per DD locus over the censused population, and its other clauses (signed paths, no revived tombstone, spend cap) are conditions on that deliverable rather than separate goals.",
+    "wiring": "a finding \u2014 \u00a76 declares no ordering against `sn-definitions-by-construction#s6`, while this plan's \u00a72 records that section as renaming live names."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "79ecaec232a3f79c437d54ce1b5369aff0c0e170c4c7aa201a09d413c6ed5433",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T03:10:57.994291+00:00",
+  "total": null
+}
