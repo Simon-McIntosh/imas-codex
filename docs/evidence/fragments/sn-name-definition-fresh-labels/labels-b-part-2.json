@@ -1,0 +1,527 @@
+[
+ {
+  "id": "item-121",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the azimuthal position of the pellet center of mass around the toroidal symmetry axis",
+  "reason": "A toroidal coordinate of a pellet is the pellet's azimuthal position, which is naturally that of its centre of mass."
+ },
+ {
+  "id": "item-122",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "The perpendicular designation refers to the velocity-space channel relative to the equilibrium magnetic field, not to the spatial direction of transport",
+  "reason": "The name states a perpendicular flux, which reads as a spatial direction, while the definition uses perpendicular for the velocity-space channel."
+ },
+ {
+  "id": "item-123",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed angular-momentum transfer rate per unit volume delivered to bulk thermal electrons through Coulomb collisions",
+  "reason": "The name names the toroidal component, the thermal-electron recipient, the collisional origin and the density form, all of which the definition states."
+ },
+ {
+  "id": "item-124",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the parallel specialization of neutral particle diffusivity, with transport resolved along the magnetic field",
+  "reason": "The definition is exactly the field-aligned diffusivity the name states, for neutral particles with the unit of a diffusivity."
+ },
+ {
+  "id": "item-125",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the full geometric extent of an individual rectangular reflector element along its object-local first tangential axis",
+  "reason": "A width of a reflector along its local first tangential axis is what the name states; the full-width convention is inherent in the word width."
+ },
+ {
+  "id": "item-126",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "this quantity represents the sum over all positive xenon charge states",
+  "reason": "Under the ruling that a bare species name counts ions, summing positive xenon charge states and excluding neutrals is the density of xenon that the name denotes."
+ },
+ {
+  "id": "item-127",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "It provides a shared parent concept for kinetic temperatures and brightness temperatures, which need not represent the same underlying physical state",
+  "reason": "The definition declares an umbrella quantity whose kinetic and radiative forms are fixed by more specific child names rather than by this one."
+ },
+ {
+  "id": "item-128",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "it specifies a location rather than a geometric radius, a pedestal width, or a spatial average",
+  "reason": "The name places the normalized poloidal flux coordinate at the pedestal, and the definition evaluates that same linear fraction at the pedestal locus."
+ },
+ {
+  "id": "item-129",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the rate at which coherent-wave energy is absorbed by fast, suprathermal electrons per unit physical volume for each toroidal mode number",
+  "reason": "Per-mode fast-electron power density is precisely the per-unit-volume absorption rate for each toroidal mode number that the name states."
+ },
+ {
+  "id": "item-130",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "It represents the charge-weighted first velocity moment while preserving its vector character",
+  "reason": "A normalized particle perturbed current density is the charge-weighted first velocity moment of the perturbed distribution, as defined."
+ },
+ {
+  "id": "item-131",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the real, in-phase component of the first-order plasma-temperature perturbation associated with one toroidal Fourier harmonic",
+  "reason": "The name states only the real part of a perturbed temperature, while the definition requires a specified toroidal Fourier harmonic eigenfunction."
+ },
+ {
+  "id": "item-132",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed height of a point on the geometric boundary of a fiber-optic current sensor",
+  "reason": "A vertical outline coordinate of the sensor is exactly this signed Z coordinate of a boundary contour point."
+ },
+ {
+  "id": "item-133",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the phase-independent magnitude of a normalized electrostatic-potential fluctuation about a specified reference field",
+  "reason": "The name states a potential amplitude, which reads in volts, while the definition is a dimensionless magnitude normalized to a reference field."
+ },
+ {
+  "id": "item-134",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "Locus-specific members evaluate the chosen parameterization without changing its normalization references",
+  "reason": "The definition presents itself as an umbrella over two parameterizations and locus-specific members that fix the actual usable form."
+ },
+ {
+  "id": "item-135",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the field-aligned normal component of the nonthermal electron pressure tensor",
+  "reason": "Parallel fast-electron pressure is the field-aligned normal stress of the fast electron population, exactly as the name states, in pascals."
+ },
+ {
+  "id": "item-136",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the flux-surface average of the reciprocal square of the total magnetic-field strength on a nested magnetic surface",
+  "reason": "The name states the flux-surface average of the inverse square of the field magnitude, which is exactly what the definition computes, in T^-2."
+ },
+ {
+  "id": "item-137",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the total rate at which plasma in that region emits energy as electromagnetic radiation",
+  "reason": "Radiated power over the core region is the volume-integrated emission over that region, as the name states, in watts."
+ },
+ {
+  "id": "item-138",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "transport of the toroidally directed component of linear momentum across a magnetic flux surface",
+  "reason": "The name states the toroidal momentum component and the ion population, and the definition delivers exactly that area-averaged flux summed over charge states."
+ },
+ {
+  "id": "item-139",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the angular-momentum source per unit volume arising from Coulomb collisions of those ions with background plasma particles",
+  "reason": "The name fixes the co-passing orbit class, charge state, collisional origin and torque-density form, all of which the definition states."
+ },
+ {
+  "id": "item-140",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "No particular surface orientation is fixed by this parent definition",
+  "reason": "The definition presents itself as a parent whose projection direction is fixed by the radial and parallel component members."
+ },
+ {
+  "id": "item-141",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the rate at which neutral atoms or molecules transfer energy to one specified divertor target through bombardment from the plasma",
+  "reason": "Neutral power at the divertor target is exactly this deposited neutral-particle power rate, in watts."
+ },
+ {
+  "id": "item-142",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "abstracts over the quadrant-resolved coefficients",
+  "reason": "The definition declares an umbrella coefficient whose upper and lower quadrant forms are fixed by more specific instances."
+ },
+ {
+  "id": "item-143",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the requested electrical potential difference that establishes the detector-bias setpoint for one spectrometer channel",
+  "reason": "A requested voltage of a spectrometer channel is the commanded bias setpoint potential difference, in volts."
+ },
+ {
+  "id": "item-144",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "This geometric coordinate labels position around the poloidal cross-section associated with a gyrokinetic eigenmode",
+  "reason": "The definition gives the geometric poloidal angle located at the eigenmode, exactly what the name states, in radians."
+ },
+ {
+  "id": "item-145",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the net electromagnetic-wave power absorbed by plasma particles, representing energy transfer from the wave field to a selected population",
+  "reason": "Wave power alone reads as the power carried by a wave, while the definition is only the part absorbed by a selected particle population."
+ },
+ {
+  "id": "item-146",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local strength of the poloidal-plane projection of the equilibrium magnetic field",
+  "reason": "Poloidal magnetic field at that locus is the poloidal-plane projection magnitude, exactly as named, in tesla."
+ },
+ {
+  "id": "item-147",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed field-aligned return-current contribution to electric current density in magnetized edge plasma",
+  "reason": "A parallel Pfirsch-Schlueter current density due to diamagnetic drift is this field-aligned return current, as the name states, in A.m^-2."
+ },
+ {
+  "id": "item-148",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the repeat arclength along the sensing-fiber centerline for the effective birefringent-axis orientation to return to the same state",
+  "reason": "A twist period of the sensor is the repeat arclength for one cycle of the twist, as the name states, in metres."
+ },
+ {
+  "id": "item-149",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the portion of wave power transferred to thermal ions in that charge state, accumulated over the volume inside the chosen surface",
+  "reason": "The name fixes thermal population, charge state, cumulative power and the enclosing flux surface, all of which the definition states."
+ },
+ {
+  "id": "item-150",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron count. Each neutral krypton atom contributes 36 equivalent electrons",
+  "reason": "A krypton prefill count reads as a number of krypton atoms, while the definition counts equivalent electrons at 36 per atom."
+ },
+ {
+  "id": "item-151",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the word maximum denotes the pedestal-gradient locus, not an extremum of electron density",
+  "reason": "The name's maximum reads as the peak density in the pedestal, while the definition evaluates density at the maximum-gradient location."
+ },
+ {
+  "id": "item-152",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the geometric average of the reciprocal major radius over a complete magnetic flux surface",
+  "reason": "The flux-surface average of the reciprocal major radius is exactly what the name states, with the matching m^-1 unit."
+ },
+ {
+  "id": "item-153",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the geometric measure of the material surface exposed toward the plasma and forming the innermost plasma-facing boundary",
+  "reason": "Area of the first wall is that plasma-facing surface measure, in square metres, as the name states."
+ },
+ {
+  "id": "item-154",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "This quantity is neither a current magnitude nor, in general, the local field-aligned projection or its unweighted flux-surface average",
+  "reason": "The name states a parallel current density, while the definition is a flux-surface-averaged current-field dot product divided by a reference vacuum field."
+ },
+ {
+  "id": "item-155",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "its signed projection along the geometric toroidal direction",
+  "reason": "The definition gives the toroidal projection of the assigned E-cross-B drift velocity for one neutral internal state, as the name states."
+ },
+ {
+  "id": "item-156",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the flux-surface-normal component of electron particle flux",
+  "reason": "A radial electron particle flux is that flux-surface-normal component, in m^-2.s^-1, as the name states."
+ },
+ {
+  "id": "item-157",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "transport rate per unit area of the vertical component of linear momentum for the total ion population",
+  "reason": "The definition is the Z-momentum Z-normal projection summed over all ion species and charge states, exactly as named."
+ },
+ {
+  "id": "item-158",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the scalar component multiplying the imaginary basis element in a complex representation of a plasma-temperature quantity",
+  "reason": "Imaginary part of plasma temperature is that imaginary coefficient, in energy units, as the name states."
+ },
+ {
+  "id": "item-159",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed local rate of kinetic-energy transfer from nonthermal particles to the bulk thermal electron population",
+  "reason": "A collisional power density on thermal electrons is that local energy-transfer rate, in W.m^-3, as named."
+ },
+ {
+  "id": "item-160",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "their perpendicular pressures are averaged rather than summed; the averaging weights are unspecified",
+  "reason": "The name gives a fast-neutral pressure, which reads as the aggregate over internal states, while the definition averages over them."
+ },
+ {
+  "id": "item-161",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "equivalently, elongation is the vertical half-height divided by the geometric minor radius",
+  "reason": "A dimensionless vertical-to-radial extent ratio of the boundary cross-section is exactly the elongation the name states."
+ },
+ {
+  "id": "item-162",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed height along $Z$ in the right-handed cylindrical",
+  "reason": "The vertical coordinate of an X-point is that signed height of the null, in metres, as the name states."
+ },
+ {
+  "id": "item-163",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the density-weighted mean over all deuterium ion charge states, rather than a thermal speed or velocity magnitude",
+  "reason": "A toroidal deuterium flow velocity at the pedestal top, summed over deuterium ions, is the quantity the name denotes."
+ },
+ {
+  "id": "item-164",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "This parent quantity is restricted to real-part quantities of isotropic plasma pressure and does not by itself specify perturbation order",
+  "reason": "The definition declares itself a parent whose perturbation order, mode label and locus are supplied by more specific children."
+ },
+ {
+  "id": "item-165",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the temporal standard deviation of the total ion-carried charge-current density after projection onto the local magnetic-field direction",
+  "reason": "A fluctuating parallel ion current density is that projected fluctuation level, in A.m^-2, as the name states."
+ },
+ {
+  "id": "item-166",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "applies to the ion population represented as one effective deuterium-tritium fuel species",
+  "reason": "A deuterium-tritium density at the divertor target is the combined DT ion number density there, which the pseudo-species represents."
+ },
+ {
+  "id": "item-167",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the full transverse extent of the clear circular opening at the diagnostic entrance pupil",
+  "reason": "A diameter of a circular diagnostic aperture is that full transverse extent, in metres, as the name states."
+ },
+ {
+  "id": "item-168",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the characteristic shear-Alfvén propagation time across a reference major-radius scale",
+  "reason": "The Alfven time is that transit time across the major-radius scale, in seconds, as the name states."
+ },
+ {
+  "id": "item-169",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "Depending on the derivative, the total density is averaged along a line, averaged over a volume, or used as the reference denominator",
+  "reason": "The definition presents a parent abundance whose line-averaged, volume-averaged and ratio forms are fixed by more specific instances."
+ },
+ {
+  "id": "item-170",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Volume-integrated Coulomb-collisional power transferred to the thermal (Maxwellian) ion population of a specified species and charge state",
+  "reason": "The name fixes thermal population, charge state and collisional origin, and the definition is the volume integral of that exchange rate."
+ },
+ {
+  "id": "item-171",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "$q=0$ denotes neutral nitrogen",
+  "reason": "The name's nitrogen density denotes ions, while the definition's numerator sums charge states including neutral nitrogen."
+ },
+ {
+  "id": "item-172",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "The parent-level scaling requires only a positive reference momentum-flux scale; it does not select a named normalization convention",
+  "reason": "The definition declares a parent mechanism-selected aggregate whose component, population and channel are fixed by child names."
+ },
+ {
+  "id": "item-173",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the net rate at which heat leaves the module through its coolant circuits",
+  "reason": "Net thermal power of a blanket module is the heat removed by its coolant, summed over branches, in watts."
+ },
+ {
+  "id": "item-174",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "representing each oxygen atom as 8 equivalent electrons equal to the atomic number",
+  "reason": "An oxygen prefill count reads as a number of oxygen atoms, while the definition counts equivalent electrons at 8 per atom."
+ },
+ {
+  "id": "item-175",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the number-density-weighted mean of the temperatures of all ion species and ion states",
+  "reason": "An ion average temperature is the density-weighted mean over all ion species and charge states, as the name states, in eV."
+ },
+ {
+  "id": "item-176",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the major-radius coordinate of the oblique reference point that anchors one current-carrying plasma filament element's rectangular cross-section",
+  "reason": "A filament's radial coordinate reads as the filament position, while the definition is the anchor point of a rectangular cross-section, not its centroid."
+ },
+ {
+  "id": "item-177",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "aggregated over all iron charge states from Fe$^{1+}$ through Fe$^{26+}$ and averaged throughout the confined plasma volume",
+  "reason": "Volume-averaged iron ion density summed over charge states, with neutrals excluded, is exactly what the bare species name denotes."
+ },
+ {
+  "id": "item-178",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the Cartesian x projection of the unit vector that defines an electron-cyclotron launcher mirror's translation direction or rotation axis",
+  "reason": "An x direction unit-vector component of the launcher mirror axis is that signed projection, as the name states."
+ },
+ {
+  "id": "item-179",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the perpendicular distance from the strap conductor axis to the inner cylindrical boundary of its annular cross-section",
+  "reason": "The inner radius of an antenna strap is that distance to the inner boundary, in metres, as the name states."
+ },
+ {
+  "id": "item-180",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "This is an enclosed-current quantity, not the electrical current carried by the Rogowski-coil sensor winding",
+  "reason": "Current of a Rogowski coil reads as the current in the coil winding, while the definition is the external current threading its contour."
+ },
+ {
+  "id": "item-181",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the density-weighted bulk-flow velocity of all contributing carbon ion charge states",
+  "reason": "A toroidal carbon flow velocity at the pedestal top, summed over carbon ions, is the quantity the name denotes."
+ },
+ {
+  "id": "item-182",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "It excludes neutral nitrogen and is distinct from",
+  "reason": "Under the ruling that a bare species name counts ions, the charge-state-summed nitrogen ion density excluding neutrals is exactly what the name denotes."
+ },
+ {
+  "id": "item-183",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the toroidal component of the velocity associated with momentum convection for ions of one selected species and charge state",
+  "reason": "The name fixes species, charge state, momentum convection and the toroidal component, all of which the definition states."
+ },
+ {
+  "id": "item-184",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the effective coefficient of the density-proportional, convective contribution to transport of a specified ion charge state",
+  "reason": "An ion charge-state particle convection velocity is that effective velocity multiplying the density, as the name states."
+ },
+ {
+  "id": "item-185",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the number-density ratio between that state and the complete hydrogenic population",
+  "reason": "The name is that ratio of neutral internal-state density to total hydrogenic density, dimensionless as stated."
+ },
+ {
+  "id": "item-186",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net signed charge current crossing the electrostatic sheath from the plasma onto the plasma-facing surface of one individual divertor tile",
+  "reason": "A conventional electric current of a divertor tile is that sheath-crossing current, in amperes, as the name states."
+ },
+ {
+  "id": "item-187",
+  "class": "unit-does-not-fit-name",
+  "confidence": "high",
+  "evidence": "This quantity is a signed direction-cosine component, not a position coordinate, distance, or unnormalized displacement component",
+  "reason": "A unit-vector component is dimensionless, but the sheet gives its unit as metres, a length that contradicts the quantity defined."
+ },
+ {
+  "id": "item-188",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "abstracted over the particular scalar component, projection, magnitude, or effective reduction chosen by a concrete specialization",
+  "reason": "The definition declares itself a parent whose projection and reduction are fixed by child names, and defines no unique direction."
+ },
+ {
+  "id": "item-189",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the projection of the local magnetic-field vector onto the toroidal direction",
+  "reason": "A toroidal magnetic field at the element centroid is that projection of the field vector, in tesla, as the name states."
+ },
+ {
+  "id": "item-190",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the local bulk translational velocity of the electron population",
+  "reason": "An electron velocity in a plasma is the electron fluid bulk velocity, which is what the definition gives, in m.s^-1."
+ },
+ {
+  "id": "item-191",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the component of plasma vorticity parallel to the toroidal symmetry axis",
+  "reason": "Vertical vorticity is that symmetry-axis projection of the velocity curl, in s^-1, as the name states."
+ },
+ {
+  "id": "item-192",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the mean local number density of ionized deuterium in the fuel-ion population",
+  "reason": "A volume average of deuterium ion density, neutrals excluded, is exactly what the name states."
+ },
+ {
+  "id": "item-193",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the binormal component of the oscillatory magnetic perturbation carried by a coherent electromagnetic wave",
+  "reason": "A binormal wave magnetic field is that binormal projection of the wave magnetic perturbation, in tesla, as named."
+ },
+ {
+  "id": "item-194",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the quadrature component of the cylindrical $R$ projection of the first-order plasma velocity eigenfunction for a specified toroidal harmonic index $n$",
+  "reason": "The name states the imaginary part of a radial perturbed velocity, while the definition requires a specified toroidal harmonic index."
+ },
+ {
+  "id": "item-195",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a dimensionless integer Fourier index that specifies periodic structure around the symmetry axis",
+  "reason": "A toroidal MHD mode number is that toroidal Fourier index, dimensionless as stated."
+ }
+]
