@@ -33,7 +33,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 33,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 5 closes on the committed accepted reading alone; section 8 now refuses to close on a seat re-read below 27 found or above 12 flagged without the lead's recorded acceptance.",
+      "reason": "",
+      "when": "2026-11-13T03:46:38.504157+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+      "commit_basis": "edit",
+      "note": "Section 5 closes on the committed accepted reading alone; section 8 now refuses to close on a seat re-read below 27 found or above 12 flagged without the lead's recorded acceptance.",
+      "reason": "",
+      "when": "2026-11-13T03:46:38.504157+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T031815948063-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261113T031815948063-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "38fee94c89418b021fb5d263943680864395cd1c",
   "rubric": "content",
