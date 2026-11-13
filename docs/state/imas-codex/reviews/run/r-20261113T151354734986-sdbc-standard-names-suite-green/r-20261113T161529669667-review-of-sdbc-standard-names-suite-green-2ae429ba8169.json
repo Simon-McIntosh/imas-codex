@@ -1,0 +1,39 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-13T16:28:34.569Z",
+  "dispatched_at": "2026-11-13T16:16:19Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/audits.py",
+      "line": 719,
+      "severity": "non-blocking",
+      "text": "The hoisted registry at audits.py:703 is used only for the guard at :712 and the selection it returns is discarded; the findings still come from conformance_findings at :719, which reselects and calls load_conventions() again per name (docs_gates.py:1565), so the registry is read from disk once per name despite the hoist."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read 2ae429ba8 against ef5da219e; three files, +37/-12 \u2014 the guard narrowed to the selection with conformance_findings called unguarded, two excess blank lines removed, a literal registry sentence and a raising-check test added.",
+    "done_when": "the done_when requires the nineteen green and the whole tests/standard_names directory green from an archive of the head on all_debug with a log ending EXIT=0; suite-green-head-2ae429ba8169\u2026.log records revision 2ae429ba8, '8751 passed, 12 skipped', 0 FAILED and EXIT=0 against base-arm-e8c1bc02a.log's '19 failed' and EXIT=1.",
+    "goal": "the node's goal is to make the nineteen standard-names tests failing on main pass; this increment narrows the guard, restates the canonical fixture against a literal registry sentence and collapses the stray blank lines, so the three findings the previous review raised at ef5da219e are each answered.",
+    "manifest": "read; it records the three repairs, the head gate result with its log path, the negative control in negative_control_wide_guard.log, and a rubric line per dimension.",
+    "write_paths": "the declared write set is nine test modules plus worker_review_docs.py, name_definition_seat.py and docs_gates.py; this increment touches three paths, of which tests/standard_names/test_house_style_checks.py is inside it and imas_codex/standard_names/review/audits.py and worker_tasks/worker_generate_docs.py are outside it but carried in the manifest's changed_paths with a scope_note."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: this increment is the repair the previous review asked for at ef5da219e; imas_codex/standard_names/review/audits.py:709-715 now guards only select_conventions and calls conformance_findings unguarded, restoring the shape main already had at c2da718df:692-712.\nVERDICT done_when: the done_when requires all nineteen failing tests green and the whole directory green from an archive on all_debug with EXIT=0; /home/ITER/mcintos/.cache/imas-codex-live-rewrite/suite-green-head-2ae429ba8169bb48952a5a0cf2c81d7b5e8a69e0.log heads with revision 2ae429ba8, the archive tree, the imported module and the cwd, and ends '8751 passed, 12 skipped, 535 deselected' with EXIT=0, against base-arm-e8c1bc02a.log's '19 failed' and EXIT=1.\nVERDICT write_paths: the node's declared write set (from the parent manifest) is nine test modules plus worker_review_docs.py, name_definition_seat.py and docs_gates.py; the increment's three paths are tests/standard_names/test_house_style_checks.py (inside), imas_codex/standard_names/review/audits.py and imas_codex/standard_names/worker_tasks/worker_generate_docs.py (outside, both named in the manifest's changed_paths with a scope_note, which the brief permits).\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T151354734986-sdbc-standard-names-suite-green/manifest.md; it states each of the three repairs, cites focused2.log (19 passed, EXIT=0), focused3.log (41 passed, EXIT=0) and negative_control_wide_guard.log (1 failed, EXIT=1), and carries a rubric line for every dimension.\nVERDICT diff: read 2ae429ba8 against ef5da219e commit by commit; three files, +37/-12 \u2014 the guard narrowed so conformance_findings is unguarded (tests/standard_names/test_house_style_checks.py:210 pins it), the canonical fixture asserted against a literal registry sentence (:147-156) and the four blank lines at worker_generate_docs.py:685 collapsed to two.\nCALL_SITES: imas_codex/standard_names/review/audits.py:824 (run_all_audits), imas_codex/standard_names/review/jev_review.py:941 (run_house_style_checks([candidate]))\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/audits.py:709-719 restores the narrow guard main held at c2da718df and keeps the conformance routing, so all three defects the previous review named are repaired.\nSCORE evidence: 19\nJUSTIFICATION evidence: suite-green-head-2ae429ba8169bb48952a5a0cf2c81d7b5e8a69e0.log names revision 2ae429ba8 and ends '8751 passed' with EXIT=0, one more pass than the 8750 at ef5da219e, matching the single test the diff adds.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: two of the three changed paths (imas_codex/standard_names/review/audits.py and worker_tasks/worker_generate_docs.py) lie outside the node's declared write set and are each carried in the manifest's scope_note.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_house_style_checks.py:210 fails with DID NOT RAISE under the wide guard (negative_control_wide_guard.log, EXIT=1) and :297 pins the skip half, while :151-156 asserts the registry sentence literally rather than read back through the renderer.\nSCORE fit: 19\nJUSTIFICATION fit: the import placement and guard shape at imas_codex/standard_names/review/audits.py:702-715 match the module's existing local-import idiom, the blank-line defect at worker_generate_docs.py:685 is gone, and no added name carries a plan or ticket label.\nSCORE reuse: 20\nJUSTIFICATION reuse: the increment adds no definition; it routes through the existing owners conformance_findings (imas_codex/standard_names/docs_gates.py:1557), select_conventions and load_conventions, and reintroduces no private copy of the conformance logic.\nFINDING imas_codex/standard_names/review/audits.py:719 non-blocking: the registry hoisted at :703 is used only for the guard and its selection is discarded, so conformance_findings reselects and calls load_conventions() once per name (docs_gates.py:1565), re-reading three YAML registries per name in a batch the live rewrite runs over hundreds of names.\n",
+  "review_run_id": "r-20261113T161529669667-review-of-sdbc-standard-names-suite-green-2ae429ba8169",
+  "reviewed_base_sha": "ef5da219ebec48c23ff294155c3cb16ddfc43462",
+  "reviewed_head_sha": "2ae429ba8169bb48952a5a0cf2c81d7b5e8a69e0",
+  "reviewed_run_id": "r-20261113T151354734986-sdbc-standard-names-suite-green",
+  "scores": {
+    "durability": 18,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T16:28:46.159713+00:00",
+  "total": 112
+}
