@@ -964,7 +964,7 @@
    "name": "electron_number_density",
    "ruling": "unit-does-not-fit-name",
    "ruling_text": "the name is regenerated to match the definition and the unit, treated as an omitted qualifier",
-   "kind": "rename",
+   "kind": "rename-waiting-on-grammar",
    "reader_classes": {
     "a": "unit-does-not-fit-name",
     "b": "unit-does-not-fit-name"
@@ -972,7 +972,7 @@
    "reason": "",
    "reason_from_reader": "",
    "hint": "",
-   "waiting_on": ""
+   "waiting_on": "grammar release of column_density \u2014 an areal abundance base, so that electron_column_density parses; the nearest bases today are electrical_conductivity and grating_line_density"
   },
   {
    "name": "electron_particle_flux_at_wall_due_to_pumping",
@@ -4449,9 +4449,9 @@
  ],
  "totals_by_kind": {
   "hint": 190,
-  "rename": 28,
+  "rename": 27,
   "docs": 96,
-  "rename-waiting-on-grammar": 2
+  "rename-waiting-on-grammar": 3
  },
  "totals_by_ruling": {
   "generic-name-single-object": 190,
@@ -4459,6 +4459,47 @@
   "parent-family-definition": 96,
   "unit-does-not-fit-name": 19,
   "rename-equivalent-electron": 2
+ },
+ "family_scope": {
+  "species": {
+   "members_censused": 15,
+   "flagged_members": [
+    "carbon_density"
+   ],
+   "not_flagged": {
+    "argon_density": "label-carried/agreeing",
+    "beryllium_density": "label-carried/agreeing",
+    "boron_density": "label-carried/disputed",
+    "deuterium_density": "label-carried/agreeing",
+    "hydrogen_density": "label-carried/agreeing",
+    "iron_density": "label-carried/agreeing",
+    "krypton_density": "label-carried/agreeing",
+    "lithium_density": "absent/",
+    "neon_density": "label-carried/disputed",
+    "nitrogen_density": "absent/",
+    "oxygen_density": "label-carried/disputed",
+    "tritium_density": "label-carried/agreeing",
+    "tungsten_density": "absent/",
+    "xenon_density": "label-carried/agreeing"
+   },
+   "reading": "the population rule admits only label-carried mismatched names, so this family can be measured but only its flagged members may be rewritten in this pass"
+  },
+  "operator": {
+   "members_censused": 8,
+   "flagged_members": [
+    "flux_surface_averaged_parallel_current_density",
+    "flux_surface_averaged_toroidal_current_density"
+   ],
+   "not_flagged": {
+    "flux_surface_averaged_effective_charge_at_plasma_boundary": "label-carried/agreeing",
+    "flux_surface_averaged_inverse_of_major_radius": "label-carried/agreeing",
+    "flux_surface_averaged_inverse_of_square_of_major_radius": "label-carried/agreeing",
+    "flux_surface_averaged_magnetic_field_magnitude": "label-carried/agreeing",
+    "flux_surface_averaged_major_radius": "label-carried/agreeing",
+    "flux_surface_averaged_square_of_magnetic_field_magnitude": "label-carried/agreeing"
+   },
+   "reading": "the population rule admits only label-carried mismatched names, so this family can be measured but only its flagged members may be rewritten in this pass"
+  }
  },
  "projection": {
   "rates_beside_even_other": {
@@ -4470,15 +4511,15 @@
    "graph_export_candidates": 2044,
    "label_carried": 1871,
    "mismatched": 316,
-   "attempted_this_pass": 314,
-   "waiting_on_grammar": 2
+   "attempted_this_pass": 313,
+   "waiting_on_grammar": 3
   },
   "projected_spend_by_component_usd": {
-   "seat.rename": 4.26,
+   "seat.rename": 4.1,
    "seat.hint": 28.88,
    "seat.docs": 14.59
   },
-  "projected_total_usd": 47.73,
+  "projected_total_usd": 47.57,
   "ceiling_usd": 150,
   "verdict": "under the ceiling"
  }
