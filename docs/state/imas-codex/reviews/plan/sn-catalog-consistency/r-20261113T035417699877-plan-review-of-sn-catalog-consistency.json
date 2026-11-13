@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T04:04:56.425Z",
+  "dispatched_at": "2026-11-13T03:55:24Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "the endpoint as written is not the sequence the writer admits, so the node needs the route and the order stated or it spends a round rediscovering them from the section's own history.",
+      "text": "the done-when requires the two deuterium\u2013tritium names \"superseded onto the ruled spelling\" and also that \"no tombstone was revived\", but the ruled spelling `flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary` is today a live `status: superseded` tombstone (verified in the catalog), and the committed census classifies both rows as `collision: \"required spelling is held by a superseded tombstone\"` with `proposed_action: keep`; the writer refuses a `supersede_*` onto a tombstone, so the first of the pair can only land through the history-apart reclaim (`lead_ruled_locator`) that the prose records for the four names and the done-when does not name, and the second can only then be superseded onto it \u2014 a node reading the endpoint as two plain supersessions hits a writer refusal on the first",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-2",
+      "reason": "landing on a tombstoned spelling is exactly the operation that can be done wrongly here, so the one clause that distinguishes a correct archive from a revival cannot be shown able to fail.",
+      "text": "the three declared controls (\"two suffixes\", \"every name ending `_at_separatrix`\", \"an average planted as `X_flux_surface_averaged_at_plasma_boundary`\") all exercise the spelling classifier, while the clause this work most depends on \u2014 \"no tombstone was revived\" \u2014 has no control, so a node can pass every plant while landing on a tombstoned spelling without the archive receipt, and nothing in the done-when shows that guard fires",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:150",
+      "id": "anchors_resolve-1",
+      "reason": "the durable evidence for the same review is linked in the neighbouring comment (`docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html`), so no node's path depends on the dead path and only the comment's record is weakened.",
+      "text": "the \u00a76 comment cites `/home/ITER/mcintos/.config/reckon/crew/runs/r-20261111T220724818947-scc-separatrix-remainder/review-records/r-20261111T220724818947-scc-separatrix-remainder.json`, and that run directory no longer exists, so the pointer resolves to nothing",
+      "type": "anchors_resolve",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+  "plan_fingerprint": "a58f97863c70c335078be8a5508038ff85df07cb8828918a853d5fe084c26688",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 41,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T035417699877-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "7ddb3dc5a1ca66de0824c8ea8c4e299c54c5dd45",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the plan and evidence anchors resolve, but one \u00a76 comment names a crew-run directory that no longer exists on disk.",
+    "done_when": "a finding \u2014 \u00a76's done-when requires the two deuterium\u2013tritium names \"superseded onto the ruled spelling\" while the ruled spelling is today a superseded tombstone, and it names neither the history-apart route that can land it nor the order the pair must take.",
+    "evidence_paths": "pass \u2014 no gate or log is placed in a scratchpad or node-local temporary directory; the census instrument and the section's records sit under `docs/evidence/fragments/sn-catalog-consistency/`.",
+    "naming": "pass \u2014 \u00a76 names no symbol, file or function, and introduces no ticket number, stage label or version tag.",
+    "reasoning": "pass \u2014 the stated root cause matches the cited read-back (109 of 111 conforming, the two residuals both `separatrix_average` on the same `summary/local/separatrix_average/n_i/deuterium_tritium/value` path), the endpoint is obtainable from the committed census instrument, and the section prescribes no implementation.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, one separatrix locus spelled one way, and its clauses all measure that one endpoint.",
+    "wiring": "pass \u2014 the meta's `s6` depends-on `sn-definitions-by-construction#s6` is present, that section resolves at `docs/plans/sn-definitions-by-construction.html:107` and does rename live names, and `sn-integrity-backlog#s49` resolves at `docs/plans/sn-integrity-backlog.html:292`."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "7db19f18fd9051e1cd3fa325190d7e6510e6741ce50f799b24e970e665b3ba8d",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T08:02:46.688562+00:00",
+  "total": null
+}
