@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T11:59:51.188Z",
+  "dispatched_at": "2026-11-13T11:46:13Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "the clause as written can only route to the escalation, so it converts a correctly reclaimed name into a false tombstone alarm and leaves the section unable to close on the very state it asked for.",
+      "text": "the clause says a name of the pair that `sn-definitions-by-construction` \u00a76 \"has already brought onto the ruled spelling is recorded as settled only where that edit was the history-apart reclaim with its archive receipt\", but that section's declared routes are \u00a72's wording, \u00a73's unit spelling and \u00a75's name-against-definition dispositions through the signed rename path, so no edit it makes can be the history-apart reclaim; the settlable branch is unreachable by the actor it names, and a name the reclaim has legitimately settled before \u00a76 runs would be reported to the lead as a revived tombstone instead of recorded",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "reasoning-1",
+      "reason": "a reclaim that archives the successor edge and a supersede written back onto the reclaimed identity can leave a two-tip or chained lineage that no clause in the section can catch, so a node could satisfy every named measure and still leave the lineage narrating the same quantity twice.",
+      "text": "the done-when requires the `_at_separatrix` name to land on the tombstoned spelling by the history-apart reclaim and the operator-order name to be superseded onto it, but the committed evidence records the operator-order name as the tombstone's live successor (`scc-separatrix-remainder.json`, `chain.refined_from: [\"flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary\"]`) while the reclaim's own action moves the tombstone's \"history, reviews and lineage\" off the spelling (`scc-separatrix-reclaim.json`), and the section states no reading that the lineage ends with one live tip and no cycle",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "bbe46c0c9c00b9a0e777a544b52aa73e14ff7725",
+  "plan_fingerprint": "d64fe843e7c87983a0c78ce64c42cee395672f5a989b1e49418353a69ac73202",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 45,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T114308547841-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "fbc55470de2da8a78d9e8bf325bb1202ef575d7a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 both cited anchors resolve, and s6's numeric claim \"109 of 111\" is the committed read-back: `scc-separatrix-reclaim.json` census reads `population 111`, `conforming_count 109`, `out_of_line_count 2`, with the two out-of-line names exactly those the prose names.",
+    "done_when": "a finding \u2014 the settle clause attributes the history-apart reclaim to `sn-definitions-by-construction` \u00a76, so its only settlable branch cannot be reached by that section's own edits.",
+    "evidence_paths": "pass \u2014 the section names no session-scratch path; its cited evidence is committed under `docs/evidence/fragments/sn-catalog-consistency/`, and the read-back it requires is a live graph measurement rather than a temporary artifact.",
+    "naming": "pass \u2014 s6's prose and its done-when carry no plan labels, stage names, ticket numbers or version tags, and no changelog prose.",
+    "reasoning": "a finding \u2014 the section performs a reclaim plus a supersede on a lineage that already has a live successor, and states no endpoint that the lineage ends with one live tip and no cycle, unlike \u00a74 which measures exactly that for its own fold.",
+    "single_goal": "pass \u2014 s6 delivers one endpoint, the deuterium\u2013tritium separatrix average onto one ruled spelling with the census population at one locator; the pair's two writes, the plants and the refusal control are all measures of that same endpoint.",
+    "wiring": "pass \u2014 s6's `plan-section-depends-on` carries `sn-definitions-by-construction#s6`, which resolves (heading at `docs/plans/sn-definitions-by-construction.html:107`), and its `data-links=\"sn-integrity-backlog#s49\"` resolves to a real section (`docs/plans/sn-integrity-backlog.html`, `id=\"s49\"`); the segment is also carried by a resolved descope reason there."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "0c1dbddb9529bf0e56960d9c0c7ca4e5b27c678260f5d0d9fe7d528e8a9ca303",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T12:09:04.213797+00:00",
+  "total": null
+}
