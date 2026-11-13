@@ -21,6 +21,15 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[4]))
 
 from imas_codex.settings import get_model  # noqa: E402
+from imas_codex.standard_names.review.name_definition_phrases import (  # noqa: E402
+    THRESHOLD as DEFAULT_PHRASE_THRESHOLD,
+    extract_phrases,
+    extract_phrases_jev,
+    judge_phrases,
+    judge_reverse,
+    phrase_check,
+    reverse_check,
+)
 from imas_codex.standard_names.review.name_definition_probes import (  # noqa: E402
     SLOTS,
     confirm_candidates,
@@ -47,6 +56,16 @@ SEAT = FRAGMENTS / "name-definition-seat-results.json"
 ANSWERS = RUN_DIR / "name-definition-probes-results-full.json"
 JEV_ANSWERS = RUN_DIR / "name-definition-probes-jev-answers.json"
 CONFIRMATIONS = RUN_DIR / "name-definition-probes-confirmations.json"
+
+PHRASE_RUN_DIR = Path(
+    "/home/ITER/mcintos/.config/reckon/crew/runs/"
+    "r-20261113T000855469523-sdbc-name-definition-phrases"
+)
+PHRASE_RESULTS = FRAGMENTS / "name-definition-phrases-results.json"
+PHRASE_EXTRACTIONS = PHRASE_RUN_DIR / "phrase-extractions.json"
+PHRASE_JUDGMENTS = PHRASE_RUN_DIR / "phrase-judgments.json"
+PHRASE_REVERSE = PHRASE_RUN_DIR / "phrase-reverse-judgments.json"
+PHRASE_CACHE_MAX = 6
 
 SPLIT_SEED = 7714
 DEV_SHARE = 1 / 3
@@ -675,6 +694,300 @@ async def final() -> None:
     )
 
 
+def cap_phrases(extracted: dict[str, list[dict]]) -> dict[str, list[dict]]:
+    """At most a fixed number of phrases per name, the highest-weight first."""
+
+    return {
+        name: sorted(phrases, key=lambda phrase: -(phrase.get("probability") or 1.0))[
+            :PHRASE_CACHE_MAX
+        ]
+        for name, phrases in extracted.items()
+    }
+
+
+def phrase_curve(
+    rows: list[dict],
+    extracted: dict[str, list[dict]],
+    judgments: dict[str, dict],
+    thresholds: tuple[float, ...],
+) -> list[dict]:
+    """Recall and false-flag rate at each threshold, over the development names."""
+
+    labels = {row["name"]: row["label"] for row in rows}
+    mismatched = {name for name, label in labels.items() if label == "mismatch"}
+    agreeing = {name for name, label in labels.items() if label == "agrees"}
+    curve: list[dict] = []
+    for threshold in thresholds:
+        flagged = {
+            row["name"]
+            for row in rows
+            if phrase_check(row, extracted.get(row["name"]) or [], judgments, threshold=threshold)
+        }
+        hits = flagged & mismatched
+        false = flagged & agreeing
+        curve.append(
+            {
+                "threshold": threshold,
+                "mismatched_found": len(hits),
+                "recall": round(len(hits) / len(mismatched), 3) if mismatched else None,
+                "agreeing_flagged": len(false),
+                "false_flag_rate": round(len(false) / len(agreeing), 3)
+                if agreeing
+                else None,
+                "flagged": sorted(flagged),
+            }
+        )
+    return curve
+
+
+def choose_threshold(curve: list[dict]) -> float:
+    """The lowest threshold whose development false-flag rate holds and which finds names."""
+
+    for entry in curve:
+        if (entry["false_flag_rate"] or 0.0) <= FALSE_FLAG_CEILING and entry[
+            "mismatched_found"
+        ]:
+            return entry["threshold"]
+    return curve[-1]["threshold"]
+
+
+async def phrases() -> None:
+    threshold_arg = None
+    if "--threshold" in sys.argv:
+        threshold_arg = float(sys.argv[sys.argv.index("--threshold") + 1])
+
+    rows = load_rows()
+    items = [{**row, "id": row["name"]} for row in rows]
+    labels = {row["name"]: row["label"] for row in rows}
+    mismatched = {name for name, label in labels.items() if label == "mismatch"}
+    agreeing = {name for name, label in labels.items() if label == "agrees"}
+
+    cache: dict = {}
+    if PHRASE_EXTRACTIONS.exists():
+        cache = json.loads(PHRASE_EXTRACTIONS.read_text())
+
+    if "chat" not in cache:
+        chat, chat_cost = await extract_phrases(
+            items, model=review_model(), concurrency=12
+        )
+        cache["chat"] = {"extracted": chat, "cost_usd": round(chat_cost, 4)}
+        PHRASE_EXTRACTIONS.write_text(json.dumps(cache, indent=1, sort_keys=True) + "\n")
+    if "jev" not in cache:
+        jev, jev_cost = await extract_phrases_jev(
+            items, model=get_model("sn-judge"), concurrency=12
+        )
+        cache["jev"] = {"extracted": jev, "cost_usd": round(jev_cost, 4)}
+        PHRASE_EXTRACTIONS.write_text(json.dumps(cache, indent=1, sort_keys=True) + "\n")
+
+    extracted = {
+        "chat": cap_phrases(cache["chat"]["extracted"]),
+        "jev": cap_phrases(cache["jev"]["extracted"]),
+    }
+
+    judgments_cache: dict = {}
+    if PHRASE_JUDGMENTS.exists():
+        judgments_cache = json.loads(PHRASE_JUDGMENTS.read_text())
+    for arm in ("chat", "jev"):
+        if arm in judgments_cache:
+            continue
+        graded, cost = await judge_phrases(
+            items, extracted[arm], model=get_model("sn-judge"), concurrency=12
+        )
+        judgments_cache[arm] = {"judgments": graded, "cost_usd": round(cost, 4)}
+        PHRASE_JUDGMENTS.write_text(
+            json.dumps(judgments_cache, indent=1, sort_keys=True) + "\n"
+        )
+
+    if PHRASE_REVERSE.exists():
+        reverse = json.loads(PHRASE_REVERSE.read_text())
+    else:
+        reverse_judgments, reverse_cost = await judge_reverse(
+            items, model=get_model("sn-judge"), concurrency=12
+        )
+        reverse = {
+            "judgments": reverse_judgments,
+            "cost_usd": round(reverse_cost, 4),
+        }
+        PHRASE_REVERSE.write_text(
+            json.dumps(reverse, indent=1, sort_keys=True) + "\n"
+        )
+
+    thresholds = tuple(round(0.05 * step, 2) for step in range(1, 20))
+    arms: dict[str, dict] = {}
+    for arm in ("chat", "jev"):
+        curve = phrase_curve(rows, extracted[arm], judgments_cache[arm]["judgments"], thresholds)
+        chosen = threshold_arg or choose_threshold(curve)
+        reading = next(entry for entry in curve if entry["threshold"] == chosen)
+        flagged = set(reading["flagged"])
+        findings = {
+            row["name"]: phrase_check(
+                row,
+                extracted[arm].get(row["name"]) or [],
+                judgments_cache[arm]["judgments"],
+                threshold=chosen,
+            )
+            for row in rows
+        }
+        findings = {name: found for name, found in findings.items() if found}
+        disposition_counts: collections.Counter = collections.Counter(
+            finding["disposition"] for found in findings.values() for finding in found
+        )
+        kind_counts: collections.Counter = collections.Counter(
+            finding["pattern"] for found in findings.values() for finding in found
+        )
+        arms[arm] = {
+            "threshold": chosen,
+            "development": {
+                "names": len(rows),
+                "mismatched": len(mismatched),
+                "mismatched_found": reading["mismatched_found"],
+                "recall": reading["recall"],
+                "agreeing": len(agreeing),
+                "agreeing_flagged": reading["agreeing_flagged"],
+                "false_flag_rate": reading["false_flag_rate"],
+                "missed_mismatched": sorted(mismatched - flagged),
+                "false_flags": sorted(agreeing & flagged),
+            },
+            "curve": curve,
+            "flagged_names": sorted(flagged),
+            "findings": findings,
+            "dispositions": dict(sorted(disposition_counts.items())),
+            "kinds": dict(sorted(kind_counts.items())),
+            "phrases_per_name": round(
+                sum(len(found) for found in extracted[arm].values()) / len(rows), 2
+            ),
+            "cost_usd": round(
+                cache[arm]["cost_usd"] + judgments_cache[arm]["cost_usd"], 4
+            ),
+        }
+
+    reverse_findings = {
+        row["name"]: found
+        for row in rows
+        if (found := reverse_check(row, reverse["judgments"]))
+    }
+
+    seat = json.loads(SEAT.read_text())
+    seat_flagged = {
+        name
+        for name, verdict in seat["verdicts"].items()
+        if verdict.get("verdict") == "flag"
+    }
+    seat_dev = seat_flagged & set(labels)
+
+    def score(flagged: set[str]) -> dict:
+        hits = flagged & mismatched
+        false = flagged & agreeing
+        return {
+            "mismatched_found": len(hits),
+            "recall": round(len(hits) / len(mismatched), 3) if mismatched else None,
+            "agreeing_flagged": len(false),
+            "false_flag_rate": round(len(false) / len(agreeing), 3) if agreeing else None,
+            "missed_mismatched": sorted(mismatched - flagged),
+            "false_flags": sorted(agreeing & flagged),
+        }
+
+    chat_flags = set(arms["chat"]["flagged_names"])
+    jev_flags = set(arms["jev"]["flagged_names"])
+    union = chat_flags | seat_dev
+    everything = chat_flags | jev_flags | seat_dev
+    result = {
+        "schema": "name-definition-phrases",
+        "check": {
+            "id": "definition_phrase_disagrees_with_name",
+            "implementation": (
+                "imas_codex.standard_names.review.name_definition_phrases.phrase_check"
+            ),
+            "reads": "description, documentation (name withheld at extraction), name, unit",
+            "calls_a_model": True,
+            "joined_finding": "name_definition_phrase_disagreement",
+        },
+        "labels": {
+            "path": (
+                "docs/evidence/fragments/sn-name-definition-second-reading/"
+                "two-reader-labels.json"
+            ),
+            "rule": "only names both readers agree on: both-flag is a mismatch, both-pass agrees",
+            "produced_by": "two independent readers; neither the phrase check nor any model produced a label",
+            "development_names": len(rows),
+            "development_mismatched": len(mismatched),
+            "development_agreeing": len(agreeing),
+            "note": (
+                "all agreed names are development data now: they have been scored "
+                "three times and are used here only to set the threshold"
+            ),
+        },
+        "arms": arms,
+        "readings": {
+            "phrase_chat_arm": score(chat_flags),
+            "phrase_jev_arm": score(jev_flags),
+            "chat_seat": score(seat_dev),
+            "phrase_chat_union_seat": score(union),
+            "phrase_jev_union_seat": score(jev_flags | seat_dev),
+            "union_every_arm": score(everything),
+        },
+        "reverse": {
+            "rule": "a qualifier the name states that the definition does not support, reported apart",
+            "findings": reverse_findings,
+            "names": sorted(reverse_findings),
+            "cost_usd": reverse["cost_usd"],
+        },
+        "thresholds": {
+            "rule": (
+                "the lowest threshold whose development false-flag rate is at or "
+                "under the ceiling and which flags at least one development "
+                "mismatch; frozen before any fresh name is read"
+            ),
+            "frozen": {
+                "chat_arm": arms["chat"]["threshold"],
+                "jev_arm": arms["jev"]["threshold"],
+                "module_default": DEFAULT_PHRASE_THRESHOLD,
+            },
+            "grid": list(thresholds),
+        },
+        "cost_usd": {
+            "chat_extraction": cache["chat"]["cost_usd"],
+            "jev_extraction": cache["jev"]["cost_usd"],
+            "jev_judgment_chat_arm": judgments_cache["chat"]["cost_usd"],
+            "jev_judgment_jev_arm": judgments_cache["jev"]["cost_usd"],
+            "jev_reverse": reverse["cost_usd"],
+            "per_name_chat_arm": round(
+                (cache["chat"]["cost_usd"] + judgments_cache["chat"]["cost_usd"])
+                / len(rows),
+                4,
+            ),
+            "per_name_jev_arm": round(
+                (cache["jev"]["cost_usd"] + judgments_cache["jev"]["cost_usd"])
+                / len(rows),
+                4,
+            ),
+        },
+        "gate": {
+            "recall_floor": RECALL_FLOOR,
+            "false_flag_ceiling": FALSE_FLAG_CEILING,
+            "development_is_not_a_gate": (
+                "the bars are measured on fresh names; this development reading is "
+                "reported for tuning only"
+            ),
+        },
+    }
+    PHRASE_RESULTS.write_text(json.dumps(result, indent=1, sort_keys=True) + "\n")
+    print(
+        json.dumps(
+            {
+                "readings": result["readings"],
+                "thresholds": result["thresholds"]["frozen"],
+                "cost_usd": result["cost_usd"],
+                "kinds": {arm: arms[arm]["kinds"] for arm in arms},
+                "dispositions": {arm: arms[arm]["dispositions"] for arm in arms},
+                "phrases_per_name": {arm: arms[arm]["phrases_per_name"] for arm in arms},
+                "reverse_names": result["reverse"]["names"],
+            },
+            indent=1,
+        )[:6000]
+    )
+
+
 def main() -> None:
     which = sys.argv[1] if len(sys.argv) > 1 else "prototype"
     rows = load_rows()
@@ -720,6 +1033,9 @@ def main() -> None:
                 :4000
             ]
         )
+        return
+    if which == "phrases":
+        asyncio.run(phrases())
         return
     asyncio.run(final())
 
