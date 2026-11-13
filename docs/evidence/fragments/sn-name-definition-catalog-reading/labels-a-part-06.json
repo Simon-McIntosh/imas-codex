@@ -105,6 +105,41 @@
   "reason": "The name's toroidal direction, counter-passing population and density normalization are all stated in the definition, which is R times the net toroidal force density on that population."
  },
  {
+  "id": "item-0531",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Both flux and number density are summed over all ionic charge states of the specified species, excluding neutral particles",
+  "reason": "A bare ion species name counts ions summed over charge states with neutrals excluded, exactly the population the definition aggregates, and the Fickian coefficient is the diffusivity the name states."
+ },
+ {
+  "id": "item-0532",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the directional transport coefficient describing electron-particle spreading driven by an electron number-density gradient along the magnetic field",
+  "reason": "The name states parallel electron diffusivity and the definition is that field-parallel particle-diffusivity coefficient, with the matching m2 s-1 unit."
+ },
+ {
+  "id": "item-0533",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "compares whole-plasma pressure with toroidal magnetic pressure and applies the Troyon size-and-current normalization",
+  "reason": "Normalized toroidal beta is the Troyon-normalized beta the name states, dimensionless and formed from the whole-plasma pressure ratio."
+ },
+ {
+  "id": "item-0534",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the vector contribution to electric current density attributed to momentum exchange between plasma ions and neutral particles",
+  "reason": "The name's ion-neutral friction mechanism and current-density nature are exactly what the definition gives, with the matching A m-2 unit."
+ },
+ {
+  "id": "item-0535",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Total density is the sum of the thermal and fast populations of the species",
+  "reason": "The name states total electron density and the definition is the full free-electron velocity-space integral, explicitly summing thermal and fast populations with bound electrons excluded."
+ },
+ {
   "id": "item-0536",
   "class": "agrees",
   "confidence": "high",
@@ -354,7 +389,7 @@
   "class": "qualifier-missing-from-name",
   "confidence": "medium",
   "evidence": "with perfect vacuum as the zero-pressure reference",
-  "reason": "The name says only coolant pressure, while the definition fixes the absolute-vacuum reference and selects static rather than stagnation pressure, attributes the name lacks."
+  "reason": "The name says only coolant pressure, while the definition fixes the perfect-vacuum reference and selects static rather than stagnation pressure, attributes the name lacks."
  },
  {
   "id": "item-0572",
@@ -372,10 +407,10 @@
  },
  {
   "id": "item-0574",
-  "class": "qualifier-missing-from-name",
+  "class": "agrees",
   "confidence": "medium",
   "evidence": "It is a transport-closure coefficient, not the material bulk ion flow velocity",
-  "reason": "The name reads as an ion flow velocity, but the definition is an effective transport-closure coefficient that only carries velocity dimensions, an attribute the name does not state."
+  "reason": "A momentum convection velocity is the effective advective transport velocity, and the definition is exactly its field-aligned projection with the density-weighted charge-state mean."
  },
  {
   "id": "item-0575",
@@ -421,10 +456,10 @@
  },
  {
   "id": "item-0581",
-  "class": "qualifier-missing-from-name",
+  "class": "definition-narrower-than-name",
   "confidence": "medium",
   "evidence": "the geometric area of the plasma-facing wetted surface of one individual divertor tile",
-  "reason": "The name states the surface area of a divertor tile, but the definition restricts it to the plasma-facing wetted surface, an identifying attribute the name does not carry."
+  "reason": "The name states the surface area of a divertor tile, but the definition restricts it to the plasma-facing wetted surface, a subset of the surfaces the name covers."
  },
  {
   "id": "item-0582",
@@ -435,10 +470,10 @@
  },
  {
   "id": "item-0583",
-  "class": "qualifier-missing-from-name",
+  "class": "agrees",
   "confidence": "medium",
   "evidence": "This quantity represents momentum-transport advection rather than neutral center-of-mass or particle-flow velocity",
-  "reason": "The name reads as a flow velocity, while the definition is an effective advection coefficient distinct from bulk particle flow, an attribute the name does not state."
+  "reason": "The name states a poloidal momentum convection velocity for one neutral internal state, and the definition is that effective advective velocity projected on the poloidal direction."
  },
  {
   "id": "item-0584",
@@ -537,5 +572,152 @@
   "confidence": "high",
   "evidence": "the signed projection of the aggregate ion energy-flux vector onto the local poloidal direction",
   "reason": "The name's poloidal projection, ion aggregation and energy-flux nature are all stated, with the areal power unit matching."
+ },
+ {
+  "id": "item-0598",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the temperature of a specified plasma species averaged along an open magnetic field line traversing the scrape-off layer",
+  "reason": "The name's species resolution, arc-length averaging and scrape-off-layer restriction are all exactly what the definition states."
+ },
+ {
+  "id": "item-0599",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the electric current vector carried by the halo plasma flowing on open magnetic field lines between the last closed flux surface and the first wall",
+  "reason": "The name states the halo current and the definition gives that current carried by the halo plasma, with its component decomposition and current unit."
+ },
+ {
+  "id": "item-0600",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the scalar effective transport coefficient for diffusive transport of neutral-particle thermal energy in the poloidal direction",
+  "reason": "The name's poloidal direction, neutral energy, diffusion-coefficient role are each stated, with the matching diffusivity unit."
+ },
+ {
+  "id": "item-0601",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the nested closed magnetic surface on which the magnitude of the safety factor is minimized, using the normalized toroidal magnetic-flux coordinate of that surface",
+  "reason": "The name gives the coordinate, its normalisation and the minimum-absolute-safety-factor locus, which is exactly what the definition evaluates."
+ },
+ {
+  "id": "item-0602",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the parallel directional component of the [ion momentum diffusion coefficient](name:ion_momentum_diffusion_coefficient) vector",
+  "reason": "The name's parallel projection, ion momentum and diffusion-coefficient nature are all stated, with the matching diffusivity unit."
+ },
+ {
+  "id": "item-0603",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the energy-equivalent measure of the mean random kinetic energy of the bulk electron population, averaged along a plasma chord",
+  "reason": "The name states a line-averaged electron temperature and the definition is the uniform path-length average of the local electron temperature."
+ },
+ {
+  "id": "item-0604",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "it is not the radial coordinate of an arbitrary point on the polarizer surface",
+  "reason": "The name states the radial coordinate of the polarizer, but the definition restricts it to one geometric reference point, a subset of the polarizer points the name covers."
+ },
+ {
+  "id": "item-0605",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the principal field-aligned component of the gyrotropic pressure tensor of suprathermal ions, summed over all fast-ion species and charge states",
+  "reason": "The name's parallel projection, total aggregation over fast-ion species and charge states, and pressure nature are all stated."
+ },
+ {
+  "id": "item-0606",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Effective charge averaged along a specified plasma line of sight",
+  "reason": "The name states a line-averaged effective charge and the definition is the uniform chord average of the local effective charge."
+ },
+ {
+  "id": "item-0607",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the maximum photon energy at the high-energy edge of the spectral interval accepted by that pixel",
+  "reason": "The name states the upper bound energy of a detector pixel and the definition is exactly that high-energy bandpass edge for one pixel."
+ },
+ {
+  "id": "item-0608",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the charge-squared-weighted composition of the local positive-ion mixture immediately adjacent to the plasma-facing limiter surface",
+  "reason": "The name fixes effective charge and the limiter locus, and the definition is the same charge-squared second moment with neutrals excluded."
+ },
+ {
+  "id": "item-0609",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local vector torque density delivered to a specified recipient particle population by Coulomb collisions with electrons",
+  "reason": "The name's recipient population, electron collision partner, vector nature and torque-density unit are all exactly what the definition gives."
+ },
+ {
+  "id": "item-0610",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a dimensionless flux-limiter parameter for momentum transport of a specified ion charge state in the vertical $Z$ direction",
+  "reason": "The name's vertical projection, ion charge-state selection and dimensionless limiter role are each stated in the definition."
+ },
+ {
+  "id": "item-0611",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "occupied collectively by the beamlets in a neutral-beam-injection group",
+  "reason": "The width varies along the beam line, and the definition fixes it at the source surface, a narrower locus than the name's unqualified beamlet-group width."
+ },
+ {
+  "id": "item-0612",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "the generic quantity does not select a particular isotope pair, charge state, reaction product, or product channel",
+  "reason": "The definition declares an umbrella rate whose counted entity and product channel are fixed by more specific instances such as the neutron and source-rate forms."
+ },
+ {
+  "id": "item-0613",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the projection of the total [diamagnetic current density](name:diamagnetic_current_density) onto the local magnetic-field direction",
+  "reason": "The name's parallel projection, diamagnetic-drift origin and current-density nature are all exactly what the definition states."
+ },
+ {
+  "id": "item-0614",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the net toroidal current produced when injected neutrals ionize and their fast ions transfer momentum to the plasma",
+  "reason": "The name's beam-injection current source is what the definition integrates, and the fast-ion plus electron-return composition is the standard content of that net current."
+ },
+ {
+  "id": "item-0615",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the geometric area of the neutron-sensitive active surface of the detector",
+  "reason": "The name states the geometric area of the neutron-sensitive detector surface, and the definition is exactly that active-surface integral with efficiency and projection weighting excluded."
+ },
+ {
+  "id": "item-0616",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a local scalar magnetic-geometry coefficient",
+  "reason": "The name states the ratio of squared flux-coordinate gradient magnitude to squared field magnitude, and the definition is that pointwise quotient, unaveraged as stated."
+ },
+ {
+  "id": "item-0617",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "parameterizes the nondiffusive transport of electron thermal energy along the local magnetic field",
+  "reason": "The name states a parallel electron energy convection velocity, and the definition is the effective field-aligned velocity that multiplies energy density to give the convective flux."
+ },
+ {
+  "id": "item-0618",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the magnetic-surface label assigned to the location from which the channel's emission originates",
+  "reason": "The name fixes the quantity, its normalization and the emission-position locus, and the definition evaluates exactly that coordinate at that position."
  }
 ]
