@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T00:25:06.408Z",
+  "dispatched_at": "2026-11-13T00:17:18Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:56",
+      "id": "done_when-1",
+      "reason": "without a third branch the worker that hits the cap has no closeable state and must block for a ruling, which converts an ordinary spend-stop into a stalled node and hides the shortfall the census already quantifies.",
+      "text": "\u00a74's done-when offers exactly two closing states, \"accepted count at least 5,503\" or \"every source in the classes was run\", but the section's own cost limit at line 53 (the approval's remaining USD 205.76 less the unspent USD 60 tranche, about USD 145.76) sits below the census's published estimate for the very classes it names (USD 58.41 + 96.54 + 1.22 + 22.24 + 22.00 + 1.96 = USD 202.37 at the full-run rate, `sib-unaccepted-census.html`), so a spend stop with classes still unrun is the expected outcome rather than an edge case and the section cannot be closed on either branch",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:56",
+      "id": "reasoning-1",
+      "reason": "a coordinator sizing the run is told to reach a number the plan's cited yield cannot produce, so either the target should be restated against what the classes support or the plan should say on what basis the near-miss classes are expected to convert above the full run's rate.",
+      "text": "the target of 5,503 needs 300 further accepted sources out of at most 828 candidates (239 awaiting review + 395 below floor + 5 documentation missing + 91 refused-by-writer + 90 attempt-capped + 8 never claimed), a conversion of 36.2%, while the same bullet cites the full run's measured 284 of 1,308 eligible sources at 21.7% and sets its own floor \"a quarter less\" at 16%; at the plan's own reference yield those classes yield about 180 names (5,383), so the primary clause is unreachable on the plan's own evidence and the section is in practice always closed by its fallback",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:48",
+      "id": "done_when-2",
+      "reason": "the checkpoint exists to be the state the run can be restored to, and a gate that can pass with that state missing its most recent writer measures the wrong event.",
+      "text": "\u00a73's prose requires the checkpoint be \"taken once ... no other graph writer is running\", but its done-when measures only that the checkpoint's creation time is after \"the last graph write of every \u00a752 run\", which is a strictly weaker condition and is provably insufficient here: \u00a72's own `sfdc-cohort-floor` run performed 31 signed source resets and a 44-source rerun on 2026-11-12, after \u00a752's last write, so a checkpoint ordered only against \u00a752 could satisfy the letter of the gate while predating \u00a72's writes",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0c94e8bf40509d22913cbdf4460a015683c2b28e",
+  "plan_fingerprint": "2d951f4bf2447ac9e4807213ed4472a607b7b8ecf6de36272726a5f7bd7840ba",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 24,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T001616164292-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "8d9d236a469b8769f0f83a03828c5f1087041147",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 all plans, sections and evidence files cited resolve on disk; the one href in a comment (`/imas-codex/evidence/fragments/sn-full-dd-continuation/sfdc-cohort-floor.html`) resolves to the committed fragment.",
+    "done_when": "two findings \u2014 \u00a74's done-when has no branch for the case its own cost limit makes likely, and \u00a73's done-when measures a weaker condition than its prose requires.",
+    "evidence_paths": "pass \u2014 every section writes its record under `docs/evidence/fragments/sn-full-dd-continuation/` in the repository, and the four cited fragments already there resolve.",
+    "naming": "pass \u2014 the plan text carries no plan label, stage name, ticket number or version tag into a symbol, filename or comment; its own section ids and followup ids are plan data, which is where such labels belong.",
+    "reasoning": "one finding \u2014 \u00a74's numeric target is not supported by the yield evidence the same section cites.",
+    "single_goal": "pass \u2014 each section names one deliverable: s2 the cohort floor, s3 the checkpoint, s4 the post-run accepted count, s5 the documentation backlog, s6 (descoped) the demotion mechanism.",
+    "wiring": "pass \u2014 every `depends-on` resolves (`sn-integrity-backlog#s51` descoped, `#s52` done; `sn-definitions-by-construction#s2`/`#s3` done, `sn-domain-per-family#s2` done), and the section map declares s3, s4, s5 with the dependencies their prose assumes."
+  },
+  "section_digests": {
+    "_document": "16ae1c71c9e5740bc6d2aa601f5df44baba94934b41f3f8c6736012e92b11e2d",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "ab19f940f4ac471bd28ace7cbc2c493228d057ab3ff0af70892c2a687f09888a",
+    "s4": "5744cc83050583629c2f3f175e2174793aadf280f7db5c92a9a320d71df0aada",
+    "s5": "6690535f2aea19399c90db7f6eecbe8aea0ff83d558dee77f801d64ef16c7a45",
+    "s6": "b69f4c480a9cf3a5bb789f9ec172fd784a2950de5ff28f25eb6162d59232fd0e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T01:48:24.575646+00:00",
+  "total": null
+}
