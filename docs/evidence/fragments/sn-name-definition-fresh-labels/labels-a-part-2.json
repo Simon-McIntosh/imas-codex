@@ -103,5 +103,110 @@
   "confidence": "high",
   "evidence": "the field-aligned normal component of the nonthermal electron pressure tensor",
   "reason": "Parallel fast-electron pressure as the field-aligned normal stress of the suprathermal electrons is exactly what the name states, in Pa."
+ },
+ {
+  "id": "item-136",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the flux-surface average of the reciprocal square of the total magnetic-field strength on a nested magnetic surface",
+  "reason": "The name states exactly the flux-surface average of the reciprocal square of the field magnitude, and T^-2 is the dimension of 1/B^2."
+ },
+ {
+  "id": "item-137",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the total rate at which plasma in that region emits energy as electromagnetic radiation",
+  "reason": "Radiated power over the core region is the volume-integrated emission rate the name says it is, in W."
+ },
+ {
+  "id": "item-138",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Toroidal specifies the transported momentum component, not the direction in which that momentum crosses the surface.",
+  "reason": "The name's toroidal refers to the momentum component carried across a flux surface, which is the standard reading, and the unit kg.m^-1.s^-2 is a momentum flux."
+ },
+ {
+  "id": "item-139",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the angular-momentum source per unit volume arising from Coulomb collisions of those ions with background plasma particles",
+  "reason": "Every identifying attribute in the name (co-passing, fast ion, charge state, collisional torque density) is the definition's scope, and N.m^-2 is a torque density."
+ },
+ {
+  "id": "item-140",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "No particular surface orientation is fixed by this parent definition.",
+  "reason": "The definition is an umbrella over directional projections whose radial and parallel components are fixed by specific instances, so the name alone does not identify which flux component is meant."
+ },
+ {
+  "id": "item-141",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the rate at which neutral atoms or molecules transfer energy to one specified divertor target through bombardment from the plasma",
+  "reason": "Deposited neutral power on one divertor target is precisely the neutral power at the target that the name states, in W."
+ },
+ {
+  "id": "item-142",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "abstracts over the quadrant-resolved coefficients",
+  "reason": "The definition makes this an umbrella over the upper and lower outboard quadrant coefficients rather than one measured coefficient, so the name alone leaves the resolved quantity open."
+ },
+ {
+  "id": "item-143",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the requested electrical potential difference that establishes the detector-bias setpoint for one spectrometer channel",
+  "reason": "A requested voltage is a commanded setpoint, which is what the definition gives for one channel, in V."
+ },
+ {
+  "id": "item-144",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "labels position around the poloidal cross-section associated with a gyrokinetic eigenmode",
+  "reason": "The poloidal angle of the eigenmode is that geometric cross-section angle, measured in rad from the stated reference."
+ },
+ {
+  "id": "item-145",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "excludes launched or generator power, unabsorbed wave power, and energy merely transported by the wave",
+  "reason": "A reader of 'wave power' expects the power the wave carries, while the definition is only the part absorbed by a selected particle population."
+ },
+ {
+  "id": "item-146",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Poloidal magnetic field at the high-field-side pedestal top is the local strength of the poloidal-plane projection",
+  "reason": "The poloidal magnetic field is the magnitude of that projection at the stated locus, in T, exactly as the name reads."
+ },
+ {
+  "id": "item-147",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed field-aligned return-current contribution to",
+  "reason": "A parallel Pfirsch-Schlueter current density due to diamagnetic drift is that field-aligned return current density, in A.m^-2."
+ },
+ {
+  "id": "item-148",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the repeat arclength along the sensing-fiber centerline for the effective birefringent-axis orientation to return to the same state",
+  "reason": "The twist period of the sensor is exactly that spatial repetition length along the fiber, in m."
+ },
+ {
+  "id": "item-149",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Cumulative wave power absorbed by a specified thermal ion charge state within the plasma volume enclosed by a specified magnetic flux surface.",
+  "reason": "The name states power of a thermal ion charge state, while the definition restricts it to wave power absorbed from the wave field, a mechanism the name omits."
+ },
+ {
+  "id": "item-150",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron count. Each neutral krypton atom contributes 36 equivalent electrons.",
+  "reason": "A krypton prefill 'count' reads as an atom count, while the definition is an equivalent-electron count weighted by the krypton atomic number."
  }
 ]
