@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T00:22:59.411Z",
+  "dispatched_at": "2026-11-13T00:15:51Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-catalog-consistency/r-20261113T001446480117-plan-review-of-sn-catalog-consistency/plan.html:50",
+      "id": "done_when-1",
+      "reason": "as written item 2 can close while item 3 is unsatisfiable, so a node reaches the end of the section with a settled row whose advisory still stands and no rule that such a row does not count as settled.",
+      "text": "a `batch-272` row may be recorded as \"already settled by `sn-definitions-by-construction` \u00a76 with the edit that settled it\", but \u00a76's dispositions (definitions \u00a75 line 103) include \"hold from the cut\" and \"a recorded reason it stands\", neither of which clears the unit-pair advisory that the next item makes a named witness; the previous review constrained the *declined* branch of this item for exactly this reason and the *settled* branch, added in this change, carries the same hole",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-catalog-consistency/r-20261113T001446480117-plan-review-of-sn-catalog-consistency/plan.html:44",
+      "id": "reasoning-1",
+      "reason": "the wrong instrument leaves the node unable to predict which rows \u00a76 settles, and only \u00a75's wording check could route one of them, so a row may be recorded as settled on a disposition that is not a rename.",
+      "text": "the sentence \"`sn-definitions-by-construction` \u00a76 may settle some of these rows itself, since its dimension check can route a mismatched name to a rename\" cites a mechanism \u00a76 does not hold: \u00a76 executes \u00a72's wording, \u00a73's unit spelling and \u00a75's name/definition dispositions, while \u00a73's dimension check already ran (`sn-definitions-by-construction#s3` is declared done) and its committed census (`docs/evidence/fragments/sn-definitions-by-construction/unit-spelling-census.json`) lists the unit-pair rows under `divergences` with `recorded_exception: false`, not under the 41-entry `dimension_mismatches` list",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-catalog-consistency/r-20261113T001446480117-plan-review-of-sn-catalog-consistency/plan.html:44",
+      "id": "reasoning-2",
+      "reason": "a worker binding the row to \"the rate family\" lands on the wrong family and would carry the rename into the wrong batch's population.",
+      "text": "`source_rate_due_to_beam_beam_fusion` is placed \"in the rate family\", but the census's `physical_base` families place it in `source_rate`, and a separate family named `rate` exists in the same census (125 divergent families), so the family name in this sentence resolves to a different family than the row belongs to",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0c94e8bf40509d22913cbdf4460a015683c2b28e",
+  "plan_fingerprint": "32d6db83f91fd872fbe1852dcd506638e13cbfb9affb1a9705be9979a311b8bf",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 35,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T001446480117-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "d619e8c4423f8467232a206800b8d8363ea853a6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-integrity-backlog/sib-consistency-batches.json`, `sib-consistency-census-run.py`, `sn-integrity-backlog#s52`, `sn-definitions-by-construction#s6`, `sn-domain-per-family#s3` and `sn-full-dd-continuation#s4` all resolve.",
+    "done_when": "a finding \u2014 the new \"recorded as already settled by \u00a76\" branch (line 50) lets a `batch-272` row close on a \u00a76 disposition that leaves the unit-pair advisory standing, which item 3 (line 51) requires gone.",
+    "evidence_paths": "pass \u2014 the batch artifact and the census instrument sit under `docs/evidence/fragments/`, and the pass's own records go to `docs/evidence/fragments/sn-catalog-consistency/`, all durable repository paths.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers; `batch-272`..`batch-279` are artifact row identifiers, which is data.",
+    "reasoning": "a finding \u2014 the prose justifies the post-\u00a76 re-read with a \"dimension check\" \u00a76 does not carry, and the batch's third row is bound to a family name the census shows it is not in.",
+    "single_goal": "pass \u2014 s2 delivers one thing, the sized batches applied; spend recording and the census entry point are enabling conditions of that one deliverable.",
+    "wiring": "pass \u2014 s2 declares waits on `sn-integrity-backlog#s52` and `sn-definitions-by-construction#s6`, both resolve, and `sn-catalog-consistency#s3` waits on s2; the ceded lineage rename resolves to \u00a74."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "e567e1e69442e38dd80ef3a16a4c7dff2898db0bf0b57b6aa6b8174665c9222b",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T01:46:37.577560+00:00",
+  "total": null
+}
