@@ -40,6 +40,16 @@
       "finding": "done_when-1",
       "reason": "The section is closed on a measure already taken; its close comment records that the scoring pass had no planted reference and that its first run mis-keyed the phrase judgments before correction, and that the seat's counts did not depend on that key.",
       "when": "2026-11-13T10:33:51.154889+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "7ca24b0ef5d705489e431030b1abd25bf1ef2a18",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The close comment names the scored revision dd62487f2 and the freeze commit 3a5c3d861 and states they live only in the unmerged worker tree by the lead's ruling, so the readings cannot be re-run from main.",
+      "reason": "",
+      "when": "2026-11-13T10:34:04.692712+00:00"
     }
   ],
   "responses": {
@@ -48,6 +58,15 @@
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
       "reason": "The section is closed on a measure already taken; its close comment records that the scoring pass had no planted reference and that its first run mis-keyed the phrase judgments before correction, and that the seat's counts did not depend on that key.",
       "when": "2026-11-13T10:33:51.154889+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "7ca24b0ef5d705489e431030b1abd25bf1ef2a18",
+      "commit_basis": "edit",
+      "note": "The close comment names the scored revision dd62487f2 and the freeze commit 3a5c3d861 and states they live only in the unmerged worker tree by the lead's ruling, so the readings cannot be re-run from main.",
+      "reason": "",
+      "when": "2026-11-13T10:34:04.692712+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T084605941237-plan-review-of-sn-definitions-by-construction.json",
