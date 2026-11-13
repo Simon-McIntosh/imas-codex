@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T08:16:47.418Z",
+  "dispatched_at": "2026-11-13T08:11:20Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:143",
+      "id": "reasoning-1",
+      "reason": "the section argues that scored names cannot carry a verdict and then makes those scored names the only thing that can stop it closing, so a node reading \u00a78 is told to accept a floor the section's own reasoning has already disqualified.",
+      "text": "the changed bullet gates \u00a78 on the seat's reading over \"the 313 names both of \u00a74's readers labelled alike\", but docs/evidence/fragments/sn-definitions-by-construction/name-definition-phrases-results.json records those same 313 names in its labels block as {development_names: 313, development_mismatched: 55, development_agreeing: 258} with the note \"all agreed names are development data now: they have been scored three times and are used here only to set the threshold\" \u2014 so the floor is set on the tuning population, the one population \u00a78's own prose at line 137 rules out on the ground that names \"scored three times ... no longer count as unseen\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:143",
+      "id": "done_when-1",
+      "reason": "as written the floor cannot fail by either route, so the bullet records a transcription rather than a measure and the guard \u00a78 exists to declare is not actually shown to fire.",
+      "text": "the bullet asks for the seat's reading to be \"taken again in the same pass and recorded beside the 41 of 55 found and 15 of 258 flagged that name-definition-seat-results.json holds for those names\", but that file is the record of the 313-name seat pass itself (scored.items 313, model openrouter/anthropic/claude-sonnet-5, cost_usd 2.2711, per-name verdicts summing to 41 of 55 and 15 of 258), so the baseline and the measurement are one artefact: a node that re-calls the seat overwrites the value it must be compared against, and a node that re-derives from the committed verdicts is guaranteed to reproduce it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:141",
+      "id": "done_when-2",
+      "reason": "the section's second completion condition asks for a merge the recorded ruling forbids, so \u00a78 cannot be closed by the node that does its work and the section will stay open with all five of its evidence conditions met.",
+      "text": "the second bullet requires \"the successor check exists as one of the named review checks\", while the verdict recorded on this plan at line 182 reports the lead's ruling of 2026-11-13 that \"the successor and slot-probe check code is not merged\" and the verdict itself is that the seat stands",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "19576030d5e8e02b96bfdddc5d82194720c55fd5",
+  "plan_fingerprint": "9a95022bf7c872ce34efe548993e34f186a873dd83e22f7b8aa10aaa555d8b49",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 37,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T080954242536-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "471f660f4ab467fc83c27556837af6e94bae9d74",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 name-definition-seat-results.json, two-reader-labels.json and the fresh-label directory all resolve on disk and in the HEAD tree, and none of the section's references is extensionless.",
+    "done_when": "a finding \u2014 \u00a78's fourth done-when bullet compares a new seat reading against a baseline that is the record of the same pass, so the floor cannot be crossed without overwriting the value it is compared to.",
+    "evidence_paths": "pass \u2014 the fresh labels live under docs/evidence/fragments/sn-name-definition-fresh-labels/ and the seat result under docs/evidence/fragments/sn-definitions-by-construction/, both committed at HEAD and openable by a later reader.",
+    "naming": "pass \u2014 \u00a78 introduces no code symbol, file name or comment, and the paths it names are evidence artefacts rather than plan-labelled source.",
+    "reasoning": "a finding \u2014 \u00a78's premise is that names already scored no longer count as unseen, yet its fourth bullet sets a closing floor from the 313 names its own cited evidence designates as development data used only to set a threshold.",
+    "single_goal": "pass \u2014 every bullet of \u00a78 serves the one verdict on which name-definition check \u00a77 re-runs, and the added seat re-read is used by that verdict rather than standing as a second deliverable.",
+    "wiring": "pass \u2014 \u00a78's declared wait on \u00a75 is the only direct dependency it needs, \u00a77's wait on \u00a78 is declared at line 23, and \u00a74's labels reach \u00a78 through \u00a75, so no relationship is missing and none points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "188d29937ef57a1aec810a58cf5fa6811e3840933f7818e6d4bffd4aa7c1d8dc",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "f22102f5bee1d009a1ccad79e435abc698fa3838aa5bc5f1d358028f39e2f007",
+    "s8": "6760bd24eca35412973fb46cfc595c579d3f309c6248fc4539ad0e3d722775d0"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T08:40:18.135997+00:00",
+  "total": null
+}
