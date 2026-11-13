@@ -385,62 +385,141 @@
  },
  "spend": {
   "ceiling_usd": 10,
-  "spent_usd": 0.0873,
-  "measured": {
-   "docs_generation_call_usd": 0.0873,
-   "rename_validation_usd": 0.0
-  },
+  "spent_usd": 0.170355,
   "per_kind": {
    "docs-wording": {
     "names_completed": 0,
     "usd": 0.0873,
-    "note": "one generation, then the review refused"
+    "note": "candidate generated; review refused by the hold-kind defect"
    },
    "rename": {
+    "names_completed": 1,
+    "usd": 0.083054704,
+    "note": "radius_of_arc_of_circle_center, applied"
+   },
+   "hint-name-axis": {
     "names_completed": 0,
     "usd": 0.0,
-    "note": "refused at grammar validation before any model call"
+    "note": "refused before any model call"
    }
-  },
-  "note": "no kind reached five edits, so no per-name rate could be measured for a completed live edit; the projection uses the two rates committed before this node, stated beside the one call this node measured"
+  }
  },
  "manifest": {
   "path": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json",
-  "entries": 429,
+  "entries": 316,
   "totals_by_kind": {
-   "rename": 61,
-   "hint": 269,
-   "docs": 99
+   "hint": 190,
+   "rename": 28,
+   "docs": 96,
+   "rename-waiting-on-grammar": 2
   },
   "totals_by_ruling": {
-   "rename-equivalent-electron": 61,
-   "generic-name-single-object": 178,
-   "parent-family-definition": 99,
-   "name-gains-operator": 91
+   "generic-name-single-object": 190,
+   "name-gains-operator": 9,
+   "parent-family-definition": 96,
+   "unit-does-not-fit-name": 19,
+   "rename-equivalent-electron": 2
   },
   "projection": {
-   "rates_beside_each_other": {
+   "rates_beside_even_other": {
     "docs_only_per_name_usd": 0.012,
     "full_regeneration_per_name_usd": 0.152,
-    "measured_docs_generation_call_usd": 0.0873,
-    "source": "rendered-wording-census.json cost block; this node's first live attempt"
+    "measured_docs_generation_call_usd": 0.0873
    },
    "names": {
-    "seat_flagged": 429,
-    "species_wording_members": 281,
-    "flux_surface_averaged_names": 32,
-    "total_distinct_upper_bound": 742
+    "graph_export_candidates": 2044,
+    "label_carried": 1871,
+    "mismatched": 316,
+    "attempted_this_pass": 314,
+    "waiting_on_grammar": 2
    },
    "projected_spend_by_component_usd": {
-    "seat.rename": 9.27,
-    "seat.hint": 40.89,
-    "seat.docs": 15.05,
-    "species-wording": 3.37,
-    "operator-wording": 0.38
+    "seat.rename": 4.26,
+    "seat.hint": 28.88,
+    "seat.docs": 14.59
    },
-   "projected_total_usd": 68.96,
+   "projected_total_usd": 47.73,
    "ceiling_usd": 150,
    "verdict": "under the ceiling"
+  },
+  "waiting_on_grammar": [
+   "lithium_source_rate_due_to_gas_injection",
+   "vertical_neutral_species_center_of_mass_velocity"
+  ]
+ },
+ "resumed_attempt": {
+  "at": "2026-11-13T13:09:10Z",
+  "review_fix_merged": "64db0f1fa merged into the worktree as a310f6405",
+  "population_corrected": {
+   "rule": "the graph is the single source of truth; the graph export candidates whose two blind readers carried a label and reconciled as mismatched",
+   "candidates": 2044,
+   "label_carried": 1871,
+   "mismatched": 316,
+   "excluded": {
+    "agreeing": 1303,
+    "disputed": 252,
+    "text-changed": 91,
+    "never_read": 82
+   }
+  },
+  "attempts": [
+   {
+    "kind": "docs-wording",
+    "name": "carbon_density",
+    "mode": "hint --axis docs --scope self",
+    "outcome": "blocked",
+    "cause": "ValueError: Unknown review hold kind: name_definition - HOLD_KINDS in imas_codex/standard_names/review/holds.py:16-25 omits the kind the name-definition seat returns",
+    "log": "~/.local/share/imas-codex/logs/sn_sn-edit.log at 14:17:18-14:18:09 host time, one retry every ~17 s",
+    "wrote_graph": false,
+    "spend_usd": 0.0873
+   },
+   {
+    "kind": "rename",
+    "name": "curvature_of_arc_of_circle_center",
+    "proposed": "radius_of_arc_of_circle_center",
+    "outcome": "applied",
+    "detail": "edit_status=applied on radius_of_arc_of_circle_center; 1 producing source carried; the command timed out at 400 s mid-review",
+    "unit_before": "m",
+    "unit_after": "m",
+    "llm_cost_usd": 0.083054704,
+    "reason": "The definition states a geometric length scale and the unit is m; a curvature is the reciprocal of that length and carries m^-1, so the name stated the wrong quantity."
+   },
+   {
+    "kind": "rename",
+    "name": "electron_number_density",
+    "proposed": "electron_column_density",
+    "outcome": "declined-by-pipeline",
+    "cause": "new name fails ISN grammar round-trip: no matching physical_base or geometry_carrier; nearest candidates electrical_conductivity, grating_line_density",
+    "unit": "m^-2",
+    "wrote_graph": false
+   },
+   {
+    "kind": "hint-name-axis",
+    "names": [
+     "electron_number_density",
+     "curvature_of_arc_of_circle_*",
+     "incident_neutral_particle_flux_at_wall",
+     "momentum",
+     "ion_charge_state_momentum_source"
+    ],
+    "outcome": "refused",
+    "cause": "name_stage=accepted cannot re-enter name generation from a hint; requires --rename with a complete spelling",
+    "wrote_graph": false
+   }
+  ],
+  "unit_misfit_findings": {
+   "electron_number_density": "definition is a path-integrated column abundance with unit m^-2; the name says a local per-volume density",
+   "curvature_of_arc_of_circle_center": "definition is a length scale with unit m; the name says its reciprocal",
+   "momentum": "definition is a parent covering both extensive momentum and momentum flux; the unit kg.m^-1.s^-2 is a flux",
+   "incident_neutral_particle_flux_at_wall": "read as unit-misfit by both readers",
+   "ion_charge_state_momentum_source": "read as unit-misfit by both readers"
   }
+ },
+ "blocker_2": {
+  "id": "review-hold-kind-name-definition-unregistered",
+  "symptom": "ValueError: Unknown review hold kind: name_definition, once per review attempt, in a retry loop",
+  "site": "imas_codex/standard_names/review/holds.py:16-25 HOLD_KINDS omits the kind worker_review_docs.py returns via name_definition_note",
+  "effect": "every documentation edit the name-definition seat flags fails review, which is the whole flagged population",
+  "spend_before_failure_usd": 0.0873
  }
 }
