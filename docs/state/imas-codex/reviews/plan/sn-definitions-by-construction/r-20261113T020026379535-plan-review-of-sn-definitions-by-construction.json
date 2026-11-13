@@ -41,7 +41,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 27,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "84eec68cb980aacd3f3d51f44589f2e18f1720d3",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The fresh-label directory landed on main with the seeded draw and three sheets, and the new section 8 names it as its own output with who draws and who labels.",
+      "reason": "",
+      "when": "2026-11-13T02:32:32.988763+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "84eec68cb980aacd3f3d51f44589f2e18f1720d3",
+      "commit_basis": "edit",
+      "note": "The fresh-label directory landed on main with the seeded draw and three sheets, and the new section 8 names it as its own output with who draws and who labels.",
+      "reason": "",
+      "when": "2026-11-13T02:32:32.988763+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T020026379535-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261113T020026379535-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "7f39d8bb19d25034454a754ff51f2a85379f2fe0",
   "rubric": "content",
