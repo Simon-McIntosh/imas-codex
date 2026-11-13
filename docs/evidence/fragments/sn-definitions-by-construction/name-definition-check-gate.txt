@@ -1,0 +1,58 @@
+# revision: a42c54b8d8bcf63b7b1f343bd203c44e83ec8ce9
+# command: uv run --no-sync pytest tests/standard_names/test_name_definition_agreement.py tests/standard_names/test_review_checks.py -p no:cacheprovider
+============================= test session starts ==============================
+collected 23 items
+
+tests/standard_names/test_name_definition_agreement.py ..........        [ 43%]
+tests/standard_names/test_review_checks.py .............                 [100%]
+
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+3.09s call     tests/standard_names/test_name_definition_agreement.py::test_a_flagged_name_is_refused_without_a_recorded_reason
+0.34s setup    tests/standard_names/test_name_definition_agreement.py::test_the_planted_normalisation_is_found
+0.07s setup    tests/standard_names/test_name_definition_agreement.py::test_a_flagged_name_is_refused_without_a_recorded_reason
+0.07s setup    tests/standard_names/test_review_checks.py::test_every_check_is_decided_exactly_once
+0.03s call     tests/standard_names/test_review_checks.py::test_evidence_fields_are_carried_by_the_review_state
+0.03s call     tests/standard_names/test_review_checks.py::test_negative_control_unplanted_field_is_rejected
+0.03s call     tests/standard_names/test_name_definition_agreement.py::test_a_flagged_seat_verdict_is_persisted_as_a_review_hold
+0.01s call     tests/standard_names/test_name_definition_agreement.py::test_a_flagged_verdict_raises_a_hold_naming_the_qualifier
+
+(2 durations < 0.005s hidden.  Use -vv to show these durations.)
+======================== 23 passed, 1 warning in 9.08s =========================
+== negative control: the seat raises no hold ==
+============================= test session starts ==============================
+collected 10 items / 9 deselected / 1 selected
+
+tests/standard_names/test_name_definition_agreement.py F                 [100%]
+
+=================================== FAILURES ===================================
+__________ test_a_flagged_seat_verdict_is_persisted_as_a_review_hold ___________
+tests/standard_names/test_name_definition_agreement.py:228: in test_a_flagged_seat_verdict_is_persisted_as_a_review_hold
+    assert [hold["raised_by"] for hold in holds] == ["name-definition-seat"]
+E   AssertionError: assert [] == ['name-definition-seat']
+E     
+E     Right contains one more item: 'name-definition-seat'
+E     Use -v to get more diff
+=============================== warnings summary ===============================
+../../../../imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434
+  /home/ITER/mcintos/Code/imas-codex/.venv/lib/python3.12/site-packages/_pytest/config/__init__.py:1434: PytestConfigWarning: Unknown config option: cache_dir
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+============================= slowest 10 durations =============================
+0.35s setup    tests/standard_names/test_name_definition_agreement.py::test_a_flagged_seat_verdict_is_persisted_as_a_review_hold
+0.03s call     tests/standard_names/test_name_definition_agreement.py::test_a_flagged_seat_verdict_is_persisted_as_a_review_hold
+
+(1 durations < 0.005s hidden.  Use -vv to show these durations.)
+=========================== short test summary info ============================
+FAILED tests/standard_names/test_name_definition_agreement.py::test_a_flagged_seat_verdict_is_persisted_as_a_review_hold
+================== 1 failed, 9 deselected, 1 warning in 7.34s ==================
+control_exit=1
+EXIT=0

@@ -10,7 +10,10 @@
     false-flag rate). The recall floor of 80 % is <strong>not met</strong> and the
     false-flag ceiling of 10 % is exceeded by the union. The deterministic pass
     alone finds 14 of 47 at 11 of 207 and the judgment alone 16 of 47 at 17 of 207.
-    Counts are from <code>name-definition-check-results.json</code>.
+    Counts are from <code>name-definition-check-results.json</code>. The
+    lead ruling of 2026-11-13 accepted the chat review seat at its own measured
+    reading and made the 80 % figure a target for a successor rather than a bar;
+    the seat's score and its pass over every published name are recorded below.
   </p>
 
   <h3>What was built</h3>
@@ -298,3 +301,78 @@
     held-out recall figure is scored against.
   </p>
 </section>
+<h3>The seat over every published name, and what it proposes</h3>
+
+  <p>
+    The lead ruling of 2026-11-13 accepted the seat at its measured reading and
+    made the 80 % figure a target for a successor, so the seat ran over every
+    published name. <strong>1,977</strong> published names were read from the live
+    graph read-only — a name is published when it carries the catalog export
+    commit (<code>catalog_commit_sha</code>); the graph's <code>status</code> field
+    marks drafts and superseded names, not the cut — with each name's definition,
+    documentation, unit and child names. All <strong>1,977</strong> were judged and
+    <strong>none went unanswered</strong>. The pass is resumable: each batch's
+    verdicts append to a GPFS JSONL as they land, so a run cut short keeps what it
+    paid for and a rerun judges only the names not yet recorded.
+  </p>
+
+  <p>
+    <strong>429 names flagged (21.7 %)</strong>, each with the qualifier kind, the
+    definition phrase the flag rests on and exactly one proposed disposition. The
+    disposition is proposed, never applied: the lead rules on each.
+  </p>
+
+  <table>
+    <thead><tr><th>Qualifier the definition states</th><th>Flagged</th><th>Proposed disposition</th></tr></thead>
+    <tbody>
+      <tr><td>restriction-to-one-object</td><td>169</td><td>rename, with a proposed spelling</td></tr>
+      <tr><td>family-of-quantities</td><td>99</td><td>hold from the cut</td></tr>
+      <tr><td>counting-convention</td><td>70</td><td>rewrite the definition</td></tr>
+      <tr><td>integration</td><td>64</td><td>rewrite the definition</td></tr>
+      <tr><td>weighting</td><td>18</td><td>rewrite the definition</td></tr>
+      <tr><td>normalisation</td><td>9</td><td>rewrite the definition</td></tr>
+    </tbody>
+  </table>
+
+  <p>
+    Totals: <strong>169 rename</strong>, <strong>161 rewrite the definition</strong>,
+    <strong>99 hold from the cut</strong>. Every one of the 429 is listed in
+    <code>name-definition-seat-catalog.json</code> with its class, phrase, unit and
+    disposition; the proposed spelling is carried where the disposition is a
+    rename. Representative findings, one per class:
+  </p>
+
+  <table>
+    <thead><tr><th>Name</th><th>Class</th><th>The phrase the flag rests on</th><th>Proposed</th></tr></thead>
+    <tbody>
+      <tr><td><code>accumulated_lithium_count</code></td><td>restriction to one object</td><td>the documentation restricts it to "the post-breakdown gas-injection count"</td><td>rename to <code>accumulated_lithium_count_due_to_gas_injection</code></td></tr>
+      <tr><td><code>conductivity</code></td><td>family of quantities</td><td>the documentation says "the parent quantity covers directional coefficients expressed in cylindrical, flux-coordinate…"</td><td>hold from the cut</td></tr>
+      <tr><td><code>accumulated_argon_count</code></td><td>counting convention</td><td>the definition states "each argon atom contributes 18 equivalent electrons"</td><td>rewrite the definition</td></tr>
+      <tr><td><code>co_passing_thermal_particle_source_rate</code></td><td>integration</td><td>the definition gives "the flux-surface-averaged volumetric rate"</td><td>rewrite the definition</td></tr>
+      <tr><td><code>ion_average_temperature_at_internal_transport_barrier</code></td><td>weighting</td><td>the definition states "distinct ion species are averaged equally"</td><td>rewrite the definition</td></tr>
+      <tr><td><code>nuclear_rate_of_neutron_detector_converter</code></td><td>normalisation</td><td>the definition gives yield "per emitted source neutron"</td><td>rewrite the definition</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Abstract parents, from the pipeline's own state</h4>
+
+  <p>
+    <strong>268</strong> published names carry at least one child through
+    <code>HAS_PARENT</code>. Of those, <strong>212</strong> are published with a
+    definition the seat reads as stating one quantity and <strong>56</strong> are
+    not — the rule being that a parent's definition states one quantity unless the
+    seat flags it as a family of quantities. Whether each of the 56 is publishable
+    with that definition is the adjudication the lead makes, not this node.
+  </p>
+
+  <p>
+    <strong>Cost.</strong> The per-name cost measured on the 313-name score is USD
+    0.0073, which projects the full pass over 2,216 judged records (the 1,977
+    published names plus the names the first, wider query judged before it was
+    recorded as over the ceiling) to about <strong>USD 16.1</strong>; the
+    re-score's 120 records add about USD 0.9, taking the node's spend to about
+    <strong>USD 17.0</strong>, inside the USD 25 ceiling. The run's own cost
+    accumulator reports USD 0.1745 because each resumed invocation counts only the
+    names it judged; the projection is stated rather than a sum that does not
+    exist.
+  </p>
