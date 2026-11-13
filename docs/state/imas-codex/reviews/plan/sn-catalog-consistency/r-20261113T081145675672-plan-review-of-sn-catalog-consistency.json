@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T08:16:42.631Z",
+  "dispatched_at": "2026-11-13T08:13:02Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "a node following the first clause would supersede a live name onto a tombstoned spelling, which is the revival the same sentence forbids, and one following the second would leave the first clause unmet, so the gate reads pass or fail on which clause the node happened to trust.",
+      "text": "the done-when's first clause requires \"the two deuterium\u2013tritium names superseded onto the ruled spelling\", while its later clause requires \"the first of the pair lands on it through the history-apart reclaim ... and the second is then superseded onto it\", so the same name is ordered both superseded onto the ruled spelling and reclaimed into it, two different signed writes whose receipts and checks differ",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-2",
+      "reason": "if definitions \u00a76 renames either name onto the ruled spelling through its \u00a72 wording, the reclaim cannot run against a name that is no longer there and the node cannot tell whether an already-conforming name satisfies the clause without an archive receipt, which is exactly the re-read-after-\u00a76 clause \u00a72 of this same plan already carries.",
+      "text": "\u00a76 takes its read-back after `sn-definitions-by-construction` \u00a76 lands and states that \u00a76 \"can rename live names\", yet its done-when commands the reclaim and the second supersede on the pair under their pre-landing spellings and carries no clause to take only the names \u00a76 leaves standing or to record one \u00a76 already settled",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "19576030d5e8e02b96bfdddc5d82194720c55fd5",
+  "plan_fingerprint": "00fbac5e5490c64af0f76c90ebc3187ab1f6400d104907f30b168c1295b56946",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 42,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T081145675672-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "baa4d5905967e124d56c72cc1a12657e0ee5d098",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-integrity-backlog#s49` resolves to the descoped \u00a749, `sn-definitions-by-construction#s6` resolves, and both cited fragments exist in the evidence directory.",
+    "done_when": "a finding \u2014 \u00a76's done-when (line 83) gives the first deuterium\u2013tritium name two incompatible dispositions, superseded onto the ruled spelling in one clause and landed on it by history-apart reclaim in another.",
+    "evidence_paths": "pass \u2014 the section's evidence lives under `docs/evidence/fragments/sn-catalog-consistency/`, where `scc-separatrix-reclaim.html` and its JSON sit, and nothing in \u00a76 points at a scratchpad or a node-local path.",
+    "naming": "pass \u2014 \u00a76 carries no plan label, ticket number or version tag into a symbol, and its prose states the ruling and the census reading rather than a changelog.",
+    "reasoning": "pass \u2014 the stated root cause matches the cited read-back (109 of 111 in line, the two out of line both bound to the deuterium\u2013tritium average), the endpoint is obtainable from the census population the plan describes, and \u00a76 names no code path, step sequence or function to implement.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, the two remaining census names brought to one ruled spelling, with the reclaim as the route to it rather than a second goal.",
+    "wiring": "pass \u2014 \u00a76's only declared wait, `sn-definitions-by-construction#s6` (line 22), resolves to that plan's \u00a76, which is the live-catalog rewrite the done-when takes its read-back after."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "fbed11e7c6d9875ff56d41d1c059cb6a7d0c0f35b173c77c0873ba427e23bcb9",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T08:41:24.451257+00:00",
+  "total": null
+}
