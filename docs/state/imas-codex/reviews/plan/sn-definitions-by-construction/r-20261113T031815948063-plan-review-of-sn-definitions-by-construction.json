@@ -53,6 +53,16 @@
       "note": "Section 8 names the population: the 208 held-out names both readers labelled alike, 36 mismatched and 172 agreeing.",
       "reason": "",
       "when": "2026-11-13T03:47:09.679450+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+      "commit_basis": "edit",
+      "finding": "done_when-3",
+      "note": "Threshold freezing is now shown by a commit the evidence names, made before the check first reads the fresh labels and unchanged at the scored revision.",
+      "reason": "",
+      "when": "2026-11-13T03:47:38.451509+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "Section 8 names the population: the 208 held-out names both readers labelled alike, 36 mismatched and 172 agreeing.",
       "reason": "",
       "when": "2026-11-13T03:47:09.679450+00:00"
+    },
+    "done_when-3": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+      "commit_basis": "edit",
+      "note": "Threshold freezing is now shown by a commit the evidence names, made before the check first reads the fresh labels and unchanged at the scored revision.",
+      "reason": "",
+      "when": "2026-11-13T03:47:38.451509+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T031815948063-plan-review-of-sn-definitions-by-construction.json",
