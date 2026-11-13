@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:984 (_name_definition_note in process_review_docs_batch)",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:637 (conformance_findings in the docs batch)",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:704 (shared_part_findings in the docs generator)",
+    "imas_codex/standard_names/review/holds.py:40 (hold_id to finding_key on the persistence path)"
+  ],
+  "completed_at": "2026-11-13T13:44:08.577Z",
+  "dispatched_at": "2026-11-13T13:37:48Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "changed_paths lists nine files but the diff changes ten: tests/standard_names/test_pool_batch_processors.py is omitted, so a coordinator auditing changed_paths against the diff cannot see one of the landed files."
+    },
+    {
+      "file": "tests/standard_names/test_prose_hold_before_accept.py",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "_PASSING_SEAT duplicates the passing-name-definition-seat stub added to tests/standard_names/conftest.py:1046 by this same change (and the pre-existing stub at tests/standard_names/test_review_docs_name_definition_hold.py:135), so one seat stub body now exists three times in the suite."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_review_docs.py",
+      "line": "739",
+      "severity": "non-blocking",
+      "text": "the changed empty-verdict branch that now returns a hold note is reached by no test: test_unanswered_name_definition_judgment_holds_the_candidate drives only the raising path, so a regression that restored 'return None' here would keep the suite green."
+    },
+    {
+      "file": "tests/standard_names/test_review_docs_stages.py",
+      "line": "341",
+      "severity": "non-blocking",
+      "text": "the diff carries formatting-only churn (import reflow, removed blank lines, reformatted _persist_gc call) unrelated to the fix, which makes the reviewed diff larger than the change it describes."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "worker_review_docs.py:984 calls _name_definition_note inside the batch, worker_review_docs.py:637 calls conformance_findings, worker_generate_docs.py:704 calls shared_part_findings, and holds.py:40 hold_id reaches finding_key from persistence.",
+    "diff": "Commits 54de110b8 and 0ddd510d5 against c83d68649 change ten files: three product files (docs_gates.py, review/holds.py, worker_review_docs.py) and seven test files, all of which address the four causes landing.md names.",
+    "done_when": "The done-when asks the six named files plus test_review_docs_name_definition_hold.py and test_worker_dependency_table.py as one all_debug job with a base-revision arm and no added failure; docs-review-tests-head.log shows 104 passed EXIT=0 over exactly those eight paths.",
+    "goal": "The goal is fifteen named documentation-review tests green by the repair each cause calls for; all fifteen ids from the brief's head-gate.log pass in the head arm of docs-review-tests-head.log, and landing.md records four distinct causes.",
+    "manifest": "manifest.md records status complete, both arms with their logs and exit statuses, the negative control at docs-review-tests-base.log, and a failed scope_note; its changed_paths list is short one file.",
+    "write_paths": "The declared paths are the nine files listed in manifest.md:3; the diff touches eight of them plus imas_codex/standard_names/docs_gates.py and imas_codex/standard_names/review/holds.py, both recorded in changed_paths under a scope_note."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_prose_hold_before_accept.py:184 fails in the base arm of docs-review-tests-base.log when the try/except at worker_review_docs.py:710 is reverted, and tests/standard_names/test_docs_conformance_gate.py fails there when the docs_gates.py:1075 containment check is reverted.",
+    "evidence": "The done-when's two arms are recorded in the manifest's baseline_suite/after_suite with the exit status each log prints (after EXIT=0, baseline EXIT=1), and both logs carry revision, tree, module_file and command header lines.",
+    "fit": "worker_review_docs.py:715 mirrors the adjacent _documentation_banned_prose_note try/except at worker_review_docs.py:673, and no name in the diff carries a plan, ticket or version label.",
+    "goal_fidelity": "The fifteen ids the run's brief names in /home/ITER/mcintos/.cache/imas-codex-live-rewrite/head-gate.log all pass in the head arm of docs-review-tests-head.log, and imas_codex/standard_names/worker_tasks/worker_review_docs.py:710 fixes the reading-2 loop the brief asked to be settled.",
+    "reuse": "tests/standard_names/test_prose_hold_before_accept.py:22 re-implements the seat stub that tests/standard_names/conftest.py:1046 adds in the same change, so the same helper body now exists three times.",
+    "scope_discipline": "imas_codex/standard_names/docs_gates.py and imas_codex/standard_names/review/holds.py lie outside the declared write paths but are recorded with a scope_note as the brief permits, while changed_paths omits tests/standard_names/test_pool_batch_processors.py that the diff does change."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the run's goal is fifteen named documentation-review tests green; all fifteen FAILED ids in the brief's head-gate.log pass in docs-review-tests-head.log after worker_review_docs.py:710 and docs_gates.py:1075.\nVERDICT done_when: the done-when names the eight test paths as one all_debug gate plus a base arm; docs-review-tests-head.log records 104 passed EXIT=0 and docs-review-tests-base.log records 9 failed EXIT=1.\nVERDICT write_paths: manifest.md:3 declares nine paths; eight appear in the diff, and docs_gates.py plus review/holds.py fall outside them but are recorded in changed_paths under a scope_note.\nVERDICT manifest: manifest.md states status complete with both arm JSONs, the negative control log and a scope_note; its changed_paths omits tests/standard_names/test_pool_batch_processors.py.\nVERDICT diff: c83d68649..0ddd510d5 changes ten files across two commits, three product files and seven test files, addressing the four causes landing.md names.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_review_docs.py:984, imas_codex/standard_names/worker_tasks/worker_review_docs.py:637, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:704, imas_codex/standard_names/review/holds.py:40\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: every failing id the brief lists in head-gate.log passes in docs-review-tests-head.log, and worker_review_docs.py:710 settles the reading-2 loop with a recorded hold.\nSCORE evidence: 17\nJUSTIFICATION evidence: docs-review-tests-head.log ends 'EXIT=0' and docs-review-tests-base.log ends 'EXIT=1', both with revision, tree, module_file and command header lines recorded in manifest.md.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: docs_gates.py and review/holds.py sit outside manifest.md:3's declared paths and rely on the brief's scope_note allowance, while changed_paths omits test_pool_batch_processors.py.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_prose_hold_before_accept.py:184 and the seven conformance tests fail in docs-review-tests-base.log on the unrepaired product code, so reinstating either regression reddens the suite.\nSCORE fit: 18\nJUSTIFICATION fit: worker_review_docs.py:715 follows the adjacent try/except idiom at worker_review_docs.py:673 and the new names carry no plan or ticket label.\nSCORE reuse: 15\nJUSTIFICATION reuse: tests/standard_names/test_prose_hold_before_accept.py:22 duplicates the seat stub that tests/standard_names/conftest.py:1046 adds rather than using it.\nFINDING manifest.md:8 non-blocking: changed_paths omits tests/standard_names/test_pool_batch_processors.py although the diff changes it.\nFINDING tests/standard_names/test_prose_hold_before_accept.py:22 non-blocking: _PASSING_SEAT duplicates the conftest fixture added by the same change.\nFINDING imas_codex/standard_names/worker_tasks/worker_review_docs.py:739 non-blocking: the new empty-verdict hold branch has no test.\nFINDING tests/standard_names/test_review_docs_stages.py:341 non-blocking: the diff carries formatting-only churn unrelated to the fix.\n",
+  "review_run_id": "r-20261113T133712846301-review-of-sdbc-docs-review-tests-green-0ddd510d55ff",
+  "reviewed_base_sha": "c83d6864987831f08f93622a5e034ddb0ee17259",
+  "reviewed_head_sha": "0ddd510d55ff14362eb420ce642f5b2703ae07b5",
+  "reviewed_run_id": "r-20261113T131000218874-sdbc-docs-review-tests-green",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T13:44:56.282950+00:00",
+  "total": 101
+}
