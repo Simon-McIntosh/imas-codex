@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T03:14:26.490Z",
+  "dispatched_at": "2026-11-13T03:06:42Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-full-dd-continuation/r-20261113T024307123800-plan-review-of-sn-full-dd-continuation/plan.html:48",
+      "id": "done_when-1",
+      "reason": "a node following this clause records a \"verified checkpoint\" on a test that the empty-archive case passes, so the plan's whole protection for \u00a74 rests on a guard that does not inspect the thing it is protecting.",
+      "text": "\u00a73's done-when requires that \"its archive passes an integrity test of the whole stream, and the same test fails on a deliberately truncated copy\", but a whole-stream integrity test validates the gzip stream and says nothing about the archive's contents: an archive whose `graph.dump` member is present and zero-length passes it, and the negative control (truncating the stream) exercises only the truncation case, so the guard fires for the one failure mode it tests and stays silent on the one the repository's own criterion was written for \u2014 `imas_codex/graph/AGENTS.md` and `imas_codex/graph/neo4j_ops.py:514` define a verified recovery archive as \"a gzip tar containing a non-empty `graph.dump` member\", and the export path produces that member by `cp` from `$DATA_DIR/dumps/neo4j.dump` (`imas_codex/graph/remote.py:944`), so a failed dump yields a well-formed stream carrying nothing",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-full-dd-continuation/r-20261113T024307123800-plan-review-of-sn-full-dd-continuation/plan.html:48",
+      "id": "evidence_paths-1",
+      "reason": "this comparison is the section's newest and least self-evidencing claim; without a recorded before/after pair the run in \u00a74 proceeds on an unverifiable statement that the store survived intact, and the evidence_paths rule asks exactly for such evidence on a durable path.",
+      "text": "the clause \u00a73 changed adds \"a read afterwards returns the same node count as the read taken before the stop\", but the clause names a recorded location only for the archive test and its truncated-copy failure (\"both recorded under `docs/evidence/fragments/sn-full-dd-continuation/`\"), leaving both node counts unrecorded \u2014 so the equality is asserted with no receipt a later reader or the \u00a74 node (which is required to read the graph \"with no graph writer running\" after this checkpoint) can open, and a restored graph that came back short leaves nothing behind showing what it was measured against",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "84eec68cb980aacd3f3d51f44589f2e18f1720d3",
+  "plan_fingerprint": "b78acc033cd663167d419c4f8cfde35728d9c96051a2798a0d2fc7c7502d8922",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 26,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T024307123800-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "11851484fa9cdcaac04a2d61fb32f0286298756e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited path resolves: `docs/evidence/fragments/sn-full-dd-continuation/` (with `cohort-143.json`, `sfdc-cohort-floor.html`), the five `sn-integrity-backlog` fragments \u00a75 cites, `sib-unaccepted-census.html` behind \u00a74's class tables, and each `#s<n>` anchor in the four cited plans; no extensionless hrefs are used.",
+    "done_when": "a finding \u2014 \u00a73's archive test is a whole-stream integrity test, which an archive carrying a present but empty `graph.dump` member passes, while the repository's own recovery-archive criterion is that the member is non-empty.",
+    "evidence_paths": "a finding \u2014 \u00a73's new node-count equality is the only claim in the done-when required to be recorded nowhere, so a later reader cannot check it and a mismatch leaves no receipt.",
+    "naming": "pass \u2014 the changed units name no symbol, file or code path, so no plan label, stage name or ticket number reaches code; \u00a73 and \u00a74 are the plan's own section numbers, which the plan document owns.",
+    "reasoning": "pass \u2014 \u00a74's changed clause closes the accounting gap it was answering, and the section's endpoint survives both checks I applied: the second branch is the arithmetic expected close (the census's own per-class estimates sum to USD 202.37 over the 828 in-scope sources against a cap of USD 145.76, so the classes cannot exhaust inside the cap, exactly as the section states), and the exclusion of the vocabulary-gap class matches the pinned 0.11.1 grammar, which carries none of the four parked tokens.",
+    "single_goal": "pass \u2014 \u00a73 names one deliverable (a verified checkpoint), \u00a74 names one (the continuation run); neither carries a second verdict.",
+    "wiring": "pass \u2014 s3 now declares `sn-integrity-backlog#s52` and `sn-full-dd-continuation#s2` (plan.html:22), and s4's six `depends-on` entries all resolve to sections that exist (`sn-definitions-by-construction` s2/s3, `sn-domain-per-family` s2, `sn-integrity-backlog` s52 all read `done`); followup `f-sfdc-002` is `open` and points at \u00a73, matching \u00a73's `implementable` status."
+  },
+  "section_digests": {
+    "_document": "16ae1c71c9e5740bc6d2aa601f5df44baba94934b41f3f8c6736012e92b11e2d",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "471891167d28547edfce20cc0bdebc5975a6068e28952a84e217f9b8cc244609",
+    "s4": "6a1d8b3457ec463991796937fe13c6ca0946b5b324de49a2099a7e6c66fbde45",
+    "s5": "6690535f2aea19399c90db7f6eecbe8aea0ff83d558dee77f801d64ef16c7a45",
+    "s6": "b69f4c480a9cf3a5bb789f9ec172fd784a2950de5ff28f25eb6162d59232fd0e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T03:44:59.221251+00:00",
+  "total": null
+}
