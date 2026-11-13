@@ -1,6 +1,6 @@
-# revision: 0d2446f8fc06768f6dbf6106ab65b5bd81191224
+# revision: 3a5c3d861054d9249028e8f64cad5500f0d0ec95
 # worktree: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-phrases
-# date: 2026-11-13T00:30:20Z
+# date: 2026-11-13T00:36:18Z
 # module.__file__: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-phrases/imas_codex/standard_names/review/name_definition_phrases.py
 # cwd: /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-name-definition-phrases
 # command: /home/ITER/mcintos/Code/imas-codex/.venv/bin/python -m pytest -p no:cacheprovider --timeout=300 tests/standard_names/test_name_definition_phrases.py
@@ -17,9 +17,9 @@ tests/standard_names/test_name_definition_phrases.py ......              [100%]
 
 -- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
 ============================= slowest 10 durations =============================
-4.22s setup    tests/standard_names/test_name_definition_phrases.py::test_a_device_part_restriction_is_flagged_under_an_unrestricted_name
+4.37s setup    tests/standard_names/test_name_definition_phrases.py::test_a_device_part_restriction_is_flagged_under_an_unrestricted_name
 
 (9 durations < 0.005s hidden.  Use -vv to show these durations.)
-========================= 6 passed, 1 warning in 5.23s =========================
+========================= 6 passed, 1 warning in 5.45s =========================
 review checks load: 2
 EXIT=0
