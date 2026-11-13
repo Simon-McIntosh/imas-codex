@@ -292,5 +292,152 @@
   "confidence": "medium",
   "evidence": "the magnitude-based measure derived from the spatial gradient, independent of any particular direction or projection",
   "reason": "the gradient magnitude of the toroidal flux coordinate is exactly the quantity the name states."
+ },
+ {
+  "id": "item-0661",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the local number density of deuterium ions in the boundary plasma immediately adjacent to a plasma-facing limiter surface",
+  "reason": "under the catalog rule a bare species name counts ions, and the definition evaluates the local ion density at the limiter the name names."
+ },
+ {
+  "id": "item-0662",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed thermal-energy transport carried by neutral atoms and molecules along the local magnetic-field direction",
+  "reason": "parallel neutral energy flux is the field-aligned neutral thermal energy flux per unit area, as the name states."
+ },
+ {
+  "id": "item-0663",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "applies to hydrogen ions on the plasma boundary, with all hydrogen ion charge states summed and neutral hydrogen excluded",
+  "reason": "under the catalog rule a bare species name counts ions, and the flux-surface average is stated in the name."
+ },
+ {
+  "id": "item-0664",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed height of that point relative to the equatorial plane in the right-handed cylindrical (R, phi, Z) frame",
+  "reason": "the vertical coordinate of the injector reference position is exactly the signed Z height the name states."
+ },
+ {
+  "id": "item-0665",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "medium",
+  "evidence": "Its aggregation is not fixed at the parent level: concrete instances may be evaluated locally, averaged over a magnetic flux surface, or formed into a ratio with another geometric quantity",
+  "reason": "the definition declares an umbrella squared gradient whose local, averaged and ratio forms are fixed by more specific instances."
+ },
+ {
+  "id": "item-0666",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the nonnegative RF power propagating back toward the source because of impedance mismatch at the plasma-antenna interface",
+  "reason": "reflected power of the antenna module is the returning RF power the name states."
+ },
+ {
+  "id": "item-0667",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the density-weighted mean kinetic temperature of all positive ion species and charge states on the plasma-facing side of the limiter",
+  "reason": "the ion average temperature at the limiter is the ion-density-weighted mean temperature the name states."
+ },
+ {
+  "id": "item-0668",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed inclination of the first axis of an oblique, trapezoidal or parallelogram-shaped cross-section of one passive conductor loop element",
+  "reason": "the alpha angle of the loop element is exactly the first-axis inclination the name states."
+ },
+ {
+  "id": "item-0669",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "expresses that scale relative to the positive reference length selected for the gyrokinetic formulation",
+  "reason": "the dimensionless ratio of the Debye length to a reference length is a normalised Debye length, as the name states."
+ },
+ {
+  "id": "item-0670",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the wavelength interval equivalent to the area of the spectrometer channel's normalized instrument-function response",
+  "reason": "the effective spectral width is the response-equivalent wavelength interval the name states."
+ },
+ {
+  "id": "item-0671",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the density-weighted mean over all krypton ion charge states",
+  "reason": "the toroidal component of the density-weighted krypton ion bulk velocity at the pedestal top is what the name states."
+ },
+ {
+  "id": "item-0672",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the upper wavelength bound corresponds to the lower frequency boundary of the same passband",
+  "reason": "the upper wavelength of the filter is the long-wavelength passband edge the name states."
+ },
+ {
+  "id": "item-0673",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the imaginary quadrature of the right-hand circularly polarized E-minus component of a wave electric field phasor",
+  "reason": "the imaginary part of the right-hand circular electric-field phasor is exactly what the name states."
+ },
+ {
+  "id": "item-0674",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the angular-momentum source deposited in the thermal-ion population by the thermalization of fast particles",
+  "reason": "the thermal-ion torque density due to thermalization is the angular-momentum transfer rate the name states."
+ },
+ {
+  "id": "item-0675",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the vector-valued transport of linear momentum carried by neutral particles restricted to one specified atomic, molecular, charge, or excitation state",
+  "reason": "the linear neutral internal-state momentum flux is the carried linear momentum flux the name states."
+ },
+ {
+  "id": "item-0676",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local signed number flow of one neutral atomic or molecular species around the magnetic axis, divided by the actual area perpendicular to the local poloidal direction",
+  "reason": "the poloidal neutral particle flux is the per-area poloidal particle crossing rate the name states."
+ },
+ {
+  "id": "item-0677",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the geometric derivative of the cumulative volume enclosed by a nested magnetic flux surface with respect to its signed poloidal magnetic-flux coordinate",
+  "reason": "the named derivative of enclosed volume with respect to poloidal flux is exactly what the definition states."
+ },
+ {
+  "id": "item-0678",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "counts photons rather than radiant energy",
+  "reason": "the name says only brightness of the camera while the definition fixes it as a photon-count radiance, a different measure from energy radiance."
+ },
+ {
+  "id": "item-0679",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the volume-averaged tritium number density ... summed over all tritium charge states, divided by the volume-averaged electron density",
+  "reason": "the definition is exactly the ratio of the volume-averaged tritium density to the volume-averaged electron density the name states."
+ },
+ {
+  "id": "item-0680",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "down-gradient redistribution of the radial component of momentum across magnetic flux surfaces within the total ion population summed over all charge states",
+  "reason": "radial in transport conventionally denotes across flux surfaces, and the coefficient is the ion momentum diffusivity the name states."
+ },
+ {
+  "id": "item-0681",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the upper allowable value of a signed electromagnetic force resultant acting on the coil",
+  "reason": "the name states a maximum force while the definition fixes it as an allowable bound on a force resultant selected by one combination-matrix row."
  }
 ]
