@@ -971,7 +971,14 @@ async def phrases() -> None:
             ),
         },
     }
-    PHRASE_RESULTS.write_text(json.dumps(result, indent=1, sort_keys=True) + "\n")
+    (PHRASE_RUN_DIR / "name-definition-phrases-results-full.json").write_text(
+        json.dumps(result, indent=1, sort_keys=True) + "\n"
+    )
+    trimmed = json.loads(json.dumps(result))
+    for arm in trimmed["arms"].values():
+        for entry in arm["curve"]:
+            entry.pop("flagged", None)
+    PHRASE_RESULTS.write_text(json.dumps(trimmed, indent=1, sort_keys=True) + "\n")
     print(
         json.dumps(
             {

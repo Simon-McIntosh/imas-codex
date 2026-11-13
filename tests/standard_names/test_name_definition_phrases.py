@@ -15,6 +15,10 @@ from imas_codex.standard_names.review.name_definition_phrases import (
     reverse_check,
 )
 
+# The planted judgment is a given grade, so the tests fix the threshold at which
+# it flags rather than inheriting the tuned operating point.
+PLANTED_THRESHOLD = 0.5
+
 RESTRICTED = {
     "id": "temperature",
     "unit": "eV",
@@ -41,7 +45,9 @@ RESTRICTED_JUDGMENTS = {
 
 
 def test_a_device_part_restriction_is_flagged_under_an_unrestricted_name():
-    findings = phrase_check(RESTRICTED, RESTRICTED_PHRASES, RESTRICTED_JUDGMENTS)
+    findings = phrase_check(
+        RESTRICTED, RESTRICTED_PHRASES, RESTRICTED_JUDGMENTS, threshold=PLANTED_THRESHOLD
+    )
 
     assert [finding["pattern"] for finding in findings] == ["restricts"]
     assert findings[0]["phrase"] == "evaluated on the divertor target plate only"
@@ -54,7 +60,11 @@ def test_the_restriction_flag_needs_the_phrase_question():
     """Control: with the closed question removed, the same inputs cannot flag."""
 
     findings = phrase_check(
-        RESTRICTED, RESTRICTED_PHRASES, RESTRICTED_JUDGMENTS, apply_judgment=False
+        RESTRICTED,
+        RESTRICTED_PHRASES,
+        RESTRICTED_JUDGMENTS,
+        threshold=PLANTED_THRESHOLD,
+        apply_judgment=False,
     )
 
     assert findings == []
@@ -96,7 +106,11 @@ def test_the_suppressed_flag_returns_when_the_convention_is_removed():
     """Control: the convention is what suppresses it, not the phrase or the grade."""
 
     findings = phrase_check(
-        SPECIES, SPECIES_PHRASES, SPECIES_JUDGMENTS, apply_conventions=False
+        SPECIES,
+        SPECIES_PHRASES,
+        SPECIES_JUDGMENTS,
+        threshold=PLANTED_THRESHOLD,
+        apply_conventions=False,
     )
 
     assert [finding["pattern"] for finding in findings] == ["narrows"]
@@ -140,7 +154,7 @@ def test_the_reverse_direction_flags_an_unsupported_name_qualifier():
         }
     }
 
-    findings = reverse_check(item, judgments)
+    findings = reverse_check(item, judgments, threshold=PLANTED_THRESHOLD)
 
     assert [finding["qualifier"] for finding in findings] == ["effective"]
     assert reverse_check(item, judgments, apply_judgment=False) == []
