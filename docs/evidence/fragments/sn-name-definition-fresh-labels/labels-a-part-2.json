@@ -418,5 +418,110 @@
   "confidence": "medium",
   "evidence": "the net conventional electric current crossing an oriented surface bounded by that contour",
   "reason": "The current associated with a Rogowski coil is the enclosed current it measures, threading the winding contour, in A."
+ },
+ {
+  "id": "item-181",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the density-weighted bulk-flow velocity of all contributing carbon ion charge states",
+  "reason": "A bare carbon velocity is the bulk flow of its ions, and its toroidal component at the pedestal top is what the definition gives."
+ },
+ {
+  "id": "item-182",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local number density of nitrogen ions in the boundary plasma immediately adjacent to a plasma-facing limiter surface",
+  "reason": "A bare species name counts ions summed over charge states, so the definition's ion sum at the limiter matches the name."
+ },
+ {
+  "id": "item-183",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "evaluated at the point of maximum major radius on each magnetic flux surface, not as a surface average",
+  "reason": "The name states a toroidal convection-velocity component but omits that it is evaluated at the outboard midplane rather than anywhere on the surface."
+ },
+ {
+  "id": "item-184",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the effective coefficient of the density-proportional, convective contribution to transport of a specified ion charge state",
+  "reason": "The charge-state particle convection velocity is exactly that effective velocity factor multiplying the charge-state density, in m.s^-1."
+ },
+ {
+  "id": "item-185",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the number-density ratio between that state and the complete hydrogenic population",
+  "reason": "The name states the neutral-state density divided by the total hydrogenic density, which is that fraction, dimensionless."
+ },
+ {
+  "id": "item-186",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net signed charge current crossing the electrostatic sheath from the plasma onto the plasma-facing surface of one individual divertor tile",
+  "reason": "The conventional electric current of one divertor tile is that sheath-crossing net current, in A."
+ },
+ {
+  "id": "item-187",
+  "class": "unit-does-not-fit-name",
+  "confidence": "high",
+  "evidence": "It is the y direction cosine of that line-of-sight direction.",
+  "reason": "The quantity is a dimensionless direction-cosine component of a unit vector, so the stated unit of m gives it a length dimension it cannot have."
+ },
+ {
+  "id": "item-188",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "abstracted over the particular scalar component, projection, magnitude, or effective reduction chosen by a concrete specialization",
+  "reason": "The definition declares an explicit parent that fixes no projection, sign or reduction of the convective neutral velocity, leaving those to specializations."
+ },
+ {
+  "id": "item-189",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the projection of the local magnetic-field vector onto the toroidal direction",
+  "reason": "Toroidal magnetic field at the ferritic element centroid is that toroidal projection of the field vector, in T."
+ },
+ {
+  "id": "item-190",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the local bulk translational velocity of the electron population",
+  "reason": "An electron velocity is the bulk fluid velocity of the electron population, which the definition gives as the distribution's first moment, in m.s^-1."
+ },
+ {
+  "id": "item-191",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "Projection of the curl of plasma center-of-mass velocity along the toroidal symmetry axis",
+  "reason": "Vertical vorticity is that symmetry-axis projection of the bulk-flow curl, in s^-1."
+ },
+ {
+  "id": "item-192",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the mean local number density of ionized deuterium in the fuel-ion population",
+  "reason": "A bare deuterium density counts ions summed over charge states, and the volume average added by the definition is what the name states."
+ },
+ {
+  "id": "item-193",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the binormal component of the oscillatory magnetic perturbation carried by a coherent electromagnetic wave",
+  "reason": "The binormal wave magnetic field is exactly that binormal component of the wave's magnetic perturbation, in T."
+ },
+ {
+  "id": "item-194",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the quadrature component of the cylindrical $R$ projection of the first-order plasma velocity eigenfunction",
+  "reason": "The imaginary part of the radial perturbed plasma velocity is that quadrature component of the R-projected eigenfunction, in m.s^-1."
+ },
+ {
+  "id": "item-195",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a dimensionless integer Fourier index that specifies periodic structure around the symmetry axis for a magnetohydrodynamic perturbation",
+  "reason": "The toroidal MHD mode number is exactly that dimensionless toroidal Fourier index."
  }
 ]
