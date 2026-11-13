@@ -208,5 +208,110 @@
   "confidence": "high",
   "evidence": "expressed as an equivalent-electron count. Each neutral krypton atom contributes 36 equivalent electrons.",
   "reason": "A krypton prefill 'count' reads as an atom count, while the definition is an equivalent-electron count weighted by the krypton atomic number."
+ },
+ {
+  "id": "item-151",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the word maximum denotes the pedestal-gradient locus, not an extremum of electron density",
+  "reason": "The name reads as the density maximum in the pedestal, while the definition evaluates the density at the locus of maximum gradient."
+ },
+ {
+  "id": "item-152",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the geometric average of the reciprocal major radius over a complete magnetic flux surface",
+  "reason": "The name states the flux-surface average of reciprocal major radius, which is this geometric coefficient, in m^-1."
+ },
+ {
+  "id": "item-153",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the geometric measure of the material surface exposed toward the plasma and forming the innermost plasma-facing boundary",
+  "reason": "The area of the first wall is exactly that geometric surface measure, in m^2."
+ },
+ {
+  "id": "item-154",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "using a magnetic-field-weighted flux-surface average and a reference vacuum toroidal field",
+  "reason": "The name suggests a local field-aligned current density, while the definition is a magnetic-field-weighted flux-surface average normalized by a reference field."
+ },
+ {
+  "id": "item-155",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed projection along the geometric toroidal direction",
+  "reason": "The toroidal projection of the effective neutral E\u00d7B drift velocity is what the name states, in m.s^-1."
+ },
+ {
+  "id": "item-156",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed net transport of electron number across magnetic flux surfaces, per unit area normal to a surface",
+  "reason": "A radial electron particle flux is that flux-surface-normal electron transport, in m^-2.s^-1."
+ },
+ {
+  "id": "item-157",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the transport rate per unit area of the vertical component of linear momentum for the total ion population",
+  "reason": "The vertical ion momentum flux is exactly that Z-momentum, Z-normal stress component."
+ },
+ {
+  "id": "item-158",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the scalar component multiplying the imaginary basis element in a complex representation of a plasma-temperature quantity",
+  "reason": "The imaginary part of the plasma temperature is that quadrature component, in energy-equivalent eV."
+ },
+ {
+  "id": "item-159",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed local rate of kinetic-energy transfer from nonthermal particles to the bulk thermal electron population",
+  "reason": "Collisional power density delivered to thermal electrons is the thermal-electron collisional power density the name states, in W.m^-3."
+ },
+ {
+  "id": "item-160",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "their perpendicular pressures are averaged rather than summed; the averaging weights are unspecified",
+  "reason": "The name states the perpendicular fast-neutral pressure without saying that it is an internal-state average with unspecified weights."
+ },
+ {
+  "id": "item-161",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "elongation is the vertical half-height divided by the geometric minor radius",
+  "reason": "The elongation of the plasma boundary is that vertical-to-radial extent ratio of the boundary cross-section, dimensionless."
+ },
+ {
+  "id": "item-162",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed height along $Z$ in the right-handed cylindrical",
+  "reason": "The vertical coordinate of an X-point is its signed Z height at the magnetic null, in m."
+ },
+ {
+  "id": "item-163",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the density-weighted mean over all deuterium ion charge states",
+  "reason": "A bare species velocity is the bulk fluid velocity of its ions, and the toroidal component of that flow at the pedestal top is what the definition gives."
+ },
+ {
+  "id": "item-164",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the scalar real quadrature of a complex representation of isotropic plasma pressure",
+  "reason": "The real part of the plasma pressure is that real quadrature of the complex scalar pressure, in Pa."
+ },
+ {
+  "id": "item-165",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the temporal standard deviation of the total ion-carried charge-current density after projection onto the local magnetic-field direction",
+  "reason": "The parallel fluctuating ion current density is that field-aligned fluctuation level of the total ion current density, in A.m^-2."
  }
 ]
