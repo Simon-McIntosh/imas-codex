@@ -53,6 +53,16 @@
       "note": "Section 6 prose now names the two live deuterium-tritium names the committed read-back counts out of line, 109 of 111 conforming, and their ruled target.",
       "reason": "",
       "when": "2026-11-13T03:15:58.195252+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "df928ea702b453f7a3b785c90f85a204b986ea39",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 6 declares a wait on the live rewrite and takes its read-back after it lands.",
+      "reason": "",
+      "when": "2026-11-13T03:16:38.077968+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "Section 6 prose now names the two live deuterium-tritium names the committed read-back counts out of line, 109 of 111 conforming, and their ruled target.",
       "reason": "",
       "when": "2026-11-13T03:15:58.195252+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "df928ea702b453f7a3b785c90f85a204b986ea39",
+      "commit_basis": "edit",
+      "note": "Section 6 declares a wait on the live rewrite and takes its read-back after it lands.",
+      "reason": "",
+      "when": "2026-11-13T03:16:38.077968+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T024042144946-plan-review-of-sn-catalog-consistency.json",
