@@ -460,7 +460,7 @@ def _review_item(axis: str) -> dict:
 @pytest.mark.parametrize("axis", ["name", "docs"])
 @pytest.mark.parametrize("transition", [None, "accepted"])
 async def test_review_writer_requires_successful_owned_transition(
-    axis: str, transition: str | None
+    axis: str, transition: str | None, passing_name_definition_seat
 ) -> None:
     dims = (
         {"grammar": 18, "semantic": 18, "convention": 18, "completeness": 18}

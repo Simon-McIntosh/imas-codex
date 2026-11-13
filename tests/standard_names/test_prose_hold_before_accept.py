@@ -18,9 +18,28 @@ from imas_codex.standard_names.worker_tasks import (
     worker_review_names as _owning_worker_review_names,
 )
 
+SEAT = "imas_codex.standard_names.review.name_definition_seat.judge_name_definitions"
+
+
+async def _PASSING_SEAT(items, **_kwargs):
+    """Answer the name-versus-definition seat with a pass for every item."""
+    return (
+        [
+            {
+                "name": entry.get("id") or entry.get("name") or "",
+                "verdict": "pass",
+                "qualifier": "agrees",
+                "reasoning": "the definition states the quantity the name does",
+                "proposed_name": "",
+            }
+            for entry in items
+        ],
+        0.0,
+    )
+
 
 def _review(
-    documentation: str, *, genuine_banned: bool = True
+    documentation: str, *, genuine_banned: bool = True, seat_raises: bool = False
 ) -> tuple[str, dict, list[dict]]:
     import imas_codex.standard_names.graph_ops as graph_ops
 
@@ -73,6 +92,9 @@ def _review(
         persisted_stage.append(stage)
         return stage
 
+    async def unavailable_seat(_items, **_kwargs):
+        raise RuntimeError("the review seat is unreachable")
+
     async def adjudicate(model, name, text, findings, **kwargs):
         adjudications.append(
             {
@@ -102,6 +124,7 @@ def _review(
             _owning_graph_review_persistence, "persist_reviewed_docs", persist
         ),
         patch.object(prose_adjudicator, "_adjudicate_one", adjudicate),
+        patch(SEAT, unavailable_seat if seat_raises else _PASSING_SEAT),
         patch("imas_codex.settings.get_model", return_value="test/model"),
         patch("imas_codex.settings.get_reasoning_effort", return_value="low"),
     ):
@@ -114,7 +137,7 @@ def _review(
     return persisted_stage[0], persisted, adjudications
 
 
-def test_estimator_recipe_is_held_and_sent_to_refinement():
+def test_estimator_recipe_is_held_and_sent_to_refinement() -> None:
     documentation = (
         "The magnetic field describes magnetic flux density. "
         "It is obtained from a weighted mean of local measurements."
@@ -131,7 +154,7 @@ def test_estimator_recipe_is_held_and_sent_to_refinement():
     assert adjudications[0]["budget_manager"].run_id == "run"
 
 
-def test_definitional_relation_is_accepted_after_adjudication():
+def test_definitional_relation_is_accepted_after_adjudication() -> None:
     documentation = (
         "The associated [ion particle flux](name:ion_particle_flux) is obtained "
         "by omitting the kinetic-energy factor from the integrand."
@@ -146,7 +169,7 @@ def test_definitional_relation_is_accepted_after_adjudication():
     assert adjudications[0]["name"] == "magnetic_field"
 
 
-def test_clean_documentation_is_accepted():
+def test_clean_documentation_is_accepted() -> None:
     documentation = "The magnetic field describes magnetic flux density."
     assert all(count == 0 for count in banned_prose_findings(documentation).values())
 
@@ -155,6 +178,26 @@ def test_clean_documentation_is_accepted():
     assert stage == "accepted"
     assert persisted["score"] == 1.0
     assert adjudications == []
+
+
+def test_unanswered_name_definition_judgment_holds_the_candidate():
+    """A seat that could not answer holds the item rather than failing it.
+
+    The batch is the unit that retries: an exception escaping the note builder
+    leaves the candidate claimed and reviewed again on every pass, and an
+    accepted item would report a definition as agreeing with its name without
+    anything having compared them.
+    """
+    documentation = "The magnetic field describes magnetic flux density."
+
+    stage, persisted, _adjudications = _review(documentation, seat_raises=True)
+
+    assert stage == "reviewed"
+    assert persisted["score"] == 1.0
+    [hold] = persisted["review_holds"]
+    assert hold["kind"] == "name_definition"
+    assert "did not answer" in hold["finding"]
+    assert "RuntimeError" in hold["finding"]
 
 
 def test_batch_reports_clean_acceptance_and_prose_quarantine_apart():

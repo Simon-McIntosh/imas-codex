@@ -41,11 +41,25 @@ _UNTEMPLATED = "magnetic_field"
 _UNPARSEABLE = "vacuum_toroidal_field_strength"
 
 _CONFORMING_OPENING = "Number density of argon ions on the last closed flux surface."
-_PROSE = (
-    "The quantity is the argon number density taken as a flux-surface average, "
-    "see [flux_surface_averaged_electron_density_at_plasma_boundary]"
-    "(name:flux_surface_averaged_electron_density_at_plasma_boundary) for the "
-    "electron counterpart."
+_FLUX_SURFACE_AVERAGE_SENTENCE = (
+    "The flux-surface average is the average of a quantity over a closed "
+    "magnetic flux surface, weighted by the inverse magnitude of the poloidal "
+    "flux gradient."
+)
+_PLASMA_BOUNDARY_SENTENCE = (
+    "The last closed magnetic flux surface: the outermost flux surface on which "
+    r"field lines close on themselves, bounding the confined plasma. Where "
+    r"$\psi = \psi_{\mathrm{LCFS}}$, $\psi$ is poloidal magnetic flux; "
+    r"$\psi_{\mathrm{LCFS}}$ is its value on the last closed flux surface."
+)
+_PROSE = "\n\n".join(
+    (
+        "See [flux_surface_averaged_electron_density_at_plasma_boundary]"
+        "(name:flux_surface_averaged_electron_density_at_plasma_boundary) for "
+        "the electron counterpart.",
+        _FLUX_SURFACE_AVERAGE_SENTENCE,
+        _PLASMA_BOUNDARY_SENTENCE,
+    )
 )
 _CANONICAL_EQUATION = (
     r"$$\langle n\rangle = \oint n\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$"
@@ -149,7 +163,9 @@ def _held_for(persisted: dict[str, Any], kind: str) -> bool:
     return any(hold["kind"] == kind for hold in persisted["review_holds"])
 
 
-def test_conforming_documentation_is_accepted_on_score() -> None:
+def test_conforming_documentation_is_accepted_on_score(
+    passing_name_definition_seat,
+) -> None:
     documentation = _documentation()
     assert conformance_findings(_AVERAGED, documentation=documentation) == []
 
@@ -160,7 +176,9 @@ def test_conforming_documentation_is_accepted_on_score() -> None:
     assert not _routed_to_refinement(persisted)
 
 
-def test_canonical_statement_of_a_registered_concept_is_accepted() -> None:
+def test_canonical_statement_of_a_registered_concept_is_accepted(
+    passing_name_definition_seat,
+) -> None:
     documentation = _documentation(equation=_CANONICAL_EQUATION)
     assert conformance_findings(_AVERAGED, documentation=documentation) == []
 
@@ -170,7 +188,9 @@ def test_canonical_statement_of_a_registered_concept_is_accepted() -> None:
     assert not _routed_to_refinement(persisted)
 
 
-def test_off_template_opening_is_refined_at_a_perfect_score() -> None:
+def test_off_template_opening_is_refined_at_a_perfect_score(
+    passing_name_definition_seat,
+) -> None:
     documentation = _documentation(opening="The argon density at the boundary.")
     findings = conformance_findings(_AVERAGED, documentation=documentation)
     assert {f.finding_class for f in findings} == {
@@ -185,7 +205,9 @@ def test_off_template_opening_is_refined_at_a_perfect_score() -> None:
     assert "template_opening" in persisted["comments_per_dim"]["registry_conformance"]
 
 
-def test_forbidden_variant_equation_is_refined_at_a_perfect_score() -> None:
+def test_forbidden_variant_equation_is_refined_at_a_perfect_score(
+    passing_name_definition_seat,
+) -> None:
     documentation = _documentation(equation=_LINE_FORM_EQUATION)
     classes = {
         f.finding_class
@@ -202,7 +224,7 @@ def test_forbidden_variant_equation_is_refined_at_a_perfect_score() -> None:
 
 @pytest.mark.parametrize("equation", [_FRACTION_EQUATION, _SUBSCRIPTED_EQUATION])
 def test_non_canonical_statement_of_a_registered_concept_is_refined(
-    equation: str,
+    equation: str, passing_name_definition_seat
 ) -> None:
     documentation = _documentation(equation=equation)
     classes = {
@@ -219,7 +241,9 @@ def test_non_canonical_statement_of_a_registered_concept_is_refined(
     assert "flux-surface average" in persisted["comments"]
 
 
-def test_name_without_selected_template_is_accepted_on_score() -> None:
+def test_name_without_selected_template_is_accepted_on_score(
+    passing_name_definition_seat,
+) -> None:
     documentation = (
         "The magnetic field, a free-form opening no template governs.\n\n"
         r"$$\mathbf{B} = \nabla \times \mathbf{A}$$"
@@ -232,7 +256,9 @@ def test_name_without_selected_template_is_accepted_on_score() -> None:
     assert not _routed_to_refinement(persisted)
 
 
-def test_name_the_grammar_cannot_parse_is_accepted_on_score() -> None:
+def test_name_the_grammar_cannot_parse_is_accepted_on_score(
+    passing_name_definition_seat,
+) -> None:
     documentation = _documentation(opening="An opening no template can govern.")
 
     persisted = _review(_UNPARSEABLE, documentation)
@@ -256,7 +282,9 @@ def test_canonical_equation_of_a_required_restatement_is_accepted() -> None:
     assert HouseStyleFindingClass.NON_CANONICAL_EQUATION not in classes
 
 
-def test_below_threshold_score_is_not_raised_by_the_conformance_check() -> None:
+def test_below_threshold_score_is_not_raised_by_the_conformance_check(
+    passing_name_definition_seat,
+) -> None:
     persisted = _review(_AVERAGED, _documentation(), score=0.5)
 
     assert persisted["score"] == 0.5
@@ -273,7 +301,9 @@ def test_finding_names_the_concept_entry_and_its_canonical_form() -> None:
     assert r"\langle f\rangle = \oint f\,dS/|\nabla\psi|" in finding.detail
 
 
-def test_review_note_is_serialisable_as_per_dimension_comment() -> None:
+def test_review_note_is_serialisable_as_per_dimension_comment(
+    passing_name_definition_seat,
+) -> None:
     persisted = _review(_AVERAGED, _documentation(equation=_FRACTION_EQUATION))
 
     assert json.loads(json.dumps(persisted["comments_per_dim"]))["registry_conformance"]
