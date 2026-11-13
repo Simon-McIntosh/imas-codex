@@ -11,6 +11,7 @@ import asyncio
 import json
 import logging
 from collections.abc import Callable
+from importlib import import_module
 
 from imas_codex.standard_names.budget import (
     bind_attempt_exposure,
@@ -44,6 +45,9 @@ _WORKER_DEPENDENCIES: dict[str, Callable[[], object]] = {
     ),
     "SEMANTIC_SIM_GATE_MODEL": lambda: SEMANTIC_SIM_GATE_MODEL,
     "SEMANTIC_SIM_GATE_RESOLUTION_METHOD": lambda: SEMANTIC_SIM_GATE_RESOLUTION_METHOD,
+        "_name_definition_note": lambda: _task_collaborator(
+        "worker_review_docs", "_name_definition_note"
+    ),
     "asyncio": lambda: asyncio,
     "bind_attempt_exposure": lambda: bind_attempt_exposure,
     "charge_billable_exception": lambda: charge_billable_exception,
@@ -54,6 +58,19 @@ _WORKER_DEPENDENCIES: dict[str, Callable[[], object]] = {
     "model_provider_exposure": lambda: model_provider_exposure,
     "strip_dd_prefix": lambda: strip_dd_prefix,
 }
+
+
+def _task_collaborator(module: str, name: str) -> object:
+    """Read a collaborator that a task module defines, when a task asks for it.
+
+    A task module's own collaborators cannot be imported here at module load,
+    because the package imports this root lazily from inside a task call. The
+    attribute is read from the module at request time, so a caller that
+    replaces the name on the owning module is still the one a task sees.
+    """
+    return getattr(
+        import_module(f"imas_codex.standard_names.worker_tasks.{module}"), name
+    )
 
 
 def _worker_dependency(name: str):
