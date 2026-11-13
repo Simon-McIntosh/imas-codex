@@ -17,7 +17,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 35,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "19576030d5e8e02b96bfdddc5d82194720c55fd5",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The seat re-read is now counted on all 313 names both readers labelled alike, against the 41 of 55 and 15 of 258 the committed seat results hold for those names.",
+      "reason": "",
+      "when": "2026-11-13T08:06:58.566935+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "19576030d5e8e02b96bfdddc5d82194720c55fd5",
+      "commit_basis": "edit",
+      "note": "The seat re-read is now counted on all 313 names both readers labelled alike, against the 41 of 55 and 15 of 258 the committed seat results hold for those names.",
+      "reason": "",
+      "when": "2026-11-13T08:06:58.566935+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T035243611880-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261113T035243611880-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "3323d5a30c78b8a1851999390c805c1e8d5f7645",
   "rubric": "content",
