@@ -1,0 +1,51 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-13T15:50:34.862Z",
+  "dispatched_at": "2026-11-13T15:43:20Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/audits.py",
+      "line": 713,
+      "severity": "non-blocking",
+      "text": "run_house_style_checks wraps conformance_findings in the same try/except Exception that previously guarded only select_conventions, so a raise from shared_part_findings now silently skips the name and drops the house-style findings that used to be emitted unguarded; the guard fails open over a wider region than before."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_generate_docs.py",
+      "line": 685,
+      "severity": "non-blocking",
+      "text": "Four consecutive blank lines remain where the local SharedPartAltered definition was removed; ruff format would collapse them to the two the surrounding module uses (E303 needs preview, so ruff check does not report it)."
+    },
+    {
+      "file": "tests/standard_names/test_house_style_checks.py",
+      "line": 80,
+      "severity": "non-blocking",
+      "text": "The canonical fixture is now built by the production renderer (replace_altered_shared_parts over shared_part_sentences) and then asserted clean by conformance_findings from the same module, so the zero-findings assertion is no longer independent of the renderer: a coherent regression in both would still pass."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit ef5da219e against c2da718df; 14 files, +125/-55, the product changes being the audit routing through conformance_findings, the shared-part refusal moving into docs_gates, the prompt whitespace repair and two review check ids.",
+    "done_when": "the done_when requires all nineteen green and the whole tests/standard_names directory green from an archive of the head on all_debug with a log ending EXIT=0; the head log records 8750 passed, 0 failed, EXIT=0 against the base arm's 19 failed, EXIT=1.",
+    "goal": "the node's goal is to make the nineteen standard-names tests failing on main pass by the repair each cause calls for; the landed diff repairs each in the product where the product was wrong and restates only expectations the product had superseded.",
+    "manifest": "read; it records the gate result, a per-test cause attribution and the product risk for the live rewrite, though that risk sentence sits in evidence_inputs rather than at the top of the manifest as the brief asks.",
+    "write_paths": "the declared write set is nine test modules plus worker_review_docs.py, name_definition_seat.py and docs_gates.py; six changed paths lie outside it and each is recorded in the manifest with a scope_note as the brief permits."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: prompt.txt:38 states the goal as making the nineteen failing standard-names tests pass by the repair each cause calls for; the diff at ef5da219e repairs five in the product (review/audits.py:713, docs_gates.py:1121, worker_generate_docs.py:955, worker_refine_docs.py:297, llm/prompts/sn/generate_docs_user.md:38) and restates the rest only where the product had superseded the expectation.\nVERDICT done_when: the done_when (prompt.txt FENCE \u2014 EVIDENCE) requires each of the nineteen to pass and the whole tests/standard_names directory to pass from an archive of the head on all_debug with a log ending EXIT=0; /home/ITER/mcintos/.cache/imas-codex-live-rewrite/suite-green-head-ef5da219ebec48c23ff294155c3cb16ddfc43462.log records 'collected 9297 items / 535 deselected / 8762 selected', '8750 passed, 12 skipped', a zero FAILED count and EXIT=0, against base-arm-e8c1bc02a.log's 19 failed and EXIT=1.\nVERDICT write_paths: prompt.txt lists nine test modules plus worker_review_docs.py, name_definition_seat.py and docs_gates.py as the declared write set; the diff touches six paths outside it (review/audits.py, worker_generate_docs.py, worker_refine_docs.py, llm/prompts/sn/generate_docs_user.md, llm/prompts/sn/review_checks.yaml, tests/standard_names/test_refine_source_cohort_gate.py), and each is named in the manifest's changed_paths and scope_note, which the brief allows.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T151354734986-sdbc-standard-names-suite-green/manifest.md; it states the gate result and log paths, attributes a cause to every one of the nineteen failures and says why each landing's gate missed its six, and flags the discarded shared-part findings as a live-rewrite risk, although that risk sits under evidence_inputs rather than at the top as the brief asks.\nVERDICT diff: read ef5da219e against c2da718df commit by commit; 14 files, +125/-55; the product changes are run_house_style_checks now routing through conformance_findings (audits.py:708), the shared-part refusal moving to docs_gates.py:1121 and both workers importing it there, one prompt whitespace repair, and two review check ids added to review_checks.yaml:540.\nCALL_SITES: imas_codex/standard_names/review/audits.py:816 (run_all_audits -> run_house_style_checks), imas_codex/standard_names/review/jev_review.py:941 (run_house_style_checks), imas_codex/standard_names/worker_tasks/worker_generate_docs.py:955 (refuse_altered_shared_parts), imas_codex/standard_names/worker_tasks/worker_refine_docs.py:297 (refuse_altered_shared_parts), imas_codex/standard_names/worker_tasks/worker_refine_docs.py:377 (SharedPartAltered), imas_codex/standard_names/worker_tasks/worker_review_docs.py:637 (conformance_findings)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every one of the nineteen failures named in the base arm now passes, and the two product defects among them are fixed at their source rather than at the assertion (imas_codex/standard_names/review/audits.py:708).\nSCORE evidence: 19\nJUSTIFICATION evidence: the head gate log records 0 FAILED and EXIT=0 over the whole directory from an archive at ef5da219e, with base-arm-e8c1bc02a.log recording the 19 failures the manifest cites.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: six of the fourteen changed paths lie outside the declared write set (imas_codex/llm/prompts/sn/review_checks.yaml:540 among them) and each is recorded with a scope_note, which the brief permits.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_house_style_checks.py:176 fails if run_house_style_checks reverts to house_style_findings, but the canonical fixture at tests/standard_names/test_house_style_checks.py:80 is built by the renderer it is asserted against.\nSCORE fit: 17\nJUSTIFICATION fit: the change follows the surrounding idiom and introduces no banned name, but imas_codex/standard_names/worker_tasks/worker_generate_docs.py:685 is left with four blank lines where the removal deleted a definition.\nSCORE reuse: 19\nJUSTIFICATION reuse: imas_codex/standard_names/review/audits.py:708 now calls the existing conformance_findings owner instead of recomposing select_conventions with house_style_findings, and the refusal lives beside shared_part_findings in imas_codex/standard_names/docs_gates.py:1026.\nFINDING imas_codex/standard_names/review/audits.py:713 non-blocking: the try/except Exception now wraps conformance_findings, so a raise from shared_part_findings silently skips the name and drops the house-style findings that were previously emitted unguarded.\nFINDING imas_codex/standard_names/worker_tasks/worker_generate_docs.py:685 non-blocking: four consecutive blank lines remain where the local definition was removed, which ruff format would collapse to two.\nFINDING tests/standard_names/test_house_style_checks.py:80 non-blocking: the canonical fixture is built by the production renderer and asserted clean by conformance_findings from the same module, so the zero-findings assertion is not independent of the renderer it accompanies.\n",
+  "review_run_id": "r-20261113T154232519627-review-of-sdbc-standard-names-suite-green-ef5da219ebec",
+  "reviewed_base_sha": "c2da718df5779b6ae8d38fac7b627d2e8a9e5f88",
+  "reviewed_head_sha": "ef5da219ebec48c23ff294155c3cb16ddfc43462",
+  "reviewed_run_id": "r-20261113T151354734986-sdbc-standard-names-suite-green",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T15:54:47.510062+00:00",
+  "total": 108
+}
