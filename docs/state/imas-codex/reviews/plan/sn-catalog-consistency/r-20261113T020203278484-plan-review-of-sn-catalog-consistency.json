@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T02:10:17.694Z",
+  "dispatched_at": "2026-11-13T02:03:03Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "without a planted divergent-suffix case a node can close \u00a76 on a read-back that holds however the catalog is spelled, so the plan's gate would certify the exact consistency it is supposed to prove.",
+      "text": "\u00a76's done-when asks for \"a live read-back of the census population shows one suffix per DD locus, with any exception the lead ruled listed by name\" but declares no planted control, so the read-back cannot be shown able to fail; every sibling section that measures with a census or audit names one (\u00a72's divergent/identical family plant, \u00a73's planted dangling link, \u00a74's planted two-tip lineage, \u00a75's planted disagreeing edges, \u00a77's planted sourceless name, \u00a78's planted control), and a population that is empty, unreadable or classified by a predicate that always answers \"one suffix\" satisfies the item as written",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+  "plan_fingerprint": "9d82ad11700df69a804f4fb91bfdb147c1fd9ec8dcc79e23ba8d97bd1d45817d",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 36,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T020203278484-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "dd63b60ed8aa0da6bb43a2021c697ead9b301e17",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sib-consistency-batches.json` exists and resolves `batch-272` (3 rows) and `batch-274`\u2013`batch-279` (147 rows); `sn-definitions-by-construction` \u00a76 and \u00a75, `sn-domain-per-family` \u00a73, `sn-catalog-grouping` \u00a73, `sn-full-dd-continuation` \u00a74, and `sn-integrity-backlog` \u00a722/\u00a746/\u00a749/\u00a752 all resolve; the plan's own extensionless section hrefs resolve as `<path>.html`.",
+    "done_when": "a finding \u2014 \u00a76's done-when names no planted control, so its suffix read-back cannot be shown to fail.",
+    "evidence_paths": "pass \u2014 \u00a72 cites the committed sizing artifact under `docs/evidence/fragments/sn-integrity-backlog/`, \u00a75 cites `docs/evidence/fragments/sn-domain-per-family/`, and the sections' own evidence follows the committed `docs/evidence/fragments/<plan>/` convention that \u00a74, \u00a76 and \u00a78 already use; no measure is directed at a scratchpad or node-local path.",
+    "naming": "pass \u2014 the only identifiers in \u00a72 are artifact batch ids and cross-plan section references, both of which resolve; no plan label, stage name, ticket number or version tag is carried into a symbol or comment, and no changelog prose appears in the changed text.",
+    "reasoning": "pass \u2014 the two changed statements in s2 hold: the census places `momentum_flux` and `momentum_source` in `physical_base` family `momentum` and `source_rate_due_to_beam_beam_fusion` in `physical_base` family `source_rate` (so the corrected wording matches the artifact, and the separate `rate` family the earlier wording named is not involved), and `sn-definitions-by-construction` \u00a75 does carry name-against-definition dispositions including rename, which \u00a76's own prose executes (\"Every live name is brought to \u00a72's wording, \u00a73's unit spelling and \u00a75's dispositions\"), so \u00a76 can settle a unit-pair row. The endpoint is reachable: the release-candidate unit-pair list in `rc8_advisories` names exactly the three batch-272 names today, so item 3's witness fails before the work. No new implementation is prescribed by the changed lines.",
+    "single_goal": "pass \u2014 each section names one deliverable; \u00a72's divergent-family convergence and its release-candidate repair rows are one catalog state on one verdict, every row dispositioned.",
+    "wiring": "pass \u2014 s2 declares `sn-integrity-backlog#s52` and `sn-definitions-by-construction#s6` in `plan-section-depends-on`, both targets exist, and every other declared relationship (s3\u2192s2, s3\u2192sn-full-dd-continuation#s4, s5\u2192sn-integrity-backlog#s52, s5\u2192sn-domain-per-family#s3) resolves to a section that exists."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "e35c4bf32892d9b90e8392b5e1171957f4973d937daaccdee3ab610d3c1c937e",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T02:31:12.302297+00:00",
+  "total": null
+}
