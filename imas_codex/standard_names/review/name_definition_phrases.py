@@ -448,9 +448,10 @@ async def judge_phrases(
 # ---------------------------------------------------------------------------
 
 # The probability at or above which a phrase is read as adding something the
-# name lacks. Set on the development names only and frozen before any scored
-# name is read.
-THRESHOLD = 0.5
+# name lacks. The lowest value whose development false-flag rate stayed at or
+# under the ceiling while the arm still found a development mismatch; frozen before
+# any scored name is read.
+THRESHOLD = 0.95
 
 
 def _convention_suppresses(phrase: str, name: str) -> tuple[bool, str]:
