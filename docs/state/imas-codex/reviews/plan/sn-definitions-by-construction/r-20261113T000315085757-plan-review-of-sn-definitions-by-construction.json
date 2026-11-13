@@ -41,7 +41,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 26,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 5 first item now fails on a later seat reading that finds fewer than 27 of 36 or flags more than 12 of 172 on the held-out names.",
+      "reason": "",
+      "when": "2026-11-13T01:54:31.602425+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "note": "Section 5 first item now fails on a later seat reading that finds fewer than 27 of 36 or flags more than 12 of 172 on the held-out names.",
+      "reason": "",
+      "when": "2026-11-13T01:54:31.602425+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T000315085757-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261113T000315085757-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "7f60e6c8daf4156fdc1c2b3541509317e6b0ad06",
   "rubric": "content",
