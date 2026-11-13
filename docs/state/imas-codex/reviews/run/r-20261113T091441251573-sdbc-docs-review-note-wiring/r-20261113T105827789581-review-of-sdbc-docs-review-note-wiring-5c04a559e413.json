@@ -8,6 +8,13 @@
   ],
   "completed_at": "2026-11-13T11:24:55.459Z",
   "dispatched_at": "2026-11-13T11:19:44Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sdbc-docs-review-note-wiring-5c04a559e413",
+      "recorded_at": "2026-11-13T12:16:36.193512+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/workers.py",
