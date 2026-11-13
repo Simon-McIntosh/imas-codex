@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-13T00:12:40.040Z",
+  "dispatched_at": "2026-11-13T00:03:49Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_cascade_calibration.py",
+      "line": "104",
+      "severity": "non-blocking",
+      "text": "non-blocking: the retirement is unguarded \u2014 deleting the rebuild test adds no assertion, so no test reddens if a future change restores a rebuild that reads a path outside the repository or reintroduces the out-of-repository DEFAULT_* defaults the done_when forbids."
+    },
+    {
+      "file": "imas_codex/standard_names/review/cascade_calibration.py",
+      "line": "41",
+      "severity": "non-blocking",
+      "text": "non-blocking: _labels, _cached_conventions, _name_axis, _docs_axis, _logistic, _fit_name_logistic, _clamp, GOLDEN_NAME and GOLDEN_DOCS are retained with no caller in the module at head; only three evidence scripts under docs/evidence reference them, and those scripts still import the removed DEFAULT_NAME_RECEIPTS/DEFAULT_DOCS_RECEIPTS, so the retention is partial."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T025432279846-sph-cascade-receipts/manifest.md",
+      "line": "19",
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite.command records PYTHONPATH=$PWD rather than an absolute path, so the baseline arm cannot be re-run verbatim from the record as the manifest contract requires."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "Read all four commits against base c8113cdfdf4f; they remove the rebuild test, its periodic-stack-dump fixture, build()/_measure/_matched_report/_content_digest/main(), SCHEMA and the two DEFAULT_* receipt paths, while retaining the threshold artifact and the rate-matching helpers.",
+    "done_when": "The dispatched done_when at prompt.txt:127 requires test_matched_policy_rebuilds_from_frozen_scores_and_receipts to run without skipping from committed fixtures, or a blocked manifest naming the lead's two options; the gate at retirement-head.log records 75 passed, 0 skipped, EXIT=0 over test_cascade_calibration.py and test_review_cascade.py, which proves the retirement rather than the dispatched measure.",
+    "goal": "The node goal at prompt.txt:38 is \"make the cascade-calibration rebuild test run on every checkout from committed inputs\"; the landed change at tests/standard_names/test_cascade_calibration.py instead deletes that test and its build() implementation, which the plan's 2026-11-12 lead ruling (c-s1-lead-ruling-retire-rebuild-check in docs/plans/sn-pipeline-hygiene.html) authorises and which the resume advice delivered.",
+    "manifest": "Read the manifest; it records the four commits, a baseline of 10 passed/1 skipped, an after run of 75 passed/0 skipped with EXIT=0, byte-identical threshold SHA256 a0aa1e74, and an empty negative_control_log explained by the retirement ruling.",
+    "write_paths": "The four changed paths (imas_codex/standard_names/review/cascade_calibration.py, tests/standard_names/test_cascade_calibration.py, docs/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts.html and its -run.py) all fall inside the seven declared write paths at prompt.txt:96-103."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion to tests/standard_names/test_cascade_calibration.py:1, so nothing fails if an out-of-repository DEFAULT_* path or a rebuild function is reintroduced; the surviving tests predate the change.",
+    "evidence": "retirement-head.log proves 75 passed with no skips, but no gate asserts that imas_codex/standard_names/review/cascade_calibration.py no longer defaults outside the repository, which prompt.txt:127 names as part of the measure.",
+    "fit": "imas_codex/standard_names/review/cascade_calibration.py:1 keeps the surrounding module idiom, but the retained axis builders at line 41 have no caller in the module at head.",
+    "goal_fidelity": "tests/standard_names/test_cascade_calibration.py:104 loses the rebuild test the goal names, and the replacement is the retirement the lead ruling at docs/plans/sn-pipeline-hygiene.html authorises rather than the stated deliverable.",
+    "reuse": "imas_codex/standard_names/review/cascade_calibration.py:307 keeps matched_cutoff and delegates intervals to imas_codex/discovery/base/evaluation.bootstrap_interval rather than adding a second implementation.",
+    "scope_discipline": "every path in the diff is among the declared write paths listed at prompt.txt:96-103, and no plan or peer evidence page outside them was edited."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal at prompt.txt:38 is \"make the cascade-calibration rebuild test run on every checkout from committed inputs\"; the landed change at tests/standard_names/test_cascade_calibration.py instead deletes that test and its build() implementation, which the plan's 2026-11-12 lead ruling (c-s1-lead-ruling-retire-rebuild-check in docs/plans/sn-pipeline-hygiene.html) authorises and which the resume advice delivered.\nVERDICT done_when: The dispatched done_when at prompt.txt:127 requires test_matched_policy_rebuilds_from_frozen_scores_and_receipts to run without skipping from committed fixtures, or a blocked manifest naming the lead's two options; the gate at retirement-head.log records 75 passed, 0 skipped, EXIT=0 over test_cascade_calibration.py and test_review_cascade.py, which proves the retirement rather than the dispatched measure.\nVERDICT write_paths: The four changed paths (imas_codex/standard_names/review/cascade_calibration.py, tests/standard_names/test_cascade_calibration.py, docs/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts.html and its -run.py) all fall inside the seven declared write paths at prompt.txt:96-103.\nVERDICT manifest: Read the manifest; it records the four commits, a baseline of 10 passed/1 skipped, an after run of 75 passed/0 skipped with EXIT=0, byte-identical threshold SHA256 a0aa1e74, and an empty negative_control_log explained by the retirement ruling.\nVERDICT diff: Read all four commits against base c8113cdfdf4f; they remove the rebuild test, its periodic-stack-dump fixture, build()/_measure/_matched_report/_content_digest/main(), SCHEMA and the two DEFAULT_* receipt paths, while retaining the threshold artifact and the rate-matching helpers.\nCALL_SITES: none\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: tests/standard_names/test_cascade_calibration.py:104 loses the rebuild test the goal names, and the replacement is the retirement the lead ruling at docs/plans/sn-pipeline-hygiene.html authorises rather than the stated deliverable.\nSCORE evidence: 13\nJUSTIFICATION evidence: retirement-head.log proves 75 passed with no skips, but no gate asserts that imas_codex/standard_names/review/cascade_calibration.py no longer defaults outside the repository, which prompt.txt:127 names as part of the measure.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in the diff is among the declared write paths listed at prompt.txt:96-103, and no plan or peer evidence page outside them was edited.\nSCORE durability: 8\nJUSTIFICATION durability: the diff adds no assertion to tests/standard_names/test_cascade_calibration.py:1, so nothing fails if an out-of-repository DEFAULT_* path or a rebuild function is reintroduced; the surviving tests predate the change.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/standard_names/review/cascade_calibration.py:1 keeps the surrounding module idiom, but the retained axis builders at line 41 have no caller in the module at head.\nSCORE reuse: 18\nJUSTIFICATION reuse: imas_codex/standard_names/review/cascade_calibration.py:307 keeps matched_cutoff and delegates intervals to imas_codex/discovery/base/evaluation.bootstrap_interval rather than adding a second implementation.\nFINDING tests/standard_names/test_cascade_calibration.py:104 non-blocking: the retirement is unguarded \u2014 deleting the rebuild test adds no assertion, so no test reddens if a future change restores a rebuild that reads a path outside the repository or reintroduces the out-of-repository DEFAULT_* defaults the done_when forbids.\nFINDING imas_codex/standard_names/review/cascade_calibration.py:41 non-blocking: _labels, _cached_conventions, _name_axis, _docs_axis, _logistic, _fit_name_logistic, _clamp, GOLDEN_NAME and GOLDEN_DOCS are retained with no caller in the module at head; only three evidence scripts under docs/evidence reference them, and those scripts still import the removed DEFAULT_NAME_RECEIPTS/DEFAULT_DOCS_RECEIPTS, so the retention is partial.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261112T025432279846-sph-cascade-receipts/manifest.md:19 non-blocking: baseline_suite.command records PYTHONPATH=$PWD rather than an absolute path, so the baseline arm cannot be re-run verbatim from the record as the manifest contract requires.",
+  "review_run_id": "r-20261113T000213560302-review-of-sph-cascade-receipts-c295a72ad243",
+  "reviewed_base_sha": "c8113cdfdf4f7e65cdff47ff48608346ddaebf4f",
+  "reviewed_head_sha": "c295a72ad243b4409a3417303f339e56b2542110",
+  "reviewed_run_id": "r-20261112T025432279846-sph-cascade-receipts",
+  "scores": {
+    "durability": 8,
+    "evidence": 13,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T00:14:43.176189+00:00",
+  "total": 88
+}
