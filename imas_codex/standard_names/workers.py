@@ -50,7 +50,6 @@ _WORKER_DEPENDENCIES: dict[str, Callable[[], object]] = {
     "detect_value_provenance": lambda: detect_value_provenance,
     "encode_source_path": lambda: encode_source_path,
     "json": lambda: json,
-    "logger": lambda: logger,
     "model_provider_exposure": lambda: model_provider_exposure,
     "strip_dd_prefix": lambda: strip_dd_prefix,
 }
