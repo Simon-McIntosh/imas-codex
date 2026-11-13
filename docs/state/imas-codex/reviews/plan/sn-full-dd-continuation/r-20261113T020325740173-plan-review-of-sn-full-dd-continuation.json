@@ -35,6 +35,16 @@
       "note": "Section 3 now requires the read after the restart to return the node count read before the stop.",
       "reason": "",
       "when": "2026-11-13T02:33:54.945277+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "84eec68cb980aacd3f3d51f44589f2e18f1720d3",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 4 now counts every source not reached by class, whether its class was unrun or cut short.",
+      "reason": "",
+      "when": "2026-11-13T02:34:21.864134+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Section 3 now requires the read after the restart to return the node count read before the stop.",
       "reason": "",
       "when": "2026-11-13T02:33:54.945277+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "84eec68cb980aacd3f3d51f44589f2e18f1720d3",
+      "commit_basis": "edit",
+      "note": "Section 4 now counts every source not reached by class, whether its class was unrun or cut short.",
+      "reason": "",
+      "when": "2026-11-13T02:34:21.864134+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-full-dd-continuation/r-20261113T020325740173-plan-review-of-sn-full-dd-continuation.json",
