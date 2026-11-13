@@ -1,0 +1,117 @@
+<!doctype html><html><head><meta charset="utf-8"><title>Live rewrite: the flagged names</title>
+<style>body{font-family:system-ui,sans-serif;max-width:1100px;margin:2rem auto;line-height:1.5}
+table{border-collapse:collapse;width:100%;font-size:.85rem}th,td{border-bottom:1px solid #ddd;padding:.3rem;text-align:left;vertical-align:top}
+code{font-size:.85em}.b{font-weight:600}</style></head><body>
+<h1>The live rewrite of the flagged names</h1>
+<p class="b">Status: blocked on the measured rate, not on the work. The documentation rewrite runs a full
+inline review per name and the five names attempted here cost USD 1.96,
+a measured rate of USD 0.39 a name. That projects the
+485-name population to about USD 190, past this node's
+USD 60 ceiling, so the pass stops and reports rather than spending past it.</p>
+
+<h2>Population and classes</h2>
+<p>485 flagged export candidates, 485 still live,
+read from the graph's own reader verdicts. Each has one primary class carrying the lead's ruling.</p>
+<table><tr><th>class</th><th>names</th></tr><tr><td>equivalent-electron</td><td>56</td></tr>
+<tr><td>family parent</td><td>144</td></tr>
+<tr><td>operator</td><td>77</td></tr>
+<tr><td>shared wording:species</td><td>11</td></tr>
+<tr><td>single object or mechanism</td><td>171</td></tr>
+<tr><td>unit misfit</td><td>26</td></tr>
+<tr><td class="b">total</td><td class="b">485</td></tr></table>
+
+<h2>Attempted this node</h2>
+<table><tr><th>name</th><th>class</th><th>outcome</th><th>unit before</th><th>unit after</th>
+<th>docs stage</th><th>docs score</th><th>spend</th><th>wall</th><th>reason</th></tr><tr><td><code>volume_averaged_neutral_species_density</code></td><td>shared wording:species</td><td>not settled</td><td>m^-3</td><td>m^-3</td><td>reviewed</td><td>0.9511879683455486</td><td>0.431368896</td><td>280s</td><td>wrapper exit 124 after 280s</td></tr>
+<tr><td><code>volume_averaged_oxygen_density</code></td><td>shared wording:species</td><td>declined</td><td>m^-3</td><td>m^-3</td><td>exhausted</td><td>—</td><td>0.38053145</td><td>99s</td><td> [docs_generate_refusal] population:species: the written text includes neutral atoms (&#x27;.\n\nThe local [oxygen density](name:oxygen_density) includes neutral atoms as well as ions; only i&#x27;) where the stored wording reads &#x27;The density counts ions summed over all charge states; neutral a</td></tr>
+<tr><td><code>volume_averaged_ion_charge</code></td><td>shared wording:species</td><td>not settled</td><td>1</td><td>1</td><td>refining</td><td>0.9272267019077862</td><td>0.44200277600000004</td><td>280s</td><td>wrapper exit 124 after 280s</td></tr>
+<tr><td><code>flux_surface_averaged_parallel_current_density</code></td><td>shared wording:operator</td><td>not settled</td><td>A.m^-2</td><td>A.m^-2</td><td>refining</td><td>0.9391389563239018</td><td>0.53976287</td><td>280s</td><td>wrapper exit 124 after 280s</td></tr>
+<tr><td><code>flux_surface_averaged_toroidal_current_density</code></td><td>shared wording:operator</td><td>not settled</td><td>A.m^-2</td><td>A.m^-2</td><td>reviewed</td><td>0.9372337852836387</td><td>0.161806964</td><td>280s</td><td>wrapper exit 124 after 280s</td></tr></table>
+
+<h2>Declines and holds</h2>
+<ul><li><code>volume_averaged_oxygen_density</code>: declined by the pipeline — the regenerated documentation
+scored below the publishing threshold and the refine budget exhausted. This is a recorded result, not an error.</li>
+<li>Three names (<code>volume_averaged_neutral_species_density</code>, <code>volume_averaged_ion_charge</code>,
+<code>flux_surface_averaged_parallel_current_density</code>) were still in inline review when the 280 s wrapper
+stopped the run; the graph carries them at <code>docs_stage</code> refining or reviewed.</li>
+<li>The first slice settled six names by signed apply and exhausted four; those are listed in the JSON and are
+not re-attempted.</li></ul>
+
+<h2>Names waiting on grammar</h2>
+<p>56 names need the word <code>equivalent_electron</code>,
+which the lead ruled is being released. They are listed, not attempted, until the pin is raised.</p><ul><li><code>accumulated_ammonia_count</code></li>
+<li><code>accumulated_ammonia_deuterated_count</code></li>
+<li><code>accumulated_argon_count</code></li>
+<li><code>accumulated_carbon_count_due_to_gas_injection</code></li>
+<li><code>accumulated_deuterated_methane_prefill_count</code></li>
+<li><code>accumulated_deuterium_count_due_to_gas_injection</code></li>
+<li><code>accumulated_ethane_count</code></li>
+<li><code>accumulated_helium_3_count_due_to_gas_injection</code></li>
+<li><code>accumulated_helium_3_prefill_count_due_to_gas_injection</code></li>
+<li><code>accumulated_hydrogen_count_due_to_gas_injection</code></li>
+<li><code>accumulated_krypton_count</code></li>
+<li><code>accumulated_lithium_count_due_to_gas_injection</code></li>
+<li><code>accumulated_lithium_prefill_count_due_to_gas_injection</code></li>
+<li><code>accumulated_methane_carbon_13_count_due_to_gas_injection</code></li>
+<li><code>accumulated_neon_count</code></li>
+<li><code>accumulated_nitrogen_count_due_to_gas_injection</code></li>
+<li><code>accumulated_oxygen_prefill_count_due_to_gas_injection</code></li>
+<li><code>accumulated_propane_count_due_to_gas_injection</code></li>
+<li><code>accumulated_silane_count_due_to_gas_injection</code></li>
+<li><code>accumulated_total_gas_count</code></li>
+<li><code>accumulated_total_prefill_gas_count</code></li>
+<li><code>accumulated_xenon_count_due_to_gas_injection</code></li>
+<li><code>accumulated_xenon_prefill_count</code></li>
+<li><code>ammonia_deuterated_prefill_count</code></li>
+<li><code>ammonia_prefill_count</code></li>
+<li><code>ammonia_source_rate</code></li>
+<li><code>argon_prefill_count</code></li>
+<li><code>argon_source_rate_due_to_gas_injection</code></li>
+<li><code>beryllium_source_rate_due_to_gas_injection</code></li>
+<li><code>carbon_prefill_count_due_to_gas_injection</code></li>
+<li><code>carbon_source_rate_due_to_gas_injection</code></li>
+<li><code>deuterated_methane_source_rate</code></li>
+<li><code>electron_particle_flux_at_wall_due_to_pumping</code></li>
+<li><code>ethane_prefill_count</code></li>
+<li><code>ethane_source_rate</code></li>
+<li><code>ethylene_prefill_count</code></li>
+<li><code>ethylene_source_rate</code></li>
+<li><code>helium_3_source_rate_due_to_gas_injection</code></li>
+<li><code>helium_4_source_rate_due_to_gas_injection</code></li>
+<li><code>krypton_prefill_count</code></li>
+<li><code>krypton_source_rate_due_to_gas_injection</code></li>
+<li><code>lithium_source_rate_due_to_gas_injection</code></li>
+<li><code>methane_carbon_13_source_rate</code></li>
+<li><code>neon_prefill_count</code></li>
+<li><code>neon_source_rate</code></li>
+<li><code>nitrogen_prefill_count</code></li>
+<li><code>nitrogen_source_rate</code></li>
+<li><code>oxygen_source_rate_due_to_gas_injection</code></li>
+<li><code>propane_prefill_count</code></li>
+<li><code>propane_source_rate</code></li>
+<li><code>silane_source_rate</code></li>
+<li><code>source_rate_due_to_gas_injection</code></li>
+<li><code>total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection</code></li>
+<li><code>total_neutral_source_rate_due_to_gas_injection</code></li>
+<li><code>total_particle_source_rate_of_divertor_due_to_recycling</code></li>
+<li><code>xenon_source_rate_due_to_gas_injection</code></li></ul>
+
+<h2>Spend</h2>
+<table><tr><th>class</th><th>USD</th></tr>
+<tr><td>shared wording:species</td><td>1.2539</td></tr><tr><td>shared wording:operator</td><td>0.7016</td></tr>
+<tr><td class="b">total</td><td class="b">1.9555 of 60 ceiling</td></tr></table>
+<p>Measured rate: USD 0.3911 a name over 5 names.</p>
+
+<h2>The censuses, re-read after the writes</h2>
+<table>
+<tr><td>live names</td><td>3284</td></tr>
+<tr><td>species families (at least 3 members)</td><td>24 families, 319 members</td></tr>
+<tr><td>families split across domains</td><td>0</td></tr>
+<tr><td><code>&lt;X&gt;_density</code> family</td><td>18 members, 18 distinct description templates</td></tr>
+<tr><td>species families with divergent documentation</td><td>16 of 16</td></tr>
+<tr><td>flux-surface-average names</td><td>74, carrying 73 distinct documentation sentences</td></tr>
+<tr><td>baseline before the first write</td><td>8 flux-surface-average forms; 20 of 20 species families divergent</td></tr>
+</table>
+<p>The settled wording has landed on the names the first slice applied; the population as a whole still carries
+one form per name, which is what the remaining 480 names were to remove.</p>
+</body></html>

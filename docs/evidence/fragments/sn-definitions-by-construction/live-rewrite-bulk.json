@@ -1,0 +1,251 @@
+{
+ "schema": "live-rewrite-bulk/1",
+ "node": "sdbc-live-rewrite-bulk",
+ "status": "blocked",
+ "blocker": {
+  "id": "measured-rate-passes-the-node-ceiling",
+  "measured": {
+   "names": 5,
+   "spend_usd": 1.9555,
+   "per_name_usd": 0.3911
+  },
+  "projection": {
+   "remaining_names": 480,
+   "projected_usd": 189.68,
+   "ceiling_usd": 60
+  },
+  "detail": "the documentation rewrite runs a full inline review per name; the five names this node attempted cost USD 0.39 each on average, which projects the 485-name population to about USD 189, past this node's USD 60 ceiling. The brief's stop rule fires before the average-over-twenty ceiling test can be reached. Delivered: the rebuilt manifest and the measured rate; the remaining 480 names wait on a ceiling decision."
+ },
+ "totals_by_class": {
+  "operator": 77,
+  "equivalent-electron": 56,
+  "family parent": 144,
+  "single object or mechanism": 171,
+  "unit misfit": 26,
+  "shared wording:species": 11
+ },
+ "attempted_this_node": [
+  {
+   "name": "volume_averaged_neutral_species_density",
+   "class": "shared wording:species",
+   "outcome": "not settled",
+   "reason": "wrapper exit 124 after 280s",
+   "wrapper_seconds": 280,
+   "wrapper_exit": 124,
+   "spend_usd": 0.431368896,
+   "before": {
+    "unit": "m^-3",
+    "docs_stage": "accepted",
+    "score_docs": null
+   },
+   "after": {
+    "unit": "m^-3",
+    "docs_stage": "reviewed",
+    "score_docs": 0.9511879683455486,
+    "name_stage": "accepted",
+    "source_count": 1,
+    "description": "Number density of a specified neutral species averaged over the plasma volume enclosed by the last closed flux surface during plasma initiation. The population counts particles of that species only while electrically neutral, aggregated over internal states and velocity populations; ions of all positive charge states are excluded.",
+    "documentation": "Number density of neutral species. The volume average of the local [neutral species density](name:neutral_species_density) is defined by\n\n$$\n\\langle n_s\\rangle_V = \\frac{1}{V}\\int_V n_s\\,dV\n$$\n\nwhere $s$ labels the specified neutral species, $n_s$ is the local [neutral species density](name:neutral_species_density) of that species, $\\langle n_s\\rangle_V$ is its volume-averaged value, $V$ is the plasma volume enclosed by the last closed flux surface, and $dV$ is a volume element.\n\nThe population counts particles of the specified species only while electrically neutral (charge state zero), aggre"
+   }
+  },
+  {
+   "name": "volume_averaged_oxygen_density",
+   "class": "shared wording:species",
+   "outcome": "declined",
+   "reason": " [docs_generate_refusal] population:species: the written text includes neutral atoms ('.\\n\\nThe local [oxygen density](name:oxygen_density) includes neutral atoms as well as ions; only i') where the stored wording reads 'The density counts ions summed over all charge states; neutral atoms are excluded.'",
+   "wrapper_seconds": 99,
+   "wrapper_exit": 3,
+   "spend_usd": 0.38053145,
+   "before": {
+    "unit": "m^-3",
+    "docs_stage": "accepted",
+    "score_docs": null
+   },
+   "after": {
+    "unit": "m^-3",
+    "docs_stage": "exhausted",
+    "score_docs": null,
+    "name_stage": "accepted",
+    "source_count": 1,
+    "description": "Volume-averaged oxygen density is the spatial mean of the local oxygen number density, summed over all charge states from neutral O0 through fully stripped O8+, over the confined plasma volume inside the last closed flux surface.",
+    "documentation": "The volume-averaged oxygen density is the volume mean of the local oxygen number density\u2014summed over all charge states from neutral O$^0$ through fully stripped O$^{8+}$\u2014within the confined plasma volume bounded by the last closed flux surface. It characterizes the total oxygen impurity inventory per confined plasma volume, independent of how that oxygen is distributed inside the boundary.\n\nThe volume average is defined by\n\n$$\n\\langle n_\\mathrm{O} \\rangle_V = \\frac{1}{V_\\mathrm{LCFS}} \\int_{V_\\mathrm{LCFS}} n_\\mathrm{O}(\\mathbf{r})\\, dV\n$$\n\nwhere $\\langle n_\\mathrm{O} \\rangle_V$ is the volume-"
+   }
+  },
+  {
+   "name": "volume_averaged_ion_charge",
+   "class": "shared wording:species",
+   "outcome": "not settled",
+   "reason": "wrapper exit 124 after 280s",
+   "wrapper_seconds": 280,
+   "wrapper_exit": 124,
+   "spend_usd": 0.44200277600000004,
+   "before": {
+    "unit": "1",
+    "docs_stage": "accepted",
+    "score_docs": null
+   },
+   "after": {
+    "unit": "1",
+    "docs_stage": "refining",
+    "score_docs": 0.9272267019077862,
+    "name_stage": "accepted",
+    "source_count": 1,
+    "description": "Volume-averaged dominant-state charge number for one specified ion species or lumped-ion population over the confined plasma volume.",
+    "documentation": "At each position, this quantity refers to the charge number of the dominant ionization state for one specified ion species or lumped-ion population, spatially averaged over the confined plasma volume.\n\nFor ion species $i$, the volume average is\n\n$$\n\\langle Z_{\\mathrm{dom},i}\\rangle_V = \\frac{1}{V_p}\\int_{V_p} Z_{\\mathrm{dom},i}(\\mathbf{x})\\,dV\n$$\n\nwhere $\\langle Z_{\\mathrm{dom},i}\\rangle_V$ is the volume-averaged charge number, $Z_{\\mathrm{dom},i}(\\mathbf{x})$ is the [ion charge number](name:ion_charge) of the dominant ionization state at position $\\mathbf{x}$, $i$ identifies the specified ion"
+   }
+  },
+  {
+   "name": "flux_surface_averaged_parallel_current_density",
+   "class": "shared wording:operator",
+   "outcome": "not settled",
+   "reason": "wrapper exit 124 after 280s",
+   "wrapper_seconds": 280,
+   "wrapper_exit": 124,
+   "spend_usd": 0.53976287,
+   "before": {
+    "unit": "A.m^-2",
+    "docs_stage": "accepted",
+    "score_docs": null
+   },
+   "after": {
+    "unit": "A.m^-2",
+    "docs_stage": "refining",
+    "score_docs": 0.9391389563239018,
+    "name_stage": "accepted",
+    "source_count": 2,
+    "description": "Flux-surface-averaged parallel current density is the signed scalar current-density quantity given by averaging the plasma current-density\u2013magnetic-field scalar product over a closed magnetic flux surface and dividing by a single global reference toroidal magnetic field.",
+    "documentation": "Flux-surface-averaged parallel current density is the signed current-density contribution associated with conventional plasma current along the magnetic field, assigned to a closed magnetic flux surface.\n\n\n\n$$\n\\left\\langle \\mathbf{j}\\cdot\\mathbf{B}\\right\\rangle = \\oint (\\mathbf{j}\\cdot\\mathbf{B})\\,dS/|\\nabla\\psi| \\,/\\, \\oint dS/|\\nabla\\psi|\n$$\n\nFor a closed surface $S$, the quantity is $j_{\\parallel}^{\\mathrm{FS}}(S)=\\langle\\mathbf{j}\\cdot\\mathbf{B}\\rangle_S/B_0$, where $j_{\\parallel}^{\\mathrm{FS}}(S)$ is the flux-surface-averaged parallel current density, $\\mathbf{j}$ is the conventional plas"
+   }
+  },
+  {
+   "name": "flux_surface_averaged_toroidal_current_density",
+   "class": "shared wording:operator",
+   "outcome": "not settled",
+   "reason": "wrapper exit 124 after 280s",
+   "wrapper_seconds": 280,
+   "wrapper_exit": 124,
+   "spend_usd": 0.161806964,
+   "before": {
+    "unit": "A.m^-2",
+    "docs_stage": "accepted",
+    "score_docs": null
+   },
+   "after": {
+    "unit": "A.m^-2",
+    "docs_stage": "reviewed",
+    "score_docs": 0.9372337852836387,
+    "name_stage": "accepted",
+    "source_count": 4,
+    "description": "Flux-surface-averaged toroidal current density is the total conventional current-density component in the toroidal direction assigned to a closed magnetic flux surface. It is the flux-surface average of the local toroidal component divided by major radius, normalized by the flux-surface average of inverse major radius.",
+    "documentation": "Flux-surface-averaged toroidal current density is the total conventional current-density component in the toroidal direction assigned to a closed magnetic flux surface. Its geometric weighting is the flux-surface average of the local toroidal component divided by major radius, normalized by the flux-surface average of inverse major radius.\n\nThe defining weighted relation is\n\n$$\\langle f\\rangle = \\oint f\\,dS/|\\nabla\\psi| \\,/\\, \\oint dS/|\\nabla\\psi|$$\n\nHere $j_{\\phi}^{\\mathrm{FS}}$ is this flux-surface-averaged toroidal current density, $j_\\phi$ is the local [toroidal current density](name:toroi"
+   }
+  }
+ ],
+ "settled_by_the_first_slice": {
+  "applied": [
+   "volume_averaged_carbon_density",
+   "volume_averaged_krypton_density",
+   "volume_averaged_neon_density",
+   "volume_averaged_nitrogen_density",
+   "flux_surface_averaged_boron_density_at_plasma_boundary",
+   "boron_density_at_plasma_boundary"
+  ],
+  "exhausted": [
+   "volume_averaged_boron_density",
+   "accumulated_ammonia_count",
+   "accumulated_argon_count",
+   "accumulated_neon_count"
+  ],
+  "note": "read from the first slice's own batch log and its s3-*.log files; not re-attempted here"
+ },
+ "waiting_on_grammar": {
+  "class": "equivalent-electron",
+  "count": 56,
+  "word_needed": "equivalent_electron",
+  "note": "the lead's ruling holds these until the grammar pin is raised",
+  "names": [
+   "accumulated_ammonia_count",
+   "accumulated_ammonia_deuterated_count",
+   "accumulated_argon_count",
+   "accumulated_carbon_count_due_to_gas_injection",
+   "accumulated_deuterated_methane_prefill_count",
+   "accumulated_deuterium_count_due_to_gas_injection",
+   "accumulated_ethane_count",
+   "accumulated_helium_3_count_due_to_gas_injection",
+   "accumulated_helium_3_prefill_count_due_to_gas_injection",
+   "accumulated_hydrogen_count_due_to_gas_injection",
+   "accumulated_krypton_count",
+   "accumulated_lithium_count_due_to_gas_injection",
+   "accumulated_lithium_prefill_count_due_to_gas_injection",
+   "accumulated_methane_carbon_13_count_due_to_gas_injection",
+   "accumulated_neon_count",
+   "accumulated_nitrogen_count_due_to_gas_injection",
+   "accumulated_oxygen_prefill_count_due_to_gas_injection",
+   "accumulated_propane_count_due_to_gas_injection",
+   "accumulated_silane_count_due_to_gas_injection",
+   "accumulated_total_gas_count",
+   "accumulated_total_prefill_gas_count",
+   "accumulated_xenon_count_due_to_gas_injection",
+   "accumulated_xenon_prefill_count",
+   "ammonia_deuterated_prefill_count",
+   "ammonia_prefill_count",
+   "ammonia_source_rate",
+   "argon_prefill_count",
+   "argon_source_rate_due_to_gas_injection",
+   "beryllium_source_rate_due_to_gas_injection",
+   "carbon_prefill_count_due_to_gas_injection",
+   "carbon_source_rate_due_to_gas_injection",
+   "deuterated_methane_source_rate",
+   "electron_particle_flux_at_wall_due_to_pumping",
+   "ethane_prefill_count",
+   "ethane_source_rate",
+   "ethylene_prefill_count",
+   "ethylene_source_rate",
+   "helium_3_source_rate_due_to_gas_injection",
+   "helium_4_source_rate_due_to_gas_injection",
+   "krypton_prefill_count",
+   "krypton_source_rate_due_to_gas_injection",
+   "lithium_source_rate_due_to_gas_injection",
+   "methane_carbon_13_source_rate",
+   "neon_prefill_count",
+   "neon_source_rate",
+   "nitrogen_prefill_count",
+   "nitrogen_source_rate",
+   "oxygen_source_rate_due_to_gas_injection",
+   "propane_prefill_count",
+   "propane_source_rate",
+   "silane_source_rate",
+   "source_rate_due_to_gas_injection",
+   "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection",
+   "total_neutral_source_rate_due_to_gas_injection",
+   "total_particle_source_rate_of_divertor_due_to_recycling",
+   "xenon_source_rate_due_to_gas_injection"
+  ]
+ },
+ "spend": {
+  "per_class": {
+   "shared wording:species": 1.2539,
+   "shared wording:operator": 0.7016
+  },
+  "measured_rate_usd_per_name": 0.3911,
+  "total_usd": 1.9555,
+  "ceiling_usd": 60
+ },
+ "censuses_after": {
+  "read_at": "2026-11-13T17:45Z",
+  "live_names": 3284,
+  "species_families_ge3_members": 24,
+  "species_family_members": 319,
+  "families_split_across_domains": 0,
+  "x_density_family_members": 18,
+  "x_density_distinct_description_templates": 18,
+  "species_families_ge3_divergent_documentation": "16 of 16",
+  "flux_surface_average_names": 74,
+  "flux_surface_average_distinct_documentation_sentences": 73,
+  "baseline_before_first_write": {
+   "flux_surface_average_forms": 8,
+   "species_families_divergent": "20 of 20"
+  }
+ },
+ "outcomes_pending": 470
+}
