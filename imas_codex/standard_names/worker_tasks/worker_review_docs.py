@@ -574,6 +574,39 @@ async def _release_docs_review_claim(
     )
 
 
+def review_holds_from_checks(
+    checked_holds: tuple[tuple[str, str | None, str], ...], item: dict[str, Any]
+) -> list[dict[str, str]]:
+    """The holds a review persists, one per check that raised a note.
+
+    A hold is what stops a passing document being accepted, so a check that
+    raises no note leaves acceptance to the score alone.
+    """
+
+    holds: list[dict[str, str]] = []
+    for kind, note, raised_by in checked_holds:
+        if note is None:
+            continue
+        evidence = json.dumps(
+            {
+                "claim": note,
+                "documentation": item.get("documentation") or "",
+                "dd_source_docs": item.get("dd_source_docs") or [],
+            },
+            sort_keys=True,
+            default=str,
+        )
+        holds.append(
+            {
+                "kind": kind,
+                "finding": note,
+                "evidence": evidence,
+                "raised_by": raised_by,
+            }
+        )
+    return holds
+
+
 def _documentation_conformance_note(
     _worker_dependency, /, item: dict[str, Any]
 ) -> str | None:
@@ -944,27 +977,7 @@ async def process_review_docs_batch(
                 ),
                 ("name_definition", name_definition_hold, "name-definition-seat"),
             )
-            review_holds: list[dict[str, str]] = []
-            for kind, note, raised_by in checked_holds:
-                if note is None:
-                    continue
-                evidence = json.dumps(
-                    {
-                        "claim": note,
-                        "documentation": item.get("documentation") or "",
-                        "dd_source_docs": item.get("dd_source_docs") or [],
-                    },
-                    sort_keys=True,
-                    default=str,
-                )
-                review_holds.append(
-                    {
-                        "kind": kind,
-                        "finding": note,
-                        "evidence": evidence,
-                        "raised_by": raised_by,
-                    }
-                )
+            review_holds = review_holds_from_checks(checked_holds, item)
             if any(note is not None for _, note, _ in checked_holds):
                 notes = [
                     note

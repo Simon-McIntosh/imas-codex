@@ -45,6 +45,13 @@ class NameDefinitionVerdict(BaseModel):
             "the one quantity both texts share."
         )
     )
+    proposed_name: str = Field(
+        default="",
+        description=(
+            "When the flag is a restriction to one object, a spelling that states "
+            "the restriction; otherwise empty."
+        ),
+    )
 
 
 class NameDefinitionBatch(BaseModel):
@@ -101,6 +108,7 @@ async def _judge_batch(
                 "verdict": "unanswered",
                 "qualifier": None,
                 "reasoning": reason,
+                "proposed_name": "",
             }
             for item in batch
         ]
@@ -126,7 +134,9 @@ async def _judge_batch(
         name = _item_payload(item)["standard_name"]
         verdict = returned.get(name)
         if verdict is None:
-            verdicts.extend(unanswered("the review seat returned no verdict for this name"))
+            verdicts.extend(
+                unanswered("the review seat returned no verdict for this name")
+            )
             continue
         qualifier = verdict.qualifier if verdict.qualifier in QUALIFIERS else None
         flagged = verdict.verdict.strip().lower() == "flag" or qualifier not in (
@@ -139,6 +149,7 @@ async def _judge_batch(
                 "verdict": "flag" if flagged else "pass",
                 "qualifier": qualifier,
                 "reasoning": verdict.reasoning,
+                "proposed_name": verdict.proposed_name if flagged else "",
             }
         )
     return verdicts, cost

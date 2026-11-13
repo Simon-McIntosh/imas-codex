@@ -196,3 +196,56 @@ def test_a_flagged_name_is_refused_without_a_recorded_reason(checks) -> None:
         f"normalisation must be this one: refused={refused_failed} "
         f"accepted={accepted_failed}"
     )
+
+
+def test_a_flagged_seat_verdict_is_persisted_as_a_review_hold() -> None:
+    """A flagged name is not accepted by review: the hold is what stops it.
+
+    The docs review accepts on score alone unless a check raised a hold, so this
+    asserts the seat's note becomes one, naming the seat that raised it.
+    """
+
+    from imas_codex.standard_names.review.name_definition_seat import (
+        name_definition_note,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+        review_holds_from_checks,
+    )
+
+    candidate = {"id": "momentum", "documentation": "Momentum is a family."}
+    note = name_definition_note(
+        candidate,
+        {
+            "name": "momentum",
+            "verdict": "flag",
+            "qualifier": "family-of-quantities",
+            "reasoning": "the definition lists three distinct momenta",
+        },
+    )
+    holds = review_holds_from_checks(
+        (("name_definition", note, "name-definition-seat"),), candidate
+    )
+    assert [hold["raised_by"] for hold in holds] == ["name-definition-seat"]
+    assert holds[0]["kind"] == "name_definition"
+    assert "three distinct momenta" in holds[0]["finding"]
+
+
+def test_a_document_the_seat_passes_carries_no_hold() -> None:
+    from imas_codex.standard_names.review.name_definition_seat import (
+        name_definition_note,
+    )
+    from imas_codex.standard_names.worker_tasks.worker_review_docs import (
+        review_holds_from_checks,
+    )
+
+    note = name_definition_note(
+        {"id": "electron_temperature"},
+        {"name": "electron_temperature", "verdict": "pass", "qualifier": "agrees"},
+    )
+    assert (
+        review_holds_from_checks(
+            (("name_definition", note, "name-definition-seat"),),
+            {"id": "electron_temperature"},
+        )
+        == []
+    )

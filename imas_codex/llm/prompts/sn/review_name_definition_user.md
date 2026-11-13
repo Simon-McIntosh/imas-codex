@@ -32,5 +32,9 @@ Return a JSON object with a `verdicts` array, one verdict per item, in the order
 given: `name`, `verdict` (`flag` or `pass`), `qualifier` (`normalisation`,
 `counting-convention`, `weighting`, `integration`, `restriction-to-one-object`,
 `family-of-quantities`, or `agrees`), and `reasoning` naming the wording in the
-definition that states the extra qualifier, or the one quantity both texts share.
+definition that states the extra qualifier, or the one quantity both texts share,
+and `proposed_name`: when the flag is a `restriction-to-one-object`, a spelling of
+the name that states the restriction (for example a name that says which face,
+coil, module, reaction branch, instrument class or discharge phase it covers);
+empty otherwise.
 Follow the schema given in the system prompt.
