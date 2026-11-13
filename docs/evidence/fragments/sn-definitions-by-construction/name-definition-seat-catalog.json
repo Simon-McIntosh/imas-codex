@@ -2562,7 +2562,7 @@
    "unit": "A.m^-2"
   },
   {
-   "definition_phrase": "The definition explicitly excludes detector quantum efficiency, detector gain and electronic registration, restricting 'channel efficiency' to only the optical-path transmission portion of the channel rather than the full channel efficiency the name implies.",
+   "definition_phrase": "The name designates the single scalar efficiency of one channel; the definition states the same quantity as a dimensionless ratio of detected to accepted photon rate, which is simply what 'efficiency' means (not an added normalisation), and clarifies the channel's optical-path scope (excluding detector QE) rather than restricting to one of several channels or adding a listed qualifier.",
    "lexical_families": [],
    "name": "efficiency_of_spectrometer_channel",
    "proposed_disposition": "rename",
@@ -3281,7 +3281,7 @@
    "unit": "1"
   },
   {
-   "definition_phrase": "The documentation sums only z=1 to 74 positive ionization states and states 'neutral tungsten is excluded', restricting the elemental tungsten density to the ionized population only, unlike the full charge-state-summed (including neutral) convention used for sibling species such as krypton and tritium.",
+   "definition_phrase": "The name already states a ratio of two volume-averaged densities; the definition gives exactly this quantity, with tungsten density summed over charge states (the standard elemental-density convention) and both averages taken over the same plasma volume, adding no qualifier beyond what the name already specifies.",
    "lexical_families": [],
    "name": "ratio_of_volume_averaged_tungsten_density_to_volume_averaged_electron_density",
    "proposed_disposition": "rename",
@@ -3660,16 +3660,16 @@
    "lexical_families": [],
    "name": "vertical_angle_of_neutral_beam_injector",
    "proposed_disposition": "rename",
-   "proposed_spelling": "",
+   "proposed_spelling": "vertical_angle_of_central_beamlet_of_neutral_beam_injector",
    "qualifier": "restriction-to-one-object",
    "unit": "rad"
   },
   {
-   "definition_phrase": "The definition restricts the coil's vertical angle to 'the second oblique side of a poloidal-field-coil parallelogram cross-section,' one of (at least) two oblique sides, rather than the coil's angle in general.",
+   "definition_phrase": "The documentation restricts the quantity to 'the second oblique side of a poloidal field coil parallelogram cross-section', one side of the coil's cross-section, whereas the name reads as the coil's vertical angle generally.",
    "lexical_families": [],
    "name": "vertical_angle_of_poloidal_field_coil",
    "proposed_disposition": "rename",
-   "proposed_spelling": "",
+   "proposed_spelling": "vertical_angle_of_second_oblique_side_of_poloidal_field_coil_cross_section",
    "qualifier": "restriction-to-one-object",
    "unit": "rad"
   },
@@ -4122,5 +4122,14 @@
  },
  "published_names": 1977,
  "schema": "name-definition-seat-catalog",
+ "spelling_search": {
+  "asked_twice": [
+   "efficiency_of_spectrometer_channel",
+   "ratio_of_volume_averaged_tungsten_density_to_volume_averaged_electron_density"
+  ],
+  "names_asked": 4,
+  "note": "the seat named the restriction for these two but proposed no spelling on either attempt; the disposition stands as rename with the restriction stated in the phrase, and the spelling is left to the lead",
+  "spellings_filled": 2
+ },
  "unanswered": []
 }
