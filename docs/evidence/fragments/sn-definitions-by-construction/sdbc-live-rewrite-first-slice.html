@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The live rewrite: first slice and the costed manifest of the rest</title>
+</head>
+<body>
+<article>
+
+<h2>The live rewrite: first slice and the costed manifest of the rest</h2>
+
+<p>The catalog checkpoint this node required was present and verified
+(<code>sfdc-graph-checkpoint.json</code>, archive sha256 beginning
+<code>389e1fffa380</code>, four checks passed, counts equal before and after), so the
+write path was opened. <strong>The live rewrite did not proceed: every
+documentation edit is refused before review by a defect in the review worker's
+dependency registry.</strong> The slice's before-state, the two wording censuses
+and the costed manifest of the whole remaining pass are recorded here; no graph
+text was changed.</p>
+
+<h3>Why no live name could be brought to accepted text</h3>
+
+<p><code>imas_codex/standard_names/worker_tasks/worker_review_docs.py:891</code>
+resolves <code>_name_definition_note</code> through
+<code>_worker_dependency()</code>, whose registry in
+<code>imas_codex/standard_names/workers.py</code> carries no such entry. The
+function is defined locally at <code>worker_review_docs.py:699</code> and takes the
+resolver as its first positional, so the lookup raises
+<code>KeyError: '_name_definition_note'</code> on the first item and the pool
+retries the same item forever: 31,430+ identical error lines in one 17-second
+window, with no model call made in the loop. The call was introduced by
+<code>a42c54b8d</code>.</p>
+
+<p>Reproduction, run once from the worktree:</p>
+
+<pre><code>UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD \
+  uv run --no-sync imas-codex sn edit nitrogen_density \
+  --hint "State the species population as the settled catalog wording: the density counts ions
+          summed over all charge states, neutral atoms excluded." \
+  --axis docs --scope self --reason "The published definition sums charge states from neutral
+          through fully stripped nitrogen, so it counts neutral atoms."</code></pre>
+
+<p>Result: the candidate documentation was generated (USD 0.0873) and
+<code>review_docs</code> then failed on every retry. Nothing was stored. The
+rename path is separate and does run, so the defect's reach is documentation
+review, which every ruled class except a pure rename requires.</p>
+
+<h3>The slice, before the rewrite</h3>
+
+<table>
+<caption>Species family <code>&lt;X&gt;_density</code>: population statement per member</caption>
+<tr><th>Population statement</th><th>Members</th></tr>
+<tr><td>ions summed over all charge states, neutral atoms excluded</td><td>8</td></tr>
+<tr><td>neutral atoms mentioned, not settled whether counted</td><td>5</td></tr>
+<tr><td>silent on the population</td><td>2</td></tr>
+</table>
+
+<p>The family is not one wording today: the settled ruling (ions summed over all
+charge states, neutral atoms excluded) is stated by 8 of 15 live members, and the
+other 7 state something else or nothing. One member named in the family,
+<code>helium_density</code>, does not exist on the live graph and was not read.</p>
+
+<table>
+<caption>Operator family: the flux-surface average</caption>
+<tr><th>Measure</th><th>Value</th></tr>
+<tr><td>names read</td><td>8</td></tr>
+<tr><td>distinct operator sentences</td><td>8</td></tr>
+<tr><td>committed baseline over published names</td><td>8 forms over 32 names</td></tr>
+</table>
+
+<p>Each of the eight names carries its own paraphrase of the operator, so no two
+of them share a sentence and none matches the settled wording: <em>the flux
+surface average is the average of a quantity over a closed magnetic flux surface
+weighted by the inverse magnitude of the poloidal flux gradient</em>.</p>
+
+<h3>What each class was to carry, and what happened</h3>
+
+<table>
+<caption>Attempts and declines, with the reason each carries</caption>
+<tr><th>Class</th><th>Name</th><th>Path</th><th>Outcome</th><th>Reason</th></tr>
+<tr>
+<td>species population wording</td><td><code>nitrogen_density</code></td>
+<td><code>sn edit --hint --axis docs --scope self</code></td>
+<td>blocked</td>
+<td>candidate generated, then <code>review_docs</code> refused by the KeyError above; nothing stored</td>
+</tr>
+<tr>
+<td>equivalent-electron count (rename)</td><td><code>accumulated_argon_count</code></td>
+<td><code>sn edit --rename accumulated_argon_equivalent_electron_count --scope self</code></td>
+<td>declined by the pipeline (exit 2)</td>
+<td>new name fails ISN grammar round-trip: no matching physical base or geometry carrier</td>
+</tr>
+</table>
+
+<p>The five names chosen for each of the four ruled classes are listed in
+<code>live-rewrite-first-slice.json</code> under <code>classes</code>, read from
+the live graph with their description, unit, status and review score. None was
+edited, because the only path that reaches them is the one the defect blocks.</p>
+
+<h3>Spend</h3>
+
+<table>
+<caption>Spend by kind, against the node's USD 10 ceiling</caption>
+<tr><th>Kind</th><th>Names completed</th><th>Spend (USD)</th><th>Note</th></tr>
+<tr><td>documentation wording</td><td>0</td><td>0.0873</td><td>one generation call, then the review refused</td></tr>
+<tr><td>rename</td><td>0</td><td>0.0000</td><td>refused at grammar validation, before any model call</td></tr>
+<tr><td><strong>total</strong></td><td><strong>0</strong></td><td><strong>0.0873</strong></td><td>0.9 % of the ceiling</td></tr>
+</table>
+
+<p>No kind reached five edits, so no per-name rate for a <em>completed</em> live
+edit exists to measure. The projection below therefore uses the two rates
+committed before this node, stated beside the one call this node did measure.</p>
+
+<h3>The manifest of the remaining pass</h3>
+
+<table>
+<caption>Names the full pass would touch, by kind</caption>
+<tr><th>Kind</th><th>Names</th></tr>
+<tr><td>rename</td><td>61</td></tr>
+<tr><td>hint (pipeline composes the candidate)</td><td>269</td></tr>
+<tr><td>docs (definition regenerated)</td><td>99</td></tr>
+<tr><td>species family members, wording</td><td>281</td></tr>
+<tr><td>flux-surface-average names, wording</td><td>32</td></tr>
+</table>
+
+<table>
+<caption>Projected spend against the section's USD 150 ceiling</caption>
+<tr><th>Component</th><th>Rate used (USD/name)</th><th>Projected (USD)</th></tr>
+<tr><td>seat renames (61)</td><td>0.152</td><td>9.27</td></tr>
+<tr><td>seat hints (269)</td><td>0.152</td><td>40.89</td></tr>
+<tr><td>seat definition rewrites (99)</td><td>0.152</td><td>15.05</td></tr>
+<tr><td>species wording (281)</td><td>0.012</td><td>3.37</td></tr>
+<tr><td>operator wording (32)</td><td>0.012</td><td>0.38</td></tr>
+<tr><td><strong>total</strong></td><td></td><td><strong>68.96</strong></td></tr>
+</table>
+
+<p>The projection is under the ceiling, so the pass as scoped does not need to be
+reduced on cost grounds. It rests on the docs-only rate measured on a disposable
+graph (USD 0.012) for the wording components and on the live per-name median
+(USD 0.152) for everything that regenerates a name; a completed live edit must be
+measured before the pass is dispatched, and this node could not measure one.</p>
+
+<h3>What remains</h3>
+
+<ol>
+<li>Repair the review worker's dependency registration so documentation review
+runs; the reproduction above is the acceptance test.</li>
+<li>Re-dispatch this slice; the before-state, the class selections and the
+manifest are ready to drive it.</li>
+<li>Settle a spelling for the equivalent-electron renames that the grammar
+accepts, by running candidates through the dry run rather than composing them.</li>
+</ol>
+
+</article>
+</body>
+</html>
