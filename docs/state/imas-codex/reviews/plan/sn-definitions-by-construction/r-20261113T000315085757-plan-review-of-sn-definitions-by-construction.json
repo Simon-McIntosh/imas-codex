@@ -71,6 +71,16 @@
       "note": "The moved item names docs/evidence/fragments/sn-name-definition-fresh-labels/ as the home of the 360 fresh names and their two blind readings.",
       "reason": "",
       "when": "2026-11-13T01:55:15.588436+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "With the successor item moved to section 7, section 5 no longer waits on fresh labels, so section 6 is held only by the seat pass.",
+      "reason": "",
+      "when": "2026-11-13T01:55:38.420471+00:00"
     }
   ],
   "responses": {
@@ -100,6 +110,15 @@
       "note": "The successor comparison left section 5 and is one item of section 7, so section 5 closes on the seat pass and its dispositions alone.",
       "reason": "",
       "when": "2026-11-13T01:54:51.302932+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "note": "With the successor item moved to section 7, section 5 no longer waits on fresh labels, so section 6 is held only by the seat pass.",
+      "reason": "",
+      "when": "2026-11-13T01:55:38.420471+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T000315085757-plan-review-of-sn-definitions-by-construction.json",
