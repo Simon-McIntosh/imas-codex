@@ -1,0 +1,37 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T04:02:52.357Z",
+  "dispatched_at": "2026-11-13T03:56:52Z",
+  "findings": [],
+  "plan_commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+  "plan_fingerprint": "7def4da4d09d62a84dfd03804671b9be5daecf2dd67f8e5db8e66fe6cc643712",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T035549408435-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "6927a780fb1fbe7fe7764d4f5e560007073796e4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-integrity-backlog` \u00a752 resolves and is `data-status=\"done\"`; the evidence directory exists; the cited member name `graph.dump` is real, written at `imas_codex/graph/remote.py:944` and read at `neo4j_ops.py:521`; \u00a72's \"signed resets and rerun of 2026-11-12\" matches the recorded runs under that section (run `r-20261112T014614393815-sfdc-cohort-floor`, comments dated 2026-11-12).",
+    "done_when": "pass \u2014 the done-when is measurable and now carries a real negative control: the archive must pass a whole-stream test *and* hold a non-empty `graph.dump` member, and the same predicate must return false on a deliberately truncated copy and on a copy whose member is empty; both are the predicate `_is_full_recovery_archive` (`imas_codex/graph/neo4j_ops.py:514`) actually computes, so the control can fail, and the node-count read after the restart (`neo4j_ops.py`/`graph/AGENTS.md` \"the live read afterwards returning the same node count as before\") is a check that returns a different value if the service comes back on a different store.",
+    "evidence_paths": "pass \u2014 the check results and both node counts are recorded under `docs/evidence/fragments/sn-full-dd-continuation/`, a repository path that exists and survives the run (it already holds four fragments from \u00a72).",
+    "naming": "pass \u2014 `graph.dump` is an artifact member name, not a plan label; `\u00a752`/`\u00a72` appear only as plan-text cross-references, which is where section pointers belong.",
+    "reasoning": "pass \u2014 the changed unit holds under all three checks. (a) The stated reason for a checkpoint (the run writes thousands of names; the newest offsite copy dated 30 October and the newest local export 7 November) is supported by its own evidence and is consistent with the push log's silence since 2026-09-02. (b) The endpoint is reachable and checkable: `imas-codex graph export` produces the gzip tar carrying `graph.dump`, and the verification the done-when demands is the repository's own recovery-archive predicate, so the measure can both pass and fail. (c) The section prescribes no implementation \u2014 it names no code path, step sequence or function; the archive/member and node-count criteria are endpoint statements, and the changed clause adds only the archive-content requirement that the earlier review showed was missing.",
+    "single_goal": "pass \u2014 one deliverable: one verified checkpoint archive, sealed, then the graph back up.",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives `s3` [`sn-integrity-backlog#s52`, `sn-full-dd-continuation#s2`], both of which exist (`sn-integrity-backlog.html:304`, `id=\"s2\"` at line 40) and both of which write the graph ahead of the checkpoint; `s4` carries `s3` as a dependency, so the run cannot start before the checkpoint."
+  },
+  "section_digests": {
+    "_document": "16ae1c71c9e5740bc6d2aa601f5df44baba94934b41f3f8c6736012e92b11e2d",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "171b85c40a7ae5d669bb68a05f7e18c89118d57c93e397c27e9fe9dd6e8ca57d",
+    "s4": "6a1d8b3457ec463991796937fe13c6ca0946b5b324de49a2099a7e6c66fbde45",
+    "s5": "6690535f2aea19399c90db7f6eecbe8aea0ff83d558dee77f801d64ef16c7a45",
+    "s6": "b69f4c480a9cf3a5bb789f9ec172fd784a2950de5ff28f25eb6162d59232fd0e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T08:04:14.832341+00:00",
+  "total": null
+}
