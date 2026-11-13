@@ -89,6 +89,16 @@
       "note": "Section 8 now says the held-out names were kept from tuning but have been scored three times, which is why fresh names are used.",
       "reason": "",
       "when": "2026-11-13T03:14:35.642248+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "5085c54e91420195d631dc47617b966af4211f79",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "Plan effort total set to 31 hours to match the eight sections.",
+      "reason": "",
+      "when": "2026-11-13T03:15:02.103916+00:00"
     }
   ],
   "responses": {
@@ -127,6 +137,15 @@
       "note": "Section 5 no longer names a later reading; the floor on the seat's re-read lives in section 8, so the two sections do not wait on each other.",
       "reason": "",
       "when": "2026-11-13T03:13:24.873053+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "5085c54e91420195d631dc47617b966af4211f79",
+      "commit_basis": "edit",
+      "note": "Plan effort total set to 31 hours to match the eight sections.",
+      "reason": "",
+      "when": "2026-11-13T03:15:02.103916+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T023545803174-plan-review-of-sn-definitions-by-construction.json",
