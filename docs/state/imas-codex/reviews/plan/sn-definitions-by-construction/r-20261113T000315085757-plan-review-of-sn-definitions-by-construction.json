@@ -51,6 +51,16 @@
       "note": "Section 5 first item now fails on a later seat reading that finds fewer than 27 of 36 or flags more than 12 of 172 on the held-out names.",
       "reason": "",
       "when": "2026-11-13T01:54:31.602425+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "The successor comparison left section 5 and is one item of section 7, so section 5 closes on the seat pass and its dispositions alone.",
+      "reason": "",
+      "when": "2026-11-13T01:54:51.302932+00:00"
     }
   ],
   "responses": {
@@ -62,6 +72,15 @@
       "note": "Section 5 first item now fails on a later seat reading that finds fewer than 27 of 36 or flags more than 12 of 172 on the held-out names.",
       "reason": "",
       "when": "2026-11-13T01:54:31.602425+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "note": "The successor comparison left section 5 and is one item of section 7, so section 5 closes on the seat pass and its dispositions alone.",
+      "reason": "",
+      "when": "2026-11-13T01:54:51.302932+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T000315085757-plan-review-of-sn-definitions-by-construction.json",
