@@ -53,6 +53,16 @@
       "note": "The floor that compared a record with itself is removed; a fresh-reference share below the accepted one now holds the section for the lead's ruling on coverage.",
       "reason": "",
       "when": "2026-11-13T08:43:52.439860+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "da9d9941f3ee285f00fcb68b358c3044093a02f8",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The successor is built and scored from a committed revision and joins the named checks only if the verdict replaces the seat.",
+      "reason": "",
+      "when": "2026-11-13T08:44:19.730852+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "The floor that compared a record with itself is removed; a fresh-reference share below the accepted one now holds the section for the lead's ruling on coverage.",
       "reason": "",
       "when": "2026-11-13T08:43:52.439860+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "da9d9941f3ee285f00fcb68b358c3044093a02f8",
+      "commit_basis": "edit",
+      "note": "The successor is built and scored from a committed revision and joins the named checks only if the verdict replaces the seat.",
+      "reason": "",
+      "when": "2026-11-13T08:44:19.730852+00:00"
     },
     "reasoning-1": {
       "action": "acted",
