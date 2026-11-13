@@ -360,8 +360,30 @@ async def extract_phrases_jev(
 # ---------------------------------------------------------------------------
 
 
-def _conventions_text() -> str:
-    return "\n".join(f"- {convention.reason}" for convention in CONVENTIONS)
+def _conventions_text(name: str = "") -> str:
+    """The conventions that can apply to this name, one per line.
+
+    A convention offered to a name it cannot apply to reads as permission to
+    excuse the phrase, so only the ones whose own tokens the name carries are
+    shown; a convention with no name tokens applies to every name.
+    """
+
+    tokens = set(name_tokens(name)) if name else set()
+    applicable = [
+        convention
+        for convention in CONVENTIONS
+        if not convention.name_tokens
+        and not convention.name_subject_tokens
+        or (convention.name_tokens and tokens & set(convention.name_tokens))
+        or (
+            not convention.name_tokens
+            and convention.name_subject_tokens
+            and tokens & set(convention.name_subject_tokens)
+        )
+    ]
+    if not applicable:
+        return "none that apply to this name"
+    return "\n".join(f"- {convention.reason}" for convention in applicable)
 
 
 def relation_state(item: dict[str, Any], phrase: dict[str, Any]) -> dict[str, Any]:
@@ -378,7 +400,7 @@ def relation_state(item: dict[str, Any], phrase: dict[str, Any]) -> dict[str, An
             for implication in name_closure(name, str(item.get("unit") or ""))
         )
         or "nothing beyond its words",
-        "recorded_conventions": _conventions_text(),
+        "recorded_conventions": _conventions_text(name),
     }
 
 
@@ -580,7 +602,7 @@ async def judge_reverse(
                     "standard_name": name,
                     "name_qualifier": qualifier,
                     "definition": _definition_text(row),
-                    "recorded_conventions": _conventions_text(),
+                    "recorded_conventions": _conventions_text(name),
                 }
             )
             index.append((name, qualifier))

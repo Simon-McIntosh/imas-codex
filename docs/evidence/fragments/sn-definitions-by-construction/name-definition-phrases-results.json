@@ -1,7 +1,7 @@
 {
  "arms": {
   "chat": {
-   "cost_usd": 4.9271,
+   "cost_usd": 4.923,
    "curve": [
     {
      "agreeing_flagged": 258,
@@ -18,122 +18,122 @@
      "threshold": 0.1
     },
     {
-     "agreeing_flagged": 253,
-     "false_flag_rate": 0.981,
+     "agreeing_flagged": 250,
+     "false_flag_rate": 0.969,
      "mismatched_found": 55,
      "recall": 1.0,
      "threshold": 0.15
     },
     {
-     "agreeing_flagged": 247,
-     "false_flag_rate": 0.957,
+     "agreeing_flagged": 248,
+     "false_flag_rate": 0.961,
      "mismatched_found": 55,
      "recall": 1.0,
      "threshold": 0.2
     },
     {
-     "agreeing_flagged": 247,
-     "false_flag_rate": 0.957,
+     "agreeing_flagged": 244,
+     "false_flag_rate": 0.946,
      "mismatched_found": 55,
      "recall": 1.0,
      "threshold": 0.25
     },
     {
-     "agreeing_flagged": 245,
-     "false_flag_rate": 0.95,
+     "agreeing_flagged": 241,
+     "false_flag_rate": 0.934,
      "mismatched_found": 55,
      "recall": 1.0,
      "threshold": 0.3
     },
     {
-     "agreeing_flagged": 232,
-     "false_flag_rate": 0.899,
+     "agreeing_flagged": 234,
+     "false_flag_rate": 0.907,
      "mismatched_found": 55,
      "recall": 1.0,
      "threshold": 0.35
     },
     {
-     "agreeing_flagged": 225,
-     "false_flag_rate": 0.872,
+     "agreeing_flagged": 214,
+     "false_flag_rate": 0.829,
      "mismatched_found": 55,
      "recall": 1.0,
      "threshold": 0.4
     },
     {
-     "agreeing_flagged": 207,
-     "false_flag_rate": 0.802,
+     "agreeing_flagged": 200,
+     "false_flag_rate": 0.775,
      "mismatched_found": 54,
      "recall": 0.982,
      "threshold": 0.45
     },
     {
-     "agreeing_flagged": 195,
-     "false_flag_rate": 0.756,
+     "agreeing_flagged": 187,
+     "false_flag_rate": 0.725,
      "mismatched_found": 53,
      "recall": 0.964,
      "threshold": 0.5
     },
     {
-     "agreeing_flagged": 182,
-     "false_flag_rate": 0.705,
+     "agreeing_flagged": 172,
+     "false_flag_rate": 0.667,
      "mismatched_found": 52,
      "recall": 0.945,
      "threshold": 0.55
     },
     {
-     "agreeing_flagged": 167,
-     "false_flag_rate": 0.647,
-     "mismatched_found": 51,
-     "recall": 0.927,
+     "agreeing_flagged": 156,
+     "false_flag_rate": 0.605,
+     "mismatched_found": 50,
+     "recall": 0.909,
      "threshold": 0.6
     },
     {
-     "agreeing_flagged": 146,
-     "false_flag_rate": 0.566,
-     "mismatched_found": 49,
-     "recall": 0.891,
+     "agreeing_flagged": 140,
+     "false_flag_rate": 0.543,
+     "mismatched_found": 50,
+     "recall": 0.909,
      "threshold": 0.65
     },
     {
-     "agreeing_flagged": 121,
-     "false_flag_rate": 0.469,
+     "agreeing_flagged": 118,
+     "false_flag_rate": 0.457,
      "mismatched_found": 48,
      "recall": 0.873,
      "threshold": 0.7
     },
     {
-     "agreeing_flagged": 104,
-     "false_flag_rate": 0.403,
+     "agreeing_flagged": 99,
+     "false_flag_rate": 0.384,
      "mismatched_found": 44,
      "recall": 0.8,
      "threshold": 0.75
     },
     {
-     "agreeing_flagged": 79,
-     "false_flag_rate": 0.306,
-     "mismatched_found": 42,
-     "recall": 0.764,
+     "agreeing_flagged": 70,
+     "false_flag_rate": 0.271,
+     "mismatched_found": 38,
+     "recall": 0.691,
      "threshold": 0.8
     },
     {
-     "agreeing_flagged": 48,
-     "false_flag_rate": 0.186,
-     "mismatched_found": 34,
-     "recall": 0.618,
+     "agreeing_flagged": 50,
+     "false_flag_rate": 0.194,
+     "mismatched_found": 32,
+     "recall": 0.582,
      "threshold": 0.85
     },
     {
-     "agreeing_flagged": 34,
-     "false_flag_rate": 0.132,
-     "mismatched_found": 23,
-     "recall": 0.418,
+     "agreeing_flagged": 33,
+     "false_flag_rate": 0.128,
+     "mismatched_found": 22,
+     "recall": 0.4,
      "threshold": 0.9
     },
     {
      "agreeing_flagged": 16,
      "false_flag_rate": 0.062,
-     "mismatched_found": 11,
-     "recall": 0.2,
+     "mismatched_found": 14,
+     "recall": 0.255,
      "threshold": 0.95
     }
    ],
@@ -148,11 +148,11 @@
      "ion_charge_state_diffusivity",
      "ipb98y2_confinement_time",
      "neutron_response_function_of_neutron_detector",
+     "parallel_conductivity",
      "parallel_total_ion_energy_convection_velocity",
+     "perturbed_plasma_mass_density_real_part",
      "plasma_temperature",
-     "poloidal_magnetic_flux_at_halo_boundary",
-     "poloidal_perturbed_vacuum_magnetic_field_real_part",
-     "radial_perturbed_plasma_velocity_real_part",
+     "poloidal_beta",
      "ratio_of_particle_temperature_to_particle_reference_temperature",
      "stray_breakdown_magnetic_field_magnitude",
      "surface_area_of_detector",
@@ -160,14 +160,12 @@
      "volume_averaged_helium_4_density"
     ],
     "mismatched": 55,
-    "mismatched_found": 11,
+    "mismatched_found": 14,
     "missed_mismatched": [
      "accumulated_ammonia_count",
      "accumulated_ammonia_deuterated_count",
      "accumulated_helium_3_prefill_count_due_to_gas_injection",
-     "accumulated_silane_count_due_to_gas_injection",
      "accumulated_total_prefill_gas_count",
-     "accumulated_xenon_count_due_to_gas_injection",
      "area_of_flux_loop",
      "argon_source_rate_due_to_gas_injection",
      "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
@@ -192,7 +190,6 @@
      "particle_diffusivity",
      "particle_torque_due_to_j_cross_b_force",
      "particle_velocity_due_to_convection",
-     "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
      "per_toroidal_mode_thermal_ion_charge_state_power_density",
      "perpendicular_co_passing_fast_particle_pressure",
      "power_density_due_to_collisions",
@@ -208,11 +205,11 @@
      "xenon_source_rate_due_to_gas_injection"
     ],
     "names": 313,
-    "recall": 0.2
+    "recall": 0.255
    },
    "dispositions": {
-    "rename": 27,
-    "rewrite-the-definition-or-rename": 6
+    "rename": 30,
+    "rewrite-the-definition-or-rename": 10
    },
    "findings": {
     "accumulated_deuterated_methane_prefill_count": [
@@ -227,10 +224,52 @@
        "prefill",
        "count"
       ],
-      "p_flag": 0.97,
+      "p_flag": 0.98,
       "pattern": "weights",
       "phrase": "weighted by ten equivalent electrons per molecule rather than reported as a molecular count",
       "phrase_adds": "weights molecule count by electron-equivalent factor instead of raw count",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "accumulated_silane_count_due_to_gas_injection": [
+     {
+      "convention": "",
+      "disposition": "rewrite-the-definition-or-rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "accumulated",
+       "silane",
+       "count",
+       "due",
+       "to",
+       "gas",
+       "injection"
+      ],
+      "p_flag": 0.95,
+      "pattern": "re-types",
+      "phrase": "represented on an equivalent-electron basis",
+      "phrase_adds": "re-types as electron-equivalent quantity",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "accumulated_xenon_count_due_to_gas_injection": [
+     {
+      "convention": "",
+      "disposition": "rewrite-the-definition-or-rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "accumulated",
+       "xenon",
+       "count",
+       "due",
+       "to",
+       "gas",
+       "injection"
+      ],
+      "p_flag": 0.95,
+      "pattern": "re-types",
+      "phrase": "expressed as an equivalent-electron count with 54 count units assigned to each xenon atom",
+      "phrase_adds": "re-types atom count as equivalent-electron count via weighting factor",
       "relation": "narrower_different_or_additional"
      }
     ],
@@ -243,7 +282,21 @@
        "alfven",
        "frequency"
       ],
-      "p_flag": 0.98,
+      "p_flag": 0.96,
+      "pattern": "restricts",
+      "phrase": "at a given radial position",
+      "phrase_adds": "restricts to a specific radial location",
+      "relation": "narrower_different_or_additional"
+     },
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "alfven",
+       "frequency"
+      ],
+      "p_flag": 0.99,
       "pattern": "restricts",
       "phrase": "for a single toroidal mode number",
       "phrase_adds": "restricts to one toroidal mode number",
@@ -261,10 +314,10 @@
        "mode",
        "frequency"
       ],
-      "p_flag": 0.97,
+      "p_flag": 0.95,
       "pattern": "restricts",
       "phrase": "during an ELMing H-mode phase",
-      "phrase_adds": "limits measurement window to ELMing H-mode phase",
+      "phrase_adds": "restricts to ELMing H-mode phase",
       "relation": "narrower_different_or_additional"
      },
      {
@@ -277,10 +330,10 @@
        "mode",
        "frequency"
       ],
-      "p_flag": 0.95,
+      "p_flag": 0.96,
       "pattern": "restricts",
-      "phrase": "during an ELMing H-mode phase",
-      "phrase_adds": "restricts to ELMing H-mode phase",
+      "phrase": "N_{\\mathrm{ELM}} is the number of identified ELM events",
+      "phrase_adds": "counts only identified ELM events",
       "relation": "narrower_different_or_additional"
      }
     ],
@@ -298,7 +351,7 @@
        "field",
        "coil"
       ],
-      "p_flag": 0.97,
+      "p_flag": 0.95,
       "pattern": "restricts",
       "phrase": "on the inboard-facing surface of a toroidal field coil",
       "phrase_adds": "restricts to one coil surface",
@@ -317,7 +370,7 @@
        "field",
        "coil"
       ],
-      "p_flag": 0.96,
+      "p_flag": 0.97,
       "pattern": "restricts",
       "phrase": "The scope is limited to toroidal field coils and to their inboard-facing surfaces; it does not include correction coils, poloidal field coils, the outboard-facing surface, or a whole-coil combination of surfaces.",
       "phrase_adds": "excludes other coils and surfaces",
@@ -334,7 +387,7 @@
        "line",
        "length"
       ],
-      "p_flag": 0.98,
+      "p_flag": 0.99,
       "pattern": "narrows",
       "phrase": "resolving the field-line length distribution rather than reporting an average connection length",
       "phrase_adds": "individual distribution, not an averaged quantity",
@@ -349,7 +402,7 @@
        "line",
        "length"
       ],
-      "p_flag": 0.96,
+      "p_flag": 0.97,
       "pattern": "restricts",
       "phrase": "of one magnetic field line traced during plasma initiation",
       "phrase_adds": "restricts to a single line during the plasma-initiation phase",
@@ -440,7 +493,7 @@
        "confinement",
        "time"
       ],
-      "p_flag": 0.97,
+      "p_flag": 0.96,
       "pattern": "narrows",
       "phrase": "The quantity documented here is the IPB98(y,2) scaling prediction of this timescale, not the directly evaluated confinement time for a particular plasma state.",
       "phrase_adds": "narrows to the scaling prediction, excludes directly evaluated confinement time",
@@ -462,7 +515,7 @@
        "b",
        "drift"
       ],
-      "p_flag": 0.95,
+      "p_flag": 0.96,
       "pattern": "normalises",
       "phrase": "expressed in dimensionless form relative to a reference momentum-flux scale",
       "phrase_adds": "normalizes to dimensionless form against reference scale",
@@ -489,6 +542,36 @@
       "relation": "narrower_different_or_additional"
      }
     ],
+    "parallel_conductivity": [
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "parallel",
+       "conductivity"
+      ],
+      "p_flag": 0.95,
+      "pattern": "narrows",
+      "phrase": "For the total plasma response, it represents the combined electrical response of the charged constituents rather than a species-resolved coefficient.",
+      "phrase_adds": "excludes species-resolved resolution for total response",
+      "relation": "narrower_different_or_additional"
+     },
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "parallel",
+       "conductivity"
+      ],
+      "p_flag": 0.95,
+      "pattern": "restricts",
+      "phrase": "When attributed to a particular source, it denotes that source's conductivity contribution and corresponding driven parallel conductive-current response, not the total conductivity.",
+      "phrase_adds": "restricts to a specific source's contribution",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
     "parallel_total_ion_energy_convection_velocity": [
      {
       "convention": "",
@@ -502,10 +585,55 @@
        "convection",
        "velocity"
       ],
-      "p_flag": 0.98,
+      "p_flag": 0.97,
       "pattern": "restricts",
       "phrase": "in the edge plasma",
       "phrase_adds": "restricts context to edge plasma",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude": [
+     {
+      "convention": "",
+      "disposition": "rewrite-the-definition-or-rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "per",
+       "toroidal",
+       "mode",
+       "right",
+       "hand",
+       "circularly",
+       "polarized",
+       "wave",
+       "electric",
+       "field",
+       "amplitude"
+      ],
+      "p_flag": 0.95,
+      "pattern": "weights",
+      "phrase": "Power-deposition-weighted",
+      "phrase_adds": "averaging weighted by power-deposition density",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "perturbed_plasma_mass_density_real_part": [
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "perturbed",
+       "plasma",
+       "mass",
+       "density",
+       "real",
+       "part"
+      ],
+      "p_flag": 0.96,
+      "pattern": "restricts",
+      "phrase": "for one toroidal Fourier harmonic",
+      "phrase_adds": "restricts to a single toroidal mode",
       "relation": "narrower_different_or_additional"
      }
     ],
@@ -525,44 +653,19 @@
       "relation": "narrower_different_or_additional"
      }
     ],
-    "poloidal_magnetic_flux_at_halo_boundary": [
+    "poloidal_beta": [
      {
       "convention": "",
-      "disposition": "rename",
+      "disposition": "rewrite-the-definition-or-rename",
       "finding_type": "name_definition_phrase_disagreement",
       "name_words": [
        "poloidal",
-       "magnetic",
-       "flux",
-       "at",
-       "halo",
-       "boundary"
+       "beta"
       ],
       "p_flag": 0.96,
-      "pattern": "restricts",
-      "phrase": "during a disruption",
-      "phrase_adds": "restricts to disruption event timing",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
-    "poloidal_perturbed_vacuum_magnetic_field_real_part": [
-     {
-      "convention": "",
-      "disposition": "rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "poloidal",
-       "perturbed",
-       "vacuum",
-       "magnetic",
-       "field",
-       "real",
-       "part"
-      ],
-      "p_flag": 0.95,
-      "pattern": "restricts",
-      "phrase": "single-toroidal-mode",
-      "phrase_adds": "restricts to one toroidal mode number",
+      "pattern": "normalises",
+      "phrase": "The reference scale is defined by a whole-plasma, current-based normalization rather than by the poloidal field at a particular point.",
+      "phrase_adds": "normalizes against a global current-based scale, not a local field value",
       "relation": "narrower_different_or_additional"
      }
     ],
@@ -575,7 +678,7 @@
        "pulse",
        "duration"
       ],
-      "p_flag": 0.98,
+      "p_flag": 0.99,
       "pattern": "narrows",
       "phrase": "of the confined-plasma phase",
       "phrase_adds": "limits duration to the confined-plasma phase only",
@@ -596,26 +699,6 @@
       "relation": "narrower_different_or_additional"
      }
     ],
-    "radial_perturbed_plasma_velocity_real_part": [
-     {
-      "convention": "",
-      "disposition": "rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "radial",
-       "perturbed",
-       "plasma",
-       "velocity",
-       "real",
-       "part"
-      ],
-      "p_flag": 0.95,
-      "pattern": "restricts",
-      "phrase": "for a specified toroidal Fourier mode",
-      "phrase_adds": "restricts to one specified mode number",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
     "radius_of_reflector": [
      {
       "convention": "",
@@ -626,7 +709,7 @@
        "of",
        "reflector"
       ],
-      "p_flag": 0.96,
+      "p_flag": 0.97,
       "pattern": "restricts",
       "phrase": "This quantity applies only to a reflector with circular aperture geometry.",
       "phrase_adds": "restricts applicability to circular aperture reflectors",
@@ -683,10 +766,27 @@
        "field",
        "magnitude"
       ],
-      "p_flag": 0.98,
+      "p_flag": 0.97,
       "pattern": "restricts",
       "phrase": "at the plasma position during initiation",
       "phrase_adds": "restricts location and time to plasma position during initiation",
+      "relation": "narrower_different_or_additional"
+     },
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "stray",
+       "breakdown",
+       "magnetic",
+       "field",
+       "magnitude"
+      ],
+      "p_flag": 0.95,
+      "pattern": "restricts",
+      "phrase": "present at the plasma position during plasma initiation",
+      "phrase_adds": "restricts to plasma position during initiation",
       "relation": "narrower_different_or_additional"
      }
     ],
@@ -701,7 +801,7 @@
        "of",
        "detector"
       ],
-      "p_flag": 0.95,
+      "p_flag": 0.97,
       "pattern": "restricts",
       "phrase": "associated with one diagnostic channel",
       "phrase_adds": "restricts to a single channel",
@@ -717,10 +817,24 @@
        "surface",
        "emissivity"
       ],
-      "p_flag": 0.96,
+      "p_flag": 0.97,
       "pattern": "aggregates",
       "phrase": "with the stated spectral and angular averaging",
       "phrase_adds": "averages over spectral band and angular range",
+      "relation": "narrower_different_or_additional"
+     },
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "surface",
+       "emissivity"
+      ],
+      "p_flag": 0.95,
+      "pattern": "narrows",
+      "phrase": "it is not a wavelength- and direction-resolved emissivity",
+      "phrase_adds": "excludes a wavelength- and direction-resolved version",
       "relation": "narrower_different_or_additional"
      }
     ],
@@ -735,7 +849,7 @@
        "coil",
        "conductor"
       ],
-      "p_flag": 0.96,
+      "p_flag": 0.95,
       "pattern": "restricts",
       "phrase": "of the conductor in an active poloidal-field or central-solenoid coil",
       "phrase_adds": "restricts to conductor of active PF/CS coil",
@@ -807,7 +921,7 @@
        "4",
        "density"
       ],
-      "p_flag": 0.97,
+      "p_flag": 0.96,
       "pattern": "restricts",
       "phrase": "in deuterium-tritium plasmas",
       "phrase_adds": "restricts context to D-T plasmas",
@@ -817,6 +931,8 @@
    },
    "flagged_names": [
     "accumulated_deuterated_methane_prefill_count",
+    "accumulated_silane_count_due_to_gas_injection",
+    "accumulated_xenon_count_due_to_gas_injection",
     "alfven_frequency",
     "edge_localized_mode_frequency",
     "fast_neutron_flux_of_toroidal_field_coil",
@@ -827,12 +943,13 @@
     "ipb98y2_confinement_time",
     "momentum_flux_due_to_e_cross_b_drift",
     "neutron_response_function_of_neutron_detector",
+    "parallel_conductivity",
     "parallel_total_ion_energy_convection_velocity",
+    "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
+    "perturbed_plasma_mass_density_real_part",
     "plasma_temperature",
-    "poloidal_magnetic_flux_at_halo_boundary",
-    "poloidal_perturbed_vacuum_magnetic_field_real_part",
+    "poloidal_beta",
     "pulse_duration",
-    "radial_perturbed_plasma_velocity_real_part",
     "radius_of_reflector",
     "ratio_of_particle_temperature_to_particle_reference_temperature",
     "refractive_index",
@@ -846,18 +963,19 @@
    ],
    "kinds": {
     "aggregates": 1,
-    "narrows": 3,
-    "normalises": 1,
+    "narrows": 5,
+    "normalises": 2,
     "other": 1,
     "re-references": 1,
-    "restricts": 24,
-    "weights": 2
+    "re-types": 2,
+    "restricts": 25,
+    "weights": 3
    },
    "phrases_per_name": 5.97,
    "threshold": 0.95
   },
   "jev": {
-   "cost_usd": 0.0177,
+   "cost_usd": 0.0171,
    "curve": [
     {
      "agreeing_flagged": 185,
@@ -869,118 +987,118 @@
     {
      "agreeing_flagged": 185,
      "false_flag_rate": 0.717,
-     "mismatched_found": 47,
-     "recall": 0.855,
+     "mismatched_found": 45,
+     "recall": 0.818,
      "threshold": 0.1
     },
     {
-     "agreeing_flagged": 182,
-     "false_flag_rate": 0.705,
-     "mismatched_found": 45,
-     "recall": 0.818,
+     "agreeing_flagged": 181,
+     "false_flag_rate": 0.702,
+     "mismatched_found": 43,
+     "recall": 0.782,
      "threshold": 0.15
     },
     {
      "agreeing_flagged": 174,
      "false_flag_rate": 0.674,
-     "mismatched_found": 43,
-     "recall": 0.782,
+     "mismatched_found": 41,
+     "recall": 0.745,
      "threshold": 0.2
     },
     {
-     "agreeing_flagged": 160,
-     "false_flag_rate": 0.62,
-     "mismatched_found": 40,
-     "recall": 0.727,
+     "agreeing_flagged": 153,
+     "false_flag_rate": 0.593,
+     "mismatched_found": 39,
+     "recall": 0.709,
      "threshold": 0.25
     },
     {
-     "agreeing_flagged": 145,
-     "false_flag_rate": 0.562,
-     "mismatched_found": 38,
-     "recall": 0.691,
+     "agreeing_flagged": 127,
+     "false_flag_rate": 0.492,
+     "mismatched_found": 35,
+     "recall": 0.636,
      "threshold": 0.3
     },
     {
-     "agreeing_flagged": 124,
-     "false_flag_rate": 0.481,
-     "mismatched_found": 38,
-     "recall": 0.691,
+     "agreeing_flagged": 110,
+     "false_flag_rate": 0.426,
+     "mismatched_found": 32,
+     "recall": 0.582,
      "threshold": 0.35
     },
     {
-     "agreeing_flagged": 106,
-     "false_flag_rate": 0.411,
-     "mismatched_found": 32,
-     "recall": 0.582,
+     "agreeing_flagged": 95,
+     "false_flag_rate": 0.368,
+     "mismatched_found": 28,
+     "recall": 0.509,
      "threshold": 0.4
     },
     {
-     "agreeing_flagged": 91,
-     "false_flag_rate": 0.353,
-     "mismatched_found": 26,
-     "recall": 0.473,
+     "agreeing_flagged": 80,
+     "false_flag_rate": 0.31,
+     "mismatched_found": 27,
+     "recall": 0.491,
      "threshold": 0.45
     },
     {
-     "agreeing_flagged": 79,
-     "false_flag_rate": 0.306,
-     "mismatched_found": 24,
-     "recall": 0.436,
+     "agreeing_flagged": 66,
+     "false_flag_rate": 0.256,
+     "mismatched_found": 22,
+     "recall": 0.4,
      "threshold": 0.5
     },
     {
-     "agreeing_flagged": 60,
-     "false_flag_rate": 0.233,
+     "agreeing_flagged": 50,
+     "false_flag_rate": 0.194,
      "mismatched_found": 18,
      "recall": 0.327,
      "threshold": 0.55
     },
     {
-     "agreeing_flagged": 47,
-     "false_flag_rate": 0.182,
-     "mismatched_found": 14,
-     "recall": 0.255,
+     "agreeing_flagged": 40,
+     "false_flag_rate": 0.155,
+     "mismatched_found": 13,
+     "recall": 0.236,
      "threshold": 0.6
     },
     {
-     "agreeing_flagged": 34,
-     "false_flag_rate": 0.132,
-     "mismatched_found": 11,
-     "recall": 0.2,
+     "agreeing_flagged": 33,
+     "false_flag_rate": 0.128,
+     "mismatched_found": 8,
+     "recall": 0.145,
      "threshold": 0.65
     },
     {
-     "agreeing_flagged": 21,
-     "false_flag_rate": 0.081,
-     "mismatched_found": 7,
-     "recall": 0.127,
+     "agreeing_flagged": 22,
+     "false_flag_rate": 0.085,
+     "mismatched_found": 6,
+     "recall": 0.109,
      "threshold": 0.7
     },
     {
-     "agreeing_flagged": 10,
-     "false_flag_rate": 0.039,
-     "mismatched_found": 3,
-     "recall": 0.055,
+     "agreeing_flagged": 15,
+     "false_flag_rate": 0.058,
+     "mismatched_found": 4,
+     "recall": 0.073,
      "threshold": 0.75
     },
     {
-     "agreeing_flagged": 7,
-     "false_flag_rate": 0.027,
-     "mismatched_found": 0,
-     "recall": 0.0,
+     "agreeing_flagged": 6,
+     "false_flag_rate": 0.023,
+     "mismatched_found": 1,
+     "recall": 0.018,
      "threshold": 0.8
+    },
+    {
+     "agreeing_flagged": 3,
+     "false_flag_rate": 0.012,
+     "mismatched_found": 1,
+     "recall": 0.018,
+     "threshold": 0.85
     },
     {
      "agreeing_flagged": 2,
      "false_flag_rate": 0.008,
-     "mismatched_found": 0,
-     "recall": 0.0,
-     "threshold": 0.85
-    },
-    {
-     "agreeing_flagged": 1,
-     "false_flag_rate": 0.004,
      "mismatched_found": 0,
      "recall": 0.0,
      "threshold": 0.9
@@ -995,8 +1113,8 @@
    ],
    "development": {
     "agreeing": 258,
-    "agreeing_flagged": 21,
-    "false_flag_rate": 0.081,
+    "agreeing_flagged": 22,
+    "false_flag_rate": 0.085,
     "false_flags": [
      "accumulated_tritium_count_due_to_gas_injection",
      "edge_localized_mode_frequency",
@@ -1004,29 +1122,33 @@
      "height_of_plasma_filament",
      "ion_charge_state_velocity",
      "ipb98y2_confinement_time",
-     "line_averaged_total_ion_temperature",
-     "minimum_gas_flow",
+     "parallel_conductivity",
      "perpendicular_normalized_perturbed_pressure_bessel_1",
+     "perpendicular_refractive_index",
      "plasma_temperature",
      "plasma_velocity",
      "poloidal_launched_wave_index_of_lower_hybrid_antenna",
+     "radial_perturbed_plasma_velocity_real_part",
+     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
      "stray_breakdown_magnetic_field_magnitude",
      "thermal_ion_charge_state_energy_velocity_due_to_convection",
+     "thickness_of_breeder_blanket_layer",
      "toroidal_argon_velocity_at_internal_transport_barrier",
-     "toroidal_coordinate_of_reflector",
      "toroidal_helium_3_velocity_at_pedestal_top",
      "toroidal_iron_velocity_at_pedestal_top",
      "toroidal_neon_velocity_at_plasma_boundary",
-     "toroidal_reference_magnetic_field",
      "vertical_focal_length_of_beamlet_group"
     ],
     "mismatched": 55,
-    "mismatched_found": 7,
+    "mismatched_found": 6,
     "missed_mismatched": [
      "accumulated_ammonia_count",
      "accumulated_ammonia_deuterated_count",
+     "accumulated_deuterated_methane_prefill_count",
+     "accumulated_helium_3_prefill_count_due_to_gas_injection",
      "accumulated_silane_count_due_to_gas_injection",
      "accumulated_total_prefill_gas_count",
+     "accumulated_xenon_count_due_to_gas_injection",
      "alfven_frequency",
      "area_of_flux_loop",
      "argon_source_rate_due_to_gas_injection",
@@ -1054,12 +1176,10 @@
      "particle_diffusivity",
      "particle_torque_due_to_j_cross_b_force",
      "particle_velocity_due_to_convection",
-     "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
      "per_toroidal_mode_thermal_ion_charge_state_power_density",
      "power_density_due_to_collisions",
      "radiated_power_of_breeder_blanket_module",
      "radius_of_neutral_beam_injector",
-     "radius_of_reflector",
      "refractive_index",
      "surface_emissivity",
      "temperature_of_coil_conductor",
@@ -1073,55 +1193,13 @@
      "xenon_source_rate_due_to_gas_injection"
     ],
     "names": 313,
-    "recall": 0.127
+    "recall": 0.109
    },
    "dispositions": {
-    "rename": 7,
-    "rewrite-the-definition-or-rename": 22
+    "rename": 9,
+    "rewrite-the-definition-or-rename": 20
    },
    "findings": {
-    "accumulated_deuterated_methane_prefill_count": [
-     {
-      "convention": "",
-      "disposition": "rewrite-the-definition-or-rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "accumulated",
-       "deuterated",
-       "methane",
-       "prefill",
-       "count"
-      ],
-      "p_flag": 0.75,
-      "pattern": "weights",
-      "phrase": "weights",
-      "phrase_adds": "",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
-    "accumulated_helium_3_prefill_count_due_to_gas_injection": [
-     {
-      "convention": "",
-      "disposition": "rewrite-the-definition-or-rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "accumulated",
-       "helium",
-       "3",
-       "prefill",
-       "count",
-       "due",
-       "to",
-       "gas",
-       "injection"
-      ],
-      "p_flag": 0.7,
-      "pattern": "weights",
-      "phrase": "weights",
-      "phrase_adds": "",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
     "accumulated_tritium_count_due_to_gas_injection": [
      {
       "convention": "",
@@ -1136,28 +1214,7 @@
        "gas",
        "injection"
       ],
-      "p_flag": 0.73,
-      "pattern": "weights",
-      "phrase": "weights",
-      "phrase_adds": "",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
-    "accumulated_xenon_count_due_to_gas_injection": [
-     {
-      "convention": "",
-      "disposition": "rewrite-the-definition-or-rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "accumulated",
-       "xenon",
-       "count",
-       "due",
-       "to",
-       "gas",
-       "injection"
-      ],
-      "p_flag": 0.71,
+      "p_flag": 0.74,
       "pattern": "weights",
       "phrase": "weights",
       "phrase_adds": "",
@@ -1175,7 +1232,7 @@
        "mode",
        "frequency"
       ],
-      "p_flag": 0.91,
+      "p_flag": 0.93,
       "pattern": "normalises",
       "phrase": "normalises",
       "phrase_adds": "",
@@ -1191,7 +1248,7 @@
        "mode",
        "frequency"
       ],
-      "p_flag": 0.77,
+      "p_flag": 0.86,
       "pattern": "restricts",
       "phrase": "restricts",
       "phrase_adds": "",
@@ -1208,7 +1265,7 @@
        "particle",
        "pressure"
       ],
-      "p_flag": 0.7,
+      "p_flag": 0.79,
       "pattern": "aggregates",
       "phrase": "aggregates",
       "phrase_adds": "",
@@ -1226,7 +1283,7 @@
        "plasma",
        "filament"
       ],
-      "p_flag": 0.77,
+      "p_flag": 0.87,
       "pattern": "restricts",
       "phrase": "restricts",
       "phrase_adds": "",
@@ -1244,7 +1301,7 @@
        "state",
        "velocity"
       ],
-      "p_flag": 0.8,
+      "p_flag": 0.82,
       "pattern": "normalises",
       "phrase": "normalises",
       "phrase_adds": "",
@@ -1268,42 +1325,6 @@
       "relation": "narrower_different_or_additional"
      }
     ],
-    "line_averaged_total_ion_temperature": [
-     {
-      "convention": "",
-      "disposition": "rewrite-the-definition-or-rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "line",
-       "averaged",
-       "total",
-       "ion",
-       "temperature"
-      ],
-      "p_flag": 0.7,
-      "pattern": "weights",
-      "phrase": "weights",
-      "phrase_adds": "",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
-    "minimum_gas_flow": [
-     {
-      "convention": "",
-      "disposition": "rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "minimum",
-       "gas",
-       "flow"
-      ],
-      "p_flag": 0.72,
-      "pattern": "narrows",
-      "phrase": "narrows",
-      "phrase_adds": "",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
     "neon_prefill_count": [
      {
       "convention": "",
@@ -1321,6 +1342,47 @@
       "relation": "narrower_different_or_additional"
      }
     ],
+    "parallel_conductivity": [
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "parallel",
+       "conductivity"
+      ],
+      "p_flag": 0.82,
+      "pattern": "restricts",
+      "phrase": "restricts",
+      "phrase_adds": "",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude": [
+     {
+      "convention": "",
+      "disposition": "rewrite-the-definition-or-rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "per",
+       "toroidal",
+       "mode",
+       "right",
+       "hand",
+       "circularly",
+       "polarized",
+       "wave",
+       "electric",
+       "field",
+       "amplitude"
+      ],
+      "p_flag": 0.72,
+      "pattern": "weights",
+      "phrase": "weights",
+      "phrase_adds": "",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
     "perpendicular_co_passing_fast_particle_pressure": [
      {
       "convention": "",
@@ -1334,7 +1396,7 @@
        "particle",
        "pressure"
       ],
-      "p_flag": 0.74,
+      "p_flag": 0.79,
       "pattern": "restricts",
       "phrase": "restricts",
       "phrase_adds": "",
@@ -1354,9 +1416,26 @@
        "bessel",
        "1"
       ],
-      "p_flag": 0.73,
+      "p_flag": 0.74,
       "pattern": "weights",
       "phrase": "weights",
+      "phrase_adds": "",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "perpendicular_refractive_index": [
+     {
+      "convention": "",
+      "disposition": "rewrite-the-definition-or-rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "perpendicular",
+       "refractive",
+       "index"
+      ],
+      "p_flag": 0.81,
+      "pattern": "normalises",
+      "phrase": "normalises",
       "phrase_adds": "",
       "relation": "narrower_different_or_additional"
      }
@@ -1370,7 +1449,7 @@
        "plasma",
        "temperature"
       ],
-      "p_flag": 0.8,
+      "p_flag": 0.72,
       "pattern": "weights",
       "phrase": "weights",
       "phrase_adds": "",
@@ -1386,7 +1465,7 @@
        "plasma",
        "velocity"
       ],
-      "p_flag": 0.88,
+      "p_flag": 0.93,
       "pattern": "weights",
       "phrase": "weights",
       "phrase_adds": "",
@@ -1408,7 +1487,7 @@
        "hybrid",
        "antenna"
       ],
-      "p_flag": 0.8,
+      "p_flag": 0.79,
       "pattern": "normalises",
       "phrase": "normalises",
       "phrase_adds": "",
@@ -1424,7 +1503,66 @@
        "pulse",
        "duration"
       ],
-      "p_flag": 0.7,
+      "p_flag": 0.86,
+      "pattern": "restricts",
+      "phrase": "restricts",
+      "phrase_adds": "",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "radial_perturbed_plasma_velocity_real_part": [
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "radial",
+       "perturbed",
+       "plasma",
+       "velocity",
+       "real",
+       "part"
+      ],
+      "p_flag": 0.75,
+      "pattern": "narrows",
+      "phrase": "narrows",
+      "phrase_adds": "",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "radial_perturbed_vacuum_magnetic_vector_potential_real_part": [
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "radial",
+       "perturbed",
+       "vacuum",
+       "magnetic",
+       "vector",
+       "potential",
+       "real",
+       "part"
+      ],
+      "p_flag": 0.78,
+      "pattern": "narrows",
+      "phrase": "narrows",
+      "phrase_adds": "",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "radius_of_reflector": [
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "radius",
+       "of",
+       "reflector"
+      ],
+      "p_flag": 0.74,
       "pattern": "restricts",
       "phrase": "restricts",
       "phrase_adds": "",
@@ -1443,7 +1581,7 @@
        "field",
        "magnitude"
       ],
-      "p_flag": 0.78,
+      "p_flag": 0.79,
       "pattern": "aggregates",
       "phrase": "aggregates",
       "phrase_adds": "",
@@ -1466,9 +1604,28 @@
        "to",
        "convection"
       ],
-      "p_flag": 0.74,
+      "p_flag": 0.71,
       "pattern": "normalises",
       "phrase": "normalises",
+      "phrase_adds": "",
+      "relation": "narrower_different_or_additional"
+     }
+    ],
+    "thickness_of_breeder_blanket_layer": [
+     {
+      "convention": "",
+      "disposition": "rename",
+      "finding_type": "name_definition_phrase_disagreement",
+      "name_words": [
+       "thickness",
+       "of",
+       "breeder",
+       "blanket",
+       "layer"
+      ],
+      "p_flag": 0.74,
+      "pattern": "restricts",
+      "phrase": "restricts",
       "phrase_adds": "",
       "relation": "narrower_different_or_additional"
      }
@@ -1487,27 +1644,9 @@
        "transport",
        "barrier"
       ],
-      "p_flag": 0.74,
+      "p_flag": 0.78,
       "pattern": "weights",
       "phrase": "weights",
-      "phrase_adds": "",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
-    "toroidal_coordinate_of_reflector": [
-     {
-      "convention": "",
-      "disposition": "rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "toroidal",
-       "coordinate",
-       "of",
-       "reflector"
-      ],
-      "p_flag": 0.73,
-      "pattern": "narrows",
-      "phrase": "narrows",
       "phrase_adds": "",
       "relation": "narrower_different_or_additional"
      }
@@ -1526,7 +1665,7 @@
        "pedestal",
        "top"
       ],
-      "p_flag": 0.8,
+      "p_flag": 0.79,
       "pattern": "weights",
       "phrase": "weights",
       "phrase_adds": "",
@@ -1546,7 +1685,7 @@
        "pedestal",
        "top"
       ],
-      "p_flag": 0.76,
+      "p_flag": 0.74,
       "pattern": "weights",
       "phrase": "weights",
       "phrase_adds": "",
@@ -1566,27 +1705,9 @@
        "plasma",
        "boundary"
       ],
-      "p_flag": 0.8,
+      "p_flag": 0.78,
       "pattern": "weights",
       "phrase": "weights",
-      "phrase_adds": "",
-      "relation": "narrower_different_or_additional"
-     }
-    ],
-    "toroidal_reference_magnetic_field": [
-     {
-      "convention": "",
-      "disposition": "rename",
-      "finding_type": "name_definition_phrase_disagreement",
-      "name_words": [
-       "toroidal",
-       "reference",
-       "magnetic",
-       "field"
-      ],
-      "p_flag": 0.7,
-      "pattern": "narrows",
-      "phrase": "narrows",
       "phrase_adds": "",
       "relation": "narrower_different_or_additional"
      }
@@ -1606,7 +1727,7 @@
        "gas",
        "injection"
       ],
-      "p_flag": 0.76,
+      "p_flag": 0.77,
       "pattern": "weights",
       "phrase": "weights",
       "phrase_adds": "",
@@ -1626,7 +1747,7 @@
        "beamlet",
        "group"
       ],
-      "p_flag": 0.7,
+      "p_flag": 0.79,
       "pattern": "aggregates",
       "phrase": "aggregates",
       "phrase_adds": "",
@@ -1635,41 +1756,41 @@
     ]
    },
    "flagged_names": [
-    "accumulated_deuterated_methane_prefill_count",
-    "accumulated_helium_3_prefill_count_due_to_gas_injection",
     "accumulated_tritium_count_due_to_gas_injection",
-    "accumulated_xenon_count_due_to_gas_injection",
     "edge_localized_mode_frequency",
     "fast_particle_pressure",
     "height_of_plasma_filament",
     "ion_charge_state_velocity",
     "ipb98y2_confinement_time",
-    "line_averaged_total_ion_temperature",
-    "minimum_gas_flow",
     "neon_prefill_count",
+    "parallel_conductivity",
+    "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
     "perpendicular_co_passing_fast_particle_pressure",
     "perpendicular_normalized_perturbed_pressure_bessel_1",
+    "perpendicular_refractive_index",
     "plasma_temperature",
     "plasma_velocity",
     "poloidal_launched_wave_index_of_lower_hybrid_antenna",
     "pulse_duration",
+    "radial_perturbed_plasma_velocity_real_part",
+    "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+    "radius_of_reflector",
     "stray_breakdown_magnetic_field_magnitude",
     "thermal_ion_charge_state_energy_velocity_due_to_convection",
+    "thickness_of_breeder_blanket_layer",
     "toroidal_argon_velocity_at_internal_transport_barrier",
-    "toroidal_coordinate_of_reflector",
     "toroidal_helium_3_velocity_at_pedestal_top",
     "toroidal_iron_velocity_at_pedestal_top",
     "toroidal_neon_velocity_at_plasma_boundary",
-    "toroidal_reference_magnetic_field",
     "total_neutral_source_rate_due_to_gas_injection",
     "vertical_focal_length_of_beamlet_group"
    ],
    "kinds": {
     "aggregates": 3,
-    "narrows": 3,
-    "normalises": 6,
-    "restricts": 4,
-    "weights": 13
+    "narrows": 2,
+    "normalises": 7,
+    "restricts": 7,
+    "weights": 10
    },
    "phrases_per_name": 0.96,
    "threshold": 0.7
@@ -1685,9 +1806,9 @@
  "cost_usd": {
   "chat_extraction": 4.8808,
   "jev_extraction": 0.0103,
-  "jev_judgment_chat_arm": 0.0463,
-  "jev_judgment_jev_arm": 0.0074,
-  "jev_reverse": 0.0028,
+  "jev_judgment_chat_arm": 0.0422,
+  "jev_judgment_jev_arm": 0.0068,
+  "jev_reverse": 0.0026,
   "per_name_chat_arm": 0.0157,
   "per_name_jev_arm": 0.0001
  },
@@ -1755,25 +1876,23 @@
     "ion_charge_state_diffusivity",
     "ipb98y2_confinement_time",
     "neutron_response_function_of_neutron_detector",
+    "parallel_conductivity",
     "parallel_total_ion_energy_convection_velocity",
+    "perturbed_plasma_mass_density_real_part",
     "plasma_temperature",
-    "poloidal_magnetic_flux_at_halo_boundary",
-    "poloidal_perturbed_vacuum_magnetic_field_real_part",
-    "radial_perturbed_plasma_velocity_real_part",
+    "poloidal_beta",
     "ratio_of_particle_temperature_to_particle_reference_temperature",
     "stray_breakdown_magnetic_field_magnitude",
     "surface_area_of_detector",
     "temperature_of_sensor",
     "volume_averaged_helium_4_density"
    ],
-   "mismatched_found": 11,
+   "mismatched_found": 14,
    "missed_mismatched": [
     "accumulated_ammonia_count",
     "accumulated_ammonia_deuterated_count",
     "accumulated_helium_3_prefill_count_due_to_gas_injection",
-    "accumulated_silane_count_due_to_gas_injection",
     "accumulated_total_prefill_gas_count",
-    "accumulated_xenon_count_due_to_gas_injection",
     "area_of_flux_loop",
     "argon_source_rate_due_to_gas_injection",
     "counter_passing_fast_ion_charge_state_power_density_due_to_collisions",
@@ -1798,7 +1917,6 @@
     "particle_diffusivity",
     "particle_torque_due_to_j_cross_b_force",
     "particle_velocity_due_to_convection",
-    "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
     "per_toroidal_mode_thermal_ion_charge_state_power_density",
     "perpendicular_co_passing_fast_particle_pressure",
     "power_density_due_to_collisions",
@@ -1813,7 +1931,7 @@
     "wave_phase_of_ion_cyclotron_heating_antenna",
     "xenon_source_rate_due_to_gas_injection"
    ],
-   "recall": 0.2
+   "recall": 0.255
   },
   "phrase_chat_union_seat": {
    "agreeing_flagged": 30,
@@ -1832,14 +1950,14 @@
     "iron_density",
     "logarithm_of_density",
     "neutron_response_function_of_neutron_detector",
+    "parallel_conductivity",
     "parallel_total_ion_energy_convection_velocity",
+    "perturbed_plasma_mass_density_real_part",
     "plasma_temperature",
+    "poloidal_beta",
     "poloidal_flux_limiter_coefficient",
-    "poloidal_magnetic_flux_at_halo_boundary",
-    "poloidal_perturbed_vacuum_magnetic_field_real_part",
     "power_due_to_electron_cyclotron_heating",
     "radial_effective_electron_diffusivity",
-    "radial_perturbed_plasma_velocity_real_part",
     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
     "ratio_of_particle_temperature_to_particle_reference_temperature",
     "stray_breakdown_magnetic_field_magnitude",
@@ -1867,8 +1985,8 @@
    "recall": 0.8
   },
   "phrase_jev_arm": {
-   "agreeing_flagged": 21,
-   "false_flag_rate": 0.081,
+   "agreeing_flagged": 22,
+   "false_flag_rate": 0.085,
    "false_flags": [
     "accumulated_tritium_count_due_to_gas_injection",
     "edge_localized_mode_frequency",
@@ -1876,28 +1994,32 @@
     "height_of_plasma_filament",
     "ion_charge_state_velocity",
     "ipb98y2_confinement_time",
-    "line_averaged_total_ion_temperature",
-    "minimum_gas_flow",
+    "parallel_conductivity",
     "perpendicular_normalized_perturbed_pressure_bessel_1",
+    "perpendicular_refractive_index",
     "plasma_temperature",
     "plasma_velocity",
     "poloidal_launched_wave_index_of_lower_hybrid_antenna",
+    "radial_perturbed_plasma_velocity_real_part",
+    "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
     "stray_breakdown_magnetic_field_magnitude",
     "thermal_ion_charge_state_energy_velocity_due_to_convection",
+    "thickness_of_breeder_blanket_layer",
     "toroidal_argon_velocity_at_internal_transport_barrier",
-    "toroidal_coordinate_of_reflector",
     "toroidal_helium_3_velocity_at_pedestal_top",
     "toroidal_iron_velocity_at_pedestal_top",
     "toroidal_neon_velocity_at_plasma_boundary",
-    "toroidal_reference_magnetic_field",
     "vertical_focal_length_of_beamlet_group"
    ],
-   "mismatched_found": 7,
+   "mismatched_found": 6,
    "missed_mismatched": [
     "accumulated_ammonia_count",
     "accumulated_ammonia_deuterated_count",
+    "accumulated_deuterated_methane_prefill_count",
+    "accumulated_helium_3_prefill_count_due_to_gas_injection",
     "accumulated_silane_count_due_to_gas_injection",
     "accumulated_total_prefill_gas_count",
+    "accumulated_xenon_count_due_to_gas_injection",
     "alfven_frequency",
     "area_of_flux_loop",
     "argon_source_rate_due_to_gas_injection",
@@ -1925,12 +2047,10 @@
     "particle_diffusivity",
     "particle_torque_due_to_j_cross_b_force",
     "particle_velocity_due_to_convection",
-    "per_toroidal_mode_right_hand_circularly_polarized_wave_electric_field_amplitude",
     "per_toroidal_mode_thermal_ion_charge_state_power_density",
     "power_density_due_to_collisions",
     "radiated_power_of_breeder_blanket_module",
     "radius_of_neutral_beam_injector",
-    "radius_of_reflector",
     "refractive_index",
     "surface_emissivity",
     "temperature_of_coil_conductor",
@@ -1943,7 +2063,7 @@
     "wave_phase_of_ion_cyclotron_heating_antenna",
     "xenon_source_rate_due_to_gas_injection"
    ],
-   "recall": 0.127
+   "recall": 0.109
   },
   "phrase_jev_union_seat": {
    "agreeing_flagged": 34,
@@ -1960,31 +2080,31 @@
     "ion_fluence_at_divertor_target",
     "ipb98y2_confinement_time",
     "iron_density",
-    "line_averaged_total_ion_temperature",
     "logarithm_of_density",
-    "minimum_gas_flow",
+    "parallel_conductivity",
     "perpendicular_normalized_perturbed_pressure_bessel_1",
+    "perpendicular_refractive_index",
     "plasma_temperature",
     "plasma_velocity",
     "poloidal_flux_limiter_coefficient",
     "poloidal_launched_wave_index_of_lower_hybrid_antenna",
     "power_due_to_electron_cyclotron_heating",
     "radial_effective_electron_diffusivity",
+    "radial_perturbed_plasma_velocity_real_part",
     "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
     "stray_breakdown_magnetic_field_magnitude",
     "thermal_ion_charge_state_energy_velocity_due_to_convection",
+    "thickness_of_breeder_blanket_layer",
     "toroidal_argon_velocity_at_internal_transport_barrier",
-    "toroidal_coordinate_of_reflector",
     "toroidal_helium_3_velocity_at_pedestal_top",
     "toroidal_iron_velocity_at_pedestal_top",
     "toroidal_neon_velocity_at_plasma_boundary",
     "toroidal_perturbed_plasma_velocity_imaginary_part",
-    "toroidal_reference_magnetic_field",
     "total_ion_particle_source_rate",
     "vertical_electron_velocity",
     "vertical_focal_length_of_beamlet_group"
    ],
-   "mismatched_found": 41,
+   "mismatched_found": 42,
    "missed_mismatched": [
     "alfven_frequency",
     "area_of_flux_loop",
@@ -1998,14 +2118,13 @@
     "particle_torque_due_to_j_cross_b_force",
     "particle_velocity_due_to_convection",
     "radius_of_neutral_beam_injector",
-    "radius_of_reflector",
     "refractive_index"
    ],
-   "recall": 0.745
+   "recall": 0.764
   },
   "union_every_arm": {
-   "agreeing_flagged": 46,
-   "false_flag_rate": 0.178,
+   "agreeing_flagged": 45,
+   "false_flag_rate": 0.174,
    "false_flags": [
     "accumulated_tritium_count_due_to_gas_injection",
     "area_of_poloidal_field_coil",
@@ -2021,18 +2140,18 @@
     "ion_fluence_at_divertor_target",
     "ipb98y2_confinement_time",
     "iron_density",
-    "line_averaged_total_ion_temperature",
     "logarithm_of_density",
-    "minimum_gas_flow",
     "neutron_response_function_of_neutron_detector",
+    "parallel_conductivity",
     "parallel_total_ion_energy_convection_velocity",
     "perpendicular_normalized_perturbed_pressure_bessel_1",
+    "perpendicular_refractive_index",
+    "perturbed_plasma_mass_density_real_part",
     "plasma_temperature",
     "plasma_velocity",
+    "poloidal_beta",
     "poloidal_flux_limiter_coefficient",
     "poloidal_launched_wave_index_of_lower_hybrid_antenna",
-    "poloidal_magnetic_flux_at_halo_boundary",
-    "poloidal_perturbed_vacuum_magnetic_field_real_part",
     "power_due_to_electron_cyclotron_heating",
     "radial_effective_electron_diffusivity",
     "radial_perturbed_plasma_velocity_real_part",
@@ -2042,13 +2161,12 @@
     "surface_area_of_detector",
     "temperature_of_sensor",
     "thermal_ion_charge_state_energy_velocity_due_to_convection",
+    "thickness_of_breeder_blanket_layer",
     "toroidal_argon_velocity_at_internal_transport_barrier",
-    "toroidal_coordinate_of_reflector",
     "toroidal_helium_3_velocity_at_pedestal_top",
     "toroidal_iron_velocity_at_pedestal_top",
     "toroidal_neon_velocity_at_plasma_boundary",
     "toroidal_perturbed_plasma_velocity_imaginary_part",
-    "toroidal_reference_magnetic_field",
     "total_ion_particle_source_rate",
     "vertical_electron_velocity",
     "vertical_focal_length_of_beamlet_group",
@@ -2072,7 +2190,7 @@
   }
  },
  "reverse": {
-  "cost_usd": 0.0028,
+  "cost_usd": 0.0026,
   "findings": {},
   "names": [],
   "rule": "a qualifier the name states that the definition does not support, reported apart"
