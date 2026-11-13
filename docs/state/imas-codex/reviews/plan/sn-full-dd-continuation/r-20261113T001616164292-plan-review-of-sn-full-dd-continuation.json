@@ -53,6 +53,16 @@
       "note": "Section 4 now says these classes are not expected to reach 5,503 at the full run's yield, so the second branch is the expected close and 5,503 the upper reading.",
       "reason": "",
       "when": "2026-11-13T01:58:09.361445+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 3 now orders the checkpoint after every recorded graph writer, section 2's resets and rerun included, taken with no writer running.",
+      "reason": "",
+      "when": "2026-11-13T01:58:31.337367+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "Section 4 gains a closing state for a cost-limit stop: each unrun class listed with its source count and census estimate beside the shortfall.",
       "reason": "",
       "when": "2026-11-13T01:57:39.739428+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+      "commit_basis": "edit",
+      "note": "Section 3 now orders the checkpoint after every recorded graph writer, section 2's resets and rerun included, taken with no writer running.",
+      "reason": "",
+      "when": "2026-11-13T01:58:31.337367+00:00"
     },
     "reasoning-1": {
       "action": "acted",
