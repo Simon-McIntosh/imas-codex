@@ -18,18 +18,18 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
   <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
   <main class="plan-doc">
     <h2 id="s1">§1 — The 13 tests red on main are fixed or owned</h2>
-    <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s1" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
     <p>Thirteen ids in <code>tests/standard_names</code> were recorded as failing on main on 2026-11-11. Re-measured by the nodes that took them, some were already green at base and one skipped rather than failed. They block no landing, but they hide regressions in every one. By 2026-11-12 twelve pass at head; the cascade-calibration id instead skips, because the frozen receipt files it reads were deleted with the reckon run directories that held them, so it measures nothing. The ids:</p>
     <ul>
       <li><code>test_cascade_calibration.py::test_matched_policy_rebuilds_from_frozen_scores_and_receipts</code></li>
@@ -105,6 +105,9 @@
 <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="_top" data-id="c-s1-lead-ruling-retire-rebuild-check" data-who="Simon McIntosh" data-when="2026-11-12T16:40:00Z">
     <div class="r-comment-body"><p>Lead ruling, 2026-11-12: the rebuild check is retired. Its calibration inputs were deleted with old run directories; the shipped cutoffs stand unchanged and the calibration is not regenerated.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-close-s1" data-who="reckon-build" data-when="2026-11-13T00:40:00Z">
+    <div class="r-comment-body"><p>§1 closed (<code>sph-cascade-receipts</code>, commits <code>7e7bd26a9</code>, <code>1223be1f1</code>, <code>c401944d5</code> and <code>c295a72ad</code>, reviewed at the final head, score 88). Under the lead's ruling the calibration rebuild check is retired and the shipped cutoffs are unchanged: the threshold artifact is byte-identical, 75 tests pass with none skipped, and the module no longer names the deleted default receipts. The negative control was waived on the ledger row because the check itself is retired and the unchanged artifact is the control. Historical evidence pages and their run scripts are records of what was observed and stay as written. Limits the review recorded: no test fails if a rebuild or an out-of-repository default returns; several fitting helpers now have no caller in the module, and three older evidence scripts still import the removed defaults, so those scripts no longer run as committed.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261111T221653916562-sph-red-gap-rules" data-who="reckon-build" data-when="2026-11-11T23:32:39.579Z">
     <div class="r-comment-body"><p>sph-red-gap-rules: the six test_gap_rule_verdicts.py ids and test_unregistered_locus_rejects_the_ordinal_compound pass on a compute partition (head arm 1 failed / 8654 passed against base 12 failed / 8639 passed), each diagnosed as a stale expectation against grammar-registered tokens and repaired in the tests alone</p></div>
