@@ -628,5 +628,96 @@
     "confidence": "medium",
     "evidence": "coefficient multiplying ion temperature in the stiff contribution to a decomposed ion energy source",
     "reason": "The implicit source rate is defined as the proportional coefficient in the ion energy-source decomposition, consistent with its inverse-time unit."
+  },
+  {
+    "id": "item-0915",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "The radial volumetric force is the R-hat projection of the local electromagnetic body-force density",
+    "reason": "The definition gives the radial component of volumetric force with the physical dimension stated by the name and unit."
+  },
+  {
+    "id": "item-0916",
+    "class": "qualifier-missing-from-name",
+    "confidence": "medium",
+    "evidence": "resolved for one specified ion charge state",
+    "reason": "The name says ion state but does not make clear that the limiter is resolved specifically by charge state."
+  },
+  {
+    "id": "item-0917",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "net local volumetric energy exchange caused by Coulomb collisions for the aggregate ion population",
+    "reason": "The definition matches collisional power density for ions, including their aggregate subpopulations."
+  },
+  {
+    "id": "item-0918",
+    "class": "definition-narrower-than-name",
+    "confidence": "medium",
+    "evidence": "The scope is the position of beam-tracing beam trajectory points",
+    "reason": "The name broadly refers to the beam-tracing beam angle, while the definition restricts it to individual trajectory-point positions."
+  },
+  {
+    "id": "item-0919",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "chord average of the local total ion density",
+    "reason": "The definition averages total ion density along a chord, matching the named population and line averaging."
+  },
+  {
+    "id": "item-0920",
+    "class": "qualifier-missing-from-name",
+    "confidence": "medium",
+    "evidence": "real electrical power consumed by one plant subsystem at its electrical boundary",
+    "reason": "The name does not specify that the subsystem quantity is consumed real electrical power measured at its boundary."
+  },
+  {
+    "id": "item-0921",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "coherent-wave energy is absorbed by the bulk thermal-electron population per unit physical volume",
+    "reason": "The name gives the recipient and mode-resolved power density but omits that the energy is deposited by coherent electromagnetic excitation."
+  },
+  {
+    "id": "item-0922",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "Projected onto specific coordinate directions, this quantity yields radial neutral internal-state particle flux",
+    "reason": "The definition treats the neutral-state particle flux as the parent quantity from which directional projections are resolved."
+  },
+  {
+    "id": "item-0923",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "scales the collisionless free-streaming upper bound on radial momentum-flux density",
+    "reason": "The name says radial flux limiter but omits that the limited flux is specifically momentum flux."
+  },
+  {
+    "id": "item-0924",
+    "class": "definition-narrower-than-name",
+    "confidence": "high",
+    "evidence": "in the edge plasma",
+    "reason": "The definition restricts radial total-momentum convection to the edge plasma, which the name does not state."
+  },
+  {
+    "id": "item-0925",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "local charge-squared-weighted ionic content of the plasma adjacent to the target",
+    "reason": "The definition gives effective ionic charge at the divertor target locus named."
+  },
+  {
+    "id": "item-0926",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "The gyrotropic pressure tensor for the fast neutral population",
+    "reason": "The fast-neutral pressure name denotes the parent gyrotropic quantity whose parallel and perpendicular components have specific names."
+  },
+  {
+    "id": "item-0927",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "each molecule is assigned 16 equivalent electrons",
+    "reason": "The name identifies ethylene sourcing but omits the sixteen-count equivalent-electron weighting applied to each molecule."
   }
 ]
