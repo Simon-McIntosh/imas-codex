@@ -537,6 +537,66 @@ checks:
   - documentation
   retrieval: false
   audit_finding_class: locus_definition
+- id: definition_qualifier_absent_from_name
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - id
+  - description
+  - documentation
+  - unit
+  - physical_base
+  - subject
+  - component
+  - coordinate
+  - position
+  - process
+  - derived_children
+  - parent_description
+  retrieval: false
+  question:
+    kind: choice
+    options:
+    - normalisation
+    - counting-convention
+    - weighting
+    - integration
+    - restriction-to-one-object
+    - family-of-quantities
+    - agrees
+    conforming:
+    - agrees
+    text: >-
+      Compare the scope the DEFINITION fixes with the scope the NAME states.
+      Read `name.id` and its `segments` first: the qualifier counts as missing
+      only when the name's own words do not already convey it. Answer
+      normalisation if the definition divides by or references a scale the
+      name does not name; counting-convention if it counts something other
+      than what the name counts (an equivalent-electron or atom-count
+      convention under a plain inventory name); weighting if the quantity is
+      averaged, summed or weighted where the name is not; integration if it is
+      integrated over a volume or a surface where the name is not;
+      restriction-to-one-object if it is scoped to one device, instrument,
+      face, channel, layer or reaction branch where the name is general;
+      family-of-quantities if `neighbourhood.derived_children` shows the entry
+      is a derived parent, or the definition declares a parent, umbrella or
+      structural quantity whose population, component, averaging or
+      specialised forms are fixed only by more specific names, so it states no
+      one quantity. Answer agrees when the definition states one quantity in
+      the scope the name states. Not a missing qualifier: the standard
+      physical meaning of the name's own quantity (a temperature is a mean
+      kinetic energy per particle, a beta is a ratio of pressures, a flux is
+      per unit area), the catalog convention that a bare species name counts
+      ions summed over charge states with neutrals excluded, or any qualifier
+      the name's own tokens already state.
+- id: definition_states_qualifier_name_lacks
+  axis: docs
+  dimension: physics_accuracy
+  evidence_fields:
+  - description
+  - documentation
+  retrieval: false
+  audit_finding_class: name_definition_disagreement
 - id: template_note
   axis: docs
   dimension: documentation_quality

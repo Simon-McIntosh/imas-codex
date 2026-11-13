@@ -1473,6 +1473,273 @@ def unit_dimension_check(candidate: dict[str, Any]) -> list[str]:
     return issues
 
 
+# Qualifier families in which a definition can state something the name does
+# not. Each family names the wording the definition uses to add the qualifier,
+# which part of the definition carries it, and the name tokens that would
+# already state it, so a definition is flagged only when it adds a qualifier
+# the name lacks.
+#
+# The description is the one-line definition; the documentation is the prose
+# around it and routinely names related quantities ("profiles are
+# volume-averaged", "a vector of components"). A qualifier read off the
+# documentation alone is therefore not evidence about the quantity named, so
+# only the families whose wording cannot describe a neighbour -- an
+# equivalent-electron counting convention, an explicitly unspecified umbrella
+# -- read the documentation as well as the description.
+_DEFINITION_QUALIFIER_FAMILIES: tuple[
+    tuple[str, re.Pattern[str], bool, tuple[str, ...]], ...
+] = (
+    (
+        "equivalent-electron-count",
+        re.compile(r"equivalent[-\s]electron", re.IGNORECASE),
+        True,
+        ("equivalent",),
+    ),
+    (
+        "unstated-aggregation",
+        re.compile(
+            r"flux[-\s]surface[-\s]averaged|volume[-\s]averaged|"
+            r"flux[-\s]surface average|volume average",
+            re.IGNORECASE,
+        ),
+        False,
+        (
+            "average",
+            "averaged",
+            "mean",
+            "integrated",
+            "total",
+            "summed",
+            "sum",
+            "maximum",
+            "minimum",
+            "max",
+            "min",
+        ),
+    ),
+    (
+        "unstated-integration",
+        re.compile(
+            r"volume[-\s]integrated|surface[-\s]integrated|wall[-\s]integrated",
+            re.IGNORECASE,
+        ),
+        False,
+        ("integrated", "total", "summed", "sum"),
+    ),
+    (
+        "unstated-normalisation",
+        re.compile(
+            r"dimensionless form relative to|expressed in dimensionless form|"
+            r"\bnormalis(?:ed|ation)\b|\bnormaliz(?:ed|ation)\b",
+            re.IGNORECASE,
+        ),
+        False,
+        ("normalized", "normalised", "dimensionless"),
+    ),
+    (
+        "unstated-relative-reference",
+        re.compile(
+            r"relative angular offset|relative (?:phase|offset) of|"
+            r"defined relative to|relative to (?:a|the) reference",
+            re.IGNORECASE,
+        ),
+        False,
+        ("relative", "reference"),
+    ),
+    (
+        "vector-for-scalar",
+        re.compile(r"gradient vector|\bvector quantity\b", re.IGNORECASE),
+        False,
+        ("vector", "components", "component"),
+    ),
+)
+
+# Wording that restricts the definition's quantity to a subset of the objects
+# the name covers: one face of a surface, one active coil, one instrument
+# class, one reaction branch, or a phase of the discharge. Each entry names the
+# restriction, the wording that states it, and the name tokens that would
+# state it themselves.
+_DEFINITION_RESTRICTIONS: tuple[tuple[str, re.Pattern[str], tuple[str, ...]], ...] = (
+    (
+        "one-face-of-a-surface",
+        re.compile(
+            r"inboard-facing surface|outboard-facing surface|one face of", re.IGNORECASE
+        ),
+        ("inboard", "outboard", "face"),
+    ),
+    (
+        "one-object-instance",
+        re.compile(
+            r"conductor of one (?:active )?(?:coil|poloidal-field coil|central-solenoid)|"
+            r"of one active (?:poloidal-field |central-solenoid )?coil|"
+            r"in an? individual active (?:poloidal-field )?coil|"
+            r"in an active [\w -]*coil",
+            re.IGNORECASE,
+        ),
+        ("one", "individual", "single"),
+    ),
+    (
+        "one-module-of-a-system",
+        re.compile(
+            r"module first-wall surface|of a breeding-blanket module|"
+            r"of one breeding-blanket module",
+            re.IGNORECASE,
+        ),
+        ("module",),
+    ),
+    (
+        "one-reaction-channel",
+        re.compile(
+            r"only the [\w -]*branch\b|only the [\w-]+ (?:branch|channel) "
+            r"contributes|restricted to the [\w-]+ (?:branch|channel)",
+            re.IGNORECASE,
+        ),
+        ("branch", "channel"),
+    ),
+    (
+        "one-instrument-class",
+        re.compile(
+            r"in an? [A-Za-z][\w-]*(?: [\w-]+){0,3} "
+            r"(?:spectrometer|diagnostic|instrument|interferometer)\b"
+        ),
+        ("spectrometer", "diagnostic", "instrument", "interferometer", "detector"),
+    ),
+    (
+        "one-discharge-phase",
+        re.compile(
+            r"confined-plasma phase|until termination of auxiliary heating|"
+            r"during the [\w-]+ phase of (?:a|the) discharge",
+            re.IGNORECASE,
+        ),
+        ("confined", "phase"),
+    ),
+)
+
+# A normalisation of a coordinate or a reference value is not a qualifier on
+# the quantity, so the noun following the marker decides whether to skip it.
+_NORMALISATION_COORDINATE_NOUNS = frozenset(
+    {
+        "radius",
+        "coordinate",
+        "poloidal",
+        "toroidal",
+        "radial",
+        "vertical",
+        "minor",
+        "major",
+        "flux",
+        "rho",
+        "beta",
+        "position",
+        "distance",
+        "time",
+        "angle",
+        "separatrix",
+        "boundary",
+        "surface",
+        "axis",
+        "to",
+    }
+)
+
+# Wording that declares the definition an unqualified umbrella whose concrete
+# forms are supplied by more specific names. The weak phrase "parent quantity"
+# alone is not enough: it is used in the documentation of agreeing names to
+# point at a related umbrella, so only wording that says the quantity itself
+# leaves its population, component or form unfixed is read.
+_ABSTRACT_PARENT_RE = re.compile(
+    r"intentionally unspecified by this (?:parent|quantity)|"
+    r"unqualified parent quantity|"
+    r"is the unqualified parent|"
+    r"fixed by (?:each|more) speciali[sz]ed|"
+    r"more specific (?:descendants|instances)|"
+    r"before any [^.]{0,40}qualifier is applied|"
+    r"(?:from|by|to) a given [\w -]{0,30}contribution",
+    re.IGNORECASE,
+)
+
+
+def _name_tokens(name: str) -> set[str]:
+    return {token for token in re.split(r"[^a-z0-9]+", name.lower()) if token}
+
+
+def _normalisation_is_on_the_quantity(definition: str, match: re.Match[str]) -> bool:
+    """Whether the normalisation marker qualifies the quantity, not a coordinate."""
+
+    following = definition[match.end() : match.end() + 40].split()
+    if not following:
+        return True
+    return following[0].strip(".,;:").lower() not in _NORMALISATION_COORDINATE_NOUNS
+
+
+def name_definition_agreement_check(candidate: dict[str, Any]) -> list[str]:
+    """Flag a definition that states a qualifier the name does not.
+
+    The definition and the name are read against each other, one qualifier
+    family at a time. A family fires only when the definition's wording adds
+    the qualifier *and* the name carries none of the tokens that would state
+    it, so a name that already says "averaged", "normalised", "vector" or
+    "equivalent" is not flagged for saying it once more.
+
+    The check is deliberately lexical: it reads the formulaic wording the
+    catalog's definitions use to introduce a counting convention, an
+    aggregation, a normalisation or an umbrella, and it reports the family it
+    fired. It reads no graph state and calls no model.
+    """
+    name = str(candidate.get("id") or candidate.get("name") or "").strip()
+    if not name:
+        return []
+    description = candidate.get("description")
+    documentation = candidate.get("documentation")
+    description = description if isinstance(description, str) else ""
+    documentation = documentation if isinstance(documentation, str) else ""
+    if not description and not documentation:
+        return []
+
+    tokens = _name_tokens(name)
+    issues: list[str] = []
+
+    for (
+        family,
+        pattern,
+        reads_documentation,
+        name_tokens,
+    ) in _DEFINITION_QUALIFIER_FAMILIES:
+        if tokens & set(name_tokens):
+            continue
+        text = f"{description} {documentation}" if reads_documentation else description
+        hit = pattern.search(text)
+        if not hit:
+            continue
+        if family == "unstated-normalisation" and not _normalisation_is_on_the_quantity(
+            text, hit
+        ):
+            continue
+        issues.append(
+            f"name_definition_disagreement: {family}: definition states "
+            f"{hit.group(0)!r}, which the name does not"
+        )
+
+    for family, pattern, name_tokens in _DEFINITION_RESTRICTIONS:
+        if tokens & set(name_tokens):
+            continue
+        hit = pattern.search(description)
+        if hit:
+            issues.append(
+                f"name_definition_disagreement: unstated-restriction: {family}: "
+                f"definition states {hit.group(0)!r}, which the name does not"
+            )
+
+    hit = _ABSTRACT_PARENT_RE.search(f"{description} {documentation}")
+    if hit:
+        issues.append(
+            f"name_definition_disagreement: abstract-parent-as-quantity: definition "
+            f"declares {hit.group(0)!r} without fixing one quantity"
+        )
+
+    return issues
+
+
 def name_unit_consistency_check(
     candidate: dict[str, Any], source_path: str | None = None
 ) -> list[str]:

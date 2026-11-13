@@ -55,6 +55,7 @@ AUDIT_FINDING_CLASSES: frozenset[str] = frozenset(
         *DOCUMENTATION_GATE_NAMES,
         *(member.value for member in HouseStyleFindingClass),
         "duplicate_component",
+        "name_definition_disagreement",
     }
 )
 

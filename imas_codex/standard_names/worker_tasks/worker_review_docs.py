@@ -574,6 +574,39 @@ async def _release_docs_review_claim(
     )
 
 
+def review_holds_from_checks(
+    checked_holds: tuple[tuple[str, str | None, str], ...], item: dict[str, Any]
+) -> list[dict[str, str]]:
+    """The holds a review persists, one per check that raised a note.
+
+    A hold is what stops a passing document being accepted, so a check that
+    raises no note leaves acceptance to the score alone.
+    """
+
+    holds: list[dict[str, str]] = []
+    for kind, note, raised_by in checked_holds:
+        if note is None:
+            continue
+        evidence = json.dumps(
+            {
+                "claim": note,
+                "documentation": item.get("documentation") or "",
+                "dd_source_docs": item.get("dd_source_docs") or [],
+            },
+            sort_keys=True,
+            default=str,
+        )
+        holds.append(
+            {
+                "kind": kind,
+                "finding": note,
+                "evidence": evidence,
+                "raised_by": raised_by,
+            }
+        )
+    return holds
+
+
 def _documentation_conformance_note(
     _worker_dependency, /, item: dict[str, Any]
 ) -> str | None:
@@ -661,6 +694,37 @@ async def _documentation_banned_prose_note(
             if match := pattern.search(text):
                 return f"banned prose ({category}): {match.group(0)!r}"
     return None
+
+
+async def _name_definition_note(
+    _worker_dependency, /, item: dict[str, Any], mgr: BudgetManager
+) -> str | None:
+    """Hold a candidate whose definition states a qualifier its name does not."""
+    from imas_codex.settings import get_reasoning_effort, get_sn_review_docs_models
+    from imas_codex.standard_names.budget import LLMCostEvent
+    from imas_codex.standard_names.review.name_definition_seat import (
+        judge_name_definitions,
+        name_definition_note,
+    )
+
+    verdicts, cost = await judge_name_definitions(
+        [item],
+        reasoning_effort=get_reasoning_effort("sn-review", "low"),
+    )
+    if cost:
+        mgr.record_llm_cost_event(
+            cost,
+            LLMCostEvent(
+                model=get_sn_review_docs_models()[0],
+                tokens_in=0,
+                tokens_out=0,
+                sn_ids=(item["id"],),
+                phase="review_docs",
+            ),
+        )
+    if not verdicts:
+        return None
+    return name_definition_note(item, verdicts[0])
 
 
 async def _documentation_contradiction_note(
@@ -824,6 +888,7 @@ async def process_review_docs_batch(
     _documentation_contradiction_note = _worker_dependency(
         "_documentation_contradiction_note"
     )
+    _name_definition_note = _worker_dependency("_name_definition_note")
     _persist_dd_gap_evidence = _worker_dependency("_persist_dd_gap_evidence")
     _persisting_chat_review = _worker_dependency("_persisting_chat_review")
     _release_docs_review_claim = _worker_dependency("_release_docs_review_claim")
@@ -899,6 +964,9 @@ async def process_review_docs_batch(
             contradiction_note = await _documentation_contradiction_note(
                 request.get("veto_item", item), mgr
             )
+            name_definition_hold = await _name_definition_note(
+                request.get("veto_item", item), mgr
+            )
             checked_holds = (
                 ("registry_conformance", conformance_note, "conventions-registry"),
                 ("banned_prose", prose_note, "prose-adjudicator"),
@@ -907,32 +975,18 @@ async def process_review_docs_batch(
                     contradiction_note,
                     "jev-contradiction",
                 ),
+                ("name_definition", name_definition_hold, "name-definition-seat"),
             )
-            review_holds: list[dict[str, str]] = []
-            for kind, note, raised_by in checked_holds:
-                if note is None:
-                    continue
-                evidence = json.dumps(
-                    {
-                        "claim": note,
-                        "documentation": item.get("documentation") or "",
-                        "dd_source_docs": item.get("dd_source_docs") or [],
-                    },
-                    sort_keys=True,
-                    default=str,
-                )
-                review_holds.append(
-                    {
-                        "kind": kind,
-                        "finding": note,
-                        "evidence": evidence,
-                        "raised_by": raised_by,
-                    }
-                )
+            review_holds = review_holds_from_checks(checked_holds, item)
             if any(note is not None for _, note, _ in checked_holds):
                 notes = [
                     note
-                    for note in (conformance_note, prose_note, contradiction_note)
+                    for note in (
+                        conformance_note,
+                        prose_note,
+                        contradiction_note,
+                        name_definition_hold,
+                    )
                     if note
                 ]
                 comments = "\n".join(filter(None, (comments, *notes)))
