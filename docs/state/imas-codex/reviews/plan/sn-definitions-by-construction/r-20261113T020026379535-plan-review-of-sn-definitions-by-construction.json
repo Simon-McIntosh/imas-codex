@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T02:07:35.317Z",
+  "dispatched_at": "2026-11-13T02:01:34Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:131",
+      "id": "anchors_resolve-1",
+      "reason": "a \u00a77 node scoring the successor has no population to score on and no author of it, so either the item silently cannot be met or the node invents both the sample and its labels.",
+      "text": "s7's new bullet states the successor is scored \"once on the names two readers labelled alike in `docs/evidence/fragments/sn-name-definition-fresh-labels/` (360 published names outside \u00a74's labelled names)\", and that directory does not exist: `ls docs/evidence/fragments/sn-name-definition-fresh-labels/` returns \"No such file or directory\", the only second-reading record at `docs/evidence/fragments/sn-name-definition-second-reading/two-reader-labels.json` holds 381 names of which 313 were labelled alike (55 flagged, 258 passed), and no plan text or cited record gives 360 or names who draws or reads that set",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:23",
+      "id": "wiring-1",
+      "reason": "without a declared producer-and-dependency the new bullet is either dead text or a wait the queue cannot see, which is the same defect the earlier wiring finding fixed for s5\u2192s4 and then reintroduced one section later.",
+      "text": "`plan-section-depends-on` declares s7 waiting on `sn-definitions-by-construction#s6` and `sn-domain-per-family#s3` only, but the bullet added at :131 makes s7 consume an artifact \u2014 360 published names drawn outside \u00a74's sample and labelled blind by two readers \u2014 that no section in this plan produces and that the dependency map does not order, so the queue has nothing to hold s7 on and a dispatch can launch it against labels that do not yet exist",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:131",
+      "id": "reasoning-1",
+      "reason": "the section's own evidence states an instrument is to be built, and the plan as written lets a node decline it without any recorded reason, so the release ships on the check the lead ruled insufficient alone.",
+      "text": "the plan records a lead ruling at :164 that \"a successor that lists a definition's narrowing phrases as free text and asks one closed question per phrase is built beside it and scored on freshly blind-labelled names\", yet s7's only bullet about it now reads \"by the chat review seat or by a successor check \u2026 the successor replaces the seat only if\", and s5 no longer mentions a successor at all, so the successor is nowhere a required deliverable and the cut can complete with the 27-of-36 seat and no record that the ruled instrument was never built",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:100",
+      "id": "done_when-1",
+      "reason": "a done-when condition no step produces measures nothing, and the floor the earlier review asked for is not actually in force until a bullet requires the re-read it compares against.",
+      "text": "the added clause \"a later reading of the seat on those held-out names that finds fewer than 27 of 36 or flags more than 12 of 172 fails this item\" names no producer, no run and no point in the section at which that reading is taken; \u00a77's re-run (:131) records counts \"on those names\" only for the fresh set, so no bullet in the plan ever re-scores the 208 held-out names, and the item's only new failure condition can therefore never be exercised",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+  "plan_fingerprint": "52b4e33efd3a5bc0f8c3015a76c2f554815efbf70396e225f8389796e5561e60",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T020026379535-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "7f39d8bb19d25034454a754ff51f2a85379f2fe0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 `docs/evidence/fragments/sn-name-definition-fresh-labels/`, cited at :131 as the home of the 360 names and their two blind readings, does not exist at HEAD.",
+    "done_when": "a finding \u2014 s5's new floor (:100) fails on \"a later reading of the seat on those held-out names\", and no bullet in the plan produces that reading, so the only failure condition the item adds is never exercised.",
+    "evidence_paths": "pass \u2014 the readings, censuses and gate logs the changed units rely on land in `docs/evidence/fragments/sn-definitions-by-construction/`, which exists and already holds eight records.",
+    "naming": "pass \u2014 the changed units add no plan label, stage name, ticket number or version tag, and no changelog prose.",
+    "reasoning": "a finding \u2014 s7 makes the successor check optional (\"replaces the seat only if\", :131) while the plan's own recorded lead ruling (:164) says the successor \"is built beside it and scored on freshly blind-labelled names\".",
+    "single_goal": "pass \u2014 s5 closes on the seat pass and its dispositions alone; s7's successor item is conditional and sits inside the pre-cut re-run of the check.",
+    "wiring": "a finding \u2014 `plan-section-depends-on` (:23) declares s7 waiting on s6 and `sn-domain-per-family#s3` only, while s7's new bullet (:131) needs 360 fresh blind labels that no section produces and no dependency declares."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "4883062b77ad177e5c59e628d7975c591a6ac836a7c25bdcb56e0b4e86f4e1cd",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "77aa04971086e8d7d335cee46212b00c0dcf8b24c6b7faaf8393ea5f071fb346"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T02:26:20.685566+00:00",
+  "total": null
+}
