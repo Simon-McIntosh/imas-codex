@@ -1,0 +1,94 @@
+{
+  "archive": {
+    "created_at": "2026-11-13T08:32:00Z",
+    "graph_dump_bytes": 2742762977,
+    "path": "/home/ITER/mcintos/.local/share/imas-codex/exports/imas-codex-graph-dev-61fdc8b-20261113T081639Z.tar.gz",
+    "sha256": "389e1fffa380d058677ef3c6e9a1a95b077fe0bde5bcff19d4dec3294caeba5a",
+    "size_bytes": 2714181566
+  },
+  "checks": [
+    {
+      "command": "gzip -t",
+      "exit": 0,
+      "expected": "pass",
+      "name": "whole-stream integrity",
+      "passed": true,
+      "target": "archive"
+    },
+    {
+      "exit": 0,
+      "expected": "pass",
+      "name": "graph.dump member non-empty",
+      "passed": true,
+      "target": "archive"
+    },
+    {
+      "command": "gzip -t",
+      "exit": 1,
+      "expected": "fail",
+      "name": "whole-stream integrity",
+      "passed": true,
+      "target": "truncated copy (first 100 MB of the stream)"
+    },
+    {
+      "command": "tar -tzvf | awk size check",
+      "exit": 1,
+      "expected": "fail",
+      "name": "graph.dump member non-empty",
+      "passed": true,
+      "target": "copy whose graph.dump member is zero bytes"
+    }
+  ],
+  "counts": {
+    "after": {
+      "nodes": 1796679,
+      "relationships": 4700432,
+      "standard_names": 5497
+    },
+    "before": {
+      "nodes": 1796679,
+      "relationships": 4700432,
+      "standard_names": 5497
+    },
+    "equal": true
+  },
+  "export": {
+    "command": "uv run --directory /home/ITER/mcintos/Code/imas-codex --no-sync imas-codex graph export",
+    "exit_note": "Stop, dump and archive all succeeded. Exit status 1 came from the command's own automatic restart: its `sbatch` was refused by the nested-launch guard (exit 97) because the export ran inside SLURM job 1291586. The service was restarted immediately afterwards by submitting its own generated script with its partition named.",
+    "exit_status": 1,
+    "finished_at": "2026-11-13T08:32:07Z",
+    "graph_dump_mb": 2615.7,
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261113T080304052155-sfdc-graph-checkpoint/graph-export.log",
+    "started_at": "2026-11-13T08:15:38Z"
+  },
+  "graph_restart": {
+    "bolt_answered": true,
+    "job_id": "1313403",
+    "node": "98dci4-gpu-0002",
+    "state": "RUNNING",
+    "submitted_command": "sbatch --partition=titan /home/ITER/mcintos/.local/share/imas-codex/services/codex-neo4j.sh"
+  },
+  "last_graph_write": {
+    "at": "2026-11-12T08:50:13Z",
+    "instrument": "newest mtime under /home/ITER/mcintos/.local/share/imas-codex/neo4j/data: a transaction checkpoint, neostore.nodestore.db, and the vector index segments"
+  },
+  "jobs": {
+    "archive_checks": {
+      "job_id": "1313404",
+      "log": "/home/ITER/mcintos/.cache/imas-codex-s19/sfdc-archive-checks-1313404.log",
+      "partition": "all_debug",
+      "state": "COMPLETED"
+    }
+  },
+  "negative_control": {
+    "empty_member_copy_failed_member_check": true,
+    "ok": true,
+    "truncated_copy_failed_integrity_test": true
+  },
+  "node": "sfdc-graph-checkpoint",
+  "plan_section": "sn-full-dd-continuation §3",
+  "writers_absent": {
+    "at_start": true,
+    "check": "squeue -u $USER -h -o '%i %j %M %R' listed only other projects' jobs (reckon fleet, nova, power_convertor); the only imas-codex process on the host was the read-only MCP serve"
+  }
+}
