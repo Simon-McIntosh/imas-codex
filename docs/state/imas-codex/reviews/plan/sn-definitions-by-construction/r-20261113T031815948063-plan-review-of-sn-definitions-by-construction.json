@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T03:27:44.841Z",
+  "dispatched_at": "2026-11-13T03:19:22Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:100",
+      "id": "done_when-1",
+      "reason": "this reintroduces the defect the earlier done_when answer repaired (a node that reports 10 of 36 found now passes both sections), and it also inverts the declared order, since \u00a78 depends on \u00a75 while \u00a75 now points at \u00a78 for the condition it must meet.",
+      "text": "the first item now reads \"that reading is committed with its counts, and \u00a78 holds the floor a later reading is checked against\", but \u00a78's only clause about a later reading (line 143) is \"a reading that finds fewer than 27 or flags more than 12 goes to the lead before the cut\" \u2014 a report, not a floor \u2014 so no section fails on a degraded seat re-read, and the item is satisfied by committing 27 of 36 and 12 of 172 however the later reading turns out",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:143",
+      "id": "done_when-2",
+      "reason": "the re-reading node would score 254 names, get a count on a different denominator, and then apply an escalation bound (fewer than 27, more than 12) that only means something on the 208, so the reading either escalates falsely or records an incomparable number.",
+      "text": "\"\u00a74's held-out names\" has no single referent: the committed check page records \u00a74's labels split by seed 7714 into 127 development and 254 held-out names (47 mismatched, 207 agreeing), while the 27 of 36 and 12 of 172 recorded beside it sum to 208 names, the names both readers label alike inside that split, and the plan names neither population",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:141",
+      "id": "done_when-3",
+      "reason": "the node must either report blocked on an unsatisfiable evidence requirement or invent an ordering claim, and the guard the clause exists to provide (thresholds chosen without sight of the labels) has no instrument left; the successor's own brief already states the workable proof, the freezing commit named in the evidence.",
+      "text": "\"thresholds fixed and committed before the fresh labels are opened, shown by commit order\" cannot be shown: both readers' labels are already committed (sheet draw 2026-11-13 01:13, labels 03:24 to 04:02), so any successor node starts from a revision that already contains them and its threshold commit necessarily lands later in history",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5085c54e91420195d631dc47617b966af4211f79",
+  "plan_fingerprint": "535b4c4c39bfc0faf51633552cdb4fad42776d3b3c01d2242471b8c4e7aa3722",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 33,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T031815948063-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "38fee94c89418b021fb5d263943680864395cd1c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/evidence/fragments/sn-name-definition-fresh-labels/ exists at HEAD with three sheet parts, six reader briefs and both readers' label files, and docs/evidence/fragments/sn-name-definition-second-reading/two-reader-labels.json exists; no extensionless href is involved.",
+    "done_when": "a finding \u2014 \u00a75's first item lost its failing condition and points at a floor \u00a78 does not hold; \u00a78's fourth item re-reads an unstated population; \u00a78's second item's commit-order proof is no longer producible.",
+    "evidence_paths": "pass \u2014 the fresh-labels directory and the section's own gate logs sit on committed paths under docs/evidence/fragments/, which a later reader can open.",
+    "naming": "pass \u2014 the changed text introduces no stage label, ticket number or version tag into a symbol, filename or comment, and states mechanisms rather than tracker entries.",
+    "reasoning": "pass \u2014 \u00a78's stated reason for fresh names (the held-out names have been scored three times in choosing among designs) matches the lead ruling of 2026-11-12 and the committed check page, and the endpoint is reachable: I recomputed the delivered labels and the two readers agree on 329 of 360 names, 54 mismatched and 275 agreeing, so \u00a78's floors of 240 alike and 30 mismatched are met and its 80 %/10 % verdict is computable; no code path, formula or function is prescribed.",
+    "single_goal": "pass \u2014 \u00a78 carries one goal, the verdict on which check stands, with the fresh labels and the successor score as its evidence, and \u00a77's re-run is the consumer rather than a second deliverable.",
+    "wiring": "pass \u2014 every declared edge resolves (s5\u2190s4, s8\u2190s5, s7\u2190s6, sn-domain-per-family#s3, s8) and s7's wait on s8 matches \u00a77's use of the check \u00a78 leaves standing; the only \u00a75\u2192\u00a78 reference is a claim about \u00a78's content rather than an artifact \u00a75 waits on, and it is the subject of the done_when finding below rather than a separate missing edge."
+  },
+  "section_digests": {
+    "_document": "188d29937ef57a1aec810a58cf5fa6811e3840933f7818e6d4bffd4aa7c1d8dc",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "17ac9166422ddcf7134addf5d85ab75987f407281b6384ff4dcc52500e228956",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "f22102f5bee1d009a1ccad79e435abc698fa3838aa5bc5f1d358028f39e2f007",
+    "s8": "c9e0dd737fa1eaa39fe2a75d6f684f89646061bcf97ee2ad1275598a27b6aaee"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T03:42:22.586172+00:00",
+  "total": null
+}
