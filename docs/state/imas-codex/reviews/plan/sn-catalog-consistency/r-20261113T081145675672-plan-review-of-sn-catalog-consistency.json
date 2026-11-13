@@ -35,6 +35,16 @@
       "note": "The first clause now defers to the stated writes: the first name by history-apart reclaim, the second by supersede.",
       "reason": "",
       "when": "2026-11-13T08:44:31.810587+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "da9d9941f3ee285f00fcb68b358c3044093a02f8",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "A name of the pair the live rewrite already brought onto the ruled spelling is recorded as settled, and only what still stands is written.",
+      "reason": "",
+      "when": "2026-11-13T08:45:06.312257+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The first clause now defers to the stated writes: the first name by history-apart reclaim, the second by supersede.",
       "reason": "",
       "when": "2026-11-13T08:44:31.810587+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "da9d9941f3ee285f00fcb68b358c3044093a02f8",
+      "commit_basis": "edit",
+      "note": "A name of the pair the live rewrite already brought onto the ruled spelling is recorded as settled, and only what still stands is written.",
+      "reason": "",
+      "when": "2026-11-13T08:45:06.312257+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T081145675672-plan-review-of-sn-catalog-consistency.json",
