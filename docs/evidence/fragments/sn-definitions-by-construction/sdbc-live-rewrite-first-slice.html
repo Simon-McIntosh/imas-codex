@@ -202,6 +202,80 @@ all.</p>
 <tr><td><strong>total</strong></td><td><strong>1</strong></td><td><strong>0.1704</strong></td></tr>
 </table>
 
+
+<h3>The slice, run: what the pipeline now does with a flagged name</h3>
+
+<p>Main's repair merged into the worktree at <code>7caff689c</code> (from
+<code>a003422a5</code>) registers <code>name_definition</code> in
+<code>HOLD_KINDS</code>, so documentation review runs. The acceptance test was the
+same <code>carbon_density</code> edit that had failed on every retry:
+it now generates, reviews and scores — <strong>0.99, exhausted</strong> — and the
+definition it stored states the settled population (<em>carbon ions summed over all
+positive charge states, counting each ion once and excluding neutral carbon</em>).
+A second documentation name was then run and its reviewer went further: it
+<strong>refused</strong> the generated text in writing.</p>
+
+<pre><code>reviewer_comments_docs = [docs_generate_refusal] population:species: the written
+text includes neutral atoms ('The local population entering the average is related
+to the neutral-inclusive elemental density b') where the stored wording reads
+'The density counts ions summed over all charge states; neutral atoms are excluded.'</code></pre>
+
+<p>That refusal is the review working as designed, and it is the first measured
+evidence of what the flagged set's rewrites cost and produce. Two things follow,
+both recorded in the evidence and the manifest:</p>
+
+<ul>
+<li><strong>A documentation rewrite can be refused on its own wording.</strong>
+A bare hint asking for the settled population does not override the DD source the
+candidate is generated from: the generator wrote <em>including every boron charge
+state</em> for a name whose source path is
+<code>summary/volume_average/n_i/boron/value</code>, and the reviewer caught the
+contradiction. The class therefore needs a spelling-level steer, not a
+population hint alone, before it converges.</li>
+<li><strong>The two families this node was asked to unify are mostly outside the
+flagged population.</strong> The population rule admits only label-carried
+mismatched names; of the fifteen <code>&lt;X&gt;_density</code> members censused,
+only <code>carbon_density</code> is flagged, and the rest reconcile as
+<em>agreeing</em> (argon, beryllium) or <em>disputed</em> (neon, oxygen) — not
+this node's to touch. Of the eight flux-surface-average names censused, two are
+flagged. The families can be measured; only their flagged members can be
+rewritten in this pass. Both facts are carried in
+<code>live-rewrite-manifest.json</code> under <code>family_scope</code>.</li>
+</ul>
+
+<p>Three names are listed in the manifest as waiting on the grammar rather than
+attempted, each with the word it needs: the two equivalent-electron counts need
+<code>equivalent_electron</code>, and <code>electron_number_density</code> needs an
+areal abundance base (<code>column_density</code>) so that
+<code>electron_column_density</code> parses.</p>
+<table>
+<caption>Every name attempted, with the stage the pipeline reached and the reviewer's own reason</caption>
+<tr><th>Class</th><th>Name</th><th>Stage</th><th>Cost (USD)</th><th>Reviewer's reason</th></tr>
+<tr><td>species family wording</td><td><code>volume_averaged_boron_density</code></td><td>exhausted (exhausted)</td><td>0.1275</td><td> [docs_generate_refusal] population:species: the written text includes neutral atoms (&#x27;The local population entering the average is related to the neutral-inclusive elemental density b&#x27;) where the stored wording reads &#x27;The density counts ions summed over all c</td></tr>
+<tr><td>species family wording</td><td><code>volume_averaged_carbon_density</code></td><td>accepted (applied)</td><td>0.0878</td><td>Calibrated Jev route: accept</td></tr>
+<tr><td>species family wording</td><td><code>volume_averaged_krypton_density</code></td><td>accepted (applied)</td><td>0.0971</td><td>Calibrated Jev route: accept</td></tr>
+<tr><td>species family wording</td><td><code>volume_averaged_neon_density</code></td><td>accepted (applied)</td><td>0.1207</td><td>Calibrated Jev route: accept</td></tr>
+<tr><td>species family wording</td><td><code>volume_averaged_nitrogen_density</code></td><td>accepted (applied)</td><td>0.1066</td><td>Calibrated Jev route: accept</td></tr>
+<tr><td>flux-surface-average wording</td><td><code>flux_surface_averaged_boron_density_at_plasma_boundary</code></td><td>accepted (applied)</td><td>0.7593</td><td>Calibrated Jev route: accept</td></tr>
+<tr><td>flux-surface-average wording</td><td><code>flux_surface_averaged_parallel_current_density</code></td><td>refining (open)</td><td>0.5386</td><td>Calibrated Jev route: accept
+definition states a normalisation the name does not: The definition states the quantity as &quot;normalized by a single global reference toroidal magnetic field&quot; and gives the formula \langle j_{\parallel}|\mathbf{B}|\rangle_S/B_0, divi</td></tr>
+<tr><td>flux-surface-average wording</td><td><code>flux_surface_averaged_toroidal_current_density</code></td><td>drafted (open)</td><td>0.1599</td><td>[Primary] Grammar: verified ISN round-trip as flux_surface_averaged(toroidal_current_density) with registered operator flux_surface_averaged, component toroidal, and physical_base current_density; bare-prefix averaging form matches the registry worked examples</td></tr>
+<tr><td>generic name for one object</td><td><code>accumulated_ammonia_count</code></td><td>reviewed (open)</td><td>0.1372</td><td>Calibrated Jev route: accept
+definition states a counting-convention the name does not: The definition states the count as an &#x27;equivalent-electron count&#x27; with &#x27;ten equivalent electrons per molecule&#x27; (Z_N + 3Z_H weighting), a specific counting convention not st</td></tr>
+<tr><td>generic name for one object</td><td><code>accumulated_argon_count</code></td><td>reviewed (open)</td><td>0.3852</td><td>Calibrated Jev route: accept
+definition states a restriction-to-one-object the name does not: The definition restricts the quantity to argon delivered specifically by gas injection and only from the post-breakdown phase onward (&#x27;it covers argon delivered by ga</td></tr>
+<tr><td>generic name for one object</td><td><code>accumulated_neon_count</code></td><td>reviewed (open)</td><td>0.6313</td><td>Calibrated Jev route: accept
+definition states a counting-convention the name does not: The definition states the count as an equivalent-electron count with ten equivalent electrons per atom (&#x27;expressed as an equivalent-electron count in which each neon atom c</td></tr>
+<tr><td>generic name for one object</td><td><code>boron_density_at_plasma_boundary</code></td><td>refining (open)</td><td>0.2975</td><td>Calibrated Jev route: accept
+definition states a counting-convention the name does not: The definition specifies &#x27;summed over all positive charge states, counting each ion once and excluding neutral boron&#x27; — a particular counting convention (ion-only, charge-s</td></tr>
+<tr><td>generic name for one object</td><td><code>electron_density_at_pedestal_maximum</code></td><td>accepted ()</td><td>0.4617</td><td>[Primary] Description quality: the single-line definition is precise, correctly identifies the pedestal-maximum locus as the point of maximum gradient magnitude (matching the terminology used by the sibling density_at_pedestal_maximum, &#x27;pedestal location of ma</td></tr>
+<tr><td>unit does not fit the name</td><td><code>square_of_major_radius</code></td><td>accepted ()</td><td>0.1032</td><td>[Primary] Generalization: the doc defines a common g/R^2 form that both children (inverse_of_square_of_major_radius with g=1, and the flux-coordinate gradient ratio with g=|∇ρ_tor|^2) instantiate, correctly abstracting rather than restating either child. Posit</td></tr>
+<tr><td>unit does not fit the name</td><td><code>incident_neutral_particle_flux_at_wall</code></td><td>accepted ()</td><td>0.5008</td><td>[Primary] Description is a single precise line matching the DD ground truth (&#x27;Particle flux from the plasma incident on the wall for a given neutral species&#x27;) while adding necessary directional precision (&#x27;moving from the plasma side toward plasma-facing mater</td></tr>
+<tr><td>unit does not fit the name</td><td><code>neutral_particle_flux_at_wall_due_to_pumping</code></td><td>accepted ()</td><td>0.6295</td><td>[Primary] Description quality: the one-line definition (&#x27;Rate at which particles of a specified neutral species are removed from the plasma region by wall pumping, giving global neutral-particle exhaust throughput&#x27;) follows the exact parallel template of the a</td></tr>
+<tr><td>unit does not fit the name</td><td><code>momentum</code></td><td>accepted ()</td><td>0.2789</td><td>[Primary] Generalization: the description and documentation correctly identify the shared concept — mass-weighted linear-velocity content, covering both extensive momentum-content quantities and momentum-flux quantities across an oriented surface — and explici</td></tr>
+</table>
+<p>17 names carry a review outcome, at a graph-recorded cost of <strong>USD 5.4227</strong>; the per-name mean is USD 0.3190, which replaces the committed estimate for the re-cost.</p>
+
 <h3>What remains</h3>
 
 <ol>

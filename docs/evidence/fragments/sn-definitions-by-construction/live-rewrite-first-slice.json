@@ -521,5 +521,221 @@
   "site": "imas_codex/standard_names/review/holds.py:16-25 HOLD_KINDS omits the kind worker_review_docs.py returns via name_definition_note",
   "effect": "every documentation edit the name-definition seat flags fails review, which is the whole flagged population",
   "spend_before_failure_usd": 0.0873
+ },
+ "slice_run": {
+  "classes": [
+   {
+    "class": "species-family-wording",
+    "names_attempted": 5,
+    "outcomes": [
+     {
+      "name": "volume_averaged_boron_density",
+      "unit": "m^-3",
+      "edit_status": "exhausted",
+      "docs_stage": "exhausted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": " [docs_generate_refusal] population:species: the written text includes neutral atoms ('The local population entering the average is related to the neutral-inclusive elemental density b') where the stored wording reads 'The density counts ions summed over all charge states; neutral atoms are excluded.'",
+      "description_now": "Volume-averaged boron density is the elemental boron number density integrated over the plasma volume and divided by that volume, including every boron charge state.",
+      "llm_cost_usd": 0.1274617
+     },
+     {
+      "name": "volume_averaged_carbon_density",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of carbon ions averaged over the confined plasma volume, summed over all positive charge states and excluding neutral carbon.",
+      "llm_cost_usd": 0.08781975399999999
+     },
+     {
+      "name": "volume_averaged_krypton_density",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of krypton ions averaged over the plasma volume, summed over all positive charge states and excluding neutral krypton atoms.",
+      "llm_cost_usd": 0.097061776
+     },
+     {
+      "name": "volume_averaged_neon_density",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of neon ions averaged over the confined plasma volume, summed over all positive charge states and excluding neutral neon atoms.",
+      "llm_cost_usd": 0.12073363200000001
+     },
+     {
+      "name": "volume_averaged_nitrogen_density",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of nitrogen ions averaged over the plasma volume inside the last closed flux surface, summed over all positive charge states and excluding neutral atoms.",
+      "llm_cost_usd": 0.10657672000000001
+     }
+    ]
+   },
+   {
+    "class": "operator-family-wording",
+    "names_attempted": 3,
+    "outcomes": [
+     {
+      "name": "flux_surface_averaged_boron_density_at_plasma_boundary",
+      "unit": "m^-3",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.90625,
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of boron ions averaged over the plasma boundary, summed over all boron ion charge states and excluding neutral boron.",
+      "llm_cost_usd": 0.7593206480000001
+     },
+     {
+      "name": "flux_surface_averaged_parallel_current_density",
+      "unit": "A.m^-2",
+      "edit_status": "open",
+      "docs_stage": "refining",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a normalisation the name does not: The definition states the quantity as \"normalized by a single global reference toroidal magnetic field\" and gives the formula \\langle j_{\\parallel}|\\mathbf{B}|\\rangle_S/B_0, dividing by a reference B0 rather than returning the plain flux-surface average \\langle j_{\\parallel}\\rangle_S that the name 'flux_surface_averaged_parallel_current_density' implies; the name carries no 'normalized' or 'relative' marker for this division by B0.",
+      "description_now": "Flux-surface-averaged parallel current density is a scalar measure of plasma current along the magnetic field on a closed magnetic flux surface, normalized by a single global reference toroidal magnetic field.",
+      "llm_cost_usd": 0.538572758
+     },
+     {
+      "name": "flux_surface_averaged_toroidal_current_density",
+      "unit": "A.m^-2",
+      "edit_status": "open",
+      "docs_stage": "drafted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": null,
+      "description_now": "Total toroidal plasma current density assigned to a closed magnetic flux surface, defined as the flux-surface average of the local toroidal current density divided by major radius, normalized by the flux-surface average of inverse major radius. It is the effective toroidal current density driving the poloidal magnetic-flux distribution in axisymmetric magnetohydrodynamic equilibrium.",
+      "llm_cost_usd": 0.159941576
+     }
+    ]
+   },
+   {
+    "class": "generic-name-single-object",
+    "names_attempted": 5,
+    "outcomes": [
+     {
+      "name": "accumulated_ammonia_count",
+      "unit": "1",
+      "edit_status": "open",
+      "docs_stage": "reviewed",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.9375,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a counting-convention the name does not: The definition states the count as an 'equivalent-electron count' with 'ten equivalent electrons per molecule' (Z_N + 3Z_H weighting), a specific counting convention not stated by the bare name 'count', which would normally mean a direct molecule count.",
+      "description_now": "Accumulated ammonia count is the cumulative equivalent-electron count of ammonia (NH3) molecules delivered by gas injection after plasma breakdown, with ten equivalent electrons per molecule. By definition the count is restricted to the gas-injection delivery mechanism and to the post-breakdown phase.",
+      "llm_cost_usd": 0.13724735200000002
+     },
+     {
+      "name": "accumulated_argon_count",
+      "unit": "1",
+      "edit_status": "open",
+      "docs_stage": "reviewed",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.9,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a restriction-to-one-object the name does not: The definition restricts the quantity to argon delivered specifically by gas injection and only from the post-breakdown phase onward ('it covers argon delivered by gas injection only, from plasma breakdown onward'), excluding prefill and other fueling mechanisms like pellet or neutral-beam injection, while the name 'accumulated_argon_count' states no such restriction to one delivery mechanism or phase. The definition also layers a counting-convention qualifier (equivalent-electron count, 18 electrons per atom) on top of this restriction.",
+      "description_now": "Accumulated argon count is the cumulative amount of argon delivered by gas injection after plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per atom. Although the name states only an accumulated count, the quantity is by definition restricted to the gas-injection delivery mechanism and the post-breakdown phase, and uses the equivalent-electron counting convention rather than a plain atom count.",
+      "llm_cost_usd": 0.3851595480000001
+     },
+     {
+      "name": "accumulated_neon_count",
+      "unit": "1",
+      "edit_status": "open",
+      "docs_stage": "reviewed",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.94375,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a counting-convention the name does not: The definition states the count as an equivalent-electron count with ten equivalent electrons per atom ('expressed as an equivalent-electron count in which each neon atom contributes ten equivalent electrons'), a weighted counting convention not stated in the name 'accumulated_neon_count'.",
+      "description_now": "Accumulated neon count is the cumulative equivalent-electron count of neutral neon atoms delivered by gas injection after plasma breakdown, with ten equivalent electrons per atom. By definition the count is restricted to the gas-injection delivery mechanism and to the post-breakdown phase.",
+      "llm_cost_usd": 0.6312633300000001
+     },
+     {
+      "name": "boron_density_at_plasma_boundary",
+      "unit": "m^-3",
+      "edit_status": "open",
+      "docs_stage": "refining",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.95625,
+      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a counting-convention the name does not: The definition specifies 'summed over all positive charge states, counting each ion once and excluding neutral boron' \u2014 a particular counting convention (ion-only, charge-state-summed, unweighted) that the bare name 'boron_density_at_plasma_boundary' does not state; the name alone could equally mean total elemental boron density including neutrals, as the documentation itself contrasts with 'boron_density'.",
+      "description_now": "Number density of boron ions at the plasma boundary, summed over all positive charge states, counting each ion once and excluding neutral boron.",
+      "llm_cost_usd": 0.29746947524999995
+     },
+     {
+      "name": "electron_density_at_pedestal_maximum",
+      "unit": "m^-3",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": null,
+      "reviewer_comments_docs": "[Primary] Description quality: the single-line definition is precise, correctly identifies the pedestal-maximum locus as the point of maximum gradient magnitude (matching the terminology used by the sibling density_at_pedestal_maximum, 'pedestal location of maximum gradient magnitude'), and proactively disambiguates from the slope quantity, avoiding the ambiguity risk flagged by that very sibling's confusingly generic name. Documentation quality: the defining equation n_e,ped,max = n_e(psi_N,ped) is dimensionally correct (m^-3 on both sides), every symbol is defined by identity via name: links (electron_density, normalized_poloidal_flux_coordinate_of_pedestal), no units appear in prose, and \u2026",
+      "description_now": "Electron density at pedestal maximum is the electron number density evaluated at the pedestal maximum, the steep mid-pedestal location of maximum pedestal-gradient magnitude. It is the density value at that locus, not the slope with respect to normalized poloidal-flux coordinate.",
+      "llm_cost_usd": 0.4617029
+     }
+    ]
+   },
+   {
+    "class": "unit-does-not-fit-name",
+    "names_attempted": 4,
+    "outcomes": [
+     {
+      "name": "square_of_major_radius",
+      "unit": "m^-2",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": null,
+      "reviewer_comments_docs": "[Primary] Generalization: the doc defines a common g/R^2 form that both children (inverse_of_square_of_major_radius with g=1, and the flux-coordinate gradient ratio with g=|\u2207\u03c1_tor|^2) instantiate, correctly abstracting rather than restating either child. Positioning: it explicitly cross-references both children by name, states the general form, and clarifies the quantity is 'not the major radius or its square itself,' correctly distinguishing the parent from a bare R or R^2 quantity; minor deduction for not situating it among broader sibling metric-coefficient families. Physics accuracy: the equation G=g/R^2 is dimensionally consistent with the m^-2 unit and matches both children's units and\u2026",
+      "description_now": "Geometric equilibrium coefficient with inverse-square major-radius scaling, spanning direct reciprocal-square factors and flux-coordinate metric ratios in toroidal plasma geometry.",
+      "llm_cost_usd": 0.1031996
+     },
+     {
+      "name": "incident_neutral_particle_flux_at_wall",
+      "unit": "s^-1",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 0.98125,
+      "reviewer_comments_docs": "[Primary] Description is a single precise line matching the DD ground truth ('Particle flux from the plasma incident on the wall for a given neutral species') while adding necessary directional precision ('moving from the plasma side toward plasma-facing material') and the exclusion of wall-emitted neutrals, consistent with the unit s^-1 (a wall-integrated total rate, not an areal density like the m^-2.s^-1 sibling incident_neutral_particle_flux_at_wall_due_to_recombination). Documentation supplies a correct surface-integral defining equation, dimensionally consistent (s^-1 = m^-2.s^-1 integrated over m^2), defines every symbol without stating any unit in prose, explicitly scopes the quantit\u2026",
+      "description_now": "Incident neutral particle flux at the wall is the wall-integrated arrival rate of neutral particles of one specified species moving from the plasma side toward plasma-facing material. It excludes neutral particles emitted by the wall.",
+      "llm_cost_usd": 0.5008105300000001
+     },
+     {
+      "name": "neutral_particle_flux_at_wall_due_to_pumping",
+      "unit": "s^-1",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": 1.0,
+      "reviewer_comments_docs": "[Primary] Description quality: the one-line definition ('Rate at which particles of a specified neutral species are removed from the plasma region by wall pumping, giving global neutral-particle exhaust throughput') follows the exact parallel template of the accepted sibling electron_particle_flux_at_wall_due_to_pumping ('Rate at which particles ... are removed from the plasma region by wall pumping, giving global ... exhaust throughput'), swapping only the species-specific token as required by the family parallel-structure rule. Documentation quality: the opening sentence mirrors the sibling's opening ('is the global scalar representation of the wall particle-removal flux ...') and supplies\u2026",
+      "description_now": "Rate at which particles of a specified neutral species are removed from the plasma region by wall pumping, giving global neutral-particle exhaust throughput.",
+      "llm_cost_usd": 0.62951991
+     },
+     {
+      "name": "momentum",
+      "unit": "kg.m^-1.s^-2",
+      "edit_status": null,
+      "docs_stage": "accepted",
+      "name_stage": "accepted",
+      "reviewer_score_name": null,
+      "reviewer_comments_docs": "[Primary] Generalization: the description and documentation correctly identify the shared concept \u2014 mass-weighted linear-velocity content, covering both extensive momentum-content quantities and momentum-flux quantities across an oriented surface \u2014 and explicitly avoid imposing a single governing equation, which is the right move given that plasma_momentum (volume-integrated content) and radial_momentum (flux component) are physically distinct kinds of quantities; a small deduction because the prose leans slightly toward flux-style phrasing ('transport of that content ... across an oriented surface') before balancing it with the content case. Positioning: the parent explicitly cross-referenc\u2026",
+      "description_now": "Linear momentum associated with plasma motion, covering concrete quantities that either represent momentum content in a plasma volume or momentum transported through an oriented surface. The specific child name defines whether the quantity is an extensive momentum or a momentum-flux component.",
+      "llm_cost_usd": 0.2788762
+     }
+    ]
+   }
+  ],
+  "graph_state_llm_cost_total_usd": 5.681158
  }
 }
