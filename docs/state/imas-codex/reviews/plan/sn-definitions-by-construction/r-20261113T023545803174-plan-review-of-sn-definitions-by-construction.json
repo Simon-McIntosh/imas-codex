@@ -1,0 +1,80 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T02:52:09.738Z",
+  "dispatched_at": "2026-11-13T02:42:21Z",
+  "findings": [
+    {
+      "anchor": "plan.html:23",
+      "id": "wiring-1",
+      "reason": "as declared the two sections wait on each other, so a queue that honours the declaration can never close either one, and a worker that wants to finish \u00a75 must exceed its scope to take the reading \u00a75 assigns to \u00a78.",
+      "text": "`plan-section-depends-on` makes s8 wait on s5, but \u00a75's first done-when item (line 100) is satisfied only by \"a later reading of the seat on those held-out names\", and \u00a78's fourth item (line 143) is the sole producer of that reading, which it names as such",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:127",
+      "id": "done_when-1",
+      "reason": "the blocking gate would either test the superseded seat, leaving names the successor flags ungated, or need a referent the plan never fixes.",
+      "text": "\u00a77's fourth export refusal is \"a published name the \u00a75 check flags without a recorded reason\", shown on a catalog planted with that one defect, while \u00a78's verdict (line 144) may replace the seat with the successor and \u00a77's next bullet (line 131) re-runs \"the name-definition check that \u00a78 leaves standing\", so the planted control can exercise an instrument that no longer runs",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:140",
+      "id": "done_when-2",
+      "reason": "without a minimum reference size the section's whole verdict rests on a population that may be too small to tell the two checks apart, and the section would close on a degenerate sample.",
+      "text": "the fresh reference is \"the names the two label alike\", with only their count recorded and no floor, so the 80 % found / 10 % flagged verdict at line 144 can be met, or missed, on an arbitrarily small reference",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:137",
+      "id": "reasoning-1",
+      "reason": "the section's stated reason contradicts the control \u00a75's measurement rests on, so a reader cannot tell whether \u00a75's held-out reading is sound and a worker on \u00a78 inherits a claim the plan's own evidence does not support.",
+      "text": "\u00a78 states \"\u00a74's labelled names have been used to tune both\", while \u00a75's done-when (line 100) requires those labels to have been \"held out from anything the check was tuned on\" and the cited ruling (line 176) gives a different reason for fresh names, that the held-out names \"have been scored three times\"",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:13",
+      "id": "wiring-2",
+      "reason": "it corrects a declared metadata total that previously matched the section sum exactly; it changes no node's path, measure or control.",
+      "text": "`plan-effort-hours` is 27.0 while the eight sections sum to 31.0 (0.5 + 7.0 + 3.0 + 3.0 + 5.0 + 6.0 + 2.5 + 4.0) after \u00a78's 4.0 hours were added",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "84eec68cb980aacd3f3d51f44589f2e18f1720d3",
+  "plan_fingerprint": "588cf86f94b26905e6ad2e28be3a18feb2d21eff2d69203e249da3eb6a66f089",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 29,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T023545803174-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "f2f2afd42444e456608a784acabaf7804ffea1f9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the fresh-label directory, \u00a74, \u00a75 and `sn-domain-per-family#s3` all resolve; the draw file confirms 360 names drawn from 1,594 eligible after excluding the 381 already-labelled names; no extensionless href is used in the changed units.",
+    "done_when": "two findings \u2014 \u00a78's fresh reference (line 140) is \"the names the two label alike\" with no minimum size behind the 80 %/10 % verdict (line 144), and \u00a77's planted negative control (line 127) is defined against a check \u00a78 may supersede.",
+    "evidence_paths": "pass \u2014 \u00a78's labels go under `docs/evidence/fragments/sn-name-definition-fresh-labels/` (committed at 6d2e5263c, seeded 360-name draw, two readers' sheets present) and \u00a77's censuses under `docs/evidence/fragments/sn-definitions-by-construction/`, both durable in-repository paths.",
+    "naming": "pass \u2014 the changed units introduce no plan labels, ticket numbers, stage names or version tags into code, paths or symbols.",
+    "reasoning": "a finding \u2014 \u00a78's rationale that \u00a74's labelled names \"have been used to tune both\" (line 137) contradicts \u00a75's own held-out claim (line 100) and the cited lead ruling (line 176), which says the held-out names were scored three times.",
+    "single_goal": "pass \u2014 \u00a78 closes on one verdict, which check \u00a77 re-runs; the fresh labels, the committed thresholds, the three scores and the seat re-read all serve that single decision.",
+    "wiring": "a finding \u2014 `plan-section-depends-on` (line 23) declares s8 waiting on s5, while \u00a75's first done-when item (line 100) can be satisfied only by the later reading \u00a78 produces (line 143), so the two sections wait on each other; \u00a77's fourth export refusal also still names \"the \u00a75 check\" (line 127) while \u00a78 may replace it (line 144)."
+  },
+  "section_digests": {
+    "_document": "188d29937ef57a1aec810a58cf5fa6811e3840933f7818e6d4bffd4aa7c1d8dc",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "4883062b77ad177e5c59e628d7975c591a6ac836a7c25bdcb56e0b4e86f4e1cd",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "0171e9084093c06aba364d840680747c67bac9d2ba14df321cfbb5a0ddc1187f",
+    "s8": "df5c5c9d1347ad841aa97654f4bc3cc3214a8231f32d089481649ccec27048d3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T03:09:45.669998+00:00",
+  "total": null
+}
