@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T03:28:07.828Z",
+  "dispatched_at": "2026-11-13T03:20:57Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "the gate can pass with the section's only remaining work undone, so the node would be closed as done with both residual names still mis-spelled.",
+      "text": "the endpoint requires conformance \"with any exception the lead ruled listed by name\", but the prose says the lead ruled these two names onto `flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary` rather than out of the endpoint, so a node can list the two residuals as ruled exceptions and close on the current 109-of-111 state with no rename made",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-2",
+      "reason": "without a plant of an average spelled `X_flux_surface_averaged_at_plasma_boundary` the read-back is never shown able to detect the one defect it exists to repair, and a suffix-only instrument passes every declared control.",
+      "text": "both planted controls differ only in the trailing locator token (\"two suffixes\", \"every name ending `_at_separatrix`\"), so neither can fail a read-back that compares suffixes alone, while the real residual `deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary` is out of line by operator order and still ends `_at_plasma_boundary`",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:80",
+      "id": "reasoning-1",
+      "reason": "the endpoint is population-wide rather than a list of five, so a node still knows what to measure; only the title is stale.",
+      "text": "the heading reads \"the last five names\" while the body and the committed read-back put the residual at two, a count left from the 93-of-98 reading that traces to `sn-integrity-backlog` \u00a749's descope reason",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "df928ea702b453f7a3b785c90f85a204b986ea39",
+  "plan_fingerprint": "bce9e71fdda718224b750e88faa7f25355187551a04b544adff8dfb8ca87098f",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 39,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T031948544926-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "8e0f3a64a135dc4118d5bdf624de10837235315b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-integrity-backlog#s49`, `sn-definitions-by-construction#s6`, and every evidence fragment cited in the s6 comments (`scc-separatrix-remainder`, `scc-separatrix-reclaim`) resolve as files or sections.",
+    "done_when": "a finding \u2014 the exception clause admits the two names the section's own prose identifies as the work, so the gate is satisfiable by the live state it starts from (plan.html:83).",
+    "evidence_paths": "pass \u2014 the written forms require a live read-back with no scratch path, and the section's own records already sit on durable paths under `docs/evidence/fragments/sn-catalog-consistency/`.",
+    "naming": "pass \u2014 the section names no symbol, file or function to create, and carries no plan label, ticket number or version tag.",
+    "reasoning": "a finding \u2014 the section's heading states a scope (\"the last five names\") its own body and committed evidence contradict at two (plan.html:80); the root cause and the 109-of-111 reading otherwise match the cited evidence.",
+    "single_goal": "pass \u2014 \u00a76 has one deliverable: the separatrix population reads one ruled spelling per locus, after `sn-definitions-by-construction` \u00a76 lands.",
+    "wiring": "pass \u2014 s6 declares its wait on `sn-definitions-by-construction` \u00a76 in both `plan-section-depends-on` (plan.html:22) and the prose (plan.html:82), and the section it is carried from, `sn-integrity-backlog` \u00a749, resolves and records that hand-off in its descope reason."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "f668b8342386ac813be7cb687989a5820ec1f374fc47d442f8c5854d41bd80cb",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T03:43:42.174413+00:00",
+  "total": null
+}
