@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T02:11:27.677Z",
+  "dispatched_at": "2026-11-13T02:04:27Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:48",
+      "id": "done_when-1",
+      "reason": "the section's whole premise is that the run writes thousands of names and needs a recovery point, and as written a node can certify a checkpoint whose restart silently lost nodes, which is the failure the checkpoint exists to prevent.",
+      "text": "\u00a73's final clause requires only that \"the graph is back up and answers a read afterwards\", so a restart that comes up with a truncated store passes: the repository's own checkpoint criterion in imas_codex/graph/AGENTS.md (\"Checkpointing the graph\") is that the live read after the restart \"return[s] the same node count as before\", and \u00a73's weaker wording drops exactly the comparison that would catch a bad restore",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-full-dd-continuation.html:56",
+      "id": "done_when-2",
+      "reason": "\u00a74 states this branch is the expected close, so the branch most likely to be exercised is the one with a silent-omission hole, and the repair is the same per-source listing the earlier review rounds already forced at class level.",
+      "text": "the cost-limit branch closes on \"every source run has its outcome recorded, each class left unrun is listed with its source count\", which leaves a class entered and then abandoned by the cost limit satisfying neither condition: the sources it never reached were not run (so carry no outcome) and the class was not left unrun (so is not listed), letting up to a whole partially-run class disappear from the accounting; the census's per-class band (USD 50.68\u2013101.27 across the six classes against a USD 145.76 ceiling) makes a stop inside the 395-source below-floor class the likely shape of this close",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "547fd2c098548726ac61a56a0c02a511ce38e25f",
+  "plan_fingerprint": "bd462531833803f45c798c9db03958bf1dab3033c66805977b4d4b937242d043",
+  "plan_slug": "sn-full-dd-continuation",
+  "plan_version": 25,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T020325740173-plan-review-of-sn-full-dd-continuation",
+  "reviewed_blob_sha": "59b304c3d2e6fa8f684173821a3bb1b1d963e98c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 sn-integrity-backlog#s52 exists and is done, this plan's s2 is done, the USD 60 tranche is recorded in sn-catalog-consistency (which has an s2), the census query resolves to sib-unaccepted-census.json, and its 5,203 / 920 / class counts match the \u00a74 classes.",
+    "done_when": "a finding \u2014 \u00a73's post-checkpoint live read requires only that the graph \"answers a read afterwards\", which a restart that lost nodes still satisfies, while the repository's own checkpoint criterion requires the read to return the same node count as before.",
+    "evidence_paths": "pass \u2014 both units record under docs/evidence/fragments/sn-full-dd-continuation/, which exists in the repository (cohort-143.json, sfdc-cohort-floor.html), not a scratch path.",
+    "naming": "pass \u2014 neither unit carries a plan label, stage name, ticket number or version tag into a symbol or comment; the units name no symbol at all.",
+    "reasoning": "pass \u2014 \u00a74's cost-limit branch is now consistent with the record: the census's class estimates (USD 50.68\u2013101.27 by per-source band, USD 202.37 at the full-run rate, corrected band USD 80\u2013160) exceed the USD 145.76 the approval leaves after the USD 205.76 remaining balance less the USD 60 consistency tranche, so truncation by cost is the expected close as \u00a74 now says; the full-run yield of 284/1,308 = 21.7% supports the statement that these classes are not expected to reach 5,503 (828 \u00d7 21.7% \u2248 180 against the 300 required).",
+    "single_goal": "pass \u2014 \u00a73 delivers one checkpoint with its control and \u00a74 one scoped run; the guard readings in \u00a74 are gates on that run, not a second deliverable.",
+    "wiring": "pass \u2014 s3 now waits on both sn-integrity-backlog#s52 and this plan's s2, and s4's six depends-on entries all resolve (s2/s3 here, sn-integrity-backlog#s52, sn-definitions-by-construction#s2 and #s3, sn-domain-per-family#s2), each cited section existing and declared done except s3 itself."
+  },
+  "section_digests": {
+    "_document": "16ae1c71c9e5740bc6d2aa601f5df44baba94934b41f3f8c6736012e92b11e2d",
+    "s1": "6edb6bfc73bfa8f3d3435cdd83ea2fde91367cf006a53a93995f459601295db8",
+    "s2": "0685f8ecfe2877442317711cdd765607eba5e0b9e9f44a51b65954020d68e962",
+    "s3": "2da639fb4433a08cce50ca1b5469bee0c2b7510126750ad312a3b2ad52625218",
+    "s4": "0c3753359ffc8ef408f5d3c947372eb2ba5107cc346734a7df221909c7ecebb2",
+    "s5": "6690535f2aea19399c90db7f6eecbe8aea0ff83d558dee77f801d64ef16c7a45",
+    "s6": "b69f4c480a9cf3a5bb789f9ec172fd784a2950de5ff28f25eb6162d59232fd0e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T02:28:17.256784+00:00",
+  "total": null
+}
