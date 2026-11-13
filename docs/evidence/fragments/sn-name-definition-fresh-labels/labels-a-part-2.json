@@ -726,5 +726,117 @@
   "confidence": "high",
   "evidence": "the local rate at which deuterium-deuterium thermonuclear reactions",
   "reason": "The D-D fusion power density is that local reaction energy-release rate, summed over both branches, in W.m^-3."
+ },
+ {
+  "id": "item-225",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as an equivalent-electron count rate",
+  "reason": "A helium-4 source rate reads as an atom delivery rate, while the definition is an equivalent-electron count rate weighted by the helium atomic number."
+ },
+ {
+  "id": "item-226",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed electrical potential difference between the two terminals of a shunt resistor",
+  "reason": "The voltage of a shunt is that signed terminal potential difference, in V."
+ },
+ {
+  "id": "item-227",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the proportionality coefficient between the diffusive momentum flux of a specified ion charge state and the negative local gradient of its momentum density",
+  "reason": "The ion charge-state momentum diffusivity is exactly that Fickian coefficient, in m^2.s^-1."
+ },
+ {
+  "id": "item-228",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the real-valued poloidal component of the perturbed plasma magnetic vector-potential eigenfunction",
+  "reason": "The real part of the poloidal perturbed vector potential is that real poloidal component, in T.m."
+ },
+ {
+  "id": "item-229",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the kinematic transport coefficient governing field-aligned diffusion of the parallel component of aggregate plasma bulk-flow",
+  "reason": "Parallel edge-plasma momentum diffusivity is that field-aligned kinematic coefficient for aggregate bulk momentum, in m^2.s^-1."
+ },
+ {
+  "id": "item-230",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "a dimensionless flux-limiter parameter for momentum transport of a specified ion charge state in the poloidal direction",
+  "reason": "The poloidal ion charge-state momentum flux-limiter coefficient is that dimensionless parameter."
+ },
+ {
+  "id": "item-231",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "the radial component of the total edge-plasma momentum-flux density",
+  "reason": "The name states the radial total momentum flux without a region, while the definition restricts the aggregate to the edge plasma."
+ },
+ {
+  "id": "item-232",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local particle count per volume for krypton ions at the sheath entrance, summed over positive ionization states",
+  "reason": "A bare krypton density counts ions summed over charge states, so the definition's ion sum at the divertor target matches the name."
+ },
+ {
+  "id": "item-233",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the toroidal momentum carried by the oxygen ion population at the last closed flux surface",
+  "reason": "The toroidal oxygen velocity at the plasma boundary is that boundary-local toroidal component of the oxygen ion bulk flow, in m.s^-1."
+ },
+ {
+  "id": "item-234",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the local volumetric rate at which total thermal plasma energy is removed by conductive transport toward plasma-facing surfaces",
+  "reason": "A conductive-loss power density is that volumetric thermal-energy removal rate, in W.m^-3."
+ },
+ {
+  "id": "item-235",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed projection of an elliptic shatter cone",
+  "reason": "The y direction unit-vector component of the shatter cone is that signed Y projection of its direction unit vector, dimensionless."
+ },
+ {
+  "id": "item-236",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the rate at which energy whose ultimate source is fuel-ion fusion reactions is transferred to matter within that region or component",
+  "reason": "The name reads as fusion power released, while the definition is deposited fusion-origin power integrated over a chosen region, assigning energy where it lands."
+ },
+ {
+  "id": "item-237",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the imaginary part of the poloidal projection of that eigenfunction for a specified toroidal Fourier harmonic",
+  "reason": "The imaginary part of the poloidal perturbed plasma velocity is that quadrature component of the poloidal projection, in m.s^-1."
+ },
+ {
+  "id": "item-238",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the density-weighted mean flow of helium-3 ions over their ion charge states",
+  "reason": "A bare helium-3 velocity is the bulk ion flow, and its toroidal component at the plasma boundary is what the definition gives."
+ },
+ {
+  "id": "item-239",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the average, over one magnetic flux surface, of the squared norm of",
+  "reason": "The flux-surface-averaged squared gradient metric of the toroidal flux coordinate is exactly what the name states, dimensionless."
+ },
+ {
+  "id": "item-240",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the scalar displacement of that vertex from the crystal-local reference point along the first in-surface direction of the Bragg crystal",
+  "reason": "The first local tangential coordinate of the Bragg crystal is that per-vertex signed displacement along e1, in m."
  }
 ]
