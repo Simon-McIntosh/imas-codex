@@ -995,6 +995,233 @@ async def phrases() -> None:
     )
 
 
+FRESH_LABELS = (
+    Path("/home/ITER/mcintos/Code/imas-codex")
+    / "docs/evidence/fragments/sn-name-definition-fresh-labels"
+)
+FRESH_REFERENCE = FRAGMENTS / "name-definition-phrases-fresh-reference.json"
+FRESH_EXTRACTIONS = PHRASE_RUN_DIR / "fresh-extractions.json"
+FRESH_JUDGMENTS = PHRASE_RUN_DIR / "fresh-judgments.json"
+FRESH_SEAT = PHRASE_RUN_DIR / "fresh-seat.json"
+FRESH_RULE = (
+    "a name both readers give any class other than agrees is mismatched; a name "
+    "both give agrees is agreeing; the rest are disputed and do not score"
+)
+
+
+def fresh_rows() -> tuple[list[dict], list[dict]]:
+    rows: list[dict] = []
+    disputed: list[dict] = []
+    for part in (1, 2, 3):
+        sheet = json.loads((FRESH_LABELS / f"sheet-part-{part}.json").read_text())
+        first = {
+            entry["id"]: entry["class"]
+            for entry in json.loads(
+                (FRESH_LABELS / f"labels-a-part-{part}.json").read_text()
+            )
+        }
+        second = {
+            entry["id"]: entry["class"]
+            for entry in json.loads(
+                (FRESH_LABELS / f"labels-b-part-{part}.json").read_text()
+            )
+        }
+        for item in sheet["items"]:
+            row = {
+                "id": item["id"],
+                "name": item["name"],
+                "unit": item.get("unit"),
+                "description": item.get("description"),
+                "documentation": item.get("documentation"),
+                "first": first[item["id"]],
+                "second": second[item["id"]],
+            }
+            if row["first"] == "agrees" and row["second"] == "agrees":
+                row["label"] = "agrees"
+            elif row["first"] != "agrees" and row["second"] != "agrees":
+                row["label"] = "mismatch"
+            else:
+                disputed.append(row)
+                continue
+            rows.append(row)
+    return rows, disputed
+
+
+def reference_record(rows: list[dict], disputed: list[dict]) -> dict:
+    return {
+        "schema": "name-definition-phrases-fresh-reference",
+        "derived_from": (
+            "docs/evidence/fragments/sn-name-definition-fresh-labels/"
+            "{sheet,labels-a,labels-b}-part-{1,2,3}.json"
+        ),
+        "rule": FRESH_RULE,
+        "counts": {
+            "names": len(rows),
+            "mismatched": sum(1 for row in rows if row["label"] == "mismatch"),
+            "agreeing": sum(1 for row in rows if row["label"] == "agrees"),
+            "disputed": len(disputed),
+        },
+        "rows": [
+            {
+                "name": row["name"],
+                "label": row["label"],
+                "first": row["first"],
+                "second": row["second"],
+            }
+            for row in rows
+        ],
+        "disputed": [
+            {"name": row["name"], "first": row["first"], "second": row["second"]}
+            for row in disputed
+        ],
+    }
+
+
+def fresh_score(flagged: set[str], rows: list[dict]) -> dict:
+    mismatched = {row["name"] for row in rows if row["label"] == "mismatch"}
+    agreeing = {row["name"] for row in rows if row["label"] == "agrees"}
+    hits = flagged & mismatched
+    wrong = flagged & agreeing
+    return {
+        "mismatched": len(mismatched),
+        "mismatched_found": len(hits),
+        "recall": round(len(hits) / len(mismatched), 3) if mismatched else None,
+        "agreeing": len(agreeing),
+        "agreeing_flagged": len(wrong),
+        "false_flag_rate": round(len(wrong) / len(agreeing), 3) if agreeing else None,
+        "missed_mismatched": sorted(mismatched - flagged),
+        "false_flags": sorted(wrong),
+    }
+
+
+async def fresh() -> None:
+    """Score the frozen check, the chat seat and their union once on fresh names."""
+
+    rows, disputed = fresh_rows()
+    items = [
+        {
+            "id": row["name"],
+            "name": row["name"],
+            "unit": row["unit"],
+            "description": row["description"],
+            "documentation": row["documentation"],
+        }
+        for row in rows
+    ]
+    FRESH_REFERENCE.write_text(
+        json.dumps(reference_record(rows, disputed), indent=1, sort_keys=True) + "\n"
+    )
+
+    extraction: dict = {}
+    if FRESH_EXTRACTIONS.exists():
+        extraction = json.loads(FRESH_EXTRACTIONS.read_text())
+    if "chat" not in extraction:
+        extracted, cost = await extract_phrases(
+            items, model=review_model(), concurrency=12
+        )
+        extraction = {"chat": {"extracted": extracted, "cost_usd": round(cost, 4)}}
+        FRESH_EXTRACTIONS.write_text(
+            json.dumps(extraction, indent=1, sort_keys=True) + "\n"
+        )
+    extracted = cap_phrases(extraction["chat"]["extracted"])
+
+    judgments: dict = {}
+    if FRESH_JUDGMENTS.exists():
+        judgments = json.loads(FRESH_JUDGMENTS.read_text())
+    if "judgments" not in judgments:
+        graded, cost = await judge_phrases(
+            items, extracted, model=get_model("sn-judge"), concurrency=12
+        )
+        judgments = {"judgments": graded, "cost_usd": round(cost, 4)}
+        FRESH_JUDGMENTS.write_text(
+            json.dumps(judgments, indent=1, sort_keys=True) + "\n"
+        )
+
+    seat: dict = {}
+    if FRESH_SEAT.exists():
+        seat = json.loads(FRESH_SEAT.read_text())
+    if "verdicts" not in seat:
+        from imas_codex.standard_names.review.name_definition_seat import (
+            judge_name_definitions,
+        )
+
+        verdicts, cost = await judge_name_definitions(
+            items, model=review_model(), concurrency=8
+        )
+        seat = {
+            "verdicts": {entry["name"]: entry for entry in verdicts},
+            "cost_usd": round(cost, 4),
+        }
+        FRESH_SEAT.write_text(json.dumps(seat, indent=1, sort_keys=True) + "\n")
+
+    frozen = json.loads(PHRASE_RESULTS.read_text())["thresholds"]["frozen"]["chat_arm"]
+    phrase_flags = {
+        row["name"]
+        for row in rows
+        if phrase_check(
+            row,
+            extracted.get(row["name"]) or [],
+            judgments["judgments"],
+            threshold=frozen,
+        )
+    }
+    seat_flags = {
+        name
+        for name, verdict in seat["verdicts"].items()
+        if verdict.get("verdict") == "flag"
+    }
+
+    _, held = split(load_rows())
+    old_seat = json.loads(SEAT.read_text())
+    old_flags = {
+        name
+        for name, verdict in old_seat["verdicts"].items()
+        if verdict.get("verdict") == "flag"
+    }
+    held_seat = fresh_score(old_flags, held)
+
+    result = {
+        "schema": "name-definition-phrases-fresh",
+        "reference": reference_record(rows, disputed)["counts"],
+        "rule": FRESH_RULE,
+        "thresholds_used": {"chat_arm": frozen},
+        "readings": {
+            "phrase_chat_arm": fresh_score(phrase_flags, rows),
+            "chat_seat": fresh_score(seat_flags, rows),
+            "phrase_chat_union_seat": fresh_score(phrase_flags | seat_flags, rows),
+        },
+        "held_out_seat_reading": {
+            "names": held_seat["mismatched"] + held_seat["agreeing"],
+            "mismatched_found": held_seat["mismatched_found"],
+            "mismatched": held_seat["mismatched"],
+            "agreeing_flagged": held_seat["agreeing_flagged"],
+            "agreeing": held_seat["agreeing"],
+            "prior_reading": {
+                "mismatched_found": 27,
+                "mismatched": 36,
+                "agreeing_flagged": 12,
+                "agreeing": 172,
+            },
+            "source": (
+                "the seat's committed verdicts over the old labels' held-out split, "
+                "re-derived rather than re-called"
+            ),
+        },
+        "cost_usd": {
+            "chat_extraction": extraction["chat"]["cost_usd"],
+            "jev_judgments": judgments["cost_usd"],
+            "chat_seat": seat["cost_usd"],
+        },
+        "gate": {"recall_floor": RECALL_FLOOR, "false_flag_ceiling": FALSE_FLAG_CEILING},
+    }
+    (PHRASE_RUN_DIR / "name-definition-phrases-fresh-full.json").write_text(
+        json.dumps(result, indent=1, sort_keys=True) + "\n"
+    )
+    print(json.dumps(result["readings"], indent=1))
+    print(json.dumps(result["held_out_seat_reading"], indent=1))
+    print(json.dumps(result["cost_usd"], indent=1))
+    print("reference:", json.dumps(result["reference"]))
+
 def main() -> None:
     which = sys.argv[1] if len(sys.argv) > 1 else "prototype"
     rows = load_rows()
@@ -1043,6 +1270,9 @@ def main() -> None:
         return
     if which == "phrases":
         asyncio.run(phrases())
+        return
+    if which == "fresh":
+        asyncio.run(fresh())
         return
     asyncio.run(final())
 
