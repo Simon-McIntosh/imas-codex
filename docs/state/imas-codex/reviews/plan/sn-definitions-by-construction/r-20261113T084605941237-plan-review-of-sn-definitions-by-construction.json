@@ -33,7 +33,24 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 38,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "finding": "done_when-1",
+      "reason": "The section is closed on a measure already taken; its close comment records that the scoring pass had no planted reference and that its first run mis-keyed the phrase judgments before correction, and that the seat's counts did not depend on that key.",
+      "when": "2026-11-13T10:33:51.154889+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "reason": "The section is closed on a measure already taken; its close comment records that the scoring pass had no planted reference and that its first run mis-keyed the phrase judgments before correction, and that the seat's counts did not depend on that key.",
+      "when": "2026-11-13T10:33:51.154889+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261113T084605941237-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261113T084605941237-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "94d325b8d606c3ecc7338afe0640a15b6a661515",
   "rubric": "content",
