@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-13T00:12:26.065Z",
+  "dispatched_at": "2026-11-13T00:04:11Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:100",
+      "id": "done_when-1",
+      "reason": "\u00a77's export gate and \u00a76's rewrite both rest on this check, and without a floor the plan cannot tell an adequate reading from an inadequate one.",
+      "text": "the first bullet replaces a target with a recording requirement: it concedes the running seat reaches 27 of 36 (75 %, \"below the 80 % target\") and accepts it, leaving no floor for the check that actually runs, so a node that reports 10 of 36 found and 12 of 172 flagged with their counts satisfies every word of it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:101",
+      "id": "single_goal-1",
+      "reason": "one verdict cannot close both, and the successor's construction is blocked on an external job while the dispositions are ready now.",
+      "text": "the new bullet makes \"a successor check ... is scored beside the seat\" a completion condition of \u00a75, so a node must both run the accepted seat over 1,975 published names and give every flagged name a disposition, and construct and score a second check on a separate population",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:101",
+      "id": "evidence_paths-1",
+      "reason": "a node dispatched for \u00a75 cannot tell where to read the scoring labels, so its score would land on an unnamed path or not at all.",
+      "text": "the successor is scored \"on names labelled blind by two readers after 2026-11-12\" and the plan names neither the path those labels live at nor who draws and labels them; `docs/evidence/fragments/sn-name-definition-fresh-labels/` does not exist at HEAD, and the only record of that location is an unexecuted brief in `docs/evidence/fragments/sn-definitions-by-construction/briefs/fresh-label-sheet.md`, which the plan does not cite",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:23",
+      "id": "wiring-1",
+      "reason": "the dependency as declared holds the whole catalogue rewrite for a comparison that is not needed to start it.",
+      "text": "`plan-section-depends-on` declares s6 waiting on s5, and with the successor bullet at :101 s5 cannot close until fresh labels exist and a successor is built and scored, so \u00a76's live rewrite (USD 150) waits on a labelling job that no section produces, though the lead ruling recorded at :164 says the chat seat runs as the check now \"so the live definition rewrite can start\"",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3925dadc863be3dd7b56a15b17f7362d1a0186c0",
+  "plan_fingerprint": "eec5784176ec1718bc1bdad46c9346042e79526c710b1f9c3477378c07a47116",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 26,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261113T000315085757-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "7f60e6c8daf4156fdc1c2b3541509317e6b0ad06",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 s5's href `sn-definitions-by-construction#s4` and `data-links` resolve, and every evidence path s5 or its comments cite exists: `docs/evidence/fragments/sn-definitions-by-construction/name-definition-labels.json`, `docs/evidence/fragments/sn-definitions-by-construction/`, and `docs/evidence/fragments/sn-name-definition-second-reading/two-reader-labels.json`.",
+    "done_when": "a finding \u2014 s5's first bullet (:100) now requires only that the two shares \"are both recorded with their counts\"; the 80 % and 10 % bars no longer apply to the check that runs, so a node reporting any recall still satisfies the section.",
+    "evidence_paths": "a finding \u2014 the successor's scoring population \"names labelled blind by two readers after 2026-11-12\" (:101) names no path and no producer, and the directory it would land in does not exist.",
+    "naming": "pass \u2014 the changed bullets carry no plan labels, stage names, ticket numbers or version tags, and state mechanisms rather than tracker history.",
+    "reasoning": "pass \u2014 the accepted figures reconcile with \u00a74's committed record (208 is two thirds of the 313 names both readers labelled alike; 36 and 172 are two thirds of its 55 flagged and 258 passed), the root cause s5 states is the one \u00a71 records at :53, and the changed bullets name no code path, step sequence or function.",
+    "single_goal": "a finding \u2014 s5 now carries building and scoring a second check (:101) beside running the accepted seat over the catalog (:100, :103), two deliverables with separate gates that one verdict cannot close.",
+    "wiring": "a finding \u2014 `plan-section-depends-on` makes s6 wait on s5 (docs/plans/sn-definitions-by-construction.html:23), and s5's new successor bullet (:101) makes s5 incomplete until a successor check is scored on fresh blind labels, so the live rewrite is gated behind a labelling job no section owns."
+  },
+  "section_digests": {
+    "_document": "c299db3e965ab12a879a63c1d08865a56963dde7744eeb490bdc0a47f1b3edb9",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "ffa4e4e0672e527e191f210f7827efd42b809bb40a9430e8250c4d4a40690a63",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "3bf8397e4c0fcbca018b6aee9f5b466ded384549e74817c22de7ef17c95be780"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-13T01:44:50.132190+00:00",
+  "total": null
+}
