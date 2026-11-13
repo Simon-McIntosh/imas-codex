@@ -208,5 +208,110 @@
     "confidence": "medium",
     "evidence": "magnetic-field deviation carried by the confined-plasma response",
     "reason": "The definition limits the perturbed plasma field to the confined-plasma response, a narrower scope than the name alone states."
+  },
+  {
+    "id": "item-0855",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "counts ND3 molecules directly rather than converting them to an equivalent-electron inventory",
+    "reason": "The name identifies the deuterated-ammonia source rate, and the definition counts that molecular species directly."
+  },
+  {
+    "id": "item-0856",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "The vector includes all spatial components",
+    "reason": "The name specifies effective neutral-state convection velocity without naming a projection, matching the full vector defined."
+  },
+  {
+    "id": "item-0857",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "flux-surface average of the magnitude of the total equilibrium magnetic-field vector",
+    "reason": "The definition averages the field strength over a flux surface, as both the averaging and magnitude terms in the name state."
+  },
+  {
+    "id": "item-0858",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "Vertical coordinate of the measurement position specifies its signed height",
+    "reason": "The definition is the signed vertical coordinate at the measurement position named."
+  },
+  {
+    "id": "item-0859",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "As a vector quantity, its components represent the diagonal entries of the momentum diffusion tensor",
+    "reason": "The name denotes the general neutral momentum diffusivity whose directional components are specified by more particular names."
+  },
+  {
+    "id": "item-0860",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "signed number of complete winding turns in a toroidal magnetic-field probe coil",
+    "reason": "The definition gives the signed complete-turn count for the toroidal-field probe identified by the name."
+  },
+  {
+    "id": "item-0861",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "At the magnetic axis, the enclosed toroidal flux is zero, so this value is zero",
+    "reason": "The definition evaluates the toroidal-flux coordinate at the magnetic-axis locus named."
+  },
+  {
+    "id": "item-0862",
+    "class": "abstract-parent-as-quantity",
+    "confidence": "high",
+    "evidence": "The directional projections of this quantity are represented by parallel fast electron pressure and perpendicular fast electron pressure",
+    "reason": "The fast-electron pressure name denotes the parent tensor quantity from which directional pressure projections are specified."
+  },
+  {
+    "id": "item-0863",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "total wave power transferred from a single traced coherent electromagnetic beam to the ionic population in a specified charge state",
+    "reason": "The definition specifies the ion charge-state contribution absorbed from the single beam named."
+  },
+  {
+    "id": "item-0864",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "covers the inner corner behavior represented separately by the upper-inner squareness and lower-inner squareness quantities",
+    "reason": "The definition covers inner boundary squareness as a whole without selecting either upper or lower inner corner."
+  },
+  {
+    "id": "item-0865",
+    "class": "definition-narrower-than-name",
+    "confidence": "medium",
+    "evidence": "plasma volume enclosed by the last closed magnetic flux surface",
+    "reason": "The general volume-averaged name does not specify the definition’s averaging volume inside the last closed surface."
+  },
+  {
+    "id": "item-0866",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "density-weighted mean parallel flow velocity over all ionic charge states",
+    "reason": "The name says parallel ion momentum diffusivity but omits that the collective species flow is averaged over charge states."
+  },
+  {
+    "id": "item-0867",
+    "class": "qualifier-missing-from-name",
+    "confidence": "medium",
+    "evidence": "resolved by ion species and charge state, not summed over charge states",
+    "reason": "The name says ion state but does not make clear that the resolved state is specifically an ionic charge state."
+  },
+  {
+    "id": "item-0868",
+    "class": "qualifier-missing-from-name",
+    "confidence": "high",
+    "evidence": "flux-surface-averaged volumetric rate",
+    "reason": "The thermal particle source name omits the flux-surface averaging that is part of the defined rate."
+  },
+  {
+    "id": "item-0869",
+    "class": "agrees",
+    "confidence": "high",
+    "evidence": "it counts delivered atoms rather than plasma electron content or ionization state",
+    "reason": "For tritium, one delivered atom contributes one equivalent-electron count, so the named gas-injection source rate has the defined scale."
   }
 ]
