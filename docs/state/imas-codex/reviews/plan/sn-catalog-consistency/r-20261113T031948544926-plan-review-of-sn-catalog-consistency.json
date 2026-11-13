@@ -43,6 +43,16 @@
       "note": "Section 6 now says the two deuterium-tritium names are superseded onto the ruled spelling and are not listed as exceptions.",
       "reason": "",
       "when": "2026-11-13T03:48:34.434623+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 6 adds a third plant: an average spelled with the operator after the quantity.",
+      "reason": "",
+      "when": "2026-11-13T03:49:14.774164+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "Section 6 now says the two deuterium-tritium names are superseded onto the ruled spelling and are not listed as exceptions.",
       "reason": "",
       "when": "2026-11-13T03:48:34.434623+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "3d5fb355e908189d36cc3e07992b77d571e8e13c",
+      "commit_basis": "edit",
+      "note": "Section 6 adds a third plant: an average spelled with the operator after the quantity.",
+      "reason": "",
+      "when": "2026-11-13T03:49:14.774164+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T031948544926-plan-review-of-sn-catalog-consistency.json",
