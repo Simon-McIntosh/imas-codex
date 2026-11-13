@@ -664,13 +664,13 @@
      {
       "name": "boron_density_at_plasma_boundary",
       "unit": "m^-3",
-      "edit_status": "open",
-      "docs_stage": "refining",
+      "edit_status": "applied",
+      "docs_stage": "accepted",
       "name_stage": "accepted",
       "reviewer_score_name": 0.95625,
-      "reviewer_comments_docs": "Calibrated Jev route: accept\ndefinition states a counting-convention the name does not: The definition specifies 'summed over all positive charge states, counting each ion once and excluding neutral boron' \u2014 a particular counting convention (ion-only, charge-state-summed, unweighted) that the bare name 'boron_density_at_plasma_boundary' does not state; the name alone could equally mean total elemental boron density including neutrals, as the documentation itself contrasts with 'boron_density'.",
-      "description_now": "Number density of boron ions at the plasma boundary, summed over all positive charge states, counting each ion once and excluding neutral boron.",
-      "llm_cost_usd": 0.29746947524999995
+      "reviewer_comments_docs": "Calibrated Jev route: accept",
+      "description_now": "Number density of boron ions at the plasma boundary, summed over all positive charge states; each ion is counted once, and neutral boron is excluded.",
+      "llm_cost_usd": 0.29767120124999996
      },
      {
       "name": "electron_density_at_pedestal_maximum",
@@ -736,6 +736,6 @@
     ]
    }
   ],
-  "graph_state_llm_cost_total_usd": 5.681158
+  "graph_state_llm_cost_total_usd": 5.68136
  }
 }
