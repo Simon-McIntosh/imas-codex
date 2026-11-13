@@ -348,5 +348,159 @@
 "confidence": "high",
 "evidence": "the post-breakdown cumulative ethane-gas inventory expressed as an equivalent-electron count",
 "reason": "The name states an accumulated ethane count, but the definition is an eighteen-equivalent-electron inventory, an added attribute the name does not carry."
+},
+{
+"id": "item-0051",
+"class": "abstract-parent-as-quantity",
+"confidence": "medium",
+"evidence": "It represents the common field-line-averaged quantity instantiated by the name for electron and ion species-specific children.",
+"reason": "The name states one temperature, but the definition declares a species-resolved parent whose concrete forms are fixed by the electron and ion children."
+},
+{
+"id": "item-0052",
+"class": "agrees",
+"confidence": "medium",
+"evidence": "the arithmetic mean of the kinetic temperatures of all charged ion species on the flux surface assigned to an internal transport barrier",
+"reason": "An average ion temperature at the barrier is what the name states, and averaging over charged ion species on that flux surface is the population the name implies."
+},
+{
+"id": "item-0053",
+"class": "abstract-parent-as-quantity",
+"confidence": "high",
+"evidence": "the local number density of a selected plasma population at the flux-surface location assigned to an internal transport barrier",
+"reason": "The name states a density without a population, but the definition declares a population-abstract parent whose electron, ion and fuel-mixture forms are fixed by more specific names."
+},
+{
+"id": "item-0054",
+"class": "abstract-parent-as-quantity",
+"confidence": "medium",
+"evidence": "This parent quantity does not by itself fix a spatial aggregation over the separatrix; an aggregation qualifier belongs to a more specific quantity.",
+"reason": "The name states a parallel electric field at the separatrix, but the definition declares a parent whose pointwise and flux-surface-averaged forms are fixed by more specific names."
+},
+{
+"id": "item-0055",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the signed detector-bias potential difference applied between the detector electrode or electron-multiplying stage and its bias reference",
+"reason": "The name states a mass-spectrometer voltage generally, but the definition fixes it to the detector bias potential difference, an attribute the name does not state."
+},
+{
+"id": "item-0056",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the rate at which coherent-wave energy is absorbed by the bulk thermal-electron population per unit physical volume, attributed to an individual toroidal mode number",
+"reason": "The name states a per-mode thermal-electron power density, but the definition fixes it to coherent-wave absorption, an attribute the name does not state."
+},
+{
+"id": "item-0057",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the global rate of beam-beam fusion events or of production of a specified reaction product caused by collisions between two nonthermal fuel-ion populations originating from beam injection",
+"reason": "The name states a rate, but the definition is a global volume-integrated rate over beam-beam channels, an integration the name does not state."
+},
+{
+"id": "item-0058",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the lower-region aggregate equivalent-electron source rate due to gas injection",
+"reason": "The name states a total lower gas source rate, but the definition adds the equivalent-electron weighting summed over injected species, which the name does not state."
+},
+{
+"id": "item-0059",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the flux-surface-averaged rate at which energy is transferred to or from the counter-passing orbit population per unit physical volume",
+"reason": "The name states a power density as if local, but the definition is a flux-surface-averaged form the name does not mention."
+},
+{
+"id": "item-0060",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "the normalized spectral contribution, evaluated in the rotating frame, of the perturbed electrostatic potential E-cross-B drift to the parallel gyrocenter part of toroidal angular-momentum flux",
+"reason": "The name states a parallel momentum flux, but the definition is a toroidal angular-momentum flux in the rotating frame for one spectral contribution, attributes the name does not state."
+},
+{
+"id": "item-0061",
+"class": "definition-narrower-than-name",
+"confidence": "medium",
+"evidence": "during plasma initiation. It excludes energy stored in internal excitation or other internal quantum states.",
+"reason": "The name states a volume-averaged neutral temperature generally, while the definition restricts it to the plasma-initiation phase."
+},
+{
+"id": "item-0062",
+"class": "qualifier-missing-from-name",
+"confidence": "high",
+"evidence": "The component is evaluated at the position of maximum major radius on each magnetic flux surface; it is not a flux-surface average.",
+"reason": "The name states a radial ion charge-state velocity, but the definition fixes where on each flux surface it is evaluated, a sampling convention the name does not state."
+},
+{
+"id": "item-0063",
+"class": "agrees",
+"confidence": "medium",
+"evidence": "the effective coefficient describing the radial advective, non-diffusive transport of total plasma momentum in the edge plasma",
+"reason": "A radial total-momentum convection velocity is the transport-closure coefficient the definition gives, and the name's total refers to total plasma momentum exactly as the definition states."
+},
+{
+"id": "item-0064",
+"class": "abstract-parent-as-quantity",
+"confidence": "high",
+"evidence": "This parent quantity abstracts over inner_radius_of_passive_loop and outer_radius_of_passive_loop.",
+"reason": "The name states a passive-loop radius, but the definition declares a parent over the inner and outer cross-section radii whose forms are fixed by the specific names."
+},
+{
+"id": "item-0065",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "the local rank-two material response that relates the plasma electric field to the conductive electric-current density",
+"reason": "The name states a conductivity as if scalar, but the definition is a rank-two tensor retaining all diagonal and off-diagonal couplings, an attribute the name does not state."
+},
+{
+"id": "item-0066",
+"class": "agrees",
+"confidence": "medium",
+"evidence": "the scalar transport coefficient whose multiplication by ion particle density gives the advective part of the ion particle flux in the radial direction",
+"reason": "A radial ion particle convection velocity is exactly the coefficient the definition multiplies by ion density, and the charge-state aggregate is the species-level ion population the name states."
+},
+{
+"id": "item-0067",
+"class": "agrees",
+"confidence": "high",
+"evidence": "the net angular-momentum transfer rate to that population per unit volume",
+"reason": "Torque density for the co-passing population is the angular-momentum transfer rate per unit volume the definition gives, and the unit fits torque per volume."
+},
+{
+"id": "item-0068",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "the complete radial span between the inner and outer faces of its rectangular cross-section",
+"reason": "The name states a width, but the definition specifies the radial extent between the inner and outer faces of a rectangular cross-section, a direction and geometry the name does not state."
+},
+{
+"id": "item-0069",
+"class": "agrees",
+"confidence": "medium",
+"evidence": "the concentration of the suprathermal, nonthermal population of a selected species",
+"reason": "A density of fast particles of a selected species is what the name states, and allowing a local or flux-surface-averaged form does not add an attribute the name contradicts."
+},
+{
+"id": "item-0070",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "the projection of the vacuum vector potential onto the vertical direction, generated exclusively by toroidal-field coil currents",
+"reason": "The name states a vacuum magnetic vector potential component, but the definition restricts the source to toroidal-field coil currents, an attribute the name does not state."
+},
+{
+"id": "item-0071",
+"class": "qualifier-missing-from-name",
+"confidence": "medium",
+"evidence": "The source population is the toroidal-field coil current system only. Contributions from plasma currents and from other external-current systems are excluded",
+"reason": "The name states a vacuum magnetic vector potential component, but the definition restricts the source to toroidal-field coil currents, an attribute the name does not state."
+},
+{
+"id": "item-0072",
+"class": "agrees",
+"confidence": "high",
+"evidence": "the local nitrogen-ion count per physical volume at that location, summed over all nitrogen ionic charge states and excluding neutral nitrogen",
+"reason": "Under the bare species convention the name denotes nitrogen ions, so the definition's ion sum with neutrals excluded is the quantity the name states."
 }
 ]
