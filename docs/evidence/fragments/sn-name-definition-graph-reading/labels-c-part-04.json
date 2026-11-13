@@ -101,7 +101,7 @@
   "id": "item-0015",
   "class": "qualifier-missing-from-name",
   "confidence": "high",
-  "evidence": "the cumulative equivalent-electron inventory of argon atoms delivered by gas injection after plasma breakdown. Each delivered argon atom contributes 18 equivalent electrons",
+  "evidence": "the cumulative equivalent-electron inventory of argon atoms delivered by gas injection after plasma breakdown",
   "reason": "The name says count, but the definition counts delivered atoms weighted by atomic number into an equivalent-electron inventory."
  },
  {
@@ -136,14 +136,14 @@
   "id": "item-0020",
   "class": "qualifier-missing-from-name",
   "confidence": "medium",
-  "evidence": "the phase angle of the oscillatory radio-frequency current phasor carried by that strap ... defined modulo 2 pi relative to a specified RF reference phase",
+  "evidence": "the phase angle of the oscillatory radio-frequency current phasor carried by that strap ... relative to a specified RF reference phase",
   "reason": "The name says wave phase, while the definition fixes it as the phase of the strap current phasor against a separately specified RF reference, a reference-relative identification the name lacks."
  },
  {
   "id": "item-0021",
   "class": "agrees",
   "confidence": "medium",
-  "evidence": "the instantaneous rate at which neutral tritium with atomic number Z = 1 is admitted to the plasma vessel by gas injection hardware",
+  "evidence": "the instantaneous rate at which neutral tritium ... is admitted to the plasma vessel by gas injection hardware",
   "reason": "With unit atomic number the equivalent-electron weighting is the identity, so the defined value is the tritium delivery rate the name states."
  },
  {
@@ -171,7 +171,7 @@
   "id": "item-0025",
   "class": "qualifier-missing-from-name",
   "confidence": "medium",
-  "evidence": "This name denotes the right-handed cylindrical (R, phi, Z) radial projection of the momentum current, not a flux-surface-normal projection",
+  "evidence": "the right-handed cylindrical ... radial projection of the momentum current, not a flux-surface-normal projection",
   "reason": "The name radial is ambiguous between the cylindrical radial direction and a flux-surface normal, and the definition adds that frame identification."
  },
  {
@@ -255,7 +255,7 @@
   "id": "item-0037",
   "class": "qualifier-missing-from-name",
   "confidence": "high",
-  "evidence": "the multiplicative departure of a plasma global energy confinement time from the IPB98(y,2) reference scaling prediction",
+  "evidence": "the multiplicative departure of a plasma's global energy confinement time from the IPB98(y,2) reference scaling prediction",
   "reason": "The factor is defined relative to one named scaling law, a reference the name does not carry."
  },
  {
@@ -269,7 +269,7 @@
   "id": "item-0039",
   "class": "qualifier-missing-from-name",
   "confidence": "high",
-  "evidence": "the full vertical geometric width occupied collectively by the beamlets ... at the injection unit grounded-grid source surface. The width changes along the beam line",
+  "evidence": "the full vertical geometric width occupied collectively by the beamlets ... at the injection unit's grounded-grid source surface ... The width changes along the beam line",
   "reason": "The width varies along the beam line, so the source-surface position the definition fixes is an identifying attribute the name lacks."
  },
  {
@@ -297,7 +297,7 @@
   "id": "item-0043",
   "class": "agrees",
   "confidence": "high",
-  "evidence": "the scalar projection of that oriented measurement-axis unit vector onto the y basis direction of the right-handed Cartesian (x, y, z) frame",
+  "evidence": "the scalar projection of that oriented measurement-axis unit vector onto the basis direction of the right-handed Cartesian",
   "reason": "The name states which gage, which measurement axis and which Cartesian component, matching the definition exactly."
  },
  {
@@ -311,7 +311,7 @@
   "id": "item-0045",
   "class": "qualifier-missing-from-name",
   "confidence": "high",
-  "evidence": "a gyrotropic vector quantity ... decomposed into components parallel and perpendicular to the equilibrium magnetic field, each expressed dimensionlessly as a ratio to a reference thermal pressure",
+  "evidence": "a gyrotropic vector quantity ... decomposed into components parallel and perpendicular to the equilibrium magnetic field ... each expressed dimensionlessly as a ratio to a reference thermal pressure",
   "reason": "The name states a pressure as if scalar, while the definition gives a two-component gyrotropic vector normalised to a reference pressure taken at the outboard midplane."
  },
  {
@@ -332,7 +332,7 @@
   "id": "item-0048",
   "class": "definition-narrower-than-name",
   "confidence": "medium",
-  "evidence": "the transverse geometric extent of the circular aperture active diffracting surface ... It describes aperture size rather than the curvature of the crystal substrate",
+  "evidence": "the transverse geometric extent of the circular active diffracting surface, measured from its center to its circumferential edge",
   "reason": "The name covers a radius of the Bragg crystal, while the definition restricts it to the circular aperture and explicitly excludes the crystal curvature radius."
  },
  {
@@ -353,7 +353,7 @@
   "id": "item-0051",
   "class": "agrees",
   "confidence": "high",
-  "evidence": "the signed projection onto the Cartesian y direction ... of the unit vector along the shatter-cone minor axis",
+  "evidence": "its signed projection onto the Cartesian y direction ... the unit vector along the shatter-cone minor axis",
   "reason": "The name states the axis, the vector and the Cartesian component, matching the definition exactly."
  },
  {
@@ -374,7 +374,7 @@
   "id": "item-0054",
   "class": "agrees",
   "confidence": "high",
-  "evidence": "Volume-averaged oxygen ion density relative to volume-averaged electron density ... summed over ionized oxygen charge states and excludes neutral oxygen",
+  "evidence": "Volume-averaged oxygen ion density relative to volume-averaged electron density ... The numerator is summed over ionized oxygen charge states ... and excludes neutral oxygen",
   "reason": "The name states both volume averages and their ratio, and ions-only is what a bare species name means."
  },
  {
@@ -404,5 +404,369 @@
   "confidence": "high",
   "evidence": "This parent quantity is restricted to real-part quantities of isotropic plasma pressure and does not by itself specify perturbation order, Fourier-mode labeling, phase normalization, or spatial locus",
   "reason": "The definition explicitly declares a parent whose perturbation order and mode labeling are supplied by more specific children."
+ },
+ {
+  "id": "item-0059",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the effective coefficient of density-proportional convective particle transport for a specified neutral state, projected onto the poloidal direction",
+  "reason": "A poloidal convection velocity for a specified neutral state is the coefficient the definition states, with no further identifying attribute."
+ },
+ {
+  "id": "item-0060",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the number of neon impurity ions per unit volume, summed over all included charged ionization states ... neutral neon atoms are excluded",
+  "reason": "A bare species density naming neon with ions summed over charge states is what the catalog rule and the definition both mean."
+ },
+ {
+  "id": "item-0061",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "evaluated at the point of maximum major radius on each magnetic flux surface, not as a surface average",
+  "reason": "The name states a toroidal velocity component but not that it is sampled at the outboard midplane point of each flux surface."
+ },
+ {
+  "id": "item-0062",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "an area-normalized vector source density ... The total quantity retains the vector direction of the net momentum-transfer rate while aggregating the included particle populations",
+  "reason": "The name says momentum source, while the definition normalises it by an area, giving the dimension and the value a surface normalisation the name does not state."
+ },
+ {
+  "id": "item-0063",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This vector quantity is the parent of component quantities such as the toroidal torque due to neutral beam shinethrough",
+  "reason": "The definition itself calls this vector the parent of the component quantities."
+ },
+ {
+  "id": "item-0064",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the poloidal magnetic energy contained within the entire plasma using the geometric-axis normalization known as li(3) ... uses the geometric axis rather than the magnetic axis",
+  "reason": "Normalised internal inductance takes different values under different normalisation conventions, and the definition fixes one the name does not state."
+ },
+ {
+  "id": "item-0065",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the toroidal component of the complex linear-MHD eigenfunction ... the toroidal projection of the perturbed plasma magnetic field",
+  "reason": "The definition states the toroidal projection of the plasma-response perturbation the name describes."
+ },
+ {
+  "id": "item-0066",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "abstracts over the quadrant-resolved coefficients upper outer squareness and lower outer squareness ... does not select either the upper or lower outboard quadrant",
+  "reason": "The definition declares a parent whose quadrant-resolved forms are fixed by more specific names."
+ },
+ {
+  "id": "item-0067",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the signed energy-flux-density vector carried by one specified neutral atom or molecule species ... summed over all internal states of the species",
+  "reason": "The species-resolved neutral energy-flux vector is exactly the quantity the name states."
+ },
+ {
+  "id": "item-0068",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the net particle-number input to a specified particle distribution from a given source contribution, integrated over the plasma volume",
+  "reason": "A volume-integrated particle source rate is the volume integral the definition gives."
+ },
+ {
+  "id": "item-0069",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the real, in-phase component of the first-order plasma-temperature perturbation associated with one toroidal Fourier harmonic",
+  "reason": "Perturbed plasma temperature in a linear eigenmode means the first-order perturbation, and the real part is the in-phase component the definition gives."
+ },
+ {
+  "id": "item-0070",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the signed position of a correction-coil conductor cross-section outline vertex along the local Frenet-Serret binormal ... measured from the conductor centerline",
+  "reason": "The name states a binormal coordinate but not that the point is an outline vertex and the origin is the conductor centerline."
+ },
+ {
+  "id": "item-0071",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "Because hydrogen has atomic number one, each atom contributes one equivalent-electron count",
+  "reason": "With unit atomic number the equivalent-electron weighting is the identity, so the defined rate is the hydrogen delivery rate the name states."
+ },
+ {
+  "id": "item-0072",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "It gives the geometric-center height for oblique geometry and the height of the specified endpoint for thick-line geometry",
+  "reason": "The name does not identify which point of the element carries the coordinate, and the definition makes that choice depend on the geometry representation."
+ },
+ {
+  "id": "item-0073",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the density-weighted mean kinetic temperature of all positive ion species and charge states on the plasma-facing side of the limiter",
+  "reason": "The name says average temperature but does not state the density weighting that fixes which average it is."
+ },
+ {
+  "id": "item-0074",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the field-aligned component of the vector defined by ion charge-state convection velocity ... no summation over charge states",
+  "reason": "A parallel component of the charge-state convection velocity is exactly the quantity the name states."
+ },
+ {
+  "id": "item-0075",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the minimum photon energy at the low-energy edge of the spectral interval accepted by an individual detector pixel",
+  "reason": "The lower bound energy of a detector pixel is exactly the low-energy edge the definition defines."
+ },
+ {
+  "id": "item-0076",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the signed field-aligned scalar return current associated with the pressure-gradient-driven current ... the amplitude multiplying the magnetic-field unit vector, not an independent vector current and not a cylindrical component",
+  "reason": "The name states a current density, while the definition fixes a signed field-aligned scalar amplitude rather than a vector or Cartesian component."
+ },
+ {
+  "id": "item-0077",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the effective Fickian particle diffusivity for ions in a specified ionization state, without specifying a spatial projection",
+  "reason": "The definition states the charge-state-resolved scalar Fickian coefficient the name denotes."
+ },
+ {
+  "id": "item-0078",
+  "class": "definition-narrower-than-name",
+  "confidence": "medium",
+  "evidence": "the energy transported to a plasma-facing surface by the bulk flow of plasma particles ... streaming along open magnetic field lines from the scrape-off layer to bounding material surfaces",
+  "reason": "The name states a power due to convection, while the definition restricts it to power deposited on plasma-facing surfaces from the scrape-off layer."
+ },
+ {
+  "id": "item-0079",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "The parent name does not select a spatial component, coordinate direction, flux-surface projection, explicit or implicit numerical treatment, isotope, or charge state; those distinctions require more specific names",
+  "reason": "The definition declares a parent rate coefficient whose component, treatment and isotope forms are supplied by more specific names."
+ },
+ {
+  "id": "item-0080",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent quantity selects a specified neutral state and does not aggregate over different neutral states, but it does not specify a transport direction or microscopic mechanism",
+  "reason": "The definition declares a parent whose directional and mechanism-resolved forms are separate named quantities."
+ },
+ {
+  "id": "item-0081",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "The dimensionless particle flux-limiter coefficient for an ion in a specified charge state controls the admissible particle flux in the density equation by scaling its collisionless free-streaming bound",
+  "reason": "The definition states the dimensionless ion-state flux-limiter coefficient the name denotes."
+ },
+ {
+  "id": "item-0082",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "Signed component along the z axis of the unit vector defining an electron-cyclotron launcher mirror's translation direction or rotation axis at its home position",
+  "reason": "The name names the mirror but not which direction its unit vector describes, nor that it is taken at the home position."
+ },
+ {
+  "id": "item-0083",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the real electrical power consumed by one plant subsystem at its electrical boundary",
+  "reason": "The name says power of a plant subsystem, while the definition fixes it as real consumed electrical power measured at the subsystem electrical boundary."
+ },
+ {
+  "id": "item-0084",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the local thermodynamic pressure of the coolant ... with perfect vacuum as the zero-pressure reference ... at a component-port interface",
+  "reason": "The name states a coolant pressure without the absolute static reference or the component-port location the definition fixes."
+ },
+ {
+  "id": "item-0085",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the parallel projection of the area-normalized momentum source acting on one specified ion charge state",
+  "reason": "The name says momentum source, while the definition normalises it by area, which fixes its dimension and value."
+ },
+ {
+  "id": "item-0086",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the component ... of the density-weighted mean bulk flow of argon impurity ions where the H-mode pedestal transitions to the confined core",
+  "reason": "The name states a toroidal argon velocity but not the density weighting over charge states that fixes the mean."
+ },
+ {
+  "id": "item-0087",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the time rate of increase of the equivalent-electron count associated with injected neon. The equivalent-electron convention assigns ten counts to each injected neon atom",
+  "reason": "The name says source rate, while the definition fixes an atomic-number-weighted equivalent-electron count rate."
+ },
+ {
+  "id": "item-0088",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the flux-surface average of the total current-magnetic-field dot product divided by the reference vacuum toroidal field ... neither a current magnitude nor ... the local field-aligned projection",
+  "reason": "The name says parallel current density, while the definition is a flux-surface-averaged, reference-field-normalised quantity that is not the local parallel projection."
+ },
+ {
+  "id": "item-0089",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the parallel component of the direction-agnostic ion charge-state energy diffusion coefficient ... applies to one specified ion charge state and is not summed over charge states",
+  "reason": "The definition states the parallel charge-state energy diffusion coefficient the name denotes."
+ },
+ {
+  "id": "item-0090",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the dimensionless ratio of signed net electrical power exported outside the plant boundary to total internal electrical power consumed by plant systems",
+  "reason": "Net efficiency of a plant system reads as net electrical output over thermal input, while the definition divides net electrical export by internal electrical consumption, which the definition itself contrasts with thermal efficiency."
+ },
+ {
+  "id": "item-0091",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the local concentration of particles belonging to a selected species or population ... refers to one selected species, not a sum over different species",
+  "reason": "The name states a species-free particle density, while the definition requires a selected species or population whose charge states are then summed."
+ },
+ {
+  "id": "item-0092",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent quantity covers reference phases that choose the complex phase origin of perturbations, including the mode reference phase",
+  "reason": "The definition declares a parent whose specific phase-origin choices are supplied by more specific names."
+ },
+ {
+  "id": "item-0093",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "The density and diffusive flux are summed over all ionic charge states of the selected species, excluding neutral particles. This ion-species scope differs from neutral-species particle diffusivity",
+  "reason": "The name states a neutral species, while every sentence of the definition describes an ion species summed over charge states and excluding neutrals."
+ },
+ {
+  "id": "item-0094",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the geometric optical throughput of a bolometer channel ... the product of its effective collecting area and accepted solid angle",
+  "reason": "Etendue is the area-solid-angle product the definition gives, at the channel level the name denotes."
+ },
+ {
+  "id": "item-0095",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the effective coefficient of the energy-density-proportional advective flux carried by neutral particles ... multiplies neutral number density to define a convective particle flux",
+  "reason": "The name states a particle convection velocity, while the definition is the energy-channel coefficient multiplying neutral energy density, which the definition says need not coincide with the particle one."
+ },
+ {
+  "id": "item-0096",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the vector density of conventional electric charge flux associated with the trapped-particle contribution. It includes direct charge transport by trapped particles and the collisional drag back-current",
+  "reason": "The trapped current density the name states is the vector charge-flux density the definition gives, with the drag back-current attributed to that same contribution."
+ },
+ {
+  "id": "item-0097",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "Instantaneous equivalent-electron source rate delivered to the plasma vessel by gas injection systems",
+  "reason": "The name says source rate, while the definition fixes an atomic-number-weighted equivalent-electron count rate summed over active species."
+ },
+ {
+  "id": "item-0098",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the spatial mean of the local number density of one specified neutral species within the plasma volume enclosed by the last closed flux surface during plasma initiation",
+  "reason": "The name states the volume average but not that it is taken during plasma initiation, a phase restriction the definition adds."
+ },
+ {
+  "id": "item-0099",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "The unqualified quantity denotes the net integral over the specified oriented surface with no source restriction and no averaging. More specific flux quantities supply the surface family, source contribution, projection, or weighting that narrows this definition",
+  "reason": "The definition declares an unqualified parent whose surface, source and weighting are fixed by more specific names."
+ },
+ {
+  "id": "item-0100",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the signed volumetric rate of kinetic-energy transfer ... averaged over a magnetic flux surface",
+  "reason": "The name states a power density, while the definition adds the flux-surface average over an infinitesimal shell between neighbouring surfaces."
+ },
+ {
+  "id": "item-0101",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the net neutral momentum transfer per unit area resolved along the toroidal direction ... summed over all neutral states",
+  "reason": "The name says momentum source, while the definition normalises it by area and sums it in the neutral population."
+ },
+ {
+  "id": "item-0102",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "expressed as 36 equivalent electrons for each krypton atom ... with a fixed species multiplier",
+  "reason": "The name says count, while the definition counts atoms weighted by atomic number into an equivalent-electron inventory."
+ },
+ {
+  "id": "item-0103",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed projection along a specified local poloidal direction ... applies locally to one specified charge state of one ion species",
+  "reason": "The poloidal projection of the charge-state E-cross-B drift velocity is exactly the quantity the name states."
+ },
+ {
+  "id": "item-0104",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the field-aligned component of the kinetic stress carried by a specified suprathermal particle distribution ... Together with the perpendicular component, it characterizes pressure anisotropy",
+  "reason": "A parallel fast-particle pressure is the field-aligned second moment the definition gives."
+ },
+ {
+  "id": "item-0105",
+  "class": "qualifier-missing-from-name",
+  "confidence": "high",
+  "evidence": "the density-weighted mean of the toroidal fluid velocities of all represented neon ion charge states at the core-side shoulder of the edge transport barrier",
+  "reason": "The name states a toroidal neon velocity but not the density weighting over charge states that fixes the mean."
+ },
+ {
+  "id": "item-0106",
+  "class": "qualifier-missing-from-name",
+  "confidence": "medium",
+  "evidence": "the inward extent of the hard X-ray emissivity peak ... measured along the normalized toroidal flux coordinate",
+  "reason": "The name states a half width, while the definition fixes that the width is measured in normalized toroidal flux, which is what makes it dimensionless."
+ },
+ {
+  "id": "item-0107",
+  "class": "abstract-parent-as-quantity",
+  "confidence": "high",
+  "evidence": "This parent concept subsumes both equilibrium-profile and linear-perturbation contexts: the equilibrium total value summed over all charged species, and the complex first-order perturbation amplitude",
+  "reason": "The definition declares a parent whose equilibrium and perturbation forms are separate contexts and named quantities."
+ },
+ {
+  "id": "item-0108",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "the coefficient of the proportional source contribution treated implicitly in an ion species' toroidal momentum equation",
+  "reason": "The definition states the implicitly treated toroidal momentum coefficient for one ion species that the name denotes."
+ },
+ {
+  "id": "item-0109",
+  "class": "agrees",
+  "confidence": "medium",
+  "evidence": "the cumulative hydrogen atom inventory delivered by gas injection during the prefill interval ending at plasma breakdown, expressed using the equivalent-electron convention",
+  "reason": "With unit atomic number the equivalent-electron convention leaves the count equal to the hydrogen atom inventory the name states."
+ },
+ {
+  "id": "item-0110",
+  "class": "agrees",
+  "confidence": "high",
+  "evidence": "its signed projection along the geometric toroidal direction ... applies locally to one specified charge state of one ion species",
+  "reason": "The toroidal projection of the charge-state E-cross-B drift velocity is exactly the quantity the name states."
  }
 ]
