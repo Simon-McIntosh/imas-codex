@@ -19,11 +19,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-definitions-by-construction#s6&quot;],&quot;s3&quot;:[&quot;sn-catalog-consistency#s2&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-domain-per-family#s3&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-definitions-by-construction#s6&quot;],&quot;s3&quot;:[&quot;sn-catalog-consistency#s2&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-domain-per-family#s3&quot;],&quot;s6&quot;:[&quot;sn-definitions-by-construction#s6&quot;]}">
   <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="37">
+<meta name="plan-version" content="39">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -79,8 +79,8 @@
 
     <h2 id="s6">§6 — One separatrix locus, one suffix: the last five names</h2>
     <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s49"></section>
-    <p>Carried from <code>sn-integrity-backlog</code> §49. Under the lead's 2026-11-07 ruling a value at the separatrix is named <code>X_at_plasma_boundary</code> and a separatrix average <code>flux_surface_averaged_X_at_plasma_boundary</code>. The signed renames and closing-lineage reclaims brought 93 of the 98 census names into line; the history-apart reclaim the lead then ruled has landed. Still out of line: the exact boundary spelling of the tritium velocity, and the two cases whose tombstone ends on a different live concept, starting with <code>electron_temperature_at_separatrix</code> to <code>thermal_electron_temperature_at_plasma_boundary</code>, which go to the lead.</p>
-    <p><strong>Done when:</strong> a live read-back of the census population shows one suffix per DD locus, with any exception the lead ruled listed by name, and the same read-back lists a locus planted with two suffixes in a disposable graph; every change went through a signed path and no tombstone was revived; spend is at most USD 2.</p>
+    <p>Carried from <code>sn-integrity-backlog</code> §49. Under the lead's 2026-11-07 ruling a value at the separatrix is named <code>X_at_plasma_boundary</code> and a separatrix average <code>flux_surface_averaged_X_at_plasma_boundary</code>. The signed renames and closing-lineage reclaims brought 93 of the 98 census names into line; the history-apart reclaim the lead then ruled has landed. The committed read-back after that reclaim counts 109 of 111 census names in line. The two still out of line are both bound to the deuterium–tritium separatrix average, <code>deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary</code> and <code>flux_surface_averaged_deuterium_tritium_density_at_separatrix</code>, which the lead ruled on 2026-11-12 onto <code>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary</code>. <code>sn-definitions-by-construction</code> §6 can rename live names, so this section's read-back is taken after it lands.</p>
+    <p><strong>Done when:</strong> a live read-back of the census population, taken after <code>sn-definitions-by-construction</code> §6 lands, shows every separatrix value named <code>X_at_plasma_boundary</code> and every separatrix average named <code>flux_surface_averaged_X_at_plasma_boundary</code>, with any exception the lead ruled listed by name; the same read-back lists a locus planted in a disposable graph with two suffixes, and a locus planted there with every name ending <code>_at_separatrix</code>; every change went through a signed path and no tombstone was revived; spend is at most USD 2.</p>
 
     <h2 id="s7">§7 — No live name without a DD source, except those held on purpose</h2>
     <section data-reckon="section" data-id="s7" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s46"></section>
@@ -116,6 +116,12 @@
     </div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-s6-lead-ruling-dt-pair" data-who="Simon McIntosh" data-when="2026-11-12T16:40:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-12. The deuterium–tritium pair that shares one Data Dictionary source resolves onto a third spelling, <code>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary</code>: the operator leads, as in the sixteen sibling species names, and the locus is the plasma boundary. Both <code>deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary</code> and <code>flux_surface_averaged_deuterium_tritium_density_at_separatrix</code> are superseded onto it.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s7-lead-ruling-sourceless" data-who="Simon McIntosh" data-when="2026-11-12T16:40:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-12: approved as proposed. <code>line_averaged_neon_density</code>, <code>radius_of_soft_xray_detector</code> and <code>ratio_of_diamagnetic_vorticity_to_major_radius</code> are rebound by signed rebind; <code>volume_averaged_electron_number_density_over_scrape_off_layer</code> and <code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code> are held from the next cut.</p></div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-20261112-root-cause-hold" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T01:20:00Z">
     <div class="r-comment-body"><p>The lead asked on 2026-11-12 for the published release candidate's inconsistencies to be traced to their causes and gave that work priority. Its finding for this section: the batches regenerate each name through the model one at a time, which is how the divergence arose, so a regenerated member is again free to differ. <code>sn-definitions-by-construction</code> §2 makes the shared part of a definition a rendered wording, and its §6 rewrites the live catalog. Run <code>r-20261112T001832467275-scc-batch-1-pilot</code> is held in the queue, not dropped. After that plan's §6 lands, re-run the census: only families still divergent return to this section's batches. The grouping half of §5 is met by <code>sn-domain-per-family</code> §3; §5 keeps its domain-audit endpoint. §4, §6 and §7 are untouched.</p></div>
 </div>
@@ -169,12 +175,6 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261111T233804207585-review-of-scc-chaincap-remeasure-a248fc354ddc" data-who="reckon-build" data-when="2026-11-11T23:58:08.878Z">
     <div class="r-comment-body"><p>review-of-scc-chaincap-remeasure-a248fc354ddc — reviewed r-20261111T221330771121-scc-chaincap-remeasure at base fc99c61f0 / head a248fc354, scored goal_fidelity 19, evidence 16, scope_discipline 20, durability 15, fit 18, reuse 19 (total 107), status parsed, verdict SOUND with five non-blocking findings and added_failure_count 0 because the run declares no suite arms and its control/capture gate reads PASS at EXIT=0.</p></div>
-</div>
-<div class="r-comment" data-section="_top" data-id="c-s6-lead-ruling-dt-pair" data-who="Simon McIntosh" data-when="2026-11-12T16:40:00Z">
-    <div class="r-comment-body"><p>Lead ruling, 2026-11-12. The deuterium–tritium pair that shares one Data Dictionary source resolves onto a third spelling, <code>flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary</code>: the operator leads, as in the sixteen sibling species names, and the locus is the plasma boundary. Both <code>deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary</code> and <code>flux_surface_averaged_deuterium_tritium_density_at_separatrix</code> are superseded onto it.</p></div>
-</div>
-<div class="r-comment" data-section="_top" data-id="c-s7-lead-ruling-sourceless" data-who="Simon McIntosh" data-when="2026-11-12T16:40:00Z">
-    <div class="r-comment-body"><p>Lead ruling, 2026-11-12: approved as proposed. <code>line_averaged_neon_density</code>, <code>radius_of_soft_xray_detector</code> and <code>ratio_of_diamagnetic_vorticity_to_major_radius</code> are rebound by signed rebind; <code>volume_averaged_electron_number_density_over_scrape_off_layer</code> and <code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code> are held from the next cut.</p></div>
 </div>
 </section>
 </main>

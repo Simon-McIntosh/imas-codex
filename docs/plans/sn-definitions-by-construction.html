@@ -10,7 +10,7 @@
   <meta name="plan-summary" content="Render the shared parts of every definition from one stored wording, fix unit spellings and name-definition mismatches, then recut the catalog.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
-  <meta name="plan-effort-hours" content="27.0">
+  <meta name="plan-effort-hours" content="31.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -24,7 +24,7 @@
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="29">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-11-13">
 </head>
 <body>
@@ -97,7 +97,7 @@
     <p>A definition that adds a normalisation, a counting convention, an integration or a restriction to one device says something the name does not. Either the name gains the qualifier or the definition loses it. The check that finds these runs wherever a name is reviewed, and its verdicts are measured against §4's labels before it is trusted. It joins the named review checks a name already passes through, and its refusal is theirs; it adds no separate gate or command.</p>
     <p>Done when:</p>
     <ul>
-      <li>measured on §4's labelled names, with the labels held out from anything the check was tuned on, the share of names labelled as mismatched that the check finds and the share of names labelled as agreeing that it flags are both recorded with their counts; the check that runs is the chat review seat, accepted by the lead on 2026-11-12 at 27 of 36 found and 12 of 172 flagged, below the 80 % target for names found and inside the 10 % ceiling for names flagged; a later reading of the seat on those held-out names that finds fewer than 27 of 36 or flags more than 12 of 172 fails this item;</li>
+      <li>measured on §4's labelled names, with the labels held out from anything the check was tuned on, the share of names labelled as mismatched that the check finds and the share of names labelled as agreeing that it flags are both recorded with their counts; the check that runs is the chat review seat, accepted by the lead on 2026-11-12 at 27 of 36 found and 12 of 172 flagged, below the 80 % target for names found and inside the 10 % ceiling for names flagged; that reading is committed with its counts, and §8 holds the floor a later reading is checked against;</li>
       <li>the check's labels were not produced by the check or by the model that runs it, stated in the evidence with who or what produced them;</li>
       <li>run over every published name, the check's findings are listed by class, and each flagged name is given one disposition: rename, rewrite the definition, hold from the cut, or a recorded reason it stands;</li>
       <li>an abstract parent is either published with a definition that states one quantity or is not published, and the count of each is recorded;</li>
@@ -124,7 +124,7 @@
     <p>The repaired graph is exported as the next release candidate to the fork, and the export itself reports the defects this plan removed so they cannot return unseen. The four refusals below are checks inside the export's existing blocking gates, reported through the result those gates already return; they add no command option and no second pass over the catalog.</p>
     <p>Done when:</p>
     <ul>
-      <li>an export dry run reports, and fails on, an operator written in more than one form, a species family with more than one wording, a quantity with two equal unit spellings and a published name the §5 check flags without a recorded reason, each shown on a catalog planted with that one defect;</li>
+      <li>an export dry run reports, and fails on, an operator written in more than one form, a species family with more than one wording, a quantity with two equal unit spellings and a published name flagged without a recorded reason by the name-definition check §8 leaves standing, each shown on a catalog planted with that one defect;</li>
       <li>the same dry run on the repaired live graph reports none of the four, or lists each exception with its recorded reason;</li>
       <li>a release candidate is cut from the main checkout to the fork only, and the censuses in <code>docs/evidence/fragments/sn-definitions-by-construction/</code> are re-run over its published files, their counts recorded beside the <code>v0.4.0rc8</code> readings in §1;</li>
       <li>the published count and the accounted exclusions are recorded beside the 1,975 and 890 of <code>v0.4.0rc8</code>, with any name newly excluded listed with its reason;</li>
@@ -134,13 +134,13 @@
 
     <h2 id="s8">§8 — A successor name check, scored on names neither check has seen</h2>
 <section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="sn-definitions-by-construction#s5"></section>
-<p>The chat review seat runs as the check at 27 of 36 mismatched names found, below the 80 % target. The lead ruled on 2026-11-12 that a successor is built beside it: one that reads a definition's narrowing phrases as free text and settles each phrase with one closed question. §4's labelled names have been used to tune both, so the successor is scored on fresh names. This section delivers those fresh labels, the successor's score on them, and the verdict on which check §7 re-runs.</p>
+<p>The chat review seat runs as the check at 27 of 36 mismatched names found, below the 80 % target. The lead ruled on 2026-11-12 that a successor is built beside it: one that reads a definition's narrowing phrases as free text and settles each phrase with one closed question. §4's held-out names were kept from tuning but have now been scored three times in choosing between designs, so they no longer count as unseen and the successor is scored on fresh names. This section delivers those fresh labels, the successor's score on them, and the verdict on which check §7 re-runs.</p>
 <p>Done when:</p>
 <ul>
-<li>360 published names outside §4's labelled names are drawn by a committed, seeded draw and labelled blind by two readers, neither of whom sees the other's labels or either check's verdict, under <code>docs/evidence/fragments/sn-name-definition-fresh-labels/</code>; the names the two label alike are the reference, and their count by class is recorded;</li>
+<li>360 published names outside §4's labelled names are drawn by a committed, seeded draw and labelled blind by two readers, neither of whom sees the other's labels or either check's verdict, under <code>docs/evidence/fragments/sn-name-definition-fresh-labels/</code>; the names the two label alike are the reference, and their count by class is recorded; a reference of fewer than 240 names, or with fewer than 30 labelled mismatched, cannot carry the verdict, and the seat then stands with that shortfall recorded;</li>
 <li>the successor check exists as one of the named review checks, with its thresholds fixed and committed before the fresh labels are opened, shown by commit order;</li>
 <li>the successor, the seat and their union are each scored once on the fresh reference names, with the count of mismatched names found and of agreeing names flagged, and no label was produced by either check or by a model that runs one;</li>
-<li>the seat is read again on §4's held-out names in the same pass and its counts are recorded beside 27 of 36 and 12 of 172, which is the later reading §5's first item names;</li>
+<li>the seat is read again on §4's held-out names in the same pass and its counts are recorded beside 27 of 36 and 12 of 172; a reading that finds fewer than 27 or flags more than 12 goes to the lead before the cut;</li>
 <li>a verdict is recorded on this section: the successor replaces the seat only if it finds at least 80 % of the mismatched fresh names and flags at most 10 % of the agreeing ones; otherwise the seat stands, with both readings beside the verdict.</li>
 </ul>
 
