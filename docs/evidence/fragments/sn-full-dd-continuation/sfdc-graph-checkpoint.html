@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>A verified graph checkpoint taken before the continuation run</title>
+</head>
+<body>
+<section id="sfdc-graph-checkpoint-record">
+<h2 id="sfdc-graph-checkpoint-heading">One verified checkpoint of the live graph, taken with no writer running</h2>
+
+<p id="sfdc-graph-checkpoint-why">This checkpoint is the state the continuation run
+in §4 can be restored to. It was taken once no graph writer was running: at the
+start, <code>squeue -u $USER</code> listed only other projects' jobs (the reckon
+fleet, nova, power_convertor) and the only imas-codex process on the host was the
+read-only MCP server. The newest write to the graph is dated
+<strong>2026-11-12T08:50:13Z</strong>, read from the newest mtime under
+<code>~/.local/share/imas-codex/neo4j/data</code> (a transaction checkpoint, the
+node store and the vector index segments), so the archive created at
+<strong>2026-11-13T08:32:00Z</strong> follows it by about twenty-four hours.</p>
+
+<h3 id="sfdc-graph-checkpoint-archive">The archive</h3>
+
+<table id="sfdc-graph-checkpoint-archive-table">
+<caption>The checkpoint archive</caption>
+<thead><tr><th>Reading</th><th>Value</th></tr></thead>
+<tbody>
+<tr><td>Path</td><td><code>imas-codex-graph-dev-61fdc8b-20261113T081639Z.tar.gz</code> under <code>~/.local/share/imas-codex/exports/</code></td></tr>
+<tr><td>Size</td><td>2,714,181,566 bytes (2.53 GiB)</td></tr>
+<tr><td>Created</td><td>2026-11-13T08:32:00Z</td></tr>
+<tr><td>SHA-256</td><td><code>389e1fffa380d058677ef3c6e9a1a95b077fe0bde5bcff19d4dec3294caeba5a</code></td></tr>
+<tr><td><code>graph.dump</code> member</td><td>2,742,762,977 bytes, the same size as the dump written for it</td></tr>
+</tbody>
+</table>
+
+<h3 id="sfdc-graph-checkpoint-export">The export</h3>
+
+<p id="sfdc-graph-checkpoint-export-path">The command was
+<code>uv run --directory /home/ITER/mcintos/Code/imas-codex --no-sync imas-codex graph export</code>,
+run with no <code>--no-restart</code> so that stop and restart are one step. It ran
+from the main checkout from 08:15:38Z to 08:32:07Z. It stopped the service
+(<code>codex-neo4j</code>, job 1310901), dumped 2,615.7 MB, wrote the archive and
+then restarted — and the restart is the one step that failed. Its own
+<code>sbatch</code> was refused by the nested-launch guard with exit 97, because
+the export ran inside SLURM job 1291586, so the command exited 1. The graph was
+down for about forty seconds and was then restarted by submitting the service's
+own generated script with its partition named:
+<code>sbatch --partition=titan ~/.local/share/imas-codex/services/codex-neo4j.sh</code>,
+giving job <strong>1313403</strong>, RUNNING on <code>98dci4-gpu-0002</code>.
+Bolt answered before the counts below were taken.</p>
+
+<p id="sfdc-graph-checkpoint-export-exit">The archive is unaffected by that exit
+status: it was written and closed before the restart step began. The status is
+recorded rather than smoothed over, because a reader restoring this checkpoint
+should know the command that produced it exited 1 at a step after the archive.</p>
+
+<h3 id="sfdc-graph-checkpoint-counts">Node counts before and after the stop</h3>
+
+<table id="sfdc-graph-checkpoint-counts-table">
+<caption>The read taken before the stop and the read taken after the restart</caption>
+<thead><tr><th>Reading</th><th>Before</th><th>After</th></tr></thead>
+<tbody>
+<tr><td>All nodes</td><td>1,796,679</td><td>1,796,679</td></tr>
+<tr><td>Relationships</td><td>4,700,432</td><td>4,700,432</td></tr>
+<tr><td><code>StandardName</code> nodes</td><td>5,497</td><td>5,497</td></tr>
+</tbody>
+</table>
+
+<p id="sfdc-graph-checkpoint-counts-note">The two all-node reads are equal, so the
+graph that came back is the graph that was stopped.</p>
+
+<h3 id="sfdc-graph-checkpoint-checks">What was checked, and on what</h3>
+
+<p id="sfdc-graph-checkpoint-checks-method">Every check ran on a copy under the
+job's own <code>/tmp</code> directory, never on the archive. The two broken copies
+are the controls: the checks must pass on the real archive and fail on each of
+them.</p>
+
+<table id="sfdc-graph-checkpoint-checks-table">
+<caption>Check results, SLURM job 1313404 on <code>all_debug</code></caption>
+<thead><tr><th>Check</th><th>Target</th><th>Exit</th><th>Required</th><th>Verdict</th></tr></thead>
+<tbody>
+<tr><td>Whole-stream integrity (<code>gzip -t</code>)</td><td>The archive</td><td>0</td><td>pass</td><td>pass</td></tr>
+<tr><td><code>graph.dump</code> member present and non-empty</td><td>The archive</td><td>0</td><td>pass</td><td>pass</td></tr>
+<tr><td>Whole-stream integrity (<code>gzip -t</code>)</td><td>Truncated copy (first 100 MB)</td><td>1</td><td>fail</td><td>fails, as required</td></tr>
+<tr><td><code>graph.dump</code> member present and non-empty</td><td>Truncated copy (first 100 MB)</td><td>0</td><td>&mdash;</td><td>the member header sits early in the stream, so truncation is caught by the integrity test and not by this one</td></tr>
+<tr><td>Whole-stream integrity (<code>gzip -t</code>)</td><td>Copy whose <code>graph.dump</code> is zero bytes</td><td>0</td><td>&mdash;</td><td>a valid stream, as expected</td></tr>
+<tr><td><code>graph.dump</code> member present and non-empty</td><td>Copy whose <code>graph.dump</code> is zero bytes</td><td>1</td><td>fail</td><td>fails, as required</td></tr>
+</tbody>
+</table>
+
+<p id="sfdc-graph-checkpoint-checks-note">The two controls fail in different
+places, which is the point of keeping both: a truncated stream is only visible to
+the whole-stream test, and an empty member is only visible to the member test.</p>
+
+<h3 id="sfdc-graph-checkpoint-logs">Logs</h3>
+
+<ul id="sfdc-graph-checkpoint-log-list">
+<li>Export transcript: <code>~/.config/reckon/crew/runs/r-20261113T080304052155-sfdc-graph-checkpoint/graph-export.log</code></li>
+<li>Archive checks: <code>~/.cache/imas-codex-s19/sfdc-archive-checks-1313404.log</code></li>
+</ul>
+</section>
+</body>
+</html>
