@@ -79,6 +79,16 @@
       "note": "Section 8 sets a minimum reference of 240 names with 30 mismatched, below which the seat stands with the shortfall recorded.",
       "reason": "",
       "when": "2026-11-13T03:14:11.752052+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "5085c54e91420195d631dc47617b966af4211f79",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 8 now says the held-out names were kept from tuning but have been scored three times, which is why fresh names are used.",
+      "reason": "",
+      "when": "2026-11-13T03:14:35.642248+00:00"
     }
   ],
   "responses": {
@@ -99,6 +109,15 @@
       "note": "Section 8 sets a minimum reference of 240 names with 30 mismatched, below which the seat stands with the shortfall recorded.",
       "reason": "",
       "when": "2026-11-13T03:14:11.752052+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "5085c54e91420195d631dc47617b966af4211f79",
+      "commit_basis": "edit",
+      "note": "Section 8 now says the held-out names were kept from tuning but have been scored three times, which is why fresh names are used.",
+      "reason": "",
+      "when": "2026-11-13T03:14:35.642248+00:00"
     },
     "wiring-1": {
       "action": "acted",
