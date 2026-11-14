@@ -1,0 +1,74 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-14T14:12:56.550Z",
+  "dispatched_at": "2026-11-14T14:02:37Z",
+  "findings": [
+    {
+      "file": "imas_codex/settings.py",
+      "line": 2004,
+      "severity": "non-blocking",
+      "summary": "the sn-benchmark candidate-models default still names openrouter/deepseek/deepseek-v4-pro, which has no entry under [tool.imas-codex.llm.openrouter-pricing] and whose proxy route this same change renames to deepseek-v4-pro-0813 in imas_codex/config/litellm_config.yaml:113, so brief item 3's \"every identifier a seat names has a cataloged price\" and the new test's own stated property do not reach the fallback slate."
+    },
+    {
+      "file": "tests/config/test_model_seats.py",
+      "line": 68,
+      "severity": "non-blocking",
+      "summary": "LATEST is a hand-maintained mirror of the seat list this change authored, so test_openrouter_seat_is_on_the_latest_release_of_its_line can catch a drift off that list but cannot establish that any entry is the newest release of its line; latestness is still asserted only by the cited created epochs in the evidence fragment."
+    },
+    {
+      "file": "tests/config/test_model_seats.py",
+      "line": 161,
+      "severity": "non-blocking",
+      "summary": "the escalation rotation test's first assertion is `\"model\" in seat`, which is what the declared negative control reddens when the seat's model line is deleted; the substantive assertion at line 166 compares the rotation's result against the same seat key the accessor reads, so the negative control does not show that the resolution arm itself fails when the rotation stops reading the seat."
+    },
+    {
+      "file": "tests/standard_names/test_refine_model_dispatch.py",
+      "line": 35,
+      "severity": "non-blocking",
+      "summary": "test_refine_default_holds_the_seated_tier replaces the previous \"fallback must contain sonnet or opus\" capability guard with a five-substring denylist, so a future cheap line outside those five substrings passes while the guard's stated purpose is to stop a capability downgrade."
+    },
+    {
+      "file": "imas_codex/llm/README.md",
+      "line": 175,
+      "severity": "non-blocking",
+      "summary": "the module README still documents the default model as anthropic/claude-haiku-4.5, which this change retires by moving the compaction default to claude-haiku-5.5 at imas_codex/settings.py:201, so the documentation now disagrees with the code because of the landed change."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/model-seats-latest.json",
+      "line": 4,
+      "severity": "non-blocking",
+      "summary": "the latestness record cites a fetch time and per-line created epochs but the fetched 852,517-byte model list is not preserved with the fragment, so no later reader can verify the epochs or check which releases each line held at that moment."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate-model-seats.sh",
+      "line": 17,
+      "severity": "non-blocking",
+      "summary": "the gate the manifest's tests line names runs pytest only, so the done_when's \"every seat resolves to its new identifier with a non-null price, shown in the gate log\" and the per-identifier completion probe appear in sibling logs instead; resolve-seats.log also ran at revision 88aeaf639, before the pricing commits 6da5cd1db and 92096c2ab that finalised the catalog."
+    },
+    {
+      "file": "landing.md",
+      "line": 4,
+      "severity": "non-blocking",
+      "summary": "the run's landing record names head commit 92096c2ab, while the reviewed head is 1bad1af53 and two further commits touch the same seats and their guards, so a reader of the landing record cannot tell what revision the promoted tree will hold."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pyproject.toml:346 seats sn-escalation on openrouter/anthropic/claude-sonnet-5.5 at the record's 2/10, vendor-diverse from the OpenAI refine seat (pyproject.toml:331) and the local DeepSeek compose seat (pyproject.toml:501), and every other seat moves to a newer same-line release, so the goal is met.\nVERDICT done_when: gate-model-seats.log ends \"9201 passed, 20 skipped, 547 deselected\" with a bare EXIT=0 at revision 1bad1af53; the live-probe and seat-resolution arms are real and recorded, but in resolve-seats.log and probe-seats-pass3.json rather than in the gate log the done_when names, and the escalation rotation is covered by a test whose red arm the negative-control log shows.\nVERDICT write_paths: the orientation declared four paths (pyproject.toml, imas_codex/settings.py, tests/config/test_model_seats.py, the evidence fragment); the diff touches 16 more, every one a Python file holding a model identifier, a proxy route, a schema example or a test pinning a retired route, all disclosed in manifest.md scope_note as the brief's write-path paragraph authorises.\nVERDICT manifest: read; it records status complete, seven commits, the head gate at 1bad1af53 with EXIT=0, a red negative-control log at 47c75e033, 22 seat rows in the evidence fragment and USD 0.0153929 of probe spend, and its artifacts reconcile with the logs and fragments it names.\nVERDICT diff: read all seven commits against e673072ad; 88aeaf639 moves the seats, the pricing catalog, the litellm routes and six source identifier sets and adds tests/config/test_model_seats.py, 47c75e033 and 44572b28d re-pin four existing tests and a schema example, 6da5cd1db holds the settings fallbacks to their seats, 92096c2ab accepts a route with no cache-write rate, 78e093fc0 updates the family-currency guidance and 1bad1af53 adds the rotation helper and its two guards.\nCALL_SITES: imas_codex/standard_names/defaults.py:57 (DEFAULT_ESCALATION_MODEL), imas_codex/standard_names/worker_tasks/worker_refine_names.py:374 (refine_model_for_attempt call), imas_codex/standard_names/worker_tasks/worker_refine_docs.py:82 (escalation model on the docs chain), imas_codex/standard_names/worker_tasks/worker_review_names.py:960 (review quorum escalation), imas_codex/cli/sn.py:1673 (--escalation-model default), imas_codex/standard_names/budget.py:model_provider_exposure (prices the seats from the catalog), imas_codex/discovery/base/llm.py:272 (openrouter prefix routing for the moved routes), imas_codex/config/litellm_config.yaml:40 (proxy routes the seats resolve through)\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: pyproject.toml:346 is the escalation seat on the newest Sonnet release at a fifth of the previous price, and every other seat under [tool.imas-codex.*] resolves to a newer same-line release recorded in docs/evidence/fragments/sn-definitions-by-construction/model-seats-latest.json, with the manifest omitting only the before/after table the brief asked for at its top.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate-model-seats.log:6-7 names revision 1bad1af53, the tree, the resolved cwd and the settings module it imported, and ends with \"9201 passed\" and a bare EXIT=0, but that log carries only the pytest arm while the seat-resolution and probe arms sit in resolve-seats.log and probe-seats-pass3.json.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: pyproject.toml, imas_codex/settings.py, tests/config/test_model_seats.py and the evidence fragment are the declared scope, and the 16 further files in the diff are all identifier or proxy routes or test pins the brief's item 2 and 4 require, all recorded in manifest.md scope_note.\nSCORE durability: 15\nJUSTIFICATION durability: tests/config/test_model_seats.py:99 fails when a catalog entry is absent and line 166 fails when the rotation stops resolving the escalation seat, and the negative-control log is genuinely red, though tests/config/test_model_seats.py:68 pins a hardcoded list rather than a record and tests/standard_names/test_refine_model_dispatch.py:35 weakens the capability guard to a denylist.\nSCORE fit: 17\nJUSTIFICATION fit: refine_model_for_attempt at imas_codex/standard_names/worker_tasks/worker_refine_names.py:36 is named by what it does, the pyproject and settings edits follow the surrounding section structure, no plan or ticket label is introduced, and the seat comments state the pricing and vendor mechanism rather than the benchmark scores.\nSCORE reuse: 18\nJUSTIFICATION reuse: tests/config/test_model_seats.py:99 imports _assert_proven_pricing from tests/standard_names/test_seat_exposure_calibration.py:60 and extends it with the cache-rate checks rather than re-implementing it, and refine_model_for_attempt wraps defaults.DEFAULT_ESCALATION_MODEL and get_model rather than naming a model of its own.\nFINDING imas_codex/settings.py:2004 non-blocking: the benchmark candidate-models default still names openrouter/deepseek/deepseek-v4-pro, which has no pricing entry and whose proxy route this change renames to deepseek-v4-pro-0813, so the brief's every-identifier-is-priced property does not hold for the fallback slate.\nFINDING tests/config/test_model_seats.py:68 non-blocking: LATEST mirrors the seat list this change authored, so it detects drift off the list but cannot establish latestness.\nFINDING tests/config/test_model_seats.py:161 non-blocking: the assertion the declared negative control reddens is the presence of the seat's model key, not the rotation's resolution, so the control does not demonstrate the resolution arm has teeth.\nFINDING tests/standard_names/test_refine_model_dispatch.py:35 non-blocking: the refine capability guard is now a five-substring denylist, which a newly named cheap line would pass.\nFINDING imas_codex/llm/README.md:175 non-blocking: the README still documents the retired haiku-4.5 default after the compaction seat moved to haiku-5.5.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/model-seats-latest.json:4 non-blocking: the latestness record cites created epochs but the fetched model list it was read from is not preserved with the fragment.\nFINDING /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate-model-seats.sh:17 non-blocking: the named gate runs pytest only, so the resolve and probe arms the done_when places in the gate log live in sibling logs, and the resolve arm predates the pricing commits.\nFINDING landing.md:4 non-blocking: the landing record names head 92096c2ab while the reviewed head is 1bad1af53.",
+  "review_run_id": "r-20261114T140218360676-review-of-sdbc-model-seats-latest-1bad1af53336",
+  "reviewed_base_sha": "e673072adc4186d026e1282c24812ed6c8330397",
+  "reviewed_head_sha": "1bad1af53336273ecd2ae1b3a38806519626c7a6",
+  "reviewed_run_id": "r-20261114T122906089714-sdbc-model-seats-latest",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T14:13:11.354723+00:00",
+  "total": 96
+}
