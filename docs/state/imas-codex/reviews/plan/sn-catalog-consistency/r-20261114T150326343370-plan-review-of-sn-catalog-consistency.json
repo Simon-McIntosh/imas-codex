@@ -1,0 +1,56 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T15:31:55.710Z",
+  "dispatched_at": "2026-11-14T15:12:43Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "reasoning-1",
+      "reason": "the node would be held to a route the writer cannot select for this pair, so its first write either stops the section or lands under a route the done-when forbids and the control cannot demonstrate.",
+      "text": "the done-when says the ruled spelling \"is taken up only by the history-apart route \u2026 extended \u2026 to this pair: the tombstone's refined descendant, `deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary`, reclaims the ruled spelling\", but the writer's own case selection admits `history_apart` only when the tombstone's live successor sits at the tombstone's locus and the **renaming name sits at a different locus** (`imas_codex/standard_names/edit.py:3400-3416`); the committed evidence puts both the reclaiming name and the ruled spelling on the same DD locus, `summary/local/separatrix_average/n_i/deuterium_tritium/value`, so `history_apart` is refused for this pair and the only admitting case is `closing_lineage` (`edit.py:3385-3390`), which retains the tombstone's history with the spelling and writes no archive receipt \u2014 the receipt whose absence the section's own negative control is built to test. A node will either report the named route refused or take a route the plan forbids, and the declared refusal control is then unexercisable.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "the control cannot fail the rule the endpoint depends on, so the section can pass its gate with a count that reads two live names on the real catalogue.",
+      "text": "the live-count control plants \"a path planted with one live name and one archived tombstone\", but an identity archived by the history-apart reclaim leaves the `StandardName` label by construction (\"the tombstone node is re-keyed to an archive id, leaves the `StandardName` label so no live query reads it as a name\", `imas_codex/standard_names/edit.py:3850-3855`), so any count of live names bound to a DD path excludes it by label rather than by the stated \"neither its status nor its name stage reads superseded\" rule; the name that actually meets this rule at the endpoint is the superseded sibling still inside `StandardName` carrying the same DD binding (`flux_surface_averaged_deuterium_tritium_density_at_separatrix` is recorded with that path), and no plant exercises it, so a count that ignores status and name stage passes both plants.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "68603f10fefceda9c0e5ef2af34592748f2b19cd",
+  "plan_fingerprint": "0384451d7b31e449b3402ccc5a76e8cd3d35612d1ab451435dcb0821ba44a045",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 47,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T150326343370-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "b394c847d07b5931a61e064bdadba8022a37e13b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the ruled spelling's holder, the DD path, and the two live names each resolve to a committed evidence row; the run directory first reported dead by an earlier review is still dead but stays declined, and the new claims cite no dead path.",
+    "done_when": "a finding \u2014 the live-count control's second plant uses an archived tombstone, a node that has left the `StandardName` label, so the plant cannot exercise the status/name-stage rule the same clause states.",
+    "evidence_paths": "pass \u2014 the read-back and the disposable-graph plants write to the committed evidence tree (`docs/evidence/fragments/sn-catalog-consistency/`), where the section's predecessor evidence already sits; no scratch or node-local path is named.",
+    "naming": "pass \u2014 the changed text names catalog identities and one writer route, carries no plan label, stage or ticket number, and states no changelog prose.",
+    "reasoning": "a finding \u2014 the text names the `history_apart` reclaim route for the tombstone's refined descendant, but the writer admits `history_apart\u2026` only where the renaming name sits at a *different* DD locus than the tombstone, so that route cannot be the one A takes.",
+    "single_goal": "pass \u2014 \u00a76 delivers one endpoint (one live name with one spelling on one separatrix-average DD path), and every clause measures one aspect of it.",
+    "wiring": "pass \u2014 \u00a76 declares `depends-on sn-definitions-by-construction#s6` (snapshot line 22) and both cited sections resolve (`sn-integrity-backlog` #s49 and `sn-definitions-by-construction` #s6 each have a matching heading id in its committed plan file)."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "fd5134b4771d97ebf53959d3d73a8a1a0c36fcff765c20b1f40284e84d006f11",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T16:20:55.360454+00:00",
+  "total": null
+}
