@@ -341,7 +341,8 @@
    {
     "class": "shared wording (11)",
     "route": "one generate with the settled sentence in shared_parts, then one review; no refine",
-    "projected_per_name_usd": 0.06
+    "projected_per_name_usd": 0.06,
+    "measured_per_name_usd": 0.07
    },
    {
     "class": "family parent (144)",
@@ -351,17 +352,20 @@
    {
     "class": "operator (77)",
     "route": "one generate with the operator registry sentence in shared_parts, then one review",
-    "projected_per_name_usd": 0.06
+    "projected_per_name_usd": 0.06,
+    "measured_per_name_usd": 0.093
    },
    {
     "class": "unit misfit (26)",
     "route": "one generate plus one refine, since a unit mismatch is a definition rewrite, not a wording substitution",
-    "projected_per_name_usd": 0.12
+    "projected_per_name_usd": 0.12,
+    "measured_per_name_usd": 0.11
    },
    {
     "class": "single object (171)",
     "route": "one generate plus one refine, the readers' phrase as the reason",
-    "projected_per_name_usd": 0.12
+    "projected_per_name_usd": 0.12,
+    "measured_per_name_usd": 0.094
    },
    {
     "class": "equivalent-electron (56)",
@@ -380,11 +384,189 @@
   "projected_total_usd": 41.88,
   "ceiling_usd": 150,
   "verdict": "under the ceiling, at the far edge of the manifest's own 47.57 projection",
-  "caveat": "the projection assumes a cold cache is paid once per batch rather than once per name, and that no name escalates"
+  "caveat": "the projection assumes a cold cache is paid once per batch rather than once per name, and that no name escalates",
+  "measured_total_usd": {
+   "shared_wording": 0.77,
+   "family_parent": 12.96,
+   "operator": 7.16,
+   "unit_misfit": 2.86,
+   "single_object": 16.07,
+   "equivalent_electron": 0.0
+  },
+  "measured_total_sum_usd": 39.83,
+  "measured_caveat": "family parent keeps its projected rate because neither parent arm settled inside the 200 s bound; the other four classes are measured and all sit at or below their projection"
  },
  "remeasurement": {
-  "status": "pending",
-  "job_id": 1314814,
-  "note": "ten names across the five classes, launched on all_debug; results land in /home/ITER/mcintos/.cache/imas-codex-live-rewrite/remeasure-progress.jsonl"
+  "status": "measured",
+  "method": "ten names through sn edit --axis docs --scope self, two per class, as the only graph writer, each bounded by timeout 200 in a SLURM all_debug job",
+  "jobs": [
+   1314814,
+   1314822
+  ],
+  "names": [
+   {
+    "class": "shared wording",
+    "name": "volume_averaged_boron_density",
+    "before": {
+     "docs_stage": "exhausted",
+     "score_docs": null,
+     "unit": "m^-3"
+    },
+    "after": {
+     "docs_stage": "exhausted",
+     "score_docs": null
+    },
+    "spend_usd": 0.0961,
+    "note": "refused at generate: its DD source includes neutral atoms, so the name is wrong and the ruling is a rename"
+   },
+   {
+    "class": "shared wording",
+    "name": "volume_averaged_carbon_density",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9318356970836305,
+     "unit": "m^-3"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9073
+    },
+    "spend_usd": 0.0441,
+    "note": "settled on the first generated draft"
+   },
+   {
+    "class": "family parent",
+    "name": "alfven_frequency",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.8687499999999999,
+     "unit": "s^-1"
+    },
+    "after": {
+     "docs_stage": "refining",
+     "score_docs": 0.9533
+    },
+    "spend_usd": null,
+    "note": "past 200 s while refining; score 0.9533 is already above threshold"
+   },
+   {
+    "class": "family parent",
+    "name": "beta",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 1.0,
+     "unit": "1"
+    },
+    "after": {
+     "docs_stage": "drafted",
+     "score_docs": null
+    },
+    "spend_usd": null,
+    "note": "past 200 s before a score persisted; the 144-sibling parent needs a longer bound"
+   },
+   {
+    "class": "operator",
+    "name": "absorbed_wave_power",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.975,
+     "unit": "W"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9647
+    },
+    "spend_usd": 0.0915,
+    "note": "settled on the first generated draft"
+   },
+   {
+    "class": "operator",
+    "name": "area_of_flux_loop",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.85625,
+     "unit": "m^2"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9573
+    },
+    "spend_usd": 0.0946,
+    "note": "settled on the first generated draft"
+   },
+   {
+    "class": "unit misfit",
+    "name": "electron_number_density",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 1.0,
+     "unit": "m^-2"
+    },
+    "after": {
+     "docs_stage": "refining",
+     "score_docs": 0.9607
+    },
+    "spend_usd": null,
+    "note": "past 200 s while refining; score 0.9607 is already above threshold"
+   },
+   {
+    "class": "unit misfit",
+    "name": "incident_neutral_particle_flux_at_wall",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 1.0,
+     "unit": "s^-1"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9551
+    },
+    "spend_usd": null,
+    "note": "settled on the first generated draft (review cost USD 0.1098)"
+   },
+   {
+    "class": "single object",
+    "name": "alpha_angle_of_ferritic_element",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 1.0,
+     "unit": "rad"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.958
+    },
+    "spend_usd": 0.0903,
+    "note": "settled on the first generated draft"
+   },
+   {
+    "class": "single object",
+    "name": "area_of_passive_loop",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.8999999999999999,
+     "unit": "m^2"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9533
+    },
+    "spend_usd": 0.0979,
+    "note": "settled on the first generated draft"
+   }
+  ],
+  "measured_rate_per_class_usd": {
+   "shared wording": 0.0701,
+   "family parent": null,
+   "operator": 0.093,
+   "unit misfit": 0.1098,
+   "single object": 0.0941
+  },
+  "notes_on_rate": {
+   "family parent": "no figure: both arm names ran past the 200 s bound before the review persisted a score, so no cost is recorded for the class; the two shared-wording arm shows the spread a refused name creates",
+   "accepted_first_pass": 7,
+   "refused_correctly": 1,
+   "unsettled_at_the_bound": 2
+  }
  }
 }

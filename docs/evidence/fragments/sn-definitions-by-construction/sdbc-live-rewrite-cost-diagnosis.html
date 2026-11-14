@@ -131,9 +131,39 @@ far edge of the manifest's own USD 47.57 projection. The projection assumes the
 cold cache is paid once per batch rather than once per name, and that no name
 reaches the escalation seat.</p>
 
-<p>The ten-name re-measurement, spread two names across each of the five classes
-and run through <code>sn edit</code>, is recorded in
-<code>live-rewrite-cost-diagnosis.json</code>.</p>
+<h3>What ten names then cost</h3>
+
+<p>Ten names, two in each of five classes, were re-measured through
+<code>sn edit --axis docs --scope self</code> as the only graph writer, each
+bounded at 200 seconds. Seven settled on the first generated draft. One was
+refused for the right reason. Two parents ran past the bound while refining,
+each already past the 0.95 threshold when the bound cut them.</p>
+
+<table>
+<thead><tr><th>class</th>name</th><th>before</th><th>after</th><th>spend</th></tr></thead>
+<tbody>
+<tr><td>shared wording</td><td>volume_averaged_carbon_density</td><td>accepted</td><td>accepted, 0.907</td><td>USD 0.0441</td></tr>
+<tr><td>shared wording</td><td>volume_averaged_boron_density</td><td>accepted</td><td>exhausted, refused at generate</td><td>USD 0.0961</td></tr>
+<tr><td>operator</td><td>absorbed_wave_power</td><td>accepted</td><td>accepted, 0.965</td><td>USD 0.0915</td></tr>
+<tr><td>operator</td><td>area_of_flux_loop</td><td>accepted</td><td>accepted, 0.957</td><td>USD 0.0946</td></tr>
+<tr><td>unit misfit</td><td>incident_neutral_particle_flux_at_wall</td><td>accepted</td><td>accepted, 0.955</td><td>USD 0.1098</td></tr>
+<tr><td>unit misfit</td><td>electron_number_density</td><td>accepted</td><td>refining, 0.961 at the bound</td><td>—</td></tr>
+<tr><td>single object</td><td>alpha_angle_of_ferritic_element</td><td>accepted</td><td>accepted, 0.958</td><td>USD 0.0903</td></tr>
+<tr><td>single object</td><td>area_of_passive_loop</td><td>accepted</td><td>accepted, 0.953</td><td>USD 0.0979</td></tr>
+<tr><td>family parent</td><td>alfven_frequency</td><td>accepted</td><td>refining, 0.953 at the bound</td><td>—</td></tr>
+<tr><td>family parent</td><td>beta</td><td>drafted</td><td>drafted, no score before the bound</td><td>—</td></tr>
+</tbody>
+</table>
+
+<p>Measured rate per class: shared wording USD 0.070, operator USD 0.093, unit
+misfit USD 0.110, single object USD 0.094 a name. No measured name exceeded
+USD 0.11. Applying the measured rates to the manifest's counts gives
+<strong>USD 39.83</strong> for the whole pass against the USD 150 ceiling. The
+family-parent rate stays at its projection of USD 0.09 because neither parent
+arm settled inside the 200-second bound, and a parent is the one class whose
+cost the bound hides rather than reveals.</p>
+
+<p>The per-name detail is in <code>live-rewrite-cost-diagnosis.json</code>.</p>
 
 </article>
 </body>
