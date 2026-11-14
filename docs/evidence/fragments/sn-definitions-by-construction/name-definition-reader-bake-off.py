@@ -56,6 +56,7 @@ LOCAL = "local/deepseek-v4.1-flash"
 READINGS = 3
 FIELDS = ("name", "unit", "description", "documentation")
 SEED = 20261114
+REREAD = False
 
 
 # ------------------------------------------------------------------ inputs
@@ -341,7 +342,14 @@ async def _append(path: Path, lock: asyncio.Lock, records: list[dict]) -> None:
 async def run_pass(arm: dict, items: list[dict], spend: Spend, *, reading: int = 0) -> dict:
     key = arm["key"]
     done = _load_progress(key, reading)
-    todo = [item for item in items if item["id"] not in done]
+    if REREAD:
+        todo = [
+            item
+            for item in items
+            if done.get(item["id"], {}).get("verdict") == "unanswered"
+        ]
+    else:
+        todo = [item for item in items if item["id"] not in done]
     size = arm["batch"]
     batches = [todo[i : i + size] for i in range(0, len(todo), size)]
     gate = asyncio.Semaphore(arm["concurrency"])
@@ -764,34 +772,77 @@ def fresh_summary(items: list[dict]) -> dict:
 
 
 def recommendation(report: dict) -> dict:
+    """The arm to run, chosen by a stated rule rather than by the top score.
+
+    The check exists to catch a qualifier before a name is accepted, so a
+    miss costs more than a hold. The rule asks two questions in order: which
+    arm classifies a single name best, measured as Youden's J over flagged and
+    standing names, and which cheap arm catches the most of the 485 flagged
+    names for the money. The seat answers the first; a cheap reader is only
+    worth running in place of it if it answers the first or adds the second.
+    """
+
     arms = report["arms"]
-    choice = "mixed-two-of-three"
-    arm = arms[choice]
+    scored = report["population"]["scored"]
+
+    def youden(row: dict) -> float | None:
+        if row["recall"] is None or row["stands_total"] == 0:
+            return None
+        specificity = row["true_negative"] / row["stands_total"]
+        return round(row["precision"] and row["recall"] + specificity - 1, 4)
+
+    def summary(key: str) -> dict:
+        row = arms[key]
+        return {
+            "arm": key,
+            "label": row["label"],
+            "recall": row["recall"],
+            "precision": row["precision"],
+            "agreement": row["agreement"],
+            "youden_j": youden(row),
+            "caught_of_flagged": row["true_positive"],
+            "flagged_total": row["flagged_total"],
+            "miss_rate": round(row["false_negative"] / row["flagged_total"], 4)
+            if row["flagged_total"]
+            else None,
+            "false_positives": row["false_positive"],
+            "cost_usd": row["cost"]["cost_usd"],
+            "cost_per_name_usd": row["cost"]["per_name_usd"],
+            "cost_for_set_usd": round((row["cost"]["per_name_usd"] or 0) * scored, 2),
+            "seconds_per_name": row["cost"]["per_name_seconds"],
+            "names_scored": row["scored"],
+        }
+
+    cheap = [key for key in ("haiku-two-of-three", "luna-two-of-three",
+                             "local-two-of-three", "mixed-two-of-three")]
+    balanced = max(
+        (key for key in arms if arms[key]["recall"] is not None),
+        key=lambda key: (youden(arms[key]) or -1),
+    )
+    catching = max(cheap, key=lambda key: arms[key]["true_positive"])
     fresh = report.get("fresh_reader") or {}
     sides = fresh.get("sides_with") or {}
-    total_flagged = arm["flagged_total"]
     return {
-        "arm": choice,
-        "label": arm["label"],
-        "cost_usd": arm["cost"]["cost_usd"],
-        "cost_per_name_usd": arm["cost"]["per_name_usd"],
-        "cost_for_set_usd": round(
-            (arm["cost"]["per_name_usd"] or 0) * report["population"]["scored"], 2
+        "rule": (
+            "highest Youden's J over the 485 flagged and 1,559 standing names, "
+            "then the cheap arm that catches the most of the 485"
         ),
-        "miss_rate": (
-            round(arm["false_negative"] / total_flagged, 4) if total_flagged else None
-        ),
-        "caught_of_flagged": arm["true_positive"],
-        "flagged_total": total_flagged
-        or sum(report["class_counts"].values()),
+        "arm": balanced,
+        "label": arms[balanced]["label"],
+        "best_balanced": summary(balanced),
+        "best_catching": summary(catching),
         "fresh_reader_sides_with_label": sides.get("label", 0),
         "fresh_reader_sides_with_haiku": sides.get("haiku", 0),
+        "fresh_reader_neither": sides.get("neither", 0),
         "notes": [
-            "the mixed panel is one reading each from Haiku, Luna and the local "
-            "model, decided two of three, so no single vendor's family bias sets "
-            "the answer",
-            "the local model is graded against blind readers on its own lane, so "
-            "its score is an upper bound and reads beside its number, not as one",
+            "the seat wins the balanced rule: it catches 305 of the 485 and "
+            "leaves 197 false holds, and no cheap arm beats it on both counts",
+            "the honest cheap option is the one that catches the most, not the "
+            "one with the best agreement: the mixed panel agrees with the seat "
+            "almost exactly and catches 262, while Luna catches 353 and pays "
+            "for it with 490 false holds",
+            "the local model is graded against a reading family of its own, so "
+            "its rows are an upper bound beside the number, not a measurement",
         ],
     }
 
@@ -874,6 +925,22 @@ def write_html(report: dict) -> None:
     )
     rec = report["recommendation"]
     population = report["population"]
+    cheap_keys = ["haiku-two-of-three", "luna-two-of-three",
+                  "local-two-of-three", "mixed-two-of-three"]
+    cheap_rows = "".join(
+        "<tr><td>{label}</td><td>{caught}</td><td>{miss}</td><td>{fp}</td>"
+        "<td>{agree}</td><td>{cost}</td></tr>".format(
+            label=arms[key]["label"],
+            caught=arms[key]["true_positive"],
+            miss=_pct(arms[key]["false_negative"] / arms[key]["flagged_total"]),
+            fp=arms[key]["false_positive"],
+            agree=_pct(arms[key]["agreement"]),
+            cost=_usd(
+                (arms[key]["cost"]["per_name_usd"] or 0) * population["scored"]
+            ),
+        )
+        for key in cheap_keys
+    )
     html = f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <title>Which reader should check a name against its definition</title>
@@ -929,11 +996,27 @@ or arm verdict. {fresh.get('answered',0)} answered. Sides with the label
 {fresh_rows}
 </table>
 <h2>Recommendation</h2>
-<p>Run <strong>{rec['label']}</strong>. It costs USD
-{_usd(rec['cost_usd'])} on these {population['scored']} names
-({_usd(rec['cost_per_name_usd'], 5)} per name), and at that miss rate it finds
-<strong>{rec['caught_of_flagged']} of {rec['flagged_total']}</strong> flagged
-names, missing {_pct(rec['miss_rate'])} of them.</p>
+<p class="note">Rule: {rec['rule']}.</p>
+<p><strong>Keep the current seat.</strong> It classifies a single name better
+than any cheap reader (Youden's J {rec['best_balanced']['youden_j']}), catching
+{rec['best_balanced']['caught_of_flagged']} of {rec['best_balanced']['flagged_total']}
+flagged names and missing {_pct(rec['best_balanced']['miss_rate'])} of them, at
+USD {_usd(rec['best_balanced']['cost_per_name_usd'], 5)} per name
+(USD {_usd(rec['best_balanced']['cost_for_set_usd'])} for this set).</p>
+<p>If a cheap reader is added beside it, run <strong>{rec['best_catching']['label']}</strong>.
+It costs USD {_usd(rec['best_catching']['cost_for_set_usd'])} on this set
+({_usd(rec['best_catching']['cost_per_name_usd'], 5)} per name,
+{rec['best_catching']['seconds_per_name']} s per name), catches
+{rec['best_catching']['caught_of_flagged']} of {rec['best_catching']['flagged_total']}
+flagged names for a {_pct(rec['best_catching']['miss_rate'])} miss rate against
+the seat's {_pct(rec['best_balanced']['miss_rate'])}, and pays for it with
+{rec['best_catching']['false_positives']} false holds against the seat's
+{rec['best_balanced']['false_positives']}.</p>
+<table>
+<tr><th>cheap arm</th><th>caught of {rec['best_balanced']['flagged_total']}</th>
+<th>miss rate</th><th>false holds</th><th>agreement</th><th>USD for this set</th></tr>
+{''.join(cheap_rows)}
+</table>
 <p>{' '.join(rec['notes'])}</p>
 <h2>Readings</h2>
 <p class="note">Every reading, its class and its own cost is in
@@ -1003,7 +1086,7 @@ def write_figure(report: dict) -> Path:
     fig.legend(
         handles=handles,
         loc="upper left",
-        bbox_to_anchor=(0.04, 0.99),
+        bbox_to_anchor=(0.075, 0.985),
         ncol=2,
         frameon=False,
         fontsize=13,
@@ -1118,7 +1201,10 @@ def main() -> None:
     parser.add_argument("--only", default="", help="comma-separated arm keys to run")
     parser.add_argument("--concurrency", type=int, default=None)
     parser.add_argument("--numbers", default="", help="comma-separated reading indexes")
+    parser.add_argument("--reread", action="store_true", help="re-ask only the names a reading left unanswered")
     options = parser.parse_args()
+    global REREAD
+    REREAD = options.reread
     if options.mode == "run":
         only = [key.strip() for key in options.only.split(",") if key.strip()]
         wanted = [int(v) for v in options.numbers.split(",") if v.strip()] or None
