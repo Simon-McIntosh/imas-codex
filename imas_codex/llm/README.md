@@ -172,7 +172,7 @@ OPENROUTER_API_KEY=sk-or-v1-...
 
 ### Model Selection
 
-Default: `anthropic/claude-haiku-4.5` (cost-effective)
+Default (compaction seat): `openrouter/anthropic/claude-haiku-5.5` (cost-effective)
 
 ```python
 from imas_codex.llm import create_litellm_model, MODELS
@@ -181,7 +181,7 @@ from imas_codex.llm import create_litellm_model, MODELS
 model = create_litellm_model(model=MODELS["gemini-pro"])
 
 # Or specific model ID
-model = create_litellm_model(model="anthropic/claude-sonnet-4.5")
+model = create_litellm_model(model="openrouter/anthropic/claude-sonnet-5.5")
 ```
 
 ## Architecture

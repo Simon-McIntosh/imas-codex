@@ -32,7 +32,11 @@ def test_refine_section_registered() -> None:
     assert "sn-refine" in settings.MODEL_SECTIONS
 
 
-CHEAP_TIERS = ("flash-lite", "haiku", "mini", "nano", "mini-max")
+# The lines measured to lift reviewed, critiqued names at the rate refine
+# needs. An allow-list, not a denylist of cheap-sounding names: a line that is
+# newly served, renamed or re-tiered is refused until someone measures it and
+# books it here.
+REFINE_CAPABLE_LINES = frozenset({"openai/gpt-6-luna"})
 
 
 def test_refine_default_holds_the_seated_tier(monkeypatch: pytest.MonkeyPatch) -> None:
@@ -47,9 +51,10 @@ def test_refine_default_holds_the_seated_tier(monkeypatch: pytest.MonkeyPatch) -
     # Bypass any pyproject override — we want to verify the *default*
     # baked into settings.py protects against accidental downgrades.
     model = settings._MODEL_DEFAULTS["sn-refine"].lower()
-    assert not any(tier in model for tier in CHEAP_TIERS), (
-        f"Default refine model {model!r} is a cheap tier; a flash-lite or "
-        "haiku refine lifts critiqued names at about 5%."
+    line = model.removeprefix("openrouter/")
+    assert line in REFINE_CAPABLE_LINES, (
+        f"Default refine model {model!r} is not a line booked as capable of "
+        f"refining critiqued names; booked lines are {sorted(REFINE_CAPABLE_LINES)}"
     )
     assert model == settings.get_model("sn-refine").lower(), (
         "the sn-refine fallback and the seat name different models, so the "

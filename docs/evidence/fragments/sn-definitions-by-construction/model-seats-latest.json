@@ -10,6 +10,15 @@
   ],
   "jev": "https://openrouter.ai/api/alpha/decisions/models returned 404; no listing endpoint for decisions models"
  },
+ "fetched_record": {
+  "kept": true,
+  "path": "docs/evidence/fragments/sn-definitions-by-construction/openrouter-models-20261114T123028Z.json.gz",
+  "encoding": "gzip",
+  "bytes_plain": 852517,
+  "bytes_compressed": 81153,
+  "sha256_plain": "39546895fdb2a5d6e709660434beea45c8651e0b98a1a694bb19d0bff1013c4c",
+  "note": "the verbatim response of the fetch the seat rows and created timestamps were read from"
+ },
  "price_unit": "USD per million tokens, prompt / completion",
  "seats": [
   {

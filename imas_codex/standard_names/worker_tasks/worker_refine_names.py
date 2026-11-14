@@ -43,10 +43,9 @@ def refine_model_for_attempt(attempt: int, rotation_cap: int) -> tuple[str, bool
     configuration, which the entrypoint module imports lazily.
     """
     from imas_codex.settings import get_model
-    from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
 
     if attempt >= rotation_cap:
-        return DEFAULT_ESCALATION_MODEL, True
+        return get_model("sn-escalation"), True
     return get_model("sn-refine"), False
 
 
