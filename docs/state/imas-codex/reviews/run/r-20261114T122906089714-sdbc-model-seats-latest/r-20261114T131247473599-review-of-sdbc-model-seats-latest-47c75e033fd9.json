@@ -1,0 +1,68 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-14T13:21:50.872Z",
+  "dispatched_at": "2026-11-14T13:13:07Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/model-seats-latest.json",
+      "line": 1,
+      "severity": "blocking",
+      "summary": "the pass-2 probe the done_when relies on records content null for google/gemini-3.8-flash and moonshotai/kimi-k3.1-pro, so two of the nine changed OpenRouter identifiers returned no completion \u2014 exactly the \"not just a 200\" case the done_when excludes \u2014 yet manifest.md artifacts reports \"9 of 9 ... served as requested\" and rubric.correctness claims each returned a live completion."
+    },
+    {
+      "file": "tests/config/test_model_seats.py",
+      "line": 159,
+      "severity": "non-blocking",
+      "summary": "`assert DEFAULT_ESCALATION_MODEL == seat[\"model\"]` cannot fail while sn-escalation names a model, because defaults.py:57 defines DEFAULT_ESCALATION_MODEL as get_model(\"sn-escalation\") and get_model reads that same seat's model key, so the assertion compares the seat against itself; the test named for the refine rotation never invokes it, and putting the model back to claude-fable-5 keeps every assertion in it green."
+    },
+    {
+      "file": "tests/config/test_model_seats.py",
+      "line": 65,
+      "severity": "non-blocking",
+      "summary": "LATEST is a hand-maintained mirror of the seat list the change itself authored, so test_openrouter_seat_is_on_the_latest_release_of_its_line can catch a drift off that list but cannot establish latestness; and the fetched record lists x-ai/grok-4.20 alongside grok-4.7, which reads as a later release of the same line that the choice of 4.7 does not address."
+    },
+    {
+      "file": "imas_codex/config/litellm_config.yaml",
+      "line": 40,
+      "severity": "non-blocking",
+      "summary": "the proxy config still routes claude-opus-4.6, claude-opus-4.7, claude-sonnet-4.6, claude-haiku-4.5, google/gemini-3-flash-preview and deepseek/deepseek-v4-flash, and brief item 4 asked for every model identifier under imas_codex/ to be listed with its file and brought to the latest version or recorded as a genuine fallback; none of these appears in the manifest's identifier inventory."
+    },
+    {
+      "file": "imas_codex/graph/dd_enrichment.py",
+      "line": 921,
+      "severity": "non-blocking",
+      "summary": "the comparison table cites \"the benchmark-backed dd-enrichment model (sonnet-4.6)\" after the seat moved to sonnet-5.5, and the brief asks comments naming a retired model to be brought up to date or removed; imas_codex/cli/sn.py:3432 has the same defect, describing the judge default as \"opus-4.8\" where the seat is now opus-5.5."
+    },
+    {
+      "file": "imas_codex/settings.py",
+      "line": 212,
+      "severity": "non-blocking",
+      "summary": "the sn-escalation default is now sonnet-5.5, identical to the sn-refine default at settings.py:208, so the comment immediately above claiming escalation is \"Vendor-diverse from compose and refine\" is false in the defaults; vendor diversity holds only while pyproject overrides sn-refine to gpt-6-luna, and a section that loses its model key would make escalation and refine the same model."
+    },
+    {
+      "file": "tests/config/test_model_seats.py",
+      "line": 96,
+      "severity": "non-blocking",
+      "summary": "`_assert_priced` duplicates `_assert_proven_pricing` in tests/standard_names/test_seat_exposure_calibration.py:60, which already owns \"a route carries finite rates with official provenance\", differing only by adding max_input_tokens; importing the owner's helper would keep the wider population without a second copy that can drift."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: every seat under [tool.imas-codex.*] moves to a newer same-line release and the escalation seat moves to anthropic/claude-sonnet-5.5 at 2/10 (pyproject.toml:343-346); the refine/compose vendor diversity survives because sn-refine resolves to OpenAI gpt-6-luna (pyproject.toml:331) and compose is local DeepSeek, so the goal is met.\nVERDICT done_when: the gate command in the manifest ran tests/config tests/llm tests/standard_names and gate-model-seats.log head records \"9201 passed, 20 skipped, 547 deselected\" with EXIT=0 at 47c75e033, but the probe the done_when requires per changed identifier (probe-seats-pass2.json) shows content null for google/gemini-3.8-flash and moonshotai/kimi-k3.1-pro, so \"returns a completion\" is not met for 2 of 9.\nVERDICT write_paths: the orientation declared four paths (pyproject.toml, imas_codex/settings.py, tests/config/test_model_seats.py, the evidence fragment); the diff touches ten more, all Python files holding identifiers or their tests, which the brief explicitly authorises and the manifest records with a scope_note.\nVERDICT manifest: read; it records status complete, the gate and its EXIT=0, the negative-control log, and a before/after table summary of 22 seat rows, and it states \"9 of 9 changed OpenRouter identifiers served as requested with a recorded cost\" which the probe artifact contradicts on completion content.\nVERDICT diff: read both commits against e673072ad; 88aeaf639 moves pyproject seats/prices and six source identifier sets plus adds tests/config/test_model_seats.py, and 47c75e033 re-pins four existing tests to the routes the seats now use, with a bijection of 15 openrouter identifiers to 15 pricing entries.\nCALL_SITES: imas_codex/standard_names/defaults.py:57, imas_codex/discovery/base/services.py:_canary_check, imas_codex/standard_names/fanout/config.py:FanoutSettings, imas_codex/settings.py:get_model, imas_codex/settings.py:get_openrouter_pricing\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: pyproject.toml:346 seats escalation on anthropic/claude-sonnet-5.5 at the catalog's 2/10, and every other seat resolves to a newer same-line release recorded in the 2026-11-14T12:30:28Z model list.\nSCORE evidence: 8\nJUSTIFICATION evidence: gate-model-seats.log ends \"EXIT=0\" over 9201 passing tests, but probe-seats-pass2.json records content null for gemini-3.8-flash and kimi-k3.1-pro while the done_when requires a completion from each changed identifier.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: ten files beyond the four declared paths are edited but every one is a Python file holding an identifier or a test pinning one, which the brief's write-path paragraph authorises and manifest.md scope_note discloses.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_seat_exposure_calibration.py:85-86 pins the escalation rates at 2.0/10.0 and would redden on a change back to fable-5, while tests/config/test_model_seats.py:159 compares DEFAULT_ESCALATION_MODEL against the same seat it is derived from.\nSCORE fit: 16\nJUSTIFICATION fit: tests/config/test_model_seats.py follows the surrounding parametrised-pytest idiom and introduces no plan or ticket label, though imas_codex/graph/dd_enrichment.py:921 and imas_codex/cli/sn.py:3432 still name retired models.\nSCORE reuse: 5\nJUSTIFICATION reuse: tests/config/test_model_seats.py:96 `_assert_priced` re-implements `_assert_proven_pricing` in tests/standard_names/test_seat_exposure_calibration.py:60 rather than importing it, though the new test does cover a wider population.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/model-seats-latest.json:1 blocking: the pass-2 probe the done_when relies on records content null for google/gemini-3.8-flash and moonshotai/kimi-k3.1-pro, so two of the nine changed OpenRouter identifiers returned no completion \u2014 exactly the \"not just a 200\" case the done_when excludes \u2014 yet manifest.md artifacts reports \"9 of 9 ... served as requested\" and rubric.correctness claims each returned a live completion.\nFINDING tests/config/test_model_seats.py:159 non-blocking: `assert DEFAULT_ESCALATION_MODEL == seat[\"model\"]` cannot fail while sn-escalation names a model, because defaults.py:57 defines DEFAULT_ESCALATION_MODEL as get_model(\"sn-escalation\") and get_model reads that same seat's model key, so the assertion compares the seat against itself; the test named for the refine rotation never invokes it, and putting the model back to claude-fable-5 keeps every assertion in it green.\nFINDING tests/config/test_model_seats.py:65 non-blocking: LATEST is a hand-maintained mirror of the seat list the change itself authored, so test_openrouter_seat_is_on_the_latest_release_of_its_line can catch a drift off that list but cannot establish latestness; and the fetched record lists x-ai/grok-4.20 alongside grok-4.7, which reads as a later release of the same line that the choice of 4.7 does not address.\nFINDING imas_codex/config/litellm_config.yaml:40 non-blocking: the proxy config still routes claude-opus-4.6, claude-opus-4.7, claude-sonnet-4.6, claude-haiku-4.5, google/gemini-3-flash-preview and deepseek/deepseek-v4-flash, and brief item 4 asked for every model identifier under imas_codex/ to be listed with its file and brought to the latest version or recorded as a genuine fallback; none of these appears in the manifest's identifier inventory.\nFINDING imas_codex/graph/dd_enrichment.py:921 non-blocking: the comparison table cites \"the benchmark-backed dd-enrichment model (sonnet-4.6)\" after the seat moved to sonnet-5.5, and the brief asks comments naming a retired model to be brought up to date or removed; imas_codex/cli/sn.py:3432 has the same defect, describing the judge default as \"opus-4.8\" where the seat is now opus-5.5.\nFINDING imas_codex/settings.py:212 non-blocking: the sn-escalation default is now sonnet-5.5, identical to the sn-refine default at settings.py:208, so the comment immediately above claiming escalation is \"Vendor-diverse from compose and refine\" is false in the defaults; vendor diversity holds only while pyproject overrides sn-refine to gpt-6-luna, and a section that loses its model key would make escalation and refine the same model.\nFINDING tests/config/test_model_seats.py:96 non-blocking: `_assert_priced` duplicates `_assert_proven_pricing` in tests/standard_names/test_seat_exposure_calibration.py:60, which already owns \"a route carries finite rates with official provenance\", differing only by adding max_input_tokens; importing the owner's helper would keep the wider population without a second copy that can drift.",
+  "review_run_id": "r-20261114T131247473599-review-of-sdbc-model-seats-latest-47c75e033fd9",
+  "reviewed_base_sha": "e673072adc4186d026e1282c24812ed6c8330397",
+  "reviewed_head_sha": "47c75e033fd9e9b3171bbe63c33897239d43467f",
+  "reviewed_run_id": "r-20261114T122906089714-sdbc-model-seats-latest",
+  "scores": {
+    "durability": 14,
+    "evidence": 8,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T13:40:53.293739+00:00",
+  "total": 75
+}
