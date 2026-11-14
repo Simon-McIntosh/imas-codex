@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<title>Which reader should check a name against its definition</title>
+<style>
+body{font:15px/1.55 system-ui,sans-serif;max-width:1100px;margin:2rem auto;padding:0 1rem;color:#111}
+table{border-collapse:collapse;margin:1rem 0;font-size:13px}
+th,td{border-bottom:1px solid #ddd;padding:.3rem .55rem;text-align:left}
+th{border-bottom:2px solid #333}
+code{font-size:12px}
+.note{color:#555;font-size:13px}
+</style></head><body>
+<h1>Which reader should check a name against its definition</h1>
+<p class="note">Scored on 2044 of 2044 labelled
+export candidates, on the name, definition and unit as the blind readers read
+them. 0 names whose read text could not be recovered
+are listed in the JSON and left out.</p>
+<figure>
+<img src="/imas-codex/figures/sn-name-definition-readers/recall-precision-by-arm.svg"
+ alt="flagged recall against flagged precision by arm">
+<figcaption>Flagged-recall against flagged-precision, one point per arm with a
+95&nbsp;% interval on both axes. Hollow grey points are the local model, graded
+against its own reading family and therefore an upper bound, not a measurement.</figcaption>
+</figure>
+<h2>Agreement with the settled verdicts</h2>
+<table>
+<tr><th>arm</th><th>flagged recall [95%]</th><th>flagged precision [95%]</th>
+<th>overall agreement [95%]</th><th>names scored</th><th>spend USD</th>
+<th>USD per name</th><th>s per name</th></tr>
+<tr><td>current seat, one reading (batched as it runs)</td><td>62.9% [58.5%, 67.1%]</td><td>60.8% [56.4%, 64.9%]</td><td>81.6% [79.8%, 83.2%]</td><td>2044</td><td>5.77</td><td>0.00282</td><td>0.89</td></tr><tr><td>Haiku 5.5, first reading</td><td>53.0% [48.5%, 57.4%]</td><td>66.4% [61.6%, 70.9%]</td><td>82.5% [80.8%, 84.1%]</td><td>2044</td><td>0.68</td><td>0.00033</td><td>2.64</td></tr><tr><td>Haiku 5.5, two of three</td><td>53.0% [48.5%, 57.4%]</td><td>67.1% [62.3%, 71.6%]</td><td>82.7% [81.0%, 84.3%]</td><td>2044</td><td>2.01</td><td>0.00033</td><td>2.61</td></tr><tr><td>GPT-6 Luna, first reading</td><td>71.8% [67.6%, 75.6%]</td><td>41.5% [38.2%, 44.8%]</td><td>69.3% [67.2%, 71.2%]</td><td>2044</td><td>0.56</td><td>0.00027</td><td>5.06</td></tr><tr><td>GPT-6 Luna, two of three</td><td>72.8% [68.7%, 76.5%]</td><td>41.9% [38.6%, 45.2%]</td><td>69.6% [67.5%, 71.5%]</td><td>2044</td><td>1.38</td><td>0.00022</td><td>5.36</td></tr><tr><td>local DS4.1-flash, first reading</td><td>40.5% [36.1%, 45.0%]</td><td>66.3% [60.6%, 71.6%]</td><td>80.8% [79.0%, 82.5%]</td><td>1930 of 2044</td><td>0.00</td><td>0.00000</td><td>75.85</td></tr><tr><td>local two of three, upper bound</td><td>33.6% [28.5%, 39.1%]</td><td>80.8% [73.0%, 86.7%]</td><td>78.5% [75.9%, 80.9%]</td><td>1043 of 2044</td><td>0.00</td><td>0.00000</td><td>82.00</td></tr><tr><td>mixed panel, two of three</td><td>53.8% [49.4%, 58.2%]</td><td>66.9% [62.1%, 71.4%]</td><td>82.7% [81.0%, 84.3%]</td><td>2044</td><td>1.23</td><td>0.00064</td><td>84.01</td></tr>
+</table>
+<h2>Recall by the readers' class</h2>
+<p class="note">Six classes, one per flagged name, grouped from the readers'
+sheet class and their quoted evidence; the counts row is how many flagged names
+fall in each.</p>
+<table>
+<tr><th>arm</th><th>equivalent-electron</th><th>family parent</th><th>operator</th><th>shared wording</th><th>single object</th><th>unit misfit</th></tr>
+<tr><td class="note">flagged names</td><td>56</td><td>139</td><td>47</td><td>84</td><td>137</td><td>22</td></tr>
+<tr><td>current seat, one reading (batched as it runs)</td><td>94.6%</td><td>69.8%</td><td>53.2%</td><td>40.5%</td><td>59.9%</td><td>63.6%</td></tr><tr><td>Haiku 5.5, first reading</td><td>91.1%</td><td>65.5%</td><td>42.5%</td><td>30.9%</td><td>43.8%</td><td>40.9%</td></tr><tr><td>Haiku 5.5, two of three</td><td>92.9%</td><td>65.5%</td><td>40.4%</td><td>28.6%</td><td>44.5%</td><td>45.5%</td></tr><tr><td>GPT-6 Luna, first reading</td><td>96.4%</td><td>77.7%</td><td>76.6%</td><td>46.4%</td><td>70.8%</td><td>63.6%</td></tr><tr><td>GPT-6 Luna, two of three</td><td>96.4%</td><td>79.9%</td><td>74.5%</td><td>47.6%</td><td>72.3%</td><td>63.6%</td></tr><tr><td>local DS4.1-flash, first reading</td><td>90.9%</td><td>48.1%</td><td>27.3%</td><td>18.8%</td><td>28.1%</td><td>45.0%</td></tr><tr><td>local two of three, upper bound</td><td>91.5%</td><td>31.1%</td><td>18.9%</td><td>10.9%</td><td>19.7%</td><td>40.0%</td></tr><tr><td>mixed panel, two of three</td><td>94.6%</td><td>67.6%</td><td>42.5%</td><td>28.6%</td><td>43.8%</td><td>45.5%</td></tr>
+</table>
+<h2>Do repeat readings agree</h2>
+<table>
+<tr><th>arm</th><th>all three agree</th><th>pairwise agreement (r1r2, r1r3, r2r3)</th></tr>
+<tr><td>Haiku 5.5, two of three</td><td>89.3%</td><td>92.9%, 93.2%, 92.5%</td></tr><tr><td>GPT-6 Luna, two of three</td><td>79.3%</td><td>86.6%, 85.2%, 87.0%</td></tr><tr><td>local two of three, upper bound</td><td>—</td><td>—, —, —</td></tr>
+</table>
+<h2>Fresh reader of another family</h2>
+<p class="note">openrouter/openai/gpt-6.1-sol at high effort,
+blind: it saw the name, definition and unit only, in shuffled order, and no label
+or arm verdict. 120 answered. Sides with the label
+36, with Haiku two-of-three 44, with both
+32, with neither 8.</p>
+<table>
+<tr><th>name</th><th>label</th><th>Haiku 2/3</th><th>fresh</th><th>sides"</th></tr>
+<tr><td><code>back_surface_neutron_flux</code></td><td>flagged</td><td>stands</td><td>pass</td><td>haiku</td></tr><tr><td><code>carbon_density_at_limiter</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>coolant_volume_of_breeder_blanket</code></td><td>flagged</td><td>stands</td><td>flag</td><td>label</td></tr><tr><td><code>current_of_passive_structure</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>electron_diffusion_coefficient</code></td><td>stands</td><td>flag</td><td>flag</td><td>haiku</td></tr><tr><td><code>electron_power_at_inside_flux_surface</code></td><td>stands</td><td>flag</td><td>flag</td><td>haiku</td></tr><tr><td><code>electron_source_rate_at_pellet_path_due_to_pellet_injection</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>electron_source_rate_due_to_injection</code></td><td>flagged</td><td>flag</td><td>flag</td><td>both</td></tr><tr><td><code>electron_source_rate_due_to_surface_emission</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>explicit_ion_torque</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>external_magnetic_flux</code></td><td>flagged</td><td>stands</td><td>pass</td><td>haiku</td></tr><tr><td><code>fast_ion_absorbed_wave_power</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>fast_ion_charge_state_absorbed_wave_power</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>fast_ion_pressure</code></td><td>flagged</td><td>stands</td><td>pass</td><td>haiku</td></tr><tr><td><code>fast_neutral_pressure</code></td><td>flagged</td><td>stands</td><td>pass</td><td>haiku</td></tr><tr><td><code>fast_torque_due_to_collisions</code></td><td>stands</td><td>stands</td><td>pass</td><td>both</td></tr><tr><td><code>first_local_tangential_coordinate_of_reflector</code></td><td>stands</td><td>flag</td><td>flag</td><td>haiku</td></tr><tr><td><code>first_local_tangential_radius_of_filter_window</code></td><td>stands</td><td>stands</td><td>pass</td><td>both</td></tr><tr><td><code>height_of_toroidal_field_coil</code></td><td>flagged</td><td>stands</td><td>flag</td><td>label</td></tr><tr><td><code>incident_neutron_power_of_breeder_blanket_module</code></td><td>stands</td><td>stands</td><td>pass</td><td>both</td></tr><tr><td><code>initial_spun_twist_phase_of_fiber_optic_current_sensor</code></td><td>stands</td><td>stands</td><td>pass</td><td>both</td></tr><tr><td><code>inner_hard_xray_half_width_at_emissivity_peak</code></td><td>flagged</td><td>stands</td><td>flag</td><td>label</td></tr><tr><td><code>inner_radius_of_poloidal_field_coil</code></td><td>stands</td><td>flag</td><td>flag</td><td>haiku</td></tr><tr><td><code>inner_radius_of_toroidal_field_coil</code></td><td>flagged</td><td>stands</td><td>flag</td><td>label</td></tr><tr><td><code>ion_charge_number</code></td><td>flagged</td><td>stands</td><td>flag</td><td>label</td></tr><tr><td><code>ion_charge_state_energy_flux</code></td><td>flagged</td><td>stands</td><td>pass</td><td>haiku</td></tr><tr><td><code>ion_charge_state_power_at_inside_flux_surface</code></td><td>stands</td><td>flag</td><td>flag</td><td>haiku</td></tr><tr><td><code>ion_momentum_source_rate</code></td><td>flagged</td><td>stands</td><td>pass</td><td>haiku</td></tr><tr><td><code>ion_torque_density_due_to_collisions</code></td><td>flagged</td><td>flag</td><td>flag</td><td>both</td></tr><tr><td><code>launched_wave_duration</code></td><td>stands</td><td>stands</td><td>flag</td><td>neither</td></tr><tr><td><code>length_of_passive_loop_element</code></td><td>stands</td><td>flag</td><td>flag</td><td>haiku</td></tr><tr><td><code>length_variation_of_interferometer_beam</code></td><td>flagged</td><td>stands</td><td>pass</td><td>haiku</td></tr><tr><td><code>momentum_flux_due_to_diamagnetic_drift</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>net_power_due_to_ion_cyclotron_heating</code></td><td>stands</td><td>flag</td><td>flag</td><td>haiku</td></tr><tr><td><code>neutral_internal_state_particle_flux</code></td><td>flagged</td><td>stands</td><td>pass</td><td>haiku</td></tr><tr><td><code>neutral_internal_state_pressure</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>neutral_state_particle_convection_velocity</code></td><td>stands</td><td>stands</td><td>flag</td><td>neither</td></tr><tr><td><code>neutron_maximum_energy_of_neutron_detector</code></td><td>stands</td><td>flag</td><td>pass</td><td>label</td></tr><tr><td><code>nitrogen_source_rate</code></td><td>flagged</td><td>flag</td><td>flag</td><td>both</td></tr><tr><td><code>non_axisymmetric_magnetic_field</code></td><td>flagged</td><td>stands</td><td>flag</td><td>label</td></tr>
+</table>
+<h2>Recommendation</h2>
+<p>Run <strong>mixed panel, two of three</strong>. It costs USD
+1.23 on these 2044 names
+(0.00064 per name), and at that miss rate it finds
+<strong>261 of 485</strong> flagged
+names, missing 46.2% of them.</p>
+<p>the mixed panel is one reading each from Haiku, Luna and the local model, decided two of three, so no single vendor's family bias sets the answer the local model is graded against blind readers on its own lane, so its score is an upper bound and reads beside its number, not as one</p>
+<h2>Readings</h2>
+<p class="note">Every reading, its class and its own cost is in
+<code>name-definition-reader-bake-off.json</code>.</p>
+</body></html>

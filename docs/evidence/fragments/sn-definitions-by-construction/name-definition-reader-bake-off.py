@@ -588,9 +588,12 @@ def spend_of(arm: str, readings: int = READINGS) -> dict:
 
 def repeat(arm: str) -> dict:
     readings = [_load_progress(arm, index) for index in range(READINGS)]
+    common = set(readings[0]) if readings else set()
+    for reading in readings[1:]:
+        common &= set(reading)
     names = {
         name
-        for name in set().intersection(*(set(reading) for reading in readings))
+        for name in common
         if all(readings[index][name]["verdict"] != "unanswered" for index in range(READINGS))
     }
     unanimous = sum(
@@ -686,10 +689,31 @@ def build_report(items: list[dict], meta: dict) -> dict:
         "class_counts": dict(collections.Counter(grouping.values())),
         "arms": arms,
         "fresh_reader": fresh_summary(items),
+        "readings": _all_readings(),
     }
     report["schema"] = "name-definition-reader-bake-off"
     report["recommendation"] = recommendation(report)
     return report
+
+
+def _all_readings() -> dict:
+    """Every call's verdict, keyed by arm and reading, as the run recorded them."""
+
+    recorded = {}
+    for arm in ("seat", "haiku", "luna", "local"):
+        for index in range(READINGS):
+            rows = _load_progress(arm, index)
+            if rows:
+                recorded[f"{arm}-r{index}"] = {
+                    name: {
+                        "verdict": row["verdict"],
+                        "qualifier": row.get("qualifier"),
+                        "cost_usd": row.get("cost_usd") or row.get("cost"),
+                        "seconds": row.get("seconds"),
+                    }
+                    for name, row in rows.items()
+                }
+    return recorded
 
 
 def fresh_summary(items: list[dict]) -> dict:
@@ -796,7 +820,8 @@ def write_html(report: dict) -> None:
         table.append(
             "<tr><td>{label}</td><td>{recall} [{rl}, {rh}]</td>"
             "<td>{precision} [{pl}, {ph}]</td><td>{agreement} [{al}, {ah}]</td>"
-            "<td>{cost}</td><td>{per_name}</td><td>{seconds}</td></tr>".format(
+            "<td>{scored}</td><td>{cost}</td><td>{per_name}</td>"
+            "<td>{seconds}</td></tr>".format(
                 label=arm["label"],
                 recall=_pct(arm["recall"]), rl=_pct(arm["recall_ci"][0]),
                 rh=_pct(arm["recall_ci"][1]),
@@ -804,6 +829,11 @@ def write_html(report: dict) -> None:
                 ph=_pct(arm["precision_ci"][1]),
                 agreement=_pct(arm["agreement"]), al=_pct(arm["agreement_ci"][0]),
                 ah=_pct(arm["agreement_ci"][1]),
+                scored=(
+                    str(arm["scored"])
+                    if not arm["unanswered"]
+                    else f"{arm['scored']} of {arm['scored'] + arm['unanswered']}"
+                ),
                 cost=_usd(cost.get("cost_usd")),
                 per_name=_usd(cost.get("per_name_usd"), 5),
                 seconds=_usd(cost.get("per_name_seconds"), 2),
@@ -870,8 +900,8 @@ against its own reading family and therefore an upper bound, not a measurement.<
 <h2>Agreement with the settled verdicts</h2>
 <table>
 <tr><th>arm</th><th>flagged recall [95%]</th><th>flagged precision [95%]</th>
-<th>overall agreement [95%]</th><th>spend USD</th><th>USD per name</th>
-<th>s per name</th></tr>
+<th>overall agreement [95%]</th><th>names scored</th><th>spend USD</th>
+<th>USD per name</th><th>s per name</th></tr>
 {''.join(table)}
 </table>
 <h2>Recall by the readers' class</h2>
@@ -936,10 +966,12 @@ def write_figure(report: dict) -> Path:
         ("mixed-two-of-three", "mixed panel, two of three", "mixed", False),
     ]
     fig, ax = plt.subplots(figsize=(14, 7.2), dpi=100)
+    handles = []
     for key, label, colour, upper in points:
         arm = report["arms"][key]
         if arm["precision"] is None or arm["recall"] is None:
             continue
+        hollow = key.endswith("-single") and key != "seat"
         x, y = arm["precision"], arm["recall"]
         left = arm["precision_ci"][0] if arm["precision_ci"][0] is not None else x
         right = arm["precision_ci"][1] if arm["precision_ci"][1] is not None else x
@@ -949,12 +981,18 @@ def write_figure(report: dict) -> Path:
             x, y, xerr=[[x - left], [right - x]],
             yerr=[[y - low], [high - y]], fmt="o", markersize=9,
             color=colours[colour], ecolor=colours[colour], elinewidth=1.2,
-            capsize=3, markerfacecolor="white" if upper else colours[colour],
+            capsize=3,
+            markerfacecolor="white" if hollow else colours[colour],
             markeredgewidth=1.6,
             zorder=3 if key == "mixed-two-of-three" else 2,
         )
-        ax.annotate(label, (x, y), xytext=(8, 7), textcoords="offset points",
-                    fontsize=11, color=colours[colour])
+        handles.append(
+            plt.Line2D(
+                [], [], marker="o", linestyle="none", markersize=9,
+                color=colours[colour], markerfacecolor="white" if hollow else colours[colour],
+                markeredgewidth=1.6, label=label,
+            )
+        )
     ax.set_xlabel("flagged precision")
     ax.set_ylabel("flagged recall")
     ax.set_xlim(0, 1.02)
@@ -962,6 +1000,16 @@ def write_figure(report: dict) -> Path:
     ax.spines["top"].set_visible(False)
     ax.spines["right"].set_visible(False)
     fig.tight_layout()
+    fig.legend(
+        handles=handles,
+        loc="upper left",
+        bbox_to_anchor=(0.04, 0.99),
+        ncol=2,
+        frameon=False,
+        fontsize=13,
+        handletextpad=0.4,
+        columnspacing=1.2,
+    )
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     out = FIG_DIR / FIG_NAME
     fig.savefig(out)
@@ -972,7 +1020,11 @@ def write_figure(report: dict) -> Path:
 # -------------------------------------------------------------------- main
 
 
-async def run_all() -> None:
+async def run_all(
+    only: list[str] | None = None,
+    concurrency: int | None = None,
+    readings: list[int] | None = None,
+) -> None:
     items, meta = load_items()
     print(
         f"labelled {meta['labelled']} scored {meta['scored']} "
@@ -982,6 +1034,23 @@ async def run_all() -> None:
     if meta["text_mismatch"]:
         print(f"text digest mismatch on {len(meta['text_mismatch'])} names", flush=True)
     plan = _plan()
+    spend = Spend(CEILING_USD)
+    if only and set(only) == {"fresh"}:
+        drawn = _fresh_draw(items)
+        print(f"fresh {await run_fresh_reader(items, drawn, spend)}", flush=True)
+        print(f"FRESH_SPEND_USD {spend.total:.4f}", flush=True)
+        return
+    if only:
+        plan = [arm for arm in plan if arm["key"] in only]
+        for arm in plan:
+            if concurrency:
+                arm["concurrency"] = concurrency
+        wanted = readings if readings is not None else range(max(arm["readings"] for arm in plan))
+        for arm in plan:
+            for reading in wanted:
+                print(f"pass {await run_pass(arm, items, spend, reading=reading)}", flush=True)
+        print(f"ONLY_SPEND_USD {spend.total:.4f}", flush=True)
+        return
     spend = Spend(STOP_AT_USD)
     pilot = _pilot_draw(items, PILOT_NAMES)
     for arm in plan:
@@ -1043,11 +1112,32 @@ def _fresh_draw(items: list[dict]) -> list[str]:
 
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", nargs="?", default="run", choices=["run", "report"])
+    parser.add_argument(
+        "mode", nargs="?", default="run", choices=["run", "report", "negative"]
+    )
+    parser.add_argument("--only", default="", help="comma-separated arm keys to run")
+    parser.add_argument("--concurrency", type=int, default=None)
+    parser.add_argument("--numbers", default="", help="comma-separated reading indexes")
     options = parser.parse_args()
     if options.mode == "run":
-        asyncio.run(run_all())
+        only = [key.strip() for key in options.only.split(",") if key.strip()]
+        wanted = [int(v) for v in options.numbers.split(",") if v.strip()] or None
+        asyncio.run(run_all(only or None, options.concurrency, wanted))
+        if only:
+            return
     items, meta = load_items()
+    if options.mode == "negative":
+        verdict = {item["id"]: "pass" for item in items}
+        scored = score(items, verdict, reader_class_groups(items))
+        print(
+            f"NEGATIVE_CONTROL {"pass for every name"} over {scored['scored']} names: "
+            f"flagged-recall {scored['recall']} "
+            f"({scored['true_positive']} of {scored['flagged_total']}), "
+            f"flagged-precision {scored['precision']}, "
+            f"agreement {scored['agreement']}",
+            flush=True,
+        )
+        return
     report = build_report(items, meta)
     OUT_JSON.write_text(json.dumps(report, indent=1, default=str))
     write_html(report)
