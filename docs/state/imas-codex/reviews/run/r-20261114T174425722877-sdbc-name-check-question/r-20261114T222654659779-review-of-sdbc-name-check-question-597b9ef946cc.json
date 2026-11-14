@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-14T23:55:50.490Z",
+  "dispatched_at": "2026-11-14T23:17:36Z",
+  "findings": [
+    "docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py:25 non-blocking: the standing-check evidence script still imports name_definition_agreement_check, which 9510df19b deleted from imas_codex/standard_names/audits.py, so the 133-of-485 and 83-wrong-holds reading this fragment cites can no longer be regenerated from the tree.",
+    "imas_codex/standard_names/review/name_definition_seat.py:228 non-blocking: name_definition_flagged was added in 9510df19b and has no caller in imas_codex or tests; name_definition_note already decides the hold, so this is an unused second spelling of the same decision.",
+    "tests/standard_names/test_name_definition_agreement.py:114 non-blocking: assert tuple(question.options) == _classes() cannot fail on a change of class content, because load_review_checks injects list(QUALIFIER_KINDS) as that very option list; it guards the injection path, not the classes."
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_name_definition_agreement.py:87 fails when a second class list appears and :118 fails when a removed judge returns, gate-base-guard-probe.log shows that same file failing 5 of its 9 tests against the base tree, and test_review_docs_name_definition_hold.py:159 drives the real batch and fails if the hold stops carrying the seat's class.",
+    "evidence": "gate-base-standard-names.log:1161 and gate-head-standard-names.log:1162 carry the two suite summaries with the same single failure id, and gate-base-guard-probe.log ends 5 failed, 4 passed with EXIT=1, so the guard is shown firing rather than merely asserted.",
+    "fit": "The seat docstring at imas_codex/standard_names/review/name_definition_seat.py:1-12 states the one-owner rule and the loader refusal at imas_codex/standard_names/review/checks.py:93 follows the existing model-validator idiom; the unused name_definition_flagged at :228 is the one lapse.",
+    "goal_fidelity": "imas_codex/llm/prompts/sn/review_name_definition_system.md is the scored candidate prompt byte-for-byte apart from its nine-line frontmatter, and imas_codex/standard_names/review/name_definition_seat.py:29 now holds the single class list that everything reads; the done_when's own false-hold clause was set aside by the lead ruling at resume-1-advice.txt:1, not by the node.",
+    "reuse": "The class list was moved to the seat rather than copied, the taxonomy reads it through _inject_name_definition_options instead of owning a second list, and the fragment reuses the committed bake-off seat reading unchanged; a search of imas_codex/standard_names found no surviving owner of the name-versus-definition capability to fork.",
+    "scope_discipline": "Every changed path outside the two declared paths is inside the lead-widened grant quoted at resume-1-advice.txt:1-8 and is listed with its reason at manifest.md:12-30; no generated model was staged and no spend beyond the stated ceiling was incurred."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261114T222654659779-review-of-sdbc-name-check-question-597b9ef946cc",
+  "reviewed_base_sha": "acf1bb1e825089f2dc62b422443dc53c690d36a9",
+  "reviewed_head_sha": "597b9ef946cc8bbefe8ac2ec1c4bc005aedb75ab",
+  "reviewed_run_id": "r-20261114T174425722877-sdbc-name-check-question",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T23:56:04.459579+00:00",
+  "total": 101,
+  "verdicts": {
+    "call_sites": "imas_codex/standard_names/worker_tasks/worker_review_docs.py:699 _name_definition_note (dependency registered at imas_codex/standard_names/worker_tasks/__init__.py:243), imas_codex/standard_names/review/checks.py:319 load_review_checks calling _inject_name_definition_options at :68, and imas_codex/standard_names/review/jev_review.py:build_docs_audit_report, whose run_name_definition_checks call site the diff removes.",
+    "diff": "Read commit by commit against acf1bb1e8: 9510df19b deletes the lexical check and its wiring and moves the classes into the seat, 06f37adc8 rewrites the guard test and the three fixtures, 597b9ef94 records the adoption and consolidation in the evidence fragment; 13 files, 572 insertions and 621 deletions.",
+    "done_when": "The done_when names the whole tests/standard_names suite at base and head, the seeded split, the held-out scoring with 95% intervals and a guard that fails on a second class list; the manifest records gate-head-standard-names.log and gate-base-standard-names.log and asserts that delta plus the negative-control probe, and the held-out reading is committed at docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-check-question.html:58.",
+    "goal": "The goal is that the seat asks the readers' question, scored on held-out names, with one implementation of the check; the landed diff ships the readers' five-class question at imas_codex/llm/prompts/sn/review_name_definition_system.md:13 and deletes the lexical implementation from imas_codex/standard_names/audits.py and imas_codex/standard_names/review/audits.py.",
+    "manifest": "Read; it records 8752 passed / 1 failed / 12 skipped at head and 8753 / 1 / 12 at base, names the three gate logs, states the guard fails 5 of 9 at base, and reports spend USD 3.0575 against the USD 15 ceiling.",
+    "write_paths": "The dispatch declared only docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-check-question.html and docs/figures/sn-definitions-by-construction/sdbc-name-check-question; the diff touches eleven further product and test paths, each named at manifest.md:12 with a scope_note quoting the lead's 2026-11-14 widening recorded in resume-1-advice.txt."
+  }
+}
