@@ -19,12 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;descoped&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-full-dd-continuation#s2&quot;],&quot;s4&quot;:[&quot;sn-full-dd-continuation#s2&quot;,&quot;sn-full-dd-continuation#s3&quot;,&quot;sn-integrity-backlog#s52&quot;,&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-domain-per-family#s2&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s6&quot;:[]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-full-dd-continuation#s2&quot;],&quot;s4&quot;:[&quot;sn-full-dd-continuation#s2&quot;,&quot;sn-full-dd-continuation#s3&quot;,&quot;sn-integrity-backlog#s52&quot;,&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-domain-per-family#s2&quot;,&quot;sn-definitions-by-construction#s7&quot;],&quot;s5&quot;:[&quot;sn-integrity-backlog#s52&quot;,&quot;sn-full-dd-continuation#s4&quot;],&quot;s6&quot;:[]}">
   <title>The Rest Of The DD Composed: The Full-DD Continuation Run | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="28">
-<meta name="plan-modified" content="2026-11-13">
+<meta name="plan-version" content="29">
+<meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
   <main class="plan-doc">
@@ -93,6 +93,9 @@
     </div>
 </section>
 <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="_top" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-13T09:00:00Z">
+    <div class="r-comment-body"><p>§3 closed (<code>sfdc-graph-checkpoint</code>, commit <code>16efff658</code>). One checkpoint was taken on 2026-11-13 with no graph writer running, after the last recorded write of 2026-11-12T08:50Z: a 2.7 GB archive whose whole stream passes its integrity test and whose <code>graph.dump</code> member is non-empty, with the integrity test failing on a truncated copy and the member test failing on a copy with an empty member. The graph returned 1,796,679 nodes, 4,700,432 relationships and 5,497 standard names before the stop and after the restart. Limits: the export's own restart failed because it ran inside a SLURM allocation, so the graph was down from about 08:16Z to 08:33Z until the service script was submitted by hand; and the last-write time is read from store file times, not from a write log. The live definition rewrite of <code>sn-definitions-by-construction</code> §6 started after this checkpoint, so §4 needs its own reading of whether a later checkpoint is wanted before the run. <a href="/imas-codex/evidence/fragments/sn-full-dd-continuation/sfdc-graph-checkpoint.html">evidence</a></p></div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T035757070901-review-of-sfdc-cohort-floor-504d281c8b11" data-who="reckon-build" data-when="2026-11-12T04:14:29.271Z">
     <div class="r-comment-body"><p>landing: independent review of run r-20261112T014614393815-sfdc-cohort-floor at d79799257559478c0ed9e677946a81ae1057a061..504d281c8b110c24df9de9b80d1b1be25d71ee3b; goal met (read-back 104 of 143 against the floor of 100), evidence 15/20 because no assertion binds the floor to an exit status, scope clean (four changed paths, all declared), five non-blocking findings recorded and none blocking; stored parsed at both granted review-record paths.</p></div>
 </div>
@@ -104,9 +107,6 @@
 </div>
 <div class="r-comment" data-section="s4" data-id="c-20261112-waits-on-generator-repair" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T04:20:00Z">
     <div class="r-comment-body"><p>§4 and §5 now wait on the generator repairs. Measured on <code>v0.4.0rc8</code>: every definition is written whole per name and every domain is decided per name, which is why all 20 species families diverge in wording and 8 of 20 are split across domain files. A run started before <code>sn-definitions-by-construction</code> §2 and §3 and <code>sn-domain-per-family</code> §2 land pays for names that the live rewrite then pays for again. §2, §3 and §6 of this plan are unaffected and proceed. Lead instruction 2026-11-12: this repair has priority.</p></div>
-</div>
-<div class="r-comment" data-section="_top" data-id="c-close-s3" data-who="reckon-build" data-when="2026-11-13T09:00:00Z">
-    <div class="r-comment-body"><p>§3 closed (<code>sfdc-graph-checkpoint</code>, commit <code>16efff658</code>). One checkpoint was taken on 2026-11-13 with no graph writer running, after the last recorded write of 2026-11-12T08:50Z: a 2.7 GB archive whose whole stream passes its integrity test and whose <code>graph.dump</code> member is non-empty, with the integrity test failing on a truncated copy and the member test failing on a copy with an empty member. The graph returned 1,796,679 nodes, 4,700,432 relationships and 5,497 standard names before the stop and after the restart. Limits: the export's own restart failed because it ran inside a SLURM allocation, so the graph was down from about 08:16Z to 08:33Z until the service script was submitted by hand; and the last-write time is read from store file times, not from a write log. The live definition rewrite of <code>sn-definitions-by-construction</code> §6 started after this checkpoint, so §4 needs its own reading of whether a later checkpoint is wanted before the run. <a href="/imas-codex/evidence/fragments/sn-full-dd-continuation/sfdc-graph-checkpoint.html">evidence</a></p></div>
 </div>
 </section>
 </main>
