@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T22:45:55.979Z",
+  "dispatched_at": "2026-11-14T22:35:53Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:22",
+      "id": "wiring-1",
+      "reason": "without the ordering declared, \u00a79 can be dispatched before \u00a77, find the three names unsourced, and either redo \u00a77's signed rebinds under its own gate or read a count that disagrees with the number its done-when names.",
+      "text": "`plan-section-depends-on` carries entries for s2, s3, s5, s6 and s7 and none for s9, while \u00a79 computes its 10-name baseline over exactly the population `plan.html:86` (\u00a77, `data-status=\"implementable\"`) will change by rebinding three of those ten",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:99",
+      "id": "done_when-1",
+      "reason": "the figure needs a base-it-is-read-against (the revision, or \"10 before \u00a77's rebinds and 7 after\") or the node's gate will refuse a correct implementation for an arithmetic reason.",
+      "text": "the done-when requires \"a count of live names without a source, exposed as one command, reports 10 on the live graph before any repair\", but the section's own prose at the same line says three of those ten are the names \u00a77 rebinds, so once \u00a77 lands the same command reports 7 and the node fails a measure that has become unreadable rather than unmet",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:99",
+      "id": "single_goal-1",
+      "reason": "two deliverables under one gate means neither the reader change nor the seven bindings has a verdict of its own, and the second cannot be closed while \u00a77 holds the same population.",
+      "text": "\"each of the seven names above ends with a producer edge through a signed path\" is the deliverable of \u00a77 (\"No live name without a DD source\", `plan.html:86`), so this node would be closed on one verdict covering both a readers' refactor and a live-graph signed repair that a peer section already owns",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:99",
+      "id": "reasoning-1",
+      "reason": "three unaccounted names are exactly the fourth case the section says must be repaired (a live name holding neither a producer edge in the count nor a copied source), so a worker verifying the baseline finds a remainder the plan does not name and cannot tell whether the conclusion or the arithmetic is wrong.",
+      "text": "the 2,609 is decomposed as \"2,020 superseded names \u2026 501 derived parents \u2026 and 85 live names\", and 2,020 + 501 + 85 = 2,606, leaving three names in the population with no stated category, while the section's conclusion \"No binding was lost\" is drawn from that decomposition being complete",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:99",
+      "id": "reasoning-2",
+      "reason": "a node assigned to bind the seven has to re-derive each name's needed source from the graph, and a reader cannot tell whether the omission is deliberate or a dropped paragraph.",
+      "text": "the prose says the seven are \"listed here with what each needs\", but the sentence delivers only their names and no requirement follows anywhere in the section, so the promise of evidence is content the plan does not hold",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0f51e3bc331d713e35f3b27a1515f1102697ac2f",
+  "plan_fingerprint": "dbf119743c26581ab4de495baa9df47708db3de73cc7a52fe5ab5b8ba3086e4f",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 54,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T214344094836-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "cecab148b9a5b77c1d0dd8288b307fdcfe96a1f0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a79's only cross-reference is `\u00a77`, which resolves to `id=\"s7\"` in the same document; the section cites no file or commit, so nothing else needs resolving and nothing is asked of the author under this item.",
+    "done_when": "a finding \u2014 \u00a79's done-when fixes the pre-repair count at 10, a replaced graph reading that is 10 only if \u00a77's three rebinds have not landed, so the same measure reads 7 or 10 depending on an order the plan never fixes.",
+    "evidence_paths": "pass \u2014 \u00a79 writes no evidence to a scratchpad path; its measures are a repository test under `tests/standard_names` and a command over the live graph, and the run record is the durable carrier the rest of the plan uses.",
+    "naming": "pass \u2014 the section states the mechanism (sources held as producer edges and as a copied list) with no plan label, ticket number or version tag in any name it introduces, and the run identifier of an earlier proposal is not cited into code.",
+    "reasoning": "a finding \u2014 \u00a79's decomposition of the 2,609 does not sum (2,020 + 501 + 85 = 2,606), so the section's conclusion that no binding was lost rests on an accounting with three names unaccounted for, and none of these figures is cited to a committed fragment as every other measured section in this plan does.",
+    "single_goal": "a finding \u2014 \u00a79 carries two deliverables: the readers' one-place rule with its count instrument, and a signed graph repair beside \u00a77 (\"each of the seven names above ends with a producer edge through a signed path\"), which is \u00a77's own endpoint.",
+    "wiring": "a finding \u2014 `_document` declares no `depends-on` entry for `s9`, yet \u00a79's baseline of 10 live names with no producer edge is stated on a population three of which it says `\u00a77` \"already rebinds\", and \u00a77 is still `implementable`."
+  },
+  "section_digests": {
+    "_document": "2c1048b18b3abc87fa0ead3305f05e2ca37ba0a7eb7882041b8ab7a29b7f2a59",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "fe0b485d37658d44737045e98025181bb507e290590b07825ff0062adf984863",
+    "s6": "253a243a23959f6452cabdc987e19b9de1cec45f996c6c86f6c861fa64307724",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626",
+    "s9": "0afc2179ae7677ade6d45014b36e73cd0bc41acd0e183464219e8dd428133559"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T22:46:00.327030+00:00",
+  "total": null
+}
