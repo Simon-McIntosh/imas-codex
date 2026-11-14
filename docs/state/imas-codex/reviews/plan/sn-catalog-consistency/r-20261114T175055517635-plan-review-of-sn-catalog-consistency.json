@@ -53,6 +53,13 @@
       "note": "The 2026-11-14 ruling is now a dated comment (c-s6-lead-ruling-dt-survivor) naming who ruled it and stating that it holds where it differs from the 2026-11-12 comment on which identity survives; the section prose points to it.",
       "reason": "",
       "when": "2026-11-14T20:13:32.670459+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "The wait on sn-domain-per-family#s3 is deliberate: both sections write live StandardName nodes through signed paths that refuse on drift, and only one such writer may run at a time, so the declared wait is the ordering, not a data dependency.",
+      "when": "2026-11-14T20:13:39.529946+00:00"
     }
   ],
   "responses": {
@@ -73,6 +80,12 @@
       "note": "The 2026-11-14 ruling is now a dated comment (c-s6-lead-ruling-dt-survivor) naming who ruled it and stating that it holds where it differs from the 2026-11-12 comment on which identity survives; the section prose points to it.",
       "reason": "",
       "when": "2026-11-14T20:13:32.670459+00:00"
+    },
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The wait on sn-domain-per-family#s3 is deliberate: both sections write live StandardName nodes through signed paths that refuse on drift, and only one such writer may run at a time, so the declared wait is the ordering, not a data dependency.",
+      "when": "2026-11-14T20:13:39.529946+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261114T175055517635-plan-review-of-sn-catalog-consistency.json",
