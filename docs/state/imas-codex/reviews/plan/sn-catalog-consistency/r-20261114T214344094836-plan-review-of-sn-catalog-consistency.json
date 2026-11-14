@@ -69,6 +69,16 @@
       "note": "The fixed count of 10 is replaced by agreement, in number and in names, with a direct read of producer edges in the same job; 10 is kept only as the dated observation.",
       "reason": "",
       "when": "2026-11-14T22:47:16.986923+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0f51e3bc331d713e35f3b27a1515f1102697ac2f",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "The repair of the seven unsourced names is removed from this section and handed to section 7 by name; this section changes no binding and delivers the readers, the count command and the guard test only.",
+      "reason": "",
+      "when": "2026-11-14T22:47:23.918626+00:00"
     }
   ],
   "responses": {
@@ -80,6 +90,15 @@
       "note": "The fixed count of 10 is replaced by agreement, in number and in names, with a direct read of producer edges in the same job; 10 is kept only as the dated observation.",
       "reason": "",
       "when": "2026-11-14T22:47:16.986923+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0f51e3bc331d713e35f3b27a1515f1102697ac2f",
+      "commit_basis": "edit",
+      "note": "The repair of the seven unsourced names is removed from this section and handed to section 7 by name; this section changes no binding and delivers the readers, the count command and the guard test only.",
+      "reason": "",
+      "when": "2026-11-14T22:47:23.918626+00:00"
     },
     "wiring-1": {
       "action": "acted",
