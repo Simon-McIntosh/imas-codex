@@ -1034,7 +1034,7 @@ def passing_name_definition_seat():
                 {
                     "name": entry.get("id") or entry.get("name") or "",
                     "verdict": "pass",
-                    "qualifier": "agrees",
+                    "reader_class": "agrees",
                     "reasoning": "the definition states the quantity the name does",
                     "proposed_name": "",
                 }
