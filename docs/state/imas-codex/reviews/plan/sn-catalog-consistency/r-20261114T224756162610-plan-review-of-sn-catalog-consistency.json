@@ -53,6 +53,16 @@
       "note": "Section 7 now declares a wait on section 9 in plan-section-depends-on and reads the listed names as its population; its done-when already covers every sourceless live name, so the seven fall inside it without a change to that endpoint.",
       "reason": "",
       "when": "2026-11-14T23:34:02.533168+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e1e738340492ba7eae4b6867add29258f27acbcc",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "The list is written to docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json, named in the done-when.",
+      "reason": "",
+      "when": "2026-11-14T23:34:11.219356+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "The disposable graph now plants five names, one for each exclusion and the one that must be counted: live with no edge, superseded by status, superseded by name stage only, a derived parent with a derived producer, and a live name with an edge and an empty copied list; the command must report 1 and name it.",
       "reason": "",
       "when": "2026-11-14T23:33:35.286050+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e1e738340492ba7eae4b6867add29258f27acbcc",
+      "commit_basis": "edit",
+      "note": "The list is written to docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json, named in the done-when.",
+      "reason": "",
+      "when": "2026-11-14T23:34:11.219356+00:00"
     },
     "wiring-1": {
       "action": "acted",
