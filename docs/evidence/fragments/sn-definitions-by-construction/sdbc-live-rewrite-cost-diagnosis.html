@@ -20,19 +20,25 @@ escalation-seat refine calls are USD 0.7055, or 57 percent.</p>
 <p>The 280 seconds is the batch wrapper's own <code>timeout 280</code>, not a
 pipeline limit. Two of the five edits had in fact reached the acceptance
 threshold when the wrapper signalled them. One edit is refused for the right
-reason and needs a rename rather than a rewrite. The pipeline defect that makes
-an edit expensive is a documentation refinement that was never shown the settled
-shared wording it is forbidden to paraphrase.</p>
+reason: its definition cannot be written without the neutral-inclusive wording
+its base name still carries, so the base names must be rewritten before the
+names derived from them. The pipeline defect that makes an edit expensive is a
+documentation refinement that was never shown the settled shared wording it is
+forbidden to paraphrase.</p>
 
 <h3>Where the money goes</h3>
 
 <figure>
 <img src="/imas-codex/figures/sn-live-rewrite-cost/cost-per-name-by-call-type.svg"
      alt="Stacked bars of spend per edit, split by generate, base refine, escalation refine and review">
-<figcaption>Spend per edit for the five shared-wording names, split by call type.
-The two most expensive edits are the two that reached the third refine rotation,
-where the escalation seat (claude-fable-5) is used: one call on that seat costs
-USD 0.298 to USD 0.407, sixty to eighty times a base refine.</figcaption>
+<figcaption>Spend per edit for the five shared-wording names, split by call
+type. Each row is one standard name, given in full. The two most expensive edits
+are the two that reached the third refine rotation, where the escalation seat
+(claude-fable-5) is used: one call on that seat costs USD 0.298 to USD 0.407,
+sixty to eighty times a base refine. The fourth row is marked an early stop, not
+a cheap edit: <code>volume_averaged_oxygen_density</code> was refused at
+generate, so its USD 0.095 is what a refusal costs, not what a completed
+definition costs.</figcaption>
 </figure>
 
 <table>
@@ -77,20 +83,24 @@ escalation refine, a multi-thousand-token output on a large model.</p>
 
 <h3>Why the writer counts neutral atoms under a bare species name</h3>
 
-<p>It was fed text that says so, and that text is right about the source. The
-<code>oxygen_density</code> node the writer links to reads "Total number density
-of oxygen atoms and ions across all charge states, from neutral to fully
-stripped", and its documentation sums <code>Z = 0..8</code>.
-<code>boron_density</code> reads "summed over neutral atoms and all ionic charge
-states through fully stripped B5+". The writer reproduced its source accurately,
-and the population gate then correctly refused the only text that source
-supports.</p>
+<p>The writer is not the defect, and neither is the name's own Data Dictionary
+source. <code>volume_averaged_oxygen_density</code> and
+<code>volume_averaged_boron_density</code> resolve to
+<code>summary/volume_average/n_i/&lt;species&gt;</code>, an <strong>ion
+density</strong>. Neutral atoms enter only through the stored text of the base
+species names the writer copies as its nearest accepted neighbours:
+<code>oxygen_density</code> reads "Total number density of oxygen atoms and ions
+across all charge states, from neutral to fully stripped", and
+<code>boron_density</code> reads "Elemental boron number density, summed over
+neutral atoms and all ionic charge states through fully stripped B5+". Those two
+sentences contradict the ions-only ruling. The writer reproduced them
+accurately and the population gate correctly refused them.</p>
 
-<p><strong>So the refusal is the right outcome for these names, and the ruling
-for them is a rename, not a docs edit.</strong> A name whose DD source is an
-elemental atom density cannot be given an ion-only definition without
-contradicting its own source. Regenerating them under the settled sentence would
-publish a definition the source does not support.</p>
+<p><strong>The remedy is ordering, not a rename.</strong> Rewrite the base
+species names first, so the <code>volume_averaged_*</code> names derived from
+them copy an ions-only definition instead of an elemental-atom one. The base
+names are the defect; the derived names are downstream of it, and a rename would
+have moved the problem rather than fixed it.</p>
 
 <p>The related error in the bulk pass is the blanket application of the species
 hint to <code>volume_averaged_neutral_species_density</code>, a name whose
@@ -109,8 +119,17 @@ the escalation seat happened to reproduce the sentence. That is why the
 expensive call is the one that settles.</p>
 
 <p>The refine prompt now carries the same settled-wording block as generate
-(<code>6b94875</code>). The template test fails at the base revision with two
-cases and passes with seventeen after the change.</p>
+(<code>6b94875</code>), and that block is one partial
+(<code>sn/_shared_parts.md</code>) included by both templates, so the two cannot
+drift apart again.</p>
+
+<p>The first version of this page said the template test guarded the fix. It did
+not: the template tests build their own context, so removing the lines in
+<code>worker_refine_docs.py</code> that populate <code>shared_parts</code> left
+them green. A test now drives the worker's own context-building path and asserts
+on what the worker hands the renderer. It fails against a tree carrying the
+base worker and passes with the fix, and it fails again when those lines are
+reverted from the head tree.</p>
 
 <h3>The cheapest correct route</h3>
 
@@ -135,12 +154,13 @@ reaches the escalation seat.</p>
 
 <p>Ten names, two in each of five classes, were re-measured through
 <code>sn edit --axis docs --scope self</code> as the only graph writer, each
-bounded at 200 seconds. Seven settled on the first generated draft. One was
-refused for the right reason. Two parents ran past the bound while refining,
-each already past the 0.95 threshold when the bound cut them.</p>
+bounded at 200 seconds. The ten outcomes add up as <strong>six accepted on the
+first generated draft</strong>, <strong>two still refining at the bound</strong>
+(both already above the 0.95 threshold), <strong>one refused at generate for the
+right reason</strong>, and <strong>one drafted with no score yet</strong>.</p>
 
 <table>
-<thead><tr><th>class</th>name</th><th>before</th><th>after</th><th>spend</th></tr></thead>
+<thead><tr><th>class</th><th>name</th><th>before</th><th>after</th><th>spend</th></tr></thead>
 <tbody>
 <tr><td>shared wording</td><td>volume_averaged_carbon_density</td><td>accepted</td><td>accepted, 0.907</td><td>USD 0.0441</td></tr>
 <tr><td>shared wording</td><td>volume_averaged_boron_density</td><td>accepted</td><td>exhausted, refused at generate</td><td>USD 0.0961</td></tr>
@@ -158,10 +178,17 @@ each already past the 0.95 threshold when the bound cut them.</p>
 <p>Measured rate per class: shared wording USD 0.070, operator USD 0.093, unit
 misfit USD 0.110, single object USD 0.094 a name. No measured name exceeded
 USD 0.11. Applying the measured rates to the manifest's counts gives
-<strong>USD 39.83</strong> for the whole pass against the USD 150 ceiling. The
-family-parent rate stays at its projection of USD 0.09 because neither parent
-arm settled inside the 200-second bound, and a parent is the one class whose
-cost the bound hides rather than reveals.</p>
+<strong>USD 39.83</strong> for the whole pass against the USD 150 ceiling.</p>
+
+<p>Three of those four rates rest on two observations each and the fourth on one,
+so read them as magnitudes rather than as measured means. The unit-misfit rate of
+USD 0.110 is a single name: its other arm, <code>electron_number_density</code>,
+ran past the bound while refining at 0.9607 and recorded no cost. The
+shared-wording mean spans both outcomes, a settled USD 0.0441 and a refused
+USD 0.0961, so it is not a settled-case cost. The family-parent rate stays at its
+projection of USD 0.09 because neither parent arm settled inside the 200-second
+bound, and a parent is the one class whose cost the bound hides rather than
+reveals.</p>
 
 <p>The per-name detail is in <code>live-rewrite-cost-diagnosis.json</code>.</p>
 

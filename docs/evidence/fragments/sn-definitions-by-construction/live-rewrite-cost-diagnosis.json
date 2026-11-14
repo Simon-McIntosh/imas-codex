@@ -315,10 +315,10 @@
  },
  "q3_neutral_counting": {
   "ruling": "a bare species name counts ions summed over charge states, neutrals excluded",
-  "what_the_writer_saw": "the linked sibling StandardName oxygen_density, whose stored description reads 'Total number density of oxygen atoms and ions across all charge states, from neutral to fully stripped', and whose documentation sums Z=0..8. boron_density reads 'Elemental boron number density, summed over neutral atoms and all ionic charge states through fully stripped B5+'.",
-  "verdict_for_oxygen_density": "the refusal is the RIGHT outcome for this name, and the ruling for it is a rename. Its source really does include neutrals: it is an elemental atom density, not an ion density. Regenerating it under the settled population sentence would publish a definition that contradicts its own DD source.",
-  "verdict_for_boron_density": "same: the DD source includes neutrals, so the name is wrong and the ruling is a rename, not a docs edit.",
-  "is_the_writer_defective": "no. The writer reproduced the linked name's stored text accurately. The defect is upstream in the bulk pass, which applied a blanket species-population hint to names whose source includes neutral atoms: the gate then correctly refused the only text the source supports.",
+  "what_the_writer_saw": "the stored text of the BASE species names oxygen_density and boron_density: 'Total number density of oxygen atoms and ions across all charge states, from neutral to fully stripped' and 'Elemental boron number density, summed over neutral atoms and all ionic charge states through fully stripped B5+'. The writer copied them because they are its nearest accepted neighbours.",
+  "own_dd_source": "volume_averaged_oxygen_density and volume_averaged_boron_density resolve to summary/volume_average/n_i/<species>, an ion density. Neutrals are not in their own source.",
+  "corrected_conclusion": "CORRECTION to the first version of this record, which said these names' DD source includes neutral atoms. It does not. The source is an ion density; the neutral wording enters only through the stored text of the base names oxygen_density and boron_density, which contradict the ions-only ruling and are what the writer copied.",
+  "remedy": "ordering, not a rename, which is the opposite of the first version's ruling. Rewrite the base species names oxygen_density and boron_density first, so the volume_averaged_* names derived from them copy an ions-only definition rather than an elemental-atom one. The base names are the defect; the derived names are downstream of it.",
   "note_on_neutral_species_density": "volume_averaged_neutral_species_density is excluded from the population rule by docs_gates.is_species_density_name (neutral_species is an aggregate subject), yet the bulk pass applied the species hint to it and drove three rotations against text that was already right for its name."
  },
  "repairs": [
@@ -327,12 +327,15 @@
    "commit": "6b94875355ee13d29a487f09de6046581bf2cd8d",
    "files": [
     "imas_codex/standard_names/worker_tasks/worker_refine_docs.py",
+    "imas_codex/llm/prompts/sn/_shared_parts.md",
+    "imas_codex/llm/prompts/sn/generate_docs_user.md",
     "imas_codex/llm/prompts/sn/refine_docs_user.md",
-    "tests/standard_names/test_refine_docs_prompt.py"
+    "tests/standard_names/test_refine_docs_worker_context.py"
    ],
    "defect": "generate_docs gives the model every settled shared part verbatim (shared_parts), but refine_docs built neither the context key nor a template block. The renderer still installs the stored sentence and the persistence gate refuses a paraphrase, so every rotation re-guesses wording it cannot land and spends a rotation until the escalation seat happens to reproduce it.",
    "evidence": "two names each burned three rotations and one escalation call; the escalation call is 57 percent of the five-name spend",
-   "test": "tests/standard_names/test_refine_docs_prompt.py::test_renders_settled_shared_wording and ::test_shared_parts_built_for_species_density fail at a084551a5 (2 failed, 15 passed) and pass at 6b94875 (17 passed)"
+   "test": "tests/standard_names/test_refine_docs_worker_context.py drives process_refine_docs_batch's own context-building path and asserts on the context the worker hands the renderer. It fails against a tree built from a084551a5 (1 failed, EXIT=1) and passes at the head tree (1 passed, EXIT=0); it also fails when the shared_parts lines are reverted from the head tree. The earlier template tests built their own context, so they guarded the template but not the worker.",
+   "template_sharing": "The settled-wording block is one partial, sn/_shared_parts.md, included by both generate_docs_user and refine_docs_user, so the two templates cannot drift. The block had been pasted into both."
   }
  ],
  "q4_cheapest_correct_route": {
@@ -417,7 +420,7 @@
      "score_docs": null
     },
     "spend_usd": 0.0961,
-    "note": "refused at generate: its DD source includes neutral atoms, so the name is wrong and the ruling is a rename"
+    "note": "refused at generate: it copied the stored neutral-inclusive wording of the base name boron_density. Its own source is an ion density, so the remedy is to rewrite the base species names first, not to rename this one."
    },
    {
     "class": "shared wording",
@@ -563,10 +566,18 @@
    "single object": 0.0941
   },
   "notes_on_rate": {
-   "family parent": "no figure: both arm names ran past the 200 s bound before the review persisted a score, so no cost is recorded for the class; the two shared-wording arm shows the spread a refused name creates",
-   "accepted_first_pass": 7,
-   "refused_correctly": 1,
-   "unsettled_at_the_bound": 2
+   "outcome_counts": {
+    "accepted_on_the_first_draft": 6,
+    "drafted_with_no_score_before_the_bound": 1,
+    "refining_at_the_bound_above_threshold": 2,
+    "refused_correctly_at_generate": 1,
+    "total": 10
+   },
+   "family parent": "no rate: both arm names (alfven_frequency, beta) ran past the 200 s bound, so the class records no cost. alfven_frequency was refining at 0.9533; beta persisted no score at all and is the drafted row.",
+   "unit misfit": "one observation only: incident_neutral_particle_flux_at_wall settled on its first draft at USD 0.1098, while electron_number_density ran past the bound while refining at 0.9607 and recorded no cost. The rate USD 0.110 rests on that single name and carries no spread.",
+   "operator": "two observations (USD 0.0915, USD 0.0946).",
+   "shared wording": "two observations covering both outcomes: one settled at USD 0.0441, one refused correctly at USD 0.0961. The mean USD 0.070 is not a settled-case cost.",
+   "single object": "two observations (USD 0.0903, USD 0.0979)."
   }
  }
 }
