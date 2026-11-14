@@ -1,0 +1,40 @@
+# Brief: a name check with much higher recall and specificity (prototype)
+
+## Where this starts
+The check asks "does this definition state the quantity the name says". A question carrying the readers' class sheet and examples was scored on 1,021 held-out names: flagged-recall 82.0 %, precision 63.1 %, 117 false holds of 777 standing names (specificity 84.9 %). The lead ruled on 2026-11-14 that this question replaces the earlier one, and that recall and specificity "need to be much higher than this". The lead asks three things: is there scope for improvement, can Jev help by pre-categorising, and how does "Drex max" do in Jev's place. This node prototypes and measures. It changes no product behaviour and writes no graph.
+
+## Inputs (read these; do not re-derive)
+- Labels: `docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts.json` (2,044 names, 485 flagged, with the readers' classes and quoted evidence). Text is the name, definition and unit as the readers read them, loaded as the bake-off script does (`docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py`).
+- The split, the adopted question and its per-name held-out readings: `/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174425722877-sdbc-name-check-question/` (`split.json`, `candidate-system-prompt.md`, `candidate-r0.jsonl`, `name-check-question-run.py`). Copy what you use into your evidence directory; that run directory is not durable.
+- Development half only for anything you tune (examples, thresholds, routing, feature weights). The held-out half is scored once per arm at the end.
+
+## The ceiling comes first
+The labels are soft on borderline names: a fresh blind reader sided with the labels on only 36 of 80 disagreements in the bake-off. No arm can be shown to exceed what the labels support. So before any arm:
+1. Take the held-out names where the adopted question and the label disagree (about 44 misses and 117 false holds). Have two fresh blind readers of different model families (`openrouter/openai/gpt-6.1-sol` at high effort, and `openrouter/anthropic/claude-opus-5.5`) each judge every one, seeing name, definition and unit and the class sheet only, never a label or a verdict, in shuffled order, mixed with an equal number of names where question and label agree.
+2. Report how many disagreements are label errors by both readers, how many are real errors of the question, and how many the readers split on. State the recall and specificity the adopted question has against the adjudicated subset, and the ceiling the remaining splits imply. Every later arm is scored against both the original labels and the adjudicated ones.
+
+## Arms (each scored on the same held-out names, one reading unless stated)
+A. The adopted question as it stands (reuse its readings).
+B. **Jev pre-categorisation, then a targeted question.** Jev (`typesafe/jev-1.14`, the project's existing key and call layer under `imas_codex/`; read `https://docs.typesafe.ai/llms.txt` and the Noul and Choice pages first) answers, per name, one Noul for each reader class: does the name carry an operator the definition omits or the reverse; is the definition written for one object, part or mechanism while the name is generic; does the definition describe a family rather than one quantity; does the unit fit the named quantity; is the count in equivalent electrons. The chat model is then asked only the class-specific question for the classes Jev raises above a threshold fitted on the development half, with that class's examples; names Jev raises nothing on pass without a chat call. Report Jev's own recall per class (so a class Jev cannot see is visible) and the cost saved.
+C. **Jev alone**: the same Nouls combined by a rule or a small fitted model (logistic on the development half) with no chat call.
+D. **Drex in Jev's place** in arms B and C. First list the models the project's TypeSafe account can call (the provider's list-models endpoint, through the existing key; never print the key). If a model named Drex (any tier, "max" preferred) is listed, run it. If none is listed, say so at the top of the manifest with the list you got, and do not substitute another model under that name.
+E. **Deterministic pre-checks before any model**: parse the name with the grammar library the project already uses and compare what the parse says (operators, locus, species, component) with the definition and unit by rule: an operator in the name with no matching integral or average in the definition's equation, a unit whose dimensions cannot be the named base under the named operator. Score these alone and as a first stage ahead of A.
+F. The best combination you can justify from the development half, fixed before it sees the held-out half.
+
+## What to report
+- Per arm: flagged-recall, specificity and precision with 95 % intervals against the original labels and against the adjudicated subset; false holds and misses as counts; recall by reader class; cost per 1,000 names and wall time.
+- A direct answer to each of the lead's three questions, from the numbers.
+- For the best arm, twenty misses and twenty false holds by name with the definition's opening sentence and unit, grouped by what they have in common, so the next improvement is visible.
+- An always-pass control and an always-flag control through the same scorer (recall 0 and specificity 0 respectively).
+- One figure: recall against specificity, one labelled point per arm with its interval, original labels and adjudicated labels as two panels sharing one legend, drawn with the repository's plotting conventions, rendered and looked at before it is committed (`docs/figures/sn-name-check-prototype/recall-specificity-by-arm.svg`).
+
+## Deliver, under `docs/evidence/fragments/sn-definitions-by-construction/`
+`name-check-prototype.json` (every reading and Jev answer), `name-check-prototype.py`, `sdbc-name-check-prototype.html`, and the figure.
+
+## Limits and conditions
+- Spend ceiling USD 20 from the calls' recorded usage; stop and report if the projection passes it.
+- No graph write, no change under `imas_codex/` or `tests/`. No catalog YAML file is an input.
+- Runs are jobs, not run where you start: `env -u SLURM_JOB_ID -u SLURM_JOBID sbatch --partition=rigel --cpus-per-task=4 --mem=16G --time=04:00:00 --output=<a GPFS log under ~/.cache/imas-codex-live-rewrite/>`, resumable from a progress file. A bare `srun --partition` hangs where you start.
+- Copy (never symlink) the five gitignored generated files from the main checkout with `cp -n`; never stage them. `UV_NO_SYNC=1`; `UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=$PWD uv run --no-sync ...`.
+- Never print `.env`. Never kill by pattern.
+- Write the manifest before any wait; if your turn is ending with a job still running, report `blocked` with a `wait_condition` naming the job. Status is `complete`, `blocked` or `failed`, nothing else. Commit locally with a conventional subject and a body; stage explicit paths; no version, plan or ticket labels in source names or comments.
