@@ -1,0 +1,53 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_judgement": "the caption is substantive, not a restatement of the title: it names the five-name population and explains that the two expensive edits reached the third refine rotation where the escalation seat is used, with the USD 0.298 to USD 0.407 per-call range, so no caption finding is recorded.",
+  "completed_at": "2026-11-14T08:50:51.670Z",
+  "dispatched_at": "2026-11-14T08:36:44Z",
+  "figure_reviewed": {
+    "artifact": "docs/figures/sn-live-rewrite-cost/cost-per-name-by-call-type.svg",
+    "caption_source": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-live-rewrite-cost-diagnosis.html",
+    "method": "judged only the attached rendered PNG; no SVG was opened, read, searched or shown",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T083511034451-review-of-sdbc-live-rewrite-cost-diagnosis-e851b74e1965-figure/image-0.png",
+    "rendered_size_px": [
+      1400,
+      720
+    ]
+  },
+  "findings": [
+    {
+      "file": "docs/figures/sn-live-rewrite-cost/cost-per-name-by-call-type.svg",
+      "id": "f113e728766",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The y-axis categories abbreviate the standard names by dropping their modifiers ('toroidal current density' for flux_surface_averaged_toroidal_current_density, 'ion charge' for volume_averaged_ion_charge, 'oxygen density' for volume_averaged_oxygen_density, 'neutral species density' for volume_averaged_neutral_species_density, 'parallel current density' for flux_surface_averaged_parallel_current_density). A reader cannot map a bar back to its full standard name from the figure or its caption alone and must consult the evidence table; it does not stop any plotted value being read."
+    },
+    {
+      "file": "docs/figures/sn-live-rewrite-cost/cost-per-name-by-call-type.svg",
+      "id": "f113e728766",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The oxygen density bar shows only a generate segment and no refine or review segments, because that edit was refused by the population check before refinement, not because it was cheaper. The figure and caption do not mark it as a refused early stop, so a reader comparing bar lengths would read USD 0.095 as an efficient edit rather than an aborted one."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass: axis labels, tick labels, value labels and legend text are near-black on white, and every segment fill (blue, green, magenta, grey) clears white so no band is washed out.",
+    "data_ink": "pass: the bar segments carry the cost decomposition and dominate the canvas; no gridlines, band or fill competes with them.",
+    "decoration": "pass: white ground, no gradient, no background fill, top and right spines hidden, and the single legend is frameless and sits in clear space above the bars.",
+    "label_collision": "pass: every value label sits just beyond its bar end in clear white margin and none overlaps a bar, another label or a tick label; y labels are fully drawn at the left margin and nothing is clipped at any edge.",
+    "legibility": "pass: five horizontal bars, five y categories, four legend entries and the x-axis label are fully drawn at 1400x720 and readable at a glance; each bar carries its USD total at its end.",
+    "table_form": "pass: a stacked bar is the right form for comparing five names by call-type share; exact per-call rows live in the evidence JSON, so the image is not standing in for a table."
+  },
+  "notes": "read-only figure review: no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. No suite was run, so added_failure_count is 0 with an empty id list. Each bar total reconciles with per_call rows in the evidence JSON (e.g. ion charge 0.033+0.006+0.030 = 0.069; toroidal 0.043+0.007+0.407+0.030 = 0.487). No SVG was opened, read, searched or shown.",
+  "project": "imas-codex",
+  "raw_text": "RUBRIC legibility: pass \u2014 five horizontal bars, five y categories, four legend entries and the x-axis label are fully drawn at 1400x720 and readable at a glance; each bar carries its USD total at its end.\nRUBRIC data_ink: pass \u2014 the bar segments carry the cost decomposition and dominate the canvas; no gridlines, band or fill competes with them.\nRUBRIC decoration: pass \u2014 white ground, no gradient, no background fill, top and right spines hidden, and the single legend is frameless and sits in clear space above the bars.\nRUBRIC contrast: pass \u2014 axis labels, tick labels, value labels and legend text are near-black on white, and every segment fill clears white so no band is washed out.\nRUBRIC table_form: pass \u2014 a stacked bar is the right form for comparing five names by call-type share; exact per-call rows live in the evidence JSON.\nRUBRIC label_collision: pass \u2014 every value label sits just beyond its bar end in clear white margin and none overlaps a bar, another label or a tick label; nothing is clipped at any edge.\nFINDING docs/figures/sn-live-rewrite-cost/cost-per-name-by-call-type.svg: non-blocking: y-axis categories abbreviate the standard names, so a bar cannot be mapped to its full standard name from the figure alone.\nFINDING docs/figures/sn-live-rewrite-cost/cost-per-name-by-call-type.svg: non-blocking: the oxygen density bar has no refine or review segment because the edit was refused early, which the figure does not distinguish from a cheaper edit.",
+  "review_run_id": "r-20261114T083511034451-review-of-sdbc-live-rewrite-cost-diagnosis-e851b74e1965-figure",
+  "reviewed_base_sha": "a084551a52a5768ef7dc369336d4d8b48b6e93b7",
+  "reviewed_head_sha": "e851b74e196545de7fb4b5ccad14faf53f7f8517",
+  "reviewed_run_id": "r-20261114T074527311953-sdbc-live-rewrite-cost-diagnosis",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T08:51:13.015264+00:00",
+  "total": null
+}
