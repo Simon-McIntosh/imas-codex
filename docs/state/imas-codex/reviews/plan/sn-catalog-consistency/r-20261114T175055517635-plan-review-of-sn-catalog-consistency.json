@@ -33,7 +33,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 51,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ef218f047b98b03b52c6f497412463e439a617bc",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The zero is now counted only over names holding a stored decision or a recorded correction; an undecided name is never counted as agreeing, each is listed with its score beside the floor, and their count is bounded at one in ten of the names the writer was asked to decide, twice the share the floor was derived to leave on calibration. The unsupported cap of 20 is gone.",
+      "reason": "",
+      "when": "2026-11-14T20:13:23.955215+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ef218f047b98b03b52c6f497412463e439a617bc",
+      "commit_basis": "edit",
+      "note": "The zero is now counted only over names holding a stored decision or a recorded correction; an undecided name is never counted as agreeing, each is listed with its score beside the floor, and their count is bounded at one in ten of the names the writer was asked to decide, twice the share the floor was derived to leave on calibration. The unsupported cap of 20 is gone.",
+      "reason": "",
+      "when": "2026-11-14T20:13:23.955215+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261114T175055517635-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261114T175055517635-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "098e7a171f38c0f39bc59f970d88580687e7963b",
   "rubric": "content",
