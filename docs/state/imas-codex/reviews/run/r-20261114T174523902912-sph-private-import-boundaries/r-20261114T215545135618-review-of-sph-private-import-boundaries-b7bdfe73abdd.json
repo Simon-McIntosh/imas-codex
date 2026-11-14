@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "ef218f047b98b03b52c6f497412463e439a617bc",
+  "call_sites": [
+    "imas_codex/standard_names/attachment_audit.py",
+    "imas_codex/standard_names/audits.py",
+    "imas_codex/standard_names/docs_gates.py",
+    "imas_codex/standard_names/edit.py",
+    "imas_codex/standard_names/export.py",
+    "imas_codex/standard_names/harmonize.py",
+    "imas_codex/standard_names/provenance_lifecycle.py",
+    "imas_codex/standard_names/provenance_rebuild.py",
+    "imas_codex/standard_names/protection.py",
+    "imas_codex/standard_names/release_notes.py",
+    "imas_codex/cli/sn.py",
+    "imas_codex/llm/sn_tools.py"
+  ],
+  "completed_at": "2026-11-14T22:34:54.290Z",
+  "dispatched_at": "2026-11-14T22:15:36Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/attachment_audit.py",
+      "line": "130",
+      "severity": "non-blocking",
+      "text": "non-blocking: the module's __all__ declares its public surface but omits ATTACH_QUERY, DETACH_QUERY and HISTORICAL_NAME_STAGES made public at lines 416-418, so the declared surface disagrees with what signed_manifest.py:7901 imports and a star-import consumer misses all three."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md",
+      "line": "10",
+      "severity": "non-blocking",
+      "text": "non-blocking: the scope_note records 21 imas_codex/standard_names modules and 3 tests/standard_names files outside the two declared write paths, so the fence granted one of the node's own subjects and the coordinator has to ratify the other 24 paths."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: after_suite names 0058d59f5 while the reviewed head is b7bdfe73, so the gate never ran at the head this review reads; the gap is 8 lines of HTML in the landing fragment, which no test imports, but the revision pair and the gate revision do not agree."
+    }
+  ],
+  "head_log_revision": "0058d59f5936d191aa4adce9af3e66213152bfa4",
+  "item_verdicts": {
+    "diff": "read all seven commits c72201a3a..b7bdfe73 against ef218f04; c72201a3a replaces every private import with a public alias or delegation in the owning module, 23052c8fa restores two monkeypatch seams, c913f0264 restores the redundant-alias re-export and formats, and the last four commits change only the evidence fragment.",
+    "done_when": "the done_when asks for before and after counts, a reason per public name, a rule that fails when any closed import is restored, and no added failure id; the counts are at docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html:23 and negative-control.log fails at EXIT=1 on one restored site, while the rule itself is not new: it already existed at base line 96 and what the change gains is the exemption set's deletion.",
+    "goal": "the node goal is that no module imports another module's private names; at b7bdfe73 the detector in tests/standard_names/test_package_import_boundaries.py:63 reports zero over every top-level module of imas_codex/standard_names, which I reproduced myself against a git archive of the reviewed head.",
+    "manifest": "read; it reports status complete, zero on all four census measures, base ef218f04 and head 0058d59f5 each 8753 passed and 1 failed with the same id, both arms' revision-stamped logs, and the lint delta at EXIT=0.",
+    "write_paths": "the dispatch fenced only docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html and docs/figures/sn-pipeline-hygiene/sph-private-import-boundaries; the diff carries 21 imas_codex/standard_names modules and 3 tests/standard_names files outside them, declared in manifest.md:10."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_package_import_boundaries.py:72 asserts no violations over an AST read with no exemption set, and reinstating the regression by pointing SN_STANDARD_NAMES_ROOT at the base tree failed it, naming all 23 sites.",
+    "evidence": "tests/standard_names/test_package_import_boundaries.py:63 asserts the measure, and suite-base.log and suite-head.log each carry a revision header and a bare EXIT=1 line with the identical single failure id.",
+    "fit": "the alias form at imas_codex/standard_names/attachment_audit.py:416 matches the pre-existing idiom at graph_ops.py:268 and ruff is clean, but attachment_audit.py:130's __all__ never lists the three names the module now exposes.",
+    "goal_fidelity": "imas_codex/standard_names/attachment_audit.py:181 and the other closed sites import the owner's public name, and my own run of the rule over b7bdfe73 reports zero violations against 23 at base.",
+    "reuse": "every added definition lives in the module that owns the capability and binds the same object (imas_codex/standard_names/cascade.py:286, catalog_import.py:608, signed_manifest.py:1729), so nothing is reimplemented.",
+    "scope_discipline": "the diff edits 24 paths that the dispatch at prompt.txt:81 does not grant, so only docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html is inside the fence."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is that no module imports another module's private names; at b7bdfe73 the detector in tests/standard_names/test_package_import_boundaries.py:63 reports zero over every top-level module of imas_codex/standard_names, which I reproduced myself against a git archive of the reviewed head.\nVERDICT done_when: the done_when asks for before and after counts, a reason per public name, a rule that fails when any closed import is restored, and no added failure id; the counts are at docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html:23 and negative-control.log fails at EXIT=1 on one restored site, while the rule itself is not new: it already existed at base line 96 and what the change gains is the exemption set's deletion.\nVERDICT write_paths: the dispatch fenced only docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html and docs/figures/sn-pipeline-hygiene/sph-private-import-boundaries; the diff carries 21 imas_codex/standard_names modules and 3 tests/standard_names files outside them, declared in manifest.md:10.\nVERDICT manifest: read; it reports status complete, zero on all four census measures, base ef218f04 and head 0058d59f5 each 8753 passed and 1 failed with the same id, both arms' revision-stamped logs, and the lint delta at EXIT=0.\nVERDICT diff: read all seven commits c72201a3a..b7bdfe73 against ef218f04; c72201a3a replaces every private import with a public alias or delegation in the owning module, 23052c8fa restores two monkeypatch seams, c913f0264 restores the redundant-alias re-export and formats, and the last four commits change only the evidence fragment.\nCALL_SITES: imas_codex/standard_names/attachment_audit.py, imas_codex/standard_names/audits.py, imas_codex/standard_names/docs_gates.py, imas_codex/standard_names/edit.py, imas_codex/standard_names/export.py, imas_codex/standard_names/harmonize.py, imas_codex/standard_names/provenance_lifecycle.py, imas_codex/standard_names/provenance_rebuild.py, imas_codex/standard_names/protection.py, imas_codex/standard_names/release_notes.py, imas_codex/cli/sn.py, imas_codex/llm/sn_tools.py\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/attachment_audit.py:181 and the other closed sites import the owner's public name, and my own run of the rule over b7bdfe73 reports zero violations against 23 at base.\nSCORE evidence: 17\nJUSTIFICATION evidence: suite-base.log and suite-head.log eachrevision header and a bare EXIT=1 line with the identical single failure id, though the head arm ran at 0058d59f5 rather than the reviewed head.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: the diff edits 24 paths outside the fence declared at prompt.txt:81, leaving only docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html inside the granted scope.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_package_import_boundaries.py:72 asserts no violations over an AST read with no exemption set, and pointing SN_STANDARD_NAMES_ROOT at the base tree made it fail naming all 23 restored sites, which I ran.\nSCORE fit: 15\nJUSTIFICATION fit: the alias idiom at imas_codex/standard_names/attachment_audit.py:416 matches the existing one at graph_ops.py:268 and ruff is clean at head, but attachment_audit.py:130's own __all__ never lists the three names the module now exposes.\nSCORE reuse: 19\nJUSTIFICATION reuse: each added definition binds the owner's own object in place (imas_codex/standard_names/cascade.py:286, catalog_import.py:608, signed_manifest.py:1729), so no capability is reimplemented.\nFINDING imas_codex/standard_names/attachment_audit.py:130 non-blocking: the module's __all__ declares its public surface but omits ATTACH_QUERY, DETACH_QUERY and HISTORICAL_NAME_STAGES made public at lines 416-418, so the declared surface disagrees with what signed_manifest.py:7901 imports and a star-import consumer misses all three.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md:10 non-blocking: the scope_note records 21 imas_codex/standard_names modules and 3 tests/standard_names files outside the two declared write paths, so the fence granted one of the node's own subjects and the coordinator has to ratify the other 24 paths.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md:13 non-blocking: after_suite names 0058d59f5 while the reviewed head is b7bdfe73, so the gate never ran at the head this review reads; the gap is 8 lines of HTML in the landing fragment, which no test imports, but the revision pair and the gate revision do not agree.",
+  "review_run_id": "r-20261114T215545135618-review-of-sph-private-import-boundaries-b7bdfe73abdd",
+  "reviewed_base_sha": "ef218f047b98b03b52c6f497412463e439a617bc",
+  "reviewed_head_sha": "b7bdfe73abdd66423337bf42f06b1a5643706fab",
+  "reviewed_run_id": "r-20261114T174523902912-sph-private-import-boundaries",
+  "reviewer": "deepseek-v4.1-flash",
+  "reviewer_run_id": "r-20261114T215545135618-review-of-sph-private-import-boundaries-b7bdfe73abdd",
+  "scores": {
+    "durability": 19,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T22:35:15.078210+00:00",
+  "total": 101
+}
