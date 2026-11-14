@@ -19,13 +19,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-catalog-consistency">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s5&quot;:[&quot;sn-definitions-by-construction#s4&quot;],&quot;s6&quot;:[&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-definitions-by-construction#s4&quot;,&quot;sn-definitions-by-construction#s5&quot;],&quot;s7&quot;:[&quot;sn-definitions-by-construction#s6&quot;,&quot;sn-domain-per-family#s3&quot;,&quot;sn-definitions-by-construction#s8&quot;,&quot;sn-definitions-by-construction#s9&quot;,&quot;sn-catalog-consistency#s6&quot;,&quot;sn-catalog-consistency#s7&quot;],&quot;s8&quot;:[&quot;sn-definitions-by-construction#s5&quot;],&quot;s9&quot;:[&quot;sn-definitions-by-construction#s8&quot;]}">
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="48">
-<meta name="plan-modified" content="2026-11-14">
+<meta name="plan-version" content="49">
+<meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -93,7 +93,7 @@
     </ul>
 
     <h2 id="s5">§5 — A check that the name and its definition say the same thing</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-definitions-by-construction#s4"></section>
+    <section data-reckon="section" data-id="s5" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links="sn-definitions-by-construction#s4"></section>
     <p>A definition that adds a normalisation, a counting convention, an integration or a restriction to one device says something the name does not. Either the name gains the qualifier or the definition loses it. The check that finds these runs wherever a name is reviewed, and its verdicts are measured against §4's labels before it is trusted. It joins the named review checks a name already passes through, and its refusal is theirs; it adds no separate gate or command.</p>
     <p>Done when:</p>
     <ul>
@@ -258,7 +258,7 @@
     <div class="r-comment-body"><p>reviewed r-20261112T083723712520-sdbc-name-definition-check at 2907b6981..0d647828a and stored a parsed record at both declared review-records paths: scores goal_fidelity 14, evidence 15, scope_discipline 14, durability 13, fit 17, reuse 11, added_failure_count 0, with four non-blocking findings (the seat's batch wiring is untested, the qualifier judgment is implemented twice, two assertions relay the string the test supplied, and the record never reconciles the seat's 16-of-47 held-out reading with the accepted 27-of-36).</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-s9-lead-ruling-adopt-the-question" data-who="Simon McIntosh" data-when="2026-11-14T20:20:00Z">
-    <div class="r-comment-body"><p>Lead ruling, 2026-11-14, on the held-out measurement of §9 (flagged-recall 61.9&nbsp;% to 82.0&nbsp;%, precision 59.9&nbsp;% to 63.1&nbsp;%, false holds 101 to 117 of 777): "adopt the new question, but our recall and specificity needs to be much higher than this". The question carrying the readers' class sheet replaces the earlier one although false holds rose; the replacement rule's false-hold clause is set aside by this ruling for this measurement. The lead also asked whether Jev can help by pre-categorising and how a Drex model does in Jev's place; that is prototyped under a brief (<code>briefs/name-check-precategorised-prototype.md</code>) and changes no product behaviour until it is measured.</p></div>
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-14, on the held-out measurement of §9 (flagged-recall 61.9 % to 82.0 %, precision 59.9 % to 63.1 %, false holds 101 to 117 of 777): "adopt the new question, but our recall and specificity needs to be much higher than this". The question carrying the readers' class sheet replaces the earlier one although false holds rose; the replacement rule's false-hold clause is set aside by this ruling for this measurement. The lead also asked whether Jev can help by pre-categorising and how a Drex model does in Jev's place; that is prototyped under a brief (<code>briefs/name-check-precategorised-prototype.md</code>) and changes no product behaviour until it is measured.</p></div>
 </div>
 </section>
 </main>
