@@ -1,0 +1,192 @@
+{
+ "node": "sdbc-model-seats-latest",
+ "record": {
+  "openrouter_models": "https://openrouter.ai/api/v1/models",
+  "fetched_at": "2026-11-14T12:30:28Z",
+  "bytes": 852517,
+  "local_router": "http://98dci4-gpu-0003:18802/v1/models",
+  "local_router_models": [
+   "deepseek-v4.1-flash"
+  ],
+  "jev": "https://openrouter.ai/api/alpha/decisions/models returned 404; no listing endpoint for decisions models"
+ },
+ "price_unit": "USD per million tokens, prompt / completion",
+ "seats": [
+  {
+   "seat": "sn-escalation",
+   "model_before": "openrouter/anthropic/claude-fable-5",
+   "model_after": "openrouter/anthropic/claude-sonnet-5.5",
+   "price_before": "10 / 50",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-sonnet-5.5 created 1790618686 is the newest of its line; fable-5.2 (8/40) is newer in its own line but the seat's line is Sonnet"
+  },
+  {
+   "seat": "sn-release-notes",
+   "model_before": "openrouter/anthropic/claude-sonnet-4.6",
+   "model_after": "openrouter/anthropic/claude-sonnet-5.5",
+   "price_before": "3 / 15",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-sonnet-5.5 created 1790618686 is the newest of its line"
+  },
+  {
+   "seat": "dd-enrichment",
+   "model_before": "openrouter/anthropic/claude-sonnet-4.6",
+   "model_after": "openrouter/anthropic/claude-sonnet-5.5",
+   "price_before": "3 / 15",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-sonnet-5.5 created 1790618686 is the newest of its line"
+  },
+  {
+   "seat": "reasoning",
+   "model_before": "openrouter/anthropic/claude-sonnet-4.6",
+   "model_after": "openrouter/anthropic/claude-sonnet-5.5",
+   "price_before": "3 / 15",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-sonnet-5.5 created 1790618686 is the newest of its line"
+  },
+  {
+   "seat": "sn-review.names[1]",
+   "model_before": "openrouter/anthropic/claude-haiku-4.5",
+   "model_after": "openrouter/anthropic/claude-haiku-5.5",
+   "price_before": "1 / 5",
+   "price_after": "0.1 / 0.5",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-haiku-5.5 created 1791397883 is the newest of its line"
+  },
+  {
+   "seat": "sn-review.names.profiles.default[0]",
+   "model_before": "openrouter/x-ai/grok-4.5",
+   "model_after": "openrouter/x-ai/grok-4.7",
+   "price_before": "2 / 6",
+   "price_after": "2 / 6",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/x-ai/grok-4.7 created 1790007541 is the newest of its line"
+  },
+  {
+   "seat": "sn-review.names.profiles.default[2]",
+   "model_before": "openrouter/anthropic/claude-sonnet-5",
+   "model_after": "openrouter/anthropic/claude-sonnet-5.5",
+   "price_before": "2 / 10",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-sonnet-5.5 created 1790618686 is the newest of its line"
+  },
+  {
+   "seat": "sn-review.names.profiles.quality-cost-balanced[0]",
+   "model_before": "openrouter/anthropic/claude-sonnet-4.6",
+   "model_after": "openrouter/anthropic/claude-sonnet-5.5",
+   "price_before": "3 / 15",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-sonnet-5.5 created 1790618686 is the newest of its line"
+  },
+  {
+   "seat": "sn-review.names.profiles.opus-only[0]",
+   "model_before": "openrouter/anthropic/claude-opus-4.8",
+   "model_after": "openrouter/anthropic/claude-opus-5.5",
+   "price_before": "5 / 25",
+   "price_after": "4 / 20",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-opus-5.5 created 1790094732 is the newest of its line"
+  },
+  {
+   "seat": "sn-review.docs[0]",
+   "model_before": "openrouter/anthropic/claude-sonnet-5",
+   "model_after": "openrouter/anthropic/claude-sonnet-5.5",
+   "price_before": "2 / 10",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-sonnet-5.5 created 1790618686 is the newest of its line"
+  },
+  {
+   "seat": "sn-review.docs[1]",
+   "model_before": "openrouter/x-ai/grok-4.5",
+   "model_after": "openrouter/x-ai/grok-4.7",
+   "price_before": "2 / 6",
+   "price_after": "2 / 6",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/x-ai/grok-4.7 created 1790007541 is the newest of its line"
+  },
+  {
+   "seat": "sn-benchmark.compose-models",
+   "model_before": "anthropic: opus-4.8, sonnet-5, haiku-4.5; grok-4.5; gemini-3.5-flash, gemini-3-flash-preview, gemini-3.1-flash-lite-preview; mimo-v2.5-pro; kimi-k3; deepseek-v4-flash",
+   "model_after": "anthropic: opus-5.5, sonnet-5.5, haiku-5.5; grok-4.7; gemini-3.8-flash, gemini-3.5-flash-lite; mimo-v2.6-pro; kimi-k3.1-pro; deepseek-v4.1-flash",
+   "price_before": "see catalog",
+   "price_after": "see catalog",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); the two flash-preview entries collapse to the one latest flash release"
+  },
+  {
+   "seat": "sn-benchmark.candidate-models",
+   "model_before": "grok-4.5, gemini-3.5-flash, gemini-3.1-pro-preview, gpt-6.1-terra, claude-sonnet-5",
+   "model_after": "grok-4.7, gemini-3.8-flash, gemini-3.1-pro-preview, gpt-6.1-terra, claude-sonnet-5.5",
+   "price_before": "see catalog",
+   "price_after": "see catalog",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z)"
+  },
+  {
+   "seat": "sn-benchmark.reviewer-model",
+   "model_before": "openrouter/anthropic/claude-opus-4.8",
+   "model_after": "openrouter/anthropic/claude-opus-5.5",
+   "price_before": "5 / 25",
+   "price_after": "4 / 20",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/anthropic/claude-opus-5.5 created 1790094732 is the newest of its line"
+  },
+  {
+   "seat": "sn-benchmark.reviewer-models",
+   "model_before": "gemini-3.5-flash, gpt-6.1-sol, grok-4.5, gemini-3.1-pro-preview, sonnet-5, opus-4.8",
+   "model_after": "gemini-3.8-flash, gpt-6.1-sol, grok-4.7, gemini-3.1-pro-preview, sonnet-5.5, opus-5.5",
+   "price_before": "see catalog",
+   "price_after": "see catalog",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z)"
+  },
+  {
+   "seat": "sn-docs",
+   "model_before": "openrouter/openai/gpt-6.1-sol",
+   "model_after": "openrouter/openai/gpt-6.1-sol",
+   "price_before": "2 / 10",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/openai/gpt-6.1-sol created 1790702882 is the newest of its line"
+  },
+  {
+   "seat": "sn-refine",
+   "model_before": "openrouter/openai/gpt-6-luna",
+   "model_after": "openrouter/openai/gpt-6-luna",
+   "price_before": "0.1 / 0.5",
+   "price_after": "0.1 / 0.5",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/openai/gpt-6-luna created 1790100786 is the newest of its line"
+  },
+  {
+   "seat": "sn-classifier",
+   "model_before": "openrouter/openai/gpt-6-luna",
+   "model_after": "openrouter/openai/gpt-6-luna",
+   "price_before": "0.1 / 0.5",
+   "price_after": "0.1 / 0.5",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/openai/gpt-6-luna created 1790100786 is the newest of its line"
+  },
+  {
+   "seat": "sn-prose-adjudicator",
+   "model_before": "openrouter/openai/gpt-6-luna",
+   "model_after": "openrouter/openai/gpt-6-luna",
+   "price_before": "0.1 / 0.5",
+   "price_after": "0.1 / 0.5",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/openai/gpt-6-luna created 1790100786 is the newest of its line"
+  },
+  {
+   "seat": "cluster-labels",
+   "model_before": "openrouter/openai/gpt-6.1-sol",
+   "model_after": "openrouter/openai/gpt-6.1-sol",
+   "price_before": "2 / 10",
+   "price_after": "2 / 10",
+   "record": "https://openrouter.ai/api/v1/models (fetched 2026-11-14T12:30:28Z); openrouter/openai/gpt-6.1-sol created 1790702882 is the newest of its line"
+  },
+  {
+   "seat": "sn-parent-enrich / discovery-triage / discovery-score / discovery-describe / discovery-vision / ids-mapping / sn-compose",
+   "model_before": "local/deepseek-v4.1-flash",
+   "model_after": "local/deepseek-v4.1-flash",
+   "price_before": "local-free",
+   "price_after": "local-free",
+   "record": "ambix router /v1/models (fetched 2026-11-14T12:30Z) serves exactly deepseek-v4.1-flash; no newer version is served"
+  },
+  {
+   "seat": "sn-domain-tree / discovery-relevance / mapping-candidates / sn-judge",
+   "model_before": "typesafe/jev-1.14",
+   "model_after": "typesafe/jev-1.14",
+   "price_before": "response usage",
+   "price_after": "response usage",
+   "record": "the decisions endpoint lists no models (GET /api/alpha/decisions/models: 404) and refuses every alias with HTTP 400; jev-1.14 is the newest release recorded (build typesafe/jev-1.14-20261014 in docs/evidence/fragments/model-refresh-code.html)"
+  }
+ ]
+}

@@ -25,14 +25,14 @@ Usage:
 
     # Structured output with retry+parse (preferred for scoring)
     batch, cost, tokens = call_llm_structured(
-        model="google/gemini-3-flash-preview",
+        model="openrouter/google/gemini-3.8-flash",
         messages=[...],
         response_model=ScoreBatch,
     )
 
     # Async structured output (also returns LLMResult with cache info)
     llm_out = await acall_llm_structured(
-        model="google/gemini-3-flash-preview",
+        model="openrouter/google/gemini-3.8-flash",
         messages=[...],
         response_model=WikiScoreBatch,
     )
@@ -41,7 +41,7 @@ Usage:
 
     # Raw response (when caller needs custom parsing)
     response, cost = call_llm(
-        model="google/gemini-3-flash-preview",
+        model="openrouter/google/gemini-3.8-flash",
         messages=[...],
     )
 """
@@ -269,7 +269,7 @@ def _lookup_catalog(model: str, *, route_only: bool) -> tuple[dict[str, Any], bo
     """Return catalog metadata for *model* and whether it is the route's own.
 
     An OpenRouter route is catalogued under either the provider-qualified id
-    (``openrouter/anthropic/claude-sonnet-4.6``) or only under the bare vendor
+    (``openrouter/anthropic/claude-sonnet-5.5``) or only under the bare vendor
     id (``openai/gpt-5.5``), and which one carries the entry differs per
     vendor.  The bare entry describes the vendor's *direct* API rather than
     the OpenRouter route, so callers that care about the difference get it
@@ -822,7 +822,7 @@ def get_model_limits(model: str) -> dict[str, int]:
     """Get token limits for a model based on its family.
 
     Args:
-        model: Model identifier (e.g., "google/gemini-3-flash-preview")
+        model: Model identifier (e.g., "openrouter/google/gemini-3.8-flash")
 
     Returns:
         Dict with max_tokens and timeout values.
@@ -2280,7 +2280,7 @@ def call_llm_structured(
     across all discovery domains.
 
     Args:
-        model: Model identifier (e.g., "google/gemini-3-flash-preview").
+        model: Model identifier (e.g., "openrouter/google/gemini-3.8-flash").
         messages: Chat messages [{"role": ..., "content": ...}].
         response_model: Pydantic model for structured output parsing.
         max_tokens: Max output tokens (None = model-family default).
@@ -2466,7 +2466,7 @@ async def acall_llm_structured(
     asyncio.sleep() for non-blocking backoff.
 
     Args:
-        model: Model identifier (e.g., "google/gemini-3-flash-preview").
+        model: Model identifier (e.g., "openrouter/google/gemini-3.8-flash").
         messages: Chat messages [{"role": ..., "content": ...}].
         response_model: Pydantic model for structured output parsing.
         max_tokens: Max output tokens (None = model-family default).
@@ -3127,7 +3127,7 @@ def call_llm(
     parsing. Prefer call_llm_structured() for Pydantic models.
 
     Args:
-        model: Model identifier (e.g., "google/gemini-3-flash-preview").
+        model: Model identifier (e.g., "openrouter/google/gemini-3.8-flash").
         messages: Chat messages [{"role": ..., "content": ...}].
         response_format: Optional Pydantic model for structured output.
         max_tokens: Max output tokens (None = model-family default).
@@ -3217,7 +3217,7 @@ async def acall_llm(
     parsing. Prefer acall_llm_structured() for Pydantic models.
 
     Args:
-        model: Model identifier (e.g., "google/gemini-3-flash-preview").
+        model: Model identifier (e.g., "openrouter/google/gemini-3.8-flash").
         messages: Chat messages [{"role": ..., "content": ...}].
         response_format: Optional Pydantic model for structured output.
         max_tokens: Max output tokens (None = model-family default).

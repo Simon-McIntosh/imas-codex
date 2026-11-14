@@ -312,7 +312,7 @@ location = "iter"
 [tool.imas-codex.sn-docs]
 # Documentation generation needs physics-faithful prose and strict banned-prose
 # compliance. Selection evidence belongs in the benchmark result artifacts.
-# Switch-back: model="openrouter/anthropic/claude-sonnet-4.6".
+# Switch-back: model="openrouter/anthropic/claude-sonnet-5.5".
 model = "openrouter/openai/gpt-6.1-sol"
 # Reasoning effort for docs prose (OpenRouter unified field).
 reasoning-effort = "high"
@@ -340,7 +340,10 @@ reasoning-effort = "high"
 # Vendor-diverse from the refine base (OpenAI) and compose model (local
 # DeepSeek) so escalation breaks a failure loop with an independent perspective
 # rather than the family that already failed the item; fires only at chain cap.
-model = "openrouter/anthropic/claude-fable-5"
+# The Anthropic Sonnet line carries roughly a fifth of the previous seat's
+# per-token price at the same tier, which is what makes a chain-cap call
+# affordable on the many family parents that reach it.
+model = "openrouter/anthropic/claude-sonnet-5.5"
 
 [tool.imas-codex.sn-parent-enrich]
 # Derived-parent description synthesis. A derived parent (e.g.
@@ -351,7 +354,7 @@ model = "openrouter/anthropic/claude-fable-5"
 # flows review → accept → docs. It is a concise-description (compose-tier)
 # task, NOT long-form physics prose — generate_docs (sn-docs) rewrites the
 # full documentation downstream — so it routes the cheap/fast compose model.
-# Switch to the docs tier (model="openrouter/anthropic/claude-sonnet-4.6",
+# Switch to the docs tier (model="openrouter/anthropic/claude-sonnet-5.5",
 # reasoning-effort="high") if review_name rejects the synthesised descriptions.
 model = "local/deepseek-v4.1-flash"
 model-route = "ambix-local"
@@ -394,13 +397,13 @@ reasoning-effort = "low"
 # message, the frozen batch artifact, and the per-domain catalog diff to write
 # a concise, factual PR body for human reviewers. Pure summarisation over
 # supplied evidence (never invents physics) — language tier is sufficient.
-model = "openrouter/anthropic/claude-sonnet-4.6"
+model = "openrouter/anthropic/claude-sonnet-5.5"
 
 [tool.imas-codex.dd-enrichment]
 # openrouter/ prefix required so direct-path bypass preserves cache_control
 # and response_cost. Without it, calls silently route through the proxy,
 # stripping cache discounts (often 80%+) and zeroing cost telemetry.
-model = "openrouter/anthropic/claude-sonnet-4.6"
+model = "openrouter/anthropic/claude-sonnet-5.5"
 
 # ─── Discovery function seats ──────────────────────────────────────────────
 # One seat per discovery function so a model can be chosen per function, the
@@ -485,7 +488,7 @@ reasoning-effort = "high"
 
 [tool.imas-codex.reasoning]
 # openrouter/ prefix — see [dd-enrichment] note above.
-model = "openrouter/anthropic/claude-sonnet-4.6"
+model = "openrouter/anthropic/claude-sonnet-5.5"
 
 [tool.imas-codex.sn-compose]
 # Maximum concurrent LLM requests issued by the compose worker.
@@ -684,14 +687,14 @@ cascade-deciding = true
 # Mixed-vendor RD-quorum chain.
 # Cycle 0 (primary, blind): local DS4-flash — catches grammar/format/ISN
 # violations for free; OK at low-stakes pass/fail signal.
-# Cycle 1 (secondary, blind): Haiku 4.5 — cross-vendor cheap diversity,
+# Cycle 1 (secondary, blind): Haiku 5.5 — cross-vendor cheap diversity,
 # breaks the same-family bias that caused the DS4 rsd=1.0 false positives.
 # Cycle 2 (escalator, context-aware): GPT-6.1 Sol — cross-vendor authority on
 # disputed items (sees both blind critiques).
 # To use one local reviewer, configure only the local model in this list.
 models = [
   "local/deepseek-v4.1-flash",
-  "openrouter/anthropic/claude-haiku-4.5",
+  "openrouter/anthropic/claude-haiku-5.5",
   "openrouter/openai/gpt-6.1-sol",
 ]
 disagreement-threshold = 0.20
@@ -705,13 +708,13 @@ endpoint-class = "local-free"
 # ---------------------------------------------------------------------------
 
 [tool.imas-codex.sn-review.names.profiles.default]
-# Production reviewer quorum: vendor-diverse Grok 4.5 and GPT-6 Luna form
-# the dual-blind base pair. Claude Sonnet 5 is the context-aware disagreement
+# Production reviewer quorum: vendor-diverse Grok 4.7 and GPT-6 Luna form
+# the dual-blind base pair. Claude Sonnet 5.5 is the context-aware disagreement
 # breaker, retaining a three-seat chain without a single-review fallback.
 models = [
-  "openrouter/x-ai/grok-4.5",
+  "openrouter/x-ai/grok-4.7",
   "openrouter/openai/gpt-6-luna",
-  "openrouter/anthropic/claude-sonnet-5",
+  "openrouter/anthropic/claude-sonnet-5.5",
 ]
 disagreement-threshold = 0.20
 
@@ -726,7 +729,7 @@ disagreement-threshold = 1.0
 [tool.imas-codex.sn-review.names.profiles.quality-cost-balanced]
 # Alternative quality-cost-balanced profile (requires OpenRouter credits).
 models = [
-  "openrouter/anthropic/claude-sonnet-4.6",
+  "openrouter/anthropic/claude-sonnet-5.5",
   "openrouter/openai/gpt-6.1-sol",
   "openrouter/google/gemini-3.1-pro-preview",
 ]
@@ -734,16 +737,16 @@ disagreement-threshold = 0.20
 
 [tool.imas-codex.sn-review.names.profiles.opus-only]
 # Single-model mode: maximum quality, maximum cost (requires OpenRouter credits).
-models = ["openrouter/anthropic/claude-opus-4.8"]
+models = ["openrouter/anthropic/claude-opus-5.5"]
 disagreement-threshold = 1.0
 
 [tool.imas-codex.sn-review.docs]
-# Dual-blind claude-sonnet-5 + grok-4.5 with a gpt-6.1-sol breaker. The pair is
+# Dual-blind claude-sonnet-5.5 + grok-4.7 with a gpt-6.1-sol breaker. The pair is
 # vendor-diverse and uses providers that sustain pool concurrency; the breaker
 # supplies an independent override perspective. All endpoints auto-resolve.
 models = [
-  "openrouter/anthropic/claude-sonnet-5",
-  "openrouter/x-ai/grok-4.5",
+  "openrouter/anthropic/claude-sonnet-5.5",
+  "openrouter/x-ai/grok-4.7",
   "openrouter/openai/gpt-6.1-sol",
 ]
 disagreement-threshold = 0.20
@@ -753,21 +756,20 @@ disagreement-threshold = 0.20
 # Each is benchmarked independently; results are compared side-by-side.
 # Format: OpenRouter model IDs (provider/model-slug).
 compose-models = [
-    "openrouter/anthropic/claude-opus-4.8",
-    "openrouter/anthropic/claude-sonnet-5",
-    "openrouter/anthropic/claude-haiku-4.5",
+    "openrouter/anthropic/claude-opus-5.5",
+    "openrouter/anthropic/claude-sonnet-5.5",
+    "openrouter/anthropic/claude-haiku-5.5",
     "openrouter/openai/gpt-6.1-sol",
     "openrouter/openai/gpt-6.1-terra",
     "openrouter/openai/gpt-6-luna",
-    "openrouter/x-ai/grok-4.5",
-    "openrouter/google/gemini-3.5-flash",
+    "openrouter/x-ai/grok-4.7",
+    "openrouter/google/gemini-3.8-flash",
     "openrouter/google/gemini-3.1-pro-preview",
-    "openrouter/google/gemini-3-flash-preview",
-    "openrouter/google/gemini-3.1-flash-lite-preview",
+    "openrouter/google/gemini-3.5-flash-lite",
     "openrouter/qwen/qwen3.7-plus",
-    "openrouter/xiaomi/mimo-v2.5-pro",
-    "openrouter/moonshotai/kimi-k3",
-    "openrouter/deepseek/deepseek-v4-flash",
+    "openrouter/xiaomi/mimo-v2.6-pro",
+    "openrouter/moonshotai/kimi-k3.1-pro",
+    "openrouter/deepseek/deepseek-v4.1-flash",
     "openrouter/meta-llama/llama-4-maverick",
 ]
 # Thin-capacity providers that throttle under concurrency stay outside every
@@ -779,16 +781,16 @@ compose-models = [
 # Current slate: concurrency-resilient, vendor-diverse reviewer candidates.
 # Throttle-prone providers are deliberately absent.
 candidate-models = [
-    "openrouter/x-ai/grok-4.5",
-    "openrouter/google/gemini-3.5-flash",
+    "openrouter/x-ai/grok-4.7",
+    "openrouter/google/gemini-3.8-flash",
     "openrouter/google/gemini-3.1-pro-preview",
     "openrouter/openai/gpt-6.1-terra",
-    "openrouter/anthropic/claude-sonnet-5",
+    "openrouter/anthropic/claude-sonnet-5.5",
 ]
 # Frontier model used as independent judge for quality scoring.
 # Must be a strong reasoning model — evaluates 5 dimensions (0-100).
 # Benchmark result artifacts record the judge used by each run.
-reviewer-model = "openrouter/anthropic/claude-opus-4.8"
+reviewer-model = "openrouter/anthropic/claude-opus-5.5"
 # Multiple reviewer models for multi-reviewer matrix benchmark.
 # Each reviewer scores independently; pairwise agreement is computed.
 # The slate spans vendors and capability tiers; measured results remain in the
@@ -797,13 +799,13 @@ reviewer-models = [
     # Candidate blind-reviewers (cheap, vendor-diverse, reasoning-capable)
     # Models whose endpoints violate the account data policy, return empty
     # content, or throttle under pool concurrency stay outside this slate.
-    "openrouter/google/gemini-3.5-flash",       # Google   $1.50/$9.00
+    "openrouter/google/gemini-3.8-flash",       # Google   $0.83/$4.13
     "openrouter/openai/gpt-6.1-sol",            # OpenAI — vendor diversity in judge panel
-    "openrouter/x-ai/grok-4.5",                 # xAI      $2/$6
+    "openrouter/x-ai/grok-4.7",                 # xAI      $2/$6
     # Quorum-breaker candidates / calibrated anchors
     "openrouter/google/gemini-3.1-pro-preview", # escalator $2/$12
-    "openrouter/anthropic/claude-sonnet-5",     # Anthropic $2/$10
-    "openrouter/anthropic/claude-opus-4.8",     # quality ceiling ref $5/$25
+    "openrouter/anthropic/claude-sonnet-5.5",   # Anthropic $2/$10
+    "openrouter/anthropic/claude-opus-5.5",     # quality ceiling ref $4/$20
 ]
 
 [tool.imas-codex.sn-fanout]
@@ -870,172 +872,166 @@ location = "iter"       # facility hosting LLM proxy (or "local" for in-process)
 # prompt rate and carries no `cache-write` key.
 #
 # Every configured production seat and reviewer-profile route belongs here: a
-# route absent from this table can only be priced from LiteLLM's bundled
+# route absent from this file can only be priced from LiteLLM's bundled
 # catalog, which does not carry newer routes at all and made a curated seat
 # unpriceable when that package was incompletely installed.
-
-[tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4-flash"]
-prompt = 0.14
-completion = 0.28
-cache-read = 0.028
-source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-flash"
-verified-at = "2026-08-11"
-max-input-tokens = 1048576
+#
+# Every entry carries the `source` it was read from and the `verified-at` date
+# of that read. Rates here were re-read on 2026-11-14 from the public model
+# OpenRouter publishes at https://openrouter.ai/api/v1/models, which carries
+# each route's prompt, completion, cache and long-input override rates and its
+# context length.
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4.1-flash"]
-prompt = 0.30
-completion = 1.20
-cache-read = 0.006
+prompt = 0.0507
+completion = 0.2028
+cache-read = 0.001014
 source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4.1-flash"
-verified-at = "2026-10-09"
+verified-at = "2026-11-14"
 max-input-tokens = 1048576
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.5"]
-prompt = 2.0
-completion = 6.0
-cache-read = 0.30
-source = "https://openrouter.ai/api/v1/model/x-ai/grok-4.5"
-verified-at = "2026-08-11"
+[tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.7"]
+prompt = 2
+completion = 6
+cache-read = 0.5
+source = "https://openrouter.ai/api/v1/model/x-ai/grok-4.7"
+verified-at = "2026-11-14"
 max-input-tokens = 500000
 overrides = [
-  { min-input-tokens = 200000, prompt = 4.0, completion = 12.0 },
-]
-
-[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-5.6-luna"]
-prompt = 0.10
-completion = 0.60
-cache-read = 0.01
-cache-write = 0.125
-source = "https://openrouter.ai/api/v1/model/openai/gpt-5.6-luna"
-verified-at = "2026-08-11"
-max-input-tokens = 1050000
-overrides = [
-  { min-input-tokens = 272000, prompt = 0.20, completion = 0.90 },
+  { min-input-tokens = 200000, prompt = 4, completion = 12, cache-read = 1 },
 ]
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-6.1-sol"]
-prompt = 2.0
-completion = 10.0
-cache-read = 0.10
-cache-write = 2.50
+prompt = 2
+completion = 10
+cache-read = 0.1
+cache-write = 2.5
 source = "https://openrouter.ai/api/v1/model/openai/gpt-6.1-sol"
-verified-at = "2026-10-18"
+verified-at = "2026-11-14"
 max-input-tokens = 1050000
 overrides = [
-  { min-input-tokens = 272000, prompt = 4.0, completion = 15.0, cache-read = 0.20, cache-write = 5.0 },
+  { min-input-tokens = 272000, prompt = 4, completion = 15, cache-read = 0.2, cache-write = 5 },
 ]
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-6.1-terra"]
-prompt = 1.0
-completion = 5.0
+prompt = 1
+completion = 5
 cache-read = 0.05
 cache-write = 1.25
 source = "https://openrouter.ai/api/v1/model/openai/gpt-6.1-terra"
-verified-at = "2026-11-07"
+verified-at = "2026-11-14"
 max-input-tokens = 1050000
 overrides = [
-  { min-input-tokens = 272000, prompt = 2.0, completion = 7.5, cache-read = 0.10, cache-write = 2.50 },
+  { min-input-tokens = 272000, prompt = 2, completion = 7.5, cache-read = 0.1, cache-write = 2.5 },
 ]
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-6-luna"]
-prompt = 0.10
-completion = 0.50
+prompt = 0.1
+completion = 0.5
 cache-read = 0.01
 cache-write = 0.125
 source = "https://openrouter.ai/api/v1/model/openai/gpt-6-luna"
-verified-at = "2026-10-18"
+verified-at = "2026-11-14"
 max-input-tokens = 1050000
 overrides = [
-  { min-input-tokens = 272000, prompt = 0.20, completion = 0.75, cache-read = 0.02, cache-write = 0.25 },
+  { min-input-tokens = 272000, prompt = 0.2, completion = 0.75, cache-read = 0.02, cache-write = 0.25 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-5.5"]
-prompt = 5.0
-completion = 30.0
-cache-read = 0.50
-source = "https://openrouter.ai/api/v1/model/openai/gpt-5.5"
-verified-at = "2026-08-11"
-max-input-tokens = 1050000
+[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-5.5"]
+prompt = 2
+completion = 10
+cache-read = 0.1
+cache-write = 2.5
+source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5.5"
+verified-at = "2026-11-14"
+max-input-tokens = 1000000
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-haiku-5.5"]
+prompt = 0.1
+completion = 0.5
+cache-read = 0.01
+cache-write = 0.125
+source = "https://openrouter.ai/api/v1/model/anthropic/claude-haiku-5.5"
+verified-at = "2026-11-14"
+max-input-tokens = 1000000
 overrides = [
-  { min-input-tokens = 272000, prompt = 10.0, completion = 45.0 },
+  { min-input-tokens = 100000, prompt = 0.5, completion = 2.5, cache-read = 0.05, cache-write = 0.625 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/openai/gpt-5.4"]
-prompt = 2.50
-completion = 15.0
-cache-read = 0.25
-source = "https://openrouter.ai/api/v1/model/openai/gpt-5.4"
-verified-at = "2026-08-11"
-max-input-tokens = 1050000
-overrides = [
-  { min-input-tokens = 272000, prompt = 5.0, completion = 22.50 },
-]
-
-[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-5"]
-prompt = 2.0
-completion = 10.0
-cache-read = 0.20
-cache-write = 2.50
-source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-5"
-verified-at = "2026-08-11"
-max-input-tokens = 1000000
-
-[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-sonnet-4.6"]
-prompt = 3.0
-completion = 15.0
-cache-read = 0.30
-cache-write = 3.75
-source = "https://openrouter.ai/api/v1/model/anthropic/claude-sonnet-4.6"
-verified-at = "2026-08-11"
-max-input-tokens = 1000000
-
-[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-haiku-4.5"]
-prompt = 1.0
-completion = 5.0
-cache-read = 0.10
-cache-write = 1.25
-source = "https://openrouter.ai/api/v1/model/anthropic/claude-haiku-4.5"
-verified-at = "2026-08-11"
-max-input-tokens = 200000
-
-[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-opus-4.8"]
-prompt = 5.0
-completion = 25.0
-cache-read = 0.50
-cache-write = 6.25
-source = "https://openrouter.ai/api/v1/model/anthropic/claude-opus-4.8"
-verified-at = "2026-08-11"
-max-input-tokens = 1000000
-
-[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-fable-5"]
-prompt = 10.0
-completion = 50.0
-cache-read = 1.0
-cache-write = 12.50
-source = "https://openrouter.ai/api/v1/model/anthropic/claude-fable-5"
-verified-at = "2026-08-11"
+[tool.imas-codex.llm.openrouter-pricing."openrouter/anthropic/claude-opus-5.5"]
+prompt = 4
+completion = 20
+cache-read = 0.2
+cache-write = 5
+source = "https://openrouter.ai/api/v1/model/anthropic/claude-opus-5.5"
+verified-at = "2026-11-14"
 max-input-tokens = 1000000
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.1-pro-preview"]
-prompt = 2.0
-completion = 12.0
-cache-read = 0.20
+prompt = 2
+completion = 12
+cache-read = 0.2
 cache-write = 0.375
 source = "https://openrouter.ai/api/v1/model/google/gemini-3.1-pro-preview"
-verified-at = "2026-08-11"
+verified-at = "2026-11-14"
 max-input-tokens = 1048576
 overrides = [
-  { min-input-tokens = 200000, prompt = 4.0, completion = 18.0 },
+  { min-input-tokens = 200000, prompt = 4, completion = 18, cache-read = 0.4 },
 ]
 
-[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.1-flash-lite-preview"]
-prompt = 0.25
-completion = 1.50
-cache-read = 0.025
-cache-write = 0.0833
-source = "https://openrouter.ai/api/v1/model/google/gemini-3.1-flash-lite-preview"
-verified-at = "2026-08-11"
+[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.8-flash"]
+prompt = 0.825
+completion = 4.125
+cache-read = 0.0825
+cache-write = 0.041666667
+source = "https://openrouter.ai/api/v1/model/google/gemini-3.8-flash"
+verified-at = "2026-11-14"
 max-input-tokens = 1048576
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-3.5-flash-lite"]
+prompt = 0.3
+completion = 2.5
+cache-read = 0.03
+cache-write = 0.083333333
+source = "https://openrouter.ai/api/v1/model/google/gemini-3.5-flash-lite"
+verified-at = "2026-11-14"
+max-input-tokens = 1048576
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/qwen/qwen3.7-plus"]
+prompt = 0.32
+completion = 1.28
+cache-read = 0.064
+cache-write = 0.4
+source = "https://openrouter.ai/api/v1/model/qwen/qwen3.7-plus"
+verified-at = "2026-11-14"
+max-input-tokens = 1000000
+overrides = [
+  { min-input-tokens = 256000, prompt = 0.96, completion = 3.84, cache-read = 0.192, cache-write = 1.2 },
+]
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/xiaomi/mimo-v2.6-pro"]
+prompt = 0.435
+completion = 0.87
+cache-read = 0.0036
+source = "https://openrouter.ai/api/v1/model/xiaomi/mimo-v2.6-pro"
+verified-at = "2026-11-14"
+max-input-tokens = 1050000
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/moonshotai/kimi-k3.1-pro"]
+prompt = 2
+completion = 10
+cache-read = 0.2
+source = "https://openrouter.ai/api/v1/model/moonshotai/kimi-k3.1-pro"
+verified-at = "2026-11-14"
+max-input-tokens = 1048576
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/meta-llama/llama-4-maverick"]
+prompt = 0.35
+completion = 1
+cache-read = 0.17
+source = "https://openrouter.ai/api/v1/model/meta-llama/llama-4-maverick"
+verified-at = "2026-11-14"
+max-input-tokens = 524288
 
 [tool.imas-codex.docs-server]
 # Host-wide HTML docs server (~/Code/dotfiles/docs-server/serve.py): fronts every

@@ -692,8 +692,8 @@ def _canary_check(location: str) -> tuple[bool, str]:
 
     # One cheap model per credential/routing class
     canary_models = [
-        ("codex", "openrouter/google/gemini-2.0-flash-001"),
-        ("codex-anthropic", "openrouter/anthropic/claude-haiku-4.5"),
+        ("codex", "openrouter/google/gemini-3.8-flash"),
+        ("codex-anthropic", "openrouter/anthropic/claude-haiku-5.5"),
     ]
 
     results: list[tuple[str, bool, str]] = []

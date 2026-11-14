@@ -98,7 +98,7 @@ imas.add_command(map_cmd, "map")
     default=None,
     help=(
         "Override the LLM model for enrichment and refinement "
-        "(e.g., 'openrouter/anthropic/claude-sonnet-4.6'). "
+        "(e.g., 'openrouter/anthropic/claude-sonnet-5.5'). "
         "Default: uses [tool.imas-codex.dd-enrichment] model from pyproject.toml."
     ),
 )
@@ -148,7 +148,7 @@ def imas_build(
         imas-codex imas dd build --reset-to enriched   # Re-refine only
         imas-codex imas dd build --reset-to refined    # Re-embed (embedding model change)
         imas-codex imas dd build --reset-to embedded   # Re-classify domains (cheapest fix)
-        imas-codex imas dd build --model openrouter/anthropic/claude-sonnet-4.6  # Override model
+        imas-codex imas dd build --model openrouter/anthropic/claude-sonnet-5.5  # Override model
         imas-codex imas dd build --dry-run -v     # Preview without writing
         imas-codex imas dd build --ids-filter "core_profiles equilibrium"  # Test subset
 

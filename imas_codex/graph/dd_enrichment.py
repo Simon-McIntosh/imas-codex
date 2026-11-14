@@ -13,7 +13,7 @@ Usage:
     stats = enrich_imas_paths(
         client=graph_client,
         version="4.0.0",
-        model="google/gemini-3-flash-preview",
+        model="openrouter/google/gemini-3.8-flash",
         batch_size=50,
     )
 """
