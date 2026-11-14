@@ -43,6 +43,16 @@
       "note": "The two refusal tests no longer hang on one branch: whichever signed write performs the reclaim, the done-when requires both refusals (archive receipt absent; reclaiming name not the tombstone's descendant) shown for that same write.",
       "reason": "",
       "when": "2026-11-14T17:13:03.274205+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "e8a8fc3f96641114cf6bb6dbdd8f6bc23b59ce3f",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "A third plant exercises the name-stage half of the live-count rule: one live name plus a sibling whose status does not read superseded while its name stage does must count one, beside the status-superseded sibling and the two-live-names case.",
+      "reason": "",
+      "when": "2026-11-14T17:13:15.665889+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The two refusal tests no longer hang on one branch: whichever signed write performs the reclaim, the done-when requires both refusals (archive receipt absent; reclaiming name not the tombstone's descendant) shown for that same write.",
       "reason": "",
       "when": "2026-11-14T17:13:03.274205+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "e8a8fc3f96641114cf6bb6dbdd8f6bc23b59ce3f",
+      "commit_basis": "edit",
+      "note": "A third plant exercises the name-stage half of the live-count rule: one live name plus a sibling whose status does not read superseded while its name stage does must count one, beside the status-superseded sibling and the two-live-names case.",
+      "reason": "",
+      "when": "2026-11-14T17:13:15.665889+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261114T162212248997-plan-review-of-sn-catalog-consistency.json",
