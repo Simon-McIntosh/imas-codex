@@ -419,5 +419,57 @@
  "blocker": {
   "id": "batches-left",
   "detail": "The species classes are done for the species this pass covered. Remaining: the derived families of the other 23 species, the operator class (77), the family parents (144), the unit misfits (26), the single-object names (171), and the equivalent-electron class (56; needs the grammar snapshot sync first). Measured rates hold under the ceiling."
+ },
+ "duplicate_identity_fold": {
+  "ruling": "electron_number_density was renamed to line_integrated_electron_number_density by lead ruling; the target already existed as a separate accepted identity.",
+  "test_applied": "Both names were compared on their DD bindings and the DD documentation of each binding. If both are the path integral of electron density along a line of sight, fold; otherwise record both and leave it to the lead.",
+  "old_name": {
+   "id": "electron_number_density",
+   "unit": "m^-2",
+   "name_stage_before": "accepted",
+   "docs_stage": "reviewed",
+   "score_docs": 0.9606928100827251,
+   "description": "Electron column number density is the free-electron number per area accumulated along a propagation path, without path-length averaging.",
+   "sources_in_graph": 1,
+   "source_bindings": [
+    "electron_number_density"
+   ]
+  },
+  "target_name": {
+   "id": "line_integrated_electron_number_density",
+   "unit": "m^-2",
+   "name_stage": "accepted",
+   "docs_stage": "accepted",
+   "score_docs": 0.8732275377674048,
+   "description": "Line-integrated electron number density is the free-electron column abundance along the complete propagation path, including forward and return segments when present.",
+   "source_bindings": [
+    "dd:equilibrium/time_slice/constraints/n_e_line/measured",
+    "dd:equilibrium/time_slice/constraints/n_e_line/reconstructed",
+    "dd:interferometer/channel/n_e_line",
+    "dd:refractometer/channel/bandwidth/n_e_line",
+    "dd:refractometer/channel/n_e_line"
+   ]
+  },
+  "dd_documentation_read": {
+   "interferometer/channel/n_e_line": "Line integrated density, possibly obtained by a combination of multiple interferometry wavelengths. Corresponds to the density integrated along the full line-of-sight (i.e. forward AND return for a reflected channel: NO dividing by 2 correction)",
+   "refractometer/channel/n_e_line": "Integral of the electron density along the line of sight, deduced from the envelope phase measurements",
+   "refractometer/channel/bandwidth/n_e_line": "Integral of the electron density along the line of sight, deduced from the envelope phase measurements",
+   "equilibrium/time_slice/constraints/n_e_line/measured": "Measured value (FLT_0D)",
+   "equilibrium/time_slice/constraints/n_e_line/reconstructed": "Value calculated from the reconstructed equilibrium (FLT_0D)"
+  },
+  "finding": "The DD documentation of every binding states a line integral of electron density along the line of sight, so the two identities are one quantity: the old one named a column density by a word that reads as a local density. They were folded rather than left as duplicates.",
+  "action": {
+   "command": "imas-codex sn supersede electron_number_density --into line_integrated_electron_number_density",
+   "dry_run_first": true,
+   "result": "superseded electron_number_density into line_integrated_electron_number_density",
+   "old_after": {
+    "name_stage": "superseded",
+    "superseded_from_stage": "accepted"
+   },
+   "sources_carried": 1,
+   "target_sources_after": 6,
+   "history": "kept; the fold tombstones the old identity and threads REFINED_FROM to the target"
+  },
+  "general_rule_recorded": "Any ruled or regenerated name that collides with an existing identity is tested the same way: compare the DD bindings and each binding's DD documentation, fold when they are one quantity, and record both sets and the distinction when they are not."
  }
 }
