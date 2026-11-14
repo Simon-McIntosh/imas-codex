@@ -102,11 +102,17 @@ def _assert_priced(model: str, owner: str) -> None:
         # endpoint class, or the decisions response's own usage cost.
         return
     pricing = _assert_proven_pricing(owner, model)
-    for key in ("cache_read", "cache_write"):
-        value = pricing[key]
-        assert isinstance(value, (int, float)), (
-            f"{owner} prices {model!r} with {key}={value!r}"
-        )
+    cache_read = pricing["cache_read"]
+    assert isinstance(cache_read, (int, float)), (
+        f"{owner} prices {model!r} with cache_read={cache_read!r}"
+    )
+    # A route may publish no cache-write rate, in which case the admission
+    # estimate prices those tokens at the base prompt rate rather than at an
+    # invented premium.
+    cache_write = pricing["cache_write"]
+    assert cache_write is None or isinstance(cache_write, (int, float)), (
+        f"{owner} prices {model!r} with cache_write={cache_write!r}"
+    )
 
 
 @pytest.mark.parametrize("seat", SINGLE_SEATS)
