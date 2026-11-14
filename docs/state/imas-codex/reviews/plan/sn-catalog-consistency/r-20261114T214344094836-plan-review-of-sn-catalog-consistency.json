@@ -89,6 +89,16 @@
       "note": "The prose now states that the three groups sum to 2,606 with three names unclassified, and rests the no-loss claim on the edge count (3,256 of 3,266 live names) instead of on the breakdown.",
       "reason": "",
       "when": "2026-11-14T22:47:34.499116+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0f51e3bc331d713e35f3b27a1515f1102697ac2f",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The promise of what each name needs is removed; the seven are named and handed to section 7.",
+      "reason": "",
+      "when": "2026-11-14T22:47:42.565936+00:00"
     }
   ],
   "responses": {
@@ -109,6 +119,15 @@
       "note": "The prose now states that the three groups sum to 2,606 with three names unclassified, and rests the no-loss claim on the edge count (3,256 of 3,266 live names) instead of on the breakdown.",
       "reason": "",
       "when": "2026-11-14T22:47:34.499116+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "0f51e3bc331d713e35f3b27a1515f1102697ac2f",
+      "commit_basis": "edit",
+      "note": "The promise of what each name needs is removed; the seven are named and handed to section 7.",
+      "reason": "",
+      "when": "2026-11-14T22:47:42.565936+00:00"
     },
     "single_goal-1": {
       "action": "acted",
