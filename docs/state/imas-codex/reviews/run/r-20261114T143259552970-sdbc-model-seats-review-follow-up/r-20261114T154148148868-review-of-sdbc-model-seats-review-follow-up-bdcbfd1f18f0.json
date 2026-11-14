@@ -1,0 +1,64 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_refine_names.py:380",
+    "imas_codex/settings.py:2018"
+  ],
+  "completed_at": "2026-11-14T16:18:09.654Z",
+  "dispatched_at": "2026-11-14T15:42:13Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143259552970-sdbc-model-seats-review-follow-up/manifest.md",
+      "line": 2,
+      "severity": "non-blocking",
+      "text": "The base revision is mistyped as 3247120148f7d860d4b111e378f84b2c111ebb4d9 which resolves to no object; it carries one extra character against the real base. The parent of 810574a9b is 3247120148f7d860d4b11e378f84b2c111ebb4d9, and baseline_suite.revision at line 17 carries the same typo."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143259552970-sdbc-model-seats-review-follow-up/negative-control.log",
+      "line": 2,
+      "severity": "non-blocking",
+      "text": "The header names the base revision, but the traceback is tests/config/test_model_seats.py:200 and that file is 182 lines at the base, so the red arm ran the head test file. The guard is sound; the header revision claim is not."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T143259552970-sdbc-model-seats-review-follow-up/manifest.md",
+      "line": 8,
+      "severity": "non-blocking",
+      "text": "Two changed paths outside the six declared write paths are listed with no scope_note, which the brief requires for an out-of-scope edit."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "worker_refine_names.py:380 calls refine_model_for_attempt; settings.py:2018 serves the candidate slate and its price.",
+    "diff": "Read commit by commit. bdcbfd1f1 repairs a pre-existing red assertion; 810574a9b carries the pricing, rotation, allow-list and evidence changes.",
+    "done_when": "All three limbs are asserted. base-arm.log is red on the enumeration test, negative-control.log is red on the escalation test, gate.log ends EXIT=0.",
+    "goal": "The goal is that every model identifier a default names is priced. settings.py:2004 now names openrouter/deepseek/deepseek-v4-pro-0813 and pyproject.toml:893 prices it.",
+    "manifest": "Read; status complete. It records 675 passed and EXIT=0 in gate.log, 1 failed in negative-control.log, and a measurement tree I confirmed exists.",
+    "write_paths": "Read; three of the nine changed paths sit outside the six declared paths: worker_refine_names.py, tests/core/test_gpt6_model_support.py, and the required gzip."
+  },
+  "justifications": {
+    "durability": "tests/config/test_model_seats.py:154 is red at the base on the unpriced default, and :200 reddens under a rotation that ignores the seat.",
+    "evidence": "gate.log ends EXIT=0 with UNPRICED_IDENTIFIERS=0, and I re-verified the preserved record independently: its sha256 matches the claimed digest and it prices the route at 0.000000111 prompt and 0.00000444 completion per token, matching pyproject.toml:894.",
+    "fit": "The additions follow the surrounding pytest idiom and reuse _assert_priced at tests/config/test_model_seats.py:101 instead of restating the catalog check.",
+    "goal_fidelity": "settings.py:2004 names the routed, priced identifier and worker_refine_names.py:47 resolves the escalation seat at call time.",
+    "reuse": "No enumerator of model defaults exists in the repository; the change uses get_model at worker_refine_names.py:47 and the pyproject catalog rather than forking them.",
+    "scope_discipline": "Two of the nine changed paths are outside the declared write paths and no scope_note was recorded (manifest.md:8)."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261114T154148148868-review-of-sdbc-model-seats-review-follow-up-bdcbfd1f18f0",
+  "reviewed_base_sha": "3247120148f7d860d4b11e378f84b2c111ebb4d9",
+  "reviewed_head_sha": "bdcbfd1f18f015919f52f3b9540e81e26fe62492",
+  "reviewed_node": "sdbc-model-seats-review-follow-up",
+  "reviewed_run_id": "r-20261114T143259552970-sdbc-model-seats-review-follow-up",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T16:18:16.850108+00:00",
+  "total": 109
+}
