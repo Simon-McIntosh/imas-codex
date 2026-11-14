@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run recorded no baseline_suite or after_suite: its change adds no suite the suite runner measures, and its gate is the report pass plus the always-pass negative control, recorded at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/reader-bake-off-gate.log with EXIT=0, so there is no suite delta to derive",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-14T17:46:26.766Z",
+  "dispatched_at": "2026-11-14T17:32:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py",
+      "line": "684",
+      "severity": "non-blocking",
+      "text": "non-blocking: schema is assigned the string \"name-definition-reader-placeholder\" and overwritten at line 702, so a dead placeholder literal ships in the delivered script and would be what the JSON carried if the overwrite were ever moved or dropped."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py",
+      "line": "995",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fresh-reader table header ends in a stray double quote (\"sides\\\"\"), so the delivered page renders a malformed column name."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T140342783775-sdbc-name-definition-reader-bake-off/manifest.md",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: orientation_write_paths declares the figure directory as docs/figures/sn-definition-readers while the landed file is docs/figures/sn-name-definition-readers/recall-precision-by-arm.svg (the path named by the brief), so a scope audit reading the manifest's grant reports the figure as outside it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py",
+      "line": "924",
+      "severity": "non-blocking",
+      "text": "non-blocking: the page prints only the first 40 of the 120 fresh-reader rows ([.. :40]) and neither the note nor the caption says the list is truncated."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from 1bad1af53 to 260a70e90; five commits add a 1,234-line scorer, its JSON of every reading, an 81-line page and the SVG, and the final commit is verified to change only the JSON's generated_at and the SVG's clip-path ids against ea1ac4da, so the committed artefacts are the gate's own outputs.",
+    "done_when": "the done-when asks for flagged-recall, flagged-precision and cost per name for each of the five arms over at least 1,900 names, spend below USD 15, and an always-pass arm printing flagged-recall 0; the report table carries all three columns for all five arms over 2,044 names at name-definition-reader-bake-off.json arms, spend_usd 9.7665, and the negative run prints flagged-recall 0.0 (0 of 485).",
+    "goal": "the node's goal is to score the production seat, two cheap models read three times, the local model and a mixed panel against the settled reader verdicts; the landed scorer does exactly that for 8 arm rows over the recommendation rule at docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py:629.",
+    "manifest": "read; status complete, the gate command and its log path recorded, spend USD 9.7665 against a USD 15 ceiling, the negative-control note and a rubric self-check for six dimensions are present.",
+    "write_paths": "the node was fenced to three files under docs/evidence/fragments/sn-definitions-by-construction/ plus docs/figures/sn-name-definition-readers; all four paths in the diff sit inside that grant, though the manifest spells the figure directory differently at manifest.md:3."
+  },
+  "justifications": {
+    "durability": "the diff adds no test or assertion that reddens on a scorer regression; the only falsifier is the negative mode at name-definition-reader-bake-off.py:1215, which prints flagged-recall 0.0 rather than asserting it.",
+    "evidence": "the gate log at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/reader-bake-off-gate.log records revision ea1ac4da, the report command and its EXIT=0 with the always-pass line at flagged-recall 0.0, and the head commit's only JSON delta is generated_at.",
+    "fit": "the script reuses imas_codex's own prompt loader and the seat's own _judge_batch at name-definition-reader-bake-off.py:299 instead of forking the production call, passes ruff check, and its evidence-artefact shape matches the sibling fragments under docs/evidence/fragments/.",
+    "goal_fidelity": "name-definition-reader-bake-off.py:241 runs the production seat from get_sn_review_docs_models()[0] at its own BATCH_SIZE of 10 and adds the two cheap models, the local model and the mixed panel the goal names.",
+    "reuse": "no owner implements arm-versus-label panel scoring with intervals; the closest, imas_codex/standard_names/benchmark.py:408 compare_to_reference, computes set-overlap precision and recall for candidate extraction and is not extended, so this file duplicates only the narrow confusion-metric shape that imas_codex/standard_names/review/cascade_calibration.py:352 also computes for the accept/refine cascade.",
+    "scope_discipline": "every path in the diff (the .py, .json, .html and docs/figures/sn-name-definition-readers/recall-precision-by-arm.svg) is inside the declared write paths, and no product code or prompt in imas_codex/ is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to score the production seat, two cheap models read three times, the local model and a mixed panel against the settled reader verdicts; the landed scorer does exactly that for 8 arm rows over the recommendation rule at docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py:629.\nVERDICT done_when: the done-when asks for flagged-recall, flagged-precision and cost per name for each of the five arms over at least 1,900 names, spend below USD 15, and an always-pass arm printing flagged-recall 0; the report table carries all three columns for all five arms over 2,044 names at name-definition-reader-bake-off.json arms, spend_usd 9.7665, and the negative run prints flagged-recall 0.0 (0 of 485).\nVERDICT write_paths: the node was fenced to three files under docs/evidence/fragments/sn-definitions-by-construction/ plus docs/figures/sn-name-definition-readers; all four paths in the diff sit inside that grant, though the manifest spells the figure directory differently at manifest.md:3.\nVERDICT manifest: read; status complete, the gate command and its log path recorded, spend USD 9.7665 against a USD 15 ceiling, the negative-control note and a rubric self-check for six dimensions are present.\nVERDICT diff: read commit by commit from 1bad1af53 to 260a70e90; five commits add a 1,234-line scorer, its JSON of every reading, an 81-line page and the SVG, and the final commit is verified to change only the JSON's generated_at and the SVG's clip-path ids against ea1ac4da, so the committed artefacts are the gate's own outputs.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: name-definition-reader-bake-off.py:241 runs the production seat from get_sn_review_docs_models()[0] at its own BATCH_SIZE of 10 and adds the two cheap models, the local model and the mixed panel the goal names.\nSCORE evidence: 18\nJUSTIFICATION evidence: the gate log at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/reader-bake-off-gate.log records revision ea1ac4da, the report command and its EXIT=0 with the always-pass line at flagged-recall 0.0, and the head commit's only JSON delta is generated_at.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff (the .py, .json, .html and docs/figures/sn-name-definition-readers/recall-precision-by-arm.svg) is inside the declared write paths, and no product code or prompt in imas_codex/ is touched.\nSCORE durability: 6\nJUSTIFICATION durability: the diff adds no test or assertion that reddens on a scorer regression; the only falsifier is the negative mode at name-definition-reader-bake-off.py:1215, which prints flagged-recall 0.0 rather than asserting it.\nSCORE fit: 17\nJUSTIFICATION fit: the script reuses imas_codex's own prompt loader and the seat's own _judge_batch at name-definition-reader-bake-off.py:299 instead of forking the production call, passes ruff check, and its evidence-artefact shape matches the sibling fragments under docs/evidence/fragments/.\nSCORE reuse: 15\nJUSTIFICATION reuse: no owner implements arm-versus-label panel scoring with intervals; the closest, imas_codex/standard_names/benchmark.py:408 compare_to_reference, computes set-overlap precision and recall for candidate extraction and is not extended, so this file duplicates only the narrow confusion-metric shape that imas_codex/standard_names/review/cascade_calibration.py:352 also computes for the accept/refine cascade.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py:684 non-blocking: schema is assigned the string \"name-definition-reader-placeholder\" and overwritten at line 702, so a dead placeholder literal ships in the delivered script and would be what the JSON carried if the overwrite were ever moved or dropped.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py:995 non-blocking: the fresh-reader table header ends in a stray double quote (\"sides\\\"\"), so the delivered page renders a malformed column name.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T140342783775-sdbc-name-definition-reader-bake-off/manifest.md:3 non-blocking: orientation_write_paths declares the figure directory as docs/figures/sn-definition-readers while the landed file is docs/figures/sn-name-definition-readers/recall-precision-by-arm.svg (the path named by the brief), so a scope audit reading the manifest's grant reports the figure as outside it.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.py:924 non-blocking: the page prints only the first 40 of the 120 fresh-reader rows ([.. :40]) and neither the note nor the caption says the list is truncated.",
+  "review_run_id": "r-20261114T173211230160-review-of-sdbc-name-definition-reader-bake-off-260a70e90021",
+  "reviewed_base_sha": "1bad1af53336273ecd2ae1b3a38806519626c7a6",
+  "reviewed_head_sha": "260a70e90021f46473eebaec3b35072c01f38534",
+  "reviewed_run_id": "r-20261114T140342783775-sdbc-name-definition-reader-bake-off",
+  "scores": {
+    "durability": 6,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T17:46:38.069040+00:00",
+  "total": 94
+}
