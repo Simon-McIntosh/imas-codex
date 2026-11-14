@@ -7,6 +7,13 @@
   ],
   "completed_at": "2026-11-14T08:56:14.149Z",
   "dispatched_at": "2026-11-14T08:34:17Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sdbc-live-rewrite-cost-diagnosis",
+      "recorded_at": "2026-11-14T09:39:05.613904+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/worker_tasks/worker_refine_docs.py",
