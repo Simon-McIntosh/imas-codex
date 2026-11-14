@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T23:12:06.898Z",
+  "dispatched_at": "2026-11-14T22:59:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/codac-uda-signals.html:37",
+      "id": "anchors_resolve-1",
+      "reason": "a node building \u00a75 must see the measured cadence failure behind its negative control, and it cannot; the citation must resolve either to the committed brief or to a committed report.",
+      "text": "\u00a71 cites the prototype at `scripts/codac_uda_prototype/` and its report at `docs/evidence/fragments/codac-uda-signals/prototype-report.md`, but neither exists: `git ls-files` carries no such tree and the fragment directory holds only `briefs/prototype-loader.md`, so the plan's whole evidence table and \u00a75's \"as it does in the prototype\" point at nothing a later reader can open",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/codac-uda-signals.html:81",
+      "id": "done_when-1",
+      "reason": "as written the node's gate measures a guard that does not exist, and the worker either silently skips the control or builds an undeclared module; either the save function is declared here or the control is repointed at something the section delivers.",
+      "text": "\u00a77's negative control requires \"a figure with a label beyond the canvas is refused by the save function\", but no repository save function performs that check: the plotting code in `scripts/figures_*.py` calls `plt.style.use(\"data-ink\")` and `savefig` directly, so the control cannot fire without a save function that \u00a77 never declares as a deliverable",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/codac-uda-signals.html:91",
+      "id": "done_when-2",
+      "reason": "\u00a711's zero-reference claim is an absence, and an absence needs a positive control showing the instrument still sees a consumer known to exist (one that must appear before the rename and be gone after); without it the last row of \u00a711 passes vacuously.",
+      "text": "\u00a79 delivers an inventory with no control of any kind, and \u00a711's done-when then rests on \"a search of the consumer inventory from \u00a79 finds no live reference to the old name\", so an inventory that silently misses a surface reads as a clean rename",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "6df3d822b66bba61befab4c37b825d09e00400ee",
+  "plan_fingerprint": "04fc514dfed840947eae225429fc2eb3612bed2b5475d54a76d868c9b7871adf",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T225843671898-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "166206148cbb2c02aa88cf52d96c853306d66727",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a71 cites a prototype tree and a prototype report that do not exist in the tracked repository.",
+    "done_when": "a finding \u2014 \u00a77's negative control names a save function the repository does not have, and \u00a79's inventory declares no control while \u00a711's rename check rests on it.",
+    "evidence_paths": "pass \u2014 measurements land in the run's landing record and figures under `docs/figures/codac-uda-signals/`; live data and plots are confined to `~/.cache/imas-codex-codac-uda/`, and no section writes evidence to a node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers are carried into a symbol, file or comment, and \u00a78's `2UT8SH` is a document identifier, not a plan label.",
+    "reasoning": "pass \u2014 \u00a71's root cause reproduces (`imas_codex/remote/executor.py:1249` runs the local branch with no setup commands, while `:1284` extends only the remote command with them); `imas_codex/config/facilities/iter.yaml` has no CODAC UDA data system while `imas_codex/discovery/signals/scanners/` exists, so \u00a72\u2013\u00a74's premises hold; and the rename footprint reproduces within drift (measured 4,401 paths / 6,914 files / 168,611 lines against the cited 4,396 / 6,932 / 166,585). No section prescribes a code path, step sequence or formula.",
+    "single_goal": "pass \u2014 each section names one deliverable (an execution path, a schema shape, a catalogue, a loader, a tool, a figure, a parse outcome, an inventory, a rename in two stages).",
+    "wiring": "pass \u2014 the eleven sections' `plan-section-depends-on` entries (s4:[s2,s3], s5:[s3,s2], s6:[s4,s5], s7:[s5], s8:[s4], s10:[s9], s11:[s10]) all resolve to existing sections, and each section's `data-links` matches its declared dependencies."
+  },
+  "section_digests": {
+    "_document": "8f61e18614e309a8c68b94f12d30a8260714946a9c1d6c4a45763beb8b6cdbaf",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s2": "25d6b783ebeccaa173931c30a00b0ae11c6d62367264baf57239709c95496872",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "c42ff4ee0df57443274823d0285a61bf1fa06417cc165ca766566bce031472a7",
+    "s5": "d4531829268e87bd2d8cbdcc9a749fc2ef404d1fa5d090c8dce99d00e2ea6f50",
+    "s6": "fd2edb98819a4f8da1b3cc59cc7844d3be4e875f8a00029d835940487bdc2444",
+    "s7": "48fa9937fad1634402866119b0977dbeb233b01d7a37c4f43a25ad277572529d",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "420693820ce5767466e19600d36d231c0316ff3c9a87683f2f65594eb2328972"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T23:13:29.668945+00:00",
+  "total": null
+}
