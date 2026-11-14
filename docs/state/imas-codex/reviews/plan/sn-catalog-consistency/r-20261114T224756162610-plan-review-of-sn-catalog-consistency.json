@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T23:32:18.903Z",
+  "dispatched_at": "2026-11-14T23:19:59Z",
+  "findings": [
+    {
+      "anchor": "plan.html:99",
+      "id": "done_when-1",
+      "reason": "a command implementing status alone, or dropping the derived-parent exclusion, passes both the declared arm and the single plant, so the node closes on a count that is wrong by hundreds.",
+      "text": "the done-when requires the count to \"count no superseded name and no derived parent with a derived producer\", but its only independent control is a disposable graph holding one live name without a producer edge beside a superseded name with none; the derived-parent exclusion (wrongly applied it admits 501 names) and the name-stage half of the section's own live rule (\"neither status nor name stage superseded\") are never planted, and the live-graph arm compares the command against a direct edge read taken in the same job, which shares whatever the command gets wrong",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:99",
+      "id": "wiring-1",
+      "reason": "\u00a77 can be dispatched and closed on its stated 3 while the seven identities handed to it remain unsourced, and no reader of the node table can see the handoff at all.",
+      "text": "the section now assigns work, stating that the 10 live names with no producer edge are \u00a77's to repair and that the names the command lists are recorded in the evidence for \u00a77, yet the node table records no dependency or inform from \u00a79 to \u00a77, and \u00a77's prose states the remaining sourceless population as 3 after the 2026-11-11 read",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:99",
+      "id": "evidence_paths-1",
+      "reason": "the recorded names are the only route by which \u00a77 learns the seven identities, so an unopenable destination leaves the \u00a77 node to invent a location and the names unrecorded.",
+      "text": "\"the names the command lists are recorded in the evidence for \u00a77\" names no path, while every other carried artifact in this plan names one, as at `plan.html:35` and `plan.html:151`",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e1e738340492ba7eae4b6867add29258f27acbcc",
+  "plan_fingerprint": "8e0be5809a4c005fa602644787b66fa0e61360eb560b956698a430288448700c",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 55,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T224756162610-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "d0833704a7441a955ae9deddededd17c899e9841",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the \u00a77 cross-reference resolves to the section present at `plan.html:85`, and every identity, count and artifact \u00a79 cites is stated in the snapshot.",
+    "done_when": "a finding \u2014 the section's single independent plant exercises only the superseded-sibling leg of its count rule, leaving the derived-parent exclusion and the name-stage half of the live rule unexercised (`plan.html:99`).",
+    "evidence_paths": "a finding \u2014 \"the names the command lists are recorded in the evidence for \u00a77\" names no durable path, and \u00a77 declares no evidence artifact for the names to land in (`plan.html:99`).",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach a symbol, and dated observations are stated as dated observations rather than as changelog prose.",
+    "reasoning": "pass \u2014 the root cause now matches its evidence (the three classified groups sum to 2,606 with three unclassified, and the no-loss claim rests on the edge count), the endpoint is obtainable from the graph the section describes, and no code path, step sequence or function is prescribed.",
+    "single_goal": "pass \u2014 \u00a79 delivers one thing, a name's sources read from one place, and its count command and guard test serve that one goal; the identities it hands to \u00a77 are not its deliverable.",
+    "wiring": "a finding \u2014 \u00a79 now hands seven named identities and its command's output to \u00a77 with no relationship recorded on the node table (`plan.html:22`), and \u00a77's own text still states the remaining sourceless population as 3 (`plan.html:87`)."
+  },
+  "section_digests": {
+    "_document": "2c1048b18b3abc87fa0ead3305f05e2ca37ba0a7eb7882041b8ab7a29b7f2a59",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "fe0b485d37658d44737045e98025181bb507e290590b07825ff0062adf984863",
+    "s6": "253a243a23959f6452cabdc987e19b9de1cec45f996c6c86f6c861fa64307724",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626",
+    "s9": "1dee6cdc52dcda202ed20af15b5ea1239dc44077bf8493bdddf7707fffc0adf7"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T23:32:26.628680+00:00",
+  "total": null
+}
