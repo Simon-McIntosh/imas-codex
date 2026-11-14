@@ -19,6 +19,13 @@
   ],
   "completed_at": "2026-11-14T20:57:08.931Z",
   "dispatched_at": "2026-11-14T20:10:51Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sph-private-import-boundaries",
+      "recorded_at": "2026-11-14T22:18:24.081296+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/harmonize.py",
