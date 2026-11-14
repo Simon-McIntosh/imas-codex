@@ -1,15 +1,14 @@
 # CODAC UDA loader prototype and design assessment
 
 The isolated reader works for live variable metadata and pulse listing, and all
-30 focused fake-client tests pass. A successful live signal read and plot are
-**still missing**. On the resumed attempt, one absolute-time envelope request
-for the previously listed variable over the last 24 hours failed after 3.042 s
-with `ReadError: ERROR udaPlugin: Requested variable does not exist`. Live
-requests stopped on that error as instructed. The earlier historical pulse
-selector is no longer present on the archive; no pulse selector was used in the
-resumed attempt. A metadata entry alone does not establish that the variable is
-readable over a particular interval. The prototype is not ready to land under
-the added successful-read-and-plot requirement.
+30 focused fake-client tests pass. The latest bounded attempt used all six
+requests: an explicitly qualified slow-campaign query returned **39 campaigns**,
+but the one-hour, 200-bin envelope read of a slow signal inside the selected
+campaign returned **0 samples**. No successful live signal read or plot has
+been obtained. The required live read and plot therefore still block landing.
+Earlier pulse and variable refusals are preserved below; neither metadata
+listing nor catalogue discovery proves that data exists for the selected
+variable, archive role and interval.
 
 No operator endpoint was contacted. No real archive address, variable name,
 variable prefix, pulse name, or live data is included here or in the prototype.
@@ -37,37 +36,77 @@ serialization; these are not isolated server latency measurements.
 | Pulse positive control, one server-declared category | 1 pulse; same 743-category catalogue | 2.135 | 25,990 | not a signal read | not applicable |
 | Resumed absolute-time read, last 24 hours, 200 envelope bins, previously listed variable | Exact error: `ReadError: ERROR udaPlugin: Requested variable does not exist` | 3.042 | no successful result | no array or span returned | not returned |
 
-The pulse control establishes that the pulse-listing path can return a pulse in
-the initial session. It does not establish that the control pulse contains the
-requested signal. The lead subsequently confirmed that the historical pulse
-selector no longer exists; the resumed attempt used only `tsFormat=absolute`
-and integer nanosecond `startTime`/`endTime`, without a pulse argument.
+The first resumed attempt used one absolute-time request and stopped on its
+variable-not-found error. The next instruction supplied a fresh allowance of
+six requests, explicitly separating fast and slow archive roles. The complete
+second sequence is recorded here; the six-request ceiling was not exceeded.
 
-The resumed attempt used **1 of at most 6 live requests**. Its requested span
-was 86,400 s, with a target of 200 envelope bins, on the same non-operator
-archive role used for the successful variable listing. It returned an error,
-not a successful empty interval. Under the instruction to record errors and
-stop if reads fail, no 30-day widening, alternative-variable listing, short
-follow-up read, or replacement-host request was made. Five request slots remain
-unused because the error stop condition fired. No sample count, actual data
-span, unit, min, max, mean or cadence can be measured from a failed read.
+| Latest request | Archive role | Outcome | Elapsed [s] | Result JSON [bytes] | Signal samples / span / unit |
+|---|---|---|---:|---:|---|
+| Fast pulse-family prefix, initial binding | fast | 0 pulses; 743 categories | 5.779 | 25,896 | not a signal read |
+| Slow campaign prefix, initial binding | slow | 0 pulses; 743 categories | 2.015 | 25,896 | not a signal read |
+| Fast pulse-family prefix, explicit native environment | fast | 0 pulses; 743 categories | 2.484 | 25,896 | not a signal read |
+| Slow campaign prefix, explicit native environment | slow | 0 pulses; 743 categories | 2.620 | 25,896 | not a signal read |
+| Slow campaign prefix with explicit pulse-segment wildcard | slow | 39 campaigns; 743 categories | 2.666 | 29,950 | not a signal read |
+| Slow signal from the mctb lead table, one hour inside a returned campaign, 200 envelope bins | slow | successful empty-interval receipt | 4.055 | 596 | 0 samples; no populated span; unit absent |
+
+The last request used `tsFormat=absolute`, integer nanosecond bounds spanning
+3,600 s, and a measured-value channel formed through mctb's `series()` naming
+convention. The selected hour was centered inside the most recently starting
+returned campaign long enough to contain an hour. Campaign membership does not
+prove this signal has samples at its midpoint. The reader's `empty=true` receipt
+and zero-length arrays were inspected; no read exception occurred in this
+six-request sequence. A zero span in the statistics helper is its empty-array
+convention, not a measured span of populated data. With no samples, there is no
+numeric min, max, mean, cadence or live plot to report. The full allowance was
+used, so there was no further window search or signal read.
+
+The empty pulse-family queries were checked against their returned category
+catalogues. Those catalogues contained matching slow campaign categories; a
+query including both category and pulse segments, in the form
+`DEMO:CAMPAIGN-*/*` with an invented example, returned 39 real campaigns through
+the same slow reader. A bare category prefix is not a sufficient pulse selector
+for the tested route. The archive's returned fast-family spellings also differ
+from the historical family used in the initial attempt; no additional fast
+query was made after the request ceiling was reached. There is no evidence here
+of a successful fast data read.
+
+Each new subprocess set its requested role after module loading and recorded
+`getHost()` and `getPort()`; all six getter receipts matched the intended
+non-operator endpoint. An inherited native `UDA_HOST`/`UDA_PORT` pair identified
+a third endpoint, so those native settings were explicitly aligned with the
+requested role for requests 3–6. The unchanged catalogue after that change does
+**not** establish that the inherited environment caused the earlier refusals.
+A client getter proves configuration, not that the intended data backend served
+the response. No transport trace or live-data success is claimed as proof of
+that stronger statement.
+
+The lead's archive-role diagnosis is an essential catalogue requirement: fast
+and slow archives serve different data. A variable can appear in metadata on
+one role while its samples belong to another. Store the variable's verified
+**data-serving archive role**, metadata-source role and verification interval
+separately. Bind a loader to that data-serving role; do not choose a server
+because its metadata listing contains the name. Earlier attribution solely to a
+vanished pulse selector is insufficient without this role and grammar check.
 
 Private receipts are under `~/.cache/imas-codex-codac-uda/`:
 `live-variables.json`, `live-pulses.json`, `live-read.json`,
-`live-summary.json`, `pulse-control.json`, and the resumed
-`absolute-live-summary.json`. The last receipt records the exact absolute
-bounds, 200-bin request, completed error and request count. These receipts carry
-actual selectors and server-returned metadata and must remain internal. There
-is no live plot or successful live signal-data file. `fake-signal.svg` and
-`fake-signal-preview.png` contain invented test data only; that earlier preview
-was rendered and visually inspected. No synthetic plot is counted as live
-validation.
+`live-summary.json`, `pulse-control.json`, the first resumed
+`absolute-live-summary.json`, and the latest `role-live-summary.json`.
+The six latest request payloads are `role-live-01.json` through
+`role-live-06.json`, with corresponding `role-live-01-binding.json` through
+`role-live-06-binding.json`. `role-live-06.npz` contains the empty read arrays and
+metadata. `role-module-environment.json` holds the inherited native settings.
+These files carry actual selectors and endpoints and must remain internal.
+There is no successful live signal-data file or live plot. `fake-signal.svg` and
+`fake-signal-preview.png` remain invented test data only; the earlier preview
+was rendered and visually inspected and is not counted as live validation.
 
-The remaining evidence needs a currently readable variable/archive binding and
-a populated absolute interval. A subsequent authorized attempt can establish
-that binding with a bounded listing on the intended archive role and then
-exercise the short-read and plot path. This one refusal does not establish that
-all variables or the whole archive are unavailable.
+The remaining evidence needs a populated signal interval on its verified
+serving role. A subsequent bounded allowance should first locate populated bins
+within a returned campaign, then choose the short validation window from those
+bins rather than from the campaign midpoint. No conclusion that the archive or
+all signals are empty follows from this one empty hour.
 
 The focused gate is
 `uv run --no-sync pytest -p no:cacheprovider scripts/codac_uda_prototype/test_reader.py`,
@@ -114,8 +153,9 @@ The project has no general CODAC array-loading service today. I would add a
 small data-access module owning the typed request/result contract and backend
 dispatch; the CODAC backend uses the shared remote executor. It must not execute
 arbitrary graph-stored Python templates or accept a host from an MCP caller.
-Resolve a graph signal identity to its accessor and configured archive role,
-then accept only a pulse or time window, sampling mode and explicit bounds.
+Resolve a graph signal identity to its accessor and verified data-serving archive
+role, independently of the archive that supplied its metadata, then accept only
+a pulse or time window, sampling mode and explicit bounds.
 
 MCP registration belongs in `AgentsServer._register_tools()` in
 [`llm/server.py`](../../../../imas_codex/llm/server.py), next to existing facility
@@ -213,7 +253,7 @@ were brought into this repository.
 | Concept | Existing fit | Missing or unsuitable today |
 |---|---|---|
 | Archive catalogue | `DataSource`, `source_type=uda`, facility ownership | `server_hostname` has range `MDSplusServer`; UDA needs a generic typed endpoint/role and private resolution |
-| Native variable or record field | `SignalNode` for source structure, `FacilitySignal` for semantics, `data_source_path` and `accessor` for the exact selector | Record-field structure, metadata source per field, native timestamp base and sampling policy need explicit representation |
+| Native variable or record field | `SignalNode` for source structure, `FacilitySignal` for semantics, `data_source_path` and `accessor` for the exact selector | Record-field structure, metadata source per field, native timestamp base, sampling policy and verified data-serving archive role need explicit representation |
 | Fetch recipe | `DataAccess`: method, library, setup, connection/data/time/cleanup templates, output format | A typed bounded read contract, endpoint role, interpreter policy, request validation and sampling receipt should accompany or replace executable templates for this backend |
 | Pulse | No first-class pulse entity | String external identity, archive namespace, absolute start/end in ns, catalogue provenance, and category relation; integer `example_shot` cannot store it |
 | Pulse category | No matching first-class class | A separate category entity and pulse membership; it is neither a diagnostic nor a numeric shot |
@@ -422,7 +462,7 @@ result schema, not only in a plot caption.
 The smallest next implementation is a typed CODAC config, the shared executor's
 local module-setup support, a scanner returning shared `ScanResult`, and one
 facility read service/tool using the same reader. Before calling that complete,
-resolve the refused variable/archive binding, validate one current two-second
-signal interval and inspect its live plot, then gate modified Cypher
+verify a populated interval on the correct data-serving role, validate one
+short signal interval and inspect its live plot, then gate modified Cypher
 against the graph on a compute partition. No live graph writes were performed
 for this prototype.
