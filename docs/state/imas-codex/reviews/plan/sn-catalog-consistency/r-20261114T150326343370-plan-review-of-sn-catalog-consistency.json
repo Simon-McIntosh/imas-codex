@@ -35,9 +35,28 @@
       "note": "The done-when no longer prescribes the route. It states the end state the lead ruled (the tombstone's refined descendant ends as the one live name with the tombstone's history kept apart, the locator-only name superseded into it), leaves the choice of signed write to the node, and where no existing signed write admits a reclaiming name on the tombstone's own DD locus requires the node to deliver that admission with two refusal tests.",
       "reason": "",
       "when": "2026-11-14T16:21:56.255460+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "68603f10fefceda9c0e5ef2af34592748f2b19cd",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The single-live-name control now plants one live name and one superseded sibling that still carries the name label and the same DD binding, which is the case the stated rule must exclude; an archived identity that has left the label is no longer the control.",
+      "reason": "",
+      "when": "2026-11-14T16:22:01.867938+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "68603f10fefceda9c0e5ef2af34592748f2b19cd",
+      "commit_basis": "edit",
+      "note": "The single-live-name control now plants one live name and one superseded sibling that still carries the name label and the same DD binding, which is the case the stated rule must exclude; an archived identity that has left the label is no longer the control.",
+      "reason": "",
+      "when": "2026-11-14T16:22:01.867938+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
