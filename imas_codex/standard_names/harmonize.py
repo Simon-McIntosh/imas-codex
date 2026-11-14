@@ -39,10 +39,10 @@ from imas_codex.standard_names.doc_links import (
 # worklist test can compare the query build_worklist issues against it.
 from imas_codex.standard_names.families import (
     DOCS_STAGE_ACCEPTED,
-    _pattern_family_rows_query as _pattern_family_rows_query,
     dd_source_exists,
     fetch_pattern_families,
     fetch_pattern_family,
+    pattern_family_rows_query,
     select_anchor,
 )
 

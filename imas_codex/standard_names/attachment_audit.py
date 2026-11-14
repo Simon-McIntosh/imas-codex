@@ -178,9 +178,9 @@ _MIN_WIPEOUT_ATTACHMENTS = 2
 #: doubled because the read it lands in is a ``str.format`` template.
 def _stranding_exemption_column() -> str:
     """Return the invariant's derived-parent exemption clause, ``format``-escaped."""
-    from imas_codex.standard_names.source_invariant import _derived_parent_cypher
+    from imas_codex.standard_names.source_invariant import derived_parent_cypher
 
-    return _derived_parent_cypher().replace("{", "{{").replace("}", "}}")
+    return derived_parent_cypher().replace("{", "{{").replace("}", "}}")
 
 
 #: Every attachment the graph asserts, with the unit context the dimensionality
@@ -407,6 +407,15 @@ SET sn.source_paths = CASE
     sn.updated_at = datetime()
 RETURN count(*) AS attached
 """
+
+
+#: The signed-manifest source exchange writes attachments and detachments with
+#: these exact statements and reads the same historical-stage set, so they are
+#: part of this module's public surface. A second spelling of the attach write
+#: would let the source exchange and the audit disagree about the row shape.
+HISTORICAL_NAME_STAGES = _HISTORICAL_NAME_STAGES
+DETACH_QUERY = _DETACH_QUERY
+ATTACH_QUERY = _ATTACH_QUERY
 
 
 _TERMINAL_RECOVERY_ELIGIBILITY_QUERY = """
@@ -1183,13 +1192,13 @@ def reconcile_attachment_consistency(
                 run_id=run_id,
             )
     if type(gc) is GraphClient and not dry_run:
-        from imas_codex.standard_names.signed_manifest import _TransactionQuery
+        from imas_codex.standard_names.signed_manifest import TransactionQuery
 
         with gc.session() as session:
             transaction = session.begin_transaction()
             try:
                 result = reconcile_attachment_consistency(
-                    _TransactionQuery(transaction),
+                    TransactionQuery(transaction),
                     include_accepted=include_accepted,
                     sn_id=sn_id,
                     run_id=run_id,

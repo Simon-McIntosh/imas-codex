@@ -600,3 +600,9 @@ def _normalize_field(val: Any) -> Any:
     if isinstance(val, str):
         return val.strip() if val.strip() else None
     return val
+
+
+#: Field comparison is shared with the catalog reconciler, which must compare a
+#: candidate against stored entries by exactly the normalization an import
+#: applies. Moving it would let the two comparisons drift.
+normalize_field = _normalize_field

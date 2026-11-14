@@ -351,6 +351,12 @@ class _TransactionQuery:
         return [dict(record) for record in self._transaction.run(cypher, **params)]
 
 
+#: The attachment audit drives its consistency read through this adapter as
+#: well, so the query surface a signed-manifest pass uses is exported rather
+#: than duplicated. The private spelling stays for the module's own probes.
+TransactionQuery = _TransactionQuery
+
+
 @dataclass(frozen=True)
 class _LoadedRow:
     id: str
@@ -1715,6 +1721,12 @@ def _load_signed_stale_source_rows(
         ):
             raise ValueError("selected stale-source row lacks exact detach authority")
     return hashlib.sha256(raw).hexdigest(), declared_digest, selected
+
+
+#: The provenance lifecycle reads a signed stale-source authority through this
+#: loader, which verifies the signature before any row is trusted. A second
+#: reader would be a second place to get that verification wrong.
+load_signed_stale_source_rows = _load_signed_stale_source_rows
 
 
 def _signed_stale_source_target_ids(row: dict[str, Any]) -> list[str]:
@@ -7889,9 +7901,9 @@ def _apply_source_exchange(
     gc: Any | None,
 ) -> dict[str, Any]:
     from imas_codex.standard_names.attachment_audit import (
-        _ATTACH_QUERY,
-        _DETACH_QUERY,
-        _HISTORICAL_NAME_STAGES,
+        ATTACH_QUERY,
+        DETACH_QUERY,
+        HISTORICAL_NAME_STAGES,
     )
 
     if guard_set != _SOURCE_EXCHANGE_GUARDS:
@@ -8034,7 +8046,7 @@ def _apply_source_exchange(
                             "source-exchange compare-and-set changed"
                         )
                     detached = query.query(
-                        _DETACH_QUERY,
+                        DETACH_QUERY,
                         items=[
                             {
                                 "source_node_id": row["given_source_id"],
@@ -8043,7 +8055,7 @@ def _apply_source_exchange(
                                 "reroute": True,
                             }
                         ],
-                        historical=sorted(_HISTORICAL_NAME_STAGES),
+                        historical=sorted(HISTORICAL_NAME_STAGES),
                     )
                     if len(detached) != 1 or int(detached[0].get("detached") or 0) != 1:
                         raise SourceExchangeConflict("given-source detach changed")
@@ -8054,7 +8066,7 @@ def _apply_source_exchange(
                         )
                     for source_id, name_id in attachments:
                         attached = query.query(
-                            _ATTACH_QUERY,
+                            ATTACH_QUERY,
                             source_node_id=source_id,
                             dd_path=str(source_id)[3:],
                             sn_id=name_id,

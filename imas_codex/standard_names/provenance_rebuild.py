@@ -262,7 +262,7 @@ def bind_recovery_sources(
             rows = gc.query(_BIND_SOURCES, name_id=name_id, specs=specs)
             return int(rows[0]["bound"]) if rows else 0
 
-        from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+        from imas_codex.standard_names.cascade import TransactionQueryAdapter
         from imas_codex.standard_names.source_invariant import (
             supersede_names_losing_last_source,
         )
@@ -270,7 +270,7 @@ def bind_recovery_sources(
         with gc.session() as session:
             tx = session.begin_transaction()
             try:
-                tx_query = _TransactionQueryAdapter(tx)
+                tx_query = TransactionQueryAdapter(tx)
                 # A recovery spec names the canonical source node for its
                 # upstream path, so re-binding one that already produces another
                 # name moves the binding rather than adding one.

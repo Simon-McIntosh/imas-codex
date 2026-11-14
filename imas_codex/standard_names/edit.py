@@ -37,7 +37,7 @@ name clears — there is no privileged accept path:
 
 - **rename** — ``apply_edit`` → ``_apply_rename``:
   1. ISN grammar round-trip on the literal requested name
-     (``cascade._isn_round_trip_ok``) — same round-trip the validate gate
+     (``cascade.isn_round_trip_ok``) — same round-trip the validate gate
      and the cascade apply run; a grammar-invalid name is refused up front.
   2. id-collision check against the live graph.
   3. shared-base / sibling desync guard (no leaf-to-parent promotion).
@@ -96,7 +96,7 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.models import EditMode, EditOrigin, EditScope, EditStatus
 from imas_codex.standard_names.cascade import (
-    _isn_round_trip_ok,
+    isn_round_trip_ok,
     parent_segment_of_child,
     rename_cascade,
 )
@@ -2422,7 +2422,7 @@ def _fold_guard_reason(
             or properties.get("claimed_at") is not None
         ):
             return f"{label} name is actively claimed"
-    parseable, detail = _isn_round_trip_ok(into)
+    parseable, detail = isn_round_trip_ok(into)
     if not parseable:
         return f"target {into!r} fails strict ISN parse/round-trip: {detail}"
     target_unit, unit_reason = _fold_unit_authority(
@@ -3957,7 +3957,7 @@ def _apply_rename(
         raise ValueError("rename mode requires a non-empty `rename` value")
 
     # 1. ISN round-trip guard on the literal requested name.
-    rt_ok, rt_reason = _isn_round_trip_ok(new_name)
+    rt_ok, rt_reason = isn_round_trip_ok(new_name)
     if not rt_ok:
         return _blocked(
             target,

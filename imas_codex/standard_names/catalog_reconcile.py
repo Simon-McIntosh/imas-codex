@@ -29,8 +29,8 @@ from typing import Any
 import yaml
 
 from imas_codex.standard_names.catalog_import import (
-    _normalize_field,
     guard_catalog_write_payloads,
+    normalize_field,
 )
 from imas_codex.standard_names.protection import PipelineAuthorityError
 from imas_codex.standard_names.provenance_rebuild import (
@@ -145,9 +145,9 @@ def _fetch_scalar_state(gc: Any, ids: list[str]) -> dict[str, dict[str, Any]]:
 
 
 def _scalar_differs(existing: dict[str, Any], entry: dict[str, Any]) -> bool:
-    """True when any scalar field differs (through :func:`_normalize_field`)."""
+    """True when any scalar field differs (through :func:`normalize_field`)."""
     for field_name in _SCALAR_FIELDS:
-        if _normalize_field(existing.get(field_name)) != _normalize_field(
+        if normalize_field(existing.get(field_name)) != normalize_field(
             entry.get(field_name)
         ):
             return True

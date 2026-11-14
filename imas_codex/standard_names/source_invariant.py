@@ -24,6 +24,14 @@ def _derived_parent_cypher(parent: str = "sn") -> str:
     return f"coalesce({parent}.origin, '') = 'derived' AND {_live_child_cypher(parent)}"
 
 
+#: Sibling modules compose these predicates into their own Cypher, so the
+#: clause fragment and the derived-parent test are part of this module's public
+#: surface. The private spellings stay because the module's own templates and
+#: tests name them.
+live_child_cypher = _live_child_cypher
+derived_parent_cypher = _derived_parent_cypher
+
+
 def _drained_test(name: str) -> str:
     """Return the predicate that says the predecessor has nothing left."""
     return f"""(

@@ -130,10 +130,10 @@ def collect_catalog_changes(
     the same YAML reader as :mod:`promote`, so the evidence the notes model sees
     is exactly what ``sn approve`` will later act on.
     """
-    from imas_codex.standard_names.promote import _git, _parse_entries
+    from imas_codex.standard_names.promote import git_output, parse_entries
 
     isnc = Path(isnc_path)
-    listing = _git(["diff", "--name-only", base_ref, "--", "standard_names"], isnc)
+    listing = git_output(["diff", "--name-only", base_ref, "--", "standard_names"], isnc)
     out: list[dict[str, Any]] = []
     if not listing:
         return out
@@ -143,9 +143,9 @@ def collect_catalog_changes(
         if line.strip().endswith((".yml", ".yaml"))
     )
     for rel in files:
-        base_entries = _parse_entries(_git(["show", f"{base_ref}:{rel}"], isnc))
+        base_entries = parse_entries(git_output(["show", f"{base_ref}:{rel}"], isnc))
         head_path = isnc / rel
-        head_entries = _parse_entries(
+        head_entries = parse_entries(
             head_path.read_text() if head_path.exists() else None
         )
         added = sorted(n for n in head_entries if n not in base_entries)
@@ -407,7 +407,7 @@ def reviewing_guide_url(*, checkout: str | Path | None = None) -> str:
                 "no reviewable address"
             )
     root = Path(checkout).resolve()
-    toplevel = run_git("rev-parse", "--show-toplevel", cwd=root)
+    toplevel = rungit_output("rev-parse", "--show-toplevel", cwd=root)
     if toplevel.returncode != 0:
         raise ReviewingGuideLinkError(
             f"{root} is not inside a git checkout, so the catalog reviewing "

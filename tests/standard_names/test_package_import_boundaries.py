@@ -1,4 +1,4 @@
-"""Keep the graph and worker packages free of sibling dependencies."""
+"""Keep the package's modules behind public names and its subpackages free of siblings."""
 
 from __future__ import annotations
 
@@ -20,39 +20,6 @@ PACKAGES = ("graph_store", "worker_tasks")
 # Modules that sit directly in the package, as distinct from its subpackages.
 TOP_LEVEL_MODULES = frozenset(
     path.stem for path in PACKAGE_ROOT.glob("*.py") if path.stem != "__init__"
-)
-
-# Sites that still import a private name from another top-level module. Each
-# entry names the importing module, the line at the census that recorded it, and
-# the private name. Matching is on (module, name) so unrelated edits that shift
-# line numbers do not fail the rule; the list only shrinks, and an entry whose
-# site has been closed fails as stale.
-PRIVATE_NAME_EXEMPTIONS: frozenset[tuple[str, int, str]] = frozenset(
-    {
-        ("attachment_audit.py", 181, "_derived_parent_cypher"),
-        ("attachment_audit.py", 1186, "_TransactionQuery"),
-        ("benchmark_roles.py", 631, "_resolve_name"),
-        ("campaign_pricing.py", 361, "_build_enum_lists"),
-        ("catalog_reconcile.py", 31, "_normalize_field"),
-        ("docs_gates.py", 15, "_dimension_container"),
-        ("docs_gates.py", 15, "_dimensions_overlap"),
-        ("docs_gates.py", 15, "_unit_dimensions"),
-        ("edit.py", 98, "_isn_round_trip_ok"),
-        ("export.py", 682, "_live_child_cypher"),
-        ("harmonize.py", 40, "_pattern_family_rows_query"),
-        ("protection.py", 185, "_pull_request_call"),
-        ("protection.py", 185, "_pull_request_state"),
-        ("provenance_lifecycle.py", 27, "_load_signed_stale_source_rows"),
-        ("provenance_lifecycle.py", 638, "_TransactionQueryAdapter"),
-        ("provenance_lifecycle.py", 1153, "_TransactionQueryAdapter"),
-        ("provenance_lifecycle.py", 1394, "_TransactionQueryAdapter"),
-        ("provenance_rebuild.py", 265, "_TransactionQueryAdapter"),
-        ("release_notes.py", 151, "_git"),
-        ("release_notes.py", 151, "_parse_entries"),
-        ("signed_manifest.py", 7311, "_ATTACH_QUERY"),
-        ("signed_manifest.py", 7311, "_DETACH_QUERY"),
-        ("signed_manifest.py", 7311, "_HISTORICAL_NAME_STAGES"),
-    }
 )
 
 
@@ -95,21 +62,14 @@ def _private_name_imports(module_path: Path) -> list[tuple[int, str]]:
 @pytest.mark.timeout(120)
 def test_no_private_name_imports_between_top_level_modules() -> None:
     """A top-level module exposes a public name instead of a sibling's private one."""
-    allowed = {(name, private) for name, _line, private in PRIVATE_NAME_EXEMPTIONS}
     violations: list[str] = []
-    live: set[tuple[str, str]] = set()
     for module_path in sorted(PACKAGE_ROOT.glob("*.py")):
         for lineno, private in _private_name_imports(module_path):
-            key = (module_path.name, private)
-            live.add(key)
-            if key not in allowed:
-                violations.append(
-                    f"{module_path.name}:{lineno}: imports private name {private!r} "
-                    "from a sibling top-level module"
-                )
+            violations.append(
+                f"{module_path.name}:{lineno}: imports private name {private!r} "
+                "from a sibling top-level module"
+            )
     assert not violations, "private-name imports:\n" + "\n".join(violations)
-    stale = allowed - live
-    assert not stale, f"stale private-name exemptions: {sorted(stale)}"
 
 
 def _package_modules(package: str) -> tuple[Path, ...]:

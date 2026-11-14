@@ -359,8 +359,8 @@ def _prepare_name_requests(
 ) -> list[_PreparedNameRequest]:
     """Render production-enriched name-review requests for the exact cohort."""
     from imas_codex.standard_names.context import (
-        _build_enum_lists,
         build_compose_context,
+        build_enum_lists,
     )
     from imas_codex.standard_names.worker_tasks.worker_review_names import (
         _enrich_name_review_items,
@@ -369,7 +369,7 @@ def _prepare_name_requests(
     items = [dict(item) for item in cohort]
     _enrich_name_review_items(items)
     compose_context = build_compose_context()
-    enum_lists = _build_enum_lists()
+    enum_lists = build_enum_lists()
     prepared: list[_PreparedNameRequest] = []
     for item in items:
         if not item.get("id"):

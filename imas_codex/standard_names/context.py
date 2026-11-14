@@ -553,6 +553,13 @@ def _build_enum_lists() -> dict[str, list[str]]:
     }
 
 
+#: The assembled enum lists are read by prompt builders and by the pricing
+#: table that names the same segments. Both need the full closed vocabulary,
+#: which no narrower accessor exposes; moving the builder would split a cache
+#: from the segment registries it reads.
+build_enum_lists = _build_enum_lists
+
+
 def build_domain_vocabulary_preseed(domain: str | None) -> str:
     """Build a vocabulary pre-seed section for compose prompts.
 

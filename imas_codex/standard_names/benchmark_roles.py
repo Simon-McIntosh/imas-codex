@@ -424,7 +424,7 @@ def load_breaker_corpus(
             {
                 "sn_id": r["sn_id"],
                 "name": r["sn_id"],
-                # score_with_reviewer resolves the display name via _resolve_name,
+                # score_with_reviewer resolves the display name via resolve_name,
                 # which reads standard_name/id; the reviewer echoes it back, so
                 # these keys are what re-aligns reviews to corpus items.
                 "standard_name": r["sn_id"],
@@ -474,7 +474,7 @@ def load_docs_sample(sample: int, seed: int, gc: Any = None) -> list[dict]:
         {
             "name": r["name"],
             # generate_docs_for_candidates / score_with_reviewer resolve the
-            # name via _resolve_name (reads standard_name/id).
+            # name via resolve_name (reads standard_name/id).
             "standard_name": r["name"],
             "id": r["name"],
             "source_id": (list(r.get("source_paths") or []) or [""])[0],
@@ -628,7 +628,7 @@ async def run_refine_bench(
     from imas_codex.discovery.base.llm import acall_llm_structured, ensure_model_prefix
     from imas_codex.graph.client import GraphClient
     from imas_codex.llm.prompt_loader import load_prompt_config, render_prompt
-    from imas_codex.standard_names.benchmark import _resolve_name
+    from imas_codex.standard_names.benchmark import resolve_name
     from imas_codex.standard_names.context import build_compose_context
     from imas_codex.standard_names.example_loader import load_compose_examples
     from imas_codex.standard_names.models import RefinedName
@@ -719,7 +719,7 @@ async def run_refine_bench(
                     return (_classify_refine_failure(exc), 0.0, 0.0, 0.0)
 
                 refined_name = (
-                    _resolve_name(
+                    resolve_name(
                         {
                             "segments": refined.segments.model_dump()
                             if hasattr(refined.segments, "model_dump")
