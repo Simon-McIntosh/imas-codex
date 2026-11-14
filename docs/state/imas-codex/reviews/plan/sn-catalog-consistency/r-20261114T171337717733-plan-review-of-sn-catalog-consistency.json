@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T17:27:00.274Z",
+  "dispatched_at": "2026-11-14T17:14:10Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:82",
+      "id": "reasoning-1",
+      "reason": "which identity ends live is this section's whole endpoint, so a plan holding two unmarked rulings that decide it differently can send the node at the opposite end state.",
+      "text": "the prose says both pair names were \"ruled on 2026-11-12 onto `flux_surface_averaged_deuterium_tritium_density_at_plasma_boundary`\", and comment `c-s6-lead-ruling-dt-pair` at line 119 records that ruling as \"Both ... are superseded onto it\", while the done-when at line 83 records a 2026-11-14 ruling in which one of those names \u2014 the tombstone's refined descendant, today `deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary` \u2014 ends as the live name holding the ruled spelling and the ruled spelling's identity (\"the tombstone\") is kept apart on an archived identity; a node implementing the recorded 2026-11-12 ruling would supersede the descendant rather than make it live, reviving the superseded identity the done-when requires archived, and the plan marks neither ruling as superseding the other",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "cf52ee2b6150282b7ace296d2ef7892d5a040508",
+  "plan_fingerprint": "1cebcc209787e9ded5125635851d26f2e7cdcc7a4889196df17c0cd3e945fe31",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 49,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T171337717733-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "f64839f6d0f2a18e1c4a38e1893aa94e194b24bd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the two section anchors resolve, the committed read-back counts 109 of 111 (scc-separatrix-reclaim.json `.census.conforming_count` 109, `.census.population` 111), both cited evidence fragments exist, and the dead review-run path at line 150 was declined by an earlier review and is not re-raised.",
+    "done_when": "pass \u2014 the endpoint is measurable (one live name on the named DD path, the ruled spelling, one live tip, no cycle, a before/after count per identity) and carries declared controls: three planted loci that must be reported non-conforming, three planted DD paths that pin the live-count rule, and two refusal tests bound to the same write that must refuse; spend is bounded at USD 2.",
+    "evidence_paths": "pass \u2014 the section names no scratch or node-local path; the evidence it cites is committed under docs/evidence/fragments/sn-catalog-consistency/, and the write/plant logs are left to the node to place.",
+    "naming": "pass \u2014 the section introduces no symbols or code and carries no plan labels, ticket numbers or version tags; \u00a749's identifier appears only as a section reference to the plan that carried this work forward.",
+    "reasoning": "a finding \u2014 the section records two lead rulings that decide different end states for the same identity: the 2026-11-12 ruling comment (and the prose at line 82) supersedes both pair names onto the ruled spelling, while the done-when's 2026-11-14 ruling makes the tombstone's descendant the live name and archives the ruled spelling's identity.",
+    "single_goal": "pass \u2014 \u00a76 delivers one thing: the deuterium\u2013tritium separatrix locus ends with one live name under the ruled spelling; the refusal tests and the live-count plants are measures of that same endpoint, not separate deliverables.",
+    "wiring": "pass \u2014 \u00a76 declares `depends-on sn-definitions-by-construction#s6` and `data-links sn-integrity-backlog#s49`; both anchors resolve (sn-definitions-by-construction.html:107 \"\u00a76 \u2014 The live catalog rewritten to the settled wording\"; sn-integrity-backlog.html:292 \"\u00a749 \u2014 One DD separatrix locus, one name suffix\", which is descoped into \u00a76), and the read-back clause is placed after the depends-on landing, so no edge is missing or misdirected."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "f8c8fffebc9db14ed9918457370f5d0071783e471c070ce56650e0f1cf00d1a6",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T19:46:15.153437+00:00",
+  "total": null
+}
