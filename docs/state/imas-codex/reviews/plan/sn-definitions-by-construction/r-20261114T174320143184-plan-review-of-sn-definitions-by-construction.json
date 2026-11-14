@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T17:52:27.936Z",
+  "dispatched_at": "2026-11-14T17:43:55Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:13",
+      "id": "wiring-1",
+      "reason": "a plan whose effort total contradicts its own sections reports 31 hours of work where 35 are dispatched, and the previous review round already repaired this same field once at 27.0 vs 31.0.",
+      "text": "`plan-effort-hours` reads 31.0 while the nine sections sum to 35.0 (0.5+7.0+3.0+3.0+5.0+6.0+2.5+4.0+4.0); \u00a79's 4.0 hours were added without updating the total",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:149",
+      "id": "anchors_resolve-1",
+      "reason": "unlike \u00a78, whose close comment records that its scored revision lives only in an unmerged worker tree, \u00a79 states its readings as committed fact with no such note; the plan must either land the artifact or record where it lives, or the node starts by hunting a file main does not carry.",
+      "text": "\u00a79 cites `docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.json` as the record of every figure in its body, but that path does not exist in HEAD (`git cat-file -e HEAD:<path>` fails; it was last written by 260a70e90, which is not an ancestor of HEAD) so a node dispatched on \u00a79 cannot open the evidence it must reproduce the split and the scoring from",
+      "type": "anchors_resolve",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:127",
+      "id": "wiring-2",
+      "reason": "if \u00a79's candidate replaces the seat, \u00a77's recut re-runs and gates on a check the plan no longer stands behind, which is the same defect the earlier review raised at this line when \u00a78 was the only successor section.",
+      "text": "\u00a77's export refusal and its re-run bullet (:131) both name \"the name-definition check \u00a78 leaves standing\", but the declarations now make s7 wait on s9 and \u00a79 closes with its own verdict on which question stands, so \u00a77 names the wrong section as the authority for the check it re-runs before the cut",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-definitions-by-construction.html:149",
+      "id": "reasoning-1",
+      "reason": "the seat's own 305 of 485 found at 197 false holds independently carries the underspecification claim, and \u00a79 compares the candidate and the seat on the same labels, so label noise largely cancels in that paired difference and the section's endpoint and replacement rule stand as written.",
+      "text": "\u00a79 concludes \"the question as the seat asks it is underspecified\" from a reading in which an independent blind reader sided with the labels on 36 and against them on 44 of 80 disagreements, but those 80 disagreements are the Haiku arm's, not the seat's, so the measurement shows the label set is contested rather than that the seat's prompt is the weak link",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "7332897372809c455bcd57eb1f3972b6adab12a1",
+  "plan_fingerprint": "0b6bd9ea9b581c9f91c2275b5893362fc7f4f949a8e48e70c799a1dbceb49359",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 44,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T174320143184-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "822f2f9ed7b32dc26141f943fca64fba131a3162",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 \u00a79's sole cited evidence file, `docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.json`, does not exist at HEAD.",
+    "done_when": "pass \u2014 each changed node names a measurable endpoint; s9's scorer carries a declared negative control (the always-pass arm must score zero flagged-recall) and a documented negative result when the candidate fails the replacement rule.",
+    "evidence_paths": "pass \u2014 the section's readings sit under the plan's committed evidence directory (`docs/evidence/fragments/sn-definitions-by-construction/`); the one path that does not open is reported under anchors_resolve.",
+    "naming": "pass \u2014 \u00a79 names no plan label, stage name, ticket number or version tag in a symbol or comment, and carries no changelog prose.",
+    "reasoning": "a finding \u2014 the fresh reader's 36/44 reading is attached to the seat's question although it was measured against the Haiku arm, not the seat.",
+    "single_goal": "pass \u2014 \u00a79 delivers one thing, the firing question for the name check; its dedup clause is a condition on that endpoint, not a second deliverable.",
+    "wiring": "a finding \u2014 _document's plan-effort-hours (31.0) is 4.0 below the nine sections' sum (35.0), and s7's bullets at :127 and :131 still name \u00a78 as the section that leaves the name check standing although s9's new verdict can replace it."
+  },
+  "section_digests": {
+    "_document": "76031c0cbbb136a5fcf78d101512539630e3c8448253620adff287fe5b6ab6ab",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "f22102f5bee1d009a1ccad79e435abc698fa3838aa5bc5f1d358028f39e2f007",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "89d6a4b9ec3e6fd6a605af17f7244cc10184a567e7389b3fa3af2208bc1f4b40"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T17:53:20.428233+00:00",
+  "total": null
+}
