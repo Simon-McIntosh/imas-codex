@@ -114,4 +114,11 @@ which the lead ruled is being released. They are listed, not attempted, until th
 </table>
 <p>The settled wording has landed on the names the first slice applied; the population as a whole still carries
 one form per name, which is what the remaining 480 names were to remove.</p>
+<h2>Second pass: the base species names first</h2>
+<p>The neutrals entered through the stored text of the base names, which the writer copies into every derived name, so the base names were rewritten first.</p>
+<table><tr><th>base name (rewritten first)</th><th>docs stage</th><th>score</th><th>spend USD</th></tr><tr><td><code>oxygen_density</code></td><td>reviewed</td><td>0.9316041724938312</td><td>0.449845</td></tr><tr><td><code>boron_density</code></td><td>exhausted</td><td>0.8499999999999999</td><td>0.097575</td></tr><tr><td><code>carbon_density</code></td><td>exhausted</td><td>0.960115662089189</td><td>0.094904</td></tr><tr><td><code>nitrogen_density</code></td><td>accepted</td><td>0.9552237019025897</td><td>0.037089</td></tr></table>
+<p>All four now state the ions-only population. Three of them exited non-zero while the stored description had already changed, which is why each settled state is read from the graph rather than from the wrapper's exit status.</p>
+<table><tr><th>derived name</th><th>docs stage</th><th>score</th><th>spend USD</th></tr><tr><td><code>line_averaged_nitrogen_density</code></td><td>accepted</td><td>0.9400035784578643</td><td>0.037537</td></tr><tr><td><code>line_averaged_oxygen_density</code></td><td>accepted</td><td>0.9447573827486166</td><td>0.040466</td></tr><tr><td><code>volume_averaged_oxygen_density</code></td><td>accepted</td><td>0.9458368026745937</td><td>0.101158</td></tr></table>
+<p>Spend is read per edit from LLMCost rows joined to the edit's own run id: USD 0.1699 a name for the base rewrites, of which the escalation seat took USD 0.3117 on one name, and USD 0.0597 a name for the derived ones, where the settled wording landed on the first draft.</p>
+<p>The <code>electron_number_density</code> rename is blocked: the ruled target <code>line_integrated_electron_number_density</code> already exists as a separate accepted identity. The name itself already carries a column density (unit m^-2, reviewed 0.9607), so the coordinator must settle whether the two identities are one quantity.</p>
 </body></html>

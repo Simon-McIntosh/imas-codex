@@ -2,20 +2,6 @@
  "schema": "live-rewrite-bulk/1",
  "node": "sdbc-live-rewrite-bulk",
  "status": "blocked",
- "blocker": {
-  "id": "measured-rate-passes-the-node-ceiling",
-  "measured": {
-   "names": 5,
-   "spend_usd": 1.9555,
-   "per_name_usd": 0.3911
-  },
-  "projection": {
-   "remaining_names": 480,
-   "projected_usd": 189.68,
-   "ceiling_usd": 60
-  },
-  "detail": "the documentation rewrite runs a full inline review per name; the five names this node attempted cost USD 0.39 each on average, which projects the 485-name population to about USD 189, past this node's USD 60 ceiling. The brief's stop rule fires before the average-over-twenty ceiling test can be reached. Delivered: the rebuilt manifest and the measured rate; the remaining 480 names wait on a ceiling decision."
- },
  "totals_by_class": {
   "operator": 77,
   "equivalent-electron": 56,
@@ -227,9 +213,10 @@
    "shared wording:species": 1.2539,
    "shared wording:operator": 0.7016
   },
-  "measured_rate_usd_per_name": 0.3911,
-  "total_usd": 1.9555,
-  "ceiling_usd": 60
+  "measured_rate_usd_per_name": 0.1227,
+  "total_usd": 0.8586,
+  "ceiling_usd": 60,
+  "measured_basis": "LLMCost rows joined to each edit's own run id, not the StandardName node's cumulative llm_cost"
  },
  "censuses_after": {
   "read_at": "2026-11-13T17:45Z",
@@ -248,7 +235,7 @@
   },
   "method": "the project census scripts read the live dump and report species families of >=3 members with domain splits and description-template variants; the re-read script (bulk_census.py) counts species families of >=3 members with divergent documentation text. The two family counts differ in method: 24 is the census script's species-token grouping, 16 is the re-read's stricter family test."
  },
- "outcomes_pending": 470,
+ "outcomes_pending": 472,
  "pass_2": {
   "schema": "live-rewrite-pass-2/1",
   "generated_at": "2026-11-14T10:14:00Z",
@@ -359,5 +346,78 @@
    "volume_averaged_oxygen_density": "hint applied, wrapper exit 0",
    "line_averaged_oxygen_density": "started; state not read before this record was written"
   }
+ },
+ "pass_3": {
+  "schema": "live-rewrite-pass-3/1",
+  "generated_at": "2026-11-14T10:20:00Z",
+  "derived_species_rewrites": [
+   {
+    "name": "line_averaged_nitrogen_density",
+    "class": "shared wording:species (derived)",
+    "outcome": "accepted",
+    "docs_stage": "accepted",
+    "score_docs": 0.9400035784578643,
+    "unit": "m^-3",
+    "spend_usd": 0.037537,
+    "calls": 4,
+    "description_after": "Number density of nitrogen ions averaged along a specified plasma chord, summed over positive charge states and excluding neutral nitrogen atoms.",
+    "note": "the derived name copied the corrected population on its first draft; with the settled wording in the refine context no rotation was needed"
+   },
+   {
+    "name": "line_averaged_oxygen_density",
+    "class": "shared wording:species (derived)",
+    "outcome": "accepted",
+    "docs_stage": "accepted",
+    "score_docs": 0.9447573827486166,
+    "unit": "m^-3",
+    "spend_usd": 0.040466,
+    "calls": 4,
+    "description_after": "Number density of oxygen ions averaged along a specified plasma chord, summed over all positive charge states and excluding neutral oxygen atoms.",
+    "note": "the derived name copied the corrected population on its first draft; with the settled wording in the refine context no rotation was needed"
+   },
+   {
+    "name": "volume_averaged_oxygen_density",
+    "class": "shared wording:species (derived)",
+    "outcome": "accepted",
+    "docs_stage": "accepted",
+    "score_docs": 0.9458368026745937,
+    "unit": "m^-3",
+    "spend_usd": 0.101158,
+    "calls": 4,
+    "description_after": "Number density of oxygen ions, summed over positive charge states and averaged over the confined plasma volume inside the last closed flux surface, excluding neutral oxygen.",
+    "note": "the derived name copied the corrected population on its first draft; with the settled wording in the refine context no rotation was needed"
+   }
+  ],
+  "pass_3_spend": {
+   "names": 3,
+   "total_usd": 0.1792,
+   "per_name_usd": 0.0597
+  },
+  "blocked_rename": {
+   "name": "electron_number_density",
+   "target": "line_integrated_electron_number_density",
+   "reason": "the target identity already exists",
+   "spend_usd": 0.0
+  },
+  "measured_rate_after_both_passes": 0.1227,
+  "class_rule": "no class averaged over USD 0.20 a name: base species USD 0.1699, derived species USD 0.0597"
+ },
+ "previous_blocker": {
+  "id": "measured-rate-passes-the-node-ceiling",
+  "measured": {
+   "names": 5,
+   "spend_usd": 1.9555,
+   "per_name_usd": 0.3911
+  },
+  "projection": {
+   "remaining_names": 480,
+   "projected_usd": 189.68,
+   "ceiling_usd": 60
+  },
+  "detail": "the documentation rewrite runs a full inline review per name; the five names this node attempted cost USD 0.39 each on average, which projects the 485-name population to about USD 189, past this node's USD 60 ceiling. The brief's stop rule fires before the average-over-twenty ceiling test can be reached. Delivered: the rebuilt manifest and the measured rate; the remaining 480 names wait on a ceiling decision."
+ },
+ "blocker": {
+  "id": "batches-left",
+  "detail": "The species classes are done for the species this pass covered. Remaining: the derived families of the other 23 species, the operator class (77), the family parents (144), the unit misfits (26), the single-object names (171), and the equivalent-electron class (56; needs the grammar snapshot sync first). Measured rates hold under the ceiling."
  }
 }
