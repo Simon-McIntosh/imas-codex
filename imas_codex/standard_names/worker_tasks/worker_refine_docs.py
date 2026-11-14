@@ -115,6 +115,18 @@ async def process_refine_docs_batch(
             prompt_context["failed_checks"] = failed_checks
         prompt_context["conventions"] = conventions_context_for(sn_id)
 
+        # The renderer installs each settled shared part verbatim and the
+        # persistence gate refuses text that paraphrases or contradicts it, so
+        # a refinement must be shown the exact sentences it has to write
+        # around. Without them every rotation re-guesses the wording and can
+        # only be refused, which spends the whole rotation budget and reaches
+        # the escalation seat.
+        from imas_codex.standard_names.docs_gates import fixed_shared_parts
+
+        prompt_context["shared_parts"] = fixed_shared_parts(
+            sn_id, prompt_context["conventions"]
+        )
+
         # Best-effort DD path enrichment
         from imas_codex.standard_names.dd_resolutions import DDResolutionError
 

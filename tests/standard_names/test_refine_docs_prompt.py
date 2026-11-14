@@ -200,3 +200,57 @@ def test_reviewer_comments_none_renders_gracefully():
     result = render_prompt("sn/refine_docs_user", ctx)
     assert "Current node docs review" in result
     assert "0.45" in result
+
+
+# ---------------------------------------------------------------------------
+# Settled shared wording
+# ---------------------------------------------------------------------------
+
+_SPECIES_PART = {
+    "part": "population",
+    "anchor": "population:species",
+    "sentence": (
+        "The density counts ions summed over all charge states; "
+        "neutral atoms are excluded."
+    ),
+    "equation": "",
+}
+
+
+def test_renders_settled_shared_wording():
+    """A refinement is shown the exact sentence the persistence gate installs.
+
+    The gate refuses a rewrite that paraphrases a settled shared part, so a
+    refine prompt that never states them leaves the model re-guessing wording
+    it cannot land.
+    """
+    result = render_prompt(
+        "sn/refine_docs_user", _minimal_ctx(shared_parts=[_SPECIES_PART])
+    )
+    assert "Settled shared wording" in result
+    assert _SPECIES_PART["sentence"] in result
+    assert "population:species" in result
+
+
+def test_omits_shared_wording_block_when_no_parts():
+    """A name carrying no shared part renders no block and no empty heading."""
+    result = render_prompt("sn/refine_docs_user", _minimal_ctx(shared_parts=[]))
+    assert "Settled shared wording" not in result
+
+
+def test_shared_parts_built_for_species_density():
+    """The worker builds the population part from the name, not from the hint."""
+    from imas_codex.standard_names.docs_gates import fixed_shared_parts
+
+    parts = fixed_shared_parts("volume_averaged_oxygen_density", None)
+    assert parts == ()
+
+    class _Conventions:
+        concepts: list = []
+
+    parts = fixed_shared_parts("volume_averaged_oxygen_density", _Conventions())
+    assert [p["anchor"] for p in parts] == ["population:species"]
+    rendered = render_prompt(
+        "sn/refine_docs_user", _minimal_ctx(shared_parts=list(parts))
+    )
+    assert "neutral atoms are excluded" in rendered

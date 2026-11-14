@@ -1,0 +1,583 @@
+{
+ "schema": "sdbc-live-rewrite-cost-diagnosis/1",
+ "generated_at": "2026-11-14T08:50:00Z",
+ "population": {
+  "names": 5,
+  "class": "shared wording (2 species, 2 operator) plus the declined oxygen density"
+ },
+ "source_of_truth": "LLMCost nodes in the graph, one per model call, joined to SNRun by run_id; run ids are the five SNRun nodes whose started_at matches each sn edit scope stamp within one second",
+ "run_ids": {
+  "volume_averaged_neutral_species_density": "fa57ff65-35c0-4c7f-8374-4de887dfb8e5",
+  "volume_averaged_oxygen_density": "5b984f2e-a5b5-485a-86a7-150463292282",
+  "volume_averaged_ion_charge": "0eaaf1e7-bf6e-430f-a81f-3d01e46219e3",
+  "flux_surface_averaged_parallel_current_density": "d047e9a4-3ad4-4d02-9ddb-86b34ba04e2e",
+  "flux_surface_averaged_toroidal_current_density": "3b98977c-1e13-497d-b6fb-b655473cc398"
+ },
+ "per_call": [
+  {
+   "name": "volume_averaged_ion_charge",
+   "run_id": "0eaaf1e7-bf6e-430f-a81f-3d01e46219e3",
+   "phase": "generate_docs",
+   "event_type": "generate_docs",
+   "model": "openrouter/openai/gpt-6.1-sol",
+   "calls": 1,
+   "cost_usd": 0.032997,
+   "tokens_in": 29503,
+   "tokens_out": 1933,
+   "tokens_cached_read": 25037
+  },
+  {
+   "name": "volume_averaged_ion_charge",
+   "run_id": "0eaaf1e7-bf6e-430f-a81f-3d01e46219e3",
+   "phase": "refine_docs",
+   "event_type": "refine_docs",
+   "model": "openrouter/openai/gpt-6-luna",
+   "calls": 2,
+   "cost_usd": 0.005612,
+   "tokens_in": 18856,
+   "tokens_out": 8586,
+   "tokens_cached_read": 9022
+  },
+  {
+   "name": "volume_averaged_ion_charge",
+   "run_id": "0eaaf1e7-bf6e-430f-a81f-3d01e46219e3",
+   "phase": "review_docs",
+   "event_type": "review_docs",
+   "model": "typesafe/jev-1.14",
+   "calls": 6,
+   "cost_usd": 0.001151,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "volume_averaged_ion_charge",
+   "run_id": "0eaaf1e7-bf6e-430f-a81f-3d01e46219e3",
+   "phase": "review_docs",
+   "event_type": "review_docs",
+   "model": "openrouter/anthropic/claude-sonnet-5",
+   "calls": 3,
+   "cost_usd": 0.028754,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "flux_surface_averaged_toroidal_current_density",
+   "run_id": "3b98977c-1e13-497d-b6fb-b655473cc398",
+   "phase": "generate_docs",
+   "event_type": "generate_docs",
+   "model": "openrouter/openai/gpt-6.1-sol",
+   "calls": 1,
+   "cost_usd": 0.042864,
+   "tokens_in": 31326,
+   "tokens_out": 2510,
+   "tokens_cached_read": 25229
+  },
+  {
+   "name": "flux_surface_averaged_toroidal_current_density",
+   "run_id": "3b98977c-1e13-497d-b6fb-b655473cc398",
+   "phase": "refine_docs",
+   "event_type": "refine_docs",
+   "model": "openrouter/openai/gpt-6-luna",
+   "calls": 2,
+   "cost_usd": 0.007239,
+   "tokens_in": 32856,
+   "tokens_out": 8338,
+   "tokens_cached_read": 9022
+  },
+  {
+   "name": "flux_surface_averaged_toroidal_current_density",
+   "run_id": "3b98977c-1e13-497d-b6fb-b655473cc398",
+   "phase": "refine_docs",
+   "event_type": "refine_docs",
+   "model": "openrouter/anthropic/claude-fable-5",
+   "calls": 1,
+   "cost_usd": 0.407248,
+   "tokens_in": 26730,
+   "tokens_out": 4145,
+   "tokens_cached_read": 7478
+  },
+  {
+   "name": "flux_surface_averaged_toroidal_current_density",
+   "run_id": "3b98977c-1e13-497d-b6fb-b655473cc398",
+   "phase": "review_docs",
+   "event_type": "review_docs",
+   "model": "typesafe/jev-1.14",
+   "calls": 6,
+   "cost_usd": 0.003601,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "flux_surface_averaged_toroidal_current_density",
+   "run_id": "3b98977c-1e13-497d-b6fb-b655473cc398",
+   "phase": "review_docs",
+   "event_type": "review_docs",
+   "model": "openrouter/anthropic/claude-sonnet-5",
+   "calls": 3,
+   "cost_usd": 0.02653,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "volume_averaged_oxygen_density",
+   "run_id": "5b984f2e-a5b5-485a-86a7-150463292282",
+   "phase": "generate_docs",
+   "event_type": "generate_docs",
+   "model": "openrouter/openai/gpt-6.1-sol",
+   "calls": 1,
+   "cost_usd": 0.094936,
+   "tokens_in": 31291,
+   "tokens_out": 1671,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "flux_surface_averaged_parallel_current_density",
+   "run_id": "d047e9a4-3ad4-4d02-9ddb-86b34ba04e2e",
+   "phase": "generate_docs",
+   "event_type": "generate_docs",
+   "model": "openrouter/openai/gpt-6.1-sol",
+   "calls": 1,
+   "cost_usd": 0.106754,
+   "tokens_in": 30758,
+   "tokens_out": 2986,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "flux_surface_averaged_parallel_current_density",
+   "run_id": "d047e9a4-3ad4-4d02-9ddb-86b34ba04e2e",
+   "phase": "refine_docs",
+   "event_type": "refine_docs",
+   "model": "openrouter/openai/gpt-6-luna",
+   "calls": 2,
+   "cost_usd": 0.009462,
+   "tokens_in": 45175,
+   "tokens_out": 9705,
+   "tokens_cached_read": 9022
+  },
+  {
+   "name": "flux_surface_averaged_parallel_current_density",
+   "run_id": "d047e9a4-3ad4-4d02-9ddb-86b34ba04e2e",
+   "phase": "review_docs",
+   "event_type": "review_docs",
+   "model": "typesafe/jev-1.14",
+   "calls": 6,
+   "cost_usd": 0.00225,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "flux_surface_averaged_parallel_current_density",
+   "run_id": "d047e9a4-3ad4-4d02-9ddb-86b34ba04e2e",
+   "phase": "review_docs",
+   "event_type": "review_docs",
+   "model": "openrouter/anthropic/claude-sonnet-5",
+   "calls": 3,
+   "cost_usd": 0.029846,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "volume_averaged_neutral_species_density",
+   "run_id": "fa57ff65-35c0-4c7f-8374-4de887dfb8e5",
+   "phase": "generate_docs",
+   "event_type": "generate_docs",
+   "model": "openrouter/openai/gpt-6.1-sol",
+   "calls": 1,
+   "cost_usd": 0.096764,
+   "tokens_in": 31614,
+   "tokens_out": 1773,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "volume_averaged_neutral_species_density",
+   "run_id": "fa57ff65-35c0-4c7f-8374-4de887dfb8e5",
+   "phase": "refine_docs",
+   "event_type": "refine_docs",
+   "model": "openrouter/openai/gpt-6-luna",
+   "calls": 2,
+   "cost_usd": 0.006065,
+   "tokens_in": 21445,
+   "tokens_out": 7806,
+   "tokens_cached_read": 4511
+  },
+  {
+   "name": "volume_averaged_neutral_species_density",
+   "run_id": "fa57ff65-35c0-4c7f-8374-4de887dfb8e5",
+   "phase": "refine_docs",
+   "event_type": "refine_docs",
+   "model": "openrouter/anthropic/claude-fable-5",
+   "calls": 1,
+   "cost_usd": 0.298305,
+   "tokens_in": 15721,
+   "tokens_out": 2448,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "volume_averaged_neutral_species_density",
+   "run_id": "fa57ff65-35c0-4c7f-8374-4de887dfb8e5",
+   "phase": "review_docs",
+   "event_type": "review_docs",
+   "model": "typesafe/jev-1.14",
+   "calls": 8,
+   "cost_usd": 0.001312,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens_cached_read": 0
+  },
+  {
+   "name": "volume_averaged_neutral_species_density",
+   "run_id": "fa57ff65-35c0-4c7f-8374-4de887dfb8e5",
+   "phase": "review_docs",
+   "event_type": "review_docs",
+   "model": "openrouter/anthropic/claude-sonnet-5",
+   "calls": 4,
+   "cost_usd": 0.025045,
+   "tokens_in": 0,
+   "tokens_out": 0,
+   "tokens_cached_read": 0
+  }
+ ],
+ "totals_by_name_usd": {
+  "flux_surface_averaged_toroidal_current_density": 0.487482,
+  "volume_averaged_neutral_species_density": 0.427491,
+  "flux_surface_averaged_parallel_current_density": 0.148312,
+  "volume_averaged_oxygen_density": 0.094936,
+  "volume_averaged_ion_charge": 0.068514
+ },
+ "total_usd": 1.226735,
+ "mean_per_name_usd": 0.245347,
+ "q1_where_the_money_goes": {
+  "headline": "USD 0.39/name is not the edit's spend. It is the StandardName node's cumulative llm_cost, which the bulk report read as this run's spend. The five edits spent USD 1.2267 in total, USD 0.2453 a name.",
+  "cumulative_versus_run": {
+   "reported_per_name_usd": 0.391,
+   "reported_source": "make_bulk_report.py reads a['llm_cost'] from the StandardName node into spend_usd",
+   "measured_run_per_name_usd": 0.2453
+  },
+  "components": [
+   {
+    "component": "generate_docs on openrouter/openai/gpt-6.1-sol",
+    "calls": 5,
+    "cost_usd": 0.374315,
+    "note": "cold prompt cache triples it: USD 0.0330-0.0429 where the cached-read arm carried ~25k tokens, USD 0.0949-0.1068 where it carried none"
+   },
+   {
+    "component": "refine_docs on openrouter/openai/gpt-6-luna",
+    "calls": 8,
+    "cost_usd": 0.028378,
+    "note": "the cheap seat; 2 rotations a name"
+   },
+   {
+    "component": "refine_docs on openrouter/anthropic/claude-fable-5",
+    "calls": 2,
+    "cost_usd": 0.705553,
+    "note": "the escalation seat, fired on the final rotation; two calls are 57 percent of the whole five-name spend"
+   },
+   {
+    "component": "review_docs (typesafe/jev-1.14 and openrouter/anthropic/claude-sonnet-5)",
+    "calls": 39,
+    "cost_usd": 0.118489,
+    "note": "stable and small"
+   }
+  ],
+  "calls_a_wording_only_rerender_needs": [
+   "generate_docs (1 call)",
+   "review_docs (1 jev pass, 1 sonnet pass)"
+  ],
+  "calls_it_made_anyway": [
+   "refine_docs rotations, 2 on each of four names and 3 on two of them, including one escalation-seat call each on two names",
+   "review_docs re-run after every refine rotation"
+  ],
+  "rotations_burned": {
+   "volume_averaged_neutral_species_density": 3,
+   "volume_averaged_oxygen_density": 0,
+   "volume_averaged_ion_charge": 2,
+   "flux_surface_averaged_parallel_current_density": 2,
+   "flux_surface_averaged_toroidal_current_density": 3
+  }
+ },
+ "q2_why_three_did_not_settle": {
+  "answer": "The 280 s bound is the batch wrapper's own: batch-bulk-1.sh runs 'timeout 280 uv run --no-sync imas-codex sn edit'. It is not a pipeline limit and nothing in the pipeline sets it.",
+  "was_it_stuck": "No. The pipeline was working when the signal arrived. The last LLMCost row for three of the runs is within seconds of the wrapper's 280 s mark, and the escalation refine call is a multi-thousand-token output on a large model.",
+  "state_now": {
+   "volume_averaged_neutral_species_density": "docs_stage reviewed, score 0.9512 (at or above the 0.95 acceptance threshold): the edit had in fact settled",
+   "flux_surface_averaged_toroidal_current_density": "docs_stage reviewed, score 0.9372: settled on the score, the wrapper had already exited",
+   "flux_surface_averaged_parallel_current_density": "docs_stage refining, score 0.9391: still below threshold, needs one more rotation",
+   "volume_averaged_ion_charge": "docs_stage refining, score 0.9272: still below threshold, needs one more rotation",
+   "volume_averaged_oxygen_density": "docs_stage exhausted: refused at generate, terminal"
+  },
+  "duration_model": "cold start (graph connect, compose context build, scored-example load) plus one generate of 30-60 s plus two refine rotations of 40-90 s already exceeds 280 s before a third rotation is attempted"
+ },
+ "q3_neutral_counting": {
+  "ruling": "a bare species name counts ions summed over charge states, neutrals excluded",
+  "what_the_writer_saw": "the stored text of the BASE species names oxygen_density and boron_density: 'Total number density of oxygen atoms and ions across all charge states, from neutral to fully stripped' and 'Elemental boron number density, summed over neutral atoms and all ionic charge states through fully stripped B5+'. The writer copied them because they are its nearest accepted neighbours.",
+  "own_dd_source": "volume_averaged_oxygen_density and volume_averaged_boron_density resolve to summary/volume_average/n_i/<species>, an ion density. Neutrals are not in their own source.",
+  "corrected_conclusion": "CORRECTION to the first version of this record, which said these names' DD source includes neutral atoms. It does not. The source is an ion density; the neutral wording enters only through the stored text of the base names oxygen_density and boron_density, which contradict the ions-only ruling and are what the writer copied.",
+  "remedy": "ordering, not a rename, which is the opposite of the first version's ruling. Rewrite the base species names oxygen_density and boron_density first, so the volume_averaged_* names derived from them copy an ions-only definition rather than an elemental-atom one. The base names are the defect; the derived names are downstream of it.",
+  "note_on_neutral_species_density": "volume_averaged_neutral_species_density is excluded from the population rule by docs_gates.is_species_density_name (neutral_species is an aggregate subject), yet the bulk pass applied the species hint to it and drove three rotations against text that was already right for its name."
+ },
+ "repairs": [
+  {
+   "id": "refine-carries-settled-shared-wording",
+   "commit": "6b94875355ee13d29a487f09de6046581bf2cd8d",
+   "files": [
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py",
+    "imas_codex/llm/prompts/sn/_shared_parts.md",
+    "imas_codex/llm/prompts/sn/generate_docs_user.md",
+    "imas_codex/llm/prompts/sn/refine_docs_user.md",
+    "tests/standard_names/test_refine_docs_worker_context.py"
+   ],
+   "defect": "generate_docs gives the model every settled shared part verbatim (shared_parts), but refine_docs built neither the context key nor a template block. The renderer still installs the stored sentence and the persistence gate refuses a paraphrase, so every rotation re-guesses wording it cannot land and spends a rotation until the escalation seat happens to reproduce it.",
+   "evidence": "two names each burned three rotations and one escalation call; the escalation call is 57 percent of the five-name spend",
+   "test": "tests/standard_names/test_refine_docs_worker_context.py drives process_refine_docs_batch's own context-building path and asserts on the context the worker hands the renderer. It fails against a tree built from a084551a5 (1 failed, EXIT=1) and passes at the head tree (1 passed, EXIT=0); it also fails when the shared_parts lines are reverted from the head tree. The earlier template tests built their own context, so they guarded the template but not the worker. The covering suite tests/standard_names/ was run as a SLURM all_debug job on the repaired tree: 8756 passed, 0 failed, EXIT=0 (job 1314959).",
+   "template_sharing": "The settled-wording block is one partial, sn/_shared_parts.md, included by both generate_docs_user and refine_docs_user, so the two templates cannot drift. The block had been pasted into both."
+  }
+ ],
+ "q4_cheapest_correct_route": {
+  "method": "per class, the cheapest route is the one that reaches the acceptance score on its first generated draft, because a rotation costs one refine call plus a re-review and the third rotation costs the escalation seat",
+  "classes": [
+   {
+    "class": "shared wording (11)",
+    "route": "one generate with the settled sentence in shared_parts, then one review; no refine",
+    "projected_per_name_usd": 0.06,
+    "measured_per_name_usd": 0.07
+   },
+   {
+    "class": "family parent (144)",
+    "route": "one generate plus refine only where the parent has more than one child shape; hold a parent that is only a grouping from the cut",
+    "projected_per_name_usd": 0.09
+   },
+   {
+    "class": "operator (77)",
+    "route": "one generate with the operator registry sentence in shared_parts, then one review",
+    "projected_per_name_usd": 0.06,
+    "measured_per_name_usd": 0.093
+   },
+   {
+    "class": "unit misfit (26)",
+    "route": "one generate plus one refine, since a unit mismatch is a definition rewrite, not a wording substitution",
+    "projected_per_name_usd": 0.12,
+    "measured_per_name_usd": 0.11
+   },
+   {
+    "class": "single object (171)",
+    "route": "one generate plus one refine, the readers' phrase as the reason",
+    "projected_per_name_usd": 0.12,
+    "measured_per_name_usd": 0.094
+   },
+   {
+    "class": "equivalent-electron (56)",
+    "route": "not attemptable: waiting on the grammar release; zero spend",
+    "projected_per_name_usd": 0.0
+   }
+  ],
+  "projection_usd": {
+   "shared_wording": 0.66,
+   "family_parent": 12.96,
+   "operator": 4.62,
+   "unit_misfit": 3.12,
+   "single_object": 20.52,
+   "equivalent_electron": 0.0
+  },
+  "projected_total_usd": 41.88,
+  "ceiling_usd": 150,
+  "verdict": "under the ceiling, at the far edge of the manifest's own 47.57 projection",
+  "caveat": "the projection assumes a cold cache is paid once per batch rather than once per name, and that no name escalates",
+  "measured_total_usd": {
+   "shared_wording": 0.77,
+   "family_parent": 12.96,
+   "operator": 7.16,
+   "unit_misfit": 2.86,
+   "single_object": 16.07,
+   "equivalent_electron": 0.0
+  },
+  "measured_total_sum_usd": 39.83,
+  "measured_caveat": "family parent keeps its projected rate because neither parent arm settled inside the 200 s bound; the other four classes are measured and all sit at or below their projection"
+ },
+ "remeasurement": {
+  "status": "measured",
+  "method": "ten names through sn edit --axis docs --scope self, two per class, as the only graph writer, each bounded by timeout 200 in a SLURM all_debug job",
+  "jobs": [
+   1314814,
+   1314822
+  ],
+  "names": [
+   {
+    "class": "shared wording",
+    "name": "volume_averaged_boron_density",
+    "before": {
+     "docs_stage": "exhausted",
+     "score_docs": null,
+     "unit": "m^-3"
+    },
+    "after": {
+     "docs_stage": "exhausted",
+     "score_docs": null
+    },
+    "spend_usd": 0.0961,
+    "note": "refused at generate: it copied the stored neutral-inclusive wording of the base name boron_density. Its own source is an ion density, so the remedy is to rewrite the base species names first, not to rename this one."
+   },
+   {
+    "class": "shared wording",
+    "name": "volume_averaged_carbon_density",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9318356970836305,
+     "unit": "m^-3"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9073
+    },
+    "spend_usd": 0.0441,
+    "note": "settled on the first generated draft"
+   },
+   {
+    "class": "family parent",
+    "name": "alfven_frequency",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.8687499999999999,
+     "unit": "s^-1"
+    },
+    "after": {
+     "docs_stage": "refining",
+     "score_docs": 0.9533
+    },
+    "spend_usd": null,
+    "note": "past 200 s while refining; score 0.9533 is already above threshold"
+   },
+   {
+    "class": "family parent",
+    "name": "beta",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 1.0,
+     "unit": "1"
+    },
+    "after": {
+     "docs_stage": "drafted",
+     "score_docs": null
+    },
+    "spend_usd": null,
+    "note": "past 200 s before a score persisted; the 144-sibling parent needs a longer bound"
+   },
+   {
+    "class": "operator",
+    "name": "absorbed_wave_power",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.975,
+     "unit": "W"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9647
+    },
+    "spend_usd": 0.0915,
+    "note": "settled on the first generated draft"
+   },
+   {
+    "class": "operator",
+    "name": "area_of_flux_loop",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.85625,
+     "unit": "m^2"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9573
+    },
+    "spend_usd": 0.0946,
+    "note": "settled on the first generated draft"
+   },
+   {
+    "class": "unit misfit",
+    "name": "electron_number_density",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 1.0,
+     "unit": "m^-2"
+    },
+    "after": {
+     "docs_stage": "refining",
+     "score_docs": 0.9607
+    },
+    "spend_usd": null,
+    "note": "past 200 s while refining; score 0.9607 is already above threshold"
+   },
+   {
+    "class": "unit misfit",
+    "name": "incident_neutral_particle_flux_at_wall",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 1.0,
+     "unit": "s^-1"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9551
+    },
+    "spend_usd": null,
+    "note": "settled on the first generated draft (review cost USD 0.1098)"
+   },
+   {
+    "class": "single object",
+    "name": "alpha_angle_of_ferritic_element",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 1.0,
+     "unit": "rad"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.958
+    },
+    "spend_usd": 0.0903,
+    "note": "settled on the first generated draft"
+   },
+   {
+    "class": "single object",
+    "name": "area_of_passive_loop",
+    "before": {
+     "docs_stage": "accepted",
+     "score_docs": 0.8999999999999999,
+     "unit": "m^2"
+    },
+    "after": {
+     "docs_stage": "accepted",
+     "score_docs": 0.9533
+    },
+    "spend_usd": 0.0979,
+    "note": "settled on the first generated draft"
+   }
+  ],
+  "measured_rate_per_class_usd": {
+   "shared wording": 0.0701,
+   "family parent": null,
+   "operator": 0.093,
+   "unit misfit": 0.1098,
+   "single object": 0.0941
+  },
+  "notes_on_rate": {
+   "outcome_counts": {
+    "accepted_on_the_first_draft": 6,
+    "drafted_with_no_score_before_the_bound": 1,
+    "refining_at_the_bound_above_threshold": 2,
+    "refused_correctly_at_generate": 1,
+    "total": 10
+   },
+   "family parent": "no rate: both arm names (alfven_frequency, beta) ran past the 200 s bound, so the class records no cost. alfven_frequency was refining at 0.9533; beta persisted no score at all and is the drafted row.",
+   "unit misfit": "one observation only: incident_neutral_particle_flux_at_wall settled on its first draft at USD 0.1098, while electron_number_density ran past the bound while refining at 0.9607 and recorded no cost. The rate USD 0.110 rests on that single name and carries no spread.",
+   "operator": "two observations (USD 0.0915, USD 0.0946).",
+   "shared wording": "two observations covering both outcomes: one settled at USD 0.0441, one refused correctly at USD 0.0961. The mean USD 0.070 is not a settled-case cost.",
+   "single object": "two observations (USD 0.0903, USD 0.0979)."
+  }
+ }
+}
