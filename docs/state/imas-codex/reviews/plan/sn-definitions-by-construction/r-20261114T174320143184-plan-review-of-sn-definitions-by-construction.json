@@ -71,6 +71,16 @@
       "note": "Both mentions in section 7 now name section 9 as the section that settles which name-definition check stands.",
       "reason": "",
       "when": "2026-11-14T18:41:45.890013+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c6aea7e58f13ce4590de132c5e414b24a3151560",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 9 no longer concludes from the 80 disagreements that the seat's question is underspecified. It states that those disagreements are the Haiku reading's, that they show the labels are contested on borderline names, and that what is known of the seat is its 180 misses of 485 and its lack of a class sheet.",
+      "reason": "",
+      "when": "2026-11-14T18:41:50.956196+00:00"
     }
   ],
   "responses": {
@@ -82,6 +92,15 @@
       "note": "The cited evidence file is now on main: the bake-off run landed after this review read the plan (land commit e4dcedfe7), and git cat-file -e HEAD:docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.json succeeds.",
       "reason": "",
       "when": "2026-11-14T18:41:41.145704+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c6aea7e58f13ce4590de132c5e414b24a3151560",
+      "commit_basis": "edit",
+      "note": "Section 9 no longer concludes from the 80 disagreements that the seat's question is underspecified. It states that those disagreements are the Haiku reading's, that they show the labels are contested on borderline names, and that what is known of the seat is its 180 misses of 485 and its lack of a class sheet.",
+      "reason": "",
+      "when": "2026-11-14T18:41:50.956196+00:00"
     },
     "wiring-1": {
       "action": "acted",
