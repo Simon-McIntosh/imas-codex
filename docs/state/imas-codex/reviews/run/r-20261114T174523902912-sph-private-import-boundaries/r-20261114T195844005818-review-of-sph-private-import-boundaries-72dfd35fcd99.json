@@ -1,0 +1,96 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "ef218f047b98b03b52c6f497412463e439a617bc",
+  "call_sites": [
+    "imas_codex/standard_names/attachment_audit.py",
+    "imas_codex/standard_names/docs_gates.py",
+    "imas_codex/standard_names/edit.py",
+    "imas_codex/standard_names/export.py",
+    "imas_codex/standard_names/harmonize.py",
+    "imas_codex/standard_names/protection.py",
+    "imas_codex/standard_names/benchmark_roles.py",
+    "imas_codex/standard_names/campaign_pricing.py",
+    "imas_codex/standard_names/catalog_reconcile.py",
+    "imas_codex/standard_names/provenance_lifecycle.py",
+    "imas_codex/standard_names/provenance_rebuild.py",
+    "imas_codex/standard_names/release_notes.py",
+    "imas_codex/standard_names/signed_manifest.py"
+  ],
+  "completed_at": "2026-11-14T20:57:08.931Z",
+  "dispatched_at": "2026-11-14T20:10:51Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/harmonize.py",
+      "line": "45",
+      "severity": "blocking",
+      "text": "blocking: the re-export lost its redundant alias (`_x as _x` became a plain `x`), so ruff reports F401 'imported but unused'; the base tree passes this check and .github/workflows/test.yml:74 runs `uv run ruff check .`, so the change reddens the lint gate."
+    },
+    {
+      "file": "imas_codex/standard_names/release_notes.py",
+      "line": "136",
+      "severity": "non-blocking",
+      "text": "non-blocking: replacing `_git(` with `git_output(` pushed the line past 88 characters, so `ruff format --check .` now refuses this file; it was clean at base, and .github/workflows/test.yml:77 runs that check."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md",
+      "line": "11",
+      "severity": "blocking",
+      "text": "blocking: the baseline_suite and after_suite log_path values join two file paths with ' .. ' instead of naming a resolvable path, and crew check --manifest refuses the record with 'does not resolve to a readable log file', so the node cannot be promoted until each arm names its logs or a digest."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: the manifest carries no messages_received line, which crew check --manifest also refuses ('must say `messages_received: none`'), so the record fails its own audit on shape alone."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "non-blocking: changed_paths lists 21 imas_codex/standard_names modules and 3 tests/standard_names files that the dispatch's declared write paths did not grant; the edits are all required by the done_when, so the mismatch is the dispatch's fence, not runaway scope, but the manifest's rubric.scope_discipline claim that every path is inside the granted set is inaccurate."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html",
+      "line": "24",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment records a before-count of 17 statements / 23 occurrences / 20 distinct over 4 census measures while plan section 8 states 24 statements / 31 occurrences / 27 distinct names, and the fragment does not reconcile the two, so a reader cannot tell whether the section's 31 sites were all closed."
+    }
+  ],
+  "head_log_revision": "23052c8fa",
+  "item_verdicts": {
+    "diff": "read c72201a3a, 23052c8fa and 72dfd35fc against ef218f04; c72201a3a closes every import by exporting a public alias or delegation, 23052c8fa repairs two regressions c72201a3a introduced (a NameError in release_notes and a lost monkeypatch seam in edit), and 72dfd35fc adds the 301-line evidence fragment.",
+    "done_when": "the done_when asks for records of the before and after counts, the public names with their reasons, a distinct rule that passes at head and fails when a closed import is restored, and no added failure id; docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html gives a reason for each of the 20 names and the four chunk logs show zero added failures.",
+    "goal": "the dispatch goal is that no module imports another's private names; the landed change closes every private-name import between top-level modules of imas_codex/standard_names, and an independent count over the git archive at 72dfd35fc returns 0.",
+    "manifest": "read; status complete, commits c72201a3a, 23052c8fa and 72dfd35fc, changed_paths matching the diff, both suite arms carrying the same single failure id; its baseline_suite and after_suite log_path fields carry a ' .. ' range that crew check --manifest refuses, and no messages_received line is present.",
+    "write_paths": "the declared write paths were docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html and docs/figures/sn-pipeline-hygiene/sph-private-import-boundaries; the diff touches 21 source files and 3 test files outside them, all required by the done_when and none granted."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_package_import_boundaries.py:72 asserts `not violations` over every top-level module with no exemption set, so restoring any one closed import reddens it; negative-control.log shows exactly that at EXIT=1 and the assertion reads no value the test supplied.",
+    "evidence": "head-chunk-02.log and baseline-chunk-02.log each record the same single FAILED id (tests/standard_names/test_refine_attempt_budget.py::TestEscalationFiresOnTheLastRotation::test_last_rotation_uses_the_escalation_seat[3-True]) at EXIT=1, and negative-control.log fails on one restored site at EXIT=1, so the gate asserts the done_when's measure.",
+    "fit": "the bare-alias export matches an idiom already at base (imas_codex/standard_names/graph_ops.py:268 and eight more), but harmonize.py:45 trips ruff F401 and release_notes.py:136 fails ruff format --check, both run by .github/workflows/test.yml:74 and :77.",
+    "goal_fidelity": "an independent AST count over the package at 72dfd35fc measures 0 private-name imports between top-level modules of imas_codex/standard_names, down from 17 statements and 23 occurrences at ef218f04.",
+    "reuse": "every added name is a bare alias or a one-line delegation to its owner (imas_codex/standard_names/cascade.py:471, imas_codex/standard_names/promote.py:1483), so no capability is re-implemented; the delegations exist only to keep the tests' patch seam on the private helper.",
+    "scope_discipline": "all 24 changed source and test files are implied by the goal, but none lies inside the two declared write paths, and the source run's own crew check --manifest refuses them as 'changed paths outside the write scope'."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the dispatch goal is that no module imports another's private names; the landed change closes every private-name import between top-level modules of imas_codex/standard_names, and an independent count over the git archive at 72dfd35fc returns 0.\nVERDICT done_when: the done_when asks for records of the before and after counts, the public names with their reasons, a distinct rule that passes at head and fails when a closed import is restored, and no added failure id; docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html gives a reason for each of the 20 names and the four chunk logs show zero added failures.\nVERDICT write_paths: the declared write paths were docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html and docs/figures/sn-pipeline-hygiene/sph-private-import-boundaries; the diff touches 21 source files and 3 test files outside them, all required by the done_when and none granted.\nVERDICT manifest: read; status complete, commits c72201a3a, 23052c8fa and 72dfd35fc, changed_paths matching the diff, both suite arms carrying the same single failure id; its baseline_suite and after_suite log_path fields carry a ' .. ' range that crew check --manifest refuses, and no messages_received line is present.\nVERDICT diff: read c72201a3a, 23052c8fa and 72dfd35fc against ef218f04; c72201a3a closes every import by exporting a public alias or delegation, 23052c8fa repairs two regressions c72201a3a introduced (a NameError in release_notes and a lost monkeypatch seam in edit), and 72dfd35fc adds the 301-line evidence fragment.\nCALL_SITES: imas_codex/standard_names/attachment_audit.py, imas_codex/standard_names/docs_gates.py, imas_codex/standard_names/edit.py, imas_codex/standard_names/export.py, imas_codex/standard_names/harmonize.py, imas_codex/standard_names/protection.py, imas_codex/standard_names/benchmark_roles.py, imas_codex/standard_names/campaign_pricing.py, imas_codex/standard_names/catalog_reconcile.py, imas_codex/standard_names/provenance_lifecycle.py, imas_codex/standard_names/provenance_rebuild.py, imas_codex/standard_names/release_notes.py, imas_codex/standard_names/signed_manifest.py\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: an independent AST count over the package at 72dfd35fc measures 0 private-name imports between top-level modules of imas_codex/standard_names, down from 17 statements and 23 occurrences at ef218f04.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-chunk-02.log and baseline-chunk-02.log each record the same single FAILED id (tests/standard_names/test_refine_attempt_budget.py::TestEscalationFiresOnTheLastRotation::test_last_rotation_uses_the_escalation_seat[3-True]) at EXIT=1, and negative-control.log fails on one restored site at EXIT=1, so the gate asserts the done_when's measure.\nSCORE scope_discipline: 10\nJUSTIFICATION scope_discipline: all 24 changed source and test files are implied by the goal, but none lies inside the two declared write paths, and the source run's own crew check --manifest refuses them as 'changed paths outside the write scope'.\nSCORE durability: 19\nJUSTIFICATION durability: tests/standard_names/test_package_import_boundaries.py:72 asserts `not violations` over every top-level module with no exemption set, so restoring any one closed import reddens it; negative-control.log shows exactly that at EXIT=1 and the assertion reads no value the test supplied.\nSCORE fit: 11\nJUSTIFICATION fit: the bare-alias export matches an idiom already at base (imas_codex/standard_names/graph_ops.py:268 and eight more), but harmonize.py:45 trips ruff F401 and release_notes.py:136 fails ruff format --check, both run by .github/workflows/test.yml:74 and :77.\nSCORE reuse: 20\nJUSTIFICATION reuse: every added name is a bare alias or a one-line delegation to its owner (imas_codex/standard_names/cascade.py:471, imas_codex/standard_names/promote.py:1483), so no capability is re-implemented; the delegations exist only to keep the tests' patch seam on the private helper.\nFINDING imas_codex/standard_names/harmonize.py:45 blocking: the re-export lost its redundant alias (`_x as _x` became a plain `x`), so ruff reports F401 'imported but unused'; the base tree passes this check and .github/workflows/test.yml:74 runs `uv run ruff check .`, so the change reddens the lint gate.\nFINDING imas_codex/standard_names/release_notes.py:136 non-blocking: replacing `_git(` with `git_output(` pushed the line past 88 characters, so `ruff format --check .` now refuses this file; it was clean at base, and .github/workflows/test.yml:77 runs that check.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md:11 blocking: the baseline_suite and after_suite log_path values join two file paths with ' .. ' instead of naming a resolvable path, and crew check --manifest refuses the record with 'does not resolve to a readable log file', so the node cannot be promoted until each arm names its logs or a digest.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md:1 blocking: the manifest carries no messages_received line, which crew check --manifest also refuses ('must say `messages_received: none`'), so the record fails its own audit on shape alone.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T174523902912-sph-private-import-boundaries/manifest.md:8 non-blocking: changed_paths lists 21 imas_codex/standard_names modules and 3 tests/standard_names files that the dispatch's declared write paths did not grant; the edits are all required by the done_when, so the mismatch is the dispatch's fence, not runaway scope, but the manifest's rubric.scope_discipline claim that every path is inside the granted set is inaccurate.\nFINDING docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html:24 non-blocking: the fragment records a before-count of 17 statements / 23 occurrences / 20 distinct over 4 census measures while plan section 8 states 24 statements / 31 occurrences / 27 distinct names, and the fragment does not reconcile the two, so a reader cannot tell whether the section's 31 sites were all closed.",
+  "review_run_id": "r-20261114T195844005818-review-of-sph-private-import-boundaries-72dfd35fcd99",
+  "reviewed_base_sha": "ef218f047b98b03b52c6f497412463e439a617bc",
+  "reviewed_head_sha": "72dfd35fcd9946bf51a698aafc59a48d9d46aa47",
+  "reviewed_run_id": "r-20261114T174523902912-sph-private-import-boundaries",
+  "reviewer": "deepseek-v4.1-flash",
+  "reviewer_run_id": "r-20261114T195844005818-review-of-sph-private-import-boundaries-72dfd35fcd99",
+  "scores": {
+    "durability": 19,
+    "evidence": 18,
+    "fit": 11,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 10
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:57:11.926514+00:00",
+  "total": 97
+}
