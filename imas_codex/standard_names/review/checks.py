@@ -55,9 +55,47 @@ AUDIT_FINDING_CLASSES: frozenset[str] = frozenset(
         *DOCUMENTATION_GATE_NAMES,
         *(member.value for member in HouseStyleFindingClass),
         "duplicate_component",
-        "name_definition_disagreement",
     }
 )
+
+# The one check that asks the name-versus-definition question. Its answer
+# classes are not written in the taxonomy: the loader reads them from the seat
+# module, so the question the docs reviewer answers and the question the seat
+# answers are one list rather than two that can drift apart.
+NAME_DEFINITION_CHECK_ID = "definition_qualifier_absent_from_name"
+
+
+def _inject_name_definition_options(entry: dict[str, Any]) -> None:
+    """Read the name-definition answer classes from their one definition.
+
+    A list written into the taxonomy would be a second copy of the classes, and
+    the two would answer the same question differently the first time one of
+    them changed. The taxonomy therefore carries no options for this question,
+    and one written there is refused rather than silently preferred.
+    """
+
+    if entry.get("id") != NAME_DEFINITION_CHECK_ID:
+        return
+
+    from imas_codex.standard_names.review.name_definition_seat import (
+        AGREEING_KIND,
+        QUALIFIER_KINDS,
+    )
+
+    question = entry.get("question")
+    if not isinstance(question, dict):
+        raise ValueError(
+            f"check {NAME_DEFINITION_CHECK_ID!r} must ask a choice question "
+            "whose options are the seat's class list"
+        )
+    if "options" in question:
+        raise ValueError(
+            f"check {NAME_DEFINITION_CHECK_ID!r} carries its own options; the "
+            "answer classes live once, in name_definition_seat.QUALIFIER_KINDS"
+        )
+    question["options"] = list(QUALIFIER_KINDS)
+    question["conforming"] = [AGREEING_KIND]
+
 
 NAME_DIMENSIONS = frozenset({"grammar", "semantic", "convention", "completeness"})
 DOCS_DIMENSIONS = frozenset(
@@ -276,7 +314,10 @@ def load_review_checks(
     data: dict[str, Any] = yaml.safe_load(
         (path or CHECKS_PATH).read_text(encoding="utf-8")
     )
-    checks = [ReviewCheck(**entry) for entry in data.get("checks", [])]
+    entries = data.get("checks", [])
+    for entry in entries:
+        _inject_name_definition_options(entry)
+    checks = [ReviewCheck(**entry) for entry in entries]
     for check in checks:
         _require_noul_true_case(check)
     reason_map = [ReasonMapEntry(**entry) for entry in data.get("human_reason_map", [])]
