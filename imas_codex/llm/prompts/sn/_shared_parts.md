@@ -1,11 +1,3 @@
----
-name: sn/_shared_parts
-description: Partial carrying the settled shared wording a docs writer must be shown and must write around (included by generate and refine)
-used_by: imas_codex.standard_names.worker_tasks.worker_generate_docs, imas_codex.standard_names.worker_tasks.worker_refine_docs
-task: generate_docs
-dynamic: true
-schema_needs: []
----
 {% if shared_parts %}
 ## Settled shared wording — write around it, never against it
 

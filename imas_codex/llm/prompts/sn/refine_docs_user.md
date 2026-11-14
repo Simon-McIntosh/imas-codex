@@ -20,9 +20,7 @@ addresses the reviewer's concerns.
 - **Kind:** {{ kind or "scalar" }}
 - **Physics domain:** {{ physics_domain or "—" }}
 {% include ("sn/_conventions.md") %}
-{% include ("sn/_shared_parts.md") %}
-
-{% if description and "description pending LLM enrichment" not in description %}
+{% include ("sn/_shared_parts.md") %}{% if description and "description pending LLM enrichment" not in description %}
 - **One-line description:** {{ description }}
 {% endif %}
 
