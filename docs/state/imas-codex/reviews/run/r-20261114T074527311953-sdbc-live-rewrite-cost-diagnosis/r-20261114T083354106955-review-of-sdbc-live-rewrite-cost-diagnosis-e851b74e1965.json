@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:965",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:227"
+  ],
+  "completed_at": "2026-11-14T08:56:14.149Z",
+  "dispatched_at": "2026-11-14T08:34:17Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_refine_docs.py",
+      "line": 124,
+      "severity": "blocking",
+      "summary": "The production half of the repair is unguarded: the added tests build prompt_context themselves (test_refine_docs_prompt.py:220-256) and the pipeline tests patch render_prompt to a constant (test_refine_docs_settled_wording.py:58-63), so reverting lines 124-127 leaves the entire suite green and the defect recurs silently until the next escalation call."
+    },
+    {
+      "file": "/tmp/reckon-crew-scratch/r-20261114T074527311953-sdbc-live-rewrite-cost-diagnosis/neg-control-base-red.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The base-red log's header names its tree as a bare git archive a084551a5, but the run collected 17 items where that revision defines 14 in that file and the three added tests exist only from 6b9487535, so the arm cannot be reproduced from the record."
+    },
+    {
+      "file": "imas_codex/llm/prompts/sn/refine_docs_user.md",
+      "line": 24,
+      "severity": "non-blocking",
+      "summary": "The settled-wording block is a verbatim copy of generate_docs_user.md:22-38 where this directory already carries partials (_conventions.md is included by both templates), and drift between two copies is the shape of the defect being repaired."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-cost-diagnosis.json",
+      "line": 567,
+      "severity": "non-blocking",
+      "summary": "accepted_first_pass 7 and unsettled_at_the_bound 2 cannot both be read from the ten-row table, which shows six accepted, one drafted, two refining and one exhausted, so one row is double counted and beta is in no count."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-cost-diagnosis.json",
+      "line": 562,
+      "severity": "non-blocking",
+      "summary": "The unit-misfit class rate 0.1098 is one recorded observation presented as a two-name mean, since electron_number_density carries spend_usd null, and notes_on_rate documents that gap for family parent only."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "loop.py:965 registers process_refine_docs_batch as the refine_docs pool and worker_refine_docs.py:227 renders sn/refine_docs_user from the context the repair extends.",
+    "diff": "Read commit by commit against a084551a5: 6b9487535 adds 12 lines to worker_refine_docs.py, 18 to refine_docs_user.md and 54 to test_refine_docs_prompt.py; d5ba5895f and e851b74e1 add the evidence JSON; f72c83651 adds the page and the figure SVG.",
+    "done_when": "live-rewrite-cost-diagnosis.json:558 records measured rates for four of five classes and q4_cheapest_correct_route records projected_total_usd 41.88 and measured_total_sum_usd 39.83 against ceiling_usd 150, with the family-parent rate disclosed as unmeasured.",
+    "goal": "The goal is to find why a live rewrite edit cost USD 0.39 and did not settle, repair what is a defect, and re-measure ten names; docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-cost-diagnosis.json carries the 19-row per-call cost table, the four answers, one repair with a base-red test and the ten re-measured names.",
+    "manifest": "Read in full; status complete, four commits, rates of USD 0.070-0.110 a name, projection USD 39.83 against USD 150, the gate command with two log paths, and the two out-of-scope edits declared.",
+    "write_paths": "The manifest declares six write paths; the diff writes four inside them and two outside them (imas_codex/llm/prompts/sn/refine_docs_user.md, tests/standard_names/test_refine_docs_prompt.py), both disclosed in the manifest's outside_scope and scope_note lines under the reviewed brief's line 28 authorisation."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_refine_docs_prompt.py:220 reddens on the template block, but no assertion reddens on reverting imas_codex/standard_names/worker_tasks/worker_refine_docs.py:124.",
+    "evidence": "neg-control-base-red.log names its tree as a084551a5 alone while the run collected 17 items and that revision defines 14.",
+    "fit": "imas_codex/llm/prompts/sn/refine_docs_user.md:24-38 reproduces generate_docs_user.md:22-38 and the import at worker_refine_docs.py:124 matches the surrounding local imports.",
+    "goal_fidelity": "live-rewrite-cost-diagnosis.json answers all four questions and ships the repair, the ten-name re-measurement, the page and the figure.",
+    "reuse": "fixed_shared_parts is extended as the owner rather than duplicated, but the block at imas_codex/llm/prompts/sn/refine_docs_user.md:24 is copied where _conventions.md shows the include idiom.",
+    "scope_discipline": "imas_codex/llm/prompts/sn/refine_docs_user.md and tests/standard_names/test_refine_docs_prompt.py fall outside the declared write paths, though both are disclosed at manifest.md:16 and manifest.md:27."
+  },
+  "notes": "Read-only review: no file outside this record and its at-sha twin was created, edited or deleted, and no test or suite was run. The base and after gate results were read from the reviewed run's own gate logs, whose headers name their trees and whose last lines read EXIT=1 and EXIT=0; the base arm's two red ids are test_renders_settled_shared_wording and test_shared_parts_built_for_species_density, which are the tests the repair adds. The delivered figure was rendered to PNG and inspected and a separate figure review already recorded a matching pass, so it is not re-scored here.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is to find why a live rewrite edit cost USD 0.39 and did not settle, repair what is a defect, and re-measure ten names; docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-cost-diagnosis.json carries the 19-row per-call cost table, the four answers, one repair with a base-red test and the ten re-measured names.\nVERDICT done_when: live-rewrite-cost-diagnosis.json:558 records measured rates for four of five classes and q4_cheapest_correct_route records projected_total_usd 41.88 and measured_total_sum_usd 39.83 against ceiling_usd 150, with the family-parent rate disclosed as unmeasured.\nVERDICT write_paths: The manifest declares six write paths; the diff writes four inside them and two outside them (imas_codex/llm/prompts/sn/refine_docs_user.md, tests/standard_names/test_refine_docs_prompt.py), both disclosed in the manifest's outside_scope and scope_note lines under the reviewed brief's line 28 authorisation.\nVERDICT manifest: Read in full; status complete, four commits, rates of USD 0.070-0.110 a name, projection USD 39.83 against USD 150, the gate command with two log paths, and the two out-of-scope edits declared.\nVERDICT diff: Read commit by commit against a084551a5: 6b9487535 adds 12 lines to worker_refine_docs.py, 18 to refine_docs_user.md and 54 to test_refine_docs_prompt.py; d5ba5895f and e851b74e1 add the evidence JSON; f72c83651 adds the page and the figure SVG.\nCALL_SITES: imas_codex/standard_names/loop.py:965, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:227\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: live-rewrite-cost-diagnosis.json answers all four questions and ships the repair, the ten-name re-measurement, the page and the figure.\nSCORE evidence: 14\nJUSTIFICATION evidence: neg-control-base-red.log names its tree as a084551a5 alone while the run collected 17 items and that revision defines 14.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: imas_codex/llm/prompts/sn/refine_docs_user.md and tests/standard_names/test_refine_docs_prompt.py fall outside the declared write paths, though both are disclosed at manifest.md:16 and manifest.md:27.\nSCORE durability: 9\nJUSTIFICATION durability: tests/standard_names/test_refine_docs_prompt.py:220 reddens on the template block, but no assertion reddens on reverting imas_codex/standard_names/worker_tasks/worker_refine_docs.py:124.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/llm/prompts/sn/refine_docs_user.md:24-38 reproduces generate_docs_user.md:22-38 and the import at worker_refine_docs.py:124 matches the surrounding local imports.\nSCORE reuse: 15\nJUSTIFICATION reuse: fixed_shared_parts is extended as the owner rather than duplicated, but the block at imas_codex/llm/prompts/sn/refine_docs_user.md:24 is copied where _conventions.md shows the include idiom.\nFINDING imas_codex/standard_names/worker_tasks/worker_refine_docs.py:124 blocking: The production half of the repair is unguarded: the added tests build prompt_context themselves (test_refine_docs_prompt.py:220-256) and the pipeline tests patch render_prompt to a constant (test_refine_docs_settled_wording.py:58-63), so reverting lines 124-127 leaves the entire suite green and the defect recurs silently until the next escalation call.\nFINDING /tmp/reckon-crew-scratch/r-20261114T074527311953-sdbc-live-rewrite-cost-diagnosis/neg-control-base-red.log:1 non-blocking: The base-red log's header names its tree as a bare git archive a084551a5, but the run collected 17 items where that revision defines 14 in that file and the three added tests exist only from 6b9487535, so the arm cannot be reproduced from the record.\nFINDING imas_codex/llm/prompts/sn/refine_docs_user.md:24 non-blocking: The settled-wording block is a verbatim copy of generate_docs_user.md:22-38 where this directory already carries partials (_conventions.md is included by both templates), and drift between two copies is the shape of the defect being repaired.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-cost-diagnosis.json:567 non-blocking: accepted_first_pass 7 and unsettled_at_the_bound 2 cannot both be read from the ten-row table, which shows six accepted, one drafted, two refining and one exhausted, so one row is double counted and beta is in no count.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-cost-diagnosis.json:562 non-blocking: The unit-misfit class rate 0.1098 is one recorded observation presented as a two-name mean, since electron_number_density carries spend_usd null, and notes_on_rate documents that gap for family parent only.",
+  "review_run_id": "r-20261114T083354106955-review-of-sdbc-live-rewrite-cost-diagnosis-e851b74e1965",
+  "reviewed_base_sha": "a084551a52a5768ef7dc369336d4d8b48b6e93b7",
+  "reviewed_head_sha": "e851b74e196545de7fb4b5ccad14faf53f7f8517",
+  "reviewed_run_id": "r-20261114T074527311953-sdbc-live-rewrite-cost-diagnosis",
+  "rubric": "review",
+  "scores": {
+    "durability": 9,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T08:56:58.035507+00:00",
+  "total": 90
+}
