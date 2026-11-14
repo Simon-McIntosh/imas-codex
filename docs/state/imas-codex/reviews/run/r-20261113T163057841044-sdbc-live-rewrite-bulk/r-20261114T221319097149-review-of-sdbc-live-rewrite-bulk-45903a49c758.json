@@ -1,0 +1,87 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "bd9072535d84b98a3ad0a4317c292addb5fb7583",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-14T23:40:50.796Z",
+  "dispatched_at": "2026-11-14T23:17:20Z",
+  "failure_basis": "the reviewed run records no baseline_suite and no after_suite arm, so there is no suite delta to derive and no suite was run against a docs-only change. The head arm's own log is docs/evidence/fragments/sn-definitions-by-construction/gate-green.log, which ends EXIT=0 with 'checks failed: 0' and carries no pytest summary line or FAILED id; gate-red.log ends EXIT=1 but it is the run's declared negative control against a deliberately wrong expected stage count, not a head-arm failure. added_failure_count reads 0 from those gate logs rather than as a measured zero against a suite.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: five of the eight changed paths lie outside the dispatch's declared write fence, which named only the three evidence records, so the checker, its expected values, its two logs and the figure landed without the fence that governs this node permitting them."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py",
+      "line": "62",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate never reads bulk['censuses'], so the species and unit censuses the done_when requires committed are carried in the record with no assertion behind them and could drift silently."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: the waiting-name assertion compares against a literal 56 written in the script rather than in expected_values.json, so one of the gate's expectations sits outside the file the docstring declares as the sole source of independent values."
+    },
+    {
+      "file": "docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the figure is committed without the script that drew it, so no committed command can regenerate it, and the gate's only check on it is that the svg path appears in the page rather than that the rendered figure is readable."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the run's own delivery manifest still reports the withdrawn measure, its own record says ten live names while the manifest's evidence_inputs carries 'sourceless live names 2609 before and 2609 now', so a reader of the manifest and a reader of the delivered record get contradicting sourceless counts for the same node."
+    }
+  ],
+  "head_log_revision": "45903a49c7589744aa299fc15c04fde17251e605",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none: a repository search for check_evidence, live-rewrite-bulk and rewrite-outcomes-by-class finds only docs/evidence and docs/state paths, and nothing in imas_codex/ or tests/ imports or reads the added code.",
+    "diff": "read all four commits against base bd9072535d84b98a3ad0a4317c292addb5fb7583: 5affbe98c and 9ff0a336d record intermediate cuts, d82975d3d writes the 485-name final block and adds the figure, and 45903a49c rebuilds live-rewrite-manifest.json from the graph with every after states, moves the old pass blocks under history, recomputes per-class spend to a 70.2411 USD total, replaces the withdrawn sourceless count with the ten live names and adds the committed gate.",
+    "done_when": "the done_when asks for one recorded outcome per flagged name, writes through sn edit or the signed rename path, spend per class under the ceiling, and the rebuilt manifest, the before-and-after record and the re-read censuses committed; docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py asserts the outcome split, the 485-row before-and-after table, the sourceless count and the spend sum against the ceiling, and I re-ran it to EXIT=0 at the head.",
+    "goal": "the node's goal is to rewrite the flagged export candidates in the live graph under the lead's rulings, and docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 records all 485 candidates settled with their after state, one of which I read back from the graph: absorbed_wave_power now carries the rewritten accepted description the record's after_description begins with.",
+    "manifest": "read at the reviewed head, status complete, commits 9ff0a336d, d82975d3d and 45903a49c plus 5affbe98c, changed_paths the eight paths in the diff, tests naming check_evidence.py as the gate, test_logs the two gate logs and logs/negative-control.log, and no baseline_suite or after_suite arms at all.",
+    "write_paths": "the dispatch fenced docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json, live-rewrite-bulk.json and sdbc-live-rewrite-bulk.html; the diff lands those three unchanged in intent, and adds check_evidence.py, expected_values.json, gate-green.log, gate-red.log and docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg outside the fence, the run manifest recording them in its scope_note."
+  },
+  "justifications": {
+    "durability": "check_evidence.py:41 fails if the per-name manifest regresses to pending entries, because it compares the count of entries carrying an after state against the literal 485 in expected_values.json, and gate-red.log shows the gate refusing a wrong stage count with EXIT=1; nothing re-runs it automatically and the expected values are a frozen snapshot.",
+    "evidence": "I re-ran docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py at 45903a49c and it printed 'checks failed: 0' with EXIT=0, but it asserts nothing about the censuses block it ships beside, and its expected_values.json is the independent read's own output with no committed log of that read.",
+    "fit": "the three evidence records keep the fragment directory's idiom and the added checker sits beside the existing docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-gate.sh, with no plan or ticket label in any of the eight added or changed names.",
+    "goal_fidelity": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json now carries all 485 entries with an after state (0 reading pending) and live-rewrite-bulk.json line 1 records 349 accepted, 119 reviewed, 13 exhausted and 4 drafted, with the 56 equivalent-electron names held as waiting on the grammar word as the brief's ruling requires.",
+    "reuse": "the search over docs/evidence and the runtime packages found no owner of a capability that verifies a committed evidence fragment against independently read values, so check_evidence.py is the first and duplicates no runtime mechanism; it reuses the district's census figures rather than re-deriving them.",
+    "scope_discipline": "git diff --stat bd9072535..45903a49c lists eight paths; the three files the dispatch fenced (live-rewrite-manifest.json, live-rewrite-bulk.json, sdbc-live-rewrite-bulk.html) are all inside it, while check_evidence.py, expected_values.json, gate-green.log, gate-red.log and the figure sit outside the fence and are declared only in the run manifest's scope_note."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to rewrite the flagged export candidates in the live graph under the lead's rulings, and docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 records all 485 candidates settled with their after state, one of which I read back from the graph: absorbed_wave_power now carries the rewritten accepted description the record's after_description begins with.\nVERDICT done_when: the done_when asks for one recorded outcome per flagged name, writes through sn edit or the signed rename path, spend per class under the ceiling, and the rebuilt manifest, the before-and-after record and the re-read censuses committed; docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py asserts the outcome split, the 485-row before-and-after table, the sourceless count and the spend sum against the ceiling, and I re-ran it to EXIT=0 at the head.\nVERDICT write_paths: the dispatch fenced docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json, live-rewrite-bulk.json and sdbc-live-rewrite-bulk.html; the diff lands those three unchanged in intent, and adds check_evidence.py, expected_values.json, gate-green.log, gate-red.log and docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg outside the fence, the run manifest recording them in its scope_note.\nVERDICT manifest: read at the reviewed head, status complete, commits 9ff0a336d, d82975d3d and 45903a49c plus 5affbe98c, changed_paths the eight paths in the diff, tests naming check_evidence.py as the gate, test_logs the two gate logs and logs/negative-control.log, and no baseline_suite or after_suite arms at all.\nVERDICT diff: read all four commits against base bd9072535d84b98a3ad0a4317c292addb5fb7583: 5affbe98c and 9ff0a336d record intermediate cuts, d82975d3d writes the 485-name final block and adds the figure, and 45903a49c rebuilds live-rewrite-manifest.json from the graph with every after states, moves the old pass blocks under history, recomputes per-class spend to a 70.2411 USD total, replaces the withdrawn sourceless count with the ten live names and adds the committed gate.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nSCORE evidence: 15\nSCORE scope_discipline: 12\nSCORE durability: 13\nSCORE fit: 17\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json now carries all 485 entries with an after state (0 reading pending) and live-rewrite-bulk.json line 1 records 349 accepted, 119 reviewed, 13 exhausted and 4 drafted, with the 56 equivalent-electron names held as waiting on the grammar word as the brief's ruling requires.\nJUSTIFICATION evidence: I re-ran docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py at 45903a49c and it printed 'checks failed: 0' with EXIT=0, but it asserts nothing about the censuses block it ships beside, and its expected_values.json is the independent read's own output with no committed log of that read.\nJUSTIFICATION scope_discipline: git diff --stat bd9072535..45903a49c lists eight paths; the three files the dispatch fenced (live-rewrite-manifest.json, live-rewrite-bulk.json, sdbc-live-rewrite-bulk.html) are all inside it, while check_evidence.py, expected_values.json, gate-green.log, gate-red.log and the figure sit outside the fence and are declared only in the run manifest's scope_note.\nJUSTIFICATION durability: check_evidence.py:41 fails if the per-name manifest regresses to pending entries, because it compares the count of entries carrying an after state against the literal 485 in expected_values.json, and gate-red.log shows the gate refusing a wrong stage count with EXIT=1; nothing re-runs it automatically and the expected values are a frozen snapshot.\nJUSTIFICATION fit: the three evidence records keep the fragment directory's idiom and the added checker sits beside the existing docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-gate.sh, with no plan or ticket label in any of the eight added or changed names.\nJUSTIFICATION reuse: the search over docs/evidence and the runtime packages found no owner of a capability that verifies a committed evidence fragment against independently read values, so check_evidence.py is the first and duplicates no runtime mechanism; it reuses the district's census figures rather than re-deriving them.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py:1 non-blocking: five of the eight changed paths lie outside the dispatch's declared write fence, which named only the three evidence records, so the checker, its expected values, its two logs and the figure landed without the fence that governs this node permitting them.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py:62 non-blocking: the gate never reads bulk['censuses'], so the species and unit censuses the done_when requires committed are carried in the record with no assertion behind them and could drift silently.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_evidence.py:57 non-blocking: the waiting-name assertion compares against a literal 56 written in the script rather than in expected_values.json, so one of the gate's expectations sits outside the file the docstring declares as the sole source of independent values.\nFINDING docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg:1 non-blocking: the figure is committed without the script that drew it, so no committed command can regenerate it, and the gate's only check on it is that the svg path appears in the page rather than that the rendered figure is readable.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json:1 non-blocking: the run's own delivery manifest still reports the withdrawn measure, its own record says ten live names while the manifest's evidence_inputs carries 'sourceless live names 2609 before and 2609 now', so a reader of the manifest and a reader of the delivered record get contradicting sourceless counts for the same node.",
+  "review_run_id": "r-20261114T221319097149-review-of-sdbc-live-rewrite-bulk-45903a49c758",
+  "reviewed_base_sha": "bd9072535d84b98a3ad0a4317c292addb5fb7583",
+  "reviewed_head_sha": "45903a49c7589744aa299fc15c04fde17251e605",
+  "reviewed_run_id": "r-20261113T163057841044-sdbc-live-rewrite-bulk",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T221319097149-review-of-sdbc-live-rewrite-bulk-45903a49c758"
+  },
+  "reviewer_run_id": "r-20261114T221319097149-review-of-sdbc-live-rewrite-bulk-45903a49c758",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 18,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T23:41:20.023740+00:00",
+  "total": 92
+}
