@@ -131,6 +131,13 @@ on what the worker hands the renderer. It fails against a tree carrying the
 base worker and passes with the fix, and it fails again when those lines are
 reverted from the head tree.</p>
 
+<p>The covering suite (<code>tests/standard_names/</code>) was run as a SLURM
+<code>all_debug</code> job against the repaired tree: <strong>8756 passed</strong>,
+0 failed, <code>EXIT=0</code>. The first run of that suite caught a defect in the
+partial extraction, a stray newline that shifted the refine prompt's no-edit
+render and tripped its golden capture; the partial now renders nothing at all
+when a name carries no shared part.</p>
+
 <h3>The cheapest correct route</h3>
 
 <table>
