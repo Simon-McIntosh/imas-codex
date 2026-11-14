@@ -25,7 +25,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 46,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c892832318107aab18f1e73bcd27e8712a418489",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The done-when now fixes the live-count rule (neither status nor name stage superseded) and adds two planted controls for it: two live names on one DD path counts two, one live name plus an archived tombstone counts one.",
+      "reason": "",
+      "when": "2026-11-14T15:03:11.480456+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c892832318107aab18f1e73bcd27e8712a418489",
+      "commit_basis": "edit",
+      "note": "The done-when now fixes the live-count rule (neither status nor name stage superseded) and adds two planted controls for it: two live names on one DD path counts two, one live name plus an archived tombstone counts one.",
+      "reason": "",
+      "when": "2026-11-14T15:03:11.480456+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T121118989186-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261113T121118989186-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "5d4889bf1c18432efd446192f30ca29a6278db72",
   "rubric": "content",
