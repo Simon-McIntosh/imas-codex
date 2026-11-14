@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Why a live rewrite edit cost USD 0.39 and did not settle</title>
+</head>
+<body>
+<article>
+
+<h2>Why a live rewrite edit cost USD 0.39 and did not settle</h2>
+
+<p><strong>The reported rate is not the edit's spend.</strong> The bulk report
+reads <code>StandardName.llm_cost</code> into its <code>spend_usd</code> field.
+That property is the name's cumulative lifetime cost, so USD 0.391 a name is the
+whole history of five names, not the cost of these five edits. Measured from the
+pipeline's own <code>LLMCost</code> records, the five edits spent
+<strong>USD 1.2267 in total, USD 0.2453 a name</strong>. Of that, two
+escalation-seat refine calls are USD 0.7055, or 57 percent.</p>
+
+<p>The 280 seconds is the batch wrapper's own <code>timeout 280</code>, not a
+pipeline limit. Two of the five edits had in fact reached the acceptance
+threshold when the wrapper signalled them. One edit is refused for the right
+reason and needs a rename rather than a rewrite. The pipeline defect that makes
+an edit expensive is a documentation refinement that was never shown the settled
+shared wording it is forbidden to paraphrase.</p>
+
+<h3>Where the money goes</h3>
+
+<figure>
+<img src="/imas-codex/figures/sn-live-rewrite-cost/cost-per-name-by-call-type.svg"
+     alt="Stacked bars of spend per edit, split by generate, base refine, escalation refine and review">
+<figcaption>Spend per edit for the five shared-wording names, split by call type.
+The two most expensive edits are the two that reached the third refine rotation,
+where the escalation seat (claude-fable-5) is used: one call on that seat costs
+USD 0.298 to USD 0.407, sixty to eighty times a base refine.</figcaption>
+</figure>
+
+<table>
+<thead>
+<tr><th>name</th><th>generate</th><th>refine (base)</th><th>refine (escalation)</th><th>review</th><th>total</th></tr>
+</thead>
+<tbody>
+<tr><td>flux_surface_averaged_parallel_current_density</td><td>0.1068</td><td>0.0095</td><td>—</td><td>0.0321</td><td>0.1483</td></tr>
+<tr><td>flux_surface_averaged_toroidal_current_density</td><td>0.0429</td><td>0.0072</td><td>0.4072</td><td>0.0301</td><td>0.4875</td></tr>
+<tr><td>volume_averaged_ion_charge</td><td>0.0330</td><td>0.0056</td><td>—</td><td>0.0300</td><td>0.0685</td></tr>
+<tr><td>volume_averaged_neutral_species_density</td><td>0.0968</td><td>0.0061</td><td>0.2983</td><td>0.0263</td><td>0.4275</td></tr>
+<tr><td>volume_averaged_oxygen_density</td><td>0.0949</td><td>—</td><td>—</td><td>—</td><td>0.0949</td></tr>
+</tbody>
+</table>
+
+<p><strong>A wording-only re-render needs two calls:</strong> one
+<code>generate_docs</code> and one <code>review_docs</code> pass. What it made
+anyway, on four of the five names, was two or three
+<code>refine_docs</code> rotations and a full re-review after each. The cost of a
+generate call also doubles on a cold prompt cache: USD 0.0330 and USD 0.0429
+where the call carried about 25,000 cached-read tokens, USD 0.0949 and USD 0.1068
+where it carried none.</p>
+
+<h3>Why three edits did not settle in 280 s</h3>
+
+<p>The bound is <code>batch-bulk-1.sh</code>'s
+<code>timeout 280 uv run --no-sync imas-codex sn edit</code>. Nothing in the
+pipeline sets it. The pipeline was not stuck: each run's last cost row lands
+within seconds of its own 280-second mark, and the call in flight was the
+escalation refine, a multi-thousand-token output on a large model.</p>
+
+<table>
+<thead><tr><th>name</th><th>state now</th><th>score</th><th>reading</th></tr></thead>
+<tbody>
+<tr><td>volume_averaged_neutral_species_density</td><td>reviewed</td><td>0.9512</td><td>at or above threshold: had settled</td></tr>
+<tr><td>flux_surface_averaged_toroidal_current_density</td><td>reviewed</td><td>0.9372</td><td>settled on the score</td></tr>
+<tr><td>flux_surface_averaged_parallel_current_density</td><td>refining</td><td>0.9391</td><td>one more rotation needed</td></tr>
+<tr><td>volume_averaged_ion_charge</td><td>refining</td><td>0.9272</td><td>one more rotation needed</td></tr>
+<tr><td>volume_averaged_oxygen_density</td><td>exhausted</td><td>—</td><td>refused at generate, terminal</td></tr>
+</tbody>
+</table>
+
+<h3>Why the writer counts neutral atoms under a bare species name</h3>
+
+<p>It was fed text that says so, and that text is right about the source. The
+<code>oxygen_density</code> node the writer links to reads "Total number density
+of oxygen atoms and ions across all charge states, from neutral to fully
+stripped", and its documentation sums <code>Z = 0..8</code>.
+<code>boron_density</code> reads "summed over neutral atoms and all ionic charge
+states through fully stripped B5+". The writer reproduced its source accurately,
+and the population gate then correctly refused the only text that source
+supports.</p>
+
+<p><strong>So the refusal is the right outcome for these names, and the ruling
+for them is a rename, not a docs edit.</strong> A name whose DD source is an
+elemental atom density cannot be given an ion-only definition without
+contradicting its own source. Regenerating them under the settled sentence would
+publish a definition the source does not support.</p>
+
+<p>The related error in the bulk pass is the blanket application of the species
+hint to <code>volume_averaged_neutral_species_density</code>, a name whose
+subject is an aggregate the population rule deliberately excludes. The pipeline
+generated text that was right for the name and spent three rotations and one
+escalation call trying to make it say the opposite.</p>
+
+<h3>The repair</h3>
+
+<p><code>generate_docs</code> gives the model every settled shared part verbatim
+through <code>shared_parts</code>. The refine path built neither that context key
+nor a template block, while the renderer still installs the stored sentence and
+the persistence gate refuses a paraphrase of it. Each rotation therefore
+re-guessed wording it could not land, was refused, and spent a rotation until
+the escalation seat happened to reproduce the sentence. That is why the
+expensive call is the one that settles.</p>
+
+<p>The refine prompt now carries the same settled-wording block as generate
+(<code>6b94875</code>). The template test fails at the base revision with two
+cases and passes with seventeen after the change.</p>
+
+<h3>The cheapest correct route</h3>
+
+<table>
+<thead><tr><th>class</th><th>names</th><th>route</th><th>projected per name</th><th>projected segment</th></tr></thead>
+<tbody>
+<tr><td>shared wording</td><td>11</td><td>one generate with the settled sentence, one review, no refine</td><td>USD 0.06</td><td>USD 0.66</td></tr>
+<tr><td>family parent</td><td>144</td><td>one generate, refine only where the parent has more than one child shape; hold a grouping-only parent from the cut</td><td>USD 0.09</td><td>USD 12.96</td></tr>
+<tr><td>operator</td><td>77</td><td>one generate with the operator registry sentence in <code>shared_parts</code></td><td>USD 0.06</td><td>USD 4.62</td></tr>
+<tr><td>unit misfit</td><td>26</td><td>one generate plus one refine: a unit mismatch is a definition rewrite</td><td>USD 0.12</td><td>USD 3.12</td></tr>
+<tr><td>single object</td><td>171</td><td>one generate plus one refine, the readers' phrase as the reason</td><td>USD 0.12</td><td>USD 20.52</td></tr>
+<tr><td>equivalent-electron</td><td>56</td><td>not attemptable until the grammar carries the word</td><td>USD 0.00</td><td>USD 0.00</td></tr>
+</tbody>
+</table>
+
+<p>Projected total <strong>USD 41.88</strong> against the USD 150 ceiling, at the
+far edge of the manifest's own USD 47.57 projection. The projection assumes the
+cold cache is paid once per batch rather than once per name, and that no name
+reaches the escalation seat.</p>
+
+<p>The ten-name re-measurement, spread two names across each of the five classes
+and run through <code>sn edit</code>, is recorded in
+<code>live-rewrite-cost-diagnosis.json</code>.</p>
+
+</article>
+</body>
+</html>
