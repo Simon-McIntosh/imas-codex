@@ -149,6 +149,7 @@ def plot(signal: Signal, path: Path) -> dict:
     The figure uses neutral marks and no per-component palette.
     """
     import matplotlib.pyplot as plt
+    from matplotlib.ticker import MaxNLocator
 
     cache = (Path.home() / ".cache" / "imas-codex-codac-uda").resolve()
     path = path.expanduser().resolve()
@@ -179,6 +180,12 @@ def plot(signal: Signal, path: Path) -> dict:
         factor = 1e9 if signal.metadata["time_base"] == "epoch_ns" else 1
         elapsed = (signal.time - signal.time[0]) / factor
         values = signal.values
+        unit = signal.metadata.get("unit") or "unspecified unit"
+        magnitude = float(np.nanmax(np.abs(values)))
+        if unit in {"A", "V", "W", "J", "Hz", "Pa"} and magnitude >= 1000:
+            prefix, divisor = ("M", 1e6) if magnitude >= 1e6 else ("k", 1e3)
+            values = values / divisor
+            unit = prefix + unit
         if signal.metadata.get("mode") == "envelope":
             axis.plot(
                 elapsed, values[:, 1], color="#929292", linewidth=2.6, label="minimum"
@@ -203,7 +210,9 @@ def plot(signal: Signal, path: Path) -> dict:
         else:
             axis.plot(elapsed, values, color="#555555", linewidth=1.2, zorder=3)
         axis.set_xlabel("elapsed time [s]")
-        axis.set_ylabel(f"signal [{signal.metadata.get('unit') or 'unspecified unit'}]")
+        axis.set_ylabel(f"signal [{unit}]")
+        axis.xaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
+        axis.yaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
         axis.ticklabel_format(style="plain", axis="both", useOffset=False)
         figure.subplots_adjust(left=0.13, right=0.97, bottom=0.14, top=0.88)
         try:

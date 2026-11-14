@@ -172,6 +172,8 @@ def fetch(client, query: str) -> Reply:
 def check_spacing(times: np.ndarray, expected: float | None) -> None:
     if len(times) < 2:
         return
+    if np.any(times[1:] <= times[:-1]):
+        raise ReadError("raw timestamps must increase strictly")
     steps = np.diff(times)
     if not np.all(np.isfinite(steps)) or np.any(steps <= 0):
         raise ReadError("raw timestamps must increase strictly")
@@ -281,6 +283,10 @@ def read(client, request: dict) -> dict:
         )
     if reply.error:
         raise ReadError(reply.error)
+    if reply.empty:
+        reply.time = np.array(
+            [], dtype=np.int64 if time_format == "absolute" else np.float64
+        )
     if len(reply.time) > maximum:
         raise ReadError("read exceeds sample bound")
     if mode == "raw":

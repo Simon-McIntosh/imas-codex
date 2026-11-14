@@ -353,3 +353,37 @@ def test_loader_timeout():
     command = [sys.executable, "-c", "import time; time.sleep(1)"]
     with pytest.raises(subprocess.TimeoutExpired):
         loader.Loader(command, timeout=0.01).pulses("DEMO:*/*")
+
+
+def test_unsigned_timestamps_cannot_wrap_backwards():
+    client = FakeClient()
+    client.times = np.array([9, 8, 7, 6, 5, 4, 3, 2], dtype=np.uint64)
+    with pytest.raises(reader.ReadError, match="increase strictly"):
+        reader.read(client, window())
+    assert client.released == [7]
+
+
+def test_empty_relative_interval_has_relative_dtype():
+    result = reader.read(
+        FakeClient(relative=True, error="requested interval is empty"),
+        window(pulse="DEMO:TRIAL/1", time_format="relative"),
+    )
+    assert result["empty"] is True
+    assert result["time_dtype"] == "float64"
+
+
+def test_plot_saves_internal_svg_and_prints_statistics(capsys):
+    from pathlib import Path
+
+    signal = loader.Signal(
+        np.arange(8),
+        np.arange(8, dtype=float),
+        {"time_base": "pulse_seconds", "unit": "K", "mode": "raw"},
+    )
+    path = Path.home() / ".cache/imas-codex-codac-uda/fake-signal.svg"
+    result = loader.plot(signal, path)
+    assert result["count"] == 8
+    assert json.loads(capsys.readouterr().out)["mean"] == 3.5
+    assert 'width="31.1cm" height="16cm"' in path.read_text()
+    with pytest.raises(ValueError, match="internal cache"):
+        loader.plot(signal, Path("public.svg"))
