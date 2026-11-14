@@ -51,9 +51,28 @@
       "note": "plan-effort-hours is now 35, the sum of the nine sections.",
       "reason": "",
       "when": "2026-11-14T18:41:36.553745+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c6aea7e58f13ce4590de132c5e414b24a3151560",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The cited evidence file is now on main: the bake-off run landed after this review read the plan (land commit e4dcedfe7), and git cat-file -e HEAD:docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.json succeeds.",
+      "reason": "",
+      "when": "2026-11-14T18:41:41.145704+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c6aea7e58f13ce4590de132c5e414b24a3151560",
+      "commit_basis": "edit",
+      "note": "The cited evidence file is now on main: the bake-off run landed after this review read the plan (land commit e4dcedfe7), and git cat-file -e HEAD:docs/evidence/fragments/sn-definitions-by-construction/name-definition-reader-bake-off.json succeeds.",
+      "reason": "",
+      "when": "2026-11-14T18:41:41.145704+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
