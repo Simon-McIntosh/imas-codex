@@ -1,0 +1,25 @@
+{
+ "candidates": 485,
+ "stages": {
+  "accepted": 349,
+  "drafted": 4,
+  "exhausted": 13,
+  "reviewed": 119
+ },
+ "settled": 485,
+ "sourceless_names": [
+  "beta",
+  "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+  "deposited_power_at_divertor_target",
+  "electron_temperature_at_plasma_boundary",
+  "line_averaged_neon_density",
+  "poloidal_total_momentum_convection_velocity",
+  "radius_of_soft_xray_detector",
+  "ratio_of_diamagnetic_vorticity_to_major_radius",
+  "voltage_of_diagnostic_antenna",
+  "volume_averaged_electron_number_density_over_scrape_off_layer"
+ ],
+ "sourceless": 10,
+ "ceiling_usd": 90.0,
+ "source": "independent read, job 1316122, 2026-11-14; names taken from the manifest and the sourceless count written as a size() over incoming PRODUCED_NAME edges"
+}
