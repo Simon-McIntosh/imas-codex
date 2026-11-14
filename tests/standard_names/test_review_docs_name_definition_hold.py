@@ -22,7 +22,7 @@ from imas_codex.standard_names.worker_tasks import (
     worker_review_docs as _owning_worker_review_docs,
 )
 
-QUALIFIER = "cross-section average"
+QUALIFIER = "definition-narrower-than-name"
 
 
 def _item() -> dict:
@@ -93,7 +93,7 @@ def test_the_batch_persists_the_holds_its_seat_raises(caplog) -> None:
                 {
                     "id": "magnetic_field",
                     "verdict": "flag",
-                    "qualifier": QUALIFIER,
+                    "reader_class": QUALIFIER,
                     "reasoning": "the definition averages over the cross-section",
                 }
             ],

@@ -1,124 +1,153 @@
-"""Tests for the check that a name and its definition say the same thing.
+"""The name-versus-definition question: one list of classes, one judge.
 
-The check reads the definition and the name against each other and reports the
-qualifier family the definition states and the name does not. These tests hold
-three things: that a planted qualifier is found, that a name which states the
-qualifier is not flagged for stating it once more, and that a name the check
-flags is not accepted by review without a recorded reason.
+The check that a name and its definition state the same quantity is asked
+once, by the review seat, with the blind readers' class sheet. These tests hold
+that the classes exist in one place, that the prompt and the review taxonomy
+read that one place, and that no second implementation decides the answer
+beside the seat. They also hold what a verdict does: a flagged name is held for
+review, a passing name is not, and a seat that did not answer holds the
+candidate rather than accepting it.
 """
 
 from __future__ import annotations
 
-import pytest
+import ast
+import re
+from collections.abc import Iterator
+from pathlib import Path
 
-from imas_codex.standard_names.audits import name_definition_agreement_check
-from imas_codex.standard_names.review.checks import load_review_checks
-from imas_codex.standard_names.review.jev_review import (
-    aggregate_docs_review,
-    build_docs_audit_report,
-    build_docs_state,
-    claim_binding_key,
-    dimension_question_name,
-    docs_question_table,
-)
+import yaml
 
-CHECK_ID = "definition_states_qualifier_name_lacks"
-
-# A quantity whose definition normalises it while the name does not say so.
-NORMALISED_CANDIDATE = {
-    "id": "momentum_flux_due_to_e_cross_b_drift",
-    "unit": "1",
-    "description": (
-        "Momentum flux due to E cross B drift is the scalar transport of a "
-        "selected component of linear plasma momentum across an oriented "
-        "surface by the electric-field-cross-magnetic-field drift, expressed in "
-        "dimensionless form."
-    ),
-    "documentation": (
-        "Momentum flux due to E cross B drift is the scalar transport of a "
-        "selected component of linear plasma momentum across an oriented "
-        "surface, expressed in dimensionless form."
-    ),
-    "source_paths": ["core_profiles/profiles_1d/momentum_flux_norm"],
-}
-
-# The same quantity with the normalisation stated in the name.
-NAMED_CANDIDATE = {
-    **NORMALISED_CANDIDATE,
-    "id": "normalized_momentum_flux_due_to_e_cross_b_drift",
-}
+PACKAGE = Path(__file__).resolve().parents[2] / "imas_codex"
+SYSTEM_PROMPT = PACKAGE / "llm" / "prompts" / "sn" / "review_name_definition_system.md"
+CHECK_ID = "definition_qualifier_absent_from_name"
 
 
-def test_the_planted_normalisation_is_found() -> None:
-    findings = name_definition_agreement_check(NORMALISED_CANDIDATE)
-    assert findings, "the planted normalised quantity was not flagged"
-    assert any("unstated-normalisation" in finding for finding in findings)
+def _classes() -> tuple[str, ...]:
+    from imas_codex.standard_names.review.name_definition_seat import QUALIFIER_KINDS
+
+    return QUALIFIER_KINDS
 
 
-def test_a_name_that_states_the_normalisation_is_not_flagged() -> None:
-    assert name_definition_agreement_check(NAMED_CANDIDATE) == []
+def _package_files(suffix: str) -> Iterator[Path]:
+    for path in sorted(PACKAGE.rglob("*" + suffix)):
+        if "__pycache__" in path.parts:
+            continue
+        yield path
 
 
-def test_an_equivalent_electron_convention_is_found() -> None:
-    findings = name_definition_agreement_check(
-        {
-            "id": "accumulated_ammonia_count",
-            "description": (
-                "Cumulative inventory of ammonia molecules, expressed as an "
-                "equivalent-electron count with ten count units per molecule."
-            ),
-            "documentation": "",
-        }
+def _class_sequences_in_python() -> list[tuple[str, int, list[str]]]:
+    """Every literal sequence of three or more class names in the package."""
+
+    classes = set(_classes())
+    found: list[tuple[str, int, list[str]]] = []
+    for path in _package_files(".py"):
+        tree = ast.parse(path.read_text(encoding="utf-8"))
+        for node in ast.walk(tree):
+            if not isinstance(node, (ast.Tuple, ast.List, ast.Set)):
+                continue
+            if not all(
+                isinstance(element, ast.Constant) and isinstance(element.value, str)
+                for element in node.elts
+            ):
+                continue
+            strings = [str(element.value) for element in node.elts]
+            if len(classes & set(strings)) >= 3:
+                found.append(
+                    (str(path.relative_to(PACKAGE.parent)), node.lineno, strings)
+                )
+    return found
+
+
+def _yaml_lists(node: object) -> Iterator[list[str]]:
+    if isinstance(node, dict):
+        for value in node.values():
+            yield from _yaml_lists(value)
+    elif isinstance(node, list):
+        if all(isinstance(element, str) for element in node):
+            yield list(node)
+        else:
+            for element in node:
+                yield from _yaml_lists(element)
+
+
+def _class_sequences_in_yaml() -> list[tuple[str, list[str]]]:
+    """Every list of three or more class names in the package's data files."""
+
+    classes = set(_classes())
+    found: list[tuple[str, list[str]]] = []
+    for path in _package_files(".yaml"):
+        data = yaml.safe_load(path.read_text(encoding="utf-8"))
+        for values in _yaml_lists(data):
+            if len(classes & set(values)) >= 3:
+                found.append((str(path.relative_to(PACKAGE.parent)), values))
+    return found
+
+
+def test_the_answer_classes_are_written_once() -> None:
+    """A second list is a second answer to the question, and fails here."""
+
+    sequences = _class_sequences_in_python()
+    assert len(sequences) == 1, (
+        "the classes the question answers with appear in more than one place, "
+        f"so the copies can disagree: {sequences}"
     )
-    assert any("equivalent-electron-count" in finding for finding in findings)
+    path, _line, values = sequences[0]
+    assert path == "imas_codex/standard_names/review/name_definition_seat.py", path
+    assert values == list(_classes())
+    assert _class_sequences_in_yaml() == []
 
 
-def test_a_name_with_no_definition_raises_nothing() -> None:
-    assert name_definition_agreement_check({"id": "plasma_current"}) == []
+def test_the_prompt_names_the_classes_in_order() -> None:
+    text = SYSTEM_PROMPT.read_text(encoding="utf-8")
+    headings = tuple(re.findall(r"^- \*\*([a-z][a-z-]*)\*\*", text, re.MULTILINE))
+    assert headings == _classes()
 
 
-def _conforming_answers(state, checks, claims, bindings):
-    """Every question answered in the conforming form.
+def test_the_review_question_offers_the_same_classes() -> None:
+    from imas_codex.standard_names.review.checks import load_review_checks
 
-    The review decision this produces is the one a reviewer gives when nothing
-    is wrong: every rubric sits in its accepted category and every claim is
-    supported. Anything that still rejects is rejecting for the reason under
-    test.
+    checks, _ = load_review_checks()
+    [check] = [entry for entry in checks if entry.id == CHECK_ID]
+    question = check.question
+    assert question is not None, "the review taxonomy no longer asks the question"
+    assert tuple(question.options) == _classes()
+    assert question.conforming == ["agrees"]
+
+
+def test_the_question_has_no_second_judge() -> None:
+    """A second place that answers the question is caught here.
+
+    The word-matching implementation answered the question in code beside the
+    seat and disagreed with it on 412 of the 2,044 labelled names. It is gone,
+    and this refuses its identifiers coming back: either the lexical function,
+    its review wiring, or its review check.
     """
 
-    table = docs_question_table(checks, claims, bindings)
-    answers: dict[str, dict] = {}
-    from imas_codex.standard_names.review.jev_review import _DOCS_DIMENSION_CRITERIA
-
-    for dimension, criteria in _DOCS_DIMENSION_CRITERIA.items():
-        key = dimension_question_name(dimension)
-        if key in table:
-            answers[key] = {"choice": next(iter(criteria))}
-    for key in table:
-        if key.startswith("claim:"):
-            answers[key] = {"choice": "supports"}
-    return answers
-
-
-@pytest.fixture(scope="module")
-def checks():
-    return load_review_checks()[0]
-
-
-def _review(candidate, checks):
-    state = build_docs_state(candidate, checks=checks)
-    report = build_docs_audit_report(
-        {**candidate, "id": candidate["id"]}, catalog_names=[], known_ids=set()
+    package = "\n".join(
+        path.read_text(encoding="utf-8") for path in _package_files(".py")
     )
-    claims = state["documentation_claims"]
-    bindings = state["binding_ids"]
-    answers = _conforming_answers(state, checks, claims, bindings)
-    for _ in claims:
-        answers[claim_binding_key(0, 0)] = {"choice": "supports"}
-    return aggregate_docs_review(state, checks, answers, audit_report=report)
+    for gone in (
+        "name_definition_agreement_check",
+        "run_name_definition_checks",
+        "qualifier_name_lacks",
+    ):
+        assert gone not in package, (
+            f"{gone!r} is a second judge of the name-versus-definition question; "
+            "the seat is the only one"
+        )
+
+    seat_modules = [
+        path.name
+        for path in _package_files(".py")
+        if "NameDefinitionBatch" in path.read_text(encoding="utf-8")
+    ]
+    assert seat_modules == ["name_definition_seat.py"], (
+        f"more than one module carries a name-definition verdict schema: {seat_modules}"
+    )
 
 
-def test_a_flagged_verdict_raises_a_hold_naming_the_qualifier() -> None:
+def test_a_flagged_verdict_raises_a_hold_naming_the_class() -> None:
     from imas_codex.standard_names.review.name_definition_seat import (
         name_definition_note,
     )
@@ -128,12 +157,12 @@ def test_a_flagged_verdict_raises_a_hold_naming_the_qualifier() -> None:
         {
             "name": "momentum",
             "verdict": "flag",
-            "qualifier": "family-of-quantities",
+            "reader_class": "abstract-parent-as-quantity",
             "reasoning": "the definition lists three distinct momenta",
         },
     )
     assert note is not None
-    assert "family-of-quantities" in note
+    assert "abstract-parent-as-quantity" in note
     assert "three distinct momenta" in note
 
 
@@ -145,7 +174,11 @@ def test_a_passing_verdict_raises_no_hold() -> None:
     assert (
         name_definition_note(
             {"id": "electron_temperature"},
-            {"name": "electron_temperature", "verdict": "pass", "qualifier": "agrees"},
+            {
+                "name": "electron_temperature",
+                "verdict": "pass",
+                "reader_class": "agrees",
+            },
         )
         is None
     )
@@ -160,50 +193,14 @@ def test_an_unanswered_verdict_holds_rather_than_accepting() -> None:
 
     note = name_definition_note(
         {"id": "momentum"},
-        {"name": "momentum", "verdict": "unanswered", "qualifier": None},
+        {"name": "momentum", "verdict": "unanswered", "reader_class": None},
     )
     assert note is not None
     assert "did not answer" in note
 
 
-def test_a_flagged_name_is_refused_without_a_recorded_reason(checks) -> None:
-    """A normalised quantity planted under an unnormalised name is refused.
-
-    The negative control is the same candidate whose name states the
-    normalisation: identical definition, identical unit, identical answers.
-    Only the name's qualifier differs, so the refusal is the check's and not
-    the scaffolding's.
-    """
-
-    refused = _review(NORMALISED_CANDIDATE, checks)
-    assert refused["checks"][CHECK_ID]["audit_finding"], (
-        "the check recorded no finding for the planted name"
-    )
-    assert refused["checks"][CHECK_ID]["failed"]
-    assert refused["decision"] == "reject"
-
-    accepted = _review(NAMED_CANDIDATE, checks)
-    assert accepted["checks"][CHECK_ID]["audit_finding"] is None
-    assert not accepted["checks"][CHECK_ID]["failed"]
-    refused_failed = {
-        check for check, record in refused["checks"].items() if record["failed"]
-    }
-    accepted_failed = {
-        check for check, record in accepted["checks"].items() if record["failed"]
-    }
-    assert refused_failed == accepted_failed | {CHECK_ID}, (
-        "the only check that stops failing when the name states the "
-        f"normalisation must be this one: refused={refused_failed} "
-        f"accepted={accepted_failed}"
-    )
-
-
-def test_a_flagged_seat_verdict_is_persisted_as_a_review_hold() -> None:
-    """A flagged name is not accepted by review: the hold is what stops it.
-
-    The docs review accepts on score alone unless a check raised a hold, so this
-    asserts the seat's note becomes one, naming the seat that raised it.
-    """
+def test_a_flagged_verdict_is_persisted_as_a_review_hold() -> None:
+    """A flagged name is not accepted by review: the hold is what stops it."""
 
     from imas_codex.standard_names.review.name_definition_seat import (
         name_definition_note,
@@ -218,7 +215,7 @@ def test_a_flagged_seat_verdict_is_persisted_as_a_review_hold() -> None:
         {
             "name": "momentum",
             "verdict": "flag",
-            "qualifier": "family-of-quantities",
+            "reader_class": "abstract-parent-as-quantity",
             "reasoning": "the definition lists three distinct momenta",
         },
     )
@@ -240,7 +237,11 @@ def test_a_document_the_seat_passes_carries_no_hold() -> None:
 
     note = name_definition_note(
         {"id": "electron_temperature"},
-        {"name": "electron_temperature", "verdict": "pass", "qualifier": "agrees"},
+        {
+            "name": "electron_temperature",
+            "verdict": "pass",
+            "reader_class": "agrees",
+        },
     )
     assert (
         review_holds_from_checks(

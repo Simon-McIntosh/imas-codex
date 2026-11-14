@@ -1,10 +1,15 @@
-"""Chat review seat: does a definition state a qualifier its name does not.
+"""Chat review seat: does a definition state the quantity its name states.
 
 The name and its definition are compared by a review model through the shared
-LLM call layer, one batch of items per call. A flagged item becomes a review
-hold in the docs review, so a name whose definition narrows, normalises,
-weights, aggregates or generalises the quantity is not accepted until a
-reviewer answers it.
+LLM call layer, one batch of items per call. The question is the blind readers'
+question, asked with the readers' own class sheet and worked examples. A flagged
+item becomes a review hold in the docs review, so a name whose definition
+narrows, normalises, weights, aggregates, generalises or re-units the quantity
+is not accepted until a reviewer answers it.
+
+This module owns the one judge of that question and the one list of the classes
+it answers with. Nothing else in the package carries a list of them or decides
+the question in code.
 """
 
 from __future__ import annotations
@@ -18,15 +23,18 @@ from pydantic import BaseModel, Field
 
 logger = logging.getLogger(__name__)
 
-QUALIFIERS = (
-    "normalisation",
-    "counting-convention",
-    "weighting",
-    "integration",
-    "restriction-to-one-object",
-    "family-of-quantities",
+# The classes the blind readers used. The prompt names the same set; a class a
+# model returns that is not here is treated as no class at all, and the verdict
+# is read as unanswered rather than as an agreement.
+QUALIFIER_KINDS = (
+    "qualifier-missing-from-name",
+    "definition-narrower-than-name",
+    "abstract-parent-as-quantity",
+    "unit-does-not-fit-name",
     "agrees",
 )
+
+AGREEING_KIND = "agrees"
 
 BATCH_SIZE = 10
 
@@ -36,13 +44,16 @@ class NameDefinitionVerdict(BaseModel):
 
     name: str = Field(description="The standard name, echoed back unchanged.")
     verdict: str = Field(description="`flag` or `pass`.")
-    qualifier: str = Field(
-        description="One of the qualifier kinds, or `agrees` when the verdict is pass."
+    reader_class: str = Field(
+        description=(
+            "One of the readers' classes, or `agrees` when the verdict is pass."
+        )
     )
     reasoning: str = Field(
         description=(
-            "The wording in the definition that states the extra qualifier, or "
-            "the one quantity both texts share."
+            "The wording in the definition that decides it: the attribute the "
+            "name lacks, the narrower scope, the umbrella wording, or the unit "
+            "mismatch; or the one quantity both texts share."
         )
     )
     proposed_name: str = Field(
@@ -106,7 +117,7 @@ async def _judge_batch(
             {
                 "name": _item_payload(item)["standard_name"],
                 "verdict": "unanswered",
-                "qualifier": None,
+                "reader_class": None,
                 "reasoning": reason,
                 "proposed_name": "",
             }
@@ -138,16 +149,16 @@ async def _judge_batch(
                 unanswered("the review seat returned no verdict for this name")
             )
             continue
-        qualifier = verdict.qualifier if verdict.qualifier in QUALIFIERS else None
-        flagged = verdict.verdict.strip().lower() == "flag" or qualifier not in (
-            None,
-            "agrees",
+        reader_class = verdict.reader_class.strip()
+        kind = reader_class if reader_class in QUALIFIER_KINDS else None
+        flagged = verdict.verdict.strip().lower() == "flag" or (
+            kind is not None and kind != AGREEING_KIND
         )
         verdicts.append(
             {
                 "name": name,
                 "verdict": "flag" if flagged else "pass",
-                "qualifier": qualifier,
+                "reader_class": kind,
                 "reasoning": verdict.reasoning,
                 "proposed_name": verdict.proposed_name if flagged else "",
             }
@@ -214,6 +225,12 @@ async def judge_name_definitions(
     return verdicts, total_cost
 
 
+def name_definition_flagged(verdict: dict[str, Any]) -> bool:
+    """Whether a verdict asks review to hold the candidate."""
+
+    return verdict.get("verdict") != "pass"
+
+
 def name_definition_note(item: dict[str, Any], verdict: dict[str, Any]) -> str | None:
     """The review hold a verdict raises, or None when it passes.
 
@@ -229,8 +246,9 @@ def name_definition_note(item: dict[str, Any], verdict: dict[str, Any]) -> str |
             "name-versus-definition review did not answer: "
             f"{verdict.get('reasoning') or 'no verdict returned'}"
         )
-    qualifier = verdict.get("qualifier") or "unspecified-qualifier"
+    reader_class = verdict.get("reader_class") or "unspecified-class"
     return (
-        f"definition states a {qualifier} the name does not: "
+        f"definition does not state the quantity the name states "
+        f"({reader_class}): "
         f"{verdict.get('reasoning') or 'the definition quantifies something else'}"
     )

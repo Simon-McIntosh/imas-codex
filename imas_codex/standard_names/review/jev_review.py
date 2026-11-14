@@ -931,7 +931,6 @@ def build_docs_audit_report(
         run_documentation_gate_checks,
         run_house_style_checks,
         run_link_integrity,
-        run_name_definition_checks,
     )
 
     candidate = dict(item)
@@ -940,7 +939,6 @@ def build_docs_audit_report(
         lint_findings=[
             *run_house_style_checks([candidate]),
             *run_documentation_gate_checks([candidate]),
-            *run_name_definition_checks([candidate]),
         ],
         link_findings=[
             finding

@@ -7,12 +7,10 @@ dynamic: true
 schema_needs: []
 ---
 
-Apply the comparison rules in the system prompt to each item below. Decide
-whether the definition states a qualifier the name does not, and name the kind.
-The unit is supplied so you can check that the quantity the definition describes
-has the dimension of the quantity the name states.
+Classify each item against the class sheet and worked examples in the system
+prompt.
 
-## Items to Review
+## Items to review
 
 {% for item in items %}
 ### Item {{ loop.index }}
@@ -26,15 +24,6 @@ has the dimension of the quantity the name states.
 
 {% endfor %}
 
-## Output Format
-
-Return a JSON object with a `verdicts` array, one verdict per item, in the order
-given: `name`, `verdict` (`flag` or `pass`), `qualifier` (`normalisation`,
-`counting-convention`, `weighting`, `integration`, `restriction-to-one-object`,
-`family-of-quantities`, or `agrees`), and `reasoning` naming the wording in the
-definition that states the extra qualifier, or the one quantity both texts share,
-and `proposed_name`: when the flag is a `restriction-to-one-object`, a spelling of
-the name that states the restriction (for example a name that says which face,
-coil, module, reaction branch, instrument class or discharge phase it covers);
-empty otherwise.
-Follow the schema given in the system prompt.
+Return the JSON object described at the end of the system prompt: a `verdicts`
+array, one entry per item in the order given, each with `name`, `verdict`,
+`reader_class`, `reasoning` and `proposed_name`.
