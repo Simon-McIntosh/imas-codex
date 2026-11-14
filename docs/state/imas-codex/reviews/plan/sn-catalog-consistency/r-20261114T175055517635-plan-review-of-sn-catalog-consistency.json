@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T20:10:34.373Z",
+  "dispatched_at": "2026-11-14T19:58:09Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:78",
+      "id": "done_when-1",
+      "reason": "the node either fails a gate its repair cannot reach or meets it by relabelling disagreeing names as residuals, so the cap and the meaning of \"set aside\" decide what the node actually delivers.",
+      "text": "\u00a75's count of 0 is achieved by declaration: every name still disagreeing is \"set aside\" as a named residual, so the zero carries no information and the only operative bound is the newly added \"the residual list holds at most 20 names\", a number no reading in the plan supports. The residual population is the audit's own undecided set \u2014 names with neither a stored decision nor a recorded correction, which check 2 in `imas_codex/standard_names/domain_audit.py` fails by construction, and which the one writer deliberately leaves (\"a name below the floor, or whose call fails, is undecided: it keeps its current domain\", `docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-writer.html:60) \u2014 and the floor is derived so that about 5% of the calibration names fall below it, so over a repair population in the thousands the undecided tail is expected in the dozens, not under 20",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:83",
+      "id": "reasoning-1",
+      "reason": "a node that reads the comment block lands the 11-12 routing, superseding the very identity the done-when requires to survive and leaving the tombstone unarchived, and no reader can check the 11-14 ruling's terms against anything but the sentence derived from it.",
+      "text": "\u00a76's endpoint requires the ruled spelling to end as an archived tombstone whose history is kept apart and `deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary` to end as the one live name that reclaims it, but the plan's recorded lead ruling of 2026-11-12 (`c-s6-lead-ruling-dt-pair`, line 120) says \"both ... are superseded onto it\", and line 82 repeats that the pair was ruled onto the ruled spelling; the 2026-11-14 ruling that reverses the survivor is recorded only inside the clause implementing it, where every other ruling in this plan carries a dated comment naming who ruled it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-catalog-consistency.html:22",
+      "id": "wiring-1",
+      "reason": "the section's endpoint and evidence are unaffected and only the order in which it may be dispatched changes, which the coordinator can settle without an edit to the plan.",
+      "text": "the node table declares \u00a76 depends on `sn-domain-per-family#s3`, which is still implementable, while \u00a76 names no input from it: its only stated upstream is `sn-definitions-by-construction` \u00a76 for the read-back, and a rename in this section changes no domain, so the declaration holds the last two spellings behind unrelated family-domain work",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "ef218f047b98b03b52c6f497412463e439a617bc",
+  "plan_fingerprint": "d7a7bbaea70ecc00192bf73eb06f2ae0d1470b38cf68cf163f401add3337db19",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 51,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T175055517635-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "098e7a171f38c0f39bc59f970d88580687e7963b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-catalog-grouping#s3`, `sn-domain-per-family#s3`, `sn-integrity-backlog#s52`, `sn-definitions-by-construction#s6` and the four cited evidence fragments under `docs/evidence/fragments/sn-catalog-consistency/` all resolve.",
+    "done_when": "a finding \u2014 \u00a75's done-when reaches its zero by setting every remaining disagreement aside, leaving an unsupported 20-name residual cap as the only operative bound.",
+    "evidence_paths": "pass \u2014 \u00a75 requires the audit's output committed with the evidence, and neither section sends a read-back to a scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 neither section carries a plan label, stage name, ticket number or changelog prose; the tombstone, the refined descendant and the two live counts are named in catalog terms.",
+    "reasoning": "a finding \u2014 \u00a76's endpoint reverses the routing the plan's own recorded lead ruling of 2026-11-12 states, and the ruling that reverses it is recorded nowhere but in the clause implementing it.",
+    "single_goal": "pass \u2014 \u00a75 carries the domain repair alone and \u00a76 the separatrix spelling and its one residual locus, each closable on one verdict.",
+    "wiring": "a finding \u2014 \u00a76's depends-on carries `sn-domain-per-family#s3` (still implementable) while the section's prose and done-when name no input from it."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b0d65d872ca664bee2d00f76df7a4416b6b8851791153cfe0c0823b1b42fc657",
+    "s6": "f8c8fffebc9db14ed9918457370f5d0071783e471c070ce56650e0f1cf00d1a6",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:11:42.429646+00:00",
+  "total": null
+}
