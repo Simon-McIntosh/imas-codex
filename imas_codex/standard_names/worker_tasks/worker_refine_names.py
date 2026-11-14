@@ -33,6 +33,23 @@ if TYPE_CHECKING:
     from imas_codex.standard_names.budget import BudgetManager
 
 
+def refine_model_for_attempt(attempt: int, rotation_cap: int) -> tuple[str, bool]:
+    """Model for one refine rotation, and whether that rotation escalates.
+
+    The last rotation runs on the escalation seat: a chain that has spent every
+    rotation on the refine seat's family is retried by a different vendor
+    rather than by the family that already failed the item. Imported here
+    rather than at module scope because both accessors read the project
+    configuration, which the entrypoint module imports lazily.
+    """
+    from imas_codex.settings import get_model
+    from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
+
+    if attempt >= rotation_cap:
+        return DEFAULT_ESCALATION_MODEL, True
+    return get_model("sn-refine"), False
+
+
 class RefineCandidateValidationError(ValueError):
     """A refined candidate failed deterministic strict grammar validation."""
 
@@ -222,13 +239,10 @@ async def process_refine_name_batch(
     )
     from imas_codex.graph.client import GraphClient
     from imas_codex.llm.prompt_loader import render_prompt
-    from imas_codex.settings import get_model, get_reasoning_effort
+    from imas_codex.settings import get_reasoning_effort
     from imas_codex.standard_names.budget import LLMCostEvent
     from imas_codex.standard_names.canonical import find_name_key_duplicate
-    from imas_codex.standard_names.defaults import (
-        DEFAULT_ESCALATION_MODEL,
-        DEFAULT_REFINE_ROTATIONS,
-    )
+    from imas_codex.standard_names.defaults import DEFAULT_REFINE_ROTATIONS
     from imas_codex.standard_names.fanout import (
         CandidateContext,
         FanoutScope,
@@ -360,7 +374,11 @@ async def process_refine_name_batch(
             # this name proposed has ever persisted — the exact case the
             # lineage-depth test never reached.
             attempt = int(item.get("refine_attempts") or chain_length + 1)
-            escalate = attempt >= rotation_cap
+            # Dedicated refine seat for every rotation, and the escalation seat
+            # on the last one: a flash-lite tier lifted critiqued names at ~5%
+            # against ~42% for the compose tier, so refine owns its own model
+            # choice rather than sharing the compose seat's.
+            model, escalate = refine_model_for_attempt(attempt, rotation_cap)
             logger.info(
                 "refine_name: %s attempt %d/%d%s",
                 sn_id,
@@ -372,14 +390,6 @@ async def process_refine_name_batch(
                     else ""
                 ),
             )
-            if escalate:
-                model = DEFAULT_ESCALATION_MODEL
-            else:
-                # Dedicated refine seat: a flash-lite tier lifted critiqued
-                # names at ~5% against ~42% for the compose tier, so refine
-                # owns its own model choice rather than sharing the compose
-                # seat's.
-                model = get_model("sn-refine")
 
             # ── Build prompt context ──────────────────────────────────
             path = item.get("source_paths", [""])[0] if item.get("source_paths") else ""

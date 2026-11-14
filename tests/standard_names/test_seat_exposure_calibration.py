@@ -82,8 +82,8 @@ def test_launch_seat_has_proven_catalog_pricing(seat: str, model: str) -> None:
 def test_escalation_seat_has_proven_catalog_pricing() -> None:
     """The paid final refinement route has its published text rates."""
     pricing = _assert_proven_pricing("sn-escalation", get_model("sn-escalation"))
-    assert pricing["prompt"] == 10.0
-    assert pricing["completion"] == 50.0
+    assert pricing["prompt"] == 2.0
+    assert pricing["completion"] == 10.0
     assert pricing["request"] == 0.0
 
 

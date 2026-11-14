@@ -197,25 +197,27 @@ _MODEL_DEFAULTS: dict[str, str] = {
     "sn-judge": "typesafe/jev-1.14",
     "cluster-labels": "openrouter/openai/gpt-6.1-sol",
     "ids-mapping": "openrouter/openai/gpt-6.1-sol",
-    "agent": "openrouter/anthropic/claude-sonnet-4.6",
-    "compaction": "openrouter/anthropic/claude-haiku-4.5",
-    "reasoning": "openrouter/anthropic/claude-sonnet-4.6",
-    "dd-enrichment": "openrouter/anthropic/claude-sonnet-4.6",
-    "sn-compose": "openrouter/anthropic/claude-sonnet-4.6",
+    "agent": "openrouter/anthropic/claude-sonnet-5.5",
+    "compaction": "openrouter/anthropic/claude-haiku-5.5",
+    "reasoning": "openrouter/anthropic/claude-sonnet-5.5",
+    "dd-enrichment": "openrouter/anthropic/claude-sonnet-5.5",
+    "sn-compose": "local/deepseek-v4.1-flash",
     "sn-docs": "openrouter/openai/gpt-6.1-sol",
     # Refinement must synthesize a corrected candidate from reviewer feedback,
     # so it uses compose-tier capability rather than a lightweight classifier.
-    "sn-refine": "openrouter/anthropic/claude-sonnet-4.6",
-    # Final refine attempt at chain cap (name + docs). Vendor-diverse from
-    # compose and refine so escalation breaks a failure loop with an
-    # independent perspective. Active model in [tool.imas-codex.sn-escalation].
-    "sn-escalation": "openrouter/anthropic/claude-fable-5",
+    "sn-refine": "openrouter/openai/gpt-6-luna",
+    # Final refine attempt at chain cap (name + docs). The three defaults hold
+    # the vendor separation the seat exists for: Anthropic here, OpenAI for
+    # refine, the local DeepSeek router for compose, so escalation breaks a
+    # failure loop with an independent perspective. Active model in
+    # [tool.imas-codex.sn-escalation].
+    "sn-escalation": "openrouter/anthropic/claude-sonnet-5.5",
     # Derived-parent description synthesis (generalises over a parent's
     # already-accepted children).  Compose-tier task — a concise
     # description, not long-form physics prose — so it defaults to the
     # cheap/fast compose model; the downstream generate_docs (sn-docs)
     # rewrites the full documentation later.  Override in pyproject.toml.
-    "sn-parent-enrich": "openrouter/anthropic/claude-sonnet-4.6",
+    "sn-parent-enrich": "local/deepseek-v4.1-flash",
     # Physics-domain classifier for DD paths (SN names inherit the domain).
     # Owns a seat rather than borrowing a generic one so the model choice is
     # attributable to the SN pipeline.
@@ -234,7 +236,7 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # PR-description synthesis for catalog review PRs: grounds on the release
     # message, the frozen batch artifact, and the per-domain catalog diff to
     # write a concise human summary. Summarisation task — language tier.
-    "sn-release-notes": "openrouter/anthropic/claude-sonnet-4.6",
+    "sn-release-notes": "openrouter/anthropic/claude-sonnet-5.5",
 }
 
 # Environment variable names per section
@@ -274,7 +276,7 @@ def get_model(section: str) -> str:
         section: One of the MODEL_SECTIONS keys.
 
     Returns:
-        Model identifier string (e.g. 'google/gemini-3-flash-preview').
+        Model identifier string (e.g. 'openrouter/google/gemini-3.8-flash').
 
     Raises:
         ValueError: If section is not a valid model section.
@@ -323,7 +325,7 @@ def get_model_config(section: str) -> dict[str, str | None]:
     Example pyproject.toml::
 
         [tool.imas-codex.sn-compose]
-        model = "local/deepseek-v4-flash"
+        model = "local/deepseek-v4.1-flash"
         model-route = "ambix-local"
         api-key-env = "AMBIX_API_KEY"
 
@@ -1652,8 +1654,8 @@ def get_pool_replicas(pool_name: str) -> int:
 # ─── SN review settings ────────────────────────────────────────────────────
 
 _SN_REVIEW_DEFAULTS: dict[str, Any] = {
-    "names-models": ["openrouter/anthropic/claude-opus-4.6"],
-    "docs-models": ["openrouter/anthropic/claude-opus-4.6"],
+    "names-models": ["openrouter/anthropic/claude-opus-5.5"],
+    "docs-models": ["openrouter/anthropic/claude-opus-5.5"],
     "disagreement-threshold": 0.15,
     "max-cycles": 3,
     "reasoning-effort": "medium",
@@ -1969,35 +1971,36 @@ def get_reasoning_effort(section: str, default: str | None = None) -> str | None
 
 _SN_BENCHMARK_DEFAULTS = {
     "compose-models": [
-        "anthropic/claude-opus-4.7",
-        "anthropic/claude-sonnet-4.6",
-        "anthropic/claude-haiku-4.5",
-        "openai/gpt-6.1-sol",
-        "openai/gpt-6.1-terra",
-        "openai/gpt-6-luna",
-        "google/gemini-3.1-pro-preview",
-        "google/gemini-3-flash-preview",
-        "google/gemini-3.1-flash-lite-preview",
-        "moonshotai/kimi-k2.6",
-        "deepseek/deepseek-v4-pro",
-        "deepseek/deepseek-v4-flash",
-        "qwen/qwen3.6-plus",
-        "meta-llama/llama-4-maverick",
+        "openrouter/anthropic/claude-opus-5.5",
+        "openrouter/anthropic/claude-sonnet-5.5",
+        "openrouter/anthropic/claude-haiku-5.5",
+        "openrouter/openai/gpt-6.1-sol",
+        "openrouter/openai/gpt-6.1-terra",
+        "openrouter/openai/gpt-6-luna",
+        "openrouter/x-ai/grok-4.7",
+        "openrouter/google/gemini-3.8-flash",
+        "openrouter/google/gemini-3.1-pro-preview",
+        "openrouter/google/gemini-3.5-flash-lite",
+        "openrouter/qwen/qwen3.7-plus",
+        "openrouter/xiaomi/mimo-v2.6-pro",
+        "openrouter/moonshotai/kimi-k3.1-pro",
+        "openrouter/deepseek/deepseek-v4.1-flash",
+        "openrouter/meta-llama/llama-4-maverick",
     ],
-    "reviewer-model": "anthropic/claude-opus-4.6",
+    "reviewer-model": "openrouter/anthropic/claude-opus-5.5",
     "reviewer-models": [
-        "anthropic/claude-opus-4.6",
-        "anthropic/claude-sonnet-4.6",
-        "openai/gpt-6.1-sol",
+        "openrouter/anthropic/claude-opus-5.5",
+        "openrouter/anthropic/claude-sonnet-5.5",
+        "openrouter/openai/gpt-6.1-sol",
     ],
     "candidate-models": [
-        "openrouter/x-ai/grok-4.5",
-        "openrouter/google/gemini-3.5-flash",
+        "openrouter/x-ai/grok-4.7",
+        "openrouter/google/gemini-3.8-flash",
         "openrouter/google/gemini-3.1-pro-preview",
         "openrouter/openai/gpt-6.1-sol",
         "openrouter/openai/gpt-6-luna",
         "openrouter/openai/gpt-6.1-terra",
-        "openrouter/anthropic/claude-sonnet-5",
+        "openrouter/anthropic/claude-sonnet-5.5",
         "openrouter/deepseek/deepseek-v4-pro",
     ],
 }

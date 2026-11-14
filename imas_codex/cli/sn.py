@@ -210,7 +210,7 @@ def _check_local_llm() -> tuple[bool, str]:
 
     Returns ``(healthy, detail)``:
       - healthy   → detail is the served model's short name (e.g.
-        ``"deepseek-v4-flash"``)
+        ``"deepseek-v4.1-flash"``)
       - unhealthy → detail is a concise reason: ``"down"`` (connection
         refused), ``"timeout"``, ``"unreachable"``, ``"auth error"``
         (server up, key rejected), ``"key missing"`` (server up, no key
@@ -1563,7 +1563,7 @@ def _reject_unscoped_accepted_reset(
     default=None,
     help=(
         "Regenerate names produced by a specific model (substring match). "
-        "Example: --from-model gemini matches 'google/gemini-3.1-flash-lite-preview'. "
+        "Example: --from-model gemini matches 'openrouter/google/gemini-3.5-flash-lite'. "
         "Implies --force."
     ),
 )
@@ -3429,7 +3429,7 @@ def _benchmark_fixture(physics: bool) -> tuple[str, list[str]]:
     "--physics-judge-model",
     "physics_judge_model",
     default=None,
-    help="Judge model (default: the calibrated sn-benchmark reviewer model, opus-4.8).",
+    help="Judge model (default: the calibrated sn-benchmark reviewer model).",
 )
 @click.option(
     "--reasoning-effort",
@@ -3527,8 +3527,8 @@ def sn_bench(
     Examples:
       imas-codex sn bench
       imas-codex sn bench --max-candidates 5
-      imas-codex sn bench --models anthropic/claude-sonnet-4.6 --models openai/gpt-6.1-sol
-      imas-codex sn bench --models anthropic/claude-sonnet-4.6,openai/gpt-6.1-sol
+      imas-codex sn bench --models anthropic/claude-sonnet-5.5 --models openai/gpt-6.1-sol
+      imas-codex sn bench --models anthropic/claude-sonnet-5.5,openai/gpt-6.1-sol
       imas-codex sn bench --include-docs
     """
     from imas_codex.cli.discover.common import setup_logging

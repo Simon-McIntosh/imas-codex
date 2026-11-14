@@ -555,7 +555,7 @@ classes:
     class_uri: common:LLMOperation
     attributes:
       llm_model:
-        description: "Model identifier (e.g., openrouter/anthropic/claude-sonnet-4.5)"
+        description: "Model identifier (e.g., openrouter/anthropic/claude-sonnet-5.5)"
       llm_cost:
         description: "Cost in USD for this operation (for batches: batch_cost / batch_size)"
         range: float

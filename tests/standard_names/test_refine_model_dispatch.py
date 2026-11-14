@@ -5,12 +5,13 @@ Pin the contract that ``process_refine_name_batch`` and
 ``get_model("sn-refine")`` — *not* ``get_model("sn-compose")`` (the
 bulk-content tier).
 
-This guards against the failure mode that triggered E3's collapse in
-acceptance rate (cl=0 ~42% → cl=1+ ~5%): flash-lite refines could not
-lift reviewer-critiqued names.  Peeling refine onto its own pyproject
-section (default Sonnet 4.6) gives the refine pass a model with
-sufficient capability to recover from feedback, and keeps the section
-free to diverge from compose (``sn-compose``) without coupling.
+This guards the failure mode where a cheap tier refines: a flash-lite or
+haiku model lifted reviewed, critiqued names at about 5% against about
+42% for the compose tier.  Refine therefore keeps its own pyproject
+section, so its model can diverge from compose without coupling, and the
+fallback in ``settings._MODEL_DEFAULTS`` holds the same capable tier the
+section names; a fallback left behind would silently change the model
+wherever the project configuration is absent.
 """
 
 from __future__ import annotations
@@ -31,20 +32,28 @@ def test_refine_section_registered() -> None:
     assert "sn-refine" in settings.MODEL_SECTIONS
 
 
-def test_refine_default_is_sonnet_class(monkeypatch: pytest.MonkeyPatch) -> None:
-    """Default refine model is in the Sonnet/Opus capability tier.
+CHEAP_TIERS = ("flash-lite", "haiku", "mini", "nano", "mini-max")
 
-    E3 audit: flash-lite cannot lift critiqued names.  We assert the
-    default contains 'sonnet' or 'opus' so a future config edit that
-    drops it back to flash/haiku/mini will fail this guard.
+
+def test_refine_default_holds_the_seated_tier(monkeypatch: pytest.MonkeyPatch) -> None:
+    """The refine fallback is a capable tier and agrees with the seat.
+
+    Two ways this guard can fail, both real: a config edit that drops the
+    fallback to a cheap tier, which cannot lift critiqued names, and a seat
+    edit that leaves the fallback behind, which silently changes the model
+    wherever the project configuration is absent.
     """
     monkeypatch.delenv("IMAS_CODEX_SN_REFINE_MODEL", raising=False)
     # Bypass any pyproject override — we want to verify the *default*
     # baked into settings.py protects against accidental downgrades.
     model = settings._MODEL_DEFAULTS["sn-refine"].lower()
-    assert any(tier in model for tier in ("sonnet", "opus")), (
-        f"Default refine model {model!r} must be Sonnet or Opus tier "
-        f"(flash-lite refines accept at ~5% per E3 audit)."
+    assert not any(tier in model for tier in CHEAP_TIERS), (
+        f"Default refine model {model!r} is a cheap tier; a flash-lite or "
+        "haiku refine lifts critiqued names at about 5%."
+    )
+    assert model == settings.get_model("sn-refine").lower(), (
+        "the sn-refine fallback and the seat name different models, so the "
+        "model changes where the project configuration is absent"
     )
 
 
@@ -78,28 +87,34 @@ def test_refine_does_not_alias_compose(monkeypatch: pytest.MonkeyPatch) -> None:
 
 
 def test_refine_name_worker_imports_refine_section() -> None:
-    """``process_refine_name_batch`` resolves its non-escalation model
-    via ``get_model("sn-refine")``.
+    """``process_refine_name_batch`` resolves its model through the rotation.
 
-    Source-level check: the worker must reference the ``"sn-refine"``
-    settings key (not ``"language"`` or ``"sn-compose"``) for the
-    non-escalation branch.  This is cheaper and more stable than
-    spinning up an asyncio mock harness with the full GraphClient +
-    fanout fakes that the worker requires at runtime.
+    Source-level check: the batch must ask the rotation helper for its model
+    rather than naming one itself, and the helper must reference the
+    ``"sn-refine"`` settings key (not ``"language"`` or ``get_model("sn-compose")``)
+    for the non-escalation branch.  This is cheaper and more stable than
+    spinning up an asyncio mock harness with the full GraphClient + fanout
+    fakes that the worker requires at runtime.
     """
     import inspect
 
     from imas_codex.standard_names import workers
 
-    src = inspect.getsource(_owning_worker_refine_names.process_refine_name_batch)
-    assert 'get_model("sn-refine")' in src, (
-        "process_refine_name_batch must dispatch via get_model('refine'); "
-        "see commit history for E3 acceptance-rate audit."
+    batch_src = inspect.getsource(_owning_worker_refine_names.process_refine_name_batch)
+    assert "refine_model_for_attempt(" in batch_src, (
+        "process_refine_name_batch must take its model from the rotation helper"
+    )
+
+    rotation_src = inspect.getsource(
+        _owning_worker_refine_names.refine_model_for_attempt
+    )
+    assert 'get_model("sn-refine")' in rotation_src, (
+        "the refine rotation must resolve the non-escalation model from the "
+        "sn-refine seat"
     )
     # And it must NOT silently route through the compose (bulk) tier.
-    assert 'get_model("sn-compose")' not in src, (
-        "process_refine_name_batch must not use get_model('sn-compose') — "
-        "flash-lite refines accept critiqued names at ~5% (E3 audit)."
+    assert 'get_model("sn-compose")' not in rotation_src, (
+        "a compose-tier model refines critiqued names at about 5%"
     )
 
 

@@ -67,14 +67,14 @@ class FanoutSettings(BaseModel):
     evidence_token_cap_escalation: int = 800
     """Total evidence-block token cap on Opus-escalation cycles."""
 
-    proposer_model: str = "local/deepseek-v4-flash"
+    proposer_model: str = "local/deepseek-v4.1-flash"
     """Proposer LLM model identifier.
 
-    Defaults to the locally-hosted DeepSeek v4 flash endpoint so the
-    full SN pipeline stays zero-cost end to end.  Override per-run
-    via ``[tool.imas-codex.sn-fanout].proposer-model`` (e.g. set to
-    ``openrouter/google/gemini-3.1-flash-lite-preview`` when willing
-    to spend budget on a higher-capability planner).
+    Defaults to the locally-hosted DeepSeek flash endpoint the ambix router
+    serves, so the full SN pipeline stays zero-cost end to end.  Override
+    per-run via ``[tool.imas-codex.sn-fanout].proposer-model`` (e.g. set it to
+    ``openrouter/google/gemini-3.8-flash`` when willing to spend budget on a
+    higher-capability planner).
     """
 
     proposer_temperature: float = 0.1

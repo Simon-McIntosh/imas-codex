@@ -209,7 +209,7 @@ def test_checked_in_pricing_zeroes_uncharged_dimensions_and_stays_inactive():
     The arithmetic consumers multiply and sum these dimensions directly, so a
     route that charges neither must yield a number rather than ``None``.
     """
-    model = "openrouter/openai/gpt-5.6-luna"
+    model = "openrouter/openai/gpt-6-luna"
 
     pricing = settings.get_openrouter_pricing(model)
 

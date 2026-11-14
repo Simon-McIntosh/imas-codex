@@ -13,7 +13,7 @@ Usage:
     stats = enrich_imas_paths(
         client=graph_client,
         version="4.0.0",
-        model="google/gemini-3-flash-preview",
+        model="openrouter/google/gemini-3.8-flash",
         batch_size=50,
     )
 """
@@ -916,10 +916,9 @@ def enrich_imas_paths(
     from imas_codex.settings import get_model
 
     if model is None:
-        # Match the production DD-build path (dd_workers uses get_model("dd-enrichment")).
-        # The old "language" fallback could silently enrich with a different model
-        # (gpt-5.4) than the benchmark-backed dd-enrichment model (sonnet-4.6),
-        # diverging description quality on any non-CLI caller.
+        # Match the production DD-build path, which reads the same seat, so a
+        # non-CLI caller cannot silently enrich with a different model than the
+        # benchmark-backed dd-enrichment seat and diverge description quality.
         model = get_model("dd-enrichment")
 
     stats = {

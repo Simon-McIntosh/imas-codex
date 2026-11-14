@@ -114,9 +114,9 @@ def test_configured_default_profile_uses_blind_pair_and_disagreement_breaker(
     from imas_codex import settings as settings_mod
 
     expected = [
-        "openrouter/x-ai/grok-4.5",
+        "openrouter/x-ai/grok-4.7",
         "openrouter/openai/gpt-6-luna",
-        "openrouter/anthropic/claude-sonnet-5",
+        "openrouter/anthropic/claude-sonnet-5.5",
     ]
     configured = settings_mod.get_sn_review_profile_models("default")
 

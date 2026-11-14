@@ -151,7 +151,7 @@ def test_expected_reservation_does_not_use_the_provider_policy_ceiling(monkeypat
     )
 
     exposure = model_provider_exposure(
-        "openrouter/x-ai/grok-4.5",
+        "openrouter/x-ai/grok-4.7",
         [{"role": "user", "content": "short rendered prompt"}],
         response_model=_BoundedResponse,
         provider_attempts=1,
@@ -169,7 +169,7 @@ def test_request_bytes_are_converted_to_tokens_before_pricing():
     """
     from imas_codex.settings import get_openrouter_pricing
 
-    route = "openrouter/anthropic/claude-sonnet-5"
+    route = "openrouter/anthropic/claude-sonnet-5.5"
     price = get_openrouter_pricing(route)
     payload = "y" * 60_000
     messages = [{"role": "user", "content": payload}]
@@ -203,7 +203,7 @@ def test_admission_prices_the_typical_completion_not_the_published_maximum():
     """
     from imas_codex.discovery.base.llm import get_model_limits
 
-    route = "openrouter/anthropic/claude-sonnet-5"
+    route = "openrouter/anthropic/claude-sonnet-5.5"
     messages = [{"role": "user", "content": "y" * 38_000}]
     published = get_model_limits(route)["max_tokens"]
     assert published > _TYPICAL_COMPLETION_TOKENS
@@ -240,7 +240,7 @@ def test_input_term_blends_the_published_cache_rates():
     """
     from imas_codex.settings import get_openrouter_pricing
 
-    route = "openrouter/anthropic/claude-sonnet-5"
+    route = "openrouter/anthropic/claude-sonnet-5.5"
     catalog = get_openrouter_pricing(route)
     assert catalog["cache_read"] and catalog["cache_write"], (
         "this route must declare both cache rates for the blend to be exercised"
@@ -270,21 +270,21 @@ def test_uncatalogued_cache_rates_fall_back_to_the_base_prompt_rate():
     # A route absent from the project catalog declares no cache rates at all.
     assert blended_input_rate("openrouter/absent/route", 4.0) == pytest.approx(4.0)
     # A cataloged route does use them, so the fallback is not silently universal.
-    assert blended_input_rate("openrouter/anthropic/claude-sonnet-5", 2.0) < 2.0
+    assert blended_input_rate("openrouter/anthropic/claude-sonnet-5.5", 2.0) < 2.0
 
 
 @pytest.mark.parametrize("bad_rate", [0.0, -1.0, float("nan"), float("inf")])
 def test_blended_rate_fails_closed_without_a_base_rate(bad_rate: float):
     """No usable base prompt rate means no admission, not a silent zero."""
     with pytest.raises(BudgetExposureUnknown):
-        blended_input_rate("openrouter/anthropic/claude-sonnet-5", bad_rate)
+        blended_input_rate("openrouter/anthropic/claude-sonnet-5.5", bad_rate)
 
 
 def test_admission_never_prices_above_a_routes_published_allowance(monkeypatch):
     """A route whose published output is smaller than the estimate uses its own."""
     from imas_codex.discovery.base import llm
 
-    route = "openrouter/anthropic/claude-sonnet-5"
+    route = "openrouter/anthropic/claude-sonnet-5.5"
     messages = [{"role": "user", "content": "prompt"}]
     small = 2_048
     monkeypatch.setattr(
@@ -324,7 +324,7 @@ def test_attempt_binding_funds_the_admission_estimate_until_the_allowance_grows(
     proven it will use everything it is given, so that one binds its full
     escalated allowance.
     """
-    route = "openrouter/anthropic/claude-sonnet-5"
+    route = "openrouter/anthropic/claude-sonnet-5.5"
     messages = [{"role": "user", "content": "y" * 20_000}]
     lease = _RecordingLease()
     bind = bind_attempt_exposure(
@@ -360,7 +360,7 @@ def test_binding_without_a_lease_is_a_noop():
     assert (
         bind_attempt_exposure(
             None,
-            "openrouter/anthropic/claude-sonnet-5",
+            "openrouter/anthropic/claude-sonnet-5.5",
             [{"role": "user", "content": "prompt"}],
             response_model=_BoundedResponse,
         )
@@ -376,7 +376,7 @@ def test_oversized_request_is_refused_against_the_token_limit(monkeypatch):
     """
     from imas_codex.discovery.base import llm
 
-    route = "openrouter/anthropic/claude-sonnet-5"
+    route = "openrouter/anthropic/claude-sonnet-5.5"
     limit = 40_000
     monkeypatch.setattr(
         llm, "get_catalog_model_info", lambda model: {"max_input_tokens": limit}
