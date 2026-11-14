@@ -15,8 +15,8 @@ from neo4j import GraphDatabase
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.provenance_lifecycle import (
     StaleSourceDetachConflict,
-    _load_signed_stale_source_rows,
     detach_signed_stale_source_bindings,
+    load_signed_stale_source_rows,
 )
 
 AUTHORITY_PATH = (
@@ -178,7 +178,7 @@ def _admitted_source_ids() -> list[str]:
 
 
 def test_committed_authority_signature_selects_exact_blocking_rows() -> None:
-    file_hash, rows_hash, rows = _load_signed_stale_source_rows(
+    file_hash, rows_hash, rows = load_signed_stale_source_rows(
         AUTHORITY_PATH, BLOCKING_SOURCE_IDS
     )
 
@@ -202,7 +202,7 @@ def test_tampered_signed_rows_are_rejected(tmp_path: Path) -> None:
     path = _write_authority(tmp_path, authority)
 
     with pytest.raises(ValueError, match="signature does not match"):
-        _load_signed_stale_source_rows(path, [authority["rows"][0]["source_id"]])
+        load_signed_stale_source_rows(path, [authority["rows"][0]["source_id"]])
 
 
 def test_signed_non_detach_row_is_not_execution_authority(tmp_path: Path) -> None:
@@ -215,12 +215,12 @@ def test_signed_non_detach_row_is_not_execution_authority(tmp_path: Path) -> Non
     path = _write_authority(tmp_path, authority)
 
     with pytest.raises(ValueError, match="lacks exact detach authority"):
-        _load_signed_stale_source_rows(path, [BLOCKING_SOURCE_IDS[0]])
+        load_signed_stale_source_rows(path, [BLOCKING_SOURCE_IDS[0]])
 
 
 def test_source_outside_signed_authority_is_rejected() -> None:
     with pytest.raises(ValueError, match="outside signed authority"):
-        _load_signed_stale_source_rows(AUTHORITY_PATH, ["dd:not/signed"])
+        load_signed_stale_source_rows(AUTHORITY_PATH, ["dd:not/signed"])
 
 
 def test_apply_requires_a_preview_manifest_hash() -> None:

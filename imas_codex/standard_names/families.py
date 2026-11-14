@@ -1117,6 +1117,12 @@ RETURN {segments}, members
 """
 
 
+#: The harmonizer groups a different population by the same invariant segments,
+#: so it composes this query rather than restating the grouping. A second
+#: spelling would let the two disagree about what makes a family.
+pattern_family_rows_query = _pattern_family_rows_query
+
+
 def fetch_pattern_families(
     gc: Any,
     *,

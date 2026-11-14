@@ -317,7 +317,7 @@ class TestBuildWorklist:
         """
         from imas_codex.standard_names.harmonize import (
             _PARENTLESS_MEMBER_FILTER,
-            _pattern_family_rows_query,
+            pattern_family_rows_query,
         )
 
         def _query(cypher, **_params):
@@ -360,7 +360,7 @@ class TestBuildWorklist:
         assert pattern_rows[0]["physical_base"] == "alpha_base"
         assert pattern_rows[0]["n"] == 3
 
-        shared = _pattern_family_rows_query(
+        shared = pattern_family_rows_query(
             seeded=False, node_filter=_PARENTLESS_MEMBER_FILTER
         )
         issued = [call.args[0] for call in gc.query.call_args_list]

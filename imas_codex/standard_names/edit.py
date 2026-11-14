@@ -37,7 +37,7 @@ name clears — there is no privileged accept path:
 
 - **rename** — ``apply_edit`` → ``_apply_rename``:
   1. ISN grammar round-trip on the literal requested name
-     (``cascade._isn_round_trip_ok``) — same round-trip the validate gate
+     (``cascade.isn_round_trip_ok``) — same round-trip the validate gate
      and the cascade apply run; a grammar-invalid name is refused up front.
   2. id-collision check against the live graph.
   3. shared-base / sibling desync guard (no leaf-to-parent promotion).
@@ -96,7 +96,7 @@ from imas_codex.discovery.base.claims import retry_on_deadlock
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.models import EditMode, EditOrigin, EditScope, EditStatus
 from imas_codex.standard_names.cascade import (
-    _isn_round_trip_ok,
+    isn_round_trip_ok as _isn_round_trip_ok,
     parent_segment_of_child,
     rename_cascade,
 )

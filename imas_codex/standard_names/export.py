@@ -679,7 +679,7 @@ def _fetch_export_population(
         docs_review_eligibility_where,
         docs_review_property_coverage,
     )
-    from imas_codex.standard_names.source_invariant import _live_child_cypher
+    from imas_codex.standard_names.source_invariant import live_child_cypher
 
     params: dict[str, Any] = docs_review_eligibility_params()
     if batch is None:
@@ -717,7 +717,7 @@ def _fetch_export_population(
          EXISTS {{
              MATCH (:StandardName)-[:HAS_PARENT]->(sn)
          }} AS is_parent,
-         {_live_child_cypher()} AS has_live_child,
+         {live_child_cypher()} AS has_live_child,
          {docs_review_eligibility_where()} AS strict_docs_review_eligibility,
          COLLECT {{
              MATCH (sn)-[:HAS_REVIEW]->(accepting_review:StandardNameReview)

@@ -26,8 +26,8 @@ from imas_codex.standard_names.protection import (
 )
 from imas_codex.standard_names.signed_manifest import (
     StaleSourceDetachConflict as StaleSourceDetachConflict,
-    _load_signed_stale_source_rows as _load_signed_stale_source_rows,
     apply_signed_manifest,
+    load_signed_stale_source_rows as load_signed_stale_source_rows,
 )
 
 _DD_DOCS_ROOT = "https://imas-data-dictionary.readthedocs.io/en"
@@ -635,13 +635,13 @@ def retarget_standard_name_sources(
         from imas_codex.graph.client import GraphClient
 
         if isinstance(gc, GraphClient):
-            from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+            from imas_codex.standard_names.cascade import TransactionQueryAdapter
 
             with gc.session() as session:
                 tx = session.begin_transaction()
                 try:
                     moved = retarget_standard_name_sources(
-                        _TransactionQueryAdapter(tx),
+                        TransactionQueryAdapter(tx),
                         old_name,
                         new_name,
                         operation=operation,
@@ -1150,13 +1150,13 @@ def reset_standard_name_sources(
         from imas_codex.graph.client import GraphClient
 
         if isinstance(gc, GraphClient):
-            from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+            from imas_codex.standard_names.cascade import TransactionQueryAdapter
 
             with gc.session() as session:
                 tx = session.begin_transaction()
                 try:
                     result = reset_standard_name_sources(
-                        _TransactionQueryAdapter(tx),
+                        TransactionQueryAdapter(tx),
                         normalized,
                         manifest_id=manifest_id,
                         reason=reason,
@@ -1391,13 +1391,13 @@ def bind_sources_exclusively(
         from imas_codex.graph.client import GraphClient
 
         if isinstance(gc, GraphClient):
-            from imas_codex.standard_names.cascade import _TransactionQueryAdapter
+            from imas_codex.standard_names.cascade import TransactionQueryAdapter
 
             with gc.session() as session:
                 tx = session.begin_transaction()
                 try:
                     bound = bind_sources_exclusively(
-                        _TransactionQueryAdapter(tx),
+                        TransactionQueryAdapter(tx),
                         name,
                         source_ids,
                         enforce_consistency=True,

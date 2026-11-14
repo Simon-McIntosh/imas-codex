@@ -183,9 +183,9 @@ def _request_evidence(pr_ref: str, pr_url: str | None) -> str | None:
     permission. Returns ``None`` when the request does not protect.
     """
     from imas_codex.standard_names.promote import (
-        _pull_request_call,
-        _pull_request_state,
         parse_pull_request_url,
+        pull_request_call,
+        pull_request_state,
     )
 
     unreadable = f"candidate_request={pr_ref} (state unreadable)"
@@ -193,12 +193,12 @@ def _request_evidence(pr_ref: str, pr_url: str | None) -> str | None:
         return unreadable
     try:
         repo, number = parse_pull_request_url(pr_url)
-        status, payload = _pull_request_call(repo, f"/pulls/{number}")
+        status, payload = pull_request_call(repo, f"/pulls/{number}")
     except Exception:
         return unreadable
     if status != 200 or not isinstance(payload, dict):
         return unreadable
-    state = _pull_request_state(payload)
+    state = pull_request_state(payload)
     if state == "OPEN":
         return f"candidate_request={pr_ref} (open)"
     if state in {"MERGED", "CLOSED"}:

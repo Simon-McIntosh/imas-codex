@@ -581,6 +581,15 @@ def _dimensions_overlap(left: set[str], right: set[str]) -> bool:
     )
 
 
+#: Dimensionality comparison is read by the docs gate, which judges whether a
+#: documented unit agrees with an audit finding. It needs the same canonical
+#: spellings and Pint parsing the audit uses, so a second implementation would
+#: disagree with the finding it is checking.
+unit_dimensions = _unit_dimensions
+dimension_container = _dimension_container
+dimensions_overlap = _dimensions_overlap
+
+
 def _dimension_sets_equivalent(left: set[str], right: set[str]) -> bool:
     """Return whether two alternatives describe the same dimension choices."""
     return all(_dimensions_overlap({dimension}, right) for dimension in left) and all(

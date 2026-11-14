@@ -280,6 +280,12 @@ def _isn_round_trip_ok(name: str) -> tuple[bool, str]:
     return True, "ok"
 
 
+#: The rename editor refuses a cascade whose composed name does not parse back
+#: to itself, and it must judge that with the same ISN parser the cascade used
+#: to compose. Moving the check would give the editor a second parser path.
+isn_round_trip_ok = _isn_round_trip_ok
+
+
 # ---------------------------------------------------------------------------
 # Locus relation recovery (parses the original child name)
 # ---------------------------------------------------------------------------
@@ -457,6 +463,12 @@ class _TransactionQueryAdapter:
 
     def query(self, cypher: str, **params: Any) -> list[dict[str, Any]]:
         return [dict(record) for record in self._transaction.run(cypher, **params)]
+
+
+#: The provenance writers drive the same cascade queries outside the cascade's
+#: own transaction, so the adapter that presents a session transaction as a
+#: query surface is shared rather than reimplemented per caller.
+TransactionQueryAdapter = _TransactionQueryAdapter
 
 
 def _apply_descendant_cascade_atomically(

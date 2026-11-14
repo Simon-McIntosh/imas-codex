@@ -1,0 +1,335 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+<section id="sph-private-import-boundaries-summary">
+  <h3>No top-level module imports another top-level module's private names</h3>
+  <p>
+    Every one of the package's remaining cross-module private names is closed.
+    Each owning module exports a public name beside the private definition, and
+    each consumer imports the public name. The import-boundary rule keeps its
+    private-name check over the package's top-level modules, and its exemption
+    set &mdash; 23 entries covering exactly the sites counted below &mdash; is
+    deleted, so restoring any one of them fails the rule.
+  </p>
+  <table id="sph-private-import-boundaries-census">
+    <thead>
+      <tr><th>measure over <code>imas_codex/standard_names/*.py</code></th>
+          <th>before</th><th>at this head</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>import statements naming a sibling's private symbol</td>
+          <td>17</td><td>0</td></tr>
+      <tr><td>names imported (occurrences)</td><td>23</td><td>0</td></tr>
+      <tr><td>distinct private names</td><td>20</td><td>0</td></tr>
+      <tr><td>caller modules</td><td>13</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The counts are produced by the same rule the test applies: an
+    <code>ast.ImportFrom</code> statement in a module directly under the
+    package that names another such module and also names a symbol beginning
+    with <code>_</code> (dunders excluded). Imports from outside the package,
+    imports involving <code>graph_store</code> or <code>worker_tasks</code>,
+    and <code>from ... import name as _alias</code> rebindings of a public name
+    are outside this measure. The before-count is the base revision
+    <code>ef218f047</code> extracted with <code>git archive</code>; the
+    after-count is the landing head.
+  </p>
+  <p id="sph-private-import-boundaries-reconciliation">
+    Section 8 states a different set of figures &mdash; 31 names over 24
+    statements and 27 distinct names &mdash; measured on 2026-11-11. Both are
+    right, and they describe the same population at two dates. The section's
+    count is the state of the package before the earlier work on this boundary,
+    which closed six module-level statements and one function-local site, eight
+    names among the seven, and recorded 31 names over 24 statements becoming 23
+    over 17 in its own landing fragment. This node's base is that later state,
+    and the arithmetic is exact: 17 + 7 = 24 statements, 23 + 8 = 31 name
+    occurrences, 20 + 7 = 27 distinct names. So the seven statements in hand at
+    base are everything the section counted that was still open, and closing
+    them closes the section's whole figure. The two counts come from two
+    censuses: the section's figure is its own 2026-11-11 count, and the 17 / 23
+    / 20 in the table above is this rule's detector run over the base revision
+    <code>ef218f047</code>, which is the same detector the test applies.
+  </p>
+</section>
+
+<section id="sph-private-import-boundaries-rule">
+  <h3>One rule per boundary, kept distinct</h3>
+  <p>
+    The private-name rule covers the modules that sit directly in the package.
+    It shares the sibling detector with, but is a separate test from, the rule
+    the package's two subpackages keep
+    (<code>test_package_imports_only_shared_module</code>), which still requires
+    <code>graph_store</code> and <code>worker_tasks</code> to reach each other
+    only through their shared module. The rule names every offending site in one
+    assertion:
+  </p>
+  <pre><code>assert not violations, "private-name imports:\n" + "\n".join(violations)</code></pre>
+</section>
+
+<section id="sph-private-import-boundaries-public-names">
+  <h3>The twenty names made public, and why each could not stay private or move</h3>
+  <p>
+    In every row the owner keeps the definition and the private spelling, and
+    gains a public name beside it. None of these can stay private: the consumer
+    is a peer module in the same package and the rule is about to stop allowing
+    it. None can move with its caller either, because each is a template, a
+    parser or a vocabulary that the owner already applies to its own data
+    &mdash; moving it would leave two copies to drift apart, which is the defect
+    the single-owner rule exists to prevent.
+  </p>
+  <table id="sph-private-import-boundaries-names">
+    <thead>
+      <tr><th>public name</th><th>owner</th><th>consumer</th><th>why it is shared</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>derived_parent_cypher</code></td>
+        <td><code>source_invariant</code></td>
+        <td><code>attachment_audit</code></td>
+        <td>A Cypher fragment selecting rows whose parent is a derived name;
+          the audit interpolates it into its own query through
+          <code>.format</code>, so it needs the invariant module's text.</td>
+      </tr>
+      <tr>
+        <td><code>live_child_cypher</code></td>
+        <td><code>source_invariant</code></td>
+        <td><code>export</code></td>
+        <td>Same shape, selecting rows that have a live child; the export
+          composes it into its identity-token query.</td>
+      </tr>
+      <tr>
+        <td><code>TransactionQuery</code></td>
+        <td><code>signed_manifest</code></td>
+        <td><code>attachment_audit</code></td>
+        <td>The signed-source transaction runner. The audit opens signed rows
+          through the object the manifest module defines, so both read under
+          one query object, not two lookalikes.</td>
+      </tr>
+      <tr>
+        <td><code>load_signed_stale_source_rows</code></td>
+        <td><code>signed_manifest</code></td>
+        <td><code>provenance_lifecycle</code></td>
+        <td>Row loader whose result shape the lifecycle state machine acts on;
+          it must be the loader whose rows the manifest write produced.</td>
+      </tr>
+      <tr>
+        <td><code>ATTACH_QUERY</code></td>
+        <td><code>attachment_audit</code></td>
+        <td><code>signed_manifest</code></td>
+        <td rowspan="3">The attach and detach templates and the stage
+          vocabulary of the attachment audit, which the signed-manifest
+          verification path runs. Two owners of these strings would let the
+          writer and the verifier drift, so the verifier imports them.</td>
+      </tr>
+      <tr>
+        <td><code>DETACH_QUERY</code></td>
+        <td><code>attachment_audit</code></td>
+        <td><code>signed_manifest</code></td>
+      </tr>
+      <tr>
+        <td><code>HISTORICAL_NAME_STAGES</code></td>
+        <td><code>attachment_audit</code></td>
+        <td><code>signed_manifest</code></td>
+      </tr>
+      <tr>
+        <td><code>resolve_name</code></td>
+        <td><code>benchmark</code></td>
+        <td><code>benchmark_roles</code></td>
+        <td>Name resolution the role bench calls while scoring a role; it must
+          resolve ids exactly as the benchmark's own lookup does.</td>
+      </tr>
+      <tr>
+        <td><code>build_enum_lists</code></td>
+        <td><code>context</code></td>
+        <td><code>campaign_pricing</code></td>
+        <td>The enum value lists built from the domain vocabulary; pricing
+          resolves a priced enum through the lists the context builder emits.</td>
+      </tr>
+      <tr>
+        <td><code>normalize_field</code></td>
+        <td><code>catalog_import</code></td>
+        <td><code>catalog_reconcile</code></td>
+        <td>The field normaliser. A reconcile comparison must normalise exactly
+          as the import does or equal fields compare unequal.</td>
+      </tr>
+      <tr>
+        <td><code>unit_dimensions</code></td>
+        <td><code>audits</code></td>
+        <td><code>docs_gates</code></td>
+        <td rowspan="3">The dimension-set algebra the gates evaluate a
+          documented unit against, in three steps: dimensions of a unit, the
+          container of a derived dimension, and whether two dimension sets
+          overlap. The audits module owns the parse of a unit string; the gates
+          only test.</td>
+      </tr>
+      <tr>
+        <td><code>dimension_container</code></td>
+        <td><code>audits</code></td>
+        <td><code>docs_gates</code></td>
+      </tr>
+      <tr>
+        <td><code>dimensions_overlap</code></td>
+        <td><code>audits</code></td>
+        <td><code>docs_gates</code></td>
+      </tr>
+      <tr>
+        <td><code>isn_round_trip_ok</code></td>
+        <td><code>cascade</code></td>
+        <td><code>edit</code></td>
+        <td>The cascade's strict ISN round-trip guard, which the fold and rename
+          paths call before either changes a name. Three test modules replace
+          the consumer's local name to prove the guard fires, so the import
+          binds the public symbol to that local spelling.</td>
+      </tr>
+      <tr>
+        <td><code>TransactionQueryAdapter</code></td>
+        <td><code>cascade</code></td>
+        <td><code>provenance_lifecycle</code>,
+          <code>provenance_rebuild</code></td>
+        <td>Adapter binding a signed-source transaction object to a cascade.
+          Both provenance paths run their writes through it, so it must be the
+          object the cascade itself consumes.</td>
+      </tr>
+      <tr>
+        <td><code>pattern_family_rows_query</code></td>
+        <td><code>families</code></td>
+        <td><code>harmonize</code></td>
+        <td>The row query over pattern families; the harmoniser reads the rows
+          the family builder writes, through the builder's own statement.</td>
+      </tr>
+      <tr>
+        <td><code>git_output</code></td>
+        <td><code>promote</code></td>
+        <td><code>release_notes</code></td>
+        <td>The package's single git invocation. The release notes read the
+          previously approved catalog through it rather than adding a second
+          subprocess call.</td>
+      </tr>
+      <tr>
+        <td><code>parse_entries</code></td>
+        <td><code>promote</code></td>
+        <td><code>release_notes</code></td>
+        <td>The catalog YAML reader. Release notes must read the approved
+          baseline through exactly the mapping an approval acts on, so the
+          reading is one function with one owner.</td>
+      </tr>
+      <tr>
+        <td><code>pull_request_call</code></td>
+        <td><code>promote</code></td>
+        <td><code>protection</code></td>
+        <td rowspan="2">The two pull-request helpers are public delegations, not
+          aliases: tests replace the private helpers to prove the network is
+          reachable only through that one seam, so the public call resolves the
+          private name when it is called and the replacement intercepts it.</td>
+      </tr>
+      <tr>
+        <td><code>pull_request_state</code></td>
+        <td><code>promote</code></td>
+        <td><code>protection</code></td>
+      </tr>
+    </tbody>
+  </table>
+</section>
+
+<section id="sph-private-import-boundaries-controls">
+  <h3>The rule is made to fail, twice</h3>
+  <p>
+    A passing suite never shows that a guard fires, so the rule was pointed at
+    packages that still hold the closed imports. The rule resolves its package
+    root from <code>SN_STANDARD_NAMES_ROOT</code>, which lets both controls run
+    without touching the working tree.
+  </p>
+  <p>
+    <strong>Every closed site, restored.</strong> Run against the base
+    revision's package, the landing rule reports all 23 names at all 17
+    statements and fails: <code>1 failed</code>, <code>EXIT=1</code>. This is
+    the recorded defect reproducing under the rule that now forbids it.
+  </p>
+  <pre><code>E   AssertionError: private-name imports:
+E     attachment_audit.py:181: imports private name '_derived_parent_cypher' from a sibling top-level module
+E     attachment_audit.py:1186: imports private name '_TransactionQuery' from a sibling top-level module
+E     benchmark_roles.py:631: imports private name '_resolve_name' from a sibling top-level module
+    ... 20 more sites ...
+</code></pre>
+  <p>
+    <strong>One closed site, restored.</strong> A copy of the landing package with
+    <code>attachment_audit.py</code>'s public import changed back to the
+    private name, run at the landing head, fails with that single site named
+    and no other:
+  </p>
+  <pre><code>E   AssertionError: private-name imports:
+E     attachment_audit.py:181: imports private name '_derived_parent_cypher' from a sibling top-level module
+========================= 1 failed, 1 warning in 9.53s =========================
+EXIT=1
+</code></pre>
+</section>
+
+<section id="sph-private-import-boundaries-gate">
+  <h3>Behaviour is unchanged</h3>
+  <p>
+    <code>tests/standard_names</code> was run once per arm, each run its own
+    <code>all_debug</code> job over its own revision's tree, and each log
+    records the revision, the tree, <code>module.__file__</code> under that tree
+    and the final exit code. The base tree is the base revision extracted with
+    <code>git archive</code> and given the five generated files the package
+    imports; the landing tree is the landing revision extracted the same way.
+    Both arms selected the same 8766 tests, so the two counts are comparable
+    row for row.
+  </p>
+  <table id="sph-private-import-boundaries-suite">
+    <thead>
+      <tr><th>arm</th><th>revision</th><th>passed</th><th>failed</th>
+          <th>skipped</th><th>failure ids</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>base</td><td><code>ef218f047</code></td><td>8753</td><td>1</td>
+          <td>12</td><td>1</td></tr>
+      <tr><td>head</td><td><code>0058d59f5</code></td><td>8753</td><td>1</td>
+          <td>12</td><td>1 (the same id)</td></tr>
+    </tbody>
+  </table>
+  <p>
+    The one failure is identical at both arms, so the change adds no failure
+    id:
+    <code>test_refine_attempt_budget.py::TestEscalationFiresOnTheLastRotation::test_last_rotation_uses_the_escalation_seat[3-True]</code>.
+    It compares a configured seat name against the model the refine seat
+    environment resolves, so it reads the environment rather than this change.
+    The head arm ran <code>0058d59f5</code>; the only commits after it change
+    this fragment, which no test imports.
+  </p>
+  <p>
+    Lint is judged by delta the same way, over the 24 changed paths in a base
+    tree and a head tree, each carrying the repository's own
+    <code>pyproject.toml</code>: <code>ruff check --no-cache</code> reports no
+    finding in either tree, and <code>ruff format --check</code> returns exit 1
+    at base, naming
+    <code>imas_codex/standard_names/harmonize.py</code>, and exit 0 at head. So
+    the head adds no finding and removes one formatting violation that predates
+    this work.
+  </p>
+</section>
+
+<section id="sph-private-import-boundaries-inputs">
+  <h3>Inputs</h3>
+  <ul>
+    <li>Commits: <code>c72201a3a</code> closes the imports and deletes the
+      exemption set (24 files); <code>23052c8fa</code> restores the two
+      monkeypatch seams the first commit disturbed (2 files);
+      <code>c913f0264</code> keeps the family row query visible to the linter
+      and formats the touched modules; <code>880ea9352</code> records the
+      census reconciliation above.</li>
+    <li>Census: 13 caller modules, 17 statements, 23 occurrences, 20 distinct
+      names &rarr; zero on all four measures. Same rule as the test's detector.</li>
+    <li>Logs, all in the run directory under
+      <code>~/.config/reckon/crew/runs/</code>: <code>private-import-census.log</code>,
+      <code>suite-base.log</code>, <code>suite-head.log</code>,
+      <code>lint-delta.log</code>, <code>negative-control.log</code>,
+      <code>negative-control-base-tree.log</code>.</li>
+  </ul>
+</section>
+</body>
+</html>

@@ -192,6 +192,12 @@ def _git(args: list[str], cwd: Path) -> str | None:
     return result.stdout
 
 
+#: The release notes read the approved catalog through this same invocation, so
+#: the git call keeps one owner. The private spelling stays because the module's
+#: own diff reader and tests name it.
+git_output = _git
+
+
 def _parse_entries(text: str | None) -> dict[str, dict[str, Any]]:
     """Parse a per-domain catalog YAML list into ``{name: entry}``."""
     if not text:
@@ -207,6 +213,11 @@ def _parse_entries(text: str | None) -> dict[str, dict[str, Any]]:
         if isinstance(entry, dict) and entry.get("name"):
             out[str(entry["name"])] = entry
     return out
+
+
+#: The catalog YAML reader is shared with the release notes, which must read the
+#: approved baseline through exactly the mapping an approval acts on.
+parse_entries = _parse_entries
 
 
 def _norm(v: Any) -> str:
@@ -1469,6 +1480,16 @@ def _pull_request_call(repo: str, path: str) -> tuple[int, Any]:
     return github_api_call("GET", f"/repos/{repo}{path}")
 
 
+def pull_request_call(repo: str, path: str) -> tuple[int, Any]:
+    """Read a pull request through the shared transport, for sibling callers.
+
+    Deliberately a delegation rather than an alias: the tests replace the
+    private helper to prove the transport seam is the only way out, and that a
+    read which misses it is caught.
+    """
+    return _pull_request_call(repo, path)
+
+
 def _pull_request_comment(repo: str, number: int, body: str) -> tuple[int, Any]:
     """One REST write onto a pull request's conversation, shared transport.
 
@@ -1570,6 +1591,15 @@ def _pull_request_state(payload: dict[str, Any]) -> str:
     if payload.get("merged") or payload.get("merged_at"):
         return "MERGED"
     return str(payload.get("state") or "").upper()
+
+
+def pull_request_state(payload: dict[str, Any]) -> str:
+    """Read a pull request's disposition, for sibling protection checks.
+
+    A delegation rather than an alias, for the same reason as
+    :func:`pull_request_call`: tests replace the private helper.
+    """
+    return _pull_request_state(payload)
 
 
 def _commit_record(row: dict[str, Any]) -> dict[str, str]:

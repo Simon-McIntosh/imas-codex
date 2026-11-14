@@ -13,10 +13,10 @@ from imas_standard_names.grammar.terms import AppliedConventions, select_convent
 
 from imas_codex.graph.models import COCOSLabelTransformation
 from imas_codex.standard_names.audits import (
-    _dimension_container,
-    _dimensions_overlap,
-    _unit_dimensions,
+    dimension_container,
+    dimensions_overlap,
     latex_def_check,
+    unit_dimensions,
 )
 from imas_codex.standard_names.doc_links import (
     NameLink,
@@ -321,12 +321,12 @@ def _evaluate_dimension_tree(
     if isinstance(node, ast.Expression):
         return _evaluate_dimension_tree(node.body, placeholders)
     if isinstance(node, ast.Constant) and isinstance(node.value, int | float):
-        return _dimension_container("dimensionless")
+        return dimension_container("dimensionless")
     if isinstance(node, ast.Name) and node.id in placeholders:
-        dimensions = _unit_dimensions({placeholders[node.id]})
+        dimensions = unit_dimensions({placeholders[node.id]})
         if dimensions is None or len(dimensions) != 1:
             return None
-        return _dimension_container(next(iter(dimensions)))
+        return dimension_container(next(iter(dimensions)))
     if isinstance(node, ast.UnaryOp) and isinstance(node.op, ast.UAdd | ast.USub):
         return _evaluate_dimension_tree(node.operand, placeholders)
     if not isinstance(node, ast.BinOp):
@@ -394,7 +394,7 @@ def _defining_equation_result(
         physics_context.declared_unit,
     )
     declared_dimensions = (
-        _unit_dimensions({declared_unit}) if declared_unit is not None else None
+        unit_dimensions({declared_unit}) if declared_unit is not None else None
     )
     if declared_dimensions is None:
         return DocumentationGateResult(
@@ -429,7 +429,7 @@ def _defining_equation_result(
             outcome=DocumentationGateOutcome.NOT_EVALUABLE,
             reason="relation cannot bind every symbol to a stated unit",
         )
-    if _dimensions_overlap(left_dimensions, right_dimensions):
+    if dimensions_overlap(left_dimensions, right_dimensions):
         return DocumentationGateResult(
             outcome=DocumentationGateOutcome.PASS,
             reason="defining relation reproduces the DD-declared unit",

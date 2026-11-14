@@ -361,6 +361,12 @@ def _resolve_name(candidate: dict) -> str:
         return ""
 
 
+#: Candidate name resolution is part of this module's public surface: the
+#: advisory benchmark and the role scorer both compose names through it, and
+#: moving it would duplicate the ISN composition path scoring shares.
+resolve_name = _resolve_name
+
+
 def validate_candidate(candidate: dict) -> tuple[bool, bool]:
     """Validate a single candidate via grammar round-trip.
 
