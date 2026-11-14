@@ -76,10 +76,28 @@ exceeds every reading of the half-width;</li>
 against the seat's <strong>101</strong> — the
 candidate holds more standing names wrongly.</li>
 </ul>
-<p><strong>Verdict: negative: the seat stands.</strong> The recall clause is met
-with room to spare, but rule 2 fails: the question that names the readers'
-classes recovers far more of the flagged names and pays for it with more false
-holds. Recorded as a negative result.</p>
+<p><strong>Verdict: the lead adopted the candidate question, 2026-11-14.</strong>
+The two clauses of the decision rule measured different errors and the ruling
+set the second one aside. The recall clause is met with room to spare: the
+question that names the readers' classes recovers 20.1 more points of the
+flagged names than the seat's own seven
+qualifier kinds, against a half-width of 6.6 points.
+The false-hold clause fails by 16 names, 117 against 101, or 2.1 points of the
+standing population.</p>
+<p>The clause was written as an adoption gate on the assumption that the two
+errors are commensurate, and the ruling treats them as not: a missed flag lets a
+definition that quantifies something else reach the catalog and stay there,
+while a false hold spends one reviewer's turn on a name that is in fact correct.
+A 20.1-point gain in the defects the question finds buys 16 additional holds out
+of 777 standing names, and the ruling takes that trade. The question it adopts
+is the readers' own: the five-class sheet and the worked examples drawn from the
+development half, not the seat's seven-kind list.</p>
+<p>The ruling carries one condition that this node was given: every existing
+refusal stays. An unanswered verdict still holds the candidate rather than
+accepting it, a flagged verdict still persists as a review hold naming its
+class, and no hold may be weakened to make a test pass. The consolidation below
+is what the ruling's one-implementation clause needed; the measure above is why
+the adopted question is the one that ships.</p>
 
 <h2 id="sdbc-name-check-question-standing">What the standing check would have found and held wrongly</h2>
 <p>The standing implementation is the model-free word-matching check
@@ -104,6 +122,9 @@ and holds <strong>83</strong> of the
 </table>
 
 <h2 id="sdbc-name-check-question-two-lists">The same question is answered twice</h2>
+<p class="note">This section records the standing state at the base revision
+<code>acf1bb1e8</code>; the consolidation it calls for has since landed and is
+recorded at the end of it.</p>
 <p>The word-matching check and the review seat both judge whether a definition
 states a qualifier the name lacks, and each carries its own list of qualifier
 <em>kinds</em>. The seat's list is the seven values in
@@ -123,10 +144,39 @@ word-matching check alone and 349 by the seat alone; neither flags 1,479 and bot
 flag 153. Of the 412 disagreements, 196 carry a settled flagged verdict and 216 a
 standing one, so the disagreement is not confined to one label. On the held-out
 half alone, 206 names are judged differently.</p>
-<p>Whichever question stands, the consolidation is a product-source change: one
-list of qualifier kinds, and one place where a name is judged. It cannot be made
-from this node's write scope, which is this fragment alone; it is recorded for
-the coordinator.</p>
+<p>Whichever question stood, the consolidation was a product-source change: one
+list of the answer classes, and one place where a name is judged. It has landed,
+under the ruling's one-implementation clause. The word-matching check is gone:
+<code>name_definition_agreement_check</code>, its six-family and six-restriction
+lists, its abstract-parent pattern and its review wiring
+(<code>run_name_definition_checks</code>) are removed, and the
+<code>definition_states_qualifier_name_lacks</code> check it decided is deleted
+from the taxonomy along with the seat's old seven-kind list. The classes now
+exist in both directions in one place, <code>QUALIFIER_KINDS</code> in
+<code>imas_codex/standard_names/review/name_definition_seat.py</code>, read by
+the prompt and by the taxonomy loader, which injects them into the one check
+that asks the question and refuses a check carrying its own options.</p>
+<p>What a hold rests on is unchanged: an unanswered verdict still holds the
+candidate rather than accepting it, a flagged verdict still persists as a
+<em>name_definition</em> review hold naming its class, and a passing verdict
+still raises no hold. What changed is the number of places that can raise one.
+The guard is <code>test_name_definition_agreement.py</code> under
+<code>tests/standard_names</code>: it fails when the answer classes appear in a
+second place in the package, and it fails when a second judge of the question
+returns.</p>
+<p>The whole <code>tests/standard_names</code> directory was run as one job from
+a git archive of each revision, on a debug partition. At head
+(<code>06f37adc8</code>) it reports <strong>8752 passed, 1 failed, 12
+skipped</strong>; at the base (<code>acf1bb1e8</code>) <strong>8753 passed,
+1 failed, 12 skipped</strong>. The one failure is the same test in both arms
+(<code>test_refine_attempt_budget.py::TestEscalationFiresOnTheLastRotation</code>),
+so the change adds no failure; the one fewer pass at head is the guard module,
+which holds 9 tests where the base held 10.</p>
+<p>The guard is shown failing against the base: the head's test file, copied
+into an extracted base tree, fails 5 of its 9 tests there — the class list is
+not single, the prompt does not carry the readers' sheet, the review question
+does not offer the same classes, a second judge is still present, and a flagged
+verdict does not yet name a class.</p>
 
 <h2 id="sdbc-name-check-question-prompt">The candidate question as it was given</h2>
 <pre>You are an independent reviewer of an IMAS standard name and the definition that accompanies it. Decide whether the definition states the same quantity as the name, or something else.
