@@ -29,6 +29,11 @@
       "kind": "folded",
       "node": "sph-private-import-boundaries",
       "recorded_at": "2026-11-14T22:18:25.814253+00:00"
+    },
+    "2": {
+      "kind": "folded",
+      "node": "sph-private-import-boundaries",
+      "recorded_at": "2026-11-14T22:18:28.251157+00:00"
     }
   },
   "findings": [
