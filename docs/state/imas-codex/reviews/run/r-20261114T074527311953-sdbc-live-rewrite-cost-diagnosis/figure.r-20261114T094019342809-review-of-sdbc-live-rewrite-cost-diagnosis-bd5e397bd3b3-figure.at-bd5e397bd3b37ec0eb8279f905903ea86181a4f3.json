@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_judgement": "the caption is substantive and not a restatement of the title: it names the five-name population, says each row is given in full, explains that the two expensive edits reached the third refine rotation where the escalation seat is used at USD 0.298 to USD 0.407 per call (sixty to eighty times a base refine), and marks the fourth row as an early stop whose USD 0.095 is the cost of a refusal rather than of a completed definition. No caption finding is recorded.",
+  "completed_at": "2026-11-14T09:57:37.518Z",
+  "dispatched_at": "2026-11-14T09:42:18Z",
+  "figure_reviewed": {
+    "artifact": "docs/figures/sn-live-rewrite-cost/cost-per-name-by-call-type.svg",
+    "caption_source": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-live-rewrite-cost-diagnosis.html",
+    "method": "judged only the attached rendered PNG; no SVG was opened, read, searched or shown",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T094019342809-review-of-sdbc-live-rewrite-cost-diagnosis-bd5e397bd3b3-figure/image-0.png",
+    "rendered_size_px": [
+      1400,
+      720
+    ]
+  },
+  "findings": [],
+  "item_verdicts": {
+    "contrast": "pass: axis labels, tick labels, y categories, USD totals and legend text are near-black on white; the italic grey early-stop note also clears the background; the blue, green, magenta and grey segment fills are each distinguishable against white and against their neighbours.",
+    "data_ink": "pass: the coloured bar segments carry the cost decomposition and occupy the visual weight of the canvas; no gridlines, bands or fills compete with them, and the only non-data ink is the legend, the tick labels and one early-stop note.",
+    "decoration": "pass: white ground, no gradient, no background fill and no decorative styling; top and right spines are absent and the single legend is frameless in clear space above the bars.",
+    "label_collision": "pass: every USD total sits just beyond its bar end in clear white margin, the early-stop note sits in the empty area right of the oxygen bar and clear of its data, y categories are fully drawn from the left margin and no label is clipped at any edge or overlaps another label, a bar or a tick label.",
+    "legibility": "pass: the rendered PNG is 1400x720; five horizontal stacked bars, five y categories given as full standard names, a four-entry legend above the bars and the x-axis label 'spend per edit [USD]' are all fully drawn and readable at a glance, and each bar carries its USD total at its end.",
+    "table_form": "pass: a stacked bar is the right form for comparing five names by call-type share, and the exact per-call values are carried by the per-call table in the same evidence document, so the image is not standing in for a table."
+  },
+  "notes": "read-only figure review: no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. No suite was run, so added_failure_count is 0 with an empty id list. The figure PNG was opened and inspected directly at 1400x720; no SVG and no other image was opened, read, searched or shown. Bar totals reconcile with the per-call table in the evidence HTML: toroidal 0.0429+0.0072+0.4072+0.0301 = 0.4874 (labelled $0.487); neutral species 0.0968+0.0061+0.2983+0.0263 = 0.4275 (labelled $0.427); parallel 0.1068+0.0095+0.0321 = 0.1484 (labelled $0.148); oxygen 0.0949 (labelled $0.095); ion charge 0.0330+0.0056+0.0300 = 0.0686 (labelled $0.069). The two findings recorded against the earlier head at e851b74e \u2014 abbreviated y categories and an unmarked early stop \u2014 are addressed in this head's rendered figure.",
+  "project": "imas-codex",
+  "raw_text": "RUBRIC legibility: pass \u2014 five horizontal stacked bars, five full-standard-name y categories, four legend entries, the x-axis label and five USD totals are all fully drawn at 1400x720 and readable at a glance.\nRUBRIC data_ink: pass \u2014 the bar segments carry the cost decomposition and dominate the canvas; no gridlines, band or fill competes with them.\nRUBRIC decoration: pass \u2014 white ground, no gradient, no background fill, top and right spines hidden, and the single legend is frameless in clear space above the bars.\nRUBRIC contrast: pass \u2014 all text is near-black or dark grey on white and every segment fill is distinguishable from white and from its neighbours.\nRUBRIC table_form: pass \u2014 a stacked bar suits comparing five names by call-type share, and the exact per-call values live in the evidence table.\nRUBRIC label_collision: pass \u2014 USD totals sit beyond bar ends, the early-stop note sits in clear space, y categories are unclipped and nothing overlaps data, another label or a tick label.\nNo blocking finding, and no non-blocking finding worth recording: the early stop is now marked in the figure itself ('refused at generate: early stop'), the y categories are given in full, and every bar total reconciles with the evidence table to the displayed three decimals.",
+  "review_run_id": "r-20261114T094019342809-review-of-sdbc-live-rewrite-cost-diagnosis-bd5e397bd3b3-figure",
+  "reviewed_base_sha": "a084551a52a5768ef7dc369336d4d8b48b6e93b7",
+  "reviewed_head_sha": "bd5e397bd3b37ec0eb8279f905903ea86181a4f3",
+  "reviewed_run_id": "r-20261114T074527311953-sdbc-live-rewrite-cost-diagnosis",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T09:51:15.414710+00:00",
+  "total": null
+}
