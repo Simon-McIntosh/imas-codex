@@ -256,13 +256,14 @@ E     benchmark_roles.py:631: imports private name '_resolve_name' from a siblin
     ... 20 more sites ...
 </code></pre>
   <p>
-    <strong>One closed site, restored.</strong> A copy of the landing package
-    with <code>attachment_audit.py</code>'s public import changed back to the
-    private name fails with that single site named, and no other:
+    <strong>One closed site, restored.</strong> A copy of the landing package with
+    <code>attachment_audit.py</code>'s public import changed back to the
+    private name, run at the landing head, fails with that single site named
+    and no other:
   </p>
   <pre><code>E   AssertionError: private-name imports:
 E     attachment_audit.py:181: imports private name '_derived_parent_cypher' from a sibling top-level module
-========================= 1 failed, 1 warning in 37.28s =========================
+========================= 1 failed, 1 warning in 9.53s =========================
 EXIT=1
 </code></pre>
 </section>
@@ -287,7 +288,7 @@ EXIT=1
     <tbody>
       <tr><td>base</td><td><code>ef218f047</code></td><td>8753</td><td>1</td>
           <td>12</td><td>1</td></tr>
-      <tr><td>head</td><td><code>c913f0264</code></td><td>8753</td><td>1</td>
+      <tr><td>head</td><td><code>0058d59f5</code></td><td>8753</td><td>1</td>
           <td>12</td><td>1 (the same id)</td></tr>
     </tbody>
   </table>
@@ -297,9 +298,8 @@ EXIT=1
     <code>test_refine_attempt_budget.py::TestEscalationFiresOnTheLastRotation::test_last_rotation_uses_the_escalation_seat[3-True]</code>.
     It compares a configured seat name against the model the refine seat
     environment resolves, so it reads the environment rather than this change.
-    The head arm ran <code>c913f0264</code>, the last commit that changes any
-    Python; the only later commit adds sixteen lines to this fragment, which no
-    test imports.
+    The head arm ran <code>0058d59f5</code>; the only commits after it change
+    this fragment, which no test imports.
   </p>
   <p>
     Lint is judged by delta the same way, over the 24 changed paths in a base
