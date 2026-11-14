@@ -1,0 +1,64 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T16:57:15.010Z",
+  "dispatched_at": "2026-11-14T16:39:12Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-1",
+      "reason": "a node can settle that an existing signed write admits the reclaim and ship with no test, leaving \"no other tombstone is revived\" with nothing under it; the done-when must require the receipt refusal shown on whichever admission the node actually uses.",
+      "text": "both refusal tests attach only to the branch \"where no existing signed write admits a reclaiming name that shares the tombstone's DD locus\", while the committed evidence states that route's requirement as \"the tombstone's quantity already held by a live successor at that locus\" (docs/evidence/fragments/sn-catalog-consistency/scc-separatrix-remainder.html) and the tombstone's quantity is here held by two live names, so a node reaches the first branch and no refusal test is produced anywhere in the section",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "done_when-2",
+      "reason": "half the stated rule is unmeasured, so the section can pass a gate whose count reads the real pair as two live names, so the very state the section exists to close would report clean.",
+      "text": "the live-count rule is \"a name is live only when neither its status nor its name stage reads superseded\", but neither plant exercises the name-stage predicate: one plants two live names, the other one live name and a superseded sibling, so a count implementing status alone reports two and one and passes both",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:83",
+      "id": "reasoning-1",
+      "reason": "an identity named by a definite article with no referent can be read as the operator-order name, and keeping apart that name's reviews and paid history rather than the tombstone's reverses what the ruling asks; the committed read-back records the tombstone's refined descendant as \"refined from `f`\" and the other name with no lineage, which is the fact that separates them.",
+      "text": "the edit removed the clause \"the ruled spelling, which is a superseded tombstone today\", so the surviving \"the tombstone's refined descendant\" and \"the tombstone's own history kept apart on an archived identity\" name an identity the section no longer introduces: the prose names only the two out-of-line live names and the ruled spelling, so a node must guess which of the three identities \"the tombstone\" is",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e8a8fc3f96641114cf6bb6dbdd8f6bc23b59ce3f",
+  "plan_fingerprint": "a5f494f37df55b980b9ae3c8d1c8ee2bc0884e0a640dfdb0718ee94bcde2dd2c",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 48,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T162212248997-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "12a9e7361498b78cd1e69126c91e45b62bde9eba",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-integrity-backlog#s49` resolves at `docs/plans/sn-integrity-backlog.html:292`, `sn-definitions-by-construction#s6` resolves at `docs/plans/sn-definitions-by-construction.html:107`, and both cited fragments exist under `docs/evidence/fragments/sn-catalog-consistency/`.",
+    "done_when": "a finding \u2014 the done-when's two live-count plants differ only in a sibling's status, so the rule's name-stage predicate is never exercised, and its archive-receipt refusal is now conditional on a branch the committed evidence says will not be taken.",
+    "evidence_paths": "pass \u2014 the cited records are committed fragments under `docs/evidence/fragments/sn-catalog-consistency/`, which a later reader can open.",
+    "naming": "pass \u2014 the section uses catalog spellings and mechanism words (history-apart, tombstone, archive receipt) and carries no plan label, stage name or ticket number into code or prose.",
+    "reasoning": "a finding \u2014 the done-when's definite \"the tombstone\" now has no antecedent in the plan.",
+    "single_goal": "pass \u2014 the section carries one endpoint, one live name bound to `summary/local/separatrix_average/n_i/deuterium_tritium/value` with the ruled spelling, and every control and history clause measures that one state.",
+    "wiring": "pass \u2014 \u00a76's declared wait on `sn-definitions-by-construction#s6` is present in `plan-section-depends-on` and resolves to that plan's \u00a76 at `docs/plans/sn-definitions-by-construction.html:107`."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "b4ab3db4aa1dcab8fe59cef3b1b0d0a9df32510c951813cd2720aa098724eb07",
+    "s6": "e78ac07a779ed97fbc8a32add1ec54244e757a91ff2899e646d8d51ebaa5e387",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T17:11:34.918676+00:00",
+  "total": null
+}
