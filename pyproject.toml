@@ -890,6 +890,14 @@ source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4.1-flash"
 verified-at = "2026-11-14"
 max-input-tokens = 1048576
 
+[tool.imas-codex.llm.openrouter-pricing."openrouter/deepseek/deepseek-v4-pro-0813"]
+prompt = 0.111
+completion = 4.44
+cache-read = 0.097
+source = "https://openrouter.ai/api/v1/model/deepseek/deepseek-v4-pro-0813"
+verified-at = "2026-11-14"
+max-input-tokens = 1048576
+
 [tool.imas-codex.llm.openrouter-pricing."openrouter/x-ai/grok-4.7"]
 prompt = 2
 completion = 6

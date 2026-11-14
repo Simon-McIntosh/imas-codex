@@ -2001,7 +2001,7 @@ _SN_BENCHMARK_DEFAULTS = {
         "openrouter/openai/gpt-6-luna",
         "openrouter/openai/gpt-6.1-terra",
         "openrouter/anthropic/claude-sonnet-5.5",
-        "openrouter/deepseek/deepseek-v4-pro",
+        "openrouter/deepseek/deepseek-v4-pro-0813",
     ],
 }
 

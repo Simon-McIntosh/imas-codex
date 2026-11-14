@@ -19,6 +19,8 @@ from __future__ import annotations
 import pytest
 
 from imas_codex.settings import (
+    _MODEL_DEFAULTS,
+    _SN_BENCHMARK_DEFAULTS,
     _get_section,
     get_model,
     get_sn_benchmark_candidate_models,
@@ -127,6 +129,32 @@ def test_panel_identifiers_are_priced(model: str) -> None:
     _assert_priced(model, "a review panel or benchmark slate")
 
 
+def _python_default_identifiers() -> list[tuple[str, str]]:
+    """Every OpenRouter identifier a Python default names, with its owner.
+
+    Read from the default mappings themselves rather than through the
+    accessors: the accessors return the project configuration whenever it
+    exists, so a default that names an unpriceable route is never exercised by
+    them.
+    """
+    rows = [
+        (f"_MODEL_DEFAULTS[{section!r}]", model)
+        for section, model in _MODEL_DEFAULTS.items()
+        if isinstance(model, str)
+    ]
+    for key, value in _SN_BENCHMARK_DEFAULTS.items():
+        values = value if isinstance(value, list) else [value]
+        rows += [(f"_SN_BENCHMARK_DEFAULTS[{key!r}]", model) for model in values]
+    return [(owner, model) for owner, model in rows if model.startswith("openrouter/")]
+
+
+@pytest.mark.parametrize(
+    "owner,model", _python_default_identifiers(), ids=lambda value: str(value)
+)
+def test_python_default_identifiers_are_priced(owner: str, model: str) -> None:
+    _assert_priced(model, owner)
+
+
 @pytest.mark.parametrize("seat", SINGLE_SEATS)
 def test_openrouter_seat_is_on_the_latest_release_of_its_line(seat: str) -> None:
     model = get_model(seat)
@@ -150,21 +178,29 @@ def test_openrouter_panel_model_is_on_the_latest_release_of_its_line(
     )
 
 
-def test_escalation_seat_drives_the_final_refine_rotation() -> None:
+def test_escalation_seat_drives_the_final_refine_rotation(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
     """The refine worker's last rotation runs the escalation seat's model.
 
-    Deleting the seat's ``model`` key makes this test fail at the first
-    assertion: the rotation would fall back to a built-in default instead of
-    reading a configured seat.
+    The seat is pointed at another priced model through its environment
+    override, so the rotation has to resolve the seat at call time. A rotation
+    that ignores the seat, reading either a built-in constant or the refine
+    tier, resolves a model the seat does not name and fails here.
     """
-    seat = _get_section("sn-escalation")
-    assert "model" in seat, "the escalation seat names no model"
+    escalated_model = "openrouter/x-ai/grok-4.7"
+    monkeypatch.setenv("IMAS_CODEX_SN_ESCALATION_MODEL", escalated_model)
 
+    seat = _get_section("sn-escalation")
     cap = DEFAULT_REFINE_ROTATIONS
     final_model, final_escalates = refine_model_for_attempt(cap, cap)
     assert final_escalates is True
-    assert final_model == seat["model"], (
+    assert final_model == escalated_model, (
         "the final rotation resolved a model the escalation seat does not name"
+    )
+    assert final_model == get_model("sn-escalation")
+    assert seat["model"] != escalated_model, (
+        "the override did not move the seat, so this run proves nothing"
     )
 
     earlier_model, earlier_escalates = refine_model_for_attempt(1, cap)

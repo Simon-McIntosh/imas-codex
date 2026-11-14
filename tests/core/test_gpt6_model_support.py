@@ -101,5 +101,5 @@ def test_current_models_are_available_to_benchmark_defaults():
     compose = settings._SN_BENCHMARK_DEFAULTS["compose-models"]
     candidates = settings._SN_BENCHMARK_DEFAULTS["candidate-models"]
     for bare in ("openai/gpt-6.1-sol", "openai/gpt-6-luna"):
-        assert bare in compose
+        assert f"openrouter/{bare}" in compose
         assert f"openrouter/{bare}" in candidates
