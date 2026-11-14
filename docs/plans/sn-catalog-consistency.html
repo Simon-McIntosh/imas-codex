@@ -23,7 +23,7 @@
   <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="50">
+<meta name="plan-version" content="51">
 <meta name="plan-modified" content="2026-11-14">
 </head>
 <body>
@@ -75,7 +75,7 @@
     <section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-catalog-grouping#s3"></section>
     <p>Carried from <code>sn-catalog-grouping</code> §3, whose code half has landed: every domain write goes through the one writer, a guard test holds it there, and the domain audit is the instrument. What it left is the repair of the live names. On 2026-10-15, after the DD re-classification, 1,477 of 2,677 live names carried a domain other than the derivation's answer, 1,701 the wrong source domains, 777 edges that disagreed and 212 no domain.</p>
     <p>Agreement of domains across each family is <code>sn-domain-per-family</code> §3's, which decides one domain per family; the grouping rows of the sized batches are superseded by it. This section keeps the audit of each live name's stored domain against its stored decision.</p>
-    <p><strong>Done when:</strong> the domain audit, run over every live name, reports zero names whose stored domain, source domains and edges disagree with the stored decision, or lists each residual name with its reason; every repair went through the one writer; the before and after counts are recorded; the audit still reports a name planted with disagreeing edges in a disposable graph; spend on domain decisions is recorded.</p>
+    <p><strong>Done when:</strong> the domain audit's output over every live name, committed with the evidence, gives a count of 0 names whose stored domain, source domains or edges disagree with the stored decision once named residuals are set aside, and the residual list holds at most 20 names, each with its reason; every repair went through the one writer; the four counts recorded on 2026-10-15 (1,477, 1,701, 777 and 212) are re-read before the repair and after it; the same audit command reports a count of 1 for a name planted with disagreeing edges in a disposable graph; spend on domain decisions is recorded and is at most USD 5.</p>
 
     <h2 id="s6">§6 — One separatrix locus, one spelling: the last two names</h2>
     <section data-reckon="section" data-id="s6" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="sn-integrity-backlog#s49"></section>
