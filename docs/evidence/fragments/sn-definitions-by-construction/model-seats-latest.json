@@ -188,5 +188,120 @@
    "price_after": "response usage",
    "record": "the decisions endpoint lists no models (GET /api/alpha/decisions/models: 404) and refuses every alias with HTTP 400; jev-1.14 is the newest release recorded (build typesafe/jev-1.14-20261014 in docs/evidence/fragments/model-refresh-code.html)"
   }
- ]
+ ],
+ "probe": {
+  "method": "one smallest-possible chat completion per changed OpenRouter identifier, with usage requested so the response reports its own cost",
+  "pass_1": {
+   "file": "probe-seats.json",
+   "token_allowance": 8,
+   "ids": 9,
+   "served_as_requested": 9,
+   "cost_usd": 0.0032462,
+   "note": "google/gemini-3.8-flash and moonshotai/kimi-k3.1-pro served but recorded no content and no usage: the allowance went to reasoning"
+  },
+  "pass_2": {
+   "file": "probe-seats-pass2.json",
+   "token_allowance": 24,
+   "ids": 9,
+   "served_as_requested": 9,
+   "cost_usd": 0.003872,
+   "note": "google/gemini-3.8-flash and moonshotai/kimi-k3.1-pro recorded a cost but still no text at 24 tokens"
+  },
+  "pass_3": {
+   "file": "probe-seats-pass3.json",
+   "token_allowance": 2048,
+   "ids": [
+    "google/gemini-3.8-flash",
+    "moonshotai/kimi-k3.1-pro",
+    "x-ai/grok-4.7",
+    "x-ai/grok-4.20"
+   ],
+   "rows": [
+    {
+     "requested": "google/gemini-3.8-flash",
+     "status": "ok",
+     "served_as": "google/gemini-3.8-flash",
+     "content": "ok",
+     "reasoning_chars": 0,
+     "finish_reason": "stop",
+     "cost_usd": 0.00044025,
+     "tokens": [
+      7,
+      116
+     ]
+    },
+    {
+     "requested": "moonshotai/kimi-k3.1-pro",
+     "status": "ok",
+     "served_as": "moonshotai/kimi-k3.1-pro",
+     "content": "ok",
+     "reasoning_chars": 158,
+     "finish_reason": "stop",
+     "cost_usd": 0.0005616,
+     "tokens": [
+      92,
+      44
+     ]
+    },
+    {
+     "requested": "x-ai/grok-4.7",
+     "status": "ok",
+     "served_as": "x-ai/grok-4.7",
+     "content": "ok",
+     "reasoning_chars": 1088,
+     "finish_reason": "stop",
+     "cost_usd": 0.007166,
+     "tokens": [
+      1249,
+      1066
+     ]
+    },
+    {
+     "requested": "x-ai/grok-4.20",
+     "status": "ok",
+     "served_as": "x-ai/grok-4.20",
+     "content": "ok",
+     "reasoning_chars": 0,
+     "finish_reason": "stop",
+     "cost_usd": 0.00010685,
+     "tokens": [
+      191,
+      1
+     ]
+    }
+   ],
+   "cost_usd": 0.0082747,
+   "note": "both identifiers that recorded null text at 24 tokens emit text at 2048: gemini-3.8-flash returns 'ok' with no reasoning, kimi-k3.1-pro returns 'ok' after 158 characters of reasoning; every identifier stays on its seat"
+  },
+  "total_cost_usd": 0.0153929
+ },
+ "line_timestamps": {
+  "source": "created field of https://openrouter.ai/api/v1/models, fetched 2026-11-14T12:30:28Z",
+  "x-ai/grok-4.7": {
+   "created": 1790007541,
+   "utc": "2026-09-21T16:19:01Z"
+  },
+  "x-ai/grok-4.20": {
+   "created": 1774979019,
+   "utc": "2026-03-31T17:43:39Z"
+  },
+  "conclusion": "grok-4.7 is the newer release of the line by 174 days; grok-4.20 is an older, larger-context variant, so the seats stay on grok-4.7",
+  "google/gemini-3.8-flash": {
+   "created": 1788362056,
+   "utc": "2026-09-02T15:14:16Z"
+  },
+  "moonshotai/kimi-k3.1-pro": {
+   "created": 1792778188,
+   "utc": "2026-10-23T17:56:28Z"
+  },
+  "deepseek/deepseek-v4.1-flash": {
+   "created": 1789021285,
+   "utc": "2026-09-10T06:21:25Z"
+  },
+  "deepseek/deepseek-v4.1-flash-1017": {
+   "created": 1792225624,
+   "utc": "2026-10-17T08:27:04Z",
+   "note": "a dated snapshot of the same line; the seats name the floating alias, which is the line's current release"
+  }
+ }
 }

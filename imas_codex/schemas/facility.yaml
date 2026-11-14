@@ -4024,7 +4024,7 @@ classes:
       config:
         description: JSON-encoded agent configuration (root paths, patterns, etc.)
       llm_model:
-        description: LLM model used (e.g., "google/gemini-3-flash-preview")
+        description: LLM model used (e.g., "openrouter/google/gemini-3.8-flash")
       llm_calls:
         description: Number of LLM calls made
         range: integer

@@ -201,21 +201,23 @@ _MODEL_DEFAULTS: dict[str, str] = {
     "compaction": "openrouter/anthropic/claude-haiku-5.5",
     "reasoning": "openrouter/anthropic/claude-sonnet-5.5",
     "dd-enrichment": "openrouter/anthropic/claude-sonnet-5.5",
-    "sn-compose": "openrouter/anthropic/claude-sonnet-5.5",
+    "sn-compose": "local/deepseek-v4.1-flash",
     "sn-docs": "openrouter/openai/gpt-6.1-sol",
     # Refinement must synthesize a corrected candidate from reviewer feedback,
     # so it uses compose-tier capability rather than a lightweight classifier.
-    "sn-refine": "openrouter/anthropic/claude-sonnet-5.5",
-    # Final refine attempt at chain cap (name + docs). Vendor-diverse from
-    # compose and refine so escalation breaks a failure loop with an
-    # independent perspective. Active model in [tool.imas-codex.sn-escalation].
+    "sn-refine": "openrouter/openai/gpt-6-luna",
+    # Final refine attempt at chain cap (name + docs). The three defaults hold
+    # the vendor separation the seat exists for: Anthropic here, OpenAI for
+    # refine, the local DeepSeek router for compose, so escalation breaks a
+    # failure loop with an independent perspective. Active model in
+    # [tool.imas-codex.sn-escalation].
     "sn-escalation": "openrouter/anthropic/claude-sonnet-5.5",
     # Derived-parent description synthesis (generalises over a parent's
     # already-accepted children).  Compose-tier task — a concise
     # description, not long-form physics prose — so it defaults to the
     # cheap/fast compose model; the downstream generate_docs (sn-docs)
     # rewrites the full documentation later.  Override in pyproject.toml.
-    "sn-parent-enrich": "openrouter/anthropic/claude-sonnet-5.5",
+    "sn-parent-enrich": "local/deepseek-v4.1-flash",
     # Physics-domain classifier for DD paths (SN names inherit the domain).
     # Owns a seat rather than borrowing a generic one so the model choice is
     # attributable to the SN pipeline.

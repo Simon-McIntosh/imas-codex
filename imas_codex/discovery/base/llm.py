@@ -270,7 +270,7 @@ def _lookup_catalog(model: str, *, route_only: bool) -> tuple[dict[str, Any], bo
 
     An OpenRouter route is catalogued under either the provider-qualified id
     (``openrouter/anthropic/claude-sonnet-5.5``) or only under the bare vendor
-    id (``openai/gpt-5.5``), and which one carries the entry differs per
+    id (``openai/gpt-6.1-sol``), and which one carries the entry differs per
     vendor.  The bare entry describes the vendor's *direct* API rather than
     the OpenRouter route, so callers that care about the difference get it
     reported instead of inferred.

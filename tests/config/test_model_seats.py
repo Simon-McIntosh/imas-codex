@@ -21,7 +21,6 @@ import pytest
 from imas_codex.settings import (
     _get_section,
     get_model,
-    get_openrouter_pricing,
     get_sn_benchmark_candidate_models,
     get_sn_benchmark_compose_models,
     get_sn_benchmark_reviewer_model,
@@ -30,7 +29,11 @@ from imas_codex.settings import (
     get_sn_review_names_models,
     get_sn_review_profile_models,
 )
-from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
+from imas_codex.standard_names.defaults import DEFAULT_REFINE_ROTATIONS
+from imas_codex.standard_names.worker_tasks.worker_refine_names import (
+    refine_model_for_attempt,
+)
+from tests.standard_names.test_seat_exposure_calibration import _assert_proven_pricing
 
 # Every single-model seat under [tool.imas-codex.*].
 SINGLE_SEATS = [
@@ -98,17 +101,12 @@ def _assert_priced(model: str, owner: str) -> None:
         # A local or decisions seat is priced by its own lane: the router's
         # endpoint class, or the decisions response's own usage cost.
         return
-    pricing = get_openrouter_pricing(model)
-    assert pricing, f"{owner} names {model!r} with no cataloged price"
-    for key in ("prompt", "completion", "cache_read"):
+    pricing = _assert_proven_pricing(owner, model)
+    for key in ("cache_read", "cache_write"):
         value = pricing[key]
         assert isinstance(value, (int, float)), (
             f"{owner} prices {model!r} with {key}={value!r}"
         )
-    assert pricing["prompt"] + pricing["completion"] > 0
-    assert pricing["max_input_tokens"], f"{model!r} carries no input limit"
-    assert pricing["source"], f"{model!r} carries no source record"
-    assert pricing["verified_at"], f"{model!r} carries no verification date"
 
 
 @pytest.mark.parametrize("seat", SINGLE_SEATS)
@@ -147,7 +145,7 @@ def test_openrouter_panel_model_is_on_the_latest_release_of_its_line(
 
 
 def test_escalation_seat_drives_the_final_refine_rotation() -> None:
-    """The chain-cap rotation reads the escalation seat, and the seat is set.
+    """The refine worker's last rotation runs the escalation seat's model.
 
     Deleting the seat's ``model`` key makes this test fail at the first
     assertion: the rotation would fall back to a built-in default instead of
@@ -155,9 +153,17 @@ def test_escalation_seat_drives_the_final_refine_rotation() -> None:
     """
     seat = _get_section("sn-escalation")
     assert "model" in seat, "the escalation seat names no model"
-    assert get_model("sn-escalation") == seat["model"]
-    assert DEFAULT_ESCALATION_MODEL == seat["model"]
-    assert get_openrouter_pricing(seat["model"]), "escalation seat is unpriced"
+
+    cap = DEFAULT_REFINE_ROTATIONS
+    final_model, final_escalates = refine_model_for_attempt(cap, cap)
+    assert final_escalates is True
+    assert final_model == seat["model"], (
+        "the final rotation resolved a model the escalation seat does not name"
+    )
+
+    earlier_model, earlier_escalates = refine_model_for_attempt(1, cap)
+    assert earlier_escalates is False
+    assert earlier_model == get_model("sn-refine")
 
 
 def test_escalation_stays_vendor_diverse_from_refine_and_compose() -> None:

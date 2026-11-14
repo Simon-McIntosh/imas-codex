@@ -3429,7 +3429,7 @@ def _benchmark_fixture(physics: bool) -> tuple[str, list[str]]:
     "--physics-judge-model",
     "physics_judge_model",
     default=None,
-    help="Judge model (default: the calibrated sn-benchmark reviewer model, opus-4.8).",
+    help="Judge model (default: the calibrated sn-benchmark reviewer model).",
 )
 @click.option(
     "--reasoning-effort",
