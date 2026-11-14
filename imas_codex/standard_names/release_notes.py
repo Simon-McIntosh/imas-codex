@@ -133,7 +133,9 @@ def collect_catalog_changes(
     from imas_codex.standard_names.promote import git_output, parse_entries
 
     isnc = Path(isnc_path)
-    listing = git_output(["diff", "--name-only", base_ref, "--", "standard_names"], isnc)
+    listing = git_output(
+        ["diff", "--name-only", base_ref, "--", "standard_names"], isnc
+    )
     out: list[dict[str, Any]] = []
     if not listing:
         return out

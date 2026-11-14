@@ -42,7 +42,7 @@ from imas_codex.standard_names.families import (
     dd_source_exists,
     fetch_pattern_families,
     fetch_pattern_family,
-    pattern_family_rows_query,
+    pattern_family_rows_query as pattern_family_rows_query,
     select_anchor,
 )
 
@@ -120,7 +120,9 @@ def written_part_form(documentation: str, stored_sentence: str) -> str:
         tokens = _TOKEN_RE.findall(sentence.lower())
         if not tokens:
             continue
-        overlap = len(set(tokens) & stored) / len(set(tokens) | stored) if stored else 0.0
+        overlap = (
+            len(set(tokens) & stored) / len(set(tokens) | stored) if stored else 0.0
+        )
         if overlap >= 0.5:
             forms.append(" ".join("#" if t.isdigit() else t for t in tokens))
     if not forms:

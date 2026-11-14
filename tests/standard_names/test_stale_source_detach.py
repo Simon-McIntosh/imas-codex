@@ -15,8 +15,8 @@ from neo4j import GraphDatabase
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.provenance_lifecycle import (
     StaleSourceDetachConflict,
-    load_signed_stale_source_rows,
     detach_signed_stale_source_bindings,
+    load_signed_stale_source_rows,
 )
 
 AUTHORITY_PATH = (
