@@ -1,0 +1,4 @@
+# command: check_evidence.py — the gate, run against the independent expected values
+# cwd: docs/evidence/fragments/sn-definitions-by-construction
+checks failed: 0
+EXIT=0

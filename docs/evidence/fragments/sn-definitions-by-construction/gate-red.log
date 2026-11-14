@@ -1,0 +1,7 @@
+# command: check_evidence.py --expected expected_wrong.json — the red run, 349 accepted in the record against a deliberately wrong expectation of 350
+# cwd: docs/evidence/fragments/sn-definitions-by-construction
+# the wrong expected file is /home/ITER/mcintos/.cache/imas-codex-live-rewrite/expected_wrong.json, kept out of the record on purpose
+FAIL outcomes: found {'accepted': 349, 'drafted': 4, 'exhausted': 13, 'reviewed': 119}, expected {'accepted': 350, 'drafted': 4, 'exhausted': 13, 'reviewed': 119}
+FAIL manifest outcomes: found {'accepted': 349, 'drafted': 4, 'exhausted': 13, 'reviewed': 119}, expected {'accepted': 350, 'drafted': 4, 'exhausted': 13, 'reviewed': 119}
+checks failed: 2
+EXIT=1
