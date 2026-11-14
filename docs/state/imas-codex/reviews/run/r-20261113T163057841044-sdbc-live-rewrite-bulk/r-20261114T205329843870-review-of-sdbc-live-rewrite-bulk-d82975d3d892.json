@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "bd9072535d84b98a3ad0a4317c292addb5fb7583",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-14T21:33:32.046Z",
+  "dispatched_at": "2026-11-14T20:54:00Z",
+  "failure_basis": "the reviewed run records no baseline_suite or after_suite arms, so there is no suite delta to derive. Its manifest's tests field names gate_final.sh, and the two gate logs it records, logs/gate-final.log and logs/negative-control.log, both end EXIT=0 with no pytest summary line and no FAILED ids. added_failure_count reads 0 from those gate logs rather than as a measured zero against a suite.",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json",
+      "line": "38",
+      "severity": "blocking",
+      "text": "blocking: all 485 entries on lines 38 to 522 still carry outcome pending with after null at the reviewed head, so the file the brief names as a rebuilt deliverable contradicts the bulk record's 349 accepted and 119 reviewed names, and a promotion would land a manifest reporting the whole population as unworked."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the top-level keys are still the first pass and contradict the final block in the same file, reading status complete beside outcomes_pending 472 and a spend of 0.8586 against a 60 ceiling beside final.spend.node_total_usd 70.2411 against 90.0, so a reader taking the top-level spend or outcomes_pending gets pass-1 figures as the node's current ones."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the final per-class spend cannot be reconciled with the pass blocks in the same file, because final.spend.per_class_usd reports shared wording species at 0.0 and carries no shared wording operator row, while the top-level spend.per_class records 1.2539 and 0.7016 on those two classes and pass_2_spend and pass_3_spend add 0.6794 and 0.1792 that appear in no class row."
+    },
+    {
+      "file": "logs/negative-control.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the declared negative control is a prose note ending EXIT=0 rather than a red run, so it shows no assertion refusing anything and the gate's falsifiability rests on a claim in a comment."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the record's guard lives only at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate_final.sh and is not committed, and its expected values were transcribed from the collector invocation they check, so no committed command re-establishes the assertions and the gate cannot detect a wrong graph read."
+    },
+    {
+      "file": "docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the figure is outside the declared write fence and its only gate check is a directory listing rather than a rendered inspection. I rendered it at 1008 by 518.4 pt with 34 text elements and found no clipped or overlapping label. Line 1 is the whole SVG document."
+    }
+  ],
+  "head_log_revision": "d82975d3d8922bff6b5626a09500e5332b8c103e",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no runtime call site reaches the change, because a repository grep for live-rewrite-bulk and rewrite-outcomes-by-class returns only docs/ paths. The consumers of these artefacts are the docs server that serves the HTML fragment and the reckon run-state records.",
+    "diff": "read all three commits against base bd9072535d84b98a3ad0a4317c292addb5fb7583. 5affbe98c records the 308-name cut, 9ff0a336d refreshes the pass-4 block at the 60.72 USD cut, and d82975d3d replaces the pass-4 block with a final block read at 2026-11-14T20:18:03Z and adds the outcome-by-class figure.",
+    "done_when": "the done_when asks that every flagged name has one recorded outcome, that each write went through sn edit or the signed rename path, that spend is per class under the ceiling, and that the rebuilt manifest, the before-and-after record and the re-read censuses are committed. The gate at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate_final.sh asserts the counts, the 485-row before-and-after table and the spend bound, with EXIT=0 in logs/gate-final.log, but asserts nothing about the manifest, whose 485 entries all still read outcome pending.",
+    "goal": "the node's goal is to rewrite the flagged export candidates in the live graph under the lead's rulings, and docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 final.names_by_stage carries all 485 names with the stage the graph holds.",
+    "manifest": "read, status complete, commits 5affbe98c, 9ff0a336d and d82975d3d, changed_paths the two evidence files, tests the gate_final.sh invocation, test_logs logs/gate-final.log and logs/negative-control.log, and no baseline_suite or after_suite arms at all.",
+    "write_paths": "the fence was live-rewrite-manifest.json, live-rewrite-bulk.json and sdbc-live-rewrite-bulk.html under docs/evidence/fragments/sn-definitions-by-construction/ and git diff --stat bd9072535d84b98a3ad0a4317c292addb5fb7583..d82975d3d8922bff6b5626a09500e5332b8c103e touches the latter two plus docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg, which is outside the fence and is declared in the source manifest's scope_request field."
+  },
+  "justifications": {
+    "durability": "nothing committed fails if this record regresses, because the only guard is the uncommitted /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate_final.sh, and its checks compare the delivered numbers with literals the same collector wrote.",
+    "evidence": "the gate at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate_final.sh asserts the counts sum to 485, 119 reviews, 13 holds, 13 exhausted and a spend bound and logs EXIT=0 in logs/gate-final.log, but its expected values are literals transcribed from the same collector run, and docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 reports class spend that contradicts its own pass blocks.",
+    "fit": "the evidence files keep the fragment idiom of their directory and docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg is embedded with a project-absolute src on the mandated 14 by 7.2 inch canvas, with no plan label in any name.",
+    "goal_fidelity": "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 final block records all 485 candidates split 349 accepted, 119 reviewed, 13 exhausted and 4 drafted with per-name lists, but the rebuilt manifest the brief also names, docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json lines 38 to 522, still reads outcome pending for every name.",
+    "reuse": "the change adds no code, and docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 censuses_after.method states the counts came from the project census scripts already in docs/evidence/fragments/sn-definitions-by-construction/ rather than from a new census implementation.",
+    "scope_discipline": "git diff --stat bd9072535d84b98a3ad0a4317c292addb5fb7583..d82975d3d8922bff6b5626a09500e5332b8c103e lists three files, two of them inside the declared fence, and docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg lies outside it and is recorded in the source manifest's scope_request field."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to rewrite the flagged export candidates in the live graph under the lead's rulings, and docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 final.names_by_stage carries all 485 names with the stage the graph holds.\nVERDICT done_when: the done_when asks that every flagged name has one recorded outcome, that each write went through sn edit or the signed rename path, that spend is per class under the ceiling, and that the rebuilt manifest, the before-and-after record and the re-read censuses are committed. The gate at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate_final.sh asserts the counts, the 485-row before-and-after table and the spend bound, with EXIT=0 in logs/gate-final.log, but asserts nothing about the manifest, whose 485 entries all still read outcome pending.\nVERDICT write_paths: the fence was live-rewrite-manifest.json, live-rewrite-bulk.json and sdbc-live-rewrite-bulk.html under docs/evidence/fragments/sn-definitions-by-construction/ and git diff --stat bd9072535d84b98a3ad0a4317c292addb5fb7583..d82975d3d8922bff6b5626a09500e5332b8c103e touches the latter two plus docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg, which is outside the fence and is declared in the source manifest's scope_request field.\nVERDICT manifest: read, status complete, commits 5affbe98c, 9ff0a336d and d82975d3d, changed_paths the two evidence files, tests the gate_final.sh invocation, test_logs logs/gate-final.log and logs/negative-control.log, and no baseline_suite or after_suite arms at all.\nVERDICT diff: read all three commits against base bd9072535d84b98a3ad0a4317c292addb5fb7583. 5affbe98c records the 308-name cut, 9ff0a336d refreshes the pass-4 block at the 60.72 USD cut, and d82975d3d replaces the pass-4 block with a final block read at 2026-11-14T20:18:03Z and adds the outcome-by-class figure.\nCALL_SITES: none\nSCORE goal_fidelity: 15\nSCORE evidence: 11\nSCORE scope_discipline: 13\nSCORE durability: 5\nSCORE fit: 16\nSCORE reuse: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 final block records all 485 candidates split 349 accepted, 119 reviewed, 13 exhausted and 4 drafted with per-name lists, but the rebuilt manifest the brief also names, docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json lines 38 to 522, still reads outcome pending for every name.\nJUSTIFICATION evidence: the gate at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate_final.sh asserts the counts sum to 485, 119 reviews, 13 holds, 13 exhausted and a spend bound and logs EXIT=0 in logs/gate-final.log, but its expected values are literals transcribed from the same collector run, and docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 reports class spend that contradicts its own pass blocks.\nJUSTIFICATION scope_discipline: git diff --stat bd9072535d84b98a3ad0a4317c292addb5fb7583..d82975d3d8922bff6b5626a09500e5332b8c103e lists three files, two of them inside the declared fence, and docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg lies outside it and is recorded in the source manifest's scope_request field.\nJUSTIFICATION durability: nothing committed fails if this record regresses, because the only guard is the uncommitted /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate_final.sh, and its checks compare the delivered numbers with literals the same collector wrote.\nJUSTIFICATION fit: the evidence files keep the fragment idiom of their directory and docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg is embedded with a project-absolute src on the mandated 14 by 7.2 inch canvas, with no plan label in any name.\nJUSTIFICATION reuse: the change adds no code, and docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json line 1 censuses_after.method states the counts came from the project census scripts already in docs/evidence/fragments/sn-definitions-by-construction/ rather than from a new census implementation.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-manifest.json:38 blocking: all 485 entries on lines 38 to 522 still carry outcome pending with after null at the reviewed head, so the file the brief names as a rebuilt deliverable contradicts the bulk record's 349 accepted and 119 reviewed names, and a promotion would land a manifest reporting the whole population as unworked.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json:1 non-blocking: the top-level keys are still the first pass and contradict the final block in the same file, reading status complete beside outcomes_pending 472 and a spend of 0.8586 against a 60 ceiling beside final.spend.node_total_usd 70.2411 against 90.0, so a reader taking the top-level spend or outcomes_pending gets pass-1 figures as the node's current ones.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json:1 non-blocking: the final per-class spend cannot be reconciled with the pass blocks in the same file, because final.spend.per_class_usd reports shared wording species at 0.0 and carries no shared wording operator row, while the top-level spend.per_class records 1.2539 and 0.7016 on those two classes and pass_2_spend and pass_3_spend add 0.6794 and 0.1792 that appear in no class row.\nFINDING logs/negative-control.log:1 non-blocking: the declared negative control is a prose note ending EXIT=0 rather than a red run, so it shows no assertion refusing anything and the gate's falsifiability rests on a claim in a comment.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json:1 non-blocking: the record's guard lives only at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/gate_final.sh and is not committed, and its expected values were transcribed from the collector invocation they check, so no committed command re-establishes the assertions and the gate cannot detect a wrong graph read.\nFINDING docs/figures/sn-definitions-by-construction/rewrite-outcomes-by-class.svg:1 non-blocking: the figure is outside the declared write fence and its only gate check is a directory listing rather than a rendered inspection. I rendered it at 1008 by 518.4 pt with 34 text elements and found no clipped or overlapping label. Line 1 is the whole SVG document.",
+  "review_run_id": "r-20261114T205329843870-review-of-sdbc-live-rewrite-bulk-d82975d3d892",
+  "reviewed_base_sha": "bd9072535d84b98a3ad0a4317c292addb5fb7583",
+  "reviewed_head_sha": "d82975d3d8922bff6b5626a09500e5332b8c103e",
+  "reviewed_run_id": "r-20261113T163057841044-sdbc-live-rewrite-bulk",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261114T205329843870-review-of-sdbc-live-rewrite-bulk-d82975d3d892"
+  },
+  "reviewer_run_id": "r-20261114T205329843870-review-of-sdbc-live-rewrite-bulk-d82975d3d892",
+  "scores": {
+    "durability": 5,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 18,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T21:33:37.892066+00:00",
+  "total": 78
+}
