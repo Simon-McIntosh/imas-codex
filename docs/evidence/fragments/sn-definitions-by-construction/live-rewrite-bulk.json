@@ -248,5 +248,116 @@
   },
   "method": "the project census scripts read the live dump and report species families of >=3 members with domain splits and description-template variants; the re-read script (bulk_census.py) counts species families of >=3 members with divergent documentation text. The two family counts differ in method: 24 is the census script's species-token grouping, 16 is the re-read's stricter family test."
  },
- "outcomes_pending": 470
+ "outcomes_pending": 470,
+ "pass_2": {
+  "schema": "live-rewrite-pass-2/1",
+  "generated_at": "2026-11-14T10:14:00Z",
+  "corrections_applied": [
+   "spend is read per edit from LLMCost rows joined to the edit's own run id, not from the StandardName node's cumulative llm_cost",
+   "each edit gets a 620 s bound and its settled state is read from the graph, not from the wrapper's exit status",
+   "base species-density names are rewritten before the names derived from them"
+  ],
+  "base_species_census": {
+   "base_species_density_names": 15,
+   "with_neutral_inclusive_text": 14,
+   "derived_species_density_names": 34,
+   "derived_with_neutral_text": 26
+  },
+  "base_species_rewrites": [
+   {
+    "name": "oxygen_density",
+    "class": "shared wording:species (base)",
+    "outcome": "rewritten",
+    "docs_stage": "reviewed",
+    "score_docs": 0.9316041724938312,
+    "unit": "m^-3",
+    "score_before": null,
+    "description_after": "Number density of oxygen ions at a plasma location, summed over positive charge states from singly ionized to fully stripped and excluding neutral oxygen.",
+    "spend_usd": 0.449845,
+    "calls": 12,
+    "by_call": {
+     "generate_docs:openrouter/openai/gpt-6.1-sol": 0.088098,
+     "review_docs:typesafe/jev-1.14": 0.000559,
+     "review_docs:openrouter/anthropic/claude-sonnet-5": 0.045504,
+     "refine_docs:openrouter/openai/gpt-6-luna": 0.003999,
+     "refine_docs:openrouter/anthropic/claude-fable-5": 0.311685
+    },
+    "note": "description now states the ions-only population; the stage label and the exit code disagree with the text for the exhausted ones, so each was read from the graph"
+   },
+   {
+    "name": "boron_density",
+    "class": "shared wording:species (base)",
+    "outcome": "rewritten; review still refining",
+    "docs_stage": "exhausted",
+    "score_docs": 0.8499999999999999,
+    "unit": "m^-3",
+    "score_before": null,
+    "description_after": "Number density of boron ions summed over positive charge states, with each ion counted once and neutral boron excluded.",
+    "spend_usd": 0.097575,
+    "calls": 4,
+    "by_call": {
+     "generate_docs:openrouter/openai/gpt-6.1-sol": 0.087636,
+     "review_docs:typesafe/jev-1.14": 0.00014,
+     "review_docs:openrouter/anthropic/claude-sonnet-5": 0.007112,
+     "refine_docs:openrouter/openai/gpt-6-luna": 0.002687
+    },
+    "note": "description now states the ions-only population; the stage label and the exit code disagree with the text for the exhausted ones, so each was read from the graph"
+   },
+   {
+    "name": "carbon_density",
+    "class": "shared wording:species (base)",
+    "outcome": "rewritten; review still refining",
+    "docs_stage": "exhausted",
+    "score_docs": 0.960115662089189,
+    "unit": "m^-3",
+    "score_before": null,
+    "description_after": "Number density of carbon ions summed over all positive charge states, with each ion counted once and neutral carbon atoms excluded.",
+    "spend_usd": 0.094904,
+    "calls": 4,
+    "by_call": {
+     "generate_docs:openrouter/openai/gpt-6.1-sol": 0.085556,
+     "review_docs:typesafe/jev-1.14": 0.000137,
+     "review_docs:openrouter/anthropic/claude-sonnet-5": 0.00727,
+     "refine_docs:openrouter/openai/gpt-6-luna": 0.001941
+    },
+    "note": "description now states the ions-only population; the stage label and the exit code disagree with the text for the exhausted ones, so each was read from the graph"
+   },
+   {
+    "name": "nitrogen_density",
+    "class": "shared wording:species (base)",
+    "outcome": "rewritten",
+    "docs_stage": "accepted",
+    "score_docs": 0.9552237019025897,
+    "unit": "m^-3",
+    "score_before": null,
+    "description_after": "Number density of nitrogen ions at a plasma location, summed over positive charge states from singly ionized to fully stripped, with neutral atoms excluded.",
+    "spend_usd": 0.037089,
+    "calls": 3,
+    "by_call": {
+     "generate_docs:openrouter/openai/gpt-6.1-sol": 0.028511,
+     "review_docs:typesafe/jev-1.14": 0.000148,
+     "review_docs:openrouter/anthropic/claude-sonnet-5": 0.00843
+    },
+    "note": "description now states the ions-only population; the stage label and the exit code disagree with the text for the exhausted ones, so each was read from the graph"
+   }
+  ],
+  "pass_2_spend": {
+   "names": 4,
+   "total_usd": 0.6794,
+   "per_name_usd": 0.1699
+  },
+  "escalation_note": "oxygen_density spent USD 0.3117 of its USD 0.4498 on the escalation seat at the third refine rotation; a two-rotation cap would have held that name near USD 0.14",
+  "renames": {
+   "electron_number_density": {
+    "ruled_target": "line_integrated_electron_number_density",
+    "result": "blocked: the target identity already exists in the graph",
+    "current_state": "electron_number_density is already a column density, reviewed at 0.9607 with unit m^-2; the existing line_integrated_electron_number_density is a separate accepted identity at 0.8732, unit m^-2",
+    "decision_needed": "the coordinator must settle whether these are one quantity under two identities or two distinct quantities"
+   }
+  },
+  "derived_species": {
+   "volume_averaged_oxygen_density": "hint applied, wrapper exit 0",
+   "line_averaged_oxygen_density": "started; state not read before this record was written"
+  }
+ }
 }
