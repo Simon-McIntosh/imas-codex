@@ -10,8 +10,6 @@ import contextlib
 import json
 import os
 import sys
-import urllib.parse
-import urllib.request
 from dataclasses import dataclass
 from typing import Any
 
@@ -57,24 +55,15 @@ def _field(value: Any, source: str) -> dict:
 
 
 def variables(client, request: dict) -> dict:
-    """Merge declared metadata field by field, retaining provenance and warnings."""
+    """List archive-declared metadata without opening another network service."""
+    if "metadata_url" in request:
+        raise ValueError("metadata endpoints are not accepted in reader requests")
     pattern = _token(request["pattern"])
     names = list(client.getVariableList(pattern))
     limit = int(request.get("limit", 1000))
     if limit < 1 or len(names) > limit:
         raise ReadError("variable catalogue exceeds limit; narrow the pattern")
-    metadata_url = request.get("metadata_url")
-    rows = {}
     warnings = []
-    if metadata_url:
-        query = urllib.parse.urlencode(
-            {
-                "select": "name,unit,description",
-                "name": f"like.{pattern.replace('*', '%')}",
-            }
-        )
-        with urllib.request.urlopen(f"{metadata_url}?{query}", timeout=5) as response:
-            rows = {str(row["name"]): row for row in json.load(response)}
     entries = []
     for item in names:
         name = str(item)
@@ -92,11 +81,6 @@ def variables(client, request: dict) -> dict:
                 description = _field(signal.get("description"), "uda")
         except Exception as exc:
             warnings.append({"name": name, "source": "uda", "error": str(exc)})
-        row = rows.get(name, {})
-        if row.get("unit") and str(row["unit"]).strip():
-            unit = _field(row["unit"], "controlsmetadata")
-        if row.get("description") and str(row["description"]).strip():
-            description = _field(row["description"], "controlsmetadata")
         entries.append({"name": name, "unit": unit, "description": description})
     return {"entries": entries, "warnings": warnings}
 

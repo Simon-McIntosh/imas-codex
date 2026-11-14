@@ -144,33 +144,12 @@ def test_variables_metadata():
     assert result["warnings"] == []
 
 
-def test_metadata_overlay_and_absence(monkeypatch):
-
-    class Response:
-        def __enter__(self):
-            import io
-
-            return io.StringIO(
-                json.dumps(
-                    [{"name": "DEMO-PLANT:TEMP", "unit": "degC", "description": " "}]
-                )
-            )
-
-        def __exit__(self, *args):
-            return False
-
-    monkeypatch.setattr(
-        reader.urllib.request, "urlopen", lambda *args, **kwargs: Response()
-    )
-    result = reader.variables(
-        FakeClient(),
-        {"pattern": "DEMO-*", "metadata_url": "http://metadata.invalid/table"},
-    )
-    assert result["entries"][0]["unit"] == {
-        "value": "degC",
-        "source": "controlsmetadata",
-    }
-    assert result["entries"][0]["description"]["source"] == "uda"
+def test_metadata_absence_and_external_endpoint_refusal(monkeypatch):
+    with pytest.raises(ValueError, match="endpoints are not accepted"):
+        reader.variables(
+            FakeClient(),
+            {"pattern": "DEMO-*", "metadata_url": "http://metadata.invalid/table"},
+        )
     client = FakeClient()
     monkeypatch.setattr(client, "getMetaTypeJSONCollapsed", lambda name: "invalid JSON")
     result = reader.variables(client, {"pattern": "DEMO-*"})

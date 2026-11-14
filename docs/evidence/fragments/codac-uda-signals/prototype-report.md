@@ -51,7 +51,7 @@ The focused gate is
 `uv run --no-sync pytest -p no:cacheprovider scripts/codac_uda_prototype/test_reader.py`,
 with the shared project environment and this worktree on `PYTHONPATH`.
 `~/.cache/imas-codex-codac-uda/prototype-tests.log` contains the full command,
-revision and tree header, `30 passed, 1 warning in 1.04s`, and final `EXIT=0`.
+revision and tree header, `30 passed, 1 warning in 1.30s`, and final `EXIT=0`.
 The warning concerns the existing `cache_dir` pytest setting when its cache
 plugin is disabled; it does not skip a test.
 
@@ -179,8 +179,11 @@ correction arrived; it is not a proposed dependency or source to carry forward.
 
 The implementation uses the mctb client calls, timestamp-type branch, explicit
 raw query flag, field selectors, handle release, and documented paging/cadence
-rules. Catalogue metadata lookup and the bounded protocol are the experiment's
-additional code. No study-specific channel lists or private archive defaults
+rules. Archive metadata lookup and the bounded protocol are the experiment's
+additional code. External metadata-service requests are deliberately excluded
+from the reader: it refuses a caller-supplied metadata URL. Any future controls
+metadata enrichment should resolve its endpoint and field precedence through
+private deployment configuration. No study-specific channel lists or private archive defaults
 were brought into this repository.
 
 ## 4. Schema fit and plant naming
