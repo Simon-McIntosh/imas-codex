@@ -1,11 +1,16 @@
 # CODAC UDA loader prototype and design assessment
 
 The isolated reader works for live variable metadata and pulse listing, and all
-30 focused fake-client tests pass. A live signal array was **not** obtained:
-the historical pulse selector returned no pulses and its read was refused with
-`ReadError: Incorrect time or pulse arguments`. A control using a category
-returned by this server produced one pulse through the same reader. This is a
-selector-validation limitation, not evidence that the archive is unreachable.
+30 focused fake-client tests pass. A successful live signal read and plot are
+**still missing**. On the resumed attempt, one absolute-time envelope request
+for the previously listed variable over the last 24 hours failed after 3.042 s
+with `ReadError: ERROR udaPlugin: Requested variable does not exist`. Live
+requests stopped on that error as instructed. The earlier historical pulse
+selector is no longer present on the archive; no pulse selector was used in the
+resumed attempt. A metadata entry alone does not establish that the variable is
+readable over a particular interval. The prototype is not ready to land under
+the added successful-read-and-plot requirement.
+
 No operator endpoint was contacted. No real archive address, variable name,
 variable prefix, pulse name, or live data is included here or in the prototype.
 
@@ -24,28 +29,45 @@ was needed. Module load and execution occurred in one shell invocation:
 Timings include shell, module load, interpreter startup, connection and JSON
 serialization; these are not isolated server latency measurements.
 
-| Request | Outcome | Elapsed [s] | Result JSON [bytes] |
-|---|---|---:|---:|
-| Variables, one exact known variable | 1 entry; nonempty UDA unit and description; no metadata warning | 2.414 | 169 |
-| Pulses, historical selector | 0 pulses; 743 categories | 2.359 | 25,896 |
-| Signal, historical pulse, relative 2–4 s, 200 envelope bins | Exact error: `ReadError: Incorrect time or pulse arguments` | 2.093 | no successful result |
-| Pulse positive control, one server-declared category | 1 pulse; same 743-category catalogue | 2.135 | 25,990 |
+| Request | Outcome | Elapsed [s] | Result JSON [bytes] | Signal samples / returned span | Unit |
+|---|---|---:|---:|---|---|
+| Variables, one exact known variable | 1 entry; nonempty UDA description; no metadata warning | 2.414 | 169 | not a signal read | present in catalogue |
+| Pulses, historical selector | 0 pulses; 743 categories | 2.359 | 25,896 | not a signal read | not applicable |
+| Signal, historical pulse, relative 2–4 s, 200 envelope bins | Exact error: `ReadError: Incorrect time or pulse arguments` | 2.093 | no successful result | no array or span returned | not returned |
+| Pulse positive control, one server-declared category | 1 pulse; same 743-category catalogue | 2.135 | 25,990 | not a signal read | not applicable |
+| Resumed absolute-time read, last 24 hours, 200 envelope bins, previously listed variable | Exact error: `ReadError: ERROR udaPlugin: Requested variable does not exist` | 3.042 | no successful result | no array or span returned | not returned |
 
-The control establishes that the pulse-listing path can return a pulse in this
-session. It does not establish why the historical selector is absent, nor that
-the control pulse contains the requested signal. The three requested operations
-were attempted once; the additional pulse request is the control for the empty
-catalogue. No replacement host, tunnel, whole-pulse read or activity scan was
-attempted. A subsequent live-read validation needs a current signal/pulse binding
-or a known two-second absolute interval. It must retain its own bounded receipt.
+The pulse control establishes that the pulse-listing path can return a pulse in
+the initial session. It does not establish that the control pulse contains the
+requested signal. The lead subsequently confirmed that the historical pulse
+selector no longer exists; the resumed attempt used only `tsFormat=absolute`
+and integer nanosecond `startTime`/`endTime`, without a pulse argument.
+
+The resumed attempt used **1 of at most 6 live requests**. Its requested span
+was 86,400 s, with a target of 200 envelope bins, on the same non-operator
+archive role used for the successful variable listing. It returned an error,
+not a successful empty interval. Under the instruction to record errors and
+stop if reads fail, no 30-day widening, alternative-variable listing, short
+follow-up read, or replacement-host request was made. Five request slots remain
+unused because the error stop condition fired. No sample count, actual data
+span, unit, min, max, mean or cadence can be measured from a failed read.
 
 Private receipts are under `~/.cache/imas-codex-codac-uda/`:
 `live-variables.json`, `live-pulses.json`, `live-read.json`,
-`live-summary.json`, and `pulse-control.json`. These carry the actual selectors
-and server-returned metadata and must remain internal. There is no live plot or
-successful live signal-data file. `fake-signal.svg` and
-`fake-signal-preview.png` contain invented test data only; the preview was
-rendered and visually inspected. Its text is readable and unclipped.
+`live-summary.json`, `pulse-control.json`, and the resumed
+`absolute-live-summary.json`. The last receipt records the exact absolute
+bounds, 200-bin request, completed error and request count. These receipts carry
+actual selectors and server-returned metadata and must remain internal. There
+is no live plot or successful live signal-data file. `fake-signal.svg` and
+`fake-signal-preview.png` contain invented test data only; that earlier preview
+was rendered and visually inspected. No synthetic plot is counted as live
+validation.
+
+The remaining evidence needs a currently readable variable/archive binding and
+a populated absolute interval. A subsequent authorized attempt can establish
+that binding with a bounded listing on the intended archive role and then
+exercise the short-read and plot path. This one refusal does not establish that
+all variables or the whole archive are unavailable.
 
 The focused gate is
 `uv run --no-sync pytest -p no:cacheprovider scripts/codac_uda_prototype/test_reader.py`,
@@ -400,6 +422,7 @@ result schema, not only in a plot caption.
 The smallest next implementation is a typed CODAC config, the shared executor's
 local module-setup support, a scanner returning shared `ScanResult`, and one
 facility read service/tool using the same reader. Before calling that complete,
-validate one current two-second signal interval live, then gate modified Cypher
+resolve the refused variable/archive binding, validate one current two-second
+signal interval and inspect its live plot, then gate modified Cypher
 against the graph on a compute partition. No live graph writes were performed
 for this prototype.
