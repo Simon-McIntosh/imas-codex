@@ -1,0 +1,48 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T20:27:04.205Z",
+  "dispatched_at": "2026-11-14T20:14:42Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:78",
+      "id": "done_when-1",
+      "reason": "a count comparing edges alone reports 0 live and 1 on the plant, and a run reporting zero undecided without listing any name passes, so the gate cannot tell a working audit from one that never exercises the two properties it claims are clean.",
+      "text": "the sole negative control plants a name with disagreeing edges, while the zero it supports covers stored domain, source domains and edges plus the new undecided accounting",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8c420879f4d144e5526776e587a6caa6e219d1e2",
+  "plan_fingerprint": "9fc3addf3c804e7c4ff655dcc381d295816068bbd4d375651a8edd60b1efdce5",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 53,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T201413326592-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "a927ab2b8644f491f820298407489122eac99a63",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-integrity-backlog` \u00a752 is done, `sn-domain-per-family` \u00a73 is closed, and `docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-writer.html` exists.",
+    "done_when": "a finding \u2014 the zero spans stored domain, source domains and edges plus the repaired undecided rule, but the one declared plant exercises the edge property alone.",
+    "evidence_paths": "pass \u2014 the audit's output is committed with the evidence under the fragments convention; no gate sits on a scratch path.",
+    "naming": "pass \u2014 no plan label, ticket number or version tag; the prose states the mechanism it measures.",
+    "reasoning": "pass \u2014 the repaired bound reconciles: `domain_decision.CONFIDENCE_FLOOR` records the floor as the highest probability leaving at most 5% of calibration names below it (derivation in `scg-name-domain-writer.html`), so \"twice the share\" is \"one in ten\", and the audit's `undecided` property is exactly \"neither a stored decision nor a recorded correction\".",
+    "single_goal": "pass \u2014 one deliverable: a committed domain-audit reading with zero disagreements, its undecided names listed and bounded, its spend recorded.",
+    "wiring": "pass \u2014 \u00a75's declared dependencies `sn-integrity-backlog#s52` and `sn-domain-per-family#s3` both resolve, both are done, and the prose names what \u00a75 takes from each."
+  },
+  "section_digests": {
+    "_document": "11f26c61b9c1b623d2ee0cccd12073818b97111edfbe33dd7fa873d7a4ea26b6",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "fe0b485d37658d44737045e98025181bb507e290590b07825ff0062adf984863",
+    "s6": "253a243a23959f6452cabdc987e19b9de1cec45f996c6c86f6c861fa64307724",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T20:27:10.701949+00:00",
+  "total": null
+}
