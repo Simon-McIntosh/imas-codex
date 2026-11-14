@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-14T18:50:48.294Z",
+  "dispatched_at": "2026-11-14T18:42:44Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-definitions-by-construction.html:100",
+      "id": "wiring-1",
+      "reason": "without a depends-on s9 or a conditional \"whichever check \u00a79 leaves standing\", the two live sections can be built against different checks and \u00a75's measure is taken of an instrument the plan elsewhere says may be replaced.",
+      "text": "\u00a75's first done-when fixes \"the check that runs is the chat review seat, accepted by the lead on 2026-11-12 at 27 of 36\", while \u00a79 (line 149, also `implementable`, also dispatchable now since it depends only on the done \u00a78) may replace that seat, and \u00a77 (line 127) already reads \"the name-definition check \u00a79 leaves standing\". \u00a75 declares `depends-on: [s4]` only, so a worker dispatched on \u00a75 today measures and lands around a check \u00a79 may displace, and \u00a75 and \u00a79 can be dispatched in the same wave carrying contradictory statements about which check stands",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-definitions-by-construction.html:149",
+      "id": "single_goal-1",
+      "reason": "a node reviewed on one verdict cannot be closed on two independent outcomes, and the consolidation half is wrongly gated on a measurement and a spend the de-duplication does not need.",
+      "text": "\u00a79 bundles two separable deliverables under one done-when: a bake-off measurement (split 2,044 names into development and held-out halves, score a candidate question once, emit a verdict with intervals) and a code change (\"exactly one implementation answers it: the list of qualifier kinds exists once \u2026 the list of qualifier kinds exists once, a name that the word-matching check and the seat would judge differently is judged once, and the suite under `tests/standard_names` passes at the merged head with a test that fails when a second list of qualifier kinds is introduced\"). The second is explicitly unconditional \u2014 it applies \"whichever question stands\", including the negative outcome in which the seat is left as it is \u2014 so a node could satisfy one and fail the other",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-definitions-by-construction.html:124",
+      "id": "reasoning-1",
+      "reason": "a mechanism written into the plan is a guess the next reviewer must test against the code, and both clauses move cleanly to the brief as \"no new command option\" plus \"the refusal appears in the export result\", leaving the plan's claim about what is refused unchanged.",
+      "text": "\u00a77 states \"The four refusals below are checks inside the export's existing blocking gates, reported through the result those gates already return; they add no command option and no second pass over the catalog.\" The first two clauses are the reuse map \u2014 where the checks sit and which return channel they use \u2014 which the review contract places in the node brief composed from this section, never in plan text; the endpoint is that the export fails on each of the four defects and that the refusal reaches a reader. \u00a72 line 58 carries the same shape (\"reported as a further class of the documentation conformance findings the writer already acts on; no new refusal family is added beside them\")",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-definitions-by-construction.html:130",
+      "id": "reasoning-2",
+      "reason": "the export's own numbers are readable from the export the node must run anyway, so this costs a clause on the line rather than a change of endpoint.",
+      "text": "\u00a77's done-when asks that \"the published count and the accounted exclusions are recorded beside the 1,975 and 890 of `v0.4.0rc8`\". 1,975 is established at line 34; 890 is introduced at line 130 and appears nowhere earlier in the plan and in no artifact the plan cites, while the plan's own export population is 2,044 candidates (line 149), so the worker cannot tell what 890 counts or which earlier reading the new one is compared against",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "922c0bcffc7978c87ba1c9d811f96ec10c15e6e9",
+  "plan_fingerprint": "2c24cd2ff1e49695f2db191c55180c627a08b72311ac8981629c5ca359e52943",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 47,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T184201241077-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "1b90d0c5ed9ad27abcfa16da158d855c4920853a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the five cited evidence directories and every cited file resolve (`name-definition-reader-bake-off.json`, `name-definition-seat-catalog.json`, `name-definition-phrases-results.json`, `published-registry-conformance.txt`, `sn-name-definition-second-reading/two-reader-labels.json`, `sn-name-definition-graph-reading/candidate-set.json`, `reader-verdicts.json`, `sn-name-definition-catalog-reading/two-reader-agreement.json`); cross-plan anchors `sn-catalog-consistency#s6`, `sn-catalog-consistency#s7` and `sn-domain-per-family#s3` all exist; committed SHAs c6da05328, c7fd07d11, 096610f40, c95592d08, 3a5c3d861, dd62487f2, 64db0f1fa, a003422a5 resolve in this repository. Caveat, not a finding: `a2f8831cf9` and `4a48c6c` (line 192, a comment) are catalog-repo SHAs and resolve in neither this repository nor the local imas-standard-names clone, consistent with the comment's own statement that they are catalog commits.",
+    "done_when": "pass \u2014 each implementable node (s5, s6, s7, s9) carries a declared negative control: a planted normalised quantity under an unnormalised name (s5), a family planted divergent after the pass (s6), a catalog planted with each of the four defects (s7), and an always-pass reader plus a test that fails on a second qualifier-kind list (s9).",
+    "evidence_paths": "pass \u2014 every gate and census the implementable nodes name is committed under `docs/evidence/fragments/\u2026`, and \u00a72 requires the gate log committed under the evidence directory; no node names a scratchpad or node-local path.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a symbol, file or comment; the plan prescribes no code identifier, and the operator words it uses (`flux_surface_averaged`, `equivalent_electron`) are grammar vocabulary, not plan vocabulary.",
+    "reasoning": "findings \u2014 \u00a77 line 124 places the four refusals inside a named code location and return channel, and \u00a77's done-when asks a count to be recorded \"beside the 1,975 and 890 of `v0.4.0rc8`\" where 890 is defined nowhere in the plan and appears in no cited artifact.",
+    "single_goal": "a finding \u2014 \u00a79 carries a measurement deliverable and a separate code-consolidation deliverable that neither implies the other.",
+    "wiring": "a finding \u2014 \u00a75 (line 100) fixes the chat review seat as \"the check that runs\" while \u00a79 (line 149) may replace that seat and \u00a77 (line 127) reads \"the name-definition check \u00a79 leaves standing\"; \u00a75 declares no depends-on on \u00a79, and both are `implementable`."
+  },
+  "section_digests": {
+    "_document": "76031c0cbbb136a5fcf78d101512539630e3c8448253620adff287fe5b6ab6ab",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-14T18:51:27.360514+00:00",
+  "total": null
+}
