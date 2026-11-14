@@ -53,6 +53,16 @@
       "note": "A third plant exercises the name-stage half of the live-count rule: one live name plus a sibling whose status does not read superseded while its name stage does must count one, beside the status-superseded sibling and the two-live-names case.",
       "reason": "",
       "when": "2026-11-14T17:13:15.665889+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "e8a8fc3f96641114cf6bb6dbdd8f6bc23b59ce3f",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The sentence introducing the tombstone is restored: the ruled spelling is held today by a superseded identity, called the tombstone, before the descendant and the archived identity are named.",
+      "reason": "",
+      "when": "2026-11-14T17:13:25.126934+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "A third plant exercises the name-stage half of the live-count rule: one live name plus a sibling whose status does not read superseded while its name stage does must count one, beside the status-superseded sibling and the two-live-names case.",
       "reason": "",
       "when": "2026-11-14T17:13:15.665889+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "e8a8fc3f96641114cf6bb6dbdd8f6bc23b59ce3f",
+      "commit_basis": "edit",
+      "note": "The sentence introducing the tombstone is restored: the ruled spelling is held today by a superseded identity, called the tombstone, before the descendant and the archived identity are named.",
+      "reason": "",
+      "when": "2026-11-14T17:13:25.126934+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261114T162212248997-plan-review-of-sn-catalog-consistency.json",
