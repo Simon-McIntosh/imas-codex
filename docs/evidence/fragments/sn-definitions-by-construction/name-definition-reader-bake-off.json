@@ -1,6 +1,6 @@
 {
  "schema": "name-definition-reader-bake-off",
- "generated_at": "2026-11-14T15:25:14Z",
+ "generated_at": "2026-11-14T15:28:40Z",
  "population": {
   "labelled": 2044,
   "scored": 2044,
@@ -443,28 +443,28 @@
    }
   },
   "local-two-of-three": {
-   "scored": 1043,
-   "unanswered": 1001,
-   "flagged_total": 301,
-   "stands_total": 742,
-   "true_positive": 101,
-   "false_positive": 24,
-   "false_negative": 200,
-   "true_negative": 718,
-   "recall": 0.3355,
+   "scored": 1141,
+   "unanswered": 903,
+   "flagged_total": 316,
+   "stands_total": 825,
+   "true_positive": 102,
+   "false_positive": 27,
+   "false_negative": 214,
+   "true_negative": 798,
+   "recall": 0.3228,
    "recall_ci": [
-    0.2846,
-    0.3907
+    0.2736,
+    0.3762
    ],
-   "precision": 0.808,
+   "precision": 0.7907,
    "precision_ci": [
-    0.7302,
-    0.8674
+    0.7126,
+    0.852
    ],
-   "agreement": 0.7852,
+   "agreement": 0.7888,
    "agreement_ci": [
-    0.7593,
-    0.8091
+    0.7641,
+    0.8115
    ],
    "by_class": {
     "equivalent-electron": {
@@ -473,24 +473,24 @@
      "recall": 0.9149
     },
     "family parent": {
-     "flagged": 90,
-     "found": 28,
-     "recall": 0.3111
+     "flagged": 98,
+     "found": 29,
+     "recall": 0.2959
     },
     "operator": {
-     "flagged": 37,
+     "flagged": 38,
      "found": 7,
-     "recall": 0.1892
+     "recall": 0.1842
     },
     "shared wording": {
-     "flagged": 46,
+     "flagged": 51,
      "found": 5,
-     "recall": 0.1087
+     "recall": 0.098
     },
     "single object": {
-     "flagged": 71,
+     "flagged": 72,
      "found": 14,
-     "recall": 0.1972
+     "recall": 0.1944
     },
     "unit misfit": {
      "flagged": 10,
@@ -502,9 +502,9 @@
    "cost": {
     "cost_usd": 0.0,
     "per_name_usd": 0.0,
-    "wall_seconds": 241566.7,
-    "per_name_seconds": 81.998,
-    "answered": 2946,
+    "wall_seconds": 242405.7,
+    "per_name_seconds": 79.634,
+    "answered": 3044,
     "unanswered": 143
    },
    "repeat_agreement": {
@@ -105842,6 +105842,594 @@
     "qualifier": "agrees",
     "cost_usd": 0.0,
     "seconds": 7.718161344528198
+   },
+   "perturbed_plasma_pressure_real_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.727555274963379
+   },
+   "perturbed_plasma_temperature_imaginary_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.856705665588379
+   },
+   "perturbed_plasma_temperature_real_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.150427341461182
+   },
+   "perturbed_plasma_mass_density_real_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 17.653536081314087
+   },
+   "perturbed_plasma_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.1117525100708
+   },
+   "perturbed_vacuum_magnetic_vector_potential": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.349507570266724
+   },
+   "perturbed_vacuum_magnetic_field": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.546604871749878
+   },
+   "pfirsch_schlueter_current_density": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.065171241760254
+   },
+   "pfirsch_schlueter_current_density_due_to_diamagnetic_drift": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 10.014614820480347
+   },
+   "plasma_electrical_conductivity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.575735807418823
+   },
+   "plasma_energy": {
+    "verdict": "flag",
+    "qualifier": "integration",
+    "cost_usd": 0.0,
+    "seconds": 6.3864240646362305
+   },
+   "plasma_magnetic_field": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.182921648025513
+   },
+   "plasma_magnetic_vector_potential": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.349222660064697
+   },
+   "plasma_current": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 16.591747760772705
+   },
+   "plasma_mass_density_imaginary_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.307238340377808
+   },
+   "plasma_mass_density_real_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.02464747428894
+   },
+   "plasma_mass_density": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 11.423739433288574
+   },
+   "plasma_filament_width": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 21.908886432647705
+   },
+   "plasma_momentum": {
+    "verdict": "flag",
+    "qualifier": "integration",
+    "cost_usd": 0.0,
+    "seconds": 6.392254590988159
+   },
+   "plasma_momentum_diffusivity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.476985931396484
+   },
+   "plasma_momentum_flux": {
+    "verdict": "flag",
+    "qualifier": "weighting",
+    "cost_usd": 0.0,
+    "seconds": 7.321233034133911
+   },
+   "plasma_power_at_divertor_target_due_to_recombination": {
+    "verdict": "flag",
+    "qualifier": "restriction-to-one-object",
+    "cost_usd": 0.0,
+    "seconds": 7.429937124252319
+   },
+   "plasma_power_at_wall_due_to_recombination": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.922548770904541
+   },
+   "plasma_power_of_divertor_due_to_recombination": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.668606758117676
+   },
+   "plasma_pressure_imaginary_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.224222183227539
+   },
+   "plasma_pressure_real_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.263955116271973
+   },
+   "plasma_temperature": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.986489534378052
+   },
+   "plasma_temperature_imaginary_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.805497884750366
+   },
+   "plasma_temperature_real_part": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.861717700958252
+   },
+   "polarization_ellipticity_of_polarimeter_beam": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.487165927886963
+   },
+   "plasma_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.659205436706543
+   },
+   "poloidal_angle_of_electron_cyclotron_beam": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.122520685195923
+   },
+   "poloidal_angle_of_gyrokinetic_eigenmode": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.397660732269287
+   },
+   "poloidal_angle_of_beam_tracing_beam": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.386871814727783
+   },
+   "poloidal_angle_of_plasma_boundary_gap": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.398691415786743
+   },
+   "poloidal_current_density_due_to_heat_viscosity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.023658275604248
+   },
+   "poloidal_angle_of_toroidal_magnetic_field_probe": {
+    "verdict": "flag",
+    "qualifier": "restriction-to-one-object",
+    "cost_usd": 0.0,
+    "seconds": 6.323706388473511
+   },
+   "poloidal_current_density_due_to_ion_neutral_friction": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.775450229644775
+   },
+   "poloidal_beta": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.9108991622924805
+   },
+   "poloidal_current_weighted_average_external_magnetic_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.106618165969849
+   },
+   "poloidal_current_function": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.190118789672852
+   },
+   "poloidal_current_density_due_to_parallel_viscosity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 10.445549726486206
+   },
+   "poloidal_electron_diffusion_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.929003000259399
+   },
+   "poloidal_electron_beta_at_pedestal_top_low_field_side": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.432104587554932
+   },
+   "poloidal_electron_beta_at_pedestal_top_high_field_side": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 18.199063062667847
+   },
+   "poloidal_electron_energy_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.225462198257446
+   },
+   "poloidal_electron_energy_diffusivity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.320138216018677
+   },
+   "poloidal_gyrocenter_frequency": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 4.914519548416138
+   },
+   "poloidal_flux_limiter_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.193232774734497
+   },
+   "poloidal_electron_diffusivity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 19.568206548690796
+   },
+   "poloidal_electron_particle_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.378469467163086
+   },
+   "poloidal_ion_charge_state_convection_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.795543193817139
+   },
+   "poloidal_ion_charge_state_energy_convection_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.879484176635742
+   },
+   "poloidal_ion_charge_state_energy_diffusivity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.343302249908447
+   },
+   "poloidal_ion_charge_state_energy_diffusion_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.98672080039978
+   },
+   "poloidal_ion_charge_state_momentum_convection_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.839420557022095
+   },
+   "poloidal_ion_charge_state_momentum_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.008242607116699
+   },
+   "poloidal_ion_charge_state_momentum_damping_rate": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.43932580947876
+   },
+   "poloidal_ion_charge_state_momentum_diffusion_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.73217225074768
+   },
+   "poloidal_ion_charge_state_particle_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.6215431690216064
+   },
+   "poloidal_ion_charge_state_momentum_flux_limiter_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.594237089157104
+   },
+   "poloidal_ion_charge_state_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.44373345375061
+   },
+   "poloidal_ion_charge_state_velocity_due_to_diamagnetic_drift": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.463240385055542
+   },
+   "poloidal_ion_diffusion_coefficient": {
+    "verdict": "flag",
+    "qualifier": "counting-convention",
+    "cost_usd": 0.0,
+    "seconds": 5.847152471542358
+   },
+   "poloidal_ion_charge_state_velocity_due_to_e_cross_b_drift": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.261455059051514
+   },
+   "poloidal_ion_momentum_flux_limiter_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.390817642211914
+   },
+   "poloidal_ion_momentum_diffusivity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.080601930618286
+   },
+   "poloidal_ion_state_momentum_flux_limiter_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 4.984106540679932
+   },
+   "poloidal_ion_particle_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.254669904708862
+   },
+   "poloidal_length_of_flux_surface": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.69588565826416
+   },
+   "poloidal_launched_wave_index_of_lower_hybrid_antenna": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.097832679748535
+   },
+   "poloidal_linear_neutral_internal_state_momentum_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.626658201217651
+   },
+   "poloidal_magnetic_field": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.721508264541626
+   },
+   "poloidal_magnetic_field_at_pedestal_top_high_field_side": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.063369274139404
+   },
+   "poloidal_magnetic_field_of_magnetic_field_probe": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.670428037643433
+   },
+   "poloidal_magnetic_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.032384395599365
+   },
+   "poloidal_magnetic_flux_at_beam_tracing_point": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.004220724105835
+   },
+   "poloidal_magnetic_flux_at_constraint_position": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.146080255508423
+   },
+   "poloidal_magnetic_flux_at_internal_transport_barrier": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.677227258682251
+   },
+   "poloidal_magnetic_flux_at_halo_boundary": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 7.596610069274902
+   },
+   "poloidal_magnetic_flux_at_magnetic_axis": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.174612998962402
+   },
+   "poloidal_ion_state_particle_convection_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 33.222784996032715
+   },
+   "poloidal_magnetic_flux_at_pedestal_top": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.610126495361328
+   },
+   "poloidal_magnetic_flux_at_pellet_path": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.803586721420288
+   },
+   "poloidal_magnetic_flux_of_flux_loop": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 12.964776277542114
+   },
+   "poloidal_magnetic_flux_at_plasma_boundary": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 14.225075721740723
+   },
+   "poloidal_momentum_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 14.654831647872925
+   },
+   "poloidal_neutral_energy_diffusivity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.069496154785156
+   },
+   "poloidal_neutral_energy_diffusion_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.562541961669922
+   },
+   "poloidal_neutral_internal_state_convection_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.434320688247681
+   },
+   "poloidal_magnetic_vector_potential": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 25.49779725074768
+   },
+   "poloidal_neutral_internal_state_energy_convection_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 6.336078405380249
+   },
+   "poloidal_neutral_internal_state_diffusion_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.467739582061768
+   },
+   "poloidal_neutral_internal_state_energy_diffusion_coefficient": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.607642412185669
+   },
+   "poloidal_neutral_internal_state_momentum_convection_velocity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 8.021542310714722
+   },
+   "poloidal_neutral_internal_state_energy_diffusivity": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 11.386349201202393
+   },
+   "poloidal_neutral_internal_state_velocity_due_to_e_cross_b_drift": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 5.365625381469727
+   },
+   "poloidal_neutral_internal_state_particle_flux": {
+    "verdict": "pass",
+    "qualifier": "agrees",
+    "cost_usd": 0.0,
+    "seconds": 9.360889434814453
    }
   }
  },
