@@ -35,6 +35,16 @@
       "note": "The done-when now fixes the live-count rule (neither status nor name stage superseded) and adds two planted controls for it: two live names on one DD path counts two, one live name plus an archived tombstone counts one.",
       "reason": "",
       "when": "2026-11-14T15:03:11.480456+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c892832318107aab18f1e73bcd27e8712a418489",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The lead ruled on 2026-11-14 that the history-apart route extends to this pair: the tombstone's refined descendant reclaims the ruled spelling despite its operator word order, and the locator-only name is superseded into it; the done-when records that ruling.",
+      "reason": "",
+      "when": "2026-11-14T15:03:16.927856+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The done-when now fixes the live-count rule (neither status nor name stage superseded) and adds two planted controls for it: two live names on one DD path counts two, one live name plus an archived tombstone counts one.",
       "reason": "",
       "when": "2026-11-14T15:03:11.480456+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "c892832318107aab18f1e73bcd27e8712a418489",
+      "commit_basis": "edit",
+      "note": "The lead ruled on 2026-11-14 that the history-apart route extends to this pair: the tombstone's refined descendant reclaims the ruled spelling despite its operator word order, and the locator-only name is superseded into it; the done-when records that ruling.",
+      "reason": "",
+      "when": "2026-11-14T15:03:16.927856+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261113T121118989186-plan-review-of-sn-catalog-consistency.json",
