@@ -33,7 +33,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 55,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e1e738340492ba7eae4b6867add29258f27acbcc",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The disposable graph now plants five names, one for each exclusion and the one that must be counted: live with no edge, superseded by status, superseded by name stage only, a derived parent with a derived producer, and a live name with an edge and an empty copied list; the command must report 1 and name it.",
+      "reason": "",
+      "when": "2026-11-14T23:33:35.286050+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e1e738340492ba7eae4b6867add29258f27acbcc",
+      "commit_basis": "edit",
+      "note": "The disposable graph now plants five names, one for each exclusion and the one that must be counted: live with no edge, superseded by status, superseded by name stage only, a derived parent with a derived producer, and a live name with an edge and an empty copied list; the command must report 1 and name it.",
+      "reason": "",
+      "when": "2026-11-14T23:33:35.286050+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261114T224756162610-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261114T224756162610-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "d0833704a7441a955ae9deddededd17c899e9841",
   "rubric": "content",
