@@ -270,11 +270,14 @@ EXIT=1
 <section id="sph-private-import-boundaries-gate">
   <h3>Behaviour is unchanged</h3>
   <p>
-    <code>tests/standard_names</code> was run in four file-list chunks at each
-    head over the revision's own tree, each chunk logging its revision, tree,
-    <code>module.__file__</code> and final exit code. The base tree is the base revision extracted
-    with <code>git archive</code> and given the five generated files the package
-    imports; the landing tree is the worktree at the landing head.
+    <code>tests/standard_names</code> was run once per arm, each run its own
+    <code>all_debug</code> job over its own revision's tree, and each log
+    records the revision, the tree, <code>module.__file__</code> under that tree
+    and the final exit code. The base tree is the base revision extracted with
+    <code>git archive</code> and given the five generated files the package
+    imports; the landing tree is the landing revision extracted the same way.
+    Both arms selected the same 8766 tests, so the two counts are comparable
+    row for row.
   </p>
   <table id="sph-private-import-boundaries-suite">
     <thead>
@@ -282,19 +285,31 @@ EXIT=1
           <th>skipped</th><th>failure ids</th></tr>
     </thead>
     <tbody>
-      <tr><td>base</td><td><code>ef218f047</code></td><td>8641</td><td>1</td>
+      <tr><td>base</td><td><code>ef218f047</code></td><td>8753</td><td>1</td>
           <td>12</td><td>1</td></tr>
-      <tr><td>head</td><td><code>23052c8fa</code></td><td>8642</td><td>1</td>
-          <td>11</td><td>1 (same)</td></tr>
+      <tr><td>head</td><td><code>c913f0264</code></td><td>8753</td><td>1</td>
+          <td>12</td><td>1 (the same id)</td></tr>
     </tbody>
   </table>
   <p>
-    The one failure is identical at both heads, so the change adds no failure
+    The one failure is identical at both arms, so the change adds no failure
     id:
     <code>test_refine_attempt_budget.py::TestEscalationFiresOnTheLastRotation::test_last_rotation_uses_the_escalation_seat[3-True]</code>.
     It compares a configured seat name against the model the refine seat
     environment resolves, so it reads the environment rather than this change.
-    One test that skipped at base runs and passes at head.
+    The head arm ran <code>c913f0264</code>, the last commit that changes any
+    Python; the only later commit adds sixteen lines to this fragment, which no
+    test imports.
+  </p>
+  <p>
+    Lint is judged by delta the same way, over the 24 changed paths in a base
+    tree and a head tree, each carrying the repository's own
+    <code>pyproject.toml</code>: <code>ruff check --no-cache</code> reports no
+    finding in either tree, and <code>ruff format --check</code> returns exit 1
+    at base, naming
+    <code>imas_codex/standard_names/harmonize.py</code>, and exit 0 at head. So
+    the head adds no finding and removes one formatting violation that predates
+    this work.
   </p>
 </section>
 
@@ -303,13 +318,16 @@ EXIT=1
   <ul>
     <li>Commits: <code>c72201a3a</code> closes the imports and deletes the
       exemption set (24 files); <code>23052c8fa</code> restores the two
-      monkeypatch seams the first commit disturbed (2 files).</li>
+      monkeypatch seams the first commit disturbed (2 files);
+      <code>c913f0264</code> keeps the family row query visible to the linter
+      and formats the touched modules; <code>880ea9352</code> records the
+      census reconciliation above.</li>
     <li>Census: 13 caller modules, 17 statements, 23 occurrences, 20 distinct
       names &rarr; zero on all four measures. Same rule as the test's detector.</li>
     <li>Logs, all in the run directory under
       <code>~/.config/reckon/crew/runs/</code>: <code>private-import-census.log</code>,
-      <code>baseline-chunk-00..03.log</code>, <code>head-chunk-00..03.log</code>,
-      <code>negative-control.log</code>,
+      <code>suite-base.log</code>, <code>suite-head.log</code>,
+      <code>lint-delta.log</code>, <code>negative-control.log</code>,
       <code>negative-control-base-tree.log</code>.</li>
   </ul>
 </section>
