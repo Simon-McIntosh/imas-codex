@@ -407,7 +407,7 @@ def reviewing_guide_url(*, checkout: str | Path | None = None) -> str:
                 "no reviewable address"
             )
     root = Path(checkout).resolve()
-    toplevel = rungit_output("rev-parse", "--show-toplevel", cwd=root)
+    toplevel = run_git("rev-parse", "--show-toplevel", cwd=root)
     if toplevel.returncode != 0:
         raise ReviewingGuideLinkError(
             f"{root} is not inside a git checkout, so the catalog reviewing "
