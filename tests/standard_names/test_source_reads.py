@@ -3,17 +3,20 @@
 The graph holds a name's sources twice: as ``PRODUCED_NAME`` edges from the
 source nodes, and as a ``source_paths`` list copied onto the name. The edges are
 the authority, so a name whose copied list is empty while its edges are not must
-still answer with its sources, and a name whose copied list is populated while
-its edges are gone must answer with none.
+still answer with its sources, and a name whose copied list names a path no edge
+gives must answer with none.
 
-The planted graph also carries two support names and one superseded name, so the
-sourceless count is exercised without counting a superseded name and without
-counting a derived parent as a loss.
+The planted graph holds exactly the seven shapes the sourceless count has to
+separate: an empty copy with no edge, a populated copy with no edge, a derived
+name with neither, a superseded status, a superseded stage, a derived parent
+whose only producer is a derived record, and a data-dictionary producer with an
+empty copy.
 """
 
 from __future__ import annotations
 
 import os
+import re
 from collections.abc import Iterator
 from pathlib import Path
 
@@ -38,8 +41,7 @@ READER_MODULES = (
 
 @pytest.fixture()
 def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
-    """Plant seven names: edge-only, list-only, agreeing, derived parent,
-    child, superseded and sourceless."""
+    """Plant the seven source shapes the count and the readers must separate."""
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",
@@ -48,29 +50,28 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
     )
     client.query(
         """UNWIND [
-          {id:'reads_edge_only', stage:'accepted', origin:'pipeline',
-           status:'draft', paths:[]},
-          {id:'reads_list_only', stage:'accepted', origin:'pipeline',
-           status:'draft', paths:['dd:reads/ghost']},
-          {id:'reads_agrees', stage:'accepted', origin:'pipeline',
-           status:'draft', paths:['dd:reads/agrees']},
-          {id:'reads_derived_parent', stage:'accepted', origin:'derived',
-           status:'draft', paths:[]},
-          {id:'reads_child', stage:'accepted', origin:'pipeline',
-           status:'draft', paths:[]},
-          {id:'reads_superseded', stage:'accepted', origin:'pipeline',
-           status:'superseded', paths:['dd:reads/ghost']},
-          {id:'reads_sourceless', stage:'accepted', origin:'pipeline',
-           status:'draft', paths:[]}
+          {id:'reads_empty_list', status:'draft', stage:'accepted',
+           origin:'pipeline', paths:[]},
+          {id:'reads_stale_list', status:'draft', stage:'accepted',
+           origin:'pipeline', paths:['dd:reads/ghost']},
+          {id:'reads_derived_orphan', status:'draft', stage:'accepted',
+           origin:'derived', paths:[]},
+          {id:'reads_status_superseded', status:'superseded', stage:'accepted',
+           origin:'pipeline', paths:[]},
+          {id:'reads_stage_superseded', status:'draft', stage:'superseded',
+           origin:'pipeline', paths:[]},
+          {id:'reads_derived_sourced', status:'draft', stage:'accepted',
+           origin:'derived', paths:[]},
+          {id:'reads_dd_bound', status:'draft', stage:'accepted',
+           origin:'pipeline', paths:[]}
         ] AS row
-        CREATE (:StandardName {id:row.id, name_stage:row.stage,
-          origin:row.origin, source_paths:row.paths, status:row.status})"""
+        CREATE (:StandardName {id:row.id, status:row.status,
+          name_stage:row.stage, origin:row.origin, source_paths:row.paths})"""
     )
     client.query(
         """UNWIND [
-          {id:'dd:reads/edge_only', holder:'reads_edge_only'},
-          {id:'dd:reads/agrees', holder:'reads_agrees'},
-          {id:'dd:reads/child', holder:'reads_child'}
+          {id:'derived:reads/source', holder:'reads_derived_sourced'},
+          {id:'dd:reads/bound', holder:'reads_dd_bound'}
         ] AS row
         CREATE (source:StandardNameSource {id:row.id, source_id:row.id})
         WITH source, row
@@ -78,80 +79,93 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
         CREATE (source)-[:PRODUCED_NAME]->(holder)"""
     )
     client.query(
-        """MATCH (parent:StandardName {id:'reads_derived_parent'}),
-                 (child:StandardName {id:'reads_child'})
-        CREATE (child)-[:HAS_PARENT]->(parent)"""
+        """MATCH (orphan:StandardName {id:'reads_derived_orphan'}),
+                 (sourced:StandardName {id:'reads_derived_sourced'}),
+                 (stale:StandardName {id:'reads_stale_list'})
+        CREATE (sourced)-[:HAS_PARENT]->(orphan)
+        CREATE (stale)-[:HAS_PARENT]->(sourced)"""
     )
     try:
         yield client
     finally:
         client.query(
             "MATCH (node) WHERE node.id STARTS WITH 'reads_' "
-            "OR node.id STARTS WITH 'dd:reads/' DETACH DELETE node"
+            "OR node.id STARTS WITH 'dd:reads/' "
+            "OR node.id STARTS WITH 'derived:reads/' DETACH DELETE node"
         )
         client.close()
 
 
 @pytest.mark.graph
 def test_reader_answers_from_the_producer_edges(planted_graph: GraphClient) -> None:
-    """An empty copied list does not hide a name's sources; a stale one does
-    not invent them."""
-    assert read_source_paths(planted_graph, "reads_edge_only") == ["dd:reads/edge_only"]
-    assert read_source_paths(planted_graph, "reads_list_only") == []
-    assert read_source_paths(planted_graph, "reads_agrees") == ["dd:reads/agrees"]
+    """An empty copy does not hide a name's sources; a stale one does not
+    invent them."""
+    assert read_source_paths(planted_graph, "reads_dd_bound") == ["dd:reads/bound"]
+    assert read_source_paths(planted_graph, "reads_stale_list") == []
+    assert read_source_paths(planted_graph, "reads_empty_list") == []
 
 
 @pytest.mark.graph
 def test_name_search_answers_from_the_producer_edges(
     planted_graph: GraphClient,
 ) -> None:
-    """Search is a reader of the same place: the planted empty-list name comes
-    back with its source and the planted stale-list name comes back with none."""
+    """Search is a reader of the same place: the planted producer comes back
+    with its path and the planted over-reporting copy comes back with none."""
     rows = fetch_standard_names(
-        ["reads_edge_only", "reads_list_only"],
+        ["reads_dd_bound", "reads_stale_list"],
         include_grammar=False,
         include_documentation=False,
         gc=planted_graph,
     )
     by_name = {row["name"]: row for row in rows}
-    assert by_name["reads_edge_only"]["source_paths"] == ["dd:reads/edge_only"]
-    assert by_name["reads_list_only"]["source_paths"] == []
+    assert by_name["reads_dd_bound"]["source_paths"] == ["dd:reads/bound"]
+    assert by_name["reads_stale_list"]["source_paths"] == []
 
-    found = search_standard_names("reads_edge_only", k=5, gc=planted_graph)
+    found = search_standard_names("reads_dd_bound", k=5, gc=planted_graph)
     search_rows = {row["name"]: row for row in found}
-    assert search_rows["reads_edge_only"]["source_paths"] == ["dd:reads/edge_only"]
+    assert search_rows["reads_dd_bound"]["source_paths"] == ["dd:reads/bound"]
 
 
 @pytest.mark.graph
-def test_sourceless_count_lists_every_unproduced_name_but_one(
+def test_sourceless_count_lists_two_of_three_and_exempts_the_third(
     planted_graph: GraphClient,
 ) -> None:
-    """Seven planted names yield two counted names and one derived parent
-    listed apart, while the raw edge read counts all three."""
+    """Seven planted names: five live, two produced, three not, of which the
+    derived parent is listed apart rather than counted."""
     report = count_live_names_without_source(planted_graph)
 
-    assert report["live_names"] == 6
-    assert report["live_with_producer"] == 3
+    assert report["live_names"] == 5
+    assert report["live_with_producer"] == 2
     assert report["live_without_producer"] == 3
     assert report["count"] == 2
     assert [entry["id"] for entry in report["names"]] == [
-        "reads_list_only",
-        "reads_sourceless",
+        "reads_empty_list",
+        "reads_stale_list",
     ]
     assert [entry["id"] for entry in report["exempt_derived_parents"]] == [
-        "reads_derived_parent"
+        "reads_derived_orphan"
     ]
 
 
-def test_no_reader_projects_the_copied_list() -> None:
-    """Each reader names its sources through the one place, not the copy.
+def test_each_reader_reads_sources_from_the_one_place() -> None:
+    """A reader that spells the copied list, or the edge pattern, itself fails
+    here: sources come from the projection that owns them."""
+    package = Path(__file__).resolve().parents[2] / "imas_codex" / "standard_names"
+    copied_list = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*\.source_paths\b")
 
-    A reader that spells ``sn.source_paths`` into its own ``RETURN`` answers
-    from the projection rather than from the edges, which is the defect this
-    module exists to prevent, so the spelling is refused at the source.
-    """
-    package = Path(__file__).parents[2] / "imas_codex" / "standard_names"
     for module in READER_MODULES:
-        text = (package / module).read_text(encoding="utf-8")
-        assert "sn.source_paths AS" not in text, module
-        assert "source_paths_projection" in text, module
+        path = package / module
+        assert path.is_file(), f"reader module is missing: {module}"
+        text = path.read_text(encoding="utf-8")
+
+        assert "source_paths_projection" in text, (
+            f"{module} does not name the one place that reads a name's sources"
+        )
+        stale = copied_list.search(text)
+        assert stale is None, (
+            f"{module} reads the copied list: {stale.group(0) if stale else ''}"
+        )
+        assert "PRODUCED_NAME" not in text, (
+            f"{module} spells the producer pattern itself instead of asking "
+            "source_paths_projection()"
+        )
