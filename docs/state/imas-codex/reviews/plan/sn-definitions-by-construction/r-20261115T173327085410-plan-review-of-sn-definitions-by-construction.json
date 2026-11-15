@@ -17,7 +17,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 58,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e12783405cd4cafe625346f3feded7fe7557efc1",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The clause now names one baseline, taken by the closing census on the live graph with the measure the final census uses: names not carrying the stored form per operator (69 of 73, 53 of 66, 23 of 28) and species families divergent (23 of 23 over 316 members). The published census of section 1 counted notation styles over another population and is stated as history, not a comparator.",
+      "reason": "",
+      "when": "2026-11-15T17:45:51.606820+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e12783405cd4cafe625346f3feded7fe7557efc1",
+      "commit_basis": "edit",
+      "note": "The clause now names one baseline, taken by the closing census on the live graph with the measure the final census uses: names not carrying the stored form per operator (69 of 73, 53 of 66, 23 of 28) and species families divergent (23 of 23 over 316 members). The published census of section 1 counted notation styles over another population and is stated as history, not a comparator.",
+      "reason": "",
+      "when": "2026-11-15T17:45:51.606820+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261115T173327085410-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261115T173327085410-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "71b05f1e119e244ffad61bc527eb62f8f227a129",
   "rubric": "content",
