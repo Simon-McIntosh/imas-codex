@@ -639,6 +639,9 @@ def report():
                 if r.get("score_after") is not None and r["score_after"] < SCORE_FLOOR
             ),
             "dropped": len(score_drops),
+            "worked_total": len(worked),
+            "with_score_before": sum(1 for r in worked if r.get("score_before") is not None),
+            "with_score_after": sum(1 for r in worked if r.get("score_after") is not None),
         },
     }
 
@@ -733,6 +736,47 @@ def report():
                 "state": "within the recorded bound"
                 if (with_source.get("count") or 0) <= SOURCELESS_RECORDED
                 else "above the recorded bound",
+            },
+            {
+                "clause": "no name left below the publishing score threshold unlisted",
+                "measure": (
+                    f"documentation review score after each edit, against {SCORE_FLOOR:.2f}"
+                ),
+                "before": (
+                    f"{selection['scores']['with_score_before']} of "
+                    f"{selection['scores']['worked_total']} worked names carry a score "
+                    "before"
+                ),
+                "after": (
+                    f"{selection['scores']['with_score_after']} of "
+                    f"{selection['scores']['worked_total']} worked names carry a score "
+                    f"after; {selection['scores']['below_floor']} are below "
+                    f"{SCORE_FLOOR:.2f}, all among the {len(held)} held"
+                ),
+                "state": "met"
+                if {
+                    r["name"]
+                    for r in worked
+                    if r.get("score_after") is not None and r["score_after"] < SCORE_FLOOR
+                }
+                <= {item["name"] for item in held}
+                else "not met",
+                "note": (
+                    "a name whose score would fall below the floor keeps its earlier "
+                    "text, so it is held rather than landed; names with no review "
+                    "score are the ones whose edit never reached a scored candidate"
+                ),
+            },
+            {
+                "clause": "spend inside the ceiling at the measured rate",
+                "measure": "LLMCost spend per edit joined to that edit's own run id",
+                "before": "0 USD",
+                "after": (
+                    f"{total:.6f} USD of {CEILING_USD:.2f} at "
+                    f"{(total / len(rated) if rated else 0.0):.6f} a name over "
+                    f"{len(rated)} rated names"
+                ),
+                "state": "met" if total <= CEILING_USD else "above the ceiling",
             },
         ],
         "sourceless_names": with_source.get("names", []),
@@ -930,6 +974,14 @@ def render_html(payload):
             SCORE_FLOOR,
             "%.4f" % scores["lowest_after"] if scores["lowest_after"] else "unrecorded",
         )
+    )
+    add(
+        '<p class="muted">Score coverage: '
+        f"{scores['with_score_before']} of {scores['worked_total']} worked names carry "
+        f"a score before the edit and {scores['with_score_after']} carry one after. "
+        "The remainder are names whose earlier record carried no score, or whose "
+        "edit never reached a scored candidate; both are counted here rather than "
+        "left implicit in the worked table.</p>"
     )
     add(
         table(
@@ -1324,14 +1376,166 @@ def figure():
     return path
 
 
+def verify(delivered_path=None):
+    """Re-derive every count the delivered report states, from the live graph.
+
+    Run after any change to the report. It reads the catalog again through the
+    committed census measures and fails on a stated count that no longer
+    matches, on spend above the ceiling or disagreeing with the records it sums,
+    on a name whose live documentation score sits below the floor without being
+    listed as held, and on a name the after-census calls non-stored that is
+    neither worked nor listed as left. Two live reads over named populations
+    plus one catalog read; nothing is written.
+    """
+
+    delivered_path = Path(delivered_path or OUT)
+    delivered = json.loads(delivered_path.read_text())
+    stated = delivered["census_after"]
+    module, rows = live_rows_all()
+    before = json.loads(CENSUS_BEFORE.read_text())["phases"]["live"]
+    forms_before = {operator: before["operators"][operator]["form_count"] for operator in module.OPERATORS}
+    families = module.family_census(rows)
+    operators = module.operator_census(rows, forms_before)
+    population = module.population_census(rows)
+    row_by_name = {row["id"]: row for row in rows}
+
+    checks = []
+
+    def check(label, reported, live):
+        checks.append((label, reported, live))
+
+    # The species list and the family measure are the closing census's, so this
+    # script must not carry a second copy that can drift from them.
+    check(
+        "the species list and family measure come from the census module",
+        False,
+        "SPECIES" in globals() or "family_template" in globals(),
+    )
+
+    for key in ("family_count", "member_count", "one_wording_count", "divergent_count"):
+        check(f"species families {key}", stated["families"][key], families[key])
+    for key in ("species_names", "departing_count", "mentioning_neutral", "silent_on_the_sum"):
+        check(f"species population {key}", stated["population"][key], population[key])
+    for operator in module.OPERATORS:
+        for key in ("name_count", "form_count", "omitted_count"):
+            check(
+                f"{operator} {key}",
+                stated["operators"][operator][key],
+                operators[operator][key],
+            )
+
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as client:
+        sourceless_after = module.sourceless(client)
+    sourceless_clause = next(
+        clause
+        for clause in delivered["done_when"]["clauses"]
+        if clause["clause"].startswith("live names with no producer edge")
+    )
+    check(
+        "sourceless live names stated",
+        int(sourceless_clause["after"]),
+        sourceless_after["count"],
+    )
+    checks.append(
+        (
+            "sourceless live names within the recorded bound",
+            True,
+            sourceless_after["count"] <= SOURCELESS_RECORDED,
+        )
+    )
+
+    records = settled_records()
+    worked = list(records.values())
+    total = round(sum(record.get("spend_usd") or 0 for record in worked), 6)
+    rated = [record for record in worked if (record.get("spend_usd") or 0) > 0]
+    check("worked names", delivered["worked_count"], len(worked))
+    check("spend total", delivered["spend"]["pass_total_usd"], total)
+    check("spend within the ceiling", True, total <= CEILING_USD)
+    check("rated names", delivered["spend"]["rated_names"], len(rated))
+    check(
+        "spend rate",
+        delivered["spend"]["rate_per_name_usd"],
+        round(total / len(rated), 6) if rated else 0.0,
+    )
+
+    with_after = [record for record in worked if record.get("score_after") is not None]
+    below_floor = [record for record in with_after if record["score_after"] < SCORE_FLOOR]
+    held_names = {item["name"] for item in delivered["held"]}
+    check("names carrying a score after", delivered["selection"]["scores"]["with_score_after"], len(with_after))
+    check("names below the score floor", delivered["selection"]["scores"]["below_floor"], len(below_floor))
+    check(
+        "every name below the floor is held",
+        set(),
+        {record["name"] for record in below_floor} - held_names,
+    )
+    check(
+        "every live score below the floor is held",
+        set(),
+        {
+            record["name"]
+            for record in worked
+            if (row_by_name.get(record["name"], {}).get("score_docs") or 0) < SCORE_FLOOR
+            and row_by_name.get(record["name"], {}).get("score_docs") is not None
+            and record["name"] not in held_names
+        },
+    )
+    drops_reported = {item["name"] for item in delivered["score_drops"]}
+    drops_live = {
+        record["name"]
+        for record in with_after
+        if record.get("score_before") is not None
+        and record["score_after"] < record["score_before"]
+    }
+    check("score drops listed (count)", len(drops_reported), len(drops_live))
+    check("score drops listed (same names)", True, drops_reported == drops_live)
+
+    worklist = json.loads(WORKLIST.read_text())
+    left = worklist["left"]
+    check("left names", delivered["left_count"], len(left))
+    check("every left name carries a non-empty reason", 0, sum(1 for item in left if not item["reason"]))
+    accounted = set(records) | {item["name"] for item in left}
+    unrouted = {item["name"] for item in delivered["unrouted"]}
+    check(
+        "every non-stored after-form name is worked, left or unrouted",
+        set(),
+        {
+            name
+            for entry in operators.values()
+            for form, names in entry["forms"].items()
+            for name in names
+            if not form_is_stored(form, entry["stored_sentence"])
+            and name not in accounted
+            and name not in unrouted
+        },
+    )
+
+    for label, reported, live in checks:
+        print(("PASS" if reported == live else "FAIL"), label, "reported", reported, "live", live)
+    mismatched = [item for item in checks if item[1] != item[2]]
+    print("checked", len(checks), "mismatched", len(mismatched))
+    return 1 if mismatched else 0
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("phase", choices=["plan", "status", "report", "census", "figure"])
+    parser.add_argument(
+        "phase", choices=["plan", "status", "report", "census", "figure", "verify"]
+    )
+    parser.add_argument(
+        "--delivered",
+        default=None,
+        help="report to verify; defaults to the file this script writes",
+    )
     args = parser.parse_args(argv)
+    if args.phase == "verify":
+        return verify(args.delivered)
     {"plan": plan, "status": status, "report": report, "census": census, "figure": figure}[
         args.phase
     ]()
+    return 0
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

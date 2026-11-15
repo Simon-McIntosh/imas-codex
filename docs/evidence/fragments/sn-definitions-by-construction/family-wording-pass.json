@@ -1,6 +1,6 @@
 {
  "schema": "family-wording-pass/1",
- "generated_at": "2026-11-15T16:10:08Z",
+ "generated_at": "2026-11-15T16:37:39Z",
  "plan_section": "sn-definitions-by-construction#s6",
  "population_source": "/home/ITER/mcintos/.cache/imas-codex-live-rewrite/census-before-pass.json",
  "probe": {
@@ -14550,7 +14550,7 @@
   }
  },
  "done_when": {
-  "read_at": "2026-11-15T16:10:08Z",
+  "read_at": "2026-11-15T16:37:39Z",
   "clauses": [
    {
     "clause": "every species family at one stored wording",
@@ -14614,6 +14614,21 @@
     "before": "10",
     "after": "10",
     "state": "within the recorded bound"
+   },
+   {
+    "clause": "no name left below the publishing score threshold unlisted",
+    "measure": "documentation review score after each edit, against 0.85",
+    "before": "129 of 173 worked names carry a score before",
+    "after": "158 of 173 worked names carry a score after; 7 are below 0.85, all among the 23 held",
+    "state": "met",
+    "note": "a name whose score would fall below the floor keeps its earlier text, so it is held rather than landed; names with no review score are the ones whose edit never reached a scored candidate"
+   },
+   {
+    "clause": "spend inside the ceiling at the measured rate",
+    "measure": "LLMCost spend per edit joined to that edit's own run id",
+    "before": "0 USD",
+    "after": "13.026033 USD of 30.00 at 0.081925 a name over 159 rated names",
+    "state": "met"
    }
   ],
   "sourceless_names": [
@@ -14650,7 +14665,10 @@
   "scores": {
    "lowest_after": 0.8499999999999999,
    "below_floor": 7,
-   "dropped": 70
+   "dropped": 70,
+   "worked_total": 173,
+   "with_score_before": 129,
+   "with_score_after": 158
   }
  },
  "outcomes": {
