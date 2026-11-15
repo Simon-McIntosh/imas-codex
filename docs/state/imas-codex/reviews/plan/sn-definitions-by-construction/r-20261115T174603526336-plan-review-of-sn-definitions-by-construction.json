@@ -35,6 +35,16 @@
       "note": "The operator clause is now a property over names: every live name naming an operator carries that operator's stored sentence or is listed by name with its reason, and a name stating no form, or a variant, counts as not carrying it. The last clause plants both shapes in a disposable graph and requires the census to report each as not carrying, so the operator clause can fail.",
       "reason": "",
       "when": "2026-11-15T17:53:21.216011+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "71724c7a819cd8ec2ff265da45f7d54c321f1da8",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The embedded counts are removed, including the 69 that excluded the one variant name; the clause refers to the closing census's committed record for the baseline and defines the measure so that a variant counts as not carrying the stored sentence.",
+      "reason": "",
+      "when": "2026-11-15T17:53:28.044616+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The operator clause is now a property over names: every live name naming an operator carries that operator's stored sentence or is listed by name with its reason, and a name stating no form, or a variant, counts as not carrying it. The last clause plants both shapes in a disposable graph and requires the census to report each as not carrying, so the operator clause can fail.",
       "reason": "",
       "when": "2026-11-15T17:53:21.216011+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "71724c7a819cd8ec2ff265da45f7d54c321f1da8",
+      "commit_basis": "edit",
+      "note": "The embedded counts are removed, including the 69 that excluded the one variant name; the clause refers to the closing census's committed record for the baseline and defines the measure so that a variant counts as not carrying the stored sentence.",
+      "reason": "",
+      "when": "2026-11-15T17:53:28.044616+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261115T174603526336-plan-review-of-sn-definitions-by-construction.json",
