@@ -20,7 +20,7 @@ from scripts.codac_uda_prototype.loader import _save_figure
 
 SUBJECT = "#555555"
 REFERENCE = "#929292"
-MODEL = "#252525"
+LINE_STYLES = ("-", "--", "-.", ":")
 CANVAS = (14, 7.2)
 BASE_STYLE = Path(__file__).with_name("data-ink.mplstyle")
 STYLE = {"axes.formatter.useoffset": False, "svg.fonttype": "none"}
@@ -176,8 +176,8 @@ def plot(signals: Sequence[LoadedSignal], path: str | Path, *, labels: Sequence[
     is the earliest returned timestamp across inputs, retained in the receipt.
     Different physical units require separate figures rather than a misleading axis.
     """
-    if not 1 <= len(signals) <= 2 or len(labels) != len(signals):
-        raise ValueError("provide one or two signals and one alias per signal")
+    if not signals or len(labels) != len(signals):
+        raise ValueError("provide signals and one alias per signal")
     if len(set(labels)) != len(labels) or any(not label.strip() for label in labels):
         raise ValueError("signal aliases must be distinct and nonempty")
     summaries = [statistics(signal) for signal in signals]
@@ -202,8 +202,12 @@ def plot(signals: Sequence[LoadedSignal], path: str | Path, *, labels: Sequence[
             zip(signals, arrays, elapsed, labels, strict=True)
         ):
             x, y = times / time_divisor, values / divisor
-            style = "-" if index == 0 else "--"
-            colour = SUBJECT if index == 0 else MODEL
+            style = (
+                LINE_STYLES[index]
+                if index < len(LINE_STYLES)
+                else (0, (index + 2, 2, 1, 2))
+            )
+            colour = SUBJECT if index == 0 else REFERENCE
             if envelope:
                 axis.plot(
                     x,
@@ -243,7 +247,7 @@ def plot(signals: Sequence[LoadedSignal], path: str | Path, *, labels: Sequence[
                     lw=3 if index == 0 else 2.6,
                     ls=style,
                     drawstyle="steps-post" if held else "default",
-                    zorder=3 - index,
+                    zorder=3 if index == 0 else 2,
                     label=alias,
                 )
         figure.legend(loc="upper center", ncol=min(3, len(axis.lines)))
@@ -252,7 +256,13 @@ def plot(signals: Sequence[LoadedSignal], path: str | Path, *, labels: Sequence[
         axis.xaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
         axis.yaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
         axis.ticklabel_format(style="plain", axis="both", useOffset=False)
-        figure.subplots_adjust(left=0.13, right=0.97, bottom=0.14, top=0.86)
+        legend_rows = (len(axis.lines) + 2) // 3
+        figure.subplots_adjust(
+            left=0.13,
+            right=0.97,
+            bottom=0.14,
+            top=min(0.86, 0.94 - 0.055 * legend_rows),
+        )
         try:
             save_figure(figure, path)
         finally:

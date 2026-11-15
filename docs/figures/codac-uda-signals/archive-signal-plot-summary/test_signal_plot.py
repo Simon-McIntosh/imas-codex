@@ -160,6 +160,17 @@ def test_overlay_refuses_incompatible_units(tmp_path):
     assert not (tmp_path / "invalid.svg").exists()
 
 
+def test_several_signals_share_one_legend_and_axis(tmp_path):
+    path = tmp_path / "several.svg"
+    receipt = signal_plot.plot(
+        [signal(), signal(values=(3.0, 2.0, 1.0)), signal(values=(4.0, 5.0, 6.0))],
+        path,
+        labels=["measurement", "comparison", "setpoint"],
+    )
+    assert len(receipt["summaries"]) == 3
+    assert path.exists()
+
+
 def test_malformed_envelopes_are_not_summarised():
     with pytest.raises(ValueError, match="envelope"):
         signal_plot.statistics(signal(mode="envelope"))
