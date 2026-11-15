@@ -332,7 +332,7 @@ class ConfluenceClient:
 
         logger.info("Attempting Azure AD SSO for %s", self.base_url)
 
-        # Step 1: Navigate to Confluence → triggers F5 → Azure AD redirect
+        # Navigate to the application to trigger the identity-provider redirect.
         try:
             response = session.get(
                 f"{self.base_url}/",
@@ -349,7 +349,7 @@ class ConfluenceClient:
             )
             return False
 
-        # Step 2: Extract $Config JSON from Azure AD login page
+        # Extract $Config JSON from the identity-provider login page.
         config = self._extract_azure_config(response.text)
         if config is None:
             logger.warning("Could not extract Azure AD config from login page")
@@ -375,7 +375,7 @@ class ConfluenceClient:
             )
             return False
 
-        # Step 3: Call GetCredentialType to validate user and refresh flowToken
+        # Validate the user and refresh the flow token.
         gct_url = config.get(
             "urlGetCredentialType",
             "https://login.microsoftonline.com/common/GetCredentialType?mkt=en-US",
@@ -427,7 +427,7 @@ class ConfluenceClient:
         except Exception as e:
             logger.debug("GetCredentialType failed (non-fatal): %s", e)
 
-        # Step 4: POST credentials to Azure AD
+        # Submit credentials to the identity provider.
         login_url = f"https://login.microsoftonline.com{url_post}"
         logger.debug("Posting credentials to Azure AD for %s", username)
 
@@ -473,7 +473,7 @@ class ConfluenceClient:
             logger.warning("SSO credential POST failed: %s", e)
             return False
 
-        # Step 5: Follow auto-submit forms (device auth, SAML assertions)
+        # Follow auto-submit forms (device auth, SAML assertions)
         # and handle interactive pages (TFA, KMSI) in a unified loop.
         for _step in range(20):
             # Handle redirects
@@ -540,7 +540,10 @@ class ConfluenceClient:
             # No more forms/redirects — we should be on Confluence now
             break
 
-        # Step 7: Verify authentication
+        return self._verify_sso_session(session)
+
+    def _verify_sso_session(self, session: requests.Session) -> bool:
+        """Verify the application response and retain its session cookies."""
         try:
             verify = session.get(
                 f"{self.api_url}/user/current",
@@ -607,7 +610,7 @@ class ConfluenceClient:
 
         logger.info("MFA required (method: %s)", default_method)
 
-        # Step 1: Begin MFA authentication
+        # Begin MFA authentication.
         begin_data = {
             "AuthMethodId": default_method,
             "Method": "BeginAuth",
@@ -629,7 +632,7 @@ class ConfluenceClient:
         mfa_ctx = begin_result.get("Ctx", ctx)
         session_id = begin_result.get("SessionId", "")
 
-        # Step 2: Get OTP code from user
+        # Obtain the OTP code from the user.
         if default_method in ("PhoneAppOTP", "OneWaySMS"):
             otp_code = self._prompt_mfa_code()
             if not otp_code:
@@ -672,7 +675,7 @@ class ConfluenceClient:
             logger.error("Unsupported MFA method: %s", default_method)
             return None
 
-        # Step 3: End MFA verification (for OTP methods)
+        # Complete MFA verification for OTP methods.
         if otp_code is not None:
             end_data = {
                 "AuthMethodId": default_method,
@@ -699,7 +702,7 @@ class ConfluenceClient:
             mfa_flow_token = end_result.get("FlowToken", mfa_flow_token)
             mfa_ctx = end_result.get("Ctx", mfa_ctx)
 
-        # Step 4: Process MFA completion
+        # Process MFA completion.
         process_data = {
             "type": 19,
             "GeneralVerify": False,
