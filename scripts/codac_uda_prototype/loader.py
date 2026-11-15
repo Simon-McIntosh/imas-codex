@@ -179,6 +179,10 @@ def plot(signal: Signal, path: Path) -> dict:
         figure, axis = plt.subplots(figsize=(14, 7.2), dpi=100)
         factor = 1e9 if signal.metadata["time_base"] == "epoch_ns" else 1
         elapsed = (signal.time - signal.time[0]) / factor
+        time_unit = "s"
+        if elapsed[-1] >= 1000:
+            elapsed = elapsed / 1000
+            time_unit = "ks"
         values = signal.values
         unit = signal.metadata.get("unit") or "unspecified unit"
         magnitude = float(np.nanmax(np.abs(values)))
@@ -209,7 +213,7 @@ def plot(signal: Signal, path: Path) -> dict:
             figure.legend(frameon=False, loc="upper center", ncol=3)
         else:
             axis.plot(elapsed, values, color="#555555", linewidth=1.2, zorder=3)
-        axis.set_xlabel("elapsed time [s]")
+        axis.set_xlabel(f"elapsed time [{time_unit}]")
         axis.set_ylabel(f"signal [{unit}]")
         axis.xaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
         axis.yaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
