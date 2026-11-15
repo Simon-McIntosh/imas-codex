@@ -1462,12 +1462,16 @@ def mode_report(args) -> None:
                 if judged["detail"].get(name) != "readers split"}
 
     held_names = set(held_labels)
+    decisions_rows = {slug: load_decisions(slug) for slug in DECISIONS_MODELS}
     cost_tables = {
-        "A": {},
+        "A": {name: float((adopted.get(name) or {}).get("cost_usd") or 0.0)
+              for name in held_names},
         "B-jev": arm_cost("arm-b-jev-held-out", held_names),
         "B-drex": arm_cost("arm-b-drex-held-out", held_names),
-        "C-jev": {},
-        "C-drex": {},
+        "C-jev": {name: float((decisions_rows["jev"].get(name) or {}).get("cost_usd") or 0.0)
+                  for name in held_names},
+        "C-drex": {name: float((decisions_rows["drex"].get(name) or {}).get("cost_usd") or 0.0)
+                   for name in held_names},
         "E": {},
         "E+A": {name: float((adopted.get(name) or {}).get("cost_usd") or 0.0)
                 for name in held_names},
@@ -1486,7 +1490,6 @@ def mode_report(args) -> None:
     class_of = split["class_of"]
     by_class = {arm: recall_by_class(result, class_of) for arm, result in scored.items()}
 
-    decision_rows = {slug: load_decisions(slug) for slug in DECISIONS_MODELS}
     held_readings = []
     for item in held:
         name = item["id"]
@@ -1502,7 +1505,7 @@ def mode_report(args) -> None:
                 "reasoning": adopted_row.get("reasoning"),
             },
             "decisions": {
-                slug: decision_rows[slug].get(name) or {}
+                slug: decisions_rows[slug].get(name) or {}
                 for slug in DECISIONS_MODELS
             },
             "arms": {arm: tables[arm].get(name) for arm in tables},
@@ -1684,6 +1687,10 @@ def draw_figure(scored, scored_adjudicated) -> None:
 
 def _pct(value) -> str:
     return "n/a" if value is None else "%.1f%%" % (100 * value)
+
+
+def _usd(value) -> str:
+    return "n/a" if value is None else f"{value:.4f}"
 
 
 def _pct_ci(value, ci) -> str:
@@ -1896,13 +1903,14 @@ def write_html(payload, scored, scored_adjudicated, by_class, held, assembled) -
     parts.append("<table><tr><th>arm</th><th>USD per 1,000 names</th>"
                  "<th>wall time [s]</th><th>what was paid for</th></tr>")
     for arm, spend_label, note in (
-        ("A", None, "reused readings, no calls made here"),
+        ("A", None, "the adopted question's committed readings, reused here at no new "
+                    "spend; the cost is what that method charges per name"),
         ("B-jev", "arm-b-jev-held-out", "Jev decision per name, then one chat call per "
                                         "name it raised"),
         ("B-drex", "arm-b-drex-held-out", "Drex decision per name, then one chat call per "
                                           "name it raised"),
-        ("C-jev", "decisions-jev", "one Jev decisions call per name"),
-        ("C-drex", "decisions-drex", "one Drex decisions call per name"),
+        ("C-jev", "decisions-jev", "one Jev decisions call per name, sent 64 at a time"),
+        ("C-drex", "decisions-drex", "one Drex decisions call per name, sent 64 at a time"),
         ("E", None, "deterministic, no calls"),
         ("F", "arm-b-jev-held-out", "inherits the arm it combines"),
     ):
@@ -1915,9 +1923,20 @@ def write_html(payload, scored, scored_adjudicated, by_class, held, assembled) -
             ARM_LABELS.get(arm, arm),
             "n/a" if per_thousand is None else f"{per_thousand:.4f}",
             "n/a" if seconds is None else f"{seconds:.0f}",
-            note if not calls else "%s (%d calls)" % (note, calls),
+            note if not calls else "%s (%d %s)" % (
+                note, calls,
+                "batches" if (spend_label or "").startswith("decisions") else "calls"),
         ]))
     parts.append("</table>")
+    parts.append(
+        "<p class=note>The cost column is what each method charges per name on a "
+        "name it has not seen, taken from the calls already recorded; the wallet "
+        "was opened only for the two B arms, the decisions pass and the two fresh "
+        "readers. A decisions call costs about 0.04 USD per 1,000 names and the "
+        "chat call it gates about 3.00 USD per 1,000, so a gated arm lands near "
+        "the adopted question's price rather than near C's; Drex's arm is the "
+        "cheaper of the two only because it raises fewer names.</p>"
+    )
     parts.append("<p class=note>Recorded spend for this whole run: {:.4f} USD of the {:.2f} USD "
                  "ceiling.</p>".format(
                      sum(float(record.get("total_usd") or 0.0) for record in spend.values()),
@@ -1969,7 +1988,9 @@ def write_html(payload, scored, scored_adjudicated, by_class, held, assembled) -
         "returning a typed verdict on every name. Alone it reaches recall {} at "
         "specificity {}, against Jev's {} and {}; in B, Drex's pre-categorisation gives "
         "recall {} at specificity {} against Jev's {} and {}. Its reliability table is "
-        "below. It is cheaper per name than Jev and a worse screen at it.</li>".format(
+        "below. It costs {} USD per 1,000 names alone against Jev's {}, and {} against "
+        "Jev's {} in B: cheaper only in B, and only because it raises fewer names. In "
+        "both places it is the worse screen.</li>".format(
             "answered, and its answer was accepted" if (scored.get("C-drex") or {}).get("scored") else
             "did not answer, so its arm is recorded as not run",
             _pct((scored.get("C-drex") or {}).get("recall")),
@@ -1980,6 +2001,10 @@ def write_html(payload, scored, scored_adjudicated, by_class, held, assembled) -
             _pct((scored.get("B-drex") or {}).get("specificity")),
             _pct((scored.get("B-jev") or {}).get("recall")),
             _pct((scored.get("B-jev") or {}).get("specificity")),
+            _usd((scored.get("C-drex") or {}).get("cost_per_1000_usd")),
+            _usd((scored.get("C-jev") or {}).get("cost_per_1000_usd")),
+            _usd((scored.get("B-drex") or {}).get("cost_per_1000_usd")),
+            _usd((scored.get("B-jev") or {}).get("cost_per_1000_usd")),
         )
     )
     parts.append("</ol>")

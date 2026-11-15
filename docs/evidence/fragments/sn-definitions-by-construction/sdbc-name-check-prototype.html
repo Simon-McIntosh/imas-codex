@@ -23,12 +23,12 @@ code{font:12px ui-monospace,monospace}
 <h2>Every arm, scored once on the held-out half</h2>
 <h3>Against the settled blind-reader labels</h3>
 <table><tr><th>arm</th><th>flagged recall [95%]</th><th>specificity [95%]</th><th>precision [95%]</th><th>false holds</th><th>misses</th><th>USD per 1,000</th></tr>
-<tr><td>A adopted question</td><td>82.0% [76.7%, 86.3%]</td><td>84.9% [82.3%, 87.3%]</td><td>63.1% [57.6%, 68.2%]</td><td>117</td><td>44</td><td>0.0</td></tr>
+<tr><td>A adopted question</td><td>82.0% [76.7%, 86.3%]</td><td>84.9% [82.3%, 87.3%]</td><td>63.1% [57.6%, 68.2%]</td><td>117</td><td>44</td><td>2.9946</td></tr>
 <tr><td>E first, then the adopted question</td><td>82.4% [77.1%, 86.7%]</td><td>83.5% [80.8%, 86.0%]</td><td>61.1% [55.7%, 66.2%]</td><td>128</td><td>43</td><td>2.9946</td></tr>
 <tr><td>B Jev raises, then the targeted question</td><td>57.0% [50.7%, 63.0%]</td><td>91.8% [89.6%, 93.5%]</td><td>68.5% [61.8%, 74.5%]</td><td>64</td><td>105</td><td>2.3981</td></tr>
 <tr><td>B Drex raises, then the targeted question</td><td>54.5% [48.2%, 60.6%]</td><td>90.7% [88.5%, 92.6%]</td><td>64.9% [58.1%, 71.1%]</td><td>72</td><td>111</td><td>1.8393</td></tr>
-<tr><td>C Jev alone</td><td>48.8% [42.6%, 55.0%]</td><td>94.2% [92.3%, 95.6%]</td><td>72.6% [65.3%, 78.8%]</td><td>45</td><td>125</td><td>0.0</td></tr>
-<tr><td>C Drex alone</td><td>37.7% [31.9%, 43.9%]</td><td>94.7% [92.9%, 96.1%]</td><td>69.2% [60.9%, 76.4%]</td><td>41</td><td>152</td><td>0.0</td></tr>
+<tr><td>C Jev alone</td><td>48.8% [42.6%, 55.0%]</td><td>94.2% [92.3%, 95.6%]</td><td>72.6% [65.3%, 78.8%]</td><td>45</td><td>125</td><td>0.0424</td></tr>
+<tr><td>C Drex alone</td><td>37.7% [31.9%, 43.9%]</td><td>94.7% [92.9%, 96.1%]</td><td>69.2% [60.9%, 76.4%]</td><td>41</td><td>152</td><td>0.0581</td></tr>
 <tr><td>E deterministic pre-checks</td><td>1.6% [0.6%, 4.1%]</td><td>98.1% [96.8%, 98.8%]</td><td>21.1% [8.5%, 43.3%]</td><td>15</td><td>240</td><td>0.0</td></tr>
 <tr><td>E1 operator rule alone</td><td>0.0% [0.0%, 1.6%]</td><td>100.0% [99.5%, 100.0%]</td><td>n/a</td><td>0</td><td>244</td><td>0.0</td></tr>
 <tr><td>E2 unit-dimension rule alone</td><td>1.6% [0.6%, 4.1%]</td><td>98.1% [96.8%, 98.8%]</td><td>21.1% [8.5%, 43.3%]</td><td>15</td><td>240</td><td>0.0</td></tr>
@@ -79,20 +79,21 @@ code{font:12px ui-monospace,monospace}
 </table>
 <h2>Cost and wall time, Jev and Drex side by side</h2>
 <table><tr><th>arm</th><th>USD per 1,000 names</th><th>wall time [s]</th><th>what was paid for</th></tr>
-<tr><td>A adopted question</td><td>0.0000</td><td>n/a</td><td>reused readings, no calls made here</td></tr>
+<tr><td>A adopted question</td><td>2.9946</td><td>n/a</td><td>the adopted question's committed readings, reused here at no new spend; the cost is what that method charges per name</td></tr>
 <tr><td>B Jev raises, then the targeted question</td><td>2.3981</td><td>138</td><td>Jev decision per name, then one chat call per name it raised (101 calls)</td></tr>
 <tr><td>B Drex raises, then the targeted question</td><td>1.8393</td><td>108</td><td>Drex decision per name, then one chat call per name it raised (85 calls)</td></tr>
-<tr><td>C Jev alone</td><td>0.0000</td><td>126</td><td>one Jev decisions call per name (32 calls)</td></tr>
-<tr><td>C Drex alone</td><td>0.0000</td><td>910</td><td>one Drex decisions call per name (32 calls)</td></tr>
+<tr><td>C Jev alone</td><td>0.0424</td><td>126</td><td>one Jev decisions call per name, sent 64 at a time (32 batches)</td></tr>
+<tr><td>C Drex alone</td><td>0.0581</td><td>910</td><td>one Drex decisions call per name, sent 64 at a time (32 batches)</td></tr>
 <tr><td>E deterministic pre-checks</td><td>0.0000</td><td>n/a</td><td>deterministic, no calls</td></tr>
 <tr><td>F best combination fixed on the development half</td><td>2.3981</td><td>138</td><td>inherits the arm it combines (101 calls)</td></tr>
 </table>
+<p class=note>The cost column is what each method charges per name on a name it has not seen, taken from the calls already recorded; the wallet was opened only for the two B arms, the decisions pass and the two fresh readers. A decisions call costs about 0.04 USD per 1,000 names and the chat call it gates about 3.00 USD per 1,000, so a gated arm lands near the adopted question's price rather than near C's; Drex's arm is the cheaper of the two only because it raises fewer names.</p>
 <p class=note>Recorded spend for this whole run: 12.8061 USD of the 20.00 USD ceiling.</p>
 <h2>The three questions the lead asked</h2>
 <ol>
 <li><strong>Is there scope for improvement?</strong> Yes, but not in the families tried here. Against the labels both fresh readers could defend, the question already recalls 92.6% at specificity 93.2%, so what is left to win is a few points, and no arm measured here raises both measures: each moves the pair by at most 1.5 points against it. The addressable scope is the 68 disputed names both readers upheld: the question is already near what these labels can prove.</li>
 <li><strong>Can Jev help by pre-categorising?</strong> Jev's own flag is right on 48.8% of flagged names and it passes 94.2% of standing ones; as a pre-categoriser in B it gates which chat question is asked. Per class, Jev finds qualifier-missing-from-name 59 of 151; definition-narrower-than-name 1 of 20; abstract-parent-as-quantity 52 of 59; unit-does-not-fit-name 5 of 10.</li>
-<li><strong>How does Drex max do in Jev's place?</strong> It <strong>answered, and its answer was accepted</strong>, returning a typed verdict on every name. Alone it reaches recall 37.7% at specificity 94.7%, against Jev's 48.8% and 94.2%; in B, Drex's pre-categorisation gives recall 54.5% at specificity 90.7% against Jev's 57.0% and 91.8%. Its reliability table is below. It is cheaper per name than Jev and a worse screen at it.</li>
+<li><strong>How does Drex max do in Jev's place?</strong> It <strong>answered, and its answer was accepted</strong>, returning a typed verdict on every name. Alone it reaches recall 37.7% at specificity 94.7%, against Jev's 48.8% and 94.2%; in B, Drex's pre-categorisation gives recall 54.5% at specificity 90.7% against Jev's 57.0% and 91.8%. Its reliability table is below. It costs 0.0581 USD per 1,000 names alone against Jev's 0.0424, and 1.8393 against Jev's 2.3981 in B: cheaper only in B, and only because it raises fewer names. In both places it is the worse screen.</li>
 </ol>
 <p class=note>Per class, Drex reading the same names alone finds qualifier-missing-from-name 28 of 151; definition-narrower-than-name 0 of 20; abstract-parent-as-quantity 58 of 59; unit-does-not-fit-name 5 of 10.</p>
 <h2>Where the best arm goes wrong</h2>

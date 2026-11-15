@@ -1869,8 +1869,8 @@
  },
  "arms": {
   "A": {
-   "cost_per_1000_usd": 0.0,
-   "cost_usd": 0.0,
+   "cost_per_1000_usd": 2.9946,
+   "cost_usd": 3.0575,
    "false_holds": 117,
    "false_negative": 44,
    "false_positive": 117,
@@ -17274,8 +17274,8 @@
    "true_positive": 139
   },
   "C-drex": {
-   "cost_per_1000_usd": 0.0,
-   "cost_usd": 0.0,
+   "cost_per_1000_usd": 0.0581,
+   "cost_usd": 0.0593,
    "false_holds": 41,
    "false_negative": 152,
    "false_positive": 41,
@@ -22409,8 +22409,8 @@
    "true_positive": 92
   },
   "C-jev": {
-   "cost_per_1000_usd": 0.0,
-   "cost_usd": 0.0,
+   "cost_per_1000_usd": 0.0424,
+   "cost_usd": 0.0432,
    "false_holds": 45,
    "false_negative": 125,
    "false_positive": 45,
@@ -63491,8 +63491,8 @@
  },
  "arms_adjudicated": {
   "A": {
-   "cost_per_1000_usd": 0.0,
-   "cost_usd": 0.0,
+   "cost_per_1000_usd": 2.9961,
+   "cost_usd": 2.9392,
    "false_holds": 49,
    "false_negative": 19,
    "false_positive": 49,
@@ -63575,8 +63575,8 @@
    "true_positive": 149
   },
   "C-drex": {
-   "cost_per_1000_usd": 0.0,
-   "cost_usd": 0.0,
+   "cost_per_1000_usd": 0.058,
+   "cost_usd": 0.0569,
    "false_holds": 32,
    "false_negative": 165,
    "false_positive": 32,
@@ -63603,8 +63603,8 @@
    "true_positive": 91
   },
   "C-jev": {
-   "cost_per_1000_usd": 0.0,
-   "cost_usd": 0.0,
+   "cost_per_1000_usd": 0.0424,
+   "cost_usd": 0.0416,
    "false_holds": 34,
    "false_negative": 136,
    "false_positive": 34,
