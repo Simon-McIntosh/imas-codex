@@ -35,7 +35,7 @@ from imas_codex import settings
 # Functions whose first positional argument is a model seat.
 _SEAT_FIRST_ARG = frozenset({"get_model", "get_model_config", "get_reasoning_effort"})
 # Functions whose ``section`` argument is a model seat.
-_SEAT_SECTION_ARG = frozenset({"llm_health_check", "llm_deep_health_check"})
+_SEAT_SECTION_ARG = frozenset({"llm_health_check"})
 # Keyword names that carry a model seat wherever they appear.
 _SEAT_KEYWORDS = frozenset({"section", "model_section"})
 # Parameter / field names that carry a model seat.

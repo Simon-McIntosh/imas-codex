@@ -674,10 +674,10 @@ class TestBuildServersSection:
         result = build_servers_section([s])
         assert "down" in result.plain
 
-    def test_unhealthy_proxy_shows_proxy_down(self):
-        s = self._status(detail="502 bad gateway via proxy")
+    def test_unhealthy_endpoint_shows_endpoint_down(self):
+        s = self._status(detail="502 bad gateway")
         result = build_servers_section([s])
-        assert "proxy down" in result.plain
+        assert "endpoint down" in result.plain
 
     def test_unhealthy_short_reason_passes_through(self):
         """Concise reasons from curated health checks render verbatim."""
