@@ -85,9 +85,28 @@
       "note": "The one-definition criterion is narrowed to scripts/ and imas_codex/; the thirteen frozen record scripts under docs/ are named as out of scope.",
       "reason": "",
       "when": "2026-11-15T22:31:53.317729+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "Section 2 now states the export behaviours the shared function must carry (resolution, bounding box, format, preview, receipt, declared size) and its done-when checks that no script keeps a save wrapper, not a call count.",
+      "reason": "",
+      "when": "2026-11-15T22:31:57.823326+00:00"
     }
   ],
   "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "note": "Section 2 now states the export behaviours the shared function must carry (resolution, bounding box, format, preview, receipt, declared size) and its done-when checks that no script keeps a save wrapper, not a call count.",
+      "reason": "",
+      "when": "2026-11-15T22:31:57.823326+00:00"
+    },
     "reuse_search-1": {
       "action": "acted",
       "by": "",
