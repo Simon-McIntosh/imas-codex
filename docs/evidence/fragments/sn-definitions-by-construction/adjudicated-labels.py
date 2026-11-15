@@ -23,9 +23,7 @@ import hashlib
 import html
 import importlib.util
 import json
-import math
 import os
-import random
 import re
 import time
 from pathlib import Path
@@ -33,19 +31,20 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 WORKTREE = HERE.parents[3]
 GRAPHLABELS = WORKTREE / "docs/evidence/fragments/sn-name-definition-graph-reading"
-PROTOTYPE_RUN_NAME = "r-20261114T205523095671-sdbc-name-check-prototype"
-QUESTION_RUN_NAME = "r-20261114T174425722877-sdbc-name-check-question"
 PROTOTYPE_JSON = HERE / "name-check-prototype.json"
+FRESH_CLASSES = GRAPHLABELS / "fresh-reader-classes.json"
+QUESTION_READINGS = GRAPHLABELS / "adopted-question-readings.json"
+QUESTION_SPLIT = GRAPHLABELS / "question-split.json"
+THIRD_READINGS = GRAPHLABELS / "third-reader-readings.json"
 LABELS = GRAPHLABELS / "reader-verdicts.json"
 OUT_JSON = GRAPHLABELS / "reader-verdicts-adjudicated.json"
 OUT_HTML = HERE / "sdbc-adjudicated-labels.html"
 
-RUN_DIR = Path(
-    os.environ.get("NAME_CHECK_ADJUDICATION_STATE")
-    or "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261115T081123414329-sdbc-adjudicated-labels"
+STATE = (
+    Path(os.environ["NAME_CHECK_ADJUDICATION_STATE"])
+    if os.environ.get("NAME_CHECK_ADJUDICATION_STATE")
+    else None
 )
-STATE = RUN_DIR / "adjudication-state"
 
 THIRD_MODEL = "openrouter/x-ai/grok-4.7"
 THIRD_EFFORT = "high"
@@ -53,8 +52,6 @@ THIRD_LABEL = "third-reader"
 CEILING_USD = 5.0
 BATCH_SIZE = 8
 CONCURRENCY = 4
-SET_SEED = 20261115
-CONTROLS_PER_DIRECTION = 20
 
 REACHED_UNCHANGED = "unchanged"
 REACHED_CORRECTED = "corrected: both fresh readers rejected the label"
@@ -64,11 +61,6 @@ REACHED_CONTESTED = "contested: no majority"
 DISPUTE_LABEL_ERROR = "label error"
 DISPUTE_UPHELD = "upholds the label"
 DISPUTE_SPLIT = "readers split"
-
-FRESH_SLUGS = {
-    "openrouter/anthropic/claude-opus-5.5": "adjudicate-claude-opus-5-5.jsonl",
-    "openrouter/openai/gpt-6.1-sol": "adjudicate-gpt-6-1-sol.jsonl",
-}
 
 
 def _load_module(name: str, path: Path):
@@ -83,15 +75,6 @@ def prototype():
     return _load_module("name_check_prototype", HERE / "name-check-prototype.py")
 
 
-def _run_dir(name: str) -> Path:
-    home = Path("/home/ITER/mcintos/.config/reckon/crew")
-    for base in (home / "runs", home / "archive" / "runs"):
-        candidate = base / name
-        if candidate.exists():
-            return candidate
-    raise SystemExit(f"run directory not found for {name}")
-
-
 def outcome(verdict: str) -> str:
     return "flagged" if verdict == "flag" else "stands"
 
@@ -104,27 +87,13 @@ def fresh_readings() -> tuple:
     detail = adjudication["detail"]
     readers = adjudication["readers"]
     models = sorted(readers)
-    classes: dict[str, dict[str, str]] = {model: {} for model in models}
-    state = _run_dir(PROTOTYPE_RUN_NAME) / "prototype-state"
-    for model, filename in FRESH_SLUGS.items():
-        path = state / filename
-        if not path.exists():
-            continue
-        for line in path.read_text().splitlines():
-            if line.strip():
-                row = json.loads(line)
-                classes[model][row["name"]] = row.get("reader_class")
+    classes = json.loads(FRESH_CLASSES.read_text())["classes"]
     return models, readers, detail, classes
 
 
 def load_question_readings() -> dict:
-    rows: dict = {}
-    path = _run_dir(QUESTION_RUN_NAME) / "candidate-r0.jsonl"
-    for line in path.read_text().splitlines():
-        if line.strip():
-            row = json.loads(line)
-            rows[row["name"]] = row
-    return rows
+    verdicts = json.loads(QUESTION_READINGS.read_text())["verdicts"]
+    return {name: {"verdict": verdict} for name, verdict in verdicts.items()}
 
 
 def reading_rows(items: list, names: list) -> list:
@@ -144,70 +113,29 @@ def reading_rows(items: list, names: list) -> list:
     return rows
 
 
-def reading_set(items: list, payload: dict) -> dict:
-    """The 40 undecided names plus 40 names the two fresh readers agreed on.
+def reading_packet() -> dict:
+    return json.loads(THIRD_READINGS.read_text())
 
-    A control is an agreement name drawn blind in equal number each way, from
-    names where only one verdict is possible because both fresh readers and the
-    adopted question already agree with the label.
-    """
 
-    detail = payload["adjudication"]["detail"]
-    readers = payload["adjudication"]["readers"]
-    models = sorted(readers)
-    question_of = {
-        row["name"]: outcome(row["adopted"]["verdict"]) for row in payload["readings"]
-    }
-    label_of = {row["name"]: row["label"] for row in payload["readings"]}
+def reading_plan(items: list) -> dict:
+    """The blind set as it was issued, joined to the text the reader saw."""
 
-    split_names = sorted(name for name, text in detail.items() if text == DISPUTE_SPLIT)
-    pool: dict[str, list] = {"flag": [], "pass": []}
-    for name in readers[models[0]]:
-        first = readers[models[0]][name]
-        second = readers[models[1]][name]
-        if first != second:
-            continue
-        if question_of.get(name) != label_of.get(name):
-            continue
-        pool[first].append(name)
-
-    rng = random.Random(SET_SEED)
-    controls: list = []
-    for direction in ("flag", "pass"):
-        names = sorted(pool[direction])
-        rng.shuffle(names)
-        controls.extend(names[:CONTROLS_PER_DIRECTION])
-
-    order = split_names + controls
-    rng = random.Random(SET_SEED + 1)
-    rng.shuffle(order)
+    packet = reading_packet()
+    order = packet["reading_order"]
     return {
-        "split_names": split_names,
-        "control_flag": sorted(controls),
-        "control_pool": {key: sorted(value) for key, value in pool.items()},
+        "split_names": packet["split_names"],
+        "control_flag": packet["control_flag"],
         "reading_order": order,
         "rows": reading_rows(items, order),
     }
 
 
 def third_reading() -> dict:
-    path = STATE / f"{THIRD_LABEL}.jsonl"
-    rows: dict = {}
-    if not path.exists():
-        return rows
-    for line in path.read_text().splitlines():
-        if not line.strip():
-            continue
-        row = json.loads(line)
-        rows[row["name"]] = row
-    return rows
+    return {row["name"]: row for row in reading_packet()["rows"]}
 
 
 def spend_report() -> dict:
-    path = STATE / f"spend-{THIRD_LABEL}.json"
-    if not path.exists():
-        return {"total_usd": 0.0, "calls": 0, "elapsed_seconds": 0.0}
-    return json.loads(path.read_text())
+    return reading_packet()["spend"]
 
 
 def run_batches(
@@ -299,29 +227,17 @@ def run_batches(
 
 
 def mode_third_reader(args) -> None:
+    if STATE is None:
+        raise SystemExit("set NAME_CHECK_ADJUDICATION_STATE to a run state directory")
     proto = prototype()
     proto.STATE = STATE
     STATE.mkdir(parents=True, exist_ok=True)
 
     items, _ = proto.load_items()
-    payload = json.loads(PROTOTYPE_JSON.read_text())
-    plan = reading_set(items, payload)
-    set_path = STATE / "reading-set.json"
-    set_path.write_text(
-        json.dumps(
-            {
-                "split_names": plan["split_names"],
-                "control_flag": plan["control_flag"],
-                "control_pool": plan["control_pool"],
-                "reading_order": plan["reading_order"],
-            },
-            indent=1,
-        )
-    )
+    plan = reading_plan(items)
     print(
         f"reading set: {len(plan['split_names'])} split names, "
-        f"{len(plan['control_flag'])} controls, {len(plan['reading_order'])} rows "
-        f"(order in {set_path})",
+        f"{len(plan['control_flag'])} controls, {len(plan['reading_order'])} rows",
         flush=True,
     )
     run_batches(
@@ -470,9 +386,8 @@ def deciding_class(row: dict, models: list):
     return collections.Counter(pool).most_common(1)[0][0]
 
 
-def control_agreement(models: list, readers: dict, payload: dict) -> dict:
-    items, _ = prototype().load_items()
-    plan = reading_set(items, payload)
+def control_agreement(models: list, readers: dict) -> dict:
+    plan = reading_packet()
     third = third_reading()
     read = 0
     agreed = 0
@@ -495,49 +410,6 @@ def control_agreement(models: list, readers: dict, payload: dict) -> dict:
     }
 
 
-def wilson(successes: int, total: int) -> list:
-    if total == 0:
-        return [0.0, 0.0]
-    z = 1.96
-    p = successes / total
-    denominator = 1 + z * z / total
-    centre = (p + z * z / (2 * total)) / denominator
-    half = (
-        z * math.sqrt(p * (1 - p) / total + z * z / (4 * total * total)) / denominator
-    )
-    return [max(0.0, centre - half), min(1.0, centre + half)]
-
-
-def score(pairs: list) -> dict:
-    flagged = [
-        (label, question_verdict)
-        for label, question_verdict in pairs
-        if label == "flagged"
-    ]
-    stands = [
-        (label, question_verdict)
-        for label, question_verdict in pairs
-        if label == "stands"
-    ]
-    found = sum(1 for _, question_verdict in flagged if question_verdict == "flagged")
-    held = sum(1 for _, question_verdict in stands if question_verdict == "flagged")
-    total_flagged = found + held
-    return {
-        "names": len(pairs),
-        "flagged": len(flagged),
-        "flagged_found": found,
-        "flagged_missed": len(flagged) - found,
-        "stands": len(stands),
-        "false_holds": held,
-        "recall": found / len(flagged) if flagged else None,
-        "recall_ci": wilson(found, len(flagged)),
-        "specificity": (len(stands) - held) / len(stands) if stands else None,
-        "specificity_ci": wilson(len(stands) - held, len(stands)),
-        "precision": found / total_flagged if total_flagged else None,
-        "precision_ci": wilson(found, total_flagged),
-    }
-
-
 def opening_sentence(text: str) -> str:
     text = re.sub(r"\s+", " ", (text or "")).strip()
     if not text:
@@ -554,14 +426,86 @@ RULE_TEXT = (
 )
 
 
+def mode_check(args) -> None:
+    """Assert the written set against the rule and the inputs it was built from."""
+
+    path = Path(args.document) if args.document else OUT_JSON
+    document = json.loads(path.read_text())
+    rows = document["rows"]
+    problems: list = []
+
+    def want(condition: bool, message: str) -> None:
+        if not condition:
+            problems.append(message)
+
+    names = [row["name"] for row in rows]
+    want(len(rows) == 2044, f"row count {len(rows)}")
+    want(len(set(names)) == len(names), "duplicate names")
+    want(all(row["adjudicated_verdict"] for row in rows), "a null adjudicated verdict")
+
+    disputed = [row for row in rows if row["dispute"]]
+    want(len(disputed) == 161, f"disputed names {len(disputed)}")
+    for row in disputed:
+        votes = collections.Counter(
+            outcome(entry["verdict"])
+            for entry in row["readings"].values()
+            if entry.get("verdict") in ("flag", "pass")
+        )
+        if row["dispute"] == DISPUTE_LABEL_ERROR:
+            want(
+                row["reached"] == REACHED_CORRECTED
+                and row["adjudicated_verdict"]
+                == outcome(next(iter(row["readings"].values()))["verdict"]),
+                f"{row['name']}: label-error dispute",
+            )
+        elif row["dispute"] == DISPUTE_SPLIT:
+            want(
+                votes
+                and votes.most_common(1)[0][1] >= 2
+                and row["reached"] == REACHED_SETTLED
+                and row["adjudicated_verdict"] == votes.most_common(1)[0][0],
+                f"{row['name']}: split dispute",
+            )
+        else:
+            want(
+                row["adjudicated_verdict"] == row["original_verdict"]
+                and row["reached"] == REACHED_UNCHANGED,
+                f"{row['name']}: upheld dispute moved",
+            )
+
+    recomputed = hashlib.sha256(LABELS.read_bytes()).hexdigest()
+    want(document["labels_sha256"] == recomputed, "input label file changed")
+
+    rebuilt = build_rows()["rows"]
+    want(
+        json.dumps(rebuilt, sort_keys=True) == json.dumps(rows, sort_keys=True),
+        "the written set does not match a fresh build from its inputs",
+    )
+
+    for problem in problems:
+        print("FAIL", problem, flush=True)
+    if problems:
+        raise SystemExit(f"{len(problems)} problems in {path}")
+    print(
+        f"checked {path}: {len(rows)} rows, {len(disputed)} disputed, rule holds",
+        flush=True,
+    )
+
+
 def mode_build(args) -> None:
     built = build_rows()
     rows = built["rows"]
     models = built["models"]
     reached = collections.Counter(row["reached"] for row in rows)
     flagged_to_stands, stands_to_flagged = moved(rows)
+    settled_moved = sum(
+        1
+        for row in rows
+        if row["reached"] == REACHED_SETTLED
+        and row["adjudicated_verdict"] != row["original_verdict"]
+    )
     payload = json.loads(PROTOTYPE_JSON.read_text())
-    controls = control_agreement(models, payload["adjudication"]["readers"], payload)
+    controls = control_agreement(models, payload["adjudication"]["readers"])
     read = [row for row in rows if row["readings"]]
     adjudicated = {
         "names": len(rows),
@@ -582,14 +526,20 @@ def mode_build(args) -> None:
         ),
         "read_again": len(read),
         "never_read_again": len(rows) - len(read),
-        "read_but_not_adjudicated": sum(
+        "dispute_outcomes": {
+            "corrected": reached.get(REACHED_CORRECTED, 0),
+            "settled_by_third_reader": reached.get(REACHED_SETTLED, 0),
+            "settled_moved": settled_moved,
+            "upheld": sum(1 for row in rows if row["dispute"] == DISPUTE_UPHELD),
+        },
+        "agreement_controls": sum(
             1 for row in rows if row["readings"] and not row["dispute"]
         ),
     }
     document = {
         "schema": "reader-verdicts-adjudicated",
         "rule": RULE_TEXT,
-        "labels_path": str(LABELS),
+        "labels_path": LABELS.relative_to(WORKTREE).as_posix(),
         "labels_sha256": hashlib.sha256(LABELS.read_bytes()).hexdigest(),
         "readers": {
             "fresh": models,
@@ -640,15 +590,32 @@ def direction_counts(rows: list, models: list) -> dict:
     return counts
 
 
+def arm_scores(rows: list) -> tuple:
+    """The adopted question scored against both label sets over the names that carry both."""
+
+    proto = prototype()
+    decisions: dict = {}
+    settled: dict = {}
+    adjudicated: dict = {}
+    for row in rows:
+        question = row.get("question_verdict")
+        if not question or not row["adjudicated_verdict"]:
+            continue
+        decisions[row["name"]] = "flag" if question == "flagged" else "pass"
+        settled[row["name"]] = row["original_verdict"]
+        adjudicated[row["name"]] = row["adjudicated_verdict"]
+    return proto.score_arm(decisions, settled), proto.score_arm(decisions, adjudicated)
+
+
 def score_row(title: str, measured: dict) -> str:
     return (
         "<tr>"
-        f"<td>{title}</td><td>{measured['names']}</td>"
+        f"<td>{title}</td><td>{measured['scored']}</td>"
         f"<td>{pct(measured['recall'])} {interval(measured['recall_ci'])}</td>"
         f"<td>{pct(measured['specificity'])} {interval(measured['specificity_ci'])}</td>"
         f"<td>{pct(measured['precision'])}</td>"
         f"<td>{measured['false_holds']}</td>"
-        f"<td>{measured['flagged_missed']}</td>"
+        f"<td>{measured['misses']}</td>"
         "</tr>"
     )
 
@@ -695,19 +662,9 @@ def mode_report(args) -> None:
     )
     spotlight = ranked[:25]
 
-    settled_pairs = []
-    adjudicated_pairs = []
-    for row in rows:
-        question = row.get("question_verdict")
-        if not question:
-            continue
-        settled_pairs.append((row["original_verdict"], question))
-        if row["adjudicated_verdict"]:
-            adjudicated_pairs.append((row["adjudicated_verdict"], question))
-    on_settled = score(settled_pairs)
-    on_adjudicated = score(adjudicated_pairs)
+    on_settled, on_adjudicated = arm_scores(rows)
 
-    split = json.loads((_run_dir(QUESTION_RUN_NAME) / "split.json").read_text())
+    split = json.loads(QUESTION_SPLIT.read_text())
 
     moved_rows = []
     for title, bucket in counts.items():
@@ -747,7 +704,8 @@ def mode_report(args) -> None:
     reached = adjudicated["reached"]
     disputes = adjudicated["disputes"]
     never_read = adjudicated["never_read_again"]
-    read_but = adjudicated["read_but_not_adjudicated"]
+    controls_read = adjudicated["agreement_controls"]
+    outcomes = adjudicated["dispute_outcomes"]
     total = adjudicated["names"]
     flagged_to_stands = len(adjudicated["flagged_to_stands"])
     stands_to_flagged = len(adjudicated["stands_to_flagged"])
@@ -799,6 +757,14 @@ def mode_report(args) -> None:
             else f"{reached[REACHED_CONTESTED]} names stay contested.</p>"
         )
     )
+    sections.append(
+        f"<p>Of the {disputes} disputed names, {outcomes['corrected']} are corrected on "
+        f"the fresh readers' consensus, {outcomes['settled_by_third_reader']} are "
+        f"settled by the third reader ({outcomes['settled_moved']} of them moving and "
+        f"{outcomes['settled_by_third_reader'] - outcomes['settled_moved']} confirming "
+        f"the settled label), and {outcomes['upheld']} keep their original verdict "
+        f"because both fresh readers upheld it.</p>"
+    )
     sections.append("<h2>Moved, by the class the deciding reading gave</h2>")
     sections.append(
         "<table><tr><th>direction</th><th>class</th><th>names</th><th>share</th></tr>"
@@ -826,10 +792,10 @@ def mode_report(args) -> None:
     )
     sections.append("<h2>The adopted question re-scored</h2>")
     sections.append(
-        f"<p>The adopted name-against-definition question read {on_adjudicated['names']} "
+        f"<p>The adopted name-against-definition question read {on_adjudicated['scored']} "
         f"of the {total} names: the held-out half of the committed split "
-        f"({split['held_out']} names). It has no reading on the remaining "
-        f"{split['development']} development-half names, which were used to fit and "
+        f"({len(split['held_out'])} names). It has no reading on the remaining "
+        f"{len(split['development'])} development-half names, which were used to fit and "
         f"validate the arms and carry no committed reading of the adopted question "
         f"itself. The question's readings are unchanged; only the labels they are "
         f"scored against moved.</p>"
@@ -845,15 +811,16 @@ def mode_report(args) -> None:
         f"<p>Scoring against the adjudicated set instead of the settled labels changes "
         f"recall by {100 * (on_adjudicated['recall'] - on_settled['recall']):.1f} points and "
         f"specificity by {100 * (on_adjudicated['specificity'] - on_settled['specificity']):.1f}. "
-        f"{on_adjudicated['names']} names carry a reading on both sides and are scored; "
-        f"the {total - on_adjudicated['names']} that do not are the development half "
-        f"plus any contested name.</p>"
+        f"{on_adjudicated['scored']} names carry a reading on both sides and are scored; "
+        f"the {total - on_adjudicated['scored']} that do not are the development half "
+        + ("." if not contested else "plus any contested name.")
+        + "</p>"
     )
     sections.append("<h2>What this set is and is not</h2>")
     sections.append(
         f"<p>Only the {disputes} names the fresh readers disagreed over were re-read "
-        f"for a verdict. The {read_but} agreement controls were read blind to measure "
-        f"the third reader's own agreement on names where no dispute existed, and "
+        f"for a verdict. The {controls['names']} agreement controls were read blind to "
+        f"measure the third reader's own agreement where no dispute existed, and "
         f"leave no verdict in the set. <strong>{never_read} names carry no further "
         f"reading at all</strong> (of {total}), so a label that is wrong where the "
         f"fresh readers agreed with it is still wrong here. This set corrects the "
@@ -874,6 +841,7 @@ def mode_report(args) -> None:
             if controls["disagreed"]
             else "."
         )
+        + "</p>"
     )
     sections.append(
         f"<p class=note>recorded spend on the third reading: "
@@ -907,10 +875,13 @@ def mode_report(args) -> None:
         flush=True,
     )
     print(
-        f"scored: settled {on_settled['names']}, adjudicated {on_adjudicated['names']}",
+        f"scored: settled {on_settled['scored']}, adjudicated {on_adjudicated['scored']}",
         flush=True,
     )
-    print(f"question on adjudicated: {on_adjudicated}", flush=True)
+    print(
+        f"question recall {on_adjudicated['recall']}, specificity {on_adjudicated['specificity']}",
+        flush=True,
+    )
 
 
 # ----------------------------------------------------------------------- main
@@ -924,6 +895,9 @@ def main() -> None:
     third.set_defaults(func=mode_third_reader)
     build = subparsers.add_parser("build")
     build.set_defaults(func=mode_build)
+    check = subparsers.add_parser("check")
+    check.add_argument("--document", default=None)
+    check.set_defaults(func=mode_check)
     report = subparsers.add_parser("report")
     report.set_defaults(func=mode_report)
     args = parser.parse_args()

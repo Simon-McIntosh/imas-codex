@@ -1,7 +1,7 @@
 {
  "schema": "reader-verdicts-adjudicated",
  "rule": "A name both fresh readers rejected takes their verdict. A pair they split on takes the third reader's verdict when that verdict forms a two-of-three majority, and stays contested otherwise. Every other name keeps its original verdict, including the 68 both readers upheld.",
- "labels_path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-adjudicated-labels/docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts.json",
+ "labels_path": "docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts.json",
  "labels_sha256": "88df49e4e5744423afa24968d5223081ad5ebc18a56d3516865f92789b15c2a8",
  "readers": {
   "fresh": [
@@ -100,7 +100,13 @@
   "contested": [],
   "read_again": 322,
   "never_read_again": 1722,
-  "read_but_not_adjudicated": 161
+  "dispute_outcomes": {
+   "corrected": 53,
+   "settled_by_third_reader": 40,
+   "settled_moved": 19,
+   "upheld": 68
+  },
+  "agreement_controls": 161
  },
  "controls": {
   "names": 40,
