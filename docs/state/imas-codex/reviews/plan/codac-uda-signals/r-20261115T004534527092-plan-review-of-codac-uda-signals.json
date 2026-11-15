@@ -59,9 +59,28 @@
       "note": "The pulse-listing clause is removed from section 4's done-when; the section's single deliverable is the variable catalogue.",
       "reason": "",
       "when": "2026-11-15T01:32:20.203113+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 7's negative control now has two cases, text beyond the canvas and two overlapping text items, and each refusal must name the offending items and write no file.",
+      "reason": "",
+      "when": "2026-11-15T01:32:27.890173+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "note": "Section 7's negative control now has two cases, text beyond the canvas and two overlapping text items, and each refusal must name the offending items and write no file.",
+      "reason": "",
+      "when": "2026-11-15T01:32:27.890173+00:00"
+    },
     "single_goal-1": {
       "action": "acted",
       "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
