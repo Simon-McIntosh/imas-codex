@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T01:10:40.017Z",
+  "dispatched_at": "2026-11-15T00:46:01Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:68",
+      "id": "single_goal-1",
+      "reason": "the node either ships an undeclared second deliverable or passes its gate on a zero-versus-zero comparison, and the fix is to move the pulse listing into Delivers or drop the clause.",
+      "text": "s4's done-when requires \"the pulse listing for one declared category returns the same count as an independent listing of that category\", a pulse-category listing its Delivers paragraph never declares, and the prototype it cites (docs/evidence/fragments/codac-uda-signals/prototype-report.md, the pulse rows) records that a bare category prefix returns 0 pulses while a working selector needs a category plus a pulse-segment wildcard, so two zero counts satisfy the clause while measuring nothing",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:83",
+      "id": "done_when-1",
+      "reason": "half the guard the section exists to provide is untested, and exercising the overlap branch costs one more line of plan text.",
+      "text": "s7's negative control fires only the out-of-canvas branch, while Delivers names a second refusal (two overlapping text items) and a requirement that the refusal name the offending items; a save function implementing only the canvas check passes the done-when in full",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:83",
+      "id": "done_when-2",
+      "reason": "a worker can deliver an unlabelled summary and a raw-only figure pair and still pass, which is exactly the mislabelling the section is written to prevent.",
+      "text": "s7's done-when renders \"a live signal and a two-signal overlay\" with no envelope or archived-on-change input and records no summary values, so the claim that such statistics are labelled and never presented as raw-sample or time-weighted cannot fail however the summary is implemented",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:93",
+      "id": "done_when-3",
+      "reason": "the control needs a per-surface record of \"no consumer exists\" that is not a count of zero, or the node cannot tell an honest zero from a blind one.",
+      "text": "s9's positive control demands \"for each surface, one consumer known to exist beforehand\", but the surfaces it lists include scheduler job names and queued or running reckon runs, whose correct answer can legitimately be zero, so for such a surface the control is unsatisfiable and the node must either substitute a consumer that does not exist or block",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:93",
+      "id": "done_when-4",
+      "reason": "a gate the node has no authority to satisfy makes it report blocked for a reason the plan should place on the author, or restate as a recommendation the inventory supports.",
+      "text": "s9's done-when also requires \"the three decisions in this plan are locked\", but all three decisions carry no choice (data-choice is empty) and locking them is the author's action, so the node can finish its inventory and still not close",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+  "plan_fingerprint": "4f6a223305c79e4158431b3960bf1fb524f848e6036a87eb6f6bfdc8bf8364e4",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T004534527092-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "32459448a17867d8989201c48d0d87e6cb14c7fe",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited prototype tree scripts/codac_uda_prototype/ and its report docs/evidence/fragments/codac-uda-signals/prototype-report.md are tracked in this worktree, the decisions section carries the three decisions s9 refers to, and no extensionless href in the changed units fails to resolve.",
+    "done_when": "a finding \u2014 s7's done-when never exercises an envelope or on-change signal, so the section's \"never presented as raw-sample or time-weighted\" claim is untested, and s7 also declares an overlap refusal its only control never fires.",
+    "evidence_paths": "pass \u2014 the inventory and scan counts go to the landing record, the synthetic figure is committed under docs/figures/codac-uda-signals/, and live plots stay under ~/.cache/imas-codex-codac-uda/ as section 1 requires for ITER-internal data.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or changelog prose reach the new text in s4, s7 or s9.",
+    "reasoning": "pass \u2014 s4's two-archive-role requirement matches the cited prototype finding that a variable can appear in one archive's metadata while its samples belong to another, and s7's labelling requirement follows from section 5's decimation reporting; no changed unit prescribes a code path or function signature.",
+    "single_goal": "a finding \u2014 s4's done-when measures a pulse-category listing that its Delivers paragraph never names, so the node carries a second deliverable and cannot be closed on one verdict.",
+    "wiring": "pass \u2014 s4's declared depends-on (s2, s3) cover the reader and the archive/pulse schema its scan uses, s7 depends on s5 for the loaded signal, and every data-links target resolves to a section present in the snapshot."
+  },
+  "section_digests": {
+    "_document": "8f61e18614e309a8c68b94f12d30a8260714946a9c1d6c4a45763beb8b6cdbaf",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s2": "25d6b783ebeccaa173931c30a00b0ae11c6d62367264baf57239709c95496872",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "a4a6bf4a435efee791911a4ce9a9a923a5b2a510a58376239abb5e2bac093ece",
+    "s5": "d4531829268e87bd2d8cbdcc9a749fc2ef404d1fa5d090c8dce99d00e2ea6f50",
+    "s6": "fd2edb98819a4f8da1b3cc59cc7844d3be4e875f8a00029d835940487bdc2444",
+    "s7": "bf140c253d800c0508e78b45016d00441f480b52bf36b792e563f44329766af1",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "7c318c64f39ab96176925a304bd7574df0b47148875fad1788f1574f783d2a04"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:31:17.093549+00:00",
+  "total": null
+}
