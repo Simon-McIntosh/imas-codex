@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T18:03:57.207Z",
+  "dispatched_at": "2026-11-15T18:03:34Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261115T180303562624-plan-review-of-sn-definitions-by-construction/plan.html:113",
+      "id": "done_when-1",
+      "reason": "a worker deriving the baseline from the only per-name record labelled \"names that name the operator\" would take 71/25/8 and exempt the omitted names, so both the baseline and the final count would silently exempt the six names the pass exists to repair, and the declared negative control could not fire.",
+      "text": "\u00a76's population \"(the names that name the operator \u2026)\" fits two different sets in the cited record, and the one its wording matches is self-exempting: `rewrite-closing-census.json` records `operators.<op>.name_count` over names whose id carries the operator (flux_surface_averaged 73, line_averaged 28, time_derivative 9) and `operator_phrases.<op>.names_naming_the_operator` over names whose *definition* names the operator (71, 25, 8), with the 2, 3 and 1 excluded names all sitting in `<omitted>` \u2014 precisely the names that never state the operator. A count taken over the second population drops those names instead of reporting them as not carrying the stored sentence, so the measure can reach \"none\" while definitions still never name the operator, and the last bullet's planted control \u2014 \"an operator name planted there stating no form of its operator\" \u2014 falls outside the population and cannot be reported at all; the first bullet's \"every live name that names the operator\" already reads as the name-carries-the-operator set, so the parenthetical contradicts it",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5784c256581f584112cdeb684c089a47d6e3b703",
+  "plan_fingerprint": "893187236c8ceba02e8d9995e72262abc1f5d0ca018ccf131e00bac2d8fc6e0d",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 61,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T180303562624-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "a233a45691383e73f008c8f07e35132a014e13cd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every path \u00a76 or its evidence names resolves in HEAD (`rewrite-closing-census.json`, `rewrite-closing-census.py`, `sdbc-live-rewrite-bulk.html`, `family-wording-pass.json`, `sdbc-rewrite-closing-census.html`, the `wordings-before-after.svg` figure), and `sdbc-rewrite-closing-census`'s `plan_section` is `sn-definitions-by-construction#s6`.",
+    "done_when": "a finding \u2014 \u00a76:113 declares a planted control for both operator shapes, but the population the same bullet states (\"the names that name the operator\") excludes such a planted name, so the control cannot be reported inside the population it is meant to prove.",
+    "evidence_paths": "pass \u2014 the census and its script are committed evidence (`docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.json` and `.py` resolve in HEAD) and the figure sits under `docs/figures/sn-definitions-by-construction/sdbc-rewrite-closing-census/`, none in a scratch or node-local path.",
+    "naming": "pass \u2014 \u00a76 names no symbol, file or formula of the implementation, and carries no stage label or ticket number; \"the publishing threshold\" and \"the signed rename path\" are existing system concepts, not plan labels.",
+    "reasoning": "a finding \u2014 the cited record holds two per-name populations that the phrase \"the names that name the operator\" fits, and the one matching that phrase is defined by the definition naming the operator, which is the outcome the measure is supposed to test; the root cause, the ability of the measure to fail, and the absence of prescribed implementation are otherwise sound.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, the live catalog rewritten to the settled wording with its closing census; the operator, family, unit, score, rename and spend clauses are facets of that one pass, and \u00a710 owns the family pass it consumes.",
+    "wiring": "pass \u2014 `plan-section-depends-on` gives s6 s2, s3, s4, s5 and s10, each an existing section, matches `data-links`/prose, `plan-effort-hours` 41.0 equals the ten `data-effort-hours` values (0.5+7.0+3.0+3.0+5.0+6.0+2.5+4.0+4.0+6.0), and s7 depends on s6."
+  },
+  "section_digests": {
+    "_document": "11e2e68b156624b18e8ed5742aa27fcf534e457bc07dfce61888ca751e83d678",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "2d00fb0a394e7b167ac3dce0bf0c4c6567c7edc1b31145d3f9706a22417ec39f",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T18:29:25.531028+00:00",
+  "total": null
+}
