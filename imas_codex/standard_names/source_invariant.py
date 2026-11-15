@@ -8,14 +8,32 @@ class MissingStandardNameSource(ValueError):
     """A live name would have no producing source after a write."""
 
 
+def _live_child_condition(child: str = "child") -> str:
+    """Return the rule that says a child counts as evidence for its parent.
+
+    Stated once: the existence test, the count and the export's live-child
+    attribute all apply this rule, so no reader can answer "does this name hold
+    live children" differently from another.
+    """
+    return f"""NOT coalesce({child}.name_stage, '') IN
+                ['superseded', 'exhausted', 'contested']
+                AND NOT coalesce({child}.status, '') IN
+                  ['deprecated', 'superseded']"""
+
+
 def _live_child_cypher(parent: str = "sn") -> str:
     """Return the evidence-bearing child test shared by writers and export."""
     return f"""EXISTS {{
               MATCH (child:StandardName)-[:HAS_PARENT]->({parent})
-              WHERE NOT coalesce(child.name_stage, '') IN
-                ['superseded', 'exhausted', 'contested']
-                AND NOT coalesce(child.status, '') IN
-                  ['deprecated', 'superseded']
+              WHERE {_live_child_condition()}
+          }}"""
+
+
+def _live_child_count_cypher(parent: str = "sn") -> str:
+    """Return how many live children a name holds, under the same rule."""
+    return f"""COUNT {{
+              MATCH (child:StandardName)-[:HAS_PARENT]->({parent})
+              WHERE {_live_child_condition()}
           }}"""
 
 
@@ -50,6 +68,7 @@ def _producerless_cypher(name: str = "sn") -> str:
 #: surface. The private spellings stay because the module's own templates and
 #: tests name them.
 live_child_cypher = _live_child_cypher
+live_child_count_cypher = _live_child_count_cypher
 derived_parent_cypher = _derived_parent_cypher
 live_name_cypher = _live_name_cypher
 producerless_cypher = _producerless_cypher
@@ -182,43 +201,110 @@ def record_supersede_receipts(
     return [old for old, _ in kept]
 
 
-def find_sourceless_live_names(
+def find_sourceless_live_name_rows(
     query: Any,
-    name_ids: Iterable[str],
+    name_ids: Iterable[str] | None = None,
     *,
     retired_is_exempt: bool = True,
+    derived_parents_exempt: bool = True,
+    exhausted_exempt_ids: Iterable[str] = (),
+) -> list[dict[str, Any]]:
+    """The one enumeration of live names that no live source produces.
+
+    Every reader that asks "which live names have no source" answers from this
+    statement: the count the ``sn sourceless`` command reports, the source
+    audit that classifies the population, and the writer guard. A second
+    enumeration elsewhere is a second rule, and two rules is how a population
+    read 2,609 on 2026-11-14 while the producer edges held 10.
+
+    A name is counted when neither the status nor the name stage reads
+    ``superseded`` and no ``PRODUCED_NAME`` source that is not stale produces
+    it. ``name_ids=None`` enumerates the whole graph; a list restricts the same
+    statement to those ids, which is what a writer asks after it has moved
+    bindings.
+
+    ``retired_is_exempt`` and ``derived_parents_exempt`` belong to the writer
+    guard: a superseded name is history, and a derived parent's producer is its
+    live children by design. The population a reader reports sets both aside —
+    ``derived_parents_exempt=False`` — and takes ``derived_parent`` and
+    ``live_children`` on each row, so the exemption is the reader's to apply
+    from the value rather than the count's to bake in. ``exhausted_exempt_ids``
+    is a signed narrow exemption: an id is excused only while its own stage is
+    ``exhausted``, so it can never excuse a name the graph has since moved on
+    from.
+    """
+    ids: list[str] | None = None
+    if name_ids is not None:
+        ids = sorted({str(name) for name in name_ids if name})
+        if not ids:
+            return []
+    exempt = sorted({str(name) for name in exhausted_exempt_ids if name})
+    derived_exclusion = (
+        f"NOT ({_derived_parent_cypher()})" if derived_parents_exempt else "true"
+    )
+    rows = (
+        query.query(
+            f"""
+            // SOURCE_INVARIANT
+            MATCH (sn:StandardName)
+            WITH sn
+            WHERE ($ids IS NULL OR sn.id IN $ids)
+              AND (NOT $retired_is_exempt OR ({_live_name_cypher()}))
+              AND {derived_exclusion}
+              AND {_producerless_cypher()}
+              AND NOT (coalesce(sn.name_stage, '') = 'exhausted'
+                       AND sn.id IN $exempt_ids)
+            RETURN sn.id AS id,
+                   sn.origin AS origin,
+                   sn.name_stage AS name_stage,
+                   ({_derived_parent_cypher()}) AS derived_parent,
+                   {_live_child_count_cypher()} AS live_children
+            ORDER BY id
+            """,
+            ids=ids,
+            retired_is_exempt=retired_is_exempt,
+            exempt_ids=exempt,
+        )
+        or []
+    )
+    return [
+        {
+            "id": str(row["id"]),
+            "origin": row.get("origin"),
+            "name_stage": row.get("name_stage"),
+            "derived_parent": bool(row.get("derived_parent")),
+            "live_children": int(row.get("live_children") or 0),
+        }
+        for row in rows
+    ]
+
+
+def find_sourceless_live_names(
+    query: Any,
+    name_ids: Iterable[str] | None = None,
+    *,
+    retired_is_exempt: bool = True,
+    derived_parents_exempt: bool = True,
     exhausted_exempt_ids: Iterable[str] = (),
 ) -> list[str]:
-    """Find touched live names with no producer through the caller's graph handle.
+    """The ids :func:`find_sourceless_live_name_rows` enumerates, in order.
 
     Superseded names are historical. A derived parent with a live child is
-    structural and may legitimately have no direct producer.  A caller that has
+    structural and may legitimately have no direct producer. A caller that has
     signed a narrow exemption names those ids in ``exhausted_exempt_ids``; an id
     is excused only while its own stage is ``exhausted``, so the exemption can
     never excuse a name the graph has since moved on from.
     """
-    ids = sorted(set(name_ids))
-    if not ids:
-        return []
-    exempt = sorted(set(exhausted_exempt_ids))
-    rows = query.query(
-        f"""
-        // SOURCE_INVARIANT
-        UNWIND $ids AS id
-        MATCH (sn:StandardName {{id: id}})
-        WITH sn
-        WHERE (NOT $retired_is_exempt OR ({_live_name_cypher()}))
-          AND NOT ({_derived_parent_cypher()})
-          AND {_producerless_cypher()}
-          AND NOT (coalesce(sn.name_stage, '') = 'exhausted'
-                   AND sn.id IN $exempt_ids)
-        RETURN sn.id AS id ORDER BY id
-        """,
-        ids=ids,
-        retired_is_exempt=retired_is_exempt,
-        exempt_ids=exempt,
-    )
-    return [str(row["id"]) for row in rows]
+    return [
+        row["id"]
+        for row in find_sourceless_live_name_rows(
+            query,
+            name_ids,
+            retired_is_exempt=retired_is_exempt,
+            derived_parents_exempt=derived_parents_exempt,
+            exhausted_exempt_ids=exhausted_exempt_ids,
+        )
+    ]
 
 
 def supersede_names_losing_last_source(

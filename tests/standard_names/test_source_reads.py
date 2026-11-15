@@ -6,16 +6,24 @@ the authority, so a name whose copied list is empty while its edges are not must
 still answer with its sources, and a name whose copied list names a path no edge
 gives must answer with none.
 
-The planted graph holds exactly the eight shapes the sourceless count has to
-separate: an empty copy with no edge, a populated copy with no edge, a derived
-name with neither, a superseded status, a superseded stage, a derived parent
-whose only producer is a derived record, a data-dictionary producer with an
-empty copy, and a name whose only producer is stale.
+The planted graph holds exactly the seven shapes the sourceless count has to
+separate, one per case the rule names: an empty copy with no edge, a populated
+copy with no edge, a derived name with no edge that holds a live child, a
+superseded status, a superseded name stage, a name whose only producer is a
+derived record, and a data-dictionary producer with an empty copy. A stale
+producer is planted on its own: a name whose only producer is stale reads as
+sourceless from search, from ``read_source_paths`` and from the count alike.
 
 The last test walks the whole package for a touch of the copied list, so a
 reader added in any module fails it, and every touch that is not a reader is
 listed with the role that licenses it. A reader is never on that list: a reader
-asks :mod:`imas_codex.standard_names.source_reads` for the edges.
+asks :mod:`imas_codex.standard_names.source_reads` for the enumerated population
+or for the edges.
+
+The population is one rule in one place, so a test also walks the package for a
+query that states both halves of the rule — the liveness test and the
+producerless test — and refuses one outside the owner that is not a stated
+write, repair or guard precondition.
 """
 
 from __future__ import annotations
@@ -82,7 +90,12 @@ def _without_extraction_records(text: str) -> str:
 
 @pytest.fixture()
 def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
-    """Plant the seven source shapes the count and the readers must separate."""
+    """Plant the seven source shapes the count and the readers must separate.
+
+    One name per case the rule names, so the count is asserted by value: three
+    are counted and four are not, and the derived parent is counted like the
+    rest and carries the attribute a reader exempts it on.
+    """
     client = GraphClient(
         uri=disposable_neo4j_uri,
         username="neo4j",
@@ -93,9 +106,9 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
         """UNWIND [
           {id:'reads_empty_list', status:'draft', stage:'accepted',
            origin:'pipeline', paths:[]},
-          {id:'reads_stale_list', status:'draft', stage:'accepted',
+          {id:'reads_full_list', status:'draft', stage:'accepted',
            origin:'pipeline', paths:['dd:reads/ghost']},
-          {id:'reads_derived_orphan', status:'draft', stage:'accepted',
+          {id:'reads_derived_parent', status:'draft', stage:'accepted',
            origin:'derived', paths:[]},
           {id:'reads_status_superseded', status:'superseded', stage:'accepted',
            origin:'pipeline', paths:[]},
@@ -104,8 +117,6 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
           {id:'reads_derived_sourced', status:'draft', stage:'accepted',
            origin:'derived', paths:[]},
           {id:'reads_dd_bound', status:'draft', stage:'accepted',
-           origin:'pipeline', paths:[]},
-          {id:'reads_stale_source', status:'draft', stage:'accepted',
            origin:'pipeline', paths:[]}
         ] AS row
         CREATE (:StandardName {id:row.id, status:row.status,
@@ -122,16 +133,9 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
         CREATE (source)-[:PRODUCED_NAME]->(holder)"""
     )
     client.query(
-        """MATCH (holder:StandardName {id:'reads_stale_source'})
-        CREATE (source:StandardNameSource {id:'dd:reads/retired', status:'stale'})
-        CREATE (source)-[:PRODUCED_NAME]->(holder)"""
-    )
-    client.query(
-        """MATCH (orphan:StandardName {id:'reads_derived_orphan'}),
-                 (sourced:StandardName {id:'reads_derived_sourced'}),
-                 (stale:StandardName {id:'reads_stale_list'})
-        CREATE (sourced)-[:HAS_PARENT]->(orphan)
-        CREATE (stale)-[:HAS_PARENT]->(sourced)"""
+        """MATCH (parent:StandardName {id:'reads_derived_parent'}),
+                 (child:StandardName {id:'reads_derived_sourced'})
+        CREATE (child)-[:HAS_PARENT]->(parent)"""
     )
     try:
         yield client
@@ -144,12 +148,60 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
         client.close()
 
 
+@pytest.fixture()
+def stale_source_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
+    """Plant one live name whose only producer is stale, and one live control.
+
+    The control is produced by a source that is not stale, so the pair shows the
+    stale edge is what makes the difference and not the absence of every edge.
+    """
+    client = GraphClient(
+        uri=disposable_neo4j_uri,
+        username="neo4j",
+        password=os.environ.get("IMAS_CODEX_TEST_NEO4J_PASSWORD", ""),
+        graph_name="source-reads-stale-fixture",
+    )
+    client.query(
+        """MATCH (node) WHERE node.id STARTS WITH 'stales_' DETACH DELETE node"""
+    )
+    client.query(
+        """UNWIND [
+          {id:'stales_only', status:'draft', stage:'accepted',
+           origin:'pipeline'},
+          {id:'stales_control', status:'draft', stage:'accepted',
+           origin:'pipeline'}
+        ] AS row
+        CREATE (:StandardName {id:row.id, status:row.status,
+          name_stage:row.stage, origin:row.origin, source_paths:[]})"""
+    )
+    client.query(
+        """MATCH (holder:StandardName {id:'stales_only'})
+        CREATE (source:StandardNameSource {id:'dd:stales/retired',
+          source_id:'stales/retired', status:'stale'})
+        CREATE (source)-[:PRODUCED_NAME]->(holder)"""
+    )
+    client.query(
+        """MATCH (holder:StandardName {id:'stales_control'})
+        CREATE (source:StandardNameSource {id:'dd:stales/live',
+          source_id:'stales/live'})
+        CREATE (source)-[:PRODUCED_NAME]->(holder)"""
+    )
+    try:
+        yield client
+    finally:
+        client.query(
+            "MATCH (node) WHERE node.id STARTS WITH 'stales_' "
+            "OR node.id STARTS WITH 'dd:stales/' DETACH DELETE node"
+        )
+        client.close()
+
+
 @pytest.mark.graph
 def test_reader_answers_from_the_producer_edges(planted_graph: GraphClient) -> None:
-    """An empty copy does not hide a name's sources; a stale one does not
+    """An empty copy does not hide a name's sources, and a stale one does not
     invent them."""
     assert read_source_paths(planted_graph, "reads_dd_bound") == ["dd:reads/bound"]
-    assert read_source_paths(planted_graph, "reads_stale_list") == []
+    assert read_source_paths(planted_graph, "reads_full_list") == []
     assert read_source_paths(planted_graph, "reads_empty_list") == []
 
 
@@ -160,14 +212,14 @@ def test_name_search_answers_from_the_producer_edges(
     """Search is a reader of the same place: the planted producer comes back
     with its path and the planted over-reporting copy comes back with none."""
     rows = fetch_standard_names(
-        ["reads_dd_bound", "reads_stale_list"],
+        ["reads_dd_bound", "reads_full_list"],
         include_grammar=False,
         include_documentation=False,
         gc=planted_graph,
     )
     by_name = {row["name"]: row for row in rows}
     assert by_name["reads_dd_bound"]["source_paths"] == ["dd:reads/bound"]
-    assert by_name["reads_stale_list"]["source_paths"] == []
+    assert by_name["reads_full_list"]["source_paths"] == []
 
     found = search_standard_names("reads_dd_bound", k=5, gc=planted_graph)
     search_rows = {row["name"]: row for row in found}
@@ -175,31 +227,76 @@ def test_name_search_answers_from_the_producer_edges(
 
 
 @pytest.mark.graph
-def test_sourceless_count_reads_stale_as_no_producer(
+def test_the_count_reports_three_of_seven_planted_names(
     planted_graph: GraphClient,
 ) -> None:
-    """Eight planted names: six live, two produced by a live source, four not,
-    of which the derived parent is listed apart. The name whose only producer
-    is stale counts here and does not count in the bare population."""
+    """Seven planted names, one per case: three have no live producer.
+
+    The count is one rule and no exemption, so the derived parent is one of the
+    three — listed with ``derived_parent`` and its live children — and the two
+    superseded names and the two produced names are not.
+    """
     report = count_live_names_without_source(planted_graph)
 
-    assert report["live_names"] == 6
-    assert report["live_with_producer"] == 2
-    assert report["live_without_producer"] == 4
     assert report["count"] == 3
     assert [entry["id"] for entry in report["names"]] == [
+        "reads_derived_parent",
         "reads_empty_list",
-        "reads_stale_list",
-        "reads_stale_source",
+        "reads_full_list",
     ]
-    assert [entry["has_edge"] for entry in report["names"]] == [False, False, True]
-    assert [entry["id"] for entry in report["exempt_derived_parents"]] == [
-        "reads_derived_orphan"
+    derived = report["names"][0]
+    assert derived["derived_parent"] is True
+    assert derived["live_children"] == 1
+    assert derived["origin"] == "derived"
+    assert [entry["derived_parent"] for entry in report["names"]] == [
+        True,
+        False,
+        False,
     ]
 
-    assert report["bare_count"] == 2
-    assert report["bare_names"] == ["reads_empty_list", "reads_stale_list"]
-    assert report["differing_names"] == ["reads_stale_source"]
+
+@pytest.mark.graph
+def test_the_count_is_the_owner_s_enumeration(planted_graph: GraphClient) -> None:
+    """The command reports what the owner enumerates, by value.
+
+    The command presents the population; it does not enumerate it. The two
+    lists are therefore the same names in the same order, so a second query
+    re-entering the command cannot answer differently from the invariant.
+    """
+    from imas_codex.standard_names.source_invariant import (
+        find_sourceless_live_name_rows,
+    )
+
+    report = count_live_names_without_source(planted_graph)
+    owner = find_sourceless_live_name_rows(
+        planted_graph, None, derived_parents_exempt=False
+    )
+    assert [entry["id"] for entry in report["names"]] == [row["id"] for row in owner]
+    assert report["count"] == len(owner)
+
+
+@pytest.mark.graph
+def test_a_name_whose_only_producer_is_stale_has_no_source(
+    stale_source_graph: GraphClient,
+) -> None:
+    """Stale reads as no source from search, from read_source_paths and from
+    the count alike, while the live-produced control answers with its source."""
+    report = count_live_names_without_source(stale_source_graph)
+    assert [entry["id"] for entry in report["names"]] == ["stales_only"]
+    assert report["count"] == 1
+
+    assert read_source_paths(stale_source_graph, "stales_only") == []
+    assert read_source_paths(stale_source_graph, "stales_control") == ["dd:stales/live"]
+
+    rows = fetch_standard_names(
+        ["stales_only", "stales_control"],
+        include_grammar=False,
+        include_documentation=False,
+        gc=stale_source_graph,
+    )
+    by_name = {row["name"]: row for row in rows}
+    assert by_name["stales_only"]["source_paths"] == []
+    assert by_name["stales_control"]["source_paths"] == ["dd:stales/live"]
 
 
 def test_a_normalized_id_list_has_the_owner_s_order() -> None:
@@ -501,7 +598,6 @@ COPIED_LIST_SITES: dict[tuple[str, str], str] = {
     ("standard_names/source_paths.py", "<module>"): "owner",
     ("standard_names/source_reads.py", "source_paths_projection"): "owner",
     ("standard_names/source_reads.py", "read_source_paths_by_name"): "owner",
-    ("standard_names/source_reads.py", "population"): "inspection",
     (
         "standard_names/worker_tasks/worker_compose_and_validate.py",
         "_compose_batch_body",
@@ -666,3 +762,232 @@ def test_every_touch_of_the_copied_list_is_classified() -> None:
         if role not in ROLES
     )
     assert not unknown, "these sites carry a role outside ROLES: " + ", ".join(unknown)
+
+
+#: The owner of the sourceless population. A statement outside the owner that
+#: composes both halves of the rule — the liveness test and the absence of a
+#: producer — is a second enumeration of that population, and two enumerations
+#: is how a count reported 2,609 on 2026-11-14 while the producer edges held 10.
+SOURCE_RULE_OWNER = (
+    "standard_names/source_invariant.py",
+    "find_sourceless_live_name_rows",
+)
+
+#: What a statement that states both halves of the rule may be. ``owner`` is the
+#: one enumeration and belongs to the owner module alone; every other role is a
+#: statement about names the caller already holds, so it answers a precondition
+#: or performs a write rather than enumerating the population.
+SOURCE_RULE_ROLES = {
+    "owner": "enumerates the population, and only the owner may",
+    "writer": "a write whose precondition is that the name it holds has no producer",
+    "guard": "a guard that refuses when the name it holds would have no producer",
+    "repair": "a repair or migration that selects names by the rule it restores",
+    "recovery": "a rebuild that answers with the sources an edge lost",
+    "report": "a census of names by status that also reports a producer count, "
+    "not the population",
+}
+
+#: Every statement in the package that states both halves of the rule, by module
+#: and statement, with the role that licenses it. A statement added anywhere
+#: fails :func:`test_no_second_enumeration_of_the_sourceless_population` until it
+#: asks :func:`imas_codex.standard_names.source_invariant.find_sourceless_live_name_rows`
+#: or is listed here with a role that makes it a precondition rather than a
+#: population read.
+SOURCE_RULE_SITES: dict[tuple[str, str], str] = {
+    SOURCE_RULE_OWNER: "owner",
+    ("standard_names/source_invariant.py", "_drained_test"): "writer",
+    ("cli/sn.py", "sn_status"): "report",
+    (
+        "standard_names/graph_store/graph_audits.py",
+        "reconcile_source_status_liveness",
+    ): "repair",
+    (
+        "standard_names/graph_store/graph_claim_release.py",
+        "_READ_REFINE_CLAIM_RELEASE_QUERY",
+    ): "guard",
+    (
+        "standard_names/graph_store/graph_parent_lifecycle.py",
+        "_persist_structural_authority",
+    ): "writer",
+    (
+        "standard_names/graph_store/graph_parent_lifecycle.py",
+        "find_orphan_parent_source_candidates",
+    ): "repair",
+    (
+        "standard_names/graph_store/graph_parent_lifecycle.py",
+        "reconcile_orphan_parent_sources",
+    ): "repair",
+    (
+        "standard_names/graph_store/graph_parent_lifecycle.py",
+        "reconcile_orphan_parent_sources_batched",
+    ): "repair",
+    (
+        "standard_names/graph_store/graph_parent_lifecycle.py",
+        "structural_accept_derived_parents",
+    ): "writer",
+    (
+        "standard_names/graph_store/graph_refinement.py",
+        "_GENERATED_SUPERSESSION_PREFLIGHT_QUERY",
+    ): "guard",
+    (
+        "standard_names/graph_store/graph_refinement.py",
+        "persist_refined_name",
+    ): "writer",
+    (
+        "standard_names/graph_store/graph_source_bindings.py",
+        "mark_sources_stale",
+    ): "writer",
+    ("standard_names/graph_store/graph_supersession.py", "_apply"): "writer",
+    (
+        "standard_names/graph_store/graph_supersession.py",
+        "supersede_exhausted_standard_name_orphans",
+    ): "writer",
+    (
+        "standard_names/graph_store/graph_supersession.py",
+        "supersede_into_ancestor",
+    ): "writer",
+    (
+        "standard_names/provenance_lifecycle.py",
+        "_SEMANTIC_SOURCE_REPAIR_INSPECTION",
+    ): "repair",
+    (
+        "standard_names/provenance_lifecycle.py",
+        "find_semantic_source_invariant_violations",
+    ): "repair",
+    (
+        "standard_names/provenance_rebuild.py",
+        "_fetch_change_history_sources",
+    ): "recovery",
+    (
+        "standard_names/signed_manifest.py",
+        "_apply_catalog_source_dispositions",
+    ): "writer",
+    ("standard_names/signed_manifest.py", "_apply_dual_authority_retirement"): "writer",
+    (
+        "standard_names/signed_manifest.py",
+        "_apply_ineligible_source_retirement",
+    ): "writer",
+    ("standard_names/signed_manifest.py", "_apply_mutation"): "writer",
+    ("standard_names/signed_manifest.py", "_apply_source_exchange"): "writer",
+    ("standard_names/signed_manifest.py", "_apply_unbound_source_attachment"): "writer",
+    ("standard_names/signed_manifest.py", "_dd_residue_release_refusal"): "guard",
+    ("standard_names/signed_manifest.py", "_orphan_guard_refusal"): "guard",
+    (
+        "standard_names/signed_manifest.py",
+        "_source_target_reconciliation_refusal",
+    ): "guard",
+    (
+        "standard_names/signed_manifest.py",
+        "_structural_source_revival_refusal",
+    ): "guard",
+    ("standard_names/signed_manifest.py", "_verify_postconditions"): "guard",
+}
+
+
+def _statement_strings(tree: ast.Module) -> list[tuple[int, str]]:
+    """Every string constant in a module, an f-string unparsed with its calls.
+
+    The two halves of the rule are interpolated from the owner by most callers,
+    so a module that asks for the rule carries neither ``PRODUCED_NAME`` nor
+    ``superseded`` of its own. Unparsing the f-string keeps the call it makes
+    visible to the scan, so a restored enumeration cannot hide behind an
+    interpolation.
+    """
+    found: list[tuple[int, str]] = []
+    for node in ast.walk(tree):
+        if isinstance(node, ast.Constant) and isinstance(node.value, str):
+            found.append((node.lineno, node.value))
+        elif isinstance(node, ast.JoinedStr):
+            found.append((node.lineno, ast.unparse(node)))
+    return found
+
+
+def _states_liveness(text: str) -> bool:
+    """Does this statement apply the live-name half of the rule?
+
+    Either by naming the owner's predicate, or by spelling the superseded
+    status and name stage itself.
+    """
+    if "live_name_cypher" in text:
+        return True
+    return "superseded" in text and ("name_stage" in text or "status" in text)
+
+
+def _states_producerless(text: str) -> bool:
+    """Does this statement apply the no-live-producer half of the rule?
+
+    Either by naming the owner's predicate, or by negating the edge itself.
+    """
+    if "producerless_cypher" in text:
+        return True
+    return "PRODUCED_NAME" in text and ("NOT EXISTS" in text or "NOT (" in text)
+
+
+def sourceless_rule_sites(root: Path) -> dict[tuple[str, str], set[int]]:
+    """Every statement under ``root`` that states both halves of the rule."""
+    sites: dict[tuple[str, str], set[int]] = {}
+    for path in sorted(root.rglob("*.py")):
+        module = path.relative_to(root).as_posix()
+        if module in GENERATED_MODULES or "__pycache__" in module:
+            continue
+        text = path.read_text(encoding="utf-8")
+        if "StandardName" not in text:
+            continue
+        tree = ast.parse(text)
+        for line, value in _statement_strings(tree):
+            if "StandardName" not in value:
+                continue
+            if _states_liveness(value) and _states_producerless(value):
+                site = (module, _carrying_statement(tree, line))
+                sites.setdefault(site, set()).add(line)
+    return sites
+
+
+def test_no_second_enumeration_of_the_sourceless_population() -> None:
+    """A statement stating both halves of the rule outside the owner is refused.
+
+    The population has one enumeration. The ``sn sourceless`` command reports
+    what ``find_sourceless_live_name_rows`` returns and the source audit
+    classifies what that same enumeration names, so no module can answer "which
+    live names have no source" with a rule of its own. Before this guard the
+    package held three such statements: the count's own query named 9 names on
+    2026-11-15, the source audit's own query named 27, and the producer edges
+    named 10.
+    """
+    package = Path(__file__).resolve().parents[2] / "imas_codex"
+    sites = sourceless_rule_sites(package)
+
+    # Positive control: the scan must see the owner's own enumeration, and the
+    # package holds at least the preconditions listed below, so an empty or
+    # broken scan cannot license every second enumeration by finding nothing.
+    assert SOURCE_RULE_OWNER in sites, (
+        "the scan does not find the owner's enumeration, so it would license anything"
+    )
+    assert len(sites) > 10, f"the scan found only {len(sites)} sites"
+
+    unlisted = sorted(set(sites) - set(SOURCE_RULE_SITES))
+    assert not unlisted, (
+        "these statements state both halves of the sourceless rule — a live "
+        "name and an absent producer — and are not the owner's enumeration. "
+        "Ask find_sourceless_live_name_rows() for the population, or list the "
+        "site in SOURCE_RULE_SITES with the role that makes it a precondition:\n"
+        + "\n".join(f"  {module}:{symbol}" for module, symbol in unlisted)
+    )
+    stale = sorted(set(SOURCE_RULE_SITES) - set(sites))
+    assert not stale, (
+        "SOURCE_RULE_SITES licenses nothing here: the code moved or now asks "
+        "the owner, so drop the entry or correct the symbol:\n"
+        + "\n".join(f"  {module}:{symbol}" for module, symbol in stale)
+    )
+    unknown = sorted(
+        f"{module}:{symbol}: {role}"
+        for (module, symbol), role in SOURCE_RULE_SITES.items()
+        if role not in SOURCE_RULE_ROLES
+    )
+    assert not unknown, (
+        "these sites carry a role outside SOURCE_RULE_ROLES: " + ", ".join(unknown)
+    )
+    owners = sorted(site for site, role in SOURCE_RULE_SITES.items() if role == "owner")
+    assert owners == [SOURCE_RULE_OWNER], (
+        f"the population has one enumeration; these sites claim to own it: {owners}"
+    )
