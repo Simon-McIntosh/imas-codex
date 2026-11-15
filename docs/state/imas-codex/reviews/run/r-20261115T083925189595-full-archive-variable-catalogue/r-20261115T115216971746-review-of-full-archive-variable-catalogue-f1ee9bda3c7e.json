@@ -1,0 +1,79 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "221b8473a8d95f828b29cb35e582a80d4de0241a",
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:3376 seed_worker",
+    "imas_codex/discovery/signals/parallel.py:5652 check_worker",
+    "imas_codex/discovery/signals/scanners/codac_uda.py:131 _persist_signals",
+    "imas_codex/remote/catalogue_scan.py:286 run_scan",
+    "imas_codex/remote/catalogue_scan.py:400 main",
+    "imas_codex/remote/catalogue_audit.py:10 measure_population",
+    "imas_codex/remote/ssh_worker.py:917 pooled_run_python_script"
+  ],
+  "completed_at": "2026-11-15T12:10:10.587Z",
+  "dispatched_at": "2026-11-15T12:09:56Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/full-archive-variable-catalogue.html",
+      "id": "f23ab6e71f8",
+      "line": "239",
+      "severity": "non-blocking",
+      "summary": "The landing record reports census union and store count 995,006 beside graph 94,633 without stating that the graph is deliberately only the earlier pilot, while the reviewed node's dispatch done_when says 'graph count minus union equals 0'; the plan section it implements requires the store count to equal the union and the graph count before and after to be equal, both of which are met, but a reader applying the dispatch sentence sees a failed measure and no sentence reconciles the two."
+    },
+    {
+      "file": "imas_codex/remote/archive_catalogue.py",
+      "id": "fcdd58c6512",
+      "line": "266",
+      "severity": "non-blocking",
+      "summary": "summary() collapses a variable's state with max(CASE WHEN metadata_state='available' THEN 1 ELSE 0 END), so a selector listed by two archives and refused by one is counted available and its refusal never reaches metadata_states or unavailable_codes; the current census has zero overlap so the reported zero is honest, but the store's own record() retains per-archive states and the plan requires the unavailable population and its archive error codes, which this aggregate would under-report for any dual-listed selector."
+    },
+    {
+      "file": "imas_codex/remote/catalogue_scan.py",
+      "id": "f1042da69aa",
+      "line": "35",
+      "severity": "non-blocking",
+      "summary": "write_receipt is a third private same-directory atomic JSON writer beside imas_codex/graph/offsite.py:270 and imas_codex/standard_names/vocab_adjudication.py:370; no shared owner for atomic receipt writing exists, so the new copy should be extracted to one rather than forked a third time."
+    }
+  ],
+  "head_log_revision": "fd0958c4ee2911cb84b8e5cc44cd63e6bb808e03",
+  "item_verdicts": {
+    "call_sites": "pass \u2014 verified the production paths that reach the change: imas_codex/discovery/signals/parallel.py:3376 seed_worker, imas_codex/discovery/signals/parallel.py:5652 check_worker, imas_codex/discovery/signals/scanners/codac_uda.py:131 _persist_signals, imas_codex/remote/catalogue_scan.py:286 run_scan, imas_codex/remote/catalogue_scan.py:400 main, imas_codex/remote/catalogue_audit.py:10 measure_population and imas_codex/remote/ssh_worker.py:917 pooled_run_python_script.",
+    "diff": "pass \u2014 read commit by commit 49f6dbe1..1230469a6: 465b1440 routes pilot writes through ingest_discovered_signals with ARCHIVE_SIGNAL_QUERY (imas_codex/discovery/signals/parallel.py:3106) and adds a resumable checkpoint, 946d7762 adds refusal states and full attributes to imas_codex/remote/scripts/codac_uda.py:59 and the schema, 76dcafd3 replaces the scanner-side store with the graph-free imas_codex/remote/archive_catalogue.py and catalogue_scan.py, 058cb28a and 3b410135 repair cleanup reporting and timeout recovery, and the rest is evidence and figures; the intermediate scanners/archive_catalogue.py added at 465b1440 is deleted at 76dcafd3, which is inside the fence.",
+    "done_when": "pass \u2014 the manifest's tests line and baseline_suite/after_suite record baseline.log at 221b8473a (47 passed, 0 failed, EXIT=0) and merge-final-focused-graph.log at fd0958c4e (166 passed, 0 failed, EXIT=0, graph files executed), so zero added failures is measured, and the landing record tabulates census, union, store count, graph counts, field coverage, states and elapsed/rates; its graph 94,633 against union 995,006 does not satisfy the dispatch's literal 'graph count minus union equals 0' (finding at the evidence fragment).",
+    "goal": "pass \u2014 the reviewed node's goal is 'deliver the catalogue of every readable archive variable with all archive metadata', and imas_codex/remote/archive_catalogue.py:32 with imas_codex/remote/catalogue_scan.py:286 deliver that, storing all 995,006 census selectors with per-variable documents and states and reporting the measured partial completion (29,265, 67,815 at handoff) that plan section 12 permits for a job that cannot finish in one allocation.",
+    "manifest": "pass \u2014 read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083925189595-full-archive-variable-catalogue/manifest.md; status complete, commits 49f6dbe1..1230469a6, changed_paths the 18 landed files, tests the literal 12-file pytest command, test_logs naming baseline.log, store-negative.log and merge-final-focused-graph.log, baseline_suite (221b8473a, 0 failures, completed true) and after_suite (fd0958c4e, 0 failures, completed true), matching the logs I read.",
+    "write_paths": "pass \u2014 the node's eleven declared fences cover all 18 files of git diff --stat 221b8473a..f1ee9bda, including imas_codex/remote/archive_catalogue.py:1, imas_codex/schemas/facility.yaml and tests/remote/test_archive_catalogue_store.py:1, with nothing outside them."
+  },
+  "justifications": {
+    "durability": "tests/remote/test_archive_catalogue_store.py:484 reddens when a batch timeout is re-raised before reader restart and range splitting (timeout-negative.log, 1 failed, EXIT=1), and tests/remote/test_archive_catalogue_store.py:60 reddens when a failed metadata request is classified available (store-negative.log, 1 failed, EXIT=1), while the head arms pass.",
+    "evidence": "the manifest's baseline_suite (baseline.log, revision 221b8473a, 47 passed, 0 failed, EXIT=0) and after_suite (merge-final-focused-graph.log, revision fd0958c4e, 166 passed, 0 failed, EXIT=0, graph test files executed) are recorded and I read both summary lines, but docs/evidence/fragments/codac-uda-signals/full-archive-variable-catalogue.html:239-240 reports graph 94,633 beside union 995,006, so the dispatch done_when's literal 'graph count minus union equals 0' is asserted nowhere.",
+    "fit": "docs/figures/codac-uda-signals/full-archive-variable-catalogue/make_figure.py:12 imports the shared imas_codex.plotting.style.save_figure, the new modules follow the surrounding British-spelling and dataclass-free style of imas_codex/remote/, and no commit subject or symbol carries a plan or ticket identifier.",
+    "goal_fidelity": "imas_codex/remote/archive_catalogue.py:32 stores every sealed census selector with both metadata documents, its state and its listing memberships, and docs/evidence/fragments/codac-uda-signals/full-archive-variable-catalogue.html:236-241 reports the store's 995,006-variable union against 29,265 completed outcomes (67,815 by the merge handoff), so the catalogue is delivered but not fully populated.",
+    "reuse": "search over imas_codex for sqlite3 found only imas_codex/clusters/label_cache.py and imas_codex/search/document_store.py, neither a resumable catalogue, so the store has no owner to extend; imas_codex/remote/catalogue_scan.py:35 does add a third private atomic-receipt writer beside imas_codex/graph/offsite.py:270 and imas_codex/standard_names/vocab_adjudication.py:370 (finding).",
+    "scope_discipline": "git diff --stat 221b8473a..f1ee9bda lists 18 files and every one is under a declared fence (imas_codex/discovery/signals/, imas_codex/remote/, imas_codex/schemas/, tests/discovery/, tests/remote/, tests/graph/, the evidence fragment or the figure directory), with only the authorized merge a79cbd0a carrying mainline files."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pass \u2014 the reviewed node's goal is 'deliver the catalogue of every readable archive variable with all archive metadata', and imas_codex/remote/archive_catalogue.py:32 with imas_codex/remote/catalogue_scan.py:286 deliver that, storing all 995,006 census selectors with per-variable documents and states and reporting the measured partial completion (29,265, 67,815 at handoff) that plan section 12 permits for a job that cannot finish in one allocation.\nVERDICT done_when: pass \u2014 the manifest's tests line and baseline_suite/after_suite record baseline.log at 221b8473a (47 passed, 0 failed, EXIT=0) and merge-final-focused-graph.log at fd0958c4e (166 passed, 0 failed, EXIT=0, graph files executed), so zero added failures is measured, and the landing record tabulates census, union, store count, graph counts, field coverage, states and elapsed/rates; its graph 94,633 against union 995,006 does not satisfy the dispatch's literal 'graph count minus union equals 0' (finding at the evidence fragment).\nVERDICT write_paths: pass \u2014 the node's eleven declared fences cover all 18 files of git diff --stat 221b8473a..f1ee9bda, including imas_codex/remote/archive_catalogue.py:1, imas_codex/schemas/facility.yaml and tests/remote/test_archive_catalogue_store.py:1, with nothing outside them.\nVERDICT manifest: pass \u2014 read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083925189595-full-archive-variable-catalogue/manifest.md; status complete, commits 49f6dbe1..1230469a6, changed_paths the 18 landed files, tests the literal 12-file pytest command, test_logs naming baseline.log, store-negative.log and merge-final-focused-graph.log, baseline_suite (221b8473a, 0 failures, completed true) and after_suite (fd0958c4e, 0 failures, completed true), matching the logs I read.\nVERDICT diff: pass \u2014 read commit by commit 49f6dbe1..1230469a6: 465b1440 routes pilot writes through ingest_discovered_signals with ARCHIVE_SIGNAL_QUERY (imas_codex/discovery/signals/parallel.py:3106) and adds a resumable checkpoint, 946d7762 adds refusal states and full attributes to imas_codex/.../scripts/codac_uda.py:59 and the schema, 76dcafd3 replaces the scanner-side store with the graph-free imas_codex/remote/archive_catalogue.py and catalogue_scan.py, 058cb28a and 3b410135 repair cleanup reporting and timeout recovery, and the rest is evidence and figures.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:3376 seed_worker, imas_codex/discovery/signals/parallel.py:5652 check_worker, imas_codex/discovery/signals/scanners/codac_uda.py:131 _persist_signals, imas_codex/remote/catalogue_scan.py:286 run_scan, imas_codex/remote/catalogue_scan.py:400 main, imas_codex/remote/catalogue_audit.py:10 measure_population, imas_codex/remote/ssh_worker.py:917 pooled_run_python_script\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/remote/archive_catalogue.py:32 stores every sealed census selector with both metadata documents, its state and its listing memberships, and docs/evidence/fragments/codac-uda-signals/full-archive-variable-catalogue.html:236-241 reports the store's 995,006-variable union against 29,265 completed outcomes (67,815 by the merge handoff), so the catalogue is delivered but not fully populated.\nSCORE evidence: 15\nJUSTIFICATION evidence: the manifest's baseline_suite (baseline.log, revision 221b8473a, 47 passed, 0 failed, EXIT=0) and after_suite (merge-final-focused-graph.log, revision fd0958c4e, 166 passed, 0 failed, EXIT=0) are recorded and I read both summary lines, but the landing record reports graph 94,633 beside union 995,006, so the done_when's literal 'graph count minus union equals 0' is asserted nowhere.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: git diff --stat 221b8473a..f1ee9bda lists 18 files and every one is under a declared fence, with only the authorized merge a79cbd0a carrying mainline files.\nSCORE durability: 18\nJUSTIFICATION durability: tests/remote/test_archive_catalogue_store.py:484 reddens when a batch timeout is re-raised before reader restart (timeout-negative.log, 1 failed, EXIT=1), and tests/remote/test_archive_catalogue_store.py:60 reddens when a failed metadata request is classified available (store-negative.log, 1 failed, EXIT=1), while the head arms pass.\nSCORE fit: 18\nJUSTIFICATION fit: docs/figures/codac-uda-signals/full-archive-variable-catalogue/make_figure.py:12 imports the shared imas_codex.plotting.style.save_figure and the new modules follow the surrounding style of imas_codex/remote/, with no plan or ticket identifier in any name or commit subject.\nSCORE reuse: 15\nJUSTIFICATION reuse: search over imas_codex for sqlite3 found only imas_codex/clusters/label_cache.py and imas_codex/search/document_store.py, neither a resumable catalogue, so the store has no owner to extend, but imas_codex/remote/catalogue_scan.py:35 is a third private atomic-receipt writer beside imas_codex/graph/offsite.py:270 and imas_codex/standard_names/vocab_adjudication.py:370.\nFINDING docs/evidence/fragments/codac-uda-signals/full-archive-variable-catalogue.html:239 non-blocking: the landing record reports union and store count 995,006 beside graph 94,633 without stating the graph is only the earlier pilot, so the dispatch done_when's literal 'graph count minus union equals 0' reads as unmet even though the plan's store-count-equals-union and graph-before-equals-after measures are both reported.\nFINDING imas_codex/remote/archive_catalogue.py:266 non-blocking: summary() collapses a variable listed by two archives with max(available), so one archive's refusal is lost from metadata_states and unavailable_codes; today's zero overlap makes the reported zero honest, but the aggregate under-reports refusals for any dual-listed selector.\nFINDING imas_codex/remote/catalogue_scan.py:35 non-blocking: write_receipt is a third private atomic JSON receipt writer beside imas_codex/graph/offsite.py:270 and imas_codex/standard_names/vocab_adjudication.py:370 and should be extracted to one owner rather than forked again.\n",
+  "review_note": "Read the source node's goal, done_when and write paths from the reviewed run's dispatch-detail.json; the manifest at the reviewed run's directory; and the diff 221b8473a..1230469a6 commit by commit at f1ee9bda and the merge/fixture/doc commits after it. The final gate ran at fd0958c4e; the only later commit 1230469a6 is documentation.",
+  "review_run_id": "r-20261115T115216971746-review-of-full-archive-variable-catalogue-f1ee9bda3c7e",
+  "reviewed_base_sha": "221b8473a8d95f828b29cb35e582a80d4de0241a",
+  "reviewed_head_sha": "1230469a687eefbf57137b532e666b490bd9b501",
+  "reviewed_run_id": "r-20261115T083925189595-full-archive-variable-catalogue",
+  "reviewer_run_id": "r-20261115T115216971746-review-of-full-archive-variable-catalogue-f1ee9bda3c7e",
+  "rubric": "review",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T12:47:17.609090+00:00",
+  "total": 101
+}
