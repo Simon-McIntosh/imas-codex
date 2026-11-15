@@ -448,3 +448,70 @@
     checkpoint. The coordinator reads later receipts and owns any continuation
     and plan closure.</p>
 </section>
+
+<section id="full-archive-variable-catalogue-main-integration">
+  <h2>Integrated catalogue code with the current parser and schema</h2>
+  <p>The authorized local merge is <code>a79cbd0acf133d0c3f5a41ba32f98d5fb39ccd9a</code>,
+    with incoming main <code>15befe52cd49d3276d74d8ed216500bbbd6dde76</code>.
+    Both parser modules and the plotting package retain main's exact content.
+    Main's deleted discovery helpers remain absent. The schema retains both the
+    candidate plant-component model and archive metadata states and fields.</p>
+  <p>The scanner delegates every pilot signal batch to
+    <code>ingest_discovered_signals</code>, then calls
+    <code>persist_name_parses</code> only after the owner acknowledges the entire
+    batch. The scanner also retains the native-selector parser call that derives
+    candidate fields. Its helper issues no signal mutation statement of its own.
+    The private store, native full/type metadata reader, pooled script bundling
+    and recoverable timeout implementation are byte-identical to the delivered
+    pre-merge implementation. A new test exercises a zero acknowledgement and
+    proves no graph client or parser hook is called, then verifies the successful
+    owner-to-parser sequence.</p>
+  <p>The first combined run reproduced two fixture failures: the parser fixture
+    raised <code>ValueError: available archive metadata requires a successful
+    document</code>; the pipeline fixture reported <code>name parse write not
+    acknowledged; selector or facility changed</code>. It completed with
+    <strong>2 failed, 164 passed, 1 warning in 34.50s</strong>. Commit
+    <code>fd0958c4ee2911cb84b8e5cc44cd63e6bb808e03</code> supplies a successful
+    metadata document in the parser fixture and mocks and asserts the retained
+    parser hook in the pipeline fixture. The metadata document guard remains
+    active.</p>
+  <table>
+    <caption>Verification on all_debug, job 1317629</caption>
+    <thead><tr><th>Measure</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Focused scanner, store, pipeline, metadata, pooled runner and loader tests;
+        name parser and component schema tests; graph-marked parser and catalogue tests</td>
+        <td>166 passed, 1 warning in 32.60s; EXIT=0; zero failing test ids</td></tr>
+      <tr><td>Worktree model regeneration before the gate</td><td>EXIT=0; generated models unstaged</td></tr>
+      <tr><td>ITER signals before / after</td><td>94,633 / 94,633; difference 0</td></tr>
+      <tr><td>Facility properties and distinct identities before / after</td><td>94,633 / 94,633 for both controls</td></tr>
+    </tbody>
+  </table>
+  <p>The final gate includes every requested file and selects graph tests with
+    <code>-m 'not slow'</code>. Actual mutation tests use a disposable Neo4j
+    database whose fixture refuses the project graph. Read-only pilot receipts
+    were recorded at <code>2026-11-15T12:03:01.841935+00:00</code> and
+    <code>2026-11-15T12:03:49.151249+00:00</code>. No production graph nodes were
+    written, refreshed or deleted. The census remains 6,861 fast plus 988,145
+    slow, overlap 0, union 995,006; the private store retains that union.</p>
+  <p>Rigel job <strong>1317566 remains running separately and was not modified</strong>.
+    It uses pinned source in job-local scratch, independent of the merged tree.
+    Its durable progress receipt at <code>2026-11-15T12:03:04.840410+00:00</code>
+    records 67,815 of 995,006 variables complete (<strong>6.815537%</strong>),
+    including 38,550 full-metadata requests in 1,467.798633 seconds at
+    <strong>26.263821 variables/s</strong> in this job. It records zero timeout
+    events, reader restarts or failed variables in this interval. The earlier
+    fixed metadata-state/field snapshot and the 1/2/4-reader measurements above
+    remain the separately reproducible snapshots; no archive trial was added
+    during merge repair. Completion of this private scan does not hold code
+    delivery.</p>
+  <p>Evidence in the worker run directory: <code>merge-models.log</code>,
+    <code>merge-focused-graph.log</code> (the first run),
+    <code>merge-final-focused-graph.log</code>,
+    <code>merge-final-graph-before.log</code>, <code>merge-final-graph-after.log</code>
+    and <code>merge-content-check.log</code>. The private cache contains
+    <code>merge-final-graph-before.json</code> and
+    <code>merge-final-graph-after.json</code>. The scan's terminal receipt remains
+    <code>full-census/recovery-job-1317566-receipt.json</code>; the manifest keeps
+    its probe for later coordinator monitoring.</p>
+</section>
