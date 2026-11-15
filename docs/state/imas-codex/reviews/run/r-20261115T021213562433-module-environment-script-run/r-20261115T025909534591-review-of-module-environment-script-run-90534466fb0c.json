@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/remote/tools.py:211",
+    "imas_codex/mdsplus/extraction.py:234",
+    "imas_codex/mdsplus/extraction.py:294",
+    "imas_codex/mdsplus/extraction.py:364",
+    "imas_codex/mdsplus/extraction.py:587",
+    "imas_codex/discovery/code/scanner.py:122",
+    "imas_codex/discovery/paths/enrichment.py:275",
+    "imas_codex/discovery/signals/scanners/mdsplus.py:263"
+  ],
+  "completed_at": "2026-11-15T03:38:26.767Z",
+  "dispatched_at": "2026-11-15T02:59:42Z",
+  "findings": [
+    {
+      "disposition": "folded into codac-uda-signals s5",
+      "file": "imas_codex/remote/scripts/codac_uda.py",
+      "line": 177,
+      "severity": "non-blocking",
+      "text": "read(), fetch(), check_spacing() and pulses() (lines 90-308, about half the module) land with no control at this head: tests/remote/test_codac_uda.py exercises only connect() and variables(), so the paging, envelope and cadence-refusal paths section 5 owns can regress silently; fold into section 5 rather than repairing here."
+    },
+    {
+      "disposition": "exempted: each branch wraps a different interpreter form (the remote -S runner versus the local runner), so a shared helper would need the branch logic passed in for no reduction in surface",
+      "file": "imas_codex/remote/executor.py",
+      "line": 1177,
+      "severity": "non-blocking",
+      "text": "_local_python_script_command builds the setup-and-python command as a third copy of a construction already inline at executor.py:1293-1296 and 1421-1424; one helper could own the join for all three branches."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Seven production call sites pass setup_commands into the changed local branch: tools.py:211-217, extraction.py:234/294/364/587, code/scanner.py:122-128, paths/enrichment.py:275-281, scanners/mdsplus.py:263.",
+    "diff": "Read commit by commit (db8fe3608, f3153d9c9, 8a360101c, 90534466f): the executor local branch and docstrings, a 344-line packaged reader, three test files, and one evidence fragment; 671 insertions and 4 deletions, and no change reaches the remote branch.",
+    "done_when": "The done_when's parts are each measured: environment observed (test_local_setup_environment), unchanged no-setup launch (test_local_without_setup_preserves_direct_launch), both entry points (the run_local fixture parametrises sync and async), and a live listing with count and elapsed time (live-listings.log: count 1, 9.530946 s sync, 11.363129 s async).",
+    "goal": "Section 2's goal (one call, both entry points, facility-aware layer keeps resolution, reader reachable this way) is delivered by imas_codex/remote/executor.py:1170-1178 plus imas_codex/remote/scripts/codac_uda.py:29-334, with the live listing taken through both entry points.",
+    "manifest": "Read; it records status complete, the 21-test gate command, seven logs with EXIT lines, baseline_suite (4 failed at 1c2476da) and after_suite (0 failed), and the live receipt fields.",
+    "write_paths": "Read the manifest's declared paths imas_codex/remote/, tests/remote/ and the exact evidence fragment; git diff --stat 1c2476da..90534466f shows only files under those and no path outside them."
+  },
+  "justifications": {
+    "durability": "tests/remote/test_executor_environment.py:33-45 asserts the setup-set environment value and is red in baseline.log at 1c2476da, and negative-control.log shows test_local_setup_makes_client_importable[sync|async] failing on the setup-removal mutation.",
+    "evidence": "The gate names tests/remote/test_executor_environment.py and tests/remote/test_codac_uda.py (21 passed, re-run by this review), and baseline.log records the same setup tests red at base revision 1c2476da with EXIT=1.",
+    "fit": "The change follows the module's existing shape (imas_codex/remote/executor.py:1293-1296 remote branch joins setup the same way), ruff check and ruff format --check pass on all five files, and commit subjects carry conventional type and scope with bodies.",
+    "goal_fidelity": "imas_codex/remote/executor.py:1170-1178 applies caller setup and replaces the shell with the selected interpreter on both entry points, so a local run reaches the archive client's module environment in one call.",
+    "reuse": "No UDA reader exists in imas_codex/ (a search for 'uda' found only IMAS backend constants in iter.yaml:104-133 and unrelated identifiers), so the reader is a first owner; _local_python_script_command extends the executor's own command construction but is now the third such construction in that file.",
+    "scope_discipline": "Every changed path is inside the manifest's declared grants (imas_codex/remote/, tests/remote/, the named evidence fragment), but imas_codex/remote/scripts/codac_uda.py:177-308 lands the read/envelope/paging capability section 5 owns."
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261115T025909534591-review-of-module-environment-script-run-90534466fb0c",
+  "reviewed_base_sha": "1c2476daf9f7c83e4eaa0d56c60fb0d132c05136",
+  "reviewed_head_sha": "90534466fb0ca4ff7bb3f1436e2c6b0b8eaa86d0",
+  "reviewed_run_id": "r-20261115T021213562433-module-environment-script-run",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 17,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T03:38:51.059401+00:00",
+  "total": 106
+}
