@@ -115,6 +115,16 @@
       "note": "Section 2's delivered state and done-when now require that no script keeps a save wrapper of its own.",
       "reason": "",
       "when": "2026-11-15T22:32:06.710519+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "Section 2 requires one definition of the slide-size declaration across scripts/ and imas_codex/, owned by the shared function.",
+      "reason": "",
+      "when": "2026-11-15T22:32:11.978139+00:00"
     }
   ],
   "responses": {
@@ -135,6 +145,15 @@
       "note": "Section 1 places the legend outcome on the signal plot (one row for up to six traces, with a test) and no longer asks the save function to re-lay or refuse a legend.",
       "reason": "",
       "when": "2026-11-15T22:32:02.793361+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "note": "Section 2 requires one definition of the slide-size declaration across scripts/ and imas_codex/, owned by the shared function.",
+      "reason": "",
+      "when": "2026-11-15T22:32:11.978139+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
