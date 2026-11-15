@@ -1,0 +1,36 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T20:15:28.549Z",
+  "dispatched_at": "2026-11-15T20:09:58Z",
+  "figure_review": {
+    "caption_finding": "none: the caption states what each panel measures (equally-weighted cumulative curves, logarithmic horizontal axis, bar comparison of component-pattern descriptions by key) and points the reader at the numeric tables below, so it does not merely repeat a title",
+    "caption_judged": "read to establish context only; the visual verdicts below are taken from the rendered PNG, not from the SVG or its markup",
+    "caption_source": "docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html",
+    "drawing_script": "docs/figures/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern/plot.py",
+    "figure": "docs/figures/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern/grouping.svg",
+    "rendered_png_reviewed": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T200858662564-review-of-signals-grouped-by-component-and-pattern-47037b02f15f-figure/image-0.png"
+  },
+  "findings": [],
+  "project": "imas-codex",
+  "review_run_id": "r-20261115T200858662564-review-of-signals-grouped-by-component-and-pattern-47037b02f15f-figure",
+  "reviewed_base_sha": "e5ea75431aa77b351808144432080c0f82dde304",
+  "reviewed_head_sha": "47037b02f15f1d72a8d3db4a5ab68cc94b590067",
+  "reviewed_run_id": "r-20261115T171542222928-signals-grouped-by-component-and-pattern",
+  "reviewer_run_id": "r-20261115T200858662564-review-of-signals-grouped-by-component-and-pattern-47037b02f15f-figure",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass: all text \u2014 tick labels, axis labels, legend entries, direct value labels and category labels \u2014 is dark on a white background at full strength, with no coloured or lightened text anywhere.",
+    "data_ink": "pass: the plotted lines and the two bars are the dominant ink; the panels carry no gridlines, no background fill and no shading, and every mark stands for a measured quantity (the 1,802 and 413 labels match the run's recorded field_patterns and category_patterns, and the blue curve's 12 % intercept at x=1 matches 3,338 singleton component groups of 27,253).",
+    "decoration": "pass: no gradient, no background fill, no styled theme and no decorative annotation; top and right spines are absent on both panels and only the axes that carry a scale remain.",
+    "label_collision": "pass: no text is clipped at any canvas edge and no text overlaps another or the data \u2014 the figure-level legend sits in clear space above the left panel, the '1,802' and '413' labels sit above their bars in empty space, and both the 10^4 tick label and the right panel's category labels render fully inside the canvas.",
+    "legibility": "pass: at the rendered width both panels read at a glance \u2014 the left panel is a two-series cumulative group-size distribution on a logarithmic axis from 10^0 to 10^4 with y ticks at 0/25/50/75/100 %, axis labels 'variables per group' and 'groups at or below size [%]', and a two-entry legend identifying 'control nodes' (dashed grey) and 'components' (solid blue); the right panel compares two labelled count categories, 'category + fields' at 1,802 and 'category only' at 413, with the values written directly above each bar and the y axis labelled 'pattern descriptions'.",
+    "table_form": "pass: the image depicts a distribution and a magnitude comparison rather than rows of values; the right panel is a two-category comparison where the relative heights carry the values at a glance, and the caption directs readers to the numeric tables for the exact totals."
+  },
+  "scope_note": "Read-only review: no file was edited, created, moved, deleted, redrawn or relabelled, and no SVG was opened, listed, searched, rendered or read.",
+  "status": "parsed",
+  "summary": "One rendered two-panel figure. Left: cumulative group-size distribution for component groups (27,253) and control-node groups (1,777) on a log horizontal axis. Right: two labelled pattern-description counts, 1,802 and 413. All six figure rubric items pass; no blocking or non-blocking finding is recorded.",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T20:16:40.135723+00:00",
+  "total": null
+}
