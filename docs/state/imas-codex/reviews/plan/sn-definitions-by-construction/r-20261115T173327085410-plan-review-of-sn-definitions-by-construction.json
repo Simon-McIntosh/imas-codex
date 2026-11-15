@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T17:36:16.202Z",
+  "dispatched_at": "2026-11-15T17:35:56Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261115T173327085410-plan-review-of-sn-definitions-by-construction/plan.html:113",
+      "id": "reasoning-1",
+      "reason": "the plan must name the one measure its closing census uses and give the earlier reading in that same measure, otherwise the section's own baseline line invites an improvement claim that neither reading establishes.",
+      "text": "the changed clause lays the closing census beside \"8 forms over 32 flux-surface-average names\" from \u00a71 and \"3 forms over 73 flux-surface-average names\" from the live closing census as two comparable baselines, but the 8 is a count of distinct notation-style combinations in published-operator-census.txt (langle_plain+oint+gradpsi_weight 17, langle_sub+oint+gradpsi_weight 3, langle_sub+oint+Bp_weight 3, langle_plain+gradpsi_weight 3, langle_sub+oint 2, langle_sub+gradpsi_weight 2, langle_sub 1, langle_plain 1 \u2014 exactly 8), while the 3 is a count of distinct matched sentence texts under shared_part_form_counts, and the largest of those three forms is the `<omitted>` bucket holding 69 of the 73 names (rewrite-closing-census.json phases.live.operators.flux_surface_averaged: form_count 3, omitted_count 69, the other forms holding 1 name and 3 names), so the two figures count different quantities and the live one counts silence as a form while the published one counts only names that state the average \u2014 a \u00a76 node comparing its closing count to both would report a 5-form improvement the instruments do not support and cannot tell whether the closure is measured on the sentence wording or on the notation style",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e12783405cd4cafe625346f3feded7fe7557efc1",
+  "plan_fingerprint": "cf207dad8821d49e905783d62f23f89be079a8db94d33d33931752fa3f986d19",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 58,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T173327085410-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "71b05f1e119e244ffad61bc527eb62f8f227a129",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the snapshot's s1, s2, s3, s5, s10 and s6 targets resolve; s6 cites sections, not files, and the sections it cites exist.",
+    "done_when": "pass \u2014 s6's closing items are measurable counts recorded beside earlier readings, and its last item is a declared negative control: the census must count a family planted divergent in a disposable graph after the pass as it did before.",
+    "evidence_paths": "pass \u2014 the readings s6 measures against sit on committed paths under docs/evidence/fragments/sn-definitions-by-construction/ (rewrite-closing-census.json, family-wording-pass.json, rendered-wording-census.json), not a scratchpad.",
+    "naming": "pass \u2014 s6 introduces no symbol or file name, so no plan label or tracker identifier reaches code through it.",
+    "reasoning": "a finding \u2014 s6's changed first item states its two baselines \"each stated with its population so that like is compared with like\", but the 8-form published figure and the 3-form live figure are produced by different instruments, so the comparison the clause asks for is not the one its cited readings hold.",
+    "single_goal": "pass \u2014 s6 carries one deliverable: the live catalog rewritten to the settled wording, with its spend ceiling and census as constraints on that one pass.",
+    "wiring": "pass \u2014 s6's depends-on carries s2, s3, s4, s5 and s10, all of which its prose invokes, s10's own depends-on names s2, and plan-effort-hours 41.0 equals the ten sections' sum (0.5+7.0+3.0+3.0+5.0+6.0+2.5+4.0+4.0+6.0)."
+  },
+  "section_digests": {
+    "_document": "11e2e68b156624b18e8ed5742aa27fcf534e457bc07dfce61888ca751e83d678",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "46e7d77d1d87e3bfaef90b2e9feebcfe5b260d89c304aa7a6acc2a9763ea1e24",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:45:08.161864+00:00",
+  "total": null
+}
