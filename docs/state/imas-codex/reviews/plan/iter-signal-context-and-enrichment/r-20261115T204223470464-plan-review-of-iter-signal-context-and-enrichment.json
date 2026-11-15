@@ -67,6 +67,16 @@
       "note": "The stale follow-up is resolved, recording that sections 2, 3 and 5 landed and that sections 4 and 10 are the pending ones behind ICP access and the archive scan.",
       "reason": "",
       "when": "2026-11-15T21:16:35.508791+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "Section 9 now also waits on section 10, so the protected archive is taken after the re-run has retired and re-created component and pattern nodes.",
+      "reason": "",
+      "when": "2026-11-15T21:16:42.908040+00:00"
     }
   ],
   "responses": {
@@ -78,6 +88,15 @@
       "note": "The stale follow-up is resolved, recording that sections 2, 3 and 5 landed and that sections 4 and 10 are the pending ones behind ICP access and the archive scan.",
       "reason": "",
       "when": "2026-11-15T21:16:35.508791+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "note": "Section 9 now also waits on section 10, so the protected archive is taken after the re-run has retired and re-created component and pattern nodes.",
+      "reason": "",
+      "when": "2026-11-15T21:16:42.908040+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment.json",
