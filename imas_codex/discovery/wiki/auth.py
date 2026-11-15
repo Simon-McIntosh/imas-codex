@@ -610,6 +610,26 @@ class CredentialManager:
                 )
             return False
 
+    def get_stored_credentials(self, site: str) -> tuple[str, str] | None:
+        """Read credentials from the system keyring without prompts or env fallback."""
+        if not self._keyring_available:
+            return None
+        import keyring
+
+        value = self._keyring_op(
+            lambda: keyring.get_password(self._service_name(site), "credentials")
+        )
+        if not value:
+            return None
+        try:
+            data = json.loads(value)
+            username, password = data["username"], data["password"]
+        except (ValueError, KeyError, TypeError):
+            return None
+        if not isinstance(username, str) or not isinstance(password, str):
+            return None
+        return (username, password) if username and password else None
+
     def get_credentials(
         self,
         site: str,

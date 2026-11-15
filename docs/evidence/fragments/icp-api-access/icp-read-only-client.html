@@ -1,0 +1,252 @@
+<article id="icp-read-only-client-evidence">
+  <h2>Authenticated integration description read through the guarded client</h2>
+  <p>The client signs in with keyring credentials and reads the API description with gateway
+  session cookies, without configuring an API bearer token. API paths resolve directly from
+  the configured origin. The live description contains <strong>793 paths, 815 operations and
+  471 GET reads</strong>, matching the lead-supplied private copy. The operations are 471 GET,
+  324 POST, 11 DELETE and 9 PUT; no HEAD operation is declared. The declared <code>Bearer</code>
+  security scheme is HTTP bearer with JWT format.</p>
+  <p><strong>Live transport measure:</strong> 11 requests completed: <strong>six integration GETs</strong>,
+  one identity-provider GET, three identity-provider POSTs and one sign-in-gateway POST.
+  There were no integration writes or refused requests in this successful run. Nine requests
+  belonged to the bounded sign-in exchange; two were integration GETs after authentication.
+  Every sign-in receipt includes method, origin and path, without query, body, headers,
+  cookies or token values. The successful transport policy is committed at
+  <code>3e8e2326650d58b6b55ea7898da4a8b3199c3d9a</code>; the subsequent diagnostic-privacy repair
+  is committed at <code>4c2bf413989b5b030fbdbd8fc777cfd5687bb08f</code>.</p>
+  <h3>Authentication boundary and authorisation</h3>
+  <p>The first guarded exchange refused a POST to a third HTTPS origin. The later lead ruling
+  authorises form POSTs during sign-in on observed origins in ignored private configuration.
+  It supersedes the plan sentence: “The only other requests the client may issue are the
+  sign-in exchange with the identity provider's own login host.” The additional origin and
+  observed handoff path are recorded only in private receipts and private configuration.</p>
+  <p>A non-read request requires an explicit, unsigned sign-in exchange and a recognised
+  sign-in form POST. Credentials go only to configured identity-provider origins.
+  Integration-host POSTs additionally require an exact configured gateway path; API and
+  documentation paths remain GET/HEAD-only in every state, even if included in the gateway
+  configuration. After authentication every request is GET or HEAD to the integration origin.
+  Stale-session renewal clears the authenticated state and explicitly re-enters sign-in.
+  Sign-in has a 40-request total budget and the shared exchange's bounded redirect loop.</p>
+  <p>Missing keyring credentials refuses before HTTP, even when environment credentials exist.
+  No prompts, credential files or environment-password fallback are used. Cookies keep their
+  native domain/path scope in memory; they are not flattened into a cross-host persistent store.</p>
+  <h3>Checks and negative controls</h3>
+  <p>The committed source passed <strong>151 focused tests</strong>. POST, PUT, PATCH and DELETE
+  are refused before transport through the client, session convenience methods, prepared
+  requests, base-session calls and direct adapter sends. Fixed-method entry points reject
+  method overrides before transport. Removing the integration method check makes
+  <strong>28 write-refusal tests fail</strong>. Removing the unsigned-exchange state check makes
+  <strong>nine sign-in refusal tests fail</strong>. Tests also refuse foreign origins, a forged
+  Host header, replaced transport, disabled TLS verification, arbitrary POST bodies and
+  credentials sent to a gateway. API POSTs remain refused during and after sign-in.</p>
+  <p>Session-renewal tests cover an unauthorized response, gateway reload HTML, an identity
+  redirect and a relative gateway-policy redirect. Persistent expiry is retried once and
+  then refused. A synthetic privacy reproduction failed because shared sign-in diagnostics
+  logged the synthetic username; its repair checks that credentials, the configured
+  application origin and a redirect query value do not enter those diagnostics. Live probes
+  disabled library logging and recorded only explicit private request receipts.</p>
+  <h3>Paging, request rate and document leads</h3>
+  <p>Plant and component search GETs declare <code>start</code> (integer, default 0) and
+  <code>tot</code> (integer, default 10). List-view request schemas declare integer
+  <code>pageIndex</code>, nullable integer-array <code>pageIndexes</code>, and integer
+  <code>pageSize</code>, without bounds or defaults in the examined schema. The plant list
+  operation <code>/api/machine-component/pbs/type/list-contents</code> uses POST and stays
+  refused, as do POST query operations. No explicit request-rate limit or retry header was
+  found in the description; the client spaces transport calls by 0.5 seconds by default,
+  at most two per second within one client. The search found 790 parameter declarations,
+  including the named search parameters, establishing a positive control for this inspection.</p>
+  <p>The table lists all 168 machine-component GET operations and the email-attachment GET.
+  Generic <code>file/.../stream</code> and <code>file/.../temp-url</code> routes provide file leads.
+  Searching all 793 paths for IDM, document or attachment names found the email-attachment
+  route and no explicitly named IDM or document route in this description. This does not
+  establish whether IDM has a separate API. Some advertised GETs have administrative names:
+  the table records their declared HTTP method, not independent proof of application semantics.
+  None of these record operations was called by this node.</p>
+  <h3>Source audit and durable receipts</h3>
+  <p>The request/send source search finds the HTTP adapter send at <code>_GuardedAdapter.send</code>,
+  preceded by <code>_RequestPolicy.check</code>. Client preflight, session sends, direct adapter
+  sends and redirected prepared requests use that same check. The shared sign-in exchange is
+  injected with this guarded session and creates no separate ICP transport. A tracked-tree
+  scan found zero private-origin literals. No credentials, cookies, token values, full API
+  description, fetched plant records or private origin are committed.</p>
+  <p>Private receipts in the node's run directory include <code>focused-committed.log</code>,
+  <code>negative-method-final.log</code>, <code>negative-state.log</code>,
+  <code>privacy-reproduction.log</code>, <code>live-authorised-sign-in.log</code>,
+  <code>live-summary.json</code>, <code>live-receipt-summary.json</code>,
+  <code>sign-in-observed-origins.json</code> and <code>source-audit.json</code>.
+  On integration, the coordinator transfers the private receipt's <code>configured</code>
+  object into the canonical ignored facility configuration's <code>icp</code> section and
+  owns the separately dispatched merged-head verification.</p>
+  <h3>Declared read-operation inventory</h3>
+  <table><thead><tr><th>Method</th><th>Origin-relative path</th></tr></thead><tbody>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/building/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/floor/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/room/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/dashboard/map</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/dashboard/component/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/dashboard/pbs-schedule/{pbsUid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/dashboard/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/{uid}/clone/validate</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/create-dto</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/type/create</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/type/view</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/type/content/{uid}/edit/{propertyName}/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/type/can-cast/{childTypeName}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/type/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/type/list-contents/filters</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/type/fakes</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/discipline/type/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/tree</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/tree/paths/{contentTypeName}/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/tree/{nodeUid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/tree/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/type/view</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/type/can-cast/{childTypeName}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/type/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/type/list-contents/filters</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/type/fakes</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/gbs/type/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/by-reference/{referenceText}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/{uid}/is-deleted</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/{uid}/clone/validate</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/create-dto</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/type/create</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/type/view</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/type/content/{uid}/edit/{propertyName}/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/type/can-cast/{childTypeName}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/type/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/type/list-contents/filters</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/type/fakes</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/type/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/validator/update-valid-fr</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/navisworks-file/urn-from-component/{componentIdentifier}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/navisworks-file/urn-from-pbs/{pbsUid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/get-aps-token</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/navisworks-file/bulk-data-update</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/navisworks-file/bulk-pbs-authorization-update</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/navisworks-file/single-pbs-authorization-update/{pbsUid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/navisworks-file/clean-orphan-component/{componentUid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/navisworks-file/clean-orphan-components</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/navisworks/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/type/view</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/type/can-cast/{childTypeName}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/type/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/type/list-contents/filters</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/type/fakes</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs-schedule/type/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/tree</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/tree/paths/{contentTypeName}/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/tree/{nodeUid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/tree/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/type/view</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/type/can-cast/{childTypeName}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/type/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/type/list-contents/filters</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/type/fakes</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/pbs/type/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/tree</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/tree/paths/{contentTypeName}/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/tree/{nodeUid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/tree/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/type/view</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/type/can-cast/{childTypeName}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/type/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/type/list-contents/filters</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/type/fakes</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/sbs/type/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/content/{uid}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/content/batch</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/content/revision/{revisionId}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/content/{uid}/copy-origin</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/content/{uid}/actions</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/content/{uid}/user/{userId}/can-subscribe</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/content/{uid}/file/{propertyName}/stream</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/content/{uid}/file/{propertyName}/temp-url</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/type/view</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/type/can-cast/{childTypeName}</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/type/search</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/type/list-contents/filters</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/type/fakes</code></td></tr>
+<tr><td>GET</td><td><code>/api/machine-component/ttt-code/type/hello</code></td></tr>
+<tr><td>GET</td><td><code>/api/main/email/content/{uid}/attachment/{index}/stream</code></td></tr>
+  </tbody></table>
+</article>
