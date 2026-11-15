@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T10:45:16.770Z",
+  "dispatched_at": "2026-11-15T10:07:47Z",
+  "figures": [
+    {
+      "caption": "Every valid name, split by how its copied list reads against its producer edges. The 754 disagreeing names change their review input, so their next review run re-runs them. Read on the live graph on 2026-11-15.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-copy-versus-edges.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T100608879592-review-of-scc-sources-read-from-one-place-d12231ef2dc7-figure/image-0.png",
+      "rubric_verdicts": {
+        "contrast": "Pass with one caveat. The '580' and '163' labels clear the 4.5:1 text floor at about 5.8:1 and 6.1:1, and the black tick and axis text is far above it; the in-bar '4,099' is white on #929292 at about 3.1:1, under the 4.5:1 floor for 14 pt text, and is recorded as a non-blocking finding.",
+        "data_ink": "Pass. The bar is four solid flat fills with no edge stroke; the only other ink is the bottom scale, the left spine, six tick labels, one axis label and four legend entries.",
+        "decoration": "Pass. No background fill, gradient, hatch or gridline; the top and right spines are absent, so nothing frames the bar beyond the scale it is read against.",
+        "label_collision": "Pass. Nothing is clipped or overlapping: the legend runs as one row fully inside the canvas, the axis label clears the tick row, the '163' label fits inside its segment (about 36 px wide against about 26 px of text), and the value labels are centred in their own segments.",
+        "legibility": "Pass. One stacked horizontal bar on a 4,853-name axis; three counts are printed inside their own segments (4,099 / 580 / 163) and the fourth in the legend, the axis reads 'valid names on the live graph [count]', and the agree-versus-disagree split (4,099 against 754) is taken in at a glance.",
+        "table_form": "Pass. Four counts could be four table rows, and every count is also printed in the legend, but the bar carries the part-to-whole proportion that is the section's argument \u2014 the 754 disagreement is 15.5% of the 4,853 valid names \u2014 which a four-row table would not show."
+      }
+    },
+    {
+      "caption": "The disagreement population. The 85 are the names whose copy is absent while a data-dictionary path produces them; the 501 are the same disagreement over derived and other producers. Read on the live graph on 2026-11-15, before the change.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-reader-agreement.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T100608879592-review-of-scc-sources-read-from-one-place-d12231ef2dc7-figure/image-1.png",
+      "rubric_verdicts": {
+        "contrast": "Pass. The value labels are #222222 on white and the heading is #444444 on white, both far above the text floor; the #929292 population grey sits at about 3.1:1 against white as the intended population weight, and it carries no text on top of it.",
+        "data_ink": "Pass. Two solid flat bars, two value labels, the axes, one heading sentence and one axis label. There is no legend, correctly, because the y-axis names carry the categories.",
+        "decoration": "Pass. No grid, no background fill and no frame beyond the left and bottom spines; the top and right spines are absent.",
+        "label_collision": "Pass. The heading is a single line that ends well inside the canvas width, both value labels sit clear of their bar ends in open white, and no text touches another artist or the data.",
+        "legibility": "Pass. Two horizontal bars on the 14 x 7.2 in canvas, each category named on the y axis, the count printed just past each bar end (85 blue, 501 grey), and the x axis labelled 'live names [count]'; the 5.9-to-1 split reads at a glance.",
+        "table_form": "Pass. Two counts could be two table rows, but bar length is what shows the 501-to-85 disproportion the surrounding prose argues; a table would flatten it."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted: read-only review, and the figure remains readable because the legend states the count. If a follow-up touches the figure, giving the 'both' segment a hatch or a repositioned value label outside the bar would make it visible without changing the data.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-copy-versus-edges.svg",
+      "id": "f8ece9e23cc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 11-name 'both' segment is about 2 px wide at this scale and drawn in near-black (#4d4d4d) at the right end of the bar, where it reads as an axis spine rather than as data: the bar visually appears to stop at 4,842 while the axis tick reads 4,853. The count 11 survives only in the legend entry 'both (11)', so a reader reconciling the bar end against the total has to notice the legend to close the gap."
+    },
+    {
+      "disposition": "exempted: read-only review and legible as rendered; darkening the grey or moving the label outside the bar are both cheap if the figure is redrawn.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-copy-versus-edges.svg",
+      "id": "f8ece9e23cc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The in-bar '4,099' is white text on the #929292 population grey, about 3.1:1 \u2014 legible in the render but below the 4.5:1 floor for 14 pt text, and it is the label on the largest and most load-bearing segment. The other two in-bar labels are on darker fills (#2f6b8f about 5.8:1, #7a4fa3 about 6.1:1) and clear the floor."
+    },
+    {
+      "disposition": "exempted: read-only review, and neither figure is misread on its own because each names its categories directly; a shared colour-role table would fix the pair if both are redrawn.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-reader-agreement.svg",
+      "id": "ff207f8bccc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The same near-identical blue marks two unrelated things across the section's two figures: #2f6b8f is 'copy omits a source the edges give' in scc-copy-versus-edges and #2e6f9e is 'DD-path producer' in scc-reader-agreement. A reader moving between the figures carries a colour meaning that is also correct for the other figure."
+    }
+  ],
+  "notes": [
+    "Read-only review: no figure, caption, script or other file was edited, created, moved or deleted by this review. Both verdicts were formed from the two named rendered PNGs opened with this review's own read tool; no SVG was opened, read, rendered or git-shown.",
+    "Both figures reconcile with the evidence fragment at the reviewed head: 4,099 + 580 + 163 + 11 = 4,853 and 580 + 163 + 11 = 754, and 85 + 501 = 586, matching the prose and the fragment's alt text.",
+    "The 586-name figure (image-1 / scc-reader-agreement.svg) is the same figure reviewed at head 2737c1643d5dc112f9ae278907f4923978a04e21; it renders the same and its earlier verdicts stand. The 4,853-name figure (image-0 / scc-copy-versus-edges.svg) is new at this head and is reviewed here for the first time.",
+    "The two headings are complementary rather than duplicative: the 586 figure's in-figure sentence states the total population, which its caption does not, and the 4,853 figure carries no title at all, leaving that job to its caption. Neither caption merely repeats a title."
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261115T100608879592-review-of-scc-sources-read-from-one-place-d12231ef2dc7-figure",
+  "reviewed_base_sha": "627f130454280df801a52c61af57cbcb4cde08b0",
+  "reviewed_head_sha": "d12231ef2dc7cef060028176f61047a997e1492d",
+  "reviewed_run_id": "r-20261114T211624671239-scc-sources-read-from-one-place",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T10:50:19.660072+00:00",
+  "total": null
+}
