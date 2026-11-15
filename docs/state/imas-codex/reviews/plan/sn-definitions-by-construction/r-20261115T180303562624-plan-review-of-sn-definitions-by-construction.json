@@ -17,7 +17,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 61,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5784c256581f584112cdeb684c089a47d6e3b703",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The population is now stated once and unambiguously: the live names whose identifier carries the operator, whether or not their definition names it. A name that never states its operator is inside the population and counts as not carrying the stored sentence, so the planted control can be reported.",
+      "reason": "",
+      "when": "2026-11-15T19:24:47.864865+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5784c256581f584112cdeb684c089a47d6e3b703",
+      "commit_basis": "edit",
+      "note": "The population is now stated once and unambiguously: the live names whose identifier carries the operator, whether or not their definition names it. A name that never states its operator is inside the population and counts as not carrying the stored sentence, so the planted control can be reported.",
+      "reason": "",
+      "when": "2026-11-15T19:24:47.864865+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261115T180303562624-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261115T180303562624-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "a233a45691383e73f008c8f07e35132a014e13cd",
   "rubric": "content",
