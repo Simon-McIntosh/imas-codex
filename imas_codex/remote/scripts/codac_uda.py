@@ -9,6 +9,7 @@ Archive addresses and operator exclusions come from deployment configuration.
 from __future__ import annotations
 
 import contextlib
+import ipaddress
 import json
 import os
 import sys
@@ -23,7 +24,11 @@ class ReadError(RuntimeError):
 
 
 def _host_key(host: str) -> str:
-    return host.strip().rstrip(".").split(".", 1)[0].lower()
+    hostname = host.strip().rstrip(".").lower()
+    try:
+        return str(ipaddress.ip_address(hostname))
+    except ValueError:
+        return hostname.split(".", 1)[0]
 
 
 def connect(host: str, operator_hosts: list[str], port: int = 3090, factory=None):
@@ -46,7 +51,11 @@ def connect(host: str, operator_hosts: list[str], port: int = 3090, factory=None
 
 
 def _token(value: str) -> str:
-    if not value or any(char in value for char in ",=\n\r"):
+    if (
+        not isinstance(value, str)
+        or not value
+        or any(char in value for char in ",=\n\r")
+    ):
         raise ValueError("query tokens must be nonempty and contain no separators")
     return value
 
@@ -89,7 +98,10 @@ def variables(client, request: dict) -> dict:
 
 def pulses(client, request: dict) -> dict:
     """Serialize SWIG pulse objects explicitly rather than relying on repr()."""
-    found = list(client.getPulses2(_token(request["pattern"])))
+    pattern = _token(request["pattern"])
+    if not pattern.endswith("/*"):
+        pattern = pattern.rstrip("/") + "/*"
+    found = list(client.getPulses2(pattern))
     limit = int(request.get("limit", 1000))
     if limit < 1 or len(found) > limit:
         raise ReadError("pulse catalogue exceeds limit; narrow the pattern")
@@ -174,6 +186,66 @@ def _limited(error: str | None) -> bool:
     return "samples in reply" in message and ("limit" in message or "exceed" in message)
 
 
+def _held_window(reply: Reply, start: int, end: int) -> tuple[Reply, int | None]:
+    """Clip event samples and expose the held boundary values explicitly."""
+    check_spacing(reply.time, None)
+    before = np.flatnonzero(reply.time <= start)
+    since = int(reply.time[before[-1]]) if len(before) else None
+    inside = (reply.time >= start) & (reply.time <= end)
+    times, values = reply.time[inside], reply.values[inside]
+    if len(before) and (not len(times) or times[0] != start):
+        times = np.concatenate((np.array([start], dtype=np.int64), times))
+        values = np.concatenate((reply.values[before[-1] : before[-1] + 1], values))
+    if len(times) and times[-1] < end:
+        times = np.concatenate((times, np.array([end], dtype=np.int64)))
+        values = np.concatenate((values, values[-1:]))
+    return Reply(
+        times, values, reply.unit, reply.description, empty=not len(times)
+    ), since
+
+
+def _aggregate(
+    reply: Reply, start, end, bins: int, *, held: bool, envelope: bool
+) -> Reply:
+    """Aggregate numeric samples; event values are weighted by their hold time."""
+    if reply.values.dtype.kind not in "biuf" or reply.values.ndim != 1:
+        raise ReadError("binning requires a scalar numeric field")
+    centers, values = [], []
+    for index in range(bins):
+        left = start + (end - start) * index // bins
+        right = start + (end - start) * (index + 1) // bins
+        if held:
+            if not len(reply.time) or reply.time[0] > left:
+                continue
+            selected = (reply.time[:-1] < right) & (reply.time[1:] > left)
+            samples = reply.values[:-1][selected]
+            durations = np.minimum(reply.time[1:][selected], right) - np.maximum(
+                reply.time[:-1][selected], left
+            )
+            if not len(samples):
+                continue
+            mean = float(np.average(samples, weights=durations))
+        else:
+            selected = (reply.time >= left) & (
+                (reply.time <= right) if index == bins - 1 else (reply.time < right)
+            )
+            samples = reply.values[selected]
+            if not len(samples):
+                continue
+            mean = float(np.mean(samples))
+        centers.append(left + (right - left) // 2)
+        values.append(
+            [mean, float(np.min(samples)), float(np.max(samples))] if envelope else mean
+        )
+    return Reply(
+        np.asarray(centers, dtype=reply.time.dtype),
+        np.asarray(values, dtype=float),
+        reply.unit,
+        reply.description,
+        empty=not len(centers),
+    )
+
+
 def read(client, request: dict) -> dict:
     """Request raw samples explicitly, paging only after a reply-limit refusal.
 
@@ -186,7 +258,11 @@ def read(client, request: dict) -> dict:
     name = f"{variable}/{_token(field)}" if field else variable
     time_format = request.get("time_format", "absolute")
     mode = request.get("mode", "raw")
-    if time_format not in {"absolute", "relative"} or mode not in {"raw", "envelope"}:
+    if time_format not in {"absolute", "relative"} or mode not in {
+        "raw",
+        "envelope",
+        "binned",
+    }:
         raise ValueError("unsupported timestamp format or read mode")
     start, end = request.get("start"), request.get("end")
     pulse = request.get("pulse")
@@ -208,6 +284,27 @@ def read(client, request: dict) -> dict:
     max_pages = int(request.get("max_pages", 20))
     bins = int(request.get("bins", 1000))
     expected = request.get("expected_spacing")
+    semantics = request.get("semantics", "samples")
+    lookback = request.get("lookback_ns", 0)
+    byte_limit = request.get("max_bytes", 8_388_608)
+    window_limit = request.get("max_window_ns", 60_000_000_000)
+    if semantics not in {"samples", "held"}:
+        raise ValueError("unsupported signal semantics")
+    held = semantics == "held"
+    if type(lookback) is not int or lookback < 0 or (lookback and not held):
+        raise ValueError("lookback requires held-value semantics")
+    if held and (time_format != "absolute" or start is None or expected is not None):
+        raise ValueError("held values require absolute bounds and no regular cadence")
+    if type(byte_limit) is not int or not 1 <= byte_limit <= 8_388_608:
+        raise ValueError("byte bound must be positive and at most 8388608")
+    if type(window_limit) is not int or not 1 <= window_limit <= 60_000_000_000:
+        raise ValueError("window bound must be positive and at most 60000000000 ns")
+    if (
+        start is not None
+        and (end - start) * (1 if time_format == "absolute" else 1e9) + lookback
+        > window_limit
+    ):
+        raise ReadError("requested window exceeds bound")
     if min(maximum, page_size, max_pages, bins) < 1 or maximum > 100_000:
         raise ValueError(
             "sample and page bounds must be positive; at most 100000 samples"
@@ -216,19 +313,31 @@ def read(client, request: dict) -> dict:
         raise ValueError("envelope bin count exceeds sample bound")
     if expected is not None and (not np.isfinite(expected) or expected <= 0):
         raise ValueError("expected_spacing must be finite and positive")
+    if (
+        mode != "envelope"
+        and expected is not None
+        and start is not None
+        and (end - start) / expected > maximum
+    ):
+        raise ReadError("expected sample count exceeds sample bound")
     parts = [f"variable={name}", f"tsFormat={time_format}"]
     if pulse:
         parts.append(f"pulse={_token(pulse)}")
     if start is not None:
         suffix = "S" if time_format == "relative" else ""
-        parts.extend((f"startTime={start}{suffix}", f"endTime={end}{suffix}"))
-    parts.append(f"decSamples={-1 if mode == 'raw' else bins}")
-    if mode == "envelope":
+        parts.extend(
+            (f"startTime={start - lookback}{suffix}", f"endTime={end}{suffix}")
+        )
+    raw_fetch = mode != "envelope" or held
+    parts.append(f"decSamples={-1 if raw_fetch else bins}")
+    if held:
+        parts.append("extSamples=true")
+    if not raw_fetch:
         parts.append("decType=env")
     query = ",".join(parts)
     queries = [query]
     reply = fetch(client, query)
-    if mode == "raw" and _limited(reply.error):
+    if raw_fetch and _limited(reply.error):
         if expected is None:
             raise ReadError("expected_spacing is required to verify raw pages")
         pages = []
@@ -275,21 +384,34 @@ def read(client, request: dict) -> dict:
         )
     if len(reply.time) > maximum:
         raise ReadError("read exceeds sample bound")
-    if mode == "raw":
+    if raw_fetch:
         check_spacing(reply.time, expected)
     elif len(reply.time) and (reply.values.ndim != 2 or reply.values.shape[1] != 3):
         raise ReadError("envelope must contain mean, minimum and maximum columns")
     if reply.time.dtype.kind not in ("iu" if time_format == "absolute" else "f"):
         raise ReadError("returned timestamp dtype disagrees with requested time base")
-    return {
+    held_since = None
+    if held:
+        reply, held_since = _held_window(reply, start, end)
+    if mode == "binned" or (held and mode == "envelope"):
+        reply = _aggregate(
+            reply, start, end, bins, held=held, envelope=mode == "envelope"
+        )
+    if len(reply.time) > maximum:
+        raise ReadError("held boundaries exceed sample bound")
+    result = {
         "name": name,
         "unit": reply.unit,
         "description": reply.description,
         "time_base": "epoch_ns" if time_format == "absolute" else "pulse_seconds",
         "decimated": True
-        if mode == "envelope"
+        if mode != "raw"
         else (False if expected is not None and len(reply.time) > 1 else None),
-        "sampling_verification": "server_envelope"
+        "sampling_verification": "held_value_bins"
+        if held and mode != "raw"
+        else "local_sample_bins"
+        if mode == "binned"
+        else "server_envelope"
         if mode == "envelope"
         else (
             "cadence_checked"
@@ -297,6 +419,10 @@ def read(client, request: dict) -> dict:
             else "explicit_raw_request"
         ),
         "mode": mode,
+        "semantics": "zero_order_hold" if held else "archived_samples",
+        "held_since_ns": held_since,
+        "held_start_covered": held_since is not None if held else None,
+        "boundary_values_synthesized": held,
         "query": query,
         "queries": queries,
         "empty": reply.empty,
@@ -305,6 +431,15 @@ def read(client, request: dict) -> dict:
         "time": reply.time.tolist(),
         "values": reply.values.tolist(),
     }
+    try:
+        size = len(json.dumps(result, allow_nan=False).encode())
+    except ValueError as exc:
+        raise ReadError(
+            "nonfinite values cannot be represented in a JSON reply"
+        ) from exc
+    if size > byte_limit:
+        raise ReadError("serialized reply exceeds byte bound")
+    return result
 
 
 def dispatch(client, request: dict) -> dict:
