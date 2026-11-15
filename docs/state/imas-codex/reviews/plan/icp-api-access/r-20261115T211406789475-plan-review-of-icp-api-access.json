@@ -1,0 +1,82 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T21:16:33.902Z",
+  "dispatched_at": "2026-11-15T21:16:04Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/transfer.py:481",
+      "id": "reuse_search-1",
+      "reason": "\u00a74's \"fetches one document's file ... with its metadata and a digest\" should be an endpoint delivered through the owner of session-injected transport, and \u00a72's HEAD-for-size requirement is already that owner's method.",
+      "text": "\u00a72 and \u00a74 need an authenticated GET/HEAD transport and one already exists: HTTPBackend/TransferClient (transfer.py:589) takes an injected requests.Session, exposes get_size() as HEAD (:507/:629) and download() (:529), and is the path the wiki pipeline already uses for exactly this (\u00a74-shaped) job at imas_codex/discovery/wiki/pipeline.py:1914 fetch_document_content and :1865 fetch_document_size; the plan proposes a client whose document fetch and size probe would be a second transport beside it",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/base/rate_governor.py:54",
+      "id": "reuse_search-2",
+      "reason": "\u00a73's rate bound is a figure with an instrument, and the design must state that it inherits a per-client sleep loop rather than a governor, or \u00a73's rate claim has no owner and will differ from every other wiki client's bound.",
+      "text": "the only process-wide pacing mechanism in the tree is AdaptiveConcurrencyGovernor, which is LLM-call AIMD and not a request pacer, so \u00a73's \"measured request rate stays at or below the stated bound\" has no pacer to reuse and rests on the four hand-rolled RATE_LIMIT_DELAY loops (confluence.py:56 with _rate_limit at :151, mediawiki.py:58 with copies at :193 and :792)",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/wiki/pipeline.py:1914",
+      "id": "thin_wrapper-1",
+      "reason": "\u00a74 should be stated as \"the existing download path plus a private-store write and digest\", so the plan's done-when can name the private store and the digest instead of implying a new fetcher.",
+      "text": "a \u00a74 fetch layer over TransferClient.download adds no behaviour the existing wrapper lacks: it already selects direct HTTP when an authenticated session is supplied, validates the expected extension (transfer.py:83 validate_expected_type), and returns content type plus bytes; the only new behaviour \u00a74 actually describes is writing bytes to a private path and hashing them",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/wiki/auth.py:277",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a72's done-when \"no code path reaches an ICP host without passing the method check\" is unachievable for a per-client guard, because \u00a74's download path goes through TransferClient's session (transfer.py:536) and never through a client _request, whereas a session-level gate covers both.",
+      "text": "the design creates a sixth authenticated client beside five existing ones that each re-implement the same session machinery: ConfluenceClient (confluence.py:96, _get_session :130 restores keyring cookies, _rate_limit :151, 401/F5 recovery in _request :158), MediaWikiClient (mediawiki.py:86, same at :136,:193), AsyncMediaWikiClient (mediawiki.py:670, async copy at :755,:792), BasicAuthWikiClient (mediawiki.py:1220, :1253), KeycloakWikiClient (keycloak.py:140, KeycloakSession :39); the shared owner is CredentialManager in auth.py (get_session :776, set_session :742, require_credentials :886) which holds credentials and cookie persistence but no session object and no request gate, so the plan's \"one place that allows only GET and HEAD\" has to be a read-only requests.Session owned next to CredentialManager and shared with those five, not a method check inside a new client's own _request",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/graph/dirs.py:37",
+      "id": "duplicate_owner-2",
+      "reason": "\u00a74's done-when names \"the stored path under the private cache\", so the plan must state the cache as a subdirectory of the existing private root, or the stored-path recording has no stable reference.",
+      "text": "\u00a74's \"private storage outside the repository\" and \"the stored path under the private cache\" is a path decision that already has one owner: DATA_BASE_DIR (~/.local/share/imas-codex) with EXPORTS_DIR (:40) and ensure_exports_dir (:94) as the established subdirectory pattern; a new cache root or an ad-hoc Path.home() join beside it is a second owner",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/discovery/wiki/config.py:34",
+      "id": "interface_budget-1",
+      "reason": "the section text must account for four new refusal outcomes and the entry points it introduces, since the week's baseline is zero on every family and \u00a72's own \"stay refused until the lead approves named ones\" already presumes a refusal surface the plan never budgets.",
+      "text": "\u00a72 (\u00a73 and \u00a74 inherit it): public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 at review time, and \u00a72 adds a client with public entry points and two new refusal outcomes (non-GET/HEAD refused before a network call, non-ICP host refused), \u00a73 adds a not-found-vs-empty outcome, \u00a74 adds not-permitted and not-a-version, and none of the three sections names anything it retires or merges, or why nothing can be",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+  "plan_fingerprint": "cf1a80e749c9091ed427a2beb40e13ef877bac787c8199af02d8f887102467ef",
+  "plan_slug": "icp-api-access",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T211406789475-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "0040c8630d13b38862ee0212c337ce362635f7df",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 \u00a72 puts sign-in, the method gate and stale-session renewal behind one choke point and \u00a73 adds only three read operations over it, which is one module hiding more behaviour than it exposes.",
+    "duplicate_owner": "a finding \u2014 the design forks two shared owners: the authenticated-session/rate machinery owned by imas_codex/discovery/wiki/auth.py (already copied into five client classes) and the private-storage path owner imas_codex/graph/dirs.py:37 DATA_BASE_DIR.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a72 adds new public entry points and two refusal outcomes (non-GET/HEAD refused, non-ICP host refused) and \u00a74 adds a third (not-permitted) plus a not-found/not-a-version family, and no section names what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the endpoints need three mechanisms that already exist in the tree and are not accounted for: the session-injecting transfer client in imas_codex/discovery/base/transfer.py:481/589 (HTTPBackend/TransferClient, already used with an authenticated session by imas_codex/discovery/wiki/pipeline.py:1914 fetch_document_content), the private data root in imas_codex/graph/dirs.py:37 DATA_BASE_DIR, and the per-client request pacing already written four times (confluence.py:56,151; mediawiki.py:58,193,792). Only the spreadsheet extraction (\u00a74 names it) was matched to existing machinery, at imas_codex/discovery/wiki/excel.py:241.",
+    "thin_wrapper": "a finding \u2014 \u00a74's \"fetches a document file into private storage\" is a wrapper over TransferClient.download that already accepts the authenticated session and validates content type, and \u00a72's session layer is a wrapper over ConfluenceClient's session/rate-limit code; neither section says why those cannot be extended."
+  },
+  "section_digests": {
+    "_document": "b9630465a753dff811d3c0e0cd8a22097765908617bcc4e915c4fb0111e41a6c",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "830192f1a1a3a40852038831a9ac8845a894958522e5f7e7d9e29b371e8d6699",
+    "s3": "9c09b6b27077f455da547c4caf872d7f317fa3a501e54ea9f113dd8887f44bb6",
+    "s4": "0307057dcc3cd104832a28ffb0f7e87ee06c36b6effa3d6e50d03c018b277537"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T21:24:50.415980+00:00",
+  "total": null
+}
