@@ -25,7 +25,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 58,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d0696f4bb1084062fe41a6c2df6fe0c73847ed6d",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "A live name of derived origin with no producer edge is now listed apart from the count as exempt under section 7's rule, beta is named as that case on the live graph, and the plant gains a seventh name of that kind which must be listed apart while the count stays 2. The prose says section 7 has six to repair beyond its own three.",
+      "reason": "",
+      "when": "2026-11-15T02:16:03.544622+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d0696f4bb1084062fe41a6c2df6fe0c73847ed6d",
+      "commit_basis": "edit",
+      "note": "A live name of derived origin with no producer edge is now listed apart from the count as exempt under section 7's rule, beta is named as that case on the live graph, and the plant gains a seventh name of that kind which must be listed apart while the count stays 2. The prose says section 7 has six to repair beyond its own three.",
+      "reason": "",
+      "when": "2026-11-15T02:16:03.544622+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261115T014330595464-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261115T014330595464-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "6ab75adb74d79a52d092d92e83bb8b2142a486b7",
   "rubric": "content",
