@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "93fa21dfaeb5b67ca778b4cd1d66eefab6922250",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/discovery/base/services.py:861:create_service_monitor",
+    "imas_codex/cli/discover/code.py:182:_llm_check",
+    "imas_codex/discovery/base/llm.py:_build_kwargs",
+    "imas_codex/settings.py:288:get_model",
+    "imas_codex/standard_names/loop.py:1775:run_sn_pools",
+    "imas_codex/cli/sn.py:404:_check_openrouter"
+  ],
+  "completed_at": "2026-11-15T16:49:05.035Z",
+  "dispatched_at": "2026-11-15T16:47:58Z",
+  "findings": [
+    {
+      "file": "tests/core/test_gpt6_model_support.py",
+      "line": "98",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion that failed at the base revision (compose models present in the benchmark candidate slate) is dropped rather than replaced - the replacement asserts fallback==pyproject at :102 and pricing at :105 only - so the gpt-6.1-sol / gpt-6-luna candidate gap can widen unnoticed, and its only record is benchmark-slate-gap.json inside the run directory, not the repository."
+    },
+    {
+      "file": "imas_codex/standard_names/loop.py",
+      "line": "1780",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new compose_route classification and the retargeted mean_cost=0 warning at :2590 (was 'direct', now 'openrouter') have no test, so a misclassified route silently stops the cost-tracking warning instead of failing."
+    },
+    {
+      "file": "imas_codex/discovery/base/services.py",
+      "line": "367",
+      "severity": "non-blocking",
+      "text": "non-blocking: the base URL 'https://openrouter.ai/api/v1' is copied here while imas_codex/embeddings/openrouter_embed.py:39 owns OPENROUTER_BASE_URL and imas_codex/cli/sn.py:427 builds the same provider key probe from a hardcoded literal, so moving or overriding the provider base now needs three edits."
+    }
+  ],
+  "head_log_revision": "03733ae27cae39ff7f17fe7009b9053a35aaa3dc",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "Read the single gained commit 03733ae27 against 9cbba584: 10 files, +241/-115, the sorted path list matching the increment the goal names - settings prefix reuse plus predicate deletion, services probe extraction with per-origin dedup, loop.py route logging, two operator docs, and three test files.",
+    "done_when": "The source done_when's focused-test arm asks for no added failure against the base revision with both failure id sets recorded; the manifest's baseline_suite (93fa21df, completed true, exit 1, 2 ids) and after_suite (03733ae27, completed true, exit 0, 0 ids) state it, and the cited logs confirm 2 failed/934 passed and 935 passed with matching FAILED ids.",
+    "goal": "The source node's goal (brief.md:3) is that no language-model call can route through a LiteLLM proxy and that its configuration, settings, probes and route table are gone; this increment is the fix pass for the prior review of the same goal, deleting the now-unused is_explicit_free_local_endpoint from imas_codex/settings.py and the last proxy prose in imas_codex/clusters/labeler.py:72 and imas_codex/standard_names/loop.py:1797.",
+    "manifest": "Read in full: status complete, commits ae10df18f4c2, 9cbba5840fbd and 03733ae27cae, both suite arms completed with log paths, checkpoint 935 head passes against 934 base passes plus 2 base failures; its statements about one probe per shared origin, distinct-origin probes and live key-info checks match the code I read at 03733ae27.",
+    "write_paths": "The brief fences pyproject.toml, imas_codex/settings.py, imas_codex/config/, imas_codex/discovery/base/, imas_codex/cli/, imas_codex/llm/, imas_codex/remote/locations.py, tests/, the proxy-mentioning AGENTS.md files and the evidence fragment; six of the ten paths in the increment are inside it and the four outside it are named on the manifest's scope_extension line."
+  },
+  "justifications": {
+    "durability": "The added probes are falsifiable - tests/discovery/test_base_services.py:216 reddens with the dedup at imas_codex/discovery/base/services.py:440 removed (call_count becomes 2) and tests/config/test_model_routes.py:53 reddens if call_decisions stops sending the literal decisions URL - but imas_codex/standard_names/loop.py:1780 and tests/core/test_gpt6_model_support.py:105 have no failing condition for the route classification or the dropped candidate-coverage invariant.",
+    "evidence": "The manifest records a completed baseline_suite at 93fa21df (exit 1, 2 failure_ids) and a completed after_suite at 03733ae27 (exit 0, 0 failure_ids), and baseline-review.log and after.log carry those same ids and the '2 failed, 934 passed' / '935 passed' summary lines, though the two arms do not run the same file set and one base failure was a 30 s pytest-timeout rather than a repaired assertion.",
+    "fit": "The new helpers at imas_codex/discovery/base/services.py:361,372 follow the module's private-name and urllib-probe idiom beside _probe_local_endpoint_models, and the test names (test_shared_provider_is_probed_once_per_poll, test_benchmark_slates_match_their_configured_models_and_prices) describe capability with no plan or ticket identifier.",
+    "goal_fidelity": "The increment removes the last non-proxy-relevant leftovers the source goal names: imas_codex/settings.py:298 now validates against the one prefix owner at :401 and the dead is_explicit_free_local_endpoint is gone, imas_codex/clusters/labeler.py:72 and imas_codex/standard_names/loop.py:1797 carry no proxy wording, and a proxy grep at 03733ae27 returns only SSH ProxyJump, oauth2-proxy and semantic prose.",
+    "reuse": "The added definitions extend owners rather than fork them - imas_codex/settings.py:300 reuses _LOCAL_ENDPOINT_PREFIXES at :401, _probe_provider_key reuses get_api_key_for_service and _service_headers, and imas_codex/standard_names/loop.py:1775 reuses get_model_endpoint - except the base-URL literal at imas_codex/discovery/base/services.py:367.",
+    "scope_discipline": "Four of the ten paths in git diff 9cbba584..03733ae27 lie outside the brief's fence (.github/skills/service-ops/SKILL.md, docs/architecture/services.md, imas_codex/clusters/labeler.py, imas_codex/standard_names/..."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal (brief.md:3) is that no model call can route through a LiteLLM proxy and its configuration, settings, probes and route table are gone; this increment deletes the now-unused is_explicit_free_local_endpoint from imas_codex/settings.py and the last proxy prose at imas_codex/clusters/labeler.py:72 and imas_codex/standard_names/loop.py:1797, and a git grep for proxy at 03733ae27 leaves only SSH ProxyJump, oauth2-proxy and semantic prose.\nVERDICT done_when: the source done_when's focused-test arm asks for no added failure against the base revision with both failure id sets recorded; the manifest's baseline_suite (93fa21df, completed, exit 1, 2 ids) and after_suite (03733ae27, completed, exit 0, 0 ids) state it and baseline-review.log/after.log carry the matching FAILED ids and '2 failed, 934 passed'/'935 passed' lines.\nVERDICT write_paths: the brief fences pyproject.toml, imas_codex/settings.py, imas_codex/config/, imas_codex/discovery/base/, imas_codex/cli/, imas_codex/llm/, imas_codex/remote/locations.py, tests/, the proxy-mentioning AGENTS.md files and the evidence fragment; six of the increment's ten paths are inside it and the manifest's scope_extension line names the other four.\nVERDICT manifest: read; status complete, commits ae10df18f/9cbba5840/03733ae27, both suite arms completed with log paths, checkpoint 935 head passes against 934 base passes plus 2 base failures, and its single-probe and actual-URL claims match the code at 03733ae27.\nVERDICT diff: read the single gained commit 03733ae27 against 9cbba584, 10 files, +241/-115 - settings prefix reuse plus predicate deletion, services probe extraction with per-origin dedup, loop.py route logging, two operator docs, and three test files.\nCALL_SITES: imas_codex/discovery/base/services.py:861:create_service_monitor, imas_codex/cli/discover/code.py:182:_llm_check, imas_codex/discovery/base/llm.py:_build_kwargs, imas_codex/settings.py:288:get_model, imas_codex/standard_names/loop.py:1775:run_sn_pools, imas_codex/cli/sn.py:404:_check_openrouter\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/settings.py:300 validates seats against the one prefix owner at :401 and the dead predicate is gone, imas_codex/clusters/labeler.py:72 and imas_codex/standard_names/loop.py:1797 carry no proxy wording, and a proxy grep at 03733ae27 leaves only SSH ProxyJump, oauth2-proxy and semantic prose.\nSCORE evidence: 16\nJUSTIFICATION evidence: baseline-review.log and after.log carry the recorded 2-failure and 0-failure summaries.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: .github/skills/service-ops/SKILL.md, docs/architecture/services.md, imas_codex/clusters/labeler.py and imas_codex/standard_names/loop.py lie outside the brief's fence though the manifest declares them in scope_extension.\nSCORE durability: 15\nJUSTIFICATION durability: tests/discovery/test_base_services.py:216 reddens when the dedup at imas_codex/discovery/base/services.py:440 is removed, but imas_codex/standard_names/loop.py:1780 and tests/core/test_gpt6_model_support.py:105 have no condition that fails.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/discovery/base/services.py:361,372 follow the module's private-name and urllib-probe idiom beside _probe_local_endpoint_models.\nSCORE reuse: 17\nJUSTIFICATION reuse: imas_codex/settings.py:300 reuses _LOCAL_ENDPOINT_PREFIXES at :401 and _probe_provider_key reuses get_api_key_for_service, while imas_codex/discovery/base/services.py:367 copies the provider base URL owned at imas_codex/embeddings/openrouter_embed.py:39.\nFINDING tests/core/test_gpt6_model_support.py:98 non-blocking: the base-failing candidate-coverage assertion is dropped rather than replaced and its gap record lives only in benchmark-slate-gap.json outside the repository.\nFINDING imas_codex/standard_names/loop.py:1780 non-blocking: the new compose_route classification and retargeted cost warning at :2590 have no test, so a misclassified route silently stops the warning.\nFINDING imas_codex/discovery/base/services.py:367 non-blocking: the provider base URL is copied while imas_codex/embeddings/openrouter_embed.py:39 owns OPENROUTER_BASE_URL and imas_codex/cli/sn.py:427 hardcodes the same provider key probe.",
+  "review_run_id": "r-20261115T164555397033-review-of-retire-the-llm-proxy-03733ae27cae",
+  "reviewed_base_sha": "9cbba5840fbd657aa90a93432b7513c71058963c",
+  "reviewed_head_sha": "03733ae27cae39ff7f17fe7009b9053a35aaa3dc",
+  "reviewed_run_id": "r-20261115T155520409111-retire-the-llm-proxy",
+  "reviewer": "deepseek-v4.1-flash",
+  "reviewer_run_id": "r-20261115T164555397033-review-of-retire-the-llm-proxy-03733ae27cae",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:05:29.456780+00:00",
+  "total": 98
+}
