@@ -77,6 +77,16 @@
       "note": "Section 2 now states that facility and data-system resolution stays in the one facility-aware layer that already performs it, and the done-when requires that the executor still performs no facility lookup.",
       "reason": "",
       "when": "2026-11-15T01:33:10.682519+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "Section 5 now requires one read path per archive: the scanner's signal validity check and the loader issue their reads through the same path, and the done-when requires both to return the same samples and the same error classification for an identical request.",
+      "reason": "",
+      "when": "2026-11-15T01:33:18.198900+00:00"
     }
   ],
   "responses": {
@@ -97,6 +107,15 @@
       "note": "Section 2 now states that facility and data-system resolution stays in the one facility-aware layer that already performs it, and the done-when requires that the executor still performs no facility lookup.",
       "reason": "",
       "when": "2026-11-15T01:33:10.682519+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "note": "Section 5 now requires one read path per archive: the scanner's signal validity check and the loader issue their reads through the same path, and the done-when requires both to return the same samples and the same error classification for an identical request.",
+      "reason": "",
+      "when": "2026-11-15T01:33:18.198900+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261115T004610796932-plan-review-of-codac-uda-signals.json",
