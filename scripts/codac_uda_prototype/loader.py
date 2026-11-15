@@ -11,6 +11,8 @@ from typing import Any
 
 import numpy as np
 
+from imas_codex.plotting import save_figure as _save_figure
+
 
 @dataclass(frozen=True)
 class Signal:
@@ -98,48 +100,6 @@ def statistics(signal: Signal) -> dict:
         statistics_kind="unweighted_bin_means" if envelope else "archived_samples",
     )
     return result
-
-
-def _save_figure(figure, path: Path) -> None:
-    """Reject clipped or intersecting text before writing an export."""
-    from matplotlib.text import Text
-
-    figure.canvas.draw()
-    renderer = figure.canvas.get_renderer()
-    canvas = figure.bbox
-    boxes = []
-    for artist in figure.findobj(Text):
-        if not artist.get_visible() or not artist.get_text().strip():
-            continue
-        box = artist.get_window_extent(renderer)
-        if box.width <= 0 or box.height <= 0:
-            continue
-        if (
-            box.x0 < canvas.x0
-            or box.y0 < canvas.y0
-            or box.x1 > canvas.x1
-            or box.y1 > canvas.y1
-        ):
-            raise ValueError(f"clipped figure text: {artist.get_text()}")
-        for prior, other in boxes:
-            if box.overlaps(other):
-                raise ValueError(
-                    f"overlapping figure text: {prior} / {artist.get_text()}"
-                )
-        boxes.append((artist.get_text(), box))
-    path.parent.mkdir(parents=True, exist_ok=True)
-    figure.savefig(path, dpi=200)
-    if path.suffix == ".svg":
-        content = path.read_text()
-        import re
-
-        content = re.sub(
-            r'width="[^"]+pt" height="[^"]+pt"',
-            'width="31.1cm" height="16cm"',
-            content,
-            count=1,
-        )
-        path.write_text(content)
 
 
 def plot(signal: Signal, path: Path) -> dict:
