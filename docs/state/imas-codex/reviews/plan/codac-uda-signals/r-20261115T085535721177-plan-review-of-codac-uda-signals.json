@@ -1,5 +1,20 @@
 {
   "absent_items": [],
+  "accepted_edits": [
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "8231d64a66ba414e6ada7698b055ad68f482abba7d786d8b73c1ceb8bc11ae08",
+        "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04"
+      },
+      "reason": "Versions 33 to 35 make exactly the three changes the newest content review asked for: section links matching the declared waits, a narrowed positive control in section 15, and the resolved follow-up; no other text changed.",
+      "units": [
+        "_document",
+        "s15"
+      ],
+      "when": "2026-11-15T09:37:10.716048+00:00"
+    }
+  ],
   "completed_at": "2026-11-15T09:16:19.290Z",
   "dispatched_at": "2026-11-15T08:57:00Z",
   "findings": [
