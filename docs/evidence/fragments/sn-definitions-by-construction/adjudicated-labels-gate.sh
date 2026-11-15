@@ -24,7 +24,7 @@ run() {
   [ $status -ne 0 ] && rc=1
 }
 
-echo "+ bash docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh"
+echo "# command: bash docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh"
 echo "worktree $ROOT at $(git rev-parse HEAD)"
 echo "== lint and format"
 run uv run --no-sync ruff check --no-cache "$SCRIPT"
