@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T21:06:45.209Z",
+  "dispatched_at": "2026-11-15T21:06:13Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261115T210446983575-plan-review-of-sn-pipeline-hygiene/plan.html:88",
+      "id": "done_when-1",
+      "reason": "the enumeration the clause demands cannot be produced by the method the clause fixes, so the node either closes on a false complete list or blocks, and the measure needs a method that reaches attribute use of an imported module (or a statement of the class as \"references a name the package no longer defines\").",
+      "text": "the done-when orders the broken scripts \"found by importing each script's package imports\", but only two of the four it names fail at import: `srtj-jev-vs-panel-operating-point-run.py` and `srtj-jev-discrimination-diagnosis-run.py` import cleanly (`IMPORT-OK`) because they reach the defaults as attributes (`calibration.DEFAULT_NAME_RECEIPTS`, `cal.DEFAULT_NAME_RECEIPTS`, `cal.DEFAULT_DOCS_RECEIPTS`) inside functions after the import succeeds, and `cascade_calibration.py` carries neither name; the clause's own class, \"imports a name the package no longer defines\", therefore excludes the two scripts whose defect is an attribute access \u2014 a worker running the stated method reports only `name-definition-check-run.py` (deleted `name_definition_agreement_check`) and `srtj-jev-name-evidence-measure-run.py` (removed `_DD_CONTEXT_QUERY`) and closes the clause satisfied while two named scripts still cannot run",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261115T210446983575-plan-review-of-sn-pipeline-hygiene/plan.html:88",
+      "id": "reasoning-1",
+      "reason": "a repair aimed at the calibration defaults leaves that script failing at import, so the node would report it regenerated while it still cannot run, and the frozen-record decision would be taken for the wrong defect.",
+      "text": "s10 groups `srtj-jev-name-evidence-measure-run.py` under the three scripts that \"import the removed calibration defaults\", but its import fails one statement earlier, on `from imas_codex.standard_names.workers import (_DD_CONTEXT_QUERY, _DOCS_GEN_PARENT_CHILDREN_QUERY)`, neither of which exists in `workers.py`; measured: `ImportError: cannot import name '_DD_CONTEXT_QUERY' from 'imas_codex.standard_names.workers'` \u2014 so the cause the clause records for that script is not the one its reproduction shows",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261115T210446983575-plan-review-of-sn-pipeline-hygiene/plan.html:88",
+      "id": "anchors_resolve-1",
+      "reason": "to record a red run that fails without a repair, the worker must locate the specific guard, gate script and validation rule the finding names; without the receipt it must re-derive each finding from scratch or decline it for lack of a target, and the review directory holds the receipts under hash-named directories that no paraphrase resolves to.",
+      "text": "the eight findings are carried only as paraphrase (\"the guard assertion on the answer classes cannot fail on a change of class content\", \"one validation rule reads its expected value from the file it checks\") with no path to the four landing reviews they came from, while the plan's own convention at s9 cites its review report (`~/.config/reckon/crew/reports/imas-codex/code-review/d6c322cc9d29/report.md`)",
+      "type": "anchors_resolve",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788",
+  "plan_fingerprint": "f87ce55e3e46ea40dee0009bd73e76c803b97a2dd90238784f9408dbd9266c25",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 42,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T210446983575-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "8ee32b98a72d63a54765e58d0425f4f8a342914c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "a finding \u2014 the four cited files resolve (`docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py`, `imas_codex/standard_names/review/name_definition_seat.py`, `imas_codex/standard_names/pools.py`, and the three `sn-review-through-jev` scripts), but the eight findings have no receipt to resolve against.",
+    "done_when": "a finding \u2014 s10's discovery clause (snapshot plan.html:88) requires the broken evidence scripts to be found \"by importing each script's package imports\", a method that cannot find two of the four scripts the same clause names.",
+    "evidence_paths": "pass \u2014 the artifacts it names live under `docs/evidence/fragments/`, a durable repository path, and no gate log is directed at a scratch location.",
+    "naming": "pass \u2014 no tracker label enters a symbol or comment; the `srtj-`/`sph-` names it carries are existing committed filenames, not new code names.",
+    "reasoning": "a finding \u2014 s10 attributes one script's breakage to the removed calibration defaults, and that script in fact fails earlier on two removed private queries, so the stated cause is not the one the reproduction shows.",
+    "single_goal": "pass \u2014 s10 carries one goal, that every open non-blocking finding is repaired with a red run or declined with a reason; its other clauses are conjunctive details of that goal, not second deliverables.",
+    "wiring": "pass \u2014 s10 declares no links and needs none: it closes findings already landed, and no other section owns the evidence scripts, `name_definition_seat.py` or `pools.py` that it names."
+  },
+  "section_digests": {
+    "_document": "fc0b9243c4b299d7cd58edf7987e28fb84b7ca51ea9f6cd18d04853eb2923d2e",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "614f818c76fcbe202743f7a8815f629cf63e0ed5cbe1f1d5b3bd136559b16323",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T21:13:56.761189+00:00",
+  "total": null
+}
