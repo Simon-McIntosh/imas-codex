@@ -13,7 +13,7 @@ from pathlib import Path
 class ArchiveCatalogue:
     """Keep bounded batches durable independently of graph acknowledgement.
 
-    Every archive membership is retained. A selector's first successful metadata
+    Every archive membership is retained. A selector's latest successful metadata
     source owns its primary metadata record; all complete source documents remain
     in the checkpoint. Failed requests carry errors and never become graph rows.
     """
