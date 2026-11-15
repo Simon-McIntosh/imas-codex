@@ -12,6 +12,7 @@ exhaustion, and a decided conflict spends none of what remains.
 from __future__ import annotations
 
 import asyncio
+from collections.abc import Callable
 from contextlib import contextmanager
 from typing import Any
 from unittest.mock import MagicMock, patch
@@ -64,6 +65,20 @@ def _refine_item(**overrides: Any) -> dict[str, Any]:
     }
     item.update(overrides)
     return item
+
+
+def _model_by_seat(escalation_model: str) -> Callable[[str], str]:
+    """The seat accessor's answer per seat name.
+
+    The last rotation resolves the escalation seat and every earlier one the
+    refine seat through the same accessor, so the accessor has to answer per
+    seat for a test to tell a rotation that escalates from one that does not.
+    """
+
+    def _seat_model(seat: str) -> str:
+        return escalation_model if seat == "sn-escalation" else "refine-seat"
+
+    return _seat_model
 
 
 class TestBudgetIsChargedOnTheClaim:
@@ -333,7 +348,14 @@ class TestEscalationFiresOnTheLastRotation:
                 "imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment._hybrid_search_neighbours",
                 return_value=[],
             ),
-            patch("imas_codex.settings.get_model", return_value="refine-seat"),
+            # The worker resolves each seat through this one accessor, so a
+            # single return value leaves the refine and escalation seats
+            # indistinguishable and the escalation assertion would compare a
+            # value with itself. Key the model on the seat name instead.
+            patch(
+                "imas_codex.settings.get_model",
+                side_effect=_model_by_seat(DEFAULT_ESCALATION_MODEL),
+            ),
             patch(
                 "imas_codex.standard_names.graph_store.graph_claim_release.stop_refine_name_attempt",
                 return_value="reviewed",
