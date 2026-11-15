@@ -17,7 +17,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 57,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c8b96d20b3693c40110ab80e3e38f37449cb187a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause now states two baselines, each with its population: the published census of section 1 (8 forms over 32 flux-surface-average names, 20 of 20 families) and the live graph as the closing census read it (3 forms over 73 names, 23 of 23 families over 316 members), so the final census is compared with the live baseline of the same cohort.",
+      "reason": "",
+      "when": "2026-11-15T17:33:16.858722+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c8b96d20b3693c40110ab80e3e38f37449cb187a",
+      "commit_basis": "edit",
+      "note": "The clause now states two baselines, each with its population: the published census of section 1 (8 forms over 32 flux-surface-average names, 20 of 20 families) and the live graph as the closing census read it (3 forms over 73 names, 23 of 23 families over 316 members), so the final census is compared with the live baseline of the same cohort.",
+      "reason": "",
+      "when": "2026-11-15T17:33:16.858722+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261115T172343385615-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261115T172343385615-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "b12e5c6875d232385d8f76c09f450ac0b2f54e87",
   "rubric": "content",
