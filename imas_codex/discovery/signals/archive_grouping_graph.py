@@ -72,11 +72,11 @@ RETURN count(DISTINCT s) AS written
 
 RETIRE_UNUSED_GROUPS_QUERY = """
 MATCH (c:PlantComponent {facility_id: $facility})
-WHERE c.archive_field_pattern IS NOT NULL
+WHERE (c.archive_field_pattern IS NOT NULL OR c.parent_component IS NOT NULL)
   AND NOT EXISTS { MATCH (:FacilitySignal)-[:IN_ARCHIVE_COMPONENT]->(c) }
-OPTIONAL MATCH (c)-[old:HAS_ARCHIVE_FIELD_PATTERN|HAS_ARCHIVE_CATEGORY_PATTERN]->()
+OPTIONAL MATCH (c)-[old:HAS_ARCHIVE_FIELD_PATTERN|HAS_ARCHIVE_CATEGORY_PATTERN|PARENT_COMPONENT]->()
 DELETE old
-REMOVE c.archive_field_pattern, c.archive_category_pattern, c.archive_member_count
+REMOVE c.archive_field_pattern, c.archive_category_pattern, c.archive_member_count, c.parent_component
 RETURN count(DISTINCT c) AS retired
 """
 

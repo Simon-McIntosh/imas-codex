@@ -98,6 +98,11 @@ def test_projection_corrects_legacy_membership_and_repeats_without_duplicates(
             ],
         )
         graph.query("""CREATE (c:PlantComponent {id:'demo:legacy', facility_id:'demo', code:'DEMO-UNIT', archive_field_pattern:'demo:legacy-pattern'})
+            CREATE (root:PlantComponent {id:'demo:legacy-root', facility_id:'demo', code:'DEMO'})
+            CREATE (orphan:PlantComponent {id:'demo:legacy-orphan', facility_id:'demo', code:'DEMO-TEST', parent_component:'demo:legacy-root'})
+            SET c.parent_component='demo:legacy-root'
+            CREATE (c)-[:PARENT_COMPONENT]->(root)
+            CREATE (orphan)-[:PARENT_COMPONENT]->(root)
             CREATE (p:ArchiveFieldPattern {id:'demo:legacy-pattern', facility_id:'demo'})
             CREATE (c)-[:HAS_ARCHIVE_FIELD_PATTERN]->(p)
             WITH c MATCH (s:FacilitySignal {facility_id:'demo'})
@@ -128,6 +133,11 @@ def test_projection_corrects_legacy_membership_and_repeats_without_duplicates(
                 "field_patterns": 1,
                 "category_patterns": 1,
             }
+            assert graph.query("""
+                MATCH (c:PlantComponent {facility_id:'demo'})
+                OPTIONAL MATCH (c)-[r:PARENT_COMPONENT]->()
+                RETURN count(DISTINCT c) AS candidates,count(c.parent_component) AS properties,count(r) AS links
+            """) == [{"candidates": 5, "properties": 0, "links": 0}]
             assert graph.query(
                 "MATCH (p:ArchiveFieldPattern {facility_id:'demo'}) WHERE p.key_kind IS NOT NULL RETURN count(p) AS n"
             ) == [{"n": 2}]
