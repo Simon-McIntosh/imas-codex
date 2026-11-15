@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T08:34:38.914Z",
+  "dispatched_at": "2026-11-15T08:09:45Z",
+  "findings": [
+    {
+      "anchor": "codac-uda-signals.html:115",
+      "id": "wiring-1",
+      "reason": "the node would have nothing to sample, and its coverage ranking would be measured over an improvised sample instead of the catalogue.",
+      "text": "\u00a715's done-when reports \"for a sample of two hundred catalogued variables, the number each source resolves\", which consumes \u00a712's catalogue, yet \u00a715 declares data-links=\"\" and appears in no depends-on entry, so a queue ordering can release it before the catalogue exists",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "codac-uda-signals.html:120",
+      "id": "reasoning-1",
+      "reason": "the node's headline coverage measure is undefined at the coverage the plan claims, and a worker would report a fraction that measures which section ran first rather than how much of the archive has a component.",
+      "text": "\u00a714's done-when gives \"the fraction of catalogued signals linked to a node\", but \u00a78 parses component codes only for the \u00a74 cohort and \u00a712's delivered fields (unit, description, data type, structure, sampling kind, sample times) carry no parsed component code, so over the \u00a712 catalogue the fraction is zero or the text means a cohort it does not name",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "codac-uda-signals.html:108",
+      "id": "done_when-1",
+      "reason": "without a stated rule for an overlapping listing, the node fails its own gate or a worker invents a counting convention that the next reader cannot check.",
+      "text": "\u00a712 requires \"for each archive role, the census count and the graph count, and they are equal\", but a signal records one listing archive (\u00a74) and the facility declares two readable roles (fast, slow in imas_codex/config/facilities/iter.yaml), so a selector listed by both roles makes the sum of per-role census counts exceed the graph count and the equality fails for a reason unrelated to the scan",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "codac-uda-signals.html:116",
+      "id": "done_when-2",
+      "reason": "the positive control is unverifiable as written, and the section needs to say where the pre-registered variable lives and how the stored evidence shows the finding without naming it.",
+      "text": "\u00a715 requires \"one variable known beforehand to appear in it is found through the stated access path\" while also requiring that \"no real variable name appears in a tracked file\", so the pre-registration that makes the control a control cannot be recorded where a later reader can open it",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "31633e31ac979f1946978b0e5be01287093f2f95",
+  "plan_fingerprint": "7652a1dc04eb0e64be0878ae936924467e51002db1776a9146d772f850e724dc",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 22,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T080919966877-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "43b6e678cd288ea424728e8afd30599089bd248e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited scripts/codac_uda_prototype/, docs/evidence/fragments/codac-uda-signals/prototype-report.md and docs/figures/ all resolve in the tree at 31633e31a; s12\u2013s15 cite no file that is missing.",
+    "done_when": "a finding \u2014 \u00a712's per-archive census equality is not well defined when one variable is listed by both readable archives, because a signal records only its single listing archive (\u00a74).",
+    "evidence_paths": "pass \u2014 every unit lands its measure in the landing record, matching the plan's evidence convention under docs/evidence/fragments/codac-uda-signals/ and the private cache for live data.",
+    "naming": "pass \u2014 s12\u2013s15 carry no plan labels, ticket numbers or version tags into the symbols or comments they describe, and state mechanisms rather than changelog.",
+    "reasoning": "a finding \u2014 \u00a714 measures \"the fraction of catalogued signals linked to a node\", but no section extends \u00a78's name parser over \u00a712's full catalogue, so the measured fraction has no population it can report.",
+    "single_goal": "pass \u2014 s12 (catalogue), s13 (pipeline + search), s14 (PBS import and link), s15 (source inventory) each name one deliverable, and s15's access-path clause is part of the inventory it records.",
+    "wiring": "a finding \u2014 \u00a715's done-when samples \"two hundred catalogued variables\" but \u00a715 declares no depends-on, so the queue can release it before any catalogue exists."
+  },
+  "section_digests": {
+    "_document": "ca046e7dd484e0a16818d273a3a96b67d0c9ab9c449484f6e87ce0e6cccd366a",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "9b2c547cdb7923a6d2beba46e2d718116d40249584198e6d41dbae9c8360fa99",
+    "s13": "7057645fb421f6c200ab061f9b8ec3e3195bea653cda5a66bb412439d13d81f9",
+    "s14": "2cee80b93c7714a6129991996f903940364ef5faae87cfe1ec88b5c18a0bc913",
+    "s15": "ce785c6a15c2612ddeee76abefed6877e6fd511b39e03b9df40f44b30ff9b44b",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "2d64094cc6100bc7fb8ee8ee9bd34a47695d4a4bdfed54b1c24757cbb626210e",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T08:36:46.604724+00:00",
+  "total": null,
+  "traced_units": [
+    "s12",
+    "s13",
+    "s14",
+    "s15"
+  ]
+}
