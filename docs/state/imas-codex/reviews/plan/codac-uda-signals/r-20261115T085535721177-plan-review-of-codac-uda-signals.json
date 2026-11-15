@@ -53,6 +53,16 @@
       "note": "Section 15's positive control now applies to each source that holds archive variable names; a source that holds component codes or prose records what it maps and how a variable is joined to it, as its own outcome.",
       "reason": "",
       "when": "2026-11-15T09:34:49.672957+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "A follow-up now records the figure-script migration as a separate plan to be written, as the lead chose, and the stale follow-up describing sections 2 to 9 as buildable is resolved.",
+      "reason": "",
+      "when": "2026-11-15T09:34:55.428186+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "Section 15's own links now name the scanner section and section 6's now include the pipeline-run section, matching the declared waits.",
       "reason": "",
       "when": "2026-11-15T09:34:38.828592+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "note": "A follow-up now records the figure-script migration as a separate plan to be written, as the lead chose, and the stale follow-up describing sections 2 to 9 as buildable is resolved.",
+      "reason": "",
+      "when": "2026-11-15T09:34:55.428186+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261115T085535721177-plan-review-of-codac-uda-signals.json",
