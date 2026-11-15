@@ -43,6 +43,16 @@
       "note": "The prototype tree and its report are now tracked on main: scripts/codac_uda_prototype/ and docs/evidence/fragments/codac-uda-signals/prototype-report.md landed with merge 83b6b5c79, so both citations in section 1 and section 5's reference resolve.",
       "reason": "",
       "when": "2026-11-15T00:44:48.857588+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "6df3d822b66bba61befab4c37b825d09e00400ee",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 7 now delivers the save function itself: one function through which the section's figures are saved and which refuses a figure with text beyond the canvas or overlapping text. The negative control fires against that delivered function.",
+      "reason": "",
+      "when": "2026-11-15T00:44:52.773474+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The prototype tree and its report are now tracked on main: scripts/codac_uda_prototype/ and docs/evidence/fragments/codac-uda-signals/prototype-report.md landed with merge 83b6b5c79, so both citations in section 1 and section 5's reference resolve.",
       "reason": "",
       "when": "2026-11-15T00:44:48.857588+00:00"
+    },
+    "done_when-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "6df3d822b66bba61befab4c37b825d09e00400ee",
+      "commit_basis": "edit",
+      "note": "Section 7 now delivers the save function itself: one function through which the section's figures are saved and which refuses a figure with text beyond the canvas or overlapping text. The negative control fires against that delivered function.",
+      "reason": "",
+      "when": "2026-11-15T00:44:52.773474+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261114T225843671898-plan-review-of-codac-uda-signals.json",
