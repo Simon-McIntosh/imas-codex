@@ -1,31 +1,184 @@
 <article id="signals-grouped-by-component-and-pattern-results">
-  <h3>Archive variables grouped by complete component prefix and exact field set</h3>
-  <p>The partial-metadata run on 15 November 2026 used a private catalogue containing all <strong>995,006 of 995,006 listed variables (100%)</strong>. Metadata retrieval had completed for <strong>500,315 variables (50.2826%)</strong> at the consistent snapshot. No variable existed only in the graph. The operation ran on <code>all_debug</code>, job <code>1318239</code>; the private receipt records 105.32 seconds for grouping, replay and graph projection.</p>
-  <table><thead><tr><th>Measure</th><th>First snapshot</th><th>Same snapshot repeated</th></tr></thead><tbody>
-    <tr><td>Variables</td><td>995,006</td><td>995,006</td></tr>
-    <tr><td>Grouped</td><td>248,153</td><td>248,153</td></tr>
-    <tr><td>Explicitly ungrouped</td><td>746,853</td><td>746,853</td></tr>
-    <tr><td>Component groups / group descriptions needed</td><td>905</td><td>905</td></tr>
-    <tr><td>Field patterns / pattern descriptions needed</td><td>765</td><td>765</td></tr>
-    <tr><td>Groups added</td><td>905</td><td>0</td></tr>
-    <tr><td>Patterns added</td><td>765</td><td>0</td></tr>
-  </tbody></table>
-  <p>The repeat uses the same listing and metadata snapshot: archive coverage remains 100% and metadata completion remains 50.2826%. It adds and removes no component groups or patterns. The <strong>1,670 component and pattern descriptions</strong> would cover the 248,153 grouped signals. This does not project enrichment for the 746,853 ungrouped variables. Names that are incomplete or outside the existing, unconfirmed parser grammar remain ungrouped; the pass does not infer another component from nearby text.</p>
-  <p>A component uses the complete parsed prefix; a field uses the exact control-function and variable-token pair, preserving numbers. For example, invented members <code>DEMO-COOL-PUMP:FCV9001-MEAS</code> and <code>DEMO-COOL-PUMP:FCV9001-TARGET</code> form one component. Another component exposing exactly those fields shares its pattern; a different function number or a subset of fields gives a different pattern. Archive membership, metadata availability, unit and value type are retained per member in the private derived store. Missing or refused metadata does not drop a listed variable.</p>
-  <h4>Component size distribution</h4>
-  <p>Sizes count distinct variables, including private-only members. There are 19 singleton components: their signals are <strong>0.001910% of all 995,006 variables</strong> (0.007657% of grouped variables). The exact histogram remains in the private receipt.</p>
-  <table><thead><tr><th>Variables per component</th><th>Components</th><th>Variables</th></tr></thead><tbody>
-    <tr><td>1</td><td>19</td><td>19</td></tr><tr><td>2–5</td><td>28</td><td>88</td></tr><tr><td>6–10</td><td>33</td><td>245</td></tr><tr><td>11–25</td><td>96</td><td>1,803</td></tr><tr><td>26–50</td><td>153</td><td>5,215</td></tr><tr><td>51–100</td><td>170</td><td>12,495</td></tr><tr><td>101–250</td><td>200</td><td>32,086</td></tr><tr><td>251–500</td><td>104</td><td>36,160</td></tr><tr><td>501–1,000</td><td>46</td><td>29,624</td></tr><tr><td>1,001–5,000</td><td>54</td><td>115,978</td></tr><tr><td>5,001 and above</td><td>2</td><td>14,440</td></tr>
-  </tbody></table>
-  <h4>Twenty largest patterns</h4>
-  <p>Ranked by variables across all components sharing a pattern, with deterministic identity ordering for ties. All names below are invented display aliases; no archive field names, component names or private hashes are included.</p>
-  <table><thead><tr><th>Invented pattern name</th><th>Distinct fields</th><th>Components</th><th>Variables</th></tr></thead><tbody>
-    <tr><td>Example pattern A</td><td>8,766</td><td>1</td><td>8,766</td></tr><tr><td>Example pattern B</td><td>3,732</td><td>2</td><td>7,464</td></tr><tr><td>Example pattern C</td><td>2,410</td><td>3</td><td>7,230</td></tr><tr><td>Example pattern D</td><td>2,397</td><td>3</td><td>7,191</td></tr><tr><td>Example pattern E</td><td>2,275</td><td>3</td><td>6,825</td></tr><tr><td>Example pattern F</td><td>2,123</td><td>3</td><td>6,369</td></tr><tr><td>Example pattern G</td><td>5,674</td><td>1</td><td>5,674</td></tr><tr><td>Example pattern H</td><td>2,533</td><td>2</td><td>5,066</td></tr><tr><td>Example pattern I</td><td>1,667</td><td>3</td><td>5,001</td></tr><tr><td>Example pattern J</td><td>1,604</td><td>3</td><td>4,812</td></tr><tr><td>Example pattern K</td><td>3,604</td><td>1</td><td>3,604</td></tr><tr><td>Example pattern L</td><td>3,376</td><td>1</td><td>3,376</td></tr><tr><td>Example pattern M</td><td>3,277</td><td>1</td><td>3,277</td></tr><tr><td>Example pattern N</td><td>3,225</td><td>1</td><td>3,225</td></tr><tr><td>Example pattern O</td><td>3,084</td><td>1</td><td>3,084</td></tr><tr><td>Example pattern P</td><td>2,908</td><td>1</td><td>2,908</td></tr><tr><td>Example pattern Q</td><td>2,741</td><td>1</td><td>2,741</td></tr><tr><td>Example pattern R</td><td>2,691</td><td>1</td><td>2,691</td></tr><tr><td>Example pattern S</td><td>2,601</td><td>1</td><td>2,601</td></tr><tr><td>Example pattern T</td><td>2,590</td><td>1</td><td>2,590</td></tr>
-  </tbody></table>
-  <h4>Graph persistence and controls</h4>
-  <p>The graph snapshot had 94,633 archive signals. The readback found 94,633 new grouping-state markers: 13,140 grouped and 81,493 ungrouped. All 13,140 grouped signals have matching scalar component identities and membership links; ungrouped signals have zero component links. The active graph projection has 97 component groups and 96 patterns; all 193 nodes link to the ITER facility. A counted repeat left those counts unchanged, adding zero groups and zero patterns. Component counts and pattern fields reflect the full private catalogue, rather than only graph members.</p>
-  <p>The baseline parser and private catalogue gate passed 60 tests. The committed implementation passed <strong>80 focused tests, zero failures</strong>, including real grouping statements on a disposable graph and a metadata-writer commit during snapshot grouping. The existing parser refusal was already correct and was reused. A malformed fixture is explicitly counted as ungrouped with no component. Mutating the parser result to attach <code>unparseable fixture</code> to the valid neighbour component makes <code>test_unparseable_name_is_counted_without_component_membership[unparseable fixture]</code> fail: the negative run has one failure and two passes. Restoring the normal parser passes. A changed-selector graph write also raises a refusal and leaves neither grouping markers nor newly created group nodes in its rolled-back batch.</p>
-  <p>The first focused gate exposed integer histogram keys changing under JSON serialization; the stored histogram now uses stable string keys. A schema test fixture also omitted the existing required accessor and was corrected. Both initial red logs are retained privately. Manual lint, formatting, whitespace and naming checks passed; schema hits are existing hardware/data identifiers and ordinary prose.</p>
-  <p><strong>Remaining operational run:</strong> metadata retrieval was still active, so this evidence does not claim a metadata-complete rerun. Repeat the same grouping command after the catalogue scan publishes completion. The online SQLite backup releases source locks between page batches; grouping then reads the job-local copy, and the ongoing scanner advanced from 500,315 completed variables at the snapshot to 505,015 afterward. No ICP or IDM content or live archive identifiers enter this fragment, and no model calls were made. The coordinator owns integration, the separate merged-result test and section closure.</p>
-  <p>Private receipts and logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171542222928-signals-grouped-by-component-and-pattern/live-grouping-receipt.json</code>, <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171542222928-signals-grouped-by-component-and-pattern/live-grouping.log</code>, <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171542222928-signals-grouped-by-component-and-pattern/head-gate.log</code> and <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171542222928-signals-grouped-by-component-and-pattern/negative-control.log</code>. The reusable private grouping store is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171542222928-signals-grouped-by-component-and-pattern/grouping.sqlite</code>.</p>
+<h3>Control paths, components and reusable field patterns</h3>
+<p>The corrected grouping covers <strong>995,006 variables, all 100% of the sealed archive listing</strong>. At this snapshot, metadata retrieval had completed for 641,265 variables (64.4484%). No variables exist only in the graph. The run executed on <code>all_debug</code>, job <code>1318453</code>, with the caller held in <code>sbatch --wait</code>. The receipt records 1322.27 seconds for grouping, replay and graph projection; subsequent verification and the code census are logged separately.</p>
+<p>The previous inferred-grammar result is superseded. Its defect reproduced with invented selectors: two different component sequences collapsed onto the same control prefix, and a valid function-level variable was marked partly parsed.</p>
+<table><thead><tr><th>Invented selector</th><th>Previous component identity</th><th>Accepted identity / kind</th></tr></thead><tbody>
+<tr><td>DEMO-UNIT:QAZ0001-ABCD</td><td>DEMO-UNIT</td><td>DEMO-UNIT:QAZ0001 — component variable</td></tr>
+<tr><td>DEMO-UNIT:QAZ0002-ABCD</td><td>DEMO-UNIT</td><td>DEMO-UNIT:QAZ0002 — distinct component variable</td></tr>
+<tr><td>DEMO-UNIT:STATUS</td><td>DEMO-UNIT / partly parsed</td><td>DEMO-UNIT — function-level variable</td></tr>
+<tr><td>DEMO-UNIT:QAZ0001-ABCD-Z9</td><td>No discriminator separation</td><td>Component QAZ0001; field ABCD; discriminator Z9</td></tr>
+</tbody></table>
+<p>The parser preserves the one-to-five-level control-breakdown path separately from the physical component. Each control-path field has one to four uppercase alphanumeric characters; VariableID has one to 24 uppercase alphanumeric or hyphen characters. Component category, sequence and field widths are treated as maxima: one to three letters, one to four digits and one to four letters respectively; the optional discriminator has at most four alphanumeric characters and takes a separating hyphen when it starts with a letter. No meaning is assigned to a category or field code. A valid VariableID outside the physical component form is a function-level variable; an invalid FunctionID or VariableID is explicitly nonconforming.</p>
+<p>The recorded reproduction ends with <code>AssertionError: distinct physical components collapse onto the same control prefix</code>; its synthetic input rows show <code>DEMO-UNIT:XYZ1234-TEMP</code> and <code>DEMO-UNIT:XYZ5678-TEMP</code> both returning <code>component=DEMO-UNIT</code>. The successful corrected parser tests distinguish those component sequences.</p>
+<h4>Coverage and the two pattern keys</h4>
+<table><thead><tr><th>Measure</th><th>Current snapshot</th></tr></thead><tbody>
+<tr><td>Component variables</td><td>457,619</td></tr>
+<tr><td>Function-level variables</td><td>491,732</td></tr>
+<tr><td>Nonconforming variables</td><td>45,655</td></tr>
+<tr><td>Component groups</td><td>27,253</td></tr>
+<tr><td>Control-node groups with function-level members</td><td>1,777</td></tr>
+<tr><td>Exact category + field-set patterns</td><td>1,802</td></tr>
+<tr><td>Category-only patterns with field unions</td><td>413</td></tr>
+</tbody></table>
+<p>The exact key combines the function-category code with the set of field codes exposed by a component. Component sequence numbers, control paths and optional field discriminators do not split a field pattern; they remain on the component or member identity. The looser key retains only the category and reports the union of its fields. Function-level variables form their own control-node groups and join no physical component or component pattern. Both pattern keys are persisted; this inventory does not decide which enrichment should use or infer that a code has one physical meaning.</p>
+<table><thead><tr><th>Description key</th><th>Component descriptions</th><th>Control-node descriptions</th><th>Pattern descriptions</th><th>Total descriptions</th><th>Component variables with a pattern shared by ≥2 components</th></tr></thead><tbody>
+<tr><td>Category + exact field set</td><td>27,253</td><td>1,777</td><td>1,802</td><td>30,832</td><td>97.8886% of 457,619</td></tr>
+<tr><td>Category only / union of fields</td><td>27,253</td><td>1,777</td><td>413</td><td>29,443</td><td>99.7972% of 457,619</td></tr>
+</tbody></table>
+<p>These description counts cover the 949,351 grouped variables; the 45,655 nonconforming variables have no group-based enrichment projection. No enrichment calls were made and the grouping incurred no metered model spend.</p>
+<h4>Distribution of group size</h4>
+<figure><img src="/imas-codex/figures/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern/grouping.svg" alt="Cumulative group-size distribution for component and control-node groups, beside the number of pattern descriptions for the exact and category-only keys."><figcaption>Each cumulative curve counts groups equally; its horizontal axis is logarithmic. The bar comparison counts component-pattern descriptions under each key. The numeric tables below retain group and variable totals. The figure uses the shared checked exporter and established subject/reference colours, and its raster preview was inspected.</figcaption></figure>
+<table><thead><tr><th>Variables per group</th><th>Component groups</th><th>Component variables</th><th>Control-node groups</th><th>Function variables</th></tr></thead><tbody>
+<tr><td>1</td><td>3,338</td><td>3,338</td><td>46</td><td>46</td></tr>
+<tr><td>2–5</td><td>3,832</td><td>11,375</td><td>191</td><td>600</td></tr>
+<tr><td>6–10</td><td>5,435</td><td>43,589</td><td>83</td><td>649</td></tr>
+<tr><td>11–25</td><td>9,464</td><td>142,934</td><td>265</td><td>4,535</td></tr>
+<tr><td>26–50</td><td>3,973</td><td>143,187</td><td>215</td><td>8,008</td></tr>
+<tr><td>51–100</td><td>783</td><td>54,667</td><td>179</td><td>13,459</td></tr>
+<tr><td>101–250</td><td>422</td><td>56,948</td><td>299</td><td>47,717</td></tr>
+<tr><td>251–500</td><td>6</td><td>1,581</td><td>264</td><td>89,539</td></tr>
+<tr><td>501–1,000</td><td>0</td><td>0</td><td>145</td><td>94,651</td></tr>
+<tr><td>1,001–5,000</td><td>0</td><td>0</td><td>79</td><td>144,424</td></tr>
+<tr><td>5,001 and above</td><td>0</td><td>0</td><td>11</td><td>88,104</td></tr>
+</tbody></table>
+<p>The exact component and control-node histograms remain in the private receipt. Signals in singleton groups account for 0.340098% of all 995,006 variables. Pattern-sharing percentages above weight component variables, rather than counting each component equally.</p>
+<h4>Twenty largest exact category + field-set patterns</h4>
+<p>Ranked by variable count; names are invented display aliases and disclose no archive field or component names.</p>
+<table><thead><tr><th>Invented pattern name</th><th>Distinct fields</th><th>Components</th><th>Component variables</th></tr></thead><tbody>
+<tr><td>Exact pattern A</td><td>11</td><td>859</td><td>32,990</td></tr>
+<tr><td>Exact pattern B</td><td>19</td><td>469</td><td>11,578</td></tr>
+<tr><td>Exact pattern C</td><td>11</td><td>265</td><td>11,130</td></tr>
+<tr><td>Exact pattern D</td><td>1</td><td>897</td><td>9,324</td></tr>
+<tr><td>Exact pattern E</td><td>16</td><td>468</td><td>9,312</td></tr>
+<tr><td>Exact pattern F</td><td>10</td><td>656</td><td>7,216</td></tr>
+<tr><td>Exact pattern G</td><td>30</td><td>59</td><td>6,018</td></tr>
+<tr><td>Exact pattern H</td><td>10</td><td>527</td><td>5,797</td></tr>
+<tr><td>Exact pattern I</td><td>7</td><td>64</td><td>5,312</td></tr>
+<tr><td>Exact pattern J</td><td>11</td><td>150</td><td>5,239</td></tr>
+<tr><td>Exact pattern K</td><td>11</td><td>167</td><td>5,190</td></tr>
+<tr><td>Exact pattern L</td><td>10</td><td>439</td><td>4,829</td></tr>
+<tr><td>Exact pattern M</td><td>11</td><td>100</td><td>3,943</td></tr>
+<tr><td>Exact pattern N</td><td>28</td><td>34</td><td>3,928</td></tr>
+<tr><td>Exact pattern O</td><td>11</td><td>150</td><td>3,750</td></tr>
+<tr><td>Exact pattern P</td><td>32</td><td>36</td><td>3,730</td></tr>
+<tr><td>Exact pattern Q</td><td>33</td><td>18</td><td>3,672</td></tr>
+<tr><td>Exact pattern R</td><td>1</td><td>492</td><td>3,192</td></tr>
+<tr><td>Exact pattern S</td><td>1</td><td>318</td><td>3,113</td></tr>
+<tr><td>Exact pattern T</td><td>34</td><td>15</td><td>3,030</td></tr>
+</tbody></table>
+<h4>Twenty largest category-only patterns</h4>
+<p>Ranked by variable count; names are invented display aliases and disclose no archive field or component names.</p>
+<table><thead><tr><th>Invented pattern name</th><th>Distinct fields</th><th>Components</th><th>Component variables</th></tr></thead><tbody>
+<tr><td>Category pattern A</td><td>67</td><td>2,432</td><td>52,748</td></tr>
+<tr><td>Category pattern B</td><td>109</td><td>1,854</td><td>44,761</td></tr>
+<tr><td>Category pattern C</td><td>101</td><td>914</td><td>31,134</td></tr>
+<tr><td>Category pattern D</td><td>38</td><td>1,206</td><td>22,786</td></tr>
+<tr><td>Category pattern E</td><td>147</td><td>205</td><td>15,124</td></tr>
+<tr><td>Category pattern F</td><td>111</td><td>900</td><td>14,406</td></tr>
+<tr><td>Category pattern G</td><td>59</td><td>544</td><td>14,038</td></tr>
+<tr><td>Category pattern H</td><td>107</td><td>799</td><td>13,366</td></tr>
+<tr><td>Category pattern I</td><td>22</td><td>1,124</td><td>12,517</td></tr>
+<tr><td>Category pattern J</td><td>13</td><td>798</td><td>10,486</td></tr>
+<tr><td>Category pattern K</td><td>43</td><td>847</td><td>10,296</td></tr>
+<tr><td>Category pattern L</td><td>17</td><td>555</td><td>9,439</td></tr>
+<tr><td>Category pattern M</td><td>42</td><td>594</td><td>9,220</td></tr>
+<tr><td>Category pattern N</td><td>48</td><td>778</td><td>9,142</td></tr>
+<tr><td>Category pattern O</td><td>52</td><td>847</td><td>8,316</td></tr>
+<tr><td>Category pattern P</td><td>30</td><td>451</td><td>8,245</td></tr>
+<tr><td>Category pattern Q</td><td>56</td><td>250</td><td>8,005</td></tr>
+<tr><td>Category pattern R</td><td>78</td><td>223</td><td>7,458</td></tr>
+<tr><td>Category pattern S</td><td>63</td><td>46</td><td>5,208</td></tr>
+<tr><td>Category pattern T</td><td>83</td><td>22</td><td>3,929</td></tr>
+</tbody></table>
+<h4>Control-path code populations</h4>
+<p>There are <strong>14 distinct level-1 field values</strong> across 949,351 conforming variables, and <strong>59 distinct level-2 field values</strong> across 949,108 variables with at least two control levels. A repeated level-2 value is aggregated across its level-1 parents. Counting full prefixes instead gives 70 distinct level-2 paths; their full names and counts are private. Nonconforming names contribute to neither population.</p>
+<p>The following table gives up to twenty largest values at each level (all fourteen at level 1). Real level-1 codes are shown only as short plant-system abbreviations, without expanded meanings. Level-2 values use invented labels; their ordering and counts match the private list.</p>
+<table><thead><tr><th>Rank</th><th>Level-1 short code</th><th>Variables</th><th>Invented level-2 label</th><th>Variables</th></tr></thead><tbody>
+<tr><td>1</td><td>CRYO</td><td>312,026</td><td>Level-2 value A</td><td>209,334</td></tr>
+<tr><td>2</td><td>BUIL</td><td>267,216</td><td>Level-2 value B</td><td>164,300</td></tr>
+<tr><td>3</td><td>CWS</td><td>164,800</td><td>Level-2 value C</td><td>80,268</td></tr>
+<tr><td>4</td><td>UTIL</td><td>86,023</td><td>Level-2 value D</td><td>40,229</td></tr>
+<tr><td>5</td><td>MAG</td><td>72,738</td><td>Level-2 value E</td><td>40,160</td></tr>
+<tr><td>6</td><td>VAC</td><td>14,327</td><td>Level-2 value F</td><td>35,400</td></tr>
+<tr><td>7</td><td>RH</td><td>12,351</td><td>Level-2 value G</td><td>32,959</td></tr>
+<tr><td>8</td><td>EC</td><td>9,481</td><td>Level-2 value H</td><td>27,601</td></tr>
+<tr><td>9</td><td>D1</td><td>5,421</td><td>Level-2 value I</td><td>27,201</td></tr>
+<tr><td>10</td><td>D2</td><td>3,431</td><td>Level-2 value J</td><td>27,004</td></tr>
+<tr><td>11</td><td>CTRL</td><td>1,337</td><td>Level-2 value K</td><td>23,903</td></tr>
+<tr><td>12</td><td>SAFE</td><td>144</td><td>Level-2 value L</td><td>22,957</td></tr>
+<tr><td>13</td><td>CTL</td><td>54</td><td>Level-2 value M</td><td>21,127</td></tr>
+<tr><td>14</td><td>IC</td><td>2</td><td>Level-2 value N</td><td>20,263</td></tr>
+<tr><td>15</td><td>—</td><td>—</td><td>Level-2 value O</td><td>16,681</td></tr>
+<tr><td>16</td><td>—</td><td>—</td><td>Level-2 value P</td><td>15,628</td></tr>
+<tr><td>17</td><td>—</td><td>—</td><td>Level-2 value Q</td><td>14,852</td></tr>
+<tr><td>18</td><td>—</td><td>—</td><td>Level-2 value R</td><td>14,279</td></tr>
+<tr><td>19</td><td>—</td><td>—</td><td>Level-2 value S</td><td>12,351</td></tr>
+<tr><td>20</td><td>—</td><td>—</td><td>Level-2 value T</td><td>12,300</td></tr>
+</tbody></table>
+<h4>Function-category code populations</h4>
+<p>There are <strong>413 distinct function-category codes</strong> across the 457,619 component variables. Function-level variables carry no physical component category. The forty largest short codes and their variable counts follow; no meaning is inferred for these codes.</p>
+<table><thead><tr><th>Rank</th><th>Function-category short code</th><th>Component variables</th></tr></thead><tbody>
+<tr><td>1</td><td>MT</td><td>52,748</td></tr>
+<tr><td>2</td><td>VG</td><td>44,761</td></tr>
+<tr><td>3</td><td>VC</td><td>31,134</td></tr>
+<tr><td>4</td><td>MP</td><td>22,786</td></tr>
+<tr><td>5</td><td>PL</td><td>15,124</td></tr>
+<tr><td>6</td><td>JA</td><td>14,406</td></tr>
+<tr><td>7</td><td>MPD</td><td>14,038</td></tr>
+<tr><td>8</td><td>CU</td><td>13,366</td></tr>
+<tr><td>9</td><td>MTE</td><td>12,517</td></tr>
+<tr><td>10</td><td>MZH</td><td>10,486</td></tr>
+<tr><td>11</td><td>MZL</td><td>10,296</td></tr>
+<tr><td>12</td><td>MZ</td><td>9,439</td></tr>
+<tr><td>13</td><td>MFT</td><td>9,220</td></tr>
+<tr><td>14</td><td>SFU</td><td>9,142</td></tr>
+<tr><td>15</td><td>BR</td><td>8,316</td></tr>
+<tr><td>16</td><td>MPI</td><td>8,245</td></tr>
+<tr><td>17</td><td>HT</td><td>8,005</td></tr>
+<tr><td>18</td><td>JC</td><td>7,458</td></tr>
+<tr><td>19</td><td>GM</td><td>5,208</td></tr>
+<tr><td>20</td><td>CHI</td><td>3,929</td></tr>
+<tr><td>21</td><td>MTH</td><td>3,697</td></tr>
+<tr><td>22</td><td>MU</td><td>3,650</td></tr>
+<tr><td>23</td><td>PV</td><td>3,647</td></tr>
+<tr><td>24</td><td>DAB</td><td>3,642</td></tr>
+<tr><td>25</td><td>ML</td><td>3,505</td></tr>
+<tr><td>26</td><td>TC</td><td>3,497</td></tr>
+<tr><td>27</td><td>VFD</td><td>3,326</td></tr>
+<tr><td>28</td><td>FAN</td><td>3,278</td></tr>
+<tr><td>29</td><td>PC</td><td>3,182</td></tr>
+<tr><td>30</td><td>MAN</td><td>3,055</td></tr>
+<tr><td>31</td><td>MLH</td><td>2,982</td></tr>
+<tr><td>32</td><td>FC</td><td>2,920</td></tr>
+<tr><td>33</td><td>DAI</td><td>2,870</td></tr>
+<tr><td>34</td><td>IL</td><td>2,849</td></tr>
+<tr><td>35</td><td>JT</td><td>2,816</td></tr>
+<tr><td>36</td><td>MPC</td><td>2,637</td></tr>
+<tr><td>37</td><td>LIG</td><td>2,557</td></tr>
+<tr><td>38</td><td>MF</td><td>2,396</td></tr>
+<tr><td>39</td><td>ACR</td><td>2,217</td></tr>
+<tr><td>40</td><td>JS</td><td>2,098</td></tr>
+</tbody></table>
+<p>The full lists, with counts for every level-1 value, level-2 value, full level-2 prefix and category code, are stored privately at <code>/home/ITER/mcintos/.cache/imas-codex-codac-uda/name-schema/control-and-category-counts.json</code>. That file is named in the manifest and is not tracked.</p>
+<h4>Graph state, replay and guarded controls</h4>
+<p>The graph readback covers all 94,633 archive signals: 29,060 component variables, 58,669 function-level variables and 6,904 nonconforming variables. Every row carries the new convention parse marker and a matching grouping state. Component and control-node scalar identities agree with their corresponding links; nonconforming variables have neither group link.</p>
+<table><thead><tr><th>Active graph group kind</th><th>After projection</th><th>After graph replay</th></tr></thead><tbody>
+<tr><td>Component groups</td><td>2,234</td><td>2,234</td></tr>
+<tr><td>Control-node groups</td><td>358</td><td>358</td></tr>
+<tr><td>Exact patterns</td><td>189</td><td>189</td></tr>
+<tr><td>Category-only patterns</td><td>95</td><td>95</td></tr>
+</tbody></table>
+<p>All 3,019 projected hierarchy/group/pattern nodes reach the ITER facility. The 200-member pilot has 68 component variables in 4 components and 2 exact patterns, 122 function-level variables in 2 control groups, and 10 nonconforming names. Every classified member has the appropriate group and matching identity. Its measured descriptions, source text, unit, domain, name, claim, embedding and archive-access fields have identical canonical JSON digests before and after grouping.</p>
+<p>The private snapshot replay adds and removes zero component groups, control groups or patterns. The graph repeat also leaves all four active counts unchanged. Obsolete active links from the inferred prefix grouping are retired; source enrichment and existing SignalSource memberships are preserved.</p>
+<table><thead><tr><th>Corrected run</th><th>Listing coverage</th><th>Metadata complete at snapshot</th><th>Component / function / nonconforming variables</th><th>Groups / control groups / exact patterns / category patterns</th></tr></thead><tbody>
+<tr><td>Earlier corrected run</td><td>100%</td><td>57.2775%</td><td>457,619 / 491,732 / 45,655</td><td>27,253 / 1,777 / 1,802 / 413</td></tr>
+<tr><td>Current foreground run</td><td>100%</td><td>64.4484%</td><td>457,619 / 491,732 / 45,655</td><td>27,253 / 1,777 / 1,802 / 413</td></tr>
+</tbody></table>
+<p>The main focused gate has <strong>125 passed, zero failed</strong>, compared with a baseline having zero failures. It exercises control hierarchy boundaries, separate component identities, field-discriminator removal from pattern keys, category unions, function-level grouping, private-store replay, source-writer snapshot isolation and real graph refusal/rollback. The updated negative mutation attaches both a malformed fixture and a valid function-level fixture to a neighbouring component; the two dedicated test ids fail, while the unmutated head passes. The red mutation log ends in <code>EXIT=1</code>; the gate and live run logs end in <code>EXIT=0</code>.</p>
+<p>A post-run schema probe found 4 obsolete component-parent properties and 4 old component-parent links among 2,334 component nodes. The focused cleanup removed that parentage from unreferenced inferred nodes, leaving all nodes and active group counts in place; the repeat retired zero. The 501 ControlNode hierarchy nodes have zero invalid parent rows. Its final disposable-graph gate passed four tests. The main 125-test gate remains the parser/grouping/pipeline measurement; the four-test gate covers this final Cypher change.</p>
+<h4>Reuse and the enrichment adapter</h4>
+<p>There is one guarded archive snapshot: <code>snapshot_archive_signals</code> in <code>discovery/signals/variable_name_graph.py</code>. Both catalogue parsing and grouping use it. The runner replays the private store through <code>ArchiveGrouping.snapshot_records</code>, and the code census uses <code>ArchiveGrouping.name_schema_counts</code>; neither measurement depends on a hardcoded table layout.</p>
+<p>These are structural <code>PlantComponent</code>, <code>ControlNode</code> and <code>ArchiveFieldPattern</code> nodes, not <code>SignalSource</code> nodes. A component group contains different fields, while a field-set pattern spans different components. Blindly copying one representative field's description, unit or classification across either population would conflate their meanings. Existing <code>MEMBER_OF</code> source memberships are therefore preserved.</p>
+<p>Enrichment needs an adapter that resolves each member's component or control-node description and the chosen pattern's field description, then supplies that composed context to a compatible existing or reconciled <code>SignalSource</code>. Source members must share the relevant field meaning, unit and classification established by context; code spelling alone does not establish those. The adapter must retain deterministic representatives and the existing source identity, member-count, status and claim fields, use <code>discovery/base/grouping.py</code> for source claim/release and shared propagation contracts, and use the signals pipeline's propagation and individualization writers for FacilitySignal status, cost, descriptions and embeddings. Pattern-field dictionaries remain reusable context rather than a second propagation mechanism. This node implements the grouping and measures the description counts; it does not claim that adapter or enrichment is shipped.</p>
+<p>Private receipts and logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171542222928-signals-grouped-by-component-and-pattern</code>: <code>schema-grouping-receipt.json</code>, <code>schema-gate.log</code>, <code>schema-measurement.log</code>, <code>schema-counts.log</code>, <code>schema-figure.log</code>, <code>parentage-gate.log</code>, <code>parentage-cleanup.log</code> and <code>convention-negative-control.log</code>. The grouping store is <code>grouping.sqlite</code>. Metadata retrieval was still incomplete at the current snapshot; run the same grouping command after its completion receipt. The coordinator owns integration, the separate merged-result gate and section closure.</p>
 </article>
