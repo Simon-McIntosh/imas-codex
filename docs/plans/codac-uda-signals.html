@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="16">
+<meta name="plan-version" content="17">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -162,11 +162,14 @@
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T021249205435-archive-pulse-schema" data-who="reckon-build" data-when="2026-11-15T04:48:08Z">
     <div class="r-comment-body"><p>Added create_archive_pulse as the scanner-facing ID derivation and validation boundary, replaced the self-supplied-ID collision example with constructor-driven coverage and corrected host-policy documentation to name its actual config-validation caller; 76 focused tests pass, a truncated supplied ID is refused, and pulse derivation/refusal mutations each fail a test that passes at head. Operator-readable configuration remains refused. Evidence: docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html#archive-pulse-schema-enforced-construction.</p></div>
 </div>
-<div class="r-comment" data-section="s9" data-id="c-run-r-20261115T021326896806-current-name-consumer-inventory" data-who="reckon-build" data-when="2026-11-15T02:53:36Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html#current-name-consumer-inventory — Read-only inventory of eight surfaces with commands; 5 units, 2 scheduler services, 175 bin files, 53 root entries, 11 GHCR package identities, 3 external MCP definitions, 28 distinct node values across 11 nodes plus 17 historical relationship errors, and 23 reckon pointers; six predeclared controls passed; Azure explicitly not measured; recommendations fork-only, rename-package after at-rest gate, iter-cx-and-imas-dd; no rename or decision lock.</p></div>
-</div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261115T062813562374-review-of-archive-signal-loader-40c2d243330d" data-who="reckon-build" data-when="2026-11-15T06:51:22.401Z">
     <div class="r-comment-body"><p>review of r-20261115T020715473645-archive-signal-loader at 40c2d243330d711419df56bd836b59de2be399ee scores goal_fidelity 19, evidence 17, scope_discipline 17, durability 17, fit 18, reuse 19 (total 107/120), added_failure_count 0 with no added failure ids, and records two non-blocking findings.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T020715473645-archive-signal-loader" data-who="reckon-build" data-when="2026-11-15T06:25:27Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/codac-uda-signals/archive-signal-loader.html#archive-signal-loader-evidence records 50 passing focused tests and a live two-second interval: 8 returned raw points in 1.732343 s, 8 envelope bins in 1.226137 s, cache repeat with zero fetches, and matching validity/refusal behavior.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261115T021326896806-current-name-consumer-inventory" data-who="reckon-build" data-when="2026-11-15T02:53:36Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html#current-name-consumer-inventory — Read-only inventory of eight surfaces with commands; 5 units, 2 scheduler services, 175 bin files, 53 root entries, 11 GHCR package identities, 3 external MCP definitions, 28 distinct node values across 11 nodes plus 17 historical relationship errors, and 23 reckon pointers; six predeclared controls passed; Azure explicitly not measured; recommendations fork-only, rename-package after at-rest gate, iter-cx-and-imas-dd; no rename or decision lock.</p></div>
 </div>
 </section>
 </main>
