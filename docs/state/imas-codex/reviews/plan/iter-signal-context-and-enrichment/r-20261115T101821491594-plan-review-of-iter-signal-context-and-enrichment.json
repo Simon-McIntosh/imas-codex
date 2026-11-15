@@ -36,6 +36,21 @@
         "s5"
       ],
       "when": "2026-11-15T14:32:18.922397+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+        "s6": "631c30f031b35766fbc9b9bf62a0670bf0504adeef4f12b7676039b81fd14365",
+        "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1"
+      },
+      "reason": "Versions 6 and 7 apply the lead's direct correction: section 3 compares the local and a paid model on enrichment with full context, and sections 6 and 7 no longer enrich a signal that has no context.",
+      "units": [
+        "s3",
+        "s6",
+        "s7"
+      ],
+      "when": "2026-11-15T14:47:18.037556+00:00"
     }
   ],
   "completed_at": "2026-11-15T10:42:15.169Z",
