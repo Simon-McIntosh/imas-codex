@@ -1,20 +1,6 @@
 {
-  "command": "imas-codex sn sourceless --json",
-  "counted": 9,
-  "exempt_derived_parents": [
-    "beta"
-  ],
-  "exempt_entries": [
-    {
-      "copied_count": 0,
-      "id": "beta",
-      "live_children": 4,
-      "name_stage": "accepted",
-      "origin": "derived"
-    }
-  ],
-  "generated_at": "2026-11-15T04:50:10.055116+00:00",
-  "live_names": [
+  "bare_count": 9,
+  "bare_names": [
     "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
     "deposited_power_at_divertor_target",
     "electron_temperature_at_plasma_boundary",
@@ -25,12 +11,26 @@
     "voltage_of_diagnostic_antenna",
     "volume_averaged_electron_number_density_over_scrape_off_layer"
   ],
-  "live_names_total": 3266,
-  "live_names_with_producer": 3256,
-  "live_names_without_producer": 10,
+  "bare_without_producer": 10,
+  "count": 9,
+  "differing_names": [],
+  "exempt_derived_parents": [
+    {
+      "copied_count": 0,
+      "has_edge": false,
+      "id": "beta",
+      "live_children": 4,
+      "name_stage": "accepted",
+      "origin": "derived"
+    }
+  ],
+  "live_names": 3266,
+  "live_with_producer": 3256,
+  "live_without_producer": 10,
   "names": [
     {
       "copied_count": 0,
+      "has_edge": false,
       "id": "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
       "live_children": 0,
       "name_stage": "accepted",
@@ -38,6 +38,7 @@
     },
     {
       "copied_count": 0,
+      "has_edge": false,
       "id": "deposited_power_at_divertor_target",
       "live_children": 1,
       "name_stage": "exhausted",
@@ -45,6 +46,7 @@
     },
     {
       "copied_count": 0,
+      "has_edge": false,
       "id": "electron_temperature_at_plasma_boundary",
       "live_children": 0,
       "name_stage": "exhausted",
@@ -52,6 +54,7 @@
     },
     {
       "copied_count": 1,
+      "has_edge": false,
       "id": "line_averaged_neon_density",
       "live_children": 0,
       "name_stage": "pending",
@@ -59,6 +62,7 @@
     },
     {
       "copied_count": 0,
+      "has_edge": false,
       "id": "poloidal_total_momentum_convection_velocity",
       "live_children": 0,
       "name_stage": "exhausted",
@@ -66,6 +70,7 @@
     },
     {
       "copied_count": 1,
+      "has_edge": false,
       "id": "radius_of_soft_xray_detector",
       "live_children": 0,
       "name_stage": "pending",
@@ -73,6 +78,7 @@
     },
     {
       "copied_count": 2,
+      "has_edge": false,
       "id": "ratio_of_diamagnetic_vorticity_to_major_radius",
       "live_children": 0,
       "name_stage": "pending",
@@ -80,6 +86,7 @@
     },
     {
       "copied_count": 0,
+      "has_edge": false,
       "id": "voltage_of_diagnostic_antenna",
       "live_children": 0,
       "name_stage": "exhausted",
@@ -87,11 +94,11 @@
     },
     {
       "copied_count": 0,
+      "has_edge": false,
       "id": "volume_averaged_electron_number_density_over_scrape_off_layer",
       "live_children": 0,
       "name_stage": "accepted",
       "origin": "pipeline"
     }
-  ],
-  "rule": "live = status and name_stage both not superseded; sources read from PRODUCED_NAME edges only"
+  ]
 }

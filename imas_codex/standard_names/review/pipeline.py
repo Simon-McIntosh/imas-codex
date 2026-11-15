@@ -301,9 +301,11 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
     # --- Load full catalog ---------------------------------------------------
 
     def _load_all_names() -> list[dict]:
+        from imas_codex.standard_names.source_reads import source_paths_projection
+
         with GraphClient() as gc:
             rows = gc.query(
-                """
+                f"""
                 MATCH (sn:StandardName)
                 WHERE sn.validation_status = 'valid'
                 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
@@ -313,7 +315,7 @@ async def extract_review_worker(state: StandardNameReviewState, **_kwargs: Any) 
                        sn.kind AS kind,
                        coalesce(u.id, sn.unit) AS unit,
                        sn.links AS links,
-                       sn.source_paths AS source_paths,
+                       {source_paths_projection()} AS source_paths,
                        sn.physical_base AS physical_base,
                        sn.subject AS subject,
                        sn.component AS component,

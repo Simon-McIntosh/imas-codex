@@ -128,11 +128,12 @@ def _has_dd_source_reference(_worker_dependency, /, item: dict[str, Any]) -> boo
 def _load_docs_review_source_item(_worker_dependency, /, sn_id: str) -> dict[str, Any]:
     """Read the same prompt-bearing projection returned by a docs claim."""
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.source_reads import source_paths_projection
 
     with GraphClient() as gc:
         rows = gc.query(
-            """
-            MATCH (sn:StandardName {id: $id})
+            f"""
+            MATCH (sn:StandardName {{id: $id}})
             OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
             OPTIONAL MATCH (sn)-[:IN_CLUSTER]->(c:IMASSemanticCluster)
             RETURN sn.id AS id,
@@ -154,14 +155,14 @@ def _load_docs_review_source_item(_worker_dependency, /, sn_id: str) -> dict[str
                    sn.edit_origin AS edit_origin,
                    sn.origin AS origin,
                    sn.run_id AS run_id,
-                   sn.source_paths AS source_paths,
-                   [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {
+                   {source_paths_projection()} AS source_paths,
+                   [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {{
                        id: source.id,
                        source_type: source.source_type,
                        source_id: source.source_id,
                        dd_path: source.dd_path,
                        dd_version: source.dd_version
-                   }] AS source_bindings
+                   }}] AS source_bindings
             """,
             id=sn_id,
         )

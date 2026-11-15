@@ -19,6 +19,7 @@ from imas_codex.standard_names.defaults import (
     DEFAULT_REFINE_ROTATIONS,
 )
 from imas_codex.standard_names.pools import pool_admission_params, pool_admission_where
+from imas_codex.standard_names.source_reads import source_paths_projection
 
 from .graph_foundation import (
     _CLAIM_TIMEOUT_SECONDS,
@@ -228,7 +229,7 @@ def claim_refine_name_batch(
             ", sn.refine_stop_reason AS refine_stop_reason"
             ", sn.refine_collision_name AS refine_collision_name"
             ", sn.name_stage AS name_stage"
-            ", sn.source_paths AS source_paths"
+            f", {source_paths_projection()} AS source_paths"
             ", sn.tags AS tags"
             ", sn.vocab_gap_detail AS vocab_gap_detail"
             ", sn.validation_issues AS validation_issues"

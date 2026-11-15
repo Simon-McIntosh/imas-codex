@@ -655,16 +655,18 @@ _REVIEW_NODE_FIELDS = (
 
 def _load_review_node(sn_id: str, gc: GraphClient) -> dict[str, Any] | None:
     """Load the fields the review scorer needs for *sn_id*."""
+    from imas_codex.standard_names.source_reads import source_paths_projection
+
     rows = gc.query(
-        """
+        f"""
         // APPROVAL_LOAD_REVIEW_NODE
-        MATCH (sn:StandardName {id: $id})
+        MATCH (sn:StandardName {{id: $id}})
         OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
         RETURN sn.id AS id, sn.id AS name, sn.description AS description,
                sn.documentation AS documentation, sn.kind AS kind,
                coalesce(u.id, sn.unit) AS unit,
                sn.physics_domain AS physics_domain,
-               sn.source_paths AS source_paths,
+               {source_paths_projection()} AS source_paths,
                sn.physical_base AS physical_base, sn.tags AS tags
         """,
         id=sn_id,

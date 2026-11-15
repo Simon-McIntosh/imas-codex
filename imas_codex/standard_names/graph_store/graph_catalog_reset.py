@@ -6,6 +6,7 @@ import logging
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
+from imas_codex.standard_names.source_reads import source_paths_projection
 
 logger = logging.getLogger(__name__)
 
@@ -316,15 +317,15 @@ def claim_names_for_validation(
         )
         # Step 2: verify — only our token
         results = gc.query(
-            """
-            MATCH (sn:StandardName {claim_token: $token})
+            f"""
+            MATCH (sn:StandardName {{claim_token: $token}})
             OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(src)
             OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
             WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested']
             RETURN sn.id AS id, sn.description AS description,
                    sn.documentation AS documentation, sn.kind AS kind,
                    sn.unit AS unit, sn.links AS links,
-                   sn.source_paths AS source_paths,
+                   {source_paths_projection()} AS source_paths,
                    sn.object AS object,
                    sn.physics_domain AS physics_domain,
                    sn.origin AS origin,
@@ -490,8 +491,11 @@ def get_validated_names(
     params: dict[str, Any] = {"limit": limit}
 
     if ids_filter:
-        where_parts.append("ANY(p IN sn.source_paths WHERE p STARTS WITH $ids_prefix)")
         from imas_codex.standard_names.source_paths import ids_prefix_for_source_paths
+
+        where_parts.append(
+            f"ANY(p IN {source_paths_projection()} WHERE p STARTS WITH $ids_prefix)"
+        )
 
         params["ids_prefix"] = ids_prefix_for_source_paths(ids_filter)
 
@@ -507,7 +511,7 @@ def get_validated_names(
             RETURN sn.id AS id, sn.description AS description,
                    sn.documentation AS documentation, sn.kind AS kind,
                    sn.unit AS unit, sn.links AS links,
-                   sn.source_paths AS source_paths,
+                   {source_paths_projection()} AS source_paths,
                    source_ids
             LIMIT $limit
             """,

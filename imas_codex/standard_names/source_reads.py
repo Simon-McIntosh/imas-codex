@@ -9,7 +9,9 @@ copied list is empty while its edges are not stops answering a search with no
 source.
 
 The copied list stays on the name as a second projection of the edges; nothing
-here writes it and nothing here reads it.
+here writes it. The one place this module reads it is the sourceless count,
+which sizes it so a reader can see which names' copies disagree with their
+edges — that difference is the subject of the read, not an answer to it.
 """
 
 from __future__ import annotations
@@ -21,6 +23,7 @@ from imas_codex.standard_names.source_invariant import (
     live_name_cypher,
     producerless_cypher,
 )
+from imas_codex.standard_names.source_paths import merge_source_paths
 
 #: The contrast this module adds to the owner's rule: a name with no
 #: ``PRODUCED_NAME`` edge of any kind. The rule the count applies is the owner's
@@ -46,8 +49,12 @@ def source_paths_projection(alias: str = "sn") -> str:
 
 
 def normalize_source_ids(ids: Any) -> list[str]:
-    """Stable, de-duplicated form of a source-id list."""
-    return sorted({str(source_id) for source_id in (ids or []) if source_id})
+    """Stable, de-duplicated form of a source-id list.
+
+    The union and its order are :func:`merge_source_paths`'s, so a list this
+    module hands out and a list a writer merges read the same way.
+    """
+    return merge_source_paths([], [i for i in (ids or []) if i])
 
 
 def read_source_paths(gc: Any, name: str) -> list[str]:

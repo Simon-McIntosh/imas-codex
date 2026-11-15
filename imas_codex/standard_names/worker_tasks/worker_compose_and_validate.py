@@ -1477,6 +1477,7 @@ def claim_ids_for_validation(
     import uuid
 
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.source_reads import source_paths_projection
 
     token = str(uuid.uuid4())
     with GraphClient() as gc:
@@ -1497,15 +1498,15 @@ def claim_ids_for_validation(
             timeout=_worker_dependency("_SCOPED_VALIDATION_CLAIM_TIMEOUT"),
         )
         results = gc.query(
-            """
-            MATCH (sn:StandardName {claim_token: $token})
+            f"""
+            MATCH (sn:StandardName {{claim_token: $token}})
             OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(src)
             OPTIONAL MATCH (child:StandardName)-[:HAS_PARENT]->(sn)
             WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested']
             RETURN sn.id AS id, sn.description AS description,
                    sn.documentation AS documentation, sn.kind AS kind,
                    sn.unit AS unit, sn.links AS links,
-                   sn.source_paths AS source_paths,
+                   {source_paths_projection()} AS source_paths,
                    sn.object AS object,
                    sn.physics_domain AS physics_domain,
                    sn.origin AS origin,
@@ -1905,15 +1906,16 @@ async def persist_worker(
 
         # Collect from graph — names we just embedded
         from imas_codex.graph.client import GraphClient
+        from imas_codex.standard_names.source_reads import source_paths_projection
 
         def _get_recent_names():
             with GraphClient() as gc:
                 results = gc.query(
-                    """
+                    f"""
                     MATCH (sn:StandardName)
                     WHERE sn.embedded_at IS NOT NULL
                       AND sn.name_stage = 'drafted'
-                    RETURN sn.id AS id, sn.source_paths AS source_paths
+                    RETURN sn.id AS id, {source_paths_projection()} AS source_paths
                     """
                 )
                 for r in results:
