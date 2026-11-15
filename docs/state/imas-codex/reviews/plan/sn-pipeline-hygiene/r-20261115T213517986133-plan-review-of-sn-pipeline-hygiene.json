@@ -35,6 +35,16 @@
       "note": "The section now says six landings and cites the stored run reviews of the family wording pass and the refine pass beside the other four; the done-when covers every non-blocking finding those six reviews leave open.",
       "reason": "",
       "when": "2026-11-15T22:02:58.040179+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1710266c9f07733ea220e8003c9c5767eceae9c7",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The method sentence is removed; the done-when states the observable, a committed script that no longer runs as committed, listed with the missing name it reports.",
+      "reason": "",
+      "when": "2026-11-15T22:03:03.104381+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The section now says six landings and cites the stored run reviews of the family wording pass and the refine pass beside the other four; the done-when covers every non-blocking finding those six reviews leave open.",
       "reason": "",
       "when": "2026-11-15T22:02:58.040179+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "1710266c9f07733ea220e8003c9c5767eceae9c7",
+      "commit_basis": "edit",
+      "note": "The method sentence is removed; the done-when states the observable, a committed script that no longer runs as committed, listed with the missing name it reports.",
+      "reason": "",
+      "when": "2026-11-15T22:03:03.104381+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261115T213517986133-plan-review-of-sn-pipeline-hygiene.json",
