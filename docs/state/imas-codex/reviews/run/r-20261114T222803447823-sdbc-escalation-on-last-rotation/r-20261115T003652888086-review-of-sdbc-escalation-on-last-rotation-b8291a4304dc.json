@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "06f37adc827c31f61cd6274dbb8d6118e4f52c1c",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:908 PoolSpec refine_name process adapter -> process_refine_placeholder",
+    "imas_codex/standard_names/worker_tasks/worker_refine_names.py:380 process_refine_name_batch -> refine_model_for_attempt"
+  ],
+  "completed_at": "2026-11-15T01:19:48.508Z",
+  "dispatched_at": "2026-11-15T00:37:27Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T222803447823-sdbc-escalation-on-last-rotation/manifest.md",
+      "id": "f1a9d3b683f",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "non-blocking: the recorded base arm is revision 06f37adc (head-gate.log), which is neither the reviewed head b8291a430 nor its parent cffe924ea (git diff --stat 06f37adc cffe924ea spans 65 files), so added_failure_count rests on a baseline that is not the head's parent; the brief named that log as the base arm and the target failure is present in it, so the figure of 0 added failures still holds, but a later reader cannot read the pair as a parent/child comparison."
+    },
+    {
+      "file": "/home/ITER/mcintos/.cache/imas-codex-live-rewrite/sdbc-escalation/run-head.sh",
+      "id": "f759d02ecb1",
+      "line": "45",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate wrapper ends with a bare `exit 0` after pytest, so the SLURM job's own exit status reads success whatever the suite did; the log's trailing EXIT= line records the real code, so gate-b8291a430.log's EXIT=0 is trustworthy, but a reader who watched the job status instead of the log would read a red run as green."
+    }
+  ],
+  "head_log_revision": "b8291a4304dc5f09ef30dee493ac5f6809c5d344",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified two production call sites: imas_codex/standard_names/loop.py:908 wires process_refine_name_batch into the refine_name PoolSpec, and imas_codex/standard_names/worker_tasks/worker_refine_names.py:380 calls refine_model_for_attempt inside that batch processor.",
+    "diff": "read the single commit b8291a430 against cffe924ea: it adds the collections.abc Callable import, a module-level _model_by_seat helper at :70, and replaces the escalation test's single-return get_model patch at :355-358 with a side_effect keyed on the seat name; both assertion lines are unchanged.",
+    "done_when": "the done_when names the test file alone and the whole tests/standard_names directory from an archive at head, both EXIT=0 with zero failures, the cause stated, and no assertion skipped or weakened; file-alone.log reads '23 passed' EXIT=0 and gate-b8291a430.log reads '8754 passed, 12 skipped' EXIT=0, the manifest states the cause as a superseded expectation, and the diff changes only the mock and adds a helper.",
+    "goal": "the node's goal is to make the last-rotation escalation test pass by the repair its cause calls for; b8291a430 repairs the test's mock so the two seats are distinguishable, and tests/standard_names/test_refine_attempt_budget.py:370 passes at that head.",
+    "manifest": "read; status complete, commit b8291a430, changed_paths the one test file, tests the sbatch --wait all_debug archive gate, test_logs the gate, file-alone and negative-control logs, baseline_suite (06f37adc, 1 failure, the target id) and after_suite (b8291a430, 0 failures), and evidence_inputs stating the cause with product-code citations.",
+    "write_paths": "the fence was imas_codex/standard_names/worker_tasks/worker_refine_names.py and tests/standard_names/test_refine_attempt_budget.py; the commit touches only the test file, and the product file is byte-identical between base and head."
+  },
+  "justifications": {
+    "durability": "the declared mutation (worker_refine_names.py:47-49 resolving the refine seat on the last rotation) reddens test_last_rotation_uses_the_escalation_seat[3-True] at negative-control.log while [1-False] and [2-False] stay green, so the assertion is falsified by exactly the regression it guards.",
+    "evidence": "gate-b8291a430.log (rev b8291a430, git archive, whole tests/standard_names) ends '8754 passed, 12 skipped' EXIT=0, and the recorded base arm head-gate.log (rev 06f37adc) ends '1 failed, 8752 passed' EXIT=1 on the target id, so the gate the worker ran asserts the done_when's measure.",
+    "fit": "tests/standard_names/test_refine_attempt_budget.py:70-81 follows the module's private-helper idiom and its docstring states the mechanism; commit b8291a430 carries a conventional subject and a body with no plan, ticket or agent attribution.",
+    "goal_fidelity": "tests/standard_names/test_refine_attempt_budget.py:370 now asserts the configured escalation model on the last rotation and :372 the refine seat on the earlier rotations, so the target id passes on product behaviour rather than on a mock that answered every seat alike.",
+    "reuse": "the helper only keys the existing imas_codex.settings.get_model mock and reuses imas_placeholder DEFAULT_ESCALATION_MODEL rather than restating the seat's model; a capability search over tests/ for a per-seat model mock found none, so no owner was forked.",
+    "scope_discipline": "git diff --stat cffe924ea..b8291a430 lists one file, tests/standard_names/test_refine_attempt_budget.py, inside the declared write paths; worker_refine_names.py is byte-identical base..head, so the negative-control mutation was reverted cleanly."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to make the last-rotation escalation test pass by the repair its cause calls for; b8291a430 repairs the test's mock so the two seats are distinguishable, and tests/standard_names/test_refine_attempt_budget.py:370 passes at that head.\nVERDICT done_when: the done_when names the test file alone and the whole tests/standard_names directory from an archive at head, both EXIT=0 with zero failures, the cause stated, and no assertion skipped or weakened; file-alone.log reads '23 passed' EXIT=0 and gate-b8291a430.log reads '8754 passed, 12 skipped' EXIT=0, the manifest states the cause as a superseded expectation, and the diff changes only the mock and adds a helper.\nVERDICT write_paths: the fence was imas_codex/standard_names/worker_tasks/worker_refine_names.py and tests/standard_names/test_refine_attempt_budget.py; the commit touches only the test file, and the product file is byte-identical between base and head.\nVERDICT manifest: read; status complete, commit b8291a430, changed_paths the one test file, tests the sbatch --wait all_debug archive gate, test_logs the gate, file-alone and negative-control logs, baseline_suite (06f37adc, 1 failure, the target id) and after_suite (b8291a430, 0 failures), and evidence_inputs stating the cause with product-code citations.\nVERDICT diff: read the single commit b8291a430 against cffe924ea: it adds the collections.abc Callable import, a module-level _model_by_seat helper at :70, and replaces the escalation test's single-return get_model patch at :355-358 with a side_effect keyed on the seat name; both assertion lines are unchanged.\nCALL_SITES: imas_codex/standard_names/loop.py:908 PoolSpec refine_name process adapter -> process_refine_name_batch, imas_codex/standard_names/worker_tasks/worker_refine_names.py:380 process_refine_name_batch -> refine_model_for_attempt\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/standard_names/test_refine_attempt_budget.py:370 now asserts the configured escalation model on the last rotation and :372 the refine seat on the earlier rotations, so the target id passes on product behaviour rather than on a mock that answered every seat alike.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-b8291a430.log (rev b8291a430, git archive, whole tests/standard_names) ends '8754 passed, 17 placeholder'\nSCORE durability: 17\nJUSTIFICATION durability: the declared mutation (worker_refine_names.py:47-49 resolving the refine seat on the last rotation) reddens test_last_rotation_uses_the_escalation_seat[3-True] at negative-control.log while [1-False] and [2-False] stay green, so the assertion is falsified by exactly the regression it guards.\nSCORE fit: 19\nJUSTIFICATION fit: tests/standard_names/test_refine_attempt_budget.py:70-81 follows the module's private-helper idiom and its docstring states the mechanism; commit b8291a430 carries a conventional subject and a body with no plan, ticket or agent attribution.\nSCORE reuse: 20\nJUSTIFICATION reuse: the helper only keys the existing imas_codex.settings.get_model mock and reuses imas_codex/standard_names/defaults.py:57 DEFAULT_ESCALATION_MODEL rather than restating the seat's model; a capability search over tests/ for a per-seat model mock found none, so no owner was forked.",
+  "review_run_id": "r-20261115T003652888086-review-of-sdbc-escalation-on-last-rotation-b8291a4304dc",
+  "reviewed_base_sha": "cffe924eaad54d955c8df27bce6af201813f3857",
+  "reviewed_head_sha": "b8291a4304dc5f09ef30dee493ac5f6809c5d344",
+  "reviewed_run_id": "r-20261114T222803447823-sdbc-escalation-on-last-rotation",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261115T003652888086-review-of-sdbc-escalation-on-last-rotation-b8291a4304dc"
+  },
+  "reviewer_run_id": "r-20261115T003652888086-review-of-sdbc-escalation-on-last-rotation-b8291a4304dc",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:19:43.967357+00:00",
+  "total": 110
+}
