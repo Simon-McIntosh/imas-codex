@@ -57,7 +57,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 20,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The stale follow-up is resolved, recording that sections 2, 3 and 5 landed and that sections 4 and 10 are the pending ones behind ICP access and the archive scan.",
+      "reason": "",
+      "when": "2026-11-15T21:16:35.508791+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "note": "The stale follow-up is resolved, recording that sections 2, 3 and 5 landed and that sections 4 and 10 are the pending ones behind ICP access and the archive scan.",
+      "reason": "",
+      "when": "2026-11-15T21:16:35.508791+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "b9d8538c8029a79133e46224f9beb8294dbadc8a",
   "rubric": "content",
