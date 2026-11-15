@@ -1,28 +1,77 @@
-<article id="archive-variable-catalogue-scope-check">
-  <h3>Catalogue implementation not delivered</h3>
-  <p>The live plan was read at version 15. The assigned tree was inspected at
-    <code>2fd068df6030aaa3c1acdc06bf5cf6086ac42d90</code> before implementation.
-    Its tracked working tree was clean.</p>
-  <p>The scanner registry imports <code>device_xml</code>, <code>edas</code>,
-    <code>imas</code>, <code>jpf</code>, <code>mdsplus</code>, <code>ppf</code>,
-    <code>tdi</code> and <code>wiki</code>. It imports no CODAC UDA scanner.
-    A scoped search of the discovery source returned no CODAC UDA reference;
-    the same search found the known configuration validator and packaged
-    reader, confirming that the search could see the upstream implementation.</p>
-  <p>The worker stopped at the dispatch's write boundary. No scanner was
-    implemented, archive contacted or graph written. No cohort scan ran on
-    any partition.</p>
+<article id="archive-variable-catalogue-evidence">
+  <h3>Scanner implemented; live catalogue acceptance remains incomplete</h3>
+  <p>Implementation commit <code>1b84dcd0c6b6c059dbdcdf9aba198a5272729cea</code>
+    registers the scanner, batches metadata through the underlying UDA protocol,
+    records separate metadata and data-serving archives, and keeps atomic private
+    recovery checkpoints. Signal writes preserve enrichment and claims. A bounded
+    read must return samples before the data-serving archive is set.</p>
+  <p>The live plan was read at version 15 against base
+    <code>2fd068df6030aaa3c1acdc06bf5cf6086ac42d90</code>. Source and test write
+    authorization was expanded after the initial evidence-only checkpoint.
+    The implementation is delivered, but the section's acceptance measure is not met.</p>
+  <figure id="archive-variable-catalogue-flow">
+    <img src="/imas-codex/figures/codac-uda-signals/archive-variable-catalogue/catalogue-provenance.svg"
+      alt="Private policy precedes metadata batching, acknowledged graph writes and a complete checkpoint. Data-serving provenance requires a bounded read returning samples.">
+    <figcaption>Catalogue completion follows graph acknowledgement. Data-serving
+      provenance follows a successful bounded read independently of metadata
+      provenance. The diagram passed checks on all 15 text bounds and pairwise
+      overlaps and its rendered preview was visually inspected.</figcaption>
+  </figure>
   <table>
-    <thead><tr><th>Required measurement</th><th>Outcome</th></tr></thead>
+    <thead><tr><th>Measurement</th><th>Observed result</th></tr></thead>
     <tbody>
-      <tr><td>Independent archive and graph cohort counts</td><td>Not measured</td></tr>
-      <tr><td>Duplicate count after a second scan</td><td>Not measured</td></tr>
-      <tr><td>Ten bounded reads, confirmed and unconfirmed</td><td>Not measured</td></tr>
-      <tr><td>Interrupted scan remains incomplete</td><td>Not exercised</td></tr>
-      <tr><td>Empty read leaves serving archive unset</td><td>Not exercised</td></tr>
-      <tr><td>Modified statements under the graph marker</td><td>No statements modified</td></tr>
+      <tr><td>Independent archive listing for the privately declared cohort</td><td>10,259 unique selectors; a previously successful selector is present</td></tr>
+      <tr><td>Independent graph cohort count and equality</td><td>Not measured; live scan did not complete</td></tr>
+      <tr><td>Duplicate count after a second live scan</td><td>Not measured; second scan not reached</td></tr>
+      <tr><td>Ten live bounded reads, confirmed and unconfirmed</td><td>Not measured; validation not reached</td></tr>
+      <tr><td>Live checkpoint after reader timeout</td><td>complete=false, enumerated=0, written=0, error=TimeoutExpired; these are checkpoint counters, not an independent graph census</td></tr>
+      <tr><td>Focused regression gate</td><td>108 passed in 6.99 s</td></tr>
+      <tr><td>Modified catalogue and scanner-scope statements under graph marker</td><td>1 passed in 25.40 s against disposable Neo4j</td></tr>
+      <tr><td>Interrupted scan and empty-read controls</td><td>Both pass at head; two corresponding deliberate mutations produce 2 failed tests in 1.47 s</td></tr>
+      <tr><td>Native metadata batch positive control</td><td>2 metadata documents in one protocol batch, 0.516117 s</td></tr>
     </tbody>
   </table>
-  <p>This record supports a blocked outcome only; it supplies no completion
-    evidence for the catalogue.</p>
+  <p>The focused gate covers recovery after 100 acknowledged writes in a
+    150-signal synthetic cohort, refusal to finish an unacknowledged graph batch,
+    empty-read exclusion, endpoint policy, exact metadata wording, and scanner
+    registration. The graph gate proves idempotent writes and retention of
+    enrichment, claims and serving provenance during a rescan. Neither replaces
+    the missing live cohort equality and ten-read measures.</p>
+  <p>The connection-policy defect was reproduced before its repair:</p>
+  <blockquote>REPRODUCED: distinct IP addresses refused: archive endpoint is reserved for operators</blockquote>
+  <p>The reader now imports the canonical host-key function from configuration
+    policy. Its pure standard-library dependency is shipped with the isolated
+    script through the existing executor on both entry points. Distinct IPv4
+    and IPv6 endpoints are accepted in tests; operator aliases are refused before
+    client construction. Every private archive block must redeclare every role.</p>
+  <p>All live work ran on <code>all_debug</code>. Job <code>1316841</code>
+    refused the initial 1,000-variable cap before graph writes. A native listing
+    established 10,259 selectors, with a known-present positive control. Narrower
+    tested wildcard expressions yielded at most three candidates and did not
+    establish a cohort large enough for ten distinct reads. The same declared
+    namespace was then bounded at 20,000 variables. Job <code>1316852</code>
+    passed its independent listing but its metadata retrieval exceeded the
+    private 60 s reader timeout. Archive endpoint and DataAccess setup had been
+    acknowledged before that request; no finished catalogue is claimed.</p>
+  <p>The live gate reached its two-counted-failure stop condition. No further live
+    attempt or timeout change was made. A resumed attempt can retain the private
+    cohort declaration and use a larger bounded reader timeout, or establish a
+    smaller supported cohort. Catalogue equality, live idempotence and ten
+    read confirmations must still be measured. The operator-reserved archive
+    was never contacted.</p>
+  <p>Durable receipts and private inputs:</p>
+  <ul>
+    <li>Run directory: <code>~/.config/reckon/crew/runs/r-20261115T020713980531-archive-variable-catalogue/</code></li>
+    <li>Passing gates: <code>focused-resource-gate.log</code> and <code>graph-scope-gate.log</code>; deliberate refusals: <code>negative-control.log</code></li>
+    <li>Live timeout: <code>live-declared-cohort-gate.log</code>; native batch: <code>native-corrected-batch-probe.log</code>; figure: <code>figure-check.log</code></li>
+    <li>Private independent listing: <code>~/.cache/imas-codex-codac-uda/catalogue-independent-listing.json</code></li>
+    <li>Private configuration backup: <code>~/.cache/imas-codex-codac-uda/catalogue-private-config.yaml</code></li>
+    <li>Incomplete checkpoint: <code>~/.cache/imas-codex-codac-uda/catalogues/iter-c70958c65c80f6ac52e6803da1fef0979d52a4a6ba5cefe45e1aae56af3deb13.json</code></li>
+  </ul>
+  <p>The focused and graph gates ran the working-tree implementation subsequently
+    committed unchanged at <code>1b84dcd0c6b6c059dbdcdf9aba198a5272729cea</code>;
+    their headers identify the preceding commit and the assigned tree. Mutation
+    and live-gate headers identify the implementation commit. Generated model
+    files were rebuilt in this worktree and are excluded from commits; the
+    integrating checkout must rebuild its models before importing the new scanner.</p>
 </article>
