@@ -2132,7 +2132,9 @@ def main() -> None:
 
     report = modes.add_parser("report", help="score every arm and "
                                                                "write the deliverables")
-    report.add_argument("--models", default=str(STATE / "openrouter-models.json"))
+    report.add_argument(
+        "--models", default=str(RUN_DIR / "probes" / "openrouter-models.json")
+    )
 
     args = parser.parse_args()
     if args.mode == "probe":
