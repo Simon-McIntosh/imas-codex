@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T23:00:38.305Z",
+  "dispatched_at": "2026-11-15T23:00:12Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:60",
+      "id": "done_when-1",
+      "reason": "as written a public, empty or partial package lands with the section, which would make section 1's promise that ICP-derived content \"is covered by the facility-scoped protected backup\" false while the gate log reads green.",
+      "text": "the added clause \"a facility-scoped private archive holding the imported nodes and links is taken before the section lands, with its package name, visibility and digest in the landing record\" has no failing condition: it requires visibility to be *recorded*, never to be private; it requires the package to hold the imported nodes and links without counting the imported nodes the package was found to contain; and it states no quiescence precondition, while section 9 \u2014 which waits on section 4 \u2014 is the only place that says \"No graph writer is running when the archive is taken\", so the day-one protection copy is taken under no stated consistency rule. The section's declared negative control still tests only link assignment, so nothing in section 4 can show the second copy exists, is private, or is complete",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "ebb5a7a4e5d1c6bc65db6926352035727a0eedb6",
+  "plan_fingerprint": "a7670cba27a9d6c7b65eb7fa556cf8e80eea53a4bca145bd05e22eaf97d90048",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 29,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T225630356341-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "330a2313544f35e3e570ecfa55f33f094dbc5426",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the plan hrefs icp-api-access and codac-uda-signals resolve to docs/plans/<name>.html, the figure docs/figures/iter-signal-context-and-enrichment/pipeline.svg exists, and each section anchor cited in the declarations is present in the snapshot.",
+    "done_when": "a finding \u2014 the archive clause newly added to section 4's done-when (plan.html:60) states no condition that can fail, so a public or incomplete package still satisfies it.",
+    "evidence_paths": "pass \u2014 every done-when in the changed units rests on a landing record, the plan's durable evidence surface, which sections 2, 3 and 5 already write under docs/evidence/fragments/iter-signal-context-and-enrichment/; no node-local or scratch path is named.",
+    "naming": "pass \u2014 the version-29 edits are prose in a decision and a done-when; neither changed unit introduces a plan label, stage name, ticket number or version tag into a name or comment.",
+    "reasoning": "pass \u2014 the decision's context now reports section 3's stored figures as they stand (local 0 of 20 responses parsed unrepaired and 130 of 200 delivered; paid 20 of 20 and 200 of 200 for USD 0.95), and the rationale records both the build-after-refinement branch and the return-to-lead branch, so neither the stated cause nor the endpoint outruns the evidence.",
+    "single_goal": "pass \u2014 section 4 still delivers one thing, the pilot system's imported context and its links; the archive is a protection condition on that content rather than a second deliverable, and no node was split by the version-29 edit.",
+    "wiring": "pass \u2014 every declared depends-on target resolves (icp-api-access#s3, icp-api-access#s4 and codac-uda-signals#s12 all exist and carry an unstruck declaration), section 10 is now a dependency of section 9's link set, and section 4's read path is delivered by the ICP plan's sections 2 to 4."
+  },
+  "section_digests": {
+    "_document": "e409354224765fb027152d6b5fbf2b4b9ffd86f3d42befb25fbb7b5f3fba3f9b",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "d0f4690e027d9156a64bbaaba7bc271ff4feef1216ebe61acf1b20983de6067a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "631c30f031b35766fbc9b9bf62a0670bf0504adeef4f12b7676039b81fd14365",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T23:14:28.114468+00:00",
+  "total": null
+}
