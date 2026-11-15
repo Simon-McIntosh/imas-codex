@@ -67,6 +67,16 @@
       "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. The document fetch and size probe go through the existing transfer client with the signed-in session injected.",
       "reason": "",
       "when": "2026-11-15T21:37:04.625269+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "finding": "reuse_search-2",
+      "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. Request pacing is delivered once as a shared request pacer and the hand-rolled delay loops are named in the brief as its future callers; section 3's rate bound is measured against that pacer.",
+      "reason": "",
+      "when": "2026-11-15T21:37:08.610800+00:00"
     }
   ],
   "responses": {
@@ -78,6 +88,15 @@
       "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. The document fetch and size probe go through the existing transfer client with the signed-in session injected.",
       "reason": "",
       "when": "2026-11-15T21:37:04.625269+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. Request pacing is delivered once as a shared request pacer and the hand-rolled delay loops are named in the brief as its future callers; section 3's rate bound is measured against that pacer.",
+      "reason": "",
+      "when": "2026-11-15T21:37:08.610800+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261115T211406789475-plan-review-of-icp-api-access.json",
