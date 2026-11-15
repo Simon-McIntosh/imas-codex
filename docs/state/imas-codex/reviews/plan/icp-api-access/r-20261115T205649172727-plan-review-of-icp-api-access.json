@@ -61,6 +61,16 @@
       "note": "Section 1 now records the authenticated check that established the machine-readable description exists: it was read, with 793 paths and 815 operations of which 471 are GET, so section 2's figures are obtainable.",
       "reason": "",
       "when": "2026-11-15T21:11:33.249434+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "c8c40c9d9ade16df0a1367bb571b371556f7fcec",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The context and enrichment plan's section 4 now declares its wait on this plan's sections 3 and 4, and its text says the content is read through the read-only client this plan delivers.",
+      "reason": "",
+      "when": "2026-11-15T21:11:38.994290+00:00"
     }
   ],
   "responses": {
@@ -81,6 +91,15 @@
       "note": "Section 1 now records the authenticated check that established the machine-readable description exists: it was read, with 793 paths and 815 operations of which 471 are GET, so section 2's figures are obtainable.",
       "reason": "",
       "when": "2026-11-15T21:11:33.249434+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "c8c40c9d9ade16df0a1367bb571b371556f7fcec",
+      "commit_basis": "edit",
+      "note": "The context and enrichment plan's section 4 now declares its wait on this plan's sections 3 and 4, and its text says the content is read through the read-only client this plan delivers.",
+      "reason": "",
+      "when": "2026-11-15T21:11:38.994290+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261115T205649172727-plan-review-of-icp-api-access.json",
