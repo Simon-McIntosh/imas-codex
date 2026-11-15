@@ -25,7 +25,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 43,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1710266c9f07733ea220e8003c9c5767eceae9c7",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section now says six landings and cites the stored run reviews of the family wording pass and the refine pass beside the other four; the done-when covers every non-blocking finding those six reviews leave open.",
+      "reason": "",
+      "when": "2026-11-15T22:02:58.040179+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1710266c9f07733ea220e8003c9c5767eceae9c7",
+      "commit_basis": "edit",
+      "note": "The section now says six landings and cites the stored run reviews of the family wording pass and the refine pass beside the other four; the done-when covers every non-blocking finding those six reviews leave open.",
+      "reason": "",
+      "when": "2026-11-15T22:02:58.040179+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261115T213517986133-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261115T213517986133-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "8c81a23dfd10563bfe3117e31d3cdbb6b26c6b98",
   "rubric": "content",
