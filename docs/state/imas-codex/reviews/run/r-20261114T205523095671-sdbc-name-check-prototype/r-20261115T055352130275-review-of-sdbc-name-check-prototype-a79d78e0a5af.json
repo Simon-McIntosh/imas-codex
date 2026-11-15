@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T06:07:58.928Z",
+  "dispatched_at": "2026-11-15T05:54:17Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py",
+      "line": 2137,
+      "severity": "non-blocking",
+      "text": "the both_down branch calls an arm that ties recall and loses specificity 'worse on both measures'; in the settled-labels sentence the repository audit ahead of the adopted question is reported as worse on both measures while its recall is equal at 82.0% and only specificity is lower by 0.5 points, so the generated sentence is strictly wrong on one measure."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py",
+      "line": 1030,
+      "severity": "non-blocking",
+      "text": "BASE_UNITS and unit_check re-implement the repository's name-versus-unit capability owned by name_unit_consistency_check at imas_codex/standard_names/audits.py:1743; the landed change adds repo_unit_check at line 1092 which wraps that owner and scores arm E3 beside the prototype rule, but the parallel expectation table remains, so the reuse cap applies."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T205523095671-sdbc-name-check-prototype/report-verify.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the gate log names revision ac208a4b16d3c8bde7a6e8ffb2e50a72a6ce6d20 and tree edaeb11c67b06978ff83f64ea940386b0484cbfa (the parent commit's tree) rather than the landed head a79d78e0a5afe6710a1a4990ec1a40784a61aea5 with tree 0207afb4233a71c341867e69aeb655b310f4ea10, so the recorded receipt cannot be tied to the landed change; the gate's substance reproduces at the head (FAILURES: 0, EXIT=0)."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is 'measure which name-against-definition check reaches the highest recall and specificity on the held-out names'; sdbc-name-check-prototype.html:14 reports the adopted question at 82.0% recall and 84.9% specificity as the best of the fourteen arms scored on the same 1,021 held-out names, so the goal is met.\nVERDICT done_when: read the dispatch done_when; mode_check at name-check-prototype.py:2207 asserts 1,021 readings, one row per held-out name per arm, both controls at recall 0 and specificity 0, the 676-model list, spend 12.8061 under the 20.00 ceiling, the figure reference and the derived comparative sentences, and I re-ran it at a79d78e0 to FAILURES: 0 / EXIT=0.\nVERDICT write_paths: read the declared paths; the diff 85f5c42..a79d78e0 touches exactly name-check-prototype.json, name-check-prototype.py, sdbc-name-check-prototype.html and docs/figures/sn-name-check-prototype/recall-specificity-by-arm.svg, all inside scope, with nothing under imas_codex/ or tests/.\nVERDICT manifest: read; it reports status complete, the six commits ending a79d78e0, spend 12.8061 USD of 20.00, the gate command verify-report.py and its logs, and records no baseline_suite or after_suite because the node is docs-only.\nVERDICT diff: read all six commits commit by commit; the first adds the script, the record, the report and the figure, four further commits fix the model list, a comma, cost pricing and figure determinism, and the last derives the comparative sentences from the scores, adds the repository-audit arm E3 and repaints the palette.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: sdbc-name-check-prototype.html:14 names the adopted question at 82.0% recall and 84.9% specificity as the best of fourteen arms, which is the comparison the goal asks to measure.\nSCORE evidence: 15\nJUSTIFICATION evidence: mode_check at name-check-prototype.py:2207 asserts every done_when clause and I reproduced FAILURES: 0 and EXIT=0 at a79d78e0, but report-verify.log:1 stamps revision ac208a4b1 and tree edaeb11c rather than the landed head's tree 0207afb4.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every commit touches only the three fragments and the one SVG under the declared paths, and the name-check-prototype.py:1094 import of imas_codex.standard_names.audits is read-only.\nSCORE durability: 13\nJUSTIFICATION durability: the committed check mode reddens on a reversed score (red run EXIT=1, 3 FAIL lines) but it lives in the prototype script rather than a repository test, nothing runs it automatically, and it does not recompute an arm's score from the readings.\nSCORE fit: 17\nJUSTIFICATION fit: name-check-prototype.py:1810 replaces the excluded brown-orange with clean hues and name-check-prototype.py:2076 derives its claim from the scores in the surrounding style.\nSCORE reuse: 5\nJUSTIFICATION reuse: unit_check and BASE_UNITS at name-check-prototype.py:1030-1069 re-implement name_unit_consistency_check at imas_codex/standard_names/audits.py:1743, although repo_unit_check at name-check-prototype.py:1092 now wraps the owner for arm E3.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py:2137 non-blocking: the both_down branch calls an arm that ties recall and loses specificity 'worse on both measures', and the settled-labels sentence reports the repository audit ahead of the adopted question that way while its recall is equal at 82.0%.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py:1030 non-blocking: BASE_UNITS and unit_check re-implement the repository's name_unit_consistency_check at imas_codex/standard_names/audits.py:1743; repo_unit_check at line 1092 wraps the owner and E3 is scored beside it, but the parallel table remains.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T205523095671-sdbc-name-check-prototype/report-verify.log:1 non-blocking: the gate log names revision ac208a4b1 and tree edaeb11c rather than the landed head, so the recorded receipt cannot be tied to the landed change; re-running the check at a79d78e0 gives FAILURES: 0 and EXIT=0.\n",
+  "review_notes": {
+    "added_failure_basis": "the reviewed manifest records no baseline_suite and no after_suite (docs-only node with no test suite), so no baseline-to-after differential is computable; added_failure_count 0 and added_failure_ids [].",
+    "figure": "rendered the landed SVG to PNG and inspected it: all eleven scored points including the always-flag control at the axis edge, one frameless figure-level legend, clean hues with the deterministic family in related teals, magenta for F and no excluded brown or olive.",
+    "gate_rerun": "name-check-prototype.py check re-run by the reviewer in the reviewed worktree at a79d78e0 (tree 0207afb4): FAILURES: 0, EXIT=0; the same check with --mutate B-jev:recall=0.99 returned EXIT=1 with 3 FAIL lines, so the guard reddens on a reversed score.",
+    "scope": "diff 85f5c42..a79d78e0 touches exactly the three declared fragments and the one declared figure file, and imports imas_codex.standard_names.audits read-only without modifying it."
+  },
+  "review_run_id": "r-20261115T055352130275-review-of-sdbc-name-check-prototype-a79d78e0a5af",
+  "reviewed_base_sha": "85f5c426d77ea3fb75c4241567ef36157d9ba4ae",
+  "reviewed_head_sha": "a79d78e0a5afe6710a1a4990ec1a40784a61aea5",
+  "reviewed_run_id": "r-20261114T205523095671-sdbc-name-check-prototype",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T06:08:22.796591+00:00",
+  "total": 88
+}
