@@ -125,6 +125,16 @@
       "note": "Section 2 requires one definition of the slide-size declaration across scripts/ and imas_codex/, owned by the shared function.",
       "reason": "",
       "when": "2026-11-15T22:32:11.978139+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "Section 1 states the save function gains no new refusal; section 2's done-when requires the count of public definitions and options added to the plotting package.",
+      "reason": "",
+      "when": "2026-11-15T22:32:15.697385+00:00"
     }
   ],
   "responses": {
@@ -154,6 +164,15 @@
       "note": "Section 2 requires one definition of the slide-size declaration across scripts/ and imas_codex/, owned by the shared function.",
       "reason": "",
       "when": "2026-11-15T22:32:11.978139+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "note": "Section 1 states the save function gains no new refusal; section 2's done-when requires the count of public definitions and options added to the plotting package.",
+      "reason": "",
+      "when": "2026-11-15T22:32:15.697385+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
