@@ -1,0 +1,132 @@
+<article id="variable-name-mapping-sources-evidence">
+  <h3>Archive metadata measured; authenticated document and plant-structure access unresolved</h3>
+  <p>This is a partial inventory, not a completed source-coverage survey. Two
+    non-interactive archive metadata interfaces returned records for all 200
+    scanner-catalogued variables. Full metadata supplies nonempty labels for
+    140/200 (70%) and engineering units for 120/200 (60%). No authenticated
+    non-interactive ICP access path or reachable SDD export was established.
+    Unreachable and uncontrolled sources below are <strong>not measured</strong>,
+    never assigned zero coverage. Nothing was imported into the graph.</p>
+  <p>The live plan was read at version 32; the worker base is
+    <code>035a2337077e9d169b7d57af62559cee373b87b8</code>. The sample is all 200
+    unique selectors in the scanner's completed controller-cohort declaration,
+    sorted without substitution. Its checkpoint confirms 200 acknowledged writes
+    and exactly the same selector set. The scope is that cohort, not the full
+    archive population.</p>
+
+  <h4 id="variable-name-mapping-sources-controls">Registration and controls</h4>
+  <p>Before live requests, the sample and one previously catalogued metadata
+    selector were written to the private file
+    <code>~/.cache/imas-codex-codac-uda/mapping-known-variables.json</code>.
+    Its SHA-256 is
+    <code>ddc245f9458e32e1ac585b669c5e23766cb3f6ad7abbfc50857d01da521103fa</code>.
+    Both metadata interfaces found that selector through the configured archive
+    endpoint. The full-JSON control used the known metadata selector from the
+    same <code>/meta</code> path; prior knowledge established its type metadata,
+    while this run established that full JSON was readable too. No known
+    variable was available for the other sources; their controls remain unrun.</p>
+  <p>The source requests ran on <code>rigel</code>, job <code>1317030</code>.
+    Each metadata interface used ten native batches of twenty selectors, with a
+    180-second bound per interface. Measured request times were 4.664 s for type
+    metadata and 9.804 s for full metadata. Hosts and exclusions were loaded from
+    private configuration and passed through the existing reader's
+    <code>connect</code> guard. The operator-reserved endpoint was not contacted.
+    No samples or pulse data were requested.</p>
+
+  <table>
+    <thead><tr><th>Measured source, ranked by useful sample coverage</th><th>Pipeline interface</th><th>Observed coverage and control</th><th>Meaning and readership</th></tr></thead>
+    <tbody>
+      <tr><td>1. Archive full metadata</td><td>Module-provided <code>UdaClientReaderPython.getMetaJSON(selector, "-1")</code>; protocol <code>UDA::getMetaJSON</code> at the selector's metadata path; native batch API used here</td><td>200/200 readable JSON lists; 1,180 attribute rows; nonempty <code>label</code> 140/200, with 28 distinct labels; nonempty <code>Units</code> 120/200; positive control found</td><td>Machine-readable archived attributes, not verified physical identities. Readable by the executing account through its configured readable archive; wider ACL not established.</td></tr>
+      <tr><td>2. Archive type metadata</td><td><code>UdaClientReaderPython.getMetaTypeJSONCollapsed(selector, "-1")</code>; protocol <code>UDA::getMetaTypeJSON</code>; native batch API used here</td><td>200/200 records and value types; positive control found; 200 identical value-field descriptions; zero nonempty value-field units</td><td>Machine-readable structure and type information. Every value description is <q>Signal value</q>; this does not resolve a physical meaning. Same measured readership as full metadata.</td></tr>
+      <tr><td>Archive CBS-node lookup</td><td><code>getCbsList(":", configured_candidate, "-1")</code> → <code>UDA::listCBSNodes</code></td><td>Not measured. Two exact cohort-derived candidate requests completed but returned no nodes; no known node control was available.</td><td>An archive control-breakdown lookup, not an ICP plant-breakdown identity check. The empty response cannot establish absence or coverage.</td></tr>
+      <tr><td>Archive global user metadata</td><td><code>listGlUserMetadata()</code>, then <code>getGlUserMetadataContent(metaname, pulseID)</code>; installed utility sources show the interface</td><td>Not measured; no source-bound known variable and no selector filter on the listing. No global listing or content request was run.</td><td>Potential metadata documents, with system, pulse and author fields. Neither signal-definition content nor source-specific readership was established.</td></tr>
+    </tbody>
+  </table>
+  <p>Bindings useful to a catalogue are <code>label.value → archive label</code>,
+    <code>Units.value → engineering unit</code>, and
+    <code>datatypes[].fields[name=val].type → value type</code>. Full metadata
+    also contains format, display limits, alarm limits and warning limits for
+    130 variables each. Ten <code>Units</code> attributes are present but empty. There are
+    60 variables without a nonempty label, and 80 without a nonempty unit.
+    Archive labels remain labels until independently verified against a signal
+    definition; type-field boilerplate must not count as semantic coverage.</p>
+
+  <h4 id="variable-name-mapping-sources-unmeasured">Document, SDD and plant-structure inventory</h4>
+  <p>Document purposes in this table come from the dispatch brief unless marked
+    as independently documented. Their contents and access-control lists were
+    not retrieved. An IDM UID is a document locator, not a verified download
+    API. The bounded unauthenticated request to
+    <a href="https://user.iter.org/?uid=2UT8SH">the naming-convention locator</a>
+    returned HTTP 302 to a login-policy path; following redirects did not yield
+    a document. This is evidence about this node's unauthenticated access,
+    not a claim that IDM lacks an API or that only a chat interface exists.
+    No chat or document-assistant interface was used.</p>
+  <table>
+    <thead><tr><th>Source</th><th>What it can map or explain</th><th>Non-interactive access and machine readability</th><th>Coverage / positive control / readers</th></tr></thead>
+    <tbody>
+      <tr><td>IDM 2UT8SH</td><td>Signal and plant-system I&amp;C variable naming convention; candidate parsing rules, not identity verification</td><td>IDM UID locator; authenticated file-download interface not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM EMCNSD</td><td>Signal lists and self-description data</td><td>IDM UID locator; actual file format and authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM C67FEV</td><td>Candidate reference supplied in the brief; content not independently established</td><td>IDM UID locator; authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM 32Z4W2</td><td>SDD Editor manual; possible export instructions</td><td>IDM UID locator; manual not retrieved, so no export command claimed</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM TPLTKG</td><td>UDA user manual; client interfaces</td><td>IDM UID locator; authenticated downloader not established; installed client code independently inspected</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM TRSF6W</td><td>ITER UDA reference</td><td>IDM UID locator; authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM VDLPJ4</td><td>UDA plugin data-source development guide</td><td>IDM UID locator; authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM TWZB4N</td><td>Candidate reference supplied in the brief; content not independently established</td><td>IDM UID locator; authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM GSW3LL</td><td>Subsystem signal list</td><td>IDM UID locator; spreadsheet/table format and authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM HPMXLE</td><td>Subsystem signal list</td><td>IDM UID locator; spreadsheet/table format and authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM F9VFK6</td><td>Subsystem signal list</td><td>IDM UID locator; spreadsheet/table format and authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>IDM 34QXCP</td><td>Self-description schema documentation, independently referenced by the public CODAC overview</td><td>IDM UID locator; schema artifact and authenticated downloader not established</td><td>Not measured / unrun / document ACL not inspected</td></tr>
+      <tr><td>SDD database and XML export</td><td>Variables, signal mapping, components, plant systems and control functions</td><td>Public overview documents a PostgreSQL database and SDD Sync save/load to XML. These are machine-readable routes in principle; no deployment URI, export file or executable export command was available for this cohort.</td><td>Not measured / unrun / database or export ACL not established</td></tr>
+      <tr><td>ICP plant-breakdown nodes, component lists and system diagrams</td><td>Code → title, description and hierarchy; the brief states ICP has no signal record kind</td><td>No non-interactive endpoint, authenticated client or exported node file established. No endpoint or query format invented.</td><td>Not measured / unrun / reading-account ACL and withheld count unknown</td></tr>
+    </tbody>
+  </table>
+  <p>The independently read
+    <a href="https://www.iter.org/sites/default/files/media/2026-03/codac_core_system_overview_34sdz5_v7_5.pdf">CODAC Core System Overview, 34SDZ5</a>
+    documents PostgreSQL SDD storage, SDD Sync XML interchange, and variable-to-signal
+    mapping in its SDD content description. It is context for an export route,
+    not a measured per-variable resolver. Its public PDF is machine-downloadable;
+    that does not establish access to any particular SDD database or the IDM
+    documents above.</p>
+
+  <h4 id="variable-name-mapping-sources-recommendation">Recommendation and limits</h4>
+  <p>Consume full archive metadata alongside type metadata: they tie at 200/200
+    record availability, while full metadata contributes the measured labels and
+    units. Preserve attribute names, values, empty-versus-absent outcomes and source
+    provenance. Treat the naming convention as a parser authority, SDD or signal
+    lists as prospective definition authorities, and ICP as the prospective
+    component authority. They cannot be ranked against archive metadata until
+    their authenticated reading paths and positive controls are measured.</p>
+  <p>The unresolved requirement is a demonstrated pipeline path to ICP, plus
+    authenticated document or SDD access sufficient to run source-bound known
+    controls and the same 200-selector intersection. Supply an authorized
+    non-interactive read client or a versioned export and one known matching
+    variable per source, then repeat this survey. The current record does not
+    establish exhaustive source discovery or a complete semantic mapping.</p>
+
+  <h4 id="variable-name-mapping-sources-receipts">Receipts and instrument checks</h4>
+  <p>Private data and executable probes remain under
+    <code>~/.cache/imas-codex-codac-uda/</code>. The final receipt is
+    <code>mapping-evidence-gate.log</code>, ending in <code>EXIT=0</code>:
+    sample=200, type_records=200, full_records=200, labels=140, units=120,
+    full_attribute_rows=1180, both metadata controls found, CBS coverage not
+    measured, operator contacts=0. Its command is
+    <code>env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync python /home/ITER/mcintos/.cache/imas-codex-codac-uda/mapping-evidence-gate.py</code>.</p>
+  <p><code>mapping-type-raw.json</code> has SHA-256
+    <code>e512047fd3e2bae0ea7be330dd84fdd6af8b7c167680f6c7c04f01e971ee4a8a</code>;
+    <code>mapping-full-raw.json</code> has SHA-256
+    <code>c20e5e66103ebefb36ae7496d4c6ec6d0682917736e11fa72ab4040364e21c8a</code>.
+    <code>mapping-summary-safe.json</code> and
+    <code>mapping-full-attributes-safe.json</code> hold the reconciled counts.
+    <code>mapping-measure-isolated.log</code> records the live request receipts,
+    and <code>mapping-cbs-raw.json</code> retains the uncontrolled empty response.</p>
+  <p>The initial helper import failed before connecting because the module
+    interpreter could not import the project's remote package dependencies.
+    Loading the standalone reader in isolation fixed the probe. The first
+    full-metadata counter then reported zero because it required a JSON object;
+    all 200 raw responses were actually nonempty lists. Offline analysis of those
+    exact receipts corrected the counter without repeating the requests. For the
+    zero value-unit result, the same type documents have nonempty units on their
+    timestamp field, proving that the field-reading instrument sees known units.
+    The uniform <q>Signal value</q> description was checked directly rather than
+    accepted as 200 physical definitions. No product code or test was changed.</p>
+</article>
