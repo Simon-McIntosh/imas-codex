@@ -43,9 +43,28 @@
       "note": "The claim that section 7 has six to repair is removed. The section now says which names are repaired, exempted as derived parents or listed as held under the lead's rulings is section 7's decision under its own done-when.",
       "reason": "",
       "when": "2026-11-15T02:45:09.779187+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7dc08854e232b402d7a698dc5ee330e0a9efa43a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The count applies one rule and no exemption: live by status and name stage, and no producer edge. The derived-origin plant is counted, the plant reports 3, and each name is listed with its origin and its count of live children so section 7 applies its own derived-parent exemption.",
+      "reason": "",
+      "when": "2026-11-15T02:45:57.846999+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7dc08854e232b402d7a698dc5ee330e0a9efa43a",
+      "commit_basis": "edit",
+      "note": "The count applies one rule and no exemption: live by status and name stage, and no producer edge. The derived-origin plant is counted, the plant reports 3, and each name is listed with its origin and its count of live children so section 7 applies its own derived-parent exemption.",
+      "reason": "",
+      "when": "2026-11-15T02:45:57.846999+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
