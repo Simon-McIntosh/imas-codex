@@ -1,0 +1,89 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T01:12:52.367Z",
+  "dispatched_at": "2026-11-15T00:46:37Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/codac-uda-signals.html#s2",
+      "id": "deep_module-1",
+      "reason": "the section states a single capability that would ship twice with divergent behaviour; folding the command construction into one shared helper is a different deliverable and a different test than \"add setup to the local branch\".",
+      "text": "\u00a72 makes project code able to run a script under a data system's setup commands and interpreter, but the local-vs-remote command construction is duplicated verbatim in `imas_codex/remote/executor.py:1171` (`executor.py:1234` local branch, `:1276` remote branch) and again in `executor.py:1321` (`:1396` local branch, `:1412` remote branch); adding a local setup path to one function leaves the other's local branch without it, so the new capability would hold only on whichever call path a caller happens to use. The design the brief should hand a node is one command-construction function both entry points call \u2014 and \u00a72's own \"Done when\" would pass while the async path stayed broken.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/codac-uda-signals.html#s5",
+      "id": "thin_wrapper-1",
+      "reason": "two read paths over one archive will disagree about error classification, limits and caching, which is exactly the class of defect \u00a75's own \"decimated \u2026 never taken from the client's own flag\" clause exists to prevent.",
+      "text": "\u00a75 delivers a loader that reads a signal over a bounded window, while the repository already has one bounded signal read per data source: `imas_codex/discovery/signals/scanners/edas.py:598`, `mdsplus.py:334`, `ppf.py:206`, `jpf.py:204`, `tdi.py:109`, `imas.py:86` all implement `check()` returning samples for a reference window, and `imas_codex/remote/scripts/check_signals_batch.py` batches those reads with per-shot retry and error classification. The section adds a second read path with its own cache, limits and sampling semantics, and states no reason the connector's read cannot be the one `check()` and the loader both call.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/codac-uda-signals.html#s7",
+      "id": "duplicate_owner-1",
+      "reason": "the section can deliver the reduction (one saver, four call sites migrated) or add a fifth saver; the plan should state which, because \"the save function these figures go through\" is the difference between an owner and a parallel copy.",
+      "text": "\u00a77 delivers \"one function that draws the figure and refuses to write it\", a fifth saver beside `scripts/codac_uda_prototype/loader.py:103` `_save_figure`, `scripts/figures_discovery_to_mapping.py:308` `save`, `scripts/figures_knowledge_graph_scale.py:697` `save` and `scripts/figures_icp_knowledge_map.py:1032` `save_gif`, with `plt.style.use(\"data-ink\")` applied ad hoc in five scripts and no shared style module anywhere in the package. The owning mechanism to extend and make the single entry point is that shared save/style module \u2014 \u00a77 creates the one that should replace the four, not one that joins them.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/codac-uda-signals.html#s2",
+      "id": "duplicate_owner-2",
+      "reason": "this is the one boundary that keeps facility lookup in one layer; a section that leaves it implicit is how the executor acquires a config lookup it is documented not to have.",
+      "text": "\u00a72 resolves a data system's declared setup and interpreter, a resolution `imas_codex/remote/tools.py:165` `run_python_script` already performs through `resolve_remote_environment(_facility_config(facility), data_system)` and hands to the executor; the executor's own docstring says it \"performs no facility lookup\". A \u00a72 that has the executor read facility config, or that adds a second facility-aware wrapper, forks the owner.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/codac-uda-signals.html#s6",
+      "id": "interface_budget-1",
+      "reason": "the plan must account for the surface it adds in its own text, either by naming a merged/retired tool or by stating why the read tool cannot fold into `search_signals` or `signal_analytics`.",
+      "text": "the supplied counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 (read 2026-11-15T00:46:10Z), yet \u00a76 adds a new MCP tool (a facility read tool, absent in data-dictionary-only mode) and a corresponding refusal family (an endpoint or unbounded window is refused), and \u00a72 adds a parameter to a public executor function; neither section names what it retires, merges, or why nothing can be. Today the server presents 30 tools (`imas_codex/llm/server.py`), each of which costs the client's context and the maintainer's surface.",
+      "type": "interface_budget",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/codac-uda-signals.html#s10",
+      "id": "interface_budget-2",
+      "reason": "\u00a711 does name the alias's removal and its zero-consumer check, so the retirement is accounted for; the finding is recorded for the sequence, not as a design change.",
+      "text": "\u00a710 keeps the old command as a transition alias \"that resolves to the same code and the same single state root\" and leaves its removal to \u00a711; \u00a710 therefore adds a CLI option (all three of distribution, branded command and MCP key) without naming what it retires, and the retirement of the alias is a second, later section's work, so the surface exists for the whole intervening period with no stated bound.",
+      "type": "interface_budget",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+  "plan_fingerprint": "4f6a223305c79e4158431b3960bf1fb524f848e6036a87eb6f6bfdc8bf8364e4",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T004610796932-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "32459448a17867d8989201c48d0d87e6cb14c7fe",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the design puts one archive client's behaviour behind four separate section-level surfaces (scanner, loader, MCP tool, name parser), each a shallow forwarder, where a single archive-client module taking an operation and returning a structured result is what all four need.",
+    "duplicate_owner": "a finding \u2014 \u00a77 delivers a fifth figure save function beside four existing ones, and \u00a72's local-setup branch must not re-resolve facility environment that `remote/tools.py:165` already resolves.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 (read 2026-11-15T00:46:10Z); \u00a76 adds an MCP view and \u00a72 adds an executor parameter, and neither section names anything it retires, merges, or why nothing can be.",
+    "reuse_search": "pass \u2014 the scanner registry (`discovery/signals/scanners/base.py`), the facility-aware script executor (`remote/tools.py:165` over `remote/executor.py:1171`) and `search_signals` (`llm/server.py:2413`) are the mechanisms \u00a72/\u00a74/\u00a76 rightly extend, and the plan's \u00a71 already names them; the two misses are recorded as findings below.",
+    "thin_wrapper": "a finding \u2014 \u00a75's loader re-implements a bounded signal read that the scanners' `check()` and `check_signals_batch.py` already perform, without saying why those cannot be extended."
+  },
+  "section_digests": {
+    "_document": "8f61e18614e309a8c68b94f12d30a8260714946a9c1d6c4a45763beb8b6cdbaf",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s2": "25d6b783ebeccaa173931c30a00b0ae11c6d62367264baf57239709c95496872",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "a4a6bf4a435efee791911a4ce9a9a923a5b2a510a58376239abb5e2bac093ece",
+    "s5": "d4531829268e87bd2d8cbdcc9a749fc2ef404d1fa5d090c8dce99d00e2ea6f50",
+    "s6": "fd2edb98819a4f8da1b3cc59cc7844d3be4e875f8a00029d835940487bdc2444",
+    "s7": "bf140c253d800c0508e78b45016d00441f480b52bf36b792e563f44329766af1",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "7c318c64f39ab96176925a304bd7574df0b47148875fad1788f1574f783d2a04"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:31:16.954423+00:00",
+  "total": null
+}
