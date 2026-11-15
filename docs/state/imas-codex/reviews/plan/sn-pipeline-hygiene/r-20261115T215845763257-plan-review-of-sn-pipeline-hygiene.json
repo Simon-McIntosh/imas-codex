@@ -1,0 +1,41 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T22:20:46.222Z",
+  "dispatched_at": "2026-11-15T22:20:11Z",
+  "findings": [],
+  "plan_commit": "9ed417d1323e090520ab1ce539e4a4e4b23f4ece",
+  "plan_fingerprint": "309a4b19c1fc4e10b3bc072a33c0566245b0c4aafb34c98c32ce9b1775f04f61",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 45,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T215845763257-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "7d03324f028a953475e2a6d87580161dd87d2206",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 all four review run ids resolve to directories holding the head review, name-definition-check-run.py and the three sn-review-through-jev scripts exist, and the s10 anchors (name_definition_seat.py, pools.py, adjudicated-labels artifacts) resolve; the four landings landed on 2026-11-15 per git log (question 00:58 +0100, prototype 07:08 +0100).",
+    "done_when": "pass \u2014 every clause is measurable (finding-by-finding repair-or-decline with a red run or a test, frozen records with a revision, byte-identical label set, no graph change, base-vs-head suite arm), and the repair clause carries its own negative control, all four findings spot-checked still reproduce in the tree (`name_definition_agreement_check` absent from audits.py, `name_definition_flagged` at review/name-definition_seat.py:228 with no caller, pools.py:426 has_live_child stage-only, adjudicated-labels.py:458 self-referential rule, gate-build-status-masked-1 masks a build failure behind the last command).",
+    "evidence_paths": "pass \u2014 the cited reviews resolve to committed paths under docs/state/imas-codex/reviews/run/, and the evidence the section requires lands in the repository's evidence tree, not a scratch path.",
+    "naming": "pass \u2014 the section names no plan label, stage name, ticket number or version tag in a symbol or file; it cites reviews and artifacts by their own recorded ids.",
+    "reasoning": "pass \u2014 the stated causes match the cited evidence (the script's deleted check, the uncalled duplicate, the stage-only live-child rule, the masked build status all reproduce), each measure can fail, and the section now states observables rather than a discovery procedure: the previous import-only method and the per-script cause attribution are both gone, and the class is defined by name absence in an import or a reached attribute, with the failure it reports when run as the evidence.",
+    "single_goal": "pass \u2014 one goal, closing the open review findings of four named landings; the graph invariant and suite arm are gate conditions on that goal, not separate deliverables.",
+    "wiring": "pass \u2014 the section declares no depends-on, informs or gates, and it needs none: it closes findings of four already-landed runs and no other node consumes it (plan-standalone meta)."
+  },
+  "section_digests": {
+    "_document": "fc0b9243c4b299d7cd58edf7987e28fb84b7ca51ea9f6cd18d04853eb2923d2e",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "8f870b8eb10c596becea03fa769988868804da36ce3970fdcb8fc28c7feb45bc",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:33:35.242697+00:00",
+  "total": null
+}
