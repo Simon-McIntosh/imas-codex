@@ -15,6 +15,7 @@ empty copy.
 
 from __future__ import annotations
 
+import ast
 import os
 import re
 from collections.abc import Iterator
@@ -37,6 +38,30 @@ READER_MODULES = (
     "benchmark_roles.py",
     "judgment_goldens.py",
 )
+
+
+def _without_extraction_records(text: str) -> str:
+    """Drop the frozen-extraction records a corpus is pinned to.
+
+    Such a record is the query that produced a committed corpus artifact, kept
+    verbatim so the artifact can be checked against it; it reads nothing at
+    runtime. Everything else in the frozen modules is a live reader.
+    """
+    skipped: set[int] = set()
+    for node in ast.parse(text).body:
+        if not isinstance(node, ast.Assign):
+            continue
+        named = any(
+            isinstance(target, ast.Name) and target.id.endswith("_EXTRACTION_RECORD")
+            for target in node.targets
+        )
+        if named:
+            skipped.update(range(node.lineno, (node.end_lineno or node.lineno) + 1))
+    return "\n".join(
+        line
+        for number, line in enumerate(text.splitlines(), 1)
+        if number not in skipped
+    )
 
 
 @pytest.fixture()
@@ -156,7 +181,7 @@ def test_each_reader_reads_sources_from_the_one_place() -> None:
     for module in READER_MODULES:
         path = package / module
         assert path.is_file(), f"reader module is missing: {module}"
-        text = path.read_text(encoding="utf-8")
+        text = _without_extraction_records(path.read_text(encoding="utf-8"))
 
         assert "source_paths_projection" in text, (
             f"{module} does not name the one place that reads a name's sources"

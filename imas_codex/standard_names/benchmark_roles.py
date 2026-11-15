@@ -392,7 +392,7 @@ def load_breaker_corpus(
 
     review_axis = "name" if axis == "names" else "docs"
     cypher = f"""
-        MATCH (r:StandardNameReview {review_axis: $axis})
+        MATCH (r:StandardNameReview {{review_axis: $axis}})
         WHERE r.reviewer_model IN $pair AND r.score IS NOT NULL
         WITH r.standard_name_id AS sid, r.reviewer_model AS m,
              avg(toFloat(r.score)) AS s
@@ -931,10 +931,35 @@ _ADVISORY_CORPUS_QUERY = f"""
     RETURN
       sn.id             AS name,
       sn.description    AS description,
+      sn.documentation  AS documentation,
       sn.unit           AS unit,
       sn.kind           AS kind,
       sn.physics_domain AS physics_domain,
       {source_paths_projection()} AS source_paths
+    ORDER BY sn.id
+"""
+
+#: The extraction that produced the frozen corpus beside the tests, kept
+#: verbatim so the artifact's record can be checked against it. It read the
+#: copied ``source_paths`` list; the query above reads the producer edges.
+#: Regenerating the corpus is what updates this record.
+_ADVISORY_CORPUS_EXTRACTION_RECORD = """
+MATCH (sn:StandardName {
+        name_stage: 'accepted', validation_status: 'valid'
+    })
+    WHERE sn.description IS NOT NULL
+      AND sn.documentation IS NOT NULL
+      AND size(sn.documentation) > 40
+      AND sn.unit IS NOT NULL
+      AND size(coalesce(sn.source_paths, [])) > 0
+    RETURN
+      sn.id             AS name,
+      sn.description    AS description,
+      sn.documentation  AS documentation,
+      sn.unit           AS unit,
+      sn.kind           AS kind,
+      sn.physics_domain AS physics_domain,
+      sn.source_paths   AS source_paths
     ORDER BY sn.id
 """
 

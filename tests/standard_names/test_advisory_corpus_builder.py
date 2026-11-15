@@ -90,7 +90,13 @@ def test_frozen_corpus_has_exact_pairs_provenance_and_hash() -> None:
     extraction = payload["source_extraction"]
     assert extraction["candidate_count"] == 1894
     assert extraction["candidate_domain_count"] == 18
-    assert extraction["query"] == benchmark_roles._ADVISORY_CORPUS_QUERY.strip()
+    assert (
+        extraction["query"]
+        == benchmark_roles._ADVISORY_CORPUS_EXTRACTION_RECORD.strip()
+    ), "the frozen corruption corpus no longer records the extraction beside it"
+    assert "PRODUCED_NAME" in benchmark_roles._ADVISORY_CORPUS_QUERY, (
+        "the live extraction reads the producer edges, not the copied list"
+    )
     assert (
         extraction["query_sha256"]
         == hashlib.sha256(extraction["query"].encode()).hexdigest()
