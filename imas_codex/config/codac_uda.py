@@ -4,6 +4,9 @@ LinkML-derived models validate field types and the readable-role vocabulary.
 These cross-endpoint checks also prevent an allowed role from aliasing an
 excluded host. Public configuration can omit hosts; connection resolution
 requires the private operator exclusion as well as the requested archive.
+Archive lists replace public entries wholesale during facility configuration
+merging, so private archive blocks must redeclare all roles and exclusions.
+Production readers share the host comparison through :func:`archive_host_key`.
 """
 
 from __future__ import annotations
@@ -20,8 +23,13 @@ from imas_codex.config.models import (
 )
 
 
-def _host_key(host: str) -> str:
-    """Compare DNS short names conservatively and IP addresses exactly."""
+def archive_host_key(host: str) -> str:
+    """Canonical archive policy key: DNS short aliases or exact IP addresses.
+
+    Readers use this comparison rather than deriving exclusion keys themselves.
+    IP address normalization preserves all address components; DNS names use
+    their short alias so case and a domain suffix cannot evade an exclusion.
+    """
     hostname = host.strip().rstrip(".").lower()
     try:
         return str(ipaddress.ip_address(hostname))
@@ -46,22 +54,32 @@ def validate_codac_uda_config(
         endpoint.role == ArchiveRole.operator and endpoint.excluded
         for endpoint in endpoints
     ):
-        raise ValueError("operator archive must be explicitly excluded")
+        raise ValueError(
+            "operator archive must be explicitly excluded; archive lists replace "
+            "public entries wholesale, so a private block must redeclare every "
+            "role, including operator with excluded: true"
+        )
 
     excluded_hosts = {
-        _host_key(endpoint.host)
+        archive_host_key(endpoint.host)
         for endpoint in endpoints
         if endpoint.excluded and endpoint.host is not None
     }
     for endpoint in endpoints:
         if endpoint.host is None:
             continue
-        host_key = _host_key(endpoint.host)
+        host_key = archive_host_key(endpoint.host)
         if not endpoint.excluded and host_key in excluded_hosts:
             raise ValueError("readable archive endpoint is reserved or excluded")
     for role in config.readable_roles or []:
         endpoint = next((item for item in endpoints if item.role == role), None)
-        if endpoint is None or endpoint.excluded:
+        if endpoint is None:
+            raise ValueError(
+                "readable archive role must name a non-excluded endpoint; archive "
+                "lists replace public entries wholesale, so a private block must "
+                "redeclare every role selected by readable_roles"
+            )
+        if endpoint.excluded:
             raise ValueError("readable archive role must name a non-excluded endpoint")
     return config
 

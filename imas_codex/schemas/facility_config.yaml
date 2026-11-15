@@ -626,7 +626,7 @@ classes:
         range: ArchiveRole
         required: true
       host:
-        description: Private endpoint hostname, absent in public configuration
+        description: Private endpoint hostname or IP address, absent in public configuration
         annotations:
           is_private: true
       port:
@@ -653,7 +653,10 @@ classes:
       - DataSystemBase
     attributes:
       archives:
-        description: Named archives including the excluded operator endpoint
+        description: >-
+          Named archives including the excluded operator endpoint. This list
+          replaces public entries wholesale when private configuration is merged;
+          a private block must redeclare every role and the operator exclusion.
         multivalued: true
         range: ArchiveEndpointConfig
         inlined_as_list: true

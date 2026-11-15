@@ -8,10 +8,12 @@ import yaml
 from pydantic import ValidationError
 
 from imas_codex.config.codac_uda import (
+    archive_host_key,
     resolve_archive_endpoint,
     validate_codac_uda_config,
 )
 from imas_codex.config.models import CodacUDAConfig, FacilityConfig
+from imas_codex.discovery.base.facility import _deep_merge
 
 
 @pytest.fixture
@@ -143,3 +145,63 @@ def test_ip_addresses_are_compared_exactly(archive_config: dict) -> None:
     archive_config["archives"][0]["host"] = "192.0.2.10"
     archive_config["archives"][2]["host"] = "192.0.2.11"
     assert resolve_archive_endpoint(archive_config, "fast").host == "192.0.2.10"
+
+
+@pytest.mark.parametrize(
+    ("read_host", "operator_host", "reserved"),
+    [
+        ("OPERATORS.example.invalid.", "operators.example.invalid", True),
+        ("operators", "operators.example.invalid", True),
+        ("archive.example.invalid", "operators.example.invalid", False),
+        ("192.0.2.10", "192.0.2.10", True),
+        ("192.0.2.10", "192.0.2.11", False),
+        ("2001:db8::1", "2001:0db8:0:0:0:0:0:1", True),
+        ("2001:db8::1", "2001:db8::2", False),
+    ],
+)
+def test_config_owns_host_comparison_for_names_aliases_and_addresses(
+    archive_config: dict, read_host: str, operator_host: str, reserved: bool
+) -> None:
+    assert (archive_host_key(read_host) == archive_host_key(operator_host)) is reserved
+    archive_config["archives"][0]["host"] = read_host
+    archive_config["archives"][2]["host"] = operator_host
+    if reserved:
+        with pytest.raises(ValueError, match="reserved or excluded"):
+            resolve_archive_endpoint(archive_config, "fast")
+    else:
+        assert resolve_archive_endpoint(archive_config, "fast").host == read_host
+
+
+@pytest.mark.parametrize("private_roles", [("fast",), ("fast", "slow", "operator")])
+def test_private_archive_list_replacement_explains_role_redeclaration(
+    archive_config: dict, private_roles: tuple[str, ...]
+) -> None:
+    public = {"data_systems": {"codac_uda": archive_config}}
+    private = {
+        "data_systems": {
+            "codac_uda": {
+                "archives": [
+                    {"role": role, "host": f"{role}.example.invalid"}
+                    for role in private_roles
+                ]
+            }
+        }
+    }
+    merged = _deep_merge(public, private)["data_systems"]["codac_uda"]
+    assert [item["role"] for item in merged["archives"]] == list(private_roles)
+    assert len(archive_config["archives"]) == 3
+    with pytest.raises(ValueError, match="private block must redeclare every role"):
+        validate_codac_uda_config(merged)
+
+
+def test_complete_private_archive_list_redeclares_roles_and_policy(
+    archive_config: dict,
+) -> None:
+    public = deepcopy(archive_config)
+    for endpoint in public["archives"]:
+        endpoint.pop("host")
+    merged = _deep_merge(public, {"archives": archive_config["archives"]})
+    assert resolve_archive_endpoint(merged, "fast").host == "fast.example.invalid"
+    assert resolve_archive_endpoint(merged, "slow").host == "slow.example.invalid"
+    with pytest.raises(ValueError, match="not readable"):
+        resolve_archive_endpoint(merged, "operator")

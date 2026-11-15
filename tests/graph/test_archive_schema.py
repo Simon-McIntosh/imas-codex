@@ -17,17 +17,18 @@ def test_pulse_and_categories_round_trip_without_losing_nanoseconds() -> None:
         description="Synthetic slow archive",
     )
     category = PulseCategory(
-        id=f"{archive.id}:campaign",
+        id=f"{archive.id}:DEMO:CAMPAIGN",
         facility_id="demo",
         archive=archive.id,
         name="DEMO:CAMPAIGN",
         description="Synthetic campaign category",
     )
+    pulse_name = "DEMO:CAMPAIGN/commissioning-alpha"
     pulse = Pulse(
-        id=f"{archive.id}:commissioning-alpha",
+        id=f"{archive.id}:{pulse_name}",
         facility_id="demo",
         archive=archive.id,
-        name="DEMO:CAMPAIGN/commissioning-alpha",
+        name=pulse_name,
         start_ns=1_731_600_000_000_000_001,
         end_ns=1_731_600_002_000_000_003,
         categories=[category.id],
@@ -35,8 +36,40 @@ def test_pulse_and_categories_round_trip_without_losing_nanoseconds() -> None:
     )
     for record in (archive, category, pulse):
         assert type(record).model_validate_json(record.model_dump_json()) == record
+    assert pulse.id == f"{pulse.archive}:{pulse.name}"
     assert pulse.name.endswith("commissioning-alpha")
     assert pulse.end_ns - pulse.start_ns == 2_000_000_002
+
+
+def test_same_pulse_segment_in_distinct_categories_has_distinct_ids() -> None:
+    archive = "demo:codac_uda:slow"
+    pulses = []
+    for category_name in ("DEMO:CAMPAIGN-ALPHA", "DEMO:CAMPAIGN-BETA"):
+        category = PulseCategory(
+            id=f"{archive}:{category_name}",
+            facility_id="demo",
+            archive=archive,
+            name=category_name,
+        )
+        name = f"{category.name}/commissioning-alpha"
+        pulses.append(
+            Pulse(
+                id=f"{archive}:{name}",
+                facility_id="demo",
+                archive=archive,
+                name=name,
+                categories=[category.id],
+                start_ns=1_731_600_000_000_000_001,
+                end_ns=1_731_600_002_000_000_003,
+            )
+        )
+    restored = [Pulse.model_validate_json(pulse.model_dump_json()) for pulse in pulses]
+    assert {pulse.name.rsplit("/", 1)[-1] for pulse in restored} == {
+        "commissioning-alpha"
+    }
+    assert len({pulse.id for pulse in restored}) == 2
+    assert len({pulse.categories[0] for pulse in restored}) == 2
+    assert all(pulse.id == f"{pulse.archive}:{pulse.name}" for pulse in restored)
 
 
 def test_archive_relationships_are_schema_driven() -> None:
@@ -77,10 +110,10 @@ def test_archive_data_source_does_not_require_mdsplus_server() -> None:
 @pytest.mark.parametrize("field", ["name", "start_ns", "end_ns", "archive"])
 def test_pulse_requires_identity_and_bounds(field: str) -> None:
     values = {
-        "id": "demo:archive:pulse-alpha",
+        "id": "demo:codac_uda:slow:DEMO:CAMPAIGN/pulse-alpha",
         "facility_id": "demo",
         "archive": "demo:codac_uda:slow",
-        "name": "pulse-alpha",
+        "name": "DEMO:CAMPAIGN/pulse-alpha",
         "start_ns": 1_731_600_000_000_000_001,
         "end_ns": 1_731_600_002_000_000_003,
     }
