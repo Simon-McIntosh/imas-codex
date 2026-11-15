@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T17:24:38.814Z",
+  "dispatched_at": "2026-11-15T17:24:25Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261115T172343385615-plan-review-of-sn-definitions-by-construction/plan.html:113",
+      "id": "done_when-1",
+      "reason": "the author would restate the baseline on the cohort the post-pass census counts (0 of 23 live families at one wording, and the live operator counts) or carry both bases explicitly, without which a closing node reports after-counts on one population against before-counts on another and cannot show its pass changed the divergence it was dispatched to remove.",
+      "text": "the first done-when now measures families on the live census \u00a710 delivers (family-wording-pass.json: family_count 23, member_count 316, families_at_one_wording_before 0; the section's own closing census records 23 of 23 divergent), yet requires that count to be laid \"beside the counts before the first write: 8 forms for the flux-surface average and 20 of 20 species families divergent among the published names\", a different cohort \u2014 20 of 20 is the published census of families with three or more members in v0.4.0rc8 (plan.html:39, 281 members; published-family-census.txt line 132 \"families with >1 description template or unit: 20 of 20\"), and rewrite-closing-census.json itself stores that figure as before_family_baseline \"20 of 20 (published-family-census.txt)\" while its live arm counts 23 families; the operator figure in the same clause shifts cohort the same way, since \u00a71's 8 forms is counted over 32 published flux-surface-averaged names while the live census counts 71 names naming that operator (rewrite-closing-census.json phases.live.operator_phrases.flux_surface_averaged.names_naming_the_operator)",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c8b96d20b3693c40110ab80e3e38f37449cb187a",
+  "plan_fingerprint": "945f4c3cb5d041c208dbd445133b5d1cd84a6a288487e78c8f069572e6a705c0",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 57,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T172343385615-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "b12e5c6875d232385d8f76c09f450ac0b2f54e87",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a72, \u00a73, \u00a75 and \u00a710 resolve as section ids of the reviewed snapshot, and the cited evidence files and pass documents exist.",
+    "done_when": "a finding \u2014 s6's first done-when places a live 23-family census beside a published 20-family baseline, so the change it reports is measured across two cohorts.",
+    "evidence_paths": "pass \u2014 the census and its readings sit under docs/evidence/fragments/sn-definitions-by-construction/ on main (rewrite-closing-census.json, family-wording-pass.json, sdbc-rewrite-closing-census.html).",
+    "naming": "pass \u2014 s6 introduces no symbol, file or comment carrying a plan label, stage name or ticket number.",
+    "reasoning": "pass \u2014 the changed clause's mechanism (species families take the wording \u00a710 stores and re-renders live) matches the s10 lead ruling at plan.html:214 and family-wording-pass.json, and the checkpoint ordering it implies is recorded in the lead ruling at plan.html:275.",
+    "single_goal": "pass \u2014 s6 names one deliverable, the live rewrite and its recorded census; spend, rename and review clauses measure that same pass.",
+    "wiring": "pass \u2014 s6 depends on s2, s3, s4, s5 and s10; every one of those sections exists, s10 carries its s2 dependency, and plan-effort-hours 41.0 equals the sum of the ten section hours (0.5+7.0+3.0+3.0+5.0+6.0+2.5+4.0+4.0+6.0)."
+  },
+  "section_digests": {
+    "_document": "11e2e68b156624b18e8ed5742aa27fcf534e457bc07dfce61888ca751e83d678",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "3dc4df7157f87e38f73dd2c2086f896e46097170ed3a0de07a053ab7c0cf3181",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:32:33.476781+00:00",
+  "total": null
+}
