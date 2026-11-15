@@ -24,6 +24,17 @@
         "s12"
       ],
       "when": "2026-11-15T10:07:29.005233+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a"
+      },
+      "reason": "Version 43 records the lead's decision that the full archive catalogue goes to a private store and the graph keeps only the pilot set; the measures were restated for the store, and the negative control now also forbids any graph count change.",
+      "units": [
+        "s12"
+      ],
+      "when": "2026-11-15T10:44:32.505512+00:00"
     }
   ],
   "completed_at": "2026-11-15T09:16:19.290Z",
