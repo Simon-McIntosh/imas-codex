@@ -1,0 +1,40 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T03:12:49.385Z",
+  "dispatched_at": "2026-11-15T02:47:16Z",
+  "findings": [],
+  "plan_commit": "0822ddf29ac308752264a209de1502e9e65dcb06",
+  "plan_fingerprint": "6ea218287656ec99e3c4a1b4271ebf50293aff84cb31c07906158a2127328876",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 61,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T024653487465-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "616b96f96cdbe5904db842e004799fd863f1cd76",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the section's only outward reference is `\u00a77` (a section heading, `plan.html:86`, present) and the evidence path above (directory present); no href is left unresolved.",
+    "done_when": "pass \u2014 the count carries a seven-name disposable-graph control that can fail in six independent directions (supersession by status and by name stage, a producer edge in the under-report and over-report directions, a derived-record producer, a derived-origin name with no edge), and it reports 3 naming the three; re-deriving the rule against the plant set yields exactly 3.",
+    "evidence_paths": "pass \u2014 the listed names go to `docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json`, a durable committed fragment directory that exists (`docs/evidence/fragments/sn-catalog-consistency/`), never a scratchpad.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach a symbol or comment; \"the one place\" and \"derived origin\" describe mechanisms, and the `scc-` fragment prefix is the repository's evidence-artifact convention, not a code name.",
+    "reasoning": "pass \u2014 the stated root cause (readers consult the copied list, which only some writers update) is the one the cited evidence shows (3,256 of 3,266 live names hold a producer edge while 85 live names have an empty copied list); the endpoint is reachable and checkable (a count whose disposable-graph arm reports 3 and whose live arm must equal a same-job edge read), and the section names no code path, function or formula to implement.",
+    "single_goal": "pass \u2014 the section delivers one endpoint (every reader resolves a name's sources as its producer edges do, one count command, one guard test, one evidence fragment); the repair of the ten names is \u00a77's, stated explicitly at plan.html:99 (\"this section reports them and changes no binding\").",
+    "wiring": "pass \u2014 \u00a79 needs no upstream and `\u00a77` declares `sn-catalog-consistency#s9` in `plan-section-depends-on` (plan.html:22), so the population hand-off is ordered and acyclic (s2\u2192s7\u2192s9)."
+  },
+  "section_digests": {
+    "_document": "2c1048b18b3abc87fa0ead3305f05e2ca37ba0a7eb7882041b8ab7a29b7f2a59",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "fe0b485d37658d44737045e98025181bb507e290590b07825ff0062adf984863",
+    "s6": "253a243a23959f6452cabdc987e19b9de1cec45f996c6c86f6c861fa64307724",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626",
+    "s9": "68a6f9772c69f43bca52d727e05f096d83d7fcecb914d29173a06bc8393bf24e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T03:13:11.216011+00:00",
+  "total": null
+}
