@@ -945,10 +945,10 @@ async def pooled_run_python_script(
         subprocess.CalledProcessError: On script error
         TimeoutError: On timeout
     """
-    import importlib.resources
     import subprocess
 
     from imas_codex.remote.executor import is_local_host
+    from imas_codex.remote.script_source import load_script_source
 
     # Local execution or no host — use standard async approach
     if ssh_host is None or is_local_host(ssh_host):
@@ -964,10 +964,7 @@ async def pooled_run_python_script(
         )
 
     # Load script content
-    script_path = importlib.resources.files("imas_codex.remote.scripts").joinpath(
-        script_name
-    )
-    script_content = script_path.read_text()
+    script_content = load_script_source(script_name)
 
     # Prepare JSON input
     json_input = json.dumps(input_data) if input_data is not None else "{}"

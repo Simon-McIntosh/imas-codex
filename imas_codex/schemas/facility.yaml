@@ -2872,6 +2872,24 @@ classes:
         range: ArchiveEndpoint
         annotations:
           relationship_type: METADATA_ARCHIVE
+      listed_archives:
+        description: Every readable archive whose census lists this exact selector
+        range: ArchiveEndpoint
+        multivalued: true
+        annotations:
+          relationship_type: LISTED_BY_ARCHIVE
+      archive_metadata:
+        description: Complete archive-reported metadata document encoded as JSON, with absent fields omitted
+      data_type:
+        description: Archive-reported value type; absent when no scalar value type is supplied
+      structure_fields:
+        description: All archive datatype field definitions encoded as JSON
+      first_sample_ns:
+        description: First sample epoch nanoseconds, only when explicitly supplied by the archive
+        range: integer
+      last_sample_ns:
+        description: Last sample epoch nanoseconds, only when explicitly supplied by the archive
+        range: integer
       data_archive:
         description: Logical archive confirmed by a bounded read returning samples; unset until confirmed
         range: ArchiveEndpoint

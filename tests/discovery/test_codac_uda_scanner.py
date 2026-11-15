@@ -7,6 +7,7 @@ from unittest.mock import Mock
 import numpy as np
 import pytest
 
+from imas_codex.discovery.signals import parallel
 from imas_codex.discovery.signals.scanners import codac_uda as catalogue
 from imas_codex.remote import codac_uda as transport
 
@@ -43,12 +44,12 @@ def entries(count):
 def scanner_io(monkeypatch):
     stored = {}
 
-    def write(facility, cohort, signals):
-        stored.update({signal.id: signal for signal in signals})
+    def write(signals):
+        stored.update({signal["id"]: signal for signal in signals})
         return len(signals)
 
     monkeypatch.setattr(catalogue, "_persist_archives", Mock())
-    monkeypatch.setattr(catalogue, "_persist_signals", write)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", write)
     reader = Mock(return_value={"entries": entries(3), "warnings": []})
 
     def respond(facility, role, payload, **kwargs):
@@ -111,13 +112,13 @@ async def test_interrupted_graph_batch_stays_incomplete_and_resumes(
     scanner_io[1].return_value = {"entries": entries(150)}
     calls = []
 
-    def interrupted(facility, cohort, signals):
+    def interrupted(signals):
         calls.append(len(signals))
         if len(calls) == 2:
             raise asyncio.CancelledError()
         return len(signals)
 
-    monkeypatch.setattr(catalogue, "_persist_signals", interrupted)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", interrupted)
     scanner = catalogue.CodacUDAScanner()
     with pytest.raises(asyncio.CancelledError):
         await scanner.scan("demo", "local", config)
@@ -136,7 +137,7 @@ async def test_interrupted_graph_batch_stays_incomplete_and_resumes(
 async def test_unacknowledged_graph_write_cannot_finish(
     config, scanner_io, monkeypatch
 ):
-    monkeypatch.setattr(catalogue, "_persist_signals", lambda *args: 0)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", lambda *args: 0)
     with pytest.raises(RuntimeError, match="incomplete graph batch"):
         await catalogue.CodacUDAScanner().scan("demo", "local", config)
     state = json.loads(open(config["_checkpoint_path"]).read())
@@ -191,14 +192,14 @@ async def test_metadata_calls_checkpoint_and_resume_independently(
 async def test_metadata_is_durable_before_graph_acknowledgement(
     config, scanner_io, monkeypatch
 ):
-    def write(facility, cohort, signals):
+    def write(signals):
         state = json.loads(open(config["_checkpoint_path"]).read())
         assert state["complete"] is False
         assert state["metadata_completed"] == len(signals) == 3
         assert state["written"] == 0
         raise TimeoutError("graph acknowledgement interrupted")
 
-    monkeypatch.setattr(catalogue, "_persist_signals", write)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", write)
     with pytest.raises(TimeoutError, match="graph acknowledgement interrupted"):
         await catalogue.CodacUDAScanner().scan("demo", "local", config)
     state = json.loads(open(config["_checkpoint_path"]).read())
@@ -413,3 +414,150 @@ async def test_scanner_uses_loader_samples_and_classifies_the_same_refusal(
     assert failed["error_classification"] == failure.value.category == "limit"
     assert confirm.call_count == 1
     runner.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_failed_metadata_counts_error_without_writing_signal(config, scanner_io):
+    stored, reader = scanner_io
+
+    def respond(facility, role, payload, **kwargs):
+        if payload["operation"] == "variables":
+            return {"entries": [{"name": "DEMO:FAILED"}]}
+        return {
+            "entries": [],
+            "failed": [{"name": "DEMO:FAILED", "error": "fixture refusal"}],
+        }
+
+    reader.side_effect = respond
+    result = await catalogue.CodacUDAScanner().scan("demo", "local", config)
+    assert result.stats["failed"] == 1
+    assert result.stats["errors"] == {"DEMO:FAILED": "fixture refusal"}
+    assert result.stats["complete"] is False
+    assert result.stats["written"] == 0
+    assert result.signals == [] and stored == {}
+
+
+def test_disk_catalogue_recovers_metadata_before_acknowledgement(tmp_path):
+    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
+
+    path = tmp_path / "catalogue.sqlite"
+    store = ArchiveCatalogue(path)
+    census = store.seed(
+        {"slow": ["DEMO:ONE", "DEMO:TWO"], "fast": ["DEMO:TWO", "DEMO:THREE"]},
+        timestamp="fixture census",
+    )
+    assert census["union"] == 3 and census["overlap"] == 1
+    fetched = []
+
+    def fetch(role, names):
+        fetched.extend((role, name) for name in names)
+        return {"entries": [{"name": name} for name in names]}
+
+    def interrupted(signals):
+        raise TimeoutError("fixture acknowledgement interruption")
+
+    def make(role, entry, cohort):
+        return entry
+
+    with pytest.raises(TimeoutError):
+        store.run(
+            facility="demo",
+            fetch=fetch,
+            ingest=interrupted,
+            make_signal=make,
+            batch_size=2,
+        )
+    store.close()
+    store = ArchiveCatalogue(path)
+    stored = {}
+
+    def ingest(signals):
+        stored.update({signal["name"]: signal for signal in signals})
+        return len(signals)
+
+    result = store.run(
+        facility="demo", fetch=fetch, ingest=ingest, make_signal=make, batch_size=2
+    )
+    assert result["complete"] is True and result["written"] == 3
+    assert len(fetched) == len(set(fetched)) == 4
+    assert set(stored["DEMO:TWO"]["listed_archives"]) == {
+        "demo:codac_uda:slow",
+        "demo:codac_uda:fast",
+    }
+    repeated = store.run(facility="demo", fetch=fetch, ingest=ingest, make_signal=make)
+    assert repeated["metadata_requests"] == repeated["newly_written"] == 0
+    store.close()
+
+
+def test_disk_catalogue_counts_failed_metadata_without_empty_signal(tmp_path):
+    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
+
+    store = ArchiveCatalogue(tmp_path / "failed.sqlite")
+    store.seed({"slow": ["DEMO:FAILED"]}, timestamp="fixture census")
+    ingest = Mock()
+    result = store.run(
+        facility="demo",
+        fetch=lambda role, names: {
+            "entries": [],
+            "failed": [{"name": names[0], "error": "fixture refusal"}],
+        },
+        ingest=ingest,
+        make_signal=Mock(),
+    )
+    assert (
+        result["complete"] is False and result["failed"] == 1 and result["written"] == 0
+    )
+    assert store.db.execute("SELECT error FROM census").fetchone() == (
+        "fixture refusal",
+    )
+    ingest.assert_not_called()
+    store.close()
+
+
+@pytest.mark.asyncio
+async def test_full_catalogue_uses_owner_ingest_and_reuses_completed_batches(
+    config, scanner_io, tmp_path
+):
+    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
+
+    path = tmp_path / "full.sqlite"
+    store = ArchiveCatalogue(path)
+    store.seed(
+        {"fast": ["DEMO:TEMP-0"], "slow": ["DEMO:TEMP-1", "DEMO:TEMP-2"]},
+        timestamp="fixture census",
+    )
+    store.close()
+    config["_catalogue_path"] = str(path)
+    scanner = catalogue.CodacUDAScanner()
+    result = await scanner.scan("demo", "local", config)
+    assert result.signals == []
+    assert result.stats["complete"] is True
+    assert result.stats["written"] == len(scanner_io[0]) == 3
+    assert result.stats["metadata_requests"] == 3
+    reader_calls = scanner_io[1].call_count
+    again = await scanner.scan("demo", "local", config)
+    assert again.stats["newly_written"] == again.stats["metadata_requests"] == 0
+    assert scanner_io[1].call_count == reader_calls
+
+
+def test_signal_keeps_all_archive_fields_and_absent_times():
+    document = {
+        "datatypes": [
+            {"name": "main", "fields": [{"name": "val", "type": "DOUBLE", "unit": "K"}]}
+        ],
+        "signature": "fixture",
+        "additional": {"source": "archive"},
+    }
+    entry = entries(1)[0] | {
+        "archive_metadata": document,
+        "data_type": "DOUBLE",
+        "structure_fields": document["datatypes"],
+    }
+    signal = catalogue.CodacUDAScanner._signal(
+        "demo", "demo:codac_uda:slow", "access", entry, "cohort"
+    )
+    assert json.loads(signal.archive_metadata) == document
+    assert json.loads(signal.structure_fields) == document["datatypes"]
+    assert signal.data_type == "DOUBLE"
+    assert signal.first_sample_ns is signal.last_sample_ns is None
+    assert signal.listed_archives == ["demo:codac_uda:slow"]

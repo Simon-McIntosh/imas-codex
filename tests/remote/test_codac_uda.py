@@ -116,8 +116,8 @@ def test_variables_bound_and_metadata_absence(monkeypatch):
         reader, "metadata_batch", lambda client, names: [{"error": "invalid JSON"}]
     )
     result = reader.variables(client, {"pattern": "DEMO-*", "limit": 1})
-    assert result["entries"][0]["unit"] == {"value": None, "source": None}
-    assert len(result["warnings"]) == 1
+    assert result["entries"] == []
+    assert result["failed"] == [{"name": "DEMO-PLANT:TEMP", "error": "invalid JSON"}]
 
 
 @pytest.mark.parametrize(
@@ -200,48 +200,27 @@ def test_listing_error_is_not_a_completed_empty_cohort():
         reader.variables(client, {"pattern": "DEMO:*"})
 
 
-def test_batch_uses_corrected_names_and_releases_handles(monkeypatch):
-    import ctypes
-
-    library = Mock()
-    buffer = ctypes.create_string_buffer(b'{"datatypes": []}')
-
-    def batch(signals, sources, count, handles, host, port):
-        assert count == 2 and host == b"archive.invalid" and port == 3090
-        assert b"DEMO/CHANNEL/meta" in signals[0]
-        handles[0], handles[1] = 10, 11
-        return 0
-
-    library.idamGetBatchAPIWithHost.side_effect = batch
-    library.getIdamErrorCode.return_value = 0
-    library.getIdamDataType.return_value = 17
-    library.getIdamDataNum.return_value = len(buffer)
-    library.getIdamData.return_value = ctypes.addressof(buffer)
-    monkeypatch.setattr(reader.ctypes, "CDLL", lambda path: library)
+def test_metadata_requests_each_variable_and_isolates_refusal():
     client = Mock()
-    client.correctVariableName.return_value = "DEMO/CHANNEL"
-    client.getHost.return_value = "archive.invalid"
-    client.getPort.return_value = 3090
-    assert (
-        reader.metadata_batch(client, ["DEMO:CHANNEL", "DEMO:OTHER"])
-        == [{"datatypes": []}] * 2
+    client.getMetaTypeJSONCollapsed.side_effect = [
+        '{"datatypes": []}',
+        ValueError("fixture refusal"),
+        '{"datatypes": []}',
+    ]
+    assert reader.metadata_batch(client, ["DEMO:ONE", "DEMO:TWO", "DEMO:THREE"]) == [
+        {"datatypes": []},
+        {"error": "fixture refusal"},
+        {"datatypes": []},
+    ]
+    assert [
+        call.args[0] for call in client.getMetaTypeJSONCollapsed.call_args_list
+    ] == ["DEMO:ONE", "DEMO:TWO", "DEMO:THREE"]
+
+
+def test_failed_metadata_is_not_an_empty_success(monkeypatch):
+    monkeypatch.setattr(
+        reader, "metadata_batch", lambda client, names: [{"error": "fixture refusal"}]
     )
-    assert [call.args[0] for call in library.udaFree.call_args_list] == [10, 11]
-
-
-def test_failed_batch_releases_every_allocated_handle(monkeypatch):
-    library = Mock()
-
-    def batch(signals, sources, count, handles, host, port):
-        handles[0] = 10
-        return -1
-
-    library.idamGetBatchAPIWithHost.side_effect = batch
-    monkeypatch.setattr(reader.ctypes, "CDLL", lambda path: library)
-    client = Mock()
-    client.correctVariableName.return_value = "DEMO/CHANNEL"
-    client.getHost.return_value = "archive.invalid"
-    client.getPort.return_value = 3090
-    with pytest.raises(reader.ReadError, match="batch failed"):
-        reader.metadata_batch(client, ["DEMO:CHANNEL"])
-    library.udaFree.assert_called_once_with(10)
+    result = reader.metadata(Mock(), {"names": ["DEMO:FAILED"]})
+    assert result["entries"] == []
+    assert result["failed"] == [{"name": "DEMO:FAILED", "error": "fixture refusal"}]

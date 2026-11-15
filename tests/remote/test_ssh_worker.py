@@ -285,3 +285,34 @@ class TestSSHWorkerExecute:
             f"Script is base64-encoded in the request payload: {script_field!r}. "
             "This triggers XDR malware detection and must be eliminated."
         )
+
+
+@pytest.mark.asyncio
+async def test_pooled_scripts_bundle_the_same_dependencies_as_executor(monkeypatch):
+    from contextlib import asynccontextmanager
+
+    from imas_codex.remote import ssh_worker
+    from imas_codex.remote.script_source import load_script_source
+
+    captured = []
+
+    class Worker:
+        async def execute(self, script, **kwargs):
+            captured.append(script)
+            return "fixture receipt"
+
+    class Pool:
+        @asynccontextmanager
+        async def acquire(self):
+            yield Worker()
+
+    monkeypatch.setattr("imas_codex.remote.executor.is_local_host", lambda host: False)
+    result = await ssh_worker.pooled_run_python_script(
+        "codac_uda.py",
+        {"operation": "variables"},
+        ssh_host="remote.invalid",
+        pool=Pool(),
+    )
+    assert result == "fixture receipt"
+    assert captured == [load_script_source("codac_uda.py")]
+    assert "sys.modules" in captured[0]

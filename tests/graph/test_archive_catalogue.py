@@ -2,6 +2,7 @@
 
 import pytest
 
+from imas_codex.discovery.signals.parallel import ingest_discovered_signals
 from imas_codex.discovery.signals.scanners import codac_uda as catalogue
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.models import ArchiveEndpoint
@@ -48,7 +49,7 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
             "signals": [signal.model_dump(mode="json")],
         }
         for _ in range(2):
-            assert graph.query(catalogue.SIGNAL_QUERY, **parameters)[0]["written"] == 1
+            assert ingest_discovered_signals(parameters["signals"]) == 1
         from imas_codex.discovery.signals.parallel import build_signal_scope_case
 
         scoped = graph.query(
@@ -76,7 +77,7 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
             "MATCH (s:FacilitySignal {id: $id}) SET s.status = 'enriched', s.claim_token = 'held'",
             id=signal.id,
         )
-        graph.query(catalogue.SIGNAL_QUERY, **parameters)
+        ingest_discovered_signals(parameters["signals"])
         rows = graph.query(
             "MATCH (s:FacilitySignal {id: $id})-[:METADATA_ARCHIVE]->(m:ArchiveEndpoint), (s)-[:DATA_ARCHIVE]->(d:ArchiveEndpoint), (s)-[:DATA_ACCESS]->(a:DataAccess) RETURN s.status AS status, s.claim_token AS claim, s.data_archive AS serving, m.id AS metadata, d.id AS data, a.id AS access, s.archive_cohorts AS cohorts",
             id=signal.id,

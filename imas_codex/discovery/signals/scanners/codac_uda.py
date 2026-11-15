@@ -33,42 +33,6 @@ MERGE (a)-[:AT_FACILITY]->(f)
 RETURN count(a) AS written
 """
 
-SIGNAL_QUERY = """
-MATCH (f:Facility {id: $facility})
-UNWIND $signals AS props
-MATCH (a:ArchiveEndpoint {id: props.metadata_archive})
-MERGE (s:FacilitySignal {id: props.id})
-ON CREATE SET s.status = props.status, s.discovered_at = datetime(),
-              s.description = props.description
-WITH s, a, f, props
-MATCH (da:DataAccess)
-WHERE da.id = CASE WHEN s.data_archive IS NOT NULL
-                   THEN s.facility_id + ':codac_uda:access:' + split(s.data_archive, ':')[-1]
-                   ELSE props.data_access END
-SET s.facility_id = props.facility_id, s.accessor = props.accessor,
-    s.name = props.name, s.discovery_source = props.discovery_source,
-    s.source_description = props.source_description, s.unit = props.unit,
-    s.data_access = da.id, s.metadata_archive = props.metadata_archive,
-    s.data_source_name = props.data_source_name,
-    s.data_source_path = props.data_source_path,
-    s.sampling_mode = props.sampling_mode, s.sampling_evidence = props.sampling_evidence,
-    s.archive_cohorts = CASE WHEN $cohort IN coalesce(s.archive_cohorts, [])
-                            THEN s.archive_cohorts
-                            ELSE coalesce(s.archive_cohorts, []) + [$cohort] END
-MERGE (s)-[:AT_FACILITY]->(f)
-WITH s, a, da
-OPTIONAL MATCH (s)-[old_access:DATA_ACCESS]->(previous_access)
-WHERE previous_access <> da
-DELETE old_access
-MERGE (s)-[:DATA_ACCESS]->(da)
-WITH s, a
-OPTIONAL MATCH (s)-[old:METADATA_ARCHIVE]->(previous)
-WHERE previous <> a
-DELETE old
-MERGE (s)-[:METADATA_ARCHIVE]->(a)
-RETURN count(DISTINCT s) AS written
-"""
-
 CONFIRM_QUERY = """
 MATCH (s:FacilitySignal {id: $signal}), (a:ArchiveEndpoint {id: $archive})
 MATCH (da:DataAccess)
@@ -162,17 +126,6 @@ def _persist_archives(facility: str, archives: list[ArchiveEndpoint]) -> None:
         raise RuntimeError("archive source bindings were not acknowledged")
 
 
-def _persist_signals(facility: str, cohort: str, signals: list[FacilitySignal]) -> int:
-    with GraphClient() as graph:
-        rows = graph.query(
-            SIGNAL_QUERY,
-            facility=facility,
-            cohort=cohort,
-            signals=[signal.model_dump(mode="json") for signal in signals],
-        )
-    return rows[0]["written"] if rows else 0
-
-
 def _confirm(signal: str, archive: str) -> None:
     with GraphClient() as graph:
         rows = graph.query(CONFIRM_QUERY, signal=signal, archive=archive)
@@ -200,6 +153,8 @@ class CodacUDAScanner:
         settings = archive_config(
             facility, config if config.get("variable_patterns") else None
         )
+        if config.get("_catalogue_path"):
+            return await self._scan_catalogue(facility, settings, config)
         effective = settings.model_dump(mode="json")
         patterns = list(dict.fromkeys(settings.variable_patterns or []))
         if not patterns:
@@ -246,9 +201,11 @@ class CodacUDAScanner:
                 "written_ids": [],
                 "skipped": {},
                 "warnings": [],
+                "failed": {},
             }
         state.setdefault("selectors", list(state["entries"]))
         state.setdefault("metadata_batches", 0)
+        state.setdefault("failed", {})
         state["complete"] = False
         state.pop("error", None)
         _save(path, state)
@@ -278,8 +235,13 @@ class CodacUDAScanner:
             ]
             for offset in range(0, len(pending), 100):
                 batch = pending[offset : offset + 100]
+                from imas_codex.discovery.signals.parallel import (
+                    ingest_discovered_signals,
+                )
+
                 count = await asyncio.to_thread(
-                    _persist_signals, facility, fingerprint, batch
+                    ingest_discovered_signals,
+                    [signal.model_dump(mode="json") for signal in batch],
                 )
                 if count != len(batch):
                     raise RuntimeError(
@@ -326,7 +288,9 @@ class CodacUDAScanner:
                 state["skipped"]["metadata_already_fetched"] = len(state["entries"])
             await persist_pending()
             pending_metadata = [
-                name for name in state["selectors"] if name not in state["entries"]
+                name
+                for name in state["selectors"]
+                if name not in state["entries"] and name not in state["failed"]
             ]
             for offset in range(0, len(pending_metadata), settings.metadata_batch_size):
                 names = pending_metadata[offset : offset + settings.metadata_batch_size]
@@ -342,13 +306,16 @@ class CodacUDAScanner:
                     config=effective,
                 )
                 received = response["entries"]
-                if len(received) != len(names) or {
-                    entry["name"] for entry in received
-                } != set(names):
+                failed = response.get("failed", [])
+                answered = [entry["name"] for entry in received + failed]
+                if len(answered) != len(names) or set(answered) != set(names):
                     raise RuntimeError(
                         "metadata batch does not match its requested selectors"
                     )
                 state["entries"].update({entry["name"]: entry for entry in received})
+                state["failed"].update(
+                    {entry["name"]: entry["error"] for entry in failed}
+                )
                 state["warnings"].extend(response.get("warnings", []))
                 state["metadata_batches"] += 1
                 _save(path, state)
@@ -370,6 +337,8 @@ class CodacUDAScanner:
                 "metadata_warnings": len(state["warnings"]),
                 "metadata_completed": state["metadata_completed"],
                 "metadata_batches": state["metadata_batches"],
+                "failed": len(state["failed"]),
+                "errors": state["failed"],
             }
             return result
         except BaseException as exc:
@@ -396,6 +365,16 @@ class CodacUDAScanner:
             data_source_name="codac_uda",
             data_source_path=name,
             metadata_archive=archive,
+            listed_archives=entry.get("listed_archives", [archive]),
+            archive_metadata=json.dumps(entry["archive_metadata"], sort_keys=True)
+            if "archive_metadata" in entry
+            else None,
+            data_type=entry.get("data_type"),
+            structure_fields=json.dumps(entry["structure_fields"], sort_keys=True)
+            if "structure_fields" in entry
+            else None,
+            first_sample_ns=entry.get("first_sample_ns"),
+            last_sample_ns=entry.get("last_sample_ns"),
             archive_cohorts=[cohort],
             description=entry.get("description", {}).get("value"),
             source_description=entry.get("description", {}).get("value"),
@@ -406,6 +385,80 @@ class CodacUDAScanner:
             if mode != "unknown"
             else None,
         )
+
+    async def _scan_catalogue(self, facility, settings, config) -> ScanResult:
+        from imas_codex.discovery.signals.parallel import ingest_discovered_signals
+        from imas_codex.discovery.signals.scanners.archive_catalogue import (
+            ArchiveCatalogue,
+        )
+
+        store = ArchiveCatalogue(Path(config["_catalogue_path"]))
+        try:
+            census = store.census()
+            if census["union"] > 1_000_000:
+                raise RuntimeError(
+                    "catalogue exceeds one million variables; authorization required"
+                )
+            if set(census["counts"]) != set(settings.readable_roles):
+                raise ValueError(
+                    "census archive roles differ from configured readable roles"
+                )
+            from imas_codex.config.codac_uda import resolve_archive_endpoint
+
+            for role in settings.readable_roles:
+                resolve_archive_endpoint(settings, role)
+            archives = [
+                ArchiveEndpoint(
+                    id=f"{facility}:codac_uda:{item.role}",
+                    facility_id=facility,
+                    data_system="codac_uda",
+                    role=item.role,
+                    excluded=bool(item.excluded),
+                )
+                for item in settings.archives
+            ]
+            await asyncio.to_thread(_persist_archives, facility, archives)
+
+            def fetch(role, names):
+                return request_archive(
+                    facility,
+                    role,
+                    {
+                        "operation": "metadata",
+                        "names": names,
+                        "metadata_batch_size": settings.metadata_batch_size,
+                    },
+                    config=settings.model_dump(mode="json"),
+                )
+
+            def make(role, entry, cohort):
+                return self._signal(
+                    facility,
+                    f"{facility}:codac_uda:{role}",
+                    _access(facility, role).id,
+                    entry,
+                    cohort,
+                ).model_dump(mode="json")
+
+            stats = await asyncio.to_thread(
+                store.run,
+                facility=facility,
+                fetch=fetch,
+                ingest=ingest_discovered_signals,
+                make_signal=make,
+                batch_size=settings.metadata_batch_size,
+                max_batches=config.get("_max_batches"),
+                progress=config.get("_progress"),
+            )
+            return ScanResult(
+                stats=stats,
+                metadata={
+                    "census": census,
+                    "checkpoint_path": str(config["_catalogue_path"]),
+                },
+            )
+        finally:
+            store.close()
 
     async def check(
         self,
