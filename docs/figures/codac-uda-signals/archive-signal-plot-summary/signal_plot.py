@@ -149,7 +149,7 @@ def save_figure(figure, path: str | Path) -> None:
         content = path.read_text()
         height = 16 * figure.get_figheight() / CANVAS[1]
         content = content.replace('height="16cm"', f'height="{height:g}cm"', 1)
-        path.write_text(content)
+        path.write_text("\n".join(line.rstrip() for line in content.splitlines()) + "\n")
 
 
 def _scale(magnitude: float, unit: str):
