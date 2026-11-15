@@ -1,0 +1,69 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-15T16:53:13.866Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-15T16:52:56Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py",
+      "line": "1410",
+      "severity": "non-blocking",
+      "text": "non-blocking: the guard the reuse repair added keys on two exact global identifier names, SPECIES in globals() or family_template in globals(), so a second species list named SPECIES_NAMES, an inlined tuple, or a re-implemented family template under another name passes the check it was added to enforce, leaving the drift the census module owns undetected."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py",
+      "line": "1466",
+      "severity": "non-blocking",
+      "text": "non-blocking: the coverage check compares the report's stated with_score_after (158) against len(with_after) from the progress records, so it passes at 158 of 173 while the done_when clause requiring a score beside every worked name is still unmet for 44 records with no score_before and 15 with no score_after; the report now discloses the gap but no assertion requires the clause."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py",
+      "line": "967",
+      "severity": "non-blocking",
+      "text": "non-blocking: the Outcomes paragraph still states the below-floor count as accepted names, but held is built by skipping every accepted record at :545 and the clause added at :754 states that the 7 below-floor names are all among the 23 held, which verify at :1468 asserts, so the delivered HTML contradicts itself in the same section."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py",
+      "line": "1379",
+      "severity": "non-blocking",
+      "text": "non-blocking: the durability assertion is a manual verify phase of the evidence script, invoked only from the run-directory gate/run_repair_checks.sh, so nothing in tests/ or CI runs it and a stale report reddens no automated check."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read both repair commits in full against 7a0a1ce89 plus the full-run diffstat from aa6e7e5: ac6f1f555 deletes the local SPECIES list and family_template and delegates operator_of to the census module's OPERATORS, and 2cd7b6e0 adds the 40-check verify phase, the score-coverage paragraph and the score-floor and spend clauses.",
+    "done_when": "the done_when asks for the committed html and json with per-family and per-operator forms before and after re-read from the live graph, every worked name with before and after text and scores, every left name with a reason, sourceless live names not above 10 and spend at most USD 30; gate-logs/repair-checks-1318172.log runs the script's verify phase and prints 40 PASS lines with checked 40 mismatched 0 and EXIT=0, covering the counts, the bound, the ceiling, the score coverage and the worked and left accounting, but not the per-name text and score completeness clause.",
+    "goal": "the reviewed run's goal is to bring the species families and operator names to the one stored wording on the live graph; family-wording-pass.json census_after records one_wording_count 0 of 23 families and divergent_count 23, species departing 39 against 76 before and operator omissions 6/4/1/0/3, so the family clause is unachieved and the operator half is reduced rather than settled.",
+    "manifest": "read the reviewed run's manifest.md; it reports status complete, names all five commits, cites gate-logs/repair-checks-1318172.log as both tests and negative_control_log with 40 of 40 counts matched and both controls failing for their named reason, and carries no baseline_suite or after_suite key, so added_failure_count is 0 and added_failure_ids is empty.",
+    "write_paths": "the four declared paths are the family-wording-pass .json, .html and .py and docs/figures/sn-family-wording-pass; git diff aa6e7e5..2cd7b6e0 changes exactly those four files (24,170 insertions) and the repair commits ac6f1f555 and 2cd7b6e0 touch only the same four files (329 insertions, 136 deletions)."
+  },
+  "justifications": {
+    "durability": "family-wording-pass.py:1379 adds a verify phase that reddens on a stale count, and the gate's reuse control shows it failing on the reverted script, but no test in tests/ or CI step invokes it, so the guard fires only when a human runs a phase that needs the live graph.",
+    "evidence": "gate-logs/repair-checks-1318172.log prints 40 PASS lines and checked 40 mismatched 0 with EXIT=0 against a live re-read, and both negative controls fail on the line each names, but family-wording-pass.py:1466 checks the stated score coverage rather than the done_when's every-name clause.",
+    "fit": "family-wording-pass.py:1404 follows the module's existing check-and-print shape and reuses the census module's measures, and the added argparse phase matches the sibling fragment generators' surface.",
+    "goal_fidelity": "family-wording-pass.py:664 records the family clause as 0 of 23 before and after because no family carries a stored sentence, so the goal's family clause does not move under this change.",
+    "reuse": "family-wording-pass.py:120 and :125 now take SPECIES, family_template, OPERATORS, family_census and operator_census from rewrite-closing-census.py's module loaded by census_module(), extending the owner that already implements the measure.",
+    "scope_discipline": "git diff 7a0a1ce89..2cd7b6e071 changes only the four declared evidence and figure paths, and no graph write appears in the landed code."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed run's goal is to bring the species families and operator names to the one stored wording on the live graph; family-wording-pass.json census_after records one_wording_count 0 of 23 families and divergent_count 23, species departing 39 against 76 before and operator omissions 6/4/1/0/3, so the family clause is unachieved and the operator half is reduced rather than settled.\nVERDICT done_when: the done_when asks for the committed html and json with per-family and per-operator forms before and after re-read from the live graph, every worked name with before and after text and scores, every left name with a reason, sourceless live names not above 10 and spend at most USD 30; gate-logs/repair-checks-1318172.log runs the script's verify phase and prints 40 PASS lines with checked 40 mismatched 0 and EXIT=0, covering the counts, the bound, the ceiling, the score coverage and the worked and left accounting, but not the per-name text and score completeness clause.\nVERDICT write_paths: the four declared paths are the family-wording-pass .json, .html and .py and docs/figures/sn-family-wording-pass; git diff aa6e7e5..2cd7b6e0 changes exactly those four files (24,170 insertions) and the repair commits ac6f1f555 and 2cd7b6e0 touch only the same four files (329 insertions, 136 deletions).\nVERDICT manifest: read the reviewed run's manifest.md; it reports status complete, names all five commits, cites gate-logs/repair-checks-1318172.log as both tests and negative_control_log with 40 of 40 counts matched and both controls failing for their named reason, and carries no baseline_suite or after_suite key, so added_failure_count is 0 and added_failure_ids is empty.\nVERDICT diff: read both repair commits in full against 7a0a1ce89 plus the full-run diffstat from aa6e7e5: ac6f1f555 deletes the local SPECIES list and family_template and delegates operator_of to the census module's OPERATORS, and 2cd7b6e0 adds the 40-check verify phase, the score-coverage paragraph and the score-floor and spend clauses.\nCALL_SITES: none\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: family-wording-pass.py:664 records the family clause as 0 of 23 before and after because no family carries a stored sentence, so the goal's family clause does not move under this change.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-logs/repair-checks-1318172.log prints 40 PASS lines and checked 40 mismatched 0 with EXIT=0 against a live re-read, and both negative controls fail on the line each names, but family-wording-pass.py:1466 checks the stated score coverage rather than the done_when's every-name clause.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 7a0a1ce89..2cd7b6e071 changes only the four declared evidence and figure paths, and no graph write appears in the landed code.\nSCORE durability: 14\nJUSTIFICATION durability: family-wording-pass.py:1379 adds a verify phase that reddens on a stale count, and the gate's reuse control shows it failing on the reverted script, but no test in tests/ or CI step invokes it, so the guard fires only when a human runs a phase that needs the live graph.\nSCORE fit: 18\nJUSTIFICATION fit: family-wording-pass.py:1404 follows the module's existing check-and-print shape and reuses the census module's measures, and the added argparse phase matches the sibling fragment generators' surface.\nSCORE reuse: 20\nJUSTIFICATION reuse: family-wording-pass.py:120 and :125 now take SPECIES, family_template, OPERATORS, family_census and operator_census from rewrite-closing-census.py's module loaded by census_module(), extending the owner that already implements the measure.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:1410 non-blocking: the guard the reuse repair added keys on two exact global identifier names, SPECIES in globals() or family_template in globals(), so a second species list named SPECIES_NAMES, an inlined tuple, or a re-implemented family template under another name passes the check it was added to enforce, leaving the drift the census module owns undetected.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:1466 non-blocking: the coverage check compares the report's stated with_score_after (158) against len(with_after) from the progress records, so it passes at 158 of 173 while the done_when clause requiring a score beside every worked name is still unmet for 44 records with no score_before and 15 with no score_after; the report now discloses the gap but no assertion requires the clause.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:967 non-blocking: the Outcomes paragraph still states the below-floor count as accepted names, but held is built by skipping every accepted record at :545 and the clause added at :754 states that the 7 below-floor names are all among the 23 held, which verify at :1468 asserts, so the delivered HTML contradicts itself in the same section.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:1379 non-blocking: the durability assertion is a manual verify phase of the evidence script, invoked only from the run-directory gate/run_repair_checks.sh, so nothing in tests/ or CI runs it and a stale report reddens no automated check.\n",
+  "review_run_id": "r-20261115T165232015761-review-of-sdbc-family-wording-pass-2cd7b6e07100",
+  "reviewed_base_sha": "aa6e7e59020ed26d2c703b7e88cd71257eab356a",
+  "reviewed_head_sha": "2cd7b6e07100486ad44ab72e31a4f98b8ec24ede",
+  "reviewed_run_id": "r-20261115T055543240731-sdbc-family-wording-pass",
+  "rubric": "text",
+  "scores": {
+    "durability": 14,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 10,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:08:04.061204+00:00",
+  "total": 99
+}
