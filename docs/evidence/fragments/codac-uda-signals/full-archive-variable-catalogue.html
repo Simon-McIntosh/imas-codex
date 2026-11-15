@@ -195,3 +195,18 @@
     <code>~/.cache/imas-codex-codac-uda/full-census/attributes-job-1317295-receipt.json</code>
     appears. The manifest carries that exact receipt-file wait probe.</p>
 </section>
+<section id="full-archive-variable-catalogue-live-backfill-checkpoint">
+  <h2>Live backfill and interrupted checkpoint</h2>
+  <p>The persistent job completed its two-batch pilot: 1,000 full-metadata
+    requests, zero repeated type requests, zero new identities and all 94,433
+    existing acknowledged identities retained. It then closed and reopened the
+    checkpoint. The subsequent progress receipt records another 5,000 variables
+    in 295.110 s, or 16.94 variables/s, including graph acknowledgement. Across
+    the pilot and resumed work, 6,000 variables have full metadata refreshed and
+    zero completed variables have been refetched. Final recovery and repeat
+    verdicts remain pending the terminal receipt.</p>
+  <p>The original job allocation is 24 hours. The scheduler refused an extension
+    with <code>Access/permission denied for job 1317295</code>. A later continuation
+    from the durable checkpoint may be needed if the remaining scan exceeds that
+    allocation; the initial backfill rate does not predict uncached type requests.</p>
+</section>
