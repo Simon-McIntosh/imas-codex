@@ -194,10 +194,10 @@ def _held_window(reply: Reply, start: int, end: int) -> tuple[Reply, int | None]
     inside = (reply.time >= start) & (reply.time <= end)
     times, values = reply.time[inside], reply.values[inside]
     if len(before) and (not len(times) or times[0] != start):
-        times = np.concatenate((np.array([start], dtype=np.int64), times))
+        times = np.concatenate((np.array([start], dtype=reply.time.dtype), times))
         values = np.concatenate((reply.values[before[-1] : before[-1] + 1], values))
     if len(times) and times[-1] < end:
-        times = np.concatenate((times, np.array([end], dtype=np.int64)))
+        times = np.concatenate((times, np.array([end], dtype=reply.time.dtype)))
         values = np.concatenate((values, values[-1:]))
     return Reply(
         times, values, reply.unit, reply.description, empty=not len(times)

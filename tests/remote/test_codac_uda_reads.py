@@ -299,3 +299,16 @@ def test_relative_bins_keep_fractional_seconds():
     )
     np.testing.assert_allclose(result["time"], [0.2, 0.6])
     assert result["values"] == [1.5, 5.5]
+
+
+def test_held_unsigned_epoch_timestamps_preserve_nanosecond_precision():
+    client = event_client()
+    origin = 1700000000000000000
+    client.times = np.array(
+        [origin - 10, origin + 4, origin + 7, origin + 12], dtype=np.uint64
+    )
+    result = reader.read(
+        client, window(start=origin, end=origin + 10, semantics="held")
+    )
+    assert result["time_dtype"] == "uint64"
+    assert result["time"] == [origin, origin + 4, origin + 7, origin + 10]
