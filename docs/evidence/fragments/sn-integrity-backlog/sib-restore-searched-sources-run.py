@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at d554595cbce239db042b7d1bd16a261adf481f81, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names, imas_codex.standard_names.graph_ops._TransactionQuery, imas_codex.standard_names.graph_ops._TransactionQuery.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Rediscover each remaining lost DD source by DD search, confirmed by Jev.
 
 Two populations are handed to this node:

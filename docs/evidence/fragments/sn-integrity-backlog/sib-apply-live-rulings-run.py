@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 204494370c9e7f791357bf3372eae17152e25fce, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Apply the lead's ruled provenance changes to live standard names without a source.
 
 The lead ruled four graph changes on live standard names that have no DD

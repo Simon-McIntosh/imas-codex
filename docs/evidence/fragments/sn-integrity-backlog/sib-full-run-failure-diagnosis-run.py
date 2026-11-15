@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at a92a3d58c454e959ba494d7e13abdf0fb03d9380, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.worker_tasks.worker_compose_batches._acall_retrying_transport_faults.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Capture and diagnose terminal DD composition sources without graph writes."""
 
 from __future__ import annotations

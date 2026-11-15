@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 617c05def8d455eeff9d97920cfa6ca879bae5e8, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.workers._collect_nearby_name_comparators, imas_codex.standard_names.workers._rerank_comparators_for_compose.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Held-out batch acceptance of the comparator rerank, off (arm A) vs on (arm B).
 
 The measure composes and reviews a held-out batch twice through the harness with

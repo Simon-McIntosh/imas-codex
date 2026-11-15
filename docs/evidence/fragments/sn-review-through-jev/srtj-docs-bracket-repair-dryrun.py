@@ -1,4 +1,10 @@
 #!/usr/bin/env python3
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at d51fab8796fce69f72f485f63317c9997ec52549, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops._normalize_bare_doc_links.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Read the live documentation pool and preview exact-link normalization."""
 
 from __future__ import annotations

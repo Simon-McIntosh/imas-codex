@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 6571f7e3d034ab8cf886b0e1e688643c2e0341aa, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.graph.dd_domain_classifier, imas_codex.standard_names.benchmark, imas_codex.standard_names.benchmark_roles.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Run one production seat benchmark while retaining matched item outcomes."""
 
 from __future__ import annotations

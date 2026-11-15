@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at e6d4b36b9d455ec5b595a8600e3abfe977a4ab96, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.graph.dd_domain_classifier.build_domain_questions.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Measure the typed-Choice domain classifier against reviewed standard-name labels.
 
 Same path set, source query, context gathering, derivation and scoring as the

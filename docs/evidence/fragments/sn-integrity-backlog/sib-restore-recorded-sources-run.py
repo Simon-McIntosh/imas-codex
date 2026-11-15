@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at f22eebcac726f52cac4970bf6b1bbddf7733ac4d, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops._TransactionQuery, imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Restore the DD source each dropped-edge name recorded for itself.
 
 Reads the live graph, re-derives the sourceless-name populations with the

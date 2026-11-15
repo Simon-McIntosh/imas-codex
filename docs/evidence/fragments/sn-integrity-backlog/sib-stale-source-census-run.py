@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at e3d2f9f4aa66ad04b3db831c41130d8f4073723c, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.sources.dd.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Read-only census of stale DD sources using the live extraction selector."""
 
 from __future__ import annotations

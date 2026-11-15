@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 9cfbd74ce2b0bca45d64aa83ff2f41777459348e, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.graph.temp_neo4j.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Gather the evidence for one live tip of the momentum-diffusivity lineage.
 
 Reads the two-name lineage's records and its DD sources from the live graph,
