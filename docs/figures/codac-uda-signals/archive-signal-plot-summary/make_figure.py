@@ -8,7 +8,8 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import numpy as np
-from signal_plot import plot
+
+from imas_codex.plotting import plot
 
 
 def main():

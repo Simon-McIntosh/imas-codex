@@ -1,5 +1,7 @@
 """Adversarial export controls and sampling-aware signal summaries."""
 
+from importlib.resources import files
+from pathlib import Path
 from types import SimpleNamespace
 
 import matplotlib
@@ -8,7 +10,21 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
-import signal_plot
+
+from imas_codex.plotting import save_figure, signals as signal_plot, style
+
+
+def test_public_guard_and_packaged_style_are_importable():
+    resource = files("imas_codex.plotting").joinpath("data-ink.mplstyle")
+    assert resource.is_file()
+    assert Path(str(resource)).resolve() == style.BASE_STYLE.resolve()
+    assert save_figure is style.save_figure
+    with plt.style.context(style.BASE_STYLE):
+        assert plt.rcParams["axes.grid"] is False
+        assert plt.rcParams["axes.spines.right"] is False
+    print(f"MEASUREMENT_MODULE={signal_plot.__file__}")
+    print(f"MEASUREMENT_STYLE_MODULE={style.__file__}")
+    print(f"MEASUREMENT_CWD={Path.cwd().resolve()}")
 
 
 def signal(time=(0.0, 1.0, 10.0), values=(0.0, 9.0, 3.0), **metadata):
@@ -176,6 +192,33 @@ def test_several_signals_share_one_legend_and_axis(tmp_path):
     )
     assert len(receipt["summaries"]) == 3
     assert path.exists()
+
+
+def test_subject_envelope_stands_above_neutral_traces(tmp_path, monkeypatch):
+    observed = {}
+
+    def inspect(figure, path):
+        observed.update({line.get_label(): line for line in figure.axes[0].lines})
+
+    monkeypatch.setattr(signal_plot, "save_figure", inspect)
+    signal_plot.plot(
+        [
+            signal(
+                time=(0.0, 2.0),
+                values=((4.0, 1.0, 7.0), (10.0, 8.0, 15.0)),
+                mode="envelope",
+            ),
+            signal(time=(0.0, 2.0), values=(2.0, 3.0), semantics="zero_order_hold"),
+        ],
+        tmp_path / "highlight.svg",
+        labels=["envelope", "events"],
+    )
+    subject = observed.pop("envelope bin mean")
+    assert subject.get_color() == style.SUBJECT
+    assert style.SUBJECT != style.REFERENCE
+    for line in observed.values():
+        assert line.get_color() == style.REFERENCE
+        assert line.get_zorder() < subject.get_zorder()
 
 
 def test_malformed_envelopes_are_not_summarised():

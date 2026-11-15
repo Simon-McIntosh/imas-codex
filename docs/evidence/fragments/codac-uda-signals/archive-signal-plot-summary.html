@@ -1,7 +1,7 @@
 <section id="archive-signal-plot-summary-evidence">
   <h3>Checked exports and sampling-aware signal summaries</h3>
-  <p>The figure-script interface in
-    <code>docs/figures/codac-uda-signals/archive-signal-plot-summary/signal_plot.py</code>
+  <p>The importable interface in
+    <code>imas_codex.plotting</code>
     consumes the loaded signal's <code>time</code>, <code>values</code> and
     <code>metadata</code>. Its public <code>statistics</code>, <code>plot</code>
     and <code>save_figure</code> functions support scalar numeric signals,
@@ -9,12 +9,15 @@
     Epoch nanoseconds are subtracted as integers before conversion to seconds;
     each overlay retains one common origin rather than independently rebasing
     its traces. Incompatible units or time bases are refused.</p>
-  <p><code>save_figure</code> reuses the existing prototype's text-boundary and
-    pairwise text-overlap guard rather than duplicating an already working
-    check. The public wrapper also refuses a direct label over a plotted line,
-    checks at raster-export resolution, and declares the slide canvas on SVGs.
-    Other figure scripts can load the module by file path and call this public
-    entry point. Existing figure scripts were not migrated.</p>
+  <p>The shared save function is now in
+    <code>imas_codex/plotting/style.py</code>. It preserves the verified
+    text-boundary and pairwise text-overlap checks, also refuses a direct label
+    over a plotted line, checks at raster-export resolution, and declares the
+    slide canvas on SVGs. Other scripts import it with
+    <code>from imas_codex.plotting import save_figure</code>. The prototype
+    imports the same function; the package imports no prototype code.
+    The style sheet lives beside the package module as package data and is
+    loaded through its resolved file path.</p>
 
   <figure id="archive-signal-plot-summary-synthetic">
     <img src="/imas-codex/figures/codac-uda-signals/archive-signal-plot-summary/synthetic-signal.svg"
@@ -23,8 +26,9 @@
       of 0.550 kA and extrema of 0.100–1.000 kA. Five event values have an
       unweighted mean of 0.470 kA and extrema of 0.200–0.950 kA. These are
       separate demonstrations, not two representations of the same underlying
-      signal. The event trace uses held steps; the envelope mean is drawn above
-      its bounds. One frameless legend identifies every series. The canvas is
+      signal. The event trace uses held steps; the envelope bin mean uses a
+      clean feature colour above neutral-grey bounds and events. One frameless
+      legend identifies every series. The canvas is
       31.1 × 16 cm; the generator is <code>make_figure.py</code> beside the SVG.</figcaption>
   </figure>
 
@@ -99,20 +103,22 @@
     These working checks were retained. The baseline event summary used the
     generic label <code>archived_samples</code>; the delivered interface gives
     the explicit archived-on-change kind above.</p>
-  <p>The final focused gate completed with <strong>19 passed, 1 warning in 1.64 s</strong>,
+  <p>The relocated focused gate completed with <strong>22 passed in 1.16 s</strong>,
     exit 0. It exercises the two bad figures through the public save function,
     checks each offending label appears in the refusal, and asserts no file
     exists. It also checks a direct label over data, envelope label precedence
     over sampling semantics, unsigned epoch-nanosecond precision, honest
     decimation, common overlay origins, multiple traces, incompatible units,
-    the loader's native relative-pulse time base, and an uneven event sequence whose unweighted mean is 4 rather than its
-    held-duration mean of 8.1. The warning is pytest's configured cache option
-    being unavailable when its cache plugin is deliberately disabled.</p>
-  <p>Bypassing the reused text guard in memory makes both head-passing refusal
+    the loader's native relative-pulse time base, and an uneven event sequence
+    whose unweighted mean is 4 rather than its held-duration mean of 8.1.
+    This includes 21 plotting tests and the prototype's shared-save regression.
+    The package resource and shared public save import are verified directly.</p>
+  <p>Bypassing the packaged text guard in memory makes both head-passing refusal
     tests fail with <code>DID NOT RAISE &lt;class 'ValueError'&gt;</code>:
-    <strong>2 failed, 1 warning in 0.22 s</strong>, exit 1. The mutation is not
+    <strong>2 failed in 0.92 s</strong>, exit 1. The mutation is not
     present in any committed file. The receipts are
-    <code>focused-tests-native-time.log</code>, <code>negative-control.log</code>,
+    <code>package-final-focused-tests.log</code>,
+    <code>package-final-negative-controls.log</code>,
     <code>baseline-observations.log</code>, <code>live-plots.log</code> and
     <code>export-check.log</code> in the assigned run directory.</p>
   <p>A final interface check reproduced the rejection of the loader's native
@@ -122,6 +128,38 @@
     native relative-time label; the new regression passes for both summary and
     figure export. This does not alter the absolute-time live figures.
     The red receipt is <code>pulse-time-base-red.log</code>.</p>
+  <h4 id="archive-signal-plot-summary-package-placement">Package placement and figure emphasis</h4>
+  <p>The plotting module, style sheet and test file were moved with
+    <code>git mv</code> into <code>imas_codex/plotting/</code> and
+    <code>tests/plotting/</code>. The figure directory now contains exactly
+    <code>synthetic-signal.svg</code> and its short regeneration script,
+    which imports <code>imas_codex.plotting.plot</code>. The public interface is
+    <code>from imas_codex.plotting import plot, statistics, save_figure</code>.</p>
+  <p>The default configuration's <code>testpaths = ["tests"]</code> and test-file
+    pattern cover the moved file. Collection under the ordinary configuration
+    found <strong>21 tests in 1.02 s</strong>, exit 0, recorded in
+    <code>package-final-collection.log</code>. The focused gate used the normal
+    root test fixtures and default marker selection. It ran in a node-local
+    source extraction with the main checkout's generated-model copies, using
+    the shared project environment without syncing it. The logs record the
+    actual imported module and resolved working directory; the overlay hashes
+    in <code>package-gate.log</code> bind that extraction to the delivered files.</p>
+  <p>The relocation initially reordered the direct-label and text checks,
+    causing <code>test_direct_label_over_data_is_refused</code> to receive
+    <code>clipped figure text: 1.2</code> before the expected direct-label
+    refusal. <code>package-focused-tests.log</code> retains that one-failure
+    reproduction. The shared save function preserves the established order;
+    the final gate passes all 22 tests.</p>
+  <p>Three clean feature colours were rendered on this same figure and
+    inspected. The blue default <code>#2878a5</code> highlights the envelope
+    bin mean; minimum, maximum and the held trace remain
+    <code>#929292</code>. The highlighted mean has the highest draw order.
+    The actual SVG was rasterized at 1400 px and inspected for contrast,
+    layering, readable labels and clipping. Candidate SVGs and previews remain
+    in the internal run directory; the repository holds one final SVG.
+    This validation and rendering ran in separate <code>all_debug</code> job
+    <code>1316902</code>, with zero new archive requests. All previously
+    recorded live arrays, summaries and private live plots retain their provenance.</p>
   <p>Source and initial synthetic-artifact commits are
     <code>03f0f851de83bb6481409a054770c4710598c8c8</code>,
     <code>c260f6ad0f5a33e4d05473ae725fab22629873c3</code> and

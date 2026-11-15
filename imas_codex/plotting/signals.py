@@ -1,6 +1,5 @@
 """Plot loaded scalar signals and report explicitly unweighted summaries.
 
-Import this file with importlib.util.spec_from_file_location from figure scripts.
 Inputs use the loader's time/values/metadata interface, without requiring a graph
 connection. Archive selectors and queries are never copied to figure labels.
 """
@@ -13,17 +12,17 @@ from typing import Any, Protocol
 
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.text import Annotation
 from matplotlib.ticker import MaxNLocator
 
-from scripts.codac_uda_prototype.loader import _save_figure
-
-SUBJECT = "#555555"
-REFERENCE = "#929292"
-LINE_STYLES = ("-", "--", "-.", ":")
-CANVAS = (14, 7.2)
-BASE_STYLE = Path(__file__).with_name("data-ink.mplstyle")
-STYLE = {"axes.formatter.useoffset": False, "svg.fonttype": "none"}
+from imas_codex.plotting.style import (
+    BASE_STYLE,
+    CANVAS,
+    LINE_STYLES,
+    REFERENCE,
+    STYLE,
+    SUBJECT,
+    save_figure,
+)
 
 
 class LoadedSignal(Protocol):
@@ -117,43 +116,6 @@ def statistics(signal: LoadedSignal) -> dict:
     return result
 
 
-def save_figure(figure, path: str | Path) -> None:
-    """Use the existing text refusal guard for every SVG or raster export.
-
-    Annotations are direct labels: their boxes must also avoid plotted lines.
-    The text check runs at the raster export resolution before any file is opened.
-    """
-    path = Path(path)
-    if path.suffix.lower() not in {".svg", ".png"}:
-        raise ValueError("figure export must be SVG or PNG")
-    figure.set_dpi(200)
-    figure.canvas.draw()
-    renderer = figure.canvas.get_renderer()
-    for axis in figure.axes:
-        for label in axis.texts:
-            if not label.get_visible() or not label.get_text().strip():
-                continue
-            box = label.get_window_extent(renderer)
-            for line in axis.lines:
-                if line.get_visible() and line.get_transform().transform_path(
-                    line.get_path()
-                ).intersects_bbox(box, filled=False):
-                    raise ValueError(
-                        f"direct label overlaps data: {label.get_text()} / {line.get_label()}"
-                    )
-            if isinstance(label, Annotation) and label.arrow_patch is not None:
-                raise ValueError("direct labels must sit beside data without arrows")
-    _save_figure(figure, path)
-    if path.suffix.lower() == ".svg":
-        # Preserve the slide width while allowing a taller explicitly sized canvas.
-        content = path.read_text()
-        height = 16 * figure.get_figheight() / CANVAS[1]
-        content = content.replace('height="16cm"', f'height="{height:g}cm"', 1)
-        path.write_text(
-            "\n".join(line.rstrip() for line in content.splitlines()) + "\n"
-        )
-
-
 def _scale(magnitude: float, unit: str):
     if unit not in {"A", "V", "W", "J", "Hz", "Pa", "H", "Ω", "s"} or not magnitude:
         return 1.0, unit or "unspecified unit"
@@ -234,7 +196,7 @@ def plot(signals: Sequence[LoadedSignal], path: str | Path, *, labels: Sequence[
                     color=colour,
                     lw=3,
                     ls=style,
-                    zorder=3,
+                    zorder=3 if index == 0 else 2,
                     label=f"{alias} bin mean",
                 )
             else:
