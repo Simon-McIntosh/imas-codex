@@ -4,8 +4,9 @@
   "exceptions_note": "A seat may stay off its line newest release only with the reason recorded here, keyed by the declaring section and query path.",
   "openrouter": {
     "source": "https://openrouter.ai/api/v1/models",
-    "note": "One dated release per line that a declared seat names, so a line keeps its tier while its versions stay comparable.",
+    "note": "Relevant model releases and route prices re-read from the serving catalogue. New family names are evaluated within their provider capability and price class; premium and specialised tiers stay separate.",
     "releases": {
+      "openrouter/anthropic/claude-fable-5.2": "2026-11-09",
       "openrouter/anthropic/claude-haiku-4.5": "2025-10-15",
       "openrouter/anthropic/claude-haiku-5.5": "2026-10-07",
       "openrouter/anthropic/claude-opus-4.1": "2025-08-05",
@@ -21,6 +22,7 @@
       "openrouter/anthropic/claude-sonnet-5.5": "2026-09-28",
       "openrouter/deepseek/deepseek-v4-flash": "2026-04-24",
       "openrouter/deepseek/deepseek-v4-flash-0731": "2026-07-31",
+      "openrouter/deepseek/deepseek-v4-pro-0813": "2026-08-12",
       "openrouter/deepseek/deepseek-v4.1-flash": "2026-09-10",
       "openrouter/deepseek/deepseek-v4.1-flash-1017": "2026-10-17",
       "openrouter/google/gemini-2.5-flash": "2025-06-17",
@@ -33,19 +35,27 @@
       "openrouter/google/gemini-3.6-flash": "2026-07-21",
       "openrouter/google/gemini-3.7-flash": "2026-08-13",
       "openrouter/google/gemini-3.8-flash": "2026-09-02",
+      "openrouter/google/gemini-4-argon": "2026-10-13",
+      "openrouter/google/gemini-4-carbon": "2026-11-10",
+      "openrouter/google/gemini-4-hydrogen": "2026-11-12",
       "openrouter/meta-llama/llama-4-maverick": "2025-04-05",
       "openrouter/moonshotai/kimi-k3.1-pro": "2026-10-23",
       "openrouter/openai/gpt-5.6-luna": "2026-07-09",
       "openrouter/openai/gpt-5.6-sol": "2026-07-09",
       "openrouter/openai/gpt-5.6-terra": "2026-07-09",
+      "openrouter/openai/gpt-6-astra": "2026-09-04",
       "openrouter/openai/gpt-6-luna": "2026-09-22",
+      "openrouter/openai/gpt-6-luna-pro": "2026-09-22",
       "openrouter/openai/gpt-6-sol": "2026-09-22",
       "openrouter/openai/gpt-6.1-sol": "2026-09-29",
+      "openrouter/openai/gpt-6.1-sol-pro": "2026-09-29",
       "openrouter/openai/gpt-6.1-terra": "2026-10-26",
+      "openrouter/openai/gpt-6.1-terra-pro": "2026-10-26",
       "openrouter/qwen/qwen3.5-plus-02-15": "2026-02-16",
       "openrouter/qwen/qwen3.5-plus-20260420": "2026-04-27",
       "openrouter/qwen/qwen3.6-plus": "2026-04-02",
       "openrouter/qwen/qwen3.7-plus": "2026-06-03",
+      "openrouter/qwen/qwen3.8-max-prime": "2026-09-23",
       "openrouter/x-ai/grok-4.20": "2026-03-31",
       "openrouter/x-ai/grok-4.3": "2026-04-30",
       "openrouter/x-ai/grok-4.5": "2026-07-08",
@@ -53,6 +63,892 @@
       "openrouter/x-ai/grok-4.7": "2026-09-21",
       "openrouter/xiaomi/mimo-v2.5-pro": "2026-04-22",
       "openrouter/xiaomi/mimo-v2.6-pro": "2026-09-21"
+    },
+    "models": {
+      "openrouter/anthropic/claude-fable-5.2": {
+        "canonical_slug": "anthropic/claude-fable-5.2-20261109",
+        "pricing": {
+          "prompt": "0.000008",
+          "completion": "0.00004",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000002",
+          "input_cache_write": "0.00001",
+          "input_cache_write_1h": "0.000016"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-haiku-4.5": {
+        "canonical_slug": "anthropic/claude-4.5-haiku-20251001",
+        "pricing": {
+          "prompt": "0.000001",
+          "completion": "0.000005",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000001",
+          "input_cache_write": "0.00000125",
+          "input_cache_write_1h": "0.000002"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-haiku-5.5": {
+        "canonical_slug": "anthropic/claude-haiku-5.5-20261007",
+        "pricing": {
+          "prompt": "0.0000001",
+          "completion": "0.0000005",
+          "web_search": "0.01",
+          "input_cache_read": "0.00000001",
+          "input_cache_write": "0.000000125",
+          "input_cache_write_1h": "0.0000002",
+          "overrides": [
+            {
+              "min_prompt_tokens": 100000,
+              "prompt": "0.0000005",
+              "completion": "0.0000025",
+              "input_cache_read": "0.00000005",
+              "input_cache_write": "0.000000625",
+              "input_cache_write_1h": "0.000001"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-opus-4.1": {
+        "canonical_slug": "anthropic/claude-4.1-opus-20250805",
+        "pricing": {
+          "prompt": "0.000015",
+          "completion": "0.000075",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000015",
+          "input_cache_write": "0.00001875",
+          "input_cache_write_1h": "0.00003"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-opus-4.5": {
+        "canonical_slug": "anthropic/claude-4.5-opus-20251124",
+        "pricing": {
+          "prompt": "0.000005",
+          "completion": "0.000025",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000005",
+          "input_cache_write": "0.00000625",
+          "input_cache_write_1h": "0.00001"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-opus-4.6": {
+        "canonical_slug": "anthropic/claude-4.6-opus-20260205",
+        "pricing": {
+          "prompt": "0.000005",
+          "completion": "0.000025",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000005",
+          "input_cache_write": "0.00000625",
+          "input_cache_write_1h": "0.00001"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-opus-4.7": {
+        "canonical_slug": "anthropic/claude-4.7-opus-20260416",
+        "pricing": {
+          "prompt": "0.000005",
+          "completion": "0.000025",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000005",
+          "input_cache_write": "0.00000625",
+          "input_cache_write_1h": "0.00001"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-opus-4.8": {
+        "canonical_slug": "anthropic/claude-4.8-opus-20260528",
+        "pricing": {
+          "prompt": "0.000005",
+          "completion": "0.000025",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000005",
+          "input_cache_write": "0.00000625",
+          "input_cache_write_1h": "0.00001"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-opus-5": {
+        "canonical_slug": "anthropic/claude-opus-5-20260723",
+        "pricing": {
+          "prompt": "0.000005",
+          "completion": "0.000025",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000005",
+          "input_cache_write": "0.00000625",
+          "input_cache_write_1h": "0.00001"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-opus-5.5": {
+        "canonical_slug": "anthropic/claude-opus-5.5-20260921",
+        "pricing": {
+          "prompt": "0.000004",
+          "completion": "0.00002",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000002",
+          "input_cache_write": "0.000005",
+          "input_cache_write_1h": "0.000008"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-sonnet-4.5": {
+        "canonical_slug": "anthropic/claude-4.5-sonnet-20250929",
+        "pricing": {
+          "prompt": "0.000003",
+          "completion": "0.000015",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000003",
+          "input_cache_write": "0.00000375",
+          "input_cache_write_1h": "0.000006",
+          "overrides": [
+            {
+              "min_prompt_tokens": 200000,
+              "prompt": "0.000006",
+              "completion": "0.0000225",
+              "input_cache_read": "0.0000006",
+              "input_cache_write": "0.0000075",
+              "input_cache_write_1h": "0.000012"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-sonnet-4.6": {
+        "canonical_slug": "anthropic/claude-4.6-sonnet-20260217",
+        "pricing": {
+          "prompt": "0.000003",
+          "completion": "0.000015",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000003",
+          "input_cache_write": "0.00000375",
+          "input_cache_write_1h": "0.000006"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-sonnet-5": {
+        "canonical_slug": "anthropic/claude-sonnet-5-20260630",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.00001",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000002",
+          "input_cache_write": "0.0000025",
+          "input_cache_write_1h": "0.000004"
+        },
+        "expiration_date": null
+      },
+      "openrouter/anthropic/claude-sonnet-5.5": {
+        "canonical_slug": "anthropic/claude-sonnet-5.5-20260928",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.00001",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000001",
+          "input_cache_write": "0.0000025",
+          "input_cache_write_1h": "0.000004"
+        },
+        "expiration_date": null
+      },
+      "openrouter/deepseek/deepseek-v4-flash": {
+        "canonical_slug": "deepseek/deepseek-v4-flash-20260423",
+        "pricing": {
+          "prompt": "0.00000009",
+          "completion": "0.00000018",
+          "input_cache_read": "0.000000018"
+        },
+        "expiration_date": null
+      },
+      "openrouter/deepseek/deepseek-v4-flash-0731": {
+        "canonical_slug": "deepseek/deepseek-v4-flash-20260731",
+        "pricing": {
+          "prompt": "0.0000000434",
+          "completion": "0.0000003",
+          "input_cache_read": "0.000000035"
+        },
+        "expiration_date": null
+      },
+      "openrouter/deepseek/deepseek-v4-pro-0813": {
+        "canonical_slug": "deepseek/deepseek-v4-pro-20260813",
+        "pricing": {
+          "prompt": "0.000000111",
+          "completion": "0.00000444",
+          "input_cache_read": "0.000000097"
+        },
+        "expiration_date": null
+      },
+      "openrouter/deepseek/deepseek-v4.1-flash": {
+        "canonical_slug": "deepseek/deepseek-v4.1-flash-20260910",
+        "pricing": {
+          "prompt": "0.0000000507",
+          "completion": "0.0000002028",
+          "input_cache_read": "0.000000001014"
+        },
+        "expiration_date": null
+      },
+      "openrouter/deepseek/deepseek-v4.1-flash-1017": {
+        "canonical_slug": "deepseek/deepseek-v4.1-flash-20261017",
+        "pricing": {
+          "prompt": "0.00000002",
+          "completion": "0.000000108",
+          "input_cache_read": "0.000000007"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-2.5-flash": {
+        "canonical_slug": "google/gemini-2.5-flash",
+        "pricing": {
+          "prompt": "0.0000003",
+          "completion": "0.0000025",
+          "image": "0.0000003",
+          "audio": "0.000001",
+          "input_audio_cache": "0.0000001",
+          "web_search": "0.014",
+          "internal_reasoning": "0.0000025",
+          "input_cache_read": "0.00000003",
+          "input_cache_write": "0.0000000833333333333333"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-2.5-flash-lite": {
+        "canonical_slug": "google/gemini-2.5-flash-lite",
+        "pricing": {
+          "prompt": "0.0000001",
+          "completion": "0.0000004",
+          "image": "0.0000001",
+          "audio": "0.0000003",
+          "input_audio_cache": "0.00000003",
+          "web_search": "0.014",
+          "internal_reasoning": "0.0000004",
+          "input_cache_read": "0.00000001",
+          "input_cache_write": "0.0000000833333333333333"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-2.5-pro-preview": {
+        "canonical_slug": "google/gemini-2.5-pro-preview-06-05",
+        "pricing": {
+          "prompt": "0.00000125",
+          "completion": "0.00001",
+          "image": "0.00000125",
+          "audio": "0.00000125",
+          "input_audio_cache": "0.000000125",
+          "web_search": "0.014",
+          "internal_reasoning": "0.00001",
+          "input_cache_read": "0.000000125",
+          "input_cache_write": "0.000000375",
+          "overrides": [
+            {
+              "min_prompt_tokens": 200000,
+              "prompt": "0.0000025",
+              "completion": "0.000015",
+              "audio": "0.0000025",
+              "input_audio_cache": "0.00000025",
+              "input_cache_read": "0.00000025"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-3.1-flash-lite": {
+        "canonical_slug": "google/gemini-3.1-flash-lite-20260507",
+        "pricing": {
+          "prompt": "0.00000025",
+          "completion": "0.0000015",
+          "image": "0.00000025",
+          "audio": "0.0000005",
+          "input_audio_cache": "0.00000005",
+          "web_search": "0.014",
+          "internal_reasoning": "0.0000015",
+          "input_cache_read": "0.000000025",
+          "input_cache_write": "0.0000000833333333333333"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-3.1-pro-preview": {
+        "canonical_slug": "google/gemini-3.1-pro-preview-20260219",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.000012",
+          "image": "0.000002",
+          "audio": "0.000002",
+          "input_audio_cache": "0.0000002",
+          "web_search": "0.014",
+          "internal_reasoning": "0.000012",
+          "input_cache_read": "0.0000002",
+          "input_cache_write": "0.000000375",
+          "overrides": [
+            {
+              "min_prompt_tokens": 200000,
+              "prompt": "0.000004",
+              "completion": "0.000018",
+              "audio": "0.000004",
+              "input_audio_cache": "0.0000004",
+              "input_cache_read": "0.0000004"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-3.5-flash": {
+        "canonical_slug": "google/gemini-3.5-flash-20260519",
+        "pricing": {
+          "prompt": "0.0000015",
+          "completion": "0.000009",
+          "image": "0.0000015",
+          "audio": "0.000003",
+          "input_audio_cache": "0.0000003",
+          "web_search": "0.014",
+          "internal_reasoning": "0.000009",
+          "input_cache_read": "0.00000015",
+          "input_cache_write": "0.0000000833333333333333"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-3.5-flash-lite": {
+        "canonical_slug": "google/gemini-3.5-flash-lite-20260721",
+        "pricing": {
+          "prompt": "0.0000003",
+          "completion": "0.0000025",
+          "image": "0.0000003",
+          "audio": "0.0000003",
+          "input_audio_cache": "0.00000003",
+          "web_search": "0.014",
+          "internal_reasoning": "0.0000025",
+          "input_cache_read": "0.00000003",
+          "input_cache_write": "0.0000000833333333333333"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-3.6-flash": {
+        "canonical_slug": "google/gemini-3.6-flash-20260721",
+        "pricing": {
+          "prompt": "0.00000075",
+          "completion": "0.00000375",
+          "image": "0.00000075",
+          "audio": "0.00000075",
+          "input_audio_cache": "0.000000075",
+          "web_search": "0.014",
+          "internal_reasoning": "0.00000375",
+          "input_cache_read": "0.000000075",
+          "input_cache_write": "0.0000000416666666666667"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-3.7-flash": {
+        "canonical_slug": "google/gemini-3.7-flash-20260813",
+        "pricing": {
+          "prompt": "0.00000075",
+          "completion": "0.00000375",
+          "image": "0.00000075",
+          "audio": "0.00000075",
+          "input_audio_cache": "0.000000075",
+          "web_search": "0.014",
+          "internal_reasoning": "0.00000375",
+          "input_cache_read": "0.000000075",
+          "input_cache_write": "0.0000000416666666666667"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-3.8-flash": {
+        "canonical_slug": "google/gemini-3.8-flash-20260902",
+        "pricing": {
+          "prompt": "0.000000825",
+          "completion": "0.000004125",
+          "image": "0.000000825",
+          "audio": "0.000000825",
+          "input_audio_cache": "0.0000000825",
+          "web_search": "0.014",
+          "internal_reasoning": "0.000004125",
+          "input_cache_read": "0.0000000825",
+          "input_cache_write": "0.0000000416666666666667"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-4-argon": {
+        "canonical_slug": "google/gemini-4-argon-20261013",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.00001",
+          "image": "0.000002",
+          "audio": "0.000002",
+          "input_audio_cache": "0.0000001",
+          "web_search": "0.014",
+          "internal_reasoning": "0.00001",
+          "input_cache_read": "0.0000001",
+          "input_cache_write": "0.0000001875"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-4-carbon": {
+        "canonical_slug": "google/gemini-4-carbon-20261110",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.00001",
+          "image": "0.000002",
+          "audio": "0.000002",
+          "input_audio_cache": "0.0000001",
+          "web_search": "0.014",
+          "internal_reasoning": "0.00001",
+          "input_cache_read": "0.0000001",
+          "input_cache_write": "0.0000001875"
+        },
+        "expiration_date": null
+      },
+      "openrouter/google/gemini-4-hydrogen": {
+        "canonical_slug": "google/gemini-4-hydrogen-20261112",
+        "pricing": {
+          "prompt": "0.0000015",
+          "completion": "0.0000075",
+          "image": "0.0000015",
+          "audio": "0.0000015",
+          "input_audio_cache": "0.000000075",
+          "web_search": "0.014",
+          "internal_reasoning": "0.0000075",
+          "input_cache_read": "0.000000075",
+          "input_cache_write": "0.0000000833333333333333"
+        },
+        "expiration_date": null
+      },
+      "openrouter/meta-llama/llama-4-maverick": {
+        "canonical_slug": "meta-llama/llama-4-maverick-17b-128e-instruct",
+        "pricing": {
+          "prompt": "0.00000035",
+          "completion": "0.000001",
+          "input_cache_read": "0.00000017"
+        },
+        "expiration_date": null
+      },
+      "openrouter/moonshotai/kimi-k3.1-pro": {
+        "canonical_slug": "moonshotai/kimi-k3.1-pro-20261023",
+        "pricing": {
+          "prompt": "0.0000002403",
+          "completion": "0.0000084023",
+          "input_cache_read": "0.0000002"
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-5.6-luna": {
+        "canonical_slug": "openai/gpt-5.6-luna-20260709",
+        "pricing": {
+          "prompt": "0.0000002",
+          "completion": "0.0000012",
+          "web_search": "0.01",
+          "input_cache_read": "0.00000002",
+          "input_cache_write": "0.00000025",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.0000004",
+              "completion": "0.0000018",
+              "input_cache_read": "0.00000004",
+              "input_cache_write": "0.0000005"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-5.6-sol": {
+        "canonical_slug": "openai/gpt-5.6-sol-20260709",
+        "pricing": {
+          "prompt": "0.0000044",
+          "completion": "0.000022",
+          "web_search": "0.01",
+          "input_cache_read": "0.00000044",
+          "input_cache_write": "0.0000055",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.0000088",
+              "completion": "0.000033",
+              "input_cache_read": "0.00000088",
+              "input_cache_write": "0.000011"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-5.6-terra": {
+        "canonical_slug": "openai/gpt-5.6-terra-20260709",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.000012",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000002",
+          "input_cache_write": "0.0000025",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.000004",
+              "completion": "0.000018",
+              "input_cache_read": "0.0000004",
+              "input_cache_write": "0.000005"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-6-astra": {
+        "canonical_slug": "openai/gpt-6-astra-20260903",
+        "pricing": {
+          "prompt": "0.00001",
+          "completion": "0.00005",
+          "web_search": "0.01",
+          "input_cache_read": "0.000001",
+          "input_cache_write": "0.0000125",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.00002",
+              "completion": "0.000075",
+              "input_cache_read": "0.000002",
+              "input_cache_write": "0.000025"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-6-luna": {
+        "canonical_slug": "openai/gpt-6-luna-20260922",
+        "pricing": {
+          "prompt": "0.0000001",
+          "completion": "0.0000005",
+          "web_search": "0.01",
+          "input_cache_read": "0.00000001",
+          "input_cache_write": "0.000000125",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.0000002",
+              "completion": "0.00000075",
+              "input_cache_read": "0.00000002",
+              "input_cache_write": "0.00000025"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-6-luna-pro": {
+        "canonical_slug": "openai/gpt-6-luna-pro-20260922",
+        "pricing": {
+          "prompt": "0.0000001",
+          "completion": "0.0000005",
+          "web_search": "0.01",
+          "input_cache_read": "0.00000001",
+          "input_cache_write": "0.000000125",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.0000002",
+              "completion": "0.00000075",
+              "input_cache_read": "0.00000002",
+              "input_cache_write": "0.00000025"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-6-sol": {
+        "canonical_slug": "openai/gpt-6-sol-20260922",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.00001",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000002",
+          "input_cache_write": "0.0000025",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.000004",
+              "completion": "0.000015",
+              "input_cache_read": "0.0000004",
+              "input_cache_write": "0.000005"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-6.1-sol": {
+        "canonical_slug": "openai/gpt-6.1-sol-20260929",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.00001",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000001",
+          "input_cache_write": "0.0000025",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.000004",
+              "completion": "0.000015",
+              "input_cache_read": "0.0000002",
+              "input_cache_write": "0.000005"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-6.1-sol-pro": {
+        "canonical_slug": "openai/gpt-6.1-sol-pro-20260929",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.00001",
+          "web_search": "0.01",
+          "input_cache_read": "0.0000001",
+          "input_cache_write": "0.0000025",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.000004",
+              "completion": "0.000015",
+              "input_cache_read": "0.0000002",
+              "input_cache_write": "0.000005"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-6.1-terra": {
+        "canonical_slug": "openai/gpt-6.1-terra-20261026",
+        "pricing": {
+          "prompt": "0.000001",
+          "completion": "0.000005",
+          "web_search": "0.01",
+          "input_cache_read": "0.00000005",
+          "input_cache_write": "0.00000125",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.000002",
+              "completion": "0.0000075",
+              "input_cache_read": "0.0000001",
+              "input_cache_write": "0.0000025"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/openai/gpt-6.1-terra-pro": {
+        "canonical_slug": "openai/gpt-6.1-terra-pro-20261026",
+        "pricing": {
+          "prompt": "0.000001",
+          "completion": "0.000005",
+          "web_search": "0.01",
+          "input_cache_read": "0.00000005",
+          "input_cache_write": "0.00000125",
+          "overrides": [
+            {
+              "min_prompt_tokens": 272000,
+              "prompt": "0.000002",
+              "completion": "0.0000075",
+              "input_cache_read": "0.0000001",
+              "input_cache_write": "0.0000025"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/qwen/qwen3.5-plus-02-15": {
+        "canonical_slug": "qwen/qwen3.5-plus-20260216",
+        "pricing": {
+          "prompt": "0.00000026",
+          "completion": "0.00000156",
+          "overrides": [
+            {
+              "min_prompt_tokens": 256000,
+              "prompt": "0.000000325",
+              "completion": "0.00000195"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/qwen/qwen3.5-plus-20260420": {
+        "canonical_slug": "qwen/qwen3.5-plus-20260420",
+        "pricing": {
+          "prompt": "0.0000003",
+          "completion": "0.0000018",
+          "input_cache_write": "0.000000375",
+          "overrides": [
+            {
+              "min_prompt_tokens": 256000,
+              "prompt": "0.000000375",
+              "completion": "0.00000225",
+              "input_cache_write": "0.00000046875"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/qwen/qwen3.6-plus": {
+        "canonical_slug": "qwen/qwen3.6-plus-04-02",
+        "pricing": {
+          "prompt": "0.000000325",
+          "completion": "0.00000195",
+          "input_cache_write": "0.00000040625",
+          "overrides": [
+            {
+              "min_prompt_tokens": 256000,
+              "prompt": "0.0000013",
+              "completion": "0.0000039",
+              "input_cache_write": "0.000001625"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/qwen/qwen3.7-plus": {
+        "canonical_slug": "qwen/qwen3.7-plus-20260602",
+        "pricing": {
+          "prompt": "0.00000032",
+          "completion": "0.00000128",
+          "input_cache_read": "0.000000064",
+          "input_cache_write": "0.0000004",
+          "overrides": [
+            {
+              "min_prompt_tokens": 256000,
+              "prompt": "0.00000096",
+              "completion": "0.00000384",
+              "input_cache_read": "0.000000192",
+              "input_cache_write": "0.0000012"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/qwen/qwen3.8-max-prime": {
+        "canonical_slug": "qwen/qwen3.8-max-prime-20260923",
+        "pricing": {
+          "prompt": "0.000004",
+          "completion": "0.000012",
+          "input_cache_read": "0.0000005"
+        },
+        "expiration_date": null
+      },
+      "openrouter/x-ai/grok-4.20": {
+        "canonical_slug": "x-ai/grok-4.20-20260309",
+        "pricing": {
+          "prompt": "0.00000125",
+          "completion": "0.0000025",
+          "web_search": "0.005",
+          "input_cache_read": "0.0000002",
+          "overrides": [
+            {
+              "min_prompt_tokens": 200000,
+              "prompt": "0.0000025",
+              "completion": "0.000005",
+              "input_cache_read": "0.0000004"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/x-ai/grok-4.3": {
+        "canonical_slug": "x-ai/grok-4.3-20260430",
+        "pricing": {
+          "prompt": "0.00000125",
+          "completion": "0.0000025",
+          "web_search": "0.005",
+          "input_cache_read": "0.0000002",
+          "overrides": [
+            {
+              "min_prompt_tokens": 200000,
+              "prompt": "0.0000025",
+              "completion": "0.000005",
+              "input_cache_read": "0.0000004"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/x-ai/grok-4.5": {
+        "canonical_slug": "x-ai/grok-4.5-20260708",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.000006",
+          "web_search": "0.005",
+          "input_cache_read": "0.0000003",
+          "overrides": [
+            {
+              "min_prompt_tokens": 200000,
+              "prompt": "0.000004",
+              "completion": "0.000012",
+              "input_cache_read": "0.0000006"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/x-ai/grok-4.6": {
+        "canonical_slug": "x-ai/grok-4.6-20260810",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.000006",
+          "web_search": "0.005",
+          "input_cache_read": "0.0000005",
+          "overrides": [
+            {
+              "min_prompt_tokens": 200000,
+              "prompt": "0.000004",
+              "completion": "0.000012",
+              "input_cache_read": "0.000001"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/x-ai/grok-4.7": {
+        "canonical_slug": "x-ai/grok-4.7-20260916",
+        "pricing": {
+          "prompt": "0.000002",
+          "completion": "0.000006",
+          "web_search": "0.005",
+          "input_cache_read": "0.0000005",
+          "overrides": [
+            {
+              "min_prompt_tokens": 200000,
+              "prompt": "0.000004",
+              "completion": "0.000012",
+              "input_cache_read": "0.000001"
+            }
+          ]
+        },
+        "expiration_date": null
+      },
+      "openrouter/xiaomi/mimo-v2.5-pro": {
+        "canonical_slug": "xiaomi/mimo-v2.5-pro-20260422",
+        "pricing": {
+          "prompt": "0.000000435",
+          "completion": "0.00000087",
+          "input_cache_read": "0.0000000036"
+        },
+        "expiration_date": null
+      },
+      "openrouter/xiaomi/mimo-v2.6-pro": {
+        "canonical_slug": "xiaomi/mimo-v2.6-pro-20260921",
+        "pricing": {
+          "prompt": "0.000000435",
+          "completion": "0.00000087",
+          "input_cache_read": "0.0000000036"
+        },
+        "expiration_date": null
+      }
+    },
+    "tier_successors": {
+      "openrouter/google/gemini-3.8-flash": "openrouter/google/gemini-4-hydrogen",
+      "openrouter/google/gemini-3.1-pro-preview": "openrouter/google/gemini-4-carbon"
+    },
+    "tier_judgements": {
+      "google-fast": "Flash to Hydrogen: USD 0.825/4.125 becomes 1.5/7.5 per million input/output tokens. Hydrogen is the nearest-priced newer general text model; Carbon and Argon cost 2/10. Google documents migration from Flash to Hydrogen.",
+      "google-standard": "Pro Preview to Carbon: USD 2/12 becomes 2/10 per million input/output tokens. Carbon and Argon tie on price distance; Carbon is the newest stable release in that capability class. This is a judgement across renamed lines.",
+      "google-small": "Flash Lite stays at USD 0.3/2.5. No newer lite model is listed; Hydrogen would raise this small seat to the fast class.",
+      "anthropic": "Fable 5.2 at USD 8/40 is a demanding-reasoning tier above Opus 5.5 at 4/20 and Sonnet 5.5 at 2/10. Haiku 5.5 remains the fast tier.",
+      "openai": "Astra at USD 10/50 and pro variants are distinct capability tiers. Sol 6.1 at 2/10, Terra 6.1 at 1/5 and Luna 6 at 0.1/0.5 remain their classes newest releases.",
+      "qwen": "The official catalogue still recommends Qwen3.7 Plus separately from Qwen3.8 Flash and Max. Neither a lower Flash nor higher Max tier replaces Plus.",
+      "meta-llama": "No successor to Maverick is offered on the configured OpenRouter route. A different provider route or capability class is outside this migration."
     }
   },
   "local": {
@@ -78,20 +974,39 @@
       "typesafe/jev-1.20",
       "typesafe/jev-2.0",
       "typesafe/jev-router"
-    ]
+    ],
+    "pricing_source": "https://openrouter.ai/api/v1/models/typesafe/jev-1.14/endpoints",
+    "pricing": {
+      "prompt": "0.000000042",
+      "completion": "0",
+      "discount": 0
+    },
+    "refresh_note": "Endpoint metadata calls Jev 1.14 the latest release; fresh requests served 1.14 and refused 1.15 and 2.0. Other ladder results are retained from the earlier read on the same day."
   },
   "embedding": {
     "source": "https://huggingface.co/api/models?author=Qwen&search=Embedding&limit=100",
     "read_at": "2026-11-15",
     "served": [
       "Qwen/Qwen3-Embedding-0.6B",
-      "Qwen/Qwen3-Embedding-0.6B-GGUF",
       "Qwen/Qwen3-Embedding-4B",
-      "Qwen/Qwen3-Embedding-4B-GGUF",
       "Qwen/Qwen3-Embedding-8B",
-      "Qwen/Qwen3-Embedding-8B-GGUF",
+      "Qwen/Qwen3-Embedding-0.6B-GGUF",
       "Qwen/Qwen3-VL-Embedding-2B",
+      "Qwen/Qwen3-Embedding-8B-GGUF",
+      "Qwen/Qwen3-Embedding-4B-GGUF",
       "Qwen/Qwen3-VL-Embedding-8B"
     ]
+  },
+  "refreshed_at": "2026-11-15T15:19:17.881286+00:00",
+  "provider_sources": {
+    "openai": "https://developers.openai.com/api/docs/models",
+    "anthropic": "https://platform.claude.com/docs/en/models/overview",
+    "google": "https://aistudio.google.com/docs/models",
+    "google_pricing": "https://aistudio.google.com/docs/pricing",
+    "qwen": "https://www.alibabacloud.com/help/en/model-studio/models",
+    "deepseek": "https://api-docs.deepseek.com/quick_start/pricing/",
+    "x-ai": "https://docs.x.ai/developers/models",
+    "xiaomi": "https://mimo.mi.com/docs/en-US/quick-start/model",
+    "moonshotai": "https://huggingface.co/moonshotai/Kimi-K3.1-Pro/blob/main/README.md"
   }
 }

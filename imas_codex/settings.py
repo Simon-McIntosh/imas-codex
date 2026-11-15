@@ -177,7 +177,7 @@ _MODEL_DEFAULTS: dict[str, str] = {
     "embedding": "Qwen/Qwen3-Embedding-0.6B",
     # Discovery function seats. Each discovery call site names the seat for the
     # work it does, so a model can be chosen per function. The four text/vision
-    # seats default to the local lane; cluster labelling and IDS mapping keep
+    # seats and IDS mapping default to the local lane; cluster labelling keeps
     # the OpenRouter model. Active models live in pyproject.toml.
     "discovery-triage": "local/deepseek-v4.1-flash",
     "discovery-score": "local/deepseek-v4.1-flash",
@@ -196,7 +196,7 @@ _MODEL_DEFAULTS: dict[str, str] = {
     # discovery and mapping seats.
     "sn-judge": "typesafe/jev-1.14",
     "cluster-labels": "openrouter/openai/gpt-6.1-sol",
-    "ids-mapping": "openrouter/openai/gpt-6.1-sol",
+    "ids-mapping": "local/deepseek-v4.1-flash",
     "agent": "openrouter/anthropic/claude-sonnet-5.5",
     "compaction": "openrouter/anthropic/claude-haiku-5.5",
     "reasoning": "openrouter/anthropic/claude-sonnet-5.5",
@@ -1654,8 +1654,16 @@ def get_pool_replicas(pool_name: str) -> int:
 # ─── SN review settings ────────────────────────────────────────────────────
 
 _SN_REVIEW_DEFAULTS: dict[str, Any] = {
-    "names-models": ["openrouter/anthropic/claude-opus-5.5"],
-    "docs-models": ["openrouter/anthropic/claude-opus-5.5"],
+    "names-models": [
+        "local/deepseek-v4.1-flash",
+        "openrouter/anthropic/claude-haiku-5.5",
+        "openrouter/openai/gpt-6.1-sol",
+    ],
+    "docs-models": [
+        "openrouter/anthropic/claude-sonnet-5.5",
+        "openrouter/x-ai/grok-4.7",
+        "openrouter/openai/gpt-6.1-sol",
+    ],
     "disagreement-threshold": 0.15,
     "max-cycles": 3,
     "reasoning-effort": "medium",
@@ -1978,8 +1986,8 @@ _SN_BENCHMARK_DEFAULTS = {
         "openrouter/openai/gpt-6.1-terra",
         "openrouter/openai/gpt-6-luna",
         "openrouter/x-ai/grok-4.7",
-        "openrouter/google/gemini-3.8-flash",
-        "openrouter/google/gemini-3.1-pro-preview",
+        "openrouter/google/gemini-4-hydrogen",
+        "openrouter/google/gemini-4-carbon",
         "openrouter/google/gemini-3.5-flash-lite",
         "openrouter/qwen/qwen3.7-plus",
         "openrouter/xiaomi/mimo-v2.6-pro",
@@ -1989,19 +1997,19 @@ _SN_BENCHMARK_DEFAULTS = {
     ],
     "reviewer-model": "openrouter/anthropic/claude-opus-5.5",
     "reviewer-models": [
-        "openrouter/anthropic/claude-opus-5.5",
-        "openrouter/anthropic/claude-sonnet-5.5",
+        "openrouter/google/gemini-4-hydrogen",
         "openrouter/openai/gpt-6.1-sol",
+        "openrouter/x-ai/grok-4.7",
+        "openrouter/google/gemini-4-carbon",
+        "openrouter/anthropic/claude-sonnet-5.5",
+        "openrouter/anthropic/claude-opus-5.5",
     ],
     "candidate-models": [
         "openrouter/x-ai/grok-4.7",
-        "openrouter/google/gemini-3.8-flash",
-        "openrouter/google/gemini-3.1-pro-preview",
-        "openrouter/openai/gpt-6.1-sol",
-        "openrouter/openai/gpt-6-luna",
+        "openrouter/google/gemini-4-hydrogen",
+        "openrouter/google/gemini-4-carbon",
         "openrouter/openai/gpt-6.1-terra",
         "openrouter/anthropic/claude-sonnet-5.5",
-        "openrouter/deepseek/deepseek-v4-pro-0813",
     ],
 }
 

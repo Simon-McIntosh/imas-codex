@@ -39,6 +39,7 @@ import pytest
 from imas_codex.settings import (
     _MODEL_DEFAULTS,
     _SN_BENCHMARK_DEFAULTS,
+    _SN_REVIEW_DEFAULTS,
     _get_section,
     get_model,
     get_sn_benchmark_candidate_models,
@@ -175,6 +176,11 @@ def _assert_priced(model: str, owner: str) -> None:
         # endpoint class, or the decisions response's own usage cost.
         return
     pricing = _assert_proven_pricing(owner, model)
+    listed = _catalog()["openrouter"]["models"][model]["pricing"]
+    for key in ("prompt", "completion"):
+        assert pricing[key] == pytest.approx(float(listed[key]) * 1_000_000), (
+            f"{owner} prices {model!r} differently from its serving catalogue"
+        )
     cache_read = pricing["cache_read"]
     assert isinstance(cache_read, (int, float)), (
         f"{owner} prices {model!r} with cache_read={cache_read!r}"
@@ -278,6 +284,11 @@ def test_every_seat_names_the_newest_release_of_its_line(
     """A seat is on its line's newest release, or records why it stays."""
     catalog = _catalog()
     if model.startswith("openrouter/"):
+        successor = catalog["openrouter"]["tier_successors"].get(model)
+        assert successor is None, (
+            f"{owner} names {model!r}, but its provider's newest same-tier "
+            f"line is {successor!r}; see the snapshot's tier_judgements"
+        )
         newest = _newest_release(catalog["openrouter"]["releases"], model)
     elif model.startswith("typesafe/"):
         served = catalog["decisions"]["served"]
@@ -335,6 +346,38 @@ def test_no_seat_names_a_release_the_decisions_lane_refuses() -> None:
     assert named and not named & refused, (
         f"a seat names a refused decisions release: {sorted(named & refused)}"
     )
+
+
+@pytest.mark.parametrize("owner,model", _DECLARED, ids=[row[0] for row in _DECLARED])
+def test_every_declared_seat_is_generally_available(owner: str, model: str) -> None:
+    assert not re.search(r"(?:^|[-/])(preview|beta|experimental|exp)(?:$|-)", model), (
+        f"{owner} names a non-production model: {model!r}"
+    )
+    if model.startswith("openrouter/"):
+        expiration = _catalog()["openrouter"]["models"][model]["expiration_date"]
+        assert expiration is None or expiration > _catalog()["read_at"], (
+            f"{owner} names expired model {model!r}: {expiration}"
+        )
+
+
+@pytest.mark.parametrize(
+    "section", sorted(section for section in _MODEL_DEFAULTS if _get_section(section))
+)
+def test_model_fallback_equals_configured_seat(section: str) -> None:
+    assert _MODEL_DEFAULTS[section] == _get_section(section)["model"]
+
+
+@pytest.mark.parametrize("axis", ["names", "docs"])
+def test_review_fallback_equals_configured_seats(axis: str) -> None:
+    assert (
+        _SN_REVIEW_DEFAULTS[f"{axis}-models"]
+        == _get_section("sn-review")[axis]["models"]
+    )
+
+
+@pytest.mark.parametrize("key", sorted(_SN_BENCHMARK_DEFAULTS))
+def test_benchmark_fallback_equals_configured_seats(key: str) -> None:
+    assert _SN_BENCHMARK_DEFAULTS[key] == _get_section("sn-benchmark")[key]
 
 
 def test_escalation_seat_drives_the_final_refine_rotation(

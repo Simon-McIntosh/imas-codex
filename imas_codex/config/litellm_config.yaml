@@ -64,15 +64,15 @@ model_list:
       litellm_credential_name: codex
       extra_headers: *cx_hdr
 
-  - model_name: openrouter/google/gemini-3.1-pro-preview
+  - model_name: openrouter/google/gemini-4-carbon
     litellm_params:
-      model: openai/google/gemini-3.1-pro-preview
+      model: openai/google/gemini-4-carbon
       litellm_credential_name: codex
       extra_headers: *cx_hdr
 
-  - model_name: openrouter/google/gemini-3.8-flash
+  - model_name: openrouter/google/gemini-4-hydrogen
     litellm_params:
-      model: openai/google/gemini-3.8-flash
+      model: openai/google/gemini-4-hydrogen
       litellm_credential_name: codex
       extra_headers: *cx_hdr
 
