@@ -1,0 +1,19 @@
+<section id="current-name-consumer-inventory">
+<h2>Current project name: external consumer inventory</h2>
+<p>Authority: live plan version 5, read before collection. Base revision: <code>1c2476daf9f7c83e4eaa0d56c60fb0d132c05136</code>. This is a read-only snapshot; no consumer, repository, package, service, graph value or decision is changed.</p>
+<h3 id="current-name-consumer-inventory-controls">Controls declared before collection</h3>
+<table>
+<thead><tr><th>Surface</th><th>Known consumer to find, or initial knowledge</th><th>Control rule</th></tr></thead>
+<tbody>
+<tr><td>Installed service and timer units</td><td><code>imas-codex-graph-push.timer</code>, documented as installed on the login host</td><td>Find its installed unit file; distinguish disk inventory from an inaccessible host-local user manager.</td></tr>
+<tr><td>Scheduler jobs</td><td><code>codex-neo4j</code>, the documented persistent graph service</td><td>Find the job in the account's scheduler listing.</td></tr>
+<tr><td>Editable installs and console scripts</td><td>Main checkout <code>.venv/bin/imas-codex</code> and <code>imas_codex</code> editable package</td><td>Find the entry point, editable target and installed metadata, without syncing the shared environment.</td></tr>
+<tr><td>Cache, state and config roots</td><td><code>~/.local/share/imas-codex</code> and <code>~/.cache/imas-codex</code>, documented application and staging roots</td><td>List named roots and immediate children; do not traverse corpus or read secrets.</td></tr>
+<tr><td>Registry image names</td><td>No installed registry receipt known beforehand</td><td>Read local graph profile/receipt image identities and explicitly distinguish them from remote registry enumeration.</td></tr>
+<tr><td>MCP client configurations</td><td><code>imas-cx</code> in both tracked client configurations</td><td>Use both tracked configurations as controls for the same parser used on external client files; report keys and commands only, never environment values.</td></tr>
+<tr><td>Stored graph paths/import names</td><td>No specific matching node is known beforehand</td><td>Establish populated labels/properties before interpreting any zero; omit internal facility identifiers from this tracked record. An unavailable graph measurement is not zero.</td></tr>
+<tr><td>Queued/running reckon runs</td><td>This run, <code>r-20261115T021326896806-current-name-consumer-inventory</code>, under project <code>imas-codex</code></td><td>Find this exact run in the external live-pointer listing; distinguish retained history from live or queued work.</td></tr>
+</tbody>
+</table>
+<p>Unavailable commands or endpoints are recorded as <strong>not measured</strong>, never as zero. Counts describe the explicitly named surface and observation time; they are not an at-rest certificate for a later rename.</p>
+</section>
