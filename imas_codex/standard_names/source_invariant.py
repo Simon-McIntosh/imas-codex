@@ -24,12 +24,35 @@ def _derived_parent_cypher(parent: str = "sn") -> str:
     return f"coalesce({parent}.origin, '') = 'derived' AND {_live_child_cypher(parent)}"
 
 
+def _live_name_cypher(name: str = "sn") -> str:
+    """Return the live-name test: neither the status nor the stage is superseded."""
+    return (
+        f"coalesce({name}.name_stage, '') <> 'superseded' "
+        f"AND coalesce({name}.status, '') <> 'superseded'"
+    )
+
+
+def _producerless_cypher(name: str = "sn") -> str:
+    """Return the test that no producer of the name is live.
+
+    A producer is a ``PRODUCED_NAME`` source that is not stale, so a name whose
+    only producers are stale reads as sourceless: the writer's drain rule and
+    every reader answering "what produces this name" agree on that.
+    """
+    return (
+        f"NOT EXISTS {{ (source:StandardNameSource)-[:PRODUCED_NAME]->({name}) "
+        "WHERE coalesce(source.status, '') <> 'stale' }"
+    )
+
+
 #: Sibling modules compose these predicates into their own Cypher, so the
-#: clause fragment and the derived-parent test are part of this module's public
+#: clause fragments and the derived-parent test are part of this module's public
 #: surface. The private spellings stay because the module's own templates and
 #: tests name them.
 live_child_cypher = _live_child_cypher
 derived_parent_cypher = _derived_parent_cypher
+live_name_cypher = _live_name_cypher
+producerless_cypher = _producerless_cypher
 
 
 def _drained_test(name: str) -> str:
@@ -183,14 +206,10 @@ def find_sourceless_live_names(
         // SOURCE_INVARIANT
         UNWIND $ids AS id
         MATCH (sn:StandardName {{id: id}})
-        OPTIONAL MATCH (source:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-        WHERE coalesce(source.status, '') <> 'stale'
-        WITH sn, count(DISTINCT source) AS producers
-        WHERE (NOT $retired_is_exempt OR (
-            coalesce(sn.name_stage, '') <> 'superseded'
-            AND coalesce(sn.status, '') <> 'superseded'))
+        WITH sn
+        WHERE (NOT $retired_is_exempt OR ({_live_name_cypher()}))
           AND NOT ({_derived_parent_cypher()})
-          AND producers = 0
+          AND {_producerless_cypher()}
           AND NOT (coalesce(sn.name_stage, '') = 'exhausted'
                    AND sn.id IN $exempt_ids)
         RETURN sn.id AS id ORDER BY id

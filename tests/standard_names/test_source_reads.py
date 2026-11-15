@@ -6,11 +6,11 @@ the authority, so a name whose copied list is empty while its edges are not must
 still answer with its sources, and a name whose copied list names a path no edge
 gives must answer with none.
 
-The planted graph holds exactly the seven shapes the sourceless count has to
+The planted graph holds exactly the eight shapes the sourceless count has to
 separate: an empty copy with no edge, a populated copy with no edge, a derived
 name with neither, a superseded status, a superseded stage, a derived parent
-whose only producer is a derived record, and a data-dictionary producer with an
-empty copy.
+whose only producer is a derived record, a data-dictionary producer with an
+empty copy, and a name whose only producer is stale.
 """
 
 from __future__ import annotations
@@ -39,6 +39,14 @@ READER_MODULES = (
     "judgment_goldens.py",
 )
 
+#: The frozen-extraction records a committed corpus artifact is pinned to. Each
+#: names the query that produced that artifact; it is kept verbatim so the
+#: artifact can be checked against it, and reads nothing at runtime. They are
+#: listed by name rather than recognised by suffix, because a live reader that
+#: happens to sit in a constant named for a record is exactly what the guard
+#: must still refuse.
+FROZEN_EXTRACTION_RECORDS = frozenset({"_ADVISORY_CORPUS_EXTRACTION_RECORD"})
+
 
 def _without_extraction_records(text: str) -> str:
     """Drop the frozen-extraction records a corpus is pinned to.
@@ -52,7 +60,7 @@ def _without_extraction_records(text: str) -> str:
         if not isinstance(node, ast.Assign):
             continue
         named = any(
-            isinstance(target, ast.Name) and target.id.endswith("_EXTRACTION_RECORD")
+            isinstance(target, ast.Name) and target.id in FROZEN_EXTRACTION_RECORDS
             for target in node.targets
         )
         if named:
@@ -88,6 +96,8 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
           {id:'reads_derived_sourced', status:'draft', stage:'accepted',
            origin:'derived', paths:[]},
           {id:'reads_dd_bound', status:'draft', stage:'accepted',
+           origin:'pipeline', paths:[]},
+          {id:'reads_stale_source', status:'draft', stage:'accepted',
            origin:'pipeline', paths:[]}
         ] AS row
         CREATE (:StandardName {id:row.id, status:row.status,
@@ -101,6 +111,11 @@ def planted_graph(disposable_neo4j_uri: str) -> Iterator[GraphClient]:
         CREATE (source:StandardNameSource {id:row.id, source_id:row.id})
         WITH source, row
         MATCH (holder:StandardName {id:row.holder})
+        CREATE (source)-[:PRODUCED_NAME]->(holder)"""
+    )
+    client.query(
+        """MATCH (holder:StandardName {id:'reads_stale_source'})
+        CREATE (source:StandardNameSource {id:'dd:reads/retired', status:'stale'})
         CREATE (source)-[:PRODUCED_NAME]->(holder)"""
     )
     client.query(
@@ -152,45 +167,98 @@ def test_name_search_answers_from_the_producer_edges(
 
 
 @pytest.mark.graph
-def test_sourceless_count_lists_two_of_three_and_exempts_the_third(
+def test_sourceless_count_reads_stale_as_no_producer(
     planted_graph: GraphClient,
 ) -> None:
-    """Seven planted names: five live, two produced, three not, of which the
-    derived parent is listed apart rather than counted."""
+    """Eight planted names: six live, two produced by a live source, four not,
+    of which the derived parent is listed apart. The name whose only producer
+    is stale counts here and does not count in the bare population."""
     report = count_live_names_without_source(planted_graph)
 
-    assert report["live_names"] == 5
+    assert report["live_names"] == 6
     assert report["live_with_producer"] == 2
-    assert report["live_without_producer"] == 3
-    assert report["count"] == 2
+    assert report["live_without_producer"] == 4
+    assert report["count"] == 3
     assert [entry["id"] for entry in report["names"]] == [
         "reads_empty_list",
         "reads_stale_list",
+        "reads_stale_source",
     ]
+    assert [entry["has_edge"] for entry in report["names"]] == [False, False, True]
     assert [entry["id"] for entry in report["exempt_derived_parents"]] == [
         "reads_derived_orphan"
     ]
 
+    assert report["bare_count"] == 2
+    assert report["bare_names"] == ["reads_empty_list", "reads_stale_list"]
+    assert report["differing_names"] == ["reads_stale_source"]
 
-def test_each_reader_reads_sources_from_the_one_place() -> None:
+
+_COPIED_LIST = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*\.source_paths\b")
+
+
+@pytest.mark.parametrize("module", READER_MODULES)
+def test_each_reader_reads_sources_from_the_one_place(module: str) -> None:
     """A reader that spells the copied list, or the edge pattern, itself fails
     here: sources come from the projection that owns them."""
     package = Path(__file__).resolve().parents[2] / "imas_codex" / "standard_names"
-    copied_list = re.compile(r"\b[A-Za-z_][A-Za-z0-9_]*\.source_paths\b")
+    path = package / module
+    assert path.is_file(), f"reader module is missing: {module}"
+    text = _without_extraction_records(path.read_text(encoding="utf-8"))
 
-    for module in READER_MODULES:
-        path = package / module
-        assert path.is_file(), f"reader module is missing: {module}"
-        text = _without_extraction_records(path.read_text(encoding="utf-8"))
+    assert "source_paths_projection" in text, (
+        f"{module} does not name the one place that reads a name's sources"
+    )
+    copied = _COPIED_LIST.search(text)
+    assert copied is None, (
+        f"{module} reads the copied list: {copied.group(0) if copied else ''}"
+    )
+    assert "PRODUCED_NAME" not in text, (
+        f"{module} spells the producer pattern itself instead of asking "
+        "source_paths_projection()"
+    )
 
-        assert "source_paths_projection" in text, (
-            f"{module} does not name the one place that reads a name's sources"
-        )
-        stale = copied_list.search(text)
-        assert stale is None, (
-            f"{module} reads the copied list: {stale.group(0) if stale else ''}"
-        )
-        assert "PRODUCED_NAME" not in text, (
-            f"{module} spells the producer pattern itself instead of asking "
-            "source_paths_projection()"
-        )
+
+def test_the_review_pipeline_reads_sources_from_the_one_place() -> None:
+    """The review pipeline loads the catalog with its own query, so its
+    projection is checked where it sits: it must ask the one place too."""
+    cli = Path(__file__).resolve().parents[2] / "imas_codex" / "cli" / "sn.py"
+    tree = ast.parse(cli.read_text(encoding="utf-8"))
+    load_catalog = next(
+        (
+            node
+            for node in ast.walk(tree)
+            if isinstance(node, ast.FunctionDef) and node.name == "_load_catalog"
+        ),
+        None,
+    )
+    assert load_catalog is not None, "the review pipeline no longer loads a catalog"
+    body = ast.get_source_segment(cli.read_text(encoding="utf-8"), load_catalog) or ""
+
+    assert "source_paths_projection" in body, (
+        "_load_catalog does not name the one place that reads a name's sources"
+    )
+    copied = _COPIED_LIST.search(body)
+    assert copied is None, (
+        f"_load_catalog reads the copied list: {copied.group(0) if copied else ''}"
+    )
+
+
+def test_a_reader_in_an_unlisted_record_constant_is_still_refused() -> None:
+    """Only a record on the explicit list is skipped: a constant that merely
+    ends the sanctioned suffix is a live reader and the guard refuses it."""
+    source = (
+        '_ADVISORY_CORPUS_EXTRACTION_RECORD = "RETURN sn.source_paths"\n'
+        "_UNREVIEWED_CORPUS_EXTRACTION_RECORD = (\n"
+        '    "MATCH (sn:StandardName)\\n"\n'
+        '    "RETURN sn.source_paths AS source_paths"\n'
+        ")\n"
+    )
+    text = _without_extraction_records(source)
+
+    assert "sn.source_paths" not in text.split("_UNREVIEWED")[0]
+    copied = _COPIED_LIST.search(text)
+    assert copied is not None, (
+        "the unlisted record was skipped although it reads the copied list"
+    )
+    assert copied.group(0) == "sn.source_paths"

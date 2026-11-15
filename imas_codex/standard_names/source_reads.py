@@ -16,23 +16,18 @@ from __future__ import annotations
 
 from typing import Any
 
-#: The one live-name test a source count applies: a name is live when neither
-#: its status nor its name stage reads superseded.
-LIVE_NAME_TEST = (
-    "coalesce(sn.status, '') <> 'superseded' "
-    "AND coalesce(sn.name_stage, '') <> 'superseded'"
+from imas_codex.standard_names.source_invariant import (
+    derived_parent_cypher,
+    live_name_cypher,
+    producerless_cypher,
 )
 
-#: No source of any kind produces the name.
-NO_PRODUCER_TEST = "NOT EXISTS { (:StandardNameSource)-[:PRODUCED_NAME]->(sn) }"
-
-#: Live children of the counted name, by the child test the writer invariant uses.
-LIVE_CHILDREN_TEST = (
-    "size([(child:StandardName)-[:HAS_PARENT]->(sn) "
-    "WHERE NOT coalesce(child.name_stage, '') IN "
-    "['superseded', 'exhausted', 'contested'] "
-    "AND NOT coalesce(child.status, '') IN ['deprecated', 'superseded'] | child])"
-)
+#: The contrast this module adds to the owner's rule: a name with no
+#: ``PRODUCED_NAME`` edge of any kind. The rule the count applies is the owner's
+#: (:func:`imas_codex.standard_names.source_invariant.producerless_cypher`),
+#: which reads a stale producer as no producer; this one is reported beside it so
+#: a reader can see where the two populations differ.
+NO_EDGE_AT_ALL = "NOT EXISTS { (:StandardNameSource)-[:PRODUCED_NAME]->(sn) }"
 
 
 def source_paths_projection(alias: str = "sn") -> str:
@@ -87,72 +82,103 @@ def read_source_paths_by_name(gc: Any, names: list[str]) -> dict[str, list[str]]
 
 
 def count_live_names_without_source(gc: Any) -> dict[str, Any]:
-    """Count live names with no producer edge, applying one rule and no exemption.
+    """Count live names with no producer, under the owner's rule.
 
-    A name is counted when neither its status nor its name stage reads
-    superseded and no producer edge points to it. Every name the rule finds is
-    listed with its origin and its count of live children, because the
-    exemptions that keep a name from being a loss — a derived parent, a name
-    held under a release ruling — are the caller's to apply, not this count's
-    to assume.
+    The predicates are the ones :mod:`imas_codex.standard_names.source_invariant`
+    owns, so this count and the export gate's ``find_sourceless_live_names``
+    report the same population by construction. A name is live when neither its
+    status nor its name stage reads superseded, and it is sourceless when no
+    non-stale ``PRODUCED_NAME`` source produces it. A name of derived origin with
+    a live child is listed apart rather than counted: its producer is its
+    children by design.
 
-    A derived parent whose producer is a derived record has a producer edge, so
-    it is not in this population. A name of derived origin that no edge produces
-    at all is listed apart as an exempt derived parent and left out of
-    ``count``: its producer is its children, by design, and a sourcelessness
-    count that reported it would report every such parent as a loss.
-    ``live_without_producer`` still counts every name the rule finds, so the
-    return agrees with a direct read of the edges.
+    The count also reports the bare population — live names with no
+    ``PRODUCED_NAME`` edge at all — and the names on which the two differ, which
+    are exactly the names whose only producers are stale. A reader that wants to
+    know whether a name is lost, and a reader that wants to know whether the
+    graph still carries an edge, are asking different questions and this is where
+    they separate.
+
+    ``count`` and ``live_without_producer`` are the owner's rule;
+    ``bare_count`` and ``bare_names`` are the edge-any-status contrast;
+    ``differing_names`` is the difference between the counted populations.
     """
+
+    def population(rule: str) -> tuple[list[dict[str, Any]], int]:
+        rows = (
+            gc.query(
+                f"""
+                MATCH (sn:StandardName)
+                WHERE {live_name_cypher()} AND {rule}
+                RETURN sn.id AS id,
+                       sn.origin AS origin,
+                       sn.name_stage AS name_stage,
+                       size(coalesce(sn.source_paths, [])) AS copied_count,
+                       {derived_parent_cypher()} AS derived_parent,
+                       size([(child:StandardName)-[:HAS_PARENT]->(sn)
+                             WHERE NOT coalesce(child.name_stage, '') IN
+                               ['superseded', 'exhausted', 'contested']
+                               AND NOT coalesce(child.status, '') IN
+                                 ['deprecated', 'superseded'] | child]) AS live_children,
+                       EXISTS {{ (:StandardNameSource)-[:PRODUCED_NAME]->(sn) }} AS has_edge
+                ORDER BY id
+                """
+            )
+            or []
+        )
+        found = []
+        for row in rows:
+            found.append(
+                {
+                    "id": str(row["id"]),
+                    "origin": row.get("origin"),
+                    "name_stage": row.get("name_stage"),
+                    "live_children": int(row.get("live_children") or 0),
+                    "copied_count": int(row.get("copied_count") or 0),
+                    "has_edge": bool(row.get("has_edge")),
+                }
+            )
+        return found, len(rows)
+
+    counted, without_producer = population(producerless_cypher())
+    bare, bare_without_producer = population(NO_EDGE_AT_ALL)
+
+    def split(entries: list[dict[str, Any]]) -> tuple[list[dict], list[dict]]:
+        listed, exempt = [], []
+        for entry in entries:
+            if entry["origin"] == "derived" and entry["live_children"] > 0:
+                exempt.append(entry)
+            else:
+                listed.append(entry)
+        return listed, exempt
+
+    listed, exempt = split(counted)
+    bare_listed, _bare_exempt = split(bare)
+
+    counted_ids = {entry["id"] for entry in listed}
+    bare_ids = {entry["id"] for entry in bare_listed}
     totals = (
         gc.query(
             f"""
             MATCH (sn:StandardName)
-            RETURN sum(CASE WHEN {LIVE_NAME_TEST} THEN 1 ELSE 0 END) AS live_names,
-                   sum(CASE WHEN {LIVE_NAME_TEST}
-                             AND EXISTS {{ (:StandardNameSource)-[:PRODUCED_NAME]->(sn) }}
+            RETURN sum(CASE WHEN {live_name_cypher()} THEN 1 ELSE 0 END) AS live_names,
+                   sum(CASE WHEN {live_name_cypher()}
+                             AND NOT ({producerless_cypher()})
                             THEN 1 ELSE 0 END) AS live_with_producer
             """
         )
         or [{"live_names": 0, "live_with_producer": 0}]
     )[0]
 
-    rows = (
-        gc.query(
-            f"""
-            MATCH (sn:StandardName)
-            WHERE {LIVE_NAME_TEST} AND {NO_PRODUCER_TEST}
-            RETURN sn.id AS id,
-                   sn.origin AS origin,
-                   sn.name_stage AS name_stage,
-                   size(coalesce(sn.source_paths, [])) AS copied_count,
-                   {LIVE_CHILDREN_TEST} AS live_children
-            ORDER BY id
-            """
-        )
-        or []
-    )
-
-    listed: list[dict[str, Any]] = []
-    exempt: list[dict[str, Any]] = []
-    for row in rows:
-        entry = {
-            "id": str(row["id"]),
-            "origin": row.get("origin"),
-            "name_stage": row.get("name_stage"),
-            "live_children": int(row.get("live_children") or 0),
-            "copied_count": int(row.get("copied_count") or 0),
-        }
-        if entry["origin"] == "derived" and entry["live_children"] > 0:
-            exempt.append(entry)
-        else:
-            listed.append(entry)
-
     return {
         "live_names": int(totals.get("live_names") or 0),
         "live_with_producer": int(totals.get("live_with_producer") or 0),
-        "live_without_producer": len(rows),
+        "live_without_producer": without_producer,
         "count": len(listed),
         "names": listed,
         "exempt_derived_parents": exempt,
+        "bare_without_producer": bare_without_producer,
+        "bare_count": len(bare_listed),
+        "bare_names": [entry["id"] for entry in bare_listed],
+        "differing_names": sorted(counted_ids - bare_ids),
     }

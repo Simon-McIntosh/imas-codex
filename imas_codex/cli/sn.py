@@ -3898,13 +3898,18 @@ def sn_coverage(physics_domain: str | None, as_json: bool) -> None:
     help="Emit machine-readable JSON instead of rich tables.",
 )
 def sn_sourceless(as_json: bool) -> None:
-    """Count live names that no source produces.
+    """Count live names that no source produces, under the writer's own rule.
 
-    A live name is one whose status and name stage both read something other
-    than superseded. The count reads producer edges only: it never consults the
-    ``source_paths`` list copied onto the name, so a name whose copied list is
-    empty while its edges are not is not reported, and a name whose copied list
-    is populated while its edges are gone still is.
+    The predicates are the source invariant's: a name is live when neither its
+    status nor its name stage reads superseded, and a producer is a source that
+    is not stale. A name whose only producers are stale therefore reads as
+    sourceless here, exactly as the write guard and the export gate read it.
+
+    The bare population is reported beside it — live names with no
+    ``PRODUCED_NAME`` edge of any kind — with the names on which the two
+    differ, so a reader can tell a name the graph still carries an edge for
+    from a name no live source produces. The count never consults the
+    ``source_paths`` list copied onto the name.
 
     A name of derived origin with live children is listed apart rather than
     counted: its producer is its children by design, so counting it would
@@ -3930,9 +3935,21 @@ def sn_sourceless(as_json: bool) -> None:
     from rich.table import Table
 
     console.print(
-        f"\n[bold]{report['count']}[/bold] live names have no producer edge, "
+        f"\n[bold]{report['count']}[/bold] live names have no live producer, "
         f"of {report['live_names']:,} live names "
         f"({report['live_with_producer']:,} with a producer).\n"
+    )
+    console.print(
+        f"[bold]{report['bare_count']}[/bold] live names have no producer edge "
+        f"at all; the two populations differ on "
+        f"[bold]{len(report['differing_names'])}[/bold] name(s) whose only "
+        "producers are stale"
+        + (
+            ": " + ", ".join(report["differing_names"])
+            if report["differing_names"]
+            else ".\n"
+        )
+        + "\n"
     )
     if report["names"]:
         table = Table(title="Live names without a source", show_header=True)
@@ -3941,6 +3958,7 @@ def sn_sourceless(as_json: bool) -> None:
         table.add_column("name_stage")
         table.add_column("live children", justify="right")
         table.add_column("copied list", justify="right")
+        table.add_column("no edge at all")
         for entry in report["names"]:
             table.add_row(
                 entry["id"],
@@ -3948,6 +3966,7 @@ def sn_sourceless(as_json: bool) -> None:
                 entry["name_stage"] or "[dim]—[/dim]",
                 str(entry["live_children"]),
                 str(entry["copied_count"]),
+                "" if entry["has_edge"] else "yes",
             )
         console.print(table)
     if report["exempt_derived_parents"]:
@@ -6629,11 +6648,15 @@ def sn_review(
                     "[bold]Layer 1:[/bold] Running deterministic audits on full catalog…"
                 )
             from imas_codex.graph.client import GraphClient
+            from imas_codex.standard_names.source_reads import (
+                normalize_source_ids,
+                source_paths_projection,
+            )
 
             def _load_catalog() -> list[dict]:
                 with GraphClient() as gc:
                     rows = gc.query(
-                        """
+                        f"""
                         MATCH (sn:StandardName)
                         OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
                         RETURN sn.id AS id, sn.description AS description,
@@ -6641,7 +6664,7 @@ def sn_review(
                                sn.kind AS kind,
                                coalesce(u.id, sn.unit) AS unit,
                                sn.tags AS tags, sn.links AS links,
-                               sn.source_paths AS source_paths,
+                               {source_paths_projection()} AS source_paths,
                                sn.physical_base AS physical_base,
                                sn.subject AS subject,
                                sn.component AS component,
@@ -6660,7 +6683,14 @@ def sn_review(
                                sn.geometric_base AS geometric_base
                         """
                     )
-                    return [dict(r) for r in rows] if rows else []
+                    loaded = []
+                    for row in rows or []:
+                        entry = dict(row)
+                        entry["source_paths"] = normalize_source_ids(
+                            entry.get("source_paths")
+                        )
+                        loaded.append(entry)
+                    return loaded
 
             all_names = await asyncio.to_thread(_load_catalog)
 
