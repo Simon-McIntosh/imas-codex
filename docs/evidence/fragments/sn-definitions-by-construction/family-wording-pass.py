@@ -40,6 +40,8 @@ HTML_OUT = HERE / "family-wording-pass.html"
 FIG_DIR = REPO / "docs" / "figures" / "sn-family-wording-pass"
 CENSUS_BEFORE = CACHE / "census-before-pass.json"
 CEILING_USD = 30.0
+SCORE_FLOOR = 0.85
+SOURCELESS_RECORDED = 10
 PROBE_FAMILY = "ratio_of_<X>_density_to_electron_density"
 PROBE_LINE_USD = 0.10
 
@@ -369,7 +371,7 @@ def settled_records():
                 record = json.loads(line)
             except json.JSONDecodeError:
                 continue
-            if record.get("name") and record.get("outcome") not in (None, "pending"):
+            if record.get("name") and record.get("outcome") is not None:
                 records[record["name"]] = record
     return records
 
@@ -380,6 +382,42 @@ def live_rows_all():
     module = census_module()
     with GraphClient() as client:
         return module, [dict(row) for row in client.query(module.LIVE_QUERY)]
+
+
+def log_score(record):
+    """The review score an edit's own log recorded, for a candidate that did not land."""
+
+    path = record.get("log")
+    if not path:
+        return None
+    try:
+        text = Path(path).read_text(encoding="utf-8", errors="replace")
+    except OSError:
+        return None
+    hits = re.findall(r"[│|]\s*(0\.\d+|1\.0+)\s*[│|]", text)
+    return float(hits[-1]) if hits else None
+
+
+def source_evidence(names):
+    """The DD source paths and their descriptions, for names that need a rename."""
+
+    from imas_codex.graph.client import GraphClient
+
+    query = """
+    MATCH (sn:StandardName) WHERE sn.id IN $names
+    OPTIONAL MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+    WITH sn,
+         collect(DISTINCT coalesce(src.dd_path, src.id, '')) AS paths,
+         collect(DISTINCT coalesce(src.description, '')) AS texts
+    RETURN sn.id AS id,
+           [p IN paths WHERE p <> ''] AS paths,
+           [t IN texts WHERE t <> ''] AS texts
+    ORDER BY sn.id
+    """
+    with GraphClient() as client:
+        return {
+            dict(record)["id"]: dict(record) for record in client.query(query, names=sorted(names))
+        }
 
 
 def templates_of(module, row_by_name, names):
@@ -501,6 +539,174 @@ def report():
         },
     }
 
+    outcomes = collections.Counter(r["outcome"] for r in worked)
+    held = []
+    for record in worked:
+        if record["outcome"] == "accepted":
+            continue
+        if record["outcome"] == "drafted":
+            why = (
+                "the edit reached its time bound with a draft stored and no review "
+                "verdict, so the earlier text stands"
+            )
+        elif record["outcome"] == "exhausted":
+            why = "review used its refine budget without a candidate above the threshold"
+        else:
+            why = "review scored the candidate below the threshold, so the earlier text stands"
+        held.append(
+            {
+                "name": record["name"],
+                "outcome": record["outcome"],
+                "why": why,
+                "log_score": log_score(record)
+                if record.get("score_after") is None
+                else record.get("score_after"),
+                "score_before": record.get("score_before"),
+                "score_after": record.get("score_after"),
+                "spend_usd": record["spend_usd"],
+            }
+        )
+    held.sort(key=lambda item: (-(item["log_score"] or 0), item["name"]))
+
+    rename_left = [
+        item
+        for item in worklist["left"]
+        if item["reason"].startswith("source includes neutrals")
+    ]
+    evidence = source_evidence([item["name"] for item in rename_left]) if rename_left else {}
+    rename_candidates = [
+        {
+            "name": item["name"],
+            "detail": item["detail"],
+            "source_paths": evidence.get(item["name"], {}).get("paths", []),
+            "source_texts": [
+                text[:320]
+                for text in (evidence.get(item["name"], {}).get("texts") or [])[:2]
+            ],
+        }
+        for item in rename_left
+    ]
+
+    left_by_reason = collections.Counter(item["reason"] for item in worklist["left"])
+    selection = {
+        "species_family_count": before["families"]["family_count"],
+        "species_family_members": before["families"]["member_count"],
+        "families_at_one_wording_before": before["families"]["one_wording_count"],
+        "species_names_departing_before": len(before["population"]["departing"]),
+        "operator_omitted_names_before": sum(
+            before["operators"][operator]["omitted_count"] for operator in module.OPERATORS
+        ),
+        "selected": sum(len(batch["names"]) for batch in worklist["batches"]),
+        "selected_reason": (
+            "the pass carries only wordings that are ruled and stored: the settled "
+            "species population sentence and each operator's stored sentence. A "
+            "family with no stored sentence would need a template written by hand, "
+            "which this pass does not do, so its members are listed with that reason "
+            "instead of converted"
+        ),
+        "left_by_reason": dict(left_by_reason.most_common()),
+        "left_total": len(worklist["left"]),
+        "worked_total": len(worked),
+        "worked_note": (
+            "the worked total includes the three probe-family names probed "
+            "before the work list was settled, so it exceeds the selected count"
+        ),
+        "scores": {
+            "lowest_after": min(
+                (r["score_after"] for r in worked if r.get("score_after") is not None),
+                default=None,
+            ),
+            "below_floor": sum(
+                1
+                for r in worked
+                if r.get("score_after") is not None and r["score_after"] < SCORE_FLOOR
+            ),
+            "dropped": len(score_drops),
+        },
+    }
+
+    sourceless_before = before.get("sourceless", {}).get("count")
+    with_source = None
+    try:
+        from imas_codex.graph.client import GraphClient
+
+        with GraphClient() as client:
+            sourceless_after = module.sourceless(client)
+        with_source = sourceless_after
+    except Exception as error:  # noqa: BLE001 - the count is evidence, not a gate
+        with_source = {"error": str(error)[:200], "count": None, "names": []}
+
+    population_after = live["population"]
+    done_when = {
+        "read_at": now(),
+        "clauses": [
+            {
+                "clause": "every species family at one stored wording",
+                "measure": "families whose members carry one description template and one unit",
+                "before": "%d of %d"
+                % (
+                    before["families"]["one_wording_count"],
+                    before["families"]["family_count"],
+                ),
+                "after": "%d of %d"
+                % (
+                    after_families["one_wording_count"],
+                    after_families["family_count"],
+                ),
+                "state": "not met",
+                "note": (
+                    "a family reaches one wording only through a stored sentence; "
+                    "the families without one are listed with that reason"
+                ),
+            },
+            {
+                "clause": "species names stating the ruled population sentence",
+                "measure": "species names whose definition departs from the statement",
+                "before": str(len(before["population"]["departing"])),
+                "after": str(len(population_after["departing"])),
+                "state": "departing names remain",
+            },
+            {
+                "clause": "one stored form per operator",
+                "measure": "distinct forms each operator is written in, and names omitting it",
+                "before": ", ".join(
+                    "%s %d forms / %d omitted"
+                    % (
+                        operator,
+                        before["operators"][operator]["form_count"],
+                        before["operators"][operator]["omitted_count"],
+                    )
+                    for operator in module.OPERATORS
+                ),
+                "after": ", ".join(
+                    "%s %d forms / %d omitted"
+                    % (
+                        operator,
+                        after_operators[operator]["form_count"],
+                        after_operators[operator]["omitted_count"],
+                    )
+                    for operator in module.OPERATORS
+                ),
+                "state": "reduced, not one",
+                "note": (
+                    "the form count includes the omitted bucket, so a count of two "
+                    "with a non-zero omitted count means the stored sentence plus "
+                    "the names that still do not state it"
+                ),
+            },
+            {
+                "clause": "live names with no producer edge at or below the recorded ten",
+                "measure": "imas-codex sn sourceless",
+                "before": str(sourceless_before),
+                "after": str(with_source.get("count")),
+                "state": "within the recorded bound"
+                if (with_source.get("count") or 0) <= SOURCELESS_RECORDED
+                else "above the recorded bound",
+            },
+        ],
+        "sourceless_names": with_source.get("names", []),
+    }
+
     probe_records = [r for r in worked if PROBE_FAMILY in (r.get("families") or [])]
     probe = {
         "family": PROBE_FAMILY,
@@ -539,6 +745,11 @@ def report():
         },
         "score_drops": score_drops,
         "census_after": census_after,
+        "done_when": done_when,
+        "selection": selection,
+        "outcomes": dict(outcomes),
+        "held": held,
+        "rename_candidates": rename_candidates,
     }
     OUT.write_text(json.dumps(payload, indent=1) + "\n")
     HTML_OUT.write_text(render_html(payload))
@@ -595,6 +806,147 @@ def render_html(payload):
             spend["ceiling_usd"],
         )
     )
+
+    done = payload["done_when"]
+    add("<h2>Done-when, read from the live graph</h2>")
+    add(
+        '<p class="muted">counts re-read at %s through the closing census measures; '
+        "the before column is the census the pass started from</p>" % esc(done["read_at"])
+    )
+    add(
+        table(
+            ["clause", "measure", "before", "after", "state"],
+            [
+                [
+                    esc(clause["clause"]),
+                    esc(clause["measure"]),
+                    esc(clause["before"]),
+                    esc(clause["after"]),
+                    (
+                        '<span class="bad">%s</span>' % esc(clause["state"])
+                        if "not" in clause["state"] or "above" in clause["state"]
+                        else esc(clause["state"])
+                    )
+                    + (
+                        '<br><span class="muted">%s</span>' % esc(clause["note"])
+                        if clause.get("note")
+                        else ""
+                    ),
+                ]
+                for clause in done["clauses"]
+            ],
+        )
+    )
+    if done.get("sourceless_names"):
+        add(
+            "<p>Names with no producer edge: %s</p>"
+            % ", ".join("<code>%s</code>" % esc(name) for name in done["sourceless_names"])
+        )
+
+    selection = payload["selection"]
+    add("<h2>What the pass took, and what it left</h2>")
+    add(
+        table(
+            ["measure", "count"],
+            [
+                ["species families", str(selection["species_family_count"])],
+                ["species family members", str(selection["species_family_members"])],
+                [
+                    "families already at one wording",
+                    str(selection["families_at_one_wording_before"]),
+                ],
+                [
+                    "species names departing from the ruled statement",
+                    str(selection["species_names_departing_before"]),
+                ],
+                [
+                    "operator names omitting the stored sentence",
+                    "all five together, %d" % selection["operator_omitted_names_before"],
+                ],
+                [
+                    "names the pass worked",
+                    "%d <span class=\"muted\">(%s)</span>"
+                    % (selection["worked_total"], esc(selection["worked_note"])),
+                ],
+                ["names left with a reason", str(selection["left_total"])],
+            ],
+        )
+    )
+    add("<p>%s</p>" % esc(selection["selected_reason"]))
+    add(
+        table(
+            ["reason a name was left", "count"],
+            [
+                [esc(reason), '<span class="num">%d</span>' % count]
+                for reason, count in selection["left_by_reason"].items()
+            ],
+        )
+    )
+
+    outcomes = payload["outcomes"]
+    add("<h2>Outcomes</h2>")
+    scores = payload["selection"]["scores"]
+    add(
+        '<p class="muted">%d names carry a lower review score after the pass than '
+        "before, and %d accepted names sit below the %.2f floor; the lowest accepted "
+        "score is %s. A revised definition scores lower whenever the reviewer weighs "
+        "the stored sentences differently, so a drop is recorded rather than treated "
+        "as a defect; the floor is what holds a name back.</p>"
+        % (
+            scores["dropped"],
+            scores["below_floor"],
+            SCORE_FLOOR,
+            "%.4f" % scores["lowest_after"] if scores["lowest_after"] else "unrecorded",
+        )
+    )
+    add(
+        table(
+            ["outcome", "count"],
+            [
+                [esc(name), '<span class="num">%d</span>' % count]
+                for name, count in sorted(outcomes.items())
+            ],
+        )
+    )
+    if payload["held"]:
+        add("<h3>Names held back, with why</h3>")
+        add(
+            table(
+                ["name", "outcome", "score", "why"],
+                [
+                    [
+                        "<code>%s</code>" % esc(item["name"]),
+                        esc(item["outcome"]),
+                        esc("%.2f" % item["log_score"]) if item["log_score"] else "",
+                        esc(item["why"]),
+                    ]
+                    for item in payload["held"]
+                ],
+            )
+        )
+    if payload["rename_candidates"]:
+        add("<h3>Names whose source needs a rename instead</h3>")
+        add(
+            "<p>The bare-species sentence would misstate these populations, so their "
+            "text is left alone: the name is wrong, not the wording. Each needs a "
+            "rename with the source evidence below.</p>"
+        )
+        add(
+            table(
+                ["name", "why", "source paths", "source description"],
+                [
+                    [
+                        "<code>%s</code>" % esc(item["name"]),
+                        esc(item["detail"]),
+                        "<br>".join("<code>%s</code>" % esc(p) for p in item["source_paths"])
+                        or '<span class="muted">no path recorded</span>',
+                        "<br>".join(esc(t) for t in item["source_texts"])
+                        or '<span class="muted">no description recorded</span>',
+                    ]
+                    for item in payload["rename_candidates"]
+                ],
+            )
+        )
 
     probe = payload["probe"]
     add("<h2>Cost probe</h2>")
