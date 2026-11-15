@@ -48,6 +48,10 @@ from imas_codex.standard_names.prose_policy import (
     BANNED_PROSE_PATTERNS as BANNED_PROSE_PATTERNS,  # noqa: F401
     banned_prose_findings,
 )
+from imas_codex.standard_names.source_reads import (
+    normalize_source_ids,
+    source_paths_projection,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -316,7 +320,7 @@ def load_refine_corpus(
     """
     from imas_codex.graph.client import GraphClient
 
-    cypher = """
+    cypher = f"""
         MATCH (sn:StandardName)-[:REFINED_FROM]->(a:StandardName)
         WHERE a.reviewer_comments_per_dim_name IS NOT NULL
           AND a.reviewer_score_name IS NOT NULL
@@ -328,7 +332,9 @@ def load_refine_corpus(
           anc.id                                  AS prior_name,
           anc.reviewer_score_name                 AS prior_score,
           anc.reviewer_comments_per_dim_name      AS critique,
-          coalesce(sn.source_paths, anc.source_paths) AS source_paths,
+          CASE WHEN size({source_paths_projection("sn")}) > 0
+               THEN {source_paths_projection("sn")}
+               ELSE {source_paths_projection("anc")} END AS source_paths,
           coalesce(sn.description, anc.description)    AS description,
           coalesce(sn.unit, anc.unit)                 AS unit,
           coalesce(sn.kind, anc.kind)                 AS data_type,
@@ -350,7 +356,7 @@ def load_refine_corpus(
                 crit = json.loads(crit)
             except (ValueError, TypeError):
                 crit = {"overall": crit}
-        paths = r.get("source_paths") or []
+        paths = normalize_source_ids(r.get("source_paths"))
         cases.append(
             {
                 "sn_id": r["sn_id"],
@@ -385,14 +391,14 @@ def load_breaker_corpus(
     from imas_codex.graph.client import GraphClient
 
     review_axis = "name" if axis == "names" else "docs"
-    cypher = """
+    cypher = f"""
         MATCH (r:StandardNameReview {review_axis: $axis})
         WHERE r.reviewer_model IN $pair AND r.score IS NOT NULL
         WITH r.standard_name_id AS sid, r.reviewer_model AS m,
              avg(toFloat(r.score)) AS s
-        WITH sid, collect({m: m, s: s}) AS scores
+        WITH sid, collect({{m: m, s: s}}) AS scores
         WHERE size(scores) = 2
-        MATCH (sn:StandardName {id: sid})
+        MATCH (sn:StandardName {{id: sid}})
         RETURN
           sid                       AS sn_id,
           scores                    AS scores,
@@ -401,7 +407,7 @@ def load_breaker_corpus(
           sn.unit                   AS unit,
           sn.kind                   AS data_type,
           sn.physics_domain         AS physics_domain,
-          sn.source_paths           AS source_paths,
+          {source_paths_projection()} AS source_paths,
           sn.documentation          AS documentation
     """
     owns = gc is None
@@ -419,7 +425,7 @@ def load_breaker_corpus(
         minimax = pair.get(BLIND_PAIR[1])
         if qwen is None or minimax is None:
             continue
-        srcs = list(r.get("source_paths") or [])
+        srcs = normalize_source_ids(r.get("source_paths"))
         items.append(
             {
                 "sn_id": r["sn_id"],
@@ -434,7 +440,7 @@ def load_breaker_corpus(
                 "unit": r.get("unit") or "",
                 "data_type": r.get("data_type") or "",
                 "physics_domain": r.get("physics_domain") or "",
-                "source_paths": list(r.get("source_paths") or []),
+                "source_paths": srcs,
                 "documentation": r.get("documentation") or "",
                 "pair_scores": {"qwen": qwen, "minimax": minimax},
                 "final_accepted": (r.get("name_stage") == "accepted"),
@@ -451,8 +457,8 @@ def load_docs_sample(sample: int, seed: int, gc: Any = None) -> list[dict]:
     """
     from imas_codex.graph.client import GraphClient
 
-    cypher = """
-        MATCH (sn:StandardName {name_stage: 'accepted'})
+    cypher = f"""
+        MATCH (sn:StandardName {{name_stage: 'accepted'}})
         WHERE sn.description IS NOT NULL
         RETURN
           sn.id             AS name,
@@ -460,7 +466,7 @@ def load_docs_sample(sample: int, seed: int, gc: Any = None) -> list[dict]:
           sn.unit           AS unit,
           sn.kind           AS kind,
           sn.physics_domain AS physics_domain,
-          sn.source_paths   AS source_paths
+          {source_paths_projection()} AS source_paths
     """
     owns = gc is None
     gc = gc or GraphClient()
@@ -470,22 +476,24 @@ def load_docs_sample(sample: int, seed: int, gc: Any = None) -> list[dict]:
         if owns:
             gc.close()
 
-    cands = [
-        {
-            "name": r["name"],
-            # generate_docs_for_candidates / score_with_reviewer resolve the
-            # name via resolve_name (reads standard_name/id).
-            "standard_name": r["name"],
-            "id": r["name"],
-            "source_id": (list(r.get("source_paths") or []) or [""])[0],
-            "description": r.get("description") or "",
-            "unit": r.get("unit") or "",
-            "kind": r.get("kind") or "scalar",
-            "physics_domain": r.get("physics_domain") or "",
-            "source_paths": list(r.get("source_paths") or []),
-        }
-        for r in rows
-    ]
+    cands = []
+    for r in rows:
+        srcs = normalize_source_ids(r.get("source_paths"))
+        # generate_docs_for_candidates / score_with_reviewer resolve the name
+        # via resolve_name (reads standard_name/id).
+        cands.append(
+            {
+                "name": r["name"],
+                "standard_name": r["name"],
+                "id": r["name"],
+                "source_id": srcs[0] if srcs else "",
+                "description": r.get("description") or "",
+                "unit": r.get("unit") or "",
+                "kind": r.get("kind") or "scalar",
+                "physics_domain": r.get("physics_domain") or "",
+                "source_paths": srcs,
+            }
+        )
     return _stratified_sample(cands, sample, seed)
 
 
@@ -911,23 +919,22 @@ _VACUOUS_DOC = (
     "as appropriate for the scenario under consideration."
 )
 
-_ADVISORY_CORPUS_QUERY = """
-    MATCH (sn:StandardName {
+_ADVISORY_CORPUS_QUERY = f"""
+    MATCH (sn:StandardName {{
         name_stage: 'accepted', validation_status: 'valid'
-    })
+    }})
     WHERE sn.description IS NOT NULL
       AND sn.documentation IS NOT NULL
       AND size(sn.documentation) > 40
       AND sn.unit IS NOT NULL
-      AND size(coalesce(sn.source_paths, [])) > 0
+      AND size({source_paths_projection()}) > 0
     RETURN
       sn.id             AS name,
       sn.description    AS description,
-      sn.documentation  AS documentation,
       sn.unit           AS unit,
       sn.kind           AS kind,
       sn.physics_domain AS physics_domain,
-      sn.source_paths   AS source_paths
+      {source_paths_projection()} AS source_paths
     ORDER BY sn.id
 """
 
@@ -1012,9 +1019,7 @@ def build_advisory_paired_corpus(
     for raw in sorted((dict(row) for row in rows), key=lambda row: row.get("name", "")):
         name = str(raw.get("name") or "")
         unit = str(raw.get("unit") or "")
-        source_paths = sorted(
-            {str(path) for path in (raw.get("source_paths") or []) if path}
-        )
+        source_paths = normalize_source_ids(raw.get("source_paths"))
         if not name or not unit or not source_paths:
             raise ValueError(
                 "advisory corpus candidates require name, unit, and source_paths"
@@ -1146,7 +1151,7 @@ def load_discrimination_corpus(
 
     corpus: list[dict] = []
     for i, r in enumerate(goods):
-        srcs = list(r.get("source_paths") or [])
+        srcs = normalize_source_ids(r.get("source_paths"))
         base = {
             "name": r["name"],
             "standard_name": r["name"],

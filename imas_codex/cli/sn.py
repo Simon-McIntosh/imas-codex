@@ -3889,6 +3889,77 @@ def sn_coverage(physics_domain: str | None, as_json: bool) -> None:
     console.print()
 
 
+@sn.command("sourceless")
+@click.option(
+    "--json",
+    "as_json",
+    is_flag=True,
+    default=False,
+    help="Emit machine-readable JSON instead of rich tables.",
+)
+def sn_sourceless(as_json: bool) -> None:
+    """Count live names that no source produces.
+
+    A live name is one whose status and name stage both read something other
+    than superseded. The count reads producer edges only: it never consults the
+    ``source_paths`` list copied onto the name, so a name whose copied list is
+    empty while its edges are not is not reported, and a name whose copied list
+    is populated while its edges are gone still is.
+
+    A name of derived origin with live children is listed apart rather than
+    counted: its producer is its children by design, so counting it would
+    report every derived parent as a loss.
+
+    \b
+    Examples:
+      imas-codex sn sourceless
+      imas-codex sn sourceless --json
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.source_reads import (
+        count_live_names_without_source,
+    )
+
+    with GraphClient() as gc:
+        report = count_live_names_without_source(gc)
+
+    if as_json:
+        click.echo(json.dumps(report, indent=2))
+        return
+
+    from rich.table import Table
+
+    console.print(
+        f"\n[bold]{report['count']}[/bold] live names have no producer edge, "
+        f"of {report['live_names']:,} live names "
+        f"({report['live_with_producer']:,} with a producer).\n"
+    )
+    if report["names"]:
+        table = Table(title="Live names without a source", show_header=True)
+        table.add_column("name", style="cyan")
+        table.add_column("origin")
+        table.add_column("name_stage")
+        table.add_column("live children", justify="right")
+        table.add_column("copied list", justify="right")
+        for entry in report["names"]:
+            table.add_row(
+                entry["id"],
+                entry["origin"] or "[dim]—[/dim]",
+                entry["name_stage"] or "[dim]—[/dim]",
+                str(entry["live_children"]),
+                str(entry["copied_count"]),
+            )
+        console.print(table)
+    if report["exempt_derived_parents"]:
+        exempt = Table(title="Listed apart: derived parents", show_header=True)
+        exempt.add_column("name", style="dim")
+        exempt.add_column("live children", justify="right")
+        for entry in report["exempt_derived_parents"]:
+            exempt.add_row(entry["id"], str(entry["live_children"]))
+        console.print(exempt)
+    console.print()
+
+
 @sn.command("status")
 @click.option(
     "--family",

@@ -12,6 +12,10 @@ from typing import Any
 
 from imas_codex.graph.client import GraphClient
 from imas_codex.standard_names.benchmark_reference import REFERENCE_NAMES
+from imas_codex.standard_names.source_reads import (
+    normalize_source_ids,
+    source_paths_projection,
+)
 
 ROOT = Path(__file__).parents[2]
 WEST = ROOT / "docs/evidence/sn-west-catalog-release"
@@ -294,7 +298,9 @@ def _group_name_copies(rows: list[dict[str, Any]]) -> None:
 def build_name_acceptable(graph: GraphClient) -> list[dict[str, Any]]:
     """Name labels from deterministic quarantine, human edits, and DD audits."""
     quarantines = graph.query(
-        "MATCH (sn:StandardName {validation_status:'quarantined'}) RETURN sn.id AS name, sn.physics_domain AS domain, sn.source_paths AS paths ORDER BY sn.id LIMIT 700"
+        "MATCH (sn:StandardName {validation_status:'quarantined'}) "
+        f"RETURN sn.id AS name, sn.physics_domain AS domain, "
+        f"{source_paths_projection()} AS paths ORDER BY sn.id LIMIT 700"
     )
     edits = graph.query(
         "MATCH (change:StandardNameChange {operation:'human_edit', origin:'human'}) WHERE change.from_name IS NOT NULL AND change.to_name IS NOT NULL RETURN change.id AS id, change.from_name AS old, change.to_name AS new ORDER BY old, new LIMIT 400"
@@ -667,19 +673,24 @@ _CONVENTIONS: Any = None
 def _live_documentation_names(graph: GraphClient) -> list[dict[str, Any]]:
     """Accepted or approved names carrying non-empty documentation.
 
-    ``source_paths`` is the name's DD binding list; a derived name carries
-    none and still belongs on the sheet, so the read never requires it.
+    ``source_paths`` is the name's DD binding list, read from its producer
+    edges; a derived name carries none and still belongs on the sheet, so the
+    read never requires it.
     """
-    return graph.query(
+    rows = graph.query(
         "MATCH (sn:StandardName) "
         "WHERE sn.name_stage IN ['accepted','approved'] "
         "AND sn.documentation IS NOT NULL AND trim(sn.documentation) <> '' "
         "RETURN sn.id AS name, sn.description AS description, "
         "sn.documentation AS documentation, sn.unit AS unit, "
-        "sn.physics_domain AS physics_domain, sn.source_paths AS source_paths "
+        f"sn.physics_domain AS physics_domain, "
+        f"{source_paths_projection()} AS source_paths "
         "ORDER BY sn.id LIMIT $limit",
         limit=LIVE_NAME_ROWS,
     )
+    for row in rows:
+        row["source_paths"] = normalize_source_ids(row.get("source_paths"))
+    return rows
 
 
 def _unit_symbols(graph: GraphClient, units: list[str]) -> dict[str, str]:

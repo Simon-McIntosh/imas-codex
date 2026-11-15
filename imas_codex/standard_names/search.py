@@ -31,6 +31,10 @@ from imas_codex.standard_names.grammar_query import (
     tier_of,
     tokenise_query,
 )
+from imas_codex.standard_names.source_reads import (
+    normalize_source_ids,
+    source_paths_projection,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -246,11 +250,12 @@ def _enrich_search_rows(
         return []
     rows = (
         gc.query(
-            """
+            f"""
             UNWIND $ids AS sn_id
-            MATCH (sn:StandardName {id: sn_id})
+            MATCH (sn:StandardName {{id: sn_id}})
             OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
             RETURN sn.id AS name,
+                   {source_paths_projection()} AS source_paths,
                    sn.description AS description,
                    sn.documentation AS documentation,
                    sn.kind AS kind,
@@ -274,6 +279,7 @@ def _enrich_search_rows(
         if row is None:
             continue
         row["score"] = scores.get(sn_id, 0.0)
+        row["source_paths"] = normalize_source_ids(row.get("source_paths"))
         enriched.append(row)
     return enriched
 
@@ -306,7 +312,8 @@ def search_standard_names(
     Returns:
         List of result dicts with keys ``name, description, documentation,
         kind, unit, name_stage, cocos_transformation_type, cocos,
-        physics_domain, source_domains, physical_base, subject, score``.
+        physics_domain, source_domains, physical_base, subject, source_paths,
+        score``.
     """
     normalized_query = (query or "").strip()
     if not normalized_query and not any(
@@ -542,7 +549,7 @@ def fetch_standard_names(
             "cocos": "sn.cocos AS cocos",
             "dd_version": "sn.dd_version AS dd_version",
             "links": "sn.links AS links",
-            "source_paths": "sn.source_paths AS source_paths",
+            "source_paths": f"{source_paths_projection()} AS source_paths",
             "constraints": "sn.constraints AS constraints",
             "validity_domain": "sn.validity_domain AS validity_domain",
             "confidence": "sn.confidence AS confidence",
@@ -637,6 +644,9 @@ def fetch_standard_names(
             RETURN {", ".join(select)}
             """
         rows = [dict(r) for r in (gc.query(cypher, names=names) or [])]
+        for row in rows:
+            if "source_paths" in row:
+                row["source_paths"] = normalize_source_ids(row["source_paths"])
 
         if needs_neighbours and rows:
             neighbours = _fetch_neighbours(gc, [r["name"] for r in rows])
