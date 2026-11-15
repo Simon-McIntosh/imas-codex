@@ -1,6 +1,6 @@
 {
  "schema": "held-names-refine-pass/1",
- "generated_at": "2026-11-15T21:00:11+00:00",
+ "generated_at": "2026-11-15T21:02:51+00:00",
  "plan_section": "sn-definitions-by-construction#s7",
  "run": {
   "node": "sdbc-held-names-refine-pass",
