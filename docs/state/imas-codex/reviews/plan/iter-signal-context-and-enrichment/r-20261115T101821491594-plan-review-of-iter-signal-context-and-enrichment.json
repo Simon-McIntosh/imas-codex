@@ -79,6 +79,16 @@
       "note": "Section 3 now names its measure: the six dimension scores in each run's stored independent review record, which the catalogue plan's build runs carry, and it requires the comparison to state how many records it found on each lane.",
       "reason": "",
       "when": "2026-11-15T10:47:34.201949+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 5 now delivers that every catalogued signal is either in a component group or in an explicit ungrouped state, with both counted.",
+      "reason": "",
+      "when": "2026-11-15T10:47:37.407050+00:00"
     }
   ],
   "responses": {
@@ -90,6 +100,15 @@
       "note": "Section 3 now names its measure: the six dimension scores in each run's stored independent review record, which the catalogue plan's build runs carry, and it requires the comparison to state how many records it found on each lane.",
       "reason": "",
       "when": "2026-11-15T10:47:34.201949+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "note": "Section 5 now delivers that every catalogued signal is either in a component group or in an explicit ungrouped state, with both counted.",
+      "reason": "",
+      "when": "2026-11-15T10:47:37.407050+00:00"
     },
     "wiring-1": {
       "action": "acted",
