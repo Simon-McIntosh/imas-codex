@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T17:46:52.615Z",
+  "dispatched_at": "2026-11-15T17:46:35Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-definitions-by-construction.html#s6",
+      "id": "done_when-1",
+      "reason": "without requiring the one form to be the stored sentence (e.g. zero omitted per operator), two of the five operator clauses close on an unrewritten catalog and the section's gate proves neither.",
+      "text": "the first item requires the census to \"count one form for each operator in \u00a72\", but `rewrite-closing-census.json` shows the census counting `<omitted>` as a form: line_integrated reports form_count 1 over 3 names and time_derivative form_count 1 over 9 names, all in `<omitted>`, with 0 names stating the stored sentence; the bullet therefore passes on those two operators with no definition changed, and the only negative control it names plants a divergent family, so nothing shows the operator clause can fail",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-definitions-by-construction.html#s6",
+      "id": "reasoning-1",
+      "reason": "the figure is the comparator the final census is laid beside, and a node counting \"not carrying the stored form\" gets 70 at the baseline, so the stated number and the stated measure must be made to agree.",
+      "text": "the changed baseline states \"69 of 73 flux-surface-average names \u2026 not carrying the stored form\", but 69 is the census's `omitted_count`; its forms block records 3 names carrying the stored sentence and 1 carrying a variant, so names not carrying the stored form number 70, and the clause's own wording hides the variant member the count excludes (volume 53 of 66 and line 23 of 28 coincide under either reading, so only flux is affected)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "71724c7a819cd8ec2ff265da45f7d54c321f1da8",
+  "plan_fingerprint": "0280cfb862380af1fd27a8637245c822d3b95de0e9d91972dd481dd05fc522c7",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 59,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T174603526336-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "cee2bc41aef833c96910a7d8be2ffc7f63c602ce",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `rewrite-closing-census.json` resolves in HEAD and holds the populations the changed clause cites (73 flux-surface, 66 volume, 28 line, 23 families over 316 members, planted family divergent 1).",
+    "done_when": "a finding \u2014 s6's first done-when accepts \"one form for each operator in \u00a72\", and the census it names counts the `<omitted>` bucket as a form, so line_integrated (3 names) and time_derivative (9 names) are green before any rewrite.",
+    "evidence_paths": "pass \u2014 the baseline and the final census live in `docs/evidence/fragments/sn-definitions-by-construction/` (`rewrite-closing-census.json`), and the negative control runs on a disposable graph the census itself starts.",
+    "naming": "pass \u2014 the changed clause introduces no symbol, label or ticket into code; the census's own artifact names are existing evidence files, not new evidence.",
+    "reasoning": "a finding \u2014 the flux-surface figure \"69 of 73 \u2026 not carrying the stored form\" is the census's omitted count, while the census records 3 names carrying the stored sentence and 1 a variant, so the count against the words used is 70.",
+    "single_goal": "pass \u2014 s6 carries one deliverable, the live catalog brought to \u00a72's wording, \u00a73's spelling and \u00a75's dispositions.",
+    "wiring": "pass \u2014 s6's declarations wait on s2, s3, s4, s5 and s10, and s10 is the section that names the member-level exceptions s6's family clause defers to."
+  },
+  "section_digests": {
+    "_document": "11e2e68b156624b18e8ed5742aa27fcf534e457bc07dfce61888ca751e83d678",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "f3f90926c13035cfc5b25342079ffc9db02737afb9bcb89deb1f011d3d0088b8",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:52:25.210818+00:00",
+  "total": null
+}
