@@ -1,0 +1,63 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/scanners/codac_uda.py:418 CodacUDAScanner._signal -> parse_variable_name",
+    "imas_codex/discovery/signals/scanners/codac_uda.py:176 _persist_signals -> persist_name_parses"
+  ],
+  "completed_at": "2026-11-15T09:48:18.600Z",
+  "dispatched_at": "2026-11-15T09:15:06Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_archive_name_parser.py",
+      "line": "198",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert parsed.properties(\"example\")[\"name_parse_provenance\"] == PARSE_PROVENANCE compares the value properties() writes at variable_names.py:64 with the same module constant the test imports at line 13, so a corrupted, emptied or misleading provenance string passes this assertion unchanged; the provenance guarantee the section rests on needs an independent literal or a substring check."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified two production call sites inside the scanner and confirmed parse_archive_catalogue has none: codac_uda.py:418 applies the parse to every scanned signal, and codac_uda.py:176 re-derives it on the write path.",
+    "diff": "read both commits against 221b8473a: 720b60b75 adds variable_names.py (parser and dataclass), variable_name_graph.py (parse persistence and bounded catalogue pass), the scanner hooks in codac_uda.py:176 and codac_uda.py:418, the facility.yaml enum/class/property block, and three test files; dfca3211b adds only the evidence fragment.",
+    "done_when": "the done_when requires the parse-outcome counts for the scanned cohort, twenty hand-checked parses using invented names in tracked files, and no variable receiving an underived component; catalogue.log/receipt records 200 parsed / 0 partly / 0 not-conforming and hand-checked-samples.log plus the evidence fragment carry the twenty invented samples, while negative-control.log shows the refusal path reddens under mutation.",
+    "goal": "the node's goal is that a scanned variable carries a candidate plant system, component and control function parsed under the naming convention with provenance and an explicit outcome, an original selector preserved byte for byte, and a candidate component hierarchy; imas_codex/discovery/signals/variable_names.py:92-115 and variable_names.py:38-70 supply exactly those, and imas_codex/schemas/facility.yaml:1696-1724 declares the PlantComponent hierarchy with PARENT_COMPONENT and CANDIDATE_PLANT_COMPONENT links kept distinct from verified identity.",
+    "manifest": "read; status complete, commits 720b60b75 and dfca3211b, changed_paths the eight landed files, tests the focused srun gate, baseline_suite one failure (test_scanner_parses_candidate_fields) and after_suite zero failures, negative_control_log naming negative-control.log, and metrics that agree with catalogue-receipt.json.",
+    "write_paths": "the declared fence was imas_codex/discovery/signals/, imas_codex/schemas/, imas_codex/graph/, imas_codex/config/, tests/discovery/, tests/graph/ and the codac-uda-signals evidence fragment; git diff --stat 221b8473a..dfca3211b touches eight paths and every one is inside that grant, with no imas_codex/graph, imas_codex/config, figure or generated-model file staged."
+  },
+  "justifications": {
+    "durability": "variable_names.py:92-115 is guarded by tests/discovery/test_archive_name_parser.py:147-200 against independent expected tokens and by the deliberate mutation at negative-control.log (EXIT=1, test_nonconforming_name_has_no_component[arbitrary text]); one added assertion at test_archive_name_parser.py:198 compares the module constant PARSE_PROVENANCE with itself and cannot redden on a corrupted provenance string.",
+    "evidence": "catalogue.log records the live pass at EXIT=0 with 200 total / 200 written / 200 parsed, coupled with the 62,183/62,183/200 positive control in catalogue-receipt.json, and focused.log reads '71 passed' EXIT=0 while hand-checked-samples.log carries the twenty invented samples; I re-hashed the four committed source files at dfca3211b and every sha256 matches the one focused.log and graph.log print, so the passing gates ran on the committed source despite their base-revision header.",
+    "fit": "imas_codex/discovery/signals/variable_names.py uses a frozen dataclass for the parse record and pydantic models for schema classes in the surrounding style, and the names (parse_variable_name, PlantComponent, SignalNameParseOutcome) describe what they do with no plan or ticket identifier.",
+    "goal_fidelity": "imas_codex/discovery/signals/variable_names.py:92-115 derives plant_system_code, plant_component_code, control_function and variable_token with an explicit SignalNameParseOutcome and preserves the selector verbatim, and variable_names.py:38-58 builds the candidate PlantComponent parent chain; the IDM 2UT8SH correspondence is recorded unconfirmed because the resumed instruction authorised inference from the catalogue.",
+    "reuse": "a capability search over imas_codex/discovery/signals, imas_codex/graph and the schema for existing selector parsing, plant-system/component and paginated-catalogue passes found no owner; PlantComponent and the parser are the first, and the scanner path is extended rather than duplicated.",
+    "scope_discipline": "git diff --stat 221b8473a..dfca3211b lists eight paths, and every one lies inside the declared fence (imas_codex/discovery/signals/, imas_codex/schemas/facility.yaml, tests/discovery/test_archive_name_parser.py, tests/graph/test_variable_name_*.py, docs/evidence/fragments/codac-uda-signals/)."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that a second plant-system and component code and the control-function token parsed from each variable name with provenance and an explicit outcome exist as candidates, the original selector preserved, and a plant-component hierarchy in the schema; imas_codex/discovery/signals/variable_names.py:92-115 and variable_names.py:38-70 deliver exactly those and imas_codex/schemas/facility.yaml:1696-1724 declares the candidate hierarchy.\nVERDICT done_when: the done_when requires parse-outcome counts for the scanned cohort, twenty hand-checked parses using invented names in tracked files, and no variable receiving an underived component; catalogue.log and catalogue-receipt.json record 200 parsed / 0 partly / 0 not-conforming with a 62,183-signal positive control, hand-checked-samples.log and the evidence fragment carry the twenty invented samples, and negative-control.log reddens the refusal path (EXIT=1), so the gate asserts the measure.\nVERDICT write_paths: the fence was imas_codex/discovery/signals/, imas_codex/schemas/, imas_codex/graph/, imas_codex/config/, tests/discovery/, tests/graph/ and the codac-uda-signals evidence fragment; git diff --stat 221b8473a..dfca3211b touches eight paths and every one is inside that grant.\nVERDICT manifest: read; status complete, commits 720b60b75 and dfca3211b, changed_paths the eight landed files, tests the focused srun gate reading '71 passed' EXIT=0, baseline_suite one failure (test_scanner_parses_candidate_fields) and after_suite zero failures, negative_control_log naming negative-control.log, and catalogue metrics that agree with catalogue-receipt.json.\nVERDICT diff: read both commits against 221b8473a; 720b60b75 adds the parser module, the persistence and bounded catalogue module, two scanner hooks at codac_uda.py:176 and codac_uda.py:418, the facility.yaml enum/class/property block and three test files, and dfca3211b adds only the evidence fragment.\nCALL_SITES: imas_codex/discovery/signals/scanners/codac_uda.py:418 CodacUDAScanner._signal -> parse_variable_name, imas_codex/discovery/signals/scanners/codac_uda.py:176 _persist_signals -> persist_name_parses\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/variable_names.py:92-115 derives the four tokens with an explicit outcome and variable_names.py:38-58 builds the candidate PlantComponent chain, with IDM 2UT8SH correspondence recorded unconfirmed under the resumed authorisation.\nSCORE evidence: 18\nJUSTIFICATION evidence: catalogue.log and catalogue-receipt.json record 200/0/0 outcomes behind a 62,183-signal positive control, and the four sha256 values I recomputed at dfca3211b match those printed by focused.log and graph.log.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 221b8473a..dfca3211b lists eight paths and every one lies inside the declared fence, with no generated model staged.\nSCORE durability: 17\nJUSTIFICATION durability: tests/discovery/test_archive_name_parser.py:147-200 asserts independent expected tokens and the mutation at negative-control.log reddens test_nonconforming_name_has_no_component[arbitrary text], but test_archive_name_parser.py:198 compares the module constant to itself.\nSCORE fit: 20\nJUSTIFICATION fit: imas_codex/discovery/signals/variable_names.py uses the repo's frozen-dataclass and pydantic idioms and names every symbol by what it does, with no plan, sprint or ticket identifier.\nSCORE reuse: 19\nJUSTIFICATION reuse: a capability search of imas_codex/discovery/signals, imas_codex/graph and the schema found no existing selector parser, plant-component model or bounded-catalogue pass, and codac_uda.py:176 extends the existing write path rather than forking it.\nFINDING tests/discovery/test_archive_name_parser.py:198 non-blocking: the assertion compares properties()['name_parse_provenance'] with the same module constant the test imports at line 13, so a corrupted or emptied provenance string passes unchanged and the assertion cannot guard the provenance guarantee.\n",
+  "review_run_id": "r-20261115T091337748089-review-of-variable-name-component-parse-dfca3211bbfa",
+  "reviewed_base_sha": "221b8473a8d95f828b29cb35e582a80d4de0241a",
+  "reviewed_head_sha": "dfca3211bbfa70e9c28401bbfd60732b346beb1b",
+  "reviewed_run_id": "r-20261115T020719811150-variable-name-component-parse",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261115T091337748089-review-of-variable-name-component-parse-dfca3211bbfa"
+  },
+  "reviewer_run_id": "r-20261115T091337748089-review-of-variable-name-component-parse-dfca3211bbfa",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T09:48:23.198415+00:00",
+  "total": 112
+}

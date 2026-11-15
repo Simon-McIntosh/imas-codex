@@ -2,7 +2,7 @@
 
 import asyncio
 import json
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 import numpy as np
 import pytest
@@ -50,6 +50,8 @@ def scanner_io(monkeypatch):
         return len(signals)
 
     monkeypatch.setattr(catalogue, "_persist_archives", Mock())
+    monkeypatch.setattr(catalogue, "GraphClient", MagicMock())
+    monkeypatch.setattr(catalogue, "persist_name_parses", Mock())
     monkeypatch.setattr(parallel, "ingest_discovered_signals", write)
     reader = Mock(return_value={"entries": entries(3), "warnings": []})
 
@@ -525,3 +527,25 @@ async def test_private_catalogue_cannot_enter_pilot_graph_ingest(
         await catalogue.CodacUDAScanner().scan("demo", "local", config)
     assert scanner_io[0] == {}
     scanner_io[1].assert_not_called()
+
+
+def test_pilot_name_parse_follows_owner_acknowledgement(monkeypatch):
+    signal = catalogue.CodacUDAScanner._signal(
+        "demo", "demo:codac_uda:slow", "demo:access", entries(1)[0], "cohort"
+    )
+    graph = MagicMock()
+    parse = Mock()
+    owner = Mock(return_value=0)
+    monkeypatch.setattr(catalogue, "GraphClient", graph)
+    monkeypatch.setattr(catalogue, "persist_name_parses", parse)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", owner)
+    assert catalogue._persist_signals("demo", "cohort", [signal]) == 0
+    graph.assert_not_called()
+    parse.assert_not_called()
+    owner.return_value = 1
+    assert catalogue._persist_signals("demo", "cohort", [signal]) == 1
+    owner.assert_called_with([signal.model_dump(mode="json")])
+    parse.assert_called_once_with(
+        graph.return_value.__enter__.return_value,
+        [{"id": signal.id, "facility": "demo", "selector": signal.accessor}],
+    )

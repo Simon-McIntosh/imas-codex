@@ -1,0 +1,92 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own arm logs as the contract requires: the reviewed manifest records baseline_suite null and after_suite null (r-20261115T081123414329-sdbc-adjudicated-labels/manifest.md, and classification.json's parsed manifest carries the same two nulls), so no base arm and no after arm exist to difference. The recorded count is therefore 0 by absence of arms, not by a measured difference; the run is an evidence node with no pytest gate, and the one gate log it does carry (adjudicated-labels-gate.log) is a shell script that ends EXIT=0.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-15T11:00:44.208Z",
+  "dispatched_at": "2026-11-15T10:01:29Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "class": "render_defect",
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-adjudicated-labels.html",
+      "id": "render-raw-list-dump-1",
+      "line": "22",
+      "severity": "blocking",
+      "text": "blocking: the paragraph that reports how many names the adopted question was scored over interpolates the raw list instead of its count, so it emits an 87,423-character sentence reading \"...the held-out half of the committed split (['absorbed_power_of_beam_tracing_beam', ... 1021 names ... 'z_major_axis_unit_vector_of_shatter_cone'] names). It has no reading on the remaining 1023 development-half names...\" \u2014 the page is a deliverable the lead is meant to read, and the defect buries the scoring discussion in a dump of every scored name."
+    },
+    {
+      "class": "duplicated_capability",
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py",
+      "id": "duplicate_capability-1",
+      "line": "498",
+      "severity": "non-blocking",
+      "text": "non-blocking: wilson() at :498 and score() at :511 re-implement name-check-prototype.py:1135 wilson and :1148 score_arm without extending them, although the same script already loads that module through prototype() and calls proto.load_items, proto.ADJUDICATION_SYSTEM and run_batches; third_reading() at :193 and spend_report() at :206 likewise duplicate load_rows (:145) and recorded_spend (:195). The copy has already diverged: wilson returns [0.0, 0.0] for an empty total where the owner returns [None, None]."
+    },
+    {
+      "class": "evidence_receipt",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T081123414329-sdbc-adjudicated-labels/adjudicated-labels-gate.log",
+      "id": "gate-step-masked-2",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only gate log records its schema-validation step failing with \"python3: can't open file '.../validate.py': [Errno 2] No such file or directory\" (line 29) and then closes \"EXIT=0\" (line 31), because the scratch file the step named had already been deleted and the failing status was dropped before the exit sentinel; the manifest's \"schema pass over the adjudicated set: 2044 rows, 2044 distinct names...\" claim therefore has no recorded run behind it, only the worker's own prose (the string appears nowhere in the run's stream except inside two manifest writes). This review recomputed that claim from the landed set and found it true (2044 rows, 2044 distinct names, no null adjudicated verdict, readings 1722/242/80), so the substance stands while the receipt does not."
+    },
+    {
+      "class": "reproducibility",
+      "file": "docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json",
+      "id": "ephemeral-path-3",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: labels_path records an absolute path inside the reviewed run's detached worktree (/home/ITER/mcintos/Code/.reckon-worktrees/.../sdbc-adjudicated-labels/docs/...), which resolves to nothing once that worktree is reclaimed; the script also reads three of its inputs from ~/.config/reckon/crew/runs/<run-id>/ state directories (adjudicated-labels.py:43-46, :86-92) and one from prototype-state jsonl files, so the committed set cannot be rebuilt from the repository alone and will stop being rebuildable when run retention collects those directories."
+    },
+    {
+      "class": "record_legibility",
+      "file": "docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json",
+      "id": "misnamed-field-4",
+      "line": "103",
+      "severity": "non-blocking",
+      "text": "non-blocking: the adjudicated block reports read_but_not_adjudicated: 161, which is the dispute count; 93 of those 161 disputes were adjudicated to a new verdict (53 corrected, 161-68=93) and the remaining 68 upheld keep their original, so no subset of 161 names were \"read but not adjudicated\". A reader reconciling the block against rows whose dispute is non-null gets 161 from a key that says the opposite."
+    },
+    {
+      "class": "render_defect",
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-adjudicated-labels.html",
+      "id": "unclosed-paragraph-5",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: the third-reader paragraph at line 27 opens <p> and never closes it, and the spend paragraph at line 28 does the same, so the closing section nests two paragraphs inside the third-reader one; the page still renders but the structure does not survive a strict parse."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read the single commit 054ae0a79 against 02fb4543 commit by commit (one commit): a 934-line evidence script, a 29-line page, and the 20708-line adjudicated set; every path is inside the declared scope and the original reader-verdicts.json is untouched.",
+    "done_when": "the done_when names five clauses; each was recomputed from the landed set rather than read from the manifest: 2044 rows over 2044 distinct names with no null adjudicated verdict, readings on exactly 322 names (242 at two readers, 80 at three), the 40 split names each carrying a third reading, the original label file's sha256 88df49e4e5744423afa24968d5223081ad5ebc18a56d3516865f92789b15c2a8 unchanged, and recorded spend USD 1.3546 against the USD 5 ceiling.",
+    "durability": "the diff adds no test and no assertion; the checks it does add are one-shot command runs whose outputs the manifest records as prose, so no artefact reddens if the adjudication rule regresses.",
+    "goal": "the node goal is to produce the adjudicated label set for the name-against-definition check; docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json carries 2044 rows for 2044 distinct names with original_verdict, adjudicated_verdict and reached on every one, which is the goal's deliverable.",
+    "manifest": "read; it records status complete, the single commit, the seven checks as prose, and both baseline_suite and after_suite as null, so no suite arm exists from which added failures could be derived.",
+    "write_paths": "the manifest declares three paths (adjudicated-labels.py, sdbc-adjudicated-labels.html, reader-verdicts-adjudicated.json); git show --stat at 054ae0a79 reports exactly those three files, 21671 insertions and no deletion."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the live plan section sn-definitions-by-construction and the reviewed node's GOAL (produce the adjudicated label set for the name-against-definition check); the landed set docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json carries 2044 rows over 2044 distinct names, each with original_verdict, adjudicated_verdict and reached, and 161 names carry the dispute class the prototype recorded.\nVERDICT done_when: read the reviewed node's EVIDENCE fence (five clauses) and recomputed every clause from the landed artefacts rather than the manifest: 2044 rows / 2044 distinct names / no null adjudicated verdict, readings on exactly 322 names (1722 with none, 242 at two readers, 80 at three), all 40 prototype splits carry three readings, the untouched reader-verdicts.json hashes to 88df49e4..., and adjudication rule violations recomputed over all 2044 rows number zero.\nVERDICT write_paths: read the manifest's three declared paths and git show --stat at 054ae0a79; the commit changes exactly adjudicated-labels.py, sdbc-adjudicated-labels.html and reader-verdicts-adjudicated.json, 21671 insertions, 0 deletions, nothing under imas_codex/ or tests/.\nVERDICT manifest: read; it states status complete, records the single commit and seven checks as prose, records baseline_suite: null and after_suite: null, and its spend figure USD 1.3546 matches adjudication-state/spend-third-reader.json and the job log's THIRD-READER_SPEND_USD line.\nVERDICT diff: read commit 054ae0a79 against 02fb4543 in full; the script reuses name-check-prototype.py's loaders, class sheet and adjudication prompt through prototype(), draws 20+20 controls from a 38/94 pool by seeded shuffle, and the page is regenerated from the written set at render time; the committed set's third-reader readings reproduce the 80 rows of adjudication-state/third-reader.jsonl with zero mismatches.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every clause of the goal and done_when is present in reader-verdicts-adjudicated.json and sdbc-adjudicated-labels.html, and the headline scores in the page (recall 0.916058, specificity 0.911647) reproduce exactly from the landed set's question_verdict column.\nSCORE evidence: 12\nJUSTIFICATION evidence: the gate log records the report step's recomputation (moved 21/51 and the full score dict) but its schema step failed on a deleted scratch file and closed EXIT=0, and the run declares neither a base nor an after suite, so two of the five done-when clauses rest on the worker's prose alone.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 054ae0a79 lists only docs/evidence/fragments/sn-definitions-by-construction/{adjudicated-labels.py,sdbc-adjudicated-labels.html} and docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json, exactly the three declared write paths, with no deletion and no edit to the input label file.\nSCORE durability: 4\nJUSTIFICATION durability: the diff adds no test and no assertion (no path under tests/ changes at 054ae0a79), so nothing reddens if the adjudication rule in adjudicated-labels.py:364-436 regresses; the only checks are one-shot command runs whose outputs the manifest stores as prose.\nSCORE fit: 15\nJUSTIFICATION fit: adjudicated-labels.py follows the fragment-directory idiom by loading docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py and reusing its ADJUDICATION_SYSTEM prompt, but its constants at :36-46 hardcode two run ids and an operator home path, and the deliverable filename is the plan-mandated one.\nSCORE reuse: 5\nJUSTIFICATION reuse: adjudicated-labels.py:498-539 re-implements wilson and a reduced score_arm that the loaded owner already provides at name-check-prototype.py:1135 and :1148, and this is a capability the repository owns and the same script reaches.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-adjudicated-labels.html:22 blocking: the scoring paragraph interpolates the 1021-name held-out list instead of its count, emitting an 87423-character sentence that buries the adopted-question discussion in a raw Python list dump.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py:498 non-blocking: wilson() and score() re-implement name-check-prototype.py:1135 and :1148 without extending the owner, and third_reading() and spend_report() duplicate :145 and :195; the copy has diverged on the empty-total return.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T081123414329-sdbc-adjudicated-labels/adjudicated-labels-gate.log:29 non-blocking: the schema-validation step failed on a deleted scratch path and the log still closes EXIT=0, so the manifest's schema-pass claim is carried by prose rather than by a recorded run, even though this review recomputed the claim and found it true.\nFINDING docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json:4 non-blocking: labels_path records a detached-worktree absolute path that stops resolving when the worktree is reclaimed.\nFINDING docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json:103 non-blocking: read_but_not_adjudicated: 161 is the dispute count, not a count of names that were read and not adjudicated, since 93 of those disputes produced a new verdict.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-adjudicated-labels.html:27 non-blocking: two paragraphs in the closing section are opened and never closed.\n",
+  "review_node": "review-of-sdbc-adjudicated-labels-054ae0a796dc",
+  "review_run_id": "r-20261115T100059703971-review-of-sdbc-adjudicated-labels-054ae0a796dc",
+  "reviewed_base_sha": "02fb45437b641644e4c1760864b44a04334905da",
+  "reviewed_head_sha": "054ae0a796dcc3e1c5d599bac2d7a9cda6980252",
+  "reviewed_run_id": "r-20261115T081123414329-sdbc-adjudicated-labels",
+  "reviewer": "independent review worker",
+  "scores": {
+    "durability": 4,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T11:00:54.308563+00:00",
+  "total": 75
+}

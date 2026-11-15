@@ -38,9 +38,9 @@ imports:
   - common
   - imas_dd
 
-# =============================================================================
+# ======================================================================
 # Enums
-# =============================================================================
+# ======================================================================
 
 enums:
   ArchiveMetadataState:
@@ -50,6 +50,16 @@ enums:
         description: Both metadata interfaces returned valid documents
       unavailable:
         description: An archive metadata request failed; fields are absent and errors retained
+
+  SignalNameParseOutcome:
+    description: Syntactic coverage of an archive selector, independent of convention confirmation
+    permissible_values:
+      parsed:
+        description: Component prefix, control function and variable token match the parser grammar
+      partly_parsed:
+        description: A component prefix is recognised but the function or variable token is incomplete
+      not_conforming:
+        description: No unambiguous component prefix can be derived
 
   ArchiveSamplingMode:
     description: Sampling semantics established by archive metadata or a read
@@ -704,9 +714,9 @@ enums:
       local:
         description: Local repository without public remote
 
-# =============================================================================
+# ======================================================================
 # Core Classes
-# =============================================================================
+# ======================================================================
 
 classes:
   Facility:
@@ -1441,9 +1451,9 @@ classes:
       evidence_summary:
         description: Brief summary of pattern evidence (e.g., "15 MDSplus, 3 IMAS writes")
 
-# =============================================================================
+# ======================================================================
 # Evidence Class (Linked semantic indicators, reusable across node types)
-# =============================================================================
+# ======================================================================
 
   Evidence:
     description: >-
@@ -1559,9 +1569,9 @@ classes:
         description: When repository was ingested (locally or via API)
         range: datetime
 
-# =============================================================================
+# ======================================================================
 # User Classes
-# =============================================================================
+# ======================================================================
 
   FacilityUser:
     description: >-
@@ -1664,9 +1674,9 @@ classes:
       # Linked accounts populated via IS_PERSON relationship:
       # (FacilityUser)-[:IS_PERSON]->(Person)
 
-# =============================================================================
+# ======================================================================
 # Data Infrastructure Classes (Public - no IPs or paths)
-# =============================================================================
+# ======================================================================
 
   MDSplusServer:
     description: An MDSplus data server (internal name only, no IP)
@@ -1690,6 +1700,36 @@ classes:
         range: ServerRole
       description:
         description: What data this server hosts
+
+  PlantComponent:
+    description: >-
+      Candidate plant component identified by a hierarchical selector prefix.
+      A syntactic parent is not a verified engineering identity or PBS mapping.
+    class_uri: facility:PlantComponent
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Composite key as facility_id:plant_component:code
+      facility_id:
+        required: true
+        range: Facility
+        annotations:
+          relationship_type: AT_FACILITY
+      code:
+        required: true
+        description: Complete selector prefix through this hierarchy level
+      name:
+        description: Local token at this level of the candidate hierarchy
+      description:
+        description: Explanation of this candidate component's origin
+      parent_component:
+        range: PlantComponent
+        description: Candidate parent derived by removing the final hyphen-delimited token
+        annotations:
+          relationship_type: PARENT_COMPONENT
+      parse_provenance:
+        description: Parser rule provenance; does not assert engineering identity
 
   ArchiveEndpoint:
     description: >-
@@ -2630,9 +2670,9 @@ classes:
       description:
         description: What this shot range represents
 
-# =============================================================================
+# ======================================================================
 # Data Semantics Classes
-# =============================================================================
+# ======================================================================
 
   Diagnostic:
     description: >-
@@ -2939,6 +2979,28 @@ classes:
       archive_cohorts:
         description: Opaque fingerprints of declared archive cohorts that enumerated this selector
         multivalued: true
+      name_parse_outcome:
+        range: SignalNameParseOutcome
+        description: Syntactic parse coverage; parsed does not mean confirmed against a naming convention
+      name_parse_provenance:
+        description: Origin of the rules used to interpret the original accessor
+      name_parse_rule_status:
+        description: Whether the grammar has been confirmed against the naming convention
+      name_parse_reason:
+        description: Explanation of incomplete or unrecognised selector syntax
+      plant_system_code:
+        description: Candidate plant-system token derived from the first selector-prefix segment
+      plant_component_code:
+        description: Complete candidate component prefix before the colon
+      control_function:
+        description: Candidate control-function token between the colon and the variable delimiter
+      variable_token:
+        description: Variable suffix after the control-function delimiter, preserved verbatim
+      candidate_plant_component:
+        range: PlantComponent
+        description: Syntactically derived candidate, never a verified identity
+        annotations:
+          relationship_type: CANDIDATE_PLANT_COMPONENT
       sampling_mode:
         description: Archive-established sampling semantics, unknown when not established
         range: ArchiveSamplingMode
@@ -3343,9 +3405,9 @@ classes:
         description: Previous version of this code it replaces
         range: AnalysisCode
 
-# =============================================================================
+# ======================================================================
 # IMAS Mapping Classes
-# =============================================================================
+# ======================================================================
 
 # NOTE: IMASNode is now defined in imas_dd.yaml as IMASNode — the unified
 # representation of IMAS Data Dictionary paths. Do not define it here.
@@ -3473,9 +3535,9 @@ classes:
         description: When this evidence was created
         range: datetime
 
-# =============================================================================
+# ======================================================================
 # Code Examples Classes
-# =============================================================================
+# ======================================================================
 
   CodeExample:
     description: >-
@@ -4270,9 +4332,9 @@ classes:
         description: Total LLM steps executed in this run
         range: integer
 
-# =============================================================================
+# ======================================================================
 # Documentation Source Classes
-# =============================================================================
+# ======================================================================
 
   DocSource:
     description: >-
@@ -4336,9 +4398,9 @@ classes:
       notes:
         description: Admin notes about this source
 
-# =============================================================================
+# ======================================================================
 # Wiki Documentation Classes
-# =============================================================================
+# ======================================================================
 
   WikiPage:
     description: >-

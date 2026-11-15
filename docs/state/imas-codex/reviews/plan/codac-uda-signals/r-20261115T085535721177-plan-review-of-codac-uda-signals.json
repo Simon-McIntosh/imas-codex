@@ -1,0 +1,169 @@
+{
+  "absent_items": [],
+  "accepted_edits": [
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "8231d64a66ba414e6ada7698b055ad68f482abba7d786d8b73c1ceb8bc11ae08",
+        "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04"
+      },
+      "reason": "Versions 33 to 35 make exactly the three changes the newest content review asked for: section links matching the declared waits, a narrowed positive control in section 15, and the resolved follow-up; no other text changed.",
+      "units": [
+        "_document",
+        "s15"
+      ],
+      "when": "2026-11-15T09:37:10.716048+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "s12": "f3927d487efae8a091a9b8189b5403cba2a58302b0c30ad4489c1a4110d909dd"
+      },
+      "reason": "Version 40 resolves the contradiction the section 12 worker measured: the archive refuses metadata for about twelve percent of listed variables, so the section now catalogues them with an explicit unavailable state; the negative control still forbids empty metadata written as success.",
+      "units": [
+        "s12"
+      ],
+      "when": "2026-11-15T10:07:29.005233+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a"
+      },
+      "reason": "Version 43 records the lead's decision that the full archive catalogue goes to a private store and the graph keeps only the pilot set; the measures were restated for the store, and the negative control now also forbids any graph count change.",
+      "units": [
+        "s12"
+      ],
+      "when": "2026-11-15T10:44:32.505512+00:00"
+    }
+  ],
+  "completed_at": "2026-11-15T09:16:19.290Z",
+  "dispatched_at": "2026-11-15T08:57:00Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:115",
+      "id": "wiring-1",
+      "reason": "the dependency exists only in the queue-ordering meta, so the section as read states no wait and the correction is a one-attribute edit that makes the two declarations consistent.",
+      "text": "section 15's own declaration reads data-links=\"\" while plan-section-depends-on declares \"s15\":[\"codac-uda-signals#s4\"], so the two declarations of the same dependency disagree; \u00a76 has the mirror defect at :76 (data-links omits s13, which the meta requires), and a reader of either section sees a wait that is not there",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:116",
+      "id": "done_when-1",
+      "reason": "without the exemption the node can complete its measurement correctly and still fail its control on two of the five sources it names, so the control must be narrowed to sources that hold variable names and the remaining sources must record why no pre-registered variable applies.",
+      "text": "\u00a715's positive control demands \"for each source, one variable known beforehand to appear in it is found through the stated access path\", but the section's own Delivers list includes the plant breakdown structure in ICP and the naming convention documents, which map component codes and prose rather than containing archive variable names, so no variable can be pre-registered as appearing in them and the control cannot pass for a source that is working; \u00a715 has no clause allowing such a source to record its own outcome, although \u00a79 was given exactly that clause for surfaces with no consumer",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:82",
+      "id": "wiring-2",
+      "reason": "an unrecorded follow-up is work the plan promises and does not carry, and the plot guard is already known to exist as a fourth copy awaiting that migration.",
+      "text": "\u00a77's Delivers states that \"moving them onto it is a follow-up, not part of this section\", but the Followups block holds a single entry (f-cus-001, \"Build the scanner and loader sections\") and nothing records the figure-script migration, so the deferred work the section names has no tracked owner; the same text at :158 is also stale, still describing \"sections 2 to 9 buildable\" while \u00a71, \u00a72, \u00a73, \u00a74, \u00a75, \u00a77 and \u00a79 now carry data-status=\"done\"",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+  "plan_fingerprint": "f63bab6c81f6e45673d6954d0aafe43dcb69d20f2ab2b07879a399973706c63e",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 32,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 15's own links now name the scanner section and section 6's now include the pipeline-run section, matching the declared waits.",
+      "reason": "",
+      "when": "2026-11-15T09:34:38.828592+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 15's positive control now applies to each source that holds archive variable names; a source that holds component codes or prose records what it maps and how a variable is joined to it, as its own outcome.",
+      "reason": "",
+      "when": "2026-11-15T09:34:49.672957+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "A follow-up now records the figure-script migration as a separate plan to be written, as the lead chose, and the stale follow-up describing sections 2 to 9 as buildable is resolved.",
+      "reason": "",
+      "when": "2026-11-15T09:34:55.428186+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "note": "Section 15's positive control now applies to each source that holds archive variable names; a source that holds component codes or prose records what it maps and how a variable is joined to it, as its own outcome.",
+      "reason": "",
+      "when": "2026-11-15T09:34:49.672957+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "note": "Section 15's own links now name the scanner section and section 6's now include the pipeline-run section, matching the declared waits.",
+      "reason": "",
+      "when": "2026-11-15T09:34:38.828592+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "note": "A follow-up now records the figure-script migration as a separate plan to be written, as the lead chose, and the stale follow-up describing sections 2 to 9 as buildable is resolved.",
+      "reason": "",
+      "when": "2026-11-15T09:34:55.428186+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261115T085535721177-plan-review-of-codac-uda-signals.json",
+  "review_run_id": "r-20261115T085535721177-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "d69695a8c4c5769dd6b6042b6cadd63e057f380d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 scripts/codac_uda_prototype/ and docs/evidence/fragments/codac-uda-signals/prototype-report.md both resolve in the repository, and the figure directories the landed sections cite exist; extensionless hrefs were resolved as <path>.html before judging.",
+    "done_when": "a finding \u2014 \u00a715's positive control requires, for each source, \"one variable known beforehand to appear in it\", but two of the five source types the section names (the plant breakdown structure in ICP, the naming convention documents) hold component codes and prose rather than archive variable names, so the control is unsatisfiable for a source behaving correctly and \u00a715 carries no exemption of the kind \u00a79 was given.",
+    "evidence_paths": "pass \u2014 every section puts its measurements in the landing record and its documents under docs/evidence/fragments/codac-uda-signals/, with the figure directory docs/figures/codac-uda-signals/ present; no section writes evidence to a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 the text carries plan section identifiers, which are the plan's own structure, and no ticket number, version tag or changelog prose reaches a symbol, file or comment.",
+    "reasoning": "pass \u2014 the root causes \u00a71 records (no data-system entry in the facility configuration, an executor that applies setup commands only on its remote branch, the schema gaps) are the ones the sections repair; every endpoint named in the changed text is obtainable from the sources it cites and each measure can fail; no section prescribes a code path, a step sequence or a function to call.",
+    "single_goal": "pass \u2014 each node names one deliverable; \u00a77's save function is the guard for the figures it delivers, not a second goal.",
+    "wiring": "a finding \u2014 \u00a715's section element carries data-links=\"\" while the document's plan-section-depends-on now declares s15 on codac-uda-signals#s4, so the section's own declaration and the queue ordering disagree; \u00a76 has the mirror gap (its data-links omits s13, which the meta requires), and \u00a77's promised follow-up has no entry in the Followups block."
+  },
+  "section_digests": {
+    "_document": "ca046e7dd484e0a16818d273a3a96b67d0c9ab9c449484f6e87ce0e6cccd366a",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "5df9abf62602bccf58438f24890c3fc3de876ebcbf5a037d1698007d222718b4",
+    "s13": "7057645fb421f6c200ab061f9b8ec3e3195bea653cda5a66bb412439d13d81f9",
+    "s14": "117b94eb546d6e2e6ecf9f388e75cd36bc15a9f1f662e8e7b1a5db994b1bb044",
+    "s15": "0f253e8e2467e5b303b08b5a9899b74126937b5d0bc6899fc876cc944660f940",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "2d64094cc6100bc7fb8ee8ee9bd34a47695d4a4bdfed54b1c24757cbb626210e",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T09:20:33.256510+00:00",
+  "total": null
+}

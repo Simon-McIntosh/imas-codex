@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 
 from imas_codex.discovery.signals.scanners.base import ScanResult, register_scanner
+from imas_codex.discovery.signals.variable_name_graph import persist_name_parses
+from imas_codex.discovery.signals.variable_names import parse_variable_name
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.models import (
     ArchiveEndpoint,
@@ -126,6 +128,26 @@ def _persist_archives(facility: str, archives: list[ArchiveEndpoint]) -> None:
         raise RuntimeError("archive source bindings were not acknowledged")
 
 
+def _persist_signals(facility: str, cohort: str, signals: list[FacilitySignal]) -> int:
+    """Delegate signal writes to their owner, then persist derived name links."""
+    from imas_codex.discovery.signals.parallel import ingest_discovered_signals
+
+    count = ingest_discovered_signals(
+        [signal.model_dump(mode="json") for signal in signals]
+    )
+    if count != len(signals):
+        return count
+    with GraphClient() as graph:
+        persist_name_parses(
+            graph,
+            [
+                {"id": signal.id, "facility": facility, "selector": signal.accessor}
+                for signal in signals
+            ],
+        )
+    return count
+
+
 def _confirm(signal: str, archive: str) -> None:
     with GraphClient() as graph:
         rows = graph.query(CONFIRM_QUERY, signal=signal, archive=archive)
@@ -237,13 +259,8 @@ class CodacUDAScanner:
             ]
             for offset in range(0, len(pending), 100):
                 batch = pending[offset : offset + 100]
-                from imas_codex.discovery.signals.parallel import (
-                    ingest_discovered_signals,
-                )
-
                 count = await asyncio.to_thread(
-                    ingest_discovered_signals,
-                    [signal.model_dump(mode="json") for signal in batch],
+                    _persist_signals, facility, fingerprint, batch
                 )
                 if count != len(batch):
                     raise RuntimeError(
@@ -427,6 +444,7 @@ class CodacUDAScanner:
             sampling_evidence=entry.get("sampling_evidence")
             if mode != "unknown"
             else None,
+            **parse_variable_name(name).properties(facility),
         )
 
     async def check(
