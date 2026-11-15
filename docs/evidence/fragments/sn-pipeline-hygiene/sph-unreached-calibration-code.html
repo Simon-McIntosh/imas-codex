@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-pipeline-hygiene">
+<meta name="node-id" content="sph-unreached-calibration-code">
+<title>No unreached code in the review calibration module</title>
+</head>
+<body><main>
+<h1 id="sph-unreached-calibration-code-title">The calibration module carries only code something reaches</h1>
+<p id="sph-unreached-calibration-code-outcome">Twelve of the eighteen
+module-level definitions in
+<code>imas_codex/standard_names/review/cascade_calibration.py</code> had no
+caller: the axis fitters that once produced the review cutoffs, and the golden
+fixture paths and receipt reader they alone used. Those fitters are deleted and
+the module is <strong>100 lines, down from 375</strong>. What remains is the
+rate matcher the test keeps cross-checking against
+<code>cascade.map_decision_score</code>, the metric helpers the
+undefined-precision test asserts, and the receipt reader whose refusal test
+names the path it could not read. A test now fails when a module-level
+definition loses its caller.</p>
+
+<h2 id="sph-unreached-calibration-code-reachability">Reachability listing, before and after.&nbsp;</h2>
+<p id="sph-unreached-calibration-code-instrument">The listing comes from the
+same guard the test runs: <code>calibration_reachability()</code> in
+<code>tests/standard_names/test_cascade_calibration.py</code> parses the module,
+takes every module-level function, class and constant, roots reachability at
+names read from a caller file in <code>imas_codex/</code> or <code>tests/</code>,
+and closes over the references found inside reached definitions. Module-level
+assignments are recorded as referrers but confer no reach, so a constant kept
+alive only by another unreached constant is reported unreached. The instrument
+is shown seeing the module rather than an empty read: it reports 18 definitions
+before and 6 after, and names the live rate matcher in both.</p>
+
+<p id="sph-unreached-calibration-code-before">Before, at base
+<code>0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788</code>: 18 definitions, 12 with no
+caller.</p>
+<pre id="sph-unreached-calibration-code-before-listing"><code># lines: 375
+# definitions: 18
+# definitions with no caller: 12
+
+ line  kind     reached  name &lt;- referrers
+   17  constant NO       THRESHOLDS_PATH &lt;- NO CALLER
+   18  constant NO       _REPO &lt;- module level
+   19  constant NO       _GOLDEN_DIR &lt;- module level
+   20  constant NO       GOLDEN_NAME &lt;- NO CALLER
+   21  constant NO       GOLDEN_DOCS &lt;- NO CALLER
+   24  class    yes      ReceiptUnavailable &lt;- _labels; _name_axis; _read_json; imported by tests/standard_names/test_cascade_calibration.py
+   28  function yes      _read_json &lt;- _docs_axis; _labels; imported by tests/standard_names/test_cascade_calibration.py
+   41  function NO       _labels &lt;- _docs_axis; _name_axis
+   63  function NO       _cached_conventions &lt;- _docs_axis
+   83  function NO       _name_axis &lt;- NO CALLER
+  183  function NO       _logistic &lt;- _name_axis
+  190  function NO       _clamp &lt;- _logistic
+  194  function NO       _fit_name_logistic &lt;- _name_axis
+  233  function NO       _docs_axis &lt;- NO CALLER
+  307  function yes      matched_cutoff &lt;- imported by tests/standard_names/test_cascade_calibration.py
+  342  constant yes      METRICS &lt;- _metric_counts
+  352  function yes      _metric_counts &lt;- _metric
+  373  function yes      _metric &lt;- imported by tests/standard_names/test_cascade_calibration.py</code></pre>
+
+<p id="sph-unreached-calibration-code-after">After, at
+<code>4149f28076db36bd264fa2cf25f77e48b07615b0</code>: 6 definitions, none
+without a caller.</p>
+<pre id="sph-unreached-calibration-code-after-listing"><code># lines: 100
+# definitions: 6
+# definitions with no caller: 0
+
+ line  kind     reached  name &lt;- referrers
+   15  class    yes      ReceiptUnavailable &lt;- _read_json; imported by tests/standard_names/test_cascade_calibration.py
+   19  function yes      _read_json &lt;- imported by tests/standard_names/test_cascade_calibration.py
+   32  function yes      matched_cutoff &lt;- imported by tests/standard_names/test_cascade_calibration.py
+   67  constant yes      METRICS &lt;- _metric_counts
+   77  function yes      _metric_counts &lt;- _metric
+   98  function yes      _metric &lt;- imported by tests/standard_names/test_cascade_calibration.py</code></pre>
+
+<h2 id="sph-unreached-calibration-code-guard">The guard fires on a callerless function.</h2>
+<p id="sph-unreached-calibration-code-guard-test">Two default-tier tests hold
+this. <code>test_every_module_definition_is_reached_from_code_or_a_test</code>
+asserts the unreached list is empty; it was red at base over exactly the twelve
+names above. <code>test_reachability_flags_a_function_nothing_reaches</code>
+appends a synthetic callerless definition to the module source and asserts the
+instrument reports precisely that name, so the guard is falsifiable without
+editing the module. The external control was the real thing: a callerless
+<code>_refit_cutoffs</code> appended to the module turned the first test red
+with <code>assert ['_refit_cutoffs'] == []</code> and <code>EXIT=1</code>. It
+was then removed.</p>
+
+<h2 id="sph-unreached-calibration-code-behaviour">Stored cutoffs and review-path behaviour unchanged.</h2>
+<p id="sph-unreached-calibration-code-artifact">No threshold value is touched:
+<code>imas_codex/standard_names/review/cascade_thresholds.json</code> is
+unmodified (SHA-256
+<code>a0aa1e74be4b0a50c182de10f6da72e9974e3f04568736e3ddb2c13e3578024a</code> at
+base and at head). The surviving functions are byte-identical in body to the
+base revision apart from the module docstring; only definitions that no caller
+reached are removed.</p>
+<p id="sph-unreached-calibration-code-gate">The whole
+<code>tests/standard_names</code> directory ran from a <code>git archive</code>
+of each arm, one <code>all_debug</code> job per arm
+(<code>1318657</code> base, <code>1318658</code> head), with the generated
+models copied in, the shared <code>.venv</code> reused and the module imported
+from the extracted tree. Base at
+<code>0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788</code>:
+<strong>24 failed, 8737 passed, 12 skipped, 541 deselected, 43 warnings in
+768.61s (0:12:48); EXIT=1</strong>. Head at
+<code>4149f28076db36bd264fa2cf25f77e48b07615b0</code>:
+<strong>24 failed, 8739 passed, 12 skipped, 541 deselected, 43 warnings in
+768.33s (0:12:48); EXIT=1</strong>. The 24 <code>FAILED</code> ids diff empty
+between the arms, so the head adds no failure; the two extra passes are the two new
+guard tests in <code>test_cascade_calibration.py</code>. The shared failures
+are properties of the archive tree rather than of this change — for example
+<code>test_release_names_missing_preview_link_invariant</code> raises
+<code>ReviewingGuideLinkError: no catalog checkout is resolved</code> in both
+arms — and are reported as outside this node's scope rather than triaged.</p>
+
+<p id="sph-unreached-calibration-code-record">Logs, the reachability driver and
+the arm scripts are under the run directory
+<code>r-20261115T210048550087-sph-unreached-calibration-code</code>; the negative
+control is its <code>negative-control.log</code>.</p>
+</main></body>
+</html>
