@@ -51,6 +51,16 @@
       "note": "Section 6's first clause no longer accepts a list of divergent families: it requires one wording per species family as section 10 delivers it, with only the members section 10 names as exceptions listed by name. The list-with-reason route remains for operator forms only.",
       "reason": "",
       "when": "2026-11-15T17:23:09.481469+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c633434dbc49b0ffd2401b5daea3a9495c7552a4",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "plan-effort-hours is 41, the sum of the ten sections.",
+      "reason": "",
+      "when": "2026-11-15T17:23:16.214457+00:00"
     }
   ],
   "responses": {
@@ -62,6 +72,15 @@
       "note": "Section 6's first clause no longer accepts a list of divergent families: it requires one wording per species family as section 10 delivers it, with only the members section 10 names as exceptions listed by name. The list-with-reason route remains for operator forms only.",
       "reason": "",
       "when": "2026-11-15T17:23:09.481469+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c633434dbc49b0ffd2401b5daea3a9495c7552a4",
+      "commit_basis": "edit",
+      "note": "plan-effort-hours is 41, the sum of the ten sections.",
+      "reason": "",
+      "when": "2026-11-15T17:23:16.214457+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261115T171303832091-plan-review-of-sn-definitions-by-construction.json",
