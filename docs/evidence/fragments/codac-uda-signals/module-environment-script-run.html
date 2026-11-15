@@ -1,0 +1,68 @@
+<article id="module-environment-script-run-evidence">
+  <h3>Local module setup and packaged archive reader</h3>
+  <p>The synchronous and asynchronous script executors apply caller-supplied
+    shell setup before running the caller-selected interpreter. With no setup,
+    both retain the direct interpreter invocation. The shared local command
+    builder quotes interpreter arguments and replaces the setup shell with
+    Python; a failed setup prevents the script from running. Facility and data
+    system resolution remain in the existing facility-aware layer.</p>
+  <p>The standalone prototype reader is packaged as
+    <code>imas_codex/remote/scripts/codac_uda.py</code>. Callers invoke it through
+    <code>run_python_script()</code> or <code>async_run_python_script()</code>,
+    supplying <code>python_command</code> and <code>setup_commands</code>.
+    It receives a JSON operation on stdin and returns a JSON receipt. Its
+    endpoint and mandatory operator exclusions arrive through
+    <code>CODAC_UDA_HOST</code>, <code>CODAC_UDA_PORT</code> and
+    <code>CODAC_UDA_OPERATOR_HOSTS</code> in the caller-supplied environment.</p>
+  <table>
+    <thead><tr><th>Control</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Recorded defect before repair</td><td>4 failed, 8 deselected in
+        2.06 s. Both entry points returned <code>None</code> instead of the
+        declared environment value; both setup-only client imports failed.</td></tr>
+      <tr><td>Focused environment controls</td><td>12 passed in 1.06 s: setup
+        inheritance, omitted and empty setup, JSON transport, setup failure and
+        interpreter selection, through both entry points.</td></tr>
+      <tr><td>Combined environment and packaged reader controls</td><td>21
+        passed in 6.61 s, including a single invented variable with unit and
+        description, clean structured output, missing-client receipts, and
+        refusal of operator endpoints before client construction.</td></tr>
+      <tr><td>Declared mutation: remove local setup</td><td>2 failed, 10
+        deselected in 1.71 s. Both
+        <code>test_local_setup_makes_client_importable</code> cases failed with
+        <code>ModuleNotFoundError: No module named 'archive_client'</code>.
+        The original executor was restored byte for byte.</td></tr>
+      <tr><td>Live slow-archive listing, synchronous</td><td>1 variable in
+        9.530946 s, with an exact selector match, a description, no unit and
+        no metadata warnings.</td></tr>
+      <tr><td>Live slow-archive listing, asynchronous</td><td>1 variable in
+        11.363129 s, with an exact selector match, a description, no unit and
+        no metadata warnings.</td></tr>
+    </tbody>
+  </table>
+  <p>The live selector is the exact variable from the prototype's successful
+    known-day slow-archive read. Its spelling was read from the private receipt
+    and retained only in memory. Endpoint, port and operator exclusions were
+    read in place from the coordinator-designated private configuration.
+    The declared module setup and <code>python3</code> ran in one shell through
+    each local executor entry point. Native client endpoint settings were
+    explicitly aligned with the selected archive after module loading.</p>
+  <p>The two live listings used 2 of the 4 authorized requests; no retries were
+    needed and no operator endpoint was contacted. Elapsed times include setup,
+    interpreter startup, archive listing, metadata lookup and receipt parsing.
+    Both calls ran on the assigned compute node under allocation
+    <code>1313886</code>. Private endpoint and selector spellings do not appear
+    in this record or in the sanitized live receipts.</p>
+  <p>Implementation commits:
+    <code>db8fe3608f8df868a154005f86098ef223029857</code> (local setup) and
+    <code>f3153d9c97c54bb4647b3dff5db4fdfb8c541bd0</code> (packaged reader).
+    The test environment reuses the project's shared virtual environment
+    without syncing it. The implementation and mutation checks ran in the
+    assigned compute allocation on <code>98dci4-clu-2001</code>.</p>
+  <p>Gate logs and the exact mutation driver are retained in the assigned
+    <code>r-20261115T021213562433-module-environment-script-run</code> run
+    directory, alongside <code>live-listings.log</code> and
+    <code>live-listings.json</code>. This record delivers the implementation,
+    focused controls and live criteria; section closure and verification of the
+    merged result remain with the coordinator.</p>
+</article>
