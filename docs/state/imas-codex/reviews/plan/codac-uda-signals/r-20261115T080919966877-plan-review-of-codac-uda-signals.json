@@ -41,7 +41,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 22,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "da4c390a6e83e1cf7ef0e24816b3f77878e566dd",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 15 now samples two hundred variables from the cohort the landed scanner section catalogued and declares its wait on that section, so it needs nothing the full-archive catalogue delivers.",
+      "reason": "",
+      "when": "2026-11-15T08:37:36.210475+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "da4c390a6e83e1cf7ef0e24816b3f77878e566dd",
+      "commit_basis": "edit",
+      "note": "Section 15 now samples two hundred variables from the cohort the landed scanner section catalogued and declares its wait on that section, so it needs nothing the full-archive catalogue delivers.",
+      "reason": "",
+      "when": "2026-11-15T08:37:36.210475+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261115T080919966877-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261115T080919966877-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "43b6e678cd288ea424728e8afd30599089bd248e",
   "rubric": "content",
