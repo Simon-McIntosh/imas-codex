@@ -105,6 +105,16 @@
       "note": "Section 1 places the legend outcome on the signal plot (one row for up to six traces, with a test) and no longer asks the save function to re-lay or refuse a legend.",
       "reason": "",
       "when": "2026-11-15T22:32:02.793361+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "Section 2's delivered state and done-when now require that no script keeps a save wrapper of its own.",
+      "reason": "",
+      "when": "2026-11-15T22:32:06.710519+00:00"
     }
   ],
   "responses": {
@@ -143,6 +153,15 @@
       "note": "The one-definition criterion is narrowed to scripts/ and imas_codex/; the thirteen frozen record scripts under docs/ are named as out of scope.",
       "reason": "",
       "when": "2026-11-15T22:31:53.317729+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "note": "Section 2's delivered state and done-when now require that no script keeps a save wrapper of its own.",
+      "reason": "",
+      "when": "2026-11-15T22:32:06.710519+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/figure-scripts-use-the-shared-save-function/r-20261115T204759308091-plan-review-of-figure-scripts-use-the-shared-save-function.json",
