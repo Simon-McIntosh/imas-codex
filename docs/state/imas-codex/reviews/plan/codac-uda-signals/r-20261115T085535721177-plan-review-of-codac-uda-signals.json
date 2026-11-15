@@ -43,9 +43,28 @@
       "note": "Section 15's own links now name the scanner section and section 6's now include the pipeline-run section, matching the declared waits.",
       "reason": "",
       "when": "2026-11-15T09:34:38.828592+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 15's positive control now applies to each source that holds archive variable names; a source that holds component codes or prose records what it maps and how a variable is joined to it, as its own outcome.",
+      "reason": "",
+      "when": "2026-11-15T09:34:49.672957+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "82632c6cf883967779f94c267638a91f6418b9a9",
+      "commit_basis": "edit",
+      "note": "Section 15's positive control now applies to each source that holds archive variable names; a source that holds component codes or prose records what it maps and how a variable is joined to it, as its own outcome.",
+      "reason": "",
+      "when": "2026-11-15T09:34:49.672957+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
