@@ -29,11 +29,11 @@
   <table id="model-seats-name-latest-versions-probe">
     <thead><tr><th>known-older identifier put to the derivation</th><th>line it resolves into</th><th>newest of that line</th></tr></thead>
     <tbody>
-      <tr id="model-seats-name-latest-versions-probe-sonnet"><td><code>openrouter/anthropic/claude-sonnet-5</code></td><td><code>anthropic/claude-sonnet</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td></tr>
-      <tr id="model-seats-name-latest-versions-probe-sol"><td><code>openrouter/openai/gpt-6-sol</code></td><td><code>openai/gpt-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td></tr>
-      <tr id="model-seats-name-latest-versions-probe-gemini"><td><code>openrouter/google/gemini-3.5-flash</code></td><td><code>google/gemini-flash</code></td><td><code>openrouter/google/gemini-3.8-flash</code></td></tr>
-      <tr id="model-seats-name-latest-versions-probe-mimo"><td><code>openrouter/xiaomi/mimo-v2.5-pro</code></td><td><code>xiaomi/mimo-pro</code></td><td><code>openrouter/xiaomi/mimo-v2.6-pro</code></td></tr>
-      <tr id="model-seats-name-latest-versions-probe-deepseek"><td><code>openrouter/deepseek/deepseek-v4-flash</code></td><td><code>deepseek/deepseek-flash</code></td><td><code>openrouter/deepseek/deepseek-v4.1-flash</code></td></tr>
+      <tr id="model-seats-name-latest-versions-probe-sonnet"><td><code>openrouter/anthropic/claude-sonnet-5</code></td><td><code>openrouter/anthropic/claude-sonnet</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td></tr>
+      <tr id="model-seats-name-latest-versions-probe-sol"><td><code>openrouter/openai/gpt-6-sol</code></td><td><code>openrouter/openai/gpt-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td></tr>
+      <tr id="model-seats-name-latest-versions-probe-gemini"><td><code>openrouter/google/gemini-3.5-flash</code></td><td><code>openrouter/google/gemini-flash</code></td><td><code>openrouter/google/gemini-3.8-flash</code></td></tr>
+      <tr id="model-seats-name-latest-versions-probe-mimo"><td><code>openrouter/xiaomi/mimo-v2.5-pro</code></td><td><code>openrouter/xiaomi/mimo-pro</code></td><td><code>openrouter/xiaomi/mimo-v2.6-pro</code></td></tr>
+      <tr id="model-seats-name-latest-versions-probe-deepseek"><td><code>openrouter/deepseek/deepseek-v4-flash</code></td><td><code>openrouter/deepseek/deepseek-flash</code></td><td><code>openrouter/deepseek/deepseek-v4.1-flash</code></td></tr>
     </tbody>
   </table>
   <table id="model-seats-name-latest-versions-table">
@@ -117,10 +117,17 @@
     <li id="model-seats-name-latest-versions-check-catalog"><code>tests/config/test_model_seats.py</code> derives each
       seat's line newest release from <code>tests/config/data/model-catalog-2026-11-15.json</code> and requires the
       seat to name it, or to carry a reason in the snapshot's <code>exceptions</code> map. The declaration set is read
-      from <code>pyproject.toml</code> itself, so a new seat is covered without editing the test.</li>
+      from <code>pyproject.toml</code> itself, so a new seat is covered without editing the test, and a
+      non-vacuity test asserts the scan found at least 20 models including three named seats, so a broken key
+      pattern fails instead of quietly parametrising nothing. The snapshot is dated because a catalog goes stale:
+      the test states that it measures the seats against the catalog recorded on that date and that refresh is
+      deliberate, and a seat behind the snapshot fails with the newest release named and the refresh instruction.</li>
     <li id="model-seats-name-latest-versions-check-live"><code>tests/config/test_model_seat_reachability.py</code>
-      (<code>-m slow</code>) answers one live request per distinct chat model and per decisions model through the
-      production call layer: 16 chat models and 1 decisions model, 17 passed in 24.12s.</li>
+      carries the <code>slow</code> marker, so the default run issues no live request (<code>17 deselected by
+      the marker in the gate log</code>): 16 distinct chat models and 1 decisions model, each answering one live
+      request through the production call layer — 17 passed, EXIT=0. The suite-wide guard against live decisions
+      calls stays in force in the file; the single decisions probe replaces the transport seam it calls through,
+      and a scratch test proved an unseamed decisions call in this tree still raises the guard's refusal.</li>
   </ul>
   <h2 id="model-seats-name-latest-versus-negative">Negative control</h2>
   <p id="model-seats-name-latest-versions-negative">Pointing the <code>sn-docs</code> seat at

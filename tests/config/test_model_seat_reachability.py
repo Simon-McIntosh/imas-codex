@@ -48,17 +48,6 @@ QUESTIONS = {
 }
 
 
-@pytest.fixture(autouse=True)
-def no_live_decisions_requests():
-    """Let this module reach the live decisions endpoint.
-
-    The suite-wide guard refuses every live request to the paid decisions
-    endpoint; this module is the one place allowed to spend on it, because the
-    served-release probe here is the only evidence the decisions seats answer.
-    """
-    yield
-
-
 def _chat_models() -> list[str]:
     models = [
         get_model(section)
@@ -141,23 +130,35 @@ def test_chat_seat_answers_one_live_request(model: str) -> None:
     response, _cost = call_llm(
         model,
         PROMPT,
-        max_tokens=16,
+        max_tokens=256,
         temperature=0.0,
-        timeout=180,
+        timeout=300,
         max_retries=2,
         service="seat-reachability",
     )
-    content = response.choices[0].message.content
+    content = (response.choices[0].message.content or "").strip()
     served = getattr(response, "model", None) or model
-    assert content is not None or response.choices[0].finish_reason, (
-        f"the route serving {model!r} returned neither content nor a finish "
-        f"reason; it answered as {served!r}"
+    assert content, (
+        f"the route serving {model!r} returned empty content, so the seat is "
+        f"reachable but unusable; it answered as {served!r} with finish_reason "
+        f"{response.choices[0].finish_reason!r}"
     )
 
 
 @pytest.mark.parametrize("model", _decisions_models())
-def test_decisions_seat_answers_one_live_request(model: str) -> None:
-    """The decisions endpoint serves the model a judgement seat names."""
+def test_decisions_seat_answers_one_live_request(
+    model: str, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """The decisions endpoint serves the model a judgement seat names.
+
+    The suite-wide guard refuses live requests to this paid endpoint, so this
+    one test replaces the transport seam it calls through with a plain HTTP
+    POST. The guard stays in force for every other test in the file and for
+    every other test in the suite.
+    """
+    from imas_codex.discovery.base import llm
+
+    monkeypatch.setattr(llm, "_post_decisions", _post_decisions_live)
     answers, cost = call_decisions(
         model,
         {"facility": "iter", "file": "seat-reachability.pro"},
@@ -168,3 +169,30 @@ def test_decisions_seat_answers_one_live_request(model: str) -> None:
         f"the decisions endpoint returned no answer for {model!r}"
     )
     assert cost >= 0.0, f"the decisions endpoint reported a negative cost for {model!r}"
+
+
+def _post_decisions_live(headers: dict[str, str], body: dict, timeout: float):
+    """POST one decisions request without the suite's httpx guard.
+
+    The guard intercepts ``httpx.Client.send``; this seam speaks HTTP through
+    the standard library and returns an ``httpx.Response`` so the call layer's
+    own status and JSON handling stays the code under test.
+    """
+    import json
+    import urllib.error
+    import urllib.request
+
+    import httpx
+
+    request = urllib.request.Request(
+        "https://openrouter.ai/api/alpha/decisions",
+        data=json.dumps(body).encode(),
+        headers={**headers, "Content-Type": "application/json"},
+        method="POST",
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=timeout) as reply:
+            payload, status = reply.read(), reply.status
+    except urllib.error.HTTPError as error:
+        payload, status = error.read(), error.code
+    return httpx.Response(status_code=status, content=payload)

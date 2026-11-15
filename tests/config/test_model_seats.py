@@ -10,6 +10,13 @@ from a copy of it:
 * every OpenRouter identifier a seat or panel names carries a cataloged price,
   so a seat cannot start a run it is unable to price.
 
+The catalog is a snapshot taken on the date in its filename, not a live query:
+a provider releasing a model does not edit this repository, so the check
+measures the seats against the catalog recorded on that date. Refreshing it is
+deliberate — read the four catalogs again, rewrite the snapshot with its
+sources and read date, and re-run this file; a seat that has fallen behind the
+refreshed snapshot fails here with the newest release named.
+
 A seat may stay off its line's newest release only through an entry in the
 snapshot's ``exceptions`` map, which carries the reason it stays, so a stale
 seat is either repaired or explained rather than silently tolerated.
@@ -222,6 +229,25 @@ def test_python_default_identifiers_are_priced(owner: str, model: str) -> None:
 _DECLARED = sorted(_declared_models().items(), key=lambda row: row[0])
 
 
+def test_the_declared_seat_list_is_not_vacuous() -> None:
+    """The scan finds the seats it claims to check, so a green run means something."""
+    declared = _declared_models()
+    assert len(declared) >= 20, (
+        f"the pyproject.toml scan found only {len(declared)} declared models; "
+        "the key pattern stopped matching and the parametrised checks below "
+        "would pass without checking a seat"
+    )
+    for known in (
+        "sn-compose.model",
+        "sn-review.names.models[0]",
+        "sn-fanout.proposer-model",
+    ):
+        assert known in declared, (
+            f"the scan missed {known!r}, a seat this project declares; a scan "
+            "that misses a seat reports a green result it never earned"
+        )
+
+
 @pytest.mark.parametrize("owner,model", _DECLARED, ids=[row[0] for row in _DECLARED])
 def test_every_declared_seat_names_a_cataloged_model(owner: str, model: str) -> None:
     """Each seat's model is listed by the lane its prefix routes to."""
@@ -279,8 +305,11 @@ def test_every_seat_names_the_newest_release_of_its_line(
     assert newest is not None, f"{owner} names {model!r}, which has no cataloged line"
     assert model == newest, (
         f"{owner} names {model!r}, but its line's newest release is {newest!r} "
-        f"({catalog['openrouter']['releases'].get(newest, 'served today')}); "
-        "name the newest release or record why the seat stays"
+        f"({catalog['openrouter']['releases'].get(newest, 'served today')}). "
+        "Name the newest release, record why the seat stays in the catalog "
+        f"snapshot's exceptions map keyed by {owner!r}, or — when the provider "
+        "released this model after the snapshot was taken — refresh the "
+        "snapshot and re-run this file"
     )
 
 
