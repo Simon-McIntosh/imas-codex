@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T17:54:21.929Z",
+  "dispatched_at": "2026-11-15T17:54:06Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261115T175340404026-plan-review-of-sn-definitions-by-construction/plan.html:113",
+      "id": "reasoning-1",
+      "reason": "a node sent to \"read\" that record will take `omitted_count`, and its baseline gates will then be two different measures.",
+      "text": "the changed clause requires each count to be \"reported beside the same count read from the closing census's committed record \u2026 by the same instrument\", but the record reports no such count: its per-operator fields are `form_count` and `omitted_count`, and its operator population is every name whose id contains the operator, not the names that name the operator. Under the section's own rule (a name stating no form, or a variant, does not carry the stored sentence) the record's own fields give a different baseline for three of the five operators: `omitted_count` is 69 of 73, 23 of 28 and 9 of 9, while the section's measure derives 68 of 71, 20 of 25 and 8 of 8 from the same record's per-name `forms` buckets minus its `names_not_naming_it` lists (stored-form buckets are 3, 5, 0, 0 and 13 names). The record carries no field for the measure, and its closest field is exactly the figure that was misread as this baseline twice before.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7ff8461e3789c8d72ea45d02903659996cb59e84",
+  "plan_fingerprint": "29ddf9b0960472c613a363c8365acba095924e4fbb6d9564f4953b8d76f777d3",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 60,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T175340404026-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "9d38f5fa394112bbf513ee3829472b00f7615465",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `rewrite-closing-census.json` and the `#s10` it names both resolve in HEAD (extensionless hrefs resolve as `<path>.html`).",
+    "done_when": "pass \u2014 the changed clause's measure is name-level and falsifiable, and the closing bullet plants a divergent family plus an operator name stating no form and one carrying a variant, so a census that reported only `omitted_count` would fail the variant plant.",
+    "evidence_paths": "pass \u2014 the baseline it cites is `docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.json`, committed at HEAD.",
+    "naming": "pass \u2014 the changed text introduces no plan label, stage name, ticket number or version tag.",
+    "reasoning": "a finding \u2014 the baseline \u00a76 names is not the count `rewrite-closing-census.json` reports, so a node reading that record for \"the same count\" lands on a figure the section's own rule contradicts.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, the live rewrite, closed on one census verdict.",
+    "wiring": "pass \u2014 \u00a76's `plan-section-depends-on` carries s2, s3, s4, s5 and s10, each of which exists, s10 declares its own link to s2, and s7 waits on s6; effort totals reconcile (plan-effort-hours 41.0 against a 41.0 sum of the ten sections)."
+  },
+  "section_digests": {
+    "_document": "11e2e68b156624b18e8ed5742aa27fcf534e457bc07dfce61888ca751e83d678",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "1a1b1a09b77a6f5d24758e8c4afc0ecdccb2a4b5a79223f7a1a3a3cc73d3e387",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T18:01:54.525786+00:00",
+  "total": null
+}
