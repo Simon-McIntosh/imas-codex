@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T06:19:40.632Z",
+  "dispatched_at": "2026-11-15T06:02:01Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/source_reads.py",
+      "line": 21,
+      "severity": "blocking",
+      "text": "the module restates the live-name, live-child and no-producer predicates that imas_codex/standard_names/source_invariant.py:11-24 exports for sibling modules to compose, and NO_PRODUCER_TEST (no producer edge at all, source_reads.py:27) differs from the owner's rule (no producer whose status is not stale), so `imas-codex sn sourceless` and the export gate's find_sourceless_live_names can report different populations: the change adds a second definition of the repository's sourceless population under a goal that exists to leave one."
+    },
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": 6644,
+      "severity": "non-blocking",
+      "text": "the review pipeline's _load_catalog still returns sn.source_paths and its ids-prefix filter consumes it, so a reader in a file this change edited still answers from the copy for the 586 live names whose copy disagrees with their producer edges."
+    },
+    {
+      "file": "tests/standard_names/test_source_reads.py",
+      "line": 43,
+      "severity": "non-blocking",
+      "text": "_without_extraction_records drops every module-level assignment whose target ends in _EXTRACTION_RECORD, so a live reader parked in a constant named that way is exempt from a guard whose docstring claims to refuse every reader that spells the copied list."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to make every reader of a name's sources agree with its producer edges; imas_codex/standard_names/source_reads.py:49 supplies the projection and search.py, benchmark_roles.py and judgment_goldens.py now ask it, but the review pipeline still reads the copied list at imas_codex/cli/sn.py:6644 and imas_codex/graph/sn_cleanup.py:65, so \"every reader\" is not reached.\nVERDICT done_when: the done_when's measurable parts are all asserted by a recorded gate: final-gate.log records 8754 passed / 0 failed against a 8753 / 0 baseline, then 3 planted-graph tests passed at the landed revision, and measure-live.json plus scc-live-names-without-a-source.json record the live count (3,266 live, 10 without a producer, 9 counted, beta listed apart); the \"85 names\" agreement is shown structurally by the shared projection and on three sampled names in search-smoke.txt rather than per name.\nVERDICT write_paths: the prompt at prompt.txt:82-83 declares only docs/evidence/fragments/sn-catalog-consistency/scc-sources-read-from-one-place.html and docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place, and 8 of the 10 changed files lie outside that grant, disclosed in the manifest's outside_scope.\nVERDICT manifest: read manifest.md; it states status complete, six commits, the two retried failure ids and their repair commit, both suite arms with 0 failures, the negative-control log and its note, and names the two readers left out of scope.\nVERDICT diff: read all six commits from e103e0ed8f129308a0ebd11d9ca9f4e8172c34be to 2737c1643; 10 files, 1718 insertions and 45 deletions, the package and CLI change plus one new module, one new test file, one artifact, one landing fragment and one figure, with the two repaired failures visible in 048ff960b.\nCALL_SITES: imas_codex/cli/sn.py:sn_sourceless, imas_codex/cli/sn.py:3268, imas_codex/llm/sn_tools.py:21, imas_codex/standard_names/judgment_goldens.py:904, imas_codex/standard_names/source_invariant.py:162\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: imas_codex/cli/sn.py:6644 still projects sn.source_paths into the review pipeline's catalog load, so a reader in an edited file answers from the copy the goal exists to stop reading.\nSCORE evidence: 16\nJUSTIFICATION evidence: final-gate.log:1146 records the 3 planted-graph tests passing at the landed revision, and the after arm at final-gate.log:1140 ran at 048ff960bde62a1d4ef2e7730053126a39f1a6a9, two docs-only commits short of the reviewed head.\nSCORE scope_discipline: 5\nJUSTIFICATION scope_discipline: prompt.txt:82-83 grants two documentation paths while the fence compels a package change, and the diff writes imas_codex/standard_names/source_reads.py among eight out-of-grant paths, all disclosed in manifest.md's outside_scope.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_source_reads.py:128 compares read_source_paths against the literal ['dd:reads/bound'] rather than against a value it passed in, and negative-control.log:10-16 shows the copied-list mutation reddening that assertion, though no test reaches the CLI command that exposes the count.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/standard_names/source_reads.py:21-42 names its predicates by the mechanism they test and follows source_invariant.py's clause-fragment idiom, and the landing figure carries an in-axes title the repository's plot style asks the caption to carry instead.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/standard_names/source_reads.py:30-42 re-spells the live-child test that imas_codex/standard_names/source_invariant.py:11 exports as live_child_cypher for exactly this composition, and its count is a second owner of the sourceless population the export gate already owns.\nFINDING imas_codex/standard_names/source_reads.py:21 blocking: the module restates the live-name, live-child and no-producer predicates that imas_codex/standard_names/source_invariant.py:11-24 exports for sibling modules to compose, and NO_PRODUCER_TEST at source_reads.py:27 (no producer edge at all) differs from the owner's rule (no producer whose status is not stale), so the new command and the export gate's find_sourceless_live_names can report different populations of live sourceless names.\nFINDING imas_codex/cli/sn.py:6644 non-blocking: the review pipeline's _load_catalog still projects sn.source_paths and its ids-prefix filter consumes it, so one reader in an edited file still answers from the copy for the 586 names whose copy disagrees with the edges.\nFINDING tests/standard_names/test_source_reads.py:43 non-blocking: the static guard drops every module-level assignment whose target ends in _EXTRACTION_RECORD, so a live reader parked in such a constant is exempt from a check that claims to refuse every reader spelling the copied list.\n",
+  "review_run_id": "r-20261115T060140957293-review-of-scc-sources-read-from-one-place-2737c1643d5d",
+  "reviewed_base_sha": "e103e0ed8f129308a0ebd11d9ca9f4e8172c34be",
+  "reviewed_head_sha": "2737c1643d5dc112f9ae278907f4923978a04e21",
+  "reviewed_run_id": "r-20261114T211624671239-scc-sources-read-from-one-place",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 13,
+    "reuse": 5,
+    "scope_discipline": 5
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T06:20:11.879469+00:00",
+  "total": 72
+}

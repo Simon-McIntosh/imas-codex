@@ -1,0 +1,38 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-15T06:03:48Z",
+  "figures": [
+    {
+      "caption": "The disagreement population. The 85 are the names whose copy is absent while a data-dictionary path produces them; the 501 are the same disagreement over derived and other producers. Read on the live graph on 2026-11-15, before the change.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-reader-agreement.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T060259991915-review-of-scc-sources-read-from-one-place-2737c1643d5d-figure/image-0.png",
+      "rubric_verdicts": {
+        "contrast": "Pass. Title #444444 and value labels #222222 on white are far above the text contrast floor; the grey population bar #929292 measures about 3.1:1 against white, at the intended population-grey weight rather than the rejected 2:1 lightness.",
+        "data_ink": "Pass. The two bars are solid flat fills carrying the whole comparison; no gradient, hatch, shadow or decorative band, and the only other ink is the axes, tick labels and the two count labels.",
+        "decoration": "Pass. No background fill or grid; top and right spines absent, so the only frame is the left spine at x=0 and the bottom spine.",
+        "label_collision": "Pass. Nothing is clipped: the ink bounding box leaves 20 px of white on the top edge, 18 px left, 20 px right and 23 px bottom. Text occupies four separate row bands (title 20-38, axes content 46-646, x tick labels 652-666, x axis label 677-696) so no text sits on other text. Each value label starts 16 px past its bar end, and the y tick labels end 10 px clear of the tick marks, so neither overlaps the data.",
+        "legibility": "Pass. Two bars read at a glance: 14 pt title and value labels on a 1400x720 canvas, category names on the y axis, 'live names [count]' on the x axis, and each count printed at the bar end (85 blue, 501 grey).",
+        "table_form": "Pass. Two category counts could be written as two table rows, but the figure encodes the 85-versus-501 share of 586 as relative bar length, which is the point the surrounding prose argues and a two-row table would obscure."
+      },
+      "script": "draw_reader_agreement.py"
+    }
+  ],
+  "findings": [],
+  "notes": [
+    "Read-only review: no file, figure, caption or script was edited. The verdict was formed from the rendered PNG at the path named above.",
+    "Bar lengths are proportional to their counts (870 px for 501, 146 px for 85, a ratio of 5.96 against the true 5.89), and the printed counts sum to the 586 stated in the title and the caption.",
+    "The caption explains rather than repeats the title: it names which population each bar is and records that both were read on the live graph on 2026-11-15 before the change."
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261115T060259991915-review-of-scc-sources-read-from-one-place-2737c1643d5d-figure",
+  "reviewed_base_sha": "e103e0ed8f129308a0ebd11d9ca9f4e8172c34be",
+  "reviewed_head_sha": "2737c1643d5dc112f9ae278907f4923978a04e21",
+  "reviewed_run_id": "r-20261114T211624671239-scc-sources-read-from-one-place",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T06:18:25.562125+00:00",
+  "total": null
+}
