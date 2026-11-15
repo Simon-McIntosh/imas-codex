@@ -1,0 +1,92 @@
+<section id="archive-signal-loader-evidence">
+  <h3>Bounded graph-identity signal loading with sampling evidence</h3>
+  <p><code>imas_codex.remote.codac_uda.ArchiveSignalLoader</code> resolves a
+    <code>FacilitySignal</code> through its <code>DATA_ACCESS</code> binding,
+    data source and <code>HOSTED_BY_ARCHIVE</code> endpoint. It resolves graph
+    pulse identities to bounds, then uses <code>ArchiveReader</code> and the
+    facility-aware <code>run_python_script</code> wrapper to run the packaged
+    reader. The same reader's <code>check</code> method supplies the catalogue
+    validity path; no prototype subprocess bridge or graph template is executed.</p>
+  <p>The result contains typed time/value arrays, signal identity, unit,
+    description, time base, issued queries and sampling evidence. Raw reads
+    report decimation as unknown unless an independent cadence check supplies
+    evidence; envelope and binned results report aggregation. String-valued
+    record fields are retained. Request-keyed atomic caches include archive,
+    endpoint, selector, bounds and sampling settings, and configured budgets
+    apply before cache lookup or reader execution.</p>
+  <table>
+    <thead><tr><th>Acceptance measurement</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Live raw read over a two-second interval</td><td>8 returned points including held boundary values,
+        2.000 s returned time span, 1.732343 s elapsed; held-value semantics,
+        decimation unknown, explicit raw request.</td></tr>
+      <tr><td>Live envelope of the same interval</td><td>8 bins,
+        1.750 s between first and last bin centers, 1.226137 s elapsed;
+        time-weighted held-value means with minima and maxima,
+        <code>held_value_bins</code> sampling evidence.</td></tr>
+      <tr><td>Repeat raw load</td><td>Cache hit in 0.001780 s; zero additional
+        reader executions. Time and value arrays equal the validity check.</td></tr>
+      <tr><td>Excessive sample request</td><td>100,001 requested samples
+        refused with classification <code>limit</code>; zero reader executions.
+        Loader and validity check return the same classification.</td></tr>
+      <tr><td>Live graph controls</td><td>Both signal and pulse queries compile
+        under <code>EXPLAIN</code>. The graph-identity raw and envelope loads
+        resolve a known-present temporary binding inside a transaction; after
+        rollback, its signal count is zero.</td></tr>
+      <tr><td>Focused product controls</td><td>50 passed, 1 warning in 6.73 s;
+        exit 0. Includes paging, envelope shape, cadence refusal, pulse listing,
+        handle release, string fields, cache isolation, policy refusal,
+        classified errors and graph pulse resolution.</td></tr>
+      <tr><td>Declared no-decimation negative control</td><td>Removing
+        <code>decSamples=-1</code> from raw queries makes
+        <code>test_raw_pages_keep_explicit_no_decimation</code> fail with
+        <code>raw sample spacing differs from expected cadence</code>;
+        1 failed, exit 1. This uses the adversarial client control, not a
+        claim of newly measured silent decimation on the live archive.</td></tr>
+    </tbody>
+  </table>
+  <p>The live acceptance ran in a separate <code>all_debug</code> job
+    <code>1316826</code> on <code>98dci4-clu-3141</code>, at product revision
+    <code>190387d3cf253a8a7c0a1df31bf8293b5fa26004</code>. It used two of its
+    four permitted reader executions; cache hits and pre-fetch refusals needed
+    no additional execution. One earlier native read exposed the timestamp
+    defect below, making three native read executions across the attempt.
+    The selected signal and active window came from the private known-day
+    receipt. The raw query used five seconds of lookback and extended samples,
+    with explicit held boundaries over the requested two seconds. The
+    operator-reserved archive was never contacted.</p>
+  <p>Two defects were reproduced and repaired. The base pulse control sent
+    <code>DEMO:*</code> where the client required <code>DEMO:*/*</code> and
+    failed its assertion; listing now supplies the explicit pulse segment.
+    The live unsigned epoch timestamps exposed mixed signed/unsigned boundary
+    concatenation, which promoted nanoseconds to floating point. The added
+    epoch-scale regression first failed with <code>float64</code> instead of
+    <code>uint64</code>; preserving the native timestamp dtype passes and
+    retains each nanosecond exactly. The existing paging cadence guard already
+    refused the adversarial decimated reply and was retained.</p>
+  <p>The first compute attempt stopped before native archive access because
+    its configured module initializer did not exist on that image. An
+    endpoint-free probe reproduced the missing-file stderr. The CODAC-specific
+    setup recipe now selects the available system initializer; its positive
+    probe returns the expected JSON operator-exclusion refusal. Generated
+    models were rebuilt only in this worktree in a separate
+    <code>all_debug</code> job; no shared virtual environment sync was needed.</p>
+  <p>Product commits are
+    <code>aaa106fdf42ed4d8c20c2a62014676c47ffcc80d</code>,
+    <code>93ee8b4e5fe3376e28885c2637e06935211d8773</code>,
+    <code>ccda6bd12347f9080f21fd83b218d72d594d1cf3</code> and
+    <code>190387d3cf253a8a7c0a1df31bf8293b5fa26004</code>.
+    Receipts in the assigned run directory include
+    <code>focused-tests.log</code>, <code>pulse-baseline-red.log</code>,
+    <code>no-decimation-red.log</code>, <code>unsigned-time-red.log</code> and
+    <code>live-gate-precision.log</code>. The quantitative live receipt,
+    native replies, arrays and metadata remain under
+    <code>~/.cache/imas-codex-codac-uda/</code>; no private archive selector,
+    endpoint or pulse spelling is present here.</p>
+  <p>The catalogue integration point is
+    <code>ArchiveReader(facility, role).check(selector, **parameters)</code>,
+    which invokes the exact same bounded <code>read</code> path as the loader.
+    The live equivalence measurement covers this shared validity API.
+    Integration with the separately delivered scanner and verification of the
+    merged head remain coordinator-owned. Plan state was not edited.</p>
+</section>
