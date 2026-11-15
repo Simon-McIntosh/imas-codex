@@ -1,0 +1,68 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T20:57:56.583Z",
+  "dispatched_at": "2026-11-15T20:57:24Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/icp-api-access/r-20261115T205649172727-plan-review-of-icp-api-access/plan.html:34",
+      "id": "reasoning-1",
+      "reason": "a worker dispatched to \u00a72 reads a parked plan with an implementable section and cannot tell whether to build, so the section either stalls on a settled prerequisite or ships against a gate the author still believes unmet.",
+      "text": "the lead and the eyebrow (line 32) say the plan is parked until credentials and the identity are settled, while the two decisions dated 2026-11-15T20:56:15 record credentials stored (line 67) and the lead's own account chosen for development (line 76), and \u00a72 is declared `implementable` (line 45); the same snapshot therefore states two different gates",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/icp-api-access/r-20261115T205649172727-plan-review-of-icp-api-access/plan.html:40",
+      "id": "reasoning-2",
+      "reason": "if the instance serves only an HTML page, \u00a72 cannot produce its declared figures and cannot close; the deliverable must name the description as the instance actually serves it, or \u00a72 must first establish that a machine-readable description exists.",
+      "text": "\u00a71's only cited evidence is that two documentation *pages* sit behind the login gate, and it concludes \"the API's own documentation page is therefore the specification\", yet \u00a72 (line 46) requires a machine-readable description and its done-when (line 47) counts \"the number of operations in the description\"; nothing in \u00a71 establishes that the instance serves a machine-readable description, so \u00a72's central figure and read-operation list may be unobtainable",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/icp-api-access/r-20261115T205649172727-plan-review-of-icp-api-access/plan.html:20",
+      "id": "wiring-1",
+      "reason": "the block binds only if the blocked plan records the dependency; as written \u00a74 there is dispatchable and will fail on exactly the access route this plan exists to create, or this plan's claim of what blocks is wrong.",
+      "text": "this plan declares it blocks `iter-signal-context-and-enrichment`, but that plan's `plan-section-depends-on` never names `icp-api-access`, its \u00a74 is `implementable` and asserts the content \"reaches the graph from ICP and IDM through the project's existing authenticated document access\" (line 59), directly contradicting this plan's \"A build worker cannot reach either today\" (line 34)",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/icp-api-access/r-20261115T205649172727-plan-review-of-icp-api-access/plan.html:52",
+      "id": "done_when-1",
+      "reason": "without the leak check a \u00a73 run can commit ICP-derived records to the tracked tree and still close, so the plan's stated containment constraint has no measure in the section most likely to violate it.",
+      "text": "\u00a71 (line 42) requires that none of the ICP content enter the repository and \u00a74's done-when (line 57) includes \"a search of the tracked tree finds none of the fetched content\", but \u00a73's done-when has no such search even though it returns typed plant-structure records a worker can cache as fixtures",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7aeafd7ef98d2fc41bfc2b2c97f9931364acf1da",
+  "plan_fingerprint": "a1aca89b90b062b0553b7b73b52cf5a4d94d2a65945c787aebfc61b7fdb49ff5",
+  "plan_slug": "icp-api-access",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T205649172727-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "8604a38c36247fc9e31f938e14877deb0b15ca5d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `icp-api-access#s2` resolves to \u00a72 on line 44, the `plan-blocks` target `docs/plans/iter-signal-context-and-enrichment.html` exists, and `codac-uda-signals.html` (line 120) references this plan; the IDM codes (`RTN78W`, `RT8Y8A`, \u2026) are external document identities, not repository anchors.",
+    "done_when": "a finding \u2014 \u00a73's done-when (line 52) carries no tracked-tree leak check although \u00a71 (line 41) forbids ICP content entering the repository and \u00a74 measures the same search.",
+    "evidence_paths": "pass \u2014 every section's evidence is the landing record, a request log or a tracked-tree search; no section names a scratchpad, node-local temporary directory or otherwise non-durable path.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag appears in any named record, symbol or comment; section names state the mechanism.",
+    "reasoning": "a finding \u2014 the parking statement contradicts the decisions on lines 61\u201376, and \u00a72's operation count is unobtainable from the specification \u00a71 actually cites (a gated documentation page, line 40).",
+    "single_goal": "pass \u2014 \u00a72 is one authenticated-client goal (session plus description inventory), \u00a73 one node-record read goal, \u00a74 one document-fetch-into-private-storage chain; no section carries two verdicts.",
+    "wiring": "a finding \u2014 line 20 declares `plan-blocks iter-signal-context-and-enrichment`, but that plan records no dependency on this one and marks its \u00a74 implementable."
+  },
+  "section_digests": {
+    "_document": "d8daab434d3089c20d017f4cb03a9173f421f2b3d2754e2324252d7880319750",
+    "s1": "28fe5e0051d8c10bd385adb785d463efbc0de80da5c392856f634e996cc6f513",
+    "s2": "949bec324113141e469f2a3602a58ae912e96e6491292ff2c5e83520514cadb8",
+    "s3": "9d9614f8867ac1d127eefc77c61fcc4a25f7f72b6e2357132fc68ffc2c33a37e",
+    "s4": "0307057dcc3cd104832a28ffb0f7e87ee06c36b6effa3d6e50d03c018b277537"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T21:05:45.555978+00:00",
+  "total": null
+}
