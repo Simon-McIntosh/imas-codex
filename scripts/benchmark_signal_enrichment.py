@@ -468,6 +468,7 @@ def pair_rows(root: Path) -> list[dict]:
         if record["arm"] == "context"
         for id in record["ids"]
     }
+    signals = {row["id"]: input_signal(row) for row in cohort["reference"]}
     rows = []
     for id in cohort["order"]:
         first_arm = (
@@ -479,11 +480,50 @@ def pair_rows(root: Path) -> list[dict]:
                 "id": id,
                 "first_arm": first_arm,
                 "context": contexts[id],
+                "signal": signals[id],
                 "first": outputs[first_arm].get(id, {}).get("description", ""),
                 "second": outputs[second_arm].get(id, {}).get("description", ""),
             }
         )
     return rows
+
+
+def target_context(messages: list[dict], accessor: str) -> str:
+    """Retain shared retrieval context and exactly the named signal block."""
+    text = next(row["content"] for row in messages if row["role"] == "user")
+    match = re.search(r"^accessor: " + re.escape(accessor) + r"$", text, re.M)
+    if match is None:
+        raise ValueError("target accessor absent from production context")
+    signal_headers = list(re.finditer(r"^### Signal \d+", text, re.M))
+    preceding = [row.start() for row in signal_headers if row.start() < match.start()]
+    if not preceding:
+        raise ValueError("target has no signal block")
+    start = preceding[-1]
+    groups = list(
+        re.finditer(
+            r"^## (?:EDAS Category:|PPF DDA:|MDSplus Tree:|JPF Subsystem:|TDI Function:|JET Device Description:)",
+            text,
+            re.M,
+        )
+    )
+    ends = [row.start() for row in signal_headers + groups if row.start() > start]
+    end = min(ends) if ends else len(text)
+    before = [row.start() for row in groups if row.start() < start]
+    group_start = before[-1] if before else 0
+    group_first = next(
+        row.start() for row in signal_headers if row.start() >= group_start
+    )
+    global_prefix = text[: groups[0].start()] if groups else ""
+    return global_prefix + text[group_start:group_first] + text[start:end]
+
+
+def blind_state(row: dict, reverse: bool) -> dict:
+    return {
+        "signal": row["signal"],
+        "context": target_context(row["context"], row["signal"]["accessor"]),
+        "first": row["second"] if reverse else row["first"],
+        "second": row["first"] if reverse else row["second"],
+    }
 
 
 def judge(root: Path) -> None:
@@ -507,62 +547,52 @@ def judge(root: Path) -> None:
             if reverse
             else rows
         )
-        for offset in range(0, len(chosen), 5):
-            batch = chosen[offset : offset + 5]
-            state = {
-                f"pair_{i}": {
-                    "signal_id": row["id"],
-                    "context": row["context"],
-                    "first": row["second"] if reverse else row["first"],
-                    "second": row["first"] if reverse else row["second"],
-                }
-                for i, row in enumerate(batch)
+        for row in chosen:
+            questions = {
+                "preference": {
+                    "type": "choice",
+                    "instructions": "Compare first and second descriptions for the one target signal in state.signal against state.context. An empty description loses to a supported description. Prefer correct physical quantity and component role; unsupported factual specificity is worse than brevity. Ignore ordering and writing style.",
+                    "criteria": preference,
+                },
+                "wrong": {
+                    "type": "choice",
+                    "instructions": "Independently check BOTH first and second descriptions for the target signal against state.signal and state.context. An empty description is wrong. Identify every empty description or unsupported factual claim, even when the other description is also wrong. Vague but supported descriptions are not wrong.",
+                    "criteria": wrong,
+                },
             }
-            questions = {}
-            for i in range(len(batch)):
-                for kind, criteria in (("preference", preference), ("wrong", wrong)):
-                    questions[f"pair_{i}_{kind}"] = {
-                        "type": "choice",
-                        "instructions": f"Judge pair_{i} against its supplied signal context, not writing style. Identify the signal in the context by signal_id and its source path. Prefer faithful specificity over plausible unsupported claims. Ignore description ordering. For preference, wrongness outweighs detail.",
-                        "criteria": criteria,
-                    }
             answers, cost = llm.call_decisions(
                 model=get_model("discovery-relevance"),
-                state=state,
+                state=blind_state(row, reverse),
                 questions=questions,
                 service="facility-discovery",
                 max_retries=1,
                 record_release=releases.append,
             )
             total += cost
-            for i, row in enumerate(batch):
-                first_arm = (
-                    ("paid" if row["first_arm"] == "local" else "local")
-                    if reverse
-                    else row["first_arm"]
-                )
-                second_arm = "paid" if first_arm == "local" else "local"
-                choice = answers[f"pair_{i}_preference"]["choice"]
-                bad = answers[f"pair_{i}_wrong"]["choice"]
-                entry = {
-                    "id": row["id"],
-                    "preferred": {
-                        "first": first_arm,
-                        "second": second_arm,
-                        "equivalent": "equivalent",
-                    }[choice],
-                    "blind_choice": choice,
-                    "wrong_arms": [
-                        arm
-                        for label, arm in (("first", first_arm), ("second", second_arm))
-                        if bad in (label, "both")
-                    ],
-                    "answers": {
-                        kind: answers[f"pair_{i}_{kind}"]
-                        for kind in ("preference", "wrong")
-                    },
-                }
-                (reversed_rows if reverse else judged).append(entry)
+            first_arm = (
+                ("paid" if row["first_arm"] == "local" else "local")
+                if reverse
+                else row["first_arm"]
+            )
+            second_arm = "paid" if first_arm == "local" else "local"
+            choice = answers["preference"]["choice"]
+            bad = answers["wrong"]["choice"]
+            entry = {
+                "id": row["id"],
+                "preferred": {
+                    "first": first_arm,
+                    "second": second_arm,
+                    "equivalent": "equivalent",
+                }[choice],
+                "blind_choice": choice,
+                "wrong_arms": [
+                    arm
+                    for label, arm in (("first", first_arm), ("second", second_arm))
+                    if bad in (label, "both")
+                ],
+                "answers": answers,
+            }
+            (reversed_rows if reverse else judged).append(entry)
             save(
                 root / "judge.json",
                 {
@@ -583,14 +613,6 @@ def judge(root: Path) -> None:
                 ),
                 flush=True,
             )
-    save(
-        root / "hand-sheet.json",
-        [
-            {key: row[key] for key in ("id", "context", "first", "second")}
-            for row in rows
-            if row["id"] in cohort["hand_ids"]
-        ],
-    )
 
 
 def summarize(root: Path) -> None:

@@ -247,3 +247,47 @@ def test_iter_reference_is_refused_before_any_graph_read(tmp_path):
         with pytest.raises(ValueError, match="non-ITER"):
             bench.prepare(tmp_path, "iter")
     graph.assert_not_called()
+
+
+def test_judge_targets_one_signal_and_keeps_its_retrieved_evidence():
+    text = """Facility conventions: currents are measured in amperes.
+## EDAS Category: coil
+Wiki: feedback control point.
+Code: read_current(channel)
+## Source snippet heading
+Preserve source snippet text.
+### Signal 1
+accessor: COIL:CURRENT
+source_description: Coil current
+### Signal 2
+accessor: COIL:VOLTAGE
+source_description: Distracting voltage
+## EDAS Category: cooling
+Wiki: unrelated cooling evidence
+### Signal 1
+accessor: WATER:TEMP
+source_description: Distracting temperature
+"""
+    row = {
+        "id": "facility:coil",
+        "first_arm": "local",
+        "signal": {"accessor": "COIL:CURRENT", "unit": "A"},
+        "context": [{"role": "user", "content": text}],
+        "first": "Current description",
+        "second": "",
+    }
+    state = bench.blind_state(row, False)
+    assert "conventions" in state["context"]
+    assert "read_current" in state["context"]
+    assert "Preserve source snippet" in state["context"]
+    assert "Coil current" in state["context"]
+    assert "Distracting" not in state["context"]
+    assert "unrelated cooling" not in state["context"]
+    assert "first_arm" not in state
+    assert "local" not in json.dumps(state)
+    swapped = bench.blind_state(row, True)
+    assert swapped["context"] == state["context"]
+    assert swapped["signal"] == state["signal"]
+    assert (swapped["first"], swapped["second"]) == ("", "Current description")
+    with pytest.raises(ValueError, match="accessor absent"):
+        bench.target_context(row["context"], "ABSENT")
