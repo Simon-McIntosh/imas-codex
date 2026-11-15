@@ -1,5 +1,24 @@
 {
   "absent_items": [],
+  "accepted_edits": [
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "b9630465a753dff811d3c0e0cd8a22097765908617bcc4e915c4fb0111e41a6c",
+        "s2": "830192f1a1a3a40852038831a9ac8845a894958522e5f7e7d9e29b371e8d6699",
+        "s3": "9c09b6b27077f455da547c4caf872d7f317fa3a501e54ea9f113dd8887f44bb6",
+        "s4": "0307057dcc3cd104832a28ffb0f7e87ee06c36b6effa3d6e50d03c018b277537"
+      },
+      "reason": "Versions 2 to 4 apply the lead's read-only instruction and answer the four content-review findings; sections 3 and 4 are un-deferred with the repository search added to section 3.",
+      "units": [
+        "_document",
+        "s2",
+        "s3",
+        "s4"
+      ],
+      "when": "2026-11-15T21:13:40.246753+00:00"
+    }
+  ],
   "completed_at": "2026-11-15T20:57:56.583Z",
   "dispatched_at": "2026-11-15T20:57:24Z",
   "findings": [
