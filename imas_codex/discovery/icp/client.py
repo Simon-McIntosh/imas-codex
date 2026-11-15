@@ -2,7 +2,11 @@
 
 Set IMAS_CODEX_ICP_ORIGIN to the authorised integration origin and
 IMAS_CODEX_ICP_DESCRIPTION_PATH to its description path at runtime. Neither
-setting has a production fallback. API paths resolve from the origin's root.
+setting has a production fallback. Select the facility with
+IMAS_CODEX_ICP_FACILITY or the constructor's facility argument. Its ignored
+private configuration holds the icp credential service, identity origins,
+sign-in origins and exact gateway sign-in paths. API paths resolve from the
+origin's root.
 Credentials come only from the system keyring. Cookies live in this session;
 they are not flattened into a cross-host persistent cookie dictionary.
 """
@@ -15,14 +19,14 @@ import time
 from contextlib import contextmanager
 from dataclasses import dataclass
 from typing import Any
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import parse_qsl, unquote, urljoin, urlsplit
 
 import requests
 
+from imas_codex.discovery.base.facility import get_facility_infrastructure
 from imas_codex.discovery.wiki.auth import CredentialManager
 from imas_codex.discovery.wiki.confluence import ConfluenceClient
 
-_IDENTITY_ORIGIN = "https://login.microsoftonline.com"
 _READ_METHODS = frozenset({"GET", "HEAD"})
 
 
@@ -75,19 +79,37 @@ def _description(response: requests.Response) -> dict[str, Any] | None:
 
 @dataclass(frozen=True)
 class RequestRecord:
-    """An outbound request receipt with no host, query, headers or body."""
+    """A private receipt; sign-in includes origin/path, never query or auth data."""
 
     method: str
     target: str
-    status: int
+    status: int | None
+    phase: str
+    origin: str | None = None
+    path: str | None = None
 
 
 class _RequestPolicy:
-    def __init__(self, origin: str, interval: float) -> None:
+    def __init__(
+        self,
+        origin: str,
+        interval: float,
+        identity_origins: frozenset[str],
+        sign_in_origins: frozenset[str],
+        gateway_paths: frozenset[str],
+        description_path: str,
+    ) -> None:
         self.origin = origin
         self.interval = interval
+        self.identity_origins = identity_origins
+        self.sign_in_origins = sign_in_origins
+        self.gateway_paths = gateway_paths
+        self.description_path = description_path
         self.authenticating = False
+        self.signed_in = False
         self.records: list[RequestRecord] = []
+        self.sign_in_requests = 0
+        self.max_sign_in_requests = 40
         self._last_send: float | None = None
         self._lock = threading.Lock()
 
@@ -103,13 +125,141 @@ class _RequestPolicy:
         method = request.method
         if origin == self.origin:
             if method not in _READ_METHODS:
-                raise ICPRequestRefused("ICP accepts only GET and HEAD")
+                path = unquote(urlsplit(request.url).path)
+                if (
+                    method != "POST"
+                    or path not in self.gateway_paths
+                    or path == self.description_path
+                    or path.lower().split("/")[1] in {"api", "docs", "swagger"}
+                ):
+                    raise ICPRequestRefused(
+                        "ICP accepts only GET and HEAD outside sign-in paths"
+                    )
+                self._check_sign_in(request, origin)
             return "integration"
-        if origin == _IDENTITY_ORIGIN and self.authenticating:
-            if method not in _READ_METHODS | {"POST"}:
-                raise ICPRequestRefused("Unsupported identity-provider method")
-            return "identity-provider"
-        raise ICPRequestRefused("The request origin is not allowed")
+        self._check_sign_in(request, origin)
+        return (
+            "identity-provider"
+            if origin in self.identity_origins
+            else "sign-in-gateway"
+        )
+
+    def _check_sign_in(self, request: requests.PreparedRequest, origin: str) -> None:
+        if not self.authenticating or self.signed_in:
+            raise ICPRequestRefused(
+                "Sign-in requests require an active unsigned exchange"
+            )
+        if origin not in self.sign_in_origins:
+            raise ICPRequestRefused("The request origin is not allowed")
+        if request.method in _READ_METHODS:
+            return
+        if request.method != "POST":
+            raise ICPRequestRefused("Only sign-in form POSTs are allowed")
+        self._check_sign_in_body(request, origin in self.identity_origins)
+
+    @staticmethod
+    def _check_sign_in_body(request: requests.PreparedRequest, identity: bool) -> None:
+        """Allow the shared login forms and standard assertion relay bodies only."""
+        import json
+
+        body = request.body
+        if isinstance(body, bytes):
+            try:
+                body = body.decode("utf-8")
+            except UnicodeError:
+                raise ICPRequestRefused(
+                    "The sign-in body is not a UTF-8 form"
+                ) from None
+        if not isinstance(body, str) or len(body) > 2_000_000:
+            raise ICPRequestRefused("The sign-in body is not a bounded form")
+        content_type = request.headers.get("Content-Type", "").split(";", 1)[0]
+        if content_type == "application/json" and identity:
+            try:
+                data = json.loads(body)
+            except ValueError:
+                raise ICPRequestRefused("The identity lookup body is invalid") from None
+            allowed = {
+                "username",
+                "isOtherIdpSupported",
+                "checkPhones",
+                "isRemoteNGCSupported",
+                "isCookieBannerShown",
+                "isFidoSupported",
+                "forceotclogin",
+                "isExternalFederationDisallowed",
+                "isRemoteConnectSupported",
+                "federationFlags",
+                "isSignup",
+                "flowToken",
+            }
+            if (
+                urlsplit(request.url).path.endswith("/GetCredentialType")
+                and isinstance(data, dict)
+                and {"username", "flowToken"} <= data.keys() <= allowed
+            ):
+                return
+            raise ICPRequestRefused("Only the identity lookup JSON is allowed")
+        if content_type != "application/x-www-form-urlencoded":
+            raise ICPRequestRefused("Only encoded sign-in forms are allowed")
+        try:
+            pairs = parse_qsl(body, keep_blank_values=True, strict_parsing=True)
+        except ValueError:
+            raise ICPRequestRefused("The sign-in form is invalid") from None
+        fields = dict(pairs)
+        keys = fields.keys()
+        if not keys or len(fields) != len(pairs):
+            raise ICPRequestRefused("The sign-in form has missing or duplicate fields")
+        if not identity:
+            if "Authorization" in request.headers:
+                raise ICPRequestRefused(
+                    "Credentials may go only to the identity provider"
+                )
+            relay_forms = (
+                ({"SAMLResponse"}, {"SAMLResponse", "RelayState"}),
+                ({"id_token", "state"}, {"id_token", "code", "state", "session_state"}),
+                ({"code", "state"}, {"id_token", "code", "state", "session_state"}),
+                ({"wresult"}, {"wa", "wresult", "wctx"}),
+            )
+            if any(required <= keys <= allowed for required, allowed in relay_forms):
+                return
+            raise ICPRequestRefused("Only assertion relay forms may reach a gateway")
+        allowed = {
+            "i13",
+            "login",
+            "loginfmt",
+            "type",
+            "LoginOptions",
+            "lrt",
+            "lrtPartition",
+            "hisRegion",
+            "hisScaleUnit",
+            "passwd",
+            "ps",
+            "psRNGCDefaultType",
+            "psRNGCEntropy",
+            "psRNGCSLK",
+            "canary",
+            "ctx",
+            "hpgrequestid",
+            "flowToken",
+            "PPSX",
+            "NewUser",
+            "FoundMSAs",
+            "fspost",
+            "i21",
+            "CookieDisclosure",
+            "IsFidoSupported",
+            "isSignupPost",
+            "i19",
+        }
+        if not {"ctx", "flowToken"} <= keys <= allowed:
+            raise ICPRequestRefused("Only identity-provider login forms are allowed")
+
+    def before_send(self) -> None:
+        if self.authenticating:
+            self.sign_in_requests += 1
+            if self.sign_in_requests > self.max_sign_in_requests:
+                raise ICPRequestRefused("The sign-in request budget was exhausted")
 
     def throttle(self) -> None:
         with self._lock:
@@ -130,11 +280,23 @@ class _GuardedAdapter(requests.adapters.HTTPAdapter):
         target = self._policy.check(request)
         if "verify" in kwargs and not kwargs["verify"]:
             raise ICPRequestRefused("TLS verification is required")
+        self._policy.before_send()
         self._policy.throttle()
-        response = super().send(request, **kwargs)
-        self._policy.records.append(
-            RequestRecord(request.method or "", target, response.status_code)
-        )
+        signing_in = self._policy.authenticating
+        response = None
+        try:
+            response = super().send(request, **kwargs)
+        finally:
+            self._policy.records.append(
+                RequestRecord(
+                    request.method or "",
+                    target,
+                    response.status_code if response is not None else None,
+                    "sign-in" if signing_in else "read",
+                    _origin(request.url) if signing_in else None,
+                    urlsplit(request.url).path if signing_in else None,
+                )
+            )
         return response
 
 
@@ -170,12 +332,13 @@ class _APILogin(ConfluenceClient):
         description_url: str,
         session: _GuardedSession,
         credentials: CredentialManager,
+        credential_service: str,
         timeout: float,
     ) -> None:
         # Keep the shared exchange on the guarded transport throughout sign-in.
         self.base_url = origin
         self.timeout = timeout
-        self.credential_service = "iter"
+        self.credential_service = credential_service
         self._session = session
         self._creds = credentials
         self._authenticated = False
@@ -201,9 +364,21 @@ class ICPClient:
     requests, redirects and direct adapter calls.
     """
 
-    def __init__(self, *, timeout: float = 30, min_interval: float = 0.5) -> None:
-        configured = os.environ.get("IMAS_CODEX_ICP_ORIGIN", "")
-        path = os.environ.get("IMAS_CODEX_ICP_DESCRIPTION_PATH", "")
+    def __init__(
+        self,
+        *,
+        facility: str | None = None,
+        timeout: float = 30,
+        min_interval: float = 0.5,
+    ) -> None:
+        facility = facility or os.environ.get("IMAS_CODEX_ICP_FACILITY")
+        if not facility:
+            raise ICPConfigurationError("Configure the ICP facility")
+        config = get_facility_infrastructure(facility).get("icp", {})
+        configured = os.environ.get("IMAS_CODEX_ICP_ORIGIN", config.get("origin", ""))
+        path = os.environ.get(
+            "IMAS_CODEX_ICP_DESCRIPTION_PATH", config.get("description_path", "")
+        )
         try:
             origin = _origin(configured)
         except ICPRequestRefused:
@@ -213,8 +388,6 @@ class ICPClient:
         parts = urlsplit(configured)
         if parts.path not in ("", "/") or parts.query or parts.fragment:
             raise ICPConfigurationError("The integration origin must have no path")
-        if origin == _IDENTITY_ORIGIN:
-            raise ICPConfigurationError("The integration origin must be an application")
         if not path.startswith("/") or path.startswith("//"):
             raise ICPConfigurationError("Configure an absolute description path")
         self._origin = origin
@@ -225,17 +398,49 @@ class ICPClient:
             )
         if timeout <= 0 or min_interval < 0:
             raise ICPConfigurationError("Timeout and request interval must be valid")
+        try:
+            identity_origins = frozenset(
+                _origin(url) for url in config["identity_origins"]
+            )
+            sign_in_origins = frozenset(
+                _origin(url) for url in config["sign_in_origins"]
+            )
+            gateway_paths = frozenset(config.get("gateway_sign_in_paths", []))
+            service = config["credential_service"]
+        except (KeyError, TypeError, ICPRequestRefused):
+            raise ICPConfigurationError(
+                "Configure the private sign-in allowlist"
+            ) from None
+        if (
+            not identity_origins
+            or not identity_origins <= sign_in_origins
+            or origin in identity_origins
+        ):
+            raise ICPConfigurationError(
+                "Identity origins must belong to the sign-in allowlist"
+            )
+        if not isinstance(service, str) or not service:
+            raise ICPConfigurationError("Configure the stored credential service")
+        if any(not isinstance(p, str) or not p.startswith("/") for p in gateway_paths):
+            raise ICPConfigurationError("Gateway sign-in paths must be absolute paths")
         self.timeout = timeout
         self._creds = CredentialManager()
-        self._credentials = self._creds.get_stored_credentials("iter")
+        self._credentials = self._creds.get_stored_credentials(service)
         if not self._credentials:
             raise ICPAuthenticationError("No stored credentials for the ICP sign-in")
         if "@" not in self._credentials[0]:
             raise ICPAuthenticationError("The stored username must be an email")
-        self._policy = _RequestPolicy(origin, min_interval)
+        self._policy = _RequestPolicy(
+            origin,
+            min_interval,
+            identity_origins,
+            sign_in_origins,
+            gateway_paths,
+            urlsplit(self._description_url).path,
+        )
         self._session = _GuardedSession(self._policy)
         self._login = _APILogin(
-            origin, self._description_url, self._session, self._creds, timeout
+            origin, self._description_url, self._session, self._creds, service, timeout
         )
         self._authenticated = False
         self._auth_lock = threading.RLock()
@@ -251,12 +456,25 @@ class ICPClient:
         return tuple(self._policy.records)
 
     @contextmanager
-    def _identity_exchange(self):
+    def _sign_in_exchange(self):
+        if self._policy.signed_in:
+            raise ICPRequestRefused(
+                "A signed-in session cannot open an implicit exchange"
+            )
+        self._policy.sign_in_requests = 0
         self._policy.authenticating = True
         try:
             yield
         finally:
             self._policy.authenticating = False
+
+    @property
+    def _authenticated(self) -> bool:
+        return self._policy.signed_in
+
+    @_authenticated.setter
+    def _authenticated(self, value: bool) -> None:
+        self._policy.signed_in = value
 
     def authenticate(self, *, force: bool = False) -> bool:
         """Verify the API description or renew the gateway session once."""
@@ -272,7 +490,7 @@ class ICPClient:
                     return True
             self._authenticated = False
             self.session.cookies.clear()
-            with self._identity_exchange():
+            with self._sign_in_exchange():
                 success = self._login._authenticate_sso(*self._credentials)
             if not success:
                 raise ICPAuthenticationError(

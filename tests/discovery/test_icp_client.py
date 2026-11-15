@@ -2,6 +2,7 @@
 
 import io
 import json
+from contextlib import nullcontext
 from unittest.mock import Mock
 
 import pytest
@@ -19,8 +20,24 @@ from imas_codex.discovery.wiki.confluence import ConfluenceClient
 
 ORIGIN = "https://integration.example.test"
 IDENTITY = "https://login.microsoftonline.com"
+GATEWAY = "https://gateway.example.test"
 DESCRIPTION = {"openapi": "3.0.0", "paths": {"/items": {"get": {}}}}
 WRITES = ("POST", "PUT", "PATCH", "DELETE")
+
+
+@pytest.fixture(autouse=True)
+def private_config(monkeypatch):
+    config = {
+        "credential_service": "iter",
+        "identity_origins": [IDENTITY],
+        "sign_in_origins": [IDENTITY, GATEWAY, ORIGIN],
+        "gateway_sign_in_paths": ["/gateway/sign-in"],
+    }
+    monkeypatch.setenv("IMAS_CODEX_ICP_FACILITY", "test-facility")
+    monkeypatch.setattr(
+        module, "get_facility_infrastructure", lambda facility: {"icp": config}
+    )
+    return config
 
 
 def response(request, status=200, body=None, headers=None):
@@ -139,8 +156,10 @@ def test_identity_provider_is_sign_in_only(client, transport, method):
 
 
 def test_sign_in_exception_does_not_allow_application_writes(client, transport):
-    with client._identity_exchange():
-        client.session.post(IDENTITY + "/login", data={"test": "value"})
+    with client._sign_in_exchange():
+        client.session.post(
+            IDENTITY + "/login", data={"ctx": "test", "flowToken": "test"}
+        )
         with pytest.raises(ICPRequestRefused):
             client.session.post(ORIGIN + "/saml", data={"assertion": "test"})
         with pytest.raises(ICPRequestRefused):
@@ -157,8 +176,10 @@ def test_preserved_post_redirect_refused(client, transport, monkeypatch, target)
         return response(request, status=307, headers={"Location": target})
 
     monkeypatch.setattr(requests.adapters.HTTPAdapter, "send", redirect)
-    with client._identity_exchange(), pytest.raises(ICPRequestRefused):
-        client.session.post(IDENTITY + "/login", data={"assertion": "test"})
+    with client._sign_in_exchange(), pytest.raises(ICPRequestRefused):
+        client.session.post(
+            IDENTITY + "/login", data={"ctx": "test", "flowToken": "test"}
+        )
     assert len(transport) == 1
     assert transport[0].url.startswith(IDENTITY)
 
@@ -403,3 +424,121 @@ def test_malformed_keyring_credentials_refuse(monkeypatch, value):
     manager._keyring_available = True
     monkeypatch.setattr(manager, "_keyring_op", lambda operation: value)
     assert manager.get_stored_credentials("iter") is None
+
+
+@pytest.mark.parametrize("state", ("before", "exchange", "signed-in"))
+@pytest.mark.parametrize(
+    "path",
+    (
+        "/api/items",
+        "/api/query/execute",
+        "/api/type/list-contents",
+        "/docs/openapi.json",
+        "/openapi.json",
+    ),
+)
+def test_api_post_refused_in_every_authentication_state(client, transport, state, path):
+    client._authenticated = state == "signed-in"
+    context = client._sign_in_exchange() if state == "exchange" else nullcontext()
+    with context, pytest.raises(ICPRequestRefused, match="only GET and HEAD"):
+        client.session.post(ORIGIN + path, data={"SAMLResponse": "synthetic"})
+    assert transport == []
+
+
+@pytest.mark.parametrize(
+    "target", (IDENTITY + "/login", GATEWAY + "/assertion", ORIGIN + "/gateway/sign-in")
+)
+@pytest.mark.parametrize("state", ("before", "signed-in", "inconsistent"))
+def test_sign_in_post_refused_outside_unsigned_exchange(
+    client, transport, target, state
+):
+    client._authenticated = state != "before"
+    client._policy.authenticating = state == "inconsistent"
+    form = (
+        {"ctx": "test", "flowToken": "test"}
+        if target.startswith(IDENTITY)
+        else {"SAMLResponse": "synthetic"}
+    )
+    with pytest.raises(ICPRequestRefused, match="active unsigned exchange"):
+        client.session.post(target, data=form)
+    assert transport == []
+
+
+def test_unlisted_origin_post_refused_during_exchange(client, transport):
+    with client._sign_in_exchange(), pytest.raises(ICPRequestRefused):
+        client.session.post(
+            "https://unlisted.example.test/assertion",
+            data={"SAMLResponse": "synthetic"},
+        )
+    assert transport == []
+
+
+@pytest.mark.parametrize(
+    "target", (GATEWAY + "/assertion", ORIGIN + "/gateway/sign-in")
+)
+def test_observed_gateway_form_allowed_only_during_sign_in(client, transport, target):
+    with client._sign_in_exchange():
+        client.session.post(
+            target, data={"SAMLResponse": "synthetic", "RelayState": "test"}
+        )
+    assert len(transport) == 1
+    record = client.request_log[0]
+    assert record.phase == "sign-in"
+    assert record.origin in {GATEWAY, ORIGIN}
+    assert record.path in {"/assertion", "/gateway/sign-in"}
+    assert "synthetic" not in str(record)
+    client._authenticated = True
+    with pytest.raises(ICPRequestRefused):
+        client.session.post(target, data={"SAMLResponse": "synthetic"})
+    assert len(transport) == 1
+
+
+@pytest.mark.parametrize(
+    "target", (GATEWAY + "/assertion", ORIGIN + "/gateway/sign-in")
+)
+@pytest.mark.parametrize(
+    "form",
+    (
+        {"passwd": "test"},
+        {"SAMLResponse": "synthetic", "passwd": "test"},
+        {"arbitrary": "test"},
+    ),
+)
+def test_gateway_refuses_credentials_and_non_login_forms(
+    client, transport, target, form
+):
+    with client._sign_in_exchange(), pytest.raises(ICPRequestRefused):
+        client.session.post(target, data=form)
+    assert transport == []
+
+
+def test_identity_provider_refuses_arbitrary_post_bodies(client, transport):
+    with client._sign_in_exchange():
+        with pytest.raises(ICPRequestRefused):
+            client.session.post(IDENTITY + "/login", data={"arbitrary": "test"})
+        with pytest.raises(ICPRequestRefused):
+            client.session.post(IDENTITY + "/login", json={"arbitrary": "test"})
+    assert transport == []
+
+
+def test_sign_in_has_one_total_transport_budget(client, transport):
+    client._policy.max_sign_in_requests = 2
+    with client._sign_in_exchange():
+        client.session.get(IDENTITY + "/login")
+        client.session.post(
+            IDENTITY + "/login", data={"ctx": "test", "flowToken": "test"}
+        )
+        with pytest.raises(ICPRequestRefused, match="budget"):
+            client.session.get(IDENTITY + "/login")
+    assert len(transport) == 2
+
+
+def test_api_path_cannot_be_configured_as_a_gateway_exception(client, transport):
+    client._policy.gateway_paths = frozenset(
+        {"/api/query/execute", "/docs/openapi.json"}
+    )
+    with client._sign_in_exchange():
+        for path in client._policy.gateway_paths:
+            with pytest.raises(ICPRequestRefused):
+                client.session.post(ORIGIN + path, data={"SAMLResponse": "synthetic"})
+    assert transport == []
