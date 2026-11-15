@@ -2,7 +2,7 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "caption_judgement": "the caption is substantive and not a restatement of the figure: it names what is plotted, defines 'divergent' as more than one description template or more than one unit, and states that the measure is the one the pre-write census used so the two readings are like for like. The paragraph immediately above the figure additionally discloses that only the flux-surface average had a pre-write reading and that the other four rows carry no before-count rather than a zero, which is the reading the figure's 'not measured' strings need. No caption finding is recorded.",
-  "completed_at": "",
+  "completed_at": "2026-11-15T05:13:16.167Z",
   "dispatched_at": "2026-11-15T04:58:52Z",
   "figure_reviewed": {
     "artifact": "docs/figures/sn-definitions-by-construction/sdbc-rewrite-closing-census/wordings-before-after.svg",
@@ -42,6 +42,6 @@
   "rubric": "figure",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-15T05:13:19.627267+00:00",
+  "timestamp": "2026-11-15T05:51:58.037546+00:00",
   "total": null
 }
