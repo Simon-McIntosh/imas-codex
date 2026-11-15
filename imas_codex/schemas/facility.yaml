@@ -43,6 +43,16 @@ imports:
 # =============================================================================
 
 enums:
+  ArchiveSamplingMode:
+    description: Sampling semantics established by archive metadata or a read
+    permissible_values:
+      continuous:
+        description: Archive explicitly identifies continuous sampling
+      on_change:
+        description: Archive explicitly identifies change-driven archiving
+      unknown:
+        description: Available evidence does not establish sampling semantics
+
   DataSourceType:
     description: Types of data source systems at fusion facilities
     permissible_values:
@@ -2857,6 +2867,24 @@ classes:
         description: What this signal measures (physics description)
       source_description:
         description: Catalogue wording supplied by the source data system, independent of enrichment
+      metadata_archive:
+        description: Logical archive whose variable listing supplied this signal's metadata
+        range: ArchiveEndpoint
+        annotations:
+          relationship_type: METADATA_ARCHIVE
+      data_archive:
+        description: Logical archive confirmed by a bounded read returning samples; unset until confirmed
+        range: ArchiveEndpoint
+        annotations:
+          relationship_type: DATA_ARCHIVE
+      archive_cohorts:
+        description: Opaque fingerprints of declared archive cohorts that enumerated this selector
+        multivalued: true
+      sampling_mode:
+        description: Archive-established sampling semantics, unknown when not established
+        range: ArchiveSamplingMode
+      sampling_evidence:
+        description: Source of evidence establishing continuous or change-driven archiving
       signal_role:
         description: >-
           Physical role this signal plays (measured, commanded,

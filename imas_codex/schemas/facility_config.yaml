@@ -669,6 +669,31 @@ classes:
         multivalued: true
         annotations:
           is_private: true
+      catalogue_role:
+        description: Readable archive whose listing supplies the variable catalogue
+        range: ReadableArchiveRole
+      catalogue_limit:
+        description: Maximum variables accepted from one declared pattern without truncation
+        range: integer
+        minimum_value: 1
+        maximum_value: 100000
+        ifabsent: int(10000)
+      metadata_batch_size:
+        description: Maximum metadata requests in one UDA protocol batch
+        range: integer
+        minimum_value: 1
+        maximum_value: 1000
+        ifabsent: int(100)
+      validation_start_ns:
+        description: Private bounded-read validation window start in epoch nanoseconds
+        range: integer
+        annotations:
+          is_private: true
+      validation_end_ns:
+        description: Private bounded-read validation window end in epoch nanoseconds
+        range: integer
+        annotations:
+          is_private: true
       max_samples:
         description: Maximum samples returned by one read
         range: integer

@@ -29,3 +29,8 @@
 # - check_ppf.py: JET PPF signal validation via ppfdata()
 # - enumerate_edas.py: JT-60SA EDAS category/data name enumeration
 # - check_edas.py: JT-60SA EDAS signal validation via eddbreadOne()
+
+# Pure standard-library modules shipped with an isolated interpreter's script.
+SCRIPT_DEPENDENCIES = {
+    "codac_uda.py": ("imas_codex.config.codac_uda",),
+}

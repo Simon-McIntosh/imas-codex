@@ -32,8 +32,10 @@ known_login_nodes:
 login_nodes:
   - "98dci4-srv-*.iter.org"
   - "98dci4-gpu-*.iter.org"
+  - "98dci4-clu-*.iter.org"
   - "98dci4-srv-*"
   - "98dci4-gpu-*"
+  - "98dci4-clu-*"
 
 # SSH aliases treated as local when running on a matching login node.
 local_hosts:
@@ -67,7 +69,7 @@ compute_locations:
 data_systems:
   codac_uda:
     setup_commands:
-      - source /etc/profile.d/z00_lmod.sh
+      - source /etc/profile.d/modules.sh
       - module load m-uda-client/7.4-iimkl-2025b
     python_command: python3
     archives:

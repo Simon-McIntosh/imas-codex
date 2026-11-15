@@ -9,6 +9,8 @@ Archive addresses and operator exclusions come from deployment configuration.
 from __future__ import annotations
 
 import contextlib
+import ctypes
+import ctypes.util
 import json
 import os
 import sys
@@ -17,26 +19,23 @@ from typing import Any
 
 import numpy as np
 
+from imas_codex.config.codac_uda import archive_host_key
+
 
 class ReadError(RuntimeError):
     """A refused read, invalid sampling cadence, or exhausted read bound."""
-
-
-def _host_key(host: str) -> str:
-    return host.strip().rstrip(".").split(".", 1)[0].lower()
 
 
 def connect(host: str, operator_hosts: list[str], port: int = 3090, factory=None):
     """Refuse operator endpoints before importing or constructing the client.
 
     A deployment must supply the exclusion list, even when injecting a client.
-    Short labels are compared so case, a domain and a trailing dot cannot evade it.
+    Canonical policy compares DNS aliases and exact IP addresses identically
+    to facility configuration validation.
     """
-    if not operator_hosts or not all(_host_key(item) for item in operator_hosts):
+    if not operator_hosts or not all(archive_host_key(item) for item in operator_hosts):
         raise ValueError("operator host exclusions must be configured")
-    if not host or any(char in host for char in "/:@ \t\n"):
-        raise ValueError("host must be a DNS name or IPv4 address without a port")
-    if _host_key(host) in {_host_key(item) for item in operator_hosts}:
+    if archive_host_key(host) in {archive_host_key(item) for item in operator_hosts}:
         raise ValueError("archive endpoint is reserved for operators")
     if factory is None:
         from uda_client_reader.uda_client_reader_python import UdaClientReaderPython
@@ -46,7 +45,7 @@ def connect(host: str, operator_hosts: list[str], port: int = 3090, factory=None
 
 
 def _token(value: str) -> str:
-    if not value or any(char in value for char in ",=\n\r"):
+    if not value or any(char in value for char in ",=\n\r'\"\\"):
         raise ValueError("query tokens must be nonempty and contain no separators")
     return value
 
@@ -56,22 +55,119 @@ def _field(value: Any, source: str) -> dict:
     return {"value": text or None, "source": source if text else None}
 
 
+def metadata_batch(client, names: list[str]) -> list[dict]:
+    """Retrieve type metadata in one UDA protocol batch, freeing every handle.
+
+    The high-level archive wrapper exposes only single-variable metadata calls.
+    Its underlying UDA library exposes idamGetBatchAPIWithHost in udaGetAPI.h
+    and the typed handle accessors in accAPI.h. Use that same library and
+    endpoint; no alternate metadata service or per-variable network loop.
+    """
+    library = ctypes.CDLL(ctypes.util.find_library("uda_client") or "libuda_client.so")
+    pointer = ctypes.POINTER
+    char_p, integer = ctypes.c_char_p, ctypes.c_int
+    signatures = {
+        "idamGetBatchAPIWithHost": (
+            [
+                pointer(char_p),
+                pointer(char_p),
+                integer,
+                pointer(integer),
+                char_p,
+                integer,
+            ],
+            integer,
+        ),
+        "getIdamErrorCode": ([integer], integer),
+        "getIdamErrorMsg": ([integer], char_p),
+        "getIdamDataNum": ([integer], integer),
+        "getIdamDataType": ([integer], integer),
+        "getIdamData": ([integer], ctypes.c_void_p),
+        "udaFree": ([integer], None),
+    }
+    for name, (arguments, result) in signatures.items():
+        function = getattr(library, name)
+        function.argtypes, function.restype = arguments, result
+    queries = [
+        f"UDA::getMetaTypeJSON(path='{_token(str(client.correctVariableName(name)))}/meta', startTime=-1)".encode()
+        for name in names
+    ]
+    signals = (char_p * len(names))(*queries)
+    sources = (char_p * len(names))(*([b""] * len(names)))
+    handles = (integer * len(names))(*([-1] * len(names)))
+    results = []
+    try:
+        status = library.idamGetBatchAPIWithHost(
+            signals,
+            sources,
+            len(names),
+            handles,
+            str(client.getHost()).encode(),
+            int(client.getPort()),
+        )
+        if status != 0:
+            raise ReadError("archive metadata batch failed")
+        for handle in handles:
+            if handle < 0 or library.getIdamErrorCode(handle):
+                results.append({"error": "archive metadata unavailable"})
+                continue
+            size = library.getIdamDataNum(handle)
+            address = library.getIdamData(handle)
+            # UDA's byte and string type codes; refuse a structured pointer.
+            if (
+                library.getIdamDataType(handle) not in {1, 17}
+                or not address
+                or not 0 < size <= 1_000_000
+            ):
+                results.append({"error": "archive metadata has invalid type or size"})
+                continue
+            try:
+                results.append(
+                    json.loads(ctypes.string_at(address, size).rstrip(b"\0"))
+                )
+            except (ValueError, UnicodeError):
+                results.append({"error": "archive metadata is not JSON"})
+    finally:
+        for handle in handles:
+            if handle >= 0:
+                library.udaFree(handle)
+    return results
+
+
 def variables(client, request: dict) -> dict:
     """List archive-declared metadata without opening another network service."""
     if "metadata_url" in request:
         raise ValueError("metadata endpoints are not accepted in reader requests")
     pattern = _token(request["pattern"])
-    names = list(client.getVariableList(pattern))
+    names = list(dict.fromkeys(str(item) for item in client.getVariableList(pattern)))
+    if client.getErrorCode() != 0:
+        raise ReadError("archive variable listing failed")
     limit = int(request.get("limit", 1000))
     if limit < 1 or len(names) > limit:
         raise ReadError("variable catalogue exceeds limit; narrow the pattern")
     warnings = []
     entries = []
-    for item in names:
-        name = str(item)
+    if request.get("metadata") is False:
+        return {
+            "entries": [
+                {
+                    "name": name,
+                    "unit": _field(None, "uda"),
+                    "description": _field(None, "uda"),
+                }
+                for name in names
+            ],
+            "warnings": [],
+        }
+    batch_size = int(request.get("metadata_batch_size", 100))
+    if not 1 <= batch_size <= 1000:
+        raise ValueError("metadata batch size must be between 1 and 1000")
+    documents = []
+    for offset in range(0, len(names), batch_size):
+        documents.extend(metadata_batch(client, names[offset : offset + batch_size]))
+    for name, document in zip(names, documents, strict=True):
         unit, description = _field(None, "uda"), _field(None, "uda")
         try:
-            document = json.loads(client.getMetaTypeJSONCollapsed(name))
             fields = document["datatypes"][0]["fields"]
             signal = next(
                 (field for field in fields if field.get("name") == "val"), None
@@ -323,10 +419,14 @@ def main() -> int:
         request = json.load(sys.stdin)
         # Native libraries can print diagnostics; reserve stdout for the receipt.
         with contextlib.redirect_stdout(sys.stderr):
+            connection = request.pop("connection", {})
             client = connect(
-                os.environ.get("CODAC_UDA_HOST", ""),
-                json.loads(os.environ.get("CODAC_UDA_OPERATOR_HOSTS", "[]")),
-                int(os.environ.get("CODAC_UDA_PORT", "3090")),
+                connection.get("host", os.environ.get("CODAC_UDA_HOST", "")),
+                connection.get(
+                    "operator_hosts",
+                    json.loads(os.environ.get("CODAC_UDA_OPERATOR_HOSTS", "[]")),
+                ),
+                int(connection.get("port", os.environ.get("CODAC_UDA_PORT", "3090"))),
             )
             result = dispatch(client, request)
         print(json.dumps({"ok": True, "result": result}))

@@ -266,6 +266,7 @@ CASE
     WHEN {alias}.discovery_source = 'ppf' THEN 'ppf'
     WHEN {alias}.discovery_source = 'jpf' THEN 'jpf'
     WHEN {alias}.discovery_source = 'edas' THEN 'edas'
+    WHEN {alias}.discovery_source = 'codac_uda' THEN 'codac_uda'
     WHEN {alias}.discovery_source IN $static_sources THEN 'device_xml'
     WHEN {alias}.data_source_name IN $static_sources THEN 'device_xml'
     ELSE 'mdsplus'
@@ -444,6 +445,8 @@ def get_signal_scanner_type(signal: dict[str, Any]) -> str:
         return "jpf"
     if source == "edas":
         return "edas"
+    if source == "codac_uda":
+        return "codac_uda"
     if source in STATIC_DATA_SOURCES:
         return "device_xml"
 
@@ -3718,9 +3721,13 @@ async def seed_worker(
 
             if result.signals:
                 batch_start = time.monotonic()
-                count = await asyncio.to_thread(
-                    ingest_discovered_signals,
-                    [s.model_dump(exclude_none=True) for s in result.signals],
+                count = (
+                    result.stats["written"]
+                    if result.stats.get("persisted")
+                    else await asyncio.to_thread(
+                        ingest_discovered_signals,
+                        [s.model_dump(exclude_none=True) for s in result.signals],
+                    )
                 )
                 total_discovered += count
                 state.discover_stats.processed += count
@@ -5897,7 +5904,7 @@ async def check_worker(
         checked: list[dict] = []
 
         # --- Scanner-based checks (PPF, JPF, EDAS, device_xml) ---
-        for scanner_type in ("ppf", "jpf", "edas", "device_xml"):
+        for scanner_type in ("ppf", "jpf", "edas", "device_xml", "codac_uda"):
             group = scanner_groups.get(scanner_type, [])
             if not group:
                 continue
