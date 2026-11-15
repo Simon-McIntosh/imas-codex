@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own gate logs: after_suite head.log records 400 passed, 0 failed, EXIT=0 at c3afb475 and baseline_suite baseline.log records 311 passed, 0 failed, EXIT=0 at 0acabb08, so the head adds no failing id and the count is a measured 0.",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/cli/sn.py:3228",
+    "imas_codex/standard_names/loop.py:70",
+    "imas_codex/standard_names/pools.py:104",
+    "imas_codex/standard_names/campaign_pricing.py:75",
+    "imas_codex/cli/llm_cli.py:195",
+    "imas_codex/discovery/base/services.py:695"
+  ],
+  "completed_at": "2026-11-15T15:34:42.485Z",
+  "dispatched_at": "2026-11-15T15:33:48Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/base/services.py",
+      "line": "695",
+      "severity": "non-blocking",
+      "text": "non-blocking: the canary's codex probe still requests openrouter/google/gemini-3.8-flash while this change renames that route to openrouter/google/gemini-4-hydrogen at imas_codex/config/litellm_config.yaml:73 and the proxy defines no wildcard, so a live canary call would be refused as an unknown model; the helper has no production caller today (only tests/discovery/test_base_services.py:183 reaches it with urlopen mocked), so it is latent rather than breaking, and the owning file is outside this node's fence."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 6 production call site(s)",
+    "diff": "Read c3afb4752f001f4c6e2b5399b5844a0a12b8cb37 and a233a0190ab890936ed2f06d77ea51eb0c14550f against base 0acabb08334743484e423591d9566b004fb9ec57; c3afb4752 moves the two Google lines across seven declarations, matches the proxy routes and fallbacks, refreshes the dated catalogue and adds the seat assertions, while a233a0190 adds only the evidence fragment.",
+    "done_when": "Read each of the five \"Done when\" clauses against head.log (400 passed, 0 failed, EXIT=0), baseline.log (311 passed, 0 failed, EXIT=0), live.log (7 SEAT_RECEIPT lines with response_model), the 63-row fragment table with before/after prices and ratios, and negative-control.log (2 failed, EXIT=1).",
+    "goal": "Read the run's goal in brief.md:5-7 and worked it against the reviewed head; all 63 declared identifiers in pyproject.toml:660-835 resolve to a same-tier line, seven moved; the code and configuration fallbacks now agree.",
+    "manifest": "Read manifest.md at the run directory; it records commits c3afb4752f001f4c6e2b5399b5844a0a12b8cb37 and a233a0190ab890936ed2f06d77ea51eb0c14550f, the head pytest command, baseline_suite and after_suite with 0 failures each and log paths, and a negative_control_log whose log I opened and found 2 failures at EXIT=1.",
+    "write_paths": "Read the run's declared write paths (pyproject.toml, imas_codex/settings.py, imas_codex/config/, tests/config/, and the evidence fragment) and confirmed all seven paths in git diff --stat 0acabb08334743484e423591d9566b004fb9ec57..a233a0190ab890936ed2f06d77ea51eb0c14550f lie inside them."
+  },
+  "justifications": {
+    "durability": "tests/config/test_model_seats.py:367 fails when a fallback diverges (demonstrated by negative-control.log's ids-mapping failure) and :284 fails when a seat names a line the snapshot records a successor for, but the successor map at tests/config/data/model-catalog-2026-11-15.json:940 is hand-maintained, so a new provider line is caught only once it is recorded there.",
+    "evidence": "baseline.log and head.log each close with EXIT=0 and zero failures (311 and 400 passed), live.log records 7 receipts with response_model, and negative-control.log closes with 2 failed and EXIT=1, though head.log:1 names the revision as \"HEAD\" rather than the landed sha.",
+    "fit": "the new tests follow the existing parametrized idiom of tests/config/test_model_seats.py:288-367 and the new pricing rows at pyproject.toml:1044-1061 use the same source/verified-at shape as their neighbours.",
+    "goal_fidelity": "pyproject.toml:766-806 carries the seven moved declarations on Google's stable Hydrogen and Carbon lines with the tier and price reasoning recorded in the snapshot's tier_judgements, and imas_codex/settings.py:1657-1662 now repeats each configured list.",
+    "reuse": "the diff adds no production definition; it imports _catalog and _declared_models from tests/config/test_model_seats.py:96-120 and extends the existing _assert_proven_pricing at tests/standard_names/test_seat_exposure_calibration.py:64 rather than duplicating a mechanism.",
+    "scope_discipline": "git diff --stat 0acabb08334743484e423591d9566b004fb9ec57..a233a0190ab890936ed2f06d77ea51eb0c14550f names seven paths and every one is inside the declared write paths in brief.md:70-73."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read the run's goal in brief.md:5-7 and worked it against the reviewed head; all 63 declared identifiers in pyproject.toml:660-835 resolve to a same-tier line, seven moved; the code and configuration fallbacks now agree.\nVERDICT done_when: Read each of the five \"Done when\" clauses against head.log (400 passed, 0 failed, EXIT=0), baseline.log (311 passed, 0 failed, EXIT=0), live.log (7 SEAT_RECEIPT lines with response_model), the 63-row fragment table with before/after prices and ratios, and negative-control.log (2 failed, EXIT=1).\nVERDICT write_paths: Read the run's declared write paths (pyproject.toml, imas_codex/settings.py, imas_codex/config/, tests/config/, and the evidence fragment) and confirmed all seven paths in git diff --stat 0acabb08334743484e423591d9566b004fb9ec57..a233a0190ab890936ed2f06d77ea51eb0c14550f lie inside them.\nVERDICT manifest: Read manifest.md at the run directory; it records commits c3afb4752f001f4c6e2b5399b5844a0a12b8cb37 and a233a0190ab890936ed2f06d77ea51eb0c14550f, the head pytest command, baseline_suite and after_suite with 0 failures each and log paths, and a negative_control_log whose log I opened and found 2 failures at EXIT=1.\nVERDICT diff: Read c3afb4752f001f4c6e2b5399b5844a0a12b8cb37 and a233a0190ab890936ed2f06d77ea51eb0c14550f against base 0acabb08334743484e423591d9566b004fb9ec57; c3afb4752 moves the two Google lines across seven declarations, matches the proxy routes and fallbacks, refreshes the dated catalogue and adds the seat assertions, while a233a0190 adds only the evidence fragment.\nCALL_SITES: imas_codex/cli/sn.py:3228, imas_codex/standard_names/loop.py:70, imas_codex/standard_names/pools.py:104, imas_codex/standard_names/campaign_pricing.py:75, imas_codex/cli/llm_cli.py:195, imas_codex/discovery/base/services.py:695\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: pyproject.toml:766-806 carries the seven moved declarations on Google's stable Hydrogen and Carbon lines with the tier and price reasoning recorded in the snapshot's tier_judgements, and imas_codex/settings.py:1657-1662 now repeats each configured list.\nSCORE evidence: 18\nJUSTIFICATION evidence: baseline.log and head.log each close with EXIT=0 and zero failures (311 and 400 passed), live.log records 7 receipts with response_model, and negative-control.log closes with 2 failed and EXIT=1, though head.log:1 names the revision as \"HEAD\" rather than the landed sha.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 0acabb08334743484e423591d9566b004fb9ec57..a233a0190ab890936ed2f06d77ea51eb0c14550f names seven paths and every one is inside the declared write paths in brief.md:70-73.\nSCORE durability: 17\nJUSTIFICATION durability: tests/config/test_model_seats.py:367 fails when a fallback diverges (demonstrated by negative-control.log's ids-mapping failure) and :284 fails when a seat names a line the snapshot records a successor for, but the successor map at tests/config/data/model-catalog-2026-11-15.json:940 is hand-maintained, so a new provider line is caught only once it is recorded there.\nSCORE fit: 18\nJUSTIFICATION fit: the new tests follow the existing parametrized idiom of tests/config/test_model_seats.py:288-367 and the new pricing rows at pyproject.toml:1044-1061 use the same source/verified-at shape as their neighbours.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no production definition; it imports _catalog and _declared_models from tests/config/test_model_seats.py:96-120 and extends the existing _assert_proven_pricing at tests/standard_names/test_seat_exposure_calibration.py:64 rather than duplicating a mechanism.\nFINDING imas_codex/discovery/base/services.py:695 non-blocking: the canary's codex probe still requests openrouter/google/gemini-3.8-flash while this change renames that route to openrouter/google/gemini-4-hydrogen at imas_codex/config/litellm_config.yaml:73 and the proxy defines no wildcard, so a live canary call would be refused as an unknown model; the helper has no production caller today (only tests/discovery/test_base_services.py:183 reaches it with urlopen mocked), so it is latent rather than breaking, and the owning file is outside this node's fence.",
+  "review_run_id": "r-20261115T153239922873-review-of-move-model-seats-to-newest-lines-a233a0190ab8",
+  "reviewed_base_sha": "0acabb08334743484e423591d9566b004fb9ec57",
+  "reviewed_head_sha": "a233a0190ab890936ed2f06d77ea51eb0c14550f",
+  "reviewed_run_id": "r-20261115T151229234113-move-model-seats-to-newest-lines",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T16:40:00.000000+00:00",
+  "total": 110
+}
