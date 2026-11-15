@@ -45,23 +45,6 @@ SOURCELESS_RECORDED = 10
 PROBE_FAMILY = "ratio_of_<X>_density_to_electron_density"
 PROBE_LINE_USD = 0.10
 
-#: One stored wording per family; a family is a species token substituted into
-#: this template, the same measure the closing census takes.
-SPECIES = [
-    "helium_3", "helium_4", "deuterium_tritium",
-    "deuterium", "tritium",
-    "helium", "hydrogen", "lithium",
-    "beryllium", "boron", "carbon",
-    "nitrogen", "oxygen", "neon",
-    "argon", "krypton", "xenon",
-    "iron", "tungsten", "total_hydrogenic",
-]
-
-#: Population qualifiers that take the name off the bare-species rule: the
-#: quantity is one charge state, or a neutral population, and the settled
-#: sentence would misstate it.
-OFF_POPULATION_TOKENS = ("neutral", "charge_state", "internal_state")
-
 #: The settled sentence is a statement about a particle number density, so it
 #: applies only where the unit is one.
 PARTICLE_DENSITY_UNIT = "m^-3"
@@ -129,23 +112,10 @@ def live_rows(names):
         return [dict(record) for record in client.query(query, names=sorted(names))]
 
 
-def family_template(name):
-    pattern = re.compile(r"(?<![a-z])(" + "|".join(SPECIES) + r")(?![a-z])")
-    return pattern.sub("<X>", name)
-
-
 def operator_of(name):
-    return [
-        operator
-        for operator in (
-            "flux_surface_averaged",
-            "volume_averaged",
-            "line_averaged",
-            "line_integrated",
-            "time_derivative",
-        )
-        if operator in name
-    ]
+    """The operators *name* carries, from the census module's own list."""
+
+    return [operator for operator in census_module().OPERATORS if operator in name]
 
 
 def off_population(name, unit):
