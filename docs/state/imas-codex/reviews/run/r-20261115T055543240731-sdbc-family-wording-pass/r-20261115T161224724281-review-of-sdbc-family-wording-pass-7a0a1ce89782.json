@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-15T16:13:41.514Z",
+  "dispatched_at": "2026-11-15T16:13:26Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py",
+      "line": "132",
+      "severity": "non-blocking",
+      "text": "non-blocking: family_template is never called and duplicates rewrite-closing-census.py:242, and the SPECIES list at :50 is a verbatim copy of rewrite-closing-census.py:53 that the module imports for its census phases, so two copies of the family measure can drift apart while the report claims one."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py",
+      "line": "537",
+      "severity": "non-blocking",
+      "text": "non-blocking: the worked list records score_before null for 44 of 173 names and score_after null for 15, so the done-when clause requiring a score beside every worked name holds for 129 names and the report states only the rated count, leaving \"as a result of the rewrite\" unsettled for the rest."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T055543240731-sdbc-family-wording-pass/gate-logs/negative-control-1318121.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the declared negative control records its two commands and no FAIL line and no EXIT= line, so the log shows that the control was started and not that the gate refused the patched count it was handed."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py",
+      "line": "703",
+      "severity": "non-blocking",
+      "text": "non-blocking: the deliverable records its own head clause as \"not met\" at 0 of 23 families before and after, so the goal needs a ruling on writing and storing one sentence per family before any further pass can satisfy it."
+    },
+    {
+      "file": "gate/gate_wording_pass_census.py",
+      "line": "44",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate compares 13 report-stated counts and nothing else, so the done-when clauses for the sourceless bound, the spend ceiling and each worked name's before and after scores are asserted by no check at all."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all three commits (11b7b3384, 991e905a7, 7a0a1ce89) against base aa6e7e5; they add one report generator, its JSON and HTML and one SVG, all under the declared fragment directory and figure directory, and the third commit records the one flux-surface name no work-list branch reached.",
+    "done_when": "the gate run is gate-logs/census-gate-1318117.log, which re-reads the live graph through the committed census measures and matched 13 of 13 report-stated counts (EXIT=0); it asserts clauses 1-3 of the four-clause measure and leaves the sourceless bound, the spend ceiling and the per-name before/after completeness to the report's own text.",
+    "goal": "the node's goal is to bring the species families and operator names to the one stored wording on the live graph; docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.json records the operator omissions falling 157 -> 14 and species departures 76 -> 39 while families at one wording stay 0 of 23, so the family half of the goal is unachieved.",
+    "manifest": "read the reviewed run's manifest.md; it reports status complete, names the three commits, the census gate log at gate-logs/census-gate-1318117.log with 13 of 13 counts matched, and the negative-control log at gate-logs/negative-control-1318121.log, which carries the control's two commands and no verdict at all.",
+    "write_paths": "the four declared paths are the three family-wording-pass files and docs/figures/sn-family-wording-pass; git diff aa6e7e59020ed26d2c703b7e88cd71257eab356a..7a0a1ce89782d31babdba53b78516c06b00e41db changes exactly those four files (23,977 insertions, 0 deletions) and nothing else."
+  },
+  "justifications": {
+    "durability": "the diff adds no assertion, and the one guard that would redden on a stale count, gate/gate_wording_pass_census.py, lives in the run directory rather than the repository, so no committed test fails if this report regresses.",
+    "evidence": "gate-logs/census-gate-1318117.log re-reads the live graph and passes 13 of 13 counts with EXIT=0, but gate/gate_wording_pass_census.py:44 checks only those counts and no gate asserts the sourceless bound, the spend ceiling or the per-name before/after scores.",
+    "fit": "family-wording-pass.py:1 follows the sibling fragment generators, and its plan_section key matches rewrite-closing-census.json, though family-wording-pass.py:132 leaves a dead helper behind.",
+    "goal_fidelity": "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:703 records the family clause as 0 of 23 before and after, and its selection leaves 199 names under \"no stored wording to carry\", so the goal's family half does not move.",
+    "reuse": "family-wording-pass.py:132 re-implements the family measure rewrite-closing-census.py:242 owns and its SPECIES list at :50 copies that module's :53, even though the report's own phases import the census module for every measurement.",
+    "scope_discipline": "git diff aa6e7e5..7a0a1ce touches only the four declared paths, and the graph work itself went through sn edit rather than through any code landed here."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to bring the species families and operator names to the one stored wording on the live graph; docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.json records the operator omissions falling 157 -> 14 and species departures 76 -> 39 while families at one wording stay 0 of 23, so the family half of the goal is unachieved.\nVERDICT done_when: the gate run is gate-logs/census-gate-1318117.log, which re-reads the live graph through the committed census measures and matched 13 of 13 report-stated counts (EXIT=0); it asserts clauses 1-3 of the four-clause measure and leaves the sourceless bound, the spend ceiling and the per-name before/after completeness to the report's own text.\nVERDICT write_paths: the four declared paths are the three family-wording-pass files and docs/figures/sn-family-wording-pass; git diff aa6e7e59020ed26d2c703b7e88cd71257eab356a..7a0a1ce89782d31babdba53b78516c06b00e41db changes exactly those four files (23,977 insertions, 0 deletions) and nothing else.\nVERDICT manifest: read the reviewed run's manifest.md; it reports status complete, names the three commits, the census gate log at gate-logs/census-gate-1318117.log with 13 of 13 counts matched, and the negative-control log at gate-logs/negative-control-1318121.log, which carries the control's two commands and no verdict at all.\nVERDICT diff: read all three commits (11b7b3384, 991e905a7, 7a0a1ce89) against base aa6e7e5; they add one report generator, its JSON and HTML and one SVG, all under the declared fragment directory and figure directory, and the third commit records the one flux-surface name no work-list branch reached.\nCALL_SITES: none\nSCORE goal_fidelity: 10\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:703 records the family clause as 0 of 23 before and after, and its selection leaves 199 names under \"no stored wording to carry\", so the goal's family half does not move.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate-logs/census-gate-1318117.log re-reads the live graph and passes 13 of 13 counts with EXIT=0, but gate/gate_wording_pass_census.py:44 checks only those counts and no gate asserts the sourceless bound, the spend ceiling or the per-name before/after scores.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff aa6e7e5..7a0a1ce touches only the four declared paths, and the graph work itself went through sn edit rather than through any code landed here.\nSCORE durability: 6\nJUSTIFICATION durability: the diff adds no assertion, and the one guard that would redden on a stale count, gate/gate_wording_pass_census.py, lives in the run directory rather than the repository, so no committed test fails if this report regresses.\nSCORE fit: 18\nJUSTIFICATION fit: family-wording-pass.py:1 follows the sibling fragment generators, and its plan_section key matches rewrite-closing-census.json, though family-wording-pass.py:132 leaves a dead helper behind.\nSCORE reuse: 5\nJUSTIFICATION reuse: family-wording-pass.py:132 re-implements the family measure rewrite-closing-census.py:242 owns and its SPECIES list at :50 copies that module's :53, even though the report's own phases import the census module for every measurement.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:132 non-blocking: family_template is never called and duplicates rewrite-closing-census.py:242, and the SPECIES list at :50 is a verbatim copy of rewrite-closing-census.py:53 that the module imports for its census phases, so two copies of the family measure can drift apart while the report claims one.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:537 non-blocking: the worked list records score_before null for 44 of 173 names and score_after null for 15, so the done-when clause requiring a score beside every worked name holds for 129 names and the report states only the rated count, leaving \"as a result of the rewrite\" unsettled for the rest.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T055543240731-sdbc-family-wording-pass/gate-logs/negative-control-1318121.log:1 non-blocking: the declared negative control records its two commands and no FAIL line and no EXIT= line, so the log shows that the control was started and not that the gate refused the patched count it was handed.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py:703 non-blocking: the deliverable records its own head clause as \"not met\" at 0 of 23 families before and after, so the goal needs a ruling on writing and storing one sentence per family before any further pass can satisfy it.\nFINDING gate/gate_wording_pass_census.py:44 non-blocking: the gate compares 13 report-stated counts and nothing else, so the done-when clauses for the sourceless bound, the spend ceiling and each worked name's before and after scores are asserted by no check at all.\n",
+  "review_run_id": "r-20261115T161224724281-review-of-sdbc-family-wording-pass-7a0a1ce89782",
+  "reviewed_base_sha": "aa6e7e59020ed26d2c703b7e88cd71257eab356a",
+  "reviewed_head_sha": "7a0a1ce89782d31babdba53b78516c06b00e41db",
+  "reviewed_run_id": "r-20261115T055543240731-sdbc-family-wording-pass",
+  "rubric": "text",
+  "scores": {
+    "durability": 6,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 10,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T16:25:48.284115+00:00",
+  "total": 73
+}
