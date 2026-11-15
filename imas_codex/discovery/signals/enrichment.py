@@ -51,9 +51,10 @@ def get_enrichment_options(model: str) -> EnrichmentOptions:
 
     if not model.startswith("local/"):
         return EnrichmentOptions()
-    return EnrichmentOptions.model_validate(
-        _get_section("discovery-describe").get("signal-enrichment", {})
-    )
+    seat = _get_section("discovery-describe")
+    if model != seat.get("model", model):
+        return EnrichmentOptions()
+    return EnrichmentOptions.model_validate(seat.get("signal-enrichment", {}))
 
 
 def fit_enrichment_prompt(baseline: str) -> str:

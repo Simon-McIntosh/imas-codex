@@ -52,6 +52,18 @@ def test_invalid_seat_options_are_refused(settings):
         EnrichmentOptions.model_validate(settings)
 
 
+def test_another_local_model_does_not_inherit_the_configured_models_controls():
+    with patch(
+        "imas_codex.settings._get_section",
+        return_value={
+            "model": "local/configured",
+            "signal-enrichment": {"json-mode": True},
+        },
+    ):
+        assert get_enrichment_options("local/configured").json_mode is True
+        assert get_enrichment_options("local/another") == EnrichmentOptions()
+
+
 def test_fitted_prompt_retains_task_enums_valid_wrapper_and_schema_last():
     prompt = fit_enrichment_prompt("FROZEN FULL TASK AND RETRIEVAL RULES")
     assert "FROZEN FULL TASK AND RETRIEVAL RULES" in prompt
