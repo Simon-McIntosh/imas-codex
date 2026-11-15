@@ -187,6 +187,24 @@ async def test_metadata_calls_checkpoint_and_resume_independently(
 
 
 @pytest.mark.asyncio
+async def test_metadata_is_durable_before_graph_acknowledgement(
+    config, scanner_io, monkeypatch
+):
+    def write(facility, cohort, signals):
+        state = json.loads(open(config["_checkpoint_path"]).read())
+        assert state["complete"] is False
+        assert state["metadata_completed"] == len(signals) == 3
+        assert state["written"] == 0
+        raise TimeoutError("graph acknowledgement interrupted")
+
+    monkeypatch.setattr(catalogue, "_persist_signals", write)
+    with pytest.raises(TimeoutError, match="graph acknowledgement interrupted"):
+        await catalogue.CodacUDAScanner().scan("demo", "local", config)
+    state = json.loads(open(config["_checkpoint_path"]).read())
+    assert state["metadata_completed"] == 3 and state["complete"] is False
+
+
+@pytest.mark.asyncio
 async def test_empty_reads_leave_serving_archive_unset(config, monkeypatch):
     reader = Mock(return_value={"time": [], "values": [], "empty": True})
     confirm = Mock()
