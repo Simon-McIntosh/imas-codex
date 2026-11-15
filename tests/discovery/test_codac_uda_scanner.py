@@ -49,6 +49,20 @@ def scanner_io(monkeypatch):
     monkeypatch.setattr(catalogue, "_persist_archives", Mock())
     monkeypatch.setattr(catalogue, "_persist_signals", write)
     reader = Mock(return_value={"entries": entries(3), "warnings": []})
+
+    def respond(facility, role, payload, **kwargs):
+        response = reader.return_value
+        if payload["operation"] == "metadata":
+            wanted = set(payload["names"])
+            return {
+                "entries": [
+                    entry for entry in response["entries"] if entry["name"] in wanted
+                ],
+                "warnings": response.get("warnings", []),
+            }
+        return response
+
+    reader.side_effect = respond
     monkeypatch.setattr(catalogue, "request_archive", reader)
     return stored, reader
 
@@ -79,7 +93,14 @@ async def test_second_scan_reenumerates_but_writes_no_new_identity(config, scann
     first = await scanner.scan("demo", "local", config)
     second = await scanner.scan("demo", "local", config)
     assert [item.id for item in first.signals] == [item.id for item in second.signals]
-    assert len(scanner_io[0]) == 3 and scanner_io[1].call_count == 2
+    assert len(scanner_io[0]) == 3
+    assert (
+        sum(
+            call.args[2]["operation"] == "variables"
+            for call in scanner_io[1].call_args_list
+        )
+        == 2
+    )
 
 
 @pytest.mark.asyncio
@@ -106,7 +127,7 @@ async def test_interrupted_graph_batch_stays_incomplete_and_resumes(
     result = await scanner.scan("demo", "local", config)
     assert result.stats["complete"] is True and result.stats["written"] == 150
     assert calls == [100, 50, 50]
-    assert scanner_io[1].call_count == 1
+    assert scanner_io[1].call_count == 3
     assert result.stats["skipped"]["already_written"] == 100
 
 
@@ -119,6 +140,50 @@ async def test_unacknowledged_graph_write_cannot_finish(
         await catalogue.CodacUDAScanner().scan("demo", "local", config)
     state = json.loads(open(config["_checkpoint_path"]).read())
     assert state["complete"] is False and state["written"] == 0
+
+
+@pytest.mark.asyncio
+async def test_metadata_calls_checkpoint_and_resume_independently(
+    config, scanner_io, monkeypatch
+):
+    config["metadata_batch_size"] = 20
+    records = entries(55)
+    by_name = {entry["name"]: entry for entry in records}
+    metadata_calls = []
+    interrupted = False
+
+    def reader(facility, role, payload, **kwargs):
+        nonlocal interrupted
+        if payload["operation"] == "variables":
+            assert payload.get("metadata") is False
+            return {"entries": [{"name": name} for name in by_name]}
+        assert payload["operation"] == "metadata"
+        assert 0 < len(payload["names"]) <= 20
+        metadata_calls.append(list(payload["names"]))
+        if len(metadata_calls) == 2 and not interrupted:
+            interrupted = True
+            state = json.loads(open(config["_checkpoint_path"]).read())
+            assert state["complete"] is False
+            assert state["metadata_completed"] == 20
+            raise TimeoutError("metadata request interrupted")
+        return {"entries": [by_name[name] for name in payload["names"]]}
+
+    monkeypatch.setattr(catalogue, "request_archive", reader)
+    scanner = catalogue.CodacUDAScanner()
+    with pytest.raises(TimeoutError, match="metadata request interrupted"):
+        await scanner.scan("demo", "local", config)
+    state = json.loads(open(config["_checkpoint_path"]).read())
+    assert state["complete"] is False
+    assert state["enumerated"] == 55
+    assert state["metadata_completed"] == 20
+    assert state["written"] == 20
+    result = await scanner.scan("demo", "local", config)
+    assert result.stats["complete"] is True
+    assert result.stats["metadata_completed"] == result.stats["written"] == 55
+    assert [len(names) for names in metadata_calls] == [20, 20, 20, 15]
+    assert set(metadata_calls[0]).isdisjoint(
+        {name for batch in metadata_calls[2:] for name in batch}
+    )
 
 
 @pytest.mark.asyncio

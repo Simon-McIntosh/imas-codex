@@ -75,6 +75,9 @@ RETURN count(DISTINCT s) AS written
 
 def _save(path: Path, state: dict) -> None:
     """Replace a private checkpoint atomically; incomplete is the default state."""
+    state["enumerated"] = len(state.get("selectors", state.get("entries", {})))
+    state["metadata_completed"] = len(state.get("entries", {}))
+    state["written"] = len(state.get("written_ids", []))
     path.parent.mkdir(parents=True, exist_ok=True)
     with tempfile.NamedTemporaryFile(mode="w", dir=path.parent, delete=False) as stream:
         json.dump(state, stream)
@@ -178,11 +181,15 @@ class CodacUDAScanner:
                 "cohort": fingerprint,
                 "complete": False,
                 "entries": {},
+                "selectors": [],
+                "metadata_batches": 0,
                 "finished_patterns": [],
                 "written_ids": [],
                 "skipped": {},
                 "warnings": [],
             }
+        state.setdefault("selectors", list(state["entries"]))
+        state.setdefault("metadata_batches", 0)
         state["complete"] = False
         state.pop("error", None)
         _save(path, state)
@@ -213,6 +220,26 @@ class CodacUDAScanner:
             metadata={"checkpoint_path": str(path), "cohort": fingerprint},
         )
         written = set(state["written_ids"])
+
+        async def persist_pending() -> None:
+            pending = [
+                self._signal(facility, archive_id, access.id, entry, fingerprint)
+                for entry in state["entries"].values()
+                if f"{facility}:general/codac_uda/{entry['name']}" not in written
+            ]
+            for offset in range(0, len(pending), 100):
+                batch = pending[offset : offset + 100]
+                count = await asyncio.to_thread(
+                    _persist_signals, facility, fingerprint, batch
+                )
+                if count != len(batch):
+                    raise RuntimeError(
+                        f"incomplete graph batch: acknowledged {count} of {len(batch)}"
+                    )
+                written.update(signal.id for signal in batch)
+                state["written_ids"] = sorted(written)
+                _save(path, state)
+
         try:
             await asyncio.to_thread(_persist_archives, facility, archives, access)
             for pattern in patterns:
@@ -230,41 +257,60 @@ class CodacUDAScanner:
                             config.get("_scan_limit", settings.catalogue_limit),
                         ),
                         "metadata_batch_size": settings.metadata_batch_size,
+                        "metadata": False,
                     },
                     config=effective,
                 )
                 for entry in response["entries"]:
-                    if entry["name"] in state["entries"]:
+                    if entry["name"] in state["selectors"]:
                         state["skipped"]["overlapping_pattern"] = (
                             state["skipped"].get("overlapping_pattern", 0) + 1
                         )
-                    state["entries"][entry["name"]] = entry
+                    else:
+                        state["selectors"].append(entry["name"])
                 state["warnings"].extend(response.get("warnings", []))
                 state["finished_patterns"].append(pattern)
                 _save(path, state)
+            if written:
+                state["skipped"]["already_written"] = len(written)
+            if state["entries"]:
+                state["skipped"]["metadata_already_fetched"] = len(state["entries"])
+            await persist_pending()
+            pending_metadata = [
+                name for name in state["selectors"] if name not in state["entries"]
+            ]
+            for offset in range(0, len(pending_metadata), settings.metadata_batch_size):
+                names = pending_metadata[offset : offset + settings.metadata_batch_size]
+                response = await asyncio.to_thread(
+                    request_archive,
+                    facility,
+                    role,
+                    {
+                        "operation": "metadata",
+                        "names": names,
+                        "metadata_batch_size": settings.metadata_batch_size,
+                    },
+                    config=effective,
+                )
+                received = response["entries"]
+                if len(received) != len(names) or {
+                    entry["name"] for entry in received
+                } != set(names):
+                    raise RuntimeError(
+                        "metadata batch does not match its requested selectors"
+                    )
+                state["entries"].update({entry["name"]: entry for entry in received})
+                state["warnings"].extend(response.get("warnings", []))
+                state["metadata_batches"] += 1
+                _save(path, state)
+                await persist_pending()
             result.signals = [
                 self._signal(facility, archive_id, access.id, entry, fingerprint)
                 for entry in state["entries"].values()
             ]
-            pending = [signal for signal in result.signals if signal.id not in written]
-            resumed = len(result.signals) - len(pending)
-            if resumed:
-                state["skipped"]["already_written"] = resumed
-            for offset in range(0, len(pending), 100):
-                batch = pending[offset : offset + 100]
-                count = await asyncio.to_thread(
-                    _persist_signals, facility, fingerprint, batch
-                )
-                if count != len(batch):
-                    raise RuntimeError(
-                        f"incomplete graph batch: acknowledged {count} of {len(batch)}"
-                    )
-                written.update(signal.id for signal in batch)
-                state["written_ids"] = sorted(written)
-                _save(path, state)
-            state["complete"] = len(written) == len(result.signals)
-            state["enumerated"] = len(result.signals)
-            state["written"] = len(written)
+            state["complete"] = (
+                len(written) == len(result.signals) == len(state["selectors"])
+            )
             _save(path, state)
             result.stats = {
                 "complete": state["complete"],
@@ -273,12 +319,12 @@ class CodacUDAScanner:
                 "written": len(written),
                 "skipped": state["skipped"],
                 "metadata_warnings": len(state["warnings"]),
+                "metadata_completed": state["metadata_completed"],
+                "metadata_batches": state["metadata_batches"],
             }
             return result
         except BaseException as exc:
             state["complete"] = False
-            state["enumerated"] = len(state["entries"])
-            state["written"] = len(written)
             state["error"] = type(exc).__name__
             _save(path, state)
             raise

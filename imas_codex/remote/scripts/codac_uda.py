@@ -134,37 +134,22 @@ def metadata_batch(client, names: list[str]) -> list[dict]:
     return results
 
 
-def variables(client, request: dict) -> dict:
-    """List archive-declared metadata without opening another network service."""
-    if "metadata_url" in request:
-        raise ValueError("metadata endpoints are not accepted in reader requests")
-    pattern = _token(request["pattern"])
-    names = list(dict.fromkeys(str(item) for item in client.getVariableList(pattern)))
-    if client.getErrorCode() != 0:
-        raise ReadError("archive variable listing failed")
-    limit = int(request.get("limit", 1000))
-    if limit < 1 or len(names) > limit:
-        raise ReadError("variable catalogue exceeds limit; narrow the pattern")
+def metadata(client, request: dict) -> dict:
+    """Return one bounded metadata batch; the caller checkpoints between calls."""
+    names = request.get("names")
+    maximum = request.get("metadata_batch_size", 100)
+    if type(maximum) is not int or not 1 <= maximum <= 1000:
+        raise ValueError("metadata batch size must be between 1 and 1000")
+    if not isinstance(names, list) or not 0 < len(names) <= maximum:
+        raise ReadError("metadata request must contain one bounded batch of names")
+    if not all(isinstance(name, str) for name in names):
+        raise ValueError("metadata names must be strings")
+    names = [_token(name) for name in names]
+    if len(set(names)) != len(names):
+        raise ValueError("metadata names must be unique")
     warnings = []
     entries = []
-    if request.get("metadata") is False:
-        return {
-            "entries": [
-                {
-                    "name": name,
-                    "unit": _field(None, "uda"),
-                    "description": _field(None, "uda"),
-                }
-                for name in names
-            ],
-            "warnings": [],
-        }
-    batch_size = int(request.get("metadata_batch_size", 100))
-    if not 1 <= batch_size <= 1000:
-        raise ValueError("metadata batch size must be between 1 and 1000")
-    documents = []
-    for offset in range(0, len(names), batch_size):
-        documents.extend(metadata_batch(client, names[offset : offset + batch_size]))
+    documents = metadata_batch(client, names)
     for name, document in zip(names, documents, strict=True):
         unit, description = _field(None, "uda"), _field(None, "uda")
         try:
@@ -181,6 +166,32 @@ def variables(client, request: dict) -> dict:
             warnings.append({"name": name, "source": "uda", "error": str(exc)})
         entries.append({"name": name, "unit": unit, "description": description})
     return {"entries": entries, "warnings": warnings}
+
+
+def variables(client, request: dict) -> dict:
+    """List selectors independently of bounded metadata retrieval."""
+    if "metadata_url" in request:
+        raise ValueError("metadata endpoints are not accepted in reader requests")
+    pattern = _token(request["pattern"])
+    names = list(dict.fromkeys(str(item) for item in client.getVariableList(pattern)))
+    if client.getErrorCode() != 0:
+        raise ReadError("archive variable listing failed")
+    limit = int(request.get("limit", 1000))
+    if limit < 1 or len(names) > limit:
+        raise ReadError("variable catalogue exceeds limit; narrow the pattern")
+    if request.get("metadata") is not False and names:
+        return metadata(client, {**request, "names": names})
+    return {
+        "entries": [
+            {
+                "name": name,
+                "unit": _field(None, "uda"),
+                "description": _field(None, "uda"),
+            }
+            for name in names
+        ],
+        "warnings": [],
+    }
 
 
 def pulses(client, request: dict) -> dict:
@@ -407,6 +418,8 @@ def dispatch(client, request: dict) -> dict:
     operation = request["operation"]
     if operation == "variables":
         return variables(client, request)
+    if operation == "metadata":
+        return metadata(client, request)
     if operation == "pulses":
         return pulses(client, request)
     if operation == "read":

@@ -44,6 +44,18 @@ def request_archive(
     if "connection" in request or "host" in request or "endpoint" in request:
         raise ValueError("archive connections come only from private configuration")
     payload = dict(request)
+    if payload.get("operation") == "metadata":
+        maximum = payload.setdefault(
+            "metadata_batch_size", settings.metadata_batch_size
+        )
+        names = payload.get("names")
+        if (
+            type(maximum) is not int
+            or not 0 < maximum <= settings.metadata_batch_size
+            or not isinstance(names, list)
+            or not 0 < len(names) <= maximum
+        ):
+            raise ValueError("archive metadata request exceeds configured batch limit")
     if payload.get("operation") == "read":
         start, end = payload.get("start"), payload.get("end")
         if (

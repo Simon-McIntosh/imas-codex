@@ -152,11 +152,44 @@ def test_variable_metadata_is_batched_and_keeps_archive_wording(monkeypatch):
         ]
     )
     monkeypatch.setattr(reader, "metadata_batch", metadata)
-    result = reader.variables(client, {"pattern": "DEMO:*", "metadata_batch_size": 2})
+    results = [
+        reader.dispatch(
+            client,
+            {
+                "operation": "metadata",
+                "names": client.getVariableList.return_value[offset : offset + 2],
+                "metadata_batch_size": 2,
+            },
+        )
+        for offset in range(0, 5, 2)
+    ]
     assert [len(call.args[1]) for call in metadata.call_args_list] == [2, 2, 1]
-    assert len(result["entries"]) == 5
-    assert result["entries"][0]["description"]["value"] == "Archive wording"
+    assert sum(len(result["entries"]) for result in results) == 5
+    assert results[0]["entries"][0]["description"]["value"] == "Archive wording"
     client.getMetaTypeJSONCollapsed.assert_not_called()
+
+
+def test_variable_listing_never_loops_over_multiple_metadata_batches(monkeypatch):
+    client = Mock()
+    client.getVariableList.return_value = [f"DEMO:TEMP-{index}" for index in range(5)]
+    client.getErrorCode.return_value = 0
+    batch = Mock()
+    monkeypatch.setattr(reader, "metadata_batch", batch)
+    with pytest.raises(reader.ReadError, match="one bounded batch"):
+        reader.variables(client, {"pattern": "DEMO:*", "metadata_batch_size": 2})
+    batch.assert_not_called()
+    listing = reader.variables(client, {"pattern": "DEMO:*", "metadata": False})
+    assert len(listing["entries"]) == 5
+    batch.assert_not_called()
+
+
+@pytest.mark.parametrize("names", [[], ["DEMO:TEMP"] * 3])
+def test_metadata_request_bound_is_enforced_before_native_call(monkeypatch, names):
+    batch = Mock()
+    monkeypatch.setattr(reader, "metadata_batch", batch)
+    with pytest.raises(reader.ReadError, match="one bounded batch"):
+        reader.metadata(Mock(), {"names": names, "metadata_batch_size": 2})
+    batch.assert_not_called()
 
 
 def test_listing_error_is_not_a_completed_empty_cohort():
