@@ -33,7 +33,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "6df3d822b66bba61befab4c37b825d09e00400ee",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The prototype tree and its report are now tracked on main: scripts/codac_uda_prototype/ and docs/evidence/fragments/codac-uda-signals/prototype-report.md landed with merge 83b6b5c79, so both citations in section 1 and section 5's reference resolve.",
+      "reason": "",
+      "when": "2026-11-15T00:44:48.857588+00:00"
+    }
+  ],
+  "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "6df3d822b66bba61befab4c37b825d09e00400ee",
+      "commit_basis": "edit",
+      "note": "The prototype tree and its report are now tracked on main: scripts/codac_uda_prototype/ and docs/evidence/fragments/codac-uda-signals/prototype-report.md landed with merge 83b6b5c79, so both citations in section 1 and section 5's reference resolve.",
+      "reason": "",
+      "when": "2026-11-15T00:44:48.857588+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261114T225843671898-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261114T225843671898-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "166206148cbb2c02aa88cf52d96c853306d66727",
   "rubric": "content",
