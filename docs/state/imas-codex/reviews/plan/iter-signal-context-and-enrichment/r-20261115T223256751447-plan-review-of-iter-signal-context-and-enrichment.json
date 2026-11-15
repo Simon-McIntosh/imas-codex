@@ -53,6 +53,16 @@
       "note": "The rationale at version 29 records the branch: sections 6 and 7 are built only after the refinement result is recorded and the lead has confirmed the local model on it; otherwise the choice returns to the lead and neither is built. The queued section 6 request is held on that.",
       "reason": "",
       "when": "2026-11-15T22:56:14.740319+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ebb5a7a4e5d1c6bc65db6926352035727a0eedb6",
+      "commit_basis": "edit",
+      "finding": "reasoning-3",
+      "note": "Section 4's done-when at version 28 requires a facility-scoped private archive of the imported nodes and links before the section lands, so ICP-derived content has a second copy from the day it exists; section 9's later archive after the re-run stands.",
+      "reason": "",
+      "when": "2026-11-15T22:56:20.506831+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "The rationale at version 29 records the branch: sections 6 and 7 are built only after the refinement result is recorded and the lead has confirmed the local model on it; otherwise the choice returns to the lead and neither is built. The queued section 6 request is held on that.",
       "reason": "",
       "when": "2026-11-15T22:56:14.740319+00:00"
+    },
+    "reasoning-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "ebb5a7a4e5d1c6bc65db6926352035727a0eedb6",
+      "commit_basis": "edit",
+      "note": "Section 4's done-when at version 28 requires a facility-scoped private archive of the imported nodes and links before the section lands, so ICP-derived content has a second copy from the day it exists; section 9's later archive after the re-run stands.",
+      "reason": "",
+      "when": "2026-11-15T22:56:20.506831+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261115T223256751447-plan-review-of-iter-signal-context-and-enrichment.json",
