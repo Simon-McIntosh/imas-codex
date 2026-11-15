@@ -1,0 +1,49 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T01:41:44.834Z",
+  "dispatched_at": "2026-11-15T01:19:05Z",
+  "findings": [
+    {
+      "anchor": "plan.html:99",
+      "id": "done_when-1",
+      "reason": "one planted name whose copied list holds a separate source while its producer edges hold none, required to be left out of the count and to answer name search with no source, is what makes both controls fail for a single imperfect implementation in both directions rather than one.",
+      "text": "the reader showing and both count controls exercise only the direction in which the copied list under-reports (a producer edge present, the copied list empty), so a reader or count that reads producer edges and then merges in whatever the copied list holds answers correctly for all 85 names and reports the required 1 on the five-name plant, while still over-reporting a source for a name whose copied list is populated and whose producer edges are absent; the section itself states the list is one which only some writers update, so such a name is exactly the class it exists to stop, and the endpoint that every reader answer as the producer edges give cannot be shown for it",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "cffe924eaad54d955c8df27bce6af201813f3857",
+  "plan_fingerprint": "af7898b146b615bd26dc3d71889a80ea8d8f97913430129b21830902fee5fc03",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 57,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261114T233440282131-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "552a034cc817e3eaafc0829a9276389f52408f62",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 tests/standard_names and docs/evidence/fragments/sn-catalog-consistency both exist in the repository, and the \u00a77 cross-reference resolves.",
+    "done_when": "a finding \u2014 both the 85-name showing and the single reader plant are names with a producer edge and an empty copied list, and the five-name count plant contains no name whose copied list holds a source while its producer edges do not, so an implementation that reads producer edges and then falls back to the copied list passes every control the section lists.",
+    "evidence_paths": "pass \u2014 the only carried artifact is written under docs/evidence/fragments/sn-catalog-consistency/, a durable repository path that already holds this plan's other fragments, and no temporary or session path is named.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a path or a symbol, and the prose states mechanism (producer edges against a copied list) rather than a tracker entry.",
+    "reasoning": "pass \u2014 the stated root cause matches the cited measurement (a 2,609 count taken from the copied list against 3,256 of 3,266 live names holding a producer edge), the records it delivers are obtainable from the graph the section lists, its disposable-graph controls can fail, and it names no code path, step sequence or function to implement.",
+    "single_goal": "pass \u2014 the section delivers one endpoint, a name's sources read from one place, with its count command and guard test; the live repair and the seven-name handoff at plan.html:99 are \u00a77's, so no live write sits under this node's verdict.",
+    "wiring": "pass \u2014 \u00a77 declares `sn-catalog-consistency#s9` in `plan-section-depends-on` (plan.html:22) and \u00a79 declares no wait of its own, which is right because it writes no binding and checks its count against a direct edge read taken in the same job."
+  },
+  "section_digests": {
+    "_document": "2c1048b18b3abc87fa0ead3305f05e2ca37ba0a7eb7882041b8ab7a29b7f2a59",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "fe0b485d37658d44737045e98025181bb507e290590b07825ff0062adf984863",
+    "s6": "253a243a23959f6452cabdc987e19b9de1cec45f996c6c86f6c861fa64307724",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626",
+    "s9": "b5beca0e96fb63d578728a8132861095321983f204d6ed873b08dfe86022e14b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T01:42:19.298832+00:00",
+  "total": null
+}
