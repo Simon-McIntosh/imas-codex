@@ -1,0 +1,28 @@
+<section id="full-archive-variable-catalogue-census">
+  <h2>Full archive census before catalogue writes</h2>
+  <p>The read-only census completed at 2026-11-15T08:47:00.200007+00:00 on
+    the rigel partition, job 1317017. No graph writes or metadata requests were
+    made. Endpoint roles and operator exclusions were read from private
+    configuration; the excluded operator endpoint was never contacted.</p>
+  <table>
+    <thead><tr><th>Population</th><th>Distinct selectors</th><th>Listing time [s]</th></tr></thead>
+    <tbody>
+      <tr><td>Slow archive</td><td>988,145</td><td>87.960</td></tr>
+      <tr><td>SDN archive</td><td>6,861</td><td>0.658</td></tr>
+      <tr><td>Listed by both</td><td>0</td><td>—</td></tr>
+      <tr><td>Union</td><td>995,006</td><td>88.619 combined</td></tr>
+    </tbody>
+  </table>
+  <p>An independently known selector from the previous cohort checkpoint occurs
+    in the slow listing. Both lists are nonempty and their exact selector sets
+    were intersected without name normalization. The union is below the
+    one-million-variable stop threshold.</p>
+  <p>The private receipt is
+    <code>~/.cache/imas-codex-codac-uda/full-census/receipt.json</code>;
+    the complete selector lists are compressed beside it. The slow list SHA-256
+    is <code>bfd2894377014104c4e81a6c8ed802ad8dc2efb367879e174261d282cae7b928</code>
+    and the SDN list SHA-256 is
+    <code>ea91a1de8350f0498c62933063e48cf79e522024081f9e22fb7a3292c1a329e5</code>.</p>
+  <p>Catalogue graph count, metadata coverage, repeat import and recovery
+    measurements are pending. This census does not establish catalogue completion.</p>
+</section>
