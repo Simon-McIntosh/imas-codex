@@ -32,11 +32,27 @@
         <code>test_local_setup_makes_client_importable</code> cases failed with
         <code>ModuleNotFoundError: No module named 'archive_client'</code>.
         The original executor was restored byte for byte.</td></tr>
-      <tr><td>Live archive control</td><td>Not measured. No live requests were
-        made; count and elapsed time are unavailable because the private
-        configuration supplies no CODAC archive setup or endpoint policy.</td></tr>
+      <tr><td>Live slow-archive listing, synchronous</td><td>1 variable in
+        9.530946 s, with an exact selector match, a description, no unit and
+        no metadata warnings.</td></tr>
+      <tr><td>Live slow-archive listing, asynchronous</td><td>1 variable in
+        11.363129 s, with an exact selector match, a description, no unit and
+        no metadata warnings.</td></tr>
     </tbody>
   </table>
+  <p>The live selector is the exact variable from the prototype's successful
+    known-day slow-archive read. Its spelling was read from the private receipt
+    and retained only in memory. Endpoint, port and operator exclusions were
+    read in place from the coordinator-designated private configuration.
+    The declared module setup and <code>python3</code> ran in one shell through
+    each local executor entry point. Native client endpoint settings were
+    explicitly aligned with the selected archive after module loading.</p>
+  <p>The two live listings used 2 of the 4 authorized requests; no retries were
+    needed and no operator endpoint was contacted. Elapsed times include setup,
+    interpreter startup, archive listing, metadata lookup and receipt parsing.
+    Both calls ran on the assigned compute node under allocation
+    <code>1313886</code>. Private endpoint and selector spellings do not appear
+    in this record or in the sanitized live receipts.</p>
   <p>Implementation commits:
     <code>db8fe3608f8df868a154005f86098ef223029857</code> (local setup) and
     <code>f3153d9c97c54bb4647b3dff5db4fdfb8c541bd0</code> (packaged reader).
@@ -45,6 +61,8 @@
     assigned compute allocation on <code>98dci4-clu-2001</code>.</p>
   <p>Gate logs and the exact mutation driver are retained in the assigned
     <code>r-20261115T021213562433-module-environment-script-run</code> run
-    directory. This record delivers the implementation and focused controls;
-    the live criterion remains unmet and the worker does not close the section.</p>
+    directory, alongside <code>live-listings.log</code> and
+    <code>live-listings.json</code>. This record delivers the implementation,
+    focused controls and live criteria; section closure and verification of the
+    merged result remain with the coordinator.</p>
 </article>
