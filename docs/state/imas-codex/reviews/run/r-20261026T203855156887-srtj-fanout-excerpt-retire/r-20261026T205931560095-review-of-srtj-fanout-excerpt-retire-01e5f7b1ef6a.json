@@ -35,6 +35,11 @@
       "kind": "folded",
       "node": "srtj-fanout-excerpt-retire",
       "recorded_at": "2026-10-26T21:08:30.391680+00:00"
+    },
+    "1": {
+      "kind": "folded",
+      "node": "srtj-fanout-excerpt-retire",
+      "recorded_at": "2026-10-26T21:08:35.018272+00:00"
     }
   },
   "findings": [
