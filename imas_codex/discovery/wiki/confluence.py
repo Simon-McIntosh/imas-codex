@@ -330,7 +330,7 @@ class ConfluenceClient:
         # Azure AD when old MRHSession/ESTSAUTH cookies are present.
         session.cookies.clear()
 
-        logger.info("Attempting Azure AD SSO for %s", self.base_url)
+        logger.info("Attempting Azure AD SSO")
 
         # Navigate to the application to trigger the identity-provider redirect.
         try:
@@ -340,13 +340,11 @@ class ConfluenceClient:
                 allow_redirects=True,
             )
         except Exception as e:
-            logger.debug("SSO initial navigation failed: %s", e)
+            logger.debug("SSO initial navigation failed (%s)", type(e).__name__)
             return False
 
         if "login.microsoftonline.com" not in response.url:
-            logger.debug(
-                "SSO did not redirect to Azure AD (url: %s)", response.url[:100]
-            )
+            logger.debug("SSO did not redirect to Azure AD")
             return False
 
         # Extract $Config JSON from the identity-provider login page.
@@ -367,10 +365,9 @@ class ConfluenceClient:
         # Username must be a full email (Azure AD UPN)
         if "@" not in username:
             logger.error(
-                "Azure AD SSO requires an email address as username, "
-                "got '%s'. Update credentials with: "
+                "Azure AD SSO requires an email address as username. "
+                "Update credentials with: "
                 "imas-codex credentials set %s --username your.name@iter.org",
-                username,
                 self.credential_service,
             )
             return False
@@ -402,10 +399,9 @@ class ConfluenceClient:
             if_exists = gct_result.get("IfExistsResult", -1)
             if if_exists == 1:
                 logger.error(
-                    "Azure AD: User '%s' does not exist in this tenant. "
+                    "Azure AD: The stored user does not exist in this tenant. "
                     "Check your email format (e.g., firstname.lastname@iter.org). "
                     "Update with: imas-codex credentials set %s --username your.name@iter.org",
-                    username,
                     self.credential_service,
                 )
                 return False
@@ -419,17 +415,17 @@ class ConfluenceClient:
             # Check for federation redirect
             fed_url = gct_result.get("Credentials", {}).get("FederationRedirectUrl")
             if fed_url:
-                logger.info("User is federated, redirect: %s", fed_url[:100])
+                logger.info("A federated identity-provider redirect was returned")
                 # Federated users need to authenticate at their IdP
                 # For now, try the standard Azure AD flow — federation may be
                 # handled server-side via the updated credential type info
 
         except Exception as e:
-            logger.debug("GetCredentialType failed (non-fatal): %s", e)
+            logger.debug("GetCredentialType failed (non-fatal, %s)", type(e).__name__)
 
         # Submit credentials to the identity provider.
         login_url = f"https://login.microsoftonline.com{url_post}"
-        logger.debug("Posting credentials to Azure AD for %s", username)
+        logger.debug("Submitting the identity-provider sign-in form")
 
         post_data = {
             "i13": "0",
@@ -470,7 +466,7 @@ class ConfluenceClient:
                 headers=_FORM_HEADERS,
             )
         except Exception as e:
-            logger.warning("SSO credential POST failed: %s", e)
+            logger.warning("SSO credential POST failed (%s)", type(e).__name__)
             return False
 
         # Follow auto-submit forms (device auth, SAML assertions)
@@ -482,7 +478,7 @@ class ConfluenceClient:
                 if redirect_url.startswith("/"):
                     parsed = urlparse(response.url)
                     redirect_url = f"{parsed.scheme}://{parsed.netloc}{redirect_url}"
-                logger.debug("Following redirect → %s", redirect_url[:100])
+                logger.debug("Following a sign-in redirect")
                 response = session.get(
                     redirect_url,
                     timeout=60,
@@ -498,11 +494,7 @@ class ConfluenceClient:
             if resp_config:
                 err_code = resp_config.get("sErrorCode")
                 if err_code:
-                    logger.error(
-                        "Azure AD error %s: %s",
-                        err_code,
-                        resp_config.get("sErrTxt", ""),
-                    )
+                    logger.error("Azure AD error %s", err_code)
                     return False
 
                 # Handle MFA (Two-Factor Authentication)
@@ -523,7 +515,7 @@ class ConfluenceClient:
             # Try auto-submit form (device auth, SAML assertion relay)
             action, fields = self._extract_auto_submit_form(response.text, response.url)
             if action:
-                logger.debug("Submitting form → %s", action[:80])
+                logger.debug("Submitting a sign-in relay form")
                 try:
                     response = session.post(
                         action,
@@ -533,7 +525,7 @@ class ConfluenceClient:
                         headers=_FORM_HEADERS,
                     )
                 except Exception as e:
-                    logger.warning("Form submission failed: %s", e)
+                    logger.warning("Form submission failed (%s)", type(e).__name__)
                     return False
                 continue
 
@@ -794,7 +786,7 @@ class ConfluenceClient:
             logger.debug("KMSI submitted → status %d", response.status_code)
             return response
         except Exception as e:
-            logger.warning("KMSI submission failed: %s", e)
+            logger.warning("KMSI submission failed (%s)", type(e).__name__)
             return None
 
     def _extract_azure_config(self, html: str) -> dict | None:

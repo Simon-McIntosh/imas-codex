@@ -2,6 +2,7 @@
 
 import io
 import json
+import logging
 from contextlib import nullcontext
 from unittest.mock import Mock
 
@@ -278,8 +279,10 @@ def test_api_verification_uses_description_instead_of_confluence_endpoint(
 
 
 def test_shared_sign_in_exchange_stays_on_guarded_transport(
-    client, transport, monkeypatch
+    client, transport, monkeypatch, caplog
 ):
+    caplog.set_level(logging.DEBUG, logger="imas_codex.discovery.wiki.confluence")
+
     def send(adapter, request, **kwargs):
         transport.append(request)
         if request.url == ORIGIN + "/openapi.json":
@@ -302,7 +305,9 @@ def test_shared_sign_in_exchange_stays_on_guarded_transport(
             return response(request, body={"IfExistsResult": 0})
         if request.url == IDENTITY + "/login" and request.method == "POST":
             return response(
-                request, status=302, headers={"Location": ORIGIN + "/callback"}
+                request,
+                status=302,
+                headers={"Location": ORIGIN + "/callback?state=private-redirect-value"},
             )
         return response(request)
 
@@ -314,6 +319,10 @@ def test_shared_sign_in_exchange_stays_on_guarded_transport(
         r.method in {"GET", "HEAD"} for r in transport if r.url.startswith(ORIGIN)
     )
     assert not client._policy.authenticating
+    assert "reader@example.test" not in caplog.text
+    assert "test-secret" not in caplog.text
+    assert "private-redirect-value" not in caplog.text
+    assert ORIGIN not in caplog.text
 
 
 def test_description_read_and_origin_rooted_paths(client, transport):
