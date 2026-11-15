@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T03:27:27.389Z",
+  "dispatched_at": "2026-11-15T02:33:49Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py",
+      "line": 1828,
+      "severity": "blocking",
+      "text": "the headline sentence asserts that every other arm 'trades one measure for the other by at most 1.5 points', which the report's own table contradicts: B Jev buys 6.8 points of specificity for 25.0 points of recall, C Drex 9.8 for 44.3, C Jev 9.3 for 33.2 and E 13.1 for 80.3, and the wording is repeated for the first lead question at line 1968; it makes the alternatives look near-equal to the adopted question at line 1968 and in the landing record when each in fact gives up a quarter to four fifths of its recall"
+    },
+    {
+      "file": "imas_codex/standard_names/audits.py",
+      "line": 1743,
+      "severity": "non-blocking",
+      "text": "the E2 unit rule at name-check-prototype.py:955 re-implements the capability the repository already owns as name_unit_consistency_check, which parses the name's dimensional head and compares it against the declared unit through the same dimension machinery; the addition wraps unit_dimension but duplicates the higher-level name-versus-unit rule and its expectation table as BASE_UNITS at name-check-prototype.py:916 rather than extending audits.py, so the arm's 1.6 per cent recall measures a homemade subset of an existing check and may understate the deterministic baseline the report calls near-useless"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py",
+      "line": 1603,
+      "severity": "non-blocking",
+      "text": "FIG_ARMS omits the always-flag control, so the figure carries no point for an arm the tables score, although the brief asks for one labelled point per arm with its interval; the control sits at specificity 0.0 and the x-limit fixed at line 1661 begins at 0.55, so the point cannot be drawn and the legend names only always pass"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py",
+      "line": 1578,
+      "severity": "non-blocking",
+      "text": "the arm palette breaks the repository's colour rules: E is drawn in the muddy brown-orange #b5651d the style guidance excludes, and B-drex #3f8f8f sits on the same teal as E+A #0f7b8a so two unrelated arms are hard to tell apart in the rendered figure"
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py",
+      "line": 1809,
+      "severity": "non-blocking",
+      "text": "_best_arm is evaluated twice and both results are discarded while the conclusion 'No arm measured here improves on it' is hardcoded prose at line 1827, so a regression that reversed an arm's score would regenerate the same sentence and the gate's string-presence check at verify-report.py:77 would still pass"
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the goal 'measure which name-against-definition check reaches the highest recall and specificity on the held-out names' from the run's dispatch record; the landed sdbc-name-check-prototype.html scores twelve arms on the 1,021 held-out names and names the adopted question as the best, so the goal is met.\nVERDICT done_when: read the dispatch record's done_when; verify-report.py asserts every arm has 1,021 held-out rows, both controls at recall 0 and specificity 0, the 676-model list, spend 12.8061 under the 20.00 ceiling and the figure reference, and I re-ran it to 12 PASS / FAILURES: 0 / EXIT=0.\nVERDICT write_paths: read the declared paths; the diff across 85f5c42..ac208a4b touches exactly the four declared paths, the three fragments and the one SVG, and nothing under imas_codex/ or tests/.\nVERDICT manifest: read the manifest; it reports status complete, names the gate command and its logs, and states the measured arm A result 82.0 per cent recall at 84.9 per cent specificity with spend 12.8061 USD of 20.00.\nVERDICT diff: read all five commits commit by commit from 85f5c42 to ac208a4b; they add the prototype script, the 1,021-reading record, the report and the figure, then fix the model-list path, a comma, the cost column and the SVG hash salt, all inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-check-prototype.html:14 reports the adopted question at 82.0 per cent recall and 84.9 per cent specificity as the best of the twelve arms measured.\nSCORE evidence: 11\nJUSTIFICATION evidence: verify-report.py asserts the done-when faithfully, but the report's own conclusion sentence at sdbc-name-check-prototype.html:14 claims a 1.5-point trade that its table at line 47 contradicts, and the gate checks only that the sentence is present.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every one of the five commits touches only docs/evidence/fragments/sn-definitions-by-construction/ and docs/figures/sn-name-check-prototype/, which are the declared write paths.\nSCORE durability: 10\nJUSTIFICATION durability: the guard is verify-report.py, which lives in the run directory rather than the repository and is the only thing that reddens if the record loses an arm or a control.\nSCORE fit: 16\nJUSTIFICATION fit: name-check-prototype.py:1624 uses the repository's data-ink style sheet on the 14 by 7.2 canvas, but the palette at line 1578 draws E in a muddy brown and gives two unrelated arms the same teal.\nSCORE reuse: 5\nJUSTIFICATION reuse: name-check-prototype.py:955 duplicates name_unit_consistency_check at imas_codex/standard_names/audits.py:1743 rather than calling or extending it, while the rest of the script does reuse parse_standard_name, unit_dimension and the decisions call layer.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py:1828 blocking: the headline sentence asserts every other arm 'trades one measure for the other by at most 1.5 points', but the report's own table shows B Jev buying 6.8 points of specificity for 25.0 points of recall, C Drex 9.8 for 44.3, C Jev 9.3 for 33.2 and E 13.1 for 80.3, so the number is wrong by up to a factor of nine and the same wording recurs at line 1968.\nFINDING imas_codex/standard_names/audits.py:1743 non-blocking: the E2 unit rule at name-check-prototype.py:955 re-implements name_unit_consistency_check, duplicating the name-versus-unit rule and its expectation table as BASE_UNITS at line 916 instead of extending the owner, so the deterministic baseline is measured against a homemade subset.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py:1603 non-blocking: the figure omits the always-flag control although the brief asks for one labelled point per arm, and the 0.55 x-limit at line 1661 puts it out of view.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py:1578 non-blocking: the palette draws E in the excluded muddy brown-orange #b5651d and gives B-drex and E+A the same teal.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py:1809 non-blocking: _best_arm is computed twice and discarded while the conclusion is hardcoded at line 1827, so the gate's presence check at verify-report.py:77 cannot catch a reversed score reversing the claim.\n",
+  "review_run_id": "r-20261115T023312771328-review-of-sdbc-name-check-prototype-ac208a4b16d3",
+  "reviewed_base_sha": "85f5c426d77ea3fb75c4241567ef36157d9ba4ae",
+  "reviewed_head_sha": "ac208a4b16d3c8bde7a6e8ffb2e50a72a6ce6d20",
+  "reviewed_run_id": "r-20261114T205523095671-sdbc-name-check-prototype",
+  "scores": {
+    "durability": 10,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T03:27:47.311166+00:00",
+  "total": 79
+}
