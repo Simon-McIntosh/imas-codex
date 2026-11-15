@@ -1,5 +1,28 @@
 {
   "absent_items": [],
+  "accepted_edits": [
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "97b060799e8637fcd8307955aa7d325df2739ce0c99a8421d29089615702810b",
+        "s2": "313c7a1d098a12f70327fb4bceec17f3efc51641365b0483ae56815afa3347d0",
+        "s3": "326fbb7b1eb43a2cc1b978e9b47c521f9fdf8612c645e8ae7ff2a970e8f139d1",
+        "s5": "9488583249fd8d1d23c17b4ff5f45aab063cd3cbfda18c2dc1aa6f64ddf3f437",
+        "s6": "0221ce810eba20ee14c2449a81df06e7031f8939df9099bb68ccc2e8b1ad0ec2",
+        "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389"
+      },
+      "reason": "Versions 1 and 2 make exactly the changes the content and design reviews asked for, each recorded in its answer; no other text changed.",
+      "units": [
+        "_document",
+        "s2",
+        "s3",
+        "s5",
+        "s6",
+        "s8"
+      ],
+      "when": "2026-11-15T10:49:27.199742+00:00"
+    }
+  ],
   "completed_at": "2026-11-15T10:42:15.169Z",
   "dispatched_at": "2026-11-15T10:20:10Z",
   "findings": [
