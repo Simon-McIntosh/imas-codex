@@ -1,0 +1,65 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T02:43:31.011Z",
+  "dispatched_at": "2026-11-15T02:17:22Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:99",
+      "id": "reasoning-1",
+      "reason": "the figure fixes \u00a77's working population and the fragment it reads, so a coordinator working from \u00a79 would dispatch and later expect two repairs the plan's own cited ruling exempts.",
+      "text": "\u00a79 states that \"\u00a77 has six to repair beyond its own three\" out of the seven names it hands over, but two of those seven, `coolant_absorbed_energy_accumulated_of_plasma_facing_component` and `volume_averaged_electron_number_density_over_scrape_off_layer`, are the names the lead's 2026-11-12 ruling holds from the next cut (comment `c-s7-lead-ruling-sourceless`, plan.html:126), and \u00a77's done-when excludes \"the names held from the release under the lead's rulings\" from its repair population; \u00a77 therefore repairs four and lists two as held, not six",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:99",
+      "id": "done_when-1",
+      "reason": "the plant is the only control for the exemption, and as worded it is satisfiable only by planting a case that is not the one the rule covers or by implementing a broader exemption than \u00a77's.",
+      "text": "the seventh plant is \"a live name of derived origin with no producer edge\" that must be \"listed apart as an exempt derived parent\", but the exemption \u00a77 states is for derived parents, not for names of derived origin: a planted name carrying origin `derived` with no live child is not a derived parent, so a count built to \u00a77's rule counts it and reports 3, or the node widens the exemption to every derived-origin name and its guard no longer matches the rule it is testing",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-catalog-consistency.html:99",
+      "id": "done_when-2",
+      "reason": "the node must write one assertion for the live-graph number and the plan permits either 9 or 10, so the gate it writes can pass a reading the plan did not mean.",
+      "text": "the live-graph clause requires the command to report \"the same number and the same names as a direct read of producer edges \u2026 (10 on 2026-11-14)\" while the same sentence requires `beta`, one of those ten, to be listed apart from the count, and the plant fixes the reporting convention so that a counted set of two with one listed apart reports 2; on the live graph the command therefore reports 9 against a direct edge read of 10, so the agreement clause as worded cannot be asserted alongside the exemption clause",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7dc08854e232b402d7a698dc5ee330e0a9efa43a",
+  "plan_fingerprint": "28ce38c291a4bdbc9e531b474c88a9732db5b9705e2cf0cf081e852916f3e332",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 60,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T021647047958-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "78da74558604f5beab170e858f58c7d8da7d6daf",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a77's done-when and the lead-ruling comment `c-s7-lead-ruling-sourceless` (plan.html:126) both resolve; no other anchor in \u00a79 is cited.",
+    "done_when": "findings \u2014 the exemption plant names a name of derived origin rather than a derived parent, and the live-graph number conflicts with the same clause's listing-apart requirement.",
+    "evidence_paths": "pass \u2014 the list is written to `docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json`, a directory that already exists with sibling fragment pairs in that family.",
+    "naming": "pass \u2014 \u00a79 carries no plan label, stage name, ticket number or changelog prose; the names it lists are graph identities, not symbols.",
+    "reasoning": "a finding \u2014 the \"six to repair\" figure handed to \u00a77 does not apply the release-hold \u00a77's own done-when exempts.",
+    "single_goal": "pass \u2014 \u00a79 delivers the readers, the count command and the section's guard test; the repair of the unsourced names stays with \u00a77.",
+    "wiring": "pass \u2014 s7 declares `sn-catalog-consistency#s9` in `plan-section-depends-on` (plan.html:22), and \u00a79 writes the fragment \u00a77 reads as its population."
+  },
+  "section_digests": {
+    "_document": "2c1048b18b3abc87fa0ead3305f05e2ca37ba0a7eb7882041b8ab7a29b7f2a59",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "fe0b485d37658d44737045e98025181bb507e290590b07825ff0062adf984863",
+    "s6": "253a243a23959f6452cabdc987e19b9de1cec45f996c6c86f6c861fa64307724",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626",
+    "s9": "fa52da3fd9d2058b076e4fffbd78c849c86a79c45aed3950250283d579ea0642"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T02:43:36.314772+00:00",
+  "total": null
+}
