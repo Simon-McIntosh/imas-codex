@@ -1,5 +1,22 @@
 {
   "absent_items": [],
+  "accepted_edits": [
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+        "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+        "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+      },
+      "reason": "Version 3 makes exactly the five changes the newest content review asked for in sections 2, 5, 7 and 9, each recorded in its answer; no other text changed.",
+      "units": [
+        "s2",
+        "s7",
+        "s9"
+      ],
+      "when": "2026-11-15T02:05:11.217147+00:00"
+    }
+  ],
   "completed_at": "2026-11-15T02:00:12.894Z",
   "dispatched_at": "2026-11-15T01:35:28Z",
   "findings": [
