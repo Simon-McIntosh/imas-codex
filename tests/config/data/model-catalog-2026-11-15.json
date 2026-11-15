@@ -1,0 +1,97 @@
+{
+  "read_at": "2026-11-15",
+  "exceptions": {},
+  "exceptions_note": "A seat may stay off its line newest release only with the reason recorded here, keyed by the declaring section and query path.",
+  "openrouter": {
+    "source": "https://openrouter.ai/api/v1/models",
+    "note": "One dated release per line that a declared seat names, so a line keeps its tier while its versions stay comparable.",
+    "releases": {
+      "openrouter/anthropic/claude-haiku-4.5": "2025-10-15",
+      "openrouter/anthropic/claude-haiku-5.5": "2026-10-07",
+      "openrouter/anthropic/claude-opus-4.1": "2025-08-05",
+      "openrouter/anthropic/claude-opus-4.5": "2025-11-24",
+      "openrouter/anthropic/claude-opus-4.6": "2026-02-04",
+      "openrouter/anthropic/claude-opus-4.7": "2026-04-16",
+      "openrouter/anthropic/claude-opus-4.8": "2026-05-27",
+      "openrouter/anthropic/claude-opus-5": "2026-07-24",
+      "openrouter/anthropic/claude-opus-5.5": "2026-09-22",
+      "openrouter/anthropic/claude-sonnet-4.5": "2025-09-29",
+      "openrouter/anthropic/claude-sonnet-4.6": "2026-02-17",
+      "openrouter/anthropic/claude-sonnet-5": "2026-06-30",
+      "openrouter/anthropic/claude-sonnet-5.5": "2026-09-28",
+      "openrouter/deepseek/deepseek-v4-flash": "2026-04-24",
+      "openrouter/deepseek/deepseek-v4-flash-0731": "2026-07-31",
+      "openrouter/deepseek/deepseek-v4.1-flash": "2026-09-10",
+      "openrouter/deepseek/deepseek-v4.1-flash-1017": "2026-10-17",
+      "openrouter/google/gemini-2.5-flash": "2025-06-17",
+      "openrouter/google/gemini-2.5-flash-lite": "2025-07-22",
+      "openrouter/google/gemini-2.5-pro-preview": "2025-06-05",
+      "openrouter/google/gemini-3.1-flash-lite": "2026-05-07",
+      "openrouter/google/gemini-3.1-pro-preview": "2026-02-19",
+      "openrouter/google/gemini-3.5-flash": "2026-05-19",
+      "openrouter/google/gemini-3.5-flash-lite": "2026-07-21",
+      "openrouter/google/gemini-3.6-flash": "2026-07-21",
+      "openrouter/google/gemini-3.7-flash": "2026-08-13",
+      "openrouter/google/gemini-3.8-flash": "2026-09-02",
+      "openrouter/meta-llama/llama-4-maverick": "2025-04-05",
+      "openrouter/moonshotai/kimi-k3.1-pro": "2026-10-23",
+      "openrouter/openai/gpt-5.6-luna": "2026-07-09",
+      "openrouter/openai/gpt-5.6-sol": "2026-07-09",
+      "openrouter/openai/gpt-5.6-terra": "2026-07-09",
+      "openrouter/openai/gpt-6-luna": "2026-09-22",
+      "openrouter/openai/gpt-6-sol": "2026-09-22",
+      "openrouter/openai/gpt-6.1-sol": "2026-09-29",
+      "openrouter/openai/gpt-6.1-terra": "2026-10-26",
+      "openrouter/qwen/qwen3.5-plus-02-15": "2026-02-16",
+      "openrouter/qwen/qwen3.5-plus-20260420": "2026-04-27",
+      "openrouter/qwen/qwen3.6-plus": "2026-04-02",
+      "openrouter/qwen/qwen3.7-plus": "2026-06-03",
+      "openrouter/x-ai/grok-4.20": "2026-03-31",
+      "openrouter/x-ai/grok-4.3": "2026-04-30",
+      "openrouter/x-ai/grok-4.5": "2026-07-08",
+      "openrouter/x-ai/grok-4.6": "2026-08-12",
+      "openrouter/x-ai/grok-4.7": "2026-09-21",
+      "openrouter/xiaomi/mimo-v2.5-pro": "2026-04-22",
+      "openrouter/xiaomi/mimo-v2.6-pro": "2026-09-21"
+    }
+  },
+  "local": {
+    "source": "http://98dci4-gpu-0003:18802/v1/models",
+    "read_at": "2026-11-15",
+    "served": [
+      "deepseek-v4.1-flash"
+    ]
+  },
+  "decisions": {
+    "source": "https://openrouter.ai/api/alpha/decisions",
+    "read_at": "2026-11-15",
+    "served": [
+      "typesafe/jev-1.13",
+      "typesafe/jev-1.14"
+    ],
+    "refused": [
+      "typesafe/jev-1.15",
+      "typesafe/jev-1.16",
+      "typesafe/jev-1.17",
+      "typesafe/jev-1.18",
+      "typesafe/jev-1.19",
+      "typesafe/jev-1.20",
+      "typesafe/jev-2.0",
+      "typesafe/jev-router"
+    ]
+  },
+  "embedding": {
+    "source": "https://huggingface.co/api/models?author=Qwen&search=Embedding&limit=100",
+    "read_at": "2026-11-15",
+    "served": [
+      "Qwen/Qwen3-Embedding-0.6B",
+      "Qwen/Qwen3-Embedding-0.6B-GGUF",
+      "Qwen/Qwen3-Embedding-4B",
+      "Qwen/Qwen3-Embedding-4B-GGUF",
+      "Qwen/Qwen3-Embedding-8B",
+      "Qwen/Qwen3-Embedding-8B-GGUF",
+      "Qwen/Qwen3-VL-Embedding-2B",
+      "Qwen/Qwen3-VL-Embedding-8B"
+    ]
+  }
+}
