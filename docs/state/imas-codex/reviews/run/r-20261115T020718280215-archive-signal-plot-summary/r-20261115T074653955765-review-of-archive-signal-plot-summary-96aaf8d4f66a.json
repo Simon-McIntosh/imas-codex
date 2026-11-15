@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 2,
+  "call_sites": [
+    "scripts/codac_uda_prototype/loader.py:14",
+    "docs/figures/codac-uda-signals/archive-signal-plot-summary/make_figure.py:11"
+  ],
+  "completed_at": "2026-11-15T08:10:34.176Z",
+  "dispatched_at": "2026-11-15T07:47:21Z",
+  "findings": [
+    {
+      "file": "scripts/codac_uda_prototype/loader.py",
+      "line": "100",
+      "severity": "non-blocking",
+      "text": "non-blocking: the prototype keeps its own statistics() and plot(), labelling held inputs archived_samples and unweighted_bin_means, so the repository now carries two summary vocabularies and the only production consumer reads the label the plan's control calls wrong, while the package kind is exercised only from tests."
+    },
+    {
+      "file": "imas_codex/plotting/style.py",
+      "line": "71",
+      "severity": "non-blocking",
+      "text": "non-blocking: the SVG width is pinned to 31.1cm while only the height scales with the figure, so a figure drawn at any width other than CANVAS exports with a distorted aspect ratio that the docstring at imas_codex/plotting/style.py:51 claims is preserved."
+    },
+    {
+      "file": "imas_codex/plotting/style.py",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: _validate_text duplicates the off-canvas and pairwise-overlap refusal that scripts/figures_knowledge_graph_scale.py:673 check_layout and scripts/figures_ai_stack.py already implement, and the addition freezes a fourth copy until the migration the plan routes to a follow-up lands."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/archive-signal-plot-summary.html",
+      "line": "92",
+      "severity": "non-blocking",
+      "text": "non-blocking: the live renders offered as evidence were produced at revision 03f0f851 from docs/figures/codac-uda-signals/archive-signal-plot-summary/signal_plot.py, five commits before the landed module at imas_codex/plotting/signals.py, so the inspected live figures do not show the delivered code path."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read commit by commit from base 44aa5ba49 to head 96aaf8d4f; seven commits add imas_codex/plotting (signals.py, style.py, data-ink.mplstyle, __init__.py), tests/plotting/test_signals.py, the synthetic figure with its generator, the evidence fragment, and replace the prototype's duplicated save helper at scripts/codac_uda_prototype/loader.py with an import of the package function, nine paths in total.",
+    "done_when": "the done_when asks for a live signal and a two-signal overlay rendered and inspected with internal paths, one envelope and one archived-on-change summary with values and statistic kinds, a committed synthetic figure embedded in evidence, two text refusals naming their offending items, and no raw-sample or time-weighted envelope label; the evidence fragment lists live-signal.svg, live-overlay.svg and live-envelope.svg, its table carries 8 points over 2.000 s with unweighted mean 70.112696 A under kind unweighted_archived_on_change_values and 8 bins over 1.750 s with mean 76.461104 A under kind unweighted_envelope_bin_means, all matching live-plot-receipt.json, embeds synthetic-signal.svg, and package-final-negative-controls.log records the two refusal tests failing with DID NOT RAISE when the guard is bypassed in memory, so the recorded gate does assert the stated measure except that the live renders were made from an earlier revision of the module.",
+    "goal": "the node's goal is a loaded signal plotted and summarised behind a save function that refuses clipped or overlapping text; imas_codex/plotting/signals.py:136 plot() draws one or several signals and reports unweighted summaries, imas_codex/plotting/style.py:41 save_figure() runs the text checks, and imas_codex/plotting/__init__.py:3 re-exports both, so the deliverable is present.",
+    "manifest": "read; it records 21 tests collected under the default configuration, 22 passing in the focused gate, a two-failure negative control, the all_debug job ids, nine changed paths and a landing line, and every figure I re-read in the referenced logs matches, though baseline_suite is null so added failures rest on the after_suite arm alone.",
+    "write_paths": "the original dispatch fenced the node to the evidence fragment and the figure directory, reopened.json records the resume grant of imas_codex/plotting/, tests/plotting/ and scripts/, and all nine paths in the diff fall inside that union, with no plan file or shared index touched."
+  },
+  "justifications": {
+    "durability": "tests/plotting/test_signals.py:112 fails if the text guards stop firing, as package-final-negative-controls.log shows, and tests/plotting/test_signals.py:54 fails if the envelope branch is reordered after the held branch, though imas_codex/plotting/signals.py:82's binned kind has no assertion.",
+    "evidence": "package-gate.log binds 22 passing tests to committed HEAD as seven matching SHA-256 values, but docs/evidence/fragments/codac-uda-signals/archive-signal-plot-summary.html:92 reports the live exports refreshed at job 1316881 while live-plots.log:4 names the pre-move module docs/figures/codac-uda-signals/archive-signal-plot-summary/signal_plot.py at revision 03f0f851, so no live render exercises the landed module.",
+    "fit": "imas_codex/plotting/style.py:8-13 keeps the repository's named-role idiom for colours and a vendored data-ink sheet whose only deviations from ~/.config/matplotlib/stylelib/data-ink.mplstyle are the slide canvas 14x7.2 and 200 dpi PNG, and no plan, version or ticket label appears in the diff.",
+    "goal_fidelity": "imas_codex/plotting/signals.py:136 plots held steps, envelope bounds and several traces on one origin while imas_codex/plotting/signals.py:63 labels each summary by its sampling kind, and imas_codex/plotting/style.py:41 refuses clipped or overlapping text before writing.",
+    "reuse": "imas_codex/plotting/signals.py:63 consolidates the summary three callers lacked an owner for, but imas_codex/plotting/style.py:16 adds a fourth copy of the text guard scripts/figures_knowledge_graph_scale.py:673 already implements and scripts/codac_uda_prototype/loader.py:100 keeps a second statistics with the archived_samples vocabulary the plan forbids.",
+    "scope_discipline": "every one of the nine changed paths at 96aaf8d4 is inside the grant reopened.json records, and the diff carries no plan edit, shared index change or unrequested artifact."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a loaded signal plotted and summarised behind a save function that refuses clipped or overlapping text; imas_codex/plotting/signals.py:136 plot() draws one or several signals and reports unweighted summaries, imas_codex/plotting/style.py:41 save_figure() runs the text checks, and imas_codex/plotting/__init__.py:3 re-exports both, so the deliverable is present.\nVERDICT done_when: the done_when asks for a live signal and a two-signal overlay rendered and inspected with internal paths, one envelope and one archived-on-change summary with values and statistic kinds, a committed synthetic figure embedded in evidence, two text refusals naming their offending items, and no raw-sample or time-weighted envelope label; the evidence fragment lists live-signal.svg, live-overlay.svg and live-envelope.svg, its table carries 8 points over 2.000 s with unweighted mean 70.112696 A under kind unweighted_archived_on_change_values and 8 bins over 1.750 s with mean 76.461104 A under kind unweighted_envelope_bin_means, all matching live-plot-receipt.json, embeds synthetic-signal.svg, and package-final-negative-controls.log records the two refusal tests failing with DID NOT RAISE when the guard is bypassed in memory, so the recorded gate does assert the stated measure except that the live renders were made from an earlier revision of the module.\nVERDICT write_paths: the original dispatch fenced the node to the evidence fragment and the figure directory, reopened.json records the resume grant of imas_codex/plotting/, tests/plotting/ and scripts/, and all nine paths in the diff fall inside that union, with no plan file or shared index touched.\nVERDICT manifest: read; it records 21 tests collected under the default configuration, 22 passing in the focused gate, a two-failure negative control, the all_debug job ids, nine changed paths and a landing line, and every figure I re-read in the referenced logs matches, though baseline_suite is null so added failures rest on the after_suite arm alone.\nVERDICT diff: read commit by commit from base 44aa5ba49 to head 96aaf8d4f; seven commits add imas_codex/plotting (signals.py, style.py, data-ink.mplstyle, __init__.py), tests/plotting/test_signals.py, the synthetic figure with its generator, the evidence fragment, and replace the prototype's duplicated save helper at scripts/codac_uda_prototype/loader.py with an import of the package function, nine paths in total.\nCALL_SITES: scripts/codac_uda_prototype/loader.py:14, docs/figures/codac-uda-signals/archive-signal-plot-summary/make_figure.py:11\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/plotting/signals.py:136 plots held steps, envelope bounds and several traces on one origin while imas_codex/plotting/signals.py:63 labels each summary by its sampling kind, and imas_codex/plotting/style.py:41 refuses clipped or overlapping text before writing.\nSCORE evidence: 15\nJUSTIFICATION evidence: package-gate.log binds 22 passing tests to committed HEAD as seven matching SHA-256 values, but docs/evidence/fragments/codac-uda-signals/archive-signal-plot-summary.html:92 reports the live exports refreshed at job 1316881 while live-plots.log:4 names the pre-move module docs/figures/codac-uda-signals/archive-signal-plot-summary/signal_plot.py at revision 03f0f851, so no live render exercises the landed module.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every one of the nine changed paths at 96aaf8d4 is inside the grant reopened.json records, and the diff carries no plan edit, shared index change or unrequested artifact.\nSCORE durability: 17\nJUSTIFICATION durability: tests/plotting/test_signals.py:112 fails if the text guards stop firing, as package-final-negative-controls.log shows, and tests/plotting/test_signals.py:54 fails if the envelope branch is reordered after the held branch, though imas_codex/plotting/signals.py:82's binned kind has no assertion.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/plotting/style.py:8-13 keeps the repository's named-role idiom for colours and a vendored data-ink sheet whose only deviations from ~/.config/matplotlib/stylelib/data-ink.mplstyle are the slide canvas 14x7.2 and 200 dpi PNG, and no plan, version or ticket label appears in the diff.\nSCORE reuse: 13\nJUSTIFICATION reuse: imas_codex/plotting/signals.py:63 consolidates the summary three callers lacked an owner for, but imas_codex/plotting/style.py:16 adds a fourth copy of the text guard scripts/figures_knowledge_graph_scale.py:673 already implements and scripts/codac_uda_prototype/loader.py:100 keeps a second statistics with the archived_samples vocabulary the plan forbids.\nFINDING scripts/codac_uda_prototype/loader.py:100 non-blocking: the prototype keeps its own statistics() and plot(), labelling held inputs archived_samples and unweighted_bin_means, so the repository now carries two summary vocabularies and the only production consumer reads the label the plan's control calls wrong, while the package kind is exercised only from tests.\nFINDING imas_codex/plotting/style.py:71 non-blocking: the SVG width is pinned to 31.1cm while only the height scales with the figure, so a figure drawn at any width other than CANVAS exports with a distorted aspect ratio that the docstring at imas_codex/plotting/style.py:51 claims is preserved.\nFINDING imas_codex/plotting/style.py:16 non-blocking: _validate_text duplicates the off-canvas and pairwise-overlap refusal that scripts/figures_knowledge_graph_scale.py:673 check_layout and scripts/figures_ai_stack.py already implement, and the addition freezes a fourth copy until the migration the plan routes to a follow-up lands.\nFINDING docs/evidence/fragments/codac-uda-signals/archive-signal-plot-summary.html:92 non-blocking: the live renders offered as evidence were produced at revision 03f0f851 from docs/figures/codac-uda-signals/archive-signal-plot-summary/signal_plot.py, five commits before the landed module at imas_codex/plotting/signals.py, so the inspected live figures do not show the delivered code path.\n",
+  "review_run_id": "r-20261115T074653955765-review-of-archive-signal-plot-summary-96aaf8d4f66a",
+  "reviewed_base_sha": "44aa5ba4984c1d1c7fdef9a9c44256f22283d2aa",
+  "reviewed_head_sha": "96aaf8d4f66a640ac3552cb5e1c41d533d9caf1b",
+  "reviewed_plan": "imas-codex:codac-uda-signals#s7",
+  "reviewed_run_id": "r-20261115T020718280215-archive-signal-plot-summary",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 13,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T08:06:23.315544+00:00",
+  "total": 97
+}
