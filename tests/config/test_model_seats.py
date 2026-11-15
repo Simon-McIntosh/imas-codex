@@ -3,10 +3,16 @@
 Two properties are asserted here, both read from the configuration rather than
 from a copy of it:
 
-* each seat resolves to a model its provider's published catalog still lists,
-  at the newest release of that model's own line; and
+* each seat names the newest release of the model line it intends, established
+  from the provider catalogs recorded in ``data/model-catalog-2026-11-15.json``
+  — the OpenRouter model list, the local lane's served models, the decisions
+  endpoint's served releases and the embedding hub listing; and
 * every OpenRouter identifier a seat or panel names carries a cataloged price,
   so a seat cannot start a run it is unable to price.
+
+A seat may stay off its line's newest release only through an entry in the
+snapshot's ``exceptions`` map, which carries the reason it stays, so a stale
+seat is either repaired or explained rather than silently tolerated.
 
 The escalation seat gets its own test because it is the one seat whose model is
 chosen by the refine rotation at chain cap rather than by the caller, and
@@ -15,6 +21,11 @@ refine and compose seats.
 """
 
 from __future__ import annotations
+
+import json
+import re
+import tomllib
+from pathlib import Path
 
 import pytest
 
@@ -63,27 +74,80 @@ SINGLE_SEATS = [
 
 REVIEW_PROFILES = ("default", "local-only", "quality-cost-balanced", "opus-only")
 
-# The newest release of each line a seat or panel names, read from the public
-# model list at https://openrouter.ai/api/v1/models on 2026-11-14. A line keeps
-# its tier: Sonnet stays Sonnet, a flash stays a flash, and a preview is listed
-# only where the line has no generally available successor.
-LATEST = {
-    "openrouter/anthropic/claude-sonnet-5.5",
-    "openrouter/anthropic/claude-haiku-5.5",
-    "openrouter/anthropic/claude-opus-5.5",
-    "openrouter/openai/gpt-6.1-sol",
-    "openrouter/openai/gpt-6.1-terra",
-    "openrouter/openai/gpt-6-luna",
-    "openrouter/x-ai/grok-4.7",
-    "openrouter/google/gemini-3.8-flash",
-    "openrouter/google/gemini-3.5-flash-lite",
-    "openrouter/google/gemini-3.1-pro-preview",
-    "openrouter/qwen/qwen3.7-plus",
-    "openrouter/xiaomi/mimo-v2.6-pro",
-    "openrouter/moonshotai/kimi-k3.1-pro",
-    "openrouter/deepseek/deepseek-v4.1-flash",
-    "openrouter/meta-llama/llama-4-maverick",
-}
+_PYPROJECT = Path(__file__).resolve().parents[2] / "pyproject.toml"
+_CATALOG = Path(__file__).with_name("data") / "model-catalog-2026-11-15.json"
+_VERSION_TOKEN = re.compile(r"^[a-z]*\d+(?:\.\d+)*$", re.IGNORECASE)
+_MODEL_KEY = re.compile(r"(^|-)models?$")
+_DATED_BUILD = re.compile(r"^(?P<release>.+)-\d{4}$")
+
+
+def _catalog() -> dict:
+    return json.loads(_CATALOG.read_text())
+
+
+def _declared_models() -> dict[str, str]:
+    """Every model identifier a ``pyproject.toml`` section declares, by owner.
+
+    The owner names the section and query path it was found at
+    (``sn-docs.model``, ``sn-review.names.models[0]``,
+    ``sn-fanout.proposer-model``), so a seat added to the configuration is
+    covered by these checks without an edit here.
+    """
+    config = tomllib.loads(_PYPROJECT.read_text())["tool"]["imas-codex"]
+    found: dict[str, str] = {}
+
+    def walk(node: object, path: str) -> None:
+        if not isinstance(node, dict):
+            return
+        for key, value in node.items():
+            child = f"{path}.{key}" if path else key
+            if not _MODEL_KEY.search(key):
+                if isinstance(value, dict):
+                    walk(value, child)
+                continue
+            if isinstance(value, str):
+                found[child] = value
+            elif isinstance(value, list):
+                for index, item in enumerate(value):
+                    if isinstance(item, str):
+                        found[f"{child}[{index}]"] = item
+
+    walk(config, "")
+    return found
+
+
+def _line(model_id: str) -> str:
+    """The model line an identifier belongs to, with its version removed.
+
+    Version tokens are dropped and tier words kept, so ``claude-sonnet-5`` and
+    ``claude-sonnet-5.5`` share a line while ``claude-opus-5.5`` does not, and
+    a release date decides between ``grok-4.20`` and ``grok-4.7`` rather than
+    string order. A provider generation number counts as part of the version:
+    ``deepseek-v4-flash`` and ``deepseek-v4.1-flash`` are versions of one flash
+    line.
+    """
+    vendor, _, family = model_id.partition("/")
+    words = [word for word in family.split("-") if not _VERSION_TOKEN.match(word)]
+    return f"{vendor}/" + "-".join(words)
+
+
+def _newest_release(releases: dict[str, str], model_id: str) -> str | None:
+    """The newest release of *model_id*'s line, ordered by release date.
+
+    A dated build such as ``deepseek-v4.1-flash-1017`` is one provider's
+    snapshot of a release whose undated identifier is listed beside it; the
+    undated identifier is the version's own name, so the dated listing is
+    dropped and cannot outrank the alias it snapshots.
+    """
+    line = _line(model_id)
+    members = {mid: day for mid, day in releases.items() if _line(mid) == line}
+    for mid in list(members):
+        dated = _DATED_BUILD.match(mid)
+        if dated and dated["release"] in members:
+            del members[mid]
+    if not members:
+        return None
+    return max(members, key=lambda mid: members[mid])
 
 
 def _panel_models() -> list[str]:
@@ -155,26 +219,92 @@ def test_python_default_identifiers_are_priced(owner: str, model: str) -> None:
     _assert_priced(model, owner)
 
 
-@pytest.mark.parametrize("seat", SINGLE_SEATS)
-def test_openrouter_seat_is_on_the_latest_release_of_its_line(seat: str) -> None:
-    model = get_model(seat)
-    if not model.startswith("openrouter/"):
+_DECLARED = sorted(_declared_models().items(), key=lambda row: row[0])
+
+
+@pytest.mark.parametrize("owner,model", _DECLARED, ids=[row[0] for row in _DECLARED])
+def test_every_declared_seat_names_a_cataloged_model(owner: str, model: str) -> None:
+    """Each seat's model is listed by the lane its prefix routes to."""
+    catalog = _catalog()
+    if model.startswith("openrouter/"):
+        listed = catalog["openrouter"]["releases"]
+        where = catalog["openrouter"]["source"]
+    elif model.startswith("local/"):
+        listed = catalog["local"]["served"]
+        where = catalog["local"]["source"]
+        model = model.removeprefix("local/")
+    elif model.startswith("typesafe/"):
+        listed = catalog["decisions"]["served"]
+        where = catalog["decisions"]["source"]
+    else:
+        listed = catalog["embedding"]["served"]
+        where = catalog["embedding"]["source"]
+    assert model in listed, (
+        f"{owner} names {model!r}, which {where} does not list; read the "
+        "catalog again and record the new release in the snapshot"
+    )
+
+
+@pytest.mark.parametrize("owner,model", _DECLARED, ids=[row[0] for row in _DECLARED])
+def test_every_seat_names_the_newest_release_of_its_line(
+    owner: str, model: str
+) -> None:
+    """A seat is on its line's newest release, or records why it stays."""
+    catalog = _catalog()
+    if model.startswith("openrouter/"):
+        newest = _newest_release(catalog["openrouter"]["releases"], model)
+    elif model.startswith("typesafe/"):
+        served = catalog["decisions"]["served"]
+
+        def release_number(candidate: str) -> tuple[int, ...]:
+            return tuple(int(part) for part in candidate.rsplit("-", 1)[-1].split("."))
+
+        newest = max(served, key=release_number)
+    elif model.startswith("local/"):
+        # The lane serves one model per served name; its catalog is the lane's
+        # own list, so any served name is the lane's current model and a name
+        # the lane has retired is the stale case covered above.
         return
-    assert model in LATEST, (
-        f"seat {seat!r} names {model!r}, which is not the newest release of "
-        "any line a seat or panel names"
+    else:
+        # Embedding sizes are the releases of one line; no newer text-embedding
+        # release exists in the hub listing, so the listing is the authority.
+        return
+
+    if owner in catalog["exceptions"]:
+        assert catalog["exceptions"][owner], (
+            f"{owner} is excepted from its line's newest release {newest!r} "
+            "but records no reason it stays"
+        )
+        return
+    assert newest is not None, f"{owner} names {model!r}, which has no cataloged line"
+    assert model == newest, (
+        f"{owner} names {model!r}, but its line's newest release is {newest!r} "
+        f"({catalog['openrouter']['releases'].get(newest, 'served today')}); "
+        "name the newest release or record why the seat stays"
     )
 
 
 @pytest.mark.parametrize("model", sorted(set(_panel_models())))
-def test_openrouter_panel_model_is_on_the_latest_release_of_its_line(
-    model: str,
-) -> None:
+def test_panel_models_are_on_their_lines_newest_release(model: str) -> None:
     if not model.startswith("openrouter/"):
         return
-    assert model in LATEST, (
-        f"a panel names {model!r}, which is not the newest release of any "
-        "line a seat or panel names"
+    newest = _newest_release(_catalog()["openrouter"]["releases"], model)
+    assert newest is not None, f"a panel names {model!r}, which has no cataloged line"
+    assert model == newest, (
+        f"a panel names {model!r}, but its line's newest release is {newest!r}"
+    )
+
+
+def test_no_seat_names_a_release_the_decisions_lane_refuses() -> None:
+    """The decisions endpoint's refusals are the negative arm of its listing."""
+    catalog = _catalog()
+    refused = set(catalog["decisions"]["refused"])
+    served = set(catalog["decisions"]["served"])
+    assert refused and served, "the decisions ladder recorded nothing to compare"
+    assert not refused & served
+    named = {model for owner, model in _DECLARED if model.startswith("typesafe/")}
+    assert named and not named & refused, (
+        f"a seat names a refused decisions release: {sorted(named & refused)}"
     )
 
 
