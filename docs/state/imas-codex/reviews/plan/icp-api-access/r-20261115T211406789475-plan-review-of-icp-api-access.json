@@ -107,6 +107,16 @@
       "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. Private storage uses the project's existing data directory owner, not a new cache root.",
       "reason": "",
       "when": "2026-11-15T21:37:20.961073+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "Section 2 now accounts for its surface: the refusals it adds are stated as the one deliberate new refusal family, required by the lead's read-only rule, and the section names nothing it can retire because no ICP client exists to replace.",
+      "reason": "",
+      "when": "2026-11-15T21:37:25.445296+00:00"
     }
   ],
   "responses": {
@@ -127,6 +137,15 @@
       "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. Private storage uses the project's existing data directory owner, not a new cache root.",
       "reason": "",
       "when": "2026-11-15T21:37:20.961073+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "note": "Section 2 now accounts for its surface: the refusals it adds are stated as the one deliberate new refusal family, required by the lead's read-only rule, and the section names nothing it can retire because no ICP client exists to replace.",
+      "reason": "",
+      "when": "2026-11-15T21:37:25.445296+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
