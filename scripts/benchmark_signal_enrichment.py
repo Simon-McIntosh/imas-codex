@@ -188,6 +188,10 @@ async def replay_batch(
     """Exercise production prompting or replay one exact captured request."""
     import litellm
 
+    from imas_codex.discovery.signals.enrichment import EnrichmentOptions
+
+    if enrichment_options is None:
+        enrichment_options = EnrichmentOptions()
     state = parallel.DataDiscoveryState(facility=facility, scanner_types=[])
     state.facility_config = get_facility(facility)
     state.cost_limit = float("inf")
@@ -274,13 +278,12 @@ async def replay_batch(
 
     started = time.monotonic()
     with ExitStack() as stack:
-        if enrichment_options is not None:
-            stack.enter_context(
-                patch(
-                    "imas_codex.discovery.signals.enrichment.get_enrichment_options",
-                    return_value=enrichment_options,
-                )
+        stack.enter_context(
+            patch(
+                "imas_codex.discovery.signals.enrichment.get_enrichment_options",
+                return_value=enrichment_options,
             )
+        )
         replacements = {
             "claim_signals_for_enrichment": claim,
             "prepare_signal_sources": lambda *a, **k: (0, 0, 0),
@@ -316,6 +319,7 @@ async def replay_batch(
         output["unit"] = by_id[output["id"]].get("unit")
     record = {
         "arm": arm,
+        "options": enrichment_options.model_dump(),
         "facility": facility,
         "ids": list(by_id),
         "responses": captured,

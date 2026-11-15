@@ -188,14 +188,6 @@ async def run_variant(root: Path, arm: str, options: EnrichmentOptions) -> None:
                 enrichment_options=options,
                 call_options=options.call_kwargs(),
             )
-            # The replay persisted its response before returning. Attach immutable
-            # variant settings to that same row, not a duplicate accounting row.
-            record["options"] = options.model_dump()
-            with db:
-                db.execute(
-                    "UPDATE batches SET document=? WHERE rowid=(SELECT max(rowid) FROM batches)",
-                    (bench.encoded(record),),
-                )
             done.append(record)
             all_records = bench.load_records(root)
             metrics = summarize(all_records, cohort)
