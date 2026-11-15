@@ -32,9 +32,9 @@
       <tr><td>Live interrupted scan</td><td>complete=false; enumerated=200; metadata_completed=20; written=20; independent partial graph count=20</td></tr>
       <tr><td>Recovery</td><td>20 completed metadata records retained; remaining 180 fetched; no completed record fetched again; complete=true only at 200 acknowledged writes</td></tr>
       <tr><td>Metadata request bounds</td><td>At most 20 names per call; slowest repeat metadata call 1.808783 s under the 30 s timeout</td></tr>
-      <tr><td>Focused regression gate</td><td>112 passed in 9.20 s; additional checkpoint-before-graph test: 1 passed in 5.79 s</td></tr>
-      <tr><td>Modified graph statements under graph marker</td><td>1 passed in 25.40 s against disposable Neo4j</td></tr>
-      <tr><td>Deliberate guard failures</td><td>Interrupted-completion and empty-read mutations: 2 failed; removing the pre-graph metadata save: 1 failed</td></tr>
+      <tr><td>Focused regression gate</td><td>Merged gate: 155 passed in 7.26 s, including both landed loader test files and the scanner checkpoint/parity tests</td></tr>
+      <tr><td>Modified graph statements under graph marker</td><td>Merged gate: 1 passed in 30.04 s against disposable Neo4j; verifies shared-loader binding after cross-archive confirmation and rescan</td></tr>
+      <tr><td>Deliberate guard failures</td><td>Interrupted-completion and empty-read mutations: 2 failed; removing the pre-graph metadata save: 1 failed; changing scanner sample values: 1 failed</td></tr>
       <tr><td>Live scan attempt budget</td><td>3 resumed scans, including controlled interruption; 5 total including 2 earlier attempts, below the ceiling of 12</td></tr>
     </tbody>
   </table>
@@ -90,9 +90,52 @@
   <ul>
     <li><code>controller-family-declaration.log</code>, <code>controller-scan-gate.log</code>, <code>controller-validity-bounded.log</code> and <code>controller-repeat.log</code> contain the live summaries and completion receipts.</li>
     <li><code>incremental-baseline.log</code> records the pre-repair failure; <code>incremental-focused-gate.log</code> and <code>incremental-boundary.log</code> record passing focused tests.</li>
-    <li><code>graph-scope-gate.log</code> executes every modified catalogue and scanner-scope statement under the graph marker. Those statements are unchanged by the incremental metadata commit.</li>
+    <li><code>graph-scope-gate.log</code> records the initial graph gate; <code>merge-graph.log</code> executes the current catalogue, source-binding, confirmation and scanner-scope statements under the graph marker.</li>
     <li><code>negative-control.log</code> and <code>incremental-negative-control.log</code> record the three deliberate mutation failures; <code>incremental-figure-check.log</code> records figure checks.</li>
   </ul>
+  <h4 id="archive-variable-catalogue-shared-reader">Shared reader integration verified</h4>
+  <p>Merge commit <code>f38f8134e00569b46641bb6e566fca84e548d521</code>
+    integrates local main parent <code>3181b9e75f0a04567fd9269df79564b8733a53b4</code>.
+    The merge reproduced three conflicts, including
+    <code>CONFLICT (add/add): Merge conflict in imas_codex/remote/codac_uda.py</code>.
+    Main's <code>ArchiveReader</code>, <code>ArchiveSignalLoader</code> and packaged
+    <code>read</code>, <code>fetch</code> and <code>_held_window</code> functions
+    remain AST-identical to that parent. Scanner validity calls
+    <code>ArchiveReader.check</code>, and successful confirmation selects the
+    matching per-archive access record. The catalogue transport accepts only
+    listing and metadata operations through the same reader transport; it contains
+    no sample-read implementation. Both facility setup fallback and compute-host
+    additions survived resolution.</p>
+  <p>The merged graph writer creates per-archive <code>DataSource</code> and
+    <code>DataAccess</code> bindings consumed by the unchanged loader. A graph test
+    confirms a different serving archive from the metadata archive, then proves a
+    rescan preserves one unambiguous loader binding. Replaying the existing private
+    checkpoint updated all 200 catalogue bindings without contacting the archive
+    or rescanning the cohort; the graph retained 200 distinct signals and ten
+    serving confirmations.</p>
+  <table>
+    <thead><tr><th>Shared-path live check, all_debug job 1316909</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Successful identical request through scanner and loader</td><td>Eight timestamps and eight envelope rows each; arrays exactly equal; uint64 timestamps and float64 values; neither read used cache</td></tr>
+      <tr><td>Identical failing native request</td><td>Both reject the deliberately invalid read mode with error_classification=invalid_request</td></tr>
+      <tr><td>Live request ceiling</td><td>Exactly 4 of 4: two successful sample requests and two native refusal receipts</td></tr>
+      <tr><td>Graph after cached metadata replay</td><td>200 signals, 200 distinct identities, 200 shared-loader bindings, ten serving confirmations</td></tr>
+    </tbody>
+  </table>
+  <p>The first merged focused run reproduced the connection guard's rejection of
+    a distinct IPv6 endpoint: <code>ValueError: host must be a DNS name or IPv4
+    address without a port</code>. The redundant colon rejection was removed in
+    favour of canonical host validation. The corrected focused gate passed all
+    155 tests, including the IPv6 test. A deliberate mutation added one to scanner
+    sample values while leaving the loader unchanged: the passing parity test
+    then failed with <code>Mismatched elements: 2 / 2 (100%)</code>.</p>
+  <p>Integration receipts in the run directory are
+    <code>merge-focused-fixed.log</code>, <code>merge-graph.log</code>,
+    <code>merge-live-parity.log</code>, <code>merge-negative.log</code> and
+    <code>merge-owner-receipt.json</code>. Full private parity parameters, sample
+    digests and the four-request ledger are retained as
+    <code>~/.cache/imas-codex-codac-uda/merge-parity-receipt.json</code> and
+    <code>~/.cache/imas-codex-codac-uda/merge-parity-request-ledger.json</code>.</p>
   <p>Private declarations, all-role configuration, per-batch checkpoints and full
     live receipts reside under <code>~/.cache/imas-codex-codac-uda/</code>, including
     <code>controller-cohort-declaration.json</code>,
