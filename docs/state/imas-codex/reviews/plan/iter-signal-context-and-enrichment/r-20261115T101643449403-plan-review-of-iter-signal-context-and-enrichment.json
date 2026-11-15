@@ -1,0 +1,95 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T10:46:00.232Z",
+  "dispatched_at": "2026-11-15T10:17:32Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/discovery/base/grouping.py:26",
+      "id": "reuse_search-1",
+      "reason": "the plan describes the endpoint, not the module; the reuse belongs in the node brief, and the plan text need not change for the implementer to reuse this owner.",
+      "text": "`claim_signal_sources` and `propagate_source_enrichment` (same file, line 92) already implement the plan's \u00a76 design: claim a `SignalSource` group, enrich one representative member, propagate `description`, `keywords`, `physics_domain` and cost to every `FacilitySignal` linked by `MEMBER_OF`, with claim-token de-duplication. \u00a76 asks for exactly this shape (one component description, one pattern description, per-member composition) and does not mention it",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/discovery/signals/variable_names.py:79",
+      "id": "reuse_search-2",
+      "reason": "\u00a75's quantities and invariants stand as written; the parser identity is brief material, not plan material.",
+      "text": "`parse_variable_name` already yields `plant_system_code`, `plant_component_code`, `control_function` and `variable_token` from each selector and builds `PlantComponent` nodes, and `FacilitySignal` (declared at imas_codex/schemas/facility.yaml:2710) already persists those as `plant_system_code` / `plant_component_code` / `candidate_plant_component` at imas_codex/schemas/facility.yaml:2932. \u00a75's \"grouping derived from the parsed variable names\" is this parser plus a group key over the tokens it already emits",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/graph/offsite.py:24",
+      "id": "reuse_search-3",
+      "reason": "\u00a79's endpoint (node counts by label, zero unlinked, package name, visibility and digest) is already expressible through these; nothing in the plan's wording is wrong.",
+      "text": "facility-scoped and full-graph archive creation with a census manifest, plus the registry package push in imas_codex/graph/ghcr.py:1, already exist; \u00a79 proposes \"a facility-scoped archive stored as a private registry package\" without reference to either",
+      "type": "reuse_search",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/discovery/base/grouping.py:92",
+      "id": "thin_wrapper-1",
+      "reason": "a second propagation path drifts from the claim-token, cost-distribution and status-transition behaviour the existing pair already owns, and the plan should require one mechanism rather than two.",
+      "text": "\u00a76 adds a component-description writer, a pattern-description writer and a component\u00d7pattern composer beside `propagate_source_enrichment`, which propagates a single group description to members today; the honest change is to generalise the source kind (component vs pattern) inside the existing claim/propagate pair, and the plan states no reason a second propagation path is needed",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/llm/server.py:1847",
+      "id": "duplicate_owner-1",
+      "reason": "the endpoint is unchanged; the owning set is brief material.",
+      "text": "`FACILITY_TOOLS` is the existing mechanism that makes a tool absent in data-dictionary-only mode; \u00a78's \"absent in the data-dictionary-only mode\" is a membership edit, not a new gate",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "imas_codex/discovery/wiki/auth.py:1",
+      "id": "duplicate_owner-2",
+      "reason": "the plan's endpoint is per-source row counts and exact/derived/absent link counts, which do not depend on which reader is extended; the duplication is a brief constraint and the census is here so the brief can carry it. and exact/derived/absent link counts, which do not depend on which reader is extended \u2014 the duplication is a brief constraint and the census is here so the brief can carry it.",
+      "text": "\u00a74 imports rows from authenticated ICP and IDM document sources; the repository already owns authenticated external-document access (Keycloak, Confluence and MediaWiki adapters under imas_codex/discovery/wiki/, structure-aware Excel extraction in imas_codex/discovery/wiki/excel.py:1, and the Document/WikiPage claim-and-status lifecycle in imas_codex/discovery/wiki/graph_ops.py:1). A separate ICP/IDM reader would duplicate the claim, retry and status machinery",
+      "type": "duplicate_owner",
+      "would_change": false
+    },
+    {
+      "anchor": "iter-signal-context-and-enrichment.html#s8",
+      "id": "interface_budget-1",
+      "reason": "the rule binds a section that grows an interface family to account for the growth in its own text, and \u00a78 is the only section that does.",
+      "text": "the section states the server \"gains at most one tool\" without naming one it retires or merges, or stating why nothing can be; the supplied weekly counts are public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0, and the 2026-11-15 tool list already carries `search_signals`, `signal_analytics`, `search_docs`, `search_code`, `fetch_content` and `get_facility_coverage` as the facility surface",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+  "plan_fingerprint": "6fb46f508ffdb035dbdb07376dd6d6b04cbfee4fc14a7a8ef98cdb256b9c2b95",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T101643449403-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "00cdc8d3268038876b2e766d1f783caa84f17333",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "pass \u2014 the plan's endpoint for \u00a76 is one composed description per member joined from two group descriptions, which is a single mechanism rather than a spread of wrappers, provided the node extends grouping.py rather than adding a second propagation path.",
+    "duplicate_owner": "a finding \u2014 a census of five duplicate owners listed in the findings below: grouping.py (group enrichment), variable_names.py + the FacilitySignal plant-component properties (component grouping), graph/offsite.py and graph/ghcr.py (facility-scoped archive), llm/server.py FACILITY_TOOLS (DD-only tool suppression), discovery/wiki/ (authenticated external document ingest).",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a78 adds one MCP tool (\"the server gains at most one tool\") without naming what it retires or merges, or stating why nothing can be.",
+    "reuse_search": "a finding \u2014 the machinery three of the plan's sections need already exists: group-level signal enrichment behind `SignalSource` in imas_codex/discovery/base/grouping.py, component tokens already parsed and stored by imas_codex/discovery/signals/variable_names.py, and facility-scoped archive push in imas_codex/graph/offsite.py; the plan proposes to build all three again.",
+    "thin_wrapper": "a finding \u2014 \u00a75 and \u00a76 add grouping and propagation layers over methods that already exist in grouping.py and variable_names.py, and neither section says why the existing owner cannot be extended."
+  },
+  "section_digests": {
+    "_document": "814d4970b29344960261a09fed2440e149a9331c504af51efb06ea85a0eab6a4",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "8606c36ff6e0644de4dc28100b7b04442df992ad5feaa1946670be058581c305",
+    "s4": "6bb38af02f91c88d6b4cc608f5e6b44a4550bd5cad51c5ab821dbf5a68b4a2b8",
+    "s5": "e5842ff1c566f6445a2e626844285a7723e27b290066deb76bea910271e2fb66",
+    "s6": "790c9159242b5a6976b2d51f8bc4ad556815a701392fc4dda539b9babb89dd3f",
+    "s7": "e8b7f6e2d525d9c7a68de83334ac884f4aadd2a55be366c5dd545b2df40bd3b4",
+    "s8": "73ad7e5d5ddb14e156ea7e573bd5828a1bcde4074bd453bc35f1074f55bf7f28",
+    "s9": "5c46f80413fec6f7c417c9cb4777760609fd8f5fc7ee69f1a9588c9021fe2c18"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T10:45:33.208533+00:00",
+  "total": null
+}
