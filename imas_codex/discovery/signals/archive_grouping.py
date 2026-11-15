@@ -6,6 +6,7 @@ import hashlib
 import json
 import os
 import sqlite3
+from collections import Counter
 from collections.abc import Iterable, Iterator
 from contextlib import closing
 from itertools import groupby
@@ -90,6 +91,59 @@ class ArchiveGrouping:
                 (facility,),
             )
         ]
+
+    def name_schema_counts(self, facility: str) -> dict:
+        """Count control field values, full prefixes and physical category codes.
+
+        A repeated second-level field is counted across all first-level parents.
+        Prefix counts retain those parents as a separate, unambiguous view.
+        Nonconforming selectors contribute to neither hierarchy nor categories.
+        """
+        levels = {1: Counter(), 2: Counter()}
+        prefixes = {1: Counter(), 2: Counter()}
+        for control, count in self.db.execute(
+            """
+            SELECT control_node,count(*) FROM members
+            WHERE facility=? AND control_node IS NOT NULL GROUP BY control_node
+        """,
+            (facility,),
+        ):
+            fields = control.split(":control_node:", 1)[1].split("-")
+            for level in (1, 2):
+                if len(fields) >= level:
+                    levels[level][fields[level - 1]] += count
+                    prefixes[level]["-".join(fields[:level])] += count
+
+        def counted(values):
+            return {
+                "distinct_values": len(values),
+                "variables": sum(values.values()),
+                "values": [
+                    {"code": code, "variables": count}
+                    for code, count in sorted(
+                        values.items(), key=lambda item: (-item[1], item[0])
+                    )
+                ],
+            }
+
+        categories = dict(
+            self.db.execute(
+                """
+            SELECT category,count(*) FROM members
+            WHERE facility=? AND category IS NOT NULL GROUP BY category
+        """,
+                (facility,),
+            )
+        )
+        return {
+            "control_path_fields": {
+                str(level): counted(values) for level, values in levels.items()
+            },
+            "control_path_prefixes": {
+                str(level): counted(values) for level, values in prefixes.items()
+            },
+            "function_categories": counted(categories),
+        }
 
     def _ids(self, table: str, facility: str) -> set[str]:
         return {

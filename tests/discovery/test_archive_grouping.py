@@ -160,6 +160,31 @@ def test_facilities_have_independent_groups(grouping):
     assert grouping.summary("beta")["component_variables"] == 1
 
 
+def test_name_schema_counts_separate_field_values_from_path_prefixes(grouping):
+    grouping.rebuild(
+        "demo",
+        records(
+            "DEMO-UNIT:QAZ0001-ABCD",
+            "DEMO-UNIT:STATUS",
+            "SYN1-UNIT:QAZ0002-ABCD",
+            "SYN1:MODE",
+            "unparseable fixture",
+        ),
+    )
+    counts = grouping.name_schema_counts("demo")
+    assert counts["control_path_fields"]["1"]["distinct_values"] == 2
+    assert counts["control_path_fields"]["1"]["variables"] == 4
+    assert counts["control_path_fields"]["2"]["values"] == [
+        {"code": "UNIT", "variables": 3}
+    ]
+    assert counts["control_path_prefixes"]["2"]["distinct_values"] == 2
+    assert counts["function_categories"] == {
+        "distinct_values": 1,
+        "variables": 2,
+        "values": [{"code": "QAZ", "variables": 2}],
+    }
+
+
 def test_largest_patterns_are_ranked_and_bounded(grouping):
     names = [f"DEMO-UNIT:QAZ{index:04d}-{chr(65 + index)}" for index in range(25)]
     names.append("DEMO-UNIT:QAZ9999-A")
