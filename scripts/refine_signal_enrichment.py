@@ -150,7 +150,11 @@ async def run_variant(root: Path, arm: str, options: EnrichmentOptions) -> None:
         raise ValueError("need the original twenty frozen context batches")
     refs = {r["id"]: r for r in cohort["reference"]}
     done = [r for r in records if r["arm"] == arm]
-    if any(r.get("options") != options.model_dump() for r in done):
+    if any(
+        EnrichmentOptions.model_validate(r.get("options", {})).model_dump()
+        != options.model_dump()
+        for r in done
+    ):
         raise ValueError("variant name already contains a different configuration")
     db = bench.open_store(root / "trial.sqlite")
     bench.assert_unchanged(cohort["reference"], bench.snapshot(cohort["order"]))
@@ -211,6 +215,7 @@ def main():
     parser.add_argument("--variant", required=True)
     parser.add_argument("--batch-size", type=int, default=10)
     parser.add_argument("--schema-constraint", action="store_true")
+    parser.add_argument("--json-mode", action="store_true")
     parser.add_argument("--thinking", action="store_true")
     parser.add_argument("--max-tokens", type=int, default=8192)
     parser.add_argument("--fitted-prompt", action="store_true")
@@ -219,6 +224,7 @@ def main():
     options = EnrichmentOptions(
         batch_size=args.batch_size,
         schema_constraint=args.schema_constraint,
+        json_mode=args.json_mode,
         thinking=True if args.thinking else None,
         max_tokens=args.max_tokens,
         fitted_prompt=args.fitted_prompt,

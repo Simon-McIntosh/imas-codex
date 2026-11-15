@@ -25,6 +25,7 @@ def plot(summary_path: Path, output: Path, preview: Path):
         "baseline-first": "Baseline, first run",
         "baseline-second": "Baseline, second run",
         "schema": "Schema constraint",
+        "json-mode": "JSON mode",
         "prompt": "Fitted output prompt",
         "thinking": "Thinking, larger token bound",
         "repair": "One validation re-ask",
@@ -32,7 +33,7 @@ def plot(summary_path: Path, output: Path, preview: Path):
         "batch-three": "Batch size three",
         "batch-one": "Batch size one",
         "combination": "Selected combination",
-        "combination-without-schema": "Combination, schema removed",
+        "combination-without-schema": "Combination, constraint removed",
     }
     arms = [arm for arm in names if arm in summary]
     plt.style.use(BASE_STYLE)

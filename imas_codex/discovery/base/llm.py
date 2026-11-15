@@ -2377,6 +2377,7 @@ async def acall_llm_structured(
     reasoning_effort: str | None = None,
     before_attempt: Callable[[int, int], None] | None = None,
     local_schema_constraint: bool = False,
+    local_json_mode: bool = False,
     validation_reask: bool = False,
 ) -> LLMResult:
     """Async version of call_llm_structured.
@@ -2436,6 +2437,12 @@ async def acall_llm_structured(
         kwargs.setdefault("extra_body", {})["response_format"] = kwargs[
             "response_format"
         ]
+    if local_json_mode:
+        if not _is_local_client_model(model) or local_schema_constraint:
+            raise ValueError(
+                "local_json_mode requires a local model without a schema constraint"
+            )
+        kwargs.setdefault("extra_body", {})["response_format"] = {"type": "json_object"}
     if validation_reask:
         # One initial request and at most one validation-directed replacement.
         max_retries = 2

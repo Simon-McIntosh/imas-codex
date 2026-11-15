@@ -20,6 +20,7 @@ from tests.discovery.test_signal_enrichment_benchmark import answer
     ("settings", "expected"),
     [
         ({"schema-constraint": True}, {"local_schema_constraint": True}),
+        ({"json-mode": True}, {"local_json_mode": True}),
         ({"validation-reask": True}, {"validation_reask": True}),
         ({"thinking": True}, {"reasoning_effort": "high"}),
         ({"thinking": False}, {"reasoning_effort": None}),
@@ -118,6 +119,20 @@ async def test_schema_constraint_reaches_actual_local_wire_options_only_when_ena
     assert constrained[0]["extra_body"]["response_format"]["type"] == "json_schema"
     schema = constrained[0]["extra_body"]["response_format"]["json_schema"]["schema"]
     assert schema["$defs"]["PhysicsDomain"]["enum"]
+
+
+@pytest.mark.asyncio
+async def test_json_mode_reaches_local_wire_and_mutually_exclusive_constraints_are_refused():
+    result, calls = await request([json.dumps(answer())], local_json_mode=True)
+    assert isinstance(result, llm.LLMResult)
+    assert calls[0]["extra_body"]["response_format"] == {"type": "json_object"}
+    with pytest.raises(ValueError, match="choose either"):
+        EnrichmentOptions(schema_constraint=True, json_mode=True)
+    result, calls = await request(
+        [json.dumps(answer())], local_json_mode=True, local_schema_constraint=True
+    )
+    assert isinstance(result, ValueError)
+    assert calls == []
 
 
 @pytest.mark.asyncio
