@@ -1,6 +1,6 @@
 {
  "schema": "family-wording-pass/1",
- "generated_at": "2026-11-15T16:00:15Z",
+ "generated_at": "2026-11-15T16:10:08Z",
  "plan_section": "sn-definitions-by-construction#s6",
  "population_source": "/home/ITER/mcintos/.cache/imas-codex-live-rewrite/census-before-pass.json",
  "probe": {
@@ -6854,7 +6854,25 @@
     "drafted": 8,
     "exhausted": 1
    },
-   "spend_usd": 5.671675
+   "spend_usd": 5.671675,
+   "non_stored_after": [
+    {
+     "text": "it is the flux surface average of the local total absorbed wave power density name total absorbed wave power density weighted by the inverse magnitude of the poloidal magnetic flux gradient",
+     "names": [
+      "flux_surface_averaged_total_absorbed_wave_power_density"
+     ],
+     "left": []
+    }
+   ],
+   "omitted_names_after": [
+    "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+    "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary",
+    "flux_surface_normal_contravariant_flux_surface_averaged_metric",
+    "parallel_current_density_flux_surface_averaged_due_to_wave_driven_current_drive",
+    "poloidal_electron_beta_flux_surface_averaged_at_pedestal_top",
+    "toroidal_current_density_flux_surface_averaged_at_constraint_position"
+   ],
+   "omitted_left": []
   },
   {
    "operator": "volume_averaged",
@@ -7015,7 +7033,15 @@
     "drafted": 3,
     "pending": 2
    },
-   "spend_usd": 3.699612
+   "spend_usd": 3.699612,
+   "non_stored_after": [],
+   "omitted_names_after": [
+    "runaway_electron_critical_momentum_volume_averaged_due_to_avalanche",
+    "volume_averaged_runaway_electron_pitch_angle",
+    "volume_averaged_runaway_electron_source_rate",
+    "volume_averaged_total_xenon_fraction"
+   ],
+   "omitted_left": []
   },
   {
    "operator": "line_averaged",
@@ -7099,7 +7125,12 @@
     "accepted": 22,
     "pending": 1
    },
-   "spend_usd": 1.477939
+   "spend_usd": 1.477939,
+   "non_stored_after": [],
+   "omitted_names_after": [
+    "line_averaged_neon_density"
+   ],
+   "omitted_left": []
   },
   {
    "operator": "line_integrated",
@@ -7129,7 +7160,10 @@
     "accepted": 2,
     "drafted": 1
    },
-   "spend_usd": 0.300057
+   "spend_usd": 0.300057,
+   "non_stored_after": [],
+   "omitted_names_after": [],
+   "omitted_left": []
   },
   {
    "operator": "time_derivative",
@@ -7174,7 +7208,14 @@
     "exhausted": 1,
     "pending": 1
    },
-   "spend_usd": 0.48946
+   "spend_usd": 0.48946,
+   "non_stored_after": [],
+   "omitted_names_after": [
+    "rotation_frequency_time_derivative_of_neoclassical_tearing_mode",
+    "time_derivative_of_derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+    "time_derivative_of_electron_density"
+   ],
+   "omitted_left": []
   }
  ],
  "worked": [
@@ -14509,7 +14550,7 @@
   }
  },
  "done_when": {
-  "read_at": "2026-11-15T16:00:15Z",
+  "read_at": "2026-11-15T16:10:08Z",
   "clauses": [
    {
     "clause": "every species family at one stored wording",
@@ -14532,7 +14573,40 @@
     "before": "flux_surface_averaged 3 forms / 69 omitted, volume_averaged 2 forms / 53 omitted, line_averaged 2 forms / 23 omitted, line_integrated 1 forms / 3 omitted, time_derivative 1 forms / 9 omitted",
     "after": "flux_surface_averaged 3 forms / 6 omitted, volume_averaged 2 forms / 4 omitted, line_averaged 2 forms / 1 omitted, line_integrated 1 forms / 0 omitted, time_derivative 2 forms / 3 omitted",
     "state": "reduced, not one",
-    "note": "the form count includes the omitted bucket, so a count of two with a non-zero omitted count means the stored sentence plus the names that still do not state it"
+    "note": "the form count includes the omitted bucket, so a count of two with a non-zero omitted count means the stored sentence plus the names that still do not state it",
+    "remaining_non_stored_forms": [
+     {
+      "operator": "flux_surface_averaged",
+      "text": "it is the flux surface average of the local total absorbed wave power density name total absorbed wave power density weighted by the inverse magnitude of the poloidal magnetic flux gradient",
+      "names": [
+       "flux_surface_averaged_total_absorbed_wave_power_density"
+      ]
+     }
+    ],
+    "remaining_omitted_names": {
+     "flux_surface_averaged": [
+      "deuterium_tritium_density_flux_surface_averaged_at_plasma_boundary",
+      "flux_surface_averaged_normalized_toroidal_flux_coordinate_at_plasma_boundary",
+      "flux_surface_normal_contravariant_flux_surface_averaged_metric",
+      "parallel_current_density_flux_surface_averaged_due_to_wave_driven_current_drive",
+      "poloidal_electron_beta_flux_surface_averaged_at_pedestal_top",
+      "toroidal_current_density_flux_surface_averaged_at_constraint_position"
+     ],
+     "volume_averaged": [
+      "runaway_electron_critical_momentum_volume_averaged_due_to_avalanche",
+      "volume_averaged_runaway_electron_pitch_angle",
+      "volume_averaged_runaway_electron_source_rate",
+      "volume_averaged_total_xenon_fraction"
+     ],
+     "line_averaged": [
+      "line_averaged_neon_density"
+     ],
+     "time_derivative": [
+      "rotation_frequency_time_derivative_of_neoclassical_tearing_mode",
+      "time_derivative_of_derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+      "time_derivative_of_electron_density"
+     ]
+    }
    },
    {
     "clause": "live names with no producer edge at or below the recorded ten",
@@ -14943,6 +15017,14 @@
     "Total neutral species number density (thermal plus non-thermal), summed over charge states, as a 1D radial profile in the edge and SOL region. Characterizes the neutral particle population in the scrape-off layer.",
     "Total neutral particle number density (thermal + non-thermal, summed over charge states) as a 2D fluctuating field on the poloidal plane grid. Represents the combined neutral population density for a given neutral species in a turbulence simulation."
    ]
+  }
+ ],
+ "unrouted": [
+  {
+   "name": "flux_surface_averaged_total_absorbed_wave_power_density",
+   "operator": "flux_surface_averaged",
+   "form": "it is the flux surface average of the local total absorbed wave power density name total absorbed wave power density weighted by the inverse magnitude of the poloidal magnetic flux gradient",
+   "why": "the work list reached operator names through the omitted bucket, and this name paraphrases its operator in its own words instead, so it was neither worked nor listed as left"
   }
  ]
 }

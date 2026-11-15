@@ -398,6 +398,15 @@ def log_score(record):
     return float(hits[-1]) if hits else None
 
 
+def form_is_stored(form, sentence):
+    """Whether a censused form is the stored sentence, ignoring punctuation case."""
+
+    def flat(text):
+        return re.sub(r"[^a-z0-9]+", "", text.lower())
+
+    return flat(form) == flat(sentence)
+
+
 def source_evidence(names):
     """The DD source paths and their descriptions, for names that need a rename."""
 
@@ -448,6 +457,7 @@ def report():
     worked = list(records.values())
     for record in worked:
         record.pop("log", None)
+    left_by_name = {item["name"]: item for item in worklist["left"]}
 
     families = []
     for family, entry in before["families"]["divergent_families"].items():
@@ -497,6 +507,25 @@ def report():
                 "worked_count": len(settled),
                 "outcomes": dict(collections.Counter(r["outcome"] for r in settled)),
                 "spend_usd": round(sum(r["spend_usd"] for r in settled), 6),
+                "non_stored_after": [
+                    {
+                        "text": text[:300],
+                        "names": sorted(names),
+                        "left": [
+                            left_by_name[name]
+                            for name in sorted(names)
+                            if name in left_by_name
+                        ],
+                    }
+                    for text, names in back["forms"].items()
+                    if text != "<omitted>" and not form_is_stored(text, front["stored_sentence"])
+                ],
+                "omitted_names_after": sorted(back["forms"].get("<omitted>", [])),
+                "omitted_left": [
+                    left_by_name[name]
+                    for name in sorted(back["forms"].get("<omitted>", []))
+                    if name in left_by_name
+                ],
             }
         )
 
@@ -567,6 +596,24 @@ def report():
             }
         )
     held.sort(key=lambda item: (-(item["log_score"] or 0), item["name"]))
+
+    worked_names = {record["name"] for record in worked}
+    unrouted = [
+        {
+            "name": name,
+            "operator": entry["operator"],
+            "form": form["text"],
+            "why": (
+                "the work list reached operator names through the omitted bucket, "
+                "and this name paraphrases its operator in its own words instead, "
+                "so it was neither worked nor listed as left"
+            ),
+        }
+        for entry in operators
+        for form in entry["non_stored_after"]
+        for name in form["names"]
+        if name not in worked_names and name not in left_by_name
+    ]
 
     rename_left = [
         item
@@ -693,6 +740,20 @@ def report():
                     "with a non-zero omitted count means the stored sentence plus "
                     "the names that still do not state it"
                 ),
+                "remaining_non_stored_forms": [
+                    {
+                        "operator": entry["operator"],
+                        "text": form["text"],
+                        "names": form["names"],
+                    }
+                    for entry in operators
+                    for form in entry["non_stored_after"]
+                ],
+                "remaining_omitted_names": {
+                    entry["operator"]: entry["omitted_names_after"]
+                    for entry in operators
+                    if entry["omitted_names_after"]
+                },
             },
             {
                 "clause": "live names with no producer edge at or below the recorded ten",
@@ -750,6 +811,7 @@ def report():
         "outcomes": dict(outcomes),
         "held": held,
         "rename_candidates": rename_candidates,
+        "unrouted": unrouted,
     }
     OUT.write_text(json.dumps(payload, indent=1) + "\n")
     HTML_OUT.write_text(render_html(payload))
@@ -1032,7 +1094,27 @@ def render_html(payload):
         )
         for form, members in (operator["forms_after"] or {}).items():
             add("<li><code>%s</code> (%d)</li>" % (esc(form), len(members)))
-        add("</ul></details>")
+        add("</ul>")
+        if operator["non_stored_after"]:
+            add("<p class=\"muted\">forms still not the stored sentence</p><ul>")
+            for form in operator["non_stored_after"]:
+                add(
+                    f"<li><code>{esc(form['text'])}</code><br>"
+                    + ", ".join(
+                        f"<code>{esc(name)}</code>" for name in form["names"]
+                    )
+                    + "</li>"
+                )
+            add("</ul>")
+        if operator["omitted_left"]:
+            add("<p class=\"muted\">names omitting the sentence, with why</p><ul>")
+            for item in operator["omitted_left"]:
+                add(
+                    f"<li><code>{esc(item['name'])}</code> &mdash; "
+                    f"{esc(item['reason'])}</li>"
+                )
+            add("</ul>")
+        add("</details>")
 
     add("<h2>Names worked</h2>")
     add(
@@ -1081,8 +1163,23 @@ def render_html(payload):
                 esc(item.get("detail", "")),
             ]
         )
-        pass
     add(table(["name", "reason", "detail"], rows))
+    if payload.get("unrouted"):
+        add("<h3>Names outside the work list that still carry a non-stored form</h3>")
+        add(
+            table(
+                ["name", "operator", "form it carries", "why it was not routed"],
+                [
+                    [
+                        f"<code>{esc(item['name'])}</code>",
+                        esc(item["operator"]),
+                        f"<code>{esc(item['form'])}</code>",
+                        esc(item["why"]),
+                    ]
+                    for item in payload["unrouted"]
+                ],
+            )
+        )
 
     add("<h2>Spend</h2>")
     rows = [
