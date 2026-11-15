@@ -1,0 +1,33 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T09:36:27.060Z",
+  "dispatched_at": "2026-11-15T08:57:01Z",
+  "findings": [],
+  "item_verdicts": {
+    "call_sites": "imas_codex/discovery/signals/scanners/tdi.py:73 calls the surviving async discover_tdi_signals from tdi.py, and imas_codex/cli/discover/signals.py:199 imports only unrelated names from parallel.py.",
+    "diff": "Read commit by commit against efa8af22; the single commit deletes discover_mdsplus_signals and synchronous discover_tdi_signals from parallel.py and run_tdi_discovery from tdi.py, 0 additions and 259 deletions, with the MDSplus section banner removed alongside its block.",
+    "done_when": "The done_when names the definition grep, the tests/discovery plus tests/cli/test_discover_signals_stage.py gate with base/after failure ids, a negative net line change, and a negative import control; after-definitions.log, baseline-suite.log, after-suite.log, the manifest's net_line_change -259 and import-control.log each record those measures.",
+    "goal": "The node's goal is to delete the three unreached signal-discovery functions leaving the TDI scanner path as the only TDI discovery implementation; the diff at 98fbf57e removes all three and imas_codex/discovery/signals/scanners/tdi.py:56-73 still imports the surviving async discover_tdi_signals from tdi.py.",
+    "manifest": "Read; it states both gate arms at 1645 passed, 8 deselected, EXIT=0, zero added failures, imports before/after recorded, and net -259 lines, all of which reconcile with the logs.",
+    "write_paths": "The manifest declares imas_codex/discovery/signals/parallel.py and imas_codex/discovery/signals/tdi.py; git diff --stat efa8af22 98fbf57e lists exactly those two files and no path outside them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to delete three unreached signal-discovery functions leaving the TDI scanner path as the only TDI discovery implementation; the diff at 98fbf57e removes all three and scanners/tdi.py:56-73 still imports the surviving async discover_tdi_signals.\nVERDICT done_when: the done_when names the definition grep, the tests/discovery plus tests/cli/test_discover_signals_stage.py gate with base/after failure ids, a negative net line change and an import negative control; each is recorded in after-definitions.log, baseline-suite.log, after-suite.log, the manifest's -259 line count and import-control.log.\nVERDICT write_paths: the manifest declares imas_codex/discovery/signals/parallel.py and imas_codex/discovery/signals/tdi.py; git diff --stat between efa8af22 and 98fbf57e lists exactly those two files.\nVERDICT manifest: read; it records 1645 passed and 8 deselected on both arms with EXIT=0, empty failure ids, before/after import outcomes and a net -259 lines, all reconciling with the logs.\nVERDICT diff: read commit by commit against efa8af22; one commit deletes discover_mdsplus_signals and synchronous discover_tdi_signals from parallel.py and run_tdi_discovery from tdi.py, 0 additions and 259 deletions.\nCALL_SITES: imas_codex/discovery/signals/scanners/tdi.py:73, imas_codex/cli/discover/signals.py:199",
+  "review_run_id": "r-20261115T085532778339-review-of-remove-unreached-discovery-functions-98fbf57e6819",
+  "reviewed_base_sha": "efa8af2292fe8362eee1830941df60e28b60a122",
+  "reviewed_head_sha": "98fbf57e681958d9cf715c47c2a240b894b3c487",
+  "reviewed_run_id": "r-20261115T082703465711-remove-unreached-discovery-functions",
+  "scores": {
+    "durability": 12,
+    "evidence": 19,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T09:38:00.811687+00:00",
+  "total": 110
+}
