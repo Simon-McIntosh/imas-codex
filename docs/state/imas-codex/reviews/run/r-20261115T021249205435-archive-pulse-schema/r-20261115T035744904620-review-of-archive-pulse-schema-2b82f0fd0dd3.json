@@ -1,0 +1,63 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T04:25:14.882Z",
+  "dispatched_at": "2026-11-15T03:58:10Z",
+  "findings": [
+    {
+      "id": "pulse-identity-assertion-is-not-independent",
+      "line": 39,
+      "path": "tests/graph/test_archive_schema.py",
+      "severity": "non-blocking",
+      "text": "assert pulse.id == f'{pulse.archive}:{pulse.name}' compares two strings the test itself supplied: id was passed as f'{archive.id}:{pulse_name}', archive and name were passed separately, and the generated model composes nothing, so the assertion holds whatever the code does. Reinstating the truncation defect in any reader would leave it green; only editing the test's own input reddens it, which is what the recorded 179e16f1 arm did."
+    },
+    {
+      "id": "pulse-composite-identity-prose-only",
+      "line": 1746,
+      "path": "imas_codex/schemas/facility.yaml",
+      "severity": "non-blocking",
+      "text": "The {archive}:{name} composite identity is stated in slot descriptions only: nothing validates id against archive and name, so a caller can write a Pulse whose id is a substring of its name and MERGE onto the short key the previous review flagged. The repair moved the collision guarantee into prose rather than into a guard."
+    },
+    {
+      "id": "host-key-duplicated-across-two-enforcement-paths",
+      "line": 26,
+      "path": "imas_codex/config/codac_uda.py",
+      "severity": "non-blocking",
+      "text": "archive_host_key re-declares the operator-exclusion host comparison already owned by scripts/codac_uda_prototype/reader.py:23, and the two disagree on IP addresses, where the prototype's key for 192.0.2.10 is the prefix 192 and this one compares addresses exactly. Two enforcement paths for one exclusion rule answer differently for the same host set."
+    },
+    {
+      "id": "docstring-claims-a-caller-that-does-not-exist",
+      "line": 9,
+      "path": "imas_codex/config/codac_uda.py",
+      "severity": "non-blocking",
+      "text": "The module docstring states that production readers share the host comparison through archive_host_key, but at the reviewed head no production module imports it, so the sentence asserts a caller that does not exist; a reader may treat endpoint policy as already enforced at connection time."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass",
+    "diff": "pass",
+    "done_when": "pass",
+    "goal": "pass",
+    "manifest": "pass",
+    "write_paths": "pass"
+  },
+  "notes": "Read the goal, done_when and write_paths from the run's dispatch record; the manifest from the run directory; all four commits of the diff against base 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136; the baseline/after/negative-control gate logs; and plan section 3 at docs/plans/codac-uda-signals.html:63. Read outside the coding diff only for the reuse judgement: scripts/codac_uda_prototype/reader.py, imas_codex/discovery/base/facility.py and imas_codex/remote/scripts/codac_uda.py. No suite was re-run and no file in the reviewed tree was modified.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal (deliver the schema and facility configuration for the archive data system, archive endpoints, pulses and pulse categories) against plan s3 at docs/plans/codac-uda-signals.html:63; imas_codex/schemas/facility.yaml:1676-1790 adds ArchiveEndpoint, PulseCategory and Pulse plus DataSource.archive_endpoint, imas_codex/schemas/facility_config.yaml:596-690 adds CodacUDAConfig with archives, readable_roles and four bounded read limits, and imas_codex/config/facilities/iter.yaml:68-85 declares the ITER codac_uda data system with its module setup and excluded operator endpoint, so every clause of the goal is present.\nVERDICT done_when: read the four clauses against the run's own receipts; repair-build.log ends EXIT=0 for both model generators, repair-tests.log records 70 passed with a bare EXIT=0 at revision 325b2d9f, tests/graph/test_archive_schema.py:27-43 round-trips a non-numeric pulse identity with literal nanosecond bounds, the facility-compliance test auto-discovers every public YAML under imas_codex/config/facilities and all four validate, and repair-reproduction.log records the pre-repair arm at 2 failed, 7 passed, EXIT=1, so the gate asserts the done_when rather than a proxy.\nVERDICT write_paths: read the six declared write paths and diffed 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136..2b82f0fd0dd3e4d8c2af89f43cd06f03b07bc109; all seven changed files sit inside imas_codex/schemas/, imas_codex/config/, tests/config/, tests/graph/ and docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html, and no facility file other than iter.yaml is touched.\nVERDICT manifest: read; it declares status complete with commits 5654dbf8ab01, 179e16f1bee2, 325b2d9fd9ca and 2b82f0fd0dd3, records repair-tests.log at 70 passed and repair-negative-control.log at 1 failed, and its baseline_suite (2 failed at 179e16f1) and after_suite (0 failed at 325b2d9f) arms reconcile with those logs.\nVERDICT diff: read all four commits individually; 5654dbf8ab01 adds the six product and test files, 179e16f1bee2 adds only the evidence fragment, 325b2d9fd9ca repairs the pulse identity examples, the host-key name and the private-list diagnostics across five files, and 2b82f0fd0dd3 appends only evidence prose to the same fragment, so no product source changed after the recorded gate.\nCALL_SITES: imas_codex/discovery/base/facility.py:_deep_merge, imas_codex/discovery/base/facility.py:get_facility_validated, imas_codex/config/models.py:FacilityConfig\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/schemas/facility_config.yaml:596 declares CodacUDAConfig with the DataSystemBase mixin, named archives, readable_roles and max_samples/max_bytes/max_window_ns/timeout, matching the plan's setup/interpreter/roles/limits clause at docs/plans/codac-uda-signals.html:63.\nSCORE evidence: 18\nJUSTIFICATION evidence: repair-tests.log carries the gate's own last lines 70 passed and EXIT=0 at revision 325b2d9f, repair-reproduction.log records the pre-repair arm 2 failed with the two named ids, and repair-negative-control.log records 1 failed with EXIT=1 on a test id the head arm passes, so the done_when is measured and the added-failure count derived is 0.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all seven paths changed between 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136 and 2b82f0fd0dd3e4d8c2af89f43cd06f03b07bc109 fall inside the six declared write paths, and the pre-connection refusal at imas_codex/config/codac_uda.py:42 is demanded by the plan's 'refused before any connection' clause at docs/plans/codac-uda-signals.html:63.\nSCORE durability: 14\nJUSTIFICATION durability: tests/config/test_codac_uda_config.py:62 reddens if ReadableArchiveRole admits operator, :86 reddens if the operator exclusion can be dropped and :146 reddens if the exact-IP branch of archive_host_key is removed, but the pulse-identity guard at tests/graph/test_archive_schema.py:39 compares a value against a string rebuilt from the fields the test itself passed and cannot fail on any code regression.\nSCORE fit: 17\nJUSTIFICATION fit: CodacUDAConfig mixes in DataSystemBase exactly as TDIConfig and the other data systems do at imas_codex/schemas/facility_config.yaml:599, and the naming check over the diff's added lines found no plan, ticket, version or attribution strings.\nSCORE reuse: 13\nJUSTIFICATION reuse: the merger is reused from imas_codex/discovery/base/facility.py:_deep_merge and setup/interpreter from DataSystemBase, but imas_codex/config/codac_uda.py:26 re-implements the operator-host comparison already owned by scripts/codac_uda_prototype/reader.py:23 rather than extending it, and the two still disagree on IP hosts.\nFINDING tests/graph/test_archive_schema.py:39 non-blocking: assert pulse.id == f'{pulse.archive}:{pulse.name}' compares two strings the test itself supplied, because the generated model echoes id and composes nothing, so the assertion holds whatever the code does and would stay green if any reader went back to building a truncated identity.\nFINDING imas_codex/schemas/facility.yaml:1746 non-blocking: the {archive}:{name} composite identity is stated only in slot descriptions, nothing validates id against archive and name, so a caller can still write a Pulse whose id is a substring of its name; the collision the previous review raised is now documented rather than prevented.\nFINDING imas_codex/config/codac_uda.py:26 non-blocking: archive_host_key duplicates the operator-exclusion host comparison already owned by scripts/codac_uda_prototype/reader.py:23 for the same policy and diverges on IP addresses, where the prototype's key for 192.0.2.10 is the prefix 192 and this one compares addresses exactly.\nFINDING imas_codex/config/codac_uda.py:9 non-blocking: the module docstring states that production readers share the host comparison through archive_host_key, but at the reviewed head no production module imports it, so the sentence describes an intention that is not implemented and a later reader will trust a caller that does not exist.\n",
+  "review_run_id": "r-20261115T035744904620-review-of-archive-pulse-schema-2b82f0fd0dd3",
+  "reviewed_base_sha": "1c2476daf9f7c83e4eaa0d56c60fb0d132c05136",
+  "reviewed_head_sha": "2b82f0fd0dd3e4d8c2af89f43cd06f03b07bc109",
+  "reviewed_run_id": "r-20261115T021249205435-archive-pulse-schema",
+  "scores": {
+    "durability": 14,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T04:36:35.222398+00:00",
+  "total": 100
+}

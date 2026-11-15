@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -155,6 +155,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T024952708941-review-of-archive-pulse-schema-179e16f1bee2" data-who="reckon-build" data-when="2026-11-15T03:56:30.143Z">
     <div class="r-comment-body"><p>Reviewed run r-20261115T021249205435-archive-pulse-schema at 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136..179e16f1bee2299fd628a85eeba20f2ff03c1a78; scores goal_fidelity 19, evidence 18, scope_discipline 19, durability 18, fit 19, reuse 14; added_failure_count 0 with an empty added_failure_ids; three non-blocking findings recorded on the Pulse identity collision, a forked host-key exclusion helper, and the private-overlay merge shape; the parsed record is stored at both declared paths and passes the review contract with findings []</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261115T035744904620-review-of-archive-pulse-schema-2b82f0fd0dd3" data-who="reckon-build" data-when="2026-11-15T04:25:14.882Z">
+    <div class="r-comment-body"><p>Independent review of archive-pulse-schema at 2b82f0fd0dd3 against base 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136 scored goal_fidelity 19, evidence 18, scope_discipline 19, durability 14, fit 17, reuse 13, with added_failure_count 0 derived from the reviewed run&#x27;s baseline_suite (2 failed at 179e16f1) and after_suite (0 failed at 325b2d9f) arms; four non-blocking findings, the load-bearing one being that the pulse-identity guard at tests/graph/test_archive_schema.py:39 compares a value against a string the test itself supplied. Record: review-records/r-20261115T021249205435-archive-pulse-schema.at-2b82f0fd0dd3e4d8c2af89f43cd06f03b07bc109.json.</p></div>
 </div>
 </section>
 </main>
