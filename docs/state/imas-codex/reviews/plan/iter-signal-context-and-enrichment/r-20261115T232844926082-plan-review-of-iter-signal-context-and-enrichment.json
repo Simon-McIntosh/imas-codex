@@ -1,0 +1,41 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T23:29:44.800Z",
+  "dispatched_at": "2026-11-15T23:29:29Z",
+  "findings": [],
+  "plan_commit": "2e677f99ebf2709ea72181a330107ccb1feb6309",
+  "plan_fingerprint": "b4effec4e38a9f177089f85a65dcb31cbc68f29fccb239767c51e5172e1e7b50",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 30,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T232844926082-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "d20279d87e7932aee3cdd35f8935898b65e01386",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the two cross-plan anchors resolve as cited (`icp-api-access.html` sections 3 and 4 exist and are declared `implementable`), and no section-4 anchor points at a renamed target.",
+    "done_when": "pass \u2014 section 4's done-when at `docs/plans/iter-signal-context-and-enrichment.html:60` now carries a condition that can fail (the registry must report the package private; archive-read node and link counts equal the graph's) and the added control withholds one imported node so the count comparison is shown to fire.",
+    "evidence_paths": "pass \u2014 section 4 records into the section's landing record and takes its archive as a private registry package; no session scratchpad or node-local temporary path is named.",
+    "naming": "pass \u2014 section 4 introduces no symbol, and its text carries no plan label, ticket number or version tag; \"pilot plant system\", \"exact/derived/absent\" and \"facility-scoped archive\" describe mechanisms, not tracker entries.",
+    "reasoning": "pass \u2014 the root cause s4 acts on is the one the cited evidence shows (the census and ICP/IDM measurement in section 1, and the read-only client whose sections 3 and 4 exist upstream); the endpoint is reachable (200 catalogued pilot signals, the ITER-facility scope, a registry package whose visibility and counts can be read back, and the archive restore implied by \"read back from the archive\" make the equality checkable); and the section names no code path, step sequence, formula or function.",
+    "single_goal": "pass \u2014 section 4 has one deliverable (one pilot system's context imported and linked); the import, the idempotent re-import and the archive are checks of that one deliverable, not a second one.",
+    "wiring": "pass \u2014 section 4's `data-links` and the `plan-section-depends-on` entry name `icp-api-access#s3` and `icp-api-access#s4`, and both resolve in `docs/plans/icp-api-access.html` (s3 delivers the read-only plant-structure reads, s4 the IDM document fetch); the plan snapshot at `plan.html` is byte-identical to the repository plan."
+  },
+  "section_digests": {
+    "_document": "e409354224765fb027152d6b5fbf2b4b9ffd86f3d42befb25fbb7b5f3fba3f9b",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "631c30f031b35766fbc9b9bf62a0670bf0504adeef4f12b7676039b81fd14365",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T23:56:14.736666+00:00",
+  "total": null
+}
