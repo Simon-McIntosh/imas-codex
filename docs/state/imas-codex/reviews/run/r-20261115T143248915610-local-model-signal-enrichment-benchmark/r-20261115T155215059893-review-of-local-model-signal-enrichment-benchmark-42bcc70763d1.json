@@ -1,0 +1,72 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_basis": "the reviewed manifest carries no baseline_suite, so no base arm was readable; the readable after arm (after_suite, revision 566d115fad66d78da39099fe01c236f5d98c3821) completed with failure_count 0 in gate-isolated.log, so no added failure is recorded and none can be derived from a base arm",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-15T15:54:17.504Z",
+  "dispatched_at": "2026-11-15T15:53:32Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_enrichment_benchmark.py",
+      "line": "141",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion that \"Answer description\" is absent from the recorded messages can never fail, because the signal handed to replay_batch already carries an empty description and that string is never supplied anywhere in the test, so it guards nothing that the mutation arm or any regression could change."
+    },
+    {
+      "file": "tests/discovery/test_signal_enrichment_benchmark.py",
+      "line": "241",
+      "severity": "non-blocking",
+      "text": "non-blocking: the prompt_digest assertion is computed from the same `messages` value the test passes into replay_batch, so both sides move with the test input and the frozen-message guard rests entirely on the line above it at :240."
+    },
+    {
+      "file": "scripts/benchmark_signal_enrichment.py",
+      "line": "572",
+      "severity": "non-blocking",
+      "text": "non-blocking: the arm re-labelling under description reversal is untested, so an inverted mapping there would silently invert the reported 11/40 reversal-disagreement figure with no failing test to show it."
+    },
+    {
+      "file": "scripts/benchmark_signal_enrichment.py",
+      "line": "644",
+      "severity": "non-blocking",
+      "text": "non-blocking: failed_responses counts only responses that failed to parse or raised, so a response that parses strictly but covers fewer signals than the batch asked for is counted as neither failed nor empty even though score_response already records that state as `complete` false, leaving the done_when's failed-response count blind to partial output."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from base 38f55dacd to head 42bcc7076 (a04636b1e, 97b12a832, e2215c708, 566d115fa, 42bcc7076), 1110 lines added over three files \u2014 the replay harness, its test module and the evidence fragment \u2014 with no other file touched.",
+    "done_when": "plan \u00a73 at docs/plans/iter-signal-context-and-enrichment.html#s3 asks per model for strict-parse share, stored domain and unit agreement, cost with token counts, calls per minute and wall time, and failed or empty response counts, plus a blind judged comparison with forty hand-read pairs and stated agreement and unchanged stored enrichment, and private/summary.json in the reviewed run directory reproduces each of those figures the landing fragment prints (local 0/20 parses, 67/200, $0, 1.4696/min, 816.55 s; paid 20/20, 69/200, $0.9524577, 3.0492/min, 393.54 s; judge paid/local/equivalent 120/34/46, reverse disagreements 11/40).",
+    "goal": "the node goal at r-20261115T143248915610-local-model-signal-enrichment-benchmark/prompt.txt:38 is to measure how well the locally served model does the signals discovery pipeline's enrichment work, and scripts/benchmark_signal_enrichment.py:369 runs both seat arms over one sealed 200-signal cohort whose landing record reports 0/20 local against 20/20 paid strict parses.",
+    "manifest": "read at the reviewed run directory; it declares status complete, five commits ending 42bcc7076, gate-isolated.log 21 passed with the mutation arm at 9 failed in negative-isolated.log, and an after_suite of revision 566d115fa with zero failures, while its baseline_suite key is empty so no base-arm suite result is carried.",
+    "write_paths": "the source manifest declares imas_codex/discovery/signals/, imas_codex/discovery/base/, tests/discovery/, scripts/ and the two docs/evidence and docs/figures paths, and every path in the diff (scripts/benchmark_signal_enrichment.py, tests/discovery/test_signal_enrichment_benchmark.py, docs/evidence/fragments/iter-signal-context-and-enrichment/local-model-signal-enrichment-benchmark.html) is inside them, with one transient out-of-fence scratch environment write at an unassigned tree path reported by the worker under outside_scope and removed."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_signal_enrichment_benchmark.py:59 reddens if stored-enrichment comparison is disabled, but its line 141 and line 241 cannot fail on any code, and the reversal arm relabelling at scripts/benchmark_signal_enrichment.py:572 that the 27.5% disagreement figure depends on has no test.",
+    "evidence": "gate-isolated.log ends at \"21 passed, 1 warning\" with EXIT=0 and private/summary.json at the reviewed run directory reconciles every headline figure printed by the landing fragment.",
+    "fit": "the harness follows the per-stage idiom already present at scripts/run_reviewer_bakeoff.py and names itself after the work rather than a plan.",
+    "goal_fidelity": "scripts/benchmark_signal_enrichment.py:369 compares the two configured seats on the same frozen production messages, so the landing record answers the node goal with measured local failure rather than a proxy.",
+    "reuse": "the search over scripts/ and imas_codex/standard_names/ found only stage-specific comparison owners (imas_codex/standard_names/benchmark.py for names, scripts/model_comparison_study.py for path scoring), and the new module extends the per-stage pattern while reusing llm.call_decisions, llm.extract_cost, SignalEnrichmentBatch and parallel.enrich_worker rather than reimplementing the call layer.",
+    "scope_discipline": "all three changed paths at scripts/benchmark_signal_enrichment.py and its two peers lie inside the declared fence, and the only breach on record is the transient scratch environment the worker reported and removed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal at r-20261115T143248915610-local-model-signal-enrichment-benchmark/prompt.txt:38 is to measure how well the locally served model does the signals discovery pipeline's enrichment work, and scripts/benchmark_signal_enrichment.py:369 runs both seat arms over one sealed 200-signal cohort whose landing record reports 0/20 local against 20/20 paid strict parses.\nVERDICT done_when: plan \u00a73 at docs/plans/iter-signal-context-and-enrichment.html#s3 asks per model for strict-parse share, stored domain and unit agreement, cost with token counts, calls per minute and wall time, and failed or empty response counts, plus a blind judged comparison with forty hand-read pairs and stated agreement and unchanged stored enrichment, and private/summary.json in the reviewed run directory reproduces each of those figures the landing fragment prints (local 0/20 parses, 67/200, $0, 1.4696/min, 816.55 s; paid 20/20, 69/200, $0.9524577, 3.0492/min, 393.54 s; judge paid/local/equivalent 120/34/46, reverse disagreements 11/40).\nVERDICT write_paths: the source manifest declares imas_codex/discovery/signals/, imas_codex/discovery/base/, tests/discovery/, scripts/ and the two docs/evidence and docs/figures paths, and every path in the diff (scripts/benchmark_signal_enrichment.py, tests/discovery/test_signal_enrichment_benchmark.py, docs/evidence/fragments/iter-signal-context-and-enrichment/local-model-signal-enrichment-benchmark.html) is inside them, with one transient out-of-fence scratch environment write at an unassigned tree path reported by the worker under outside_scope and removed.\nVERDICT manifest: read at the reviewed run directory; it declares status complete, five commits ending 42bcc7076, gate-isolated.log 21 passed with the mutation arm at 9 failed in negative-isolated.log, and an after_suite of revision 566d115fa with zero failures, while its baseline_suite key is empty so no base-arm suite result is carried.\nVERDICT diff: read commit by commit from base 38f55dacd to head 42bcc7076 (a04636b1e, 97b12a832, e2215c708, 566d115fa, 42bcc7076), 1110 lines added over three files \u2014 the replay harness, its test module and the evidence fragment \u2014 with no other file touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/benchmark_signal_enrichment.py:369 compares the two configured seats on the same frozen production messages, so the landing record answers the node goal with measured local failure rather than a proxy.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-isolated.log ends at \"21 passed, 1 warning\" with EXIT=0 and private/summary.json at the reviewed run directory reconciles every headline figure printed by the landing fragment.\nSCORE scope_discipline: 16\nJUSTIFICATION scope_discipline: all three changed paths at scripts/benchmark_signal_enrichment.py and its two peers lie inside the declared fence, and the only breach on record is the transient scratch environment the worker reported and removed.\nSCORE durability: 13\nJUSTIFICATION durability: tests/discovery/test_signal_enrichment_benchmark.py:59 reddens if stored-enrichment comparison is disabled, but its line 141 and line 241 cannot fail on any code, and the reversal arm relabelling at scripts/benchmark_signal_enrichment.py:572 that the 27.5% disagreement figure depends on has no test.\nSCORE fit: 16\nJUSTIFICATION fit: the harness follows the per-stage idiom already present at scripts/run_reviewer_bakeoff.py and names itself after the work rather than a plan.\nSCORE reuse: 15\nJUSTIFICATION reuse: the search over scripts/ and imas_codex/standard_names/ found only stage-specific comparison owners (imas_codex/standard_names/benchmark.py for names, scripts/model_comparison_study.py for path scoring), and the new module extends the per-stage pattern while reusing llm.call_decisions, llm.extract_cost, SignalEnrichmentBatch and parallel.enrich_worker rather than reimplementing the call layer.\nFINDING tests/discovery/test_signal_enrichment_benchmark.py:141 non-blocking: the assertion that \"Answer description\" is absent from the recorded messages can never fail, because the signal handed to replay_batch already carries an empty description and that string is never supplied anywhere in the test, so it guards nothing that the mutation arm or any regression could change.\nFINDING tests/discovery/test_signal_enrichment_benchmark.py:241 non-blocking: the prompt_digest assertion is computed from the same `messages` value the test passes into replay_batch, so both sides move with the test input and the frozen-message guard rests entirely on the line above it at :240.\nFINDING scripts/benchmark_signal_enrichment.py:572 non-blocking: the arm re-labelling under description reversal is untested, so an inverted mapping there would silently invert the reported 11/40 reversal-disagreement figure with no failing test to show it.\nFINDING scripts/benchmark_signal_enrichment.py:644 non-blocking: failed_responses counts only responses that failed to parse or raised, so a response that parses strictly but covers fewer signals than the batch asked for is counted as neither failed nor empty even though score_response already records that state as `complete` false, leaving the done_when's failed-response count blind to partial output.",
+  "review_run_id": "r-20261115T155215059893-review-of-local-model-signal-enrichment-benchmark-42bcc70763d1",
+  "reviewed_base_sha": "38f55dacd39bd12b9871898f4c09459ebbd6b8b3",
+  "reviewed_head_sha": "42bcc70763d18207a07c78ca7047ed1f115a426c",
+  "reviewed_run_id": "r-20261115T143248915610-local-model-signal-enrichment-benchmark",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 15,
+    "scope_discipline": 16
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T16:04:29.398694+00:00",
+  "total": 95
+}
