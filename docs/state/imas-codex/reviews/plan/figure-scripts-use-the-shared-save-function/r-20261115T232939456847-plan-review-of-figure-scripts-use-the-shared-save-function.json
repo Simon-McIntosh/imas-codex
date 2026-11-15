@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T23:30:32.757Z",
+  "dispatched_at": "2026-11-15T23:30:14Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/figure-scripts-use-the-shared-save-function.html:48",
+      "id": "done_when-1",
+      "reason": "the done-when must say \"each figure file's exported ratio\" and require the before/after size-and-ratio listing, or a worker closes the node on a measure undefined for part of its own set and skips the record that documents the size change.",
+      "text": "the ratio invariant is quantified over \"each file\", which includes receipts and previews that have no width-to-height, while the record the plan does ask for (each vector figure's declared size before and after) is named only in the delivered paragraph and never required by the done-when, so a worker can satisfy the stated measure without listing the sizes, and cannot say what the measure even means for a non-figure file",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2e677f99ebf2709ea72181a330107ccb1feb6309",
+  "plan_fingerprint": "ade9adce7aa6b391f215b82df1456f59554c33972c72dea635f9caa3c1c8c026",
+  "plan_slug": "figure-scripts-use-the-shared-save-function",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T232939456847-plan-review-of-figure-scripts-use-the-shared-save-function",
+  "reviewed_blob_sha": "5bb6a6d87e395c3525764fecdc43abe4f8ab0d49",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 imas_codex/plotting/, scripts/, docs/figures/ and the s1 link all resolve in the tree; the shared save's fixed-width-and-derived-height behaviour is exactly what line 38 and s1 describe.",
+    "done_when": "a finding \u2014 s2's new ratio clause (line 48) asserts \"each file's width-to-height ratio is unchanged\", a set that also holds receipts and previews with no width or height, and the delivered before/after size record is not asked for by the done-when.",
+    "evidence_paths": "pass \u2014 the section's records land in the landing record, the repository's own durable record path; the work is 3.5 h of local edits and regeneration under docs/figures/, not a scratch tree.",
+    "naming": "pass \u2014 s2 names no code paths, symbols or tracker labels; no plan label reaches anything a worker would build.",
+    "reasoning": "pass \u2014 the stated defect matches the code (width is substituted with a fixed 31.1cm while height is derived, so a canvas drawn at 18 in or 20 in wide would come out with a wrong ratio), the endpoint is obtainable and the ratio check can fail on today's shared function, and s2 prescribes no code path or step sequence.",
+    "single_goal": "pass \u2014 s2 has one deliverable: scripts reach the shared export with files equivalent to today's; the physical-size sentence is a consequence of that export, not a second goal.",
+    "wiring": "pass \u2014 the node table's only relationship, s2 depends-on figure-scripts-use-the-shared-save-function#s1, resolves and points at the section that owns the corrected export."
+  },
+  "section_digests": {
+    "_document": "4dea64427d72247ec7267de4bc6f56d85c0ade04effc8f525bbda5516b514f60",
+    "s1": "dcf0721a9e37aac700d6f736a0ffe707b876997971a1b1a050ab25c00c7e4cb5",
+    "s2": "360d89f86669ebe78c915ed8a5e390d437d0639ea279ac3c5cdf1f5b7bbc57ad"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T23:57:25.970147+00:00",
+  "total": null
+}
