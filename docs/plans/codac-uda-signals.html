@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery,mcp-server">
   <meta name="plan-after" content="sn-definitions-by-construction">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;deferred&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;deferred&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s4&quot;:[&quot;codac-uda-signals#s2&quot;,&quot;codac-uda-signals#s3&quot;],&quot;s5&quot;:[&quot;codac-uda-signals#s2&quot;,&quot;codac-uda-signals#s3&quot;],&quot;s6&quot;:[&quot;codac-uda-signals#s4&quot;,&quot;codac-uda-signals#s5&quot;],&quot;s7&quot;:[&quot;codac-uda-signals#s5&quot;],&quot;s8&quot;:[&quot;codac-uda-signals#s4&quot;],&quot;s10&quot;:[&quot;codac-uda-signals#s9&quot;],&quot;s11&quot;:[&quot;codac-uda-signals#s10&quot;]}">
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -68,7 +68,7 @@
 <p><strong>Done when.</strong> For one declared cohort, the number of signals in the graph equals the number the archive lists for the same patterns, counted independently in the landing record; a second run writes no duplicates; a sample of ten cohort signals has its data-serving archive confirmed by a bounded read that returns samples, with the counts confirmed and unconfirmed in the landing record; and the scan ran on a compute partition (<code>rigel</code> or <code>all_debug</code>). Modified graph statements pass under the <code>graph</code> marker. <strong>Negative control:</strong> a scan interrupted part-way reports itself incomplete and is not counted as a finished cohort; and a signal listed on an archive that returns no samples for it keeps its data-serving archive unset.</p>
 
     <h2 id="s5">§5 — A signal is loaded by identity over a bounded window, with honest sampling</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="codac-uda-signals#s2,codac-uda-signals#s3"></section>
+    <section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links="codac-uda-signals#s2,codac-uda-signals#s3"></section>
 <p><strong>Delivers.</strong> A loader that takes a graph signal identity and either an absolute time window or a pulse, plus a sampling mode (raw, envelope or binned) and explicit sample and byte limits, and returns time and value arrays with the signal's name, unit, description, time base, the query issued and the sampling evidence. Whether the result is decimated is reported as true, false or unknown, and is never taken from the client's own flag alone. Structured-record fields and string-valued signals are loadable. Results are cached by archive, selector, bounds and sampling settings.</p>
 <p><strong>Done when.</strong> One live two-second interval of one signal loads in raw and in envelope mode from a compute partition, with sample count, time span and elapsed time in the landing record; a repeat load is served from the cache; a request beyond the limits is refused before any fetch; for one identical request the scanner's validity check and the loader return the same samples, and for one failing request the same error classification. <strong>Negative control:</strong> a paged raw read issued without the explicit no-decimation setting fails the cadence test, as it does in the prototype.</p>
 
