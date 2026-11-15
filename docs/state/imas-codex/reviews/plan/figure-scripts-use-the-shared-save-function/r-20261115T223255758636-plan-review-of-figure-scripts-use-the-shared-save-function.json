@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T22:45:57.098Z",
+  "dispatched_at": "2026-11-15T22:45:13Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas_codex/docs/plans/figure-scripts-use-the-shared-save-function.html:43",
+      "id": "done_when-1",
+      "reason": "the section names a boundary the gate cannot observe, so the node can be closed while the stated capability is false at two of the six traces it claims.",
+      "text": "\u00a71 states the signal-plot legend sits on one row \"for up to six traces\" while the only legend measure is \"a four-trace signal plot's legend occupies one row\", and the sole declared negative control names only the aspect ratio, so a layout that fits four and wraps at five or six satisfies the gate with the declared limit unmet.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas_codex/docs/plans/figure-scripts-use-the-shared-save-function.html:48",
+      "id": "done_when-2",
+      "reason": "as written the gate either fails on code the plan does not own or is silently narrowed at build time, so the delivered repository state and the plan's claim diverge.",
+      "text": "\u00a72's search measure \"no save wrapper defined in a script\" is unscoped to figure exports, and `scripts/` holds non-figure save helpers today (`scripts/map_ids_domains.py:246 def save_ids_domains`, `scripts/benchmark_signal_enrichment.py:44 def save(path, value)`), so read literally the gate is unsatisfiable without deleting unrelated code, and read loosely it measures nothing.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas_codex/docs/plans/figure-scripts-use-the-shared-save-function.html:47",
+      "id": "reasoning-1",
+      "reason": "the option list is a mechanism guess that sends the builder at the wrong artifact \u2014 an interface shape rather than the figures \u2014 and it belongs in the node brief, not in the plan's chosen endpoint and anywhere it fits.",
+      "text": "\u00a72 fixes the shared function's interface surface (\"the export behaviours those scripts need (resolution, bounding box, output format, preview image, receipt and the declared size)\", plus a stated count of \"public definitions and options added to the plotting package\"), which names the function to extend and the options to widen instead of the figures and formats the scripts must produce; the scan at \u00a746 is satisfied only if the worker reproduces this guessed option list exactly.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+  "plan_fingerprint": "c15078ec61a70566ffab3ec12acb2b84aa5a6f6dea6bba2d0ed22eb3f2f61604",
+  "plan_slug": "figure-scripts-use-the-shared-save-function",
+  "plan_version": 1,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T223255758636-plan-review-of-figure-scripts-use-the-shared-save-function",
+  "reviewed_blob_sha": "c8cacd6cbb5cd79552075776f0c4066f13bd223c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/plotting/`, `scripts/`, `docs/`, `tests/plotting/` all exist in the tree, and the `#s1` href resolves as a same-document anchor.",
+    "done_when": "a finding \u2014 \u00a71 docs/plans/figure-scripts-use-the-shared-save-function.html:43 declares the signal-plot legend one row \"for up to six traces\" but its only legend measure is a four-trace plot, so the declared boundary is untested and a fix capped at four passes.",
+    "evidence_paths": "pass \u2014 both done-whens put their measures in the repository's plotting test directory and a landing record, not a node-local scratch path.",
+    "naming": "pass \u2014 the changed units introduce no plan label, ticket or stage name into a symbol; `imas_codex/plotting/` and `scripts/` remain named by their real paths.",
+    "reasoning": "pass on the two root causes (the SVG export declares 31.1 cm width while its height tracks the figure's own height, `imas_codex/plotting/style.py:41-80`; the signal plot sets `ncol=min(3, len(axis.lines))`, `imas_codex/plotting/signals.py:217`, so four entries make two rows) and on the counts (three scripts define `check_layout`, `figures_mapping_flow.py:29` imports one; 13 docs scripts carry one) \u2014 with the exception that \u00a72 prescribes the export interface rather than the figures it must produce, recorded as a finding.",
+    "single_goal": "pass \u2014 \u00a71 still carries two deliverables (export aspect ratio and signal-plot legend layout), but both are now measured by the one gate, so the earlier concern that the gate proved only one of them no longer holds.",
+    "wiring": "pass \u2014 `plan-section-depends-on` carries `s2 -> figure-scripts-use-the-shared-save-function#s1`, which resolves to the `id=\"s1\"` section of this plan, and no other dependency is reachable from either section."
+  },
+  "section_digests": {
+    "_document": "4dea64427d72247ec7267de4bc6f56d85c0ade04effc8f525bbda5516b514f60",
+    "s1": "b819e09e080e1ec910605c5672148c4d579558c401eb79a7f3f07826cd76e83c",
+    "s2": "2c7e3c5c768b1b2fb40fcaed5b562bfa2937fe68811f28df3614160dc9b29061"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:56:04.124952+00:00",
+  "total": null
+}
