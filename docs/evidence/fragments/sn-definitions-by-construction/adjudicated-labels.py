@@ -704,7 +704,6 @@ def mode_report(args) -> None:
     reached = adjudicated["reached"]
     disputes = adjudicated["disputes"]
     never_read = adjudicated["never_read_again"]
-    controls_read = adjudicated["agreement_controls"]
     outcomes = adjudicated["dispute_outcomes"]
     total = adjudicated["names"]
     flagged_to_stands = len(adjudicated["flagged_to_stands"])
