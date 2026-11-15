@@ -88,6 +88,24 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync python /home/ITER/mcintos/.cache/imas-codex-codac-uda/mapping-evidence-gate.py",
+    "integrated_revision": "8e28a816b007a3317cd3e8632eb7a959abb92b4c",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261115T083906611033-variable-name-mapping-sources/review-landing/gate-8e28a816b007a3317cd3e8632eb7a959abb92b4c.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'env UV_PROJECT_ENVIRONMENT=./.venv uv run --no-sync python /home/ITER/mcintos/.cache/imas-codex-codac-uda/mapping-evidence-gate.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/imas-codex"
+    ]
+  },
   "lane": "codex",
   "lane_advisory": {
     "backend": "codex",
