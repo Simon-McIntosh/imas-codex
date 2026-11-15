@@ -291,6 +291,20 @@ def test_metadata_field_counter_distinguishes_present_zero_and_absent_unit(tmp_p
     known = available("DEMO:KNOWN") | {
         "unit": {"value": "K"},
         "archive_lower_display_limit": 0,
+        "first_sample_ns": 123,
+        "last_sample_ns": 456,
+        "sampling_mode": "event",
+        "sampling_evidence": "archive fixture",
+        "structure_fields": [{"name": "val", "type": "DOUBLE"}],
+        "data_type": "DOUBLE",
+        "description": {"value": "Fixture archive description"},
+        "archive_labels": ["Enabled"],
+        "archive_format": "%.2f",
+        "archive_upper_display_limit": 100,
+        "archive_lower_alarm_limit": 1,
+        "archive_upper_alarm_limit": 99,
+        "archive_lower_warning_limit": 2,
+        "archive_upper_warning_limit": 98,
     }
     store.save_batch(
         "slow",
@@ -306,7 +320,11 @@ def test_metadata_field_counter_distinguishes_present_zero_and_absent_unit(tmp_p
     coverage = store.summary()["metadata_fields"]
     assert coverage["unit"] == coverage["archive_lower_display_limit"] == 1
     assert coverage["archive_metadata"] == 2
-    assert coverage["last_sample_ns"] == 0
+    assert all(
+        value == 1
+        for field, value in coverage.items()
+        if field not in {"archive_metadata", "metadata_interfaces"}
+    )
     store.close()
 
 
@@ -397,3 +415,36 @@ def test_separate_population_audit_reads_only_and_requires_positive_control(
         and json.loads((tmp_path / "before.json").read_text()) == receipt
     )
     assert all(call.args[0].startswith("MATCH") for call in graph.query.call_args_list)
+
+
+def test_cleanup_failure_cannot_publish_a_complete_job_receipt(tmp_path):
+    from types import SimpleNamespace
+
+    store_path = tmp_path / "cleanup.sqlite"
+    store = ArchiveCatalogue(store_path)
+    store.seed({"slow": ["DEMO:TEMP"]}, timestamp="fixture")
+    store.close()
+
+    class Readers:
+        settings = SimpleNamespace(readable_roles=["slow"])
+
+        def __init__(self, config):
+            pass
+
+        def fetch(self, role, names, cached):
+            return {"entries": [available(name) for name in names]}
+
+        def close(self):
+            raise RuntimeError("fixture reader cleanup failed")
+
+    receipt = tmp_path / "receipt.json"
+    with pytest.raises(RuntimeError, match="reader cleanup failed"):
+        run_scan(
+            store_path=store_path,
+            config={},
+            receipt_path=receipt,
+            reader_factory=Readers,
+        )
+    result = json.loads(receipt.read_text())
+    assert result["status"] == "failed"
+    assert result["error"] == "fixture reader cleanup failed"

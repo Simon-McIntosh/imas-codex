@@ -139,7 +139,10 @@ class MetadataReaders:
     def _close(session: dict) -> None:
         process = session["process"]
         if process.stdin and not process.stdin.closed:
-            process.stdin.close()
+            try:
+                process.stdin.close()
+            except BrokenPipeError:
+                pass  # The child closed its input; still reap it and read its status.
         try:
             process.wait(timeout=10)
         except subprocess.TimeoutExpired:
@@ -156,10 +159,22 @@ class MetadataReaders:
                 process.wait(timeout=10)
         if process.stdout:
             process.stdout.close()
+        if process.returncode:
+            raise RuntimeError(
+                f"metadata reader exited with status {process.returncode}"
+            )
 
     def close(self) -> None:
+        errors = []
         for session in self.sessions:
-            self._close(session)
+            try:
+                self._close(session)
+            except Exception as exc:
+                errors.append(exc)
+        if errors:
+            raise RuntimeError(
+                "metadata reader cleanup failed: " + str(errors[0])
+            ) from errors[0]
 
 
 def run_scan(
@@ -246,19 +261,28 @@ def run_scan(
         receipt.update(status="failed", error_type=type(exc).__name__, error=str(exc))
         raise
     finally:
-        try:
-            if readers is not None:
-                readers.close()
-        finally:
-            if store is not None:
-                store.close()
-            if lease is not None:
-                lease.close()
-            receipt.update(
-                elapsed_seconds=time.monotonic() - started,
-                completed_at=datetime.now(UTC).isoformat(),
-            )
-            write_receipt(receipt_path, receipt)
+        cleanup_errors = []
+        for resource in (readers, store, lease):
+            if resource is not None:
+                try:
+                    resource.close()
+                except Exception as exc:
+                    cleanup_errors.append(exc)
+        if cleanup_errors:
+            receipt["cleanup_errors"] = [str(exc) for exc in cleanup_errors]
+            if receipt["status"] != "failed":
+                receipt.update(
+                    status="failed",
+                    error_type=type(cleanup_errors[0]).__name__,
+                    error=str(cleanup_errors[0]),
+                )
+        receipt.update(
+            elapsed_seconds=time.monotonic() - started,
+            completed_at=datetime.now(UTC).isoformat(),
+        )
+        write_receipt(receipt_path, receipt)
+        if cleanup_errors and sys.exc_info()[0] is None:
+            raise cleanup_errors[0]
     return receipt
 
 
