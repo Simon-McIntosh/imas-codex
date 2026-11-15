@@ -1767,22 +1767,36 @@ async def run_sn_pools(
     import os
 
     from imas_codex.discovery.base.llm import _supports_cache_control
-    from imas_codex.settings import get_model
+    from imas_codex.settings import (
+        _LOCAL_ENDPOINT_PREFIXES,
+        get_model,
+        get_model_endpoint,
+    )
 
-    _a3_model = compose_model or get_model("sn-compose")
-    _a3_cache = _supports_cache_control(_a3_model)
-    _a3_or_key = os.environ.get("OPENROUTER_API_KEY_STANDARD_NAMES") or ""
-    _a3_or_key_src = "OPENROUTER_API_KEY_STANDARD_NAMES"
-    if not _a3_or_key:
-        _a3_or_key = os.environ.get("OPENROUTER_API_KEY_IMAS_CODEX") or ""
-        _a3_or_key_src = "OPENROUTER_API_KEY_IMAS_CODEX"
-    _a3_route = "direct" if (_a3_cache and _a3_or_key) else "proxy"
+    route_model = compose_model or get_model("sn-compose")
+    supports_prompt_cache = _supports_cache_control(route_model)
+    endpoint = get_model_endpoint(route_model)
+    if endpoint:
+        compose_route = "local"
+        credential_source = endpoint.get("api_key_env") or "NONE"
+    elif route_model.startswith(_LOCAL_ENDPOINT_PREFIXES):
+        compose_route = "unresolved"
+        credential_source = "NONE"
+    else:
+        compose_route = "openrouter"
+        credential_source = (
+            "OPENROUTER_API_KEY_STANDARD_NAMES"
+            if os.environ.get("OPENROUTER_API_KEY_STANDARD_NAMES")
+            else "OPENROUTER_API_KEY_IMAS_CODEX"
+        )
+    if not os.environ.get(credential_source):
+        credential_source = "NONE"
     logger.info(
         "run_sn_pools: model=%s supports_cache=%s route=%s api_key_source=%s",
-        _a3_model,
-        _a3_cache,
-        _a3_route,
-        _a3_or_key_src if _a3_or_key else "NONE",
+        route_model,
+        supports_prompt_cache,
+        compose_route,
+        credential_source,
     )
 
     primary_error: BaseException | None = None
@@ -2573,10 +2587,10 @@ async def run_sn_pools(
                 spent,
                 mean_cost,
             )
-            if processed > 0 and mean_cost == 0.0 and _a3_route == "direct":
+            if processed > 0 and mean_cost == 0.0 and compose_route == "openrouter":
                 logger.warning(
                     "run_sn_pools: pool=%s has %d processed items but mean_cost=0 "
-                    "with expected route='direct' — cost tracking may be broken",
+                    "with expected route='openrouter' — cost tracking may be broken",
                     pool_name,
                     processed,
                 )

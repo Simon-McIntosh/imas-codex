@@ -182,3 +182,110 @@ class TestLlmHealthCheckWithDecisions:
         assert detail.startswith("score (")
         # The decisions route is not probed once the score seat is down.
         assert mock_urlopen.call_count == 1
+
+
+@pytest.mark.parametrize(
+    "model,expected_url",
+    [
+        ("openrouter/example/chat", "https://openrouter.ai/api/v1/key"),
+        ("typesafe/example-decision", "https://decisions.example.test/api/v1/key"),
+    ],
+)
+def test_seat_health_uses_its_own_origin(model, expected_url, monkeypatch):
+    from imas_codex.discovery.base import llm, services
+
+    monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "test-key")
+    monkeypatch.setattr(
+        llm, "DECISIONS_ENDPOINT", "https://decisions.example.test/api/alpha/decisions"
+    )
+    with (
+        patch(
+            "imas_codex.settings.get_model_config",
+            return_value={"model": model, "api_base": None},
+        ),
+        patch("urllib.request.urlopen", return_value=MagicMock()) as send,
+    ):
+        assert services.llm_health_check("discovery-score")[0]
+    assert send.call_count == 1
+    assert send.call_args.args[0].full_url == expected_url
+
+
+@pytest.mark.parametrize(
+    "model", ["openrouter/example/chat", "typesafe/example-decision"]
+)
+def test_shared_provider_is_probed_once_per_poll(model, monkeypatch):
+    from imas_codex.discovery.base.services import llm_health_check_with_decisions
+
+    monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "test-key")
+    with (
+        patch(
+            "imas_codex.settings.get_model_config",
+            return_value={"model": model, "api_base": None},
+        ),
+        patch("urllib.request.urlopen", return_value=MagicMock()) as send,
+    ):
+        assert llm_health_check_with_decisions("discovery-score")[0]
+    assert send.call_count == 1
+    assert send.call_args.args[0].full_url == "https://openrouter.ai/api/v1/key"
+
+
+def test_distinct_provider_origins_each_get_one_probe(monkeypatch):
+    from imas_codex.discovery.base import llm, services
+
+    monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "test-key")
+    monkeypatch.setattr(
+        llm, "DECISIONS_ENDPOINT", "https://decisions.example.test/api/alpha/decisions"
+    )
+    with (
+        patch(
+            "imas_codex.settings.get_model_config",
+            return_value={"model": "openrouter/example/chat", "api_base": None},
+        ),
+        patch("urllib.request.urlopen", return_value=MagicMock()) as send,
+    ):
+        assert services.llm_health_check_with_decisions("discovery-score")[0]
+    assert [call.args[0].full_url for call in send.call_args_list] == [
+        "https://openrouter.ai/api/v1/key",
+        "https://decisions.example.test/api/v1/key",
+    ]
+
+
+def test_local_router_and_provider_each_get_one_probe(monkeypatch):
+    from imas_codex.discovery.base.services import llm_health_check_with_decisions
+
+    monkeypatch.setenv("OPENROUTER_API_KEY_FACILITY_DISCOVERY", "test-key")
+    reply = MagicMock()
+    reply.__enter__.return_value.read.return_value = b'{"data":[{"id":"model"}]}'
+    with (
+        patch(
+            "imas_codex.settings.get_model_config",
+            return_value={
+                "model": "local/example",
+                "api_base": "http://router.test/v1",
+            },
+        ),
+        patch("urllib.request.urlopen", return_value=reply) as send,
+    ):
+        assert llm_health_check_with_decisions("discovery-score")[0]
+    assert [call.args[0].full_url for call in send.call_args_list] == [
+        "http://router.test/v1/models",
+        "https://openrouter.ai/api/v1/key",
+    ]
+
+
+def test_provider_health_uses_the_requested_service_key(monkeypatch):
+    from imas_codex.discovery.base.services import llm_health_check_with_decisions
+
+    monkeypatch.setenv("OPENROUTER_API_KEY_STANDARD_NAMES", "test-service-key")
+    with (
+        patch(
+            "imas_codex.settings.get_model_config",
+            return_value={"model": "openrouter/example/chat", "api_base": None},
+        ),
+        patch("urllib.request.urlopen", return_value=MagicMock()) as send,
+    ):
+        assert llm_health_check_with_decisions("sn-docs", service="standard-names")[0]
+    assert send.call_count == 1
+    assert (
+        send.call_args.args[0].get_header("Authorization") == "Bearer test-service-key"
+    )

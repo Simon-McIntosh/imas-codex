@@ -191,13 +191,6 @@ class TestModuleLevelConstants:
         assert isinstance(settings.EMBEDDING_DIMENSION, int)
 
 
-def test_free_local_endpoint_requires_explicit_trusted_classification():
-    assert settings.is_explicit_free_local_endpoint("local/deepseek-v4.1-flash")
-    assert not settings.is_explicit_free_local_endpoint(
-        "openrouter/openai/gpt-5.6-luna"
-    )
-
-
 def test_checked_in_pricing_zeroes_uncharged_dimensions_and_stays_inactive():
     """An undeclared per-request or per-image charge prices at zero.
 
@@ -390,7 +383,6 @@ class TestDiscoveryFunctionSeats:
             assert endpoint is not None, f"{seat} registered no endpoint"
             assert endpoint["api_base"] == route_api_base
             assert endpoint["endpoint_class"] == "local-free"
-            assert settings.is_explicit_free_local_endpoint(model)
 
     def test_provider_override_leaves_the_local_route(self, monkeypatch):
         """A seat moved to another provider drops its local route, key and class.
@@ -415,7 +407,6 @@ class TestDiscoveryFunctionSeats:
 
         settings.register_model_endpoints()
         assert settings.get_model_endpoint(moved) is None
-        assert not settings.is_explicit_free_local_endpoint(moved)
 
         source = settings.resolve_model_source("section:ids-mapping")
         assert source.api_base is None

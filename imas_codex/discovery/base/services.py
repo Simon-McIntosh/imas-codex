@@ -292,14 +292,20 @@ def embed_health_check() -> tuple[bool, str]:
         return False, str(e)[:100]
 
 
-def llm_health_check(section: str) -> tuple[bool, str]:
+def llm_health_check(
+    section: str, service: str = "facility-discovery"
+) -> tuple[bool, str]:
     """Probe the endpoint a seat calls without generating model tokens."""
     from imas_codex.settings import get_model_config
 
     config = get_model_config(section)
     if config["api_base"]:
         return _probe_local_endpoint_models(section)
-    return decisions_health_check()
+    return _probe_provider_key(
+        _provider_key_url(decisions=config["model"].startswith("typesafe/")),
+        service,
+        10,
+    )
 
 
 def _probe_local_endpoint_models(section: str) -> tuple[bool, str]:
@@ -348,38 +354,40 @@ def decisions_health_check(
     service: str = "facility-discovery",
     timeout: int = 10,
 ) -> tuple[bool, str]:
-    """Cheap reachability probe of the decisions route a seat calls.
+    """Check credentials on the decisions endpoint's origin without a decision."""
+    return _probe_provider_key(_provider_key_url(decisions=True), service, timeout)
 
-    The code-relevance pipeline calls the OpenRouter decisions endpoint
-    directly, with the credential named by ``service``. Chat models use the
-    same provider credentials. This sends one authenticated
-    ``GET`` to the key-info endpoint on the decisions route's own origin: it
-    carries no model, state or questions, so the decisions endpoint is never
-    asked to judge anything and no decision is billed.
 
-    Returns:
-        (healthy, detail) tuple where detail names the route host on success
-        and the refusal on failure (``endpoint refused``, ``auth refused
-        (401)``, ``endpoint timeout``, ...).
+def _provider_key_url(*, decisions: bool) -> str:
+    """Resolve the credential probe on the selected provider route's origin."""
+    from urllib.parse import urlsplit
+
+    from imas_codex.discovery.base.llm import DECISIONS_ENDPOINT
+
+    endpoint = DECISIONS_ENDPOINT if decisions else "https://openrouter.ai/api/v1"
+    origin = urlsplit(endpoint)
+    return f"{origin.scheme}://{origin.netloc}/api/v1/key"
+
+
+def _probe_provider_key(probe_url: str, service: str, timeout: int) -> tuple[bool, str]:
+    """Check provider reachability and credentials without generating tokens.
+
+    Chat and decisions requests to the same origin use the same service key.
+    This probe checks that shared credential, not whether a particular model
+    can generate a reply; live completion tests verify the latter separately.
     """
     import urllib.error
     import urllib.parse
     import urllib.request
 
-    from imas_codex.discovery.base.llm import (
-        DECISIONS_ENDPOINT,
-        _service_headers,
-        get_api_key_for_service,
-    )
+    from imas_codex.discovery.base.llm import _service_headers, get_api_key_for_service
 
     try:
         api_key = get_api_key_for_service(service)
     except Exception as e:  # noqa: BLE001 - a missing credential is a failure
         return False, f"no key: {str(e)[:60]}"
 
-    origin = urllib.parse.urlsplit(DECISIONS_ENDPOINT)
-    probe_url = f"{origin.scheme}://{origin.netloc}/api/v1/key"
-    label = origin.netloc or DECISIONS_ENDPOINT
+    label = urllib.parse.urlsplit(probe_url).netloc
     request_headers = {
         "Authorization": "Bearer " + api_key,
         **_service_headers(service),
@@ -414,15 +422,27 @@ def llm_health_check_with_decisions(
     scores files (``section``) and the OpenRouter decisions route the relevance
     seat calls. The panel's ``llm`` row is up only when both answer, so this
     reports the chat seat's own result when it fails, the decisions route's
-    when that fails, and the seat's detail when both succeed.
+    when that fails, and the seat's detail when both succeed. When both use
+    the same provider origin and service key, one credential probe covers
+    both; distinct origins each receive their own probe.
 
     Args:
         section: Chat model section to check (e.g. discovery-score).
         service: Service tag whose credential the decisions route needs.
     """
-    healthy, seat_detail = llm_health_check(section)
+    from imas_codex.settings import get_model_config
+
+    healthy, seat_detail = llm_health_check(section, service=service)
     if not healthy:
         return False, f"score ({seat_detail})"
+
+    config = get_model_config(section)
+    if not config["api_base"] and _provider_key_url(
+        decisions=config["model"].startswith("typesafe/")
+    ) == _provider_key_url(decisions=True):
+        # Both calls share an origin and service credential, so one check
+        # proves the reachability/authentication condition for both routes.
+        return True, seat_detail
 
     healthy, decisions_detail = decisions_health_check(service)
     if not healthy:

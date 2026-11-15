@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import json
 from urllib.parse import urlparse
 
 import httpx
@@ -41,14 +42,20 @@ def test_every_declared_seat_resolves_to_its_endpoint(seat, model, monkeypatch):
         assert not config.get("api_base"), seat
         received = []
 
-        def send(headers, body, timeout):
-            received.append(body)
-            return httpx.Response(200, json={"answers": {}, "usage": {"cost": 0}})
+        def send(client, request, **kwargs):
+            received.append((str(request.url), json.loads(request.content)))
+            return httpx.Response(
+                200, json={"answers": {}, "usage": {"cost": 0}}, request=request
+            )
 
-        monkeypatch.setattr(llm, "_post_decisions", send)
+        monkeypatch.setattr(httpx.Client, "send", send)
         llm.call_decisions(model, {}, {}, service="seat-routing", max_retries=1)
-        assert received == [{"model": model, "state": {}, "questions": {}}]
-        assert llm.DECISIONS_ENDPOINT == "https://openrouter.ai/api/alpha/decisions"
+        assert received == [
+            (
+                "https://openrouter.ai/api/alpha/decisions",
+                {"model": model, "state": {}, "questions": {}},
+            )
+        ], seat
         return
 
     request = llm._build_kwargs(

@@ -2,8 +2,8 @@
 
 Generates human-readable labels, descriptions, and enrichment metadata
 for clusters using controlled vocabularies from LinkML schemas.
-Routes through the canonical ``call_llm`` infrastructure so that LiteLLM
-proxy routing, retry logic, and cost tracking are shared with all other
+Routes through the canonical ``call_llm`` infrastructure so that endpoint
+resolution, retry logic, and cost tracking are shared with all other
 LLM consumers.
 
 Prompts are rendered via the shared Jinja2 template system in
@@ -69,7 +69,7 @@ class ClusterLabeler:
     """Generates labels, descriptions, and enrichment metadata for clusters.
 
     Uses ``call_llm`` from ``discovery.base.llm`` for all LLM calls,
-    inheriting LiteLLM proxy routing, retry logic, and cost tracking.
+    sharing endpoint resolution, retry logic, and cost tracking.
 
     Controlled vocabularies are injected into the prompt via Jinja2 templates
     from ``imas_codex/llm/prompts/clusters/labeler.md``.  Validation of

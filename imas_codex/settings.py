@@ -297,7 +297,7 @@ def get_model(section: str) -> str:
 
 def _validate_model_identifier(model: str, owner: str) -> None:
     """Refuse a seat whose model does not identify a supported route."""
-    prefixes = ("openrouter/", "typesafe/", "local/", "hosted_vllm/", "ollama/")
+    prefixes = ("openrouter/", "typesafe/", *_LOCAL_ENDPOINT_PREFIXES)
     if not isinstance(model, str) or not any(
         model.startswith(prefix) and model.removeprefix(prefix).strip()
         for prefix in prefixes
@@ -468,16 +468,6 @@ def get_model_endpoint(model: str) -> dict[str, str | None] | None:
     (i.e. it should use the direct OpenRouter routing).
     """
     return _MODEL_ENDPOINTS.get(model)
-
-
-def is_explicit_free_local_endpoint(model: str) -> bool:
-    """Return whether trusted config explicitly marks a local model as free."""
-    endpoint = get_model_endpoint(model)
-    return bool(
-        model.startswith(_LOCAL_ENDPOINT_PREFIXES)
-        and endpoint
-        and endpoint.get("endpoint_class") == "local-free"
-    )
 
 
 @dataclass(frozen=True, slots=True)

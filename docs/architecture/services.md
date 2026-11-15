@@ -1,6 +1,6 @@
 # Service Management
 
-IMAS Codex runs three independent services that can be started, stopped, and
+IMAS Codex manages two independent services that can be started, stopped, and
 scaled independently. Each service has its own CLI group with a unified
 `start` command that auto-detects the deployment mode.
 
@@ -10,7 +10,6 @@ scaled independently. Each service has its own CLI group with a unified
 |---------|-----|-----------|-----------|---------|
 | **Neo4j** | `imas-codex graph` | SLURM (compute) | 4 CPUs, 32 GB, no GPU | Knowledge graph database |
 | **Embed** | `imas-codex embed` | SLURM (compute) | 2 CPUs, 16 GB, N GPUs | GPU-accelerated embedding |
-| **LLM Proxy** | `imas-codex llm` | systemd (login) | CPU only, ~50 MB | LiteLLM routing + Langfuse tracking |
 
 ## Quick Start
 
@@ -18,7 +17,6 @@ scaled independently. Each service has its own CLI group with a unified
 # Start all services
 imas-codex graph start           # Neo4j on SLURM
 imas-codex embed start           # Embed server on SLURM (4 GPUs default)
-imas-codex llm start             # LLM proxy on login node
 
 # Check status
 imas-codex graph status          # Neo4j health + SLURM resource usage
@@ -27,7 +25,6 @@ imas-codex embed status          # Embed health + GPU info
 # Stop all
 imas-codex embed stop
 imas-codex graph stop
-imas-codex llm stop
 ```
 
 ## Deployment Architecture
@@ -84,18 +81,20 @@ Inside the SLURM batch script, the process is the last command (`exec`),
 so SLURM manages it directly — `scancel` stops it, cgroup enforcement
 is automatic.
 
-### Systemd Services (LLM Proxy)
+### Language-model endpoints
 
-The LLM proxy runs on the login node (needs outbound HTTPS for API
-providers). `start` installs and starts a systemd user service:
+Language-model seats call their serving endpoints directly: the configured
+local model router, OpenRouter chat completions, or the provider decisions
+endpoint. The local router's lifecycle belongs to its hosting service, and
+external providers manage their own availability. This CLI manages graph and
+embedding services; model selection and credentials live in the per-seat
+configuration.
 
-```
-User: imas-codex llm start
-  → installs ~/.config/systemd/user/imas-codex-llm.service (if needed)
-  → systemctl --user start imas-codex-llm
-  → _wait_for_health("LLM proxy", ...)  ← rich spinner
-  → ✓ LLM proxy healthy
-```
+Discovery health checks query a local seat's models listing or the provider's
+key-info endpoint without generating tokens. Chat and decisions calls sharing
+an origin and service credential share one key-info probe per poll. A healthy
+key-info response establishes reachability and authentication, while the
+opt-in live tests prove that a model actually answers.
 
 ### Foreground Mode
 
@@ -105,8 +104,6 @@ Use `--foreground` / `-f` to run a service directly in the terminal
 ```bash
 imas-codex embed start -f                    # Run embed server directly
 imas-codex embed start -f --gpu 1            # On specific GPU
-imas-codex llm start -f                      # Run LLM proxy directly
-imas-codex llm start -f --port 19000         # Custom port
 ```
 
 When `SLURM_JOB_ID` is set (i.e., already inside a batch script), the
@@ -176,7 +173,6 @@ Server (http://98dci4-gpu-0002.iter.org:18765):
 imas-codex embed logs            # Last 50 lines
 imas-codex embed logs -f         # Follow live
 imas-codex embed logs -n 100     # Last 100 lines
-imas-codex llm logs              # LLM proxy logs
 ```
 
 ## Systemd Service Management
@@ -189,10 +185,6 @@ imas-codex embed service install
 imas-codex embed service start
 imas-codex embed service status
 
-# LLM proxy
-imas-codex llm service install
-imas-codex llm service start
-imas-codex llm service status
 ```
 
 ## Troubleshooting
@@ -204,11 +196,14 @@ imas-codex llm service status
 3. **Script errors**: `cat ~/.local/share/imas-codex/services/codex-embed.log`
 4. **Health check**: `curl http://<compute-node>:18765/health`
 
-### LLM proxy won't start
+### Model endpoint is unavailable
 
-1. **Missing API key**: Ensure `OPENROUTER_API_KEY` is in `.env`
-2. **Service logs**: `imas-codex llm logs`
-3. **Manual test**: `imas-codex llm start -f` to see errors directly
+1. Resolve the seat with `get_model_config()` to identify its serving endpoint.
+2. For a local seat, check the hosting router and the key named by `api-key-env`.
+3. For an OpenRouter seat, check its service-specific `OPENROUTER_API_KEY_<SERVICE>`
+   or the fallback `OPENROUTER_API_KEY_IMAS_CODEX` credential.
+4. Use the opt-in live seat tests for completion-level verification; they can
+   incur provider charges.
 
 ### Neo4j won't start
 
@@ -226,7 +221,6 @@ facility with a non-zero index in `locations` is offset by that index.
 | Neo4j Bolt | 7687 |
 | Neo4j HTTP | 7474 |
 | Embed | 18765 |
-| LLM Proxy | 18400 |
 
 ### Rich output disabled
 
