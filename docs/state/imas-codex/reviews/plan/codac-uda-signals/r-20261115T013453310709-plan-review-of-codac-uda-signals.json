@@ -89,6 +89,16 @@
       "note": "Section 9's heading now reads that every consumer is listed and each rename decision has a recommendation, matching its done-when.",
       "reason": "",
       "when": "2026-11-15T02:03:52.109898+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "caa852cef909868a7f07b6f8e345a7466b38d398",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The structural sentence is removed from section 5's Delivers; the endpoint stays in the done-when, which requires the validity check and the loader to agree on samples and error classification for an identical request.",
+      "reason": "",
+      "when": "2026-11-15T02:04:02.093773+00:00"
     }
   ],
   "responses": {
@@ -109,6 +119,15 @@
       "note": "Section 9's heading now reads that every consumer is listed and each rename decision has a recommendation, matching its done-when.",
       "reason": "",
       "when": "2026-11-15T02:03:52.109898+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "caa852cef909868a7f07b6f8e345a7466b38d398",
+      "commit_basis": "edit",
+      "note": "The structural sentence is removed from section 5's Delivers; the endpoint stays in the done-when, which requires the validity check and the loader to agree on samples and error classification for an identical request.",
+      "reason": "",
+      "when": "2026-11-15T02:04:02.093773+00:00"
     },
     "single_goal-1": {
       "action": "acted",
