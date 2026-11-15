@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T07:22:26.084Z",
+  "dispatched_at": "2026-11-15T07:09:22Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/review/pipeline.py",
+      "line": 316,
+      "severity": "non-blocking",
+      "text": "extract_review_worker's _load_all_names still projects sn.source_paths, so the production review pipeline (imported at imas_codex/cli/sn.py:6689) remains a reader that answers from the copied list; its source_paths feeds the DD-documentation fetch at pipeline.py:767/878/956 and review_input_hash at pipeline.py:343, so the goal's \"every reader\" is still unmet for one live reader, and the repair of the previous review's cli loader stopped at the file that finding named."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json",
+      "line": 2,
+      "severity": "non-blocking",
+      "text": "the artifact records \"command\": \"imas-codex sn sourceless --json\", but its key set (counted, live_names_total, live_names_with_producer, exempt_entries, rule) appears in no revision of imas_codex/standard_names/source_reads.py or the CLI command in this range (the report returns count, names, exempt_derived_parents, bare_count, bare_names, differing_names), and no code in the tree writes this path, so section 7 cannot regenerate the population from the command the done_when names."
+    },
+    {
+      "file": "imas_codex/standard_names/source_reads.py",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "normalize_source_ids re-implements the deduplicated, deterministically sorted source-path list that imas_codex/standard_names/source_paths.py:192 merge_source_paths already owns for exactly these values, rather than extending that owner."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to make every reader of a name's sources agree with its producer edges; imas_codex/standard_names/source_reads.py:44-56 is the one place, and imas_codex/standard_names/search.py:552, imas_codex/standard_names/benchmark_roles.py:335,410,469, imas_codex/standard_names/judgment_goldens.py:303,687 and imas_codex/cli/sn.py:6667 now project the producer edges instead of the copied list, while imas_codex/standard_names/review/pipeline.py:316 still reads the copy for the production review engine.\nVERDICT done_when: every measurable part of the done_when is asserted and recorded \u2014 final-gate.log:1140 (8758 passed, 12 skipped, 0 failed, EXIT-FINAL-SUITE=0 at 39f0839c0), final-gate.log:1165 (3 planted-graph tests passed), negative-control.log (2 failed, EXIT-MUTATED-GRAPH=1), baseline-gate.log (8753 passed, 0 failed, EXIT=0), manifest.md:30-31 both arms completed with failure_count 0, and the planted-graph count asserted against literal expectations at tests/standard_names/test_source_reads.py:178-194.\nVERDICT write_paths: manifest.md:3 declares docs/evidence/fragments/sn-catalog-consistency/scc-sources-read-from-one-place.html and the docs/figures/... directory; 9 of the 11 changed paths lie outside that grant, disclosed in manifest.md:35 outside_scope.\nVERDICT manifest: read manifest.md; it states status complete, eight commits, the two retried failure ids and their repair at 048ff960b, both suite arms with zero failures, the negative-control log and its note, the measurement module and cwd, and the two readers it deliberately leaves out of scope.\nVERDICT diff: read all eight commits from e103e0ed8f129308a0ebd11d9ca9f4e8172c34be to 627f130454280df801a52c61af57cbcb4cde08b0 \u2014 11 files, 1875 insertions, 56 deletions \u2014 and confirmed each of the previous review's three findings is repaired in 39f0839c0: the predicates are imported from source_invariant.py rather than restated, imas_codex/cli/sn.py:6667 projects the edges, and the guard's exemption is the explicit FROZEN_EXTRACTION_RECORDS list with a test refusing an unlisted record constant.\nCALL_SITES: imas_codex/cli/sn.py:3929 (sn sourceless), imas_codex/cli/sn.py:3262, imas_codex/cli/sn.py:3268, imas_codex/cli/sn.py:3297, imas_codex/llm/sn_tools.py:21, imas_codex/llm/sn_tools.py:23, imas_codex/standard_names/export.py:3074, imas_codex/standard_names/attachment_audit.py:3004\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/pipeline.py:316 still projects sn.source_paths into the production review engine's catalog, so one live reader answers from the copy the goal exists to stop reading.\nSCORE evidence: 16\nJUSTIFICATION evidence: final-gate.log:1140 records 8758 passed and 0 failed at 39f0839c0 with a 8753/0 baseline arm, but the committed population artifact at docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json:2 names a command whose output shape no revision in the range produces.\nSCORE scope_discipline: 6\nJUSTIFICATION scope_discipline: manifest.md:3 grants two documentation paths while the diff writes imas_codex/standard_names/source_reads.py and seven other package and test paths, all disclosed in manifest.md:35 outside_scope.\nSCORE durability: 17\nJUSTIFICATION durability: negative-control.log shows tests/standard_names/test_source_reads.py:143-145 reddening when source_paths_projection is mutated to coalesce(sn.source_paths, []), and test_source_reads.py:178-194 compares the count against literal planted-graph expectations rather than against anything the test passed in, though no test reaches the CLI command's JSON output.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/standard_names/source_reads.py:27-56 composes source_invariant.py's clause fragments and names each helper by the mechanism it renders, while the landing figure docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-reader-agreement.svg carries an in-axes title the repository's plot style asks the caption to carry instead.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/standard_names/source_reads.py:48 re-implements the deduplicated sorted source-path list that imas_codex/standard_names/source_paths.py:192 merge_source_paths owns, though source_paths_projection at source_reads.py:31 and the count do compose source_invariant.py's exported predicates rather than restating them.\nFINDING imas_codex/standard_names/review/pipeline.py:316 non-blocking: extract_review_worker's _load_all_names still projects sn.source_paths, so the production review pipeline imported at imas_codex/cli/sn.py:6689 remains a reader of the copy, and its source_paths feeds both the DD-documentation fetch at pipeline.py:767 and the review_input_hash at pipeline.py:343.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json:2 non-blocking: the artifact records \"command\": \"imas-codex sn sourceless --json\", but its key set appears in no revision of the report function in this range and no code writes that path, so section 7 cannot regenerate the population from the command the done_when names.\nFINDING imas_codex/standard_names/source_reads.py:48 non-blocking: normalize_source_ids duplicates the deterministic dedup-and-sort capability that imas_codex/standard_names/source_paths.py:192 merge_source_paths already owns.\n",
+  "review_run_id": "r-20261115T070859675344-review-of-scc-sources-read-from-one-place-627f13045428",
+  "reviewed_base_sha": "e103e0ed8f129308a0ebd11d9ca9f4e8172c34be",
+  "reviewed_head_sha": "627f130454280df801a52c61af57cbcb4cde08b0",
+  "reviewed_run_id": "r-20261114T211624671239-scc-sources-read-from-one-place",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 6
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T07:23:12.574392+00:00",
+  "total": 75
+}
