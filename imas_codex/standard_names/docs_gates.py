@@ -829,6 +829,129 @@ def population_contradiction(name: str, text: str) -> str | None:
     return None
 
 
+# --------------------------------------------------------------- species families
+# A species family is the set of names that differ only in the species they
+# name, such as ``<X>_density`` with eighteen members. Each member's definition
+# states the family's one sentence with the species substituted, so the family
+# carries a single wording rather than one template per member. The grammar
+# library carries no sentence for a family yet, so the sentences are stored
+# here for a reviewer to read and change, and proposed upstream; the shared
+# parts of §2 are rendered from the same place.
+
+#: The species a family varies over, against the words its members' prose uses.
+SPECIES_FAMILY_WORDS: dict[str, str] = {
+    "helium_3": "helium-3",
+    "helium_4": "helium-4",
+    "deuterium_tritium": "deuterium-tritium",
+    "total_hydrogenic": "hydrogenic",
+    "deuterium": "deuterium",
+    "tritium": "tritium",
+    "helium": "helium",
+    "hydrogen": "hydrogen",
+    "lithium": "lithium",
+    "beryllium": "beryllium",
+    "boron": "boron",
+    "carbon": "carbon",
+    "nitrogen": "nitrogen",
+    "oxygen": "oxygen",
+    "neon": "neon",
+    "argon": "argon",
+    "krypton": "krypton",
+    "xenon": "xenon",
+    "iron": "iron",
+    "tungsten": "tungsten",
+}
+
+#: One stored sentence per species family, with ``<X>`` the only variable.
+#:
+#: A family whose members count a species density carries the ruled population
+#: statement as it was ruled. A family whose members count injected atoms names
+#: neutral atoms because that is the quantity it counts, not a density
+#: population, and states no charge-state sum.
+SPECIES_FAMILY_SENTENCES: dict[str, str] = {
+    "<X>_density": ("Number density of <X> ions. " + SPECIES_POPULATION_SENTENCE),
+    "<X>_density_at_divertor_target": (
+        "Number density of <X> ions at the divertor target. "
+        + SPECIES_POPULATION_SENTENCE
+    ),
+    "<X>_density_at_internal_transport_barrier": (
+        "Number density of <X> ions at the internal transport barrier. "
+        + SPECIES_POPULATION_SENTENCE
+    ),
+    "<X>_density_at_limiter": (
+        "Number density of <X> ions at the limiter. " + SPECIES_POPULATION_SENTENCE
+    ),
+    "<X>_density_at_magnetic_axis": (
+        "Number density of <X> ions at the magnetic axis. "
+        + SPECIES_POPULATION_SENTENCE
+    ),
+    "<X>_density_at_pedestal_top": (
+        "Number density of <X> ions at the pedestal top. " + SPECIES_POPULATION_SENTENCE
+    ),
+    "<X>_density_at_plasma_boundary": (
+        "Number density of <X> ions at the plasma boundary. "
+        + SPECIES_POPULATION_SENTENCE
+    ),
+    "<X>_prefill_count": (
+        "Equivalent-electron count of the neutral <X> atoms introduced as "
+        "prefill before plasma breakdown."
+    ),
+    "<X>_source_rate_due_to_gas_injection": (
+        "Equivalent-electron source rate of the neutral <X> atoms injected "
+        "to the vessel by gas injection."
+    ),
+    "accumulated_<X>_count": (
+        "Cumulative equivalent-electron count of the neutral <X> atoms "
+        "delivered to the vessel after plasma breakdown."
+    ),
+    "accumulated_<X>_count_due_to_gas_injection": (
+        "Cumulative equivalent-electron count of the neutral <X> atoms "
+        "delivered by gas injection after plasma breakdown."
+    ),
+    "accumulated_<X>_prefill_count": (
+        "Cumulative equivalent-electron count of the neutral <X> atoms "
+        "delivered as prefill before plasma breakdown."
+    ),
+    "accumulated_<X>_prefill_count_due_to_gas_injection": (
+        "Cumulative equivalent-electron count of the neutral <X> atoms "
+        "delivered by gas injection as prefill before plasma breakdown."
+    ),
+    "flux_surface_averaged_<X>_density_at_plasma_boundary": (
+        "Flux-surface-averaged number density of <X> ions at the plasma "
+        "boundary. " + SPECIES_POPULATION_SENTENCE
+    ),
+    "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary": (
+        "Flux-surface-averaged density-weighted toroidal velocity of <X> ions "
+        "at the plasma boundary."
+    ),
+    "line_averaged_<X>_density": (
+        "Line-averaged number density of <X> ions. " + SPECIES_POPULATION_SENTENCE
+    ),
+    "volume_averaged_<X>_density": (
+        "Volume-averaged number density of <X> ions. " + SPECIES_POPULATION_SENTENCE
+    ),
+    "ratio_of_<X>_density_to_electron_density": (
+        "Ratio of the <X> ion number density to the electron number density. "
+        + SPECIES_POPULATION_SENTENCE
+    ),
+    "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density": (
+        "Ratio of the volume-averaged <X> ion number density to the "
+        "volume-averaged electron number density. " + SPECIES_POPULATION_SENTENCE
+    ),
+    "toroidal_<X>_velocity_at_internal_transport_barrier": (
+        "Density-weighted toroidal velocity of <X> ions at the internal "
+        "transport barrier."
+    ),
+    "toroidal_<X>_velocity_at_magnetic_axis": (
+        "Density-weighted toroidal velocity of <X> ions at the magnetic axis."
+    ),
+    "toroidal_<X>_velocity_at_pedestal_top": (
+        "Density-weighted toroidal velocity of <X> ions at the pedestal top."
+    ),
+    "toroidal_<X>_velocity_at_plasma_boundary": (
+        "Density-weighted toroidal velocity of <X> ions at the plasma boundary."
+    ),
+}
 _OPERATOR_TOKENS: frozenset[str] | None = None
 
 # Two sentences whose word sets agree this closely state the same shared part,
@@ -908,8 +1031,70 @@ def is_species_density_name(name: str) -> bool:
     return subjects[0] not in single | aggregate
 
 
+# Longest species first, so ``helium_3`` is read before ``helium`` and
+# ``deuterium_tritium`` before ``deuterium``: the alternation is anchored to the
+# whole name, so a shorter token cannot match a longer species' prefix.
+_SPECIES_ALTERNATION = "|".join(
+    re.escape(token) for token in sorted(SPECIES_FAMILY_WORDS, key=len, reverse=True)
+)
+
+#: Each family key compiled once, with the species as the only variable.
+_SPECIES_GROUP = r"(?P<species>" + _SPECIES_ALTERNATION + r")"
+_SPECIES_FAMILY_PATTERNS: dict[str, re.Pattern[str]] = {
+    key: re.compile(
+        "^" + _SPECIES_GROUP.join(re.escape(part) for part in key.split("<X>")) + "$"
+    )
+    for key in SPECIES_FAMILY_SENTENCES
+}
+
+
+def species_family(name: str) -> tuple[str, str] | None:
+    """Return *name*'s family key and species words, or ``None``.
+
+    A family is read from the stored family keys rather than from the name's
+    qualifiers: ``total_hydrogenic`` reads as two qualifiers, and the family is
+    the set of names that differ only in the species they name.
+    """
+
+    for key, pattern in _SPECIES_FAMILY_PATTERNS.items():
+        match = pattern.match(name)
+        if match is not None:
+            return key, SPECIES_FAMILY_WORDS[match.group("species")]
+    return None
+
+
+def species_family_sentence(name: str) -> str | None:
+    """Render *name*'s family sentence, with the species substituted.
+
+    The stored sentence is the family's whole wording: only ``<X>`` is
+    substituted, so two members of one family render the same sentence apart
+    from the species. ``None`` means the name is not a stored family member.
+    """
+
+    family = species_family(name)
+    if family is None:
+        return None
+    key, words = family
+    return SPECIES_FAMILY_SENTENCES[key].replace("<X>", words)
+
+
+def species_family_description(name: str) -> str | None:
+    """The one wording a family states its members' description in.
+
+    The stored sentence may state the definition in more than one sentence; the
+    description is a one-line summary, so it is the stored sentence's first
+    sentence. Only the species varies, so the members of a family carry one
+    description per family apart from the species.
+    """
+
+    sentence = species_family_sentence(name)
+    if sentence is None:
+        return None
+    return sentence.split(". ", 1)[0].rstrip(".") + "."
+
+
 def shared_part_sentences(
-    name: str, conventions: AppliedConventions
+    name: str, conventions: AppliedConventions | None
 ) -> tuple[tuple[str, str], ...]:
     """Return the stored wording of each shared part *name* carries.
 
@@ -918,6 +1103,15 @@ def shared_part_sentences(
     """
 
     parts: list[tuple[str, str]] = []
+    family = species_family(name)
+    if family is not None:
+        parts.append(
+            (f"species_family:{family[0]}", species_family_sentence(name) or "")
+        )
+    if is_species_density_name(name):
+        parts.append(("population:species", SPECIES_POPULATION_SENTENCE))
+    if conventions is None:
+        return tuple(parts)
     operators = _operator_tokens()
     loci = _locus_registry_tokens()
     for concept in conventions.concepts:
@@ -929,8 +1123,6 @@ def shared_part_sentences(
             continue
         if sentence and sentence not in {text for _, text in parts}:
             parts.append((f"concept:{concept.token}", sentence))
-    if is_species_density_name(name):
-        parts.append(("population:species", SPECIES_POPULATION_SENTENCE))
     return tuple(parts)
 
 
@@ -943,8 +1135,19 @@ def fixed_shared_parts(
     every name carrying it states, and the equation where the part has one.
     """
 
+    parts: list[dict[str, str]] = []
+    family = species_family(name)
+    if family is not None:
+        parts.append(
+            {
+                "part": "species_family",
+                "anchor": f"species_family:{family[0]}",
+                "sentence": species_family_sentence(name) or "",
+                "equation": "",
+            }
+        )
     if not conventions:
-        return ()
+        return tuple(parts)
     if isinstance(conventions, dict):
         conventions = AppliedConventions.model_validate(conventions)
     equations = {
@@ -952,8 +1155,9 @@ def fixed_shared_parts(
         for concept in conventions.concepts
         if concept.equation
     }
-    parts: list[dict[str, str]] = []
     for anchor, sentence in shared_part_sentences(name, conventions):
+        if anchor.startswith("species_family:"):
+            continue
         token = anchor.split(":", 1)[1]
         part = {"part": "population" if anchor.startswith("population:") else anchor}
         parts.append(
@@ -968,8 +1172,17 @@ def fixed_shared_parts(
 
 
 def description_with_population(name: str, description: str) -> str:
-    """State the settled population in a species density's one-line description."""
+    """State a species name's one-line description in its stored wording.
 
+    A stored species family states one description, rendered from the family's
+    sentence with the species substituted, so the members of a family carry one
+    description apart from the species. Any other species density states the
+    settled population in the written description.
+    """
+
+    family_description = species_family_description(name)
+    if family_description is not None:
+        return family_description
     if not is_species_density_name(name):
         return description
     text = description.strip().rstrip(".")
@@ -1025,7 +1238,7 @@ def _prose_sentences(text: str) -> list[str]:
 
 def shared_part_findings(
     name: str,
-    conventions: AppliedConventions,
+    conventions: AppliedConventions | None,
     documentation: str,
     description: str = "",
 ) -> list[HouseStyleFinding]:
@@ -1136,9 +1349,9 @@ def refuse_altered_shared_parts(
     before it is persisted rather than published.
     """
 
-    if not conventions:
+    if not conventions and species_family(name) is None:
         return
-    applied = AppliedConventions.model_validate(conventions)
+    applied = AppliedConventions.model_validate(conventions) if conventions else None
     findings = shared_part_findings(
         name, applied, documentation, description=description
     )

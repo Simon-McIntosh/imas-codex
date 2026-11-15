@@ -67,7 +67,9 @@ def _roster_graph(disposable_neo4j_uri):
         graph.query("MATCH (sn:StandardName {test_roster_seed: true}) DETACH DELETE sn")
 
 
-def _documentation(equation: str, *, opening: str = _CANONICAL_OPENING) -> str:
+def _documentation(
+    equation: str, *, opening: str = _CANONICAL_OPENING, name: str = _ARGON
+) -> str:
     written = (
         f"{opening}\n\n"
         "The flux-surface average of the local argon number density.\n\n"
@@ -78,7 +80,7 @@ def _documentation(equation: str, *, opening: str = _CANONICAL_OPENING) -> str:
     # wording, because the renderer installs it verbatim. Build the canonical
     # fixture the same way rather than hand-writing a paraphrase.
     return replace_altered_shared_parts(
-        written, shared_part_sentences(_ARGON, select_conventions(_ARGON))
+        written, shared_part_sentences(name, select_conventions(name))
     )
 
 
@@ -92,7 +94,7 @@ def test_line_form_equation_is_a_forbidden_variant() -> None:
 
 def test_surface_form_equation_is_not_flagged() -> None:
     findings = conformance_findings(
-        _BERYLLIUM, documentation=_documentation(_SURFACE_FORM)
+        _BERYLLIUM, documentation=_documentation(_SURFACE_FORM, name=_BERYLLIUM)
     )
     assert HouseStyleFindingClass.FORBIDDEN_EQUATION_VARIANT not in {
         finding.finding_class for finding in findings
@@ -103,7 +105,7 @@ def test_separatrix_gloss_is_flagged_for_a_boundary_name() -> None:
     findings = conformance_findings(
         _BERYLLIUM,
         description="Beryllium density on the separatrix.",
-        documentation=_documentation(_SURFACE_FORM),
+        documentation=_documentation(_SURFACE_FORM, name=_BERYLLIUM),
     )
     assert HouseStyleFindingClass.FORBIDDEN_LOCUS_GLOSS in {
         finding.finding_class for finding in findings
@@ -111,7 +113,7 @@ def test_separatrix_gloss_is_flagged_for_a_boundary_name() -> None:
 
 
 def test_forbidden_symbol_spelling_is_flagged() -> None:
-    documentation = _documentation(_SURFACE_FORM).replace(
+    documentation = _documentation(_SURFACE_FORM, name=_ARGON).replace(
         "The flux-surface average of the local argon number density.",
         "The flux-surface average of the local argon density $N_s$.",
     )
@@ -122,7 +124,7 @@ def test_forbidden_symbol_spelling_is_flagged() -> None:
 
 
 def test_density_documentation_allows_rho_symbol() -> None:
-    documentation = _documentation(_SURFACE_FORM).replace(
+    documentation = _documentation(_SURFACE_FORM, name=_ARGON).replace(
         "The flux-surface average of the local argon number density.",
         r"The flux-surface average of the local argon density $\rho$.",
     )
@@ -162,7 +164,9 @@ def test_findings_name_their_registry_entry() -> None:
     assert findings
     for finding in findings:
         assert finding.finding_class in HouseStyleFindingClass
-        assert finding.registry_entry.startswith(("concept:", "notation:", "template:"))
+        assert finding.registry_entry.startswith(
+            ("concept:", "notation:", "template:", "species_family:")
+        )
 
 
 def test_audit_report_carries_the_conformance_findings() -> None:
@@ -170,7 +174,7 @@ def test_audit_report_carries_the_conformance_findings() -> None:
         {
             "id": _CARBON,
             "description": "Flux-surface-averaged carbon density.",
-            "documentation": _documentation(_LINE_FORM),
+            "documentation": _documentation(_LINE_FORM, name=_CARBON),
         }
     ]
     report = run_all_audits(names)
@@ -426,16 +430,21 @@ def test_sign_convention_gate_is_silent_when_the_paragraph_is_present() -> None:
 
 def test_fixture_census_counts_each_class_once() -> None:
     written = [
-        {"name": _CARBON, "documentation": _documentation(_LINE_FORM)},
+        {
+            "name": _CARBON,
+            "documentation": _documentation(_LINE_FORM, name=_CARBON),
+        },
         {
             "name": _BERYLLIUM,
             "description": "Beryllium density on the separatrix.",
-            "documentation": _documentation(_SURFACE_FORM),
+            "documentation": _documentation(_SURFACE_FORM, name=_BERYLLIUM),
         },
         {
             "name": _ARGON,
             "documentation": _documentation(
-                _SURFACE_FORM, opening="The argon density at the boundary."
+                _SURFACE_FORM,
+                opening="The argon density at the boundary.",
+                name=_ARGON,
             ),
         },
         {"name": _ARGON, "documentation": _documentation(_SURFACE_FORM)},

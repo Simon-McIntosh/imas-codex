@@ -620,7 +620,10 @@ def _documentation_with_registry_form(
 
     written = normalize_prose_spelling(documentation)
     if not conventions:
-        return written
+        written = replace_altered_shared_parts(
+            written, shared_part_sentences(name, None)
+        )
+        return open_without_fragment(written)
     applied = AppliedConventions.model_validate(conventions)
     opening, notes = _instantiated_template_sentences(name, applied.templates)
     missing_notes = [note for note in notes if note not in written]
