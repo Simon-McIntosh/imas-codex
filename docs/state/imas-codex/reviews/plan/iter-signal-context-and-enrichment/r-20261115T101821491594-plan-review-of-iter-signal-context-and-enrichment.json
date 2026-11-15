@@ -51,6 +51,19 @@
         "s7"
       ],
       "when": "2026-11-15T14:47:18.037556+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "8f36931801173f29a800da5a067ee516381b1ff25d13d540474b94a05d8b6caa",
+        "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83"
+      },
+      "reason": "Versions 14 and 15 record the lead's rulings relayed through the decision census: the description model is locked, and section 5 runs on the partial catalogue now and again when the scan completes.",
+      "units": [
+        "_document",
+        "s5"
+      ],
+      "when": "2026-11-15T17:14:58.607275+00:00"
     }
   ],
   "completed_at": "2026-11-15T10:42:15.169Z",
