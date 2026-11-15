@@ -1,0 +1,90 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T20:48:00.857Z",
+  "dispatched_at": "2026-11-15T20:47:37Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/figure-scripts-use-the-shared-save-function.html:46",
+      "id": "done_when-1",
+      "reason": "a build node could report this line of its done-when green while every one of the ten scripts still saves through matplotlib, so the count the search is meant to drive to zero is the wrong count.",
+      "text": "\u00a72's only script-level search measure, \"no direct call to the plotting library's save under `scripts/`\", is satisfied before any work: the single call site under `scripts/` (`scripts/codac_uda_prototype/loader.py:14,183`) already goes through the shared function, and none of the ten scripts in scope import it \u2014 they call matplotlib's `fig.savefig` or their own local helpers (`figures_mapping_flow.py:241`, `figures_knowledge_graph_scale.py:666,699`, `figures_icp_knowledge_map.py:783,1220`). The measure therefore cannot fail on the unfixed code",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/figure-scripts-use-the-shared-save-function.html:36",
+      "id": "reasoning-1",
+      "reason": "the misstatement is what produced the unfailable search in \u00a72; restating the start as \"save outside the shared function\" makes the done-when measure the real one.",
+      "text": "\"Ten tracked scripts under `scripts/` call the plotting library's save directly\" misstates the cited mechanism: the ten scripts (6 `figures_*`, 4 `plot_jet_*`, matching the plan's split) bypass the shared function via `fig.savefig` or their own `save`/`save_static`/`check_layout` helpers, and exactly one file under `scripts/` imports `save_figure`",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/figure-scripts-use-the-shared-save-function.html:45",
+      "id": "reasoning-2",
+      "reason": "a build node obeying \u00a72 verbatim must either leave one of the ten non-conforming and fail its own done-when, or widen the shared function's contract, a decision the plan does not settle.",
+      "text": "\u00a72's \"Each of the ten figure scripts saves through the shared function\" is unreachable for `scripts/figures_icp_knowledge_map.py`, whose stage output is an animated `.gif` written by `FuncAnimation.save` (`save_gif`, lines 1032-1046), while the shared function refuses any path whose suffix is not `.svg` or `.png` (`imas_codex/plotting/style.py:47-49`)",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/figure-scripts-use-the-shared-save-function.html:45",
+      "id": "done_when-2",
+      "reason": "without both roots named, a build node can satisfy the record by listing four JET scripts as \"not run\" with no reason, and the landing record stops measuring what \u00a72 claims.",
+      "text": "the regeneration scope is narrowed to `docs/figures/`, but the four JET scripts write to `docs/images/` (`plot_jet_epoch_evolution.py:31`, `plot_jet_composite_geometry.py:447`, plus 17 tracked files there), so the done-when leaves four of the ten scripts' figures outside the \"regenerated \u2026 or its reason\" record while \u00a72's first sentence requires all ten",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/figure-scripts-use-the-shared-save-function.html:40",
+      "id": "single_goal-1",
+      "reason": "a reviewer cannot close \u00a71 on one verdict when fixing the legend alone or the scale alone leaves it open, and the section's only negative control tests the scale.",
+      "text": "\u00a71's goal is that an export keeps its drawn aspect ratio at any canvas size, but the section also delivers a figure-level legend forced onto one row or refused; the two are independent mechanisms and the section's gate proves only the first",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/figure-scripts-use-the-shared-save-function.html:41",
+      "id": "done_when-3",
+      "reason": "the signals plot's figure legend caps columns at three (`imas_codex/plotting/signals.py:217`), a four-entry legend therefore wraps today, and nothing in the plan's gate would show it fixed.",
+      "text": "\u00a71 declares a legend deliverable (\"laid out on one row or refused with the reason\") and gives it no measure: the done-when tests aspect ratio at three canvas sizes and the default slide size only, so the legend requirement holds however the code behaves",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/figure-scripts-use-the-shared-save-function.html:36",
+      "id": "reasoning-3",
+      "reason": "the operative measure in \u00a72 (\"one definition of the text check\") already covers all three copies, so the miscount changes only the prose, not the work.",
+      "text": "the start says the text check \"is now a fourth copy of a refusal that two figure scripts already implement for themselves\", but three scripts carry their own copy (`figures_knowledge_graph_scale.py:673`, `figures_ai_stack.py:191`, `figures_icp_knowledge_map.py:740`), the shared one being the fourth",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "4ed233528ff5627f971cea35905652e7090cca09",
+  "plan_fingerprint": "370d3d2df01fc44dfc36279e6c7e9948ca99746c23b2bf4e73f770851f4dab9f",
+  "plan_slug": "figure-scripts-use-the-shared-save-function",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T204704596761-plan-review-of-figure-scripts-use-the-shared-save-function",
+  "reviewed_blob_sha": "7983f514b5c0d8597ec7de08167d0621a9d2837e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/plotting/`, `scripts/`, `docs/figures/` and the plotting test directory all resolve in the repository.",
+    "done_when": "a finding \u2014 \u00a72's \"no direct call to the plotting library's save under `scripts/`\" is already true of the unfixed tree, and \u00a71 names no measure for the legend deliverable it adds.",
+    "evidence_paths": "pass \u2014 evidence lands in the plan's own landing record and the plotting test directory; no scratchpad or node-local path is named.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number reaches a symbol; no section names a code path, function or formula.",
+    "reasoning": "a finding \u2014 the stated start (\"ten scripts call the plotting library's save directly\") does not match the tree, and the \u00a72 endpoint of ten scripts saving through that function is unreachable for the one script whose output is a `.gif`.",
+    "single_goal": "a finding \u2014 \u00a71 (\"exports a figure of any size without distortion\") also delivers a legend-row layout change, a second mechanism with its own gate.",
+    "wiring": "pass \u2014 s2 declares depends-on s1 (`plan-section-depends-on`), `plan-after: codac-uda-signals` resolves to `docs/plans/codac-uda-signals.html`, and the single followup targets the build of this plan."
+  },
+  "section_digests": {
+    "_document": "a54f27d05efc5590a78b831b1a2c0a730300f59d72eb6f4b6bf2a192195e9d70",
+    "s1": "bef2f04edfa0724b3ef60e9ba9130aecaad251de7a82b6a30865d3153636a9f0",
+    "s2": "406c775af3b8a02a9dcd64a0e1ba02f603d6c72c4c2fc9e1fefd833b4935c36f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T20:54:11.282642+00:00",
+  "total": null
+}
