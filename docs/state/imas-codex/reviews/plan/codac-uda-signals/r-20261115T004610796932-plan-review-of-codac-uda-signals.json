@@ -97,6 +97,16 @@
       "note": "Section 7 now delivers the repository's single figure save function: the existing figure scripts save through it and no other save function remains, shown by a search recorded in the landing record.",
       "reason": "",
       "when": "2026-11-15T01:33:25.013194+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "Section 6 now bounds its surface: the server gains at most one tool, the read is a mode of an existing signal tool where one already returns sample data, and the landing record gives the tool count before and after with the reason a new tool was needed if one was added.",
+      "reason": "",
+      "when": "2026-11-15T01:33:34.822946+00:00"
     }
   ],
   "responses": {
@@ -126,6 +136,15 @@
       "note": "Section 2 now states that facility and data-system resolution stays in the one facility-aware layer that already performs it, and the done-when requires that the executor still performs no facility lookup.",
       "reason": "",
       "when": "2026-11-15T01:33:10.682519+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "note": "Section 6 now bounds its surface: the server gains at most one tool, the read is a mode of an existing signal tool where one already returns sample data, and the landing record gives the tool count before and after with the reason a new tool was needed if one was added.",
+      "reason": "",
+      "when": "2026-11-15T01:33:34.822946+00:00"
     },
     "thin_wrapper-1": {
       "action": "acted",
