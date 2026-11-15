@@ -274,7 +274,11 @@ def test_repaired_success_never_improves_raw_parse_rate_or_hides_failed_signals(
         "raw": json.dumps(answer()),
         "score": bench.score_response(json.dumps(answer()), 1),
     }
-    bad = {"raw": "not JSON", "score": bench.score_response("not JSON", 1)}
+    bad = {
+        "raw": "not JSON",
+        "score": bench.score_response("not JSON", 1),
+        "error": "Invalid JSON",
+    }
     base = {
         "arm": "repair",
         "seconds": 1,
@@ -293,3 +297,64 @@ def test_repaired_success_never_improves_raw_parse_rate_or_hides_failed_signals(
     assert summary["delivery_rate"] == 0.5
     assert summary["failed_signals_by_class"] == {"invalid_json": 1}
     assert summary["total_calls"] == 4
+
+
+@pytest.mark.parametrize(
+    ("error", "cause"),
+    [
+        ("results.0.physics_domain: invalid enum", "enumeration"),
+        ("results.0.keywords: list_type", "array_type"),
+    ],
+)
+def test_raw_fences_do_not_hide_terminal_field_validation_failures(error, cause):
+    from scripts import refine_signal_enrichment as refine
+
+    response = {
+        "raw": "```json\n{}\n```",
+        "score": {"error": "Invalid JSON json_invalid"},
+        "error": error,
+    }
+    assert refine.failure_class(response) == "invalid_json"
+    assert refine.failure_class(response, terminal=True) == cause
+
+
+def test_partial_coverage_and_server_abort_have_distinct_failure_counts():
+    from scripts import refine_signal_enrichment as refine
+
+    base = {
+        "arm": "trial",
+        "seconds": 1,
+        "input_tokens": 2,
+        "output_tokens": 3,
+        "cost_usd": 0,
+    }
+    records = [
+        {
+            **base,
+            "ids": ["delivered", "missing"],
+            "responses": [
+                {
+                    "raw": "[]",
+                    "score": {"parse_success": False, "error": "schema wrapper absent"},
+                }
+            ],
+            "outputs": [{"id": "delivered"}],
+        },
+        {
+            **base,
+            "ids": ["aborted"],
+            "responses": [
+                {
+                    "raw": "{",
+                    "score": {"parse_success": False, "error": "json_invalid"},
+                    "finish_reason": "abort",
+                    "error": "abort",
+                }
+            ],
+            "outputs": [],
+        },
+    ]
+    result = refine.summarize(records, {"order": ["delivered", "missing", "aborted"]})[
+        "trial"
+    ]
+    assert result["failed_signals_by_class"] == {"coverage": 1, "provider_abort": 1}

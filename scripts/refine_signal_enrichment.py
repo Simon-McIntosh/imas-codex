@@ -70,11 +70,15 @@ def subset_messages(messages: list[dict], indices: list[int]) -> list[dict]:
     return result
 
 
-def failure_class(response: dict) -> str:
+def failure_class(response: dict, *, terminal: bool = False) -> str:
     """Classify recorded failures without treating repaired text as raw JSON."""
+    if response.get("finish_reason") == "abort":
+        return "provider_abort"
     if response.get("raw") is None:
         return "transport"
-    error = response.get("error", "") + response.get("score", {}).get("error", "")
+    error = (response.get("error") if terminal else None) or response.get(
+        "score", {}
+    ).get("error", "")
     if response.get("score", {}).get("empty"):
         return "empty"
     if "json_invalid" in error or "Invalid JSON" in error:
@@ -103,7 +107,13 @@ def summarize(records: list[dict], cohort: dict) -> dict:
                 raw_failed[failure_class(r["responses"][0])] += len(r["ids"])
             absent = set(r["ids"]) - {o["id"] for o in r["outputs"]}
             if absent:
-                failed[failure_class(r["responses"][-1])] += len(absent)
+                last = r["responses"][-1]
+                cause = (
+                    failure_class(last, terminal=True)
+                    if last.get("error")
+                    else "coverage"
+                )
+                failed[cause] += len(absent)
         summary[arm] = {
             "signals": sum(len(r["ids"]) for r in batches),
             "initial_calls": len(batches),
