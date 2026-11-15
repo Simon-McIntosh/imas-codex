@@ -1,6 +1,6 @@
 {
  "schema": "held-names-refine-pass/1",
- "generated_at": "2026-11-15T20:38:43+00:00",
+ "generated_at": "2026-11-15T21:00:11+00:00",
  "plan_section": "sn-definitions-by-construction#s7",
  "run": {
   "node": "sdbc-held-names-refine-pass",
@@ -6557,40 +6557,277 @@
  "rebinds": [
   {
    "name": "breakdown_magnetic_field",
+   "target": "rebind the parent to the parent-level breakdown field, leaving `plasma_initiation/global_quantities/b_field_stray` to its child `stray_breakdown_magnetic_field`",
    "note": "the parent is bound to plasma_initiation/global_quantities/b_field_stray, the stray-field leaf, while its own child is the stray specialization; the parent should not carry the leaf's binding.",
    "reason": "Needs a binding decision outside this pass: the parent is bound to plasma_initiation/global_quantities/b_field_stray, the stray-field leaf, while its own child is the stray specialization; the parent should not carry the leaf's binding."
   },
   {
    "name": "ion_momentum_source_due_to_diamagnetic_drift",
+   "target": "fold into the accepted `ion_momentum_flux_due_to_diamagnetic_drift`",
    "note": "collides with the live identity ion_momentum_flux_due_to_diamagnetic_drift",
    "reason": "Needs a naming decision: the flux spelling 'ion_momentum_flux_due_to_diamagnetic_drift' is already a live identity bound to plasma_transport/model/profiles_1d/ion/momentum/diamagnetic/flux, a different Data Dictionary path from this name's edge_sources/source/ggd/ion/momentum/diamagnetic. The rename is refused as an existing identity, and folding the two would merge two distinct quantities."
   },
   {
    "name": "momentum",
+   "target": "fold into the accepted `momentum_flux`",
    "note": "the name duplicates the accepted identity momentum_flux (same unit, same meaning); a rename onto it is refused as an existing identity.",
    "reason": "Needs a binding decision outside this pass: the name duplicates the accepted identity momentum_flux (same unit, same meaning); a rename onto it is refused as an existing identity."
   },
   {
    "name": "momentum_flux_due_to_e_cross_b_drift",
+   "target": "fold into the accepted `momentum_flux_normalized_due_to_e_cross_b_drift`",
    "note": "the stored quantity is dimensionless (unit 1) and the accepted identity momentum_flux_normalized_due_to_e_cross_b_drift carries the canonical normalized spelling; a rename onto it is refused.",
    "reason": "Needs a binding decision outside this pass: the stored quantity is dimensionless (unit 1) and the accepted identity momentum_flux_normalized_due_to_e_cross_b_drift carries the canonical normalized spelling; a rename onto it is refused."
   },
   {
    "name": "momentum_source_due_to_diamagnetic_drift",
+   "target": "fold into the accepted `momentum_flux_due_to_diamagnetic_drift`",
    "note": "collides with the live identity momentum_flux_due_to_diamagnetic_drift",
    "reason": "Needs a naming decision: the flux spelling 'momentum_flux_due_to_diamagnetic_drift' is already a live identity bound to edge_transport/model/ggd/momentum/flux/diamagnetic and plasma_transport/model/ggd/momentum/flux/diamagnetic, a different Data Dictionary path from this name's core_sources/source/profiles_1d/ion/momentum/diamagnetic. The rename is refused as an existing identity, and folding the two would merge two distinct quantities."
   },
   {
    "name": "neutral_particle_flux_at_wall_due_to_pumping",
+   "target": "rebind to the pumping-speed quantity the path `wall/global_quantities/neutral/pumping_speed` stores",
    "note": "the name states a particle flux at the wall while the binding is wall/global_quantities/neutral/pumping_speed, a pumping-speed coefficient in s^-1.",
    "reason": "Needs a binding decision outside this pass: the name states a particle flux at the wall while the binding is wall/global_quantities/neutral/pumping_speed, a pumping-speed coefficient in s^-1."
   },
   {
    "name": "rate_due_to_beam_beam_fusion",
+   "target": "fold into the accepted `neutron_source_rate_due_to_beam_beam_fusion`",
    "note": "The rename chain this pass attempted (volume_integrated_rate_due_to_beam_beam_fusion, then nuclear_source_rate_due_to_beam_beam_fusion) exhausted on the name axis, but the catalog already holds neutron_source_rate_due_to_beam_beam_fusion accepted on both axes with the same meaning: the volume-integrated neutron production rate from fusion between beam ions. The two identities must be folded: bind this DD path to the accepted name and drop the exhausted chain rather than inventing a third spelling.",
    "reason": null
   }
  ],
+ "grouping_parents": [
+  {
+   "name": "average_external_magnetic_flux",
+   "live_children": 1
+  },
+  {
+   "name": "beta",
+   "live_children": 4
+  },
+  {
+   "name": "decay_length_over_scrape_off_layer",
+   "live_children": 2
+  },
+  {
+   "name": "density_at_divertor_target",
+   "live_children": 19
+  },
+  {
+   "name": "density_at_internal_transport_barrier",
+   "live_children": 19
+  },
+  {
+   "name": "density_at_limiter",
+   "live_children": 19
+  },
+  {
+   "name": "density_at_magnetic_axis",
+   "live_children": 19
+  },
+  {
+   "name": "density_at_pedestal_top",
+   "live_children": 19
+  },
+  {
+   "name": "density_at_plasma_boundary",
+   "live_children": 18
+  },
+  {
+   "name": "edge_plasma_momentum_diffusivity",
+   "live_children": 1
+  },
+  {
+   "name": "efficiency_of_plant_system",
+   "live_children": 2
+  },
+  {
+   "name": "fast_neutral_pressure",
+   "live_children": 2
+  },
+  {
+   "name": "flux_at_divertor_target",
+   "live_children": 1
+  },
+  {
+   "name": "flux_at_wall_due_to_recombination",
+   "live_children": 1
+  },
+  {
+   "name": "flux_at_wall_due_to_surface_emission",
+   "live_children": 2
+  },
+  {
+   "name": "flux_due_to_pumping",
+   "live_children": 1
+  },
+  {
+   "name": "flux_due_to_surface_emission",
+   "live_children": 1
+  },
+  {
+   "name": "hydrogenic_density",
+   "live_children": 1
+  },
+  {
+   "name": "ion_density_at_plasma_boundary",
+   "live_children": 2
+  },
+  {
+   "name": "ion_momentum_source_rate",
+   "live_children": 1
+  },
+  {
+   "name": "ion_rotation_frequency",
+   "live_children": 1
+  },
+  {
+   "name": "kinetic_energy_density",
+   "live_children": 5
+  },
+  {
+   "name": "maximum_magnetic_field",
+   "live_children": 1
+  },
+  {
+   "name": "momentum_diffusion_coefficient",
+   "live_children": 7
+  },
+  {
+   "name": "momentum_flux_due_to_perturbed_parallel_vector_potential",
+   "live_children": 1
+  },
+  {
+   "name": "momentum_flux_normalized_due_to_e_cross_b_drift",
+   "live_children": 2
+  },
+  {
+   "name": "momentum_flux_normalized_due_to_perturbed_parallel_vector_potential",
+   "live_children": 2
+  },
+  {
+   "name": "momentum_source",
+   "live_children": 9
+  },
+  {
+   "name": "momentum_source_rate",
+   "live_children": 1
+  },
+  {
+   "name": "net_ion_momentum_source",
+   "live_children": 1
+  },
+  {
+   "name": "neutral_momentum_flux_limiter_coefficient",
+   "live_children": 5
+  },
+  {
+   "name": "neutron_source_rate_due_to_thermal_fusion",
+   "live_children": 4
+  },
+  {
+   "name": "normalized_particle_perturbed_energy",
+   "live_children": 1
+  },
+  {
+   "name": "outer_squareness_of_flux_surface",
+   "live_children": 2
+  },
+  {
+   "name": "outer_squareness_of_plasma_boundary",
+   "live_children": 2
+  },
+  {
+   "name": "particle_energy",
+   "live_children": 2
+  },
+  {
+   "name": "particle_flux_at_wall_due_to_surface_emission",
+   "live_children": 3
+  },
+  {
+   "name": "plasma_momentum_diffusivity",
+   "live_children": 4
+  },
+  {
+   "name": "power_at_inside_flux_surface",
+   "live_children": 3
+  },
+  {
+   "name": "power_due_to_convection",
+   "live_children": 3
+  },
+  {
+   "name": "power_of_breeder_blanket_module",
+   "live_children": 1
+  },
+  {
+   "name": "pressure_over_scrape_off_layer",
+   "live_children": 2
+  },
+  {
+   "name": "radius_of_passive_loop",
+   "live_children": 2
+  },
+  {
+   "name": "source_due_to_diamagnetic_drift",
+   "live_children": 1
+  },
+  {
+   "name": "source_rate_due_to_thermal_fusion",
+   "live_children": 1
+  },
+  {
+   "name": "square_of_major_radius",
+   "live_children": 2
+  },
+  {
+   "name": "temperature_at_divertor_target",
+   "live_children": 2
+  },
+  {
+   "name": "temperature_at_magnetic_axis",
+   "live_children": 2
+  },
+  {
+   "name": "temperature_over_scrape_off_layer",
+   "live_children": 2
+  },
+  {
+   "name": "torque_due_to_collisions",
+   "live_children": 3
+  },
+  {
+   "name": "total_hydrogenic_density",
+   "live_children": 1
+  },
+  {
+   "name": "triangularity_of_flux_surface",
+   "live_children": 2
+  },
+  {
+   "name": "velocity_due_to_convection",
+   "live_children": 3
+  },
+  {
+   "name": "wavelength_of_visible_camera",
+   "live_children": 2
+  }
+ ],
+ "grammar_route": {
+  "word": "equivalent_electron",
+  "category": "normalized",
+  "route": "The word is a registered grammar qualifier, not a vocabulary gap: `Qualifier.EQUIVALENT_ELECTRON = \"equivalent_electron\"` in the shared library's `grammar/model_types.py`, added by commit `135c42e` (\"feat(grammar): add equivalent-electron counting qualifier\", 2026-11-13) and first tagged `v0.12.0rc1` in the `imas-standard-names` checkout the pipeline imports. The strict parser reads the token in the `normalized` qualifier category, so a name carrying it parses as `<qualifiers> + <base>`.",
+  "earlier_record": "The 56 names live in `live-rewrite-bulk.json` under `waiting_equivalent_electron` (as of 2026-11-14T21:49Z); that slice listed them with a stated counting basis and left their names unchanged, so the list records an expectation, not a refusal.",
+  "why_these_landed": "This pass parsed every planned rename with `parse_canonical_name` before submitting it, so a spelling that composes to itself reached the name reviewer as a canonical name; three of the 56 \u2014 ammonia, argon and neon \u2014 landed accepted, and the review chose the word in each.",
+  "accepted": [
+   "accumulated_ammonia_equivalent_electron_count",
+   "accumulated_argon_equivalent_electron_count_due_to_gas_injection",
+   "accumulated_neon_equivalent_electron_count"
+  ]
+ },
  "sourceless": {
   "baseline": 10,
   "now": 10,

@@ -49,6 +49,73 @@ NODE_OPENED = datetime(2026, 11, 15, 16, 53, 6, tzinfo=UTC)
 SOURCELESS_GATE = 10
 EXCERPT = 320
 
+FIGURE_SRC = "/imas-codex/figures/sn-held-names-refine-pass/outcomes-by-hold-kind.svg"
+
+# What each undecided identity must be bound to, read from the decision note
+# this pass recorded and, where the note names a relative, from the graph's own
+# HAS_PARENT link. A fold names the accepted identity the DD path should point
+# at; a rebind names the path or the level the name actually states.
+REBIND_TARGETS = {
+    "breakdown_magnetic_field": (
+        "rebind the parent to the parent-level breakdown field, leaving "
+        "`plasma_initiation/global_quantities/b_field_stray` to its child "
+        "`stray_breakdown_magnetic_field`"
+    ),
+    "ion_momentum_source_due_to_diamagnetic_drift": (
+        "fold into the accepted `ion_momentum_flux_due_to_diamagnetic_drift`"
+    ),
+    "momentum": "fold into the accepted `momentum_flux`",
+    "momentum_flux_due_to_e_cross_b_drift": (
+        "fold into the accepted `momentum_flux_normalized_due_to_e_cross_b_drift`"
+    ),
+    "momentum_source_due_to_diamagnetic_drift": (
+        "fold into the accepted `momentum_flux_due_to_diamagnetic_drift`"
+    ),
+    "neutral_particle_flux_at_wall_due_to_pumping": (
+        "rebind to the pumping-speed quantity the path "
+        "`wall/global_quantities/neutral/pumping_speed` stores"
+    ),
+    "rate_due_to_beam_beam_fusion": (
+        "fold into the accepted `neutron_source_rate_due_to_beam_beam_fusion`"
+    ),
+}
+
+# The earlier slice listed 56 names as waiting on `equivalent_electron` and left
+# them with their old names. The word is a registered grammar qualifier, so the
+# route that made the three renames land is the parser gate the queue applied
+# before submitting each rename, not a change of vocabulary.
+EQUIVALENT_ELECTRON_ROUTE = {
+    "word": "equivalent_electron",
+    "category": "normalized",
+    "route": (
+        "The word is a registered grammar qualifier, not a vocabulary gap: "
+        '`Qualifier.EQUIVALENT_ELECTRON = "equivalent_electron"` in the '
+        "shared library's `grammar/model_types.py`, added by commit `135c42e` "
+        '("feat(grammar): add equivalent-electron counting qualifier", '
+        "2026-11-13) and first tagged `v0.12.0rc1` in the `imas-standard-names` "
+        "checkout the pipeline imports. The strict parser reads the token in "
+        "the `normalized` qualifier category, so a name carrying it parses as "
+        "`<qualifiers> + <base>`."
+    ),
+    "earlier_record": (
+        "The 56 names live in `live-rewrite-bulk.json` under "
+        "`waiting_equivalent_electron` (as of 2026-11-14T21:49Z); that slice "
+        "listed them with a stated counting basis and left their names "
+        "unchanged, so the list records an expectation, not a refusal."
+    ),
+    "why_these_landed": (
+        "This pass parsed every planned rename with `parse_canonical_name` "
+        "before submitting it, so a spelling that composes to itself reached the "
+        "name reviewer as a canonical name; three of the 56 — ammonia, argon and "
+        "neon — landed accepted, and the review chose the word in each."
+    ),
+    "accepted": [
+        "accumulated_ammonia_equivalent_electron_count",
+        "accumulated_argon_equivalent_electron_count_due_to_gas_injection",
+        "accumulated_neon_equivalent_electron_count",
+    ],
+}
+
 
 def load_json(path: Path, default):
     if not path.exists():
@@ -421,10 +488,21 @@ def build() -> dict:
             if r["grammar_word"]
         ],
         "rebinds": [
-            {"name": r["name"], "note": r["rebind_note"], "reason": r["reason"]}
+            {
+                "name": r["name"],
+                "target": REBIND_TARGETS.get(r["name"]),
+                "note": r["rebind_note"],
+                "reason": r["reason"],
+            }
             for r in name_rows
             if r["rebind_note"]
         ],
+        "grouping_parents": [
+            {"name": r["name"], "live_children": r["live_children"]}
+            for r in name_rows
+            if r["hold_category"] == "family parent"
+        ],
+        "grammar_route": EQUIVALENT_ELECTRON_ROUTE,
         "sourceless": {
             "baseline": SOURCELESS_GATE,
             "now": sourceless["count"],
@@ -510,6 +588,15 @@ def render(doc: dict) -> str:
             f"<td>{slot['rate_per_name_usd']:.4f}</td></tr>"
         )
     parts.append("</table>")
+    parts.append(
+        f'<figure><img src="{FIGURE_SRC}" width="1200" '
+        'alt="names per hold kind split by the outcome the pass reached, and the '
+        'spend on each kind"><figcaption>Names per hold kind, split by the '
+        "outcome the pass reached (left), and the USD the pass spent on the kind "
+        "with its accepted share (right). The grouping-parent bar is the bulk "
+        "ruling: those 54 parents are held from the cut rather than re-steered, "
+        "so their spend is zero.</figcaption></figure>"
+    )
 
     parts.append("<h3>Renames: old identity, new identity, distinction</h3>")
     parts.append(
@@ -568,7 +655,6 @@ def render(doc: dict) -> str:
         parts.append(
             f"<tr><td><code>{esc(row['name'])}</code></td>"
             f"<td>{esc(row['hold_category'])}</td>"
-            f"<td>{esc(row['live_children'] if row['live_children'] is not None else '—')}</td>"
             f"<td>{esc(row['outcome'])}</td>"
             f"<td>{esc(row['reason'])}</td><td>{esc(open_text)}</td></tr>"
         )
@@ -577,32 +663,69 @@ def render(doc: dict) -> str:
     parts.append("<h3>Waiting on grammar</h3>")
     parts.append(
         "<table><caption>Names whose definition cannot agree with the name "
-        "until the grammar can say the qualifier the binding stores</caption>"
+        "until the grammar can say the qualifier the binding stores, grouped by "
+        "the word each one needs</caption>"
     )
     parts.append(
-        "<tr><th>Name</th><th>Word it needs</th><th>Why no spelling "
+        "<tr><th>Word the name needs</th><th>Names</th><th>Why no spelling "
         "parses today</th></tr>"
     )
-    for row in sorted(doc["grammar_waits"], key=lambda r: r["name"]):
+    by_word: dict[str, list[dict]] = collections.defaultdict(list)
+    for row in doc["grammar_waits"]:
+        by_word[(row["word"] or "").strip().strip('"')].append(row)
+    for word, rows in sorted(by_word.items(), key=lambda kv: (-len(kv[1]), kv[0])):
+        names = ", ".join(
+            f"<code>{esc(r['name'])}</code>"
+            for r in sorted(rows, key=lambda r: r["name"])
+        )
+        notes = " ".join(
+            f"<strong>{esc(r['name'])}</strong>: {esc(r['note'])}"
+            for r in sorted(rows, key=lambda r: r["name"])
+        )
         parts.append(
-            f"<tr><td><code>{esc(row['name'])}</code></td>"
-            f"<td><code>{esc(row['word'])}</code></td>"
-            f"<td>{esc(row['note'])}</td></tr>"
+            f"<tr><td><code>{esc(word)}</code> ({len(rows)})</td>"
+            f"<td>{names}</td><td>{notes}</td></tr>"
         )
     parts.append("</table>")
+    route = doc["grammar_route"]
+    parts.append(
+        f"<p><strong>The <code>{esc(route['word'])}</code> word, and why three "
+        "renames still landed.</strong> "
+        f"{esc(route['route'])} {esc(route['earlier_record'])} "
+        f"{esc(route['why_these_landed'])} They are "
+        + ", ".join(f"<code>{esc(n)}</code>" for n in route["accepted"])
+        + " each accepted on both axes.</p>"
+    )
 
     parts.append("<h3>Needing a rebind or a fold decision</h3>")
     parts.append(
         "<table><caption>Names whose binding contradicts the name, or whose "
         "identity duplicates an accepted one</caption>"
     )
-    parts.append("<tr><th>Name</th><th>Decision needed</th></tr>")
+    parts.append("<tr><th>Name</th><th>Target</th><th>Decision needed</th></tr>")
     for row in sorted(doc["rebinds"], key=lambda r: r["name"]):
+        target = row.get("target") or "not stated in the note"
         parts.append(
             f"<tr><td><code>{esc(row['name'])}</code></td>"
-            f"<td>{esc(row['note'])}</td></tr>"
+            f"<td>{esc(target)}</td><td>{esc(row['note'])}</td></tr>"
         )
     parts.append("</table>")
+
+    parts.append("<h3>Grouping parents held from the cut</h3>")
+    parts.append(
+        f"<p>The bulk ruling holds these "
+        f"<strong>{len(doc['grouping_parents'])}</strong> parents out of the cut "
+        "rather than re-steering them: each is a family parent whose children "
+        "already carry the specific quantity, so the parent's own definition "
+        "cannot be settled without deciding the family's shape. They are listed "
+        "here so a later pass can take them by name.</p>"
+    )
+    parts.append("<ul>")
+    for row in sorted(doc["grouping_parents"], key=lambda r: r["name"]):
+        children = row.get("live_children")
+        suffix = f" — {children} live children" if children else ""
+        parts.append(f"<li><code>{esc(row['name'])}</code>{esc(suffix)}</li>")
+    parts.append("</ul>")
 
     sourceless = doc["sourceless"]
     parts.append("<h3>Live names without a source</h3>")
