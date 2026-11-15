@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 9,
+  "call_sites": [
+    "imas_codex/discovery/signals/scanners/base.py:_auto_register",
+    "imas_codex/discovery/signals/parallel.py:seed_worker",
+    "imas_codex/discovery/signals/parallel.py:get_signal_scanner_type",
+    "imas_codex/discovery/signals/parallel.py:check_worker",
+    "imas_codex/discovery/signals/parallel.py:persist_data_access",
+    "imas_codex/remote/executor.py:run_python_script",
+    "imas_codex/remote/executor.py:async_run_python_script",
+    "imas_codex/config/codac_uda.py:resolve_archive_endpoint",
+    "imas_codex/remote/scripts/codac_uda.py:main"
+  ],
+  "completed_at": "2026-11-15T07:41:44.124Z",
+  "dispatched_at": "2026-11-15T07:29:24Z",
+  "findings": [
+    {
+      "file": "imas_codex/remote/codac_uda.py",
+      "line": 34,
+      "severity": "non-blocking",
+      "text": "request_archive duplicates the capability main landed in parallel at the same path (ArchiveReader, imas_codex/remote/codac_uda.py:80: validate policy, refuse excluded endpoints, call run_python_script(\"codac_uda.py\"), classify errors); both descend from the same base, so the merge must reconcile two incompatible APIs at one path rather than land both."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": 3726,
+      "severity": "non-blocking",
+      "text": "the new persisted branch and the codac_uda addition at imas_codex/discovery/signals/parallel.py:5907 have no test, so a regression that reports the scanner's cumulative written count without persisting, or drops codac_uda from the check pass, passes every recorded gate."
+    },
+    {
+      "file": "imas_codex/remote/script_source.py",
+      "line": 8,
+      "severity": "non-blocking",
+      "text": "only the executor path calls load_script_source, while imas_codex/remote/ssh_worker.py:967 still reads raw script source, so any script declared in SCRIPT_DEPENDENCIES run through pooled_run_python_script would execute without its bundled module."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T020713980531-archive-variable-catalogue/graph-scope-gate.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the graph gate's header names revision a0b16cdab, which contains only the evidence html and not tests/graph/test_archive_catalogue.py, so the graph-marker evidence is a dirty-working-tree measurement; it is sound only because the queries are byte-identical from 1b84dcd0c onward."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against base 2fd068df; six commits \u2014 a docs record, the scanner implementation (1b84dcd0c, 15 files), a docs/evidence and figure commit, the metadata-checkpoint repair (4d4b94e78), one durability test (321c1aaf6), and a final docs commit \u2014 17 files, 2775 insertions; the Cypher statements are byte-identical from 1b84dcd0c to the head.",
+    "done_when": "the done_when names independent listing count, no duplicates on a second run, ten bounded confirmations with confirmed/unconfirmed counts, an all_debug partition, graph-marker passage and two negative controls; controller-repeat.log records independent_archive_count 200 = first_graph_count 200 = second_graph_count 200 with duplicates 0, sampled 10 / confirmed 10 / unconfirmed 0, partition all_debug, interrupted_complete false with resumed 180, and graph-scope-gate.log records 1 passed under -m graph, so the gate asserts the stated measure.",
+    "goal": "the node's goal is a registered archive scanner plus the variable catalogue for one declared cohort in the graph; imas_codex/discovery/signals/scanners/codac_uda.py:134 implements scan/check, registers at line 431 via register_scanner, and writes FacilitySignal nodes carrying selector, unit, archive wording, metadata_archive, data_archive, sampling_mode and archive_cohorts, so the deliverable is present.",
+    "manifest": "read; it records the focused gate as 112 passed (incremental-focused-gate.log), baseline 1 failed pre-repair (incremental-baseline.log), the graph gate, the three deliberate mutation failures, and the live all_debug job ids, and every number I re-read in the logs matches the manifest's artifacts block.",
+    "write_paths": "the dispatch record carries an empty write_paths list (dispatch-detail.json), so the exclusive scope is vacuous; the manifest's scope_note records an explicit expanded grant on resume, and every path in the diff maps either to the goal or to one of the five steering items in brief.md."
+  },
+  "justifications": {
+    "durability": "incremental-negative-control.log shows a genuinely failing guard (removing the pre-graph save fails tests/discovery/test_codac_uda_scanner.py with assert 0 == 3), but imas_codex/discovery/signals/parallel.py:3726's persisted-count branch has no assertion that would redden if it regressed.",
+    "evidence": "controller-repeat.log records independent 200 = graph 200 = repeat 200 with duplicates 0 and 10 confirmed / 0 unconfirmed on all_debug, and graph-scope-gate.log records 1 passed under -m graph against a disposable database.",
+    "fit": "imas_codex/discovery/signals/scanners/codac_uda.py:189 follows the registry idiom of the sibling scanners and carries no plan or version label, though imas_codex/discovery/signals/scanners/base.py:14 lists the scanner types and still omits codac_uda.",
+    "goal_fidelity": "imas_codex/discovery/signals/scanners/codac_uda.py:134 persists each archive variable as a facility signal with separate metadata and data provenance, sampling mode and resumability, and the live cohort reached 200 graph signals.",
+    "reuse": "the change reuses register_scanner, ScanResult, persist_data_access, run_python_script and archive_host_key, but imas_codex/remote/codac_uda.py:34 re-implements the transport that main's imas_codex/remote/codac_uda.py:80 ArchiveReader already owns at the same path.",
+    "scope_discipline": "the dispatch's write_paths is empty so the scope test is unfalsifiable, and imas_codex/remote/executor.py:1221 changes a shared module for a section-local need, though the manifest records the expanded grant and each path maps to a goal or a steering item."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is a registered archive scanner plus the variable catalogue for one declared cohort in the graph; imas_codex/discovery/signals/scanners/codac_uda.py:134 implements scan/check, registers at line 431 via register_scanner, and writes FacilitySignal nodes carrying selector, unit, archive wording, metadata_archive, data_archive, sampling_mode and archive_cohorts, so the deliverable is present.\nVERDICT done_when: the done_when names independent listing count, no duplicates on a second run, ten bounded confirmations with confirmed/unconfirmed counts, an all_debug partition, graph-marker passage and two negative controls; controller-repeat.log records independent_archive_count 200 = first_graph_count 200 = second_graph_count 200 with duplicates 0, sampled 10 / confirmed 10 / unconfirmed 0, partition all_debug, interrupted_complete false with resumed 180, and graph-scope-gate.log records 1 passed under -m graph, so the gate asserts the stated measure.\nVERDICT write_paths: the dispatch record carries an empty write_paths list (dispatch-detail.json), so the exclusive scope is vacuous; the manifest's scope_note records an explicit expanded grant on resume, and every path in the diff maps either to the goal or to one of the five steering items in brief.md.\nVERDICT manifest: read; it records the focused gate as 112 passed (incremental-focused-gate.log), baseline 1 failed pre-repair (incremental-baseline.log), the graph gate, the three deliberate mutation failures, and the live all_debug job ids, and every number I re-read in the logs matches the manifest's artifacts block.\nVERDICT diff: read commit by commit against base 2fd068df; six commits \u2014 a docs record, the scanner implementation (1b84dcd0c, 15 files), a docs/evidence and figure commit, the metadata-checkpoint repair (4d4b94e78), one durability test (321c1aaf6), and a final docs commit \u2014 17 files, 2775 insertions; the Cypher statements are byte-identical from 1b84dcd0c to the head.\nCALL_SITES: imas_codex/discovery/signals/scanners/base.py:_auto_register, imas_codex/discovery/signals/parallel.py:seed_worker, imas_codex/discovery/signals/parallel.py:get_signal_scanner_type, imas_codex/discovery/signals/parallel.py:check_worker, imas_codex/discovery/signals/parallel.py:persist_data_access, imas_codex/remote/executor.py:run_python_script, imas_codex/remote/executor.py:async_run_python_script, imas_codex/config/codac_uda.py:resolve_archive_endpoint, imas_codex/remote/scripts/codac_uda.py:main\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/scanners/codac_uda.py:134 persists each archive variable as a facility signal with separate metadata and data provenance, sampling mode and resumability, and the live cohort reached 200 graph signals.\nSCORE evidence: 17\nJUSTIFICATION evidence: controller-repeat.log records independent 200 = graph 200 = repeat 200 with duplicates 0 and 10 confirmed / 0 unconfirmed on all_debug, and graph-scope-gate.log records 1 passed under -m graph against a disposable database.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: the dispatch's write_paths is empty so the scope test is unfalsifiable, and imas_codex/remote/executor.py:1221 changes a shared module for a section-local need, though the manifest records the expanded grant and each path maps to a goal or a steering item.\nSCORE durability: 15\nJUSTIFICATION durability: incremental-negative-control.log shows a genuinely failing guard (removing the pre-graph save fails tests/discovery/test_codac_uda_scanner.py with assert 0 == 3), but imas_codex/discovery/signals/parallel.py:3726's persisted-count branch has no assertion that would redden if it regressed.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/discovery/signals/scanners/codac_uda.py:189 follows the registry idiom of the sibling scanners and carries no plan or version label, though imas_codex/discovery/signals/scanners/base.py:14 lists the scanner types and still omits codac_uda.\nSCORE reuse: 12\nJUSTIFICATION reuse: the change reuses register_scanner, ScanResult, persist_data_access, run_python_script and archive_host_key, but imas_codex/remote/codac_uda.py:34 re-implements the transport that main's imas_codex/remote/codac_uda.py:80 ArchiveReader already owns at the same path.\nFINDING imas_codex/remote/codac_uda.py:34 non-blocking: request_archive duplicates the capability main landed in parallel at the same path (ArchiveReader, imas_codex/remote/codac_uda.py:80: validate policy, refuse excluded endpoints, call run_python_script(\"codac_uda.py\"), classify errors); both descend from the same base, so the merge must reconcile two incompatible APIs at one path rather than land both.\nFINDING imas_codex/discovery/signals/parallel.py:3726 non-blocking: the new persisted branch and the codac_uda addition at imas_codex/discovery/signals/parallel.py:5907 have no test, so a regression that reports the scanner's cumulative written count without persisting, or drops codac_uda from the check pass, passes every recorded gate.\nFINDING imas_codex/remote/script_source.py:8 non-blocking: only the executor path calls load_script_source, while imas_codex/remote/ssh_worker.py:967 still reads raw script source, so any script declared in SCRIPT_DEPENDENCIES run through pooled_run_python_script would execute without its bundled module.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T020713980531-archive-variable-catalogue/graph-scope-gate.log:1 non-blocking: the graph gate's header names revision a0b16cdab, which contains only the evidence html and not tests/graph/test_archive_catalogue.py, so the graph-marker evidence is a dirty-working-tree measurement; it is sound only because the queries are byte-identical from 1b84dcd0c onward.",
+  "review_run_id": "r-20261115T072656364475-review-of-archive-variable-catalogue-2fb760aab3e1",
+  "reviewed_base_sha": "2fd068df6030aaa3c1acdc06bf5cf6086ac42d90",
+  "reviewed_head_sha": "2fb760aab3e1fa67b662d44acc88b6522ee8d6d5",
+  "reviewed_plan": "imas-codex:codac-uda-signals#s4",
+  "reviewed_run_id": "r-20261115T020713980531-archive-variable-catalogue",
+  "scores": {
+    "durability": 15,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 12,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T07:43:22.450268+00:00",
+  "total": 93
+}
