@@ -1,0 +1,47 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_judgement": "the caption is substantive and not a restatement of the figure: it names what is plotted, defines 'divergent' as more than one description template or more than one unit, and states that the measure is the one the pre-write census used so the two readings are like for like. The paragraph immediately above the figure additionally discloses that only the flux-surface average had a pre-write reading and that the other four rows carry no before-count rather than a zero, which is the reading the figure's 'not measured' strings need. No caption finding is recorded.",
+  "completed_at": "",
+  "dispatched_at": "2026-11-15T04:58:52Z",
+  "figure_reviewed": {
+    "artifact": "docs/figures/sn-definitions-by-construction/sdbc-rewrite-closing-census/wordings-before-after.svg",
+    "caption_source": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-rewrite-closing-census.html",
+    "drawing_script": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py",
+    "method": "judged only the attached rendered PNG; no SVG was opened, read, listed, searched, rendered or shown, and no image other than the named PNG was opened",
+    "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T045629911795-review-of-sdbc-rewrite-closing-census-19daa7a6db6e-figure/image-0.png",
+    "rendered_size_px": [
+      1400,
+      720
+    ]
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py",
+      "id": "fc4908f3f17",
+      "line": 782,
+      "severity": "non-blocking",
+      "summary": "The pre-write arm's colour #929292 (set in the palette dict at line 741 and used for the grey bars and for every grey numeral at lines 779-806) is about 3.1:1 against white. It is applied at 11 pt for the four 'not measured' strings at line 782, which need 4.5:1, so the annotation explaining why four of five operator rows carry no grey bar is the lowest-contrast text in the figure; the grey 14 pt numerals at lines 784, 804 and 806 fall short of the same 4.5:1 threshold for their size. A reader can still read it at full size, but the figure is displayed on the evidence page at a 26 rem max-height, where this is the first text to fade, and the 'not measured' strings are the only cue that the missing grey bars are an absent measurement rather than a zero. A darker neutral for the annotations, or a darker grey applied to text only, would clear it without touching the two-series colour meaning."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "defect (non-blocking): the grey used for every 'not measured' annotation and every grey value label is #929292 on white, a ratio of about 3.1:1. That clears 3:1, but 11 pt text needs 4.5:1 and the 14 pt numerals do too, so the string that explains the four absent grey bars is the faintest text in the compare page, and on the page the figure is downscaled to a 26 rem max-height it is the first thing to fade.",
+    "data_ink": "pass: the counts are carried by solid bars at 0.36 and 0.34 height with the value printed beside or above each, and nothing else competes for weight; no error band, trend line or reference mark is drawn.",
+    "decoration": "pass: white ground, no gradient, background fill or shading of any kind, no gridlines, and the top and right spines of both axes are absent; the legend is frameless.",
+    "label_collision": "pass: no label is clipped or overlapping. The rendered ink bounding box spans x 18-1379 and y 24-692 inside a 1400x720 canvas, leaving 18 px clear on the left, 20 px on the right, 24 px at the top and 27 px at the bottom, so no text is cut at a canvas edge; the top legend sits above both panel titles with clear space between, the vertical y-axis label of the right panel lies between the panels and touches neither the left panel's bars nor its x-axis label, the two '0' zero-length bars of the left family category are labelled 0 and 0 with clear space between them, and no direct label sits over a bar of the other arm.",
+    "legibility": "pass: two panels read at a glance at 1400x720; all five operator labels ('flux surface averaged', 'line averaged', 'line integrated', 'time derivative', 'volume averaged') are fully drawn, both family categories are spelled out over two and three lines, every bar carries its count as a direct label, and one frameless two-entry legend above the panels names both arms. The four rows with no pre-write reading are marked 'not measured' rather than left blank, so the empty grey position cannot be read as a zero.",
+    "table_form": "pass: the image plots counts of wordings per operator and counts of families per wording class, a category comparison rather than a set of numbers a reader needs to look up, so it is not standing in for a table; the exact counts, denominators and per-name detail are carried by the census JSON and HTML tables beside it."
+  },
+  "notes": "read-only review: no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. The figure review runs no suite, so added_failure_count is 0 with an empty id list. One attached PNG was reviewed, image-0.png, and its 1400x720 size matches the drawing script's 14x7.2 in figure at 100 dpi, which is the positive control that the attachment is the SVG's render.",
+  "project": "imas-codex",
+  "raw_text": "RUBRIC legibility: pass \u2014 two panels read at a glance at 1400x720; all five operator labels and both family categories are fully drawn, every bar carries its count as a direct label, one frameless two-entry legend names both arms, and the four rows with no pre-write reading say 'not measured' rather than showing an empty position that reads as zero.\nRUBRIC data_ink: pass \u2014 solid bars with the value printed beside or above each carry all the weight; no error band, trend line or reference mark competes with them.\nRUBRIC decoration: pass \u2014 white ground, no gradient, background fill or shading, no gridlines, top and right spines absent, frameless legend.\nRUBRIC contrast: defect (non-blocking) \u2014 the grey #929292 used for the four 'not measured' strings at 11 pt and for every grey value label at 14 pt is about 3.1:1 on white, under the 4.5:1 those sizes need, so the cue that explains the missing grey bars is the faintest text in the figure and the first to fade at the page's reduced height.\nRUBRIC table_form: pass \u2014 the image plots counts compared across categories, not values a reader looks up, and the exact counts and per-name detail sit in the census JSON and HTML tables beside it.\nRUBRIC label_collision: pass \u2014 ink spans x 18-1379, y 24-692 inside a 1400x720 canvas, at least 18 px clear on every edge; no label is clipped, no label overlaps another, and no direct label sits over a bar of the other arm.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py:782 non-blocking: the pre-write grey #929292 renders at about 3.1:1 on white, below the 4.5:1 that 11 pt text and 14 pt numerals need, so the 'not measured' annotations that explain the four absent grey bars are the lowest-contrast text in the figure and fade first when the page displays the figure at its 26 rem max-height.",
+  "review_run_id": "r-20261115T045629911795-review-of-sdbc-rewrite-closing-census-19daa7a6db6e-figure",
+  "reviewed_base_sha": "c1d0d9bf97e29ea7210aa304b6b59d759c2d7758",
+  "reviewed_head_sha": "19daa7a6db6e1a0212c2be6cd4c82b11957e0cd5",
+  "reviewed_run_id": "r-20261114T234551064752-sdbc-rewrite-closing-census",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T05:13:19.627267+00:00",
+  "total": null
+}
