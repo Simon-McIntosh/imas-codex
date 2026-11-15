@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T21:25:03.569Z",
+  "dispatched_at": "2026-11-15T21:24:29Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-pipeline-hygiene.html:88",
+      "id": "done_when-1",
+      "reason": "a worker closes s10 on eight red runs while ten open non-blocking findings from the same landings stay unowned, which is exactly the loss the section says it exists to prevent.",
+      "text": "the prose says \"Four landings of 2026-11-15 passed review with findings that were not blocking and were left open. They are closed here so they are not lost\", but the reviews it cites leave eleven non-blocking findings open at head (r-20261114T222654659779: 3; r-20261115T150029916459: 3; r-20261115T115510140775: 5) and s10 enumerates eight: three of the labels landing's five head findings \u2014 `unchecked-summary-blocks-3`, `unfenced-paths-4`, `scratch-outside-tmpdir-5` \u2014 are named nowhere in docs/plans/ or docs/evidence/, and the fourth landing it counts (r-20261114T205523095671-sdbc-name-check-prototype, whose head reviews r-20261115T023312771328 and r-20261115T055352130275 leave seven non-blocking findings open) is not cited at all, so the section's own measure covers a subset of the class it declares; the heading \"The open review findings on the name check and the source readers are closed\" also omits the labels landing whose findings its body carries",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-pipeline-hygiene.html:88",
+      "id": "reasoning-1",
+      "reason": "the method clause replaces a falsifiable endpoint with a resolver whose disagreements with \"runs as committed\" become arguments in the node instead of findings, and deleting it leaves the section checkable on exactly the four members it names.",
+      "text": "the done-when orders that the scripts \"are found by resolving every package name and attribute each script uses against the tree, not by importing alone\", which prescribes a discovery procedure in plan text and anchors the sweep to a static resolution that both over- and under-reports: attributes provided dynamically (`__file__`, a module `__getattr__`, names bound by `getattr`/`importlib` inside the script) resolve as missing when the script runs, and attributes that resolve statically can still fail at run time; the observable the section actually wants is a committed script that no longer runs as committed, plus the missing name it reports, and that is directly checkable (the three sn-review-through-jev scripts reach `DEFAULT_NAME_RECEIPTS`/`DEFAULT_DOCS_RECEIPTS` on `cascade_calibration`, both absent, and `srtj-jev-name-evidence-measure-run.py` and `name-definition-check-run.py` fail at import)",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e8c61f0a2b22b4703c0a01a2e1094d57ca266554",
+  "plan_fingerprint": "cc99e6ec100620607678a945a9165c6c41cbff96479511fcd5fd5a52827f2360",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 43,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T211540785448-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "8c81a23dfd10563bfe3117e31d3cdbb6b26c6b98",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the three cited review directories exist under docs/state/imas-codex/reviews/run/ and each holds review JSON that quotes its findings in full; the four named evidence scripts (docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py and the three sn-review-through-jev `*-run.py` files) exist; `review/name_definition_seat.py` and `pools.py` resolve.",
+    "done_when": "a finding \u2014 s10 at docs/plans/sn-pipeline-hygiene.html:88 enumerates eight findings while the reviews it cites record eleven non-blocking findings at head, and the fourth landing it claims is left with no cited review at all.",
+    "evidence_paths": "pass \u2014 s10 sends evidence to the plan's durable `docs/evidence/` tree and its frozen-record alternative writes in place in the committed script; no scratchpad, node-local temp or session-only path is named, and no gate log is directed outside the repository.",
+    "naming": "pass \u2014 s10's symbols are content names (`name-definition-check-run.py`, `name_definition_flagged`, `pools.py`); the only plan-local phrases (\"the eight findings above\", \"Four landings\") stay in plan prose, not in a symbol, comment or filename.",
+    "reasoning": "a finding \u2014 s10:88 fixes the sweep's discovery as static resolution of every package name and attribute each script uses, a method that is wrong in both directions and displaces the observable endpoint the section is really after.",
+    "single_goal": "pass \u2014 each clause of s10 is one of the named open findings, its red-run control, or an invariance control on those repairs (label-set byte-identity, no stored graph change, the whole-directory arm), so one verdict can close the section.",
+    "wiring": "pass \u2014 every section of docs/plans/sn-pipeline-hygiene.html carries `data-links=\"\"` and the `plan-standalone` meta declares the plan consumes and feeds no other plan, so no depends-on/informs/gates edge is owed; `plan-section-declarations` lists s9 and s10 as implementable, so no dependency s10 needs is missing."
+  },
+  "section_digests": {
+    "_document": "fc0b9243c4b299d7cd58edf7987e28fb84b7ca51ea9f6cd18d04853eb2923d2e",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "a4c3b5fb9e91208a3ea3f1f5c3a908d2a4978cdc69245301ea15debb27be1b41",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T21:35:42.561310+00:00",
+  "total": null
+}
