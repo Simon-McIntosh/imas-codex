@@ -1,0 +1,490 @@
+{
+  "agent": {
+    "alias": "sol61",
+    "backend": "codex",
+    "effort": "high",
+    "launch": "cli",
+    "model": "gpt-6.1-sol",
+    "sandbox": "worktree-full"
+  },
+  "attempt": 2,
+  "attempt_kind": "resume",
+  "backend": "codex",
+  "base_sha": "035a2337077e9d169b7d57af62559cee373b87b8",
+  "boundary_waiver": null,
+  "brief": {
+    "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083906611033-variable-name-mapping-sources/brief.md",
+    "sha256": "3b008ece70dc44a0631f8b6bbabb7b4ab03d64fe6dbb0900c78cf23db7604e88"
+  },
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "detail": "backend reports token usage but no headroom",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_write_input_tokens": 0,
+      "cache_write_input_tokens_cumulative": 0,
+      "cached_input_tokens": 5662080,
+      "cached_input_tokens_cumulative": 5662080,
+      "input_tokens": 5873156,
+      "input_tokens_cumulative": 5873156,
+      "output_tokens": 37435,
+      "output_tokens_cumulative": 37435,
+      "reasoning_output_tokens": 10006,
+      "reasoning_output_tokens_cumulative": 10006
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 212,
+    "files": 1,
+    "removed": 0
+  },
+  "clone_matches": [],
+  "commit_resolution": null,
+  "commits": [
+    "8eb59fc6818235a99f800bb603a68233f7aeca21",
+    "0e4b2678784cc091d2462f57f13d7635eb0aca96"
+  ],
+  "completed_at": "2026-11-15T09:11:54Z",
+  "completed_at_source": "stream_mtime",
+  "dispatched_at": "2026-11-15T08:42:56Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": {
+    "reason": "model_span_unavailable_at_promotion",
+    "status": "underivable"
+  },
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv uv run --no-sync python /home/ITER/mcintos/.cache/imas-codex-codac-uda/mapping-evidence-gate.py",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083906611033-variable-name-mapping-sources/mapping-completed-record-final-gate.log"
+  },
+  "impl_move": {
+    "at_complete": null,
+    "at_dispatch": 0.4449760765550239,
+    "plan": "codac-uda-signals",
+    "reason": "corrective-run:resume",
+    "verdict": "exempt"
+  },
+  "lane": "codex",
+  "lane_advisory": {
+    "backend": "codex",
+    "burn_multiple": 2.14254053423539,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'codex' is projected to exhaust at 2026-11-17T09:06:35Z, which is after this node's 18000s horizon ending 2026-11-15T13:42:31.048322+00:00",
+    "horizon_ends_at": "2026-11-15T13:42:31.048322+00:00",
+    "horizon_seconds": 18000,
+    "metered": true,
+    "observed_at": "2026-11-15T08:42:30Z",
+    "precedes_horizon": false,
+    "projected_exhaustion_at": "2026-11-17T09:06:35Z",
+    "resets_at": "2026-11-19T16:24:40Z",
+    "seconds_until_reset": 373329,
+    "state": "quiet",
+    "utilisation_pct": 82.0
+  },
+  "lane_declaration": {
+    "backend": "codex",
+    "headroom": "known",
+    "metered": true,
+    "observed_at": "2026-11-15T08:42:30Z",
+    "read_at": "2026-11-15T08:42:31Z",
+    "resolved_backend": "codex",
+    "utilisation_pct": 82.0
+  },
+  "lane_reading": {
+    "age_seconds": null,
+    "binding_observed": "unknown",
+    "detail": "backend declares no lane document",
+    "generating": "unknown",
+    "headroom": "unknown",
+    "mean_context": "unknown",
+    "observed_at": null,
+    "state": "unknown",
+    "suggested_shelf_life_seconds": null,
+    "throughput": {
+      "age_seconds": null,
+      "aggregate_tokens_per_second": "unknown",
+      "detail": "backend declares no lane document",
+      "mean_tokens_per_second": "unknown",
+      "observed_at": null,
+      "runs": "unknown",
+      "state": "unknown"
+    },
+    "waiting": "unknown"
+  },
+  "lane_receipt": {
+    "effective_context_window": 380000,
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-15T09:11:54Z",
+    "quota_state": "measured",
+    "quota_windows": [
+      {
+        "observed_at": "2026-11-15T09:11:54Z",
+        "resets_at": 1795105480,
+        "used_percent": 83.0,
+        "window_minutes": 10080
+      }
+    ],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "notional_cost_usd": "no_dated_rate",
+      "rate_basis": "no_dated_rate"
+    }
+  },
+  "lineage": null,
+  "local": false,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083906611033-variable-name-mapping-sources/manifest.md",
+  "member": "disposable-r-20261115T083906611033-variable-name-mapping-sources",
+  "model_key": "sol",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "variable-name-mapping-sources",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083906611033-variable-name-mapping-sources/steering.md",
+    "brief_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083906611033-variable-name-mapping-sources/brief.md",
+    "brief_sha256": "3b008ece70dc44a0631f8b6bbabb7b4ab03d64fe6dbb0900c78cf23db7604e88",
+    "capability": {
+      "class": "general",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "low",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff"
+    },
+    "done_when": "Done when. The record lists each source with its access command or interface and, for a sample of two hundred variables from the cohort the scanner section catalogued, the number each source resolves; it ranks the sources by measured coverage and recommends which the catalogue should consume. Nothing is imported by this section, and no real variable name appears in a tracked file. Positive control: for each source, one variable known beforehand to appear in it is found through the stated access path; the known variables are written to a private file before the run, and the tracked record carries that file's SHA-256 digest and, per source, whether its variable was found. Negative control: a source that cannot be reached from the node is recorded as not measured, never as resolving zero.",
+    "estimated_hours": 4.0,
+    "goal": "deliver the measured inventory of existing sources that map archive variable names",
+    "id": "variable-name-mapping-sources",
+    "images": [],
+    "inputs": [],
+    "lane_declaration": {
+      "backend": "codex",
+      "headroom": "known",
+      "metered": true,
+      "observed_at": "2026-11-15T08:42:30Z",
+      "read_at": "2026-11-15T08:42:31Z",
+      "resolved_backend": "codex",
+      "utilisation_pct": 82.0
+    },
+    "lane_reading": {
+      "age_seconds": null,
+      "binding_observed": "unknown",
+      "detail": "backend declares no lane document",
+      "generating": "unknown",
+      "headroom": "unknown",
+      "mean_context": "unknown",
+      "observed_at": null,
+      "state": "unknown",
+      "suggested_shelf_life_seconds": null,
+      "throughput": {
+        "age_seconds": null,
+        "aggregate_tokens_per_second": "unknown",
+        "detail": "backend declares no lane document",
+        "mean_tokens_per_second": "unknown",
+        "observed_at": null,
+        "runs": "unknown",
+        "state": "unknown"
+      },
+      "waiting": "unknown"
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083906611033-variable-name-mapping-sources/manifest.md",
+    "negative_control": "none: the node writes a record, not a test; its controls are the pre-registered known variable per source and the not-measured outcome stated in the done-when",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "archive-signal-mcp-read": [
+        "docs/evidence/fragments/codac-uda-signals/archive-signal-mcp-read.html",
+        "docs/figures/codac-uda-signals/archive-signal-mcp-read",
+        "imas_codex/llm",
+        "imas_codex/remote",
+        "tests/llm",
+        "tests/remote"
+      ],
+      "archive-signals-pipeline-run": [
+        "docs/evidence/fragments/codac-uda-signals/archive-signals-pipeline-run.html",
+        "docs/figures/codac-uda-signals/archive-signals-pipeline-run",
+        "imas_codex/discovery/signals",
+        "tests/discovery"
+      ],
+      "full-archive-variable-catalogue": [
+        "docs/evidence/fragments/codac-uda-signals/full-archive-variable-catalogue.html",
+        "docs/figures/codac-uda-signals/full-archive-variable-catalogue",
+        "imas_codex/config",
+        "imas_codex/discovery/signals",
+        "imas_codex/graph",
+        "imas_codex/remote",
+        "imas_codex/schemas",
+        "tests/config",
+        "tests/discovery",
+        "tests/graph",
+        "tests/remote"
+      ],
+      "plant-breakdown-structure-links": [
+        "docs/evidence/fragments/codac-uda-signals/plant-breakdown-structure-links.html",
+        "docs/figures/codac-uda-signals/plant-breakdown-structure-links",
+        "imas_codex/discovery",
+        "imas_codex/graph",
+        "imas_codex/schemas",
+        "tests/discovery",
+        "tests/graph"
+      ],
+      "remove-unreached-discovery-functions": [
+        "imas_codex/discovery/signals/parallel.py",
+        "imas_codex/discovery/signals/tdi.py"
+      ],
+      "scc-sources-read-from-one-place": [
+        "docs/evidence/fragments/sn-catalog-consistency/scc-sources-read-from-one-place.html",
+        "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place"
+      ],
+      "sdbc-adjudicated-labels": [
+        "docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py",
+        "docs/evidence/fragments/sn-definitions-by-construction/sdbc-adjudicated-labels.html",
+        "docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json"
+      ],
+      "sdbc-family-wording-pass": [
+        "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.html",
+        "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.json",
+        "docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py",
+        "docs/figures/sn-family-wording-pass"
+      ],
+      "variable-name-component-parse": [
+        "docs/evidence/fragments/codac-uda-signals/variable-name-component-parse.html",
+        "docs/figures/codac-uda-signals/variable-name-component-parse"
+      ]
+    },
+    "plan": "codac-uda-signals",
+    "regenerate_paths": [],
+    "requested_backend": "codex",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§15",
+    "spec_level": "guided",
+    "time_budget": "5h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "docs/evidence/fragments/codac-uda-signals/variable-name-mapping-sources.html",
+      "docs/figures/codac-uda-signals/variable-name-mapping-sources"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": null,
+  "outcome": "",
+  "outside_scope_paths": [
+    "gc.pid.lock"
+  ],
+  "pace": {
+    "allowance": {
+      "advisory": true,
+      "burn_multiple": 2.1425075157705047,
+      "derived": 0.4210020237318122,
+      "drain_hours": 168.0,
+      "effective_limit": 0.4210020237318122,
+      "elapsed_fraction": 0.38272911248346564,
+      "elapsed_hours": 64.29849089722222,
+      "group": "codex-sub",
+      "limited_by": "allowance",
+      "observed_at": "2026-11-15T08:42:34+00:00",
+      "pace_multiple": 1.1,
+      "provider_ceiling": null,
+      "reason": null,
+      "remaining_budget": 0.18000000000000005,
+      "remaining_windows": null,
+      "resets_at": "2026-11-19T16:24:40Z",
+      "state": "observed",
+      "utilisation": 0.82,
+      "window_minutes": 10080
+    },
+    "bar": {
+      "bar": 0.9144639999999999,
+      "decided_by": "window",
+      "margin": -0.10196399999999994,
+      "name": "variable-name-mapping-sources",
+      "score": 0.8125,
+      "state": "observed",
+      "verdict": "split",
+      "window_fill": 0.82
+    },
+    "clocks": {
+      "five_hour": {
+        "age_seconds": 0.56723,
+        "observed_at": "2026-11-15T08:42:34+00:00",
+        "period": "primary",
+        "resets_at": "2026-11-19T16:24:40Z",
+        "state": "observed",
+        "utilisation": 0.82,
+        "window_minutes": 10080
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "not_published",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": "codex-sub",
+    "hold": null,
+    "lane": "codex",
+    "lift_id": null,
+    "member": "codex",
+    "node": "variable-name-mapping-sources",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": null,
+    "recorded_at": "2026-11-15T08:42:34.567230+00:00",
+    "score": 0.8125,
+    "session": null,
+    "source": "recorded",
+    "state": "observed"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5228.216,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": null,
+  "plan_impl_at_dispatch": 0.4449760765550239,
+  "plan_link": null,
+  "promoted_by": "review-acceptance",
+  "promoted_revision": "0e4b2678784cc091d2462f57f13d7635eb0aca96",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "035a2337077e9d169b7d57af62559cee373b87b8",
+    "reviewed_head_sha": "0e4b2678784cc091d2462f57f13d7635eb0aca96",
+    "scores": {
+      "durability": 9,
+      "evidence": 14,
+      "fit": 16,
+      "goal_fidelity": 15,
+      "reuse": 20,
+      "scope_discipline": 19
+    },
+    "status": "parsed",
+    "total": 93
+  },
+  "review_tier": "none",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261115T083906611033-variable-name-mapping-sources",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§15",
+  "session": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+  "session_harness": "codex",
+  "session_id": "01a1de5f-e022-7d82-8329-7bd10d1f8ff4",
+  "session_model": "gpt-6.1-sol",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "guided",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 5662080,
+    "cumulative_input_tokens": 11535236,
+    "detail": "turn tokens recorded, but no span was supplied to rate them",
+    "generated_tokens": 47441
+  },
+  "time_budget": "5h",
+  "tool_steps": 111.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 1738,
+  "watch_override": {
+    "arming_line": "reckon crew watch --project imas-codex",
+    "attach_line": "/home/ITER/mcintos/Code/reckon/.venv/bin/reckon crew follow --project imas-codex --session 3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+    "requested": true,
+    "session_attached": true,
+    "watcher_live": true
+  },
+  "worker_exit": {
+    "attempt": 2,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-15T09:12:00Z",
+    "last_record_type": "turn.completed",
+    "launched_at": "2026-11-15T09:05:40Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [
+      {
+        "bytes": 75256800,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083906611033-variable-name-mapping-sources/codex-home/cache"
+      },
+      {
+        "bytes": 32753627,
+        "path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T083906611033-variable-name-mapping-sources/codex-home/plugins"
+      }
+    ],
+    "run_id": "r-20261115T083906611033-variable-name-mapping-sources",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 347,
+    "worker_pid": 243883
+  },
+  "worker_seconds": 1725,
+  "worker_seconds_source": "rollout_receipts",
+  "worktree_retention": null
+}
