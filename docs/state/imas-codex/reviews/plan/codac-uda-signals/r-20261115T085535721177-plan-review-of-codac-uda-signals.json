@@ -13,6 +13,17 @@
         "s15"
       ],
       "when": "2026-11-15T09:37:10.716048+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "s12": "f3927d487efae8a091a9b8189b5403cba2a58302b0c30ad4489c1a4110d909dd"
+      },
+      "reason": "Version 40 resolves the contradiction the section 12 worker measured: the archive refuses metadata for about twelve percent of listed variables, so the section now catalogues them with an explicit unavailable state; the negative control still forbids empty metadata written as success.",
+      "units": [
+        "s12"
+      ],
+      "when": "2026-11-15T10:07:29.005233+00:00"
     }
   ],
   "completed_at": "2026-11-15T09:16:19.290Z",
