@@ -18,12 +18,12 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;}">
   <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="47">
+<meta name="plan-version" content="48">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -80,7 +80,7 @@
 <p>On 2026-11-11 the standard-names package carried 31 private names imported from one of its top-level modules into another, across 24 import statements (31 name occurrences, 27 distinct names). Its subpackages are outside this section: they keep their own sibling-import rule. The package's import-boundary test checks only two subpackages, and its rule there forbids every import between sibling modules, a rule the package's top-level modules cannot meet, so it passes over all of them.</p><p><strong>Done when:</strong> no top-level module of <code>imas_codex/standard_names</code> imports a private name from another top-level module of that package (imports from outside the package, such as from <code>imas_codex.settings</code>, and imports involving its subpackages are outside this section), each closed either by moving the caller or through a public name the owning module exports, with the before and after counts recorded and every name made public listed in the landing evidence with the reason it can neither stay private nor move with its caller; the existing import-boundary test gains a private-name rule over the package's top-level modules, kept distinct from the sibling-import rule its subpackages keep, passes at head, and fails when any one closed import is restored; behaviour is unchanged, and <code>tests/standard_names</code> adds no failure id against the stated base.</p>
 
     <h2 id="s9">No unreached code in the review calibration module</h2>
-<section data-reckon="section" data-id="s9" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s9" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>A code review of the review package on 2026-11-14 (<code>~/.config/reckon/crew/reports/imas-codex/code-review/d6c322cc9d29/report.md</code>) found that about 224 of the 375 lines of <code>imas_codex/standard_names/review/cascade_calibration.py</code> are reached by nothing: the fitting functions that once produced the review cutoffs. The cutoffs in use are the stored values in <code>cascade_thresholds.json</code>; no command or test re-fits them. The treatment was held until the name-check work decided whether the cutoffs would be re-fitted; it closed without re-fitting them, and the lead ruled on 2026-11-15 that no screening model is added.</p><p><strong>Done when:</strong> every function and constant in the module is reached from a caller in <code>imas_codex/</code> or from a test that asserts its behaviour, shown by a reachability listing committed with the evidence before and after; the module's line count falls and the count is stated; the stored cutoffs and every behaviour of the review path are unchanged, shown by the whole <code>tests/standard_names</code> directory adding no failure at the head against the base, each from an archive as one <code>all_debug</code> job; a test fails when a function with no caller is added back to the module.</p>
 
     <h2 id="s10">The open review findings on the name check, the source readers, the labels, the prototype and the two wording passes are closed</h2>
@@ -193,7 +193,10 @@
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html</p></div>
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261115T210048550087-sph-unreached-calibration-code" data-who="reckon-build" data-when="2026-11-15T21:06:04Z">
-    <div class="r-comment-body"><p>sph-unreached-calibration-code deleted the module&#x27;s twelve callerless definitions (module 375 -&gt; 100 lines) and added a reachability guard that fails on a planted callerless function; the two archive suite arms report 24 failed / 8737 passed at base and 24 failed / 8739 passed at head with identical failure id sets.</p></div>
+    <div class="r-comment-body"><p>sph-unreached-calibration-code deleted the module's twelve callerless definitions (module 375 -&gt; 100 lines) and added a reachability guard that fails on a planted callerless function; the two archive suite arms report 24 failed / 8737 passed at base and 24 failed / 8739 passed at head with identical failure id sets.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-s9-closed-calibration-module-reached" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-15T22:50:00Z">
+    <div class="r-comment-body"><p>Closed. The twelve definitions of the calibration module that nothing reached are deleted (375 lines to 100) and a guard test fails on a planted callerless function. The whole standard-names directory run from an archive at the reviewed head shows two failures, both in <code>test_refine_model_dispatch.py</code> and both present at the base revision: the model-seat route check introduced on main the same afternoon rejects the placeholder model identifiers those tests set. They are not from this change and are carried to the open-findings section. The independent review left four non-blocking findings, which the open-findings section also covers.</p></div>
 </div>
 </section>
 </main>
