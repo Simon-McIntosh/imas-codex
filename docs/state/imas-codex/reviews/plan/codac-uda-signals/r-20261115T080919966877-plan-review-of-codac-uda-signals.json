@@ -1,5 +1,24 @@
 {
   "absent_items": [],
+  "accepted_edits": [
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "ca046e7dd484e0a16818d273a3a96b67d0c9ab9c449484f6e87ce0e6cccd366a",
+        "s12": "5df9abf62602bccf58438f24890c3fc3de876ebcbf5a037d1698007d222718b4",
+        "s14": "117b94eb546d6e2e6ecf9f388e75cd36bc15a9f1f662e8e7b1a5db994b1bb044",
+        "s15": "0f253e8e2467e5b303b08b5a9899b74126937b5d0bc6899fc876cc944660f940"
+      },
+      "reason": "Version 31 makes exactly the four changes the newest content review asked for in sections 12, 14 and 15, each recorded in its answer; no other text changed.",
+      "units": [
+        "_document",
+        "s12",
+        "s14",
+        "s15"
+      ],
+      "when": "2026-11-15T08:38:39.238582+00:00"
+    }
+  ],
   "completed_at": "2026-11-15T08:34:38.914Z",
   "dispatched_at": "2026-11-15T08:09:45Z",
   "findings": [
