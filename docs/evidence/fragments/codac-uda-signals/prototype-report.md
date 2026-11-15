@@ -1,14 +1,17 @@
 # CODAC UDA loader prototype and design assessment
 
-The isolated reader works for live variable metadata and pulse listing, and all
-30 focused fake-client tests pass. The latest bounded attempt used all six
-requests: an explicitly qualified slow-campaign query returned **39 campaigns**,
-but the one-hour, 200-bin envelope read of a slow signal inside the selected
-campaign returned **0 samples**. No successful live signal read or plot has
-been obtained. The required live read and plot therefore still block landing.
-Earlier pulse and variable refusals are preserved below; neither metadata
-listing nor catalogue discovery proves that data exists for the selected
-variable, archive role and interval.
+The prototype now has a **successful live signal read and inspected live plot**.
+Using the exact known-active 24-hour day and continuously sampled current from
+mctb's tuning-day example, the slow-role reader returned **208 envelope rows in
+2.051 s**, spanning **85.944 ks**, with unit **A**. The arrays, statistics, SVG
+and rendered preview are in the private cache. The preview was visually
+inspected and is readable, without clipped or overlapping text. All **30
+focused fake-client tests pass**. The live-read-and-plot requirement is met.
+
+Earlier failed and empty attempts remain recorded below. Their interpretation
+is now explicit: metadata and campaign membership do not establish interval
+coverage, on-change controller fields can legitimately be empty without edge
+samples or lookback, and pulse matching needs both category and pulse segments.
 
 No operator endpoint was contacted. No real archive address, variable name,
 variable prefix, pulse name, or live data is included here or in the prototype.
@@ -20,7 +23,7 @@ change, server change, or rename applied.
 
 ## Live outcomes and evidence
 
-The requests ran from `98dci4-clu-2001` on 2026-11-14. Each started a fresh
+The requests ran from `98dci4-clu-2001` on 2026-11-14 and 2026-11-15. Each started a fresh
 module-loaded reader from the project's Python 3.12 loader. The dependency
 module supplied Python 3.13.5, NumPy and `uda_client_reader`; no build or install
 was needed. Module load and execution occurred in one shell invocation:
@@ -36,12 +39,70 @@ serialization; these are not isolated server latency measurements.
 | Pulse positive control, one server-declared category | 1 pulse; same 743-category catalogue | 2.135 | 25,990 | not a signal read | not applicable |
 | Resumed absolute-time read, last 24 hours, 200 envelope bins, previously listed variable | Exact error: `ReadError: ERROR udaPlugin: Requested variable does not exist` | 3.042 | no successful result | no array or span returned | not returned |
 
+The final instruction supplied a fresh allowance of four slow-role requests,
+with no pulse catalogue calls. Two were used:
+
+| Known-day request | Outcome | Elapsed [s] | Result JSON [bytes] | Signal samples / returned span | Unit |
+|---|---|---:|---:|---|---|
+| Exact known-active day and continuous current, 200-bin envelope, extra native environment overrides retained | `subprocess.TimeoutExpired`; exact reason `timed out after 20 seconds` | 20.057 | no result | no array returned | not returned |
+| Same variable, day and envelope settings, canonical mctb module environment without those overrides, 60 s timeout | nonempty read, arrays saved and plot inspected | 2.051 | 16,974 | 208 rows / 85,943.547077993 s | present: A |
+
+The complete first exception, including its private command arguments, is
+retained only in `known-day-native-timeout.json`; those arguments are redacted
+here to keep host names out of tracked files. The successful retry finished in
+2.051 s, well inside either timeout. The retry removed extra native environment
+overrides and increased the deadline, so it is not a controlled experiment
+identifying which factor caused the first timeout. The successful invocation
+uses the canonical module-provided environment and the configured slow host,
+without replacing native module settings speculatively. The client endpoint
+receipt matches the selected slow role.
+
+The variable and window were extracted directly from `DAY` and the continuous
+current passed to `day_series()` in mctb's
+`docs/figures/htscl-thermal/tuning_day.py`, then expanded through the exact
+`series()` naming convention in `htscl_data.py`. The reader requested
+`tsFormat=absolute`, integer epoch-nanosecond bounds for 86,400 s,
+`decSamples=200`, and `decType=env`. The archive returned 208 rows: the bin
+request is a target, not an exact result-count guarantee. No whole-day raw array
+was requested. The result retains separate mean, minimum and maximum columns.
+
+The plot function printed these statistics from the saved live arrays:
+
+| Metric | Live result |
+|---|---:|
+| Returned envelope rows | 208 |
+| Returned timestamp span | 85.943547078 ks |
+| Median returned timestamp spacing | 28.767732132 s |
+| Minimum across envelope lower bounds | 27.248462677 A |
+| Maximum across envelope upper bounds | 34.102503906 kA |
+| Unweighted mean of envelope bin means | 6.399381608 kA |
+| Returned unit | A |
+
+The spacing is that of the **returned envelope timestamps**, not a measurement
+of the raw acquisition cadence. The mean is explicitly an unweighted mean of
+bin means, not a time-weighted daily current. The inspected figure shows a
+clear high-current plateau and low-current intervals, so the successful route
+provides nonuniform, nonzero data rather than a uniform-column or empty-result
+artifact. It uses the existing `plot()` function, with kiloseconds on the long
+time axis and kiloamperes on the signal axis. The export's mechanical text
+bounds/overlap check passed; its 1400-pixel preview was then inspected visually.
+
+The arrays are `known-day-live-signal.npz` and
+`known-day-live-signal.json`, statistics are `known-day-live-statistics.json`,
+and the live figure and inspected preview are `known-day-live-signal.svg` and
+`known-day-live-preview.png`, all under `~/.cache/imas-codex-codac-uda/`.
+`known-day-live-receipt.json`, `known-day-live-binding.json` and
+`known-day-live-plot-receipt.json` retain the completed request, endpoint check
+and plot result. No live data or figure is committed. The two remaining request
+slots were not used because the required read, plot, inspection and statistics
+had succeeded; an optional on-change read was unnecessary for this evidence.
+
 The first resumed attempt used one absolute-time request and stopped on its
 variable-not-found error. The next instruction supplied a fresh allowance of
 six requests, explicitly separating fast and slow archive roles. The complete
 second sequence is recorded here; the six-request ceiling was not exceeded.
 
-| Latest request | Archive role | Outcome | Elapsed [s] | Result JSON [bytes] | Signal samples / span / unit |
+| Earlier role-specific request | Archive role | Outcome | Elapsed [s] | Result JSON [bytes] | Signal samples / span / unit |
 |---|---|---|---:|---:|---|
 | Fast pulse-family prefix, initial binding | fast | 0 pulses; 743 categories | 5.779 | 25,896 | not a signal read |
 | Slow campaign prefix, initial binding | slow | 0 pulses; 743 categories | 2.015 | 25,896 | not a signal read |
@@ -98,21 +159,37 @@ The six latest request payloads are `role-live-01.json` through
 `role-live-06-binding.json`. `role-live-06.npz` contains the empty read arrays and
 metadata. `role-module-environment.json` holds the inherited native settings.
 These files carry actual selectors and endpoints and must remain internal.
-There is no successful live signal-data file or live plot. `fake-signal.svg` and
-`fake-signal-preview.png` remain invented test data only; the earlier preview
-was rendered and visually inspected and is not counted as live validation.
+These earlier receipts contain no successful live signal data. The later
+known-day artifacts listed above supply the successful read and plot.
+`fake-signal.svg` and `fake-signal-preview.png` remain invented test data only
+and are not counted as live validation.
 
-The remaining evidence needs a populated signal interval on its verified
-serving role. A subsequent bounded allowance should first locate populated bins
-within a returned campaign, then choose the short validation window from those
-bins rather than from the campaign midpoint. No conclusion that the archive or
-all signals are empty follows from this one empty hour.
+The successful known-day read resolves the live-data evidence gap; it does not
+establish universal coverage for arbitrary variables, intervals or the fast
+archive. The earlier empty controller read is explained by its on-change
+storage and arbitrary selected hour. Such a signal may have a valid held value
+without an event inside the requested interval. For on-change fields, follow
+mctb's raw path: `decSamples=-1,extSamples=true`, together with a lookback or a
+known-active window. Retain the last sample before the start for sample-and-hold
+semantics, and trim an extra sample after the end when enforcing a half-open
+window. An envelope over an arbitrary quiet hour cannot establish absence of a
+held value. The prototype does not yet expose `extSamples` as a request option;
+this belongs in the production reader's typed sampling policy. It was not
+necessary for the continuously sampled live validation, and no optional
+on-change live read was made.
+
+The pulse catalogue finding also remains: supply an explicit pulse-segment
+wildcard, for example the invented `DEMO:CAMPAIGN-*/*`. The bare category-prefix
+queries returned zero despite matching categories being listed, while the
+qualified slow query returned 39 campaigns. A production scanner should build
+this grammar explicitly and test it rather than treating a clean zero as an
+empty archive.
 
 The focused gate is
 `uv run --no-sync pytest -p no:cacheprovider scripts/codac_uda_prototype/test_reader.py`,
 with the shared project environment and this worktree on `PYTHONPATH`.
 `~/.cache/imas-codex-codac-uda/prototype-tests.log` contains the full command,
-revision and tree header, `30 passed, 1 warning in 1.30s`, and final `EXIT=0`.
+revision and tree header, `30 passed, 1 warning in 1.31s`, and final `EXIT=0`.
 The warning concerns the existing `cache_dir` pytest setting when its cache
 plugin is disabled; it does not skip a test.
 
@@ -462,7 +539,7 @@ result schema, not only in a plot caption.
 The smallest next implementation is a typed CODAC config, the shared executor's
 local module-setup support, a scanner returning shared `ScanResult`, and one
 facility read service/tool using the same reader. Before calling that complete,
-verify a populated interval on the correct data-serving role, validate one
-short signal interval and inspect its live plot, then gate modified Cypher
+retain the now-validated known-day selector as a private positive control,
+implement the typed role/sampling policy, then gate modified Cypher
 against the graph on a compute partition. No live graph writes were performed
 for this prototype.
