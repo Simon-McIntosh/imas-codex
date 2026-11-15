@@ -1,0 +1,83 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T02:00:12.894Z",
+  "dispatched_at": "2026-11-15T01:35:28Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:58",
+      "id": "wiring-1",
+      "reason": "the queue releases s2 and s3 in parallel, so s2's live control either waits on an undeclared upstream or is run against the wrong facility's setup and records a control that never exercised the CODAC client; declaring the edge costs one line and orders the work.",
+      "text": "\u00a72's live control lists a variable \"through the same call\" under a facility data system's declared setup commands, and \u00a73 is the unit that puts the CODAC UDA data system into the facility configuration (`data-status=\"implementable\"`, `data-depends-on` absent for s2 and s3); \u00a71 records that the configuration has no CODAC UDA entry today, so the only declared setup \u00a72 can resolve through the facility-aware layer before \u00a73 lands is a different facility's",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:58",
+      "id": "done_when-1",
+      "reason": "a worker graded on that clause either records a deviation against a healthy executor or deletes locality detection to make the sentence true; the intended endpoint is narrower, that the executor resolves no data system's setup or interpreter.",
+      "text": "the done-when asserts \"the executor still performs no facility lookup\", but `imas_codex/remote/executor.py:821` defines `_get_facility_local_hosts()`, which imports `get_facility` and iterates `list_facilities()`, and it is called from `_get_configured_local_hosts()` at :878, so the clause is already false against the code it names",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:82",
+      "id": "single_goal-1",
+      "reason": "the migration is a second, separately-reviewable deliverable on unrelated scripts, and folding it into a 3-hour low-risk plotting node means neither half is gated on its own evidence.",
+      "text": "\u00a77 now delivers \"the repository's single figure save function ... and the repository's existing figure scripts save through it, so no other save function remains\", which is a repository-wide rewrite: 11 tracked scripts call `.savefig(` directly (6 `scripts/figures_*.py`, 4 `scripts/plot_jet_*.py`, and `scripts/codac_uda_prototype/loader.py`) and no shared save function exists to route them through, so the node carries the plotted-signal deliverable and a migration of ten unrelated figure scripts under one verdict and one `low`-risk class",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:90",
+      "id": "reasoning-1",
+      "reason": "the heading is what a roadmap or sprint table shows for the node, so the section as listed promises locked decisions while the work delivers evidence for the lead to decide on; the retitle is one line and removes a false closure signal.",
+      "text": "the \u00a79 heading reads \"the rename decisions are locked\", while the done-when at :93 states \"a recommendation for each of the three decisions ... locking them stays with the lead\", and all three decision blocks carry `data-choice=\"\"`, so the heading asserts an endpoint the section has been changed to explicitly decline",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:72",
+      "id": "reasoning-2",
+      "reason": "the measurable endpoint is already stated in the done-when, and leaving the structural sentence in place asks a worker to adopt one internal shape the plan cannot check, which is the guess a reviewer would then have to test against the code.",
+      "text": "\u00a75's new sentence \"There is one read path per archive: the scanner's validity check and the loader issue their reads through it\" fixes an internal code path rather than an endpoint, and nothing in the done-when measures it: the two observations it does require (same samples for one request, same error classification for one failing request) are satisfied by two independent implementations that agree, so the sentence binds the mechanism while its own measure cannot see it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "caa852cef909868a7f07b6f8e345a7466b38d398",
+  "plan_fingerprint": "6f9e159d9fcae66a2dae1bc4fca925b127fd20cd29ae6b987fa938175c2af9e2",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T013453310709-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "f94d28a2d7e19b9b6f39ccbc388b9226ac58f4cb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `scripts/codac_uda_prototype/` and `docs/evidence/fragments/codac-uda-signals/prototype-report.md` both resolve in the tree, every `codac-uda-signals#sN` depends-on target exists, and no href needs the `.html` convention to resolve.",
+    "done_when": "a finding \u2014 \u00a72's done-when requires that \"the executor still performs no facility lookup\", which the executor already contradicts today.",
+    "evidence_paths": "pass \u2014 every landing record and figure in the units under review writes to a durable path (the run's landing record, `docs/figures/codac-uda-signals/`, `docs/evidence/fragments/codac-uda-signals/`), and no measured step names a scratchpad or node-local temporary.",
+    "naming": "pass \u2014 the changed units introduce no plan labels, stage names, ticket numbers or changelog prose; their symbols are not named after this plan.",
+    "reasoning": "a finding \u2014 \u00a79's heading declares the rename decisions locked while its own done-when hands locking to the lead.",
+    "single_goal": "a finding \u2014 \u00a77 carries the plotting deliverable plus a repository-wide migration of every existing figure script onto one save function.",
+    "wiring": "a finding \u2014 \u00a72's live control needs the CODAC UDA data system that \u00a73 delivers, but \u00a72 declares no dependency and \u00a73 is not wired as its upstream."
+  },
+  "section_digests": {
+    "_document": "8f61e18614e309a8c68b94f12d30a8260714946a9c1d6c4a45763beb8b6cdbaf",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s2": "c6da2d794ad11b6b32cdd08544451c42abf58727a0a94432d31c3becd9c7be55",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "71bfea46c4592d4dac0412fc9cb65e4dbda1dec4d912987371c59ea2669790bc",
+    "s6": "2d64094cc6100bc7fb8ee8ee9bd34a47695d4a4bdfed54b1c24757cbb626210e",
+    "s7": "d001e91c3e88aec1382a3a35eb60ce911f8991e9a2914b052395a262ffcac1f3",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "917e25a0f2949fd9d81301a616301ea2376b4d758088c4ae253af5cf56286435"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T02:02:49.668149+00:00",
+  "total": null
+}
