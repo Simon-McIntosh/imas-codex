@@ -65,7 +65,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 0,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "The plan states the endpoint; the node's brief cites this existing owner as the mechanism to extend and forbids a second one. Section 6 now also requires one enrichment mechanism for groups.",
+      "reason": "",
+      "when": "2026-11-15T10:46:57.107520+00:00"
+    }
+  ],
+  "responses": {
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "note": "The plan states the endpoint; the node's brief cites this existing owner as the mechanism to extend and forbids a second one. Section 6 now also requires one enrichment mechanism for groups.",
+      "reason": "",
+      "when": "2026-11-15T10:46:57.107520+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261115T101643449403-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261115T101643449403-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "00cdc8d3268038876b2e766d1f783caa84f17333",
   "rubric": "design",
