@@ -97,6 +97,16 @@
       "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. The sign-in and session handling are the credential manager's and the existing single-sign-on flow; the ICP client adds the method and host check and no new session machinery.",
       "reason": "",
       "when": "2026-11-15T21:37:16.728871+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-2",
+      "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. Private storage uses the project's existing data directory owner, not a new cache root.",
+      "reason": "",
+      "when": "2026-11-15T21:37:20.961073+00:00"
     }
   ],
   "responses": {
@@ -108,6 +118,15 @@
       "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. The sign-in and session handling are the credential manager's and the existing single-sign-on flow; the ICP client adds the method and host check and no new session machinery.",
       "reason": "",
       "when": "2026-11-15T21:37:16.728871+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "note": "The plan states the endpoint; each node's brief cites this existing owner as the mechanism to extend and forbids a second one. Private storage uses the project's existing data directory owner, not a new cache root.",
+      "reason": "",
+      "when": "2026-11-15T21:37:20.961073+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
