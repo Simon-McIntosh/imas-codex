@@ -41,7 +41,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 46,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6a42a3b0f72405bce01436c61f6f24a7d0e5f55a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The section landed while this review ran (reviewed head 28a3768b4, merged at 436b9531d) and is declared done with a closing comment; no node will be dispatched on it.",
+      "reason": "",
+      "when": "2026-11-15T22:58:57.909187+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6a42a3b0f72405bce01436c61f6f24a7d0e5f55a",
+      "commit_basis": "edit",
+      "note": "The section landed while this review ran (reviewed head 28a3768b4, merged at 436b9531d) and is declared done with a closing comment; no node will be dispatched on it.",
+      "reason": "",
+      "when": "2026-11-15T22:58:57.909187+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261115T224114754975-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261115T224114754975-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "0510d0a13c700227d2f06f9e7a9b7c00d22c2c45",
   "rubric": "content",
