@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Current same-tier model seats and matching fallbacks</title>
+  <style>
+    body { font: 15px/1.5 system-ui, sans-serif; max-width: 100rem; margin: 2rem auto; padding: 0 1rem; color: #202124; }
+    table { border-collapse: collapse; font-size: 13px; width: 100%; }
+    th, td { text-align: left; vertical-align: top; padding: .4rem; border-bottom: 1px solid #ddd; }
+    code { overflow-wrap: anywhere; }
+    .table-wrap { overflow-x: auto; }
+  </style>
+</head>
+<body>
+<article id="move-model-seats-to-newest-lines">
+  <h1>Current same-tier model seats and matching fallbacks</h1>
+  <p>Provider listings and serving catalogues were read on 2026-11-15 before editing the seats.
+  Of 63 declared identifiers, seven move to a newer stable Google line and 56 stay on their current
+  same-tier models. No declaration moves merely to obtain a more expensive capability class.
+  The local and decisions seats retain their models. The lead authorised this migration without a benchmark.</p>
+  <p>The application change is committed as <code>c3afb4752f001f4c6e2b5399b5844a0a12b8cb37</code>, measured against <code>0acabb08334743484e423591d9566b004fb9ec57</code>.
+  The dated catalogue now carries model metadata, published route prices, provider references and the
+  explicit judgements needed when model families change their names.</p>
+  <h2>Tier decisions and projected cost</h2>
+  <p>Google Flash becomes Hydrogen: the serving catalogue's input/output rates change from
+  $0.825/$4.125 to $1.50/$7.50 per million tokens, a 1.81818× ratio on each side, across three declarations.
+  Hydrogen is the closest-priced newer general text model; the other newer candidates, Argon and Carbon,
+  each list $2/$10. Google also documents migration from Flash on its
+  <a href="https://aistudio.google.com/docs/models/gemini-4-hydrogen">Hydrogen model page</a>.
+  This is a judgement across renamed lines, preserving the fast workload class.</p>
+  <p>Google Pro Preview becomes Carbon across four declarations: $2/$12 becomes $2/$10,
+  a 1× input ratio and 0.833333× output ratio. Argon and Carbon tie for the closest listed prices;
+  Carbon's 2026-11-10 release is newer than Argon's 2026-10-13 release. Both are stable, unlike
+  the displaced preview. This is a judgement within the provider's complex-reasoning class.
+  Flash Lite remains at $0.30/$2.50 because the provider still lists that small tier separately;
+  Hydrogen would raise it to a different price and capability class.</p>
+  <p>These are the actual configured OpenRouter routes' listed prices, read from the
+  <a href="https://openrouter.ai/api/v1/models">serving model catalogue</a>, using ordinary text
+  input and output at the base context tier. They are not LiteLLM estimates or native-API quotes.
+  For comparison, <a href="https://aistudio.google.com/docs/pricing">Google's direct API pricing</a>
+  lists Flash at $0.75/$3.75 and Hydrogen at $1.50/$7.50, a 2× native-API ratio; Pro Preview is
+  $2/$12 and Carbon is $2/$10 today. Google announces Carbon at $4/$20 from December 1, 2026;
+  the serving route's current $2/$10 snapshot must be refreshed before treating these ratios as future prices.
+  Cache, long-context, tools and changed token volumes can alter actual workload cost.</p>
+  <p>Anthropic's newer Fable 5.2 is $8/$40, a separate demanding-reasoning class above the seated
+  Opus 5.5 ($4/$20) and Sonnet 5.5 ($2/$10); Haiku 5.5 retains the fast class.
+  OpenAI's Astra ($10/$50) and pro variants are distinct tiers from the seated Sol, Terra and Luna.
+  Qwen's own catalogue still recommends Plus separately from Flash and Max, so Plus stays.
+  Xiaomi, Moonshot and xAI already name their newest offered same-tier lines. No newer same-tier
+  Meta route is offered in the serving catalogue. DeepSeek's dated Flash build is a snapshot of
+  its current Flash line; the configured undated route stays as the existing release check specifies.</p>
+  <h2>Every declared seat</h2>
+  <p>All prices are USD per million input/output tokens from the fresh serving listings, for the model
+  named before and the model named after. “Before” is the base revision's identifier priced at today's
+  listing, not a historical invoice. The local chat and embedding services have no per-token provider
+  invoice, so their application charge is zero; the zero-to-zero ratio is undefined. Jev's listed rate
+  is $0.042 input and $0 output, confirmed by its
+  <a href="https://openrouter.ai/api/v1/models/typesafe/jev-1.14/endpoints">TypeSafe endpoint metadata</a>;
+  its zero-output ratio is likewise undefined. There are seven new-line moves, zero same-line moves
+  and 56 unchanged declarations.</p>
+  <div class="table-wrap"><table id="seat-price-comparison">
+  <thead><tr><th>Seat</th><th>Before</th><th>After</th><th>Input before</th><th>Output before</th><th>Input after</th><th>Output after</th><th>Move</th><th>Input ratio</th><th>Output ratio</th></tr></thead>
+  <tbody>
+    <tr><td><code>cluster-labels.model</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>dd-enrichment.model</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>discovery-describe.model</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>discovery-relevance.model</code></td><td><code>typesafe/jev-1.14</code></td><td><code>typesafe/jev-1.14</code></td><td>0.042</td><td>0</td><td>0.042</td><td>0</td><td>unchanged</td><td>1×</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>discovery-score.model</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>discovery-triage.model</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>discovery-vision.model</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>embedding.model</code></td><td><code>Qwen/Qwen3-Embedding-0.6B</code></td><td><code>Qwen/Qwen3-Embedding-0.6B</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>ids-mapping.model</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>mapping-candidates.model</code></td><td><code>typesafe/jev-1.14</code></td><td><code>typesafe/jev-1.14</code></td><td>0.042</td><td>0</td><td>0.042</td><td>0</td><td>unchanged</td><td>1×</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>reasoning.model</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.candidate-models[0]</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td>2</td><td>6</td><td>2</td><td>6</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.candidate-models[1]</code></td><td><code>openrouter/google/gemini-3.8-flash</code></td><td><code>openrouter/google/gemini-4-hydrogen</code></td><td>0.825</td><td>4.125</td><td>1.5</td><td>7.5</td><td>new-line</td><td>1.81818×</td><td>1.81818×</td></tr>
+    <tr><td><code>sn-benchmark.candidate-models[2]</code></td><td><code>openrouter/google/gemini-3.1-pro-preview</code></td><td><code>openrouter/google/gemini-4-carbon</code></td><td>2</td><td>12</td><td>2</td><td>10</td><td>new-line</td><td>1×</td><td>0.833333×</td></tr>
+    <tr><td><code>sn-benchmark.candidate-models[3]</code></td><td><code>openrouter/openai/gpt-6.1-terra</code></td><td><code>openrouter/openai/gpt-6.1-terra</code></td><td>1</td><td>5</td><td>1</td><td>5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.candidate-models[4]</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[0]</code></td><td><code>openrouter/anthropic/claude-opus-5.5</code></td><td><code>openrouter/anthropic/claude-opus-5.5</code></td><td>4</td><td>20</td><td>4</td><td>20</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[10]</code></td><td><code>openrouter/qwen/qwen3.7-plus</code></td><td><code>openrouter/qwen/qwen3.7-plus</code></td><td>0.32</td><td>1.28</td><td>0.32</td><td>1.28</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[11]</code></td><td><code>openrouter/xiaomi/mimo-v2.6-pro</code></td><td><code>openrouter/xiaomi/mimo-v2.6-pro</code></td><td>0.435</td><td>0.87</td><td>0.435</td><td>0.87</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[12]</code></td><td><code>openrouter/moonshotai/kimi-k3.1-pro</code></td><td><code>openrouter/moonshotai/kimi-k3.1-pro</code></td><td>0.2403</td><td>8.4023</td><td>0.2403</td><td>8.4023</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[13]</code></td><td><code>openrouter/deepseek/deepseek-v4.1-flash</code></td><td><code>openrouter/deepseek/deepseek-v4.1-flash</code></td><td>0.0507</td><td>0.2028</td><td>0.0507</td><td>0.2028</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[14]</code></td><td><code>openrouter/meta-llama/llama-4-maverick</code></td><td><code>openrouter/meta-llama/llama-4-maverick</code></td><td>0.35</td><td>1</td><td>0.35</td><td>1</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[1]</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[2]</code></td><td><code>openrouter/anthropic/claude-haiku-5.5</code></td><td><code>openrouter/anthropic/claude-haiku-5.5</code></td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[3]</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[4]</code></td><td><code>openrouter/openai/gpt-6.1-terra</code></td><td><code>openrouter/openai/gpt-6.1-terra</code></td><td>1</td><td>5</td><td>1</td><td>5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[5]</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[6]</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td>2</td><td>6</td><td>2</td><td>6</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[7]</code></td><td><code>openrouter/google/gemini-3.8-flash</code></td><td><code>openrouter/google/gemini-4-hydrogen</code></td><td>0.825</td><td>4.125</td><td>1.5</td><td>7.5</td><td>new-line</td><td>1.81818×</td><td>1.81818×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[8]</code></td><td><code>openrouter/google/gemini-3.1-pro-preview</code></td><td><code>openrouter/google/gemini-4-carbon</code></td><td>2</td><td>12</td><td>2</td><td>10</td><td>new-line</td><td>1×</td><td>0.833333×</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[9]</code></td><td><code>openrouter/google/gemini-3.5-flash-lite</code></td><td><code>openrouter/google/gemini-3.5-flash-lite</code></td><td>0.3</td><td>2.5</td><td>0.3</td><td>2.5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-model</code></td><td><code>openrouter/anthropic/claude-opus-5.5</code></td><td><code>openrouter/anthropic/claude-opus-5.5</code></td><td>4</td><td>20</td><td>4</td><td>20</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-models[0]</code></td><td><code>openrouter/google/gemini-3.8-flash</code></td><td><code>openrouter/google/gemini-4-hydrogen</code></td><td>0.825</td><td>4.125</td><td>1.5</td><td>7.5</td><td>new-line</td><td>1.81818×</td><td>1.81818×</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-models[1]</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-models[2]</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td>2</td><td>6</td><td>2</td><td>6</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-models[3]</code></td><td><code>openrouter/google/gemini-3.1-pro-preview</code></td><td><code>openrouter/google/gemini-4-carbon</code></td><td>2</td><td>12</td><td>2</td><td>10</td><td>new-line</td><td>1×</td><td>0.833333×</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-models[4]</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-models[5]</code></td><td><code>openrouter/anthropic/claude-opus-5.5</code></td><td><code>openrouter/anthropic/claude-opus-5.5</code></td><td>4</td><td>20</td><td>4</td><td>20</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-classifier.model</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-compose.model</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>sn-docs.model</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-domain-tree.model</code></td><td><code>typesafe/jev-1.14</code></td><td><code>typesafe/jev-1.14</code></td><td>0.042</td><td>0</td><td>0.042</td><td>0</td><td>unchanged</td><td>1×</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>sn-escalation.model</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-fanout.proposer-model</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>sn-judge.model</code></td><td><code>typesafe/jev-1.14</code></td><td><code>typesafe/jev-1.14</code></td><td>0.042</td><td>0</td><td>0.042</td><td>0</td><td>unchanged</td><td>1×</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>sn-parent-enrich.model</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>sn-prose-adjudicator.model</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-refine.model</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-release-notes.model</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.docs.models[0]</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.docs.models[1]</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td>2</td><td>6</td><td>2</td><td>6</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.docs.models[2]</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.models[0]</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>sn-review.names.models[1]</code></td><td><code>openrouter/anthropic/claude-haiku-5.5</code></td><td><code>openrouter/anthropic/claude-haiku-5.5</code></td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.models[2]</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.profiles.default.models[0]</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td><code>openrouter/x-ai/grok-4.7</code></td><td>2</td><td>6</td><td>2</td><td>6</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.profiles.default.models[1]</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td><code>openrouter/openai/gpt-6-luna</code></td><td>0.1</td><td>0.5</td><td>0.1</td><td>0.5</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.profiles.default.models[2]</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.profiles.local-only.models[0]</code></td><td><code>local/deepseek-v4.1-flash</code></td><td><code>local/deepseek-v4.1-flash</code></td><td>0</td><td>0</td><td>0</td><td>0</td><td>unchanged</td><td>n/a (0 → 0)</td><td>n/a (0 → 0)</td></tr>
+    <tr><td><code>sn-review.names.profiles.opus-only.models[0]</code></td><td><code>openrouter/anthropic/claude-opus-5.5</code></td><td><code>openrouter/anthropic/claude-opus-5.5</code></td><td>4</td><td>20</td><td>4</td><td>20</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.profiles.quality-cost-balanced.models[0]</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td><code>openrouter/anthropic/claude-sonnet-5.5</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.profiles.quality-cost-balanced.models[1]</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td><code>openrouter/openai/gpt-6.1-sol</code></td><td>2</td><td>10</td><td>2</td><td>10</td><td>unchanged</td><td>1×</td><td>1×</td></tr>
+    <tr><td><code>sn-review.names.profiles.quality-cost-balanced.models[2]</code></td><td><code>openrouter/google/gemini-3.1-pro-preview</code></td><td><code>openrouter/google/gemini-4-carbon</code></td><td>2</td><td>12</td><td>2</td><td>10</td><td>new-line</td><td>1×</td><td>0.833333×</td></tr>
+  </tbody></table></div>
+  <h2>Fallbacks, prices and proxy routes</h2>
+  <p>The IDS mapping fallback now names the configured local model. Both review-chain fallback lists
+  and the benchmark composition, candidate and reviewer defaults match the configured lists in order.
+  Tests compare 21 configured single-model fallbacks, two review chains and four benchmark defaults
+  directly with configuration. The agent and compaction defaults have no declared counterparts and
+  already name their providers' newest same-tier models; they add no declared seat to the table.
+  The switch-back Google comment and the two Google proxy routes now name the selected stable lines.</p>
+  <p>The refresh also exposed a stale Kimi reservation price of $2/$10. Its route currently lists
+  $0.2403/$8.4023, and the configured estimates now use those rates. This corrects the estimate
+  while keeping the model unchanged, so its model-migration ratio in the table is 1×.
+  A test now requires configured text rates to agree with the snapshot.</p>
+  <p>The two originally unseated proxy routes remain: <code>openrouter/deepseek/deepseek-v4-pro-0813</code>
+  is still offered at $0.111/$4.44, and <code>openrouter/qwen/qwen3.8-max-prime</code>
+  is still offered at $4/$12. Neither is silently deleted or seated.</p>
+  <h2>Measures and controls</h2>
+  <p>Baseline: 311 passed, 17 live tests deselected, zero failures in 6.09 s.
+  Reproduction before repair: 16 failed and 295 passed in 6.82 s — seven stale Google declarations,
+  four preview declarations and five mismatched fallback values. For example,
+  <code>test_model_fallback_equals_configured_seat[ids-mapping]</code> reported
+  <code>&#x27;openrouter/openai/gpt-6.1-sol&#x27; != &#x27;local/deepseek-v4.1-flash&#x27;</code>.
+  Head: 400 passed, 24 live tests deselected, zero failures in 6.08 s; added failures = 0.
+  All suite arms ran on the all_debug partition with the shared environment and --no-sync, in isolated
+  job scratch trees. Each log records the imported settings module and resolved working directory.</p>
+  <p>Under the opt-in slow marker, all seven changed declarations returned non-empty content:
+  7 passed in 34.61 s, 663 total tokens and $0.00418250 in response-reported usage cost.
+  The fresh positive Jev probe cost $0.000013188, making the total reported positive-request spend
+  $0.004195688. This task specified bounded reachability probes and no dollar ceiling; no benchmark
+  or bulk pipeline was run. A reachability response establishes the model is served, not its task quality.</p>
+  <table id="live-seat-receipts"><thead><tr><th>Changed declaration</th><th>Requested model</th><th>Response model</th><th>Content</th><th>Reported USD</th></tr></thead><tbody>
+    <tr><td><code>sn-review.names.profiles.quality-cost-balanced.models[2]</code></td><td><code>openrouter/google/gemini-4-carbon</code></td><td><code>google/gemini-4-carbon</code></td><td><code>ok</code></td><td>0.00080600</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[7]</code></td><td><code>openrouter/google/gemini-4-hydrogen</code></td><td><code>google/gemini-4-hydrogen</code></td><td><code>ok</code></td><td>0.00035700</td></tr>
+    <tr><td><code>sn-benchmark.compose-models[8]</code></td><td><code>openrouter/google/gemini-4-carbon</code></td><td><code>google/gemini-4-carbon</code></td><td><code>ok</code></td><td>0.00080600</td></tr>
+    <tr><td><code>sn-benchmark.candidate-models[1]</code></td><td><code>openrouter/google/gemini-4-hydrogen</code></td><td><code>google/gemini-4-hydrogen</code></td><td><code>ok</code></td><td>0.00034200</td></tr>
+    <tr><td><code>sn-benchmark.candidate-models[2]</code></td><td><code>openrouter/google/gemini-4-carbon</code></td><td><code>google/gemini-4-carbon</code></td><td><code>ok</code></td><td>0.00081600</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-models[0]</code></td><td><code>openrouter/google/gemini-4-hydrogen</code></td><td><code>google/gemini-4-hydrogen</code></td><td><code>ok</code></td><td>0.00025950</td></tr>
+    <tr><td><code>sn-benchmark.reviewer-models[3]</code></td><td><code>openrouter/google/gemini-4-carbon</code></td><td><code>google/gemini-4-carbon</code></td><td><code>ok</code></td><td>0.00079600</td></tr>
+  </tbody></table>
+  <p>The live negative control pointed sn-docs at <code>openrouter/openai/gpt-9-absent</code> through
+  a scratch environment override. The production call layer reached the serving route, which refused it
+  with HTTP 400 and <code>openai/gpt-9-absent is not a valid model ID</code>.
+  The fallback control changed the scratch IDS fallback to <code>local/unserved-negative-control</code>
+  while leaving its configured seat local/deepseek-v4.1-flash. The new equality assertion failed.
+  The combined negative arm reported 2 failed, EXIT=1; neither failing test is a failure of the head arm.
+  Neither mutation entered the delivered tree.</p>
+  <p>A fresh local listing returned deepseek-v4.1-flash. Jev 1.14 answered as
+  <code>typesafe/jev-1.14-20261014</code>; candidate releases 1.15 and 2.0 were refused with
+  “does not exist”. Its endpoint metadata identifies 1.14 as the latest release.</p>
+  <h2>Source listings</h2>
+  <ul>
+    <li><a href="https://developers.openai.com/api/docs/models">openai model listing</a></li>
+    <li><a href="https://platform.claude.com/docs/en/models/overview">anthropic model listing</a></li>
+    <li><a href="https://aistudio.google.com/docs/models">google model listing</a></li>
+    <li><a href="https://aistudio.google.com/docs/pricing">google_pricing model listing</a></li>
+    <li><a href="https://www.alibabacloud.com/help/en/model-studio/models">qwen model listing</a></li>
+    <li><a href="https://api-docs.deepseek.com/quick_start/pricing/">deepseek model listing</a></li>
+    <li><a href="https://docs.x.ai/developers/models">x-ai model listing</a></li>
+    <li><a href="https://mimo.mi.com/docs/en-US/quick-start/model">xiaomi model listing</a></li>
+    <li><a href="https://huggingface.co/moonshotai/Kimi-K3.1-Pro/blob/main/README.md">moonshotai model listing</a></li>
+    <li><a href="https://huggingface.co/api/models?author=Qwen&amp;search=Embedding&amp;limit=100">Qwen embedding hub listing</a></li>
+  </ul>
+  <p>The run record retains the raw serving catalogue, local and decisions replies, the compact
+  live receipts, the 63-row machine-readable comparison, and baseline, reproduction, head, live and
+  negative-control logs. Its home is <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T151229234113-move-model-seats-to-newest-lines</code>.</p>
+</article>
+</body>
+</html>

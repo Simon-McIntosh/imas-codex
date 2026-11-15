@@ -13,6 +13,8 @@ a listed release, and these tests prove the lane still serves it.
 
 from __future__ import annotations
 
+import json
+
 import pytest
 from pydantic import BaseModel
 
@@ -32,6 +34,7 @@ from imas_codex.settings import (
     get_sn_review_names_models,
     get_sn_review_profile_models,
 )
+from tests.config.test_model_seats import _catalog, _declared_models
 
 pytestmark = pytest.mark.slow
 
@@ -105,6 +108,10 @@ class _Reply(BaseModel):
 @pytest.mark.parametrize("model", _chat_models())
 def test_chat_seat_answers_one_live_request(model: str) -> None:
     """The route a chat seat names accepts its model and returns a reply."""
+    _assert_chat_reply(model)
+
+
+def _assert_chat_reply(model: str, owner: str | None = None) -> None:
     if model.startswith("local/"):
         # The local lane is served over the OpenAI-compatible client that the
         # structured call dispatches to; litellm refuses the ``local/`` prefix
@@ -127,7 +134,7 @@ def test_chat_seat_answers_one_live_request(model: str) -> None:
         parsed = result.parsed
         assert parsed.word, f"the lane serving {model!r} returned an empty reply"
         return
-    response, _cost = call_llm(
+    response, cost = call_llm(
         model,
         PROMPT,
         max_tokens=256,
@@ -137,12 +144,41 @@ def test_chat_seat_answers_one_live_request(model: str) -> None:
         service="seat-reachability",
     )
     content = (response.choices[0].message.content or "").strip()
-    served = getattr(response, "model", None) or model
+    served = getattr(response, "model", None)
     assert content, (
         f"the route serving {model!r} returned empty content, so the seat is "
         f"reachable but unusable; it answered as {served!r} with finish_reason "
         f"{response.choices[0].finish_reason!r}"
     )
+    assert served, f"the response for {model!r} did not identify its model"
+    print(
+        "SEAT_RECEIPT "
+        + json.dumps(
+            {
+                "seat": owner or model,
+                "requested_model": model,
+                "response_model": served,
+                "content": content,
+                "cost_usd": cost,
+                "usage": response.usage.model_dump(),
+            }
+        )
+    )
+
+
+_CHANGED_SEATS = [
+    (owner, model)
+    for owner, model in _declared_models().items()
+    if model in _catalog()["openrouter"]["tier_successors"].values()
+]
+
+
+@pytest.mark.parametrize(
+    "owner,model", _CHANGED_SEATS, ids=[owner for owner, _model in _CHANGED_SEATS]
+)
+def test_changed_seat_answers_one_live_request(owner: str, model: str) -> None:
+    """Every moved declaration gets its own request and response receipt."""
+    _assert_chat_reply(model, owner)
 
 
 @pytest.mark.parametrize("model", _decisions_models())

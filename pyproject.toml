@@ -731,7 +731,7 @@ disagreement-threshold = 1.0
 models = [
   "openrouter/anthropic/claude-sonnet-5.5",
   "openrouter/openai/gpt-6.1-sol",
-  "openrouter/google/gemini-3.1-pro-preview",
+  "openrouter/google/gemini-4-carbon",
 ]
 disagreement-threshold = 0.20
 
@@ -763,8 +763,8 @@ compose-models = [
     "openrouter/openai/gpt-6.1-terra",
     "openrouter/openai/gpt-6-luna",
     "openrouter/x-ai/grok-4.7",
-    "openrouter/google/gemini-3.8-flash",
-    "openrouter/google/gemini-3.1-pro-preview",
+    "openrouter/google/gemini-4-hydrogen",
+    "openrouter/google/gemini-4-carbon",
     "openrouter/google/gemini-3.5-flash-lite",
     "openrouter/qwen/qwen3.7-plus",
     "openrouter/xiaomi/mimo-v2.6-pro",
@@ -782,8 +782,8 @@ compose-models = [
 # Throttle-prone providers are deliberately absent.
 candidate-models = [
     "openrouter/x-ai/grok-4.7",
-    "openrouter/google/gemini-3.8-flash",
-    "openrouter/google/gemini-3.1-pro-preview",
+    "openrouter/google/gemini-4-hydrogen",
+    "openrouter/google/gemini-4-carbon",
     "openrouter/openai/gpt-6.1-terra",
     "openrouter/anthropic/claude-sonnet-5.5",
 ]
@@ -799,11 +799,11 @@ reviewer-models = [
     # Candidate blind-reviewers (cheap, vendor-diverse, reasoning-capable)
     # Models whose endpoints violate the account data policy, return empty
     # content, or throttle under pool concurrency stay outside this slate.
-    "openrouter/google/gemini-3.8-flash",       # Google   $0.83/$4.13
+    "openrouter/google/gemini-4-hydrogen",       # Google   $1.5/$7.5
     "openrouter/openai/gpt-6.1-sol",            # OpenAI — vendor diversity in judge panel
     "openrouter/x-ai/grok-4.7",                 # xAI      $2/$6
     # Quorum-breaker candidates / calibrated anchors
-    "openrouter/google/gemini-3.1-pro-preview", # escalator $2/$12
+    "openrouter/google/gemini-4-carbon",        # escalator $2/$10
     "openrouter/anthropic/claude-sonnet-5.5",   # Anthropic $2/$10
     "openrouter/anthropic/claude-opus-5.5",     # quality ceiling ref $4/$20
 ]
@@ -831,7 +831,7 @@ evidence-token-cap-escalation = 800
 #
 # Higher-capability alternatives (require OpenRouter credits, retain
 # for switch-back / A-B benchmarking):
-#   proposer-model = "openrouter/google/gemini-3.1-pro-preview"
+#   proposer-model = "openrouter/google/gemini-4-carbon"
 #   proposer-model = "openrouter/openai/gpt-6.1-sol"
 #
 # Note: Anthropic's structured-output API rejects schemas with ``oneOf``
@@ -1026,11 +1026,11 @@ verified-at = "2026-11-14"
 max-input-tokens = 1050000
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/moonshotai/kimi-k3.1-pro"]
-prompt = 2
-completion = 10
+prompt = 0.2403
+completion = 8.4023
 cache-read = 0.2
 source = "https://openrouter.ai/api/v1/model/moonshotai/kimi-k3.1-pro"
-verified-at = "2026-11-14"
+verified-at = "2026-11-15"
 max-input-tokens = 1048576
 
 [tool.imas-codex.llm.openrouter-pricing."openrouter/meta-llama/llama-4-maverick"]
@@ -1040,6 +1040,24 @@ cache-read = 0.17
 source = "https://openrouter.ai/api/v1/model/meta-llama/llama-4-maverick"
 verified-at = "2026-11-14"
 max-input-tokens = 524288
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-4-hydrogen"]
+prompt = 1.5
+completion = 7.5
+cache-read = 0.075
+cache-write = 0.0833333333333
+source = "https://openrouter.ai/api/v1/model/google/gemini-4-hydrogen"
+verified-at = "2026-11-15"
+max-input-tokens = 1048576
+
+[tool.imas-codex.llm.openrouter-pricing."openrouter/google/gemini-4-carbon"]
+prompt = 2
+completion = 10
+cache-read = 0.1
+cache-write = 0.1875
+source = "https://openrouter.ai/api/v1/model/google/gemini-4-carbon"
+verified-at = "2026-11-15"
+max-input-tokens = 1048576
 
 [tool.imas-codex.docs-server]
 # Host-wide HTML docs server (~/Code/dotfiles/docs-server/serve.py): fronts every
