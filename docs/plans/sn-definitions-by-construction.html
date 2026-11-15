@@ -10,7 +10,7 @@
   <meta name="plan-summary" content="Render the shared parts of every definition from one stored wording, fix unit spellings and name-definition mismatches, then recut the catalog.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
-  <meta name="plan-effort-hours" content="35.0">
+  <meta name="plan-effort-hours" content="41.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -19,12 +19,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-catalog-consistency">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s5&quot;:[&quot;sn-definitions-by-construction#s4&quot;],&quot;s6&quot;:[&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-definitions-by-construction#s4&quot;,&quot;sn-definitions-by-construction#s5&quot;,&quot;sn-definitions-by-construction#s10&quot;],&quot;s7&quot;:[&quot;sn-definitions-by-construction#s6&quot;,&quot;sn-domain-per-family#s3&quot;,&quot;sn-definitions-by-construction#s8&quot;,&quot;sn-definitions-by-construction#s9&quot;,&quot;sn-catalog-consistency#s6&quot;,&quot;sn-catalog-consistency#s7&quot;],&quot;s8&quot;:[&quot;sn-definitions-by-construction#s5&quot;],&quot;s9&quot;:[&quot;sn-definitions-by-construction#s8&quot;]}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;done&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s5&quot;:[&quot;sn-definitions-by-construction#s4&quot;],&quot;s6&quot;:[&quot;sn-definitions-by-construction#s2&quot;,&quot;sn-definitions-by-construction#s3&quot;,&quot;sn-definitions-by-construction#s4&quot;,&quot;sn-definitions-by-construction#s5&quot;,&quot;sn-definitions-by-construction#s10&quot;],&quot;s7&quot;:[&quot;sn-definitions-by-construction#s6&quot;,&quot;sn-domain-per-family#s3&quot;,&quot;sn-definitions-by-construction#s8&quot;,&quot;sn-definitions-by-construction#s9&quot;,&quot;sn-catalog-consistency#s6&quot;,&quot;sn-catalog-consistency#s7&quot;],&quot;s8&quot;:[&quot;sn-definitions-by-construction#s5&quot;],&quot;s9&quot;:[&quot;sn-definitions-by-construction#s8&quot;],&quot;s10&quot;:[&quot;sn-definitions-by-construction#s2&quot;]}">
   <title>One Wording Per Concept, By Construction | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="55">
+<meta name="plan-version" content="57">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -110,7 +110,7 @@
     <p>Spend is drawn from the USD 250 the lead authorised for this repair on 2026-11-12. This section may use at most USD 150 of it. The first family rewritten measures the real cost per name, and the section stops and reports if that rate projects the whole pass past the ceiling.</p>
     <p>Done when:</p>
     <ul>
-      <li>the wording census over every live name counts one form for each operator in §2 and one wording for each species family, or lists each remaining family with its reason, beside the counts before the first write: 8 forms for the flux-surface average and 20 of 20 species families divergent among the published names;</li>
+      <li>the wording census over every live name counts one form for each operator in §2, or lists each remaining operator form with its reason, and one wording for each species family as §10 delivers it, with only the members §10 names as exceptions listed by name, beside the counts before the first write: 8 forms for the flux-surface average and 20 of 20 species families divergent among the published names;</li>
       <li>the population statement is the one the lead ruled in §2 on every species name, with any exception listed by name;</li>
       <li>the unit census of §3 and the name-definition check of §5 are re-run after the last write and their counts recorded beside their earlier readings;</li>
       <li>no name's documentation review score falls below the publishing threshold as a result of the rewrite, or each that does is listed and held;</li>
@@ -210,6 +210,9 @@
 <div class="r-comment" data-section="s1" data-id="c-20261112-registry-conformance" data-who="reckon-review (session 07a8cbfa)" data-when="2026-11-12T02:20:00Z">
     <div class="r-comment-body"><p>Measured after this section was written: the documentation conformance check the writer already runs, applied to all 1,975 published names, reports at least one finding on 548 of them. 150 are a density opening that departs from its template, 16 a line-average equation and 13 a flux-surface-average equation that is not the canonical one, 12 a volume-average equation, and 30 a plasma-boundary definition or gloss the registry forbids. 243 published names select no registry entry at all. The check exists and passes none of this to the export, which is why names written before a wording was settled were published unchanged. Output and script: <code>docs/evidence/fragments/sn-definitions-by-construction/published-registry-conformance.txt</code>.</p></div>
 </div>
+<div class="r-comment" data-section="s10" data-id="c-s10-lead-ruling-store-a-family-sentence" data-who="Simon McIntosh" data-when="2026-11-15T17:00:00Z">
+    <div class="r-comment-body"><p>Lead ruling, 2026-11-15, on the family clause of §6 after two rewrite passes left 0 of 23 species families at one wording: "Store a family sentence". A sentence is stored per species family, as operators and the population statement already have, and the members are re-rendered from it. Listing each family with its reason, the alternative §6's done-when allows, is not taken.</p></div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261112T085541527625-review-of-sdbc-rendered-shared-wording-3fc2991d9dfb" data-who="reckon-build" data-when="2026-11-12T09:16:49.415Z">
     <div class="r-comment-body"><p>Reviewed r-20261112T063332484056-sdbc-rendered-shared-wording at 60654017d..3fc2991d9 and stored a parsed record at both declared review-records paths: scores goal_fidelity 12, evidence 9, scope_discipline 19, durability 6, fit 16, reuse 13, added_failure_count 0, with four blocking findings (the refusal is unreachable in the pipeline, its test bypasses the pipeline, the review_arms grouping denies a reason that quotes the rendered sentence, and the rendered arm passes 6 of 15 against the control's 11 of 15) and four non-blocking ones.</p></div>
 </div>
@@ -281,9 +284,6 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-s9-lead-rulings-screen-and-labels" data-who="Simon McIntosh" data-when="2026-11-15T08:00:00Z">
     <div class="r-comment-body"><p>Lead rulings, 2026-11-15, on the prototype (<code>sdbc-name-check-prototype.html</code>). <strong>No screen:</strong> the adopted question stays the single name-against-definition check; neither Jev nor Drex Max is placed ahead of it (adopted question 82.0 % recall and 84.9 % specificity; Jev screen 57.0 and 91.8; Drex Max screen 54.5 and 90.7). <strong>Labels:</strong> the 53 labels both fresh readers rejected are corrected, and the 40 names the readers split on go to a third reader of another model family; the result is kept as an adjudicated label set beside the original.</p></div>
-</div>
-<div class="r-comment" data-section="s10" data-id="c-s10-lead-ruling-store-a-family-sentence" data-who="Simon McIntosh" data-when="2026-11-15T17:00:00Z">
-    <div class="r-comment-body"><p>Lead ruling, 2026-11-15, on the family clause of §6 after two rewrite passes left 0 of 23 species families at one wording: "Store a family sentence". A sentence is stored per species family, as operators and the population statement already have, and the members are re-rendered from it. Listing each family with its reason, the alternative §6's done-when allows, is not taken.</p></div>
 </div>
 </section>
 </main>
