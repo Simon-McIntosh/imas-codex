@@ -33,7 +33,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 27,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "ebb5a7a4e5d1c6bc65db6926352035727a0eedb6",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The decision's context at version 29 reads that none of the local model's 20 raw responses parsed without repair, matching the rationale and section 3.",
+      "reason": "",
+      "when": "2026-11-15T22:56:07.933757+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "ebb5a7a4e5d1c6bc65db6926352035727a0eedb6",
+      "commit_basis": "edit",
+      "note": "The decision's context at version 29 reads that none of the local model's 20 raw responses parsed without repair, matching the rationale and section 3.",
+      "reason": "",
+      "when": "2026-11-15T22:56:07.933757+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261115T223256751447-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261115T223256751447-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "060f8b47db8416550aad8ec6e66b9a7a06da89be",
   "rubric": "content",
