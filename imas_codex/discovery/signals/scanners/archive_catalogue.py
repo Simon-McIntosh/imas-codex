@@ -232,8 +232,12 @@ class ArchiveCatalogue:
         unrequested = self.db.execute(
             "SELECT count(*) FROM census WHERE attributes_checked=0"
         ).fetchone()[0]
+        unacknowledged = self.db.execute(
+            "SELECT count(*) FROM census WHERE attributes_checked=1 AND acknowledged=0"
+        ).fetchone()[0]
         return {
-            "complete": total_written == census["union"] and unrequested == 0,
+            "complete": total_written == census["union"]
+            and unrequested == unacknowledged == 0,
             "persisted": True,
             "enumerated": census["union"],
             "written": total_written,

@@ -659,3 +659,31 @@ def test_unavailable_signal_clears_archive_fields_and_available_requires_documen
             {"name": "DEMO:EMPTY", "metadata_state": "available"},
             "cohort",
         )
+
+
+def test_refreshed_metadata_requires_acknowledgement_for_existing_identity(tmp_path):
+    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
+
+    store = ArchiveCatalogue(tmp_path / "refresh.sqlite")
+    store.seed({"slow": ["DEMO:TEMP"]}, timestamp="fixture census")
+    with store.db:
+        store.db.execute("INSERT INTO written VALUES ('DEMO:TEMP')")
+        store.db.execute(
+            "UPDATE census SET document=?,attributes_checked=1,metadata_state='available',acknowledged=0",
+            (json.dumps({"name": "DEMO:TEMP", "metadata_state": "available"}),),
+        )
+    arguments = {
+        "facility": "demo",
+        "fetch": Mock(),
+        "ingest": len,
+        "make_signal": lambda role, entry, cohort: entry,
+    }
+    paused = store.run(**arguments, max_batches=0)
+    assert paused["complete"] is False and paused["written"] == 1
+    resumed = store.run(**arguments)
+    assert (
+        resumed["complete"]
+        and resumed["newly_written"] == resumed["metadata_requests"] == 0
+    )
+    arguments["fetch"].assert_not_called()
+    store.close()
