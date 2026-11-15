@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T22:45:57.050Z",
+  "dispatched_at": "2026-11-15T22:45:13Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:83",
+      "id": "done_when-1",
+      "reason": "a done-when that passes on arrival cannot distinguish a delivered section from an untouched one, and the node dispatched on it will either redo finished work or close on a measure that never had to fail.",
+      "text": "\u00a79's done-when requires the module's line count to fall, every definition to be reached, and a test that fails when an unreached definition is added; at head the module is 100 lines (from 375), `test_every_module_definition_is_reached_from_code_or_a_test` passes, and `test_reachability_flags_a_function_nothing_reaches` is already the declared control and already fires, so the section's gate is green before a node touches it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:83",
+      "id": "reasoning-1",
+      "reason": "the false premise fixes the section's status at `implementable` and sends a worker to delete code that is already gone, while the actual remaining decision \u2014 close the section as landed, or restate its measure against the pre-state \u2014 is never presented.",
+      "text": "\u00a79 states as current fact (\"about 224 of the 375 lines of `review/cascade_calibration.py` are reached by nothing: the fitting functions that once produced the review cutoffs\") a condition that the tree no longer holds: the module is 100 lines with 4 functions at HEAD and commit `4149f2807` already deleted the fitters",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:92",
+      "id": "wiring-1",
+      "reason": "the followup is the plan's dispatch pointer; left as written it queues work already landed and hides the one section that still needs a node.",
+      "text": "the plan's single followup `f-sph-001` is `open` and recommends `/reckon-build sn-pipeline-hygiene \u00a71`, a section recorded `done` and reviewed at score 88, and its body enumerates \u00a71\u2013\u00a76/\u00a78 as the parallel set while omitting the two sections that are actually open (\u00a79, \u00a710)",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:87",
+      "id": "single_goal-1",
+      "reason": "no single verdict can close a node whose gate mixes a gate-script repair, a rule deduplication and a whole-graph no-change assertion, so the section should divide along the six reviews it draws from.",
+      "text": "\u00a710 closes findings from six landings: a dead evidence script, an uncalled hold decision, a guard assertion that cannot fail, a restored population query, a duplicated live-child rule, a gate script that reports success on a failed build, and a validation rule reading its expectation from the file under test, plus the global assertions that the label set is byte-identical and the live graph is unchanged",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1710266c9f07733ea220e8003c9c5767eceae9c7",
+  "plan_fingerprint": "901579520ef732d8e1113e805d41b5f52fd2d06e79efe1740674aa04854a8ec1",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 46,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T224114754975-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "0510d0a13c700227d2f06f9e7a9b7c00d22c2c45",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the six review ids, the four evidence scripts, `review/name_definition_seat.py`, `pools.py`, `review/cascade_calibration.py`, `cascade_thresholds.json`, the `d6c322cc9d29` code-review report, the fragment hrefs and `sn-integrity-backlog#s17` all resolve; the one extensionless cross-link (`sn-integrity-backlog#s17`) resolves as a real section.",
+    "done_when": "a finding \u2014 \u00a79's done-when (`plan.html:83`) is already satisfied at head; its measure passes before any node runs and therefore proves nothing about a change.",
+    "evidence_paths": "pass \u2014 every landing cited writes its record under `docs/evidence/fragments/sn-pipeline-hygiene/` (20 files present) or `docs/state/imas-codex/reviews/run/`, both durable in-tree paths; \u00a79's and \u00a710's `all_debug` suite arms are recorded in those in-tree fragments rather than a scratch tree.",
+    "naming": "pass \u2014 the plan's text names files and functions that exist in the tree, cites run ids only as records, and carries no ticket numbers or changelog prose into named code.",
+    "reasoning": "a finding \u2014 \u00a79's stated state (\"about 224 of the 375 lines \u2026 are reached by nothing\") is contradicted by the tree and by the plan's own committed evidence; the measurable parts of \u00a710's premises were re-verified and do hold.",
+    "single_goal": "a finding \u2014 \u00a710 (`plan.html:87`) carries five unrelated repairs plus two global no-change assertions under one verdict.",
+    "wiring": "a finding \u2014 the only open followup `f-sph-001` (`plan.html:92`) still recommends `/reckon-build sn-pipeline-hygiene \u00a71` although \u00a71 is `done`, and its body lists only \u00a71\u2013\u00a76/\u00a78, so the two implementable sections (\u00a79 delivered, \u00a710 open) are unrepresented."
+  },
+  "section_digests": {
+    "_document": "fc0b9243c4b299d7cd58edf7987e28fb84b7ca51ea9f6cd18d04853eb2923d2e",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "74688d482ee00f0f28ed1052be32bb9bb31527aa48192d5a4a5fc24b9676c610",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:58:05.809699+00:00",
+  "total": null
+}
