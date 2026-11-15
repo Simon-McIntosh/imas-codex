@@ -3045,12 +3045,23 @@ class ExhaustedOrphanSupersessionConflict(RuntimeError):
 def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
     """Classify every live name without a producer using its own source record.
 
+    The population is the owner's one enumeration,
+    :func:`imas_codex.standard_names.source_invariant.find_sourceless_live_name_rows`,
+    and not a query of this module's own: a population read spelled here is a
+    second rule, and on 2026-11-15 this one named 27 names while the producer
+    edges named 10, because it read a stale producer as a producer and a
+    superseded name stage as live. The attributes below are this module's — it
+    needs the recorded paths, the model and the stage to classify a name it was
+    already given.
+
     Recorded paths, resolution identities, source mirrors and detachment
     receipts belong to the name itself. Related names supply chain topology,
     but their source records do not establish that this name was ever bound.
-    The independent count protects against an incomplete population read.
     """
-    from imas_codex.standard_names.source_invariant import _derived_parent_cypher
+    from imas_codex.standard_names.source_invariant import (
+        _derived_parent_cypher,
+        find_sourceless_live_name_rows,
+    )
 
     terminal = ["deprecated", "superseded"]
 
@@ -3061,32 +3072,30 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
             raise RuntimeError("source audit query exceeded ten seconds")
         return rows
 
-    count = read(
-        """MATCH (sn:StandardName)
-        WHERE NOT sn.status IN $terminal
-          AND NOT EXISTS {
-            (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-          }
-        RETURN count(sn) AS total""",
-        terminal=terminal,
-    )[0]["total"]
+    population = [
+        row["id"]
+        for row in find_sourceless_live_name_rows(
+            gc, None, derived_parents_exempt=False
+        )
+    ]
+    if not population:
+        return []
     names = read(
-        f"""MATCH (sn:StandardName)
-        WHERE NOT sn.status IN $terminal
-          AND NOT EXISTS {{
-            (:StandardNameSource)-[:PRODUCED_NAME]->(sn)
-          }}
+        f"""UNWIND $ids AS id
+        MATCH (sn:StandardName {{id: id}})
         RETURN sn.id AS id, sn.name_stage AS stage, sn.docs_stage AS docs_stage,
                sn.validation_status AS validation_status, sn.model AS model,
                sn.status AS status, sn.origin AS origin, sn.source_paths AS paths,
                sn.source_path AS path,
                sn.source_dd_resolution_converged_ids AS resolutions,
                ({_derived_parent_cypher()}) AS derived_parent
-        ORDER BY id LIMIT 6000""",
-        terminal=terminal,
+        ORDER BY id""",
+        ids=population,
     )
-    if len(names) != count or len({row["id"] for row in names}) != count:
-        raise RuntimeError(f"source audit population incomplete: {len(names)}/{count}")
+    if {row["id"] for row in names} != set(population):
+        raise RuntimeError(
+            f"source audit population incomplete: {len(names)}/{len(population)}"
+        )
     sources = read(
         """MATCH (source:StandardNameSource)
         RETURN source.id AS id, source.source_id AS source_id,

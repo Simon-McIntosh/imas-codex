@@ -8,10 +8,11 @@ module, so two readers cannot answer differently for one name, and a name whose
 copied list is empty while its edges are not stops answering a search with no
 source.
 
-The copied list stays on the name as a second projection of the edges; nothing
-here writes it. The one place this module reads it is the sourceless count,
-which sizes it so a reader can see which names' copies disagree with their
-edges — that difference is the subject of the read, not an answer to it.
+The population of live names no source produces is enumerated by
+:mod:`imas_codex.standard_names.source_invariant` — the module that owns the
+rule — and this module presents it. Nothing here writes the copied list, and
+nothing here reads it: a sourceless count taken from the copy answers a
+different question, and answered it wrongly by hundreds.
 """
 
 from __future__ import annotations
@@ -19,18 +20,9 @@ from __future__ import annotations
 from typing import Any
 
 from imas_codex.standard_names.source_invariant import (
-    derived_parent_cypher,
-    live_name_cypher,
-    producerless_cypher,
+    find_sourceless_live_name_rows,
 )
 from imas_codex.standard_names.source_paths import merge_source_paths
-
-#: The contrast this module adds to the owner's rule: a name with no
-#: ``PRODUCED_NAME`` edge of any kind. The rule the count applies is the owner's
-#: (:func:`imas_codex.standard_names.source_invariant.producerless_cypher`),
-#: which reads a stale producer as no producer; this one is reported beside it so
-#: a reader can see where the two populations differ.
-NO_EDGE_AT_ALL = "NOT EXISTS { (:StandardNameSource)-[:PRODUCED_NAME]->(sn) }"
 
 
 def source_paths_projection(alias: str = "sn") -> str:
@@ -42,10 +34,17 @@ def source_paths_projection(alias: str = "sn") -> str:
     needs no ``producer`` variable declared in the enclosing query, so it
     composes into a ``RETURN`` beside the other projections.
 
+    A stale producer is not a source: the writer's rule reads a stale edge as
+    no edge, so a name whose only producer is stale answers here with nothing —
+    the same answer the sourceless count gives for the same name.
+
     The list is unordered; :func:`normalize_source_ids` gives the stable order a
     caller that exposes it as a value should use.
     """
-    return f"[(producer:StandardNameSource)-[:PRODUCED_NAME]->({alias}) | producer.id]"
+    return (
+        f"[(producer:StandardNameSource)-[:PRODUCED_NAME]->({alias}) "
+        "WHERE coalesce(producer.status, '') <> 'stale' | producer.id]"
+    )
 
 
 def normalize_source_ids(ids: Any) -> list[str]:
@@ -89,103 +88,21 @@ def read_source_paths_by_name(gc: Any, names: list[str]) -> dict[str, list[str]]
 
 
 def count_live_names_without_source(gc: Any) -> dict[str, Any]:
-    """Count live names with no producer, under the owner's rule.
+    """The live names no live source produces, under the owner's one rule.
 
-    The predicates are the ones :mod:`imas_codex.standard_names.source_invariant`
-    owns, so this count and the export gate's ``find_sourceless_live_names``
-    report the same population by construction. A name is live when neither its
-    status nor its name stage reads superseded, and it is sourceless when no
-    non-stale ``PRODUCED_NAME`` source produces it. A name of derived origin with
-    a live child is listed apart rather than counted: its producer is its
-    children by design.
+    The enumeration is
+    :func:`imas_codex.standard_names.source_invariant.find_sourceless_live_name_rows`;
+    this module only names the shape a caller and the ``sn sourceless`` command
+    read. The rule admits no exemption: a name is counted when neither its
+    status nor its name stage reads superseded and no non-stale
+    ``PRODUCED_NAME`` source produces it. A name of derived origin whose
+    children are its producer is counted like any other and carries
+    ``derived_parent`` beside its ``live_children``, so a reader that exempts a
+    derived parent does so from a listed attribute rather than from a count
+    that already removed it.
 
-    The count also reports the bare population — live names with no
-    ``PRODUCED_NAME`` edge at all — and the names on which the two differ, which
-    are exactly the names whose only producers are stale. A reader that wants to
-    know whether a name is lost, and a reader that wants to know whether the
-    graph still carries an edge, are asking different questions and this is where
-    they separate.
-
-    ``count`` and ``live_without_producer`` are the owner's rule;
-    ``bare_count`` and ``bare_names`` are the edge-any-status contrast;
-    ``differing_names`` is the difference between the counted populations.
+    ``count`` and ``names`` are the whole of the answer: one population, one
+    number, and the same names the producer edges give.
     """
-
-    def population(rule: str) -> tuple[list[dict[str, Any]], int]:
-        rows = (
-            gc.query(
-                f"""
-                MATCH (sn:StandardName)
-                WHERE {live_name_cypher()} AND {rule}
-                RETURN sn.id AS id,
-                       sn.origin AS origin,
-                       sn.name_stage AS name_stage,
-                       size(coalesce(sn.source_paths, [])) AS copied_count,
-                       {derived_parent_cypher()} AS derived_parent,
-                       size([(child:StandardName)-[:HAS_PARENT]->(sn)
-                             WHERE NOT coalesce(child.name_stage, '') IN
-                               ['superseded', 'exhausted', 'contested']
-                               AND NOT coalesce(child.status, '') IN
-                                 ['deprecated', 'superseded'] | child]) AS live_children,
-                       EXISTS {{ (:StandardNameSource)-[:PRODUCED_NAME]->(sn) }} AS has_edge
-                ORDER BY id
-                """
-            )
-            or []
-        )
-        found = []
-        for row in rows:
-            found.append(
-                {
-                    "id": str(row["id"]),
-                    "origin": row.get("origin"),
-                    "name_stage": row.get("name_stage"),
-                    "live_children": int(row.get("live_children") or 0),
-                    "copied_count": int(row.get("copied_count") or 0),
-                    "has_edge": bool(row.get("has_edge")),
-                }
-            )
-        return found, len(rows)
-
-    counted, without_producer = population(producerless_cypher())
-    bare, bare_without_producer = population(NO_EDGE_AT_ALL)
-
-    def split(entries: list[dict[str, Any]]) -> tuple[list[dict], list[dict]]:
-        listed, exempt = [], []
-        for entry in entries:
-            if entry["origin"] == "derived" and entry["live_children"] > 0:
-                exempt.append(entry)
-            else:
-                listed.append(entry)
-        return listed, exempt
-
-    listed, exempt = split(counted)
-    bare_listed, _bare_exempt = split(bare)
-
-    counted_ids = {entry["id"] for entry in listed}
-    bare_ids = {entry["id"] for entry in bare_listed}
-    totals = (
-        gc.query(
-            f"""
-            MATCH (sn:StandardName)
-            RETURN sum(CASE WHEN {live_name_cypher()} THEN 1 ELSE 0 END) AS live_names,
-                   sum(CASE WHEN {live_name_cypher()}
-                             AND NOT ({producerless_cypher()})
-                            THEN 1 ELSE 0 END) AS live_with_producer
-            """
-        )
-        or [{"live_names": 0, "live_with_producer": 0}]
-    )[0]
-
-    return {
-        "live_names": int(totals.get("live_names") or 0),
-        "live_with_producer": int(totals.get("live_with_producer") or 0),
-        "live_without_producer": without_producer,
-        "count": len(listed),
-        "names": listed,
-        "exempt_derived_parents": exempt,
-        "bare_without_producer": bare_without_producer,
-        "bare_count": len(bare_listed),
-        "bare_names": [entry["id"] for entry in bare_listed],
-        "differing_names": sorted(counted_ids - bare_ids),
-    }
+    names = find_sourceless_live_name_rows(gc, None, derived_parents_exempt=False)
+    return {"count": len(names), "names": names}

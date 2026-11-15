@@ -1,0 +1,205 @@
+<h2 id="scc-one-enumeration-of-sourceless-names-outcome">One enumeration of the names no source produces</h2>
+<p>Three statements answered "which live names have no source", under two
+different rules. On 2026-11-15, in one job on the live graph, the source audit's
+own query named <strong>27</strong> names, the count the
+<code>sn sourceless</code> command printed <strong>9</strong>, and a direct read
+of the <code>PRODUCED_NAME</code> edges <strong>10</strong>. The package now
+holds one enumeration, in
+<code>imas_codex/standard_names/source_invariant.py</code>:
+<code>find_sourceless_live_name_rows</code> applies the live-name rule and the
+no-live-producer rule in a single statement and returns each name with its
+origin, name stage, live-child count and derived-parent attribute.
+<code>find_sourceless_live_names</code> returns the ids of those rows, so the
+command reports what the invariant finds by construction.
+<code>count_live_names_without_source</code> in
+<code>imas_codex/standard_names/source_reads.py</code> deletes its own query and
+its restated live-children expression and presents the owner's rows;
+<code>classify_sourceless_standard_names</code> in
+<code>imas_codex/standard_names/graph_store/graph_supersession.py</code> deletes
+its own population query and classifies exactly the names that enumeration
+names. Both the count and the audit read the population with no exemption: a
+derived parent is listed with <code>derived_parent</code> set rather than
+subtracted, which is what §7 needs in order to apply its own exemption.</p>
+
+<h3 id="scc-one-enumeration-of-sourceless-names-reproduction">The defect, reproduced before the change</h3>
+<p>The two rules were not merely duplicated, they disagreed. Reading the live
+graph before any edit, the same job asked the source audit and the producer
+edges:</p>
+<pre id="scc-one-enumeration-of-sourceless-names-repro"><code>source audit population (its own query): 27
+direct producer-edge read (writer rule): 10
+count_live_names_without_source: 9
+
+in the source audit, not in the direct read:
+  argon_density_at_separatrix
+  current_density_due_to_ohmic_current_drive
+  curvature_of_arc_of_circle_center
+  diamagnetic_momentum_flux
+  diamagnetic_momentum_flux_limiter_coefficient
+  electron_absorbed_wave_power
+  electron_energy
+  electron_number_density
+  normalized_toroidal_flux_coordinate_at_separatrix
+  pedestal_width
+  runaway_electron_critical_electric_field
+  toroidal_beryllium_velocity
+  toroidal_momentum_diffusion_coefficient
+  toroidal_total_plasma_momentum_at_separatrix
+  toroidal_tritium_velocity_at_separatrix
+  tungsten_density_at_separatrix
+  wavelength_of_filter
+in the direct read, not in the source audit:
+in the direct read, not in the count:
+  beta</code></pre>
+<p>The 17 names read as sourceless to the audit because it treated a stale
+producer as a producer and did not look at the name stage; <code>beta</code> is
+the derived parent the count removed from its own answer. A review of the
+previous section recorded the same contradiction from the other side: "the
+headline prints <code>report['count']</code> (9, with the exempt derived parent
+subtracted) beside <code>live_without_producer</code> 10, so the command reports
+a self-contradictory count".</p>
+
+<h3 id="scc-one-enumeration-of-sourceless-names-one-rule">One statement, and the reader's one rule</h3>
+<p><code>find_sourceless_live_name_rows(query, name_ids=None, &hellip;)</code>
+takes <code>name_ids=None</code> for the whole graph and a list for the writer's
+touched set, so the same statement answers both. The writer's two exemptions —
+superseded names and derived parents — are parameters of that statement, and the
+population read sets <code>derived_parents_exempt=False</code>: the count and the
+audit report every live name with no live producer, so the two can no longer
+differ by an exemption. The live-child rule is stated once, in
+<code>_live_child_condition</code>, which feeds the existence test, the count and
+the derived-parent attribute, so no statement restates it.</p>
+<p>The shared projection had one disagreement of its own:
+<code>source_paths_projection()</code> listed every producer edge, so a name
+whose only producer is stale answered <code>read_source_paths</code> and name
+search with that retired path while the count treated it as no source. The
+projection now filters <code>coalesce(producer.status, '') &lt;&gt; 'stale'</code>,
+so search, <code>read_source_paths</code> and the count answer the same way for
+the same name. A planted graph shows it by value: <code>stales_only</code>, whose
+only producer carries <code>status: 'stale'</code>, reads with no source from all
+three and is the count's single entry, while its control
+<code>stales_control</code> answers <code>['dd:stales/live']</code> and is not
+counted.</p>
+<p>A disposable graph planted with the seven names the section names reports
+three: <code>reads_empty_list</code>, <code>reads_full_list</code> and
+<code>reads_derived_parent</code>. The two superseded names are not counted, the
+name produced by a derived record is not counted, and the data-dictionary
+producer with an empty copy is not counted. <code>reads_derived_parent</code> is
+listed with <code>derived_parent: true</code> and one live child, and
+<code>reads_full_list</code> — a live name with no edge whose copied list names a
+path — answers name search with no source.</p>
+
+<h3 id="scc-one-enumeration-of-sourceless-names-guard">The guard, and how it was shown to fire</h3>
+<p><code>tests/standard_names/test_source_reads.py</code> walks
+<code>imas_codex/</code>, parses every module and treats a Cypher statement that
+states both halves of the rule — the liveness test and the producerless test, by
+the owner's predicate or spelled inline — as a second enumeration of the
+population unless it is registered with a role that makes it a precondition
+(<code>SOURCE_RULE_SITES</code>, 29 sites: one <code>owner</code>, the writer
+guards, repairs and one status census). The scan unparses f-strings, so a module
+that interpolates <code>live_name_cypher()</code> and
+<code>producerless_cypher()</code> into a restored query cannot hide behind the
+interpolation. The test also fails on a registry entry the scan no longer finds
+and on any site claiming <code>owner</code> other than the enumeration, and its
+positive control requires the scan to see the owner's own statement.</p>
+<p>Applying the declared mutation — a second enumeration query restored in
+<code>source_reads.py</code> — the guard fails and names it:</p>
+<pre id="scc-one-enumeration-of-sourceless-names-negative-control"><code>FAILED tests/standard_names/test_source_reads.py::test_no_second_enumeration_of_the_sourceless_population - AssertionError: these statements state both halves of the sourceless rule — a live name and an absent producer — and are not the owner's enumeration. Ask find_sourceless_live_name_rows() for the population, or list the site in SOURCE_RULE_SITES with the role that makes it a precondition:
+    standard_names/source_reads.py:population
+assert not [('standard_names/source_reads.py', 'population')]
+================= 1 failed, 13 deselected, 1 warning in 15.29s =================
+EXIT=1</code></pre>
+
+<h3 id="scc-one-enumeration-of-sourceless-names-live-comparison">The command and the editor read, in one job</h3>
+<p>The artifact is written by the command that measures the population, and the
+same job reads the producer edges directly with a statement that shares nothing
+with the owner, and asks the source audit. All three answer 10, the same names in
+the same order. The transcript is committed here because the run log lives
+outside the repository
+(<code>scc-one-enumeration-live-comparison.log</code> in the run directory); its
+last line is the bare exit status:</p>
+<pre id="scc-one-enumeration-of-sourceless-names-comparison"><code>command headline:
+  wrote docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json
+
+  10 live names have no live producer.
+
+                            Live names without a source
+ ┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━┳━━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━┓
+ ┃ name                ┃ origin   ┃ name_stage ┃ live children ┃ derived parent ┃
+ ┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━╇━━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━┩
+ │ beta                │ derived  │ accepted   │             4 │ yes            │
+ │ coolant_absorbed_e… │ pipeline │ accepted   │             0 │                │
+ │ deposited_power_at… │ pipeline │ exhausted  │             1 │                │
+ │ electron_temperatu… │ —        │ exhausted  │             0 │                │
+ │ line_averaged_neon… │ —        │ pending    │             0 │                │
+ │ poloidal_total_mom… │ —        │ exhausted  │             0 │                │
+ │ radius_of_soft_xra… │ —        │ pending    │             0 │                │
+ │ ratio_of_diamagnet… │ —        │ pending    │             0 │                │
+ │ voltage_of_diagnos… │ —        │ exhausted  │             0 │                │
+ │ volume_averaged_el… │ pipeline │ accepted   │             0 │                │
+ └─────────────────────┴──────────┴────────────┴───────────────┴────────────━━━┘
+
+command count: 10
+direct edge read: 10
+source audit: 10
+command == direct, same order: True
+command == source audit, same order: True
+
+name                                                                     origin     stage        children derived
+beta                                                                     derived    accepted            4 True
+coolant_absorbed_energy_accumulated_of_plasma_facing_component           pipeline   accepted            0 False
+deposited_power_at_divertor_target                                       pipeline   exhausted           1 False
+electron_temperature_at_plasma_boundary                                  None       exhausted           0 False
+line_averaged_neon_density                                               None       pending             0 False
+poloidal_total_momentum_convection_velocity                              None       exhausted           0 False
+radius_of_soft_xray_detector                                             None       pending             0 False
+ratio_of_diamagnetic_vorticity_to_major_radius                           None       pending             0 False
+voltage_of_diagnostic_antenna                                            None       exhausted           0 False
+volume_averaged_electron_number_density_over_scrape_off_layer            pipeline   accepted            0 False
+EXIT=0</code></pre>
+<p>The committed record of the population,
+<code>docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json</code>
+holds the command's own two keys — <code>count: 10</code> and the ten
+<code>names</code> with their attributes — and is regenerated by
+<code>imas-codex sn sourceless --output</code>, so §7 reads the population the
+command reports. The same run is the section's no-write check: every statement
+in it is a <code>MATCH</code>.</p>
+
+<h3 id="scc-one-enumeration-of-sourceless-names-suite">The whole suite, both arms, from an archive</h3>
+<p>One <code>all_debug</code> job per arm, each running the whole
+<code>tests/standard_names</code> directory from a <code>git archive</code>
+extraction of its revision in the run directory, submitted with
+<code>SLURM_JOB_ID</code> unset so each is a job of its own rather than a step of
+the worker's allocation: job <code>1317852</code> at
+<code>d57818f72e1014160cfa1051bbce8d33c7749a19</code> and job
+<code>1317853</code> at <code>67d79ccc0</code>.</p>
+<table id="scc-one-enumeration-of-sourceless-names-suite-table">
+<caption>Whole <code>tests/standard_names</code> directory, one job per arm</caption>
+<thead><tr><th>base</th><th>head</th></tr></thead>
+<tbody>
+<tr><td><code>d57818f72</code></td><td><code>67d79ccc0</code></td></tr>
+<tr><td>8738 passed</td><td>8739 passed</td></tr>
+<tr><td>22 failed</td><td>22 failed</td></tr>
+<tr><td>12 skipped</td><td>12 skipped</td></tr>
+<tr><td colspan="2">0 failure ids added: the two failing sets are the same 22 ids</td></tr>
+</tbody>
+</table>
+<p>Both arms fail the same 22 ids and nothing else; the head arm adds no failure
+id. The 22 are one environmental cause, not a change: every one raises
+<code>ReviewingGuideLinkError: no catalog checkout is resolved, so the reviewing
+guide has no reviewable address</code>, because a batch job's home has no catalog
+checkout. They are present in the base arm at the same revision this work
+started from, so they are outside the change and outside this node's scope.</p>
+<p>The file that carries the guard is the gate receipt at head:
+<code>tests/standard_names/test_source_reads.py</code> ran 14 tests,
+<strong>14 passed</strong>, <code>EXIT=0</code>, listed in the manifest's
+<code>tests</code> and <code>test_logs</code>. The disposable-graph tests inside
+it are the planted seven-name population and the stale-only pair; both are
+<code>graph</code>-marked and were run with a disposable Neo4j, so the counts
+above are values read off a graph rather than stubs.</p>
+<p>The change deletes more from <code>imas_codex/</code> than it adds: 205 lines
+deleted against 193 added across the four touched modules, a net
+<strong>12 lines fewer</strong>. What went is three population statements — the
+count's own query, the count's restated live-children expression, and the source
+audit's own population query — replaced by one statement in the owner. The
+additions are that statement, its two helper predicates and the docstrings that
+say which rule each reader applies.</p>
