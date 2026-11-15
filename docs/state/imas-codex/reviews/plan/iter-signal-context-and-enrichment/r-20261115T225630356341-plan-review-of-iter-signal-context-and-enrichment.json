@@ -17,7 +17,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 29,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2e677f99ebf2709ea72181a330107ccb1feb6309",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 4 at version 30 requires the registry to report the package private, the archive's imported node and link counts to equal the graph's, no graph writer running, and adds a negative control where an archive with one node withheld fails the comparison.",
+      "reason": "",
+      "when": "2026-11-15T23:28:35.476217+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2e677f99ebf2709ea72181a330107ccb1feb6309",
+      "commit_basis": "edit",
+      "note": "Section 4 at version 30 requires the registry to report the package private, the archive's imported node and link counts to equal the graph's, no graph writer running, and adds a negative control where an archive with one node withheld fails the comparison.",
+      "reason": "",
+      "when": "2026-11-15T23:28:35.476217+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261115T225630356341-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261115T225630356341-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "330a2313544f35e3e570ecfa55f33f094dbc5426",
   "rubric": "content",
