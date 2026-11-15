@@ -1,0 +1,464 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Closing census of the standard-name rewrite</title>
+<style>
+:root { --ink:#1a1a1a; --mute:#5b5b5b; --rule:#d8d8d8; --met:#1f6b3a; --bad:#a2231d; }
+body { max-width: 62rem; margin: 2.5rem auto; padding: 0 1.25rem 6rem;
+       font: 16px/1.55 -apple-system, "Segoe UI", Roboto, sans-serif; color: var(--ink); }
+h1 { font-size: 1.6rem; line-height: 1.25; margin: 0 0 .6rem; }
+h2 { font-size: 1.15rem; margin: 2.6rem 0 .7rem; padding-bottom: .3rem;
+     border-bottom: 1px solid var(--rule); }
+h3 { font-size: 1rem; margin: 2rem 0 .5rem; }
+p, li { margin: .55rem 0; }
+code { font: 13px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+       background: #f4f4f2; padding: .05rem .25rem; }
+p.lede { color: var(--mute); margin-bottom: 1.4rem; }
+p.sub, p.note { color: var(--mute); font-size: .93rem; }
+.met { color: var(--met); font-weight: 600; }
+.notmet { color: var(--bad); font-weight: 600; }
+table { border-collapse: collapse; width: 100%; margin: .8rem 0 1.2rem;
+        font-size: .87rem; }
+th, td { text-align: left; vertical-align: top; padding: .35rem .5rem;
+         border-bottom: 1px solid var(--rule); }
+th { font-weight: 600; color: var(--mute); }
+figure { margin: 1.4rem 0 1.8rem; }
+figure img { width: 100%; height: auto; max-height: 26rem; }
+figcaption { font-size: .85rem; color: var(--mute); margin-top: .5rem; }
+ul { padding-left: 1.2rem; }
+</style>
+</head>
+<body>
+<h1>Closing census of the standard-name wording rewrite</h1>
+
+<p class="lede">Every clause of the section&rsquo;s done-when, measured over every
+live name after the rewrite. Live means <code>name_stage != superseded</code> and
+is 3,266 names. The rewriting pass ran under another node; this node measured its
+result, changed nothing in the census subject, and reports what it found.</p>
+
+<h2>What this node did not do</h2>
+<ul>
+<li><strong>No graph write.</strong> The live graph carries a watermark, read
+before the first measurement and again after the last: 5,498 nodes at
+<code>2026-11-14T19:06:08.357Z</code> both times. A write would move both. Every
+statement this node issued to the live graph was a <code>MATCH</code>.</li>
+<li><strong>No rename.</strong> All 485 names the rewrite touched kept their name.
+The pass rewrote definitions, so the signed rename path had no entrants and no
+sources or paid history could be displaced by it.</li>
+<li><strong>No model spend beyond the node cap.</strong> The review seat over all
+3,266 live names cost USD 8.7992 against a node cap of USD 12.00. It is the only
+model call this node made; each of its costs is read per batch from the
+provider&rsquo;s own usage record.</li>
+</ul>
+<h2>The seven clauses</h2>
+
+<p class="sub">A verdict is given per clause, and per half where a clause has two
+halves that land differently. A clause the evidence cannot settle is marked not
+met rather than argued.</p>
+
+<h3>1. Operator forms and species-family wordings, beside the pre-write counts</h3>
+
+<p>The clause asks for one form per operator over every live name and one wording
+per species family, <em>or</em> each remaining family listed with its reason,
+beside the counts before the first write.</p>
+
+<p><span class="notmet">Operator half: not met over every live name.</span>
+<span class="met">Family half: met</span>, through the clause&rsquo;s alternative
+&mdash; every remaining family is listed below with its reason.</p>
+
+<p>The operator half fails on the whole live population. The flux-surface average
+carries 73 live names in 3 forms, of which 69 are the census&rsquo;s
+<code>&lt;omitted&gt;</code> bucket. That bucket is mostly <em>paraphrase</em>,
+not absence: a second, independent reading that only asks whether a name mentions
+its operator finds 71 of 73 flux-surface names and 173 of 179 across all five
+operators. The wording test is a stricter thing &mdash; it accepts a sentence only
+when it shares at least half its token set with the stored sentence &mdash; so it
+scores a majority of definitions that do define the operator as omitted. Over the
+population the rewrite actually reached, 483 names, each operator present carries
+exactly one form and none is omitted.</p>
+<table>
+<thead><tr>
+<th>operator</th><th>forms before the first write</th>
+<th>forms, rewritten names</th><th>names</th><th>in &lt;omitted&gt;</th>
+<th>the forms among the rewritten names</th>
+</tr></thead>
+<tbody>
+<tr>
+<td><code>flux_surface_averaged</code></td><td>8 (32 names)</td><td>1</td>
+<td>3</td><td>0</td>
+<td>3 names: the flux surface average is the average of a quantity over a closed
+magnetic flux surface weighted by the inverse magnitude of the poloidal flux
+gradient</td>
+</tr>
+<tr>
+<td><code>volume_averaged</code></td><td>no reading</td><td>1</td><td>13</td>
+<td>0</td>
+<td>13 names: the volume average is the integral of a quantity over a stated
+volume divided by that volume</td>
+</tr>
+<tr>
+<td><code>line_averaged</code></td><td>no reading</td><td>1</td><td>5</td>
+<td>0</td>
+<td>5 names: the line average is the integral of a quantity along a stated chord
+divided by the chord length</td>
+</tr>
+<tr>
+<td><code>line_integrated</code></td><td>no reading</td><td>none carried</td>
+<td>0</td><td>0</td><td>no name in the rewrite population carries this
+operator</td>
+</tr>
+<tr>
+<td><code>time_derivative</code></td><td>no reading</td><td>none carried</td>
+<td>0</td><td>0</td><td>no name in the rewrite population carries this
+operator</td>
+</tr>
+</tbody>
+</table>
+
+<p class="note">Only the flux-surface average had a pre-write reading, because
+that is the operator the section named. The other four are measured after the
+pass only, so their rows carry no before-count rather than a zero.</p>
+<figure>
+<img src="/imas-codex/figures/sn-definitions-by-construction/sdbc-rewrite-closing-census/wordings-before-after.svg"
+     alt="Wording forms per operator and per species family, before the rewrite and after it">
+<figcaption>Wording forms per operator and per species family: the published names
+before the first write, and every live name after the rewrite. A family is
+divergent when its members carry more than one description template or more than
+one unit &mdash; the measure the pre-write census used, so the two readings are
+like for like.</figcaption>
+</figure>
+<p>Every species family is still divergent after the pass, and each is listed
+below with the reason it is. The family criterion is a description template with
+the species word replaced by a placeholder and the template counted distinct; a
+family sits at one wording when it carries one template and one unit.</p>
+
+<table>
+<thead><tr><th>family</th><th>members</th><th>description templates</th>
+<th>units</th><th>members in the rewrite</th><th>why it is still divergent</th>
+</tr></thead>
+<tbody>
+<tr><td><code>&lt;X&gt;_density</code></td><td>18</td><td>18</td><td>1</td><td>4</td><td>4 of 18 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>&lt;X&gt;_density_at_divertor_target</code></td><td>18</td><td>15</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>&lt;X&gt;_density_at_internal_transport_barrier</code></td><td>18</td><td>13</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>&lt;X&gt;_density_at_limiter</code></td><td>18</td><td>16</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>&lt;X&gt;_density_at_magnetic_axis</code></td><td>18</td><td>14</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>&lt;X&gt;_density_at_pedestal_top</code></td><td>18</td><td>18</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>&lt;X&gt;_density_at_plasma_boundary</code></td><td>18</td><td>14</td><td>1</td><td>1</td><td>1 of 18 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>&lt;X&gt;_prefill_count</code></td><td>6</td><td>6</td><td>1</td><td>4</td><td>4 of 6 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>&lt;X&gt;_source_rate_due_to_gas_injection</code></td><td>11</td><td>11</td><td>1</td><td>9</td><td>9 of 11 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>accumulated_&lt;X&gt;_count</code></td><td>3</td><td>3</td><td>1</td><td>3</td><td>every member was rewritten and the descriptions still differ</td></tr>
+<tr><td><code>accumulated_&lt;X&gt;_count_due_to_gas_injection</code></td><td>9</td><td>9</td><td>1</td><td>7</td><td>7 of 9 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>accumulated_&lt;X&gt;_prefill_count</code></td><td>3</td><td>3</td><td>1</td><td>1</td><td>1 of 3 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>accumulated_&lt;X&gt;_prefill_count_due_to_gas_injection</code></td><td>3</td><td>3</td><td>1</td><td>3</td><td>every member was rewritten and the descriptions still differ</td></tr>
+<tr><td><code>flux_surface_averaged_&lt;X&gt;_density_at_plasma_boundary</code></td><td>17</td><td>13</td><td>1</td><td>1</td><td>1 of 17 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>flux_surface_averaged_toroidal_&lt;X&gt;_velocity_at_plasma_boundary</code></td><td>17</td><td>17</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>line_averaged_&lt;X&gt;_density</code></td><td>18</td><td>18</td><td>1</td><td>5</td><td>5 of 18 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>ratio_of_&lt;X&gt;_density_to_electron_density</code></td><td>3</td><td>3</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>ratio_of_volume_averaged_&lt;X&gt;_density_to_volume_averaged_electron_density</code></td><td>14</td><td>14</td><td>1</td><td>4</td><td>4 of 14 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+<tr><td><code>toroidal_&lt;X&gt;_velocity_at_internal_transport_barrier</code></td><td>17</td><td>17</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>toroidal_&lt;X&gt;_velocity_at_magnetic_axis</code></td><td>17</td><td>17</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>toroidal_&lt;X&gt;_velocity_at_pedestal_top</code></td><td>17</td><td>17</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>toroidal_&lt;X&gt;_velocity_at_plasma_boundary</code></td><td>17</td><td>17</td><td>1</td><td>0</td><td>no member was in the rewrite population</td></tr>
+<tr><td><code>volume_averaged_&lt;X&gt;_density</code></td><td>18</td><td>16</td><td>1</td><td>6</td><td>6 of 18 members were rewritten; the family was never brought to one wording as a whole</td></tr>
+</tbody>
+</table>
+<p class="note">Of the 23 families, two had every member rewritten and still carry
+more than one template: <code>accumulated_&lt;X&gt;_count</code> and
+<code>accumulated_&lt;X&gt;_prefill_count_due_to_gas_injection</code>. Those are
+residual divergences of the pass rather than of its scope. The other 21 were
+reached partially or not at all: the rewrite population was 483 of the 3,266 live
+names, and no family was brought to one wording as a whole.</p>
+
+<p class="note">The pre-write reading, 20 of 20 divergent, is over the published
+catalog (1,975 names in <code>standard_names/*.yml</code>); the reading above is
+over the live graph (3,266 names). The two populations differ, so the family count
+differs with them. No family here is absent from the live set the pass operated
+on, and the same measure and three-member floor were used on both sides.</p>
+<h3>2. The population statement on every species name, exceptions by name</h3>
+
+<p>The lead&rsquo;s ruling, as the section records it: &ldquo;The density counts
+ions summed over all charge states; neutral atoms are excluded.&rdquo; The clause
+allows departures only when each is named, so the counts below carry their
+lists.</p>
+
+<p><span class="met">Met</span> through the exception route, and the exception
+list is not small: <span class="notmet">76 of 91 species names depart</span>.</p>
+<p>Of the 76, twenty-eight state the <em>opposite</em> population: a definition
+that includes neutral atoms, or restricts the count to one charge state, where
+the ruling includes every charge state and excludes neutrals.</p>
+<p>The remaining 48 do not write the ruled statement, of which 36 paraphrase it
+and 12 are silent on whether the count sums charge states.</p>
+<table>
+<thead><tr><th>state of the species definition</th><th>names</th>
+<th>silent on the sum</th></tr></thead>
+<tbody>
+<tr><td>writes the ruled statement exactly</td><td>15</td><td>0</td></tr>
+<tr><td>states the opposite population</td><td>28</td><td>0</td></tr>
+<tr><td>does not write it (paraphrase)</td><td>36</td><td>0</td></tr>
+<tr><td>does not write it (silent on the sum)</td><td>12</td><td>12</td></tr>
+</tbody>
+</table>
+<p class="note">The 12 silent names stand inside the 48, not beside them, so the
+column sums to 76 departing and 91 species names in all.</p>
+
+<h4>does not write the settled wording &mdash; 48 names</h4>
+<p><code>argon_density</code>, <code>beryllium_density</code>, <code>fast_ion_charge_state_density</code>, <code>fast_ion_charge_state_power_density</code>, <code>gyrocenter_density</code>, <code>helium_3_density</code>, <code>ion_charge_state_density</code>, <code>ion_charge_state_power_density</code>, <code>ion_charge_state_torque_density</code>, <code>ion_state_kinetic_energy_density</code>, <code>iron_density</code>, <code>line_averaged_argon_density</code>, <code>line_averaged_beryllium_density</code>, <code>line_averaged_deuterium_tritium_density</code>, <code>line_averaged_helium_3_density</code>, <code>line_averaged_helium_4_density</code>, <code>line_averaged_iron_density</code>, <code>line_averaged_lithium_density</code>, <code>line_averaged_neon_density</code>, <code>line_averaged_tritium_density</code>, <code>line_averaged_tungsten_density</code>, <code>neon_density</code>, <code>normalized_gyrocenter_perturbed_current_density</code>, <code>normalized_gyrocenter_perturbed_density</code>, <code>parallel_normalized_gyrocenter_perturbed_current_density</code>, <code>parallel_pfirsch_schlueter_current_density</code>, <code>per_toroidal_mode_fast_ion_charge_state_power_density</code>, <code>per_toroidal_mode_thermal_ion_charge_state_power_density</code>, <code>pfirsch_schlueter_current_density</code>, <code>poloidal_pfirsch_schlueter_current_density</code>, <code>radial_pfirsch_schlueter_current_density</code>, <code>thermal_ion_charge_state_power_density</code>, <code>toroidal_ion_charge_state_torque_density</code>, <code>toroidal_pfirsch_schlueter_current_density</code>, <code>tritium_density</code>, <code>tungsten_density</code>, <code>vertical_pfirsch_schlueter_current_density</code>, <code>volume_averaged_argon_density</code>, <code>volume_averaged_beryllium_density</code>, <code>volume_averaged_deuterium_density</code>, <code>volume_averaged_helium_3_density</code>, <code>volume_averaged_helium_4_density</code>, <code>volume_averaged_hydrogen_density</code>, <code>volume_averaged_iron_density</code>, <code>volume_averaged_lithium_density</code>, <code>volume_averaged_tritium_density</code>, <code>volume_averaged_tungsten_density</code>, <code>volume_averaged_xenon_density</code></p>
+<h4>states the opposite population &mdash; 28 names</h4>
+<p><code>deuterium_density</code>, <code>deuterium_tritium_density</code>, <code>fast_neutral_density</code>, <code>fast_neutral_internal_state_number_density</code>, <code>helium_4_density</code>, <code>hydrogen_density</code>, <code>hydrogenic_density</code>, <code>krypton_density</code>, <code>line_averaged_deuterium_density</code>, <code>line_averaged_hydrogen_density</code>, <code>line_averaged_xenon_density</code>, <code>neutral_density</code>, <code>neutral_internal_state_density</code>, <code>neutral_internal_state_torque_density</code>, <code>neutral_kinetic_energy_density</code>, <code>neutral_power_density</code>, <code>neutral_state_kinetic_energy_density</code>, <code>neutral_state_power_density</code>, <code>neutral_torque_density</code>, <code>thermal_ion_charge_state_number_density</code>, <code>thermal_neutral_density</code>, <code>thermal_neutral_internal_state_density</code>, <code>toroidal_neutral_internal_state_torque_density</code>, <code>toroidal_neutral_torque_density</code>, <code>total_hydrogenic_density</code>, <code>total_neutral_number_density</code>, <code>volume_averaged_deuterium_tritium_density</code>, <code>xenon_density</code></p>
+<h3>3. The unit census and the name-definition check, re-run and recorded beside
+their earlier readings</h3>
+
+<p><span class="met">Met.</span> Both were re-run after the last write over the
+whole live set, and each count sits beside the reading it is compared with.</p>
+<p><strong>Unit census.</strong> 3,266 names scanned, 3,263 carrying a unit and
+1,608 distinct quantities.</p>
+
+<table>
+<thead><tr><th>measure</th><th>before the rewrite</th><th>after it</th></tr></thead>
+<tbody>
+<tr><td>duplicate quantities across quantities</td><td>4 spelling pairs</td>
+<td>0 unresolved</td></tr>
+<tr><td>dimension mismatches</td><td>41</td><td>41</td></tr>
+<tr><td>names without a unit</td><td>not measured before</td><td>3</td></tr>
+</tbody>
+</table>
+<p class="note">The four duplicate spellings the section resolved were
+<code>rate</code> (Hz 6, s^-1 21), <code>source_rate</code> (Hz 11, s^-1 48),
+<code>torque</code> (N.m 23, kg.m^2.s^-2 6) and <code>torque_density</code>
+(N.m^-2 77, kg.m^-1.s^-2 9). All four are now resolved, with no unresolved
+duplicate left. The 41 dimension mismatches are unchanged from the pre-rewrite
+reading of 41: the pass created none and repaired none. The census also records
+45 divergences, 42 of them without a name-unit rule that would class them as
+mismatches.</p>
+<p><strong>Name-definition check.</strong> The seat asks, for every live name,
+whether the definition states the quantity the name denotes, and answers with a
+verdict and a qualifier.</p>
+
+<table>
+<thead><tr><th>measure</th><th>catalog pass (earlier)</th>
+<th>this pass over every live name</th></tr></thead>
+<tbody>
+<tr><td>names judged</td><td>1,977</td><td>3,256</td></tr>
+<tr><td>flagged</td><td>429</td><td>817</td></tr>
+<tr><td>unanswered</td><td>not recorded</td><td>10</td></tr>
+<tr><td>cost</td><td>USD 0.00009 per name</td><td>USD 8.7992 in all</td></tr>
+</tbody>
+</table>
+<p class="note">The 817 flags break down by qualifier: restriction-to-one-object
+294 and family-of-quantities 232, beside 291 across the rest &mdash; integration
+125, counting-convention 80, weighting 44, normalisation 42.</p>
+
+<p class="note">The flagged rate is 25.1% (817 of 3,256) against the catalog
+pass&rsquo;s 21.7% (429 of 1,977), and the cost per name is about thirty times
+it. The two readings used a different model and prompt setting; the census
+records both rather than claiming they are one instrument. Every per-name
+verdict, with its qualifier and its reasoning, is in the census JSON under
+<code>phases.seat.verdicts</code>, including the 10 the seat left
+unanswered.</p>
+<h3>4. No score below the publishing threshold, or each that is listed and held</h3>
+
+<p><span class="met">Met</span> through the clause&rsquo;s second route: 15 of the
+485 rewritten names sit below the 0.85 publishing threshold and every one is
+listed and held.</p>
+
+<table>
+<thead><tr><th>name</th><th>documentation</th><th>why held</th></tr></thead>
+<tbody>
+<tr><td><code>boron_density</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>breakdown_magnetic_field</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>brightness_of_visible_camera</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>co_passing_thermal_electron_power_density_due_to_collisions</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>fast_particle_power_due_to_collisions</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>flux_surface_averaged_toroidal_current_density</code></td><td>none recorded</td><td>no documentation score</td></tr>
+<tr><td><code>hydrogenic_density</code></td><td>none recorded</td><td>no documentation score</td></tr>
+<tr><td><code>ion_charge</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>ion_momentum_source_due_to_diamagnetic_drift</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>neutral_particle_flux_at_wall_due_to_pumping</code></td><td>none recorded</td><td>no documentation score</td></tr>
+<tr><td><code>outer_squareness_of_flux_surface</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>total_hydrogenic_density</code></td><td>none recorded</td><td>no documentation score</td></tr>
+<tr><td><code>volume_averaged_ion_charge</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>x_unit_vector_of_pellet_injector</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+<tr><td><code>z_direction_unit_vector_of_pellet_injector</code></td><td>0.8499999999999999</td><td>below threshold</td></tr>
+</tbody>
+</table>
+<p class="note">Eleven of the fifteen score 0.8499999999999999 at full precision
+&mdash; below the 0.85 threshold by the smallest step double precision carries,
+which is why they are held rather than passed; the remaining four carry no
+documentation score at all. The rewrite evidence records no pre-rewrite score for
+any of them (its rows carry only a post-rewrite <code>score_docs</code>), so
+&ldquo;as a result of the rewrite&rdquo; cannot be established from it. The clause
+is met on its listing-and-holding branch, not by a demonstration that no score
+fell.</p>
+
+<p class="note">For scale: 2,462 of the 3,266 live names carry a documentation
+score, the median is 0.94, and two rewritten names are absent from the live set
+(<code>curvature_of_arc_of_circle_center</code>,
+<code>electron_number_density</code>).</p>
+<h3>5. The signed rename path, and the sourceless count</h3>
+
+<p><span class="met">Met.</span> The pass renamed no identity: all 485 names it
+touched keep their name, so no rename could bypass the signed path and no sources
+or paid history could be displaced by one.</p>
+
+<p>The count of sourceless live names is 10, unchanged from the pre-rewrite
+sourceless count in <code>live-rewrite-bulk</code>, and it did not rise.</p>
+
+<table>
+<thead><tr><th>sourceless live name</th></tr></thead>
+<tbody>
+<tr><td><code>beta</code></td></tr>
+<tr><td><code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code></td></tr>
+<tr><td><code>deposited_power_at_divertor_target</code></td></tr>
+<tr><td><code>electron_temperature_at_plasma_boundary</code></td></tr>
+<tr><td><code>line_averaged_neon_density</code></td></tr>
+<tr><td><code>poloidal_total_momentum_convection_velocity</code></td></tr>
+<tr><td><code>radius_of_soft_xray_detector</code></td></tr>
+<tr><td><code>ratio_of_diamagnetic_vorticity_to_major_radius</code></td></tr>
+<tr><td><code>voltage_of_diagnostic_antenna</code></td></tr>
+<tr><td><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></td></tr>
+</tbody>
+</table>
+<p class="note">Sourceless means a live node carrying a unit and no incoming
+PRODUCED_NAME edge, counted over the edges rather than over the copied
+source_paths property. That distinction matters: an earlier measurement reported
+2,609 by counting nodes whose copied property was empty, which counts superseded
+names and derived parents, and that figure was withdrawn. Ten is the same figure
+the pass started from.</p>
+<h3>6. Spend per family beside the measured rate, and the total beside USD 150.</h3>
+
+<p><span class="met">Met</span> at the granularity the evidence records, which is
+per rewrite class rather than per species family. Each class carries its spend and
+its rate per name; the section total sits beside its ceiling.</p>
+
+<table>
+<thead><tr><th>class</th><th>names</th><th>spend USD</th>
+<th>rate USD per name</th></tr></thead>
+<tbody>
+<tr><td>operator</td><td>77</td><td>11.9006</td><td>0.1546</td></tr>
+<tr><td>equivalent-electron</td><td>56</td><td>0.0000</td><td>0.0000</td></tr>
+<tr><td>family parent</td><td>144</td><td>28.9831</td><td>0.2013</td></tr>
+<tr><td>single object or mechanism</td><td>171</td><td>20.5112</td><td>0.1199</td></tr>
+<tr><td>unit misfit</td><td>26</td><td>4.7694</td><td>0.1834</td></tr>
+<tr><td>shared wording:species</td><td>11</td><td>4.0767</td><td>0.3706</td></tr>
+<tr><td><strong>rewriting pass, total</strong></td><td>485</td>
+<td><strong>70.2411</strong></td><td>0.0930</td></tr>
+<tr><td>closing census, review seat</td><td>3,256</td><td>8.7992</td>
+<td>0.0027</td></tr>
+<tr><td><strong>section total</strong></td><td></td>
+<td><strong>79.0403</strong></td><td>of 150.00</td></tr>
+</tbody>
+</table>
+<p class="note">The pass spent USD 70.2411 of the USD 90.00 ceiling the section
+set on it, at USD 0.0930 per name. With this node&rsquo;s USD 8.7992 the section
+stands at USD 79.0403 of its USD 150.00 ceiling, 52.7% used.</p>
+
+<p class="note">The clause asks for spend <em>per family</em>. The evidence
+records spend per rewrite class, not per species family, and the eleven names in
+the <code>shared wording:species</code> class are the only per-family rows it can
+be read off; the family-parent class carries 144 names across many families
+without splitting them. So the counts above are family-adjacent rather than
+per-family, and no per-family breakdown exists to report.</p>
+<h3>7. A family planted divergent in a disposable graph, counted as before</h3>
+
+<p><span class="met">Met.</span> After the pass, this run started a disposable
+Neo4j, wrote a five-member species family into it, measured it, and removed it.
+One member was planted divergent in both its definition and its documentation,
+and the measure the census applies to the live graph is the exact measure applied
+here.</p>
+<p>The family is <code>argon_density</code>, <code>boron_density</code>,
+<code>helium_density</code>, <code>iron_density</code> and
+<code>neon_density</code>. The planted member is <code>helium_density</code>: it
+states that ions and neutral atoms are counted together, where the ruled
+population excludes neutrals.</p>
+
+<table>
+<thead><tr><th>reading</th><th>result in the disposable graph</th></tr></thead>
+<tbody>
+<tr><td>population forms across the family</td><td>2 &mdash; one form for the
+four clean members, one <code>&lt;omitted&gt;</code> for the planted
+member</td></tr>
+<tr><td>family divergent</td><td>1 &mdash; <code>&lt;X&gt;_density</code>,
+in both its description templates and its population statement</td></tr>
+<tr><td>population contradictions</td><td>1 &mdash;
+<code>helium_density</code> only</td></tr>
+<tr><td>clean-arm family in the same graph</td><td>4 members, 1 form</td></tr>
+</tbody>
+</table>
+<p class="note">This is the negative control the clause asks for: a divergence
+planted after the pass is still counted, so the census that reports 23 of 23 live
+families divergent is capable of reporting a planted one and of clearing the
+members that carry none. The first attempt at this arm found nothing &mdash; the
+family resolved to a single member because bare <code>helium</code> was missing
+from the species list the family template uses, a defect carried over from the
+pre-write census script. Adding it made the planted divergence visible and the
+control arm clean, and the fix is in the instrument committed with this page.</p>
+<h2>Limits of this measurement</h2>
+<ul>
+<li><strong>The wording test counts paraphrase as omission.</strong> It accepts a
+sentence only when it shares at least half its token set with the stored
+sentence; 173 of 179 operator-bearing names mention their operator, so the
+bucket is not absence. Both readings are recorded, and the stricter one is what
+the counts above use.</li>
+<li><strong>Two populations are compared.</strong> The pre-write readings are
+over the published catalog (1,975 names); the post-write readings are over the
+live graph (3,266 names). Denominators are stated on every row that needs
+one, and no reading is subtracted from a reading over another
+denominator.</li>
+<li><strong>Pre-rewrite documentation scores are not recorded</strong> for the 15
+held names, so whether a score fell <em>as a result of the rewrite</em> cannot be
+settled from the evidence. That clause is reported on its listing branch.</li>
+<li><strong>Spend is per class, not per family.</strong> No per-family split
+exists in the evidence for this pass.</li>
+<li><strong>The 817 seat flags are counted, not adjudicated.</strong> They are
+reported by qualifier and listed in the census JSON; nothing here decides whether
+any individual flag is right.</li>
+<li><strong>Two rewritten names are no longer live</strong>
+(<code>curvature_of_arc_of_circle_center</code>,
+<code>electron_number_density</code>), so 483 of the 485 names the pass touched
+are in the population measured here.</li>
+</ul>
+<h2>How to reproduce</h2>
+
+<p>The census instrument committed beside this page produced every number above.
+It runs in four phases, each saving the census JSON before the next begins:</p>
+
+<ul>
+<li><code>--phase live</code> reads the live graph only, and writes the operator,
+family, population, unit, score and sourceless readings.</li>
+<li><code>--phase planted</code> starts a disposable Neo4j, plants the family,
+measures it and removes it.</li>
+<li><code>--phase seat</code> judges every live name against its definition.
+This is the only phase that calls a model, and its per-batch costs are recorded
+beside its verdicts.</li>
+<li><code>--phase figure</code> draws the figure from the census JSON.</li>
+</ul>
+<p>Every phase was submitted to a compute partition with
+<code>SLURM_JOB_ID</code> unset, per the workstation rule that graph reads and
+model calls do not run on a login or fleet node. A single command reruns the whole
+census: <code>--phase all</code>.</p>
+<h2>Sum of the verdicts</h2>
+
+<table>
+<thead><tr><th>clause</th><th>verdict</th><th>the number that carries it</th></tr></thead>
+<tbody>
+<tr><td>1. operator forms</td><td>not met over every live name</td>
+<td>3 forms, 69 of 73 omitted; one form among the rewritten names</td></tr>
+<tr><td>1. species families</td><td>met, by reason</td>
+<td>23 of 23 still divergent, each listed with why</td></tr>
+<tr><td>2. population statement</td><td>met, by named exception</td>
+<td>76 of 91 depart, 28 of them stating the opposite</td></tr>
+<tr><td>3. unit census and seat, re-run</td><td>met</td>
+<td>4 duplicates resolved, 41 mismatches unchanged; 3,256 judged, 817 flagged</td></tr>
+<tr><td>4. scores held</td><td>met, by listing and holding</td>
+<td>15 held of 485</td></tr>
+<tr><td>5. rename path and sourceless</td><td>met</td>
+<td>0 renames; sourceless 10, unchanged</td></tr>
+<tr><td>6. spend</td><td>met at class granularity</td>
+<td>USD 79.0403 of 150</td></tr>
+<tr><td>7. planted family</td><td>met</td>
+<td>2 forms and 1 divergent family in the disposable graph</td></tr>
+</tbody>
+</table>
+</body>
+</html>

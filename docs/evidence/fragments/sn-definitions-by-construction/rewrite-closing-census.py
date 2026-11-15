@@ -236,7 +236,8 @@ def operator_census(rows, before):
         else:
             entry["form_count"] = None
             entry["forms"] = {}
-            entry["note"] = "no live name carrying the operator parses here"
+            entry["omitted_count"] = 0
+            entry["note"] = "no name in this population carries the operator"
         out[operator] = entry
     return out
 
@@ -334,12 +335,29 @@ def population_census(rows):
             departing.append(
                 {
                     "name": row["id"],
-                    "reason": "states no population",
-                    "phrase": "the settled population sentence is absent",
+                    "reason": "does not write the settled wording",
+                    "phrase": "no sentence in the definition overlaps the settled wording",
+                    "names_the_sum": bool(
+                        re.search(r"charge.?state|summed over", text, re.IGNORECASE)
+                    ),
                 }
             )
+    unparaphrased = [
+        entry["name"]
+        for entry in departing
+        if entry["reason"] == "does not write the settled wording" and not entry["names_the_sum"]
+    ]
+    paraphrased = [
+        entry["name"]
+        for entry in departing
+        if entry["reason"] == "does not write the settled wording" and entry["names_the_sum"]
+    ]
     return {
         "ruled_statement": SPECIES_POPULATION_SENTENCE,
+        "paraphrasing_the_sum": len(paraphrased),
+        "paraphrasing_names": sorted(paraphrased),
+        "silent_on_the_sum": len(unparaphrased),
+        "silent_names": sorted(unparaphrased),
         "species_names": len(species),
         "states_settled_sentence": stating,
         "mentioning_neutral": mentioning_neutral,
@@ -367,7 +385,7 @@ def score_census(rows, rewrite):
             held.append({"name": name, "score": None, "why": "no documentation score"})
         elif float(score) < DEFAULT_MIN_SCORE:
             held.append(
-                {"name": name, "score": round(float(score), 4), "why": "below threshold"}
+                {"name": name, "score": float(score), "why": "below threshold"}
             )
     scores = sorted(
         float(row["score_docs"]) for row in rows if row.get("score_docs") is not None
@@ -396,21 +414,69 @@ def sourceless(client):
     }
 
 
-def published_subset(rows, before):
-    """The same operator and family measures over the published names only.
+def operator_phrase_re(operator):
+    words = operator.split("_")
+    words[-1] = words[-1][:6]
+    return re.compile(r"[\s\-]+".join(words) + "[a-z]*", re.IGNORECASE)
 
-    The counts before the first write were taken over the published names, so
-    the comparison is only like for like on this subset.
+
+def operator_phrase_census(rows):
+    """Whether each operator's concept is named in the name's own text at all.
+
+    A name can carry the operator and define it in its own words, which the
+    stored sentence's wording test reads as an omission. This second reading
+    asks only whether the operator is named, so the two together separate a
+    paraphrase from a definition that never states the operator.
     """
 
-    published = [row for row in rows if row.get("name_stage") == "published"]
+    out = {}
+    for operator in OPERATORS:
+        pattern = operator_phrase_re(operator)
+        names = [row for row in rows if operator in row["id"]]
+        absent = [
+            row["id"]
+            for row in names
+            if not pattern.search((row["description"] or "") + " " + (row["documentation"] or ""))
+        ]
+        out[operator] = {
+            "name_count": len(names),
+            "names_naming_the_operator": len(names) - len(absent),
+            "names_not_naming_it": absent,
+        }
+    return out
+
+
+def annotate_family_reasons(families, rewrite):
+    """Say why each family still carries more than one wording.
+
+    A family the rewrite never touched has a reason its population explains;
+    one it touched only in part was never brought to one wording as a whole.
+    """
+
+    rewritten = {entry["name"] for entry in rewrite["before_after"]}
+    for entry in families["divergent_families"].values():
+        members = entry["names"]
+        touched = sum(1 for name in members if name in rewritten)
+        entry["rewritten_members"] = touched
+        if touched == 0:
+            entry["reason"] = "no member was in the rewrite population"
+        elif touched < len(members):
+            entry["reason"] = (
+                "%d of %d members were rewritten; the family was never brought to "
+                "one wording as a whole" % (touched, len(members))
+            )
+        else:
+            entry["reason"] = "every member was rewritten and the descriptions still differ"
+
+
+def rewritten_subset(rows, rewrite, before):
+    """The same measures over the names the rewrite itself wrote."""
+    names = {entry["name"] for entry in rewrite["before_after"]}
+    subset = [row for row in rows if row["id"] in names]
     return {
-        "name_count": len(published),
-        "operators": operator_census(published, before),
-        "families": family_census(published),
-        "families_baseline_list": family_census(
-            published, name_re=BASELINE_NAME_RE, word_re=BASELINE_WORD_RE
-        ),
+        "name_count": len(subset),
+        "operators": operator_census(subset, before),
+        "families": family_census(subset),
     }
 
 
@@ -435,11 +501,12 @@ def phase_live():
             "live_name_count": len(rows),
             "live_name_rule": "name_stage <> 'superseded', the unit census rule",
             "operators": operator_census(rows, before),
+            "operator_phrases": operator_phrase_census(rows),
             "families": family_census(rows),
             "families_baseline_list": family_census(
                 rows, name_re=BASELINE_NAME_RE, word_re=BASELINE_WORD_RE
             ),
-            "published_subset": published_subset(rows, before),
+            "rewritten_subset": rewritten_subset(rows, rewrite, before),
             "population": population_census(rows),
             "units": live_unit_spelling_census(client),
             "scores": score_census(rows, rewrite),
@@ -456,6 +523,7 @@ def phase_live():
             result["live_graph_write"] = (
                 "watermark moved during the run; reported, attributed to no one"
             )
+    annotate_family_reasons(result["families"], rewrite)
     census["phases"]["live"] = result
     save_census(census)
     print("operators:", {op: e["form_count"] for op, e in result["operators"].items()}, flush=True)
@@ -743,7 +811,10 @@ def phase_figure():
     ]
     fig.legend(
         handles,
-        ["before the first write", "after the rewrite"],
+        [
+            "before the first write, published names",
+            "after the rewrite, every live name",
+        ],
         loc="upper center",
         ncol=2,
         frameon=False,
