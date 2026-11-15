@@ -281,3 +281,21 @@ def test_sample_binning_retains_sampling_evidence():
     assert result["values"] == [1.5, 5.5]
     assert result["sampling_verification"] == "local_sample_bins"
     assert result["decimated"] is True
+
+
+def test_relative_bins_keep_fractional_seconds():
+    client = FakeClient(relative=True)
+    client.times = np.arange(8, dtype=float) / 10
+    result = reader.read(
+        client,
+        window(
+            start=0.0,
+            end=0.8,
+            time_format="relative",
+            pulse="DEMO:TRIAL/1",
+            mode="binned",
+            bins=2,
+        ),
+    )
+    np.testing.assert_allclose(result["time"], [0.2, 0.6])
+    assert result["values"] == [1.5, 5.5]

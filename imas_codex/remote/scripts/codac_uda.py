@@ -212,8 +212,11 @@ def _aggregate(
         raise ReadError("binning requires a scalar numeric field")
     centers, values = [], []
     for index in range(bins):
-        left = start + (end - start) * index // bins
-        right = start + (end - start) * (index + 1) // bins
+        integer_time = reply.time.dtype.kind in "iu"
+        left_offset = (end - start) * index
+        right_offset = (end - start) * (index + 1)
+        left = start + (left_offset // bins if integer_time else left_offset / bins)
+        right = start + (right_offset // bins if integer_time else right_offset / bins)
         if held:
             if not len(reply.time) or reply.time[0] > left:
                 continue
@@ -233,7 +236,9 @@ def _aggregate(
             if not len(samples):
                 continue
             mean = float(np.mean(samples))
-        centers.append(left + (right - left) // 2)
+        centers.append(
+            left + ((right - left) // 2 if integer_time else (right - left) / 2)
+        )
         values.append(
             [mean, float(np.min(samples)), float(np.max(samples))] if envelope else mean
         )
