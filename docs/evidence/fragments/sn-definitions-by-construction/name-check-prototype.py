@@ -1622,6 +1622,11 @@ def draw_figure(scored, scored_adjudicated) -> None:
 
     FIG_DIR.mkdir(parents=True, exist_ok=True)
     plt.style.use("data-ink")
+    # A fixed hash salt keeps the SVG byte-identical across reruns: matplotlib
+    # otherwise names its clip and marker ids from object addresses, so an
+    # unchanged figure rewrites the whole file and a reviewer cannot see
+    # whether anything moved.
+    plt.rcParams["svg.hashsalt"] = "sn-name-check"
     fig, axes = plt.subplots(1, 2, figsize=(14, 7.2), sharey=True)
     panels = (
         (axes[0], scored, "original labels"),
