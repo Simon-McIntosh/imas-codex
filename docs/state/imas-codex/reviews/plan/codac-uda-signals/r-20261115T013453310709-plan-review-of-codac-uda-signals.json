@@ -15,6 +15,17 @@
         "s9"
       ],
       "when": "2026-11-15T02:05:11.217147+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "2b5db62b211cb0a558935db2a0a94427dce1446dcb8f0ddb52f05bf124e50dc5"
+      },
+      "reason": "Version 5 only records which sections the three rename decisions govern (the two deferred rename sections); no section text or done-when changed.",
+      "units": [
+        "_document"
+      ],
+      "when": "2026-11-15T02:28:21.032869+00:00"
     }
   ],
   "completed_at": "2026-11-15T02:00:12.894Z",
