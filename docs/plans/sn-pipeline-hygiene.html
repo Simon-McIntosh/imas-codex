@@ -10,7 +10,7 @@
   <meta name="plan-summary" content="Fix or own the 13 tests red on main, declare CORRECTS, close private imports between standard-names modules, pin-test ISN, and let releases run from a worker.">
   <meta name="plan-status" content="active">
   <meta name="plan-roi" content="mid">
-  <meta name="plan-effort-hours" content="22.5">
+  <meta name="plan-effort-hours" content="30.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="orchestrator">
   <meta name="plan-capability-reasoning" content="deep">
@@ -18,12 +18,12 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
   <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="39">
+<meta name="plan-version" content="41">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -78,6 +78,14 @@
     <h2 id="s8">§8 — No module imports another&#x27;s private names</h2>
 <section data-reckon="section" data-id="s8" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>On 2026-11-11 the standard-names package carried 31 private names imported from one of its top-level modules into another, across 24 import statements (31 name occurrences, 27 distinct names). Its subpackages are outside this section: they keep their own sibling-import rule. The package's import-boundary test checks only two subpackages, and its rule there forbids every import between sibling modules, a rule the package's top-level modules cannot meet, so it passes over all of them.</p><p><strong>Done when:</strong> no top-level module of <code>imas_codex/standard_names</code> imports a private name from another top-level module of that package (imports from outside the package, such as from <code>imas_codex.settings</code>, and imports involving its subpackages are outside this section), each closed either by moving the caller or through a public name the owning module exports, with the before and after counts recorded and every name made public listed in the landing evidence with the reason it can neither stay private nor move with its caller; the existing import-boundary test gains a private-name rule over the package's top-level modules, kept distinct from the sibling-import rule its subpackages keep, passes at head, and fails when any one closed import is restored; behaviour is unchanged, and <code>tests/standard_names</code> adds no failure id against the stated base.</p>
+
+    <h2 id="s9">No unreached code in the review calibration module</h2>
+<section data-reckon="section" data-id="s9" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>A code review of the review package on 2026-11-14 (<code>~/.config/reckon/crew/reports/imas-codex/code-review/d6c322cc9d29/report.md</code>) found that about 224 of the 375 lines of <code>imas_codex/standard_names/review/cascade_calibration.py</code> are reached by nothing: the fitting functions that once produced the review cutoffs. The cutoffs in use are the stored values in <code>cascade_thresholds.json</code>; no command or test re-fits them. The treatment was held until the name-check work decided whether the cutoffs would be re-fitted; it closed without re-fitting them, and the lead ruled on 2026-11-15 that no screening model is added.</p><p><strong>Done when:</strong> every function and constant in the module is reached from a caller in <code>imas_codex/</code> or from a test that asserts its behaviour, shown by a reachability listing committed with the evidence before and after; the module's line count falls and the count is stated; the stored cutoffs and every behaviour of the review path are unchanged, shown by the whole <code>tests/standard_names</code> directory adding no failure at the head against the base, each from an archive as one <code>all_debug</code> job; a test fails when a function with no caller is added back to the module.</p>
+
+    <h2 id="s10">The open review findings on the name check and the source readers are closed</h2>
+<section data-reckon="section" data-id="s10" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<p>Four landings of 2026-11-15 passed review with findings that were not blocking and were left open. They are closed here so they are not lost. From the name check: an evidence script (<code>docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py</code>) imports a check that was deleted, so its reading cannot be regenerated; <code>name_definition_flagged</code> in <code>review/name_definition_seat.py</code> has no caller and spells the hold decision a second time; and the guard assertion on the answer classes cannot fail on a change of class content. From the source readers: the guard does not recognise the source audit's population query if it were restored; that query runs outside the ten-second ceiling every other statement of the audit has; and <code>pools.py</code> states the live-child rule from the name stage alone. From the adjudicated labels: the gate script reports success when its build step fails, and one validation rule reads its expected value from the file it checks.</p><p><strong>Done when:</strong> each of the eight findings above is either repaired, with a test or a recorded red run that fails without the repair, or declined in the evidence with the reason it stands; no function in <code>review/name_definition_seat.py</code> is without a caller; the evidence script that cited the deleted check either regenerates its reading from the tree or is marked in place as a frozen record with the revision it ran at; the live-child rule is stated in one place and <code>pools.py</code> reads it; the adjudicated label set is byte-identical after its gate is repaired; no stored name, definition or binding changes on the live graph; the whole <code>tests/standard_names</code> directory adds no failure at the head against the base, each from an archive as one <code>all_debug</code> job.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
