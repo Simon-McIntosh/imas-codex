@@ -59,9 +59,28 @@
       "note": "Section 2's live control no longer resolves through the facility configuration: the control supplies the archive client's setup commands and endpoint itself from private configuration, so the section needs nothing section 3 delivers and the two stay parallel.",
       "reason": "",
       "when": "2026-11-15T02:03:20.144965+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "caa852cef909868a7f07b6f8e345a7466b38d398",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause is narrowed to the intended endpoint: the executor resolves no data system's setup or interpreter itself and receives them from its caller.",
+      "reason": "",
+      "when": "2026-11-15T02:03:30.056086+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "caa852cef909868a7f07b6f8e345a7466b38d398",
+      "commit_basis": "edit",
+      "note": "The clause is narrowed to the intended endpoint: the executor resolves no data system's setup or interpreter itself and receives them from its caller.",
+      "reason": "",
+      "when": "2026-11-15T02:03:30.056086+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
