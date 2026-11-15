@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T17:14:31.122Z",
+  "dispatched_at": "2026-11-15T17:14:13Z",
+  "findings": [
+    {
+      "anchor": "plan.html:113",
+      "id": "done_when-1",
+      "reason": "without the tightening a \u00a76 node closes on the unrepaired graph, and every later section that reads \"the families are at one wording\" inherits a claim that was never made true.",
+      "text": "\u00a76's first done-when item accepts \"one wording for each species family, or lists each remaining family with its reason\", but the s10 lead ruling recorded at `plan.html:285` says that alternative \"is not taken\", and `plan-section-depends-on` now makes \u00a76 wait on s10; a \u00a76 node can therefore still close on 23 divergent families listed with reasons, the state s10 exists to remove, and the s6 close comment already recorded exactly that close (\"23 of 23 species families still divergent and each listed with its reason\") as satisfying this clause",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:13",
+      "id": "wiring-1",
+      "reason": "the plan's own aggregate is the figure a coordinator sizes the work from, and it is wrong by 6.0 hours.",
+      "text": "`plan-effort-hours` reads 35.0 while the ten sections sum to 41.0 (0.5+7.0+3.0+3.0+5.0+6.0+2.5+4.0+4.0+6.0); \u00a710's 6.0 hours were added without retyping the total, and the same total was corrected once before when \u00a79 was added",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:22",
+      "id": "wiring-2",
+      "reason": "the composed snapshot drops the only edge that says \u00a710 reuses \u00a72's stored-wording route, which is the claim the section's first done-when clause rests on.",
+      "text": "`plan-section-depends-on` carries no `s10` key although s10 declares `data-links=\"sn-definitions-by-construction#s2\"` and its prose names \u00a72 as the route its sentence is held and rendered through, while every other section with a done dependency (s5 on s4, s8 on s5) carries its key",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:149",
+      "id": "reasoning-1",
+      "reason": "\u00a75 and \u00a77 both consume \"the check \u00a79 leaves standing\", and the section that fixes that check states an acceptance rule its recorded evidence fails.",
+      "text": "\u00a79 is now declared done and its lead-ruling comment records that the readers' question was adopted although false holds rose from 101 to 117, \"the replacement rule's false-hold clause is set aside by this ruling for this measurement\", while the section's own done-when still reads that the candidate \"replaces the seat only if ... its false holds are not higher, and otherwise the seat is left as it is and the result is recorded as negative\"; a later reader applying the written rule to the recorded measurement reaches the opposite verdict from the one the plan landed",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c633434dbc49b0ffd2401b5daea3a9495c7552a4",
+  "plan_fingerprint": "1986ab16b3994ca6fff814ee6c8737a0c6713f49921ea42423f54fd72018cca3",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 55,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T171303832091-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "df635a014f8901d86e3eac6d52256adbff8ce4f6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `s10` and `sn-definitions-by-construction#s2` resolve, the two evidence pages named in s10 resolve with `git cat-file -e HEAD:<path>`, and the numbers s10 quotes (23 families, 316 members, 0 of 23 at one wording) reconcile with `rewrite-closing-census.json` (`phases/live/families/{family_count,member_count,one_wording_count}` = 23, 316, 0).",
+    "done_when": "a finding \u2014 \u00a76's first done-when item still allows \"lists each remaining family with its reason\", the close the s10 lead ruling rejects, and \u00a76 is now declared to depend on s10 (`plan.html:113`, `plan.html:285`).",
+    "evidence_paths": "pass \u2014 s10's prose cites `docs/evidence/fragments/sn-definitions-by-construction/sdbc-live-rewrite-bulk.html` and `family-wording-pass.html`, both present in HEAD, and the closing census it measures against is the committed `sdbc-rewrite-closing-census.html` under the same evidence directory.",
+    "naming": "pass \u2014 s10 names no plan label in a symbol or comment; the section's heading omits the `\u00a710 \u2014` prefix the other sections carry, which is display text rather than a code name.",
+    "reasoning": "a finding \u2014 \u00a79's done-when still makes false holds a replacement condition and its recorded outcome sets that clause aside by lead ruling, so a section declared done states an acceptance rule its own evidence fails (`plan.html:149`, whose supersession is recorded at `plan.html:273`).",
+    "single_goal": "pass \u2014 s10 carries one deliverable, a stored sentence per species family from which the members are re-rendered; every clause of its done-when measures a facet of that one deliverable.",
+    "wiring": "a finding \u2014 `plan-effort-hours` reads 35.0 against a ten-section sum of 41.0, and `plan-section-depends-on` has no key for s10 although s10 states and uses a dependency on \u00a72 (`plan.html:13`, `plan.html:22`)."
+  },
+  "section_digests": {
+    "_document": "11e2e68b156624b18e8ed5742aa27fcf534e457bc07dfce61888ca751e83d678",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "ef84a3d62e01937f14f0a28e69e1b486a4adb24d35e86da9d7d3d5b244b9b7e6",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T17:22:03.783353+00:00",
+  "total": null
+}
