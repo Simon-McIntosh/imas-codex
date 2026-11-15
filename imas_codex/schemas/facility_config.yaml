@@ -49,6 +49,8 @@ enums:
         description: TDI function-based data access layer
       uda:
         description: Universal Data Access (UDA) system
+      codac_uda:
+        description: CODAC plant archive through the UDA client
       imas:
         description: IMAS native data format
       ppf:
@@ -59,6 +61,24 @@ enums:
         description: HDF5 file-based storage
       netcdf:
         description: NetCDF scientific data format
+
+  ArchiveRole:
+    description: Named CODAC archive roles, including an excluded operator endpoint
+    permissible_values:
+      fast:
+        description: Fast archive
+      slow:
+        description: Slow archive
+      operator:
+        description: Operator-reserved endpoint, never readable by this application
+
+  ReadableArchiveRole:
+    description: Archive roles that application readers may select
+    permissible_values:
+      fast:
+        description: Fast archive
+      slow:
+        description: Slow archive
 
   LocalForwardProtocol:
     description: Protocol for local port forwards
@@ -576,6 +596,9 @@ classes:
       imas:
         description: IMAS native data configuration
         range: IMASConfig
+      codac_uda:
+        description: CODAC UDA archive configuration
+        range: CodacUDAConfig
       jpf:
         description: JET JPF (JET Processing Facility) raw hardware signal configuration
         range: JPFConfig
@@ -590,6 +613,79 @@ classes:
           and dispatch based on source name and file format.
         multivalued: true
         range: StaticSourceConfig
+
+  ArchiveEndpointConfig:
+    description: >-
+      Named archive endpoint. Hosts are resolved only from private facility
+      configuration. The operator role must remain excluded; readers validate
+      the complete policy through imas_codex.config.codac_uda before resolution.
+    class_uri: fc:ArchiveEndpointConfig
+    attributes:
+      role:
+        description: Archive role used as the stable endpoint identity
+        range: ArchiveRole
+        required: true
+      host:
+        description: Private endpoint hostname, absent in public configuration
+        annotations:
+          is_private: true
+      port:
+        description: UDA service port
+        range: integer
+        minimum_value: 1
+        maximum_value: 65535
+        ifabsent: int(3090)
+      excluded:
+        description: Endpoint is forbidden for catalogue and data reads
+        range: boolean
+        ifabsent: "false"
+      description:
+        description: Purpose of this endpoint, without infrastructure identifiers
+
+  CodacUDAConfig:
+    description: >-
+      CODAC archive setup, named endpoint policy and bounded read budget.
+      Private configuration supplies hosts and variable patterns. Public
+      configuration remains valid with unresolved endpoints; resolving a read
+      requires an explicit operator exclusion and a non-excluded target.
+    class_uri: fc:CodacUDAConfig
+    mixins:
+      - DataSystemBase
+    attributes:
+      archives:
+        description: Named archives including the excluded operator endpoint
+        multivalued: true
+        range: ArchiveEndpointConfig
+        inlined_as_list: true
+      readable_roles:
+        description: Application-readable roles; operator is deliberately not permitted
+        multivalued: true
+        range: ReadableArchiveRole
+      variable_patterns:
+        description: Private bounded cohort of archive variable selectors
+        multivalued: true
+        annotations:
+          is_private: true
+      max_samples:
+        description: Maximum samples returned by one read
+        range: integer
+        minimum_value: 1
+        ifabsent: int(100000)
+      max_bytes:
+        description: Maximum serialized result size in bytes
+        range: integer
+        minimum_value: 1
+        ifabsent: int(8388608)
+      max_window_ns:
+        description: Maximum absolute read interval in nanoseconds
+        range: integer
+        minimum_value: 1
+        ifabsent: int(60000000000)
+      timeout:
+        description: Maximum reader execution time in seconds
+        range: float
+        minimum_value: 0.001
+        ifabsent: float(30.0)
 
   TDIConfig:
     description: >-
