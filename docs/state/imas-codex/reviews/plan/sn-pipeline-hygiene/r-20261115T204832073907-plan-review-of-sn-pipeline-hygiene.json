@@ -1,0 +1,50 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T20:49:49.913Z",
+  "dispatched_at": "2026-11-15T20:49:13Z",
+  "findings": [
+    {
+      "anchor": "plan.html:118",
+      "id": "reasoning-1",
+      "reason": "a reader acting on the plan will leave three committed readings unreproducible while repairing the analogous one, so the repair-or-freeze endpoint \u00a710 applies to the name-check script must be extended to these three.",
+      "text": "the \u00a71 close comment records that \"three older evidence scripts still import the removed defaults, so those scripts no longer run as committed\", yet the plan retires \u00a71 as done and neither \u00a710 nor \u00a77 owns those scripts, while \u00a710's first row closes the structurally identical case of one evidence script importing a deleted check; the reproduced failure is `python -c \"from imas_codex.standard_names.review.cascade_calibration import DEFAULT_NAME_RECEIPTS\"`, which raises ImportError because the module no longer defines `DEFAULT_NAME_RECEIPTS` or `DEFAULT_DOCS_RECEIPTS`, and the three files that reference them are docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point-run.py, srtj-jev-name-evidence-measure-run.py and srtj-jev-discrimination-diagnosis-run.py",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3cb35919e72b3e1a38833fc05eca08ef124ae9d3",
+  "plan_fingerprint": "60a44e55f71896a643f7981c28a7a1142e72fd4bbd9c77ffec561982fa21bb6e",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 41,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T204832073907-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "a4259d2ce531d6c7795586091291974ee91b0851",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 imas_codex/standard_names/review/cascade_calibration.py (375 lines), review/cascade_thresholds.json, ~/.config/reckon/crew/reports/imas-codex/code-review/d6c322cc9d29/report.md, docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py, review/name_definition_seat.py (name_definition_flagged at :228) and imas_codex/standard_names/pools.py all resolve; the cited report's \"about 224 of its 375 lines\" matches its own FINDING at report.md:19.",
+    "done_when": "pass \u2014 s9's reachability clause carries a negative control (a test fails when an uncalled function is added back) and s10's carries a per-finding red run; both name archives, suites and byte-identity checks that can fail.",
+    "evidence_paths": "pass \u2014 s9 cites a stored code-review report and s10 cites in-repository evidence fragments and scripts; both done-whens place listings under evidence, not a node-local temporary path.",
+    "naming": "pass \u2014 s9 and s10 introduce no plan labels, stage names, ticket numbers or version tags into code; the section text cites files and behaviours rather than prescribing symbols.",
+    "reasoning": "a finding \u2014 \u00a71 is marked done while its own close comment records three evidence scripts that no longer run, and no section or followup owns repairing or freezing them.",
+    "single_goal": "pass \u2014 s9 has one deliverable (no unreached code in the calibration module) and s10 closes on one verdict (every one of the eight named findings repaired or declined), even though the findings span three subsystems.",
+    "wiring": "pass \u2014 s9 and s10 are marked implementable and declare no dependency on live work; s10's eight findings come from four already-closed landings, so no depends-on, informs or gates edge is missing."
+  },
+  "section_digests": {
+    "_document": "fc0b9243c4b299d7cd58edf7987e28fb84b7ca51ea9f6cd18d04853eb2923d2e",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "28cced55c853a5cc52b9db2f477e13d775e49e0a1161195bb3c9fb84adb5e982",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T21:02:32.861910+00:00",
+  "total": null
+}
