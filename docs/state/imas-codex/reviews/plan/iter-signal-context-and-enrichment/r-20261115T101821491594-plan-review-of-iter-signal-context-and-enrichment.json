@@ -1,0 +1,81 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T10:42:15.169Z",
+  "dispatched_at": "2026-11-15T10:20:10Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:21",
+      "id": "wiring-1",
+      "reason": "the section's whole measure is a count over rows other sections write, so a DAG that releases it early lets it pass its gate while most of the ITER content it must protect is not yet written.",
+      "text": "`plan-section-depends-on` gives section 9 only `iter-signal-context-and-enrichment#s4`, but section 9's deliverable counts and archives \"every node and link this work and the catalogue plan created for ITER\", which includes the component groups (s5), the component and pattern descriptions (s6) and the whole-catalogue enrichment and embedding rows (s7), plus the catalogue rows of `codac-uda-signals#s12`, which is still `implementable`; the queue releases a node when its declared upstream passes its review and gate, so section 9 becomes dispatchable as soon as section 4 lands and would take its archive and its \"zero that do not reach the ITER facility node\" count before those rows exist.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:111",
+      "id": "wiring-2",
+      "reason": "a coordinator dispatching from the followup would queue section 5 believing its upstream had landed, and the queue would hold it while the followup's claim goes unchecked.",
+      "text": "the followup states \"Sections 2 and 5 are buildable once the plan's content and design reviews are answered\", but section 5's declared upstream `codac-uda-signals#s12` carries `data-status=\"implementable\"` in that plan, so section 5 is stored awaiting-upstream and is not buildable until that section lands.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:53",
+      "id": "done_when-1",
+      "reason": "a mean and range need a number, so the node cannot produce the section's central comparison from any record that exists, and would either invent a scoring scheme the plan does not sanction or land a narrative verdict standing in for a measured one.",
+      "text": "section 3's done-when requires \"the independent review scores of at least two build nodes of this project ... beside the mean and range of the review scores of the external lane's nodes\", but no imas-codex review record carries a numeric score: the project's review reports emit RUBRIC and FINDING lines and no score (for example `reports/imas-codex/code-review/d6c322cc9d29/report.md`), and of 2440 run manifests on this workstation exactly one carries a `review_scores:` field, in another project and as that node's own self-scoring.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:62",
+      "id": "done_when-2",
+      "reason": "the section's gate is a count of ungrouped signals, and as written one clause requires that count to be zero while the other requires it to be non-zero on a signal the archive certainly contains.",
+      "text": "section 5 delivers \"Every catalogued archive signal belongs to a component group\", and the same section's negative control requires \"a signal whose name does not parse is placed in an explicit ungrouped state and is counted\", so the deliverable's invariant and its control cannot both hold; a worker reads the first as \"the count of ungrouped signals is zero\" and the second as \"ungrouped is a legitimate state\".",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:53",
+      "id": "reasoning-1",
+      "reason": "the sample's composition is the measurement, so without a requirement binding section 2 and the second node to the local lane the node either cannot assemble its sample or assembles one that says nothing about the lane it is checking.",
+      "text": "section 3 compares \"the locally served build lane\" using \"at least two build nodes of this project completed since the model-seat section landed, one of them section 2 of this plan\", but section 2 and the section table declare nothing that puts section 2's node on the local lane, and the project's dispatch policy leaves the lane to a picker, so section 2's node may be built on an external lane and the required sample can contain zero local-lane nodes.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+  "plan_fingerprint": "6fb46f508ffdb035dbdb07376dd6d6b04cbfee4fc14a7a8ef98cdb256b9c2b95",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T101821491594-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "00cdc8d3268038876b2e766d1f783caa84f17333",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/figures/iter-signal-context-and-enrichment/pipeline.svg` (3209 bytes) is present, `codac-uda-signals#s12` exists with that id, and the followup's `/reckon-build` skill path is the repository's own build skill.",
+    "done_when": "a finding \u2014 section 3's measure names \"independent review scores ... mean and range\", a quantity no imas-codex review record carries.",
+    "evidence_paths": "pass \u2014 every gate writes to the plan's landing record or to a private pre-committed file, and the figure sits under `docs/figures/iter-signal-context-and-enrichment/`, which resolves in the tree.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach any symbol, and the section text names no code path or function.",
+    "reasoning": "a finding \u2014 section 3's sample requires a section 2 node that nothing requires to have run on the local lane it is comparing.",
+    "single_goal": "pass \u2014 each of the nine sections names one deliverable, and each gate reports that deliverable's own numbers.",
+    "wiring": "a finding \u2014 section 9 depends only on `s4` while its count spans the ITER rows sections 5, 6 and 7 write, and the followup's dispatchable set contradicts `codac-uda-signals#s12`'s recorded status."
+  },
+  "section_digests": {
+    "_document": "814d4970b29344960261a09fed2440e149a9331c504af51efb06ea85a0eab6a4",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "8606c36ff6e0644de4dc28100b7b04442df992ad5feaa1946670be058581c305",
+    "s4": "6bb38af02f91c88d6b4cc608f5e6b44a4550bd5cad51c5ab821dbf5a68b4a2b8",
+    "s5": "e5842ff1c566f6445a2e626844285a7723e27b290066deb76bea910271e2fb66",
+    "s6": "790c9159242b5a6976b2d51f8bc4ad556815a701392fc4dda539b9babb89dd3f",
+    "s7": "e8b7f6e2d525d9c7a68de83334ac884f4aadd2a55be366c5dd545b2df40bd3b4",
+    "s8": "73ad7e5d5ddb14e156ea7e573bd5828a1bcde4074bd453bc35f1074f55bf7f28",
+    "s9": "5c46f80413fec6f7c417c9cb4777760609fd8f5fc7ee69f1a9588c9021fe2c18"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T10:45:33.292639+00:00",
+  "total": null
+}
