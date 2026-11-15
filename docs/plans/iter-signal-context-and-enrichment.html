@@ -17,12 +17,12 @@
   <meta name="plan-capability-verification" content="strict">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery,mcp-server">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[],&quot;s4&quot;:[&quot;iter-signal-context-and-enrichment#s3&quot;],&quot;s5&quot;:[&quot;codac-uda-signals#s12&quot;],&quot;s6&quot;:[&quot;iter-signal-context-and-enrichment#s4&quot;,&quot;iter-signal-context-and-enrichment#s5&quot;],&quot;s7&quot;:[&quot;iter-signal-context-and-enrichment#s6&quot;],&quot;s8&quot;:[&quot;iter-signal-context-and-enrichment#s7&quot;],&quot;s9&quot;:[&quot;iter-signal-context-and-enrichment#s4&quot;,&quot;iter-signal-context-and-enrichment#s6&quot;,&quot;iter-signal-context-and-enrichment#s7&quot;]}">
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="8">
+<meta name="plan-version" content="9">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -45,7 +45,7 @@
     <p>The existing signals discovery pipeline already enriches a source once and fills a template for each member, and already exports and pushes graph archives per facility. This plan uses both.</p>
 
     <h2 id="s2">§2 — Every configured model seat names its model's latest version</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p><strong>Delivers.</strong> Each model seat the project configuration declares names the latest available version of the model it intends, or the landing record states why a seat stays on an earlier one. Seats that route to the locally served model name the model that lane serves today.</p>
     <p><strong>Done when.</strong> The landing record lists every declared seat with the model it named before, the latest version found and where that was established, and the model it names after; the configuration tests pass with no added failure against the base revision; and each changed seat answers one live request. <strong>Negative control:</strong> a seat naming a model its route does not serve fails its live request and is reported, not silently left.</p>
 
@@ -119,7 +119,7 @@
     <div class="r-comment-body"><p>Reviewed r-20261115T104944405793-model-seats-name-latest-versions at head 5e95c4c21cc315318d4a9f142436a90a0edfa6a8 against base d588fa703e76e54d4e39af1b742c31764b21dee7: goal_fidelity 16, evidence 15, scope_discipline 15, durability 13, fit 15, reuse 17, 6 non-blocking findings, added_failure_count 0, status parsed; the record is stored under the reviewed run's review-records/ as r-20261115T104944405793-model-seats-name-latest-versions.json and its head-keyed copy.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261115T104944405793-model-seats-name-latest-versions" data-who="reckon-build" data-when="2026-11-15T13:13:36Z">
-    <div class="r-comment-body"><p>Replaced the hand-written newest-release allow-list in tests/config/test_model_seats.py with a derivation from four provider catalogs read 2026-11-15 (tests/config/data/model-catalog-2026-11-15.json) and added a slow live seat-reachability test; all 63 model identifiers declared in pyproject.toml already named their line&#x27;s newest release, so 0 seats moved and pyproject.toml is unchanged: tests/config 311 passed / 0 failed at head against 203 passed / 0 failed at head/base with 17 live tests deselected so the default run issues zero live request, and 17 live seat requests passed under the slow marker</p></div>
+    <div class="r-comment-body"><p>Replaced the hand-written newest-release allow-list in tests/config/test_model_seats.py with a derivation from four provider catalogs read 2026-11-15 (tests/config/data/model-catalog-2026-11-15.json) and added a slow live seat-reachability test; all 63 model identifiers declared in pyproject.toml already named their line's newest release, so 0 seats moved and pyproject.toml is unchanged: tests/config 311 passed / 0 failed at head against 203 passed / 0 failed at head/base with 17 live tests deselected so the default run issues zero live request, and 17 live seat requests passed under the slow marker</p></div>
 </div>
 </section>
 </main>
