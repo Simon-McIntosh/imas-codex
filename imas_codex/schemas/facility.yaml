@@ -43,6 +43,14 @@ imports:
 # =============================================================================
 
 enums:
+  ArchiveMetadataState:
+    description: Outcome of the archive type and full-attribute metadata requests
+    permissible_values:
+      available:
+        description: Both metadata interfaces returned valid documents
+      unavailable:
+        description: An archive metadata request failed; fields are absent and errors retained
+
   ArchiveSamplingMode:
     description: Sampling semantics established by archive metadata or a read
     permissible_values:
@@ -2880,6 +2888,39 @@ classes:
           relationship_type: LISTED_BY_ARCHIVE
       archive_metadata:
         description: Complete archive-reported metadata document encoded as JSON, with absent fields omitted
+      metadata_state:
+        description: Availability of archive type and full metadata, independent of signal discovery status
+        range: ArchiveMetadataState
+      metadata_error_code:
+        description: Archive error code from the first failed metadata interface
+        range: integer
+      metadata_error:
+        description: Archive error message explaining unavailable metadata
+      metadata_errors:
+        description: Per-interface archive error codes and messages encoded as JSON
+      archive_labels:
+        description: Full-metadata labels in archive order; labels do not establish physical identity
+        multivalued: true
+      archive_format:
+        description: Full-metadata display format
+      archive_lower_display_limit:
+        description: Full-metadata lower display limit in the reported engineering unit
+        range: float
+      archive_upper_display_limit:
+        description: Full-metadata upper display limit in the reported engineering unit
+        range: float
+      archive_lower_alarm_limit:
+        description: Full-metadata lower alarm limit in the reported engineering unit
+        range: float
+      archive_upper_alarm_limit:
+        description: Full-metadata upper alarm limit in the reported engineering unit
+        range: float
+      archive_lower_warning_limit:
+        description: Full-metadata lower warning limit in the reported engineering unit
+        range: float
+      archive_upper_warning_limit:
+        description: Full-metadata upper warning limit in the reported engineering unit
+        range: float
       data_type:
         description: Archive-reported value type; absent when no scalar value type is supplied
       structure_fields:

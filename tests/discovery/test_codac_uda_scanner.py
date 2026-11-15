@@ -33,6 +33,7 @@ def entries(count):
     return [
         {
             "name": f"DEMO:TEMP-{index}",
+            "archive_metadata": {"type": {"datatypes": []}, "full": []},
             "unit": {"value": "K"},
             "description": {"value": "Archive wording"},
         }
@@ -417,7 +418,7 @@ async def test_scanner_uses_loader_samples_and_classifies_the_same_refusal(
 
 
 @pytest.mark.asyncio
-async def test_failed_metadata_counts_error_without_writing_signal(config, scanner_io):
+async def test_failed_metadata_is_catalogued_as_unavailable(config, scanner_io):
     stored, reader = scanner_io
 
     def respond(facility, role, payload, **kwargs):
@@ -425,16 +426,21 @@ async def test_failed_metadata_counts_error_without_writing_signal(config, scann
             return {"entries": [{"name": "DEMO:FAILED"}]}
         return {
             "entries": [],
-            "failed": [{"name": "DEMO:FAILED", "error": "fixture refusal"}],
+            "failed": [
+                {"name": "DEMO:FAILED", "error": "fixture refusal", "error_code": 9105}
+            ],
         }
 
     reader.side_effect = respond
     result = await catalogue.CodacUDAScanner().scan("demo", "local", config)
     assert result.stats["failed"] == 1
     assert result.stats["errors"] == {"DEMO:FAILED": "fixture refusal"}
-    assert result.stats["complete"] is False
-    assert result.stats["written"] == 0
-    assert result.signals == [] and stored == {}
+    assert result.stats["complete"] is True
+    assert result.stats["written"] == 1
+    assert len(result.signals) == len(stored) == 1
+    signal = result.signals[0]
+    assert signal.metadata_state == "unavailable" and signal.metadata_error_code == 9105
+    assert signal.archive_metadata is signal.unit is signal.source_description is None
 
 
 def test_disk_catalogue_recovers_metadata_before_acknowledgement(tmp_path):
@@ -489,28 +495,37 @@ def test_disk_catalogue_recovers_metadata_before_acknowledgement(tmp_path):
     store.close()
 
 
-def test_disk_catalogue_counts_failed_metadata_without_empty_signal(tmp_path):
+def test_disk_catalogue_persists_unavailable_metadata_with_code(tmp_path):
     from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
 
     store = ArchiveCatalogue(tmp_path / "failed.sqlite")
     store.seed({"slow": ["DEMO:FAILED"]}, timestamp="fixture census")
-    ingest = Mock()
+    ingest = Mock(return_value=1)
     result = store.run(
         facility="demo",
         fetch=lambda role, names: {
             "entries": [],
-            "failed": [{"name": names[0], "error": "fixture refusal"}],
+            "failed": [
+                {"name": names[0], "error": "fixture refusal", "error_code": 9105}
+            ],
         },
         ingest=ingest,
-        make_signal=Mock(),
+        make_signal=lambda role, entry, cohort: entry,
     )
     assert (
-        result["complete"] is False and result["failed"] == 1 and result["written"] == 0
+        result["complete"] is True and result["failed"] == 1 and result["written"] == 1
     )
+    signal = ingest.call_args.args[0][0]
+    assert (
+        signal["metadata_state"] == "unavailable"
+        and signal["metadata_error_code"] == 9105
+    )
+    assert "archive_metadata" not in signal
     assert store.db.execute("SELECT error FROM census").fetchone() == (
         "fixture refusal",
     )
-    ingest.assert_not_called()
+    ingest.assert_called_once()
+    assert result["unavailable_codes"] == {9105: 1}
     store.close()
 
 
@@ -561,3 +576,86 @@ def test_signal_keeps_all_archive_fields_and_absent_times():
     assert signal.data_type == "DOUBLE"
     assert signal.first_sample_ns is signal.last_sample_ns is None
     assert signal.listed_archives == ["demo:codac_uda:slow"]
+
+
+def test_existing_type_checkpoint_is_retained_and_full_attributes_backfilled(tmp_path):
+    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
+
+    store = ArchiveCatalogue(tmp_path / "backfill.sqlite")
+    store.seed({"slow": ["DEMO:EXISTING", "DEMO:PENDING"]}, timestamp="fixture census")
+    type_document = {"datatypes": [{"name": "main", "fields": []}]}
+    old = {"name": "DEMO:EXISTING", "archive_metadata": type_document}
+    with store.db:
+        store.db.execute(
+            "UPDATE census SET document=?,acknowledged=1 WHERE name=?",
+            (json.dumps(old), old["name"]),
+        )
+        store.db.execute("INSERT INTO written VALUES (?)", (old["name"],))
+    assert store.cached_type_documents("slow", [old["name"], "DEMO:PENDING"]) == {
+        old["name"]: type_document
+    }
+    fetched = []
+
+    def fetch(role, names):
+        fetched.extend(names)
+        return {
+            "entries": [
+                {
+                    "name": name,
+                    "metadata_state": "available",
+                    "archive_metadata": {
+                        "type": type_document,
+                        "full": [{"name": "Units", "value": "K"}],
+                    },
+                }
+                for name in names
+            ]
+        }
+
+    result = store.run(
+        facility="demo",
+        fetch=fetch,
+        ingest=len,
+        make_signal=lambda role, entry, cohort: entry,
+    )
+    assert (
+        result["complete"] and result["written"] == 2 and result["newly_written"] == 1
+    )
+    assert set(fetched) == {"DEMO:EXISTING", "DEMO:PENDING"}
+    repeated = store.run(
+        facility="demo",
+        fetch=fetch,
+        ingest=len,
+        make_signal=lambda role, entry, cohort: entry,
+    )
+    assert repeated["metadata_requests"] == repeated["newly_written"] == 0
+    assert len(fetched) == 2
+    store.close()
+
+
+def test_unavailable_signal_clears_archive_fields_and_available_requires_document():
+    entry = entries(1)[0] | {
+        "metadata_state": "unavailable",
+        "metadata_error_code": 9105,
+        "metadata_error": "fixture refusal",
+        "archive_labels": ["untrusted"],
+    }
+    signal = catalogue.CodacUDAScanner._signal(
+        "demo", "demo:codac_uda:slow", "access", entry, "cohort"
+    )
+    assert signal.metadata_state == "unavailable" and signal.metadata_error_code == 9105
+    assert (
+        signal.archive_metadata
+        is signal.archive_labels
+        is signal.unit
+        is signal.structure_fields
+        is None
+    )
+    with pytest.raises(ValueError, match="requires a successful document"):
+        catalogue.CodacUDAScanner._signal(
+            "demo",
+            "demo:codac_uda:slow",
+            "access",
+            {"name": "DEMO:EMPTY", "metadata_state": "available"},
+            "cohort",
+        )

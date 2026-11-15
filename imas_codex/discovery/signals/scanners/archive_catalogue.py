@@ -10,12 +10,29 @@ from collections.abc import Callable, Iterable
 from pathlib import Path
 
 
+def metadata_entries(response: dict) -> list[dict]:
+    """Represent every answered selector, including explicit archive refusals."""
+    entries = list(response["entries"])
+    answered = {entry["name"] for entry in entries}
+    for failure in response.get("failed", []):
+        if failure["name"] not in answered:
+            entries.append(
+                {
+                    "name": failure["name"],
+                    "metadata_state": "unavailable",
+                    "metadata_error_code": failure.get("error_code", 0),
+                    "metadata_error": failure["error"],
+                }
+            )
+    return entries
+
+
 class ArchiveCatalogue:
     """Keep bounded batches durable independently of graph acknowledgement.
 
     Every archive membership is retained. A selector's latest successful metadata
     source owns its primary metadata record; all complete source documents remain
-    in the checkpoint. Failed requests carry errors and never become graph rows.
+    in the checkpoint. Metadata refusals become unavailable signal records.
     """
 
     def __init__(self, path: Path):
@@ -30,6 +47,37 @@ class ArchiveCatalogue:
             CREATE INDEX IF NOT EXISTS pending_ingest ON census(role) WHERE document IS NOT NULL AND acknowledged=0;
             CREATE INDEX IF NOT EXISTS selector_membership ON census(name);
         """)
+
+        columns = {row[1] for row in self.db.execute("PRAGMA table_info(census)")}
+        with self.db:
+            for name, definition in (
+                ("attributes_checked", "INTEGER NOT NULL DEFAULT 0"),
+                ("metadata_state", "TEXT"),
+                ("error_code", "INTEGER"),
+            ):
+                if name not in columns:
+                    self.db.execute(
+                        f"ALTER TABLE census ADD COLUMN {name} {definition}"
+                    )
+            self.db.execute(
+                "CREATE INDEX IF NOT EXISTS pending_attributes ON census(role) WHERE attributes_checked=0"
+            )
+
+    def cached_type_documents(self, role: str, names: list[str]) -> dict:
+        """Reuse successful type documents while backfilling full attributes."""
+        placeholders = ",".join("?" for _ in names)
+        records = self.db.execute(
+            f"SELECT name,document FROM census WHERE role=? AND name IN ({placeholders}) AND document IS NOT NULL",
+            [role, *names],
+        )
+        result = {}
+        for name, encoded in records:
+            document = json.loads(encoded).get("archive_metadata")
+            if isinstance(document, dict) and "datatypes" in document:
+                result[name] = document
+            elif isinstance(document, dict) and isinstance(document.get("type"), dict):
+                result[name] = document["type"]
+        return result
 
     def close(self) -> None:
         self.db.close()
@@ -104,38 +152,40 @@ class ArchiveCatalogue:
             while max_batches is None or batches < max_batches:
                 # Replay fetched but unacknowledged records before new requests.
                 pending = self.db.execute(
-                    "SELECT name,document FROM census WHERE role=? AND document IS NOT NULL AND acknowledged=0 LIMIT ?",
+                    "SELECT name,document FROM census WHERE role=? AND attributes_checked=1 AND document IS NOT NULL AND acknowledged=0 LIMIT ?",
                     (role, batch_size),
                 ).fetchall()
                 if not pending:
                     names = [
                         row[0]
                         for row in self.db.execute(
-                            "SELECT name FROM census WHERE role=? AND document IS NULL AND error IS NULL LIMIT ?",
+                            "SELECT name FROM census WHERE role=? AND attributes_checked=0 LIMIT ?",
                             (role, batch_size),
                         )
                     ]
                     if not names:
                         break
                     response = fetch(role, names)
-                    entries = response["entries"]
-                    failed = response.get("failed", [])
-                    answered = [item["name"] for item in entries + failed]
+                    entries = metadata_entries(response)
+                    answered = [item["name"] for item in entries]
                     if len(answered) != len(names) or set(answered) != set(names):
                         raise RuntimeError(
                             "metadata receipt does not match requested selectors"
                         )
                     with self.db:
                         self.db.executemany(
-                            "UPDATE census SET document=? WHERE role=? AND name=?",
+                            "UPDATE census SET document=?,error=?,error_code=?,metadata_state=?,attributes_checked=1,acknowledged=0 WHERE role=? AND name=?",
                             (
-                                (json.dumps(item), role, item["name"])
+                                (
+                                    json.dumps(item),
+                                    item.get("metadata_error"),
+                                    item.get("metadata_error_code"),
+                                    item.get("metadata_state", "available"),
+                                    role,
+                                    item["name"],
+                                )
                                 for item in entries
                             ),
-                        )
-                        self.db.executemany(
-                            "UPDATE census SET error=? WHERE role=? AND name=?",
-                            ((item["error"], role, item["name"]) for item in failed),
                         )
                     fetched += len(names)
                     pending = [(item["name"], json.dumps(item)) for item in entries]
@@ -157,7 +207,7 @@ class ArchiveCatalogue:
                             f"incomplete graph batch: acknowledged {count} of {len(signals)}"
                         )
                     with self.db:
-                        self.db.executemany(
+                        added = self.db.executemany(
                             "INSERT OR IGNORE INTO written VALUES (?)",
                             ((name,) for name, _ in pending),
                         )
@@ -165,7 +215,7 @@ class ArchiveCatalogue:
                             "UPDATE census SET acknowledged=1 WHERE role=? AND name=?",
                             ((role, name) for name, _ in pending),
                         )
-                    written += count
+                    written += added.rowcount
                 if progress:
                     progress(
                         {
@@ -180,18 +230,26 @@ class ArchiveCatalogue:
             "SELECT count(*) FROM census WHERE error IS NOT NULL"
         ).fetchone()[0]
         unrequested = self.db.execute(
-            "SELECT count(*) FROM census WHERE document IS NULL AND error IS NULL"
+            "SELECT count(*) FROM census WHERE attributes_checked=0"
         ).fetchone()[0]
         return {
-            "complete": total_written == census["union"]
-            and unrequested == 0
-            and failed == 0,
+            "complete": total_written == census["union"] and unrequested == 0,
             "persisted": True,
             "enumerated": census["union"],
             "written": total_written,
             "newly_written": written,
             "metadata_requests": fetched,
             "failed": failed,
+            "metadata_states": dict(
+                self.db.execute(
+                    "SELECT metadata_state,count(*) FROM census WHERE attributes_checked=1 GROUP BY metadata_state"
+                )
+            ),
+            "unavailable_codes": dict(
+                self.db.execute(
+                    "SELECT error_code,count(*) FROM census WHERE metadata_state='unavailable' GROUP BY error_code"
+                )
+            ),
             "metadata_batches": batches,
             "elapsed_seconds": time.monotonic() - started,
         }

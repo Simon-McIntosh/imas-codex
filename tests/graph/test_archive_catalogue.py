@@ -42,6 +42,11 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
             "archive_metadata": {"fixture": "complete archive document"},
             "data_type": "DOUBLE",
             "structure_fields": [{"name": "val", "type": "DOUBLE"}],
+            "metadata_state": "available",
+            "archive_labels": ["Enabled", "Disabled"],
+            "archive_format": "%.2f",
+            "archive_lower_display_limit": 0,
+            "archive_upper_alarm_limit": 990,
         }
         signal = catalogue.CodacUDAScanner._signal(
             facility, archive, access, entry, "cohort"
@@ -119,6 +124,55 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
         assert binding[0]["archive_id"] == f"{facility}:codac_uda:fast"
         assert binding[0]["archive_role"] == "fast"
         assert binding[0]["method_type"] == "codac_uda"
+        attributes = graph.query(
+            "MATCH (s:FacilitySignal {id:$id}) RETURN s.metadata_state AS state, "
+            "s.archive_labels AS labels,s.archive_format AS format, "
+            "s.archive_lower_display_limit AS lower,s.archive_upper_alarm_limit AS alarm",
+            id=signal.id,
+        )
+        assert attributes == [
+            {
+                "state": "available",
+                "labels": ["Enabled", "Disabled"],
+                "format": "%.2f",
+                "lower": 0,
+                "alarm": 990,
+            }
+        ]
+        refused = catalogue.CodacUDAScanner._signal(
+            facility,
+            archive,
+            access,
+            {
+                "name": entry["name"],
+                "metadata_state": "unavailable",
+                "metadata_error_code": 9105,
+                "metadata_error": "fixture metadata refusal",
+            },
+            "cohort",
+        )
+        assert ingest_discovered_signals([refused.model_dump(mode="json")]) == 1
+        unavailable = graph.query(
+            "MATCH (s:FacilitySignal {id:$id}) RETURN s.metadata_state AS state, "
+            "s.metadata_error_code AS code,count(s.unit) AS units,count(s.archive_metadata) AS documents, "
+            "count(s.archive_labels) AS labels,count(s.archive_format) AS formats, "
+            "count(s.archive_lower_display_limit) AS limits,s.status AS status,s.claim_token AS claim,s.data_archive AS serving",
+            id=signal.id,
+        )
+        assert unavailable == [
+            {
+                "state": "unavailable",
+                "code": 9105,
+                "units": 0,
+                "documents": 0,
+                "labels": 0,
+                "formats": 0,
+                "limits": 0,
+                "status": "enriched",
+                "claim": "held",
+                "serving": f"{facility}:codac_uda:fast",
+            }
+        ]
         graph.query(
             "MATCH (a:ArchiveEndpoint {id: $archive}) SET a.excluded = true",
             archive=archive,

@@ -48,7 +48,13 @@ async def test_seed_reports_only_acknowledged_archive_signals(
         "request_archive",
         Mock(
             return_value={
-                "entries": [{"name": "DEMO:TEMP", "unit": {"value": "K"}}],
+                "entries": [
+                    {
+                        "name": "DEMO:TEMP",
+                        "unit": {"value": "K"},
+                        "archive_metadata": {"type": {}, "full": []},
+                    }
+                ],
             }
         ),
     )

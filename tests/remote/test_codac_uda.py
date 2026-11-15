@@ -116,8 +116,10 @@ def test_variables_bound_and_metadata_absence(monkeypatch):
         reader, "metadata_batch", lambda client, names: [{"error": "invalid JSON"}]
     )
     result = reader.variables(client, {"pattern": "DEMO-*", "limit": 1})
-    assert result["entries"] == []
-    assert result["failed"] == [{"name": "DEMO-PLANT:TEMP", "error": "invalid JSON"}]
+    assert result["entries"][0]["metadata_state"] == "unavailable"
+    assert result["failed"] == [
+        {"name": "DEMO-PLANT:TEMP", "error": "invalid JSON", "error_code": 0}
+    ]
 
 
 @pytest.mark.parametrize(
@@ -207,11 +209,14 @@ def test_metadata_requests_each_variable_and_isolates_refusal():
         ValueError("fixture refusal"),
         '{"datatypes": []}',
     ]
-    assert reader.metadata_batch(client, ["DEMO:ONE", "DEMO:TWO", "DEMO:THREE"]) == [
-        {"datatypes": []},
-        {"error": "fixture refusal"},
-        {"datatypes": []},
-    ]
+    client.getMetaJSON.return_value = "[]"
+    client.getErrorCode.return_value = 0
+    documents = reader.metadata_batch(client, ["DEMO:ONE", "DEMO:TWO", "DEMO:THREE"])
+    assert documents[0] == documents[2] == {"type": {"datatypes": []}, "full": []}
+    assert (
+        documents[1]["error"] == "fixture refusal" and documents[1]["error_code"] == 0
+    )
+    assert client.getMetaJSON.call_count == 3
     assert [
         call.args[0] for call in client.getMetaTypeJSONCollapsed.call_args_list
     ] == ["DEMO:ONE", "DEMO:TWO", "DEMO:THREE"]
@@ -222,5 +227,9 @@ def test_failed_metadata_is_not_an_empty_success(monkeypatch):
         reader, "metadata_batch", lambda client, names: [{"error": "fixture refusal"}]
     )
     result = reader.metadata(Mock(), {"names": ["DEMO:FAILED"]})
-    assert result["entries"] == []
-    assert result["failed"] == [{"name": "DEMO:FAILED", "error": "fixture refusal"}]
+    assert result["entries"][0]["metadata_state"] == "unavailable"
+    assert result["entries"][0]["metadata_error_code"] == 0
+    assert "archive_metadata" not in result["entries"][0]
+    assert result["failed"] == [
+        {"name": "DEMO:FAILED", "error": "fixture refusal", "error_code": 0}
+    ]

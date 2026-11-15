@@ -305,16 +305,24 @@ class CodacUDAScanner:
                     },
                     config=effective,
                 )
-                received = response["entries"]
-                failed = response.get("failed", [])
-                answered = [entry["name"] for entry in received + failed]
+                from imas_codex.discovery.signals.scanners.archive_catalogue import (
+                    metadata_entries,
+                )
+
+                received = metadata_entries(response)
+                failed = [
+                    entry
+                    for entry in received
+                    if entry.get("metadata_state") == "unavailable"
+                ]
+                answered = [entry["name"] for entry in received]
                 if len(answered) != len(names) or set(answered) != set(names):
                     raise RuntimeError(
                         "metadata batch does not match its requested selectors"
                     )
                 state["entries"].update({entry["name"]: entry for entry in received})
                 state["failed"].update(
-                    {entry["name"]: entry["error"] for entry in failed}
+                    {entry["name"]: entry["metadata_error"] for entry in failed}
                 )
                 state["warnings"].extend(response.get("warnings", []))
                 state["metadata_batches"] += 1
@@ -352,6 +360,25 @@ class CodacUDAScanner:
         facility: str, archive: str, access: str, entry: dict, cohort: str
     ) -> FacilitySignal:
         name = entry["name"]
+        metadata_state = entry.get("metadata_state", "available")
+        if metadata_state == "unavailable":
+            entry = {
+                key: value
+                for key, value in entry.items()
+                if key
+                in {
+                    "name",
+                    "metadata_state",
+                    "metadata_error_code",
+                    "metadata_error",
+                    "metadata_errors",
+                    "listed_archives",
+                }
+            }
+        elif metadata_state != "available" or not entry.get("archive_metadata"):
+            raise ValueError(
+                "available archive metadata requires a successful document"
+            )
         mode = entry.get("sampling_mode", "unknown")
         if mode not in {item.value for item in ArchiveSamplingMode}:
             mode = "unknown"
@@ -365,6 +392,20 @@ class CodacUDAScanner:
             data_source_name="codac_uda",
             data_source_path=name,
             metadata_archive=archive,
+            metadata_state=metadata_state,
+            metadata_error_code=entry.get("metadata_error_code"),
+            metadata_error=entry.get("metadata_error"),
+            metadata_errors=json.dumps(entry["metadata_errors"])
+            if entry.get("metadata_errors")
+            else None,
+            archive_labels=entry.get("archive_labels"),
+            archive_format=entry.get("archive_format"),
+            archive_lower_display_limit=entry.get("archive_lower_display_limit"),
+            archive_upper_display_limit=entry.get("archive_upper_display_limit"),
+            archive_lower_alarm_limit=entry.get("archive_lower_alarm_limit"),
+            archive_upper_alarm_limit=entry.get("archive_upper_alarm_limit"),
+            archive_lower_warning_limit=entry.get("archive_lower_warning_limit"),
+            archive_upper_warning_limit=entry.get("archive_upper_warning_limit"),
             listed_archives=entry.get("listed_archives", [archive]),
             archive_metadata=json.dumps(entry["archive_metadata"], sort_keys=True)
             if "archive_metadata" in entry
@@ -380,7 +421,7 @@ class CodacUDAScanner:
             source_description=entry.get("description", {}).get("value"),
             unit=entry.get("unit", {}).get("value"),
             discovery_source="codac_uda",
-            sampling_mode=mode,
+            sampling_mode=mode if metadata_state == "available" else None,
             sampling_evidence=entry.get("sampling_evidence")
             if mode != "unknown"
             else None,

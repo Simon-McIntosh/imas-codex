@@ -56,21 +56,52 @@ def _field(value: Any, source: str) -> dict:
     return {"value": text or None, "source": source if text else None}
 
 
-def metadata_batch(client, names: list[str]) -> list[dict]:
-    """Fetch one metadata document per variable, isolating individual refusals.
+def metadata_batch(
+    client, names: list[str], type_documents: dict | None = None
+) -> list[dict]:
+    """Query type and full attributes, retaining each interface's archive error.
 
-    The high-level client preserves the archive's type decoding. A failed
-    variable cannot discard the other documents in the bounded caller batch.
+    Previously checkpointed type documents may be reused during attribute
+    backfill. Both interfaces are attempted even when one refuses a variable.
     """
     results = []
     for name in names:
-        try:
-            document = json.loads(client.getMetaTypeJSONCollapsed(name))
-            if not isinstance(document, dict):
-                raise ValueError("archive metadata is not an object")
-            results.append(document)
-        except Exception as exc:
-            results.append({"error": str(exc)})
+        documents = {}
+        errors = []
+        for interface, method in (
+            ("type", client.getMetaTypeJSONCollapsed),
+            ("full", client.getMetaJSON),
+        ):
+            if interface == "type" and name in (type_documents or {}):
+                documents[interface] = type_documents[name]
+                continue
+            code = 0
+            try:
+                raw = method(name) if interface == "type" else method(name, "-1")
+                try:
+                    code = int(client.getErrorCode())
+                except (ValueError, TypeError):
+                    code = 0
+                if code:
+                    raise ReadError(str(client.getErrorMsg()))
+                document = json.loads(raw)
+                if not isinstance(document, dict if interface == "type" else list):
+                    raise ValueError("archive metadata has an unexpected JSON shape")
+                documents[interface] = document
+            except Exception as exc:
+                errors.append(
+                    {"interface": interface, "error_code": code, "error": str(exc)}
+                )
+        if errors:
+            results.append(
+                {
+                    "error": errors[0]["error"],
+                    "error_code": errors[0]["error_code"],
+                    "errors": errors,
+                }
+            )
+        else:
+            results.append(documents)
     return results
 
 
@@ -116,50 +147,107 @@ def metadata(client, request: dict) -> dict:
     warnings = []
     entries = []
     failed = []
-    documents = metadata_batch(client, names)
+    cached = request.get("type_documents")
+    documents = (
+        metadata_batch(client, names, cached)
+        if cached
+        else metadata_batch(client, names)
+    )
     for name, document in zip(names, documents, strict=True):
         if "error" in document:
-            failed.append({"name": name, "error": str(document["error"])})
-            continue
-        unit, description = _field(None, "uda"), _field(None, "uda")
-        try:
-            datatypes = document["datatypes"]
-            root = next(
-                (item for item in datatypes if item.get("name") == "main"),
-                datatypes[-1],
-            )
-            fields = root["fields"]
-            signal = next(
-                (field for field in fields if field.get("name") == "val"), None
-            )
-            if signal is None and len(fields) == 1:
-                signal = fields[0]
-            if signal:
-                unit = _field(signal.get("unit"), "uda")
-                description = _field(signal.get("description"), "uda")
-        except (KeyError, IndexError, TypeError) as exc:
-            failed.append({"name": name, "error": str(exc)})
-            continue
-        entries.append(
-            {
+            entry = {
                 "name": name,
-                "unit": unit,
-                "description": description,
-                "archive_metadata": document,
-                "data_type": signal.get("type") if signal else None,
-                "structure_fields": datatypes,
-                **{
-                    key: document[key]
-                    for key in (
-                        "first_sample_ns",
-                        "last_sample_ns",
-                        "sampling_mode",
-                        "sampling_evidence",
-                    )
-                    if document.get(key) is not None
-                },
+                "metadata_state": "unavailable",
+                "metadata_error_code": document.get("error_code", 0),
+                "metadata_error": str(document["error"]),
+                "metadata_errors": document.get("errors", []),
             }
+            entries.append(entry)
+            failed.append(
+                {
+                    "name": name,
+                    "error": entry["metadata_error"],
+                    "error_code": entry["metadata_error_code"],
+                }
+            )
+            continue
+        type_document = document.get("type", document)
+        attributes = document.get("full", [])
+        datatypes = type_document.get("datatypes", [])
+        valid_structure = isinstance(datatypes, list) and all(
+            isinstance(item, dict)
+            and isinstance(item.get("fields", []), list)
+            and all(isinstance(field, dict) for field in item.get("fields", []))
+            for item in datatypes
         )
+        if not valid_structure or not all(
+            isinstance(item, dict) for item in attributes
+        ):
+            error = "archive metadata document has invalid fields"
+            entries.append(
+                {
+                    "name": name,
+                    "metadata_state": "unavailable",
+                    "metadata_error_code": 0,
+                    "metadata_error": error,
+                }
+            )
+            failed.append({"name": name, "error": error, "error_code": 0})
+            continue
+        root = next(
+            (item for item in datatypes if item.get("name") == "main"),
+            datatypes[-1] if datatypes else {},
+        )
+        fields = root.get("fields", [])
+        signal = next((field for field in fields if field.get("name") == "val"), None)
+        if signal is None and len(fields) == 1:
+            signal = fields[0]
+        values = {}
+        for attribute in attributes:
+            value = attribute.get("value")
+            if value is not None and str(value).strip():
+                values.setdefault(attribute.get("name"), []).append(value)
+        entry = {
+            "name": name,
+            "metadata_state": "available",
+            "unit": _field(next(iter(values.get("Units", [])), None), "uda_full"),
+            "description": _field(
+                signal.get("description") if signal else None, "uda_type"
+            ),
+            "archive_metadata": {"type": type_document, "full": attributes},
+            "data_type": signal.get("type") if signal else None,
+            "structure_fields": datatypes,
+            **{
+                key: type_document[key]
+                for key in (
+                    "first_sample_ns",
+                    "last_sample_ns",
+                    "sampling_mode",
+                    "sampling_evidence",
+                )
+                if type_document.get(key) is not None
+            },
+        }
+        if values.get("label"):
+            entry["archive_labels"] = [str(value) for value in values["label"]]
+        if values.get("Format"):
+            entry["archive_format"] = str(values["Format"][0])
+        for source, target in (
+            ("LowerDisplayLimit", "archive_lower_display_limit"),
+            ("UpperDisplayLimit", "archive_upper_display_limit"),
+            ("LowerAlarmLimit", "archive_lower_alarm_limit"),
+            ("UpperAlarmLimit", "archive_upper_alarm_limit"),
+            ("LowerWarningLimit", "archive_lower_warning_limit"),
+            ("UpperWarningLimit", "archive_upper_warning_limit"),
+        ):
+            if values.get(source):
+                try:
+                    value = float(values[source][0])
+                    if np.isfinite(value):
+                        entry[target] = value
+                except (ValueError, TypeError):
+                    pass
+        entries.append(entry)
     return {"entries": entries, "warnings": warnings, "failed": failed}
 
 
