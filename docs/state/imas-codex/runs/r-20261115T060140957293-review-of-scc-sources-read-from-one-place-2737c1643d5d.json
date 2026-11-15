@@ -986,6 +986,46 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "aa6e7e59020ed26d2c703b7e88cd71257eab356a",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261115T060140957293-review-of-scc-sources-read-from-one-place-2737c1643d5d",
+    "scratch_bytes": 31559,
+    "scratch_host": "98dci4-clu-2001.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261115T060140957293-review-of-scc-sources-read-from-one-place-2737c1643d5d",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 31559,
+        "path": "/tmp/reckon-crew-scratch/r-20261115T060140957293-review-of-scc-sources-read-from-one-place-2737c1643d5d"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/review-of-scc-sources-read-from-one-place-2737c1643d5d",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/_trash/r-20261115T060140957293-review-of-scc-sources-read-from-one-place-2737c1643d5d-20261115T062014896294Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
