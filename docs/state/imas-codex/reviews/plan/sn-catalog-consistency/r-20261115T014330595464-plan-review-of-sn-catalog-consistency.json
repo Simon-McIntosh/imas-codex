@@ -1,0 +1,57 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T02:13:42.779Z",
+  "dispatched_at": "2026-11-15T01:44:05Z",
+  "findings": [
+    {
+      "anchor": "plan.html:99",
+      "id": "done_when-1",
+      "reason": "a worker implementing the rule as written reports `beta` into the evidence file \u00a77 reads as its population, and a derived parent planted with no producer is the case that would otherwise show the class rule firing.",
+      "text": "the count's \"no derived parent with a derived producer\" exclusion is planted only as \"a derived parent whose only producer is a derived record\", a name that already carries a producer edge and is therefore excluded by the no-edge rule; a derived parent with no producer edge at all is counted, and the population contains one: `beta`, which the section itself hands to \u00a77 with the six other edgeless names, but which the committed read classifies as an exempt derived parent (`docs/evidence/fragments/sn-catalog-consistency/scc-sourceless-names.json`, `derived_parent_exempt: [\"beta\"]`, and its html: \"derived parent (`beta`), which the invariant exempts as structural\") while \u00a77's done-when (`plan.html:87`) exempts derived parents \u2014 so the count reports a name \u00a77 neither must nor can repair",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:99",
+      "id": "evidence_paths-1",
+      "reason": "the figure is the whole justification for a control the section just added, and with no citable record the next reader must either accept it or re-measure the live graph to check the control is sized right.",
+      "text": "\"of which the live graph held three on 2026-11-14\" justifies the sixth plant and the expected count of 2, yet unlike the section's other carried artifacts (`plan.html:98` for the list it writes; `plan.html:35` for \u00a71's census) it names no fragment carrying that reading, and the same section's decomposition already leaves \"the remaining three of the 2,609 \u2026 not classified\", so a later reader cannot tell whether the over-reporting three are those three or a separate set drawn from the ten",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "d0696f4bb1084062fe41a6c2df6fe0c73847ed6d",
+  "plan_fingerprint": "a7d7c4c5854ec5c7770298ec4c84b6280cf86b3cbb724dc9a57af9a9f96ef8c3",
+  "plan_slug": "sn-catalog-consistency",
+  "plan_version": 58,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T014330595464-plan-review-of-sn-catalog-consistency",
+  "reviewed_blob_sha": "6ab75adb74d79a52d092d92e83bb8b2142a486b7",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `tests/standard_names`, `docs/evidence/fragments/sn-catalog-consistency/` and `docs/plans/sn-catalog-consistency.html` all resolve; the section's only output path sits under an existing durable directory, and no href requires resolution.",
+    "done_when": "a finding \u2014 the count's derived-parent exclusion is exercised only by a derived parent that already carries a derived producer, so the class rule never fires and a real edgeless derived parent in the same population slips through (`plan.html:99`).",
+    "evidence_paths": "a finding \u2014 the sixth plant's justification, \"the live graph held three on 2026-11-14\", is the only figure in the section with no record a later reader can open (`plan.html:99`).",
+    "naming": "pass \u2014 the changed clause names a mechanism and a dated observation, with no plan label, stage name or ticket reference reaching a symbol or a comment.",
+    "reasoning": "pass \u2014 the stated root cause (one fact stored twice, the copied list read by some writers only) is what the cited decomposition shows; the endpoint is a live-graph comparison that can fail, with planted controls; and the section names no code path, step sequence or function.",
+    "single_goal": "pass \u2014 the node delivers one capability (a single reading of a name's sources): the readers, the count command, its guard test and the evidence file it writes.",
+    "wiring": "pass \u2014 `plan-section-depends-on` carries `\"s9\"` under `s7` (`plan.html:22`), so \u00a77's population read from \u00a79's evidence file is ordered correctly, and \u00a79 declares no upstream it needs."
+  },
+  "section_digests": {
+    "_document": "2c1048b18b3abc87fa0ead3305f05e2ca37ba0a7eb7882041b8ab7a29b7f2a59",
+    "s1": "c69f79e72b8fe8652e9dcd8632a35ca7eaa3a205fd5ee3e2ee98bc74afc136ba",
+    "s2": "6ae00a9294feccc4fe231a1dcc4077c59b5540dc981de50b9f86e781d0bfc92a",
+    "s3": "aa1fea350fe30f045ccc80ea17e474ba76d1f634673cf083a8205d5245fb5357",
+    "s4": "ef7bd7f314233248216f8598211014764b74d1c74c308db48db9ab9390a33d55",
+    "s5": "fe0b485d37658d44737045e98025181bb507e290590b07825ff0062adf984863",
+    "s6": "253a243a23959f6452cabdc987e19b9de1cec45f996c6c86f6c861fa64307724",
+    "s7": "abb53d14a3cb7db35add3d596e723e7c0e012bbee6e7f328d2b7b520a5956700",
+    "s8": "124c4cffdc2b27efae89ba41f97a27ff57b01c0b53ce596b6c025f1e6523e626",
+    "s9": "3a665a4724450c0cede0313ad3472022075628c8becd09206e2e5c55b61d6bb5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T02:14:12.975937+00:00",
+  "total": null
+}
