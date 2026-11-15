@@ -82,6 +82,13 @@ def test_integer_epoch_nanoseconds_remain_distinct():
     np.testing.assert_equal(signal_plot._elapsed(times, int(times[0]), 1e9), [0, 1e-9])
 
 
+def test_loader_pulse_seconds_time_base(tmp_path):
+    loaded = signal(time_base="pulse_seconds")
+    assert signal_plot.statistics(loaded)["time_span_s"] == 10
+    receipt = signal_plot.plot([loaded], tmp_path / "pulse.svg", labels=["measurement"])
+    assert receipt["time_base"] == "pulse_seconds"
+
+
 @pytest.mark.parametrize(
     "case, names",
     [("clipped", ["outside canvas"]), ("overlap", ["first label", "second label"])],

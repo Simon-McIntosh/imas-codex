@@ -99,22 +99,29 @@
     These working checks were retained. The baseline event summary used the
     generic label <code>archived_samples</code>; the delivered interface gives
     the explicit archived-on-change kind above.</p>
-  <p>The final focused gate completed with <strong>18 passed, 1 warning in 1.46 s</strong>,
+  <p>The final focused gate completed with <strong>19 passed, 1 warning in 1.64 s</strong>,
     exit 0. It exercises the two bad figures through the public save function,
     checks each offending label appears in the refusal, and asserts no file
     exists. It also checks a direct label over data, envelope label precedence
     over sampling semantics, unsigned epoch-nanosecond precision, honest
     decimation, common overlay origins, multiple traces, incompatible units,
-    and an uneven event sequence whose unweighted mean is 4 rather than its
+    the loader's native relative-pulse time base, and an uneven event sequence whose unweighted mean is 4 rather than its
     held-duration mean of 8.1. The warning is pytest's configured cache option
     being unavailable when its cache plugin is deliberately disabled.</p>
   <p>Bypassing the reused text guard in memory makes both head-passing refusal
     tests fail with <code>DID NOT RAISE &lt;class 'ValueError'&gt;</code>:
     <strong>2 failed, 1 warning in 0.22 s</strong>, exit 1. The mutation is not
     present in any committed file. The receipts are
-    <code>focused-tests-final.log</code>, <code>negative-control.log</code>,
+    <code>focused-tests-native-time.log</code>, <code>negative-control.log</code>,
     <code>baseline-observations.log</code>, <code>live-plots.log</code> and
     <code>export-check.log</code> in the assigned run directory.</p>
+  <p>A final interface check reproduced the rejection of the loader's native
+    <code>pulse_seconds</code> time base:
+    <code>ValueError: time_base must be epoch_ns or relative_s</code>,
+    one failed test, exit 1. The plotting boundary now accepts the loader's
+    native relative-time label; the new regression passes for both summary and
+    figure export. This does not alter the absolute-time live figures.
+    The red receipt is <code>pulse-time-base-red.log</code>.</p>
   <p>Source and initial synthetic-artifact commits are
     <code>03f0f851de83bb6481409a054770c4710598c8c8</code>,
     <code>c260f6ad0f5a33e4d05473ae725fab22629873c3</code> and

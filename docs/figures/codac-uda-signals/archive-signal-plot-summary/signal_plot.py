@@ -39,8 +39,8 @@ def _arrays(signal: LoadedSignal):
     if times.ndim != 1 or values.ndim == 0 or len(times) != len(values):
         raise ValueError("time and value dimensions disagree")
     base = signal.metadata.get("time_base")
-    if base not in {"epoch_ns", "relative_s"}:
-        raise ValueError("time_base must be epoch_ns or relative_s")
+    if base not in {"epoch_ns", "pulse_seconds", "relative_s"}:
+        raise ValueError("time_base must be epoch_ns, pulse_seconds or relative_s")
     if times.dtype.kind not in ("iu" if base == "epoch_ns" else "iuf"):
         raise ValueError("timestamp dtype disagrees with time base")
     if not np.all(np.isfinite(times)) or np.any(times[1:] <= times[:-1]):
@@ -149,7 +149,9 @@ def save_figure(figure, path: str | Path) -> None:
         content = path.read_text()
         height = 16 * figure.get_figheight() / CANVAS[1]
         content = content.replace('height="16cm"', f'height="{height:g}cm"', 1)
-        path.write_text("\n".join(line.rstrip() for line in content.splitlines()) + "\n")
+        path.write_text(
+            "\n".join(line.rstrip() for line in content.splitlines()) + "\n"
+        )
 
 
 def _scale(magnitude: float, unit: str):
