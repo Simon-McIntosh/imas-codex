@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="codac-uda-signals">
   <meta name="plan-title" content="CODAC UDA signals in the graph, and the rename to iter-codex">
   <meta name="plan-summary" content="ITER plant signals are searchable and loadable through the MCP server; the project is then renamed iter-codex in stages">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="44.25">
   <meta name="plan-capability-version" content="1.0">
@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery,mcp-server">
   <meta name="plan-after" content="sn-definitions-by-construction">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;deferred&quot;,&quot;s11&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;deferred&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s4&quot;:[&quot;codac-uda-signals#s2&quot;,&quot;codac-uda-signals#s3&quot;],&quot;s5&quot;:[&quot;codac-uda-signals#s2&quot;,&quot;codac-uda-signals#s3&quot;],&quot;s6&quot;:[&quot;codac-uda-signals#s4&quot;,&quot;codac-uda-signals#s5&quot;],&quot;s7&quot;:[&quot;codac-uda-signals#s5&quot;],&quot;s8&quot;:[&quot;codac-uda-signals#s4&quot;],&quot;s10&quot;:[&quot;codac-uda-signals#s9&quot;],&quot;s11&quot;:[&quot;codac-uda-signals#s10&quot;]}">
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="3">
+<meta name="plan-version" content="4">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -105,15 +105,6 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="import-package-name" data-choice="" data-by="" data-when="">
-    <p class="r-dec-q">Does the Python import package become iter_codex , or does only the user-facing name change?</p>
-    <p class="r-dec-ctx">The package name is in 138,394 places and in every in-flight worktree. Changing only the distribution, command and MCP key is far smaller, and leaves an import name that no longer matches the product.</p>
-    <p class="r-dec-opts">
-      <button class="r-opt" data-value="rename-package">Rename the package too</button>
-      <button class="r-opt" data-value="user-facing-only">User-facing names only</button>
-      </p>
-    <p class="r-dec-rat"></p>
-    </div>
 <div class="r-dec" data-key="github-repository-rename" data-choice="" data-by="" data-when="">
     <p class="r-dec-q">Are the fork and the iterorganization upstream repository renamed, and who does it?</p>
     <p class="r-dec-ctx">A repository rename is outward-facing and needs the organisation&#x27;s agreement. GitHub redirects the old address, but release automation, registry ownership and badges move with it.</p>
@@ -121,6 +112,15 @@
       <button class="r-opt" data-value="both">Rename both</button>
       <button class="r-opt" data-value="fork-only">Fork only for now</button>
       <button class="r-opt" data-value="neither">Keep both names</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="import-package-name" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the Python import package become iter_codex , or does only the user-facing name change?</p>
+    <p class="r-dec-ctx">The package name is in 138,394 places and in every in-flight worktree. Changing only the distribution, command and MCP key is far smaller, and leaves an import name that no longer matches the product.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="rename-package">Rename the package too</button>
+      <button class="r-opt" data-value="user-facing-only">User-facing names only</button>
       </p>
     <p class="r-dec-rat"></p>
     </div>
