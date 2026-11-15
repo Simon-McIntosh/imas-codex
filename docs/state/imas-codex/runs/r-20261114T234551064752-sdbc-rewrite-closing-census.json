@@ -1,0 +1,1148 @@
+{
+  "agent": {
+    "alias": "dsv4.1-flash",
+    "backend": "clive",
+    "effective_input_window": 230144,
+    "effort": "high",
+    "launch": "cli",
+    "local": true,
+    "model": "deepseek-v4.1-flash",
+    "sandbox": "worktree-full",
+    "usable_input_window": 230144
+  },
+  "attempt": 1,
+  "attempt_kind": "dispatch",
+  "backend": "clive",
+  "base_sha": "c1d0d9bf97e29ea7210aa304b6b59d759c2d7758",
+  "boundary_waiver": null,
+  "brief": null,
+  "budget": {
+    "budget_overrun": false,
+    "budget_overrun_notice": null,
+    "budget_overrun_seconds": 0,
+    "budget_overrun_tokens": 0,
+    "cost_usd": null,
+    "cost_usd_cumulative": null,
+    "cost_usd_imputed": true,
+    "detail": "no rate-limit event in the stream yet",
+    "headroom": "unknown",
+    "rate_limit_period_minutes": null,
+    "rate_limit_type": null,
+    "refusal": false,
+    "resets_at": null,
+    "surpassed_threshold": null,
+    "threshold_status": null,
+    "tokens": {
+      "cache_creation_input_tokens": 0,
+      "cache_creation_input_tokens_cumulative": 0,
+      "cache_read_input_tokens": 0,
+      "cache_read_input_tokens_cumulative": 0,
+      "fallback_credit": null,
+      "inference_geo": "",
+      "input_tokens": 60951522,
+      "input_tokens_cumulative": 60951522,
+      "output_tokens": 164134,
+      "output_tokens_cumulative": 164134,
+      "service_tier": "standard",
+      "speed": "standard"
+    },
+    "utilisation_pct": null
+  },
+  "changed_lines": {
+    "added": 30170,
+    "files": 4,
+    "removed": 17
+  },
+  "clone_matches": [
+    {
+      "existing_function": {
+        "line": 465,
+        "name": "_free_port_pair",
+        "path": "tests/standard_names/conftest.py"
+      },
+      "run_function": {
+        "line": 604,
+        "name": "_free_port_pair",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 607
+    },
+    {
+      "existing_function": {
+        "line": 453,
+        "name": "mock_heavy_operations",
+        "path": "tests/conftest.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 418,
+        "name": "test_composite_is_the_largest_of_five_nouls",
+        "path": "tests/discovery/test_code_relevance.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 283,
+        "name": "test_stats_queries_receive_scanner_scope",
+        "path": "tests/discovery/test_enrichment_context.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 19,
+        "name": "test_max_of_dimensions",
+        "path": "tests/discovery/test_scorer.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 248,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 97,
+        "name": "fake_engine",
+        "path": "tests/discovery/test_signals_focus_reset.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 1030,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 1763,
+        "name": "mock_pipeline",
+        "path": "tests/discovery/test_signals_pipeline.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 76,
+        "name": "test_build_stats_include_auxiliary_ids_and_identifier_totals",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 102,
+        "name": "test_build_stats_uses_max_of_enriched_and_embedded",
+        "path": "tests/graph/test_dd_progress.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_returns_dict",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 392,
+        "name": "test_has_facility_key",
+        "path": "tests/graph/test_domain_queries.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 2418,
+        "name": "test_terminal_recovery_manifest_covers_exact_fixture_cohort",
+        "path": "tests/standard_names/test_attachment_audit.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 66,
+        "name": "test_reconcile_maps_unset_and_terminal_statuses_idempotently",
+        "path": "tests/standard_names/test_catalog_status_reconcile.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 282,
+        "name": "test_review_c0_c1_c2_emit_correct_cycle",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 329,
+        "name": "test_review_docs_phase_is_review_docs",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 379,
+        "name": "test_review_retry_distinguishes_batch_id",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 438,
+        "name": "test_review_no_retry_single_event",
+        "path": "tests/standard_names/test_charge_sites.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 106,
+        "name": "test_6dim_reviewer",
+        "path": "tests/standard_names/test_compose_example_injection.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 92,
+        "name": "test_all_pools_non_zero",
+        "path": "tests/standard_names/test_compute_pool_pending.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 41,
+        "name": "__init__",
+        "path": "tests/standard_names/test_cost_ledger_augments_only.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 462,
+        "name": "test_review_writer_requires_successful_owned_transition",
+        "path": "tests/standard_names/test_dd_gap_automated_writers.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 735
+    },
+    {
+      "existing_function": {
+        "line": 187,
+        "name": "test_property_coverage_requires_plural_axis_and_every_filtered_property",
+        "path": "tests/standard_names/test_docs_review_eligibility.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 100,
+        "name": "test_scalar_selected_dedup_removes_other_binding_and_projection",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 370,
+        "name": "test_ineligible_source_retirement_surfaces_orphaned_names",
+        "path": "tests/standard_names/test_dual_binding_dedup.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 64,
+        "name": "query",
+        "path": "tests/standard_names/test_edits_scope_selection.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 28,
+        "name": "test_returns_feedback_mapping",
+        "path": "tests/standard_names/test_fetch_review_feedback_for_sources.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 395,
+        "name": "test_source_status_reconcile_repairs_both_liveness_directions",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 461,
+        "name": "test_source_status_reconcile_is_idempotent_when_no_residue_matches",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 545,
+        "name": "test_pending_counts_mirror_review_and_edit_scope",
+        "path": "tests/standard_names/test_pipeline_recovery_mechanics.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 418,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 516,
+        "name": "_mock_review",
+        "path": "tests/standard_names/test_pool_batch_processors.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 1608,
+        "name": "test_generate_maps_to_draft_only",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 1633,
+        "name": "test_generate_and_regen_sum_matches_display_total",
+        "path": "tests/standard_names/test_pool_orchestration_contracts.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 188,
+        "name": "test_pending_counts_returns_all_six_keys",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 251,
+        "name": "test_single_query_call",
+        "path": "tests/standard_names/test_pool_wiring.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 269,
+        "name": "_mock_review_result",
+        "path": "tests/standard_names/test_rd_quorum.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 8,
+        "name": "test_reconcile_revived_status_requires_a_matching_fold_receipt",
+        "path": "tests/standard_names/test_reconcile_revived_status.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 38,
+        "name": "test_ingestion_reads_line_and_request_comment_surfaces",
+        "path": "tests/standard_names/test_review_comment_triage.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 42,
+        "name": "test_write_reviews_forwards_cost_and_tokens",
+        "path": "tests/standard_names/test_review_cost.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 107,
+        "name": "test_6dim_full_reviewer",
+        "path": "tests/standard_names/test_review_example_injection.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 234,
+        "name": "test_signed_dispositions_apply_all_modes_and_preserve_outside_allowlist",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 427,
+        "name": "test_preview_refuses_removal_of_target_last_live_binding",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 484,
+        "name": "test_signed_structural_authority_admits_last_binding_removal",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 654,
+        "name": "test_admitted_subset_applies_only_safe_rows_and_replays_without_writes",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 747,
+        "name": "test_signed_mirror_repair_applies_scalar_and_projection_classes_exactly",
+        "path": "tests/standard_names/test_signed_source_dispositions.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 18,
+        "name": "test_skipped_source_retry_is_exact_audited_and_context_preserving",
+        "path": "tests/standard_names/test_skipped_source_retry_graph.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 27,
+        "name": "query",
+        "path": "tests/standard_names/test_sn_run_dry_run.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 122,
+        "name": "test_direct_ancestor_fold_preserves_lineage_and_retargets_source",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 172,
+        "name": "test_present_upstream_stale_source_is_signed_refusal",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 219,
+        "name": "test_absent_upstream_stale_source_detaches_and_stays_stale",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 526,
+        "name": "test_dual_binding_is_deduplicated_without_reversing_lineage",
+        "path": "tests/standard_names/test_supersede_into_ancestor.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 73,
+        "name": "test_each_row_lands_in_exactly_one_bucket",
+        "path": "tests/standard_names/test_vocab_gap_triage.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 292,
+        "name": "test_format_load_row",
+        "path": "tests/test_cli.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    },
+    {
+      "existing_function": {
+        "line": 58,
+        "name": "_make_stats",
+        "path": "tests/test_run_domain_cycles.py"
+      },
+      "run_function": {
+        "line": 725,
+        "name": "_plot_style",
+        "path": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py"
+      },
+      "window_line": 734
+    }
+  ],
+  "commit_resolution": null,
+  "commits": [
+    "19daa7a6db6e1a0212c2be6cd4c82b11957e0cd5"
+  ],
+  "completed_at": "2026-11-15T04:54:13.868Z",
+  "completed_at_source": "terminal_event",
+  "dispatched_at": "2026-11-14T23:58:05Z",
+  "disposition": null,
+  "dispute_count": 0,
+  "domain_waiver": null,
+  "duration_measurement": null,
+  "execution_fit": {
+    "allowed": true,
+    "execution_capable": true,
+    "matched_measure": null,
+    "override": false,
+    "role": "implement",
+    "status": "no-execution-measure"
+  },
+  "failure_classification": null,
+  "gate": "passed",
+  "gate_check": {
+    "command": "uv run --no-sync python docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py --phase all",
+    "exit_status": 0,
+    "log_digest": null,
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T234551064752-sdbc-rewrite-closing-census/census-all.log"
+  },
+  "impl_move": {
+    "at_complete": 0.7571428571428571,
+    "at_dispatch": 0.6428571428571429,
+    "plan": "sn-definitions-by-construction",
+    "verdict": "moved"
+  },
+  "lane": "clive",
+  "lane_advisory": {
+    "backend": "clive",
+    "burn_multiple": null,
+    "cheaper_lane": {
+      "detail": "",
+      "lane": null,
+      "state": "not_evaluated"
+    },
+    "detail": "'clive' is unmetered, so it has no window to exhaust; the local lane's scarcity is throughput, which it does not publish",
+    "horizon_ends_at": "2026-11-15T11:57:51.865130+00:00",
+    "horizon_seconds": 43200,
+    "metered": false,
+    "observed_at": null,
+    "precedes_horizon": null,
+    "projected_exhaustion_at": null,
+    "resets_at": null,
+    "seconds_until_reset": null,
+    "state": "quiet",
+    "utilisation_pct": null
+  },
+  "lane_declaration": {
+    "backend": "clive",
+    "headroom": null,
+    "metered": false,
+    "observed_at": null,
+    "read_at": "2026-11-14T23:57:51Z",
+    "resolved_backend": "clive",
+    "utilisation_pct": null
+  },
+  "lane_reading": {
+    "age_seconds": 13,
+    "binding_observed": "unknown",
+    "detail": "",
+    "generating": 10,
+    "headroom": -26,
+    "mean_context": 130909,
+    "observed_at": "2026-11-14T23:57:39Z",
+    "state": "fresh",
+    "suggested_shelf_life_seconds": 45,
+    "throughput": {
+      "age_seconds": 13,
+      "aggregate_tokens_per_second": 432.175,
+      "detail": "",
+      "mean_tokens_per_second": 40.771,
+      "observed_at": "2026-11-14T23:57:39Z",
+      "runs": 10.6,
+      "state": "measured"
+    },
+    "waiting": 1
+  },
+  "lane_receipt": {
+    "effective_context_window": "unmeasured",
+    "notional_cost_usd": "unmeasured",
+    "observed_at": "2026-11-15T04:54:13.868Z",
+    "quota_state": "unmeasured",
+    "quota_windows": [],
+    "rate_basis": "unmeasured",
+    "unmeasured": {
+      "effective_context_window": "missing_rollout",
+      "notional_cost_usd": "missing_rollout",
+      "quota_windows": "unmetered",
+      "rate_basis": "missing_rollout"
+    }
+  },
+  "lineage": null,
+  "local": true,
+  "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T234551064752-sdbc-rewrite-closing-census/manifest.md",
+  "member": "disposable-r-20261114T234551064752-sdbc-rewrite-closing-census",
+  "model_key": "flash",
+  "negative_control": {
+    "reason": "node-writes-no-test-path",
+    "verdict": "exempt"
+  },
+  "no_commit": null,
+  "node": "sdbc-rewrite-closing-census",
+  "node_definition": {
+    "admission_findings": [],
+    "after": [],
+    "anchor_paths": [],
+    "brief": "",
+    "brief_path": "",
+    "brief_sha256": "",
+    "capability": {
+      "class": "orchestrator",
+      "requirements": {
+        "reasoning": "deep",
+        "risk": "critical",
+        "verification": "strict"
+      },
+      "version": "1.0"
+    },
+    "compares_with": "",
+    "coordinator": {
+      "authoring_turn": {
+        "detail": "the dispatching harness exposed no authoring-turn token usage",
+        "status": "unknown",
+        "tokens": null
+      },
+      "harness": null,
+      "runtime_session_id": null,
+      "session_id": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9"
+    },
+    "done_when": "sdbc-rewrite-closing-census.html and its json are committed stating, clause by clause, met or not met with the evidence: the wording census over every live name with the forms per operator and the wordings per species family beside the counts before the first write, each remaining divergent family listed with its reason; every species name whose text departs from the ruled population statement listed by name; the unit census and the name-against-definition check re-run on every live name with counts beside their earlier readings; every name of the 485 whose documentation score is below the publishing threshold listed as held; live names without a producer edge counted by edges; spend per class and total beside USD 150; and the census reporting a family planted divergent in a disposable graph; no graph write; model spend at most USD 12; graph reads and model calls run as all_debug or rigel jobs submitted with SLURM_JOB_ID unset",
+    "estimated_hours": null,
+    "goal": "measure every clause of the section's done-when over every live name after the rewrite",
+    "id": "sdbc-rewrite-closing-census",
+    "images": [],
+    "inputs": [
+      "docs/evidence/fragments/sn-definitions-by-construction/live-rewrite-bulk.json"
+    ],
+    "lane_declaration": {
+      "backend": "clive",
+      "headroom": null,
+      "metered": false,
+      "observed_at": null,
+      "read_at": "2026-11-14T23:57:51Z",
+      "resolved_backend": "clive",
+      "utilisation_pct": null
+    },
+    "lane_reading": {
+      "age_seconds": 13,
+      "binding_observed": "unknown",
+      "detail": "",
+      "generating": 10,
+      "headroom": -26,
+      "mean_context": 130909,
+      "observed_at": "2026-11-14T23:57:39Z",
+      "state": "fresh",
+      "suggested_shelf_life_seconds": 45,
+      "throughput": {
+        "age_seconds": 13,
+        "aggregate_tokens_per_second": 432.175,
+        "detail": "",
+        "mean_tokens_per_second": 40.771,
+        "observed_at": "2026-11-14T23:57:39Z",
+        "runs": 10.6,
+        "state": "measured"
+      },
+      "waiting": 1
+    },
+    "manifest_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261114T234551064752-sdbc-rewrite-closing-census/manifest.md",
+    "negative_control": "",
+    "over_fence_note": "",
+    "over_fence_reason": "",
+    "peer_scopes": {
+      "codac-uda-loader-prototype": [
+        "docs/evidence/fragments/codac-uda-signals/prototype-report.md",
+        "scripts/codac_uda_prototype"
+      ],
+      "sdbc-escalation-on-last-rotation": [
+        "imas_codex/standard_names/worker_tasks/worker_refine_names.py",
+        "tests/standard_names/test_refine_attempt_budget.py"
+      ],
+      "sdbc-name-check-prototype": [
+        "docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.json",
+        "docs/evidence/fragments/sn-definitions-by-construction/name-check-prototype.py",
+        "docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-check-prototype.html",
+        "docs/figures/sn-name-check-prototype"
+      ],
+      "sdbc-name-check-question": [
+        "docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-check-question.html",
+        "docs/figures/sn-definitions-by-construction/sdbc-name-check-question",
+        "imas_codex/llm/prompts/sn/review_name_definition_system.md",
+        "imas_codex/llm/prompts/sn/review_name_definition_user.md",
+        "imas_codex/standard_names/audits.py",
+        "imas_codex/standard_names/jev_review.py",
+        "imas_codex/standard_names/review/audits.py",
+        "imas_codex/standard_names/review/name_definition_seat.py",
+        "imas_codex/standard_names/worker_tasks/worker_review_docs.py",
+        "tests/standard_names/test_name_definition_agreement.py",
+        "tests/standard_names/test_review_docs_name_definition_hold.py"
+      ]
+    },
+    "plan": "sn-definitions-by-construction",
+    "regenerate_paths": [],
+    "requested_backend": "clive",
+    "requires_decisions": [],
+    "role": "implement",
+    "section": "§6",
+    "spec_level": "exact",
+    "time_budget": "12h",
+    "token_budget": null,
+    "waits_only_after": false,
+    "write_paths": [
+      "docs/evidence/fragments/sn-definitions-by-construction/sdbc-rewrite-closing-census.html",
+      "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.json",
+      "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py",
+      "docs/figures/sn-rewrite-closing-census",
+      "docs/figures/sn-definitions-by-construction/sdbc-rewrite-closing-census"
+    ]
+  },
+  "orchestrator_lane_override": null,
+  "orientation_input_tokens": 5040021.0,
+  "outcome": "",
+  "outside_scope_paths": [],
+  "pace": {
+    "allowance": null,
+    "bar": null,
+    "clocks": {
+      "five_hour": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "five_hour",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      },
+      "seven_day": {
+        "age_seconds": null,
+        "observed_at": null,
+        "period": "seven_day",
+        "resets_at": null,
+        "state": "unknown",
+        "utilisation": null,
+        "window_minutes": null
+      }
+    },
+    "group": null,
+    "hold": null,
+    "lane": "clive",
+    "lift_id": null,
+    "member": null,
+    "node": "sdbc-rewrite-closing-census",
+    "policy": {
+      "drain_lead_hours": 12.0,
+      "pace_multiple": 1.1
+    },
+    "reason": "the lane declares no budget group, so no wallet paced it",
+    "recorded_at": "2026-11-14T23:57:59.496174+00:00",
+    "score": 0.71875,
+    "session": null,
+    "source": null,
+    "state": "unknown"
+  },
+  "picker_selection": {
+    "action": "fallback",
+    "backend": null,
+    "comment": "",
+    "confidence": null,
+    "effort": null,
+    "excluded": [],
+    "fallback_reason": "timeout",
+    "family": null,
+    "jev_model": "~typesafe/jev-latest",
+    "latency_ms": 5057.199,
+    "model": null,
+    "offered": [],
+    "probabilities": {},
+    "stage_ms": {}
+  },
+  "plan": "sn-definitions-by-construction",
+  "plan_impl_at_dispatch": 0.6428571428571429,
+  "plan_link": null,
+  "promoted_by": null,
+  "promoted_revision": "19daa7a6db6e1a0212c2be6cd4c82b11957e0cd5",
+  "resume_waiver": null,
+  "review": {
+    "absent": [],
+    "reviewed_base_sha": "c1d0d9bf97e29ea7210aa304b6b59d759c2d7758",
+    "reviewed_head_sha": "19daa7a6db6e1a0212c2be6cd4c82b11957e0cd5",
+    "scores": {
+      "durability": 11,
+      "evidence": 14,
+      "fit": 17,
+      "goal_fidelity": 19,
+      "reuse": 18,
+      "scope_discipline": 20
+    },
+    "status": "parsed",
+    "total": 99
+  },
+  "review_tier": "full",
+  "role": "implement",
+  "route_mode": "explicit",
+  "run_id": "r-20261114T234551064752-sdbc-rewrite-closing-census",
+  "scope_acceptances": null,
+  "scope_changed": false,
+  "section": "§6",
+  "session": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+  "session_harness": "claude",
+  "session_id": "932c24a5-9eeb-46ed-bb65-754fc371b129",
+  "session_model": "deepseek-v4.1-flash",
+  "shadow_controlled": null,
+  "shadow_patch": "",
+  "spec_level": "exact",
+  "stalled": false,
+  "suite_delta": null,
+  "tests_added": null,
+  "throughput": {
+    "cumulative_cached_input_tokens": 0,
+    "cumulative_input_tokens": 61311001,
+    "detail": "generation and wall clock reported separately by the backend; utilisation divided by the configured lane window 230144",
+    "elapsed_seconds": 17742.52,
+    "generated_tokens": 181733,
+    "generation_seconds": 17110.813,
+    "input_budget_tokens": 230144,
+    "input_utilisation_pct": 77.5,
+    "machine_seconds": 631.707,
+    "peak_input_tokens": 178444,
+    "tokens_per_second": 10.62,
+    "wall_tokens_per_second": 10.24
+  },
+  "time_budget": "12h",
+  "tool_steps": 497.0,
+  "unplanned_reason": null,
+  "unreconciled_override": null,
+  "wall_seconds": 17768,
+  "watch_override": null,
+  "worker_exit": {
+    "attempt": 1,
+    "ended_during": "working",
+    "ended_pids": [],
+    "exit_code": 0,
+    "exited_at": "2026-11-15T04:54:15Z",
+    "last_record_type": "result",
+    "launched_at": "2026-11-14T23:58:10Z",
+    "recorded_by": "supervisor",
+    "removed_harness_caches": [],
+    "run_id": "r-20261114T234551064752-sdbc-rewrite-closing-census",
+    "signal": null,
+    "signal_name": null,
+    "stream_records_seen": 21103,
+    "worker_pid": 407406
+  },
+  "worker_seconds": 17642,
+  "worker_seconds_source": "stream_events",
+  "worktree_retention": null
+}
