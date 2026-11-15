@@ -1168,6 +1168,16 @@ def run_script_via_stdin(
     return output.strip() or "(no output)"
 
 
+def _local_python_script_command(
+    python_command: str, runner: str, setup_commands: list[str] | None
+) -> list[str]:
+    """Apply shell setup and replace that shell with the selected interpreter."""
+    cmd = [python_command, "-c", runner]
+    if setup_commands:
+        return ["bash", "-c", " && ".join([*setup_commands, f"exec {shlex.join(cmd)}"])]
+    return cmd
+
+
 def run_python_script(
     script_name: str,
     input_data: dict | list | None = None,
@@ -1195,7 +1205,7 @@ def run_python_script(
             ``remote_environment`` block; this executor performs no facility
             lookup.
         setup_commands: Shell commands to run before Python (e.g., module loads).
-            Only used for remote (SSH) execution. Supplied by the
+            Applied on both local and remote (SSH) execution. Supplied by the
             facility-aware layer from the facility ``remote_environment``
             block.
 
@@ -1248,7 +1258,7 @@ def run_python_script(
 
     if is_local:
         result = subprocess.run(
-            [python_command, "-c", runner],
+            _local_python_script_command(python_command, runner, setup_commands),
             input=json_input,
             capture_output=True,
             text=True,
@@ -1341,7 +1351,7 @@ async def async_run_python_script(
             facility-aware layer from the facility ``remote_environment``
             block; this executor performs no facility lookup.
         setup_commands: Shell commands to run before Python (e.g., module loads).
-            Only used for remote (SSH) execution. Supplied by the
+            Applied on both local and remote (SSH) execution. Supplied by the
             facility-aware layer from the facility ``remote_environment``
             block.
 
@@ -1388,7 +1398,7 @@ async def async_run_python_script(
     )
 
     if is_local:
-        cmd = [python_command, "-c", runner]
+        cmd = _local_python_script_command(python_command, runner, setup_commands)
     else:
         # Check SSH health once per host per session (sync, cached)
         _ensure_ssh_healthy_once(ssh_host)
