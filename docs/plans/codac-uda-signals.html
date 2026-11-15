@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery,mcp-server">
   <meta name="plan-after" content="sn-definitions-by-construction">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;deferred&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;deferred&quot;,&quot;s11&quot;:&quot;deferred&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;done&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s4&quot;:[&quot;codac-uda-signals#s2&quot;,&quot;codac-uda-signals#s3&quot;],&quot;s5&quot;:[&quot;codac-uda-signals#s2&quot;,&quot;codac-uda-signals#s3&quot;],&quot;s6&quot;:[&quot;codac-uda-signals#s4&quot;,&quot;codac-uda-signals#s5&quot;],&quot;s7&quot;:[&quot;codac-uda-signals#s5&quot;],&quot;s8&quot;:[&quot;codac-uda-signals#s4&quot;],&quot;s10&quot;:[&quot;codac-uda-signals#s9&quot;],&quot;s11&quot;:[&quot;codac-uda-signals#s10&quot;]}">
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="14">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -58,7 +58,7 @@
 <p><strong>Done when.</strong> A focused test shows a local run with a declared setup command observes the environment that command sets, and that a local run with no setup command behaves exactly as before, each shown on both the synchronous and the asynchronous entry point; the executor resolves no data system's setup or interpreter itself and receives them from its caller. A live control lists one variable through the same call from a compute partition, supplying the archive client's setup commands and endpoint itself from private configuration, and records count and elapsed time in the landing record. <strong>Negative control:</strong> with the setup step removed, the same test fails on both entry points because the client is not importable.</p>
 
     <h2 id="s3">§3 — The schema can hold an archive, a pulse and a pulse category</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p><strong>Delivers.</strong> The LinkML schemas and facility configuration represent: a CODAC UDA data system for ITER with its setup, interpreter, named archive roles and read limits; an archive endpoint that is not an MDSplus server; a pulse with a string identity, absolute start and end in nanoseconds and its archive; and a pulse category with pulse membership. Operator-reserved endpoints are representable as excluded and are refused before any connection.</p>
 <p><strong>Done when.</strong> The generated models build; schema-driven tests pass; a fixture pulse with a non-numeric identity round-trips; and the ITER facility configuration validates with the new data system while every other facility's configuration validates unchanged. <strong>Negative control:</strong> a configuration naming an operator-reserved endpoint as a readable role is rejected by validation.</p>
 
