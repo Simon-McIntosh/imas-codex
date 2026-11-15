@@ -23,6 +23,8 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -62,8 +64,8 @@
 
     <h2 id="s4">§4 — The variable catalogue for a named cohort is in the graph</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="codac-uda-signals#s2,codac-uda-signals#s3"></section>
-<p><strong>Delivers.</strong> A registered CODAC UDA scanner. For a cohort of variable patterns declared in the private ITER configuration, each archive variable is a facility signal owned by the ITER facility, carrying its exact archive selector, its unit and description as the archive reports them, and the data-access record that reads it. The scan is resumable and reports how many variables it enumerated, wrote and skipped, with reasons.</p>
-<p><strong>Done when.</strong> For one declared cohort, the number of signals in the graph equals the number the archive lists for the same patterns, counted independently in the landing record; a second run writes no duplicates; and the scan ran on a compute partition (<code>rigel</code> or <code>all_debug</code>). Modified graph statements pass under the <code>graph</code> marker. <strong>Negative control:</strong> a scan interrupted part-way reports itself incomplete and is not counted as a finished cohort.</p>
+<p><strong>Delivers.</strong> A registered CODAC UDA scanner. For a cohort of variable patterns declared in the private ITER configuration, each archive variable is a facility signal owned by the ITER facility, carrying its exact archive selector, its unit and description as the archive reports them, and the data-access record that reads it. Each signal records two archive roles separately: the archive whose listing supplied its metadata, and the archive verified to serve its data, which is unset until a read has returned samples from it. Each signal also records whether it is sampled continuously or archived on change, where the archive or a read establishes it. The scan is resumable and reports how many variables it enumerated, wrote and skipped, with reasons.</p>
+<p><strong>Done when.</strong> For one declared cohort, the number of signals in the graph equals the number the archive lists for the same patterns, counted independently in the landing record; a second run writes no duplicates; a sample of ten cohort signals has its data-serving archive confirmed by a bounded read that returns samples, with the counts confirmed and unconfirmed in the landing record; the pulse listing for one declared category returns the same count as an independent listing of that category; and the scan ran on a compute partition (<code>rigel</code> or <code>all_debug</code>). Modified graph statements pass under the <code>graph</code> marker. <strong>Negative control:</strong> a scan interrupted part-way reports itself incomplete and is not counted as a finished cohort; and a signal listed on an archive that returns no samples for it keeps its data-serving archive unset.</p>
 
     <h2 id="s5">§5 — A signal is loaded by identity over a bounded window, with honest sampling</h2>
     <section data-reckon="section" data-id="s5" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="codac-uda-signals#s2,codac-uda-signals#s3"></section>
@@ -77,8 +79,8 @@
 
     <h2 id="s7">§7 — A loaded signal is plotted and summarised</h2>
     <section data-reckon="section" data-id="s7" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links="codac-uda-signals#s5"></section>
-<p><strong>Delivers.</strong> From one loaded signal, or several overlaid on a shared time axis, a figure and a summary: sample count, time span, minimum, maximum, mean and sample interval, with envelope and archived-on-change statistics labelled as such and never presented as raw-sample or time-weighted values. Figures follow the plot style rules and pass the save-time checks for clipped and overlapping text.</p>
-<p><strong>Done when.</strong> A live signal and a two-signal overlay are rendered and inspected, with the internal file paths in the landing record; a synthetic-data figure is committed under <code>docs/figures/codac-uda-signals/</code> and embedded in the evidence. <strong>Negative control:</strong> a figure with a label beyond the canvas is refused by the save function.</p>
+<p><strong>Delivers.</strong> From one loaded signal, or several overlaid on a shared time axis, a figure and a summary: sample count, time span, minimum, maximum, mean and sample interval, with envelope and archived-on-change statistics labelled as such and never presented as raw-sample or time-weighted values. The section also delivers the save function these figures go through: one function that draws the figure and refuses to write it when any text extends beyond the canvas or two text items overlap, naming the offending items. Figures follow the plot style rules.</p>
+<p><strong>Done when.</strong> A live signal and a two-signal overlay are rendered and inspected, with the internal file paths in the landing record; a synthetic-data figure is committed under <code>docs/figures/codac-uda-signals/</code> and embedded in the evidence. <strong>Negative control:</strong> a figure with a label beyond the canvas is refused by the save function this section delivers, and no file is written.</p>
 
     <h2 id="s8">§8 — A variable name yields a candidate plant component and control function</h2>
     <section data-reckon="section" data-id="s8" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="codac-uda-signals#s4"></section>
@@ -88,7 +90,7 @@
     <h2 id="s9">§9 — Every consumer of the current name is listed, and the rename decisions are locked</h2>
     <section data-reckon="section" data-id="s9" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
 <p><strong>Delivers.</strong> A read-only inventory of everything that resolves through the current name outside the tracked tree: installed service and timer units, scheduler job names, editable installs and console scripts, cache, state and config roots, registry image names, MCP client configurations, stored graph values that embed a path or import name, and queued or running reckon runs. Beside it, the list of surfaces that keep the <code>imas</code> name because they are about IMAS: the standard-names catalog and grammar library, the data-dictionary server and commands, the data-dictionary graph labels and the <code>imas</code> dependency.</p>
-<p><strong>Done when.</strong> The inventory is in the landing record with a count per surface and the command that produced each count, and the three decisions in this plan are locked. Nothing is renamed by this section.</p>
+<p><strong>Done when.</strong> The inventory is in the landing record with a count per surface and the command that produced each count, and the three decisions in this plan are locked. Nothing is renamed by this section. <strong>Positive control:</strong> for each surface, one consumer known to exist beforehand (named in the landing record before the inventory runs) appears in that surface's result. <strong>Negative control:</strong> a surface whose command cannot run on the node is recorded as not measured, never as a count of zero.</p>
 
     <h2 id="s10">§10 — The project answers to iter-codex, and nothing running breaks</h2>
     <section data-reckon="section" data-id="s10" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links="codac-uda-signals#s9"></section>
@@ -102,45 +104,45 @@
 <p><strong>Done when.</strong> After a fresh environment sync from the main checkout, the default test tier shows no failures added against the pre-rename base; the graph service, its daily push timer and the embedding service run under their updated units and are discovered by the client; a new graph image pulls by its new name; reckon serves the project under the new key with its run history intact; and a search of the consumer inventory from §9 finds no live reference to the old name. <strong>Negative control:</strong> an import of the old package name fails.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="import-package-name" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Does the Python import package become <code>iter_codex</code>, or does only the user-facing name change?</p>
-        <p class="r-dec-ctx">The package name is in 138,394 places and in every in-flight worktree. Changing only the distribution, command and MCP key is far smaller, and leaves an import name that no longer matches the product.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="rename-package">Rename the package too</button>
-          <button class="r-opt" data-value="user-facing-only">User-facing names only</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="github-repository-rename" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Are the fork and the <code>iterorganization</code> upstream repository renamed, and who does it?</p>
-        <p class="r-dec-ctx">A repository rename is outward-facing and needs the organisation's agreement. GitHub redirects the old address, but release automation, registry ownership and badges move with it.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="both">Rename both</button>
-          <button class="r-opt" data-value="fork-only">Fork only for now</button>
-          <button class="r-opt" data-value="neither">Keep both names</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="mcp-server-names" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">What do the two servers advertise after the rename?</p>
-        <p class="r-dec-ctx">Today the client key is <code>imas-cx</code> and the data-dictionary server is <code>imas-dd</code>. The data-dictionary server is about IMAS and both sessions consulted say it keeps its name.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="iter-cx-and-imas-dd">iter-cx for the full server, imas-dd unchanged</button>
-          <button class="r-opt" data-value="iter-cx-and-iter-dd">iter-cx and iter-dd</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="import-package-name" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Does the Python import package become iter_codex , or does only the user-facing name change?</p>
+    <p class="r-dec-ctx">The package name is in 138,394 places and in every in-flight worktree. Changing only the distribution, command and MCP key is far smaller, and leaves an import name that no longer matches the product.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="rename-package">Rename the package too</button>
+      <button class="r-opt" data-value="user-facing-only">User-facing names only</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="github-repository-rename" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">Are the fork and the iterorganization upstream repository renamed, and who does it?</p>
+    <p class="r-dec-ctx">A repository rename is outward-facing and needs the organisation&#x27;s agreement. GitHub redirects the old address, but release automation, registry ownership and badges move with it.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="both">Rename both</button>
+      <button class="r-opt" data-value="fork-only">Fork only for now</button>
+      <button class="r-opt" data-value="neither">Keep both names</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="mcp-server-names" data-choice="" data-by="" data-when="">
+    <p class="r-dec-q">What do the two servers advertise after the rename?</p>
+    <p class="r-dec-ctx">Today the client key is imas-cx and the data-dictionary server is imas-dd . The data-dictionary server is about IMAS and both sessions consulted say it keeps its name.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="iter-cx-and-imas-dd">iter-cx for the full server, imas-dd unchanged</button>
+      <button class="r-opt" data-value="iter-cx-and-iter-dd">iter-cx and iter-dd</button>
+      </p>
+    <p class="r-dec-rat"></p>
+    </div>
+</section>
 
     <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-      <article class="r-fu" data-id="f-cus-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-14" data-recommends-skill="/reckon-build codac-uda-signals">
-        <h4 class="r-fu-title">Build the scanner and loader sections</h4>
-        <div class="r-fu-body">Sections 2 to 9 are buildable under the current name. Sections 10 and 11 stay deferred until the at-rest conditions in §10 hold.</div>
-        <pre class="r-fu-prompt">/reckon-build codac-uda-signals</pre>
-      </article>
-    </section>
+<h2><span class="sec">§</span> Followups</h2>
+<article class="r-fu" data-id="f-cus-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-14" data-recommends-skill="/reckon-build codac-uda-signals" data-resolved-at="" data-resolved-by="">
+    <h4 class="r-fu-title">Build the scanner and loader sections</h4>
+    <div class="r-fu-body">Sections 2 to 9 are buildable under the current name. Sections 10 and 11 stay deferred until the at-rest conditions in §10 hold.</div>
+    <pre class="r-fu-prompt">/reckon-build codac-uda-signals</pre>
+    </article>
+</section>
   </main>
 </body>
 </html>
