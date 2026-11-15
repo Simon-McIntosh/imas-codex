@@ -28,6 +28,7 @@ from imas_codex.standard_names.provenance_lifecycle import (
     deletion_change_cypher,
     deletion_change_params,
 )
+from imas_codex.standard_names.source_reads import source_paths_projection
 
 if TYPE_CHECKING:
     from imas_codex.graph.client import GraphClient
@@ -58,11 +59,11 @@ def collect_purge_candidates(client: GraphClient) -> list[PurgeCandidate]:
       single leaf under ``/diamagnetic/<leaf>``.
     """
     rows = client.query(
-        """
-        MATCH (sn:StandardName {validation_status: 'quarantined'})
+        f"""
+        MATCH (sn:StandardName {{validation_status: 'quarantined'}})
         RETURN sn.id AS id,
                coalesce(sn.validation_issues, []) AS issues,
-               coalesce(sn.source_paths, []) AS paths
+               {source_paths_projection()} AS paths
         """
     )
     candidates: list[PurgeCandidate] = []

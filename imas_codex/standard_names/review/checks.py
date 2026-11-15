@@ -296,13 +296,31 @@ def _dict_string_keys(node: ast.AST | None) -> set[str]:
     return set()
 
 
+def _query_text(node: ast.AST) -> str | None:
+    """A query literal's text, an f-string interpolation left as a gap.
+
+    A query that composes its projection from the module that owns it is an
+    f-string, so its literal parts are read exactly as a plain string's are: an
+    interpolation contributes a gap, and every alias the query writes around it
+    is still found.
+    """
+    if isinstance(node, ast.Constant) and isinstance(node.value, str):
+        return node.value
+    if isinstance(node, ast.JoinedStr):
+        return "".join(
+            part.value
+            if isinstance(part, ast.Constant) and isinstance(part.value, str)
+            else " "
+            for part in node.values
+        )
+    return None
+
+
 def _query_strings(tree: ast.AST) -> list[str]:
     return [
-        _const_str(node)
+        text
         for node in ast.walk(tree)
-        if isinstance(node, ast.Constant)
-        and isinstance(node.value, str)
-        and "MATCH (sn:StandardName)" in node.value
+        if (text := _query_text(node)) and "MATCH (sn:StandardName)" in text
     ]
 
 

@@ -29,6 +29,7 @@ from typing import TYPE_CHECKING, Any
 
 from imas_codex.standard_names import vocabulary_definitions as vocabulary_source
 from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
+from imas_codex.standard_names.source_reads import source_paths_projection
 
 logger = logging.getLogger(__name__)
 
@@ -1484,19 +1485,19 @@ RETURN n.keywords AS keywords,
        changes
 """
 
-_DOCS_GEN_ENRICH_QUERY = """
-MATCH (sn:StandardName {id: $sn_id})
+_DOCS_GEN_ENRICH_QUERY = f"""
+MATCH (sn:StandardName {{id: $sn_id}})
 OPTIONAL MATCH (sn)<-[:HAS_STANDARD_NAME]-(imas:IMASNode)
-RETURN sn.source_paths AS source_paths,
+RETURN {source_paths_projection()} AS source_paths,
        sn.cocos_transformation_type AS cocos_label,
        sn.origin AS origin,
-       collect(DISTINCT {
+       collect(DISTINCT {{
            id: imas.id,
            documentation: coalesce(imas.documentation, ''),
            description: coalesce(imas.description, ''),
            alias: imas.name,
            unit: coalesce(imas.unit, '')
-       }) AS dd_nodes
+       }}) AS dd_nodes
 """
 
 _DOCS_GEN_COCOS_PARAMS_QUERY = """

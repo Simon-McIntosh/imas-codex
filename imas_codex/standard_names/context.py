@@ -707,6 +707,8 @@ def fetch_review_neighbours(
     drives the vector lookup, ``physical_base`` the same-base lookup, and
     ``source_paths`` the same-path lookup.
     """
+    from imas_codex.standard_names.source_reads import source_paths_projection
+
     sn_id = sn.get("id") or sn.get("name") or ""
     desc = sn.get("description") or sn.get("name") or sn.get("id") or ""
     physical_base = (
@@ -791,12 +793,13 @@ def fetch_review_neighbours(
             try:
                 rows = (
                     gc.query(
-                        """
+                        f"""
                         MATCH (sn:StandardName)
                         WHERE sn.id <> $sn_id
                           AND coalesce(sn.validation_status, '') <> 'quarantined'
                           AND coalesce(sn.name_stage, '') = 'accepted'
-                          AND ANY(p IN sn.source_paths WHERE p STARTS WITH $prefix)
+                          AND ANY(p IN {source_paths_projection()}
+                                  WHERE p STARTS WITH $prefix)
                         OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
                         RETURN sn.id AS id,
                                sn.id AS name,

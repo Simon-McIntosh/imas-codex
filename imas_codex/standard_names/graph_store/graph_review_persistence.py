@@ -23,6 +23,7 @@ from imas_codex.standard_names.pools import pool_admission_params, pool_admissio
 from imas_codex.standard_names.review.holds import (
     sync_holds,
 )
+from imas_codex.standard_names.source_reads import source_paths_projection
 
 from . import graph_foundation as foundation
 
@@ -690,7 +691,7 @@ def claim_review_docs_batch(
             ", sn.edit_origin AS edit_origin"
             ", sn.origin AS origin"
             ", sn.run_id AS run_id"
-            ", sn.source_paths AS source_paths"
+            f", {source_paths_projection()} AS source_paths"
             ", [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {"
             "     id: source.id,"
             "     source_type: source.source_type,"

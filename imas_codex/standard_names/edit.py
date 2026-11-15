@@ -684,7 +684,11 @@ def _stamp_successor_validation(
         "description": root_row.get("description") or "",
         "physics_domain": root_row.get("physics_domain"),
         "cocos_transformation_type": root_row.get("cocos_transformation_type"),
-        "source_paths": root_row.get("source_paths") or [],
+        # The row is the target's own fetch, which reads its producers from the
+        # edges: the copied list is not on it. Hand the gate the provenance the
+        # name really has, so a rename successor clears the same DD-provenance
+        # audit a pipeline candidate clears instead of clearing it with none.
+        "source_paths": _producing_source_ids(root_row),
     }
     issues, _summary, status = validate_name_candidate(entry)
     gc.query(

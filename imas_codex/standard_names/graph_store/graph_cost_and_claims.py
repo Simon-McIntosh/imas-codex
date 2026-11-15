@@ -15,6 +15,7 @@ from imas_codex.standard_names.pools import (
     pool_admission_params,
     pool_admission_where,
 )
+from imas_codex.standard_names.source_reads import source_paths_projection
 
 from .graph_foundation import (
     _CLAIM_TIMEOUT_SECONDS,
@@ -661,7 +662,7 @@ def claim_review_name_batch(
         query_params=query_params,
         batch_size=batch_size,
         timeout_seconds=timeout_seconds,
-        extra_return_fields=", sn.name AS name, sn.tags AS tags, coalesce(sn.chain_length, 0) AS chain_length, sn.name_stage AS name_stage, sn.origin AS origin, sn.edit_mode AS edit_mode, sn.name_hint AS name_hint, sn.docs_hint AS docs_hint, sn.edit_reason AS edit_reason, sn.edit_origin AS edit_origin, sn.physical_base AS physical_base, sn.geometry AS geometry, sn.grammar_parse_version AS grammar_parse_version, sn.source_paths AS source_paths, [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {     id: source.id,     source_type: source.source_type,     source_id: source.source_id,     status: source.status,     description: source.description,     physics_domain: source.physics_domain,     compose_hint: source.compose_hint,     compose_hint_reason: source.compose_hint_reason,     dd_path: source.dd_path,     dd_version: source.dd_version,     dd_documentation: source.dd_documentation,     dd_snapshot_pinned: source.dd_snapshot_pinned,     dd_parent_path: source.dd_parent_path,     dd_parent_documentation: source.dd_parent_documentation,     dd_data_type: source.dd_data_type,     dd_unit: source.dd_unit,     dd_coordinates: source.dd_coordinates,     dd_lifecycle_status: source.dd_lifecycle_status,     enhanced_description: source.enhanced_description }] AS source_bindings",
+        extra_return_fields=", sn.name AS name, sn.tags AS tags, coalesce(sn.chain_length, 0) AS chain_length, sn.name_stage AS name_stage, sn.origin AS origin, sn.edit_mode AS edit_mode, sn.name_hint AS name_hint, sn.docs_hint AS docs_hint, sn.edit_reason AS edit_reason, sn.edit_origin AS edit_origin, sn.physical_base AS physical_base, sn.geometry AS geometry, sn.grammar_parse_version AS grammar_parse_version, " + source_paths_projection() + " AS source_paths, [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {     id: source.id,     source_type: source.source_type,     source_id: source.source_id,     status: source.status,     description: source.description,     physics_domain: source.physics_domain,     compose_hint: source.compose_hint,     compose_hint_reason: source.compose_hint_reason,     dd_path: source.dd_path,     dd_version: source.dd_version,     dd_documentation: source.dd_documentation,     dd_snapshot_pinned: source.dd_snapshot_pinned,     dd_parent_path: source.dd_parent_path,     dd_parent_documentation: source.dd_parent_documentation,     dd_data_type: source.dd_data_type,     dd_unit: source.dd_unit,     dd_coordinates: source.dd_coordinates,     dd_lifecycle_status: source.dd_lifecycle_status,     enhanced_description: source.enhanced_description }] AS source_bindings",
         domain=domain,
         scope_run_id=scope_run_id,
         drain_scope_id=drain_scope_id,

@@ -32,6 +32,7 @@ from imas_codex.standard_names.models import (
     RefinedName,
     StandardNameQualityReviewNameOnlyBatch,
 )
+from imas_codex.standard_names.source_reads import source_paths_projection
 
 
 class CampaignCostCeilingExceeded(RuntimeError):
@@ -164,7 +165,7 @@ _ARCHIVE_RECOVERED_CATALOG_IDS = frozenset(
     {"normalized_collisionality", "thermal_ion_density"}
 )
 
-_COHORT_RETURN = """
+_COHORT_RETURN = f"""
 RETURN sn.id AS id,
        sn.name AS name,
        sn.description AS description,
@@ -184,8 +185,8 @@ RETURN sn.id AS id,
        sn.physical_base AS physical_base,
        sn.geometry AS geometry,
        sn.grammar_parse_version AS grammar_parse_version,
-       sn.source_paths AS source_paths,
-       [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {
+       {source_paths_projection()} AS source_paths,
+       [(source:StandardNameSource)-[:PRODUCED_NAME]->(sn) | {{
            id: source.id,
            source_type: source.source_type,
            source_id: source.source_id,
@@ -205,7 +206,7 @@ RETURN sn.id AS id,
            dd_coordinates: source.dd_coordinates,
            dd_lifecycle_status: source.dd_lifecycle_status,
            enhanced_description: source.enhanced_description
-       }] AS source_bindings
+       }}] AS source_bindings
 ORDER BY sn.id
 """
 

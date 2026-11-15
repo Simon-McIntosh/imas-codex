@@ -417,6 +417,7 @@ def check_catalog(
     from pydantic import TypeAdapter
 
     from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.source_reads import source_paths_projection
 
     ta = TypeAdapter(StandardNameEntry)
     sidecar = _load_sidecar_metadata(catalog_dir)
@@ -514,7 +515,7 @@ def check_catalog(
     # difference is counted, not resolved by a second selector.
     with GraphClient() as gc:
         rows = gc.query(
-            """
+            f"""
             MATCH (sn:StandardName)
             WHERE sn.name_stage IN ['accepted', 'approved']
             RETURN sn.id AS id,
@@ -522,7 +523,7 @@ def check_catalog(
                    sn.documentation AS documentation,
                    sn.kind AS kind,
                    sn.unit AS unit,
-                   sn.source_paths AS source_paths,
+                   {source_paths_projection()} AS source_paths,
                    sn.validity_domain AS validity_domain,
                    sn.constraints AS constraints,
                    sn.catalog_commit_sha AS catalog_commit_sha,
