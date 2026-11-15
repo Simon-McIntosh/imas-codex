@@ -1965,8 +1965,8 @@ def write_html(payload, scored, scored_adjudicated, by_class, held, assembled) -
         )
     )
     parts.append(
-        "<li><strong>How does Drex max do in Jev's place?</strong> It <strong>{}</strong> "
-        ", returning a typed verdict on every name. Alone it reaches recall {} at "
+        "<li><strong>How does Drex max do in Jev's place?</strong> It <strong>{}</strong>, "
+        "returning a typed verdict on every name. Alone it reaches recall {} at "
         "specificity {}, against Jev's {} and {}; in B, Drex's pre-categorisation gives "
         "recall {} at specificity {} against Jev's {} and {}. Its reliability table is "
         "below. It is cheaper per name than Jev and a worse screen at it.</li>".format(
