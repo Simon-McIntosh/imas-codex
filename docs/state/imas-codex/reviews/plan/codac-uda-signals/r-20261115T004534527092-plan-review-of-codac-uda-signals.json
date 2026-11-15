@@ -89,6 +89,16 @@
       "note": "Section 9's positive control now applies to each surface that has a known consumer; a surface with none records that as its own outcome, with the listing that shows the surface is empty, distinct from a count of zero from a command that saw nothing.",
       "reason": "",
       "when": "2026-11-15T01:32:42.461225+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "finding": "done_when-4",
+      "note": "Section 9 no longer requires the decisions to be locked. It delivers a recommendation for each of the three decisions with the inventory evidence behind it; locking stays with the lead.",
+      "reason": "",
+      "when": "2026-11-15T01:32:51.300204+00:00"
     }
   ],
   "responses": {
@@ -118,6 +128,15 @@
       "note": "Section 9's positive control now applies to each surface that has a known consumer; a surface with none records that as its own outcome, with the listing that shows the surface is empty, distinct from a count of zero from a command that saw nothing.",
       "reason": "",
       "when": "2026-11-15T01:32:42.461225+00:00"
+    },
+    "done_when-4": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "note": "Section 9 no longer requires the decisions to be locked. It delivers a recommendation for each of the three decisions with the inventory evidence behind it; locking stays with the lead.",
+      "reason": "",
+      "when": "2026-11-15T01:32:51.300204+00:00"
     },
     "single_goal-1": {
       "action": "acted",
