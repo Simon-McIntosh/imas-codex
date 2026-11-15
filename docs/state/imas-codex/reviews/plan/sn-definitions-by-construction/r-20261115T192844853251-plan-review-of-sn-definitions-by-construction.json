@@ -1,0 +1,41 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T19:31:51.388Z",
+  "dispatched_at": "2026-11-15T19:31:04Z",
+  "findings": [],
+  "plan_commit": "018d2cf3e4f489f822592a8135fcbeb5602782b4",
+  "plan_fingerprint": "d4576ee732545b5ca22fbbbcbb605cb89d2f0a2132c4b89ce0ba96ab11bb6ec7",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 62,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T192844853251-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "55b9d5dad46676b528574fed4519df81316a3a3b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a72, \u00a73, \u00a75 and \u00a710 resolve by id in the snapshot and rewrite-closing-census.json resolves at HEAD; \u00a72's done-when names the same five operator slugs the record keys its operator block on.",
+    "done_when": "pass \u2014 s6's changed first item now measures a population the cited record actually carries (identifier-carrying names: 73/66/28/9/3, each equal to its form buckets' sum, and 316 family members over 23 families), and the section's last item plants three shapes (a divergent family, an operator name stating no form, an operator name carrying a variant) whose detection can fail, so the guard is falsifiable.",
+    "evidence_paths": "pass \u2014 s6's citation `rewrite-closing-census.json` is the committed record at docs/evidence/fragments/sn-definitions-by-construction/ (the evidence directory \u00a71 establishes for this plan), and the section sends its spend, per-family rate and re-run counts to the same directory rather than a scratchpad.",
+    "naming": "pass \u2014 the changed clause names concepts only (operator, stored sentence, identifier-carrying population); no plan labels, stage names, ticket numbers or code symbols reach it.",
+    "reasoning": "pass \u2014 the changed bullet's root cause now matches its evidence: the previous population (\"names that name the operator\") was the self-exempting set, and grounding it in the identifier makes a name that never states its operator countable (flux_surface_averaged 2 such names, line_averaged 3, time_derivative 1 in the record's operator_phrases block); the endpoint is reachable from the record by the derivation the bullet requires, and the bullet states properties over names, prescribing no code path, no step sequence and no function.",
+    "single_goal": "pass \u2014 each node states one deliverable in its own done-when; \u00a79's two-deliverable bundling was raised in an earlier review and is unchanged, so it is not repeated here.",
+    "wiring": "pass \u2014 plan-effort-hours 41.0 is the exact sum of the ten section efforts, and s6's five declared dependencies (s2, s3, s4, s5, s10) each resolve to a section that exists and that the section's prose relies on."
+  },
+  "section_digests": {
+    "_document": "11e2e68b156624b18e8ed5742aa27fcf534e457bc07dfce61888ca751e83d678",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "0d62d87956c33ada83f0aff033ba93eba8bc40bdde9dff0aec52c0d6894ec7b0",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T19:44:14.024553+00:00",
+  "total": null
+}
