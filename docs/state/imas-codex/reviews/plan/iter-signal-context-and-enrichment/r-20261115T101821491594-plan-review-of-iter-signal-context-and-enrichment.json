@@ -21,6 +21,21 @@
         "s8"
       ],
       "when": "2026-11-15T10:49:27.199742+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "4d46a4110d0abbf8cfb591f04d9670c3fc7383ca49d7f525f87239393aad7ae0",
+        "s3": "387d69f1cc4ac464013f1ba2390512504a7f634c30e983d291c2547f2773fb1f",
+        "s5": "2fb7d1aa82de0503050bb34ccd49a34d58f13a85a5f35d0098fbc92f318ddeda"
+      },
+      "reason": "Versions 4 and 5 rewrite section 3 on the lead's direct correction: the benchmark measures the local model on pipeline enrichment work, not build lanes on code. Sections 2 and 5 lose only the sentence tying them to the old benchmark sample.",
+      "units": [
+        "_document",
+        "s3",
+        "s5"
+      ],
+      "when": "2026-11-15T14:32:18.922397+00:00"
     }
   ],
   "completed_at": "2026-11-15T10:42:15.169Z",
