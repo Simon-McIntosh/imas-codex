@@ -1,0 +1,74 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "e5ea75431aa77b351808144432080c0f82dde304",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/discovery/signals/scanners/codac_uda.py:447",
+    "imas_codex/discovery/signals/archive_grouping.py:167",
+    "imas_codex/discovery/signals/variable_name_graph.py:99",
+    "imas_codex/discovery/signals/variable_name_graph.py:129",
+    "imas_codex/discovery/signals/archive_grouping_graph.py:127",
+    "imas_codex/remote/catalogue_grouping.py:114"
+  ],
+  "completed_at": "2026-11-15T20:09:10.629Z",
+  "dispatched_at": "2026-11-15T20:08:07Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/archive_grouping_graph.py",
+      "line": "73",
+      "severity": "non-blocking",
+      "text": "non-blocking: RETIRE_UNUSED_GROUPS_QUERY unlinks unreferenced components but never retires the ArchiveFieldPattern or root PlantComponent nodes left unreferenced, so a component that gains a field leaves a content-addressed pattern node behind and graph_group_counts hides it behind an EXISTS filter; parentage-cleanup.log records 2,334 PlantComponent candidates against 2,234 active groups after a cleanup that retired 4 links and removed no node."
+    },
+    {
+      "file": "imas_codex/discovery/signals/archive_grouping.py",
+      "line": "464",
+      "severity": "non-blocking",
+      "text": "non-blocking: singleton_signal_share divides singleton-group signals by total, which includes the 45,655 ungrouped variables, so the field name does not carry the denominator the done_when's phrase implies; the fragment states the 995,006 denominator, so the record is honest but the measure name is not."
+    }
+  ],
+  "head_log_revision": "4f5d97cc28a15ed55d98b8052bf22e75c2e10af9",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit by commit against 225707a: 2722a1bd1 rewrites the parser and both grouping stores (11 files), 4f5d97cc2 adds name_schema_counts, a test and plot.py, 0e2b7f710 adjusts figure ticks, 35392fccd extends the retire query and its graph test, 47037b02f rewrites the evidence fragment and adds grouping.svg.",
+    "done_when": "the done_when asks for a pytest gate with zero added failures plus coverage, counts, size distribution, singleton share, twenty largest patterns, description counts and a non-adding repeat; baseline.log reads 60 passed EXIT=0 at e5ea75431, schema-gate.log 125 passed EXIT=0 at 4f5d97cc2 and parentage-gate.log 4 passed EXIT=0 at 35392fccd, and the fragment's figures reconcile with schema-grouping-receipt.json including zero adds on repeat.",
+    "goal": "the node's goal groups every catalogued archive variable by component and repeated field pattern; archive_grouping.py:156 rebuild() classifies each selector and derives exact and category-union patterns, and the live run reports 995,006 variables, 27,253 component groups, 1,777 control-node groups, 1,802 exact patterns and 413 category patterns.",
+    "manifest": "read; status complete, commits 2722a1bd1 through 47037b02f, changed_paths the 14 files, test_logs including schema-gate.log and parentage-gate.log, baseline_suite and after_suite completed with failure_count 0, negative_control_log convention-negative-control.log with 2 failed 2 passed EXIT=1.",
+    "write_paths": "the declared fence is imas_codex/discovery/signals/, imas_codex/discovery/base/, imas_codex/remote/, imas_codex/schemas/, tests/discovery/, tests/remote/, tests/graph/, the node fragment and the figure directory; all 14 files in the diff are inside it."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_archive_name_parser.py:19-25 reddens if two component sequences collapse onto one identity, but docs/figures/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern/plot.py has no test and rests only on imas_codex/plotting/style.py:41 save_figure.",
+    "evidence": "schema-gate.log at revision 4f5d97cc2 reports 125 passed EXIT=0 and the fragment's counts reconcile with schema-grouping-receipt.json, but the 125-test arm was not re-run after 35392fccd and the manifest's tests: line names only the 4-test graph arm.",
+    "fit": "imas_codex/discovery/signals/archive_grouping.py:95-146 returns an ad-hoc nested dict whose counting scope lives only in the docstring, and the store declares columns in both executescript at :48 and the ALTER loop at :64.",
+    "goal_fidelity": "imas_codex/discovery/signals/archive_grouping.py:156-296 writes the three membership states and both pattern keys and imas_codex/discovery/signals/archive_grouping_graph.py:36-71 projects them, so the delivered capability is the goal's deliverable.",
+    "reuse": "imas_codex/discovery/signals/variable_name_graph.py:63 is now the single guarded snapshot that archive_grouping_graph.py:63 imports, so the duplicate the diff deletes at archive_grouping_graph.py:52 is gone, and no other naming parser or grouping owner exists.",
+    "scope_discipline": "git diff --stat 225707a 47037b02f touches only the 14 files named in the node goal and its declared fence."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to group every catalogued archive variable by component and by repeated field pattern; imas_codex/discovery/signals/archive_grouping.py:156 rebuild() writes each selector as a component, control-node or ungrouped member and derives both an exact category+field-set pattern and a category union, and docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html:8 reports the live run over 995,006 variables with 27,253 component groups, 1,777 control-node groups, 1,802 exact patterns and 413 category patterns.\nVERDICT done_when: the done_when asks for a pytest gate with zero added failures plus a landing record of coverage, counts, distribution, singleton share, twenty largest patterns, description counts and a non-adding repeat; the manifest's baseline_suite records 60 passed EXIT=0 at e5ea75431 and schema-gate.log records 125 passed EXIT=0 at 4f5d97cc2, parentage-gate.log 4 passed EXIT=0 at 35392fccd, and the fragment's numbers reconcile with schema-grouping-receipt.json (995006/457619/491732/45655 variables, 27253/1777/1802/413 groups, repeat adds 0) in this reviewer's own read.\nVERDICT write_paths: the declared fence is the six source and test directories plus the node fragment and its figure directory; git diff --stat 225707a 47037b02f lists exactly the 14 files the node goal names and every one is inside it or named in the goal.\nVERDICT manifest: read; status complete, commits 2722a1bd1 through 47037b02f, changed_paths the 14 files in the range, negative_control_log convention-negative-control.log (2 failed, 2 passed, EXIT=1), baseline_suite and after_suite both failure_count 0 with completed true.\nVERDICT diff: read the five commits against 225707a; 2722a1bd1 rewrites the parser and both grouping stores, 4f5d97cc2 adds name_schema_counts and the figure script, 0e2b7f710 bounds the figure ticks, 35392fccd extends the retire query to legacy parentage, 47037b02f rewrites the evidence fragment and adds grouping.svg, and no removed test leaves a behaviour it covered uncovered (test_catalogue_pass_is_not_limited_to_one_cohort_or_facility survives as the facility=None assertion at tests/discovery/test_archive_name_parser.py:219).\nCALL_SITES: imas_codex/discovery/signals/scanners/codac_uda.py:447, imas_codex/discovery/signals/archive_grouping.py:167, imas_codex/discovery/signals/variable_name_graph.py:99, imas_codex/discovery/signals/variable_name_graph.py:129, imas_codex/discovery/signals/archive_grouping_graph.py:127, imas_codex/remote/catalogue_grouping.py:114\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/archive_grouping.py:156-296 writes the three membership states and both pattern keys and imas_codex/discovery/signals/archive_grouping_graph.py:127-198 projects them, so the delivered capability is the goal's deliverable.\nSCORE evidence: 17\nJUSTIFICATION evidence: the gate the done_when names is schema-gate.log at revision 4f5d97cc2 with a 125 passed summary the worker recorded, and the receipt figures I read reconcile with the fragment's tables, but the 125-test arm was not re-run after 35392fccd and the manifest's tests: line names only the 4-test graph arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 225707a 47037b02f touches only the 14 files named in the node goal and the declared fence, with no unrelated edit.\nSCORE durability: 16\nJUSTIFICATION durability: tests/discovery/test_archive_name_parser.py:19-25 reddens if two component sequences collapse onto one identity (the defect convention-reproduction.log records as an AssertionError) and tests/graph/test_archive_grouping.py:196-217 reddens on a non-atomic batch, but docs/figures/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern/plot.py has no test and rests only on imas_codex/plotting/style.py:41 save_figure.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/discovery/signals/archive_grouping.py:95-146 name_schema_counts returns an ad-hoc nested dict whose counting scope (field values across parents versus full prefixes) lives only in the docstring, and the same file declares columns in both executescript at :48 and the ALTER loop at :64.\nSCORE reuse: 20\nJUSTIFICATION reuse: imas_codex/discovery/signals/variable_name_graph.py:63 now owns the single guarded snapshot that archive_grouping_graph.py:6-10 imports, so the duplicate the diff deletes at archive_grouping_graph.py:52 is gone and the runner replays through ArchiveGrouping.snapshot_records; a capability search over imas_codex/discovery/signals, imas_codex/remote and imas_codex/plotting found no other naming parser or grouping owner.\nFINDING imas_codex/discovery/signals/archive_grouping_graph.py:73 non-blocking: RETIRE_UNUSED_GROUPS_QUERY removes HAS_ARCHIVE_* and PARENT_COMPONENT links from unreferenced components but never retires the ArchiveFieldPattern or root PlantComponent nodes left unreferenced, so a component that gains a field leaves a content-addressed pattern node behind forever, and graph_group_counts hides it behind an EXISTS filter; parentage-cleanup.log shows 2,334 PlantComponent candidates against 2,234 active groups after a cleanup that retired 4 and removed no node.\nFINDING imas_codex/discovery/signals/archive_grouping.py:464 non-blocking: singleton_signal_share divides singleton-group signals by total, which includes the 45,655 ungrouped variables, so the field name does not carry the denominator the done_when's \"share of signals whose group has a single member\" implies; the fragment at signals-grouped-by-component-and-pattern.html:29 does state the 995,006 denominator, so the record is honest but the measure name is not.\n",
+  "review_run_id": "r-20261115T200659214486-review-of-signals-grouped-by-component-and-pattern-47037b02f15f",
+  "reviewed_base_sha": "225707a216465712e047754bcc3aacbdd2b58955",
+  "reviewed_head_sha": "47037b02f15f1d72a8d3db4a5ab68cc94b590067",
+  "reviewed_run_id": "r-20261115T171542222928-signals-grouped-by-component-and-pattern",
+  "reviewer": {
+    "backend": "codex",
+    "effort_note": "node-local review of commits since 225707a",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261115T200659214486-review-of-signals-grouped-by-component-and-pattern-47037b02f15f"
+  },
+  "reviewer_run_id": "r-20261115T200659214486-review-of-signals-grouped-by-component-and-pattern-47037b02f15f",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T20:20:46.087293+00:00",
+  "total": 109
+}
