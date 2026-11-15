@@ -49,7 +49,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 1,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "The pulse-listing clause is removed from section 4's done-when; the section's single deliverable is the variable catalogue.",
+      "reason": "",
+      "when": "2026-11-15T01:32:20.203113+00:00"
+    }
+  ],
+  "responses": {
+    "single_goal-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "8729908124aa0eee33722e8fe355b3caa226d26d",
+      "commit_basis": "edit",
+      "note": "The pulse-listing clause is removed from section 4's done-when; the section's single deliverable is the variable catalogue.",
+      "reason": "",
+      "when": "2026-11-15T01:32:20.203113+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261115T004534527092-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261115T004534527092-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "32459448a17867d8989201c48d0d87e6cb14c7fe",
   "rubric": "content",
