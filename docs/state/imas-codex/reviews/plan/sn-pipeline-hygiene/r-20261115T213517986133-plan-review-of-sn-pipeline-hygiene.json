@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T21:50:36.068Z",
+  "dispatched_at": "2026-11-15T21:49:43Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:88",
+      "id": "reasoning-1",
+      "reason": "a section whose stated purpose is that no finding is lost either names the fourth landing's findings or must stop claiming four, and if the fourth is one of those two runs most of its findings are currently unowned.",
+      "text": "the section opens \"Four landings of 2026-11-15 passed review with findings that were not blocking and were left open\" but names three run reviews and eight findings, and neither the family-wording-pass reviews (nine non-blocking findings) nor the held-names-refine-pass review (seven non-blocking findings), both completed on 2026-11-15 under docs/state/imas-codex/reviews/run/, appears in the section or elsewhere in the plan, so a reader cannot tell which landing is the fourth or whether its findings are covered by the \"closed here so they are not lost\" claim, and the largest open set is owned by no section",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:88",
+      "id": "reasoning-2",
+      "reason": "dropping the method sentence leaves a checkable class and removes a guessed mechanism the reviewer would have to test against the tree.",
+      "text": "the done-when states the discovery method for the broken evidence scripts (\"the scripts are found by resolving every package name and attribute each script uses against the tree, not by importing alone\"), which is a step sequence the worker must follow rather than a property of the delivered set, and the discovery procedure belongs to the node brief while the plan fixes only the class and what each reading shows",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e8c61f0a2b22b4703c0a01a2e1094d57ca266554",
+  "plan_fingerprint": "cc99e6ec100620607678a945a9165c6c41cbff96479511fcd5fd5a52827f2360",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 43,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T213517986133-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "8c81a23dfd10563bfe3117e31d3cdbb6b26c6b98",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the three cited run directories exist, the four named evidence scripts exist (docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py and the three under sn-review-through-jev), and imas_codex/standard_names/review/name_definition_seat.py:228 defines name_definition_flagged.",
+    "done_when": "pass \u2014 s10's done-when names, for each finding, a repair held by a test or a recorded red run that fails without it, plus concrete terminal checks (byte-identical label set, unchanged live-graph records, a whole-directory head-against-base run on all_debug); each of these can fail.",
+    "evidence_paths": "pass \u2014 the section sends every reading to committed evidence under docs/evidence/ and every finding to the stored review under docs/state/imas-codex/reviews/run/, both durable paths a later reader can open.",
+    "naming": "pass \u2014 the section names files and records by what they are; no plan, stage or ticket label reaches a symbol or a comment.",
+    "reasoning": "a finding \u2014 s10 states \"Four landings of 2026-11-15\" and then cites three run reviews, while the two other stored reviews of that date (sdbc-family-wording-pass and sdbc-held-names-refine-pass) carry nine and seven non-blocking findings and are named nowhere.",
+    "single_goal": "pass \u2014 s10 carries one deliverable, the closure of the open non-blocking review findings of the enumerated landings, and the accompanying invariants are the checks on that one deliverable.",
+    "wiring": "pass \u2014 every relationship on the plan's node table resolves, and s10 depends on nothing it does not name; the section's four landing reviews are cited from docs/state/imas-codex/reviews/run/ and three of the four reviews it names resolve (see the reasoning finding on the fourth)."
+  },
+  "section_digests": {
+    "_document": "fc0b9243c4b299d7cd58edf7987e28fb84b7ca51ea9f6cd18d04853eb2923d2e",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "a4c3b5fb9e91208a3ea3f1f5c3a908d2a4978cdc69245301ea15debb27be1b41",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:01:14.472213+00:00",
+  "total": null
+}
