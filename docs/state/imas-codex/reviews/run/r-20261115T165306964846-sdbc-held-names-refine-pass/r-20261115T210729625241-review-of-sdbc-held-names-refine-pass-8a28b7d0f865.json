@@ -1,0 +1,117 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed manifest records no baseline_suite or after_suite arm, so no before/after pair exists to subtract. Its only gate logs are /home/ITER/mcintos/.local/share/imas-codex/gate-logs/held-names-refine-pass/green-1318561.log (checked 151 names, 38 accepted, 10 sourceless; EXIT=0) and red-1318562.log (FAIL accepted: graph 38, evidence 39; EXIT=1), and the red arm is the gate's own injected control rather than a failing test, so the added-failure set is empty.",
+  "assertion_analysis": [
+    {
+      "failure_condition": "The assertion expected_accepted compared against the graph's own resolve_all lineage walk fails whenever the evidence records a row as accepted on both axes that the live graph does not hold at the resolved identity. The recorded red arm reinstated exactly that condition with --inject-accepted 1 and the gate printed FAIL accepted: graph 38, evidence 39 and EXIT=1.",
+      "lines": "check_held_names_refine_pass.py:143"
+    },
+    {
+      "failure_condition": "The live-identity assertion fires when the graph's deepest accepted responsibility set differs from the artefact's live_id, for instance after a rename moves a successor; it fails independently of the artefact because the walk is recomputed from the graph, though it reproduces any error in the rule itself.",
+      "lines": "check_held_names_refine_pass.py:128"
+    },
+    {
+      "failure_condition": "The docs-score assertion reddens when a recorded docs score disagrees with s.reviewer_score_docs by more than 1e-6; it is skipped when either side is null, and a read-only probe of all 8 null rows found the graph also holds no docs score at their live identities, so the skip hides nothing in this artefact.",
+      "lines": "check_held_names_refine_pass.py:159"
+    },
+    {
+      "failure_condition": "The sourceless assertion fails whenever the repository's own count_live_names_without_source differs from the artefact's recorded value \u2014 an independent source on both sides, so a drifted graph or an edited count reddens it; no negative control exercises it.",
+      "lines": "check_held_names_refine_pass.py:169"
+    },
+    {
+      "failure_condition": "The spend assertion fails only when the artefact records a total above the ceiling it also records; it cannot fail on a true ledger spend above 20 recorded as below it, since both sides come from the same document. This assertion does not name an independent source.",
+      "lines": "check_held_names_refine_pass.py:178"
+    },
+    {
+      "failure_condition": "The figure refuses (SystemExit) when the outcome split it recomputes from the rows sums to a different count than the by-hold-kind table records, so a hand-edited JSON reddens the regeneration rather than drawing a wrong bar.",
+      "lines": "docs/figures/sn-held-names-refine-pass/make_outcomes_by_hold_kind.py:74"
+    }
+  ],
+  "call_sites": [],
+  "completed_at": "2026-11-15T21:08:45.383Z",
+  "dispatched_at": "2026-11-15T21:08:20Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_held_names_refine_pass.py",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "The gate file is outside the node's four declared write paths \u2014 docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.json, .html and .py plus docs/figures/sn-held-names-refine-pass \u2014 so the landed diff carries a fifth path the fence did not grant; the coordinator must widen the declared paths to the fragment directory or the gate must move."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.py",
+      "line": "568",
+      "severity": "non-blocking",
+      "text": "The open-holds table is closed with parts.append(\"</p>\") instead of \"</table>\", so the delivered held-names-refine-pass.html:22 ends that table with an orphan closing paragraph and the table element is left unclosed in a committed artefact."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.py",
+      "line": "580",
+      "severity": "non-blocking",
+      "text": "The by-hold-kind header row declares four cells (<th>Hold kind</th><th>Names</th><th>Accepted</th><th>Spend (USD)</th>) while each row emits five (<td> for the per-name rate at :588), so the delivered table's last column \u2014 the per-name USD rate the figure draws beside it \u2014 carries no header."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.py",
+      "line": "403",
+      "severity": "non-blocking",
+      "text": "total_spend is summed over spend_by_name, which credits one LLMCost row to every id in standard_name_ids, so the per-kind spend column sums to 15.348296 while the headline total reads 11.564196 \u2014 3.7841 USD (33%) more than the total stated beside the ceiling, and neither the HTML nor the JSON says the column is a non-partition of shared rename cost."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_held_names_refine_pass.py",
+      "line": "178",
+      "severity": "non-blocking",
+      "text": "The spend assertion compares two fields of the artefact it just read (doc[\"spend\"][\"total_usd\"] > doc[\"spend\"][\"ceiling_usd\"]), so a total recorded below the ledger's true spend passes, and no negative control exercises this branch \u2014 the recorded red arm only injects into the accepted count."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_held_names_refine_pass.py",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "LINEAGE, SUCCESSORS, pick_live and resolve_all are verbatim copies of held-names-refine-pass.py:180-244, and no test asserts the copies agree, so the docstring's claim that the gate re-reads 'by the report's own lineage rule' is a claim about two independent texts rather than about one shared owner."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T165306964846-sdbc-held-names-refine-pass/manifest.md",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "The gate result is recorded under a gate: key with the command only described, and the manifest carries no tests: line, so promotion cannot rebuild its gate receipt from the record and must fall back to the commit message."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call site reaches the change: the fragment and figure are not imported by imas_codex, and a search for consumers of docs/evidence/fragments found only imas_codex/standard_names/judgment_goldens.py and review/cascade_calibration.py reading sn-judgment-evaluation, a different fragment.",
+    "diff": "Read all three commits against c266404dfb0dc4d83bf7a1dfd4df6b0b19868fa6: fa0580c0a adds the report generator and its JSON/HTML, e9e60e695 adds the figure script, SVG and the held-name/grammar/rebind sections, 8a28b7d0f adds the read-only gate; 10,950 insertions, six files, no generated file staged.",
+    "done_when": "Read FENCE \u2014 EVIDENCE at prompt.txt:145: the counts, the before/after table, the held names, the renames, the grammar and rebind lists, the sourceless ceiling and the spend ceiling; check_held_names_refine_pass.py asserts identity, stage pair, docs score, the sourceless count and an artefact-internal spend ceiling, and leaves the by-kind counts, before-scores, held reasons, grammar/rebind lists and HTML/JSON agreement unchecked.",
+    "goal": "Read the dispatch goal at prompt.txt:38 \u2014 one more refine pass over the names the first rewrite left unaccepted \u2014 and the delivered held-names-refine-pass.json carries the 151-name population with an outcome per row, 36 accepted on both axes, 30 grammar waits, 54 grouping parents, 7 rebind/fold decisions and 15 renames with their distinction.",
+    "manifest": "Read manifest.md \u2014 status complete, three commits fa0580c0a/e9e60e695/8a28b7d0f, green gate job 1318561 EXIT=0 and red job 1318562 EXIT=1; the gate is recorded under gate: and figures:, with no tests:, test_logs:, baseline_suite: or after_suite: line.",
+    "write_paths": "Read the four declared write paths at prompt.txt:120-123; the diff lands six files, five inside them and check_held_names_refine_pass.py outside all four."
+  },
+  "justifications": {
+    "durability": "check_held_names_refine_pass.py:143-146 refuses a count the graph does not hold \u2014 the recorded red arm at /home/ITER/mcintos/.local/share/imas-codex/gate-logs/held-names-refine-pass/red-1318562.log printed FAIL accepted: graph 38, evidence 39 and EXIT=1 \u2014 so the accepted-count guard demonstrably fires, while the other five branches have no negative control.",
+    "evidence": "The done_when's eight clauses are only partly gated: check_held_names_refine_pass.py:120-176 re-reads identity, stage, docs score and the sourceless count from the graph, but it never checks the by-hold-kind counts, the before-scores, the still-held reasons, the grammar and rebind lists, or that the HTML matches the JSON it was rendered from.",
+    "fit": "The fragment follows the surrounding evidence idiom \u2014 check_evidence.py already sits beside it in the same directory \u2014 and the figure goes through imas_codex.plotting.style.save_figure with BASE_STYLE, but held-names-refine-pass.py:568 closes a table with a paragraph tag and :580 declares four headers over five cells.",
+    "goal_fidelity": "The goal is one more refine pass over the names the first rewrite left unaccepted, and docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.json carries 151 population rows with an outcome each (36 accepted, 30 grammar waits, 54 grouping parents, 7 rebind/fold, 24 unsettled) plus 15 renames with old and new identity.",
+    "reuse": "The sourceless count and the graph client are the repository's own (imas_codex/standard_names/source_reads.py:90, imas_codex/graph/client.py) and the figure reuses save_figure, but check_held_names_refine_pass.py:42-77 copies LINEAGE, SUCCESSORS, pick_live and resolve_all verbatim from held-names-refine-pass.py:180-244 rather than importing them, and nothing asserts the two copies stay equal.",
+    "scope_discipline": "The diff touches only docs/evidence/fragments/sn-definitions-by-construction/ and docs/figures/sn-held-names-refine-pass/, but check_held_names_refine_pass.py:1 is a fifth path that the node's four declared write paths do not grant."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read prompt.txt:38 and the delivered held-names-refine-pass.json, which carries the 151-name population with an outcome per row (36 accepted, 30 grammar waits, 54 grouping parents, 7 rebind/fold, 24 unsettled), 15 renames with old/new identity and a distinction, and the spend of USD 11.5642 against the USD 20 ceiling.\nVERDICT done_when: read prompt.txt:145 against check_held_names_refine_pass.py:112-178, which asserts live identity, stage pair, docs score, the sourceless count and an artefact-internal spend ceiling, and does not assert the by-hold-kind counts, the before-scores, the still-held reasons, the grammar and rebind lists, or that the HTML agrees with the JSON.\nVERDICT write_paths: read the four declared paths at prompt.txt:120-123 and the diff of 8a28b7d0f; five landed files sit inside them and docs/evidence/fragments/sn-definitions-by-construction/check_held_names_refine_pass.py:1 sits outside all four.\nVERDICT manifest: read manifest.md \u2014 status complete, commits fa0580c0a/e9e60e695/8a28b7d0f, green gate job 1318561 EXIT=0 and red job 1318562 EXIT=1 recorded under gate: at manifest.md:13, with no tests:, test_logs:, baseline_suite: or after_suite: line.\nVERDICT diff: read all three commits against c266404dfb0dc4d83bf7a1dfd4df6b0b19868fa6 commit by commit \u2014 fa0580c0a adds the report generator and JSON/HTML, e9e60e695 the figure script, SVG and the held/grammar/rebind sections, 8a28b7d0f the read-only gate; six files, 10,950 insertions, nothing outside docs/evidence/fragments/sn-definitions-by-construction/ and docs/figures/sn-held-names-refine-pass/ and no generated file staged.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.json carries 151 population rows with an outcome, 15 renames with distinction and the measured spend, which is the pass the goal at prompt.txt:38 asked for.\nSCORE evidence: 11\nJUSTIFICATION evidence: check_held_names_refine_pass.py:112-178 verifies identity, stage, docs score and sourceless but never the by-hold-kind counts, before-scores, held reasons, grammar/rebind lists or HTML/JSON agreement that the done_when at prompt.txt:145 states.\nSCORE scope_discipline: 10\nJUSTIFICATION scope_discipline: check_held_names_refine_pass.py:1 is outside the four declared write paths while every other landed path is inside docs/evidence/fragments/sn-definitions-by-construction/ or docs/figures/sn-held-names-refine-pass/.\nSCORE durability: 14\nJUSTIFICATION durability: check_held_names_refine_pass.py:143 fires on an injected count \u2014 red-1318562.log prints FAIL accepted: graph 38, evidence 39 with EXIT=1 \u2014 but that is the only branch a negative control has exercised.\nSCORE fit: 14\nJUSTIFICATION fit: the fragment follows the check_evidence.py idiom in the same directory, but held-names-refine-pass.py:568 closes a table with </p> and :580 declares four headers over five cells in the delivered HTML.\nSCORE reuse: 13\nJUSTIFICATION reuse: imas_codex/standard_names/source_reads.py:90 and imas_codex.plotting.style.save_figure are reused, but check_held_names_refine_pass.py:42-77 duplicates held-names-refine-pass.py:180-244 without an owner or a test binding the copies.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_held_names_refine_pass.py:1 non-blocking: the gate is a fifth path outside the node's four declared write paths, so the land carries a file the fence did not grant.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.py:568 non-blocking: the open-holds table is closed with </p> and the delivered HTML at line 22 carries an orphan closing paragraph and an unclosed table.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.py:580 non-blocking: four <th> headers sit over five <td> cells, leaving the per-name rate column at :588 unlabelled in the delivered page.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.py:403 non-blocking: per-kind spend sums to 15.348296 against a headline total of 11.564196 because a shared rename cost row is credited to every id, and the page does not say the column is not a partition.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_held_names_refine_pass.py:178 non-blocking: the spend assertion compares two fields of the evidence file, so a total recorded below the ledger's true spend passes and no negative control exercises the branch.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_held_names_refine_pass.py:42 non-blocking: LINEAGE, SUCCESSORS, pick_live and resolve_all are copied verbatim from held-names-refine-pass.py:180-244 with no assertion that the two rules agree.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T165306964846-sdbc-held-names-refine-pass/manifest.md:13 non-blocking: the gate result is recorded under gate: with no tests: or test_logs: line, so promotion cannot rebuild its gate receipt from the record.",
+  "review_run_id": "r-20261115T210729625241-review-of-sdbc-held-names-refine-pass-8a28b7d0f865",
+  "reviewed_base_sha": "c266404dfb0dc4d83bf7a1dfd4df6b0b19868fa6",
+  "reviewed_head_sha": "8a28b7d0f86590755ea2a8df14dc2083e3723c88",
+  "reviewed_run_id": "r-20261115T165306964846-sdbc-held-names-refine-pass",
+  "reviewer_rerun": {
+    "command": "uv run --no-sync python -c <bounded read of the 8 null-score live identities>",
+    "result": "All 8 rows whose evidence records a null docs score also hold no reviewer_score_docs in the graph at their live identity; no defect."
+  },
+  "rubric": "review",
+  "scores": {
+    "durability": 14,
+    "evidence": 11,
+    "fit": 14,
+    "goal_fidelity": 17,
+    "reuse": 13,
+    "scope_discipline": 10
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T21:19:51.147461+00:00",
+  "total": 79
+}
