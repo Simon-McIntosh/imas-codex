@@ -1,0 +1,90 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T20:46:35.255Z",
+  "dispatched_at": "2026-11-15T20:44:43Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment/plan.html:126",
+      "id": "wiring-1",
+      "reason": "a build session that follows the sole followup re-dispatches three completed sections and misses the four that are actually implementable.",
+      "text": "followup f-isce-001 still reads \"Sections 2 and 5 are buildable ... Section 3 follows section 2\", while `plan-section-declarations` marks s2, s3 and s5 `done`; the plan's only build queue therefore points a session at work already landed and never mentions sections 4 and 10 as the pending ones",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment/plan.html:21",
+      "id": "wiring-2",
+      "reason": "section 9 can land before section 10 and close with the ITER nodes section 10 creates outside the only protected archive the plan promises.",
+      "text": "`plan-section-depends-on` gives section 9 only `s4`, `s6` and `s7`, but section 10 retires and re-creates ITER component and pattern nodes, and section 9 promises every node this work created for ITER is in the facility-scoped archive, which section 1 states as the lead's protection condition",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment/plan.html:89",
+      "id": "done_when-1",
+      "reason": "without one agreed figure set the completed-catalogue run cannot be read beside the partial one, which is the whole of section 10's measure.",
+      "text": "section 10 requires \"the same counts as section 5 beside the partial run's\" and then lists variables in each parse outcome, control-node groups, patterns under both keys and the share of component variables in a shared pattern, while section 5 (line 65) requires the fraction of the archive held, grouped and ungrouped counts, group-size distribution, the share of single-member groups and the twenty largest patterns with field counts; the two sets overlap only partly, so neither side can produce the comparison section 10 promises",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment/plan.html:95",
+      "id": "reasoning-1",
+      "reason": "the decision record is the durable evidence a later reader inherits, and as written it credits the local lane with a parse rate its own measurement reports as zero.",
+      "text": "the description-model decision states \"the local model delivered 130 of 200 with no response parsing unrepaired\", but the stored section 3 record gives the local lane 0 of 20 strict parses and 130 of 200 outputs against the paid model's 20 of 20 and 200 of 200; 130 counts delivered outputs, not responses that parsed",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment/plan.html:100",
+      "id": "reasoning-2",
+      "reason": "a worker on section 4 or 6 cannot tell whether ICP context is imported and passed to the chosen provider, and either answer changes what those sections deliver.",
+      "text": "the ratified rationale states \"With ICP access parked, no ICP-derived content is in scope for it\", yet section 4 delivers ICP and IDM content into the graph and section 6 (line 70) has that same paid model write component descriptions from the linked context of those nodes; the rationale and the two sections disagree about whether ICP content exists to be sent",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment/plan.html:113",
+      "id": "reasoning-3",
+      "reason": "section 4's dispatch either violates a stated gate or waits on a decision no one has been asked to make.",
+      "text": "the `local-lane-accepted` decision, whose context reads \"Until then no ICP or IDM content is given to any worker\", remains undecided while its face also names section 4 is the section that reads exactly that content, so section 4 is declared `implementable` under an open gate that forbids it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "6e365ba6a96156d4ebd5c266b58f9a9defb8e685",
+  "plan_fingerprint": "ab37b02c543c853b0b8859de8181dfb7145d484ba7621bbe9502313b9d1c5492",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 20,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T204223470464-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "b9d8538c8029a79133e46224f9beb8294dbadc8a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `codac-uda-signals#s12` resolves to that plan's section with the same id, `iter-signal-context-and-enrichment#s1`\u2013`#s10` resolve as in-document anchors, and `local-model-signal-enrichment-benchmark.html` exists.",
+    "done_when": "a finding \u2014 section 10's done-when (snapshot line 89) promises \"the same counts as section 5\" but enumerates a different figure set from section 5's done-when, so the partial-and-complete comparison it exists for is not defined by either section.",
+    "evidence_paths": "pass \u2014 the cited benchmark and grouping evidence sit under `docs/evidence/fragments/iter-signal-context-and-enrichment/` and the decision records are in the plan itself, none in a scratch path.",
+    "naming": "pass \u2014 the new decision key `description-model` and its rationale name mechanisms and providers, carrying no plan label, stage name or ticket number.",
+    "reasoning": "a finding \u2014 the new description-model rationale states the local lane \"delivered 130 of 200 with no response parsing unrepaired\" where the recorded measurement says 0 of 20 strict parses and 130 of 200 outputs, and its \"ICP access parked\" sentence removes the ICP content that sections 4 and 6 are built to carry.",
+    "single_goal": "pass \u2014 each section names one deliverable; section 10's retirement clause is the idempotence arm of its own regrouping, not a second deliverable.",
+    "wiring": "a finding \u2014 the plan's only followup (`#followups`, snapshot line 126) still routes a build at sections 2, 5 and 3, which the declarations now mark done, and `plan-section-depends-on` (line 21) leaves section 9 without section 10, so section 9 can close before the regrouping replaces the ITER group nodes its archive is meant to hold."
+  },
+  "section_digests": {
+    "_document": "a16cd72ca44c23647fbf11f12a8fd98c5825dc06dca50caa8674f7cee47f7e18",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "99748134bf3eceae4bd28b2460e2ebe121c89666b174c8be536b52d1510d66d7",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "923ec63ee399b43999ca879e9499e0bad33adefb4695c4715cc5b34549e66dea",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "631c30f031b35766fbc9b9bf62a0670bf0504adeef4f12b7676039b81fd14365",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T20:54:11.076886+00:00",
+  "total": null
+}
