@@ -1,9 +1,10 @@
-"""Replay fixed private cohorts through the signal worker without graph writes.
+"""Compare signal descriptions with frozen production prompts and private sinks.
 
-Raw completions are validated before any sanitizer or wrapper coercion. The
-production prompt, schema, grouping and result matching are exercised; graph
-claims, context reads and result writes are replaced by private trial boundaries.
-The worker does not predict units: its incoming authoritative unit is retained.
+The context pass runs the production worker's normal graph and retrieval reads.
+Both model arms replay its exact final messages through the same worker's call
+and result-matching path. Raw parsing is scored before the production parser's
+normal sanitization, so recovered output never improves the strict parse rate.
+Units are authoritative input metadata, not a field the model predicts.
 """
 
 from __future__ import annotations
@@ -12,6 +13,9 @@ import argparse
 import asyncio
 import hashlib
 import json
+import math
+import os
+import re
 import sqlite3
 import time
 from collections import Counter
@@ -25,6 +29,8 @@ from imas_codex.discovery.signals import parallel
 from imas_codex.discovery.signals.models import SignalEnrichmentBatch
 from imas_codex.graph.client import GraphClient
 from imas_codex.settings import get_model
+
+MODEL_OVERRIDE = "IMAS_CODEX_DISCOVERY_DESCRIBE_MODEL"
 
 
 def encoded(value) -> str:
@@ -40,8 +46,12 @@ def save(path: Path, value) -> None:
     path.chmod(0o600)
 
 
+def assert_unchanged(before, after) -> None:
+    if encoded(before) != encoded(after):
+        raise ValueError("stored enrichment changed during the private trial")
+
+
 def snapshot(ids: list[str]) -> list[dict]:
-    """Export every stored property, bounded to one row per named signal."""
     with GraphClient() as gc:
         rows = gc.query(
             "UNWIND $ids AS id MATCH (s:FacilitySignal {id: id}) "
@@ -53,26 +63,29 @@ def snapshot(ids: list[str]) -> list[dict]:
     return rows
 
 
-def prepare(root: Path, pilot_path: Path, facility: str) -> None:
+def prepare(root: Path, facility: str) -> None:
+    if facility == "iter":
+        raise ValueError("the comparison accepts a non-ITER reference facility only")
     if (root / "cohort.json").exists():
-        raise FileExistsError(
-            "fixed cohort already exists; use another private directory"
-        )
+        raise FileExistsError("fixed cohort already exists")
+    condition = (
+        "s.enriched_at IS NOT NULL AND s.description IS NOT NULL "
+        "AND s.physics_domain IS NOT NULL AND s.source_description IS NOT NULL "
+        "AND trim(s.source_description) <> ''"
+    )
     with GraphClient() as gc:
         domains = gc.query(
-            "MATCH (s:FacilitySignal {facility_id: $facility}) "
-            "WHERE s.enriched_at IS NOT NULL AND s.description IS NOT NULL "
-            "AND s.physics_domain IS NOT NULL "
-            "RETURN s.physics_domain AS domain, count(*) AS count ORDER BY domain LIMIT 40",
+            "MATCH (s:FacilitySignal {facility_id: $facility}) WHERE "
+            + condition
+            + " RETURN s.physics_domain AS domain, count(*) AS count ORDER BY domain LIMIT 40",
             facility=facility,
         )
         buckets = []
         for domain in domains:
             rows = gc.query(
-                "MATCH (s:FacilitySignal {facility_id: $facility}) "
-                "WHERE s.enriched_at IS NOT NULL AND s.description IS NOT NULL "
-                "AND s.physics_domain = $domain "
-                "RETURN s.id AS id ORDER BY id LIMIT 200",
+                "MATCH (s:FacilitySignal {facility_id: $facility}) WHERE "
+                + condition
+                + " AND s.physics_domain = $domain RETURN s.id AS id ORDER BY id LIMIT 200",
                 facility=facility,
                 domain=domain["domain"],
             )
@@ -83,25 +96,18 @@ def prepare(root: Path, pilot_path: Path, facility: str) -> None:
             if bucket and len(selected) < 200:
                 selected.append(bucket.pop(0))
     if len(selected) != 200 or len(domains) < 3:
-        raise ValueError("need 200 enriched signals across several domains")
-    pilot = json.loads(pilot_path.read_text())
-    pilot_ids = pilot["written_ids"]
-    if len(pilot_ids) != 200 or len(set(pilot_ids)) != 200:
-        raise ValueError("pilot checkpoint must name exactly 200 distinct signals")
+        raise ValueError(
+            "need 200 enriched signals with source context across several domains"
+        )
     reference = snapshot(selected)
-    iter_rows = snapshot(pilot_ids)
-    cohorts = {facility: reference, "iter": iter_rows}
-    # Even spacing across the round-robin domain ordering fixes the hand sample.
-    hand_ids = {facility: selected[::5], "iter": sorted(pilot_ids)[::5]}
     document = {
-        "cohorts": cohorts,
-        "order": {facility: selected, "iter": sorted(pilot_ids)},
-        "hand_ids": hand_ids,
-        "selection": "sorted ids round-robin across all stored domains; every fifth for hand reading",
+        "facility": facility,
+        "reference": reference,
+        "order": selected,
+        "hand_ids": selected[::5],
         "domains": domains,
-        "pilot_checkpoint_digest": digest(pilot),
-        "cohort_digest": digest(cohorts),
-        "reference_digest": digest(reference),
+        "selection": "sorted ids round-robin across domains, nonempty catalogue description required; every fifth fixed for hand reading",
+        "cohort_digest": digest(reference),
         "sealed_at": time.time(),
     }
     save(root / "cohort.json", document)
@@ -109,7 +115,8 @@ def prepare(root: Path, pilot_path: Path, facility: str) -> None:
         encoded(
             {
                 "cohort_digest": document["cohort_digest"],
-                "sizes": {k: len(v) for k, v in cohorts.items()},
+                "size": len(reference),
+                "domains": len(domains),
             }
         ),
         flush=True,
@@ -117,7 +124,7 @@ def prepare(root: Path, pilot_path: Path, facility: str) -> None:
 
 
 def input_signal(row: dict) -> dict:
-    """Remove stored model answers while preserving catalogue metadata."""
+    """Remove stored model answers while retaining authoritative source context."""
     p = row["properties"]
     fields = (
         "id",
@@ -139,7 +146,7 @@ def input_signal(row: dict) -> dict:
 
 
 def score_response(content: str | None, expected: int) -> dict:
-    """A malformed response remains a failure even if repair could recover it."""
+    """A malformed response is a strict failure even if production recovers it."""
     result = {
         "parse_success": False,
         "empty": not bool(content and content.strip()),
@@ -159,25 +166,36 @@ def score_response(content: str | None, expected: int) -> dict:
     return result
 
 
-def assert_unchanged(before, after) -> None:
-    if encoded(before) != encoded(after):
-        raise ValueError("stored enrichment changed during the private trial")
+def open_store(path: Path) -> sqlite3.Connection:
+    db = sqlite3.connect(path)
+    path.chmod(0o600)
+    db.execute("CREATE TABLE IF NOT EXISTS batches(document TEXT NOT NULL)")
+    return db
 
 
 async def replay_batch(
-    signals: list[dict], facility: str, db: sqlite3.Connection, transport=None
+    signals: list[dict],
+    facility: str,
+    db: sqlite3.Connection,
+    transport=None,
+    *,
+    messages=None,
+    capture_context=False,
+    arm="test",
 ) -> dict:
-    """Use the real worker with private claims and sinks and a strict parser."""
+    """Exercise production prompting or replay one exact captured request."""
+    import litellm
+
     state = parallel.DataDiscoveryState(facility=facility, scanner_types=[])
     state.facility_config = get_facility(facility)
     state.cost_limit = float("inf")
-    state.wiki_context = {}
     pending = [signals]
-    captured = []
-    requests = []
-    outputs = []
+    captured, requests, outputs = [], [], []
+    accounting = {"cost_usd": 0.0, "input_tokens": 0, "output_tokens": 0}
     original_call = llm.acall_llm_structured
-    original_transport = transport or llm._acompletion_local
+    original_local = transport or llm._acompletion_local
+    original_paid = litellm.acompletion
+    original_query = GraphClient.query
 
     def claim(*args, **kwargs):
         if pending:
@@ -185,9 +203,9 @@ async def replay_batch(
         state.stop_requested = True
         return []
 
-    async def capture_transport(kwargs):
+    async def observe(awaitable):
         started = time.monotonic()
-        response = await original_transport(kwargs)
+        response = await awaitable
         raw = response.choices[0].message.content
         captured.append(
             {
@@ -198,11 +216,26 @@ async def replay_batch(
                 "finish_reason": response.choices[0].finish_reason,
             }
         )
+        accounting["input_tokens"] += response.usage.prompt_tokens or 0
+        accounting["output_tokens"] += response.usage.completion_tokens or 0
+        accounting["cost_usd"] += llm.extract_cost(
+            response, model=get_model("discovery-describe")
+        )
         return response
 
+    async def local_call(kwargs):
+        return await observe(original_local(kwargs))
+
+    async def paid_call(**kwargs):
+        return await observe(original_paid(**kwargs))
+
     async def call_once(**kwargs):
+        if messages is not None:
+            kwargs["messages"] = messages
         requests.append(kwargs["messages"])
-        kwargs.update(max_retries=1, timeout=180)
+        if capture_context:
+            return SignalEnrichmentBatch(results=[]), 0.0, 0
+        kwargs.update(max_retries=1, timeout=180, max_tokens=8192)
         try:
             return await original_call(**kwargs)
         except Exception as exc:
@@ -223,212 +256,364 @@ async def replay_batch(
         outputs.extend(entries)
         return len(entries)
 
-    def refuse_graph(*args, **kwargs):
-        raise AssertionError("private trial attempted a live graph operation")
-
-    def strict_parse(content, model, model_id):
-        return model.model_validate_json(content)
+    def guarded_query(client, cypher, **params):
+        if not capture_context or re.search(
+            r"\b(?:SET|MERGE|CREATE|DELETE|REMOVE|DROP|FOREACH)\b", cypher
+        ):
+            raise AssertionError("private trial attempted a live graph operation")
+        return original_query(client, cypher, **params)
 
     started = time.monotonic()
     with ExitStack() as stack:
-        substitutions = {
+        replacements = {
             "claim_signals_for_enrichment": claim,
             "prepare_signal_sources": lambda *a, **k: (0, 0, 0),
             "propagate_units_from_signal_nodes": lambda *a, **k: 0,
-            "fetch_tree_context": lambda *a, **k: {},
-            "fetch_epoch_context": lambda *a, **k: {},
-            "fetch_signal_code_refs": lambda *a, **k: {},
-            "_fetch_code_chunks": lambda *a, **k: [],
             "mark_signals_enriched": write,
             "mark_signals_underspecified": write,
             "propagate_source_enrichment": lambda *a, **k: 0,
             "release_signal_claim": lambda *a, **k: None,
             "judge_and_store_signal_roles": AsyncMock(return_value=(0, 0)),
-            "GraphClient": refuse_graph,
         }
-        for name, replacement in substitutions.items():
-            stack.enter_context(patch.object(parallel, name, replacement))
-        stack.enter_context(
-            patch(
-                "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
-                return_value=[],
+        if not capture_context:
+            replacements.update(
+                fetch_tree_context=lambda *a, **k: {},
+                fetch_epoch_context=lambda *a, **k: {},
+                fetch_signal_code_refs=lambda *a, **k: {},
+                _fetch_code_chunks=lambda *a, **k: [],
             )
-        )
+            stack.enter_context(
+                patch(
+                    "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+                    return_value=[],
+                )
+            )
+        for name, replacement in replacements.items():
+            stack.enter_context(patch.object(parallel, name, replacement))
+        stack.enter_context(patch.object(GraphClient, "query", guarded_query))
         stack.enter_context(patch.object(llm, "acall_llm_structured", call_once))
-        stack.enter_context(patch.object(llm, "_acompletion_local", capture_transport))
-        stack.enter_context(patch.object(llm, "_sanitize_content", lambda value: value))
-        stack.enter_context(
-            patch.object(llm, "_parse_structured_content", strict_parse)
-        )
+        stack.enter_context(patch.object(llm, "_acompletion_local", local_call))
+        stack.enter_context(patch.object(litellm, "acompletion", paid_call))
         await parallel.enrich_worker(state)
     by_id = {signal["id"]: signal for signal in signals}
     for output in outputs:
         output["unit"] = by_id[output["id"]].get("unit")
     record = {
+        "arm": arm,
         "facility": facility,
         "ids": list(by_id),
         "responses": captured,
         "messages": requests,
+        "prompt_digest": digest(requests),
         "outputs": outputs,
         "seconds": time.monotonic() - started,
-        "cost_usd": state.enrich_stats.cost,
+        "context_cost_usd": state.enrich_stats.cost if capture_context else 0.0,
+        **accounting,
     }
     with db:
         db.execute("INSERT INTO batches(document) VALUES (?)", (encoded(record),))
     return record
 
 
-def open_store(path: Path) -> sqlite3.Connection:
-    db = sqlite3.connect(path)
-    path.chmod(0o600)
-    db.execute("CREATE TABLE IF NOT EXISTS batches(document TEXT NOT NULL)")
-    return db
+def load_records(root: Path) -> list[dict]:
+    with open_store(root / "trial.sqlite") as db:
+        return [
+            json.loads(row[0]) for row in db.execute("SELECT document FROM batches")
+        ]
 
 
-async def run(root: Path) -> None:
+async def capture(root: Path) -> None:
     cohort = json.loads((root / "cohort.json").read_text())
-    if digest(cohort["cohorts"]) != cohort["cohort_digest"]:
+    if digest(cohort["reference"]) != cohort["cohort_digest"]:
         raise ValueError("sealed cohort digest mismatch")
-    if not get_model("discovery-describe").startswith("local/"):
-        raise ValueError(
-            "benchmark requires the locally served discovery-describe seat"
-        )
+    assert_unchanged(cohort["reference"], snapshot(cohort["order"]))
+    if load_records(root):
+        raise ValueError("store is not empty")
+    refs = {row["id"]: row for row in cohort["reference"]}
     db = open_store(root / "trial.sqlite")
-    if db.execute("SELECT count(*) FROM batches").fetchone()[0]:
-        raise ValueError("trial already contains responses; refusing a mixed rerun")
-    before = {
-        facility: snapshot(cohort["order"][facility]) for facility in cohort["cohorts"]
-    }
-    for facility in before:
-        assert_unchanged(cohort["cohorts"][facility], before[facility])
-    save(root / "before.json", before)
-    for facility, ids in cohort["order"].items():
-        rows = {row["id"]: row for row in cohort["cohorts"][facility]}
-        for offset in range(0, len(ids), 20):
-            signals = [input_signal(rows[id]) for id in ids[offset : offset + 20]]
-            record = await replay_batch(signals, facility, db)
+    for offset in range(0, 200, 10):
+        ids = cohort["order"][offset : offset + 10]
+        record = await replay_batch(
+            [input_signal(refs[id]) for id in ids],
+            cohort["facility"],
+            db,
+            capture_context=True,
+            arm="context",
+        )
+        if len(record["messages"]) != 1:
+            raise ValueError(
+                "production context pass did not produce exactly one request"
+            )
+        print(
+            encoded(
+                {
+                    "context_signals": offset + 10,
+                    "prompt_digest": record["prompt_digest"],
+                    "context_cost_usd": record["context_cost_usd"],
+                }
+            ),
+            flush=True,
+        )
+    assert_unchanged(cohort["reference"], snapshot(cohort["order"]))
+
+
+def budget_guard(pilot_cost: float, actual: float = 0.0) -> float:
+    if not math.isfinite(pilot_cost) or pilot_cost <= 0:
+        raise ValueError("paid pilot needs a positive measured cost before projection")
+    estimate = pilot_cost * 20
+    if estimate > 20 or actual + 2 * pilot_cost > 20:
+        raise ValueError("paid comparison exceeds the twenty dollar ceiling")
+    return estimate
+
+
+async def model_arm(root: Path, arm: str, *, pilot=False) -> None:
+    cohort = json.loads((root / "cohort.json").read_text())
+    records = load_records(root)
+    contexts = [record for record in records if record["arm"] == "context"]
+    if len(contexts) != 20:
+        raise ValueError("need all 200 frozen full-context inputs before either arm")
+    refs = {row["id"]: row for row in cohort["reference"]}
+    db = open_store(root / "trial.sqlite")
+    done = [record for record in records if record["arm"] == arm]
+    local = get_model("discovery-describe")
+    paid = get_model("sn-docs")
+    if not local.startswith("local/") or not paid.startswith("openrouter/"):
+        raise ValueError(
+            "configured local describe and paid documentation seats required"
+        )
+    model = local if arm == "local" else paid
+    if pilot and done:
+        raise ValueError("paid pilot already exists")
+    if not pilot and arm == "paid":
+        estimate = json.loads((root / "estimate.json").read_text())
+        budget_guard(estimate["pilot_cost_usd"], sum(row["cost_usd"] for row in done))
+    assert_unchanged(cohort["reference"], snapshot(cohort["order"]))
+    with patch.dict(os.environ, {MODEL_OVERRIDE: model}):
+        for context in contexts[:1] if pilot else contexts:
+            if any(row["ids"] == context["ids"] for row in done):
+                continue
+            if arm == "paid" and not pilot:
+                budget_guard(
+                    estimate["pilot_cost_usd"], sum(row["cost_usd"] for row in done)
+                )
+            record = await replay_batch(
+                [input_signal(refs[id]) for id in context["ids"]],
+                cohort["facility"],
+                db,
+                messages=context["messages"][0],
+                arm=arm,
+            )
+            if record["prompt_digest"] != context["prompt_digest"]:
+                raise ValueError(
+                    "model arm did not use exactly the frozen production messages"
+                )
+            done.append(record)
             print(
                 encoded(
                     {
-                        "facility": facility,
-                        "offset": offset,
-                        "outputs": len(record["outputs"]),
-                        "responses": [
-                            response["score"] for response in record["responses"]
-                        ],
-                        "seconds": record["seconds"],
+                        "arm": arm,
+                        "signals_attempted": sum(len(row["ids"]) for row in done),
+                        "strict_parses": sum(
+                            response["score"]["parse_success"]
+                            for row in done
+                            for response in row["responses"]
+                        ),
+                        "pipeline_outputs": sum(len(row["outputs"]) for row in done),
+                        "cost_usd": sum(row["cost_usd"] for row in done),
                     }
                 ),
                 flush=True,
             )
-    after = {
-        facility: snapshot(cohort["order"][facility]) for facility in cohort["cohorts"]
-    }
-    save(root / "after.json", after)
-    for facility in before:
-        assert_unchanged(before[facility], after[facility])
+    after = snapshot(cohort["order"])
+    assert_unchanged(cohort["reference"], after)
     save(
-        root / "integrity.json",
-        {
-            facility: {
-                "before": digest(before[facility]),
-                "after": digest(after[facility]),
-                "identical": True,
-            }
-            for facility in before
-        },
+        root / f"integrity-{arm}.json",
+        {"before": cohort["cohort_digest"], "after": digest(after), "identical": True},
     )
-    db.close()
+    if pilot:
+        cost = done[0]["cost_usd"]
+        projected = budget_guard(cost)
+        save(
+            root / "estimate.json",
+            {
+                "pilot_signals": 10,
+                "pilot_cost_usd": cost,
+                "projected_200_usd": projected,
+                "doubled_projection_usd": projected * 2,
+                "ceiling_usd": 20,
+                "model": paid,
+                "reason": "Existing sn-docs seat writes project descriptions through OpenRouter; only the discovery-describe environment override changes.",
+                "input_tokens": done[0]["input_tokens"],
+                "output_tokens": done[0]["output_tokens"],
+            },
+        )
+        print(encoded(json.loads((root / "estimate.json").read_text())), flush=True)
+
+
+def pair_rows(root: Path) -> list[dict]:
+    cohort = json.loads((root / "cohort.json").read_text())
+    records = load_records(root)
+    outputs = {
+        arm: {
+            output["id"]: output
+            for record in records
+            if record["arm"] == arm
+            for output in record["outputs"]
+        }
+        for arm in ("local", "paid")
+    }
+    contexts = {
+        id: record["messages"][0]
+        for record in records
+        if record["arm"] == "context"
+        for id in record["ids"]
+    }
+    rows = []
+    for id in cohort["order"]:
+        first_arm = (
+            "local" if int(hashlib.sha256(id.encode()).hexdigest(), 16) % 2 else "paid"
+        )
+        second_arm = "paid" if first_arm == "local" else "local"
+        rows.append(
+            {
+                "id": id,
+                "first_arm": first_arm,
+                "context": contexts[id],
+                "first": outputs[first_arm].get(id, {}).get("description", ""),
+                "second": outputs[second_arm].get(id, {}).get("description", ""),
+            }
+        )
+    return rows
 
 
 def judge(root: Path) -> None:
+    rows = pair_rows(root)
     cohort = json.loads((root / "cohort.json").read_text())
-    db = open_store(root / "trial.sqlite")
-    records = [json.loads(row[0]) for row in db.execute("SELECT document FROM batches")]
-    rows = [
-        output
-        for record in records
-        if record["facility"] != "iter"
-        for output in record["outputs"]
-    ]
-    reference = {
-        row["id"]: row["properties"]
-        for facility, rows in cohort["cohorts"].items()
-        if facility != "iter"
-        for row in rows
+    total, judged, reversed_rows, releases = 0.0, [], [], []
+    preference = {
+        "first": "First is materially more accurate or useful with support in context.",
+        "second": "Second is materially more accurate or useful with support in context.",
+        "equivalent": "No material difference in supported accuracy and usefulness.",
     }
-    judged = []
-    total = 0.0
-    releases = []
-    for offset in range(0, len(rows), 20):
-        batch = rows[offset : offset + 20]
-        examples = {
-            f"signal_{i}": {
-                "source": input_signal(
-                    {"id": row["id"], "properties": reference[row["id"]]}
-                ),
-                "reference": reference[row["id"]]["description"],
-                "candidate": row["description"],
-            }
-            for i, row in enumerate(batch)
-        }
-        criteria = {
-            "equivalent": "Preserves the reference's physical quantity, role, important qualifiers and useful information, or improves them with support in source metadata.",
-            "weaker": "Consistent with the reference but loses meaningful specificity or leaves the physical quantity or role vague.",
-            "wrong": "Changes or contradicts quantity, role, units, geometry or physical interpretation, or adds unsupported factual specificity.",
-        }
-        questions = {
-            key: {
-                "type": "choice",
-                "instructions": f"Compare candidate with reference for {key}. Use source only as evidence; do not treat model style as quality. References are an incumbent comparison, not independent truth.",
-                "criteria": criteria,
-            }
-            for key in examples
-        }
-        answers, cost = llm.call_decisions(
-            model=get_model("discovery-relevance"),
-            state=examples,
-            questions=questions,
-            service="facility-discovery",
-            max_retries=1,
-            record_release=releases.append,
+    wrong = {
+        "neither": "Both are consistent with the context, even if vague.",
+        "first": "Only first contradicts context or asserts unsupported factual specificity; an empty description is wrong.",
+        "second": "Only second contradicts context or asserts unsupported factual specificity; an empty description is wrong.",
+        "both": "Both contradict context or assert unsupported factual specificity, or both are empty.",
+    }
+    for reverse in (False, True):
+        chosen = (
+            [row for row in rows if row["id"] in cohort["hand_ids"]]
+            if reverse
+            else rows
         )
-        total += cost
-        for i, row in enumerate(batch):
-            judged.append(
-                {
-                    "id": row["id"],
-                    "category": answers[f"signal_{i}"]["choice"],
-                    "answer": answers[f"signal_{i}"],
+        for offset in range(0, len(chosen), 5):
+            batch = chosen[offset : offset + 5]
+            state = {
+                f"pair_{i}": {
+                    "signal_id": row["id"],
+                    "context": row["context"],
+                    "first": row["second"] if reverse else row["first"],
+                    "second": row["first"] if reverse else row["second"],
                 }
+                for i, row in enumerate(batch)
+            }
+            questions = {}
+            for i in range(len(batch)):
+                for kind, criteria in (("preference", preference), ("wrong", wrong)):
+                    questions[f"pair_{i}_{kind}"] = {
+                        "type": "choice",
+                        "instructions": f"Judge pair_{i} against its supplied signal context, not writing style. Identify the signal in the context by signal_id and its source path. Prefer faithful specificity over plausible unsupported claims. Ignore description ordering. For preference, wrongness outweighs detail.",
+                        "criteria": criteria,
+                    }
+            answers, cost = llm.call_decisions(
+                model=get_model("discovery-relevance"),
+                state=state,
+                questions=questions,
+                service="facility-discovery",
+                max_retries=1,
+                record_release=releases.append,
             )
-        save(
-            root / "judge.json",
-            {
-                "model": get_model("discovery-relevance"),
-                "served_releases": releases,
-                "cost_usd": total,
-                "rows": judged,
-            },
-        )
-        print(encoded({"judged": len(judged), "cost_usd": total}), flush=True)
+            total += cost
+            for i, row in enumerate(batch):
+                first_arm = (
+                    ("paid" if row["first_arm"] == "local" else "local")
+                    if reverse
+                    else row["first_arm"]
+                )
+                second_arm = "paid" if first_arm == "local" else "local"
+                choice = answers[f"pair_{i}_preference"]["choice"]
+                bad = answers[f"pair_{i}_wrong"]["choice"]
+                entry = {
+                    "id": row["id"],
+                    "preferred": {
+                        "first": first_arm,
+                        "second": second_arm,
+                        "equivalent": "equivalent",
+                    }[choice],
+                    "blind_choice": choice,
+                    "wrong_arms": [
+                        arm
+                        for label, arm in (("first", first_arm), ("second", second_arm))
+                        if bad in (label, "both")
+                    ],
+                    "answers": {
+                        kind: answers[f"pair_{i}_{kind}"]
+                        for kind in ("preference", "wrong")
+                    },
+                }
+                (reversed_rows if reverse else judged).append(entry)
+            save(
+                root / "judge.json",
+                {
+                    "model": get_model("discovery-relevance"),
+                    "served_releases": sorted(set(releases)),
+                    "cost_usd": total,
+                    "rows": judged,
+                    "reversed_rows": reversed_rows,
+                },
+            )
+            print(
+                encoded(
+                    {
+                        "judged": len(judged),
+                        "reversed": len(reversed_rows),
+                        "cost_usd": total,
+                    }
+                ),
+                flush=True,
+            )
+    save(
+        root / "hand-sheet.json",
+        [
+            {key: row[key] for key in ("id", "context", "first", "second")}
+            for row in rows
+            if row["id"] in cohort["hand_ids"]
+        ],
+    )
 
 
 def summarize(root: Path) -> None:
     cohort = json.loads((root / "cohort.json").read_text())
-    db = open_store(root / "trial.sqlite")
-    records = [json.loads(row[0]) for row in db.execute("SELECT document FROM batches")]
-    summary = {}
-    for facility, originals in cohort["cohorts"].items():
-        batches = [record for record in records if record["facility"] == facility]
+    records = load_records(root)
+    refs = {row["id"]: row["properties"] for row in cohort["reference"]}
+    summary = {
+        "cohort_digest": cohort["cohort_digest"],
+        "domains": dict(Counter(row["physics_domain"] for row in refs.values())),
+        "shared_context_cost_usd": sum(
+            row["context_cost_usd"] for row in records if row["arm"] == "context"
+        ),
+    }
+    for arm in ("local", "paid"):
+        batches = [record for record in records if record["arm"] == arm]
         responses = [response for record in batches for response in record["responses"]]
         outputs = {
             output["id"]: output for record in batches for output in record["outputs"]
         }
-        refs = {row["id"]: row["properties"] for row in originals}
         seconds = sum(record["seconds"] for record in batches)
-        summary[facility] = {
-            "selected": len(originals),
+        cost = sum(record["cost_usd"] for record in batches)
+        summary[arm] = {
+            "selected": 200,
             "attempted": sum(len(record["ids"]) for record in batches),
             "responses": len(responses),
             "parse_successes": sum(
@@ -444,7 +629,10 @@ def summarize(root: Path) -> None:
             "output_signals": len(outputs),
             "seconds": seconds,
             "calls_per_minute": len(responses) * 60 / seconds if seconds else 0,
-            "cost_usd": sum(record["cost_usd"] for record in batches),
+            "cost_usd": cost,
+            "cost_per_signal_usd": cost / 200,
+            "input_tokens": sum(row["input_tokens"] for row in batches),
+            "output_tokens": sum(row["output_tokens"] for row in batches),
             "domain_agreement": sum(
                 output["physics_domain"] == refs[id].get("physics_domain")
                 for id, output in outputs.items()
@@ -454,22 +642,27 @@ def summarize(root: Path) -> None:
                 for id, output in outputs.items()
             ),
             "known_unit_count": sum(bool(row.get("unit")) for row in refs.values()),
-            "stored_domains": dict(
-                Counter(row.get("physics_domain") for row in refs.values())
-            ),
-            "model": get_model("discovery-describe"),
             "served_models": sorted(
                 {response.get("served_model", "") for response in responses}
             ),
         }
-    judge_path = root / "judge.json"
-    if judge_path.exists():
-        judgments = json.loads(judge_path.read_text())
+    if (root / "judge.json").exists():
+        j = json.loads((root / "judge.json").read_text())
+        original = {row["id"]: row for row in j["rows"]}
         summary["judge"] = {
-            "categories": dict(Counter(row["category"] for row in judgments["rows"])),
-            "cost_usd": judgments["cost_usd"],
-            "model": judgments["model"],
-            "served_releases": judgments["served_releases"],
+            "preferences": dict(Counter(row["preferred"] for row in j["rows"])),
+            "either_wrong": sum(bool(row["wrong_arms"]) for row in j["rows"]),
+            "wrong_per_arm": dict(
+                Counter(arm for row in j["rows"] for arm in row["wrong_arms"])
+            ),
+            "reverse_disagreements": sum(
+                row["preferred"] != original[row["id"]]["preferred"]
+                for row in j["reversed_rows"]
+            ),
+            "reverse_count": len(j["reversed_rows"]),
+            "cost_usd": j["cost_usd"],
+            "model": j["model"],
+            "served_releases": j["served_releases"],
         }
     save(root / "summary.json", summary)
     print(encoded(summary), flush=True)
@@ -477,18 +670,30 @@ def summarize(root: Path) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("action", choices=["prepare", "run", "judge", "summarize"])
+    parser.add_argument(
+        "action",
+        choices=[
+            "prepare",
+            "capture",
+            "estimate",
+            "local",
+            "paid",
+            "judge",
+            "summarize",
+        ],
+    )
     parser.add_argument("--store", type=Path, required=True)
     parser.add_argument("--facility", default="jt-60sa")
-    parser.add_argument("--pilot", type=Path)
     args = parser.parse_args()
     args.store.mkdir(parents=True, exist_ok=True, mode=0o700)
     if args.action == "prepare":
-        if args.pilot is None:
-            parser.error("prepare requires --pilot")
-        prepare(args.store, args.pilot, args.facility)
-    elif args.action == "run":
-        asyncio.run(run(args.store))
+        prepare(args.store, args.facility)
+    elif args.action == "capture":
+        asyncio.run(capture(args.store))
+    elif args.action == "estimate":
+        asyncio.run(model_arm(args.store, "paid", pilot=True))
+    elif args.action in ("local", "paid"):
+        asyncio.run(model_arm(args.store, args.action))
     elif args.action == "judge":
         judge(args.store)
     else:

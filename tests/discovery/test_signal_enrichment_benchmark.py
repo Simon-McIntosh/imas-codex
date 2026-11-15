@@ -140,3 +140,103 @@ async def test_worker_replay_writes_only_private_results(tmp_path, malformed):
     assert db.execute("SELECT count(*) FROM batches").fetchone()[0] == 1
     assert "Answer description" not in json.dumps(record["messages"])
     db.close()
+
+
+@pytest.mark.parametrize("cost", [0.0, float("nan"), -0.1, 1.01])
+def test_paid_projection_refuses_missing_or_excessive_cost(cost):
+    with pytest.raises(ValueError):
+        bench.budget_guard(cost)
+
+
+def test_paid_budget_reserves_the_next_call():
+    assert bench.budget_guard(0.1) == 2.0
+    with pytest.raises(ValueError, match="ceiling"):
+        bench.budget_guard(0.1, actual=19.9)
+
+
+@pytest.mark.asyncio
+async def test_normal_context_is_captured_without_enrichment_calls(tmp_path):
+    signal = {
+        "id": "jt-60sa:synthetic",
+        "facility_id": "jt-60sa",
+        "name": "COOLING:TEMP",
+        "accessor": "COOLING:TEMP",
+        "source_description": "Temperature",
+        "unit": "K",
+        "discovery_source": "synthetic",
+    }
+    db = bench.open_store(tmp_path / "capture.sqlite")
+    tree = {
+        signal["id"]: {"node_description": "Authoritative sensor calibration context"}
+    }
+    with (
+        patch.object(
+            bench.parallel, "fetch_tree_context", return_value=tree
+        ) as tree_read,
+        patch.object(bench.parallel, "fetch_epoch_context", return_value={}),
+        patch.object(bench.parallel, "fetch_signal_code_refs", return_value={}),
+        patch.object(bench.parallel, "_fetch_code_chunks", return_value=[]),
+        patch(
+            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            return_value=[],
+        ),
+    ):
+        record = await bench.replay_batch(
+            [signal], "jt-60sa", db, capture_context=True, arm="context"
+        )
+    tree_read.assert_called_once_with([signal["id"]])
+    assert (
+        "Authoritative sensor calibration context"
+        in record["messages"][0][1]["content"]
+    )
+    assert record["responses"] == []
+    assert record["outputs"] == []
+    db.close()
+
+
+@pytest.mark.asyncio
+async def test_fenced_response_stays_a_strict_failure_when_pipeline_recovers(tmp_path):
+    content = "```json\n" + json.dumps(answer()) + "\n```"
+
+    async def transport(kwargs):
+        return SimpleNamespace(
+            model="local/test",
+            choices=[
+                SimpleNamespace(
+                    message=SimpleNamespace(content=content), finish_reason="stop"
+                )
+            ],
+            usage=SimpleNamespace(prompt_tokens=5, completion_tokens=10),
+        )
+
+    messages = [
+        {"role": "system", "content": "Fixed production schema"},
+        {"role": "user", "content": "Fixed retrieved context"},
+    ]
+    signal = {
+        "id": "jt-60sa:synthetic",
+        "name": "COOLING:TEMP",
+        "accessor": "COOLING:TEMP",
+        "unit": "K",
+    }
+    db = bench.open_store(tmp_path / "recovery.sqlite")
+    with (
+        patch.object(bench.llm, "get_api_key", return_value="test"),
+        patch.object(
+            bench.llm,
+            "_build_kwargs",
+            return_value={
+                "api_base": "http://localhost:8000/v1",
+                "model": "local/test",
+            },
+        ),
+        patch.object(bench.llm, "_is_local_api_base", return_value=True),
+    ):
+        record = await bench.replay_batch(
+            [signal], "jt-60sa", db, transport=transport, messages=messages
+        )
+    assert record["responses"][0]["score"]["parse_success"] is False
+    assert len(record["outputs"]) == 1
+    assert record["messages"] == [messages]
+    assert record["prompt_digest"] == bench.digest([messages])
+    db.close()
