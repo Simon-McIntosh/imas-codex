@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T23:05:12.103Z",
+  "dispatched_at": "2026-11-15T23:04:50Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/figure-scripts-use-the-shared-save-function.html:47",
+      "id": "reasoning-1",
+      "reason": "without a stated size decision the implementing node must pick, and whichever it picks the done-when either fails on sizes or on \"no script keeps a figure-export function of its own\".",
+      "text": "\u00a72 now requires that \"the scripts still write every file they write today, in the same formats and at the same sizes\", but four tracked `docs/figures/discovery-to-mapping/*.svg` and `docs/figures/jt60sa-mapping-study/agreement.svg` declare `width=\"1008pt\"` (35.6 cm) today and are written by plain `fig.savefig` with no size rewrite, while \u00a71 fixes the shared export to declare the slide width (`save_figure` writes `width=\"31.1cm\"` and a height derived from it); routing those five figures through the shared function necessarily changes their declared size, so the section cannot be satisfied as written and a worker must either republish them at a new size or leave them on a script-local export \u2014 each violating one clause, and the author has not said which.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "057515152daf4420be31b44593d8a7dcd998982e",
+  "plan_fingerprint": "7406696f2c58fc3b2fac63544b9649198669eb9f255e1d09a7c54faaaa3cfae6",
+  "plan_slug": "figure-scripts-use-the-shared-save-function",
+  "plan_version": 2,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T225907172111-plan-review-of-figure-scripts-use-the-shared-save-function",
+  "reviewed_blob_sha": "e64ae1fc9c93a3d333a4357e95fc98203773211b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `imas_codex/plotting/` exists, the cited `scripts/` tree holds the ten scripts and the three local checks, and both section hrefs resolve to existing anchors in the snapshot, so none dangles.",
+    "done_when": "pass \u2014 \u00a71's revised measure now tests a four-trace and a six-trace legend, and both fail on today's code (`figure.legend(ncol=min(3, len(axis.lines)))` yields two text rows for four entries and for six, measured in `imas_codex/plotting/signals.py:217`), so the added clause can fail; \u00a72's negative control is reachable because the four `plot_jet_*` scripts run no text check at all.",
+    "evidence_paths": "pass \u2014 every measure is recorded in the landing record inside the repository; nothing in \u00a71 or \u00a72 sends evidence to a session scratchpad.",
+    "naming": "pass \u2014 neither section names a symbol, stage label or ticket number; \u00a72 states the outcome (\"no function in a script that exports a figure other than by calling the shared one\") rather than a function to write.",
+    "reasoning": "a finding \u2014 \u00a72's new sentence \"in the same formats and at the same sizes\" is unreachable for the five tracked figures whose declared physical width is 1008pt today, because \u00a71 fixes the shared export's declared width at 31.1 cm.",
+    "single_goal": "pass \u2014 \u00a71's two deliverables now each carry a measure in the two done-when clauses, so the section cannot be closed on one without the other being observed.",
+    "wiring": "pass \u2014 \u00a72 declares `figure-scripts-use-the-shared-save-function#s1` in `data-links` and the snapshot's `plan-section-depends-on` carries `{\"s2\":[\".../#s1\"]}`; the plan's `plan-after` names `codac-uda-signals`, and `docs/plans/codac-uda-signals.html` exists."
+  },
+  "section_digests": {
+    "_document": "4dea64427d72247ec7267de4bc6f56d85c0ade04effc8f525bbda5516b514f60",
+    "s1": "dcf0721a9e37aac700d6f736a0ffe707b876997971a1b1a050ab25c00c7e4cb5",
+    "s2": "6b42f67299ef49dc22e37033deec6bc035bc01d05936f731b2b6c8574178f56b"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T23:18:14.181104+00:00",
+  "total": null
+}
