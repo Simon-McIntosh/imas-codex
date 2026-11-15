@@ -1,0 +1,49 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T05:21:22.910Z",
+  "dispatched_at": "2026-11-15T05:02:51Z",
+  "findings": [
+    {
+      "id": "accept-path-assertion-is-not-independent",
+      "line": 106,
+      "path": "tests/graph/test_archive_schema.py",
+      "severity": "non-blocking",
+      "text": "assert pulse.id == \"demo:codac_uda:slow:DEMO:CAMPAIGN/commissioning-alpha\" compares the constructor's output against the same literal the test handed in as id= on line 99, so it stays green for any implementation that derives the ID from archive and name, including one with the supplied-ID check deleted at imas_codex/config/codac_uda.py:63. It guards derivation, not the accept arm its name claims; the refusal arm is independently guarded by test_pulse_construction_refuses_mismatched_id and its mutation receipt."
+    },
+    {
+      "id": "identity-guard-has-no-production-caller",
+      "line": 31,
+      "path": "imas_codex/config/codac_uda.py",
+      "severity": "non-blocking",
+      "text": "create_archive_pulse has no production call site anywhere under imas_codex/ (only tests/graph/test_archive_schema.py imports it), and direct Pulse construction still accepts a truncated ID because the generated model at imas_codex/graph/models.py:15138 carries no cross-field rule. The enforcement is therefore opt-in and prospective: a scanner that constructs Pulse directly can still write the colliding ID the repair exists to prevent. The docstring and the evidence fragment state this limitation honestly."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass",
+    "diff": "pass",
+    "done_when": "pass",
+    "goal": "pass",
+    "manifest": "pass",
+    "write_paths": "pass"
+  },
+  "notes": "Scoped to the two commits gained since the prior review at 2b82f0fd0dd3: 2636cdd0a (fix, imas_codex/config/codac_uda.py + tests/graph/test_archive_schema.py) and f2a47423b (docs, docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html). Read the source node's goal, done_when and write_paths from dispatch-detail.json; the run manifest's recorded gate and control receipts; construction-tests.log (76 passed, EXIT=0 at 2636cdd0), pulse-construction-reproduction.log (pre-repair revision accepts the truncated ID, positive control true), pulse-derivation-mutation.log and pulse-id-refusal-mutation.log (each exits 1 on the named test), and construction-operator-control.log. Read outside the diff only for the reuse judgement: searched imas_codex/ for an existing pulse-construction or composite-identifier owner and read the generated Pulse model in the reviewed worktree. ruff check and ruff format --check pass on both changed Python files. No suite was re-run and nothing in the reviewed tree was modified.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal (dispatch-detail.json) is to deliver the archive schema and facility configuration; the increment at 2636cdd0a adds imas_codex/config/codac_uda.py:31 create_archive_pulse as the pulse-identity construction boundary the prior review found missing.\nVERDICT done_when: the done_when asks that schema-driven tests pass and a fixture pulse round-trips; the focused gate recorded in construction-tests.log runs tests/graph/test_archive_schema.py among four files and reports 76 passed, EXIT=0 at revision 2636cdd0a.\nVERDICT write_paths: dispatch-detail.json declares imas_codex/schemas/, imas_codex/config/, tests/config/, tests/graph/ and docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html; all three changed paths sit inside that list.\nVERDICT manifest: the manifest records the gate command, its 76-passed result, the two mutation receipts and one control; its stated summaries match construction-tests.log (76 passed in 10.75s), pulse-derivation-mutation.log (1 failed in 1.79s), pulse-id-refusal-mutation.log (1 failed in 1.40s) and construction-operator-control.log (1 failed in 6.28s).\nVERDICT diff: read both commits against base 2b82f0fd0; 3 files and 146 insertions, the function plus its TYPE_CHECKING import at imas_codex/config/codac_uda.py:21-67, four tests at tests/graph/test_archive_schema.py:69-118, and one evidence section at docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html:109-153; the remaining changes are docstring corrections to archive_host_key at imas_codex/config/codac_uda.py:70-76.\nCALL_SITES: imas_codex/config/codac_uda.py:validate_codac_uda_config (consumer of archive_host_key, docstring-only change); create_archive_pulse has no production call site across imas_codex/\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: imas_codex/config/codac_uda.py:31 derives the graph ID from archive and complete name and refuses a disagreeing supplied ID, but the guard is opt-in and no production caller uses it, so direct Pulse construction still accepts the truncated identity.\nSCORE evidence: 18\nJUSTIFICATION evidence: construction-tests.log ends with 76 passed in 10.75s and EXIT=0 at revision 2636cdd0a, and pulse-construction-reproduction.log and pulse-id-refusal.log bracket the behaviour before and after the repair with a positive control.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the diff touches only imas_codex/config/codac_uda.py, tests/graph/test_archive_schema.py and the declared evidence fragment, and the docstring correction at codac_uda.py:70-76 replaces a false reader claim with the true configuration-validation caller at codac_uda.py:108.\nSCORE durability: 17\nJUSTIFICATION durability: pulse-derivation-mutation.log reinstates the final-segment derivation and reddens test_same_pulse_segment_in_distinct_categories_has_distinct_ids, while pulse-id-refusal-mutation.log disables the guard at codac_uda.py:63 and reddens test_pulse_construction_refuses_mismatched_id at tests/graph/test_archive_schema.py:85.\nSCORE fit: 17\nJUSTIFICATION fit: the addition at imas_codex/config/codac_uda.py:31 follows the module's keyword-only, typed style, raises ValueError as validate_codac_uda_config does, and its only convention novelty is the deferred graph-model import at codac_uda.py:49; ruff check and ruff format --check pass on both Python files.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner exists for pulse construction or composite-identifier derivation \u2014 the search over imas_codex/ for create_/make_ constructors and id composition found only inline scanner model construction, and the generated model at imas_codex/graph/models.py:15138 validates fields only \u2014 so create_archive_pulse is the first owner rather than a fork.\nFINDING tests/graph/test_archive_schema.py:106 non-blocking: the accept-path assertion compares the literal the test itself supplied as id= against the constructor's output, so it cannot redden when the supplied-ID check at imas_codex/config/codac_uda.py:63 is removed and does not guard the arm its name claims.\nFINDING imas_codex/config/codac_uda.py:31 non-blocking: the new identity guard has no production caller and direct Pulse construction remains unenforced, so the collision it prevents stays reachable for any scanner that builds Pulse itself.\n",
+  "review_run_id": "r-20261115T050058626678-review-of-archive-pulse-schema-f2a47423b91a",
+  "reviewed_base_sha": "2b82f0fd0dd3e4d8c2af89f43cd06f03b07bc109",
+  "reviewed_head_sha": "f2a47423b91aef5cee2cdedc5d4fdbbb963ba511",
+  "reviewed_run_id": "r-20261115T021249205435-archive-pulse-schema",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T05:24:33.077917+00:00",
+  "total": 107
+}
