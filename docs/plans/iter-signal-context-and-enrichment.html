@@ -18,11 +18,11 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="signals,discovery,mcp-server">
   <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;,&quot;s7&quot;:&quot;implementable&quot;,&quot;s8&quot;:&quot;implementable&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
-  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[],&quot;s4&quot;:[&quot;iter-signal-context-and-enrichment#s3&quot;],&quot;s5&quot;:[&quot;codac-uda-signals#s12&quot;],&quot;s6&quot;:[&quot;iter-signal-context-and-enrichment#s4&quot;,&quot;iter-signal-context-and-enrichment#s5&quot;],&quot;s7&quot;:[&quot;iter-signal-context-and-enrichment#s6&quot;],&quot;s8&quot;:[&quot;iter-signal-context-and-enrichment#s7&quot;],&quot;s9&quot;:[&quot;iter-signal-context-and-enrichment#s4&quot;,&quot;iter-signal-context-and-enrichment#s6&quot;,&quot;iter-signal-context-and-enrichment#s7&quot;]}">
+  <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[],&quot;s4&quot;:[&quot;iter-signal-context-and-enrichment#s3&quot;],&quot;s5&quot;:[],&quot;s6&quot;:[&quot;iter-signal-context-and-enrichment#s4&quot;,&quot;iter-signal-context-and-enrichment#s5&quot;],&quot;s7&quot;:[&quot;iter-signal-context-and-enrichment#s6&quot;],&quot;s8&quot;:[&quot;iter-signal-context-and-enrichment#s7&quot;],&quot;s9&quot;:[&quot;iter-signal-context-and-enrichment#s4&quot;,&quot;iter-signal-context-and-enrichment#s6&quot;,&quot;iter-signal-context-and-enrichment#s7&quot;]}">
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="15">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -60,9 +60,9 @@
     <p><strong>Done when.</strong> The landing record gives the number of source rows imported per source, the number of the pilot system's signals with an exact link, a derived link and no link, and twenty links of each present kind checked by hand against the source; every imported node and link reaches the ITER facility node; a second import adds none; and a search of the tracked tree for the imported identifiers and a sample of imported titles finds none. Graph-marked statements pass. <strong>Negative control:</strong> a signal whose component number appears in no source row receives no link, and a row that names a different system links to no pilot signal.</p>
 
     <h2 id="s5">§5 — Catalogued signals are grouped by component and by field pattern</h2>
-    <section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="codac-uda-signals#s12"></section>
-    <p><strong>Delivers.</strong> Every catalogued archive variable, whether in the graph or only in the private catalogue store, is either in a component group or in an explicit ungrouped state, and components that expose the same set of fields share a field pattern. The grouping is derived from the parsed variable names and the archive metadata. For the signals that are in the graph it is stored there under the ITER facility, and it is recomputed without duplicates when the catalogue grows.</p>
-    <p><strong>Done when.</strong> The landing record gives the number of variables, the number grouped and the number ungrouped, the number of component groups and field patterns; the distribution of group size; the share of signals whose group has a single member; and the twenty largest patterns with their field counts, using invented names in tracked files. The number of group descriptions and pattern descriptions that enrichment would need is stated beside the number of signals. A second run adds no groups. <strong>Negative control:</strong> a signal whose name does not parse is placed in an explicit ungrouped state and is counted, never attached to another component's group.</p>
+    <section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <p><strong>Delivers.</strong> Every catalogued archive variable, whether in the graph or only in the private catalogue store, is either in a component group or in an explicit ungrouped state, and components that expose the same set of fields share a field pattern. The grouping is derived from the parsed variable names and the archive metadata. For the signals that are in the graph it is stored there under the ITER facility, and it is recomputed without duplicates when the catalogue grows. It is run first on the partial catalogue, while the archive scan is still filling the private store, and run again when the scan completes.</p>
+    <p><strong>Done when.</strong> For each run the landing record states the fraction of the archive the private store held, and gives the number of variables, the number grouped and the number ungrouped, the number of component groups and field patterns; the distribution of group size; the share of signals whose group has a single member; and the twenty largest patterns with their field counts, using invented names in tracked files. The number of group descriptions and pattern descriptions that enrichment would need is stated beside the number of signals. A second run adds no groups. <strong>Negative control:</strong> a signal whose name does not parse is placed in an explicit ungrouped state and is counted, never attached to another component's group.</p>
 
     <h2 id="s6">§6 — The pilot system's signals are enriched by group and the result is measured</h2>
     <section data-reckon="section" data-id="s6" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="iter-signal-context-and-enrichment#s4,iter-signal-context-and-enrichment#s5"></section>
@@ -103,6 +103,15 @@
       <button class="r-opt" data-value="coordinator-curates">Not accepted: the coordinator curates and workers see only the graph</button>
       </p>
     <p class="r-dec-rat"></p>
+    </div>
+<div class="r-dec" data-key="description-model" data-choice="paid-gpt-6.1-sol" data-by="lead" data-when="2026-11-15T17:14:08+00:00" data-sections="s6,s7">
+    <p class="r-dec-q">Which model writes ITER signal descriptions in the discovery pipeline?</p>
+    <p class="r-dec-ctx">The comparison in section 3 on 200 signals with identical full-context prompts: the local model delivered 130 of 200 with no response parsing unrepaired; the paid model delivered 200 of 200 for 0.95 US dollars.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="paid-gpt-6.1-sol">The paid model, gpt-6.1-sol</button>
+      <button class="r-opt" data-value="local-after-retest">The local model after a constrained retest</button>
+      </p>
+    <p class="r-dec-rat">The lead chose the paid model, gpt-6.1-sol, on 2026-11-15 at about 17:25 UTC through the decision census, relayed by the reckon session. With ICP access parked, no ICP-derived content is in scope for it.</p>
     </div>
 </section>
 
