@@ -1,0 +1,28 @@
+<article id="archive-variable-catalogue-scope-check">
+  <h3>Catalogue implementation not delivered</h3>
+  <p>The live plan was read at version 15. The assigned tree was inspected at
+    <code>2fd068df6030aaa3c1acdc06bf5cf6086ac42d90</code> before implementation.
+    Its tracked working tree was clean.</p>
+  <p>The scanner registry imports <code>device_xml</code>, <code>edas</code>,
+    <code>imas</code>, <code>jpf</code>, <code>mdsplus</code>, <code>ppf</code>,
+    <code>tdi</code> and <code>wiki</code>. It imports no CODAC UDA scanner.
+    A scoped search of the discovery source returned no CODAC UDA reference;
+    the same search found the known configuration validator and packaged
+    reader, confirming that the search could see the upstream implementation.</p>
+  <p>The worker stopped at the dispatch's write boundary. No scanner was
+    implemented, archive contacted or graph written. No cohort scan ran on
+    any partition.</p>
+  <table>
+    <thead><tr><th>Required measurement</th><th>Outcome</th></tr></thead>
+    <tbody>
+      <tr><td>Independent archive and graph cohort counts</td><td>Not measured</td></tr>
+      <tr><td>Duplicate count after a second scan</td><td>Not measured</td></tr>
+      <tr><td>Ten bounded reads, confirmed and unconfirmed</td><td>Not measured</td></tr>
+      <tr><td>Interrupted scan remains incomplete</td><td>Not exercised</td></tr>
+      <tr><td>Empty read leaves serving archive unset</td><td>Not exercised</td></tr>
+      <tr><td>Modified statements under the graph marker</td><td>No statements modified</td></tr>
+    </tbody>
+  </table>
+  <p>This record supports a blocked outcome only; it supplies no completion
+    evidence for the catalogue.</p>
+</article>
