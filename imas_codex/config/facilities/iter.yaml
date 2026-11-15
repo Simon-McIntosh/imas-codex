@@ -65,6 +65,24 @@ compute_locations:
 # Data system configuration for signal discovery
 # Used by: imas-codex discover iter --only signals
 data_systems:
+  codac_uda:
+    setup_commands:
+      - source /etc/profile.d/z00_lmod.sh
+      - module load m-uda-client/7.4-iimkl-2025b
+    python_command: python3
+    archives:
+      - role: fast
+        description: Fast plant archive
+      - role: slow
+        description: Slow plant archive
+      - role: operator
+        excluded: true
+        description: Reserved for operator use
+    readable_roles: [fast, slow]
+    max_samples: 100000
+    max_bytes: 8388608
+    max_window_ns: 60000000000
+    timeout: 30.0
   # IMAS is ITER's native data format.
   imas:
     backends:

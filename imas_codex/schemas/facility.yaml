@@ -67,6 +67,16 @@ enums:
       config_file:
         description: Plain text configuration files (sensor configs, mappings, tables)
 
+  ArchiveRole:
+    description: Archive endpoint role, independent of the transport server type
+    permissible_values:
+      fast:
+        description: Fast archive
+      slow:
+        description: Slow archive
+      operator:
+        description: Operator-reserved endpoint, excluded from application reads
+
   ToolStatus:
     description: Availability status of a command-line tool
     permissible_values:
@@ -1663,6 +1673,113 @@ classes:
       description:
         description: What data this server hosts
 
+  ArchiveEndpoint:
+    description: >-
+      A named archive endpoint, independent of MDSplus infrastructure.
+      Only logical roles are public; connection hosts remain in private config.
+    class_uri: facility:ArchiveEndpoint
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Composite key as {facility_id}:{data_system}:{role}
+      facility_id:
+        description: Owning facility
+        required: true
+        range: Facility
+        annotations:
+          relationship_type: AT_FACILITY
+      data_system:
+        description: Facility data system key that resolves private connection settings
+        required: true
+      role:
+        description: Logical archive role
+        range: ArchiveRole
+        required: true
+      excluded:
+        description: Endpoint is forbidden for application connections
+        range: boolean
+        required: true
+      description:
+        description: Purpose and contents of this archive
+
+  PulseCategory:
+    description: >-
+      Archive-declared pulse category. Membership is carried by Pulse.categories
+      and is independent of the plant component hierarchy.
+    class_uri: facility:PulseCategory
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: >-
+          Composite key as {archive}:{name}, using the full ArchiveEndpoint.id
+          in archive and the complete archive-reported category identity in name.
+      facility_id:
+        description: Owning facility
+        required: true
+        range: Facility
+        annotations:
+          relationship_type: AT_FACILITY
+      archive:
+        description: Archive that declares this category
+        required: true
+        range: ArchiveEndpoint
+        annotations:
+          relationship_type: IN_ARCHIVE
+      name:
+        description: Exact category identity returned by the archive
+        required: true
+      description:
+        description: Archive-declared category description
+
+  Pulse:
+    description: >-
+      Archive pulse with a string external identity and absolute Unix epoch
+      nanosecond bounds. A pulse is not an integer experimental shot number.
+    class_uri: facility:Pulse
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: >-
+          Composite key as {archive}:{name}, using the full ArchiveEndpoint.id
+          in archive and the complete category-qualified archive-reported pulse
+          identity in name. Preserve every category and pulse path segment.
+      facility_id:
+        description: Owning facility
+        required: true
+        range: Facility
+        annotations:
+          relationship_type: AT_FACILITY
+      archive:
+        description: Archive that declares this pulse and its time bounds
+        required: true
+        range: ArchiveEndpoint
+        annotations:
+          relationship_type: IN_ARCHIVE
+      name:
+        description: >-
+          Exact non-numeric or numeric-looking identity returned by the archive,
+          including its category and every pulse path segment.
+        required: true
+      start_ns:
+        description: Absolute start time in Unix epoch nanoseconds
+        required: true
+        range: integer
+      end_ns:
+        description: Absolute end time in Unix epoch nanoseconds
+        required: true
+        range: integer
+      categories:
+        description: Archive-declared category memberships
+        multivalued: true
+        range: PulseCategory
+        annotations:
+          relationship_type: IN_PULSE_CATEGORY
+      description:
+        description: Archive-declared pulse description
+
   DataSource:
     description: >-
       A data source at a facility (hierarchical data container).
@@ -1688,6 +1805,11 @@ classes:
       server_hostname:
         description: Primary server hosting this data source
         range: MDSplusServer
+      archive_endpoint:
+        description: Logical archive endpoint hosting this data source
+        range: ArchiveEndpoint
+        annotations:
+          relationship_type: HOSTED_BY_ARCHIVE
       description:
         description: Data source description
       shot_dependent:

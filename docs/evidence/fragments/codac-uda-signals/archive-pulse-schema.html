@@ -1,0 +1,156 @@
+<section id="archive-pulse-schema-delivery">
+  <h3>Archive endpoints, pulses and facility configuration</h3>
+  <p>The LinkML schemas now represent a logical <code>ArchiveEndpoint</code>,
+  <code>PulseCategory</code> and <code>Pulse</code>, with facility ownership,
+  archive ownership and pulse-category membership. <code>DataSource.archive_endpoint</code>
+  links an archive without requiring an MDSplus server. Endpoint hosts remain
+  private and are absent from graph endpoint records.</p>
+  <p>The product commit is <code>5654dbf8ab0188abd5550ab4c229c76d477eabdb</code>.
+  ITER declares <code>data_systems.codac_uda</code>, its module setup and
+  interpreter, fast and slow readable roles, an excluded operator role, and
+  limits of 100,000 samples, 8,388,608 serialized bytes, 60,000,000,000 ns and
+  30 s per read. No real archive host, variable or pulse identity was added.</p>
+  <table>
+    <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline at <code>1c2476daf9f7c83e4eaa0d56c60fb0d132c05136</code></td><td>31 passed, 2 warnings in 6.18 s; exit 0</td></tr>
+      <tr><td>Generated models</td><td>Graph, data dictionary and facility configuration models built; exit 0</td></tr>
+      <tr><td>Focused gate with the delivered product diff</td><td>59 passed, 2 warnings in 8.32 s; exit 0; no added failures</td></tr>
+      <tr><td>Public facility configurations</td><td>ITER validates with the archive system; JET, JT-60SA and TCV validate with unchanged files</td></tr>
+      <tr><td>Invalid fixture control</td><td>1 failed, 1 warning in 2.49 s; exit 1; operator rejected as a readable role</td></tr>
+    </tbody>
+  </table>
+  <p>The baseline reproduction generated its model directly from the recorded
+  base schema in isolated scratch. Its positive control retained the existing
+  IMAS block, while <code>codac_uda_field_present: False</code> and
+  <code>reserved_config_accepted_and_discarded: True</code> showed the missing
+  typed configuration. The delivered generated model instead refuses the
+  operator role with <code>Input should be 'fast' or 'slow'</code>. All build and
+  positive-gate work ran in separate <code>all_debug</code> jobs; the single
+  invalid-fixture test ran in the assigned worker allocation.</p>
+  <p>The synthetic pulse <code>DEMO:CAMPAIGN/commissioning-alpha</code> round-trips
+  through JSON with start <code>1731600000000000001</code> ns and end
+  <code>1731600002000000003</code> ns, preserving its category and the exact
+  <code>2000000002</code> ns difference.</p>
+  <p>Connection callers must pass the merged public/private data-system block
+  to <code>imas_codex.config.codac_uda.resolve_archive_endpoint</code> before
+  constructing a client. Generated models enforce the readable-role vocabulary
+  and positive budgets; <code>validate_codac_uda_config</code> additionally
+  rejects duplicate roles, absent or excluded readable endpoints, and readable
+  hosts that alias an excluded host. The resolver requires the private operator
+  exclusion and requested host. Public configuration validates with unresolved
+  hosts but cannot yield a connectable endpoint.</p>
+  <p>Durable receipts are <code>baseline-build.log</code>,
+  <code>baseline-tests.log</code>, <code>reproduction.log</code>,
+  <code>head-build.log</code>, <code>head-tests.log</code> and
+  <code>negative-control.log</code> under the assigned run directory. The two
+  positive-gate warnings also occur in the baseline: the disabled pytest cache
+  plugin leaves a cache setting unknown, and a generated description contains
+  a Python escape warning. No graph or archive connection was needed for this
+  schema/configuration gate.</p>
+</section>
+<section id="archive-pulse-schema-review-repairs">
+  <h3>Identity, host-policy ownership and private archive overrides</h3>
+  <p>The repair commit is <code>325b2d9fd9ca9b46fada3f96c31d0cafc4bc8d31</code>.
+  Before repair, added assertions reproduced two failures: the worked pulse
+  expected <code>demo:codac_uda:slow:DEMO:CAMPAIGN/commissioning-alpha</code>
+  but held <code>demo:codac_uda:slow:commissioning-alpha</code>; a private list
+  containing only a fast endpoint discarded the public slow and operator
+  entries, then reported only <code>operator archive must be explicitly excluded</code>.
+  The reproduction receipt records <code>2 failed, 7 passed, 1 warning in 21.39s</code>
+  and <code>EXIT=1</code>. Its seven passing cases establish that the config
+  module already compared IP addresses exactly.</p>
+  <p><code>Pulse.id</code> now names its actual slots:
+  <code>{archive}:{name}</code>, where <code>archive</code> is the full endpoint
+  ID and <code>name</code> is the complete category-qualified identity returned
+  by the archive. Category IDs use their own <code>archive</code> and
+  <code>name</code> slots too. The worked pulse and the collision regression
+  retain every category and pulse path segment.</p>
+  <table>
+    <thead><tr><th>Synthetic pulse name</th><th>Distinct serialized model ID</th></tr></thead>
+    <tbody>
+      <tr><td><code>DEMO:CAMPAIGN-ALPHA/commissioning-alpha</code></td><td><code>demo:codac_uda:slow:DEMO:CAMPAIGN-ALPHA/commissioning-alpha</code></td></tr>
+      <tr><td><code>DEMO:CAMPAIGN-BETA/commissioning-alpha</code></td><td><code>demo:codac_uda:slow:DEMO:CAMPAIGN-BETA/commissioning-alpha</code></td></tr>
+    </tbody>
+  </table>
+  <p><code>imas_codex.config.codac_uda.archive_host_key</code> is the production
+  owner of host comparison and is shared by endpoint policy validation.
+  It compares DNS short aliases after case and trailing-dot normalization,
+  and compares complete normalized IP addresses. The regression covers a
+  hostname, a short alias, equal and distinct IPv4 addresses sharing a first
+  octet, and equal and distinct IPv6 addresses. Thus an identical reserved
+  address is refused while a different address remains readable. The prototype
+  reader was left unchanged; production callers import the config-owned rule.</p>
+  <p><strong>Merge decision: retain wholesale list replacement.</strong>
+  A private <code>archives</code> list must redeclare every required role and
+  its policy, including <code>operator</code> with <code>excluded: true</code>.
+  Supplying only hosts does not inherit the public list entries or their flags.
+  The error now explains this merge contract instead of leaving a partial
+  override looking like an unexplained policy fault. Tests exercise the actual
+  facility dictionary merge for a partial role list, a complete host-only list
+  missing its exclusion flags, and a complete policy-bearing list that resolves
+  both readable endpoints while still refusing the operator role.</p>
+  <table>
+    <thead><tr><th>Repair measure</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Generated models at the repair commit</td><td>Graph, data dictionary and facility configuration models built; exit 0</td></tr>
+      <tr><td>Focused schema and configuration gate</td><td>70 passed, 2 warnings in 16.77s; exit 0; both reproduced failures resolved</td></tr>
+      <tr><td>Operator-readable fixture mutation</td><td>1 failed, 1 warning in 16.81s; exit 1; generated validation still refuses operator as a readable role</td></tr>
+    </tbody>
+  </table>
+  <p>The repair build, positive gate and invalid-fixture control ran in a separate
+  <code>all_debug</code> job. Receipts are <code>repair-reproduction.log</code>,
+  <code>repair-build.log</code>, <code>repair-tests.log</code> and
+  <code>repair-negative-control.log</code> in the assigned run directory.
+  The four public facility configurations still validate and their files have
+  no changes from the reviewed delivery. The prototype has no diff either.
+  All host, category and pulse examples added here are invented.</p>
+</section>
+<section id="archive-pulse-schema-enforced-construction">
+  <h3>Enforced pulse construction</h3>
+  <p>The construction repair is <code>2636cdd0a1e55ae232f7f1c8b1157793effb8770</code>.
+  The reviewed generated model accepted the truncated ID
+  <code>demo:codac_uda:slow:commissioning-alpha</code> while preserving the full
+  name <code>DEMO:CAMPAIGN/commissioning-alpha</code>. The reproduction receipt
+  records <code>positive_control.full_archive_name_preserved: True</code> and
+  the different canonical ID
+  <code>demo:codac_uda:slow:DEMO:CAMPAIGN/commissioning-alpha</code>.</p>
+  <p><code>imas_codex.config.codac_uda.create_archive_pulse</code> is the
+  scanner-facing construction and validation boundary. It derives the ID from
+  the archive ID and complete archive-reported name, preserves that name byte
+  for byte, requires its category and pulse path, and refuses a supplied ID
+  that disagrees. Scanner callers construct records through this function;
+  direct construction of the generated <code>Pulse</code> remains structural
+  validation and does not enforce this cross-field identity rule.</p>
+  <p>The collision regression now calls the project constructor without supplying
+  either ID. The function must produce distinct IDs for the two synthetic
+  categories sharing <code>commissioning-alpha</code>. Separate tests require
+  refusal of a final-segment-only ID and an ID from a different archive, accept
+  a matching supplied ID, and reject unqualified or incomplete pulse names.</p>
+  <p>Correction to the earlier host-policy integration wording: configuration
+  validation currently calls <code>archive_host_key</code>. Packaged-reader
+  adoption is not established by this node, and the module documentation now
+  states its actual caller. No prototype or packaged-reader file was edited.</p>
+  <table>
+    <thead><tr><th>Construction measure</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Focused schema/configuration gate</td><td>76 passed, 1 warning in 10.75s; exit 0</td></tr>
+      <tr><td>Truncated supplied ID</td><td>Refused with “pulse id disagrees with archive and full archive-reported name”; canonical ID positive control succeeds</td></tr>
+      <tr><td>Mutation: derive from final segment only</td><td>1 failed, 1 warning in 1.79s; exit 1; collision test observes one ID instead of two</td></tr>
+      <tr><td>Mutation: disable supplied-ID refusal</td><td>1 failed, 1 warning in 1.40s; exit 1; refusal test reports DID NOT RAISE</td></tr>
+      <tr><td>Operator-readable fixture mutation</td><td>1 failed, 1 warning in 6.28s; exit 1; operator remains refused</td></tr>
+    </tbody>
+  </table>
+  <p>The focused gate and all controls ran in a separate <code>all_debug</code>
+  job at the construction repair commit. Receipts are
+  <code>pulse-construction-reproduction.log</code>,
+  <code>construction-tests.log</code>, <code>pulse-id-refusal.log</code>,
+  <code>pulse-derivation-mutation.log</code>,
+  <code>pulse-id-refusal-mutation.log</code> and
+  <code>construction-operator-control.log</code> in the assigned run directory.
+  Mutation receipts name the imported scratch module and resolved working
+  directory; each mutation fails a test that passes at the unmodified head.
+  Schema files were unchanged, and the focused gate confirms generated-model
+  currency and all four public facility configurations. All new identities
+  are synthetic.</p>
+</section>
