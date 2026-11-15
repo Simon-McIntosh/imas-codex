@@ -59,6 +59,16 @@
       "note": "Section 9 now waits on sections 4, 6 and 7, and its counts are taken after the last of them lands; it no longer claims the catalogue plan's private store, which is not in the graph.",
       "reason": "",
       "when": "2026-11-15T10:47:25.330424+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "The follow-up now says section 2 is buildable first and that section 5 waits on the catalogue plan's section 12.",
+      "reason": "",
+      "when": "2026-11-15T10:47:30.016157+00:00"
     }
   ],
   "responses": {
@@ -70,6 +80,15 @@
       "note": "Section 9 now waits on sections 4, 6 and 7, and its counts are taken after the last of them lands; it no longer claims the catalogue plan's private store, which is not in the graph.",
       "reason": "",
       "when": "2026-11-15T10:47:25.330424+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "note": "The follow-up now says section 2 is buildable first and that section 5 waits on the catalogue plan's section 12.",
+      "reason": "",
+      "when": "2026-11-15T10:47:30.016157+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261115T101821491594-plan-review-of-iter-signal-context-and-enrichment.json",
