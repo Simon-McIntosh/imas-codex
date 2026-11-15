@@ -75,6 +75,16 @@
       "note": "Where-this-starts now counts three script definitions and one cross-script importer; section 2 requires that no script defines or imports its own check.",
       "reason": "",
       "when": "2026-11-15T22:31:46.470129+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "finding": "reuse_search-2",
+      "note": "The one-definition criterion is narrowed to scripts/ and imas_codex/; the thirteen frozen record scripts under docs/ are named as out of scope.",
+      "reason": "",
+      "when": "2026-11-15T22:31:53.317729+00:00"
     }
   ],
   "responses": {
@@ -86,6 +96,15 @@
       "note": "Where-this-starts now counts three script definitions and one cross-script importer; section 2 requires that no script defines or imports its own check.",
       "reason": "",
       "when": "2026-11-15T22:31:46.470129+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "2e9b0d44e44f7fabbe1066137550136188f4c2a8",
+      "commit_basis": "edit",
+      "note": "The one-definition criterion is narrowed to scripts/ and imas_codex/; the thirteen frozen record scripts under docs/ are named as out of scope.",
+      "reason": "",
+      "when": "2026-11-15T22:31:53.317729+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/figure-scripts-use-the-shared-save-function/r-20261115T204759308091-plan-review-of-figure-scripts-use-the-shared-save-function.json",
