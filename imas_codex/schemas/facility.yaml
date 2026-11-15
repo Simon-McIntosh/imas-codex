@@ -43,6 +43,14 @@ imports:
 # ======================================================================
 
 enums:
+  ArchiveGroupingState:
+    description: Whether an archive selector supplies a complete component and field key
+    permissible_values:
+      grouped:
+        description: Complete parsed name belongs to a component with a field pattern
+      ungrouped:
+        description: Incomplete or nonconforming name supplies no grouping membership
+
   ArchiveMetadataState:
     description: Outcome of the archive type and full-attribute metadata requests
     permissible_values:
@@ -1731,6 +1739,47 @@ classes:
       parse_provenance:
         description: Parser rule provenance; does not assert engineering identity
 
+      archive_member_count:
+        range: integer
+        description: Distinct catalogued archive variables with this complete component prefix
+      archive_field_pattern:
+        range: ArchiveFieldPattern
+        description: Exact set of control-function and variable-token pairs exposed by this component
+        annotations:
+          relationship_type: HAS_ARCHIVE_FIELD_PATTERN
+
+  ArchiveFieldPattern:
+    description: >-
+      A facility-scoped exact field set shared by candidate archive components.
+      Fields retain control-function numbers and variable tokens without interpreting them.
+    class_uri: facility:ArchiveFieldPattern
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Facility plus archive_field_pattern plus SHA256 of the sorted field set
+      facility_id:
+        required: true
+        range: Facility
+        annotations:
+          relationship_type: AT_FACILITY
+      fields:
+        required: true
+        multivalued: true
+        description: Sorted unique control-function and variable-token pairs separated by a hyphen
+      field_count:
+        required: true
+        range: integer
+        description: Number of distinct fields in the pattern
+      component_count:
+        range: integer
+        description: Number of components exposing this field set in the catalogue snapshot
+      member_count:
+        range: integer
+        description: Number of variables across components exposing this field set
+      description:
+        description: Meaning of the shared fields when established from linked context
+
   ArchiveEndpoint:
     description: >-
       A named archive endpoint, independent of MDSplus infrastructure.
@@ -3001,6 +3050,16 @@ classes:
         description: Syntactically derived candidate, never a verified identity
         annotations:
           relationship_type: CANDIDATE_PLANT_COMPONENT
+      archive_grouping_state:
+        range: ArchiveGroupingState
+        description: Explicit grouped or ungrouped result from the catalogue grouping pass
+      archive_grouping_reason:
+        description: Why an incomplete or nonconforming selector has no grouping membership
+      archive_component:
+        range: PlantComponent
+        description: Component group derived only from a completely parsed archive selector
+        annotations:
+          relationship_type: IN_ARCHIVE_COMPONENT
       sampling_mode:
         description: Archive-established sampling semantics, unknown when not established
         range: ArchiveSamplingMode
