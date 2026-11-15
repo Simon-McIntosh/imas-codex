@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T12:56:48.134Z",
+  "dispatched_at": "2026-11-15T12:37:37Z",
+  "figures": [
+    {
+      "caption": "Every valid name, split by how its copied list reads against its producer edges. The upper row is the whole population; the lower row is the number that disagrees, drawn to its own scale so the 11 names that disagree in both directions are visible rather than a hairline.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-copy-versus-edges.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T123540057127-review-of-scc-sources-read-from-one-place-a6147082962d-figure/image-0.png",
+      "rubric_verdicts": {
+        "contrast": "Pass. Every value, axis and legend label is #1a1a1a on white (about 16:1), including the '11 both directions' label that names the palest segment.",
+        "data_ink": "Pass. Four flat fills and one leader line; the only other ink is the shared scale, two left spines, two y labels and one four-entry legend.",
+        "decoration": "Pass. No grid, no background fill, no gradient, no hatch; the top and right spines are absent.",
+        "label_collision": "Pass. Measured on the render: no ink within 20 px of any canvas edge (ink spans x 21-1379, y 24-698 of 1400x720), so nothing is clipped; the four legend entries sit clear of each other, and the '11 both directions' label and its leader sit in white space above and right of the bar.",
+        "legibility": "Pass. A 4,853-name stacked bar over two panels: the agreement and the disagreement are printed in ink under the upper bar (4,099 agree with the edges / 754 disagree), and the lower panel splits the 754 (580 omit a source / 163 name an extra path) with the 11 'both directions' pulled above the bar by a short leader. Every number the section argues is legible without the legend. Caveat, visible in the render: the two panels share one x-axis label while their tick rows read 0-1,000-2,000-3,000-4,000 above and 0-100-...-700 below, and the y labels ('all 4,853 valid names' / 'the 754 that disagree') are what mark the lower panel as a zoom; the caption states the scale change.",
+        "table_form": "Pass. Five counts could be table rows, but the bar carries the part-to-whole proportion (754 of 4,853 agree with the edges for 4,099) and the lower panel carries the within-disagreement split, neither of which a count table shows."
+      }
+    },
+    {
+      "caption": "The disagreement population. The 85 are the names whose copy is absent while a data-dictionary path produces them; the 501 are the same disagreement over derived and other producers. Read on the live graph on 2026-11-15, before the change.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-reader-agreement.svg",
+      "rendered_png": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T123540057127-review-of-scc-sources-read-from-one-place-a6147082962d-figure/image-1.png",
+      "rubric_verdicts": {
+        "contrast": "Pass. Values and labels are #1a1a1a on white; both fills (#1f4f6b and #8fb6cd) are data only, with no text on top of them.",
+        "data_ink": "Pass. Two solid flat bars, two value labels, one x label and two y tick labels; no legend, correctly, because the axis names each row.",
+        "decoration": "Pass. No grid, background fill or frame beyond the left and bottom spines. The two shades separate rows the axis already names, so the colour is redundant rather than distracting.",
+        "label_collision": "Pass. Measured on the render: ink spans x 18-1379 and y 20-698 of 1400x720, so nothing is clipped, and the value labels sit clear of the bar ends in open white with no text touching another label or the bars' interiors except where intended.",
+        "legibility": "Pass. Two rows named on the y axis ('DD-path producer', 'every other producer') with the count printed just past each bar end (85, 501); the roughly six-to-one disproportion reads at a glance and the x axis names the count.",
+        "table_form": "Pass. Two counts could be two table rows, but bar length carries the 'one group is about six times the other' claim the caption makes, which a pair of numbers in a table would flatten."
+      }
+    }
+  ],
+  "findings": [
+    {
+      "disposition": "exempted: read-only review; the figure is still readable on its own because each row is named and the caption calls the population 'The disagreement population'. A redraw could name it as the live names whose copied list is empty, which is what the bars sum to.",
+      "file": "docs/figures/sn-catalog-consistency/scc-sources-read-from-one-place/scc-reader-agreement.svg",
+      "id": "ff207f8bccc",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The x-axis label states the population as 'live names whose copy omits a source its edges give' and the two bars sum to 586, but the neighbouring figure uses that same wording for a class of 580 (out of 4,853 valid names) and the page prose calls the class 591 (580 plus the 11 that disagree in both directions). The label never says this figure counts a different universe - the 3,266 live names whose copied list is empty - so a reader moving between the two figures finds three numbers for what looks like one class and no way to reconcile them from the figures alone."
+    }
+  ],
+  "notes": [
+    "Read-only review: no figure, caption, script or other file was edited, created, moved, deleted, redrawn, relabelled or reformatted by this review. Both verdicts were formed from the two named rendered PNGs opened with this review's own Read tool (plus crops of those same PNGs for close inspection); no SVG was opened, read, listed, searched, rendered or git-shown, and no other image was opened.",
+    "Both figures reconcile with the evidence fragment at the reviewed head: 4,099 + 580 + 163 + 11 = 4,853, 580 + 163 + 11 = 754, and 85 + 501 = 586.",
+    "Neither caption merely repeats a title: each states what the classes are and what the reader should take from them.",
+    "The canonical record at this reviewed run had previously held the review at head d12231ef2, whose figures render differently (counts printed inside the segments, a heading sentence inside the second figure). That record is preserved byte-identical at ...figure.at-d12231ef2dc7cef060028176f61047a997e1492d.json, and this record supersedes it at the canonical path for head a6147082, whose redrawn pair is what was reviewed here."
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261115T123540057127-review-of-scc-sources-read-from-one-place-a6147082962d-figure",
+  "reviewed_base_sha": "627f130454280df801a52c61af57cbcb4cde08b0",
+  "reviewed_head_sha": "a6147082962d4faf59dfc68ff05c49ba6c02dfc6",
+  "reviewed_run_id": "r-20261114T211624671239-scc-sources-read-from-one-place",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T12:58:53.437243+00:00",
+  "total": null
+}
