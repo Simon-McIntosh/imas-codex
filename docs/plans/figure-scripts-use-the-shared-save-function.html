@@ -7,7 +7,7 @@
   <meta name="reckon-type" content="plan">
   <meta name="plan-slug" content="figure-scripts-use-the-shared-save-function">
   <meta name="plan-title" content="Figure scripts save through the shared, checked save function">
-  <meta name="plan-summary" content="Every figure script in the repository saves through one function that refuses clipped or overlapping text, and that function exports correctly at any canvas size">
+  <meta name="plan-summary" content="Every figure script saves through one function that refuses clipped or overlapping text and exports correctly at any canvas size">
   <meta name="plan-status" content="draft">
   <meta name="plan-roi" content="medium">
   <meta name="plan-effort-hours" content="5.0">
@@ -32,7 +32,7 @@
       <p class="lead">The plotting package has one save function that refuses to write a figure whose text is clipped or overlapping. Ten older figure scripts still save directly and carry their own copies of that check, or none. This plan moves them onto the one function, after correcting two defects its reviews found.</p>
     </header>
 
-    <h2 id="context">Where this starts</h2>
+    <h3>Where this starts</h3>
     <p>The save function landed with the signal plotting work in <code>imas_codex/plotting/</code>. Its independent reviews recorded that the text check is now a fourth copy of a refusal that two figure scripts already implement for themselves, that the exported width is fixed while the height follows the figure, so a figure drawn at another width is exported with a distorted aspect ratio, and that a four-entry legend wraps onto a second row. Ten tracked scripts under <code>scripts/</code> call the plotting library's save directly: six named for figures and four for JET plots.</p>
 
     <h2 id="s1">§1 — The save function exports a figure of any size without distortion</h2>
