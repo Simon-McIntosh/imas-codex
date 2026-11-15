@@ -532,7 +532,7 @@ def mode_build(args) -> None:
             "settled_moved": settled_moved,
             "upheld": sum(1 for row in rows if row["dispute"] == DISPUTE_UPHELD),
         },
-        "agreement_controls": sum(
+        "fresh_reader_agreements": sum(
             1 for row in rows if row["readings"] and not row["dispute"]
         ),
     }
