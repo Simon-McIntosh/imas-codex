@@ -71,6 +71,13 @@
       "note": "plan-section-depends-on carries s10 waiting on section 2, whose route its sentences are held and rendered through.",
       "reason": "",
       "when": "2026-11-15T17:23:22.858327+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "Section 9 is landed and closed. Its done-when is left as the rule that was written before the measurement; the lead's ruling that set its false-hold clause aside for this measurement is recorded as a dated comment on the section beside the closing comment, which is where a later reader finds why the verdict differs from the written rule. Rewriting a landed section's endpoint to match its outcome would hide that a ruling overrode it.",
+      "when": "2026-11-15T17:23:30.804438+00:00"
     }
   ],
   "responses": {
@@ -82,6 +89,12 @@
       "note": "Section 6's first clause no longer accepts a list of divergent families: it requires one wording per species family as section 10 delivers it, with only the members section 10 names as exceptions listed by name. The list-with-reason route remains for operator forms only.",
       "reason": "",
       "when": "2026-11-15T17:23:09.481469+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Section 9 is landed and closed. Its done-when is left as the rule that was written before the measurement; the lead's ruling that set its false-hold clause aside for this measurement is recorded as a dated comment on the section beside the closing comment, which is where a later reader finds why the verdict differs from the written rule. Rewriting a landed section's endpoint to match its outcome would hide that a ruling overrode it.",
+      "when": "2026-11-15T17:23:30.804438+00:00"
     },
     "wiring-1": {
       "action": "acted",
