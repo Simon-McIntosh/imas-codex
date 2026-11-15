@@ -1,0 +1,112 @@
+<article id="variable-name-component-parse-evidence">
+  <h3>Every catalogued archive selector has a candidate name parse</h3>
+  <p>The all-catalogue pass at <code>2026-11-15T08:58:42Z</code> updated all
+    <strong>200 archive signals</strong> present at that time: 200 parsed,
+    zero partly parsed and zero not conforming. It changed zero original selectors
+    and found zero component links unsupported by the parser. The pass used
+    implementation commit <code>720b60b7568f413901c081e37eb1954b64bdabb5</code>.
+    No facility or cohort filter restricted its population.</p>
+  <p><strong>Interpretation remains unconfirmed.</strong> IDM <code>2UT8SH</code>
+    was unavailable to this worker. The rules below were inferred from the
+    catalogued names and archive-supplied metadata, as authorised for this node.
+    Every signal records <code>name_parse_rule_status=unconfirmed</code> and
+    provenance naming that limitation. A <code>parsed</code> outcome means that
+    all tokens match this grammar; it does not certify compliance with the IDM
+    document, a PBS code, an engineering identity or the meaning of an abbreviation.</p>
+  <table>
+    <thead><tr><th>Independent graph measurement</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Positive control: all FacilitySignal nodes / native selectors / archive bindings</td><td>62,183 / 62,183 / 200</td></tr>
+      <tr><td>All archive signals at the pass / acknowledged writes</td><td>200 / 200</td></tr>
+      <tr><td>Parsed / partly parsed / not conforming</td><td>200 / 0 / 0; sum = 200</td></tr>
+      <tr><td>Changed original selectors / unsupported candidate links</td><td>0 / 0</td></tr>
+      <tr><td>Distinct full component prefixes / control-function tokens / variable suffixes</td><td>2 / 5 / 40</td></tr>
+      <tr><td>Candidate hierarchy nodes / parent links</td><td>5 / 4; scalar parent properties agree with every parent relationship</td></tr>
+      <tr><td>Archive-provided source descriptions</td><td>All 200 say “Signal value”; no token semantics are established by those descriptions</td></tr>
+      <tr><td>Hand-checked sample / invented equivalents in this record</td><td>20 / 20</td></tr>
+    </tbody>
+  </table>
+  <h4 id="variable-name-component-parse-rules">Observed rules and limits</h4>
+  <table>
+    <thead><tr><th>Observation and source</th><th>Implemented interpretation</th><th>Confirmation</th></tr></thead>
+    <tbody>
+      <tr><td>The native catalogue selectors have a colon after a four-token, hyphen-separated prefix.</td><td>The first prefix token is a candidate plant-system code; the complete prefix is a candidate component code. Successive prefix truncations give candidate parents. The parser permits two or more uppercase alphanumeric tokens, each beginning with a letter.</td><td>Token boundaries observed; plant-system meaning, component meaning, engineering ancestry and generalisation beyond four levels unconfirmed.</td></tr>
+      <tr><td>After the colon, the catalogue has a letter-plus-digit token followed by a hyphen.</td><td>Keep that complete token as a candidate control function, without translating its letters or number.</td><td>Lexical structure observed; control-function interpretation and allowed letters or number widths unconfirmed.</td></tr>
+      <tr><td>The remaining catalogue suffixes contain uppercase letters, digits and sometimes an underscore.</td><td>Keep the entire variable suffix. Do not split underscore segments into additional identity claims. The grammar permits internal underscores and refuses additional hyphens in the suffix.</td><td>Observed character classes supported; permitted suffix vocabulary, lengths and delimiter variants unconfirmed.</td></tr>
+      <tr><td>The archive metadata supplies generic wording and no component or function mapping.</td><td>Do not infer verified identity, physical meaning or a PBS number. Persist only CANDIDATE_PLANT_COMPONENT links.</td><td>No semantic confirmation available.</td></tr>
+    </tbody>
+  </table>
+  <p>A single colon and a valid prefix establish a candidate component boundary.
+    An incomplete right side gives <code>partly_parsed</code>, retaining only
+    recognised tokens. Ambiguous boundaries or malformed prefixes give
+    <code>not_conforming</code>, no component property and no candidate link.
+    Reparsing clears a stale candidate link. Input is never trimmed, case-folded
+    or repaired; the original accessor stays byte for byte unchanged.</p>
+  <h4 id="variable-name-component-parse-samples">Twenty sampled splits checked by hand</h4>
+  <p>Twenty evenly spaced records were selected from the ID-ordered 200-signal
+    snapshot. Each original colon boundary, all four prefix segments, complete
+    function token and complete suffix were checked by inspection. The table uses
+    invented equivalents, preserving both distinct component prefixes and all five
+    sampled function identities. The private original-to-invented mapping remains
+    in the run directory. All rows have candidate system <code>DEMO</code> and
+    outcome <code>parsed</code>. “Pump” and “valve” below are invented labels and
+    convey no information about the real components. These checks establish token
+    splits against the observed structure; confirmation against IDM remains unavailable.</p>
+  <table>
+    <thead><tr><th>Sample</th><th>Invented selector</th><th>Expected component code</th><th>Expected function</th><th>Expected variable</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>DEMO-COOL-LOOP-PUMP:PCV9001-READ_EN</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9001</td><td>READ_EN</td></tr>
+      <tr><td>2</td><td>DEMO-COOL-LOOP-PUMP:PCV9001-LIMITLOW</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9001</td><td>LIMITLOW</td></tr>
+      <tr><td>3</td><td>DEMO-COOL-LOOP-PUMP:PCV9001-TRIGGER</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9001</td><td>TRIGGER</td></tr>
+      <tr><td>4</td><td>DEMO-COOL-LOOP-PUMP:PCV9001-OUTPUTS</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9001</td><td>OUTPUTS</td></tr>
+      <tr><td>5</td><td>DEMO-COOL-LOOP-PUMP:PCV9002-READ_EN</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9002</td><td>READ_EN</td></tr>
+      <tr><td>6</td><td>DEMO-COOL-LOOP-PUMP:PCV9002-LIMITLOW</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9002</td><td>LIMITLOW</td></tr>
+      <tr><td>7</td><td>DEMO-COOL-LOOP-PUMP:PCV9002-TRIGGER</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9002</td><td>TRIGGER</td></tr>
+      <tr><td>8</td><td>DEMO-COOL-LOOP-PUMP:PCV9002-OUTPUTS</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9002</td><td>OUTPUTS</td></tr>
+      <tr><td>9</td><td>DEMO-COOL-LOOP-PUMP:PCV9003-READ_EN</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9003</td><td>READ_EN</td></tr>
+      <tr><td>10</td><td>DEMO-COOL-LOOP-PUMP:PCV9003-LIMITLOW</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9003</td><td>LIMITLOW</td></tr>
+      <tr><td>11</td><td>DEMO-COOL-LOOP-PUMP:PCV9003-TRIGGER</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9003</td><td>TRIGGER</td></tr>
+      <tr><td>12</td><td>DEMO-COOL-LOOP-PUMP:PCV9003-OUTPUTS</td><td>DEMO-COOL-LOOP-PUMP</td><td>PCV9003</td><td>OUTPUTS</td></tr>
+      <tr><td>13</td><td>DEMO-COOL-LOOP-VALVE:PCV9004-READ_EN</td><td>DEMO-COOL-LOOP-VALVE</td><td>PCV9004</td><td>READ_EN</td></tr>
+      <tr><td>14</td><td>DEMO-COOL-LOOP-VALVE:PCV9004-LIMITLOW</td><td>DEMO-COOL-LOOP-VALVE</td><td>PCV9004</td><td>LIMITLOW</td></tr>
+      <tr><td>15</td><td>DEMO-COOL-LOOP-VALVE:PCV9004-TRIGGER</td><td>DEMO-COOL-LOOP-VALVE</td><td>PCV9004</td><td>TRIGGER</td></tr>
+      <tr><td>16</td><td>DEMO-COOL-LOOP-VALVE:PCV9004-OUTPUTS</td><td>DEMO-COOL-LOOP-VALVE</td><td>PCV9004</td><td>OUTPUTS</td></tr>
+      <tr><td>17</td><td>DEMO-COOL-LOOP-VALVE:PCV9005-READ_EN</td><td>DEMO-COOL-LOOP-VALVE</td><td>PCV9005</td><td>READ_EN</td></tr>
+      <tr><td>18</td><td>DEMO-COOL-LOOP-VALVE:PCV9005-LIMITLOW</td><td>DEMO-COOL-LOOP-VALVE</td><td>PCV9005</td><td>LIMITLOW</td></tr>
+      <tr><td>19</td><td>DEMO-COOL-LOOP-VALVE:PCV9005-TRIGGER</td><td>DEMO-COOL-LOOP-VALVE</td><td>PCV9005</td><td>TRIGGER</td></tr>
+      <tr><td>20</td><td>DEMO-COOL-LOOP-VALVE:PCV9005-OUTPUTS</td><td>DEMO-COOL-LOOP-VALVE</td><td>PCV9005</td><td>OUTPUTS</td></tr>
+    </tbody>
+  </table>
+  <h4 id="variable-name-component-parse-validation">Failure evidence and validation</h4>
+  <p>The missing behavior was reproduced on base
+    <code>221b8473a8d95f828b29cb35e582a80d4de0241a</code> with an invented selector:
+    <code>assert getattr(signal, "plant_system_code", None) == "DEMO"</code>
+    failed with <code>AssertionError: assert None == 'DEMO'</code>.
+    The focused gate then passed <strong>71 tests in 8.38 s</strong>, including
+    40 tests in the parser's focused file, twenty explicit invented splits,
+    seven non-conforming names, six partial forms and scanner regressions.
+    Disposable-graph tests passed <strong>4 tests in 34.76 s</strong>, exercising
+    actual Cypher, two facilities, separate cohort identities, all three outcomes,
+    hierarchy idempotence, stale-link clearing and stale-selector refusal.</p>
+  <p>The negative input <code>arbitrary text</code> receives
+    <code>not_conforming</code>, no component property and no candidate link.
+    A deliberate in-memory mutation instead returns an invented parsed component
+    for that input. Its previously passing test fails with
+    <code>parsed != not_conforming</code>: <strong>1 failed, 6 passed in 1.83 s</strong>,
+    <code>EXIT=1</code>. No mutation was applied to repository source or to the live
+    graph. Thus zero live non-conforming outcomes reflects the catalogued population,
+    not an unexercised refusal path.</p>
+  <p>All catalogue passes, model regeneration, passing focused gates and graph-marked
+    gates ran on <code>all_debug</code>. The initial stale-model collection failure
+    was repaired by rebuilding only the worktree's gitignored models; none is
+    staged. Full logs and private data are under
+    <code>~/.config/reckon/crew/runs/r-20261115T020719811150-variable-name-component-parse/</code>:
+    <code>baseline-reproduced.log</code>, <code>focused.log</code>,
+    <code>graph.log</code>, <code>negative-control.log</code>,
+    <code>catalogue.log</code>, <code>catalogue-receipt.json</code>,
+    <code>catalogue-before-private.json</code>, <code>catalogue-after-private.json</code>
+    and <code>hand-checked-samples-private.json</code>. Logs identify the revision,
+    worktree, command and exit status; the passing gate records source-file hashes.
+    The coordinator owns integration, merged-head verification and any later
+    confirmation against the naming convention.</p>
+</article>
