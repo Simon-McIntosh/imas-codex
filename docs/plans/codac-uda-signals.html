@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="19">
+<meta name="plan-version" content="20">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -105,33 +105,33 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
-<div class="r-dec" data-key="github-repository-rename" data-choice="" data-by="" data-when="" data-sections="s10,s11">
+<div class="r-dec" data-key="github-repository-rename" data-choice="both" data-by="lead" data-when="2026-11-15T08:00:32+00:00" data-sections="s10,s11">
     <p class="r-dec-q">Are the fork and the iterorganization upstream repository renamed, and who does it?</p>
     <p class="r-dec-ctx">A repository rename is outward-facing and needs the organisation&#x27;s agreement. GitHub redirects the old address, but release automation, registry ownership and badges move with it.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="both">Rename both</button>
+      <button class="r-opt chosen" data-value="both">Rename both</button>
       <button class="r-opt" data-value="fork-only">Fork only for now</button>
       <button class="r-opt" data-value="neither">Keep both names</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">Both the fork and the organisation repository are renamed; the lead reports that agreement with the organisation has been reached. Container images do not move with a repository rename and are migrated separately.</p>
     </div>
-<div class="r-dec" data-key="import-package-name" data-choice="" data-by="" data-when="" data-sections="s10,s11">
+<div class="r-dec" data-key="import-package-name" data-choice="rename-package" data-by="lead" data-when="2026-11-15T08:00:32+00:00" data-sections="s10,s11">
     <p class="r-dec-q">Does the Python import package become iter_codex , or does only the user-facing name change?</p>
     <p class="r-dec-ctx">The package name is in 138,394 places and in every in-flight worktree. Changing only the distribution, command and MCP key is far smaller, and leaves an import name that no longer matches the product.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="rename-package">Rename the package too</button>
+      <button class="r-opt chosen" data-value="rename-package">Rename the package too</button>
       <button class="r-opt" data-value="user-facing-only">User-facing names only</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The import package becomes iter_codex, in the last stage of the rename at a quiet window, so the import name matches the product. The stored graph templates that import the old name migrate with it.</p>
     </div>
-<div class="r-dec" data-key="mcp-server-names" data-choice="" data-by="" data-when="" data-sections="s10,s11">
+<div class="r-dec" data-key="mcp-server-names" data-choice="iter-cx-and-imas-dd" data-by="lead" data-when="2026-11-15T08:00:32+00:00" data-sections="s10,s11">
     <p class="r-dec-q">What do the two servers advertise after the rename?</p>
     <p class="r-dec-ctx">Today the client key is imas-cx and the data-dictionary server is imas-dd . The data-dictionary server is about IMAS and both sessions consulted say it keeps its name.</p>
     <p class="r-dec-opts">
-      <button class="r-opt" data-value="iter-cx-and-imas-dd">iter-cx for the full server, imas-dd unchanged</button>
+      <button class="r-opt chosen" data-value="iter-cx-and-imas-dd">iter-cx for the full server, imas-dd unchanged</button>
       <button class="r-opt" data-value="iter-cx-and-iter-dd">iter-cx and iter-dd</button>
       </p>
-    <p class="r-dec-rat"></p>
+    <p class="r-dec-rat">The full server advertises iter-cx. The data-dictionary server keeps imas-dd because it serves the IMAS data model.</p>
     </div>
 </section>
 
@@ -162,6 +162,9 @@
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T021249205435-archive-pulse-schema" data-who="reckon-build" data-when="2026-11-15T04:48:08Z">
     <div class="r-comment-body"><p>Added create_archive_pulse as the scanner-facing ID derivation and validation boundary, replaced the self-supplied-ID collision example with constructor-driven coverage and corrected host-policy documentation to name its actual config-validation caller; 76 focused tests pass, a truncated supplied ID is refused, and pulse derivation/refusal mutations each fail a test that passes at head. Operator-readable configuration remains refused. Evidence: docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html#archive-pulse-schema-enforced-construction.</p></div>
 </div>
+<div class="r-comment" data-section="s4" data-id="c-run-r-20261115T072656364475-review-of-archive-variable-catalogue-2fb760aab3e1" data-who="reckon-build" data-when="2026-11-15T07:41:44.124Z">
+    <div class="r-comment-body"><p>independent review of r-20261115T020713980531-archive-variable-catalogue at 2fb760aab3e1 reads parsed, scoring goal_fidelity 18, evidence 17, scope_discipline 15, durability 15, fit 16, reuse 12, with zero added failures and four non-blocking findings.</p></div>
+</div>
 <div class="r-comment" data-section="s5" data-id="c-run-r-20261115T062813562374-review-of-archive-signal-loader-40c2d243330d" data-who="reckon-build" data-when="2026-11-15T06:51:22.401Z">
     <div class="r-comment-body"><p>review of r-20261115T020715473645-archive-signal-loader at 40c2d243330d711419df56bd836b59de2be399ee scores goal_fidelity 19, evidence 17, scope_discipline 17, durability 17, fit 18, reuse 19 (total 107/120), added_failure_count 0 with no added failure ids, and records two non-blocking findings.</p></div>
 </div>
@@ -170,9 +173,6 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-run-r-20261115T021326896806-current-name-consumer-inventory" data-who="reckon-build" data-when="2026-11-15T02:53:36Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html#current-name-consumer-inventory — Read-only inventory of eight surfaces with commands; 5 units, 2 scheduler services, 175 bin files, 53 root entries, 11 GHCR package identities, 3 external MCP definitions, 28 distinct node values across 11 nodes plus 17 historical relationship errors, and 23 reckon pointers; six predeclared controls passed; Azure explicitly not measured; recommendations fork-only, rename-package after at-rest gate, iter-cx-and-imas-dd; no rename or decision lock.</p></div>
-</div>
-<div class="r-comment" data-section="s4" data-id="c-run-r-20261115T072656364475-review-of-archive-variable-catalogue-2fb760aab3e1" data-who="reckon-build" data-when="2026-11-15T07:41:44.124Z">
-    <div class="r-comment-body"><p>independent review of r-20261115T020713980531-archive-variable-catalogue at 2fb760aab3e1 reads parsed, scoring goal_fidelity 18, evidence 17, scope_discipline 15, durability 15, fit 16, reuse 12, with zero added failures and four non-blocking findings.</p></div>
 </div>
 </section>
 </main>
