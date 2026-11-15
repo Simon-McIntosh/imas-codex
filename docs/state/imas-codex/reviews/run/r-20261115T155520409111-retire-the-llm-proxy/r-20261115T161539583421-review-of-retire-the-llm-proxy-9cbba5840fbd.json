@@ -1,0 +1,97 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "93fa21dfaeb5b67ca778b4cd1d66eefab6922250",
+  "call_site_count": 9,
+  "call_sites": [
+    "imas_codex/discovery/base/llm.py:_build_kwargs",
+    "imas_codex/discovery/base/services.py:llm_health_check",
+    "imas_codex/discovery/base/services.py:create_service_monitor",
+    "imas_codex/cli/discover/code.py:llm_health_check_with_decisions",
+    "imas_codex/cli/tunnel.py:_get_tunnel_ports",
+    "imas_codex/cli/host.py:host_survey",
+    "imas_codex/cli/services.py:_stop_login_services",
+    "imas_codex/cli/__init__.py:_COMMANDS",
+    "imas_codex/cli/sn.py:_run_sn_cmd"
+  ],
+  "completed_at": "2026-11-15T16:18:35.202Z",
+  "dispatched_at": "2026-11-15T16:18:08Z",
+  "findings": [
+    {
+      "file": "tests/core/test_gpt6_model_support.py",
+      "line": "103",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion that failed at the base revision (the gpt-6.1 tiers present in the benchmark candidate slate) was replaced with a pyproject-equality and pricing assertion, so a pre-existing gap is turned green rather than reported, and the test's own name no longer matches what it asserts."
+    },
+    {
+      "file": "docs/architecture/services.md",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: the page still documents a LLM Proxy service started by `imas-codex llm start` and stopped by `imas-codex llm stop`, and .github/skills/service-ops/SKILL.md:65-76 still lists the removed command group, so a moved CLI is described to operators and to the service-ops skill as still present; both paths lie outside the node's fence and the manifest's outside_scope names neither."
+    },
+    {
+      "file": "tests/config/test_model_routes.py",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: the decisions-route arm asserts the request body equals the model the test itself passed to call_decisions, an echo that holds for any routing change, and its only route assertion at :51 pins a module constant while _post_decisions is monkeypatched, so a proxy substituted inside call_decisions would leave the test green."
+    },
+    {
+      "file": "imas_codex/settings.py",
+      "line": "300",
+      "severity": "non-blocking",
+      "text": "non-blocking: _validate_model_identifier restates the local serving prefixes inline while _LOCAL_ENDPOINT_PREFIXES at :401 owns that same set in the same module, so a prefix added to one list silently disagrees with the other."
+    },
+    {
+      "file": "imas_codex/settings.py",
+      "line": "473",
+      "severity": "non-blocking",
+      "text": "non-blocking: is_explicit_free_local_endpoint is left with no production caller once llm_health_check moved to get_model_config, so the predicate survives only for its own tests."
+    },
+    {
+      "file": "imas_codex/discovery/base/services.py",
+      "line": "302",
+      "severity": "non-blocking",
+      "text": "non-blocking: every non-local seat now reports health from the decisions route probed with the fixed facility-discovery credential rather than the seat's own service, and llm_health_check_with_decisions probes that route a second time at :428, adding a duplicate request per poll."
+    }
+  ],
+  "head_log_revision": "9cbba5840fbd657aa90a93432b7513c71058963c",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 9 production call site(s)",
+    "diff": "read both commits against 93fa21dfaeb5b67ca778b4cd1d66eefab6922250 \u2014 36 files, +280/-5055: ae10df18f removes the proxy branch from _build_kwargs, the proxy probes from services.py, proxy settings from settings.py, the llm CLI command group and route table, and 9cbba5840 aligns fixtures and the progress label with direct endpoint routing.",
+    "done_when": "the done_when asks for a recorded search, a per-seat route test, focused base/after runs with failure ids, one live local and one live OpenRouter reply, a negative net line count and a scratch-seat refusal; the manifest records all six and the run's own logs back each one (search.log 250 base matches to 0 with a positive control, routing.log 68 passed, baseline.log 2 failed/727 passed, after.log 877 passed, live.log 2 passed, net -4775 lines, negative-control.log 3 failed).",
+    "goal": "the node's goal is that no model call can route through the LiteLLM proxy and that its configuration, settings, probes and route table are gone; the diff deletes imas_codex/config/litellm_config.yaml, the proxy settings in imas_codex/settings.py (get_llm_proxy_port/get_postgres_port/get_llm_proxy_url/_get_llm_proxy_host/get_llm_location/get_llm_scheduler), the readiness/proxy/deep probes and _canary_check in imas_codex/discovery/base/services.py, and imas_codex/cli/llm_cli.py plus imas_codex/cli/llm_db.py, leaving the litellm client library in place.",
+    "manifest": "read; status complete, commits ae10df18f4c2421e9c5dda36609e9f912c9bbef9 and 9cbba5840fbd657aa90a93432b7513c71058963c, baseline_suite at 93fa21dfaeb5b67ca778b4cd1d66eefab6922250 completed with 2 failures and after_suite at 9cbba5840 completed with 0 failures, test_logs naming baseline.log, after.log, negative-control.log, routing.log and live.log, and the gate's sbatch command in tests.",
+    "write_paths": "the reviewed brief fences pyproject.toml, imas_codex/settings.py, imas_codex/config/, imas_codex/discovery/base/, imas_codex/cli/, imas_codex/llm/, imas_codex/remote/locations.py, tests/, the AGENTS.md files that mention the proxy and the evidence fragment; all 36 paths in the diff lie inside those, and the declared evidence fragment docs/evidence/fragments/iter-signal-context-and-enrichment/retire-the-llm-proxy.html was not written."
+  },
+  "justifications": {
+    "durability": "tests/config/test_model_routes.py:85 fails if _validate_model_identifier is restored to a no-op, as negative-control.log shows red on exactly that mutation, but tests/config/test_model_routes.py:50 is an echo of the test's own input and would stay green if call_decisions routed elsewhere.",
+    "evidence": "search.log shows the head search at 0 matches with a 250-match baseline control and a positive control listing live litellm imports, while baseline.log and after.log carry the recorded failure ids the manifest's baseline_suite and after_suite quote.",
+    "fit": "imas_codex/settings.py:290-304 keeps the module's existing ValueError-for-a-bad-seat idiom and every added test name describes the capability (tests/discovery/test_llm_openrouter_routing.py) with no plan or ticket identifier.",
+    "goal_fidelity": "imas_codex/discovery/base/llm.py:2081 refuses a model with no endpoint and _build_kwargs carries no proxy branch, and imas_codex/config/litellm_config.yaml is deleted, so no runtime path can reach a proxy; only stale prose remains at imas_codex/clusters/labeler.py:6 and imas_codex/standard_names/loop.py:1779, which the manifest reports under outside_scope.",
+    "reuse": "imas_codex/settings.py:300 re-lists the local serving prefixes that _LOCAL_ENDPOINT_PREFIXES at :401 already owns in the same module, though the probe at imas_codex/discovery/base/services.py:319 reuses the existing _format_load_detail owner rather than re-deriving it.",
+    "scope_discipline": "every path in git diff 93fa21dfa..9cbba5840 is inside the declared write paths, but tests/core/test_gpt6_model_support.py:103 rewrites a pre-existing failing assertion the node's goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that no model call can route through the LiteLLM proxy and that its configuration, settings, probes and route table are gone; the diff deletes imas_codex/config/litellm_config.yaml, the proxy settings in imas_codex/settings.py (get_llm_proxy_port/get_postgres_port/get_llm_proxy_url/_get_llm_proxy_host/get_llm_location/get_llm_scheduler), the readiness/proxy/deep probes and _canary_check in imas_codex/discovery/base/services.py, and imas_codex/cli/llm_cli.py plus imas_codex/cli/llm_db.py, leaving the litellm client library in place.\nVERDICT done_when: the done_when asks for a recorded search, a per-seat route test, focused base/after runs with failure ids, one live local and one live OpenRouter reply, a negative net line count and a scratch-seat refusal; the manifest records all six and the run's own logs back each one (search.log 250 base matches to 0 with a positive control, routing.log 68 passed, baseline.log 2 failed/727 passed, after.log 877 passed, live.log 2 passed, net -4775 lines, negative-control.log 3 failed).\nVERDICT write_paths: the reviewed brief fences pyproject.toml, imas_codex/settings.py, imas_codex/config/, imas_codex/discovery/base/, imas_codex/cli/, imas_codex/llm/, imas_codex/remote/locations.py, tests/, the AGENTS.md files that mention the proxy and the evidence fragment; all 36 paths in the diff lie inside those, and the declared evidence fragment docs/evidence/fragments/iter-signal-context-and-enrichment/retire-the-llm-proxy.html was not written.\nVERDICT manifest: read; status complete, commits ae10df18f4c2421e9c5dda36609e9f912c9bbef9 and 9cbba5840fbd657aa90a93432b7513c71058963c, baseline_suite at 93fa21dfaeb5b67ca778b4cd1d66eefab6922250 completed with 2 failures and after_suite at 9cbba5840 completed with 0 failures, test_logs naming baseline.log, after.log, negative-control.log, routing.log and live.log, and the gate's sbatch command in tests.\nVERDICT diff: read both commits against 93fa21dfaeb5b67ca778b4cd1d66eefab6922250 \u2014 36 files, +280/-5055: ae10df18f removes the proxy branch from _build_kwargs, the proxy probes from services.py, proxy settings from settings.py, the llm CLI command group and route table, and 9cbba5840 aligns fixtures and the progress label with direct endpoint routing.\nCALL_SITES: imas_codex/discovery/base/llm.py:_build_kwargs, imas_codex/discovery/base/services.py:llm_health_check, imas_codex/discovery/base/services.py:create_service_monitor, imas_codex/cli/discover/code.py:llm_health_check_with_decisions, imas_codex/cli/tunnel.py:_get_tunnel_ports, imas_codex/cli/host.py:host_survey, imas_codex/cli/services.py:_stop_login_services, imas_codex/cli/__init__.py:_COMMANDS, imas_codex/cli/sn.py:_run_sn_cmd\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/discovery/base/llm.py:2081 refuses a model with no endpoint and _build_kwargs carries no proxy branch, and imas_codex/config/litellm_config.yaml is deleted, so no runtime path can reach a proxy; only stale prose remains at imas_codex/clusters/labeler.py:6 and imas_codex/standard_names/loop.py:1779, which the manifest reports under outside_scope.\nSCORE evidence: 19\nJUSTIFICATION evidence: search.log shows the head search at 0 matches with a 250-match baseline control and a positive control listing live litellm imports, while baseline.log and after.log carry the recorded failure ids the manifest's baseline_suite and after_suite quote.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: every path in git diff 93fa21dfa..9cbba5840 is inside the declared write paths, but tests/core/test_gpt6_model_support.py:103 rewrites a pre-existing failing assertion the node's goal does not imply.\nSCORE durability: 16\nJUSTIFICATION durability: tests/config/test_model_routes.py:85 fails if _validate_model_identifier is restored to a no-op, as negative-control.log shows red on exactly that mutation, but tests/config/test_model_routes.py:50 is an echo of the test's own input and would stay green if call_decisions routed elsewhere.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/settings.py:290-304 keeps the module's existing ValueError-for-a-bad-seat idiom and every added test name describes the capability (tests/discovery/test_llm_openrouter_routing.py) with no plan or ticket identifier.\nSCORE reuse: 15\nJUSTIFICATION reuse: imas_codex/settings.py:300 re-lists the local serving prefixes that _LOCAL_ENDPOINT_PREFIXES at :401 already owns in the same module, though the probe at imas_codex/discovery/base/services.py:319 reuses the existing _format_load_detail owner rather than re-deriving it.\nFINDING tests/core/test_gpt6_model_support.py:103 non-blocking: the assertion that failed at the base revision (the gpt-6.1 tiers present in the benchmark candidate slate) was replaced with a pyproject-equality and pricing assertion, so a pre-existing gap is turned green rather than reported, and the test's own name no longer matches what it asserts.\nFINDING docs/architecture/services.md:13 non-blocking: the page still documents a LLM Proxy service started by `imas-codex llm start` and stopped by `imas-codex llm stop`, and .github/skills/service-ops/SKILL.md:65-76 still lists the removed command group, so a moved CLI is described to operators and to the service-ops skill as still present; both paths lie outside the node's fence and the manifest's outside_scope names neither.\nFINDING tests/config/test_model_routes.py:50 non-blocking: the decisions-route arm asserts the request body equals the model the test itself passed to call_decisions, an echo that holds for any routing change, and its only route assertion at :51 pins a module constant while _post_decisions is monkeypatched, so a proxy substituted inside call_decisions would leave the test green.\nFINDING imas_codex/settings.py:300 non-blocking: _validate_model_identifier restates the local serving prefixes inline while _LOCAL_ENDPOINT_PREFIXES at :401 owns that same set in the same module, so a prefix added to one list silently disagrees with the other.\nFINDING imas_codex/settings.py:473 non-blocking: is_explicit_free_local_endpoint is left with no production caller once llm_health_check moved to get_model_config, so the predicate survives only for its own tests.\nFINDING imas_codex/discovery/base/services.py:302 non-blocking: every non-local seat now reports health from the decisions route probed with the fixed facility-discovery credential rather than the seat's own service, and llm_health_check_with_decisions probes that route a second time at :428, adding a duplicate request per poll.",
+  "review_run_id": "r-20261115T161539583421-review-of-retire-the-llm-proxy-9cbba5840fbd",
+  "reviewed_base_sha": "93fa21dfaeb5b67ca778b4cd1d66eefab6922250",
+  "reviewed_head_sha": "9cbba5840fbd657aa90a93432b7513c71058963c",
+  "reviewed_run_id": "r-20261115T155520409111-retire-the-llm-proxy",
+  "reviewer": "deepseek-v4.1-flash",
+  "reviewer_run_id": "r-20261115T161539583421-review-of-retire-the-llm-proxy-9cbba5840fbd",
+  "scores": {
+    "durability": 16,
+    "evidence": 19,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T16:33:15.826837+00:00",
+  "total": 99
+}
