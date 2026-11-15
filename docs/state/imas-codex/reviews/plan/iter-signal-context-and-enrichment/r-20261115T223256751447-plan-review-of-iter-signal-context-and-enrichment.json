@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T22:45:57.045Z",
+  "dispatched_at": "2026-11-15T22:45:05Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T223256751447-plan-review-of-iter-signal-context-and-enrichment/plan.html:95",
+      "id": "reasoning-1",
+      "reason": "a reader of the decision face is told the opposite of what the section 3 comparison measured, so the recorded rationale for choosing the local model reads as supported when it was not.",
+      "text": "the decision's context still reads \"the local model delivered 130 of 200 with no response parsing unrepaired\", while the ratified paragraph four lines below in the same decision records \"0 of 20 responses parsed unrepaired, 130 of 200 descriptions delivered\"; the context is the text the decision surface displays and it presents the local lane as parse-clean, which is the single fact the whole local-model choice turns on",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T223256751447-plan-review-of-iter-signal-context-and-enrichment/plan.html:100",
+      "id": "reasoning-2",
+      "reason": "one recorded ruling for the failed-refinement branch (stay on the local lane with repaired parse, or return the choice to the lead) would settle whether sections 6 and 7 are buildable now.",
+      "text": "the reverted choice is recorded as contingent (\"a refinement round ... is in progress, and its result is recorded here when it reports\") yet sections 6 and 7 are declared `implementable` under it, and neither the decision nor those sections records the branch where the refinement does not make the local model produce parseable descriptions: the only alternative named in the decision is the paid model, which the same paragraph excludes by requiring ICP-derived context to stay inside ITER, and section 1 (line 40) uses the local model only \"once a benchmark shows that lane is capable\", and the comparison recorded here shows 0 of 20 strict parses under the pipeline defaults \u2014 so a dispatched section 6 node runs on an unsettled condition with no stated outcome if it fails",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261115T223256751447-plan-review-of-iter-signal-context-and-enrichment/plan.html:83",
+      "id": "reasoning-3",
+      "reason": "the fix is a change to s9's endpoint (an archive taken when s4 lands as well as after the re-run), which the current dependency order forbids a node from choosing on its own.",
+      "text": "s9 now waits on s10, and s10 waits on `codac-uda-signals#s12` (stored `implementable`, a scan of 988,145 archive variables), so the facility-scoped protected archive of the ICP and IDM nodes that s4 creates is taken only after that scan completes, while section 1 (line 40) states that every node and link so created \"is covered by the facility-scoped protected backup\"; ICP content is the only copy and does not enter the repository, so a graph loss in the window between s4 landing and the scan completing loses it unrecoverably",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fbcdb35c19e5e5087f77a1cf8e62bda6e93e2ca5",
+  "plan_fingerprint": "6aea6bb7ed9749f87d7313444f1745e18e33dd2994bc8ab9752fc08fcf88a5bb",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T223256751447-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "060f8b47db8416550aad8ec6e66b9a7a06da89be",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/plans/icp-api-access.html`, `docs/plans/codac-uda-signals.html` and the s1\u2013s10 anchors all exist and resolve.",
+    "done_when": "pass \u2014 each section states measures and a negative control that can fail; the changed units add no done-when.",
+    "evidence_paths": "pass \u2014 evidence is landed in the plan, in landing records and in run records under the crew reports tree; no section sends a gate log to a node-local temporary path.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or version tags reach symbols or filenames; the follow-up title and body are plan prose, not code.",
+    "reasoning": "a finding \u2014 the `description-model` decision's context contradicts its own ratification on whether the local lane parsed, and the reverted choice is contingent on an unrecorded retest while section 1's capability premise is the one the comparison falsified; separately, s9's new wait on s10 postpones the protected archive of the ICP nodes s4 creates.",
+    "single_goal": "pass \u2014 each section names one deliverable.",
+    "wiring": "pass \u2014 every `plan-section-depends-on` edge resolves, including the new `s9 -> iter-signal-context-and-enrichment#s10`, which matches s9's `data-links`; `icp-api-access#s3` (plant structure and component records) and `icp-api-access#s4` (IDM document fetch) are the right subjects for s4, and `codac-uda-signals#s12` (every readable archive variable catalogued) is the right subject for s10."
+  },
+  "section_digests": {
+    "_document": "39352c5fa964975f5923d29ebf68f03bb1966dcd59545fc518ad1d54b84b18a0",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "a9e2dcda9f1320f9431e17c0f132335589d5a554898f32f9bcb33ec2aaa611df",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "631c30f031b35766fbc9b9bf62a0670bf0504adeef4f12b7676039b81fd14365",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:53:55.942864+00:00",
+  "total": null
+}
