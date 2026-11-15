@@ -69,7 +69,7 @@ compute_locations:
 data_systems:
   codac_uda:
     setup_commands:
-      - source /etc/profile.d/modules.sh
+      - if [ -f /etc/profile.d/z00_lmod.sh ]; then source /etc/profile.d/z00_lmod.sh; else source /etc/profile.d/modules.sh; fi
       - module load m-uda-client/7.4-iimkl-2025b
     python_command: python3
     archives:

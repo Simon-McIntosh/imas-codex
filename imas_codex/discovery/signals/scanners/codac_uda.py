@@ -19,7 +19,7 @@ from imas_codex.graph.models import (
     FacilitySignalStatus,
 )
 from imas_codex.remote.codac_uda import (
-    ArchiveRequestError,
+    ArchiveReader,
     archive_config,
     request_archive,
 )
@@ -37,14 +37,18 @@ SIGNAL_QUERY = """
 MATCH (f:Facility {id: $facility})
 UNWIND $signals AS props
 MATCH (a:ArchiveEndpoint {id: props.metadata_archive})
-MATCH (da:DataAccess {id: props.data_access})
 MERGE (s:FacilitySignal {id: props.id})
 ON CREATE SET s.status = props.status, s.discovered_at = datetime(),
               s.description = props.description
+WITH s, a, f, props
+MATCH (da:DataAccess)
+WHERE da.id = CASE WHEN s.data_archive IS NOT NULL
+                   THEN s.facility_id + ':codac_uda:access:' + split(s.data_archive, ':')[-1]
+                   ELSE props.data_access END
 SET s.facility_id = props.facility_id, s.accessor = props.accessor,
     s.name = props.name, s.discovery_source = props.discovery_source,
     s.source_description = props.source_description, s.unit = props.unit,
-    s.data_access = props.data_access, s.metadata_archive = props.metadata_archive,
+    s.data_access = da.id, s.metadata_archive = props.metadata_archive,
     s.data_source_name = props.data_source_name,
     s.data_source_path = props.data_source_path,
     s.sampling_mode = props.sampling_mode, s.sampling_evidence = props.sampling_evidence,
@@ -52,6 +56,10 @@ SET s.facility_id = props.facility_id, s.accessor = props.accessor,
                             THEN s.archive_cohorts
                             ELSE coalesce(s.archive_cohorts, []) + [$cohort] END
 MERGE (s)-[:AT_FACILITY]->(f)
+WITH s, a, da
+OPTIONAL MATCH (s)-[old_access:DATA_ACCESS]->(previous_access)
+WHERE previous_access <> da
+DELETE old_access
 MERGE (s)-[:DATA_ACCESS]->(da)
 WITH s, a
 OPTIONAL MATCH (s)-[old:METADATA_ARCHIVE]->(previous)
@@ -63,14 +71,50 @@ RETURN count(DISTINCT s) AS written
 
 CONFIRM_QUERY = """
 MATCH (s:FacilitySignal {id: $signal}), (a:ArchiveEndpoint {id: $archive})
+MATCH (da:DataAccess)
 WHERE a.excluded = false AND s.facility_id = a.facility_id
+  AND da.id = a.facility_id + ':codac_uda:access:' + a.role
 OPTIONAL MATCH (s)-[old:DATA_ARCHIVE]->(previous)
 WHERE previous <> a
 DELETE old
-SET s.data_archive = a.id
+SET s.data_archive = a.id, s.data_access = da.id
 MERGE (s)-[:DATA_ARCHIVE]->(a)
+WITH s, da
+OPTIONAL MATCH (s)-[old_access:DATA_ACCESS]->(previous_access)
+WHERE previous_access <> da
+DELETE old_access
+MERGE (s)-[:DATA_ACCESS]->(da)
 RETURN count(DISTINCT s) AS written
 """
+
+
+BINDING_QUERY = """
+MATCH (f:Facility {id: $facility})
+UNWIND $bindings AS props
+MATCH (a:ArchiveEndpoint {id: props.archive}), (access:DataAccess {id: props.access})
+WHERE a.excluded = false
+MERGE (source:DataSource {id: props.source})
+SET source.name = props.name, source.facility_id = $facility,
+    source.archive_endpoint = a.id, source.source_format = 'codac_uda',
+    source.shot_dependent = false
+MERGE (source)-[:AT_FACILITY]->(f)
+MERGE (source)-[:HOSTED_BY_ARCHIVE]->(a)
+RETURN count(source) AS written
+"""
+
+
+def _access(facility: str, role: str) -> DataAccess:
+    return DataAccess(
+        id=f"{facility}:codac_uda:access:{role}",
+        facility_id=facility,
+        name=f"CODAC UDA {role} bounded reads",
+        method_type="codac_uda",
+        library="imas_codex.remote.codac_uda",
+        access_type="local",
+        data_source=f"{facility}:codac_uda:source:{role}",
+        connection_template="from imas_codex.remote.codac_uda import ArchiveSignalLoader",
+        data_template="data = ArchiveSignalLoader().load('{signal_id}', start={start_ns}, end={end_ns})",
+    )
 
 
 def _save(path: Path, state: dict) -> None:
@@ -85,9 +129,7 @@ def _save(path: Path, state: dict) -> None:
     temporary.replace(path)
 
 
-def _persist_archives(
-    facility: str, archives: list[ArchiveEndpoint], access: DataAccess
-) -> None:
+def _persist_archives(facility: str, archives: list[ArchiveEndpoint]) -> None:
     from imas_codex.discovery.signals.parallel import persist_data_access
 
     with GraphClient() as graph:
@@ -100,7 +142,24 @@ def _persist_archives(
             raise RuntimeError(
                 "archive write was not acknowledged; facility must exist"
             )
-    persist_data_access(access)
+    bindings = []
+    for archive in archives:
+        if archive.excluded:
+            continue
+        method = _access(facility, archive.role)
+        persist_data_access(method)
+        bindings.append(
+            {
+                "archive": archive.id,
+                "access": method.id,
+                "source": method.data_source,
+                "name": f"codac_uda:{archive.role}",
+            }
+        )
+    with GraphClient() as graph:
+        rows = graph.query(BINDING_QUERY, facility=facility, bindings=bindings)
+    if not rows or rows[0]["written"] != len(bindings):
+        raise RuntimeError("archive source bindings were not acknowledged")
 
 
 def _persist_signals(facility: str, cohort: str, signals: list[FacilitySignal]) -> int:
@@ -194,17 +253,7 @@ class CodacUDAScanner:
         state.pop("error", None)
         _save(path, state)
         archive_id = f"{facility}:codac_uda:{role}"
-        access = DataAccess(
-            id=f"{facility}:codac_uda",
-            facility_id=facility,
-            name="CODAC UDA bounded reads",
-            method_type="python",
-            library="uda_client_reader",
-            access_type="local",
-            data_source="codac_uda",
-            connection_template="from imas_codex.remote.codac_uda import request_archive",
-            data_template="data = request_archive('{facility}', '{archive_role}', dict(operation='read', name='{accessor}', start={start_ns}, end={end_ns}, mode='raw'))",
-        )
+        access = _access(facility, role)
         archives = [
             ArchiveEndpoint(
                 id=f"{facility}:codac_uda:{item.role}",
@@ -241,7 +290,7 @@ class CodacUDAScanner:
                 _save(path, state)
 
         try:
-            await asyncio.to_thread(_persist_archives, facility, archives, access)
+            await asyncio.to_thread(_persist_archives, facility, archives)
             for pattern in patterns:
                 if pattern in state["finished_patterns"]:
                     continue
@@ -365,63 +414,68 @@ class CodacUDAScanner:
         signals: list[FacilitySignal],
         config: dict[str, Any],
         reference_shot: int | None = None,
+        *,
+        read_parameters: dict[str, Any] | None = None,
     ) -> list[dict]:
         settings = archive_config(
             facility, config if config.get("variable_patterns") else None
         )
-        effective = settings.model_dump(mode="json")
-        start, end = settings.validation_start_ns, settings.validation_end_ns
-        if (
-            type(start) is not int
-            or type(end) is not int
-            or not 0 < end - start <= settings.max_window_ns
-        ):
-            raise ValueError(
-                "declare a bounded validation window in private configuration"
-            )
+        effective = {
+            "ssh_host": ssh_host,
+            "data_systems": {"codac_uda": settings.model_dump(mode="json")},
+        }
+        parameters = {
+            "start": settings.validation_start_ns,
+            "end": settings.validation_end_ns,
+            "mode": "envelope",
+            "bins": min(32, settings.max_samples),
+            "max_samples": settings.max_samples,
+            **(read_parameters or {}),
+        }
         results = []
         for signal in signals:
             attempts = []
             confirmed = None
+            shared_signal = None
             for role in settings.readable_roles:
-                try:
-                    reply = await asyncio.to_thread(
-                        request_archive,
-                        facility,
-                        role,
-                        {
-                            "operation": "read",
-                            "name": signal.accessor,
-                            "start": start,
-                            "end": end,
-                            "mode": "envelope",
-                            "bins": min(32, settings.max_samples),
-                            "max_samples": settings.max_samples,
-                        },
-                        config=effective,
-                    )
-                    count = len(reply["time"])
-                    if (
-                        count
-                        and len(reply["values"]) == count
-                        and not reply.get("empty", False)
-                    ):
-                        archive = f"{facility}:codac_uda:{role}"
-                        await asyncio.to_thread(_confirm, signal.id, archive)
-                        signal.data_archive = archive
-                        confirmed = archive
-                        attempts.append({"role": role, "samples": count})
-                        break
-                    attempts.append({"role": role, "samples": 0, "reason": "empty"})
-                except ArchiveRequestError as exc:
-                    attempts.append(
-                        {"role": role, "samples": 0, "reason": exc.error_type}
-                    )
+                reader = ArchiveReader(facility, role, config=effective)
+                reply = await asyncio.to_thread(
+                    reader.check, signal.accessor, **parameters
+                )
+                if reply["success"]:
+                    shared_signal = reply["signal"]
+                    archive = reader.archive
+                    await asyncio.to_thread(_confirm, signal.id, archive)
+                    signal.data_archive = archive
+                    signal.data_access = _access(facility, role).id
+                    confirmed = archive
+                    attempts.append({"role": role, "samples": len(shared_signal.time)})
+                    break
+                attempts.append(
+                    {
+                        "role": role,
+                        "samples": 0,
+                        "reason": reply["error_classification"],
+                        "error": reply["error"],
+                    }
+                )
             results.append(
                 {
                     "signal_id": signal.id,
                     "valid": confirmed is not None,
                     "data_archive": confirmed,
+                    "data_access": signal.data_access,
+                    "signal": shared_signal,
+                    "shape": list(shared_signal.values.shape)
+                    if shared_signal is not None
+                    else None,
+                    "dtype": str(shared_signal.values.dtype)
+                    if shared_signal is not None
+                    else None,
+                    "error_classification": None
+                    if confirmed
+                    else attempts[-1]["reason"],
+                    "error": None if confirmed else attempts[-1]["error"],
                     "attempts": attempts,
                 }
             )

@@ -5948,7 +5948,8 @@ async def check_worker(
                         "id": signal_id,
                         "success": success,
                         "shot": shot,
-                        "data_access": signal_data_access.get(signal_id),
+                        "data_access": r.get("data_access")
+                        or signal_data_access.get(signal_id),
                     }
                     if success:
                         entry["shape"] = r.get("shape")

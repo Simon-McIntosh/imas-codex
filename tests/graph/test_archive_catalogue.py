@@ -4,6 +4,8 @@ import pytest
 
 from imas_codex.discovery.signals.scanners import codac_uda as catalogue
 from imas_codex.graph.client import GraphClient
+from imas_codex.graph.models import ArchiveEndpoint
+from imas_codex.remote import codac_uda as service
 
 pytestmark = pytest.mark.graph
 
@@ -13,31 +15,24 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
 ):
     facility = "demo-archive-catalogue"
     archive = f"{facility}:codac_uda:slow"
-    access = f"{facility}:codac_uda"
+    access = catalogue._access(facility, "slow").id
     with GraphClient() as graph:
         graph.query(
             "CREATE (:Facility {id: $facility, name: 'Demonstration'})",
             facility=facility,
         )
-        graph.query(
-            "CREATE (:DataAccess {id: $access, facility_id: $facility})",
-            access=access,
-            facility=facility,
-        )
-        archive_rows = [
-            {
-                "id": archive,
-                "facility_id": facility,
-                "data_system": "codac_uda",
-                "role": "slow",
-                "excluded": False,
-            }
-        ]
-        assert (
-            graph.query(
-                catalogue.ARCHIVE_QUERY, facility=facility, archives=archive_rows
-            )[0]["written"]
-            == 1
+        catalogue._persist_archives(
+            facility,
+            [
+                ArchiveEndpoint(
+                    id=f"{facility}:codac_uda:{role}",
+                    facility_id=facility,
+                    data_system="codac_uda",
+                    role=role,
+                    excluded=False,
+                )
+                for role in ["slow", "fast"]
+            ],
         )
         entry = {
             "name": "DEMO:TEMP",
@@ -70,9 +65,11 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
         )
         assert rows == [{"total": 1, "metadata": 1, "confirmed": 0}]
         assert (
-            graph.query(catalogue.CONFIRM_QUERY, signal=signal.id, archive=archive)[0][
-                "written"
-            ]
+            graph.query(
+                catalogue.CONFIRM_QUERY,
+                signal=signal.id,
+                archive=f"{facility}:codac_uda:fast",
+            )[0]["written"]
             == 1
         )
         graph.query(
@@ -88,13 +85,18 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
             {
                 "status": "enriched",
                 "claim": "held",
-                "serving": archive,
+                "serving": f"{facility}:codac_uda:fast",
                 "metadata": archive,
-                "data": archive,
-                "access": access,
+                "data": f"{facility}:codac_uda:fast",
+                "access": catalogue._access(facility, "fast").id,
                 "cohorts": ["cohort"],
             }
         ]
+        binding = graph.query(service.SIGNAL_QUERY, signal_id=signal.id)
+        assert len(binding) == 1
+        assert binding[0]["archive_id"] == f"{facility}:codac_uda:fast"
+        assert binding[0]["archive_role"] == "fast"
+        assert binding[0]["method_type"] == "codac_uda"
         graph.query(
             "MATCH (a:ArchiveEndpoint {id: $archive}) SET a.excluded = true",
             archive=archive,

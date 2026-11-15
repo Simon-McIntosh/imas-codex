@@ -4,6 +4,7 @@ import asyncio
 import json
 from unittest.mock import Mock
 
+import numpy as np
 import pytest
 
 from imas_codex.discovery.signals.scanners import codac_uda as catalogue
@@ -206,9 +207,14 @@ async def test_metadata_is_durable_before_graph_acknowledgement(
 
 @pytest.mark.asyncio
 async def test_empty_reads_leave_serving_archive_unset(config, monkeypatch):
-    reader = Mock(return_value={"time": [], "values": [], "empty": True})
+    reader = Mock()
+    reader.check.return_value = {
+        "success": False,
+        "error_classification": "empty",
+        "error": "archive interval is empty",
+    }
     confirm = Mock()
-    monkeypatch.setattr(catalogue, "request_archive", reader)
+    monkeypatch.setattr(catalogue, "ArchiveReader", Mock(return_value=reader))
     monkeypatch.setattr(catalogue, "_confirm", confirm)
     signal = catalogue.CodacUDAScanner._signal(
         "demo", "demo:codac_uda:slow", "demo:codac_uda", entries(1)[0], "cohort"
@@ -216,7 +222,7 @@ async def test_empty_reads_leave_serving_archive_unset(config, monkeypatch):
     result = await catalogue.CodacUDAScanner().check("demo", "local", [signal], config)
     assert result[0]["valid"] is False and result[0]["data_archive"] is None
     assert signal.data_archive is None
-    assert reader.call_count == 2
+    assert reader.check.call_count == 2
     confirm.assert_not_called()
 
 
@@ -224,14 +230,18 @@ async def test_empty_reads_leave_serving_archive_unset(config, monkeypatch):
 async def test_serving_archive_requires_samples_and_can_differ_from_metadata(
     config, monkeypatch
 ):
-    reader = Mock(
-        side_effect=[
-            {"time": [], "values": [], "empty": True},
-            {"time": [1, 2], "values": [[3, 2, 4], [4, 3, 5]], "empty": False},
-        ]
-    )
+    reader = Mock(archive="demo:codac_uda:slow")
+    reader.check.side_effect = [
+        {"success": False, "error_classification": "empty", "error": "empty"},
+        {
+            "success": True,
+            "signal": transport.Signal(
+                np.array([1, 2]), np.array([[3, 2, 4], [4, 3, 5]]), {}
+            ),
+        },
+    ]
     confirm = Mock()
-    monkeypatch.setattr(catalogue, "request_archive", reader)
+    monkeypatch.setattr(catalogue, "ArchiveReader", Mock(return_value=reader))
     monkeypatch.setattr(catalogue, "_confirm", confirm)
     signal = catalogue.CodacUDAScanner._signal(
         "demo", "demo:codac_uda:fast", "demo:codac_uda", entries(1)[0], "cohort"
@@ -269,7 +279,10 @@ def test_transport_uses_facility_runner_and_preserves_reader_error(config, monke
     ) == {"entries": []}
     assert runner.call_args.kwargs["facility"] == "demo"
     assert runner.call_args.kwargs["data_system"] == "codac_uda"
-    assert runner.call_args.args[1]["connection"]["host"] == "slow.invalid"
+    assert runner.call_args.kwargs["input_data"]["operation"] == "variables"
+    assert "CODAC_UDA_HOST=slow.invalid" in " ".join(
+        runner.call_args.kwargs["setup_commands"]
+    )
     runner.side_effect = subprocess.CalledProcessError(
         1,
         "reader",
@@ -277,14 +290,14 @@ def test_transport_uses_facility_runner_and_preserves_reader_error(config, monke
             {"ok": False, "error_type": "ReadError", "error": "bounded refusal"}
         ),
     )
-    with pytest.raises(transport.ArchiveRequestError, match="bounded refusal") as error:
+    with pytest.raises(transport.ArchiveReadError, match="bounded refusal") as error:
         transport.request_archive(
             "demo",
             "slow",
             {"operation": "variables", "pattern": "DEMO:*"},
             config=config,
         )
-    assert error.value.error_type == "ReadError"
+    assert error.value.category == "limit"
 
 
 @pytest.mark.parametrize(
@@ -317,3 +330,86 @@ def test_compute_host_resolves_facility_scripts_locally(monkeypatch):
     finally:
         executor._get_facility_local_hosts.cache_clear()
         executor._get_configured_local_hosts.cache_clear()
+
+
+@pytest.mark.asyncio
+async def test_scanner_uses_loader_samples_and_classifies_the_same_refusal(
+    config, monkeypatch, tmp_path
+):
+    config["readable_roles"] = ["slow"]
+    original_reader = transport.ArchiveReader
+    reader = original_reader(
+        "demo",
+        "slow",
+        config={
+            "data_systems": {
+                "codac_uda": {
+                    key: value
+                    for key, value in config.items()
+                    if not key.startswith("_")
+                }
+            }
+        },
+        cache_dir=tmp_path / "reads",
+    )
+    runner = Mock(
+        return_value=json.dumps(
+            {
+                "ok": True,
+                "result": {
+                    "time": [1, 2],
+                    "values": [3, 4],
+                    "time_dtype": "int64",
+                    "value_dtype": "float32",
+                    "time_base": "epoch_ns",
+                },
+            }
+        )
+    )
+    monkeypatch.setattr(transport, "run_python_script", runner)
+    monkeypatch.setattr(catalogue, "ArchiveReader", Mock(return_value=reader))
+    confirm = Mock()
+    monkeypatch.setattr(catalogue, "_confirm", confirm)
+    signal = catalogue.CodacUDAScanner._signal(
+        "demo",
+        reader.archive,
+        catalogue._access("demo", "slow").id,
+        entries(1)[0],
+        "cohort",
+    )
+    graph = Mock()
+    graph.query.return_value = [
+        {
+            "signal_id": signal.id,
+            "facility_id": "demo",
+            "selector": signal.accessor,
+            "unit": "K",
+            "description": "Archive wording",
+            "archive_id": reader.archive,
+            "archive_role": "slow",
+            "method_type": "codac_uda",
+        }
+    ]
+    loader = transport.ArchiveSignalLoader(graph, reader_factory=lambda *args: reader)
+    parameters = {"start": 1, "end": 3, "mode": "raw", "bins": 2, "max_samples": 10}
+    checked = (
+        await catalogue.CodacUDAScanner().check(
+            "demo", "local", [signal], config, read_parameters=parameters
+        )
+    )[0]
+    loaded = loader.load(signal.id, **parameters)
+    np.testing.assert_array_equal(checked["signal"].time, loaded.time)
+    np.testing.assert_array_equal(checked["signal"].values, loaded.values)
+    assert checked["signal"].values.dtype == loaded.values.dtype == np.float32
+    confirm.assert_called_once_with(signal.id, reader.archive)
+    refused = parameters | {"max_samples": config.get("max_samples", 100_000) + 1}
+    failed = (
+        await catalogue.CodacUDAScanner().check(
+            "demo", "local", [signal], config, read_parameters=refused
+        )
+    )[0]
+    with pytest.raises(transport.ArchiveReadError) as failure:
+        loader.load(signal.id, **refused)
+    assert failed["error_classification"] == failure.value.category == "limit"
+    assert confirm.call_count == 1
+    runner.assert_called_once()
