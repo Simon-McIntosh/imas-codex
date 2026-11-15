@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="icp-api-access">
   <meta name="plan-title" content="The pipeline reads ICP and IDM through an authenticated, read-only client">
   <meta name="plan-summary" content="An authenticated read-only route into the ICP API and IDM documents is established on the integration instance">
-  <meta name="plan-status" content="draft">
+  <meta name="plan-status" content="active">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="10.0">
   <meta name="plan-capability-version" content="1.0">
@@ -18,11 +18,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="discovery,signals">
   <meta name="plan-blocks" content="iter-signal-context-and-enrichment">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;deferred&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;deferred&quot;,&quot;s4&quot;:&quot;deferred&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;icp-api-access#s2&quot;],&quot;s4&quot;:[&quot;icp-api-access#s2&quot;]}">
   <title>The pipeline reads ICP and IDM through an authenticated, read-only client | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
+<meta name="plan-version" content="1">
+<meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -40,7 +42,7 @@
     <p>The lead has authorised private curation of ICP content into the graph under the ITER facility. None of it may enter the repository, and it is read inside ITER only.</p>
 
     <h2 id="s2">§2 — An authenticated session reads the integration instance's API description</h2>
-    <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links=""></section>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
     <p><strong>Delivers.</strong> Project code signs in to the ICP integration instance with credentials held in the keyring, never in a file or a prompt, and reads the API's machine-readable description. A record lists the read operations the API offers for plant breakdown structure nodes, component lists and documents, the authentication the API itself declares, and any paging or rate rules it states. Only read operations are ever issued, and only against the integration instance.</p>
     <p><strong>Done when.</strong> The landing record gives the number of operations in the description and the number that are reads, the list of read operations relevant to plant structure, components and documents, and the declared authentication scheme; a test shows a stale session is detected and renewed; and a request log shows every request used a read method against the integration host. <strong>Negative control:</strong> with no stored credentials the client refuses before any request, and a write method is refused by the client itself.</p>
 
@@ -55,29 +57,27 @@
     <p><strong>Done when.</strong> One spreadsheet and one PDF named before the run are each fetched at a stated version, with size and digest in the landing record and the stored path under the private cache; the spreadsheet's sheet names and row counts are recorded; a request for a version that does not exist returns an explicit outcome; and a search of the tracked tree finds none of the fetched content. <strong>Negative control:</strong> a document the account may not read is reported as not permitted, never as empty.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
-      <h2><span class="sec">§</span> Decisions</h2>
-      <div class="r-dec" data-key="pipeline-identity" data-sections="s2,s3,s4" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Which identity does the pipeline sign in with?</p>
-        <p class="r-dec-ctx">The ITER document assistant reads ICP through a service account. A personal account works for development but ties a pipeline to one person's permissions. The team that runs the assistant will know the sanctioned route.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="service-account">A service account requested for this pipeline</button>
-          <button class="r-opt" data-value="personal-for-development">The lead's own account for development, a service account before any scheduled use</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-      <div class="r-dec" data-key="credentials-stored" data-sections="s2,s3,s4" data-choice="" data-by="" data-when="">
-        <p class="r-dec-q">Are credentials for the ICP integration instance stored in the keyring?</p>
-        <p class="r-dec-ctx">The lead stores them with the project's credentials command. No agent handles the password and none is placed in a prompt.</p>
-        <p class="r-dec-opts">
-          <button class="r-opt" data-value="stored">Stored</button>
-        </p>
-        <p class="r-dec-rat"></p>
-      </div>
-    </section>
+<h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="credentials-stored" data-choice="stored" data-by="lead" data-when="2026-11-15T20:56:15+00:00" data-sections="s2,s3,s4">
+    <p class="r-dec-q">Are credentials for the ICP integration instance stored in the keyring?</p>
+    <p class="r-dec-ctx">The lead stores them with the project&#x27;s credentials command. No agent handles the password and none is placed in a prompt.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="stored">Stored</button>
+      </p>
+    <p class="r-dec-rat">The lead stored credentials for the ITER single-sign-on service with the project&#x27;s credentials command on 2026-11-15. No agent handled the password.</p>
+    </div>
+<div class="r-dec" data-key="pipeline-identity" data-choice="personal-for-development" data-by="lead" data-when="2026-11-15T20:56:15+00:00" data-sections="s2,s3,s4">
+    <p class="r-dec-q">Which identity does the pipeline sign in with?</p>
+    <p class="r-dec-ctx">The ITER document assistant reads ICP through a service account. A personal account works for development but ties a pipeline to one person&#x27;s permissions. The team that runs the assistant will know the sanctioned route.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="service-account">A service account requested for this pipeline</button>
+      <button class="r-opt chosen" data-value="personal-for-development">The lead&#x27;s own account for development, a service account before any scheduled use</button>
+      </p>
+    <p class="r-dec-rat">The lead said on 2026-11-15 to use their own account. A service account is still to be arranged before any scheduled use.</p>
+    </div>
+</section>
 
-    <section data-reckon="followups" id="followups" class="r-followups">
-      <h2><span class="sec">§</span> Followups</h2>
-    </section>
+    
   </main>
 </body>
 </html>
