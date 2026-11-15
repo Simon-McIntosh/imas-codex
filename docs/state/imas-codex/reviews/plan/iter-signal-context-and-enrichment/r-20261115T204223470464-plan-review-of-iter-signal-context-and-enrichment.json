@@ -77,9 +77,28 @@
       "note": "Section 9 now also waits on section 10, so the protected archive is taken after the re-run has retired and re-created component and pattern nodes.",
       "reason": "",
       "when": "2026-11-15T21:16:42.908040+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 10's done-when now lists the same measures as section 5: the fraction of the archive held, grouped and ungrouped counts, parse outcomes, component and control-node groups, patterns under both keys, the group-size distribution, the share of single-member groups, the share in a shared pattern and the twenty largest patterns.",
+      "reason": "",
+      "when": "2026-11-15T21:16:54.365172+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "note": "Section 10's done-when now lists the same measures as section 5: the fraction of the archive held, grouped and ungrouped counts, parse outcomes, component and control-node groups, patterns under both keys, the group-size distribution, the share of single-member groups, the share in a shared pattern and the twenty largest patterns.",
+      "reason": "",
+      "when": "2026-11-15T21:16:54.365172+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
