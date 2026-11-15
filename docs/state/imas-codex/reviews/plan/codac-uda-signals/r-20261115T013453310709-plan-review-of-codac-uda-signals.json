@@ -49,7 +49,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 2,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "caa852cef909868a7f07b6f8e345a7466b38d398",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 2's live control no longer resolves through the facility configuration: the control supplies the archive client's setup commands and endpoint itself from private configuration, so the section needs nothing section 3 delivers and the two stay parallel.",
+      "reason": "",
+      "when": "2026-11-15T02:03:20.144965+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "caa852cef909868a7f07b6f8e345a7466b38d398",
+      "commit_basis": "edit",
+      "note": "Section 2's live control no longer resolves through the facility configuration: the control supplies the archive client's setup commands and endpoint itself from private configuration, so the section needs nothing section 3 delivers and the two stay parallel.",
+      "reason": "",
+      "when": "2026-11-15T02:03:20.144965+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261115T013453310709-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261115T013453310709-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "f94d28a2d7e19b9b6f39ccbc388b9226ac58f4cb",
   "rubric": "content",
