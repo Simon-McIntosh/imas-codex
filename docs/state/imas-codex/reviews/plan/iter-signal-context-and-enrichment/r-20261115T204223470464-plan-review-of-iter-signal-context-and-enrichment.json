@@ -87,6 +87,16 @@
       "note": "Section 10's done-when now lists the same measures as section 5: the fraction of the archive held, grouped and ungrouped counts, parse outcomes, component and control-node groups, patterns under both keys, the group-size distribution, the share of single-member groups, the share in a shared pattern and the twenty largest patterns.",
       "reason": "",
       "when": "2026-11-15T21:16:54.365172+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The decision's context now gives the comparison's figures as recorded: the local model produced 0 of 20 responses that parsed unrepaired and delivered 130 of 200 descriptions; the paid model 20 of 20 and 200 of 200.",
+      "reason": "",
+      "when": "2026-11-15T21:17:01.830937+00:00"
     }
   ],
   "responses": {
@@ -98,6 +108,15 @@
       "note": "Section 10's done-when now lists the same measures as section 5: the fraction of the archive held, grouped and ungrouped counts, parse outcomes, component and control-node groups, patterns under both keys, the group-size distribution, the share of single-member groups, the share in a shared pattern and the twenty largest patterns.",
       "reason": "",
       "when": "2026-11-15T21:16:54.365172+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "note": "The decision's context now gives the comparison's figures as recorded: the local model produced 0 of 20 responses that parsed unrepaired and delivered 130 of 200 descriptions; the paid model 20 of 20 and 200 of 200.",
+      "reason": "",
+      "when": "2026-11-15T21:17:01.830937+00:00"
     },
     "wiring-1": {
       "action": "acted",
