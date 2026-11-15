@@ -51,9 +51,28 @@
       "note": "Section 15 now samples two hundred variables from the cohort the landed scanner section catalogued and declares its wait on that section, so it needs nothing the full-archive catalogue delivers.",
       "reason": "",
       "when": "2026-11-15T08:37:36.210475+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "da4c390a6e83e1cf7ef0e24816b3f77878e566dd",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 14's coverage measure now names its population: the signals that carry a parsed component code. It reports how many of those link to a node, and separately how many catalogued signals carry no parsed code.",
+      "reason": "",
+      "when": "2026-11-15T08:37:39.306832+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "da4c390a6e83e1cf7ef0e24816b3f77878e566dd",
+      "commit_basis": "edit",
+      "note": "Section 14's coverage measure now names its population: the signals that carry a parsed component code. It reports how many of those link to a node, and separately how many catalogued signals carry no parsed code.",
+      "reason": "",
+      "when": "2026-11-15T08:37:39.306832+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
