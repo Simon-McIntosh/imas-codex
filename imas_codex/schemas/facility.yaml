@@ -44,12 +44,14 @@ imports:
 
 enums:
   ArchiveGroupingState:
-    description: Whether an archive selector supplies a complete component and field key
+    description: Structural group kind for a component variable, function variable or invalid selector
     permissible_values:
-      grouped:
-        description: Complete parsed name belongs to a component with a field pattern
+      component:
+        description: Component variable belongs to its physical component group
+      control_node:
+        description: Function-level variable belongs to its control node group
       ungrouped:
-        description: Incomplete or nonconforming name supplies no grouping membership
+        description: Nonconforming selector supplies no control-node or component membership
 
   ArchiveMetadataState:
     description: Outcome of the archive type and full-attribute metadata requests
@@ -62,12 +64,12 @@ enums:
   SignalNameParseOutcome:
     description: Syntactic coverage of an archive selector, independent of convention confirmation
     permissible_values:
-      parsed:
-        description: Component prefix, control function and variable token match the parser grammar
-      partly_parsed:
-        description: A component prefix is recognised but the function or variable token is incomplete
+      component_variable:
+        description: Control path and component category, sequence and field match the naming grammar
+      function_variable:
+        description: Valid function-level variable without a physical component field form
       not_conforming:
-        description: No unambiguous component prefix can be derived
+        description: FunctionID or VariableID does not conform to the naming grammar
 
   ArchiveSamplingMode:
     description: Sampling semantics established by archive metadata or a read
@@ -1711,8 +1713,8 @@ classes:
 
   PlantComponent:
     description: >-
-      Candidate plant component identified by a hierarchical selector prefix.
-      A syntactic parent is not a verified engineering identity or PBS mapping.
+      Component identified by a control path plus category and sequence code.
+      The naming code does not establish a physical meaning or a PBS mapping.
     class_uri: facility:PlantComponent
     attributes:
       id:
@@ -1726,47 +1728,97 @@ classes:
           relationship_type: AT_FACILITY
       code:
         required: true
-        description: Complete selector prefix through this hierarchy level
+        description: Complete control path, colon, component category and sequence
       name:
-        description: Local token at this level of the candidate hierarchy
+        description: Component category and sequence code
       description:
-        description: Explanation of this candidate component's origin
-      parent_component:
-        range: PlantComponent
-        description: Candidate parent derived by removing the final hyphen-delimited token
+        description: Meaning of this component when established from context
+      control_node:
+        range: ControlNode
+        description: Complete control-breakdown path containing this component
         annotations:
-          relationship_type: PARENT_COMPONENT
+          relationship_type: AT_CONTROL_NODE
+      component_category:
+        description: Component function-category letter code, without an inferred meaning
+      component_sequence:
+        description: Component sequence digits, preserving leading zeroes
       parse_provenance:
         description: Parser rule provenance; does not assert engineering identity
 
       archive_member_count:
         range: integer
-        description: Distinct catalogued archive variables with this complete component prefix
+        description: Distinct catalogued archive variables belonging to this component or control node
       archive_field_pattern:
         range: ArchiveFieldPattern
-        description: Exact set of control-function and variable-token pairs exposed by this component
+        description: Pattern keyed by component category and its exact set of field codes
         annotations:
           relationship_type: HAS_ARCHIVE_FIELD_PATTERN
+      archive_category_pattern:
+        range: ArchiveFieldPattern
+        description: Looser category-only pattern holding the union of category fields
+        annotations:
+          relationship_type: HAS_ARCHIVE_CATEGORY_PATTERN
 
-  ArchiveFieldPattern:
-    description: >-
-      A facility-scoped exact field set shared by candidate archive components.
-      Fields retain control-function numbers and variable tokens without interpreting them.
-    class_uri: facility:ArchiveFieldPattern
+  ControlNode:
+    description: A node at one of the five possible control-breakdown hierarchy levels
+    class_uri: facility:ControlNode
     attributes:
       id:
         identifier: true
         required: true
-        description: Facility plus archive_field_pattern plus SHA256 of the sorted field set
+        description: Facility plus control_node plus complete path through this level
       facility_id:
         required: true
         range: Facility
         annotations:
           relationship_type: AT_FACILITY
+      code:
+        required: true
+        description: Complete control path through this level
+      name:
+        description: Control-path field at this level, without an inferred meaning
+      level:
+        required: true
+        range: integer
+        description: One-based control-breakdown depth, from one through five
+      parent_control_node:
+        range: ControlNode
+        description: Control path with its last field removed
+        annotations:
+          relationship_type: PARENT_CONTROL_NODE
+      parse_provenance:
+        description: Naming grammar used to derive the hierarchy
+      description:
+        description: Meaning of this control node when established from context
+      archive_member_count:
+        range: integer
+        description: Function-level variables grouped directly under this control node
+
+  ArchiveFieldPattern:
+    description: >-
+      A facility-scoped category and field-set pattern, or a category-only field union.
+      Patterns retain category and field codes without interpreting their meanings.
+    class_uri: facility:ArchiveFieldPattern
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Facility plus exact category-field fingerprint, or facility plus category-only code
+      facility_id:
+        required: true
+        range: Facility
+        annotations:
+          relationship_type: AT_FACILITY
+      component_category:
+        required: true
+        description: Component function-category code shared by the pattern members
+      key_kind:
+        required: true
+        description: category_fields for an exact field set, or category for the union of all fields in a category
       fields:
         required: true
         multivalued: true
-        description: Sorted unique control-function and variable-token pairs separated by a hyphen
+        description: Sorted unique field codes, excluding sequence numbers and discriminators
       field_count:
         required: true
         range: integer
@@ -3030,21 +3082,32 @@ classes:
         multivalued: true
       name_parse_outcome:
         range: SignalNameParseOutcome
-        description: Syntactic parse coverage; parsed does not mean confirmed against a naming convention
+        description: Component-variable, function-variable or nonconforming syntactic classification
       name_parse_provenance:
         description: Origin of the rules used to interpret the original accessor
       name_parse_rule_status:
         description: Whether the grammar has been confirmed against the naming convention
       name_parse_reason:
         description: Explanation of incomplete or unrecognised selector syntax
-      plant_system_code:
-        description: Candidate plant-system token derived from the first selector-prefix segment
+      control_path:
+        description: FunctionID as an ordered control-breakdown path
+      control_node:
+        range: ControlNode
+        description: Complete control-breakdown path containing this variable
+        annotations:
+          relationship_type: AT_CONTROL_NODE
+      variable_id:
+        description: Unmodified VariableID after the colon
       plant_component_code:
-        description: Complete candidate component prefix before the colon
-      control_function:
-        description: Candidate control-function token between the colon and the variable delimiter
-      variable_token:
-        description: Variable suffix after the control-function delimiter, preserved verbatim
+        description: Control path plus colon and component category and sequence
+      component_category:
+        description: Component function-category letters, without an inferred meaning
+      component_sequence:
+        description: Component sequence digits, preserving leading zeroes
+      field_code:
+        description: Sensor, actuator or controller field code, without an inferred meaning
+      field_discriminator:
+        description: Optional discriminator following the field code
       candidate_plant_component:
         range: PlantComponent
         description: Syntactically derived candidate, never a verified identity
@@ -3052,7 +3115,7 @@ classes:
           relationship_type: CANDIDATE_PLANT_COMPONENT
       archive_grouping_state:
         range: ArchiveGroupingState
-        description: Explicit grouped or ungrouped result from the catalogue grouping pass
+        description: Explicit component, control-node or ungrouped result from the catalogue grouping pass
       archive_grouping_reason:
         description: Why an incomplete or nonconforming selector has no grouping membership
       archive_component:
@@ -3060,6 +3123,11 @@ classes:
         description: Component group derived only from a completely parsed archive selector
         annotations:
           relationship_type: IN_ARCHIVE_COMPONENT
+      archive_control_node:
+        range: ControlNode
+        description: Function-level variable group, separate from physical component membership
+        annotations:
+          relationship_type: IN_ARCHIVE_CONTROL_NODE
       sampling_mode:
         description: Archive-established sampling semantics, unknown when not established
         range: ArchiveSamplingMode

@@ -1,10 +1,4 @@
-"""Exact component and field-set grouping in a private, replaceable SQLite store.
-
-The complete prefix identifies a candidate component. A field retains both the
-control function and the variable token, including numbers: grouping does not
-assert that similarly spelled fields mean the same thing. Metadata remains
-per archive and per member; missing metadata does not erase a listed variable.
-"""
+"""Private component and control-node groups with exact and category field patterns."""
 
 from __future__ import annotations
 
@@ -45,11 +39,7 @@ def catalogue_records(db: sqlite3.Connection) -> Iterator[dict]:
 
 
 class ArchiveGrouping:
-    """Atomically recompute one facility, preserving other facilities' groups.
-
-    The source catalogue is opened read-only. Derived membership lives separately
-    so the metadata scanner's lease and checkpoints stay with their owner.
-    """
+    """Own private membership storage and atomic recomputation of one facility."""
 
     def __init__(self, path: Path):
         path.parent.mkdir(parents=True, exist_ok=True)
@@ -66,97 +56,40 @@ class ArchiveGrouping:
             CREATE TABLE IF NOT EXISTS patterns (
                 facility TEXT, id TEXT PRIMARY KEY, fields TEXT,
                 component_count INTEGER NOT NULL, member_count INTEGER NOT NULL);
+            CREATE TABLE IF NOT EXISTS control_groups (
+                facility TEXT, id TEXT PRIMARY KEY, code TEXT, member_count INTEGER NOT NULL);
             CREATE TABLE IF NOT EXISTS grouping_receipts (facility TEXT PRIMARY KEY, receipt TEXT);
         """)
+        with self.db:
+            for table, columns in {
+                "members": ("outcome", "control_node", "category", "discriminator"),
+                "components": (
+                    "control_node",
+                    "category",
+                    "sequence",
+                    "category_pattern",
+                ),
+                "patterns": ("category", "key_kind"),
+            }.items():
+                present = {
+                    row[1] for row in self.db.execute(f"PRAGMA table_info({table})")
+                }
+                for column in columns:
+                    if column not in present:
+                        self.db.execute(f"ALTER TABLE {table} ADD COLUMN {column} TEXT")
 
     def close(self) -> None:
         self.db.close()
 
-    def rebuild(self, facility: str, records: Iterable[dict]) -> dict:
-        """Replace a complete snapshot transactionally; reject duplicate selectors."""
-        if not facility:
-            raise ValueError("a facility is required")
-        previous_components = {
-            row[0]
-            for row in self.db.execute(
-                "SELECT id FROM components WHERE facility=?", (facility,)
-            )
-        }
-        previous_patterns = {
-            row[0]
-            for row in self.db.execute(
-                "SELECT id FROM patterns WHERE facility=?", (facility,)
-            )
-        }
-
-        def member_rows():
-            for record in records:
-                parsed = parse_variable_name(record["name"])
-                complete = parsed.outcome == SignalNameParseOutcome.parsed
-                yield (
-                    facility,
-                    parsed.selector,
-                    ArchiveGroupingState.grouped.value
-                    if complete
-                    else ArchiveGroupingState.ungrouped.value,
-                    None if complete else parsed.reason,
-                    f"{facility}:plant_component:{parsed.plant_component_code}"
-                    if complete
-                    else None,
-                    f"{parsed.control_function}-{parsed.variable_token}"
-                    if complete
-                    else None,
-                    json.dumps(record.get("archives", {}), sort_keys=True),
-                )
-
-        with self.db:
-            for table in ("members", "components", "patterns"):
-                self.db.execute(f"DELETE FROM {table} WHERE facility=?", (facility,))
-            self.db.executemany(
-                "INSERT INTO members VALUES (?,?,?,?,?,?,?)", member_rows()
-            )
-            rows = self.db.execute(
-                "SELECT component,field FROM members WHERE facility=? AND component IS NOT NULL ORDER BY component,field",
+    def snapshot_records(self, facility: str) -> list[dict]:
+        """Materialize a replayable snapshot without exposing the table layout."""
+        return [
+            {"name": name, "archives": json.loads(archives)}
+            for name, archives in self.db.execute(
+                "SELECT name,archives FROM members WHERE facility=? ORDER BY name",
                 (facility,),
             )
-            for component, fields in groupby(rows, key=lambda row: row[0]):
-                field_set = sorted({row[1] for row in fields})
-                encoded = json.dumps(field_set, separators=(",", ":"))
-                digest = hashlib.sha256(encoded.encode()).hexdigest()
-                pattern = f"{facility}:archive_field_pattern:{digest}"
-                self.db.execute(
-                    "INSERT INTO components VALUES (?,?,?,?,?)",
-                    (
-                        facility,
-                        component,
-                        component.split(":plant_component:", 1)[1],
-                        pattern,
-                        len(field_set),
-                    ),
-                )
-                self.db.execute(
-                    "INSERT INTO patterns VALUES (?,?,?,?,?) "
-                    "ON CONFLICT(id) DO UPDATE SET component_count=component_count+1, member_count=member_count+excluded.member_count",
-                    (facility, pattern, encoded, 1, len(field_set)),
-                )
-            receipt = self.summary(facility)
-            receipt.update(
-                groups_added=len(
-                    self._ids("components", facility) - previous_components
-                ),
-                groups_removed=len(
-                    previous_components - self._ids("components", facility)
-                ),
-                patterns_added=len(self._ids("patterns", facility) - previous_patterns),
-                patterns_removed=len(
-                    previous_patterns - self._ids("patterns", facility)
-                ),
-            )
-            self.db.execute(
-                "INSERT INTO grouping_receipts VALUES (?,?) ON CONFLICT(facility) DO UPDATE SET receipt=excluded.receipt",
-                (facility, json.dumps(receipt)),
-            )
-        return receipt
+        ]
 
     def _ids(self, table: str, facility: str) -> set[str]:
         return {
@@ -166,39 +99,219 @@ class ArchiveGrouping:
             )
         }
 
+    def rebuild(self, facility: str, records: Iterable[dict]) -> dict:
+        """Classify every selector and replace all derived rows in one transaction."""
+        if not facility:
+            raise ValueError("a facility is required")
+        previous = {
+            table: self._ids(table, facility)
+            for table in ("components", "control_groups", "patterns")
+        }
+
+        def member_rows():
+            for record in records:
+                parsed = parse_variable_name(record["name"])
+                component = parsed.outcome == SignalNameParseOutcome.component_variable
+                function = parsed.outcome == SignalNameParseOutcome.function_variable
+                state = (
+                    ArchiveGroupingState.component
+                    if component
+                    else ArchiveGroupingState.control_node
+                    if function
+                    else ArchiveGroupingState.ungrouped
+                )
+                yield (
+                    facility,
+                    parsed.selector,
+                    state.value,
+                    parsed.reason,
+                    f"{facility}:plant_component:{parsed.plant_component_code}"
+                    if component
+                    else None,
+                    parsed.field_code,
+                    json.dumps(record.get("archives", {}), sort_keys=True),
+                    parsed.outcome.value,
+                    f"{facility}:control_node:{parsed.control_path}"
+                    if component or function
+                    else None,
+                    parsed.component_category,
+                    parsed.field_discriminator,
+                )
+
+        with self.db:
+            for table in ("members", "components", "control_groups", "patterns"):
+                self.db.execute(f"DELETE FROM {table} WHERE facility=?", (facility,))
+            self.db.executemany(
+                """INSERT INTO members
+                (facility,name,state,reason,component,field,archives,outcome,control_node,category,discriminator)
+                VALUES (?,?,?,?,?,?,?,?,?,?,?)""",
+                member_rows(),
+            )
+            rows = self.db.execute(
+                """SELECT component,control_node,category,field FROM members
+                WHERE facility=? AND state=? ORDER BY component,field""",
+                (facility, ArchiveGroupingState.component.value),
+            )
+            for component, members in groupby(rows, key=lambda row: row[0]):
+                members = list(members)
+                _, control, category, _ = members[0]
+                fields = sorted({row[3] for row in members})
+                encoded = json.dumps(fields, separators=(",", ":"))
+                digest = hashlib.sha256(
+                    json.dumps([category, fields], separators=(",", ":")).encode()
+                ).hexdigest()
+                pattern = f"{facility}:archive_field_pattern:{digest}"
+                code = component.split(":plant_component:", 1)[1]
+                self.db.execute(
+                    """INSERT INTO components
+                    (facility,id,code,pattern,member_count,control_node,category,sequence,category_pattern)
+                    VALUES (?,?,?,?,?,?,?,?,?)""",
+                    (
+                        facility,
+                        component,
+                        code,
+                        pattern,
+                        len(members),
+                        control,
+                        category,
+                        code.rsplit(":", 1)[1][len(category) :],
+                        f"{facility}:archive_category_pattern:{category}",
+                    ),
+                )
+                self.db.execute(
+                    """INSERT INTO patterns
+                    (facility,id,fields,component_count,member_count,category,key_kind) VALUES (?,?,?,?,?,?,?)
+                    ON CONFLICT(id) DO UPDATE SET component_count=component_count+1,
+                    member_count=member_count+excluded.member_count""",
+                    (
+                        facility,
+                        pattern,
+                        encoded,
+                        1,
+                        len(members),
+                        category,
+                        "category_fields",
+                    ),
+                )
+            for control, count in self.db.execute(
+                """SELECT control_node,count(*) FROM members
+                WHERE facility=? AND state=? GROUP BY control_node""",
+                (facility, ArchiveGroupingState.control_node.value),
+            ):
+                self.db.execute(
+                    "INSERT INTO control_groups VALUES (?,?,?,?)",
+                    (facility, control, control.split(":control_node:", 1)[1], count),
+                )
+            fields_by_category = self.db.execute(
+                """SELECT category,field FROM members
+                WHERE facility=? AND state=? GROUP BY category,field ORDER BY category,field""",
+                (facility, ArchiveGroupingState.component.value),
+            )
+            for category, rows in groupby(fields_by_category, key=lambda row: row[0]):
+                fields = [row[1] for row in rows]
+                count, members = self.db.execute(
+                    "SELECT count(*),sum(member_count) FROM components WHERE facility=? AND category=?",
+                    (facility, category),
+                ).fetchone()
+                self.db.execute(
+                    """INSERT INTO patterns
+                    (facility,id,fields,component_count,member_count,category,key_kind) VALUES (?,?,?,?,?,?,?)""",
+                    (
+                        facility,
+                        f"{facility}:archive_category_pattern:{category}",
+                        json.dumps(fields),
+                        count,
+                        members,
+                        category,
+                        "category",
+                    ),
+                )
+            receipt = self.summary(facility)
+            for table, prefix in (
+                ("components", "groups"),
+                ("control_groups", "control_groups"),
+                ("patterns", "patterns"),
+            ):
+                current = self._ids(table, facility)
+                receipt[prefix + "_added"] = len(current - previous[table])
+                receipt[prefix + "_removed"] = len(previous[table] - current)
+            self.db.execute(
+                "INSERT INTO grouping_receipts VALUES (?,?) ON CONFLICT(facility) DO UPDATE SET receipt=excluded.receipt",
+                (facility, json.dumps(receipt)),
+            )
+        return receipt
+
     def member(self, facility: str, name: str) -> dict:
         row = self.db.execute(
-            "SELECT state,reason,component,field,archives FROM members WHERE facility=? AND name=?",
+            """SELECT state,reason,component,field,archives,outcome,control_node,category,discriminator
+            FROM members WHERE facility=? AND name=?""",
             (facility, name),
         ).fetchone()
         if row is None:
             raise KeyError(name)
-        return {
-            "state": row[0],
-            "reason": row[1],
-            "component": row[2],
-            "field": row[3],
-            "archives": json.loads(row[4]),
-        }
+        return dict(
+            zip(
+                (
+                    "state",
+                    "reason",
+                    "component",
+                    "field",
+                    "archives",
+                    "outcome",
+                    "control_node",
+                    "category",
+                    "discriminator",
+                ),
+                (*row[:4], json.loads(row[4]), *row[5:]),
+                strict=True,
+            )
+        )
 
     def component(self, component_id: str) -> dict:
         row = self.db.execute(
-            "SELECT facility,code,pattern,member_count FROM components WHERE id=?",
+            """SELECT facility,code,pattern,member_count,control_node,category,sequence,category_pattern
+            FROM components WHERE id=?""",
             (component_id,),
         ).fetchone()
         if row is None:
             raise KeyError(component_id)
         return {
             "id": component_id,
+            **dict(
+                zip(
+                    (
+                        "facility_id",
+                        "code",
+                        "archive_field_pattern",
+                        "archive_member_count",
+                        "control_node",
+                        "component_category",
+                        "component_sequence",
+                        "archive_category_pattern",
+                    ),
+                    row,
+                    strict=True,
+                )
+            ),
+        }
+
+    def control_group(self, node_id: str) -> dict:
+        row = self.db.execute(
+            "SELECT facility,code,member_count FROM control_groups WHERE id=?",
+            (node_id,),
+        ).fetchone()
+        if row is None:
+            raise KeyError(node_id)
+        return {
+            "id": node_id,
             "facility_id": row[0],
             "code": row[1],
-            "archive_field_pattern": row[2],
-            "archive_member_count": row[3],
+            "archive_member_count": row[2],
         }
 
     def pattern(self, pattern_id: str) -> dict:
         row = self.db.execute(
-            "SELECT facility,fields,component_count,member_count FROM patterns WHERE id=?",
+            "SELECT facility,fields,component_count,member_count,category,key_kind FROM patterns WHERE id=?",
             (pattern_id,),
         ).fetchone()
         if row is None:
@@ -211,6 +324,17 @@ class ArchiveGrouping:
             "field_count": len(fields),
             "component_count": row[2],
             "member_count": row[3],
+            "component_category": row[4],
+            "key_kind": row[5],
+        }
+
+    def _sizes(self, table: str, facility: str) -> dict[str, int]:
+        return {
+            str(size): count
+            for size, count in self.db.execute(
+                f"SELECT member_count,count(*) FROM {table} WHERE facility=? GROUP BY member_count ORDER BY member_count",
+                (facility,),
+            )
         }
 
     def summary(self, facility: str) -> dict:
@@ -220,38 +344,86 @@ class ArchiveGrouping:
                 (facility,),
             )
         )
-        sizes = dict(
+        outcomes = dict.fromkeys(
+            (outcome.value for outcome in SignalNameParseOutcome), 0
+        )
+        outcomes.update(
+            dict(
+                self.db.execute(
+                    "SELECT outcome,count(*) FROM members WHERE facility=? GROUP BY outcome",
+                    (facility,),
+                )
+            )
+        )
+        sizes = self._sizes("components", facility)
+        control_sizes = self._sizes("control_groups", facility)
+        total = sum(states.values())
+        component_variables = states.get(ArchiveGroupingState.component.value, 0)
+        component_count, control_count = (
+            sum(sizes.values()),
+            sum(control_sizes.values()),
+        )
+        counts = dict(
             self.db.execute(
-                "SELECT member_count,count(*) FROM components WHERE facility=? GROUP BY member_count ORDER BY member_count",
+                "SELECT key_kind,count(*) FROM patterns WHERE facility=? GROUP BY key_kind",
                 (facility,),
             )
         )
-        total = sum(states.values())
-        patterns = [
-            self.pattern(row[0])
-            for row in self.db.execute(
-                "SELECT id FROM patterns WHERE facility=? ORDER BY member_count DESC,id LIMIT 20",
+        shared = {}
+        largest = {}
+        for kind, column in (
+            ("category_fields", "pattern"),
+            ("category", "category_pattern"),
+        ):
+            shared_count = self.db.execute(
+                f"""SELECT coalesce(sum(c.member_count),0) FROM components c
+                JOIN patterns p ON p.id=c.{column} WHERE c.facility=? AND p.component_count>=2""",
                 (facility,),
+            ).fetchone()[0]
+            shared[kind] = (
+                shared_count / component_variables if component_variables else 0
             )
-        ]
+            largest[kind] = [
+                self.pattern(row[0])
+                for row in self.db.execute(
+                    "SELECT id FROM patterns WHERE facility=? AND key_kind=? ORDER BY member_count DESC,id LIMIT 20",
+                    (facility, kind),
+                )
+            ]
         return {
             "facility": facility,
             "variables": total,
-            "grouped": states.get(ArchiveGroupingState.grouped.value, 0),
+            "parse_outcomes": outcomes,
+            "component_variables": component_variables,
+            "function_variables": states.get(
+                ArchiveGroupingState.control_node.value, 0
+            ),
+            "grouped": component_variables
+            + states.get(ArchiveGroupingState.control_node.value, 0),
             "ungrouped": states.get(ArchiveGroupingState.ungrouped.value, 0),
-            "component_groups": sum(sizes.values()),
-            "field_patterns": self.db.execute(
-                "SELECT count(*) FROM patterns WHERE facility=?", (facility,)
-            ).fetchone()[0],
-            "group_size_distribution": {
-                str(size): count for size, count in sizes.items()
+            "component_groups": component_count,
+            "control_node_groups": control_count,
+            "field_patterns": counts.get("category_fields", 0),
+            "category_patterns": counts.get("category", 0),
+            "group_size_distribution": sizes,
+            "control_group_size_distribution": control_sizes,
+            "singleton_signal_share": (sizes.get("1", 0) + control_sizes.get("1", 0))
+            / total
+            if total
+            else 0,
+            "shared_pattern_component_variable_share": shared,
+            "largest_patterns": largest["category_fields"],
+            "largest_category_patterns": largest["category"],
+            "group_descriptions_needed": component_count + control_count,
+            "descriptions_needed": {
+                kind: {
+                    "component": component_count,
+                    "control_node": control_count,
+                    "pattern": counts.get(kind, 0),
+                    "total": component_count + control_count + counts.get(kind, 0),
+                }
+                for kind in ("category_fields", "category")
             },
-            "singleton_signal_share": sizes.get(1, 0) / total if total else 0,
-            "largest_patterns": patterns,
-            "group_descriptions_needed": sum(sizes.values()),
-            "pattern_descriptions_needed": self.db.execute(
-                "SELECT count(*) FROM patterns WHERE facility=?", (facility,)
-            ).fetchone()[0],
         }
 
 

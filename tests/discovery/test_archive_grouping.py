@@ -1,9 +1,10 @@
-"""Component grouping with invented names and exact, complete field sets."""
+"""Convention grouping with invented selectors and exact/category field sets."""
 
 import json
 import sqlite3
 from contextlib import closing
 from itertools import chain
+from unittest.mock import patch
 
 import pytest
 
@@ -25,79 +26,116 @@ def records(*names):
     return [{"name": name} for name in names]
 
 
-def test_components_share_only_identical_complete_field_sets(grouping):
+def test_component_identity_field_patterns_and_category_unions(grouping):
     names = [
-        "DEMO-COOL-PUMP:FCV9001-MEAS",
-        "DEMO-COOL-PUMP:FCV9001-TARGET",
-        "DEMO-COOL-VALVE:FCV9001-TARGET",
-        "DEMO-COOL-VALVE:FCV9001-MEAS",
-        "DEMO-HEAT-PUMP:FCV9001-MEAS",
-        "DEMO-HEAT-VALVE:FCV9002-MEAS",
+        "DEMO-UNIT:QAZ0001-ABCD",
+        "DEMO-UNIT:QAZ0001-EFGH",
+        "DEMO-UNIT:QAZ0002-ABCD",
+        "DEMO-UNIT:QAZ0002-EFGH",
+        "DEMO-UNIT:QAZ0003-ABCD",
+        "DEMO-UNIT:QAZ0004-ABCD1",
+        "DEMO-UNIT:QAZ0004-ABCD2",
+        "DEMO-NEXT:QAZ0001-ABCD",
+        "DEMO-NEXT:QAZ0001-EFGH",
+        "DEMO-UNIT:HJK0001-ABCD",
+        "DEMO-UNIT:STATUS",
+        "DEMO-NEXT:MODE",
+        "unparseable fixture",
     ]
     receipt = grouping.rebuild("demo", records(*reversed(names)))
-    assert (receipt["variables"], receipt["grouped"], receipt["ungrouped"]) == (6, 6, 0)
-    assert receipt["component_groups"] == 4
+    assert receipt["variables"] == 13
+    assert receipt["parse_outcomes"] == {
+        "component_variable": 10,
+        "function_variable": 2,
+        "not_conforming": 1,
+    }
+    assert receipt["grouped"] == 12
+    assert receipt["component_groups"] == 6
+    assert receipt["control_node_groups"] == 2
     assert receipt["field_patterns"] == 3
-    assert receipt["group_size_distribution"] == {"1": 2, "2": 2}
-    assert receipt["singleton_signal_share"] == 2 / 6
-    assert receipt["group_descriptions_needed"] == 4
-    assert receipt["pattern_descriptions_needed"] == 3
-    components = [
-        grouping.component(grouping.member("demo", name)["component"]) for name in names
+    assert receipt["category_patterns"] == 2
+    assert receipt["group_size_distribution"] == {"1": 2, "2": 4}
+    assert receipt["control_group_size_distribution"] == {"1": 2}
+    assert receipt["shared_pattern_component_variable_share"] == {
+        "category_fields": 0.9,
+        "category": 0.9,
+    }
+    assert receipt["descriptions_needed"]["category_fields"] == {
+        "component": 6,
+        "control_node": 2,
+        "pattern": 3,
+        "total": 11,
+    }
+    assert receipt["descriptions_needed"]["category"]["total"] == 10
+    first = grouping.component(grouping.member("demo", names[0])["component"])
+    second = grouping.component(grouping.member("demo", names[2])["component"])
+    assert first["id"] != second["id"]
+    assert first["archive_field_pattern"] == second["archive_field_pattern"]
+    assert grouping.pattern(first["archive_field_pattern"])["fields"] == [
+        "ABCD",
+        "EFGH",
     ]
+    discriminated = grouping.component(grouping.member("demo", names[5])["component"])
+    assert discriminated["archive_member_count"] == 2
+    assert grouping.pattern(discriminated["archive_field_pattern"])["field_count"] == 1
+    assert grouping.pattern(discriminated["archive_category_pattern"])["fields"] == [
+        "ABCD",
+        "EFGH",
+    ]
+    repeat = grouping.rebuild("demo", grouping.snapshot_records("demo"))
     assert (
-        components[0]["archive_field_pattern"] == components[2]["archive_field_pattern"]
+        repeat["groups_added"]
+        == repeat["control_groups_added"]
+        == repeat["patterns_added"]
+        == 0
     )
-    assert (
-        components[0]["archive_field_pattern"] != components[4]["archive_field_pattern"]
-    )
-    assert (
-        components[4]["archive_field_pattern"] != components[5]["archive_field_pattern"]
-    )
-    largest = receipt["largest_patterns"][0]
-    assert largest["fields"] == ["FCV9001-MEAS", "FCV9001-TARGET"]
-    assert (
-        largest["field_count"],
-        largest["component_count"],
-        largest["member_count"],
-    ) == (2, 2, 4)
-    repeat = grouping.rebuild("demo", records(*names))
-    assert repeat["groups_added"] == repeat["patterns_added"] == 0
-    assert repeat["groups_removed"] == repeat["patterns_removed"] == 0
     assert repeat["largest_patterns"] == receipt["largest_patterns"]
 
 
+def test_function_variables_belong_only_to_their_control_node(grouping):
+    receipt = grouping.rebuild(
+        "demo", records("DEMO-UNIT:STATUS", "DEMO-UNIT:MODE", "DEMO-UNIT:QAZ0001-ABCD")
+    )
+    assert receipt["component_groups"] == receipt["control_node_groups"] == 1
+    member = grouping.member("demo", "DEMO-UNIT:STATUS")
+    assert member["state"] == "control_node"
+    assert member["component"] is None
+    assert member["field"] is None
+    assert grouping.control_group(member["control_node"])["archive_member_count"] == 2
+    assert receipt["component_variables"] == 1
+    assert receipt["function_variables"] == 2
+
+
 @pytest.mark.parametrize(
-    "name", ["unparseable fixture", "DEMO-COOL:FCV9001", "DEMO-COOL:UNKNOWN-MEAS"]
+    "name",
+    ["unparseable fixture", "DEMOX-UNIT:QAZ0001-ABCD", "DEMO-UNIT:HAS_UNDERSCORE"],
 )
 def test_unparseable_name_is_counted_without_component_membership(grouping, name):
-    receipt = grouping.rebuild("demo", records("DEMO-COOL:FCV9001-MEAS", name))
+    receipt = grouping.rebuild("demo", records("DEMO-UNIT:QAZ0001-ABCD", name))
     assert receipt["variables"] == 2
-    assert receipt["grouped"] == receipt["ungrouped"] == 1
+    assert receipt["component_variables"] == receipt["ungrouped"] == 1
     assert receipt["component_groups"] == receipt["field_patterns"] == 1
     member = grouping.member("demo", name)
     assert member["state"] == "ungrouped"
     assert member["reason"]
-    assert member["component"] is None
-    assert member["field"] is None
+    assert member["component"] is member["control_node"] is member["field"] is None
 
 
-def test_growth_changes_pattern_without_duplicating_component(grouping):
-    initial = records("DEMO-COOL:FCV9001-MEAS")
-    first = grouping.rebuild("demo", initial)
+def test_growth_changes_exact_pattern_and_refreshes_category_union(grouping):
+    initial = records("DEMO-UNIT:QAZ0001-ABCD")
+    grouping.rebuild("demo", initial)
     component = grouping.member("demo", initial[0]["name"])["component"]
-    enlarged = initial + records("DEMO-COOL:FCV9001-TARGET")
-    grown = grouping.rebuild("demo", enlarged)
+    category_pattern = grouping.component(component)["archive_category_pattern"]
+    grown = grouping.rebuild("demo", initial + records("DEMO-UNIT:QAZ0001-EFGH"))
     assert grouping.member("demo", initial[0]["name"])["component"] == component
     assert grown["groups_added"] == grown["groups_removed"] == 0
     assert grown["patterns_added"] == grown["patterns_removed"] == 1
-    assert grown["largest_patterns"][0]["id"] != first["largest_patterns"][0]["id"]
-    assert grouping.component(component)["archive_member_count"] == 2
-    assert grouping.rebuild("demo", enlarged)["patterns_added"] == 0
+    assert grouping.component(component)["archive_category_pattern"] == category_pattern
+    assert grouping.pattern(category_pattern)["fields"] == ["ABCD", "EFGH"]
 
 
 def test_failed_or_duplicate_snapshot_preserves_committed_groups(grouping):
-    initial = records("DEMO-COOL:FCV9001-MEAS")
+    initial = records("DEMO-UNIT:QAZ0001-ABCD")
     grouping.rebuild("demo", initial)
     before = grouping.summary("demo")
     with pytest.raises(sqlite3.IntegrityError):
@@ -113,34 +151,31 @@ def test_failed_or_duplicate_snapshot_preserves_committed_groups(grouping):
     assert grouping.summary("demo") == before
 
 
-def test_facilities_have_independent_membership_and_pattern_identity(grouping):
-    names = records("DEMO-COOL:FCV9001-MEAS")
+def test_facilities_have_independent_groups(grouping):
+    names = records("DEMO-UNIT:QAZ0001-ABCD")
     alpha = grouping.rebuild("alpha", names)
     beta = grouping.rebuild("beta", names)
     assert alpha["largest_patterns"][0]["id"] != beta["largest_patterns"][0]["id"]
     grouping.rebuild("alpha", [])
-    assert grouping.summary("beta")["variables"] == 1
-    assert grouping.member("beta", names[0]["name"])["state"] == "grouped"
+    assert grouping.summary("beta")["component_variables"] == 1
 
 
-def test_largest_patterns_are_ranked_by_signal_count_and_bounded(grouping):
-    # Every component exposes a different exact field set.
-    items = records(*(f"DEMO-UNIT{index}:FCV{index}-MEAS" for index in range(25)))
-    items += records("DEMO-EXTRA:FCV0-MEAS")
-    receipt = grouping.rebuild("demo", items)
+def test_largest_patterns_are_ranked_and_bounded(grouping):
+    names = [f"DEMO-UNIT:QAZ{index:04d}-{chr(65 + index)}" for index in range(25)]
+    names.append("DEMO-UNIT:QAZ9999-A")
+    receipt = grouping.rebuild("demo", records(*names))
     assert receipt["field_patterns"] == 25
     assert len(receipt["largest_patterns"]) == 20
     assert receipt["largest_patterns"][0]["member_count"] == 2
-    assert all(pattern["field_count"] == 1 for pattern in receipt["largest_patterns"])
 
 
 def test_private_catalogue_union_keeps_pending_refused_and_graph_only_variables(
     tmp_path, grouping
 ):
     source = tmp_path / "catalogue.sqlite"
-    measured = "DEMO-COOL:FCV9001-MEAS"
-    pending = "DEMO-COOL:FCV9001-TARGET"
-    graph_only = "DEMO-HEAT:FCV9001-MEAS"
+    measured = "DEMO-COOL:QAZ0001-ABCD"
+    pending = "DEMO-COOL:QAZ0001-EFGH"
+    graph_only = "DEMO-HEAT:QAZ0001-ABCD"
     with closing(ArchiveCatalogue(source)) as catalogue:
         catalogue.seed(
             {"slow": [measured, pending, "unparseable fixture"], "fast": [measured]},
@@ -196,16 +231,20 @@ def test_private_catalogue_union_keeps_pending_refused_and_graph_only_variables(
     assert receipt["metadata_completed_fraction"] == 1 / 3
     assert receipt["metadata_scan_complete"] is False
     assert receipt["graph_only_variables"] == 1
-    assert (receipt["variables"], receipt["grouped"], receipt["ungrouped"]) == (4, 3, 1)
+    assert (receipt["variables"], receipt["grouped"], receipt["ungrouped"]) == (
+        4,
+        3,
+        1,
+    )
     member = grouping.member("demo", measured)
     assert member["archives"]["slow"]["unit"] == "K"
     assert member["archives"]["slow"]["data_type"] == "float64"
     assert member["archives"]["fast"]["metadata_state"] == "unavailable"
-    assert grouping.member("demo", pending)["state"] == "grouped"
+    assert grouping.member("demo", pending)["state"] == "component"
 
 
 def test_invalid_source_census_cannot_replace_grouping(tmp_path, grouping):
-    grouping.rebuild("demo", records("DEMO-COOL:FCV9001-MEAS"))
+    grouping.rebuild("demo", records("DEMO-COOL:QAZ0001-ABCD"))
     before = grouping.summary("demo")
     source = tmp_path / "catalogue.sqlite"
     with closing(ArchiveCatalogue(source)) as catalogue:
@@ -219,7 +258,7 @@ def test_grouping_snapshot_allows_metadata_writer_to_commit(
     tmp_path, grouping, monkeypatch
 ):
     source = tmp_path / "catalogue.sqlite"
-    name = "DEMO-COOL:FCV9001-MEAS"
+    name = "DEMO-COOL:QAZ0001-ABCD"
     rebuild = grouping.rebuild
     with closing(ArchiveCatalogue(source)) as catalogue:
         catalogue.db.execute("PRAGMA busy_timeout=0")
@@ -251,29 +290,45 @@ def test_grouping_snapshot_allows_metadata_writer_to_commit(
         assert catalogue.record(name)["archives"]["slow"]["completed"] is True
 
 
-def test_runner_publishes_repeated_snapshot_and_a_failure_receipt(tmp_path):
+def test_runner_uses_store_accessor_and_publishes_failure_receipts(tmp_path):
     source, store, receipt = (
         tmp_path / name for name in ("source.sqlite", "groups.sqlite", "receipt.json")
     )
     with closing(ArchiveCatalogue(source)) as catalogue:
         catalogue.seed(
-            {"slow": ["DEMO-COOL:FCV9001-MEAS", "unparseable fixture"]},
+            {"slow": ["DEMO-UNIT:QAZ0001-ABCD", "unparseable fixture"]},
             timestamp="invented",
         )
-    result = run_grouping(
-        catalogue=source, store=store, facility="demo", receipt_path=receipt
-    )
+    original = ArchiveGrouping.snapshot_records
+    calls = []
+
+    def snapshot(self, facility):
+        calls.append(facility)
+        return original(self, facility)
+
+    with patch.object(ArchiveGrouping, "snapshot_records", snapshot):
+        result = run_grouping(
+            catalogue=source, store=store, facility="demo", receipt_path=receipt
+        )
+    assert calls == ["demo"]
     assert json.loads(receipt.read_text()) == result
     assert result["status"] == "complete"
     assert result["first"]["ungrouped"] == 1
-    assert result["repeat"]["groups_added"] == result["repeat"]["patterns_added"] == 0
+    assert (
+        result["repeat"]["groups_added"]
+        == result["repeat"]["control_groups_added"]
+        == result["repeat"]["patterns_added"]
+        == 0
+    )
     with pytest.raises(ValueError, match="separate"):
         run_grouping(
             catalogue=source, store=source, facility="demo", receipt_path=receipt
         )
-    missing = tmp_path / "missing.sqlite"
     with pytest.raises(sqlite3.OperationalError):
         run_grouping(
-            catalogue=missing, store=store, facility="demo", receipt_path=receipt
+            catalogue=tmp_path / "missing.sqlite",
+            store=store,
+            facility="demo",
+            receipt_path=receipt,
         )
     assert json.loads(receipt.read_text())["status"] == "failed"

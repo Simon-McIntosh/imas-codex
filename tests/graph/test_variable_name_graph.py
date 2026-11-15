@@ -1,4 +1,4 @@
-"""Real parser writes, hierarchy and refusal on a disposable graph."""
+"""Real naming-convention writes and refusal on a disposable graph."""
 
 import pytest
 
@@ -13,7 +13,9 @@ from imas_codex.graph.models import ArchiveEndpoint
 pytestmark = pytest.mark.graph
 
 
-def test_scanner_and_all_catalogue_pass_write_only_derived_candidates(disposable_graph):
+def test_scanner_and_shared_catalogue_parse_persist_distinct_identities(
+    disposable_graph,
+):
     with GraphClient() as graph:
         for facility in ("demo-alpha", "demo-beta"):
             graph.query("CREATE (:Facility {id: $id})", id=facility)
@@ -31,9 +33,9 @@ def test_scanner_and_all_catalogue_pass_write_only_derived_candidates(disposable
                 ],
             )
             selectors = [
-                "DEMO-COOL-LOOP-PUMP:PCV9001-MEAS",
-                "arbitrary text",
-                "DEMO-COOL-LOOP-PUMP:PCV9001",
+                "DEMO-UNIT:QAZ0001-ABCD",
+                "unparseable fixture",
+                "DEMO-UNIT:STATUS",
             ]
             signals = [
                 scanner.CodacUDAScanner._signal(
@@ -45,74 +47,94 @@ def test_scanner_and_all_catalogue_pass_write_only_derived_candidates(disposable
                         "metadata_state": "available",
                         "archive_metadata": {"type": {"datatypes": []}, "full": []},
                     },
-                    f"example-{index}",
+                    f"fixture-{index}",
                 )
                 for index, selector in enumerate(selectors)
             ]
             for _ in range(2):
-                assert scanner._persist_signals(facility, "example", signals) == 3
+                assert scanner._persist_signals(facility, "fixture", signals) == 3
         for _ in range(2):
             assert parse_archive_catalogue(graph, batch_size=2) == {
                 "total": 6,
                 "written": 6,
-                "outcomes": {"parsed": 2, "partly_parsed": 2, "not_conforming": 2},
+                "outcomes": {
+                    "component_variable": 2,
+                    "function_variable": 2,
+                    "not_conforming": 2,
+                },
             }
-        rows = graph.query("""
-            MATCH (s:FacilitySignal)
+        rows = graph.query("""MATCH (s:FacilitySignal)
             OPTIONAL MATCH (s)-[:CANDIDATE_PLANT_COMPONENT]->(c:PlantComponent)
-            RETURN s.accessor AS selector, s.name AS name, s.name_parse_outcome AS outcome,
-                   s.candidate_plant_component AS component_property, c.id AS component,
-                   c.code AS code, s.name_parse_rule_status AS rule_status
-        """)
+            OPTIONAL MATCH (s)-[:AT_CONTROL_NODE]->(control:ControlNode)
+            RETURN s.accessor AS selector,s.name_parse_outcome AS outcome,
+                s.candidate_plant_component AS component_property,c.id AS component,c.code AS code,
+                s.control_node AS control_property,control.id AS control,control.code AS control_code""")
         assert len(rows) == 6
         for row in rows:
-            assert row["selector"] == row["name"]
             assert row["component_property"] == row["component"]
-            assert row["rule_status"] == "unconfirmed"
-            if row["outcome"] == "not_conforming":
+            assert row["control_property"] == row["control"]
+            if row["outcome"] == "component_variable":
+                assert row["code"] == "DEMO-UNIT:QAZ0001"
+                assert row["control_code"] == "DEMO-UNIT"
+            elif row["outcome"] == "function_variable":
                 assert row["component"] is None
+                assert row["control_code"] == "DEMO-UNIT"
             else:
-                assert row["code"] == row["selector"].split(":")[0]
+                assert row["component"] is row["control"] is None
         hierarchy = graph.query(
-            "MATCH (c:PlantComponent) OPTIONAL MATCH (c)-[:PARENT_COMPONENT]->(p:PlantComponent) RETURN c.code AS code, c.parent_component AS parent_property, p.id AS parent"
+            "MATCH (c:ControlNode) OPTIONAL MATCH (c)-[:PARENT_CONTROL_NODE]->(p:ControlNode) RETURN c.parent_control_node AS parent_property,p.id AS parent"
         )
-        assert len(hierarchy) == 8
-        assert sum(row["parent"] is not None for row in hierarchy) == 6
+        assert len(hierarchy) == 4
+        assert sum(row["parent"] is not None for row in hierarchy) == 2
         assert all(row["parent_property"] == row["parent"] for row in hierarchy)
+        assert graph.query("MATCH (c:PlantComponent) RETURN count(c) AS n") == [
+            {"n": 2}
+        ]
 
 
-def test_nonconforming_name_removes_stale_candidate_link(disposable_graph):
+def test_nonconforming_parse_removes_stale_component_and_control_links(
+    disposable_graph,
+):
     with GraphClient() as graph:
-        graph.query("""
-            CREATE (:Facility {id:'demo'})
-            CREATE (s:FacilitySignal {id:'demo:signal', facility_id:'demo', accessor:'arbitrary text',
-                                    candidate_plant_component:'demo:unsupported', control_function:'UNSUPPORTED'})
+        graph.query("""CREATE (:Facility {id:'demo'})
+            CREATE (s:FacilitySignal {id:'demo:signal',facility_id:'demo',accessor:'unparseable fixture',
+                candidate_plant_component:'demo:unsupported',control_node:'demo:unsupported-control',
+                plant_system_code:'WRONG',control_function:'WRONG',variable_token:'WRONG'})
             CREATE (c:PlantComponent {id:'demo:unsupported'})
+            CREATE (control:ControlNode {id:'demo:unsupported-control'})
             CREATE (s)-[:CANDIDATE_PLANT_COMPONENT]->(c)
-        """)
+            CREATE (s)-[:AT_CONTROL_NODE]->(control)""")
         assert persist_name_parses(
             graph,
-            [{"id": "demo:signal", "facility": "demo", "selector": "arbitrary text"}],
+            [
+                {
+                    "id": "demo:signal",
+                    "facility": "demo",
+                    "selector": "unparseable fixture",
+                }
+            ],
         ) == {"not_conforming": 1}
-        assert graph.query("""
-            MATCH (s:FacilitySignal {id:'demo:signal'})
-            OPTIONAL MATCH (s)-[:CANDIDATE_PLANT_COMPONENT]->(c)
-            RETURN s.name_parse_outcome AS outcome, s.candidate_plant_component AS property,
-                   s.control_function AS function, count(c) AS links
-        """) == [
-            {
-                "outcome": "not_conforming",
-                "property": None,
-                "function": None,
-                "links": 0,
-            }
-        ]
+        assert (
+            graph.query("""MATCH (s:FacilitySignal {id:'demo:signal'})
+            OPTIONAL MATCH (s)-[:CANDIDATE_PLANT_COMPONENT|AT_CONTROL_NODE]->(c)
+            RETURN s.name_parse_outcome AS outcome,s.candidate_plant_component AS component,
+                s.control_node AS control,s.control_function AS legacy,count(c) AS links""")
+            == [
+                {
+                    "outcome": "not_conforming",
+                    "component": None,
+                    "control": None,
+                    "legacy": None,
+                    "links": 0,
+                }
+            ]
+        )
 
 
 def test_changed_selector_refuses_a_stale_parse_write(disposable_graph):
     with GraphClient() as graph:
         graph.query(
-            "CREATE (:Facility {id:'demo'}), (:FacilitySignal {id:'demo:signal', facility_id:'demo', accessor:'arbitrary text'})"
+            "CREATE (:Facility {id:'demo'}), (:FacilitySignal {id:'demo:signal', facility_id:'demo', accessor:'unparseable fixture'})"
         )
         with pytest.raises(RuntimeError, match="not acknowledged"):
             persist_name_parses(
@@ -121,7 +143,7 @@ def test_changed_selector_refuses_a_stale_parse_write(disposable_graph):
                     {
                         "id": "demo:signal",
                         "facility": "demo",
-                        "selector": "DEMO-COOL:PCV9001-MEAS",
+                        "selector": "DEMO-UNIT:QAZ0001-ABCD",
                     }
                 ],
             )

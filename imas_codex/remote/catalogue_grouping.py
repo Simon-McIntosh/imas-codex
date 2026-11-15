@@ -58,34 +58,34 @@ def run_grouping(
         )
         write_receipt(receipt_path, receipt)
         # Replay the same snapshot, not a fresh read of a growing metadata store.
-        rows = grouping.db.execute(
-            "SELECT name,archives FROM members WHERE facility=? ORDER BY name",
-            (facility,),
-        ).fetchall()
-        import json
-
         receipt["repeat"] = grouping.rebuild(
-            facility,
-            (
-                {"name": name, "archives": json.loads(archives)}
-                for name, archives in rows
-            ),
+            facility, grouping.snapshot_records(facility)
         )
-        if receipt["repeat"]["groups_added"] or receipt["repeat"]["patterns_added"]:
-            raise RuntimeError("repeated grouping added groups or field patterns")
+        if any(
+            receipt["repeat"][key]
+            for key in ("groups_added", "control_groups_added", "patterns_added")
+        ):
+            raise RuntimeError(
+                "repeated grouping added component groups, control groups or patterns"
+            )
         if graph is not None:
             from imas_codex.discovery.signals.archive_grouping_graph import (
+                graph_group_counts,
                 persist_archive_grouping,
             )
 
             receipt["graph"] = persist_archive_grouping(
                 graph, grouping, facility, signals
             )
+            receipt["graph_counts"] = graph_group_counts(graph, facility)
             receipt["graph_repeat"] = persist_archive_grouping(
                 graph, grouping, facility, signals
             )
+            receipt["graph_counts_repeat"] = graph_group_counts(graph, facility)
             if receipt["graph"] != receipt["graph_repeat"]:
                 raise RuntimeError("graph grouping repeat changed coverage")
+            if receipt["graph_counts"] != receipt["graph_counts_repeat"]:
+                raise RuntimeError("graph grouping repeat changed group counts")
         receipt["status"] = "complete"
     except BaseException as exc:
         receipt.update(status="failed", error_type=type(exc).__name__, error=str(exc))
