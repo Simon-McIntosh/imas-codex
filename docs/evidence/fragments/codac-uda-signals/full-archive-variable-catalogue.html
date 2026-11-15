@@ -30,11 +30,12 @@
   <h2>Bounded metadata, one ingest owner and recoverable acknowledgement</h2>
   <figure>
     <img src="/imas-codex/figures/codac-uda-signals/full-archive-variable-catalogue/catalogue-recovery.svg"
-      alt="The independent census precedes bounded metadata requests, durable metadata checkpoints, the pipeline ingest owner and acknowledged graph identities.">
-    <figcaption>Each batch is durable before ingest; completed metadata survives
-      interrupted acknowledgement. The diagram uses the repository's checked
-      export, passed text bounds and overlap validation and was inspected as a
-      rendered raster.</figcaption>
+      alt="The independent census feeds bounded native readers and a private SQLite catalogue. A separate read-only audit checks the frozen pilot graph.">
+    <figcaption>The diagram reflects the current private-store contract, superseding the
+      graph-ingest route recorded in the historical evidence below. Metadata
+      batches commit to SQLite; the scan has no graph connection. The separate
+      population audit is read-only. Export passed text bounds and overlap
+      validation, and the rendered raster was inspected.</figcaption>
   </figure>
   <p>The scanner's separate signal writer was removed. Bounded batches use
     <code>ingest_discovered_signals</code>, preserving enrichment, claims and
@@ -209,4 +210,132 @@
     with <code>Access/permission denied for job 1317295</code>. A later continuation
     from the durable checkpoint may be needed if the remaining scan exceeds that
     allocation; the initial backfill rate does not predict uncached type requests.</p>
+</section>
+<section id="full-archive-variable-catalogue-private-store">
+  <h2>Private catalogue delivery; the pilot graph stays fixed</h2>
+  <p>The current contract replaces full-archive graph ingestion with a private
+    catalogue store. The 94,633 existing pilot signals are retained without
+    deletion, extension or refresh by this scan. The tracked entry point is
+    <code>uv run --no-sync python -m imas_codex.remote.catalogue_scan</code>.
+    Its arguments name the private SQLite store, private configuration, receipt,
+    reader bound, batch size and time budget. The scan has no graph client,
+    graph model or discovery-pipeline import in its execution path. The old bulk
+    catalogue option in the pilot scanner is explicitly refused. The pilot's
+    ordinary owner-ingest path, refresh preservation and check routing remain
+    covered by their tests.</p>
+  <p>The store retains every archive membership and the raw output of both
+    <code>getMetaTypeJSONCollapsed</code> and <code>getMetaJSON</code>.
+    Successful cached type documents are reused. Available records require both
+    interface documents. Refusals carry an unavailable state, archive error code
+    and diagnostics; if only one interface succeeds, its raw output is retained
+    as partial interface evidence without calling the record available. Labels,
+    engineering unit, format and display, alarm and warning limits are retained.
+    A missing or blank unit is absent; no data reads are used to obtain one.</p>
+  <table>
+    <thead><tr><th>Archive</th><th>Census variables</th><th>Both interfaces completed</th><th>Available</th><th>Unavailable</th></tr></thead>
+    <tbody><tr><td>Fast</td><td>6,861</td><td>6,861</td><td>6,861</td><td>0</td></tr>
+<tr><td>Slow</td><td>988,145</td><td>7,604</td><td>7,604</td><td>0</td></tr></tbody>
+  </table>
+  <p>Listed by both archives: <strong>0</strong>. Census union and store distinct
+    variable count: <strong>995,006</strong>; difference: <strong>0</strong>.
+    At the bounded control receipt, 14,465 variables have complete
+    metadata outcomes (1.453760%), and
+    980,541 await the full-metadata pass. All completed outcomes in
+    this partial subset are available; unavailable outcomes and their error-code
+    groups are both zero so far. The unrequested population is not an absence
+    claim. A fixture that makes a metadata request fail yields one unavailable
+    outcome with code 9105 and its error, proving that the unavailable-state and
+    error-code counters can report a failure.</p>
+  <table>
+    <thead><tr><th>Read-only pilot measurement</th><th>Signals</th><th>Observed at</th></tr></thead>
+    <tbody>
+      <tr><td>Before private scan</td><td>94,633</td><td>2026-11-15T11:00:35.856879+00:00</td></tr>
+      <tr><td>After concurrency measurement</td><td>94,633</td><td>2026-11-15T11:04:51.507193+00:00</td></tr>
+      <tr><td>After native exit-status control</td><td>94,633</td><td>2026-11-15T11:08:44.306349+00:00</td></tr>
+    </tbody>
+  </table>
+  <p>Before minus after is <strong>0</strong>; each read also found 94,633
+    facility properties and 94,633 distinct identities. Population measurement
+    uses the separate read-only <code>imas_codex.remote.catalogue_audit</code>
+    entry point. The metadata scan itself never imports it.</p>
+  <table>
+    <thead><tr><th>Native readers</th><th>Variables this phase</th><th>Scan elapsed [s]</th><th>Variables/s</th><th>Cumulative complete</th><th>Completed fraction</th></tr></thead>
+    <tbody><tr><td>1</td><td>800</td><td>42.919</td><td>18.640</td><td>9,661</td><td>0.9709%</td></tr>
+<tr><td>2</td><td>1,600</td><td>71.984</td><td>22.227</td><td>11,261</td><td>1.1318%</td></tr>
+<tr><td>4</td><td>3,200</td><td>82.592</td><td>38.744</td><td>14,461</td><td>1.4534%</td></tr></tbody>
+  </table>
+  <p>Rigel benchmark job 1317393 completed in 4 min 24 s, against its 30-minute
+    bound, using 69.740 s of actual CPU time. Each phase continued the same store
+    on disjoint pending selector ranges. There were no metadata errors in these
+    sampled ranges. Four readers gave the best observed rate, 38.744 variables/s,
+    compared with 18.640 for one; no larger concurrency was needed. These phases
+    reused cached type documents, so uncached type requests can lower the later
+    rate. No metered enrichment calls were made.</p>
+  <p>Rigel control job 1317431 then completed four more full-metadata requests,
+    read the native processes' successful exit statuses, and wrote a paused
+    receipt with SQLite integrity <code>ok</code>. That receipt is the snapshot
+    used for the counts below. Every field counter has a fixture where the field
+    is present, including zero-valued limits and supplied sampling times; zeros
+    below mean no supplied value in the completed subset.</p>
+  <table>
+    <thead><tr><th>Metadata field</th><th>Completed variables carrying it</th></tr></thead>
+    <tbody><tr><td>Both raw metadata interface documents</td><td>14,465</td></tr>
+<tr><td>Datatype structures</td><td>14,465</td></tr>
+<tr><td>Scalar value type</td><td>8,387</td></tr>
+<tr><td>Archive type description</td><td>8,064</td></tr>
+<tr><td>Engineering unit from full metadata</td><td>1,412</td></tr>
+<tr><td>Labels</td><td>6,862</td></tr>
+<tr><td>Format</td><td>1,202</td></tr>
+<tr><td>Lower display limit</td><td>1,202</td></tr>
+<tr><td>Upper display limit</td><td>1,202</td></tr>
+<tr><td>Lower alarm limit</td><td>0</td></tr>
+<tr><td>Upper alarm limit</td><td>0</td></tr>
+<tr><td>Lower warning limit</td><td>0</td></tr>
+<tr><td>Upper warning limit</td><td>0</td></tr>
+<tr><td>First sample time</td><td>0</td></tr>
+<tr><td>Last sample time</td><td>0</td></tr>
+<tr><td>Archive sampling kind</td><td>0</td></tr>
+<tr><td>Archive sampling evidence</td><td>0</td></tr>
+<tr><td>Partial interface documents on unavailable outcomes</td><td>0</td></tr></tbody>
+  </table>
+  <p>The frozen pilot's type-only metadata remains historical graph data.
+    Coverage above counts the private store's completed full-metadata outcomes,
+    excluding pending type-only checkpoints. Missing sample times and sampling
+    evidence are left absent, and generic type descriptions are not treated as
+    variable-specific physical descriptions.</p>
+  <p>The guard reproduced before repair: the pilot scanner's private-catalogue
+    test reported <code>DID NOT RAISE ValueError</code>. It now refuses the route
+    before any reader or writer. The focused gate reports
+    <code>115 passed, 1 warning in 16.18s</code>; the isolated graph gate reports
+    <code>1 passed, 1 warning in 51.17s</code>. The final store gate, including
+    cleanup status and all field-counter controls, reports
+    <code>16 passed, 1 warning in 9.16s</code>.</p>
+  <p>The declared mutation classifies a failed metadata request as available with
+    empty metadata. The store refuses it, and the mutated run reports
+    <code>1 failed, 1 warning in 2.53s</code>, naming
+    <code>test_store_metadata_refusal_is_unavailable_with_archive_code</code>;
+    the head arm passes that test. The graph-import guard was also made to fire
+    on an explicit graph import, then the real store scan and its cached repeat
+    ran successfully while graph, discovery and Neo4j imports were refused.</p>
+  <p>An additional receipt control reproduced a cleanup exception that left a
+    terminal receipt marked complete. Cleanup now checks native exit statuses,
+    attempts every owned cleanup, marks the receipt failed and propagates the
+    error. Its reproducing test fails before the fix and passes afterward.
+    Interrupted/reopened fixture scans never refetch completed ranges; a repeated
+    completed store adds zero rows and makes zero metadata requests. A second
+    job attempting the same store is refused before any native reader starts.</p>
+  <p>Persistent rigel job <strong>1317445</strong> continues the same store with
+    four native reader processes and batches of 100. Its 23-hour application
+    budget drains in-flight batches before the 24-hour scheduler limit; a paused
+    receipt can be continued by another job using the same entry point and
+    SQLite file. The job was submitted without a foreground wait. Full archive
+    completion is not claimed, and is not required for review of the committed
+    code and this measured partial-store delivery.</p>
+  <p>Private store: <code>~/.cache/imas-codex-codac-uda/full-census/catalogue.sqlite</code>.
+    Log: <code>~/.cache/imas-codex-codac-uda/full-census/store-persistent-1317445.log</code>.
+    Terminal receipt: <code>~/.cache/imas-codex-codac-uda/full-census/store-job-1317445-receipt.json</code>.
+    The manifest waits on that receipt. All seven superseded private import
+    programs were removed after the tracked entry point passed its checks;
+    census, selector lists, configuration, store, diagnostic helpers and receipts
+    were preserved. The coordinator owns review, promotion and plan closure.</p>
 </section>

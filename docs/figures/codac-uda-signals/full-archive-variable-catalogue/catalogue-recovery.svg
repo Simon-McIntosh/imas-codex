@@ -6,7 +6,7 @@
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
     <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
-    <dc:date>2026-11-15T10:08:26.155643</dc:date>
+    <dc:date>2026-11-15T12:02:33.232832</dc:date>
     <dc:format>image/svg+xml</dc:format>
     <dc:creator>
      <cc:Agent>
@@ -30,84 +30,87 @@ z
   </g>
   <g id="axes_1">
    <g id="patch_2">
-    <path d="M 366.892903 116.1216
-Q 401.990837 116.1216 435.747131 116.1216
-" clip-path="url(#pebbf51017e)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
-    <path d="M 429.747131 113.1216
-L 435.747131 116.1216
-L 429.747131 119.1216
-" clip-path="url(#pebbf51017e)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 413.260903 116.1216
+Q 448.358837 116.1216 482.115131 116.1216
+" clip-path="url(#p02d1b7bed3)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 476.115131 113.1216
+L 482.115131 116.1216
+L 476.115131 119.1216
+" clip-path="url(#p02d1b7bed3)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
    </g>
    <g id="patch_3">
-    <path d="M 643.104 175.354521
-Q 643.104 201.969931 643.104 227.2437
-" clip-path="url(#pebbf51017e)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
-    <path d="M 646.104 221.2437
-L 643.104 227.2437
-L 640.104 221.2437
-" clip-path="url(#pebbf51017e)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 689.472 175.354521
+Q 689.472 201.969931 689.472 227.2437
+" clip-path="url(#p02d1b7bed3)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 692.472 221.2437
+L 689.472 227.2437
+L 686.472 221.2437
+" clip-path="url(#p02d1b7bed3)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
    </g>
    <g id="patch_4">
-    <path d="M 437.087897 278.27712
-Q 401.989963 278.27712 368.233669 278.27712
-" clip-path="url(#pebbf51017e)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
-    <path d="M 374.233669 281.27712
-L 368.233669 278.27712
-L 374.233669 275.27712
-" clip-path="url(#pebbf51017e)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 483.455897 278.27712
+Q 448.357963 278.27712 414.601669 278.27712
+" clip-path="url(#p02d1b7bed3)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 420.601669 281.27712
+L 414.601669 278.27712
+L 420.601669 275.27712
+" clip-path="url(#p02d1b7bed3)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
    </g>
    <g id="patch_5">
-    <path d="M 179.424 342.279321
-Q 179.424 368.894731 179.424 394.1685
-" clip-path="url(#pebbf51017e)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
-    <path d="M 182.424 388.1685
-L 179.424 394.1685
-L 176.424 388.1685
-" clip-path="url(#pebbf51017e)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 483.455897 445.20192
+Q 448.357963 445.20192 414.601669 445.20192
+" clip-path="url(#p02d1b7bed3)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
+    <path d="M 420.601669 448.20192
+L 414.601669 445.20192
+L 420.601669 442.20192
+" clip-path="url(#p02d1b7bed3)" style="fill: none; stroke: #929292; stroke-width: 1.2; stroke-linecap: round"/>
    </g>
    <g id="text_1">
-    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="179.424" y="101.201355" transform="rotate(-0 179.424 101.201355)">Independent census</text>
+    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="225.792" y="101.201355" transform="rotate(-0 225.792 101.201355)">Independent census</text>
    </g>
    <g id="text_2">
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(86.928844 132.818712)">988,145 slow + 6,861 fast</text>
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(88.667906 149.62254)">995,006 distinct selectors</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(133.296844 132.818712)">988,145 slow + 6,861 fast</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(135.035906 149.62254)">995,006 distinct selectors</text>
    </g>
    <g id="text_3">
-    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="643.104" y="101.201355" transform="rotate(-0 643.104 101.201355)">Bounded metadata requests</text>
+    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="689.472" y="101.201355" transform="rotate(-0 689.472 101.201355)">Bounded native readers</text>
    </g>
    <g id="text_4">
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(555.698062 132.818712)">One request per variable</text>
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(541.205875 149.62254)">500 variables per checkpoint</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(555.426375 132.818712)">Disjoint selector ranges, at most eight</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(555.902156 149.62254)">Type and full metadata; no data reads</text>
    </g>
    <g id="text_5">
-    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="643.104" y="268.126155" transform="rotate(-0 643.104 268.126155)">Durable metadata checkpoint</text>
+    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="689.472" y="268.126155" transform="rotate(-0 689.472 268.126155)">Private SQLite catalogue</text>
    </g>
    <g id="text_6">
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(500.364156 299.743512)">Full documents and archive membership</text>
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(509.813063 316.54734)">Per-variable failures retain their errors</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(579.582937 299.743512)">Documents, states, error codes</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(576.127781 316.54734)">All listing memberships retained</text>
    </g>
    <g id="text_7">
-    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="179.424" y="268.126155" transform="rotate(-0 179.424 268.126155)">Pipeline ingest owner</text>
+    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="225.792" y="268.126155" transform="rotate(-0 225.792 268.126155)">Resume or cached repeat</text>
    </g>
    <g id="text_8">
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(88.919469 299.743512)">Refresh archive metadata</text>
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(19.769312 316.54734)">Preserve enrichment and serving provenance</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(124.181531 299.743512)">Commit each bounded batch</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(80.439187 316.54734)">Skip every completed metadata outcome</text>
    </g>
    <g id="text_9">
-    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="179.424" y="435.050955" transform="rotate(-0 179.424 435.050955)">Acknowledged graph identities</text>
+    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="225.792" y="435.050955" transform="rotate(-0 225.792 435.050955)">Frozen pilot graph</text>
    </g>
    <g id="text_10">
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(10.7415 466.668312)">Mark batch written only after acknowledgement</text>
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(25.055406 483.47214)">Completed batches are never fetched again</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(145.008719 466.668312)">94,633 existing signals</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(88.654344 483.47214)">No connection from the metadata scan</text>
    </g>
    <g id="text_11">
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(499.593063 426.129432)">On interruption: replay cached metadata</text>
-    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(495.8415 442.93326)">whose graph write was not acknowledged</text>
+    <text style="font-size: 16px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; text-anchor: middle; fill: #2878a5" x="689.472" y="435.050955" transform="rotate(-0 689.472 435.050955)">Separate population audit</text>
+   </g>
+   <g id="text_12">
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(569.802625 466.668312)">Read-only counts around the scan</text>
+    <text style="font-size: 14px; font-family: 'DejaVu Sans', 'Bitstream Vera Sans', 'Computer Modern Sans Serif', 'Lucida Grande', 'Verdana', 'Geneva', 'Lucid', 'Arial', 'Helvetica', 'Avant Garde', sans-serif; fill: #0b0b0b" transform="translate(590.23825 483.47214)">Before and after must agree</text>
    </g>
   </g>
  </g>
  <defs>
-  <clipPath id="pebbf51017e">
+  <clipPath id="p02d1b7bed3">
    <rect x="40.32" y="20.736" width="927.36" height="476.928"/>
   </clipPath>
  </defs>

@@ -1,5 +1,6 @@
-"""Render the census, durable metadata and ingest acknowledgement boundary."""
+"""Render the private metadata checkpoint and separate frozen pilot audit."""
 
+import os
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -23,44 +24,50 @@ figure.subplots_adjust(left=0.04, right=0.96, bottom=0.04, top=0.96)
 
 stages = [
     (
-        0.15,
+        0.20,
         0.84,
         "Independent census",
         "988,145 slow + 6,861 fast\n995,006 distinct selectors",
     ),
     (
-        0.65,
+        0.70,
         0.84,
-        "Bounded metadata requests",
-        "One request per variable\n500 variables per checkpoint",
+        "Bounded native readers",
+        "Disjoint selector ranges, at most eight\nType and full metadata; no data reads",
     ),
     (
-        0.65,
+        0.70,
         0.49,
-        "Durable metadata checkpoint",
-        "Full documents and archive membership\nPer-variable failures retain their errors",
+        "Private SQLite catalogue",
+        "Documents, states, error codes\nAll listing memberships retained",
     ),
     (
-        0.15,
+        0.20,
         0.49,
-        "Pipeline ingest owner",
-        "Refresh archive metadata\nPreserve enrichment and serving provenance",
+        "Resume or cached repeat",
+        "Commit each bounded batch\nSkip every completed metadata outcome",
     ),
     (
-        0.15,
+        0.20,
         0.14,
-        "Acknowledged graph identities",
-        "Mark batch written only after acknowledgement\nCompleted batches are never fetched again",
+        "Frozen pilot graph",
+        "94,633 existing signals\nNo connection from the metadata scan",
+    ),
+    (
+        0.70,
+        0.14,
+        "Separate population audit",
+        "Read-only counts around the scan\nBefore and after must agree",
     ),
 ]
 for x, y, label, detail in stages:
     axis.text(x, y, label, ha="center", va="center", fontsize=16, color=SUBJECT)
     axis.text(x, y - 0.085, detail, ha="center", va="center", fontsize=14)
 for start, end in [
-    ((0.35, 0.80), (0.43, 0.80)),
-    ((0.65, 0.68), (0.65, 0.56)),
-    ((0.43, 0.46), (0.35, 0.46)),
-    ((0.15, 0.33), (0.15, 0.21)),
+    ((0.40, 0.80), (0.48, 0.80)),
+    ((0.70, 0.68), (0.70, 0.56)),
+    ((0.48, 0.46), (0.40, 0.46)),
+    ((0.48, 0.11), (0.40, 0.11)),
 ]:
     axis.add_patch(
         FancyArrowPatch(
@@ -72,14 +79,9 @@ for start, end in [
             color=REFERENCE,
         )
     )
-axis.text(
-    0.65,
-    0.14,
-    "On interruption: replay cached metadata\nwhose graph write was not acknowledged",
-    ha="center",
-    va="center",
-    fontsize=14,
-)
 output = Path(__file__).parent / "catalogue-recovery.svg"
 save_figure(figure, output)
 print("Checked text bounds and overlaps:", output)
+if preview := os.environ.get("CATALOGUE_PREVIEW"):
+    save_figure(figure, Path(preview))
+    print("Rendered inspection image:", preview)
