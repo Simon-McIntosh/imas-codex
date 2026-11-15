@@ -138,3 +138,60 @@
     obtain metadata availability for the refused variables, or seek a changed
     catalogue contract. No full completion or plan closure is claimed.</p>
 </section>
+<section id="full-archive-variable-catalogue-attributes-resumed">
+  <h2>Metadata refusals are catalogued; full attributes are being backfilled</h2>
+  <p>The revised catalogue contract supersedes the metadata-availability blocker
+    above. Every listed variable is retained: an archive refusal produces
+    <code>metadata_state=unavailable</code>, its archive error code and diagnostic,
+    with no archive metadata fields. An available record requires a nonempty
+    metadata document. The pipeline ingest function remains the signal writer,
+    preserving enrichment, claims and the archive selected for data serving.</p>
+  <p>Both archive interfaces are consumed: type metadata and full metadata.
+    Successful type documents already in the checkpoint are reused; every
+    variable receives the full-metadata request. The raw documents retain all
+    returned attributes, and explicit graph fields hold labels, engineering unit,
+    format, display limits, alarm limits and warning limits. A blank or absent
+    engineering unit remains absent. This scan performs zero data reads.</p>
+  <p>Before implementation, the revised fixture run reproduced
+    <code>3 failed, 1 warning in 1.89s</code>: the full interface was not called,
+    a refused variable had no unavailable record, and cached type metadata was
+    not reused for the full-attribute request. The revised focused gate reports
+    <code>87 passed, 2 warnings in 11.47s</code>; the live graph gate reports
+    <code>1 passed, 1 warning in 39.55s</code>. A follow-up malformed-document
+    check is included in <code>47 passed, 1 warning in 10.80s</code>. The cached
+    refresh acknowledgement test reports <code>1 passed, 1 warning in 6.45s</code>.</p>
+  <p>The declared mutation classifies a failed metadata request as available with
+    empty metadata. Its run reports <code>1 failed, 1 warning in 1.99s</code>,
+    naming <code>test_metadata_refusal_is_unavailable_with_code_and_no_metadata_fields</code>;
+    that test passes in the head arm. The graph fixture verifies that an
+    unavailable refresh clears archive metadata fields while preserving enriched
+    state and the data-serving archive.</p>
+  <p>A native smoke on rigel returned eight full attributes and a nonempty unit
+    for a known available control, and an unavailable state with code 9105 for a
+    known refusal. Data reads were zero. An initial smoke helper selected a
+    whitespace-only unit as its positive control and failed; stripping whitespace
+    corrected the control selection without changing production behavior.</p>
+  <table>
+    <thead><tr><th>Persistent import receipt</th><th>Observed or required value</th></tr></thead>
+    <tbody>
+      <tr><td>Rigel job</td><td>1317295; submitted without a foreground wait</td></tr>
+      <tr><td>Start time</td><td>2026-11-15T10:31:10.582506+00:00</td></tr>
+      <tr><td>Existing acknowledged identities retained</td><td>94,433</td></tr>
+      <tr><td>Full-metadata backfill completed at start</td><td>0</td></tr>
+      <tr><td>Checkpointed batch bound</td><td>500 variables</td></tr>
+      <tr><td>Union target</td><td>995,006</td></tr>
+      <tr><td>Final graph minus union</td><td>Pending; required 0</td></tr>
+      <tr><td>Metadata states and unavailable error-code counts</td><td>Pending final receipt</td></tr>
+      <tr><td>Cached repeat and interrupted resume</td><td>Pending; required 0 new identities and 0 completed variables refetched</td></tr>
+    </tbody>
+  </table>
+  <p>The job reopens the durable checkpoint after two bounded batches, completes
+    the catalogue, and measures a cached repeat. Its final receipt records graph
+    equality, state and error-code counts, coverage for every metadata field,
+    interface request counts and elapsed time. Progress receipts provide the
+    measured rate. Completion remains unclaimed until those receipts are read.</p>
+  <p>The private log is <code>~/.cache/imas-codex-codac-uda/full-census/attributes-1317295.log</code>.
+    The coordinator resumes this worker when
+    <code>~/.cache/imas-codex-codac-uda/full-census/attributes-job-1317295-receipt.json</code>
+    appears. The manifest carries that exact receipt-file wait probe.</p>
+</section>
