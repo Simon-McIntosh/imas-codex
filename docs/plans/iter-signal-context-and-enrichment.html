@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="27">
+<meta name="plan-version" content="29">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -57,7 +57,7 @@
     <h2 id="s4">§4 — One plant system's signals carry context from ICP and IDM</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="6.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="icp-api-access#s3,icp-api-access#s4"></section>
     <p><strong>Delivers.</strong> For one pilot plant system, the magnet cold test bench, the graph holds its plant breakdown structure nodes, the rows of its signal list and data file, and references to its functional specification, each as an ITER-facility node, and each catalogued signal of that system is linked to the rows and component it corresponds to. A link is marked as exact when the source names the archive variable, as derived when it was joined through a component number, and as absent when no source row was found. The content reaches the graph from ICP and IDM through the read-only client that the plan <code>icp-api-access</code> delivers, which can issue no write, and it does not enter the repository. The function-category codes and their official meanings are imported with it, so a component's category has a name.</p>
-    <p><strong>Done when.</strong> The landing record gives the number of source rows imported per source, the number of the pilot system's signals with an exact link, a derived link and no link, and twenty links of each present kind checked by hand against the source; every imported node and link reaches the ITER facility node; a second import adds none; and a search of the tracked tree for the imported identifiers and a sample of imported titles finds none. Graph-marked statements pass. <strong>Negative control:</strong> a signal whose component number appears in no source row receives no link, and a row that names a different system links to no pilot signal.</p>
+    <p><strong>Done when.</strong> The landing record gives the number of source rows imported per source, the number of the pilot system's signals with an exact link, a derived link and no link, and twenty links of each present kind checked by hand against the source; every imported node and link reaches the ITER facility node; a second import adds none; a facility-scoped private archive holding the imported nodes and links is taken before the section lands, with its package name, visibility and digest in the landing record, so the imported content has a second copy from the day it exists; and a search of the tracked tree for the imported identifiers and a sample of imported titles finds none. Graph-marked statements pass. <strong>Negative control:</strong> a signal whose component number appears in no source row receives no link, and a row that names a different system links to no pilot signal.</p>
 
     <h2 id="s5">§5 — Catalogued signals are grouped by component and by field pattern</h2>
     <section data-reckon="section" data-id="s5" data-effort-hours="4.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
@@ -92,12 +92,12 @@
 <h2><span class="sec">§</span> Decisions</h2>
 <div class="r-dec" data-key="description-model" data-choice="local-after-retest" data-by="lead" data-when="2026-11-15T21:33:54+00:00" data-sections="s6,s7">
     <p class="r-dec-q">Which model writes ITER signal descriptions in the discovery pipeline?</p>
-    <p class="r-dec-ctx">The comparison in section 3 on 200 signals with identical full-context prompts: the local model delivered 130 of 200 with no response parsing unrepaired; the paid model delivered 200 of 200 for 0.95 US dollars.</p>
+    <p class="r-dec-ctx">The comparison in section 3 on 200 signals with identical full-context prompts: the local model delivered 130 of 200 and none of its 20 raw responses parsed without repair; the paid model delivered 200 of 200 with all 20 parsing, for 0.95 US dollars.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="paid-gpt-6.1-sol">The paid model, gpt-6.1-sol</button>
       <button class="r-opt chosen" data-value="local-after-retest">The local model after a constrained retest</button>
       </p>
-    <p class="r-dec-rat">The lead reverted the earlier choice of the paid model on 2026-11-15: ITER signal descriptions are written by the locally served model, and the pipeline is refined to suit it now that proper context is available. The comparison in section 3 ran that model with the pipeline&#x27;s defaults (0 of 20 responses parsed unrepaired, 130 of 200 descriptions delivered, against 20 of 20 and 200 of 200 for the paid model); a refinement round on batch size, schema-constrained output, reasoning mode and prompt is in progress, and its result is recorded here when it reports. ICP-derived context therefore stays inside ITER.</p>
+    <p class="r-dec-rat">The lead reverted the earlier choice of the paid model on 2026-11-15: ITER signal descriptions are written by the locally served model, and the pipeline is refined to suit it now that proper context is available. The comparison in section 3 ran that model with the pipeline&#x27;s defaults (0 of 20 responses parsed unrepaired, 130 of 200 descriptions delivered, against 20 of 20 and 200 of 200 for the paid model); a refinement round on batch size, schema-constrained output, reasoning mode and prompt is in progress, and its result is recorded here when it reports. ICP-derived context therefore stays inside ITER. Sections 6 and 7 are built only after that result is recorded here and the lead has confirmed the local model on it; if the refinement does not make the local model deliver reliably, the choice returns to the lead with the measured figures and neither section is built in the meantime.</p>
     </div>
 <div class="r-dec" data-key="full-enrichment-cost-accepted" data-choice="" data-by="" data-when="" data-sections="s7">
     <p class="r-dec-q">Is the projected call count and cost of enriching the whole catalogue accepted?</p>
