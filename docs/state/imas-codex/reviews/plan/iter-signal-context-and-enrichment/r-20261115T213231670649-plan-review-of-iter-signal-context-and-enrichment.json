@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T21:35:22.918Z",
+  "dispatched_at": "2026-11-15T21:33:57Z",
+  "findings": [
+    {
+      "anchor": "plan.html:100",
+      "id": "reasoning-1",
+      "reason": "it is the only statement on whether ICP-derived context reaches an external provider, and a coordinator relying on it would dispatch section 6 with ICP content under a ruling that says none is in scope.",
+      "text": "the `description-model` ratification reads \"With ICP access parked, no ICP-derived content is in scope for it\", yet this same version makes section 4 wait on `icp-api-access#s3` and `icp-api-access#s4` (ICP access is therefore not parked) and section 6 has that paid model write component descriptions from the linked context section 4 imports, so the ratification's premise is false under the plan's own wiring",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:118",
+      "id": "reasoning-2",
+      "reason": "section 1 is what a dispatcher reads first, so leaving its lane requirement standing beside a ratification that lifts it lets a future dispatch either refuse a permitted external lane or breach the lead's premise, and section 1 must record the superseding ruling.",
+      "text": "the new `local-lane-accepted` ratification says \"there is no need to run this work on the local lane\" and that the gated sections \"may be built on any lane\", while section 1's fourth standing lead decision still reads \"Work that reads that content runs on the locally served model inside ITER, once a benchmark shows that lane is capable\", leaving two live instructions on where ICP-reading work runs",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+  "plan_fingerprint": "eadd24007ffeb7370f1a5c4d6b7953d155c4c1758bb03ff8cfdc629ef7c47b8a",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 22,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T213231670649-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "aa21e9ec663fffa9e0439502fb284882d5ff21f8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 both new anchors resolve: `icp-api-access.html` carries `id=\"s3\"` and `id=\"s4\"`, and the page itself is present in `docs/plans/`.",
+    "done_when": "pass \u2014 the reviewed document unit changes no section's done-when, and every section it wires is unchanged, each retaining a declared negative control.",
+    "evidence_paths": "pass \u2014 the document unit names no evidence or gate path; the section landing records it wires are untouched.",
+    "naming": "pass \u2014 the unit introduces no symbol, file name or comment; decision keys and section ids are unchanged.",
+    "reasoning": "a finding \u2014 the `description-model` ratification still asserts that no ICP-derived content is in scope, which the same version's section 4 wiring and section 6 deliverable contradict.",
+    "single_goal": "pass \u2014 the document unit changes no section's deliverable, so each section still carries the single goal it was reviewed with.",
+    "wiring": "pass \u2014 section 4's `plan-section-depends-on` entries now name `icp-api-access#s3` and `icp-api-access#s4`, both of which exist in `docs/plans/icp-api-access.html` and deliver the plant-structure records and the IDM document fetch that section 4 imports, replacing a dependency on the model comparison that section 4 does not use."
+  },
+  "section_digests": {
+    "_document": "8ff30b90e7eda606ef5d9321c410ad09055d05766e0d2b07562fa78609ff0d79",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "99748134bf3eceae4bd28b2460e2ebe121c89666b174c8be536b52d1510d66d7",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "a9e2dcda9f1320f9431e17c0f132335589d5a554898f32f9bcb33ec2aaa611df",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "631c30f031b35766fbc9b9bf62a0670bf0504adeef4f12b7676039b81fd14365",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T21:45:10.002096+00:00",
+  "total": null
+}
