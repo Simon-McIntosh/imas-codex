@@ -26,3 +26,46 @@
   <p>Catalogue graph count, metadata coverage, repeat import and recovery
     measurements are pending. This census does not establish catalogue completion.</p>
 </section>
+<section id="full-archive-variable-catalogue-controls">
+  <h2>Bounded metadata, one ingest owner and recoverable acknowledgement</h2>
+  <figure>
+    <img src="/imas-codex/figures/codac-uda-signals/full-archive-variable-catalogue/catalogue-recovery.svg"
+      alt="The independent census precedes bounded metadata requests, durable metadata checkpoints, the pipeline ingest owner and acknowledged graph identities.">
+    <figcaption>Each batch is durable before ingest; completed metadata survives
+      interrupted acknowledgement. The diagram uses the repository's checked
+      export, passed text bounds and overlap validation and was inspected as a
+      rendered raster.</figcaption>
+  </figure>
+  <p>The scanner's separate signal writer was removed. Bounded batches use
+    <code>ingest_discovered_signals</code>, preserving enrichment, claims and
+    confirmed data-serving provenance. The pooled SSH path uses the same
+    dependency loader as the executor. The disk-backed catalogue retains every
+    listing membership and complete metadata document. Missing optional times
+    and sampling evidence remain absent.</p>
+  <p>The metadata refusal reproduced before repair:
+    <code>test_failed_metadata_is_not_an_empty_success</code> failed because a
+    metadata error produced an entry with null unit and description. The reader
+    now returns that variable's error without a successful entry; the scanner
+    counts it as failed and writes no empty-metadata signal.</p>
+  <table>
+    <thead><tr><th>Measure</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Base focused tests</td><td>47 passed; zero failures</td></tr>
+      <tr><td>Changed scanner, pipeline, transport, worker and read tests</td><td>96 passed; zero added failures</td></tr>
+      <tr><td>Actual catalogue statements on a disposable graph</td><td>1 passed under the graph marker</td></tr>
+      <tr><td>Mutation: accept failed metadata as an empty success</td><td>Metadata refusal test fails</td></tr>
+      <tr><td>Mutation: remove archive routing from the check loop</td><td>Pipeline routing test fails</td></tr>
+      <tr><td>Metadata rate sample, slow archive</td><td>20 successful requests in 0.272 s; 73.61 variables/s</td></tr>
+      <tr><td>Metadata rate sample, fast archive</td><td>20 successful requests in 0.330 s; 60.58 variables/s</td></tr>
+      <tr><td>Deliberately bounded live pilot</td><td>1,000 metadata records and acknowledged writes in 10.581 s; incomplete after two batches</td></tr>
+    </tbody>
+  </table>
+  <p>The broader native multi-request probe failed; the working client path is
+    one metadata request per variable. The live pilot ran on rigel as job
+    1317068. The first possible catalogue write was after the census was both
+    completed and committed. The full resume is still running; these pilot
+    measurements do not establish full catalogue coverage.</p>
+  <p>The census commit is <code>49f6dbe1d5679fa254e044295e058a2c83c203b9</code>;
+    implementation is <code>465b144083daab30d5763b44f88d4f3e28d67309</code>.
+    Exact gate logs and commands are named in the worker manifest.</p>
+</section>
