@@ -1,0 +1,81 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "d57818f72e1014160cfa1051bbce8d33c7749a19",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/cli/sn.py:3942 sn_sourceless -> count_live_names_without_source",
+    "imas_codex/standard_names/export.py:3067 export source gate -> classify_sourceless_standard_names, find_sourceless_live_names",
+    "imas_codex/standard_names/ledger.py:58 find_provenance_orphans -> classify_sourceless_standard_names",
+    "imas_codex/standard_names/graph_store/graph_supersession.py:3391 -> classify_sourceless_standard_names",
+    "imas_codex/standard_names/attachment_audit.py:3004 _find_orphaned_names -> find_sourceless_live_names",
+    "imas_codex/standard_names/source_invariant.py:398 require_producing_sources -> find_sourceless_live_names",
+    "imas_codex/standard_names/search.py:258 fetch_standard_names -> source_paths_projection"
+  ],
+  "completed_at": "2026-11-15T15:08:51.148Z",
+  "dispatched_at": "2026-11-15T15:08:05Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_source_reads.py",
+      "line": "913",
+      "severity": "non-blocking",
+      "text": "non-blocking: _states_liveness recognises a liveness test only when it names live_name_cypher or spells 'superseded', so the source audit's deleted population query \u2014 NOT sn.status IN $terminal, with 'superseded' passed as a parameter at graph_supersession.py:3066 \u2014 would pass the guard if restored, and no test asserts the audit excludes a superseded name stage or reads a stale producer as no producer; the audit half of this change is therefore unguarded."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_supersession.py",
+      "line": "3077",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new population read calls gc.query through find_sourceless_live_name_rows and so escapes the read() wrapper at :3066 that raises 'source audit query exceeded ten seconds' for every other statement in the function, leaving the audit's largest read the only one with no ceiling."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-one-enumeration-of-sourceless-names.html",
+      "line": "70",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment states 'no statement restates it' of the live-child rule, but imas_codex/standard_names/pools.py:426 defines has_live_child from the stage half alone and omits the status half, so the sentence claims a singularity the package does not hold."
+    }
+  ],
+  "head_log_revision": "67d79ccc0",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified seven production call sites in the reviewed tree: the CLI command, the export gate, the ledger, the supersession caller, the attachment audit, the writer guard, and name search through the shared projection.",
+    "diff": "read commit by commit against base d57818f72: 67d79ccc0 deletes the count's own population query and the audit's, adds find_sourceless_live_name_rows and _live_child_count_cypher, filters stale producers out of source_paths_projection and adds 366 test lines; 3b4f88b19 adds only the 204-line evidence fragment.",
+    "done_when": "read the done_when's clauses against the manifest's logs I opened: the gate ran tests/standard_names/test_source_reads.py (14 passed, EXIT=0), live-comparison.log records command 10 / direct edge read 10 / source audit 10 in one job and is transcribed into the committed fragment at scc-one-enumeration-of-sourceless-names.html:118-160, the committed JSON holds count 10 with beta's derived_parent true, imas_codex adds 193 and deletes 205 lines, and suite-base.log and suite-head.log both read 22 failed against the same 22 ids, which I re-diffed to zero added ids.",
+    "goal": "the node's goal is to leave one enumeration of live names without a source in the package; imas_codex/standard_names/source_invariant.py:204 now holds find_sourceless_live_name_rows, and imas_codex/standard_names/source_reads.py:92 and imas_codex/standard_names/graph_store/graph_supersession.py:3077 both answer from it.",
+    "manifest": "read; status complete, commits 67d79ccc0 and 3b4f88b19, changed_paths the seven landed paths, tests naming the gate command, test_logs naming the gate, negative-control, live-comparison and both suite logs, and baseline_suite/after_suite each completed true with 22 failures and no added id.",
+    "write_paths": "the declared fence was the four product modules, tests/standard_names/test_source_reads.py, the population JSON, the two fragment paths and a figures directory; git show --stat of 67d79ccc0 lists six files and 3b4f88b19 the new fragment, every one inside that set."
+  },
+  "justifications": {
+    "durability": "the count's regression reddens test_no_second_enumeration_of_the_sourceless_population in negative-control.log (EXIT=1), but _states_liveness at tests/standard_names/test_source_reads.py:913 requires the literal 'superseded', so the audit's own deleted query could return without any test failing.",
+    "evidence": "tests/standard_names/test_source_reads.py ran 14 passed EXIT=0 in the gate log at revision 67d79ccc0 and docs/evidence/fragments/sn-catalog-consistency/scc-one-enumeration-of-sourceless-names.html:139 commits the same-job 10/10/10 transcript ending EXIT=0.",
+    "fit": "the new predicates follow the helper-plus-alias idiom of imas_codex/standard_names/source_invariant.py:13-45, but graph_supersession.py:3077 calls the enumeration outside the ten-second read() ceiling that every other audit statement in that function passes through.",
+    "goal_fidelity": "imas_codex/standard_names/source_invariant.py:204 is the one enumeration and both the count (imas_codex/standard_names/source_reads.py:92) and the audit (imas_codex/standard_names/graph_store/graph_supersession.py:3077) delegate to it, though imas_codex/standard_names/graph_store/graph_audits.py:2412 keeps a pre-existing restricted restatement outside the fence.",
+    "reuse": "the change extends the existing owner \u2014 imas_codex/standard_names/source_invariant.py:282 find_sourceless_live_names now wraps the new row enumeration, which composes live_name_cypher and producerless_cypher rather than restating them.",
+    "reuse_search": "searched imas_codex/ for another sourceless-population mechanism by capability (grep for sourceless, PRODUCED_NAME, without_source) and found only the writer guards, repairs and census registered in SOURCE_RULE_SITES; no second owner exists.",
+    "scope_discipline": "every path in 67d79ccc0 and 3b4f88b19 \u2014 imas_codex/cli/sn.py, three imas_codex/standard_names modules, tests/standard_names/test_source_reads.py, the population JSON and the new fragment \u2014 is inside the declared write paths, and the sibling fragment's stale prose was left to outside_scope."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to leave one enumeration of live names without a source in the package; imas_codex/standard_names/source_invariant.py:204 now holds find_sourceless_live_name_rows, and imas_codex/standard_names/source_reads.py:92 and imas_codex/standard_names/graph_store/graph_supersession.py:3077 both answer from it.\nVERDICT done_when: read the done_when's clauses against the manifest's logs I opened \u2014 the gate ran tests/standard_names/test_source_reads.py (14 passed, EXIT=0), live-comparison.log records command 10 / direct edge read 10 / source audit 10 in one job and is transcribed into the committed fragment at docs/evidence/fragments/sn-catalog-consistency/scc-one-enumeration-of-sourceless-names.html:118-160, the committed JSON holds count 10 with beta's derived_parent true, imas_codex adds 193 and deletes 205 lines, and suite-base.log and suite-head.log both read 22 failed against the same 22 ids, which I re-diffed to zero added ids.\nVERDICT write_paths: the declared fence was the four product modules, tests/standard_names/test_source_reads.py, the population JSON, the two fragment paths and a figures directory; git show --stat of 67d79ccc0 lists six files and 3b4f88b19 the new fragment, every one inside that set.\nVERDICT manifest: read; status complete, commits 67d79ccc0 and 3b4f88b19, changed_paths the seven landed paths, tests naming the gate command, test_logs naming the gate, negative-control, live-comparison and both suite logs, and baseline_suite/after_suite each completed true with 22 failures and no added id.\nVERDICT diff: read commit by commit against base d57818f72: 67d79ccc0 deletes the count's own population query and the audit's, adds find_sourceless_live_name_rows and _live_child_count_cypher, filters stale producers out of source_paths_projection and adds 366 test lines; 3b4f88b19 adds only the 204-line evidence fragment.\nCALL_SITES: imas_codex/cli/sn.py:3942 sn_sourceless -> count_live_names_without_source, imas_codex/standard_names/export.py:3067 export source gate -> classify_sourceless_standard_names and find_sourceless_live_names, imas_codex/standard_names/ledger.py:58 find_provenance_orphans -> classify_sourceless_standard_names, imas_codex/standard_names/graph_store/graph_supersession.py:3391 -> classify_sourceless_standard_names, imas_codex/standard_names/attachment_audit.py:3004 _find_orphaned_names -> find_sourceless_live_names, imas_codex/standard_names/source_invariant.py:398 require_producing_sources -> find_sourceless_live_names, imas_codex/standard_names/search.py:258 fetch_standard_names -> source_paths_projection\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/source_invariant.py:204 is the one enumeration and both imas_codex/standard_names/source_reads.py:92 and imas_codex/standard_names/graph_store/graph_supersession.py:3077 delegate to it, though imas_codex/standard_names/graph_store/graph_audits.py:2412 keeps a pre-existing restricted restatement outside the fence.\nSCORE evidence: 19\nJUSTIFICATION evidence: tests/standard_names/test_source_reads.py ran 14 passed EXIT=0 in the gate log at revision 67d79ccc0, and docs/evidence/fragments/sn-catalog-consistency/scc-one-enumeration-of-sourceless-names.html:139 commits the same-job 10/10/10 transcript ending EXIT=0.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in 67d79ccc0 and 3b4f88b19 \u2014 imas_codex/cli/sn.py, three imas_codex/standard_names modules, tests/standard_names/test_source_reads.py, the population JSON and the new fragment \u2014 is inside the declared write paths, and the sibling fragment's stale prose was left to outside_scope.\nSCORE durability: 14\nJUSTIFICATION durability: the count's regression reddens test_no_second_enumeration_of_the_sourceless_population in negative-control.log (EXIT=1), but _states_liveness at tests/standard_names/test_source_reads.py:913 requires the literal 'superseded', so the audit's own deleted query could return without any test failing.\nSCORE fit: 16\nJUSTIFICATION fit: the new predicates follow the helper-plus-alias idiom of imas_codex/standard_names/source_invariant.py:13-45, but imas_codex/standard_names/graph_store/graph_supersession.py:3077 calls the enumeration outside the ten-second read() call at :3066 that every other audit statement passes through.\nSCORE reuse: 20\nJUSTIFICATION reuse: the change extends the existing owner \u2014 imas_codex/standard_names/source_invariant.py:282 find_sourceless_live_names now wraps the new row enumeration, which composes live_name_cypher and producerless_cypher rather than restating them \u2014 and a search of imas_codex for another sourceless-population mechanism found only the preconditions registered in SOURCE_RULE_SITES.\nFINDING tests/standard_names/test_source_reads.py:913 non-blocking: _states_liveness recognises a liveness test only when it names live_name_cypher or spells 'superseded', so the source audit's deleted population query \u2014 NOT sn.status IN $terminal, with 'superseded' passed as a parameter at graph_supersession.py:3066 \u2014 would pass the guard if restored, and no test asserts the audit excludes a superseded name stage or reads a stale producer as no producer; the audit half of this change is therefore unguarded.\nFINDING imas_codex/standard_names/graph_store/graph_supersession.py:3077 non-blocking: the new population read calls gc.query through find_sourceless_live_name_rows and so escapes the read() wrapper at :3066 that raises 'source audit query exceeded ten seconds' for every other statement in the function, leaving the audit's largest read the only one with no ceiling.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-one-enumeration-of-sourceless-names.html:70 non-blocking: the fragment states 'no statement restates it' of the live-child rule, but imas_codex/standard_names/pools.py:426 defines has_live_child from the stage half alone and omits the status half, so the sentence claims a singularity the package does not hold.",
+  "review_run_id": "r-20261115T150029916459-review-of-scc-one-enumeration-of-sourceless-names-3b4f88b19aa0",
+  "reviewed_base_sha": "d57818f72e1014160cfa1051bbce8d33c7749a19",
+  "reviewed_head_sha": "3b4f88b19aa043120ee1e6a7c614a279b132e44e",
+  "reviewed_run_id": "r-20261115T133849971919-scc-one-enumeration-of-sourceless-names",
+  "reviewer": {
+    "backend": "local",
+    "effort": "standard",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261115T150029916459-review-of-scc-one-enumeration-of-sourceless-names-3b4f88b19aa0"
+  },
+  "reviewer_run_id": "r-20261115T150029916459-review-of-scc-one-enumeration-of-sourceless-names-3b4f88b19aa0",
+  "scores": {
+    "durability": 14,
+    "evidence": 19,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T15:30:02.517818+00:00",
+  "total": 117
+}
