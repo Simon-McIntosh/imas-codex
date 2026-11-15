@@ -17,7 +17,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 41,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3cb35919e72b3e1a38833fc05eca08ef124ae9d3",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 10 now owns every committed evidence script that imports a name the package no longer defines, found by importing each script's package imports, and names the three sn-review-through-jev scripts that import the removed calibration defaults alongside the one that cited the deleted check; each regenerates from the tree or is marked as a frozen record with its revision.",
+      "reason": "",
+      "when": "2026-11-15T21:04:36.620394+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3cb35919e72b3e1a38833fc05eca08ef124ae9d3",
+      "commit_basis": "edit",
+      "note": "Section 10 now owns every committed evidence script that imports a name the package no longer defines, found by importing each script's package imports, and names the three sn-review-through-jev scripts that import the removed calibration defaults alongside the one that cited the deleted check; each regenerates from the tree or is marked as a frozen record with its revision.",
+      "reason": "",
+      "when": "2026-11-15T21:04:36.620394+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261115T204832073907-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261115T204832073907-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "a4259d2ce531d6c7795586091291974ee91b0851",
   "rubric": "content",
