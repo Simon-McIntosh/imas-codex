@@ -53,9 +53,28 @@
       "note": "The section no longer states a cause per script; it requires each script to be listed in the evidence with the missing name it shows, so the name-evidence script's failure on the removed worker queries is recorded as measured.",
       "reason": "",
       "when": "2026-11-15T21:15:18.067232+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788",
+      "commit_basis": "edit",
+      "finding": "anchors_resolve-1",
+      "note": "The section cites the stored review of each run the findings came from under docs/state/imas-codex/reviews/run/, by run id, where each finding is quoted in full.",
+      "reason": "",
+      "when": "2026-11-15T21:15:26.409819+00:00"
     }
   ],
   "responses": {
+    "anchors_resolve-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788",
+      "commit_basis": "edit",
+      "note": "The section cites the stored review of each run the findings came from under docs/state/imas-codex/reviews/run/, by run id, where each finding is quoted in full.",
+      "reason": "",
+      "when": "2026-11-15T21:15:26.409819+00:00"
+    },
     "done_when-1": {
       "action": "acted",
       "by": "",
