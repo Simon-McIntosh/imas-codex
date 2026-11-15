@@ -61,6 +61,16 @@
       "note": "The section is declared done; its text is the record of the state the landing changed, and the closing comment states the present state (module at 100 lines, guard in place).",
       "reason": "",
       "when": "2026-11-15T22:59:02.824308+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6a42a3b0f72405bce01436c61f6f24a7d0e5f55a",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Followup f-sph-001 is resolved with the plan's present state: every section but the open-findings one is landed or deferred.",
+      "reason": "",
+      "when": "2026-11-15T22:59:08.142685+00:00"
     }
   ],
   "responses": {
@@ -81,6 +91,15 @@
       "note": "The section is declared done; its text is the record of the state the landing changed, and the closing comment states the present state (module at 100 lines, guard in place).",
       "reason": "",
       "when": "2026-11-15T22:59:02.824308+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6a42a3b0f72405bce01436c61f6f24a7d0e5f55a",
+      "commit_basis": "edit",
+      "note": "Followup f-sph-001 is resolved with the plan's present state: every section but the open-findings one is landed or deferred.",
+      "reason": "",
+      "when": "2026-11-15T22:59:08.142685+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261115T224114754975-plan-review-of-sn-pipeline-hygiene.json",
