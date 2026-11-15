@@ -106,3 +106,51 @@
   no changes from the reviewed delivery. The prototype has no diff either.
   All host, category and pulse examples added here are invented.</p>
 </section>
+<section id="archive-pulse-schema-enforced-construction">
+  <h3>Enforced pulse construction</h3>
+  <p>The construction repair is <code>2636cdd0a1e55ae232f7f1c8b1157793effb8770</code>.
+  The reviewed generated model accepted the truncated ID
+  <code>demo:codac_uda:slow:commissioning-alpha</code> while preserving the full
+  name <code>DEMO:CAMPAIGN/commissioning-alpha</code>. The reproduction receipt
+  records <code>positive_control.full_archive_name_preserved: True</code> and
+  the different canonical ID
+  <code>demo:codac_uda:slow:DEMO:CAMPAIGN/commissioning-alpha</code>.</p>
+  <p><code>imas_codex.config.codac_uda.create_archive_pulse</code> is the
+  scanner-facing construction and validation boundary. It derives the ID from
+  the archive ID and complete archive-reported name, preserves that name byte
+  for byte, requires its category and pulse path, and refuses a supplied ID
+  that disagrees. Scanner callers construct records through this function;
+  direct construction of the generated <code>Pulse</code> remains structural
+  validation and does not enforce this cross-field identity rule.</p>
+  <p>The collision regression now calls the project constructor without supplying
+  either ID. The function must produce distinct IDs for the two synthetic
+  categories sharing <code>commissioning-alpha</code>. Separate tests require
+  refusal of a final-segment-only ID and an ID from a different archive, accept
+  a matching supplied ID, and reject unqualified or incomplete pulse names.</p>
+  <p>Correction to the earlier host-policy integration wording: configuration
+  validation currently calls <code>archive_host_key</code>. Packaged-reader
+  adoption is not established by this node, and the module documentation now
+  states its actual caller. No prototype or packaged-reader file was edited.</p>
+  <table>
+    <thead><tr><th>Construction measure</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Focused schema/configuration gate</td><td>76 passed, 1 warning in 10.75s; exit 0</td></tr>
+      <tr><td>Truncated supplied ID</td><td>Refused with “pulse id disagrees with archive and full archive-reported name”; canonical ID positive control succeeds</td></tr>
+      <tr><td>Mutation: derive from final segment only</td><td>1 failed, 1 warning in 1.79s; exit 1; collision test observes one ID instead of two</td></tr>
+      <tr><td>Mutation: disable supplied-ID refusal</td><td>1 failed, 1 warning in 1.40s; exit 1; refusal test reports DID NOT RAISE</td></tr>
+      <tr><td>Operator-readable fixture mutation</td><td>1 failed, 1 warning in 6.28s; exit 1; operator remains refused</td></tr>
+    </tbody>
+  </table>
+  <p>The focused gate and all controls ran in a separate <code>all_debug</code>
+  job at the construction repair commit. Receipts are
+  <code>pulse-construction-reproduction.log</code>,
+  <code>construction-tests.log</code>, <code>pulse-id-refusal.log</code>,
+  <code>pulse-derivation-mutation.log</code>,
+  <code>pulse-id-refusal-mutation.log</code> and
+  <code>construction-operator-control.log</code> in the assigned run directory.
+  Mutation receipts name the imported scratch module and resolved working
+  directory; each mutation fails a test that passes at the unmodified head.
+  Schema files were unchanged, and the focused gate confirms generated-model
+  currency and all four public facility configurations. All new identities
+  are synthetic.</p>
+</section>
