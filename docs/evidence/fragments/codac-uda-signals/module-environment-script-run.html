@@ -1,0 +1,50 @@
+<article id="module-environment-script-run-evidence">
+  <h3>Local module setup and packaged archive reader</h3>
+  <p>The synchronous and asynchronous script executors apply caller-supplied
+    shell setup before running the caller-selected interpreter. With no setup,
+    both retain the direct interpreter invocation. The shared local command
+    builder quotes interpreter arguments and replaces the setup shell with
+    Python; a failed setup prevents the script from running. Facility and data
+    system resolution remain in the existing facility-aware layer.</p>
+  <p>The standalone prototype reader is packaged as
+    <code>imas_codex/remote/scripts/codac_uda.py</code>. Callers invoke it through
+    <code>run_python_script()</code> or <code>async_run_python_script()</code>,
+    supplying <code>python_command</code> and <code>setup_commands</code>.
+    It receives a JSON operation on stdin and returns a JSON receipt. Its
+    endpoint and mandatory operator exclusions arrive through
+    <code>CODAC_UDA_HOST</code>, <code>CODAC_UDA_PORT</code> and
+    <code>CODAC_UDA_OPERATOR_HOSTS</code> in the caller-supplied environment.</p>
+  <table>
+    <thead><tr><th>Control</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Recorded defect before repair</td><td>4 failed, 8 deselected in
+        2.06 s. Both entry points returned <code>None</code> instead of the
+        declared environment value; both setup-only client imports failed.</td></tr>
+      <tr><td>Focused environment controls</td><td>12 passed in 1.06 s: setup
+        inheritance, omitted and empty setup, JSON transport, setup failure and
+        interpreter selection, through both entry points.</td></tr>
+      <tr><td>Combined environment and packaged reader controls</td><td>21
+        passed in 6.61 s, including a single invented variable with unit and
+        description, clean structured output, missing-client receipts, and
+        refusal of operator endpoints before client construction.</td></tr>
+      <tr><td>Declared mutation: remove local setup</td><td>2 failed, 10
+        deselected in 1.71 s. Both
+        <code>test_local_setup_makes_client_importable</code> cases failed with
+        <code>ModuleNotFoundError: No module named 'archive_client'</code>.
+        The original executor was restored byte for byte.</td></tr>
+      <tr><td>Live archive control</td><td>Not measured. No live requests were
+        made; count and elapsed time are unavailable because the private
+        configuration supplies no CODAC archive setup or endpoint policy.</td></tr>
+    </tbody>
+  </table>
+  <p>Implementation commits:
+    <code>db8fe3608f8df868a154005f86098ef223029857</code> (local setup) and
+    <code>f3153d9c97c54bb4647b3dff5db4fdfb8c541bd0</code> (packaged reader).
+    The test environment reuses the project's shared virtual environment
+    without syncing it. The implementation and mutation checks ran in the
+    assigned compute allocation on <code>98dci4-clu-2001</code>.</p>
+  <p>Gate logs and the exact mutation driver are retained in the assigned
+    <code>r-20261115T021213562433-module-environment-script-run</code> run
+    directory. This record delivers the implementation and focused controls;
+    the live criterion remains unmet and the worker does not close the section.</p>
+</article>
