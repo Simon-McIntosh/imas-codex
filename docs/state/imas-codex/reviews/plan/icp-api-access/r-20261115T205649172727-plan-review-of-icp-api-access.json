@@ -41,7 +41,30 @@
   "plan_slug": "icp-api-access",
   "plan_version": 1,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "c8c40c9d9ade16df0a1367bb571b371556f7fcec",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The header no longer says the plan is parked: it states that the lead chose their own account and stored credentials, that section 2 is buildable, and that sections 3 and 4 follow it.",
+      "reason": "",
+      "when": "2026-11-15T21:11:26.247427+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "c8c40c9d9ade16df0a1367bb571b371556f7fcec",
+      "commit_basis": "edit",
+      "note": "The header no longer says the plan is parked: it states that the lead chose their own account and stored credentials, that section 2 is buildable, and that sections 3 and 4 follow it.",
+      "reason": "",
+      "when": "2026-11-15T21:11:26.247427+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261115T205649172727-plan-review-of-icp-api-access.json",
   "review_run_id": "r-20261115T205649172727-plan-review-of-icp-api-access",
   "reviewed_blob_sha": "8604a38c36247fc9e31f938e14877deb0b15ca5d",
   "rubric": "content",
