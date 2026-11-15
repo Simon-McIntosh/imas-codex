@@ -23,6 +23,7 @@ hold, so the gate must fail. A gate that only ever runs green proves nothing.
 from __future__ import annotations
 
 import argparse
+import importlib.util
 import json
 from pathlib import Path
 
@@ -31,17 +32,22 @@ from imas_codex.standard_names.source_reads import count_live_names_without_sour
 
 HERE = Path(__file__).resolve().parent
 EVIDENCE = HERE / "held-names-refine-pass.json"
+REPORT = HERE / "held-names-refine-pass.py"
 
-LINEAGE = """
-MATCH path = (s:StandardName)-[:REFINED_FROM*0..6]->(o:StandardName {id:$n})
-RETURN s.id AS id, s.name_stage AS ns, s.docs_stage AS ds,
-       min(length(path)) AS depth
-"""
 
-SUCCESSORS = """
-MATCH (t:StandardName)-[:REFINED_FROM]->(p:StandardName) WHERE p.id IN $ids
-RETURN p.id AS id, count(t) AS n
-"""
+def _report_module():
+    """The report's own lineage rule, loaded from the module that owns it.
+
+    The gate re-reads each name's live identity "by the report's own lineage
+    rule"; importing the report is what makes that one rule rather than two
+    texts that can drift.
+    """
+    spec = importlib.util.spec_from_file_location("held_names_refine_pass", REPORT)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
 
 STAGE = """
 MATCH (s:StandardName {id:$id})
@@ -50,37 +56,9 @@ RETURN s.name_stage AS ns, s.docs_stage AS ds,
 """
 
 
-def pick_live(candidates: list[dict], root: str) -> dict:
-    if not candidates:
-        return {"id": root, "ns": None, "ds": None, "depth": 0, "out_deg": 0}
-
-    def deepest(rows: list[dict]) -> dict:
-        return max(rows, key=lambda r: (r["depth"], -r["out_deg"]))
-
-    published = [
-        c for c in candidates if c["ns"] == "accepted" and c["ds"] == "accepted"
-    ]
-    if published:
-        return deepest(published)
-    named = [c for c in candidates if c["ns"] == "accepted"]
-    if named:
-        return deepest(named)
-    stopped = [c for c in candidates if c["out_deg"] == 0 and c["ns"] != "superseded"]
-    if stopped:
-        return deepest(stopped)
-    return next((c for c in candidates if c["id"] == root), candidates[0])
-
-
 def resolve_all(gc, names: list[str]) -> dict[str, str]:
-    rows: dict[str, list[dict]] = {}
-    for name in names:
-        rows[name] = gc.query(LINEAGE, n=name)
-    ids = sorted({r["id"] for rs in rows.values() for r in rs})
-    degrees = {r["id"]: r["n"] for r in gc.query(SUCCESSORS, ids=ids)}
-    for rs in rows.values():
-        for r in rs:
-            r["out_deg"] = degrees.get(r["id"], 0)
-    return {name: pick_live(rs, name)["id"] for name, rs in rows.items()}
+    """Each name's live identity, resolved by the report module's rule."""
+    return _report_module().resolve_live(gc, names)
 
 
 def main() -> int:

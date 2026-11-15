@@ -445,18 +445,34 @@ def mode_check(args) -> None:
 
     disputed = [row for row in rows if row["dispute"]]
     want(len(disputed) == 161, f"disputed names {len(disputed)}")
+    models, readers, _, _ = fresh_readings()
     for row in disputed:
+        name = row["name"]
+        # Every stored reading must be the committed fresh reading for that
+        # model, so a flip inside the artefact cannot agree with itself.
+        for model in models:
+            if name not in readers[model]:
+                continue
+            want(
+                row["readings"].get(model, {}).get("verdict") == readers[model][name],
+                f"{name}: stored reading departs from {model}'s committed reading",
+            )
         votes = collections.Counter(
             outcome(entry["verdict"])
             for entry in row["readings"].values()
             if entry.get("verdict") in ("flag", "pass")
         )
         if row["dispute"] == DISPUTE_LABEL_ERROR:
+            both = {
+                outcome(readers[model][name])
+                for model in models
+                if name in readers[model]
+            }
             want(
-                row["reached"] == REACHED_CORRECTED
-                and row["adjudicated_verdict"]
-                == outcome(next(iter(row["readings"].values()))["verdict"]),
-                f"{row['name']}: label-error dispute",
+                len(both) == 1
+                and row["reached"] == REACHED_CORRECTED
+                and row["adjudicated_verdict"] == next(iter(both)),
+                f"{name}: label-error dispute",
             )
         elif row["dispute"] == DISPUTE_SPLIT:
             want(
@@ -481,6 +497,26 @@ def mode_check(args) -> None:
         json.dumps(rebuilt, sort_keys=True) == json.dumps(rows, sort_keys=True),
         "the written set does not match a fresh build from its inputs",
     )
+    expected_adjudicated, expected_controls = adjudicated_summary(rows, models)
+    want(
+        document.get("adjudicated") == expected_adjudicated,
+        "the adjudicated summary does not match the rows it summarises",
+    )
+    want(
+        document.get("controls") == expected_controls,
+        "the controls block does not match the committed fresh readings",
+    )
+    spend = document.get("spend_usd")
+    if STATE is not None:
+        want(spend == spend_report().get("total_usd"), "the spend entry drifted")
+    else:
+        # The ledger lives in the run state, which a clean checkout does not
+        # carry; the offline reading is a bound, and the build records the exact
+        # figure from the ledger when it has it.
+        want(
+            isinstance(spend, int | float) and 0 < spend <= CEILING_USD,
+            f"the spend entry is not a positive figure inside the ceiling: {spend}",
+        )
 
     for problem in problems:
         print("FAIL", problem, flush=True)
@@ -492,10 +528,12 @@ def mode_check(args) -> None:
     )
 
 
-def mode_build(args) -> None:
-    built = build_rows()
-    rows = built["rows"]
-    models = built["models"]
+def adjudicated_summary(rows: list, models: list) -> tuple[dict, dict]:
+    """The document's adjudicated and controls blocks, from the rows alone.
+
+    One builder for the write and for the check, so a summary block cannot be
+    regenerated from a rule the check does not apply.
+    """
     reached = collections.Counter(row["reached"] for row in rows)
     flagged_to_stands, stands_to_flagged = moved(rows)
     settled_moved = sum(
@@ -504,8 +542,6 @@ def mode_build(args) -> None:
         if row["reached"] == REACHED_SETTLED
         and row["adjudicated_verdict"] != row["original_verdict"]
     )
-    payload = json.loads(PROTOTYPE_JSON.read_text())
-    controls = control_agreement(models, payload["adjudication"]["readers"])
     read = [row for row in rows if row["readings"]]
     adjudicated = {
         "names": len(rows),
@@ -536,6 +572,16 @@ def mode_build(args) -> None:
             1 for row in rows if row["readings"] and not row["dispute"]
         ),
     }
+    payload = json.loads(PROTOTYPE_JSON.read_text())
+    controls = control_agreement(models, payload["adjudication"]["readers"])
+    return adjudicated, controls
+
+
+def mode_build(args) -> None:
+    built = build_rows()
+    rows = built["rows"]
+    models = built["models"]
+    adjudicated, controls = adjudicated_summary(rows, models)
     document = {
         "schema": "reader-verdicts-adjudicated",
         "rule": RULE_TEXT,

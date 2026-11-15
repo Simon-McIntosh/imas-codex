@@ -225,12 +225,6 @@ async def judge_name_definitions(
     return verdicts, total_cost
 
 
-def name_definition_flagged(verdict: dict[str, Any]) -> bool:
-    """Whether a verdict asks review to hold the candidate."""
-
-    return verdict.get("verdict") != "pass"
-
-
 def name_definition_note(item: dict[str, Any], verdict: dict[str, Any]) -> str | None:
     """The review hold a verdict raises, or None when it passes.
 
