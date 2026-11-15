@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="docs-project" content="imas-codex">
+  <meta name="reckon-type" content="plan">
+  <meta name="plan-slug" content="figure-scripts-use-the-shared-save-function">
+  <meta name="plan-title" content="Figure scripts save through the shared, checked save function">
+  <meta name="plan-summary" content="Every figure script in the repository saves through one function that refuses clipped or overlapping text, and that function exports correctly at any canvas size">
+  <meta name="plan-status" content="draft">
+  <meta name="plan-roi" content="medium">
+  <meta name="plan-effort-hours" content="5.0">
+  <meta name="plan-capability-version" content="1.0">
+  <meta name="plan-capability-class" content="general">
+  <meta name="plan-capability-reasoning" content="standard">
+  <meta name="plan-capability-verification" content="strict">
+  <meta name="plan-owner" content="Simon McIntosh">
+  <meta name="plan-tags" content="figures,plotting">
+  <meta name="plan-after" content="codac-uda-signals">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;figure-scripts-use-the-shared-save-function#s1&quot;]}">
+  <title>Figure scripts save through the shared, checked save function | imas-codex</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+  <link rel="stylesheet" href="/_shared/dashboard.css">
+</head>
+<body>
+  <main class="plan-doc">
+    <header>
+      <p class="eyebrow">Plan &middot; Figures</p>
+      <h1>Figure scripts save through the shared, checked save function</h1>
+      <p class="lead">The plotting package has one save function that refuses to write a figure whose text is clipped or overlapping. Ten older figure scripts still save directly and carry their own copies of that check, or none. This plan moves them onto the one function, after correcting two defects its reviews found.</p>
+    </header>
+
+    <h2 id="context">Where this starts</h2>
+    <p>The save function landed with the signal plotting work in <code>imas_codex/plotting/</code>. Its independent reviews recorded that the text check is now a fourth copy of a refusal that two figure scripts already implement for themselves, that the exported width is fixed while the height follows the figure, so a figure drawn at another width is exported with a distorted aspect ratio, and that a four-entry legend wraps onto a second row. Ten tracked scripts under <code>scripts/</code> call the plotting library's save directly: six named for figures and four for JET plots.</p>
+
+    <h2 id="s1">§1 — The save function exports a figure of any size without distortion</h2>
+    <section data-reckon="section" data-id="s1" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <p><strong>Delivers.</strong> A figure saved through the shared function keeps its drawn aspect ratio in the exported file at any canvas width and height, and the file declares a physical size derived from the figure. The default full-width canvas and its declared slide size are unchanged. A figure-level legend that would wrap is laid out on one row or refused with the reason.</p>
+    <p><strong>Done when.</strong> Tests in the plotting test directory show that for three canvas sizes, one of them the default, the exported width-to-height ratio equals the drawn ratio within one part in a thousand, and that the default canvas still declares its slide size. <strong>Negative control:</strong> with the width fixed as it is today, the test for a non-default canvas fails.</p>
+
+    <h2 id="s2">§2 — Every figure script saves through the shared function</h2>
+    <section data-reckon="section" data-id="s2" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="figure-scripts-use-the-shared-save-function#s1"></section>
+    <p><strong>Delivers.</strong> Each of the ten figure scripts saves through the shared function, and the scripts' own copies of the clipped-text and overlap check are gone. Every figure the scripts produce that is tracked under <code>docs/figures/</code> is regenerated through it, or the landing record states why a script could not be run and leaves its figure untouched. A figure the check refuses is repaired by moving its labels, never by bypassing the check.</p>
+    <p><strong>Done when.</strong> A search recorded in the landing record finds no direct call to the plotting library's save under <code>scripts/</code> and one definition of the text check in the repository; the landing record lists each script with one of regenerated, refused and repaired, or not run with its reason; each regenerated figure was rendered and looked at, and the count of figures that changed is given; the net change in lines under <code>scripts/</code> is stated. Any script that reads live data runs on a compute partition (<code>all_debug</code>). <strong>Negative control:</strong> a script given a label beyond the canvas writes no file.</p>
+
+    <section data-reckon="followups" id="followups" class="r-followups">
+      <h2><span class="sec">§</span> Followups</h2>
+      <article class="r-fu" data-id="f-fss-001" data-status="open" data-capability-version="1.0" data-capability-class="general" data-written-by="reckon-create" data-written-at="2026-11-15" data-recommends-skill="/reckon-build figure-scripts-use-the-shared-save-function" data-resolved-at="" data-resolved-by="">
+        <h4 class="r-fu-title">Correct the export and move the scripts</h4>
+        <div class="r-fu-body">Both sections are buildable once the plan's content and design reviews are answered.</div>
+        <pre class="r-fu-prompt">/reckon-build figure-scripts-use-the-shared-save-function</pre>
+      </article>
+    </section>
+  </main>
+</body>
+</html>
