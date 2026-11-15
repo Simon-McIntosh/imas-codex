@@ -1,0 +1,148 @@
+<article id="archive-variable-catalogue-evidence">
+  <h3>Registered archive scanner: 200-variable cohort verified in the graph</h3>
+  <p>The independently listed cohort contains 200 unique variables. The completed
+    scan and its fresh repeat each contain 200 graph signals and 200 distinct
+    identities: zero duplicates. Ten bounded reads through the landed reader
+    confirmed the data-serving archive for ten signals; none remained unconfirmed
+    in that sample. All ten confirmations survived the repeat scan.</p>
+  <p>The live plan was read at version 18 against worker base
+    <code>2fd068df6030aaa3c1acdc06bf5cf6086ac42d90</code>. The private declaration
+    selects five controller patterns from one controller family. Each independent
+    listing returned 40 variables, giving 200 unique selectors after deduplication.
+    All 80 expected controller suffix combinations were present, providing a
+    positive control on the listing. Selectors, endpoint identities and configuration
+    remain private cache data.</p>
+  <figure id="archive-variable-catalogue-flow">
+    <img src="/imas-codex/figures/codac-uda-signals/archive-variable-catalogue/catalogue-provenance.svg"
+      alt="Private policy precedes bounded metadata calls and checkpoints, acknowledged graph writes and completion. A bounded read returning samples separately confirms data-serving provenance.">
+    <figcaption>Each metadata chunk is saved before graph acknowledgement. An
+      interrupted cohort stays incomplete; recovery skips completed metadata and
+      acknowledged graph batches. A read returning samples establishes data-serving
+      provenance independently of metadata provenance. All 15 text bounds and all
+      pairwise text overlaps passed checks; the rendered preview was inspected.</figcaption>
+  </figure>
+  <table>
+    <thead><tr><th>Measurement</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Independent private-pattern listing</td><td>5 × 40 variables; 200 unique selectors; 80 expected suffix combinations present</td></tr>
+      <tr><td>Completed graph cohort</td><td>200 signals, 200 distinct identities, 200 metadata-archive bindings</td></tr>
+      <tr><td>Fresh repeat</td><td>200 signals, 200 distinct identities, zero duplicates; all 200 metadata records fetched again</td></tr>
+      <tr><td>Ten live validity reads</td><td>10 confirmed, 0 unconfirmed; eight held-value envelope bins per read, no cache hits; all 10 graph bindings retained after repeat</td></tr>
+      <tr><td>Bounded read parameters</td><td>2 s interval; explicit held semantics; at most 4,096 samples and 1 MiB; 30 s timeout</td></tr>
+      <tr><td>Live interrupted scan</td><td>complete=false; enumerated=200; metadata_completed=20; written=20; independent partial graph count=20</td></tr>
+      <tr><td>Recovery</td><td>20 completed metadata records retained; remaining 180 fetched; no completed record fetched again; complete=true only at 200 acknowledged writes</td></tr>
+      <tr><td>Metadata request bounds</td><td>At most 20 names per call; slowest repeat metadata call 1.808783 s under the 30 s timeout</td></tr>
+      <tr><td>Focused regression gate</td><td>Merged gate: 155 passed in 7.26 s, including both landed loader test files and the scanner checkpoint/parity tests</td></tr>
+      <tr><td>Modified graph statements under graph marker</td><td>Merged gate: 1 passed in 30.04 s against disposable Neo4j; verifies shared-loader binding after cross-archive confirmation and rescan</td></tr>
+      <tr><td>Deliberate guard failures</td><td>Interrupted-completion and empty-read mutations: 2 failed; removing the pre-graph metadata save: 1 failed; changing scanner sample values: 1 failed</td></tr>
+      <tr><td>Live scan attempt budget</td><td>3 resumed scans, including controlled interruption; 5 total including 2 earlier attempts, below the ceiling of 12</td></tr>
+    </tbody>
+  </table>
+  <p>Source commit <code>1b84dcd0c6b6c059dbdcdf9aba198a5272729cea</code>
+    registers the scanner, separates metadata and serving provenance, preserves
+    enrichment and claims, and applies the canonical host policy through the
+    facility-aware packaged-script runner. Commit
+    <code>4d4b94e78e72d22b0df51c883e5d1b397a84f381</code> separates name listing
+    from bounded metadata retrieval. Each native metadata batch is one reader call,
+    followed by an atomic checkpoint before graph persistence. Commit
+    <code>321c1aaf6f56f3faf9ce96314d0eb268822b66f6</code> adds a test that observes
+    that checkpoint at the graph-write boundary.</p>
+  <p>The incremental defect was reproduced before repair. The new recovery test
+    required enumeration to request names without metadata:</p>
+  <blockquote>assert payload.get("metadata") is False — AssertionError: assert None is False</blockquote>
+  <p>The same recovery test passes after repair. A separate mutation removed the
+    checkpoint save before graph persistence and failed with
+    <code>assert 0 == 3</code> for <code>metadata_completed</code>. The existing
+    empty-read guard was exercised directly: an empty response leaves serving
+    provenance unset and never invokes confirmation. Mutating it to confirm an
+    empty response makes its passing test fail. The graph test independently
+    observes a listed signal with metadata provenance and no serving provenance.</p>
+  <p>The connection-policy defect was also reproduced before repair:</p>
+  <blockquote>REPRODUCED: distinct IP addresses refused: archive endpoint is reserved for operators</blockquote>
+  <p>The reader imports <code>archive_host_key</code> from configuration policy.
+    Operator aliases are refused before client construction. Private configuration
+    must redeclare every archive role. Pulse creation uses the validated
+    <code>create_archive_pulse</code> factory. The operator-reserved endpoint was
+    never contacted.</p>
+  <p>The earlier 10,259-variable cohort exceeded a single metadata call's timeout.
+    It was replaced by the declared 200-variable controller family; incremental
+    metadata calls now allow wider cohorts without one long metadata operation.
+    A day-long validity request was refused by the landed reader's fixed 60 s
+    ceiling, so no absence was inferred from that refusal. Successful validation
+    instead used a two-second interval centred on a timestamp in the known populated
+    receipt. The reader returned archive-supplied preceding observations and
+    explicitly reported held-value bins, synthesized boundaries and no cache hits.
+    Eight bins per signal are a requested representation, not evidence of eight
+    raw samples or a continuous sampling cadence. Catalogue sampling mode remains
+    unknown unless archive evidence establishes it.</p>
+  <p>All live listing, scan and validity jobs ran on <code>all_debug</code>:
+    declaration <code>1316880</code>, interruption and resume <code>1316883</code>,
+    successful validity reads <code>1316889</code>, and fresh repeat
+    <code>1316890</code>. Validity used the landed reader at
+    <code>44aa5ba4984c1d1c7fdef9a9c44256f22283d2aa</code>, reader blob
+    <code>4619214951a7878087d223c751b32e55c05cfd9e</code>. Its source was extracted
+    into job-local scratch with generated models copied from this worktree because
+    the main checkout's generated models could not import the archive configuration.
+    No shared main files were changed. The validity log records the imported
+    module path and resolved working directory.</p>
+  <p>Durable evidence is in
+    <code>~/.config/reckon/crew/runs/r-20261115T020713980531-archive-variable-catalogue/</code>:</p>
+  <ul>
+    <li><code>controller-family-declaration.log</code>, <code>controller-scan-gate.log</code>, <code>controller-validity-bounded.log</code> and <code>controller-repeat.log</code> contain the live summaries and completion receipts.</li>
+    <li><code>incremental-baseline.log</code> records the pre-repair failure; <code>incremental-focused-gate.log</code> and <code>incremental-boundary.log</code> record passing focused tests.</li>
+    <li><code>graph-scope-gate.log</code> records the initial graph gate; <code>merge-graph.log</code> executes the current catalogue, source-binding, confirmation and scanner-scope statements under the graph marker.</li>
+    <li><code>negative-control.log</code> and <code>incremental-negative-control.log</code> record the three deliberate mutation failures; <code>incremental-figure-check.log</code> records figure checks.</li>
+  </ul>
+  <h4 id="archive-variable-catalogue-shared-reader">Shared reader integration verified</h4>
+  <p>Merge commit <code>f38f8134e00569b46641bb6e566fca84e548d521</code>
+    integrates local main parent <code>3181b9e75f0a04567fd9269df79564b8733a53b4</code>.
+    The merge reproduced three conflicts, including
+    <code>CONFLICT (add/add): Merge conflict in imas_codex/remote/codac_uda.py</code>.
+    Main's <code>ArchiveReader</code>, <code>ArchiveSignalLoader</code> and packaged
+    <code>read</code>, <code>fetch</code> and <code>_held_window</code> functions
+    remain AST-identical to that parent. Scanner validity calls
+    <code>ArchiveReader.check</code>, and successful confirmation selects the
+    matching per-archive access record. The catalogue transport accepts only
+    listing and metadata operations through the same reader transport; it contains
+    no sample-read implementation. Both facility setup fallback and compute-host
+    additions survived resolution.</p>
+  <p>The merged graph writer creates per-archive <code>DataSource</code> and
+    <code>DataAccess</code> bindings consumed by the unchanged loader. A graph test
+    confirms a different serving archive from the metadata archive, then proves a
+    rescan preserves one unambiguous loader binding. Replaying the existing private
+    checkpoint updated all 200 catalogue bindings without contacting the archive
+    or rescanning the cohort; the graph retained 200 distinct signals and ten
+    serving confirmations.</p>
+  <table>
+    <thead><tr><th>Shared-path live check, all_debug job 1316909</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Successful identical request through scanner and loader</td><td>Eight timestamps and eight envelope rows each; arrays exactly equal; uint64 timestamps and float64 values; neither read used cache</td></tr>
+      <tr><td>Identical failing native request</td><td>Both reject the deliberately invalid read mode with error_classification=invalid_request</td></tr>
+      <tr><td>Live request ceiling</td><td>Exactly 4 of 4: two successful sample requests and two native refusal receipts</td></tr>
+      <tr><td>Graph after cached metadata replay</td><td>200 signals, 200 distinct identities, 200 shared-loader bindings, ten serving confirmations</td></tr>
+    </tbody>
+  </table>
+  <p>The first merged focused run reproduced the connection guard's rejection of
+    a distinct IPv6 endpoint: <code>ValueError: host must be a DNS name or IPv4
+    address without a port</code>. The redundant colon rejection was removed in
+    favour of canonical host validation. The corrected focused gate passed all
+    155 tests, including the IPv6 test. A deliberate mutation added one to scanner
+    sample values while leaving the loader unchanged: the passing parity test
+    then failed with <code>Mismatched elements: 2 / 2 (100%)</code>.</p>
+  <p>Integration receipts in the run directory are
+    <code>merge-focused-fixed.log</code>, <code>merge-graph.log</code>,
+    <code>merge-live-parity.log</code>, <code>merge-negative.log</code> and
+    <code>merge-owner-receipt.json</code>. Full private parity parameters, sample
+    digests and the four-request ledger are retained as
+    <code>~/.cache/imas-codex-codac-uda/merge-parity-receipt.json</code> and
+    <code>~/.cache/imas-codex-codac-uda/merge-parity-request-ledger.json</code>.</p>
+  <p>Private declarations, all-role configuration, per-batch checkpoints and full
+    live receipts reside under <code>~/.cache/imas-codex-codac-uda/</code>, including
+    <code>controller-cohort-declaration.json</code>,
+    <code>controller-cohort-private-config.yaml</code>,
+    <code>controller-cohort-checkpoint.json</code>,
+    <code>controller-interruption-receipt.json</code>,
+    <code>controller-validity-receipt.json</code> and
+    <code>controller-catalogue-live-receipt.json</code>. Generated model files are
+    excluded from commits and must be rebuilt in the integrating checkout.</p>
+</article>

@@ -256,6 +256,7 @@ def _auto_register() -> None:
     _auto_registered = True
     # Import triggers module-level registration
     from imas_codex.discovery.signals.scanners import (  # noqa: F401
+        codac_uda,
         device_xml,
         edas,
         imas,

@@ -396,3 +396,47 @@ class ArchiveSignalLoader:
             signal.metadata.get("description") or binding["description"] or ""
         )
         return signal
+
+
+def archive_config(facility: str, config: dict | None = None):
+    """Load private endpoint settings explicitly and ignore discovery runtime keys."""
+    if config is None:
+        config = get_facility_with_infrastructure(facility)["data_systems"]["codac_uda"]
+    return validate_codac_uda_config(
+        {key: value for key, value in config.items() if not key.startswith("_")}
+    )
+
+
+def request_archive(
+    facility: str, role: str, request: dict, *, config: dict | None = None
+) -> dict:
+    """Fetch catalogue metadata through the shared reader transport.
+
+    Sample reads belong to ArchiveReader.read/check; this entry point accepts
+    only listing and metadata operations, with one bounded metadata batch.
+    """
+    settings = archive_config(facility, config)
+    payload = dict(request)
+    operation = payload.pop("operation", None)
+    if operation not in {"variables", "metadata"}:
+        raise ValueError("catalogue requests accept only variables or metadata")
+    if {"connection", "host", "endpoint"} & payload.keys():
+        raise ValueError("archive connections come only from private configuration")
+    if operation == "metadata":
+        maximum = payload.setdefault(
+            "metadata_batch_size", settings.metadata_batch_size
+        )
+        names = payload.get("names")
+        if (
+            type(maximum) is not int
+            or not 0 < maximum <= settings.metadata_batch_size
+            or not isinstance(names, list)
+            or not 0 < len(names) <= maximum
+        ):
+            raise ValueError("archive metadata request exceeds configured batch limit")
+    reader = ArchiveReader(
+        facility,
+        role,
+        config={"data_systems": {"codac_uda": settings.model_dump(mode="json")}},
+    )
+    return reader._request(operation, **payload)

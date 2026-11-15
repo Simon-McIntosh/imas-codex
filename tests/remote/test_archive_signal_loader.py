@@ -16,6 +16,7 @@ def facility_config():
         "data_systems": {
             "codac_uda": {
                 "archives": [
+                    {"role": "fast", "host": "fast.invalid"},
                     {"role": "slow", "host": "archive.invalid"},
                     {"role": "operator", "host": "operators.invalid", "excluded": True},
                 ],

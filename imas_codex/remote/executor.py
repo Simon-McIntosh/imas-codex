@@ -1216,14 +1216,11 @@ def run_python_script(
         FileNotFoundError: If script doesn't exist
         subprocess.CalledProcessError: On non-zero exit
     """
-    import importlib.resources
     import json
 
-    # Load script from package (Python 3.12+ required)
-    script_path = importlib.resources.files("imas_codex.remote.scripts").joinpath(
-        script_name
-    )
-    script_content = script_path.read_text()
+    from imas_codex.remote.script_source import load_script_source
+
+    script_content = load_script_source(script_name)
 
     is_local = is_local_host(ssh_host)
 
@@ -1364,14 +1361,11 @@ async def async_run_python_script(
         TimeoutError: If command exceeds timeout
         asyncio.CancelledError: If task is cancelled
     """
-    import importlib.resources
     import json
 
-    # Load script from package (Python 3.12+ required)
-    script_path = importlib.resources.files("imas_codex.remote.scripts").joinpath(
-        script_name
-    )
-    script_content = script_path.read_text()
+    from imas_codex.remote.script_source import load_script_source
+
+    script_content = load_script_source(script_name)
 
     is_local = is_local_host(ssh_host)
 

@@ -32,8 +32,10 @@ known_login_nodes:
 login_nodes:
   - "98dci4-srv-*.iter.org"
   - "98dci4-gpu-*.iter.org"
+  - "98dci4-clu-*.iter.org"
   - "98dci4-srv-*"
   - "98dci4-gpu-*"
+  - "98dci4-clu-*"
 
 # SSH aliases treated as local when running on a matching login node.
 local_hosts:

@@ -18,13 +18,8 @@ import re
 from collections.abc import Mapping
 from typing import TYPE_CHECKING, Any
 
-from imas_codex.config.models import (
-    ArchiveEndpointConfig,
-    ArchiveRole,
-    CodacUDAConfig,
-)
-
 if TYPE_CHECKING:
+    from imas_codex.config.models import ArchiveEndpointConfig, CodacUDAConfig
     from imas_codex.graph.models import Pulse
 
 
@@ -87,6 +82,8 @@ def validate_codac_uda_config(
     data: Mapping[str, Any] | CodacUDAConfig,
 ) -> CodacUDAConfig:
     """Validate structure and exclusions without importing a client or connecting."""
+    from imas_codex.config.models import ArchiveRole, CodacUDAConfig
+
     config = CodacUDAConfig.model_validate(
         data.model_dump() if isinstance(data, CodacUDAConfig) else dict(data)
     )
@@ -125,6 +122,8 @@ def validate_codac_uda_config(
             )
         if endpoint.excluded:
             raise ValueError("readable archive role must name a non-excluded endpoint")
+    if set(roles) != set(ArchiveRole):
+        raise ValueError("a private archive block must redeclare every archive role")
     return config
 
 
@@ -132,6 +131,8 @@ def resolve_archive_endpoint(
     data: Mapping[str, Any] | CodacUDAConfig, role: str
 ) -> ArchiveEndpointConfig:
     """Return a configured endpoint only after its complete read policy passes."""
+    from imas_codex.config.models import ArchiveRole
+
     config = validate_codac_uda_config(data)
     if role not in (config.readable_roles or []):
         raise ValueError("archive role is not readable")
