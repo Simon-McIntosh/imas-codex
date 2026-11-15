@@ -17,7 +17,30 @@
   "plan_slug": "sn-catalog-consistency",
   "plan_version": 57,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cffe924eaad54d955c8df27bce6af201813f3857",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The plant gains a sixth name: live, no producer edge, copied list populated. The count must report 2 and name both, and name search must return no source for that name, so a reader that merges the copied list into the edges fails the control.",
+      "reason": "",
+      "when": "2026-11-15T01:43:12.684006+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "cffe924eaad54d955c8df27bce6af201813f3857",
+      "commit_basis": "edit",
+      "note": "The plant gains a sixth name: live, no producer edge, copied list populated. The count must report 2 and name both, and name search must return no source for that name, so a reader that merges the copied list into the edges fails the control.",
+      "reason": "",
+      "when": "2026-11-15T01:43:12.684006+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-catalog-consistency/r-20261114T233440282131-plan-review-of-sn-catalog-consistency.json",
   "review_run_id": "r-20261114T233440282131-plan-review-of-sn-catalog-consistency",
   "reviewed_blob_sha": "552a034cc817e3eaafc0829a9276389f52408f62",
   "rubric": "content",
