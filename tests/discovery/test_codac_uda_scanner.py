@@ -443,118 +443,6 @@ async def test_failed_metadata_is_catalogued_as_unavailable(config, scanner_io):
     assert signal.archive_metadata is signal.unit is signal.source_description is None
 
 
-def test_disk_catalogue_recovers_metadata_before_acknowledgement(tmp_path):
-    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
-
-    path = tmp_path / "catalogue.sqlite"
-    store = ArchiveCatalogue(path)
-    census = store.seed(
-        {"slow": ["DEMO:ONE", "DEMO:TWO"], "fast": ["DEMO:TWO", "DEMO:THREE"]},
-        timestamp="fixture census",
-    )
-    assert census["union"] == 3 and census["overlap"] == 1
-    fetched = []
-
-    def fetch(role, names):
-        fetched.extend((role, name) for name in names)
-        return {"entries": [{"name": name} for name in names]}
-
-    def interrupted(signals):
-        raise TimeoutError("fixture acknowledgement interruption")
-
-    def make(role, entry, cohort):
-        return entry
-
-    with pytest.raises(TimeoutError):
-        store.run(
-            facility="demo",
-            fetch=fetch,
-            ingest=interrupted,
-            make_signal=make,
-            batch_size=2,
-        )
-    store.close()
-    store = ArchiveCatalogue(path)
-    stored = {}
-
-    def ingest(signals):
-        stored.update({signal["name"]: signal for signal in signals})
-        return len(signals)
-
-    result = store.run(
-        facility="demo", fetch=fetch, ingest=ingest, make_signal=make, batch_size=2
-    )
-    assert result["complete"] is True and result["written"] == 3
-    assert len(fetched) == len(set(fetched)) == 4
-    assert set(stored["DEMO:TWO"]["listed_archives"]) == {
-        "demo:codac_uda:slow",
-        "demo:codac_uda:fast",
-    }
-    repeated = store.run(facility="demo", fetch=fetch, ingest=ingest, make_signal=make)
-    assert repeated["metadata_requests"] == repeated["newly_written"] == 0
-    store.close()
-
-
-def test_disk_catalogue_persists_unavailable_metadata_with_code(tmp_path):
-    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
-
-    store = ArchiveCatalogue(tmp_path / "failed.sqlite")
-    store.seed({"slow": ["DEMO:FAILED"]}, timestamp="fixture census")
-    ingest = Mock(return_value=1)
-    result = store.run(
-        facility="demo",
-        fetch=lambda role, names: {
-            "entries": [],
-            "failed": [
-                {"name": names[0], "error": "fixture refusal", "error_code": 9105}
-            ],
-        },
-        ingest=ingest,
-        make_signal=lambda role, entry, cohort: entry,
-    )
-    assert (
-        result["complete"] is True and result["failed"] == 1 and result["written"] == 1
-    )
-    signal = ingest.call_args.args[0][0]
-    assert (
-        signal["metadata_state"] == "unavailable"
-        and signal["metadata_error_code"] == 9105
-    )
-    assert "archive_metadata" not in signal
-    assert store.db.execute("SELECT error FROM census").fetchone() == (
-        "fixture refusal",
-    )
-    ingest.assert_called_once()
-    assert result["unavailable_codes"] == {9105: 1}
-    store.close()
-
-
-@pytest.mark.asyncio
-async def test_full_catalogue_uses_owner_ingest_and_reuses_completed_batches(
-    config, scanner_io, tmp_path
-):
-    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
-
-    path = tmp_path / "full.sqlite"
-    store = ArchiveCatalogue(path)
-    store.seed(
-        {"fast": ["DEMO:TEMP-0"], "slow": ["DEMO:TEMP-1", "DEMO:TEMP-2"]},
-        timestamp="fixture census",
-    )
-    store.close()
-    config["_catalogue_path"] = str(path)
-    scanner = catalogue.CodacUDAScanner()
-    result = await scanner.scan("demo", "local", config)
-    assert result.signals == []
-    assert result.stats["complete"] is True
-    assert result.stats["written"] == len(scanner_io[0]) == 3
-    assert result.stats["metadata_requests"] == 3
-    reader_calls = scanner_io[1].call_count
-    again = await scanner.scan("demo", "local", config)
-    assert again.stats["newly_written"] == again.stats["metadata_requests"] == 0
-    assert scanner_io[1].call_count == reader_calls
-
-
 def test_signal_keeps_all_archive_fields_and_absent_times():
     document = {
         "datatypes": [
@@ -576,61 +464,6 @@ def test_signal_keeps_all_archive_fields_and_absent_times():
     assert signal.data_type == "DOUBLE"
     assert signal.first_sample_ns is signal.last_sample_ns is None
     assert signal.listed_archives == ["demo:codac_uda:slow"]
-
-
-def test_existing_type_checkpoint_is_retained_and_full_attributes_backfilled(tmp_path):
-    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
-
-    store = ArchiveCatalogue(tmp_path / "backfill.sqlite")
-    store.seed({"slow": ["DEMO:EXISTING", "DEMO:PENDING"]}, timestamp="fixture census")
-    type_document = {"datatypes": [{"name": "main", "fields": []}]}
-    old = {"name": "DEMO:EXISTING", "archive_metadata": type_document}
-    with store.db:
-        store.db.execute(
-            "UPDATE census SET document=?,acknowledged=1 WHERE name=?",
-            (json.dumps(old), old["name"]),
-        )
-        store.db.execute("INSERT INTO written VALUES (?)", (old["name"],))
-    assert store.cached_type_documents("slow", [old["name"], "DEMO:PENDING"]) == {
-        old["name"]: type_document
-    }
-    fetched = []
-
-    def fetch(role, names):
-        fetched.extend(names)
-        return {
-            "entries": [
-                {
-                    "name": name,
-                    "metadata_state": "available",
-                    "archive_metadata": {
-                        "type": type_document,
-                        "full": [{"name": "Units", "value": "K"}],
-                    },
-                }
-                for name in names
-            ]
-        }
-
-    result = store.run(
-        facility="demo",
-        fetch=fetch,
-        ingest=len,
-        make_signal=lambda role, entry, cohort: entry,
-    )
-    assert (
-        result["complete"] and result["written"] == 2 and result["newly_written"] == 1
-    )
-    assert set(fetched) == {"DEMO:EXISTING", "DEMO:PENDING"}
-    repeated = store.run(
-        facility="demo",
-        fetch=fetch,
-        ingest=len,
-        make_signal=lambda role, entry, cohort: entry,
-    )
-    assert repeated["metadata_requests"] == repeated["newly_written"] == 0
-    assert len(fetched) == 2
-    store.close()
 
 
 def test_unavailable_signal_clears_archive_fields_and_available_requires_document():
@@ -661,29 +494,34 @@ def test_unavailable_signal_clears_archive_fields_and_available_requires_documen
         )
 
 
-def test_refreshed_metadata_requires_acknowledgement_for_existing_identity(tmp_path):
-    from imas_codex.discovery.signals.scanners.archive_catalogue import ArchiveCatalogue
+@pytest.mark.asyncio
+async def test_private_catalogue_cannot_enter_pilot_graph_ingest(
+    config, scanner_io, tmp_path
+):
+    import sqlite3
 
-    store = ArchiveCatalogue(tmp_path / "refresh.sqlite")
-    store.seed({"slow": ["DEMO:TEMP"]}, timestamp="fixture census")
-    with store.db:
-        store.db.execute("INSERT INTO written VALUES ('DEMO:TEMP')")
-        store.db.execute(
-            "UPDATE census SET document=?,attributes_checked=1,metadata_state='available',acknowledged=0",
-            (json.dumps({"name": "DEMO:TEMP", "metadata_state": "available"}),),
+    path = tmp_path / "private.sqlite"
+    with sqlite3.connect(path) as db:
+        db.executescript(
+            "CREATE TABLE census(role TEXT,name TEXT,document TEXT,error TEXT,acknowledged INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(role,name)); CREATE TABLE receipts(key TEXT PRIMARY KEY,value TEXT);"
         )
-    arguments = {
-        "facility": "demo",
-        "fetch": Mock(),
-        "ingest": len,
-        "make_signal": lambda role, entry, cohort: entry,
-    }
-    paused = store.run(**arguments, max_batches=0)
-    assert paused["complete"] is False and paused["written"] == 1
-    resumed = store.run(**arguments)
-    assert (
-        resumed["complete"]
-        and resumed["newly_written"] == resumed["metadata_requests"] == 0
-    )
-    arguments["fetch"].assert_not_called()
-    store.close()
+        db.execute("INSERT INTO census(role,name) VALUES ('slow','DEMO:TEMP-0')")
+        db.execute(
+            "INSERT INTO receipts VALUES ('census',?)",
+            (
+                json.dumps(
+                    {
+                        "counts": {"slow": 1, "fast": 0},
+                        "union": 1,
+                        "overlap": 0,
+                        "fingerprint": "fixture",
+                        "timestamp": "fixture",
+                    }
+                ),
+            ),
+        )
+    config["_catalogue_path"] = str(path)
+    with pytest.raises(ValueError, match="private catalogue"):
+        await catalogue.CodacUDAScanner().scan("demo", "local", config)
+    assert scanner_io[0] == {}
+    scanner_io[1].assert_not_called()

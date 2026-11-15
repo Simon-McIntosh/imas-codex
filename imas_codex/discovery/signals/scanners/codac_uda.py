@@ -150,11 +150,13 @@ class CodacUDAScanner:
         config: dict[str, Any],
         reference_shot: int | None = None,
     ) -> ScanResult:
+        if config.get("_catalogue_path"):
+            raise ValueError(
+                "use the private catalogue entry point outside the pilot scanner"
+            )
         settings = archive_config(
             facility, config if config.get("variable_patterns") else None
         )
-        if config.get("_catalogue_path"):
-            return await self._scan_catalogue(facility, settings, config)
         effective = settings.model_dump(mode="json")
         patterns = list(dict.fromkeys(settings.variable_patterns or []))
         if not patterns:
@@ -305,7 +307,7 @@ class CodacUDAScanner:
                     },
                     config=effective,
                 )
-                from imas_codex.discovery.signals.scanners.archive_catalogue import (
+                from imas_codex.remote.archive_catalogue import (
                     metadata_entries,
                 )
 
@@ -426,80 +428,6 @@ class CodacUDAScanner:
             if mode != "unknown"
             else None,
         )
-
-    async def _scan_catalogue(self, facility, settings, config) -> ScanResult:
-        from imas_codex.discovery.signals.parallel import ingest_discovered_signals
-        from imas_codex.discovery.signals.scanners.archive_catalogue import (
-            ArchiveCatalogue,
-        )
-
-        store = ArchiveCatalogue(Path(config["_catalogue_path"]))
-        try:
-            census = store.census()
-            if census["union"] > 1_000_000:
-                raise RuntimeError(
-                    "catalogue exceeds one million variables; authorization required"
-                )
-            if set(census["counts"]) != set(settings.readable_roles):
-                raise ValueError(
-                    "census archive roles differ from configured readable roles"
-                )
-            from imas_codex.config.codac_uda import resolve_archive_endpoint
-
-            for role in settings.readable_roles:
-                resolve_archive_endpoint(settings, role)
-            archives = [
-                ArchiveEndpoint(
-                    id=f"{facility}:codac_uda:{item.role}",
-                    facility_id=facility,
-                    data_system="codac_uda",
-                    role=item.role,
-                    excluded=bool(item.excluded),
-                )
-                for item in settings.archives
-            ]
-            await asyncio.to_thread(_persist_archives, facility, archives)
-
-            def fetch(role, names):
-                return request_archive(
-                    facility,
-                    role,
-                    {
-                        "operation": "metadata",
-                        "names": names,
-                        "metadata_batch_size": settings.metadata_batch_size,
-                    },
-                    config=settings.model_dump(mode="json"),
-                )
-
-            def make(role, entry, cohort):
-                return self._signal(
-                    facility,
-                    f"{facility}:codac_uda:{role}",
-                    _access(facility, role).id,
-                    entry,
-                    cohort,
-                ).model_dump(mode="json")
-
-            stats = await asyncio.to_thread(
-                store.run,
-                facility=facility,
-                fetch=fetch,
-                ingest=ingest_discovered_signals,
-                make_signal=make,
-                batch_size=settings.metadata_batch_size,
-                max_batches=config.get("_max_batches"),
-                progress=config.get("_progress"),
-            )
-            return ScanResult(
-                stats=stats,
-                metadata={
-                    "census": census,
-                    "checkpoint_path": str(config["_catalogue_path"]),
-                },
-            )
-        finally:
-            store.close()
 
     async def check(
         self,

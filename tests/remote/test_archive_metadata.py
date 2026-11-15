@@ -1,6 +1,7 @@
 """Both archive metadata interfaces and explicit unavailability semantics."""
 
 import json
+from io import StringIO
 
 from imas_codex.remote.scripts import codac_uda as reader
 
@@ -126,3 +127,23 @@ def test_invalid_structure_is_unavailable_without_aborting_batch():
         entry["metadata_state"] == "unavailable" and entry["metadata_error_code"] == 0
     )
     assert "archive_metadata" not in entry
+
+
+def test_metadata_stream_refuses_data_operation_and_keeps_serving_metadata():
+    client = Client()
+    source = StringIO(
+        json.dumps({"operation": "read"})
+        + "\n"
+        + json.dumps({"operation": "metadata", "names": ["DEMO:TEMP"]})
+        + "\n"
+    )
+    output = StringIO()
+    assert reader.metadata_stream(client, source, output) == 0
+    receipts = [
+        json.loads(line.removeprefix("CODAC_METADATA "))
+        for line in output.getvalue().splitlines()
+    ]
+    assert receipts[0] == {"ready": True}
+    assert receipts[1]["ok"] is False and "refuses non-metadata" in receipts[1]["error"]
+    assert receipts[2]["ok"] is True
+    assert client.calls == [("type", "DEMO:TEMP"), ("full", "DEMO:TEMP")]

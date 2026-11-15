@@ -98,6 +98,7 @@ def metadata_batch(
                     "error": errors[0]["error"],
                     "error_code": errors[0]["error_code"],
                     "errors": errors,
+                    "documents": documents,
                 }
             )
         else:
@@ -161,6 +162,11 @@ def metadata(client, request: dict) -> dict:
                 "metadata_error_code": document.get("error_code", 0),
                 "metadata_error": str(document["error"]),
                 "metadata_errors": document.get("errors", []),
+                **(
+                    {"metadata_interfaces": document["documents"]}
+                    if document.get("documents")
+                    else {}
+                ),
             }
             entries.append(entry)
             failed.append(
@@ -190,6 +196,7 @@ def metadata(client, request: dict) -> dict:
                     "metadata_state": "unavailable",
                     "metadata_error_code": 0,
                     "metadata_error": error,
+                    "metadata_interfaces": {"type": type_document, "full": attributes},
                 }
             )
             failed.append({"name": name, "error": error, "error_code": 0})
@@ -615,9 +622,32 @@ def dispatch(client, request: dict) -> dict:
     raise ValueError("unknown operation")
 
 
+def metadata_stream(client, source, output) -> int:
+    """Serve metadata-only batches on one persistent native client.
+
+    The framed channel excludes data operations and survives native diagnostic
+    lines on stdout. Each process handles one archive and one request at a time.
+    """
+    prefix = "CODAC_METADATA "
+    print(prefix + json.dumps({"ready": True}), file=output, flush=True)
+    for line in source:
+        try:
+            request = json.loads(line)
+            if request.get("operation") != "metadata":
+                raise ValueError("metadata stream refuses non-metadata operations")
+            with contextlib.redirect_stdout(sys.stderr):
+                result = metadata(client, request)
+            receipt = {"ok": True, "result": result}
+        except Exception as exc:
+            receipt = {"ok": False, "error_type": type(exc).__name__, "error": str(exc)}
+        print(prefix + json.dumps(receipt), file=output, flush=True)
+    return 0
+
+
 def main() -> int:
     try:
-        request = json.load(sys.stdin)
+        streaming = os.environ.get("CODAC_UDA_METADATA_STREAM") == "1"
+        request = None if streaming else json.load(sys.stdin)
         # Native libraries can print diagnostics; reserve stdout for the receipt.
         with contextlib.redirect_stdout(sys.stderr):
             client = connect(
@@ -625,7 +655,10 @@ def main() -> int:
                 json.loads(os.environ.get("CODAC_UDA_OPERATOR_HOSTS", "[]")),
                 int(os.environ.get("CODAC_UDA_PORT", "3090")),
             )
-            result = dispatch(client, request)
+            if not streaming:
+                result = dispatch(client, request)
+        if streaming:
+            return metadata_stream(client, sys.stdin, sys.stdout)
         print(json.dumps({"ok": True, "result": result}))
         return 0
     except Exception as exc:
