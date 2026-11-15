@@ -49,3 +49,60 @@
   a Python escape warning. No graph or archive connection was needed for this
   schema/configuration gate.</p>
 </section>
+<section id="archive-pulse-schema-review-repairs">
+  <h3>Identity, host-policy ownership and private archive overrides</h3>
+  <p>The repair commit is <code>325b2d9fd9ca9b46fada3f96c31d0cafc4bc8d31</code>.
+  Before repair, added assertions reproduced two failures: the worked pulse
+  expected <code>demo:codac_uda:slow:DEMO:CAMPAIGN/commissioning-alpha</code>
+  but held <code>demo:codac_uda:slow:commissioning-alpha</code>; a private list
+  containing only a fast endpoint discarded the public slow and operator
+  entries, then reported only <code>operator archive must be explicitly excluded</code>.
+  The reproduction receipt records <code>2 failed, 7 passed, 1 warning in 21.39s</code>
+  and <code>EXIT=1</code>. Its seven passing cases establish that the config
+  module already compared IP addresses exactly.</p>
+  <p><code>Pulse.id</code> now names its actual slots:
+  <code>{archive}:{name}</code>, where <code>archive</code> is the full endpoint
+  ID and <code>name</code> is the complete category-qualified identity returned
+  by the archive. Category IDs use their own <code>archive</code> and
+  <code>name</code> slots too. The worked pulse and the collision regression
+  retain every category and pulse path segment.</p>
+  <table>
+    <thead><tr><th>Synthetic pulse name</th><th>Distinct serialized model ID</th></tr></thead>
+    <tbody>
+      <tr><td><code>DEMO:CAMPAIGN-ALPHA/commissioning-alpha</code></td><td><code>demo:codac_uda:slow:DEMO:CAMPAIGN-ALPHA/commissioning-alpha</code></td></tr>
+      <tr><td><code>DEMO:CAMPAIGN-BETA/commissioning-alpha</code></td><td><code>demo:codac_uda:slow:DEMO:CAMPAIGN-BETA/commissioning-alpha</code></td></tr>
+    </tbody>
+  </table>
+  <p><code>imas_codex.config.codac_uda.archive_host_key</code> is the production
+  owner of host comparison and is shared by endpoint policy validation.
+  It compares DNS short aliases after case and trailing-dot normalization,
+  and compares complete normalized IP addresses. The regression covers a
+  hostname, a short alias, equal and distinct IPv4 addresses sharing a first
+  octet, and equal and distinct IPv6 addresses. Thus an identical reserved
+  address is refused while a different address remains readable. The prototype
+  reader was left unchanged; production callers import the config-owned rule.</p>
+  <p><strong>Merge decision: retain wholesale list replacement.</strong>
+  A private <code>archives</code> list must redeclare every required role and
+  its policy, including <code>operator</code> with <code>excluded: true</code>.
+  Supplying only hosts does not inherit the public list entries or their flags.
+  The error now explains this merge contract instead of leaving a partial
+  override looking like an unexplained policy fault. Tests exercise the actual
+  facility dictionary merge for a partial role list, a complete host-only list
+  missing its exclusion flags, and a complete policy-bearing list that resolves
+  both readable endpoints while still refusing the operator role.</p>
+  <table>
+    <thead><tr><th>Repair measure</th><th>Receipt</th></tr></thead>
+    <tbody>
+      <tr><td>Generated models at the repair commit</td><td>Graph, data dictionary and facility configuration models built; exit 0</td></tr>
+      <tr><td>Focused schema and configuration gate</td><td>70 passed, 2 warnings in 16.77s; exit 0; both reproduced failures resolved</td></tr>
+      <tr><td>Operator-readable fixture mutation</td><td>1 failed, 1 warning in 16.81s; exit 1; generated validation still refuses operator as a readable role</td></tr>
+    </tbody>
+  </table>
+  <p>The repair build, positive gate and invalid-fixture control ran in a separate
+  <code>all_debug</code> job. Receipts are <code>repair-reproduction.log</code>,
+  <code>repair-build.log</code>, <code>repair-tests.log</code> and
+  <code>repair-negative-control.log</code> in the assigned run directory.
+  The four public facility configurations still validate and their files have
+  no changes from the reviewed delivery. The prototype has no diff either.
+  All host, category and pulse examples added here are invented.</p>
+</section>
