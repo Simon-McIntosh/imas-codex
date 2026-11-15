@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run records no baseline_suite or after_suite block. The derived delta comes from its own two suite receipts: reader-tests.log at 2fd068df6030 plus working changes ran 31 tests with 0 failures, and focused-tests.log at ccda6bd1234 plus working changes ran 50 tests with 0 failures and EXIT=0, so no failure id is added and none is removed.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "call_sites_emission": "none",
+  "completed_at": "2026-11-15T06:51:22.401Z",
+  "dispatched_at": "2026-11-15T06:28:39Z",
+  "findings": [
+    {
+      "file": "tests/remote/test_archive_signal_loader.py",
+      "line": "184",
+      "severity": "non-blocking",
+      "text": "assert_array_equal(loaded.values, check['signal'].values) compares two decodes of the one dict the mocked reader._request returns, so it stays true even if the loader stopped routing through ArchiveReader.read and fetched on its own; the divergence this test names would not redden it, and the guard that does fail is the one-fetch cache assertion at tests/remote/test_archive_signal_loader.py:106 together with the live gate's validity_same_samples measurement."
+    },
+    {
+      "file": "imas_codex/remote/scripts/codac_uda.py",
+      "line": "347",
+      "severity": "non-blocking",
+      "text": "A held-value read whose first reply trips the client's reply-sample limit can never page, because held mode forbids expected_spacing and this branch then raises 'expected_spacing is required to verify raw pages'; imas_codex/remote/codac_uda.py:66-77 classifies that message as 'sampling' because it contains 'spacing', so a caller is told its cadence evidence was wrong when the truth is a volume refusal whose remedy is a narrower window."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "No production call site: a grep for ArchiveSignalLoader, ArchiveReader and codac_uda over imas_codex at 40c2d2433 with a passing positive control (run_python_script in the same tree) returns only the three definition modules, so the loader is delivered for the separately dispatched scanner and MCP nodes to wire.",
+    "diff": "Read all five commits against base 2fd068df6030 -- 6 files, +1222/-13, being a new loader service, extensions to the packaged reader, two test files, one facility initializer line and the evidence fragment, with nothing carried that the goal and the upstream steering text do not imply.",
+    "done_when": "Read the plan section's done-when; live-gate-precision.log records every clause on all_debug job 1316826 at 98dci4-clu-3141 -- raw 8 points over a two-second interval in 1.732343 s, envelope 8 bins in 1.226137 s, a cache repeat with fetches 0, a 100001-sample refusal with fetches 0 and classification limit matching the validity check, and validity_same_samples true.",
+    "goal": "Read the node goal to deliver the bounded signal loader by graph identity with reported sampling evidence; imas_codex/remote/codac_uda.py:341-399 resolves the FacilitySignal to DataAccess to DataSource to HOSTED_BY_ARCHIVE binding and returns raw, envelope and binned arrays with decimation reported as true, false or unknown at imas_codex/remote/scripts/codac_uda.py:410-431.",
+    "manifest": "Read the run manifest; it reports status complete with five commits, six changed paths, tests and test_logs naming focused-tests.log (50 passed, EXIT=0) and no-decimation-red.log as the negative control, but leaves baseline_suite and after_suite empty so the added-failure delta had to be read from the recorded suite logs themselves.",
+    "write_paths": "Read the declared write paths docs/evidence/fragments/codac-uda-signals/archive-signal-loader.html and docs/figures/codac-uda-signals/archive-signal-loader alongside the grant in resume-1-advice.txt; the five code and test paths are inside that grant and imas_codex/config/facilities/iter.yaml:70 is outside it, edited under the grant's explicit escape clause and recorded in changed_paths with a scope_note."
+  },
+  "justifications": {
+    "durability": "tests/remote/test_codac_uda_reads.py:149-160 and :309-313 were each observed red on the reinstated defect (no-decimation-red.log, unsigned-time-red.log) and green at head, though the loader-versus-check equality at tests/remote/test_archive_signal_loader.py:184 cannot redden on the divergence the node names.",
+    "evidence": "live-gate-precision.log records the compute-partition raw (8 points, 2.0 s span) and envelope (8 bins) loads, a zero-fetch cache repeat, a zero-fetch 100001-sample refusal with matching classifications and validity equality at head 190387d3c, with the declared negative control red in no-decimation-red.log.",
+    "fit": "The new module follows the surrounding idiom of imas_codex/remote/tools.py:run_python_script and the dataclass style of imas_codex/config/codac_uda.py, carries no plan label, version suffix or ticket reference, and each of its five commits has a conventional subject and a body.",
+    "goal_fidelity": "imas_codex/remote/codac_uda.py:341-399 resolves one graph binding and returns arrays with name, unit, description, time_base, query and sampling evidence, while imas_codex/remote/codac_uda.py:186-234 enforces byte, sample and window budgets before the reader runs.",
+    "reuse": "The change extends the packaged reader imas_codex/remote/scripts/codac_uda.py rather than forking it and calls the owners create_archive_pulse, archive_host_key, resolve_archive_endpoint and run_python_script instead of restating them; a capability search over imas_codex for a single-signal archive-binding resolver, a bounded-read owner and an atomic JSON cache found none, only per-module ad hoc os.replace writes.",
+    "scope_discipline": "Every changed path except imas_codex/config/facilities/iter.yaml:70 sits inside the grant resume-1-advice.txt extends to source and tests, and that one file is declared in changed_paths with a scope_note and reproduced in environment-probe.log as that grant directs."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal to deliver the bounded signal loader by graph identity with reported sampling evidence; imas_codex/remote/codac_uda.py:341-399 resolves the FacilitySignal to DataAccess to DataSource to HOSTED_BY_ARCHIVE binding and returns raw, envelope and binned arrays with decimation reported as true, false or unknown at imas_codex/remote/scripts/codac_uda.py:410-431.\nVERDICT done_when: read plan section 5's done-when; live-gate-precision.log records every clause on all_debug job 1316826 at 98dci4-clu-3141 -- raw 8 points over a two-second interval in 1.732343 s, envelope 8 bins in 1.226137 s, a cache repeat with fetches 0, a 100001-sample refusal with fetches 0 and classification limit matching the validity check, and validity_same_samples true.\nVERDICT write_paths: read the declared write paths docs/evidence/fragments/codac-uda-signals/archive-signal-loader.html and docs/figures/codac-uda-signals/archive-signal-loader alongside the grant in resume-1-advice.txt; five code and test paths are inside that grant and imas_codex/config/facilities/iter.yaml:70 is outside it, edited under the grant's escape clause and recorded in changed_paths with a scope_note.\nVERDICT manifest: read the run manifest; status complete, five commits, six changed paths, focused-tests.log at 50 passed with EXIT=0, negative control no-decimation-red.log, but baseline_suite and after_suite left empty.\nVERDICT diff: read all five commits against base 2fd068df6030; 6 files, +1222/-13, a new loader service, packaged-reader extensions, two test files, one facility initializer line and the evidence fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/remote/codac_uda.py:341-399 resolves one graph binding and returns arrays with name, unit, description, time_base, query and sampling evidence.\nSCORE evidence: 17\nJUSTIFICATION evidence: live-gate-precision.log records the compute-partition raw and envelope loads, a zero-fetch cache repeat, a zero-fetch over-budget refusal and validity equality at head 190387d3c, with the declared negative control red in no-decimation-red.log.\nSCORE scope_discipline: 17\nJUSTIFICATION scope_discipline: every changed path except imas_codex/config/facilities/iter.yaml:70 sits inside the grant resume-1-advice.txt extends, and that one is declared in changed_paths with a scope_note.\nSCORE durability: 17\nJUSTIFICATION durability: tests/remote/test_codac_uda_reads.py:149-160 and :309-313 were each observed red on the receiver's reinstated defect and green at head.\nSCORE fit: 18\nJUSTIFICATION fit: the new module follows the idiom of imas_codex/remote/tools.py:run_python_script and carries no plan label, version suffix or ticket reference.\nSCORE reuse: 19\nJUSTIFICATION reuse: the change extends imas_codex/remote/scripts/codac_uda.py and calls create_archive_pulse, archive_host_key and run_python_script rather than restating them.\nFINDING tests/remote/test_archive_signal_loader.py:184 non-blocking: assert_array_equal(loaded.values, check['signal'].values) compares two decodes of the one dict the mocked reader._request returns, so it cannot redden on a loader that stops sharing the read path.\nFINDING imas_codex/remote/scripts/codac_uda.py:347 non-blocking: a held read whose first reply is limited can never page and is classified 'sampling' rather than a volume refusal.",
+  "review_run_id": "r-20261115T062813562374-review-of-archive-signal-loader-40c2d243330d",
+  "reviewed_base_sha": "2fd068df6030aaa3c1acdc06bf5cf6086ac42d90",
+  "reviewed_head_sha": "40c2d243330d711419df56bd836b59de2be399ee",
+  "reviewed_run_id": "r-20261115T020715473645-archive-signal-loader",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 17
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T06:51:26.817511+00:00",
+  "total": 107
+}
