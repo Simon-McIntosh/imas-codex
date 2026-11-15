@@ -1,0 +1,76 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived by diffing the reviewed run's own gate logs: arms/base/failed-ids.txt holds 24 ids and arms/head/failed-ids.txt holds 24 ids, `comm -13` between the sorted sets prints nothing, and the two suite logs close with '24 failed, 8737 passed' (base, revision 0c5d927a5) and '24 failed, 8739 passed' (head, revision 4149f2807), matching after_suite/baseline_suite in the reviewed manifest. The added-failure set is empty.",
+  "assertion_analysis": [
+    {
+      "assertion": "tests/standard_names/test_cascade_calibration.py:229 `[row[\"name\"] for row in rows if not row[\"reached\"]] == []`",
+      "fails_when": "any module-level definition loses every referrer: reinstating `_labels` or `_name_axis` as it stood at base, whose only referrers were each other, reddens it \u2014 this is what negative-control.log records with the appended `_refit_cutoffs` (assert ['_refit_cutoffs'] == [], EXIT=1).",
+      "independent": true
+    },
+    {
+      "assertion": "tests/standard_names/test_cascade_calibration.py:232-239 hardcoded name set subset assertion",
+      "fails_when": "_external_references or the parse returns nothing.",
+      "independent": true
+    },
+    {
+      "assertion": "tests/standard_names/test_cascade_calibration.py:247 `[row[\"name\"] for row in rows if not row[\"reached\"]] == [\"_refit_cutoffs\"]`",
+      "fails_when": "the analysis declares an unreferenced appended definition reached, i.e. an instrument that reports everything as reached.",
+      "independent": true
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-15T22:25:03.032Z",
+  "dispatched_at": "2026-11-15T22:24:26Z",
+  "findings": [
+    {
+      "dimension": "goal_fidelity",
+      "file": "docs/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts-run.py",
+      "line": 17,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts-run.py:17 non-blocking: the deletion removes THRESHOLDS_PATH, which this committed script reads as calibration.THRESHOLDS_PATH at :17 and :147, so the receipt script now raises AttributeError where it read the threshold file; plan section s10 covers the other evidence scripts that lose names under docs/evidence and names this one nowhere, so nothing owns regenerating or retiring it."
+    },
+    {
+      "dimension": "evidence",
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T210048550087-sph-unreached-calibration-code/manifest.md",
+      "line": 20,
+      "severity": "non-blocking",
+      "text": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T210048550087-sph-unreached-calibration-code/manifest.md:20 non-blocking: the after_suite line carries the key \"exit_status: \" instead of \"exit_status\", so the JSON object has no exit_status field and a reader deriving the arm's status from the record finds none; the head suite log's own EXIT=1 line is the only readable status."
+    },
+    {
+      "dimension": "durability",
+      "file": "tests/standard_names/test_cascade_calibration.py",
+      "line": 133,
+      "severity": "non-blocking",
+      "text": "tests/standard_names/test_cascade_calibration.py:133 non-blocking: _reads_of_calibration_module records `alias.name` for a `from ... import name as local` and then intersects with loaded names at :150, so an aliased from-import of a module definition never confers reach and the guard would report that reached name unreached; no such import exists today, so the guard is right on the current tree but its alias handling is untested."
+    },
+    {
+      "dimension": "scope_discipline",
+      "file": "tests/standard_names/test_cascade_calibration.py",
+      "line": 1,
+      "severity": "non-blocking",
+      "severity_note": "the declaration, not the landing, is short",
+      "text": "tests/standard_names/test_cascade_calibration.py:1 non-blocking: this file and imas_codex/standard_names/review/cascade_calibration.py:1 carry the change, but the dispatch declared docs/evidence/fragments/sn-pipeline-hygiene/sph-unreached-calibration-code.html and docs/figures/sn-pipeline-hygiene/sph-unreached-calibration-code as the whole scope, so two of the three changed paths fall outside the declared write paths; the goal implies both edits and nothing extraneous was added."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Read the goal at prompt.txt:38 ('leave no unreached code in the review calibration module') against imas_codex/standard_names/review/cascade_calibration.py: now 100 lines holding 6 definitions (ReceiptUnavailable, _read_json, matched_cutoff, METRICS, _metric_counts, _metric), each read by an asserting test in tests/standard_names/test_cascade_calibration.py:15-92, with the 12 callerless fitters and their fixture paths deleted and none of the module's live behaviour touched.\nVERDICT done_when: Read the four clauses at prompt.txt:107 against arms/base/suite.log and arms/head/suite.log: each arm was extracted with `git archive` by suite-arm.sh from 0c5d927a5 and 4149f2807 and run once, closing '24 failed, 8737 passed, 12 skipped, 541 deselected' and '24 failed, 8739 passed, 12 skipped, 541 deselected' with EXIT=1 each; arms/base/failed-ids.txt and arms/head/failed-ids.txt differ by nothing; the reachability listings before (18 definitions, 12 callerless) and after (6, 0) are in docs/evidence/fragments/sn-pipeline-hygiene/sph-unreached-calibration-code.html; the module's line count is stated (375 -> 100); and negative-control.log shows the appended _refit_cutoffs reddening the guard with assert ['_refit_cutoffs'] == [] and EXIT=1.\nVERDICT write_paths: Read the declaration at prompt.txt:85-86 (the fragment html and docs/figures/sn-pipeline-hygiene/sph-unreached-calibration-code); the diff changes three paths, of which docs/evidence/fragments/sn-pipeline-hygiene/sph-unreached-calibration-code.html is inside it while imas_codex/standard_names/review/cascade_calibration.py and tests/standard_names/test_cascade_calibration.py are outside it, and no path the goal does not imply was added.\nVERDICT manifest: Read manifest.md; it reports status complete with commits 4149f28076db36bd264fa2cf25f77e48b07615b0 and 28a3768b46ef49bed3e84604427e3f7fe55eb18b, both archive arms under test_logs with their revisions and trees, the reachability artifacts, a rubric line per dimension and outside_scope naming the 24 shared archive failures, but its after_suite line at manifest.md:20 writes the key \"exit_status: \" so that line carries no readable exit status.\nVERDICT diff: Read 4149f2807 and 28a3768b4 against base 0c5d927a5 commit by commit; 4149f2807 deletes 12 definitions (277 lines) from imas_codex/standard_names/review/cascade_calibration.py and adds the reachability guard to tests/standard_names/test_cascade_calibration.py, and 28a3768b4 adds only the 122-line evidence fragment, leaving cascade_thresholds.json untouched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/review/cascade_calibration.py:1-100 keeps only definitions a test reaches, and the deletion also removes THRESHOLDS_PATH that docs/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts-run.py:17 still reads.\nSCORE evidence: 18\nJUSTIFICATION evidence: arms/base/suite.log and arms/head/suite.log record '24 failed, 8737 passed' and '24 failed, 8739 passed' from archive trees with identical FAILED id sets, while the reviewed head arm ran at 4149f2807 and the record's after_suite key at manifest.md:20 is unreadable.\nSCORE scope_discipline: 14\nJUSTIFICATION scope_discipline: every changed path is implied by the goal and nothing extraneous landed, but two of the three, imas_codex/standard_names/review/cascade_calibration.py:1 and tests/standard_names/test_cascade_calibration.py:1, lie outside the write_paths declared at prompt.txt:85-86.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_cascade_calibration.py:229 reddens when a callerless definition is reinstated, shown in negative-control.log with assert ['_refit_cutoffs'] == [] and EXIT=1, though the alias handling at :133 cannot see an aliased from-import.\nSCORE fit: 17\nJUSTIFICATION fit: the additions at tests/standard_names/test_cascade_calibration.py:96-250 are module-level helpers and test functions in the flat style the rest of that file uses, and no name they introduce carries a plan, ticket or AI marker.\nSCORE reuse: 20\nJUSTIFICATION reuse: no owner for module-definition reachability exists \u2014 tests/lint/test_fanout_confined_to_refine_name.py confines attribute references and tests/standard_names/test_public_api_naming.py parses names, neither reports unreached definitions \u2014 so calibration_reachability at tests/standard_names/test_cascade_calibration.py:203 is the first owner of that capability.\nFINDING docs/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts-run.py:17 non-blocking: the deletion removes THRESHOLDS_PATH, which this committed script reads as calibration.THRESHOLDS_PATH at :17 and :147, so the receipt script now raises AttributeError where it read the threshold file, and no plan section names it.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T210048550087-sph-unreached-calibration-code/manifest.md:20 non-blocking: the after_suite line writes the key \"exit_status: \" instead of \"exit_status\", so a reader deriving the head arm's status from the record finds no exit_status field.\nFINDING tests/standard_names/test_cascade_calibration.py:133 non-blocking: _reads_of_calibration_module records alias.name for an aliased from-import and intersects with loaded names at :150, so a definition imported under another name never confers reach and the guard would call it unreached.\nFINDING tests/standard_names/test_cascade_calibration.py:1 non-blocking: this file and imas_codex/standard_names/review/cascade_calibration.py:1 carry the change while the declared write paths at prompt.txt:85-86 name only the fragment and figures paths.\n",
+  "review_run_id": "r-20261115T222310928079-review-of-sph-unreached-calibration-code-28a3768b46ef",
+  "reviewed_base_sha": "0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788",
+  "reviewed_head_sha": "28a3768b46ef49bed3e84604427e3f7fe55eb18b",
+  "reviewed_run_id": "r-20261115T210048550087-sph-unreached-calibration-code",
+  "rubric": "review",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 14
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T22:40:59.279258+00:00",
+  "total": 104
+}
