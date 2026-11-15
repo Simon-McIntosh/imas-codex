@@ -1,0 +1,56 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T03:56:30.143Z",
+  "dispatched_at": "2026-11-15T02:51:04Z",
+  "findings": [
+    {
+      "id": "pulse-identity-collides-on-basename",
+      "line": 1743,
+      "path": "imas_codex/schemas/facility.yaml",
+      "severity": "non-blocking",
+      "text": "Pulse.id documents its composite as facility:archive:external_identity, but the class has no external_identity slot (its identity slot is name, at facility.yaml:1756), and the only worked example, tests/graph/test_archive_schema.py:27-30, builds the id from the last path component of DEMO:CAMPAIGN/commissioning-alpha. That key is not injective: DEMO:CAMPAIGN/alpha and DEMO:OTHER/alpha would both yield demo:codac_uda:slow:alpha and MERGE onto one graph node. The next section's scanner will copy whichever convention the landed example shows."
+    },
+    {
+      "id": "host-key-duplicated-across-two-enforcement-paths",
+      "line": 23,
+      "path": "imas_codex/config/codac_uda.py",
+      "severity": "non-blocking",
+      "text": "_host_key re-declares the operator-exclusion host comparison that scripts/codac_uda_prototype/reader.py:23 already owns for the same policy, and the two disagree on IP addresses: the prototype's key for 192.0.2.10 is the prefix 192, while this one compares addresses exactly. Two enforcement paths for one exclusion rule now answer differently for the same host set, so a reader adopting one cannot be sure the other agrees."
+    },
+    {
+      "id": "private-overlay-must-redeclare-archive-roles",
+      "line": 35,
+      "path": "docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html",
+      "severity": "non-blocking",
+      "text": "The fragment directs connection callers to pass the merged public/private data-system block to resolve_archive_endpoint, but _deep_merge at imas_codex/discovery/base/facility.py:71 replaces a list wholesale. A private file supplying only hosts for the existing archives therefore drops the operator role, and validate_codac_uda_config then refuses with 'operator archive must be explicitly excluded', a policy message answering what is a merge-shape problem. The private block must redeclare all three roles."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "pass",
+    "diff": "pass",
+    "done_when": "pass",
+    "goal": "pass",
+    "manifest": "pass",
+    "write_paths": "pass"
+  },
+  "notes": "Read goal, done_when and write_paths from the run's dispatch record; the manifest from the run directory; both commits of the diff against their base; the five gate logs; and plan section 3 at docs/plans/codac-uda-signals.html:62-63. Read outside the diff only for the reuse judgement: scripts/codac_uda_prototype/reader.py, imas_codex/discovery/base/facility.py and the DataSystemBase mixin. No suite was re-run and no file in the reviewed tree was modified.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: pass - read the node goal from the run's dispatch record against the plan section it serves (docs/plans/codac-uda-signals.html:62); imas_codex/schemas/facility.yaml:1676-1780 adds ArchiveEndpoint, PulseCategory and Pulse, imas_codex/schemas/facility_config.yaml:645-687 adds CodacUDAConfig with DataSystemBase setup and interpreter, named archives, readable_roles and four read limits, and imas_codex/config/facilities/iter.yaml:68-85 declares the ITER archive data system, so every clause of the deliverable is present.\nVERDICT done_when: pass - read the four measures against the run's gate logs: head-build.log ends EXIT=0 for both model generators; head-tests.log ends '59 passed, 2 warnings in 8.32s' and its 59 collected items reconcile exactly as the 31 baseline plus 21 in tests/config/test_codac_uda_config.py plus 7 in tests/graph/test_archive_schema.py; tests/graph/test_archive_schema.py:27-39 round-trips a non-numeric pulse identity with literal nanosecond bounds; and the facility-compliance parametrisation shown in head-tests.log covers jet, jt-60sa and tcv from files this diff does not touch.\nVERDICT write_paths: pass - read the run's six declared write paths and diffed 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136..179e16f1bee2299fd628a85eeba20f2ff03c1a78; the seven changed files all fall inside imas_codex/schemas/, imas_codex/config/, tests/config/, tests/graph/ and the named evidence fragment path, and no facility file other than iter.yaml is touched.\nVERDICT manifest: pass - read the manifest's status complete, its commits 5654dbf8ab0188abd5550ab4c229c76d477eabdb and 179e16f1bee2299fd628a85eeba20f2ff03c1a78, its recorded head gate and its negative-control note; the recorded 59 passed matches head-tests.log and the recorded red matches negative-control.log.\nVERDICT diff: pass - read both commits individually: 5654dbf8ab01 carries the six product and test files and 179e16f1bee2299fd628a85eeba20f2ff03c1a78 carries only docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html, and the 28 tests the diff adds reconcile against the gate log's 59 collected.\nVERDICT call_sites: pass - no production call site reaches the new resolver yet; the reachable surface is the regenerated FacilityConfig, validated at imas_codex/discovery/base/facility.py:241 by get_facility_validated and at imas_codex/discovery/base/facility.py:210 by validate_facility_config, while imas_codex/config/codac_uda.py has no caller until a later section connects it.\nCALL_SITES: imas_codex/discovery/base/facility.py:241, imas_codex/discovery/base/facility.py:210, imas_codex/cli/facilities.py:34\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/schemas/facility_config.yaml:645 declares CodacUDAConfig with mixins DataSystemBase, named archives, readable_roles and the three bounded read limits, matching the plan's setup/interpreter/roles/limits clause at docs/plans/codac-uda-signals.html:62.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-tests.log records '59 passed, 2 warnings in 8.32s' with a bare EXIT=0 line and its 59 collected items reconcile against the 31 baseline plus the 28 the diff adds, so the done_when's measures are recorded rather than merely claimed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all seven paths changed between 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136 and 179e16f1bee2299fd628a85eeba20f2ff03c1a78 are inside the six declared write paths, and the pre-connection refusal at imas_codex/config/codac_uda.py is demanded by the plan's 'refused before any connection' clause.\nSCORE durability: 18\nJUSTIFICATION durability: tests/config/test_codac_uda_config.py:46 reddens if ReadableArchiveRole admits operator, :72 reddens if the operator exclusion can be dropped, and :146 reddens if the IP-exact branch of _host_key is removed; no assertion compares a value against the same variable the test itself supplied.\nSCORE fit: 19\nJUSTIFICATION fit: CodacUDAConfig mixes in DataSystemBase exactly as TDIConfig, MDSplusConfig and seven other data systems do in imas_codex/schemas/facility_config.yaml, and the naming checks over the diff's added lines found no plan, ticket, version or attribution strings.\nSCORE reuse: 14\nJUSTIFICATION reuse: setup and interpreter are reused from the DataSystemBase owner rather than re-declared, but imas_codex/config/codac_uda.py:23 forks the operator-exclusion host comparison already owned by scripts/codac_uda_prototype/reader.py:23 instead of extending or retiring it.\nFINDING imas_codex/schemas/facility.yaml:1743 non-blocking: Pulse.id cites an external_identity component the class does not have, and its only worked example builds a non-injective id from the identity's basename, so distinct pulses in different categories collapse onto one graph key.\nFINDING imas_codex/config/codac_uda.py:23 non-blocking: _host_key duplicates scripts/codac_uda_prototype/reader.py:23 for the same operator-exclusion policy and diverges from it on IP hosts, leaving two enforcement paths for one rule.\nFINDING docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html:35 non-blocking: the merged public/private block it directs callers to pass replaces the archives list wholesale at imas_codex/discovery/base/facility.py:71, so a private host overlay drops the operator role and the resolver reports a policy error for a merge-shape problem.\n",
+  "review_run_id": "r-20261115T024952708941-review-of-archive-pulse-schema-179e16f1bee2",
+  "reviewed_base_sha": "1c2476daf9f7c83e4eaa0d56c60fb0d132c05136",
+  "reviewed_head_sha": "179e16f1bee2299fd628a85eeba20f2ff03c1a78",
+  "reviewed_run_id": "r-20261115T021249205435-archive-pulse-schema",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 19,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T03:57:15.279921+00:00",
+  "total": 107
+}
