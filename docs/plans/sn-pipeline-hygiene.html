@@ -18,13 +18,13 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;done&quot;}">
   <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="38">
-<meta name="plan-modified" content="2026-11-14">
+<meta name="plan-version" content="39">
+<meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
   <main class="plan-doc">
@@ -76,7 +76,7 @@
     
 
     <h2 id="s8">§8 — No module imports another&#x27;s private names</h2>
-<section data-reckon="section" data-id="s8" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s8" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="done" data-links=""></section>
 <p>On 2026-11-11 the standard-names package carried 31 private names imported from one of its top-level modules into another, across 24 import statements (31 name occurrences, 27 distinct names). Its subpackages are outside this section: they keep their own sibling-import rule. The package's import-boundary test checks only two subpackages, and its rule there forbids every import between sibling modules, a rule the package's top-level modules cannot meet, so it passes over all of them.</p><p><strong>Done when:</strong> no top-level module of <code>imas_codex/standard_names</code> imports a private name from another top-level module of that package (imports from outside the package, such as from <code>imas_codex.settings</code>, and imports involving its subpackages are outside this section), each closed either by moving the caller or through a public name the owning module exports, with the before and after counts recorded and every name made public listed in the landing evidence with the reason it can neither stay private nor move with its caller; the existing import-boundary test gains a private-name rule over the package's top-level modules, kept distinct from the sibling-import rule its subpackages keep, passes at head, and fails when any one closed import is restored; behaviour is unchanged, and <code>tests/standard_names</code> adds no failure id against the stated base.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
