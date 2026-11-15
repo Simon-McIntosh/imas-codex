@@ -39,6 +39,9 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
             "name": "DEMO:TEMP",
             "unit": {"value": "K"},
             "description": {"value": "Archive wording"},
+            "archive_metadata": {"fixture": "complete archive document"},
+            "data_type": "DOUBLE",
+            "structure_fields": [{"name": "val", "type": "DOUBLE"}],
         }
         signal = catalogue.CodacUDAScanner._signal(
             facility, archive, access, entry, "cohort"
@@ -65,6 +68,24 @@ def test_archive_catalogue_statements_are_idempotent_and_keep_provenance(
             id=signal.id,
         )
         assert rows == [{"total": 1, "metadata": 1, "confirmed": 0}]
+        fields = graph.query(
+            "MATCH (s:FacilitySignal {id: $id}) RETURN s.unit AS unit, "
+            "s.data_type AS data_type, count(s.archive_metadata) AS documents, "
+            "count(s.structure_fields) AS structures, count(s.first_sample_ns) AS first_times, "
+            "count(s.last_sample_ns) AS last_times, count(s.listed_archives) AS listings",
+            id=signal.id,
+        )
+        assert fields == [
+            {
+                "unit": "K",
+                "data_type": "DOUBLE",
+                "documents": 1,
+                "structures": 1,
+                "first_times": 0,
+                "last_times": 0,
+                "listings": 1,
+            }
+        ]
         assert (
             graph.query(
                 catalogue.CONFIRM_QUERY,
