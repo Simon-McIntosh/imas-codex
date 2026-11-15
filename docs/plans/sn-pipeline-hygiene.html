@@ -18,12 +18,12 @@
   <meta name="plan-sprint" content="S19">
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;,&quot;s10&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s10&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;,&quot;s6&quot;:&quot;done&quot;,&quot;s7&quot;:&quot;deferred&quot;,&quot;s8&quot;:&quot;done&quot;,&quot;s9&quot;:&quot;implementable&quot;}">
   <meta name="plan-standalone" content="Each section repairs a defect no other live plan consumes, and nothing downstream waits on this plan.">
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="46">
+<meta name="plan-version" content="47">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -191,6 +191,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261114T174523902912-sph-private-import-boundaries" data-who="reckon-build" data-when="2026-11-14T21:54:35Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/sn-pipeline-hygiene/sph-private-import-boundaries.html</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261115T210048550087-sph-unreached-calibration-code" data-who="reckon-build" data-when="2026-11-15T21:06:04Z">
+    <div class="r-comment-body"><p>sph-unreached-calibration-code deleted the module&#x27;s twelve callerless definitions (module 375 -&gt; 100 lines) and added a reachability guard that fails on a planted callerless function; the two archive suite arms report 24 failed / 8737 passed at base and 24 failed / 8739 passed at head with identical failure id sets.</p></div>
 </div>
 </section>
 </main>
