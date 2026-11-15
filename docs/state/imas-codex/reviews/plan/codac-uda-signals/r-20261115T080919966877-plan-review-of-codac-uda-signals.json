@@ -71,6 +71,16 @@
       "note": "Section 12 now counts distinct variable selectors: the census gives each archive's count, the number listed by both, and the count of the union, and the graph count must equal the union. Each signal records every archive that lists it.",
       "reason": "",
       "when": "2026-11-15T08:37:42.927671+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "da4c390a6e83e1cf7ef0e24816b3f77878e566dd",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 15's known variables are written to a private file before the run, and the tracked record carries that file's SHA-256 digest and, per source, whether its pre-registered variable was found, so the control can be checked without a name in a tracked file.",
+      "reason": "",
+      "when": "2026-11-15T08:37:45.975183+00:00"
     }
   ],
   "responses": {
@@ -82,6 +92,15 @@
       "note": "Section 12 now counts distinct variable selectors: the census gives each archive's count, the number listed by both, and the count of the union, and the graph count must equal the union. Each signal records every archive that lists it.",
       "reason": "",
       "when": "2026-11-15T08:37:42.927671+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "da4c390a6e83e1cf7ef0e24816b3f77878e566dd",
+      "commit_basis": "edit",
+      "note": "Section 15's known variables are written to a private file before the run, and the tracked record carries that file's SHA-256 digest and, per source, whether its pre-registered variable was found, so the control can be checked without a name in a tracked file.",
+      "reason": "",
+      "when": "2026-11-15T08:37:45.975183+00:00"
     },
     "reasoning-1": {
       "action": "acted",
