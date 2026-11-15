@@ -43,6 +43,16 @@
       "note": "Section 1's done-when at version 2 tests both a four-trace and a six-trace legend on one row, so the stated limit is measured.",
       "reason": "",
       "when": "2026-11-15T22:58:51.112633+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "057515152daf4420be31b44593d8a7dcd998982e",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 2's search at version 2 is scoped to functions that export a figure; helpers that save data files are named as out of scope.",
+      "reason": "",
+      "when": "2026-11-15T22:58:56.078973+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "Section 1's done-when at version 2 tests both a four-trace and a six-trace legend on one row, so the stated limit is measured.",
       "reason": "",
       "when": "2026-11-15T22:58:51.112633+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "057515152daf4420be31b44593d8a7dcd998982e",
+      "commit_basis": "edit",
+      "note": "Section 2's search at version 2 is scoped to functions that export a figure; helpers that save data files are named as out of scope.",
+      "reason": "",
+      "when": "2026-11-15T22:58:56.078973+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/figure-scripts-use-the-shared-save-function/r-20261115T223255758636-plan-review-of-figure-scripts-use-the-shared-save-function.json",
