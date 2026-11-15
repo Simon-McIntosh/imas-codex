@@ -1,5 +1,20 @@
 {
   "absent_items": [],
+  "accepted_edits": [
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "a9004fa7bc679a770d12e8aaeaafc141192ed84c7fb09eac91c10387bb6cfa27",
+        "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b"
+      },
+      "reason": "Versions 21 to 26 answer the six findings of the newest content review and record the lead's rulings on lane, ICP access and the description model; section 10's measures now match section 5's.",
+      "units": [
+        "_document",
+        "s10"
+      ],
+      "when": "2026-11-15T21:34:18.013331+00:00"
+    }
+  ],
   "completed_at": "2026-11-15T20:46:35.255Z",
   "dispatched_at": "2026-11-15T20:44:43Z",
   "findings": [
