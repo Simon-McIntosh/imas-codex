@@ -1,0 +1,91 @@
+<section id="local-model-signal-enrichment-benchmark-results">
+  <h3>Full-context signal enrichment comparison</h3>
+  <p>The paid arm completed all 200 signals; the local arm delivered 130 descriptions and failed seven ten-signal batches. None of the local arm's twenty raw responses parsed without repair. This result does not support accepting the current local configuration for unattended enrichment. The lead's model choice remains open; this record does not authorize sending ITER document content to an external provider.</p>
+  <p>This follows the revised scope delivered on 15 November 2026 and the live plan's comparison requirement: one fixed reference sample, no ITER names-only sample. The discarded exploratory ITER trial was stopped and its private outputs removed. No ITER document content was used in this comparison.</p>
+
+  <h4>Sample and execution</h4>
+  <p>The sample contains 200 already-enriched JT-60SA signals, selected before either arm in round-robin order over 26 stored physics domains. Each has a nonempty catalogue source description. Twenty ten-signal batches passed through the production enrichment worker with its normal facility configuration, tree, wiki and code retrieval. All twenty prompts contained catalogue descriptions, wiki retrieval and code retrieval; none contained tree-node descriptions. Stored model-written names, descriptions, keywords and classifications were removed from the model inputs.</p>
+  <p>The normal-context pass ran once and its exact final messages were frozen. Every local and paid batch has the same prompt digest as its corresponding context batch: all forty comparisons passed. Both arms used the same temperature, token bound, timeout, schema, result matching and context. Only the description seat's environment override changed. Graph write, claim, propagation and role sinks were replaced with private sinks, and the replay's graph client rejects mutation queries. All measurement jobs ran on <code>rigel</code>.</p>
+  <table>
+    <caption>Model identities and accounting boundaries</caption>
+    <thead><tr><th>Arm</th><th>Configured model</th><th>Served model</th><th>Selection</th></tr></thead>
+    <tbody>
+      <tr><td>Local</td><td>local/deepseek-v4.1-flash</td><td>deepseek-v4.1-flash</td><td>Existing discovery-describe seat</td></tr>
+      <tr><td>Paid</td><td>openrouter/openai/gpt-6.1-sol</td><td>openai/gpt-6.1-sol</td><td>Existing sn-docs description-writing model, through IMAS_CODEX_DISCOVERY_DESCRIBE_MODEL only</td></tr>
+    </tbody>
+  </table>
+  <p>No project model configuration changed. The first ten paid signals cost $0.060686 with 18,531 input and 1,436 output tokens, projecting $1.21372 for 200 signals ($2.42744 with a twofold reserve) before proceeding. The pilot is included once in the final paid totals.</p>
+
+  <h4>Measured model arms</h4>
+  <table>
+    <caption>Generation and strict response accounting; each response covers ten signals</caption>
+    <thead><tr><th>Measure</th><th>Local</th><th>Paid</th></tr></thead>
+    <tbody>
+      <tr><td>Selected / attempted signals</td><td>200 / 200</td><td>200 / 200</td></tr>
+      <tr><td>Raw structured parses without repair</td><td>0/20 (0%)</td><td>20/20 (100%)</td></tr>
+      <tr><td>Strictly failed / empty responses</td><td>20 / 0</td><td>0 / 0</td></tr>
+      <tr><td>Pipeline hard-failed batches</td><td>7/20</td><td>0/20</td></tr>
+      <tr><td>Private descriptions delivered</td><td>130/200 (65%)</td><td>200/200 (100%)</td></tr>
+      <tr><td>Stored physics-domain agreement, whole cohort</td><td>67/200 (33.5%)</td><td>69/200 (34.5%)</td></tr>
+      <tr><td>Stored physics-domain agreement, delivered outputs</td><td>67/130 (51.5%)</td><td>69/200 (34.5%)</td></tr>
+      <tr><td>Stored unit preserved, delivered outputs</td><td>130/130 (100%)</td><td>200/200 (100%)</td></tr>
+      <tr><td>Whole-cohort unit-preserving output coverage</td><td>130/200 (65%)</td><td>200/200 (100%)</td></tr>
+      <tr><td>Input / output tokens</td><td>376,723 / 30,904</td><td>399,369 / 30,897</td></tr>
+      <tr><td>Marginal generation cost</td><td>$0</td><td>$0.9524577</td></tr>
+      <tr><td>Cost per attempted signal</td><td>$0</td><td>$0.0047622885</td></tr>
+      <tr><td>Elapsed generation time</td><td>816.55 s (13 min 36.55 s)</td><td>393.54 s (6 min 33.54 s)</td></tr>
+      <tr><td>Calls per minute</td><td>1.470</td><td>3.049</td></tr>
+    </tbody>
+  </table>
+  <p>The raw parse measure validates the original response directly against <code>SignalEnrichmentBatch</code>. Fenced JSON remains a strict failure even where the production sanitizer recovers it. The ordinary parser recovered thirteen local batches; the remaining seven failed on invalid JSON (five), a string in the keywords-array field (one), and an invalid physics-domain enumeration (one). No malformed response was repaired by hand or counted as a strict success.</p>
+  <p>Unit is authoritative input metadata retained by the pipeline, not a field predicted by this structured output. The cohort has 132 known units and 68 absent units. Unit agreement above measures preservation, including absent values; it provides no evidence of independent unit inference. Stored domains are incumbent classifications rather than adjudicated ground truth, so agreement measures reproducibility, not physical correctness. Rates are observed elapsed rates through the shared serving lanes, without a dedicated performance allocation.</p>
+
+  <h4>Blind description comparison and its calibration</h4>
+  <p>Signal-id hashing fixed description order independently for each pair, and the judge saw neither model identity nor stored model-written answers. It used the configured discovery-relevance model, <code>typesafe/jev-1.14</code>, served release <code>typesafe/jev-1.14-20261014</code>. Each final call judged one signal, its source metadata and its own complete retrieved group/signal context. The same forty preselected pairs were presented again with descriptions swapped.</p>
+  <table>
+    <caption>Primary blind verdicts and independently sealed manual readings</caption>
+    <thead><tr><th>Measure</th><th>Count</th></tr></thead>
+    <tbody>
+      <tr><td>All 200: paid better / local better / equivalent</td><td>120 (60%) / 34 (17%) / 46 (23%)</td></tr>
+      <tr><td>130 pairs with both descriptions present: paid / local / equivalent</td><td>50 / 34 / 46</td></tr>
+      <tr><td>Judge: either available description semantically wrong</td><td>78/200</td></tr>
+      <tr><td>Judge: local / paid available descriptions semantically wrong</td><td>65/130 / 30/200</td></tr>
+      <tr><td>Missing local / paid descriptions</td><td>70 / 0</td></tr>
+      <tr><td>Judge: either description wrong or missing</td><td>140/200 (70%)</td></tr>
+      <tr><td>Manual forty: paid / local / equivalent</td><td>35 / 0 / 5</td></tr>
+      <tr><td>Manual forty: local missing; local available descriptions wrong; paid wrong</td><td>14/40; 21/26; 0/40</td></tr>
+      <tr><td>Manual preference agreement with judge</td><td>22/40 (55%)</td></tr>
+      <tr><td>Preference agreement where both descriptions exist in manual sample</td><td>8/26 (30.8%)</td></tr>
+      <tr><td>Manual agreement with exact set of wrong descriptions</td><td>22/40 (55%)</td></tr>
+      <tr><td>Reversed-order preference disagreement</td><td>11/40 (27.5%)</td></tr>
+      <tr><td>Reversed-order wrong-set disagreement</td><td>8/40 (20%)</td></tr>
+    </tbody>
+  </table>
+  <p>The forty manual preferences were sealed before any judge verdict was read, with SHA256 <code>f9947a41b3e82f5383ef080feb8ea9b18769e7f2df32606a64ae1b86db51e986</code>. Fourteen local absences and twenty-one unsupported local descriptions account for the manual sample's thirty-five paid preferences. These judgments are one reader's context-based assessment, not an independent facility-expert gold standard. The judge's low agreement and order sensitivity limit the automated quality counts; they are reported, not treated as validated truth.</p>
+  <p>An initial five-pair packed judge was rejected as an instrument: it agreed with manual preferences on 14/40 and changed 17/40 when reversed. It even preferred an empty local description in two concrete cases (<code>lcdb_b260008_zeff.s002_comment</code> and <code>dhc_iontemp</code>). The same two cases chose the nonempty description when isolated. Twelve alignment preference controls passed, followed by seven controls through the final one-target judging function. The initial packed receipts remain preserved; only the judging phase was repeated, with the original model outputs and manual readings unchanged.</p>
+  <table>
+    <caption>Representative manual distinctions, against catalogue and retrieved context</caption>
+    <thead><tr><th>Source binding</th><th>Local interpretation rejected</th><th>Supported alternative</th></tr></thead>
+    <tbody>
+      <tr><td>DCSV/ppDIVL; catalogue “Lower Diverter Control PT(DIV_L)”</td><td>Pressure transducer, divertor gas pressure and detachment claims</td><td>Retain the lower-divertor control-point role; PT alone does not establish a pressure measurement</td></tr>
+      <tr><td>DCSV/ppEFCC3FB; catalogue “EFCC FB: max amplitude PP 3”</td><td>“during plasma pulse 3”</td><td>Describe the feedback maximum-amplitude setting and preserve PP 3 as a source tag whose expansion is not established</td></tr>
+      <tr><td>DCSV/ppEFCC4FB; unit A</td><td>Peak-to-peak expansion and mixed current/voltage interpretation</td><td>Describe the catalogue's maximum feedback-current setting without inventing a voltage quantity</td></tr>
+    </tbody>
+  </table>
+
+  <h4>Integrity, controls and cost</h4>
+  <p>All properties of the named 200 reference nodes were serialized canonically before generation and again after each arm. Both before/after comparisons are byte-identical, with SHA256 <code>320e920861ff9b963910de866f11c83091613c888e6cad91b20e10e6115e6d36</code>. Only private SQLite/JSON files received trial outputs. Positive controls see a known valid structured response; malformed, fenced and schema-invalid responses fail strict parsing. A mutation that labels invalid JSON as success and disables the stored-enrichment comparison produces nine failing tests against zero failing tests at the delivered head.</p>
+  <p>The focused gate at <code>566d115fad66d78da39099fe01c236f5d98c3821</code> completed with <strong>21 passed, 1 warning</strong>; its mutation arm completed with <strong>9 failed, 12 passed, 1 warning</strong>. The read-only result audit recomputed raw scores, checked all forty prompt digests, checked both integrity receipts, reconciled all 200 verdicts and forty reversed verdicts, and verified the manual seal.</p>
+  <p>Generation paid $0.9524577 of the authorized $20 ceiling. Shared normal-context retrieval cost $0.195670524 and took 474.98 s. Initial judging cost $0.224700126, alignment controls $0.002054472, final controls $0.000480312, and final judging $0.042493584. Total trial spend was <strong>$1.417856718</strong>. The unused ceiling reflects the completed fixed sample, not an admission or safety hold. Local generation's marginal API cost is zero; hardware allocation costs are not priced here.</p>
+  <p>The lead's acceptance or refusal and model selection must be recorded by the coordinator before pilot enrichment is dispatched. This worker supplies the comparison and leaves that decision open. No live plan state or shared model configuration was modified.</p>
+
+  <h4>Durable receipts</h4>
+  <p>Receipt root: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T143248915610-local-model-signal-enrichment-benchmark</code>. The private cohort, exact prompts, raw model responses, descriptions and hand readings are retained there rather than copied into the repository.</p>
+  <ul>
+    <li><code>private/cohort.json</code>, <code>private/trial.sqlite</code>, <code>private/estimate.json</code>, <code>private/context-summary.json</code></li>
+    <li><code>private/integrity-local.json</code>, <code>private/integrity-paid.json</code>, <code>private/summary.json</code>, <code>private/results-audit.json</code></li>
+    <li><code>private/hand-sheet.json</code>, <code>private/hand-review.jsonl</code>, <code>private/hand-seal.json</code></li>
+    <li><code>private/judge.json</code>, <code>private/judge-packed.json</code>, <code>private/results-audit-packed.json</code>, <code>private/judge-controls.json</code>, <code>private/judge-isolated-controls.json</code></li>
+    <li><code>gate-isolated.log</code>, <code>negative-isolated.log</code>, <code>judge-isolated-controls.log</code>, <code>judge-isolated.log</code>, <code>report-isolated.log</code></li>
+  </ul>
+</section>
