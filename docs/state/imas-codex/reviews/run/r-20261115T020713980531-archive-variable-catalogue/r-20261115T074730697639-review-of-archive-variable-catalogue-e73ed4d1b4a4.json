@@ -1,0 +1,78 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms. baseline_suite (merge-focused.log, declared revision 2fb760aab) ran 155 tests with 1 failed, 154 passed, EXIT=1, the sole failure tests/remote/test_codac_uda.py::test_distinct_ip_endpoints_are_not_operator_aliases[2001:db8::1-2001:db8::2]. after_suite (merge-focused-fixed.log) ran the same 155 tests with 155 passed, EXIT=0. The after arm's failure set is empty, so no failure id is added and the one baseline id is removed.",
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:3687",
+    "imas_codex/discovery/signals/parallel.py:5907",
+    "imas_codex/remote/executor.py:1221"
+  ],
+  "call_sites_emission": "list",
+  "completed_at": "2026-11-15T08:19:42.236Z",
+  "dispatched_at": "2026-11-15T07:47:57Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/scanners/codac_uda.py",
+      "line": "36",
+      "severity": "non-blocking",
+      "text": "SIGNAL_QUERY and _persist_signals (the latter at imas_codex/discovery/signals/scanners/codac_uda.py:165) are a second discovered-signal write pass beside the owner ingest_discovered_signals at imas_codex/discovery/signals/parallel.py:3343, which already batches on a 500-row bound and preserves status and claim fields. The scanner's serving-aware data_access switch is a capability that owner does not carry, so the correct repair is to extend the owner rather than leave two writers that can drift."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": "3725",
+      "severity": "non-blocking",
+      "text": "The new result.stats['written'] branch and the codac_uda addition to the check-worker loop at parallel.py:5907 have no test. The scanner's scan and check are covered directly in tests/discovery/test_codac_uda_scanner.py, but the routing that reaches them is not; a regression that drops codac_uda from the check loop, or that reports the persisted count without persisting, reddens nothing."
+    },
+    {
+      "file": "imas_codex/remote/script_source.py",
+      "line": "8",
+      "severity": "non-blocking",
+      "text": "load_script_source is wired into both executor entry points but not into the pooled worker path (imas_codex/remote/ssh_worker.py:967, untouched here), which still reads the raw script source with importlib.resources. Any script declared in SCRIPT_DEPENDENCIES (imas_codex/remote/scripts/__init__.py:34) and run through pooled_run_python_script would execute without its bundled module and fail at its first import of imas_codex.config.codac_uda. No current caller does that, so it is a latent divergence rather than an active fault."
+    },
+    {
+      "file": "imas_codex/remote/executor.py",
+      "line": "1221",
+      "severity": "non-blocking",
+      "text": "This file is written outside the node's declared fence of two docs paths and outside the reopened grant in reopened.json, which lists only imas_codex/discovery/signals/scanners/, imas_codex/remote/scripts/, imas_codex/graph/ and imas_codex/schemas/. It is listed in changed_paths with a scope_note claiming a user-expanded grant and the coordinator's brief does direct the config and remote edits, but neither the fence nor the reopened grant record that expansion, so the write is authorised by prose rather than by a scope record."
+    },
+    {
+      "file": "imas_codex/discovery/signals/scanners/codac_uda.py",
+      "line": "36",
+      "severity": "non-blocking",
+      "text": "The gate receipt binds weakly: merge-focused-fixed.log:1 and merge-graph.log:1 both carry a '# revision 2fb760aab...' header, but those logs were written at 08:36:04 and 08:33:56 while the merge carrying the source under test is f38f8134e, committed at 08:37:30. The after_suite block therefore declares a revision that predates the code it measured, and no post-merge pytest exists at f38f8134e. The manifest's evidence_inputs explains the sequence, but the log alone cannot rebind to it."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read all eight commits against base 2fd068df; the node's own commits are 1b84dcd0c, 4d4b94e78, 321c1aaf6, a3a0c1446, 2fb760aab, the merge f38f8134e and e73ed4d1b, spanning a new scanner, the transport, the packaged script, schema and facility config, four test files, the evidence fragment and one figure, plus the executor and script_source change only the merge introduces.",
+    "done_when": "Read section 4's done_when; controller-repeat.log records independent_archive_count 200 = first_graph_count 200 = second_graph_count 200 with duplicates 0, ten confirmed and zero unconfirmed, on partition all_debug under jobs 1316880/1316883/1316889/1316890; merge-graph.log records 1 passed under -m graph; and the two negative controls are controller-scan-gate.log (completed false at 20 of 200) and test_empty_reads_leave_serving_archive_unset.",
+    "goal": "Read the node goal (plan section 4); imas_codex/discovery/signals/scanners/codac_uda.py:396-485 builds one FacilitySignal per archive variable with its exact selector, unit, description and sampling_mode, and keeps metadata_archive and data_archive separate, the latter set only by the bounded read in check().",
+    "manifest": "Read the reviewed manifest; status complete, eight commits, eighteen changed paths, a tests string naming the 155-test focused selection, test_logs naming merge-focused-fixed.log and merge-graph.log, baseline_suite at 2fb760aab with one IPv6 failure, after_suite at the same revision with none, and the negative control merge-negative.log at EXIT=1.",
+    "write_paths": "Read the declared write paths in the reviewed run's prompt.txt (two docs paths) and the reopened grant in reopened.json; sixteen source and test paths in changed_paths lie outside both, documented in the manifest's scope_note as a user-expanded grant and implied by the brief's instructions to edit imas_codex/config/codac_uda.py and the packaged reader."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_codac_uda_scanner.py:194-232 and :243-263 were each observed red on a reinstated defect (incremental-negative-control.log and merge-negative.log) and green at head, while the parallel.py:3725 and :5907 routing the change adds has no covering test.",
+    "evidence": "controller-repeat.log reports 200 independent, 200 first graph and 200 repeat graph with duplicates 0 and 10 of 10 confirmed on all_debug, but merge-focused-fixed.log:1 names revision 2fb760aab while measuring the merge f38f8134e, so the receipt is honest and documented yet does not bind to the revision it measured.",
+    "fit": "The scanner follows the plugin idiom of imas_codex/discovery/signals/scanners/ppf.py:370 with a module-level register_scanner call, the transport reuses the dataclass style of imas_codex/config/codac_uda.py, and no added name, comment or commit message carries a plan label, version suffix or ticket reference.",
+    "goal_fidelity": "imas_codex/discovery/signals/scanners/codac_uda.py:396-485 emits one signal per selector with metadata provenance from the listing and data provenance left unset until ArchiveReader.check returns samples, matching section 4's two-role requirement.",
+    "reuse": "The transport, the reader and the pulse and host helpers extend their owners rather than restating them, but the scanner's SIGNAL_QUERY at imas_codex/discovery/signals/scanners/codac_uda.py:36 restates the discovered-signal write pass owned by ingest_discovered_signals at imas_codex/discovery/signals/parallel.py:3343 instead of extending it.",
+    "scope_discipline": "The diff edits sixteen paths outside the two declared fence entries, for example imas_codex/remote/executor.py:1221, which is outside even the reopened grant, though the manifest records the expanded grant and the coordinator's brief directed the config and remote edits."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read plan section 4's goal; imas_codex/discovery/signals/scanners/codac_uda.py:396-485 emits one FacilitySignal per archive variable carrying its exact selector, unit and description, with metadata_archive and data_archive kept as separate roles and the latter set only by a bounded read that returned samples.\nVERDICT done_when: section 4's done_when is measured live on all_debug -- controller-repeat.log has 200 independent = 200 first graph = 200 repeat graph with duplicates 0 and 10 confirmed / 0 unconfirmed, merge-graph.log has 1 passed under -m graph, and controller-scan-gate.log shows an interrupted cohort at completed false, 20 of 200.\nVERDICT write_paths: the declared fence is two docs paths in prompt.txt, reopened.json extends it to four source subtrees, and sixteen paths in the diff sit outside both, recorded in the manifest scope_note and implied by the brief's instruction to edit imas_codex/config/codac_uda.py and the packaged reader.\nVERDICT manifest: read; status complete, eight commits, eighteen changed paths, after_suite 155 passed EXIT=0 at 2fb760aab with no failures, baseline_suite 1 failed (an IPv6 alias test), negative control merge-negative.log EXIT=1.\nVERDICT diff: read eight commits against base 2fd068df -- a new scanner, ArchiveReader.check and ArchiveSignalLoader in the transport, bounded metadata batches in the packaged script, schema and facility support, four test files, the evidence fragment and one figure, plus the executor and script_source change that only the merge introduces.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:3687, imas_codex/discovery/signals/parallel.py:5907, imas_codex/remote/executor.py:1221\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/scanners/codac_uda.py:396-485 keeps metadata and data provenance separate and leaves the data-serving archive unset until a read returns samples.\nSCORE evidence: 16\nJUSTIFICATION evidence: controller-repeat.log records 200 independent = 200 graph = 200 repeat with duplicates 0 and 10 of 10 confirmed on all_debug; merge-focused-fixed.log:1 names revision 2fb760aab while measuring the merge f38f8134e.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: sixteen changed paths, including imas_codex/remote/executor.py:1221, sit outside the two declared fence entries and outside the reopened grant, though the manifest scope_note records the expanded grant.\nSCORE durability: 16\nJUSTIFICATION durability: tests/discovery/test_codac_uda_scanner.py:194-232 and :243-263 were each observed red on a reinstated defect and green at head, but the parallel.py:3725 and :5907 routing is untested.\nSCORE fit: 18\nJUSTIFICATION fit: the scanner follows the plugin idiom of imas_codex/discovery/signals/scanners/ppf.py:370 with a module-level register_scanner call and no added name or comment carries a plan label or ticket reference.\nSCORE reuse: 13\nJUSTIFICATION reuse: the transport and reader extend their owners, but SIGNAL_QUERY at imas_codex/discovery/signals/scanners/codac_uda.py:36 restates the write pass owned by ingest_discovered_signals at imas_codex/discovery/signals/parallel.py:3343.\nFINDING imas_codex/discovery/signals/scanners/codac_uda.py:36 non-blocking: SIGNAL_QUERY and _persist_signals are a second discovered-signal write pass beside the owner ingest_discovered_signals at imas_codex/discovery/signals/parallel.py:3343, so the serving-aware data_access switch has no single owner and the two writers can drift.\nFINDING imas_codex/discovery/signals/parallel.py:3725 non-blocking: the persisted-count branch and the codac_uda check-loop addition at parallel.py:5907 have no test, so a regression that drops the scanner from the loop or misreports written count reddens nothing.\nFINDING imas_codex/remote/script_source.py:8 non-blocking: load_script_source is wired into both executor entry points but not into imas_codex/remote/ssh_worker.py:967, so any SCRIPT_DEPENDENCIES script run through pooled_run_python_script would execute without its bundled module and fail at its first import.\nFINDING imas_codex/remote/executor.py:1221 non-blocking: the file is written outside the declared two-path fence and outside the reopened grant, so the write is authorised only by the manifest scope_note's prose and not by any scope record the run carries.\nFINDING imas_codex/discovery/signals/scanners/codac_uda.py:36 non-blocking: the gate receipt binds weakly -- after_suite and the graph log both carry a 2fb760aab header while the source under test is the merge f38f8134e, and no post-merge pytest exists at that revision.",
+  "review_run_id": "r-20261115T074730697639-review-of-archive-variable-catalogue-e73ed4d1b4a4",
+  "reviewed_base_sha": "2fd068df6030aaa3c1acdc06bf5cf6086ac42d90",
+  "reviewed_head_sha": "e73ed4d1b4a4f1f220c3176d7fb91d8629ded1cc",
+  "reviewed_run_id": "r-20261115T020713980531-archive-variable-catalogue",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 13,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T08:12:00Z",
+  "total": 97
+}
