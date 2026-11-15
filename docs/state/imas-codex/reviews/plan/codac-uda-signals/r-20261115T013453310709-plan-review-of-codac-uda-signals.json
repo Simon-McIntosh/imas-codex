@@ -26,6 +26,17 @@
         "_document"
       ],
       "when": "2026-11-15T02:28:21.032869+00:00"
+    },
+    {
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "digests": {
+        "_document": "206ce854a068483048e05b7d237a3ec84e3f395c346a2ac16df731a3a3ec028d"
+      },
+      "reason": "Version 20 only records the lead's choices on the three rename decisions; no section text or done-when changed.",
+      "units": [
+        "_document"
+      ],
+      "when": "2026-11-15T08:00:46.687337+00:00"
     }
   ],
   "completed_at": "2026-11-15T02:00:12.894Z",
