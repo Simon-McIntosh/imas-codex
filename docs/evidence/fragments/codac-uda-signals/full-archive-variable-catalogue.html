@@ -346,3 +346,105 @@
     census, selector lists, configuration, store, diagnostic helpers and receipts
     were preserved. The coordinator owns review, promotion and plan closure.</p>
 </section>
+<section id="full-archive-variable-catalogue-timeout-delivery">
+  <h2>Code delivered; range timeouts are recoverable and the scan runs separately</h2>
+  <p>The committed code is delivered independently of full archive completion.
+    Commit <code>3b410135e763ea600443e3b1b72a2155a96126f9</code> adds bounded timeout
+    recovery to the store-only entry point. The code and store may be reviewed
+    and landed while the persistent metadata pass continues. No production graph
+    nodes are added, refreshed or deleted, and no data reads are made.</p>
+  <p>The failure was confirmed in the terminal receipt for job 1317445:
+    <code>TimeoutError: native metadata reader exceeded its batch deadline</code>,
+    after 439.134 s with four readers and batches of 100. Its 14,465 completion
+    count was the starting snapshot. A separate rigel read of the durable store
+    found <strong>29,265 completed outcomes</strong>, all available so far,
+    <strong>2.941188%</strong> of 995,006 variables, with 965,741 pending. Thus
+    14,800 further outcomes survived the failed job. The repaired receipt path
+    records the current checkpoint on unexpected failure.</p>
+  <p>The defect also reproduced before repair in
+    <code>test_timeout_restarts_reader_halves_range_and_recovers_with_backoff</code>:
+    the fixture raised <code>TimeoutError: fixture native batch deadline</code>.
+    A timeout now reaps and restarts only its owned native reader, halves the
+    pending range and retries with bounded exponential backoff. Each original
+    range has at most four request attempts with the selected three-retry
+    budget. A range that exhausts the budget is recorded with
+    <code>fetch_state=failed</code>, its error, attempt count and a durable range
+    receipt. Later ranges continue. Transport failures are kept distinct from
+    archive refusals with archive error codes, and are retried by a later job
+    while completed metadata remains excluded.</p>
+  <p>The focused head arm reports <code>120 passed, 1 warning in 28.50s</code>.
+    Tests cover successful split recovery, backoff, permanent timeout exhaustion,
+    continuing to a later range, durable failed-range records, resumption without
+    requesting the completed variable, expected native termination and current
+    checkpoint receipts. Re-raising the timeout before restart and splitting
+    produces <code>1 failed, 1 warning in 1.69s</code>, naming the recovery test;
+    the head arm passes that test. The earlier metadata-state mutation and
+    isolated graph-statement gate remain recorded above.</p>
+  <table>
+    <thead><tr><th>Readers</th><th>Measured variables/s</th><th>Observed evidence</th></tr></thead>
+    <tbody>
+      <tr><td>1</td><td>18.6398</td><td>800 variables, 42.919 s; completed bounded phase</td></tr>
+      <tr><td>2</td><td>22.2271</td><td>1,600 variables, 71.984 s; completed bounded phase</td></tr>
+      <tr><td>4</td><td>38.7445</td><td>3,200 variables, 82.592 s; later sustained run timed out</td></tr>
+    </tbody>
+  </table>
+  <p>The continuation selects <strong>one reader and batches of 50</strong>,
+    with a 60-second batch deadline, three retries and 1/2/4-second backoff.
+    The short four-reader measurement does not establish sustained tolerance;
+    the later timeout motivates a conservative single-reader setting with
+    recovery. These are the existing measured rates; no additional archive
+    trial was run for this delivery. Read-only store and graph measurements
+    made zero metadata requests.</p>
+  <p>The census remains 988,145 slow variables and 6,861 fast variables, overlap
+    zero and union <strong>995,006</strong>. The private store contains exactly
+    that many distinct variables; store minus union is zero. At the reviewed
+    prelaunch snapshot, available is 29,265, unavailable is zero, and transport
+    fetch failures are zero. Both failure counters have positive fixture cases.
+    The following field counts describe those 29,265 completed outcomes.</p>
+  <table><thead><tr><th>Metadata field</th><th>Completed variables carrying it</th></tr></thead>
+    <tbody><tr><td><code>unit</code></td><td>3,767</td></tr>
+<tr><td><code>description</code></td><td>22,864</td></tr>
+<tr><td><code>data_type</code></td><td>23,187</td></tr>
+<tr><td><code>structure_fields</code></td><td>29,265</td></tr>
+<tr><td><code>archive_metadata</code></td><td>29,265</td></tr>
+<tr><td><code>archive_labels</code></td><td>19,133</td></tr>
+<tr><td><code>archive_format</code></td><td>3,724</td></tr>
+<tr><td><code>archive_lower_display_limit</code></td><td>3,724</td></tr>
+<tr><td><code>archive_upper_display_limit</code></td><td>3,724</td></tr>
+<tr><td><code>archive_lower_alarm_limit</code></td><td>0</td></tr>
+<tr><td><code>archive_upper_alarm_limit</code></td><td>3</td></tr>
+<tr><td><code>archive_lower_warning_limit</code></td><td>0</td></tr>
+<tr><td><code>archive_upper_warning_limit</code></td><td>3</td></tr>
+<tr><td><code>first_sample_ns</code></td><td>0</td></tr>
+<tr><td><code>last_sample_ns</code></td><td>0</td></tr>
+<tr><td><code>sampling_mode</code></td><td>0</td></tr>
+<tr><td><code>sampling_evidence</code></td><td>0</td></tr>
+<tr><td><code>metadata_interfaces</code></td><td>0</td></tr></tbody></table>
+  <p>The read-only pilot count is <strong>94,633 before and after</strong>:
+    the new baseline at 2026-11-15T11:26:41.513636+00:00 and the post-repair
+    measurement at 2026-11-15T11:37:30.960788+00:00 both returned 94,633 signals,
+    facility properties and distinct identities. The scan remains independent
+    of graph infrastructure, with its import boundary tested actively.</p>
+  <p>Persistent rigel job <strong>1317566</strong> runs the pinned delivered
+    source from job-local scratch. Its startup log prints the imported module,
+    resolved directory and introduced timeout-recovery marker. The worker tree
+    can be promoted and cleaned without removing that running source. A cached
+    generated configuration model makes the launch recipe reusable after cleanup;
+    no generated model is tracked. The application drains at 23 hours inside its
+    24-hour allocation, so another job can continue the same private store.</p>
+  <p>After relaunch, the graph audit at 2026-11-15T11:41:47.903468+00:00
+    again counted 94,633 signals. The persistent job's progress receipt at
+    2026-11-15T11:42:45.526507+00:00 records 6,050 further completed outcomes
+    in 248.485 s, or 24.348 variables/s. Cumulative completion is 35,315 of
+    995,006 variables (3.549225%), with zero timeout events, restarts or exhausted
+    fetch ranges in that interval. This is progress beyond the fixed field/state
+    snapshot above, rather than a claim that the entire archive is complete.</p>
+  <p>The code delivery is complete; the scan is still running and does not hold
+    review or landing. Log:
+    <code>~/.cache/imas-codex-codac-uda/full-census/store-recovery-1317566.log</code>.
+    Terminal receipt:
+    <code>~/.cache/imas-codex-codac-uda/full-census/recovery-job-1317566-receipt.json</code>.
+    The manifest records the receipt probe alongside the still-running scan
+    checkpoint. The coordinator reads later receipts and owns any continuation
+    and plan closure.</p>
+</section>
