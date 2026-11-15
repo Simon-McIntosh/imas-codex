@@ -18,7 +18,15 @@ from imas_codex.discovery.signals.variable_names import (
 def test_scanner_parses_candidate_fields():
     selector = "DEMO-COOL-LOOP-PUMP:PCV9001-MEAS"
     signal = CodacUDAScanner._signal(
-        "demo", "demo:archive", "demo:access", {"name": selector}, "example"
+        "demo",
+        "demo:archive",
+        "demo:access",
+        {
+            "name": selector,
+            "metadata_state": "available",
+            "archive_metadata": {"type": {"datatypes": []}, "full": []},
+        },
+        "example",
     )
     assert signal.accessor == selector
     assert getattr(signal, "plant_system_code", None) == "DEMO"

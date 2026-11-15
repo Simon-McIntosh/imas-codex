@@ -40,7 +40,11 @@ def test_scanner_and_all_catalogue_pass_write_only_derived_candidates(disposable
                     facility,
                     archive,
                     scanner._access(facility, "slow").id,
-                    {"name": selector},
+                    {
+                        "name": selector,
+                        "metadata_state": "available",
+                        "archive_metadata": {"type": {"datatypes": []}, "full": []},
+                    },
                     f"example-{index}",
                 )
                 for index, selector in enumerate(selectors)

@@ -38,11 +38,19 @@ imports:
   - common
   - imas_dd
 
-# =============================================================================
+# ======================================================================
 # Enums
-# =============================================================================
+# ======================================================================
 
 enums:
+  ArchiveMetadataState:
+    description: Outcome of the archive type and full-attribute metadata requests
+    permissible_values:
+      available:
+        description: Both metadata interfaces returned valid documents
+      unavailable:
+        description: An archive metadata request failed; fields are absent and errors retained
+
   SignalNameParseOutcome:
     description: Syntactic coverage of an archive selector, independent of convention confirmation
     permissible_values:
@@ -706,9 +714,9 @@ enums:
       local:
         description: Local repository without public remote
 
-# =============================================================================
+# ======================================================================
 # Core Classes
-# =============================================================================
+# ======================================================================
 
 classes:
   Facility:
@@ -1443,9 +1451,9 @@ classes:
       evidence_summary:
         description: Brief summary of pattern evidence (e.g., "15 MDSplus, 3 IMAS writes")
 
-# =============================================================================
+# ======================================================================
 # Evidence Class (Linked semantic indicators, reusable across node types)
-# =============================================================================
+# ======================================================================
 
   Evidence:
     description: >-
@@ -1561,9 +1569,9 @@ classes:
         description: When repository was ingested (locally or via API)
         range: datetime
 
-# =============================================================================
+# ======================================================================
 # User Classes
-# =============================================================================
+# ======================================================================
 
   FacilityUser:
     description: >-
@@ -1666,9 +1674,9 @@ classes:
       # Linked accounts populated via IS_PERSON relationship:
       # (FacilityUser)-[:IS_PERSON]->(Person)
 
-# =============================================================================
+# ======================================================================
 # Data Infrastructure Classes (Public - no IPs or paths)
-# =============================================================================
+# ======================================================================
 
   MDSplusServer:
     description: An MDSplus data server (internal name only, no IP)
@@ -2662,9 +2670,9 @@ classes:
       description:
         description: What this shot range represents
 
-# =============================================================================
+# ======================================================================
 # Data Semantics Classes
-# =============================================================================
+# ======================================================================
 
   Diagnostic:
     description: >-
@@ -2912,6 +2920,57 @@ classes:
         range: ArchiveEndpoint
         annotations:
           relationship_type: METADATA_ARCHIVE
+      listed_archives:
+        description: Every readable archive whose census lists this exact selector
+        range: ArchiveEndpoint
+        multivalued: true
+        annotations:
+          relationship_type: LISTED_BY_ARCHIVE
+      archive_metadata:
+        description: Complete archive-reported metadata document encoded as JSON, with absent fields omitted
+      metadata_state:
+        description: Availability of archive type and full metadata, independent of signal discovery status
+        range: ArchiveMetadataState
+      metadata_error_code:
+        description: Archive error code from the first failed metadata interface
+        range: integer
+      metadata_error:
+        description: Archive error message explaining unavailable metadata
+      metadata_errors:
+        description: Per-interface archive error codes and messages encoded as JSON
+      archive_labels:
+        description: Full-metadata labels in archive order; labels do not establish physical identity
+        multivalued: true
+      archive_format:
+        description: Full-metadata display format
+      archive_lower_display_limit:
+        description: Full-metadata lower display limit in the reported engineering unit
+        range: float
+      archive_upper_display_limit:
+        description: Full-metadata upper display limit in the reported engineering unit
+        range: float
+      archive_lower_alarm_limit:
+        description: Full-metadata lower alarm limit in the reported engineering unit
+        range: float
+      archive_upper_alarm_limit:
+        description: Full-metadata upper alarm limit in the reported engineering unit
+        range: float
+      archive_lower_warning_limit:
+        description: Full-metadata lower warning limit in the reported engineering unit
+        range: float
+      archive_upper_warning_limit:
+        description: Full-metadata upper warning limit in the reported engineering unit
+        range: float
+      data_type:
+        description: Archive-reported value type; absent when no scalar value type is supplied
+      structure_fields:
+        description: All archive datatype field definitions encoded as JSON
+      first_sample_ns:
+        description: First sample epoch nanoseconds, only when explicitly supplied by the archive
+        range: integer
+      last_sample_ns:
+        description: Last sample epoch nanoseconds, only when explicitly supplied by the archive
+        range: integer
       data_archive:
         description: Logical archive confirmed by a bounded read returning samples; unset until confirmed
         range: ArchiveEndpoint
@@ -3346,9 +3405,9 @@ classes:
         description: Previous version of this code it replaces
         range: AnalysisCode
 
-# =============================================================================
+# ======================================================================
 # IMAS Mapping Classes
-# =============================================================================
+# ======================================================================
 
 # NOTE: IMASNode is now defined in imas_dd.yaml as IMASNode — the unified
 # representation of IMAS Data Dictionary paths. Do not define it here.
@@ -3476,9 +3535,9 @@ classes:
         description: When this evidence was created
         range: datetime
 
-# =============================================================================
+# ======================================================================
 # Code Examples Classes
-# =============================================================================
+# ======================================================================
 
   CodeExample:
     description: >-
@@ -4273,9 +4332,9 @@ classes:
         description: Total LLM steps executed in this run
         range: integer
 
-# =============================================================================
+# ======================================================================
 # Documentation Source Classes
-# =============================================================================
+# ======================================================================
 
   DocSource:
     description: >-
@@ -4339,9 +4398,9 @@ classes:
       notes:
         description: Admin notes about this source
 
-# =============================================================================
+# ======================================================================
 # Wiki Documentation Classes
-# =============================================================================
+# ======================================================================
 
   WikiPage:
     description: >-

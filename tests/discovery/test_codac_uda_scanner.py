@@ -2,11 +2,12 @@
 
 import asyncio
 import json
-from unittest.mock import Mock
+from unittest.mock import MagicMock, Mock
 
 import numpy as np
 import pytest
 
+from imas_codex.discovery.signals import parallel
 from imas_codex.discovery.signals.scanners import codac_uda as catalogue
 from imas_codex.remote import codac_uda as transport
 
@@ -32,6 +33,7 @@ def entries(count):
     return [
         {
             "name": f"DEMO:TEMP-{index}",
+            "archive_metadata": {"type": {"datatypes": []}, "full": []},
             "unit": {"value": "K"},
             "description": {"value": "Archive wording"},
         }
@@ -43,12 +45,14 @@ def entries(count):
 def scanner_io(monkeypatch):
     stored = {}
 
-    def write(facility, cohort, signals):
-        stored.update({signal.id: signal for signal in signals})
+    def write(signals):
+        stored.update({signal["id"]: signal for signal in signals})
         return len(signals)
 
     monkeypatch.setattr(catalogue, "_persist_archives", Mock())
-    monkeypatch.setattr(catalogue, "_persist_signals", write)
+    monkeypatch.setattr(catalogue, "GraphClient", MagicMock())
+    monkeypatch.setattr(catalogue, "persist_name_parses", Mock())
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", write)
     reader = Mock(return_value={"entries": entries(3), "warnings": []})
 
     def respond(facility, role, payload, **kwargs):
@@ -111,13 +115,13 @@ async def test_interrupted_graph_batch_stays_incomplete_and_resumes(
     scanner_io[1].return_value = {"entries": entries(150)}
     calls = []
 
-    def interrupted(facility, cohort, signals):
+    def interrupted(signals):
         calls.append(len(signals))
         if len(calls) == 2:
             raise asyncio.CancelledError()
         return len(signals)
 
-    monkeypatch.setattr(catalogue, "_persist_signals", interrupted)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", interrupted)
     scanner = catalogue.CodacUDAScanner()
     with pytest.raises(asyncio.CancelledError):
         await scanner.scan("demo", "local", config)
@@ -136,7 +140,7 @@ async def test_interrupted_graph_batch_stays_incomplete_and_resumes(
 async def test_unacknowledged_graph_write_cannot_finish(
     config, scanner_io, monkeypatch
 ):
-    monkeypatch.setattr(catalogue, "_persist_signals", lambda *args: 0)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", lambda *args: 0)
     with pytest.raises(RuntimeError, match="incomplete graph batch"):
         await catalogue.CodacUDAScanner().scan("demo", "local", config)
     state = json.loads(open(config["_checkpoint_path"]).read())
@@ -191,14 +195,14 @@ async def test_metadata_calls_checkpoint_and_resume_independently(
 async def test_metadata_is_durable_before_graph_acknowledgement(
     config, scanner_io, monkeypatch
 ):
-    def write(facility, cohort, signals):
+    def write(signals):
         state = json.loads(open(config["_checkpoint_path"]).read())
         assert state["complete"] is False
         assert state["metadata_completed"] == len(signals) == 3
         assert state["written"] == 0
         raise TimeoutError("graph acknowledgement interrupted")
 
-    monkeypatch.setattr(catalogue, "_persist_signals", write)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", write)
     with pytest.raises(TimeoutError, match="graph acknowledgement interrupted"):
         await catalogue.CodacUDAScanner().scan("demo", "local", config)
     state = json.loads(open(config["_checkpoint_path"]).read())
@@ -413,3 +417,135 @@ async def test_scanner_uses_loader_samples_and_classifies_the_same_refusal(
     assert failed["error_classification"] == failure.value.category == "limit"
     assert confirm.call_count == 1
     runner.assert_called_once()
+
+
+@pytest.mark.asyncio
+async def test_failed_metadata_is_catalogued_as_unavailable(config, scanner_io):
+    stored, reader = scanner_io
+
+    def respond(facility, role, payload, **kwargs):
+        if payload["operation"] == "variables":
+            return {"entries": [{"name": "DEMO:FAILED"}]}
+        return {
+            "entries": [],
+            "failed": [
+                {"name": "DEMO:FAILED", "error": "fixture refusal", "error_code": 9105}
+            ],
+        }
+
+    reader.side_effect = respond
+    result = await catalogue.CodacUDAScanner().scan("demo", "local", config)
+    assert result.stats["failed"] == 1
+    assert result.stats["errors"] == {"DEMO:FAILED": "fixture refusal"}
+    assert result.stats["complete"] is True
+    assert result.stats["written"] == 1
+    assert len(result.signals) == len(stored) == 1
+    signal = result.signals[0]
+    assert signal.metadata_state == "unavailable" and signal.metadata_error_code == 9105
+    assert signal.archive_metadata is signal.unit is signal.source_description is None
+
+
+def test_signal_keeps_all_archive_fields_and_absent_times():
+    document = {
+        "datatypes": [
+            {"name": "main", "fields": [{"name": "val", "type": "DOUBLE", "unit": "K"}]}
+        ],
+        "signature": "fixture",
+        "additional": {"source": "archive"},
+    }
+    entry = entries(1)[0] | {
+        "archive_metadata": document,
+        "data_type": "DOUBLE",
+        "structure_fields": document["datatypes"],
+    }
+    signal = catalogue.CodacUDAScanner._signal(
+        "demo", "demo:codac_uda:slow", "access", entry, "cohort"
+    )
+    assert json.loads(signal.archive_metadata) == document
+    assert json.loads(signal.structure_fields) == document["datatypes"]
+    assert signal.data_type == "DOUBLE"
+    assert signal.first_sample_ns is signal.last_sample_ns is None
+    assert signal.listed_archives == ["demo:codac_uda:slow"]
+
+
+def test_unavailable_signal_clears_archive_fields_and_available_requires_document():
+    entry = entries(1)[0] | {
+        "metadata_state": "unavailable",
+        "metadata_error_code": 9105,
+        "metadata_error": "fixture refusal",
+        "archive_labels": ["untrusted"],
+    }
+    signal = catalogue.CodacUDAScanner._signal(
+        "demo", "demo:codac_uda:slow", "access", entry, "cohort"
+    )
+    assert signal.metadata_state == "unavailable" and signal.metadata_error_code == 9105
+    assert (
+        signal.archive_metadata
+        is signal.archive_labels
+        is signal.unit
+        is signal.structure_fields
+        is None
+    )
+    with pytest.raises(ValueError, match="requires a successful document"):
+        catalogue.CodacUDAScanner._signal(
+            "demo",
+            "demo:codac_uda:slow",
+            "access",
+            {"name": "DEMO:EMPTY", "metadata_state": "available"},
+            "cohort",
+        )
+
+
+@pytest.mark.asyncio
+async def test_private_catalogue_cannot_enter_pilot_graph_ingest(
+    config, scanner_io, tmp_path
+):
+    import sqlite3
+
+    path = tmp_path / "private.sqlite"
+    with sqlite3.connect(path) as db:
+        db.executescript(
+            "CREATE TABLE census(role TEXT,name TEXT,document TEXT,error TEXT,acknowledged INTEGER NOT NULL DEFAULT 0,PRIMARY KEY(role,name)); CREATE TABLE receipts(key TEXT PRIMARY KEY,value TEXT);"
+        )
+        db.execute("INSERT INTO census(role,name) VALUES ('slow','DEMO:TEMP-0')")
+        db.execute(
+            "INSERT INTO receipts VALUES ('census',?)",
+            (
+                json.dumps(
+                    {
+                        "counts": {"slow": 1, "fast": 0},
+                        "union": 1,
+                        "overlap": 0,
+                        "fingerprint": "fixture",
+                        "timestamp": "fixture",
+                    }
+                ),
+            ),
+        )
+    config["_catalogue_path"] = str(path)
+    with pytest.raises(ValueError, match="private catalogue"):
+        await catalogue.CodacUDAScanner().scan("demo", "local", config)
+    assert scanner_io[0] == {}
+    scanner_io[1].assert_not_called()
+
+
+def test_pilot_name_parse_follows_owner_acknowledgement(monkeypatch):
+    signal = catalogue.CodacUDAScanner._signal(
+        "demo", "demo:codac_uda:slow", "demo:access", entries(1)[0], "cohort"
+    )
+    graph = MagicMock()
+    parse = Mock()
+    owner = Mock(return_value=0)
+    monkeypatch.setattr(catalogue, "GraphClient", graph)
+    monkeypatch.setattr(catalogue, "persist_name_parses", parse)
+    monkeypatch.setattr(parallel, "ingest_discovered_signals", owner)
+    assert catalogue._persist_signals("demo", "cohort", [signal]) == 0
+    graph.assert_not_called()
+    parse.assert_not_called()
+    owner.return_value = 1
+    assert catalogue._persist_signals("demo", "cohort", [signal]) == 1
+    owner.assert_called_with([signal.model_dump(mode="json")])
+    parse.assert_called_once_with(
+        graph.return_value.__enter__.return_value,
+        [{"id": signal.id, "facility": "demo", "selector": signal.accessor}],
+    )

@@ -9,8 +9,6 @@ Archive addresses and operator exclusions come from deployment configuration.
 from __future__ import annotations
 
 import contextlib
-import ctypes
-import ctypes.util
 import json
 import os
 import sys
@@ -58,89 +56,53 @@ def _field(value: Any, source: str) -> dict:
     return {"value": text or None, "source": source if text else None}
 
 
-def _metadata_token(value: str) -> str:
-    value = _token(value)
-    if any(char in value for char in "'\"\\"):
-        raise ValueError("metadata selectors cannot contain quotes or escapes")
-    return value
+def metadata_batch(
+    client, names: list[str], type_documents: dict | None = None
+) -> list[dict]:
+    """Query type and full attributes, retaining each interface's archive error.
 
-
-def metadata_batch(client, names: list[str]) -> list[dict]:
-    """Retrieve type metadata in one UDA protocol batch, freeing every handle.
-
-    The high-level archive wrapper exposes only single-variable metadata calls.
-    Its underlying UDA library exposes idamGetBatchAPIWithHost in udaGetAPI.h
-    and the typed handle accessors in accAPI.h. Use that same library and
-    endpoint; no alternate metadata service or per-variable network loop.
+    Previously checkpointed type documents may be reused during attribute
+    backfill. Both interfaces are attempted even when one refuses a variable.
     """
-    library = ctypes.CDLL(ctypes.util.find_library("uda_client") or "libuda_client.so")
-    pointer = ctypes.POINTER
-    char_p, integer = ctypes.c_char_p, ctypes.c_int
-    signatures = {
-        "idamGetBatchAPIWithHost": (
-            [
-                pointer(char_p),
-                pointer(char_p),
-                integer,
-                pointer(integer),
-                char_p,
-                integer,
-            ],
-            integer,
-        ),
-        "getIdamErrorCode": ([integer], integer),
-        "getIdamErrorMsg": ([integer], char_p),
-        "getIdamDataNum": ([integer], integer),
-        "getIdamDataType": ([integer], integer),
-        "getIdamData": ([integer], ctypes.c_void_p),
-        "udaFree": ([integer], None),
-    }
-    for name, (arguments, result) in signatures.items():
-        function = getattr(library, name)
-        function.argtypes, function.restype = arguments, result
-    queries = [
-        f"UDA::getMetaTypeJSON(path='{_metadata_token(str(client.correctVariableName(name)))}/meta', startTime=-1)".encode()
-        for name in names
-    ]
-    signals = (char_p * len(names))(*queries)
-    sources = (char_p * len(names))(*([b""] * len(names)))
-    handles = (integer * len(names))(*([-1] * len(names)))
     results = []
-    try:
-        status = library.idamGetBatchAPIWithHost(
-            signals,
-            sources,
-            len(names),
-            handles,
-            str(client.getHost()).encode(),
-            int(client.getPort()),
-        )
-        if status != 0:
-            raise ReadError("archive metadata batch failed")
-        for handle in handles:
-            if handle < 0 or library.getIdamErrorCode(handle):
-                results.append({"error": "archive metadata unavailable"})
+    for name in names:
+        documents = {}
+        errors = []
+        for interface, method in (
+            ("type", client.getMetaTypeJSONCollapsed),
+            ("full", client.getMetaJSON),
+        ):
+            if interface == "type" and name in (type_documents or {}):
+                documents[interface] = type_documents[name]
                 continue
-            size = library.getIdamDataNum(handle)
-            address = library.getIdamData(handle)
-            # UDA's byte and string type codes; refuse a structured pointer.
-            if (
-                library.getIdamDataType(handle) not in {1, 17}
-                or not address
-                or not 0 < size <= 1_000_000
-            ):
-                results.append({"error": "archive metadata has invalid type or size"})
-                continue
+            code = 0
             try:
-                results.append(
-                    json.loads(ctypes.string_at(address, size).rstrip(b"\0"))
+                raw = method(name) if interface == "type" else method(name, "-1")
+                try:
+                    code = int(client.getErrorCode())
+                except (ValueError, TypeError):
+                    code = 0
+                if code:
+                    raise ReadError(str(client.getErrorMsg()))
+                document = json.loads(raw)
+                if not isinstance(document, dict if interface == "type" else list):
+                    raise ValueError("archive metadata has an unexpected JSON shape")
+                documents[interface] = document
+            except Exception as exc:
+                errors.append(
+                    {"interface": interface, "error_code": code, "error": str(exc)}
                 )
-            except (ValueError, UnicodeError):
-                results.append({"error": "archive metadata is not JSON"})
-    finally:
-        for handle in handles:
-            if handle >= 0:
-                library.udaFree(handle)
+        if errors:
+            results.append(
+                {
+                    "error": errors[0]["error"],
+                    "error_code": errors[0]["error_code"],
+                    "errors": errors,
+                    "documents": documents,
+                }
+            )
+        else:
+            results.append(documents)
     return results
 
 
@@ -185,23 +147,115 @@ def metadata(client, request: dict) -> dict:
         raise ValueError("metadata names must be unique")
     warnings = []
     entries = []
-    documents = metadata_batch(client, names)
+    failed = []
+    cached = request.get("type_documents")
+    documents = (
+        metadata_batch(client, names, cached)
+        if cached
+        else metadata_batch(client, names)
+    )
     for name, document in zip(names, documents, strict=True):
-        unit, description = _field(None, "uda"), _field(None, "uda")
-        try:
-            fields = document["datatypes"][0]["fields"]
-            signal = next(
-                (field for field in fields if field.get("name") == "val"), None
+        if "error" in document:
+            entry = {
+                "name": name,
+                "metadata_state": "unavailable",
+                "metadata_error_code": document.get("error_code", 0),
+                "metadata_error": str(document["error"]),
+                "metadata_errors": document.get("errors", []),
+                **(
+                    {"metadata_interfaces": document["documents"]}
+                    if document.get("documents")
+                    else {}
+                ),
+            }
+            entries.append(entry)
+            failed.append(
+                {
+                    "name": name,
+                    "error": entry["metadata_error"],
+                    "error_code": entry["metadata_error_code"],
+                }
             )
-            if signal is None and len(fields) == 1:
-                signal = fields[0]
-            if signal:
-                unit = _field(signal.get("unit"), "uda")
-                description = _field(signal.get("description"), "uda")
-        except Exception as exc:
-            warnings.append({"name": name, "source": "uda", "error": str(exc)})
-        entries.append({"name": name, "unit": unit, "description": description})
-    return {"entries": entries, "warnings": warnings}
+            continue
+        type_document = document.get("type", document)
+        attributes = document.get("full", [])
+        datatypes = type_document.get("datatypes", [])
+        valid_structure = isinstance(datatypes, list) and all(
+            isinstance(item, dict)
+            and isinstance(item.get("fields", []), list)
+            and all(isinstance(field, dict) for field in item.get("fields", []))
+            for item in datatypes
+        )
+        if not valid_structure or not all(
+            isinstance(item, dict) for item in attributes
+        ):
+            error = "archive metadata document has invalid fields"
+            entries.append(
+                {
+                    "name": name,
+                    "metadata_state": "unavailable",
+                    "metadata_error_code": 0,
+                    "metadata_error": error,
+                    "metadata_interfaces": {"type": type_document, "full": attributes},
+                }
+            )
+            failed.append({"name": name, "error": error, "error_code": 0})
+            continue
+        root = next(
+            (item for item in datatypes if item.get("name") == "main"),
+            datatypes[-1] if datatypes else {},
+        )
+        fields = root.get("fields", [])
+        signal = next((field for field in fields if field.get("name") == "val"), None)
+        if signal is None and len(fields) == 1:
+            signal = fields[0]
+        values = {}
+        for attribute in attributes:
+            value = attribute.get("value")
+            if value is not None and str(value).strip():
+                values.setdefault(attribute.get("name"), []).append(value)
+        entry = {
+            "name": name,
+            "metadata_state": "available",
+            "unit": _field(next(iter(values.get("Units", [])), None), "uda_full"),
+            "description": _field(
+                signal.get("description") if signal else None, "uda_type"
+            ),
+            "archive_metadata": {"type": type_document, "full": attributes},
+            "data_type": signal.get("type") if signal else None,
+            "structure_fields": datatypes,
+            **{
+                key: type_document[key]
+                for key in (
+                    "first_sample_ns",
+                    "last_sample_ns",
+                    "sampling_mode",
+                    "sampling_evidence",
+                )
+                if type_document.get(key) is not None
+            },
+        }
+        if values.get("label"):
+            entry["archive_labels"] = [str(value) for value in values["label"]]
+        if values.get("Format"):
+            entry["archive_format"] = str(values["Format"][0])
+        for source, target in (
+            ("LowerDisplayLimit", "archive_lower_display_limit"),
+            ("UpperDisplayLimit", "archive_upper_display_limit"),
+            ("LowerAlarmLimit", "archive_lower_alarm_limit"),
+            ("UpperAlarmLimit", "archive_upper_alarm_limit"),
+            ("LowerWarningLimit", "archive_lower_warning_limit"),
+            ("UpperWarningLimit", "archive_upper_warning_limit"),
+        ):
+            if values.get(source):
+                try:
+                    value = float(values[source][0])
+                    if np.isfinite(value):
+                        entry[target] = value
+                except (ValueError, TypeError):
+                    pass
+        entries.append(entry)
+    return {"entries": entries, "warnings": warnings, "failed": failed}
 
 
 def pulses(client, request: dict) -> dict:
@@ -568,9 +622,32 @@ def dispatch(client, request: dict) -> dict:
     raise ValueError("unknown operation")
 
 
+def metadata_stream(client, source, output) -> int:
+    """Serve metadata-only batches on one persistent native client.
+
+    The framed channel excludes data operations and survives native diagnostic
+    lines on stdout. Each process handles one archive and one request at a time.
+    """
+    prefix = "CODAC_METADATA "
+    print(prefix + json.dumps({"ready": True}), file=output, flush=True)
+    for line in source:
+        try:
+            request = json.loads(line)
+            if request.get("operation") != "metadata":
+                raise ValueError("metadata stream refuses non-metadata operations")
+            with contextlib.redirect_stdout(sys.stderr):
+                result = metadata(client, request)
+            receipt = {"ok": True, "result": result}
+        except Exception as exc:
+            receipt = {"ok": False, "error_type": type(exc).__name__, "error": str(exc)}
+        print(prefix + json.dumps(receipt), file=output, flush=True)
+    return 0
+
+
 def main() -> int:
     try:
-        request = json.load(sys.stdin)
+        streaming = os.environ.get("CODAC_UDA_METADATA_STREAM") == "1"
+        request = None if streaming else json.load(sys.stdin)
         # Native libraries can print diagnostics; reserve stdout for the receipt.
         with contextlib.redirect_stdout(sys.stderr):
             client = connect(
@@ -578,7 +655,10 @@ def main() -> int:
                 json.loads(os.environ.get("CODAC_UDA_OPERATOR_HOSTS", "[]")),
                 int(os.environ.get("CODAC_UDA_PORT", "3090")),
             )
-            result = dispatch(client, request)
+            if not streaming:
+                result = dispatch(client, request)
+        if streaming:
+            return metadata_stream(client, sys.stdin, sys.stdout)
         print(json.dumps({"ok": True, "result": result}))
         return 0
     except Exception as exc:

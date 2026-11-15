@@ -3112,6 +3112,60 @@ def ingest_epochs(
         return results
 
 
+ARCHIVE_SIGNAL_QUERY = """
+UNWIND $signals AS props
+MATCH (f:Facility {id: props.facility_id})
+MATCH (a:ArchiveEndpoint {id: props.metadata_archive})
+MERGE (s:FacilitySignal {id: props.id})
+ON CREATE SET s.status = props.status, s.discovered_at = datetime(),
+              s.description = props.description
+WITH s, a, f, props
+MATCH (da:DataAccess)
+WHERE da.id = CASE WHEN s.data_archive IS NOT NULL
+                   THEN s.facility_id + ':codac_uda:access:' + split(s.data_archive, ':')[-1]
+                   ELSE props.data_access END
+SET s.facility_id = props.facility_id, s.accessor = props.accessor,
+    s.name = props.name, s.discovery_source = props.discovery_source,
+    s.source_description = props.source_description, s.unit = props.unit,
+    s.metadata_state = props.metadata_state, s.metadata_error_code = props.metadata_error_code,
+    s.metadata_error = props.metadata_error, s.metadata_errors = props.metadata_errors,
+    s.archive_labels = props.archive_labels, s.archive_format = props.archive_format,
+    s.archive_lower_display_limit = props.archive_lower_display_limit,
+    s.archive_upper_display_limit = props.archive_upper_display_limit,
+    s.archive_lower_alarm_limit = props.archive_lower_alarm_limit,
+    s.archive_upper_alarm_limit = props.archive_upper_alarm_limit,
+    s.archive_lower_warning_limit = props.archive_lower_warning_limit,
+    s.archive_upper_warning_limit = props.archive_upper_warning_limit,
+    s.archive_metadata = props.archive_metadata, s.data_type = props.data_type,
+    s.structure_fields = props.structure_fields,
+    s.first_sample_ns = props.first_sample_ns, s.last_sample_ns = props.last_sample_ns,
+    s.listed_archives = props.listed_archives,
+    s.data_access = da.id, s.metadata_archive = props.metadata_archive,
+    s.data_source_name = props.data_source_name,
+    s.data_source_path = props.data_source_path,
+    s.sampling_mode = props.sampling_mode, s.sampling_evidence = props.sampling_evidence,
+    s.archive_cohorts = CASE WHEN props.archive_cohorts[0] IN coalesce(s.archive_cohorts, [])
+                            THEN s.archive_cohorts
+                            ELSE coalesce(s.archive_cohorts, []) + props.archive_cohorts END
+MERGE (s)-[:AT_FACILITY]->(f)
+WITH s, a, da, props
+OPTIONAL MATCH (s)-[old_access:DATA_ACCESS]->(previous_access)
+WHERE previous_access <> da
+DELETE old_access
+MERGE (s)-[:DATA_ACCESS]->(da)
+WITH s, a, props
+OPTIONAL MATCH (s)-[old:METADATA_ARCHIVE]->(previous)
+WHERE previous <> a
+DELETE old
+MERGE (s)-[:METADATA_ARCHIVE]->(a)
+WITH s, props
+UNWIND coalesce(props.listed_archives, [props.metadata_archive]) AS archive_id
+MATCH (listed:ArchiveEndpoint {id: archive_id})
+MERGE (s)-[:LISTED_BY_ARCHIVE]->(listed)
+RETURN count(DISTINCT s) AS written
+"""
+
+
 def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> int:
     """Ingest discovered signals to graph with epoch relationships.
 
@@ -3133,6 +3187,29 @@ def ingest_discovered_signals(signals: list[dict], *, batch_size: int = 500) -> 
         with GraphClient() as gc:
             for i in range(0, len(signals), batch_size):
                 batch = signals[i : i + batch_size]
+                archive_batch = [
+                    sig for sig in batch if sig.get("discovery_source") == "codac_uda"
+                ]
+                if archive_batch:
+                    if len(archive_batch) != len(batch):
+                        ingested += ingest_discovered_signals(
+                            archive_batch, batch_size=batch_size
+                        )
+                        ingested += ingest_discovered_signals(
+                            [
+                                sig
+                                for sig in batch
+                                if sig.get("discovery_source") != "codac_uda"
+                            ],
+                            batch_size=batch_size,
+                        )
+                        continue
+                    rows = gc.query(ARCHIVE_SIGNAL_QUERY, signals=batch)
+                    acknowledged = rows[0]["written"] if rows else 0
+                    if acknowledged != len(batch):
+                        raise RuntimeError("archive signal batch was not acknowledged")
+                    ingested += acknowledged
+                    continue
                 scan_rows = [
                     {
                         "signal": sig,
@@ -3491,7 +3568,7 @@ async def seed_worker(
                         e,
                     )
 
-            if result.signals:
+            if result.signals or result.stats.get("persisted"):
                 batch_start = time.monotonic()
                 count = (
                     result.stats["written"]
