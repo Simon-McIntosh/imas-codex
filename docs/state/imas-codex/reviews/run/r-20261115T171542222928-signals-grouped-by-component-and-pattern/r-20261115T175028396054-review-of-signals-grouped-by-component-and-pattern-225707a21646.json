@@ -1,0 +1,77 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "e5ea75431aa77b351808144432080c0f82dde304",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/remote/catalogue_grouping.py:106 main (python -m entry point run by the measurement job)",
+    "imas_codex/graph/models.py:18560 FacilitySignal.archive_grouping_state (generated from the landed schema, no reader yet)"
+  ],
+  "completed_at": "2026-11-15T17:52:13.732Z",
+  "dispatched_at": "2026-11-15T17:51:31Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: plan section 5 requires the grouping to be run again when the catalogue scan completes, and only the partial-metadata run exists; the fragment states the rerun is pending, so that half of the deliverable awaits a follow-up dispatch after the scan publishes completion."
+    },
+    {
+      "file": "imas_codex/discovery/signals/archive_grouping_graph.py",
+      "line": "53",
+      "severity": "non-blocking",
+      "text": "non-blocking: snapshot_archive_signals re-implements the guarded snapshot mechanism already owned inline by imas_codex/discovery/signals/variable_name_graph.py:72 parse_archive_catalogue (missing-selector control count, ordered paged read, closed control count, refuse-on-change), so a correction to that guard has two places to land."
+    },
+    {
+      "file": "imas_codex/remote/catalogue_grouping.py",
+      "line": "61",
+      "severity": "non-blocking",
+      "text": "non-blocking: run_grouping reads the members table through grouping.db.execute and hardcodes its column layout to replay its own snapshot, and imports json mid-function at :65, coupling the runner to imas_codex/discovery/signals/archive_grouping.py's schema instead of a store accessor."
+    }
+  ],
+  "head_log_revision": "65a3d7288803c8e6ab5010f34dd296935f61eb12",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "searched imas_codex/ for importers of archive_grouping, catalogue_grouping and ArchiveFieldPattern outside the new modules and their tests: the only reachable runtime surfaces are the module's own python -m entry point and the generated FacilitySignal properties, so no pipeline code reaches the change yet.",
+    "diff": "read commit by commit against e5ea75431aa77b351808144432080c0f82dde304: 65a3d7288 adds archive_grouping.py (320 lines), archive_grouping_graph.py (143), remote/catalogue_grouping.py (125), 59 facility.yaml schema lines and two test files (279 and 171 lines); 225707a21 adds only the 31-line evidence fragment; no deletions in either commit.",
+    "done_when": "the done_when asks for a pytest gate with zero added failures plus per-run coverage, counts, size distribution, singleton share, twenty largest patterns, description counts and a non-adding second run; baseline.log (rev e5ea75431) reads 60 passed EXIT=0 and head-gate.log (rev 65a3d7288) reads 80 passed EXIT=0, so the added-failure count is 0, and docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html:8-20 states 100% coverage, 248153/746853/905/765, the histogram, 19 singletons at 0.001910%, twenty inventoried pattern rows and 1670 descriptions beside 248153 grouped signals.",
+    "goal": "the node's goal is to group every catalogued archive variable by component and by repeated field pattern; imas_codex/discovery/signals/archive_grouping.py:75 rebuild() writes each selector as grouped with a component and field or as an explicit ungrouped row with a reason, and the landed run (live-grouping-receipt.json first) reports 995006 variables, 248153 grouped, 746853 ungrouped, 905 components and 765 patterns, so the goal's deliverable exists and was exercised on the live catalogue.",
+    "manifest": "read; status complete, commits 65a3d7288803c8e6ab5010f34dd296935f61eb12 and 225707a216465712e047754bcc3aacbdd2b58955, changed_paths the seven landed files, tests the literal six-file head gate, test_logs baseline.log/head-gate.log/live-grouping.log, baseline_suite 60 passed exit 0 completed, after_suite 80 passed exit 0 completed, negative_control_log negative-control.log with 1 failed 2 passed EXIT=1.",
+    "write_paths": "the declared fence covered imas_codex/discovery/signals/, imas_codex/discovery/base/, imas_codex/remote/, imas_codex/schemas/, tests/discovery/, tests/remote/, tests/graph/ and the one evidence fragment; the two landed commits touch imas_codex/discovery/signals/archive_grouping.py, imas_codex/discovery/signals/archive_grouping_graph.py, imas_codex/remote/catalogue_grouping.py, imas_codex/schemas/facility.yaml, tests/discovery/test_archive_grouping.py, tests/graph/test_archive_grouping.py and that fragment, all inside the fence."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_archive_grouping.py:73-83 reddens when the parser attaches a non-parsing selector to a neighbour component (negative-control.log shows assert 2 == 0), tests/discovery/test_archive_grouping.py:104-113 catches pattern identity that ignores field growth, and tests/graph/test_archive_grouping.py:154-175 catches a projection that acknowledges a refused selector.",
+    "evidence": "baseline.log reads 60 passed EXIT=0 and head-gate.log reads 80 passed EXIT=0 over the six-file head gate, negative-control.log reads 1 failed 2 passed EXIT=1 with FAILED tests/discovery/test_archive_grouping.py::test_unparseable_name_is_counted_without_component_membership[unparseable fixture], and the head gate ran at 65a3d7288 with only the evidence fragment added afterwards.",
+    "fit": "imas_codex/discovery/signals/archive_grouping.py:25-150 follows the module shape of imas_codex/discovery/signals/variable_name_graph.py:11-113 with a Cypher-free store and typed accessors, but imas_codex/remote/catalogue_grouping.py:61-65 reaches into grouping.db with raw SQL and a mid-function import json.",
+    "goal_fidelity": "imas_codex/discovery/signals/archive_grouping.py:75-100 assigns every selector either a component or an explicit ungrouped state and derives field patterns, and live-grouping-receipt.json records 995006 variables as 248153 grouped and 746853 ungrouped with 905 components and 765 patterns, though the plan's second run after scan completion (docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html:29) is still unlanded.",
+    "reuse": "the parse owner imas_codex/discovery/signals/variable_names.py:88 and the receipt publisher imas_codex/remote/catalogue_scan.py:35 are reused, but imas_codex/discovery/signals/archive_grouping_graph.py:53-88 re-implements the control-count, ordered-page and repeat-control snapshot that imas_codex/discovery/signals/variable_name_graph.py:72-101 already owns, and imas_codex/discovery/signals/archive_grouping.py:25 reads the census table owned by imas_codex/remote/archive_catalogue.py:129 without extending it.",
+    "scope_discipline": "git diff --stat e5ea75431aa77b351808144432080c0f82dde304 225707a216465712e047754bcc3aacbdd2b58955 lists seven added files, every one inside the declared fence (imas_codex/discovery/signals/, imas_codex/remote/, imas_codex/schemas/, tests/discovery/, tests/graph/, docs/evidence/fragments/iter-signal-context-and-enrichment/) and nothing under imas_codex/discovery/base/."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to group every catalogued archive variable by component and by repeated field pattern; imas_codex/discovery/signals/archive_grouping.py:75 rebuild() writes each selector as grouped with a component and field or as an explicit ungrouped row with a reason, and the landed run (live-grouping-receipt.json first) reports 995006 variables, 248153 grouped, 746853 ungrouped, 905 components and 765 patterns, so the goal's deliverable exists and was exercised on the live catalogue.\nVERDICT done_when: the done_when asks for a pytest gate with zero added failures plus per-run coverage, counts, size distribution, singleton share, twenty largest patterns, description counts and a non-adding second run; baseline.log (rev e5ea75431) reads 60 passed EXIT=0 and head-gate.log (rev 65a3d7288) reads 80 passed EXIT=0, so the added-failure count is 0, and docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html:8-20 states 100% coverage, 248153/746853/905/765, the histogram, 19 singletons at 0.001910%, twenty inventoried pattern rows and 1670 descriptions beside 248153 grouped signals.\nVERDICT write_paths: the declared fence covered imas_codex/discovery/signals/, imas_codex/discovery/base/, imas_codex/remote/, imas_codex/schemas/, tests/discovery/, tests/remote/, tests/graph/ and the one evidence fragment; the two landed commits touch imas_codex/discovery/signals/archive_grouping.py, imas_codex/discovery/signals/archive_grouping_graph.py, imas_codex/remote/catalogue_grouping.py, imas_codex/schemas/facility.yaml, tests/discovery/test_archive_grouping.py, tests/graph/test_archive_grouping.py and that fragment, all inside the fence.\nVERDICT manifest: read; status complete, commits 65a3d7288803c8e6ab5010f34dd296935f61eb12 and 225707a216465712e047754bcc3aacbdd2b58955, changed_paths the seven landed files, tests the literal six-file head gate, test_logs baseline.log/head-gate.log/live-grouping.log, baseline_suite 60 passed exit 0 completed, after_suite 80 passed exit 0 completed, negative_control_log negative-control.log with 1 failed 2 passed EXIT=1.\nVERDICT diff: read commit by commit against e5ea75431aa77b351808144432080c0f82dde304: 65a3d7288 adds archive_grouping.py (320 lines), archive_grouping_graph.py (143), remote/catalogue_grouping.py (125), 59 facility.yaml schema lines and two test files (279 and 171 lines); 225707a21 adds only the 31-line evidence fragment; no deletions in either commit.\nCALL_SITES: imas_codex/remote/catalogue_grouping.py:106 main (python -m entry point run by the measurement job), imas_codex/graph/models.py:18560 FacilitySignal.archive_grouping_state (generated from the landed schema, no reader yet)\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/archive_grouping.py:75-100 assigns every selector either a component or an explicit ungrouped state and derives field patterns, and live-grouping-receipt.json records 995006 variables as 248153 grouped and 746853 ungrouped with 905 components and 765 patterns, though the plan's second run after scan completion (docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html:29) is still unlanded.\nSCORE evidence: 17\nJUSTIFICATION evidence: baseline.log reads 60 passed EXIT=0 and head-gate.log reads 80 passed EXIT=0 over the six-file head gate, negative-control.log reads 1 failed 2 passed EXIT=1 with FAILED tests/discovery/test_archive_grouping.py::test_unparseable_name_is_counted_without_component_membership[unparseable fixture], and the head gate ran at 65a3d7288 with only the evidence fragment added afterwards.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat e5ea75431aa77b351808144432080c0f82dde304 225707a216465712e047754bcc3aacbdd2b58955 lists seven added files, every one inside the declared fence (imas_codex/discovery/signals/, imas_codex/remote/, imas_codex/schemas/, tests/discovery/, tests/graph/, docs/evidence/fragments/iter-signal-context-and-enrichment/) and nothing under imas_codex/discovery/base/.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_archive_grouping.py:73-83 reddens when the parser attaches a non-parsing selector to a neighbour component (negative-control.log shows assert 2 == 0), tests/discovery/test_archive_grouping.py:104-113 catches pattern identity that ignores field growth, and tests/graph/test_archive_grouping.py:154-175 catches a projection that acknowledges a refused selector.\nSCORE fit: 15\nJUSTIFICATION fit: imas_codex/discovery/signals/archive_grouping.py:25-150 follows the module shape of imas_codex/discovery/signals/variable_name_graph.py:11-113 with a typed private store and accessors, but imas_codex/remote/catalogue_grouping.py:61-65 reaches into grouping.db with raw SQL and a mid-function import json.\nSCORE reuse: 5\nJUSTIFICATION reuse: the parse owner imas_codex/discovery/signals/variable_names.py:88 and the receipt publisher imas_codex/remote/catalogue_scan.py:35 are reused, but imas_codex/discovery/signals/archive_grouping_graph.py:53-88 re-implements the control-count, ordered-page and repeat-control snapshot that imas_codex/discovery/signals/variable_name_graph.py:72-101 already owns, and imas_codex/discovery/signals/archive_grouping.py:25 reads the census table owned by imas_codex/remote/archive_catalogue.py:129 without extending it.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html:29 non-blocking: plan section 5 requires the grouping to be run again when the catalogue scan completes, and only the partial-metadata run exists; the fragment states the rerun is pending, so that half of the deliverable awaits a follow-up dispatch after the scan publishes completion.\nFINDING imas_codex/discovery/signals/archive_grouping_graph.py:53 non-blocking: snapshot_archive_signals re-implements the guarded snapshot mechanism already owned inline by imas_codex/discovery/signals/variable_name_graph.py:72 parse_archive_catalogue (missing-selector control count, ordered paged read, closed control count, refuse-on-change), so a correction to that guard has two places to land.\nFINDING imas_codex/remote/catalogue_grouping.py:61 non-blocking: run_grouping reads the members table through grouping.db.execute and hardcodes its column layout to replay its own snapshot, and imports json mid-function at :65, coupling the runner to imas_codex/discovery/signals/archive_grouping.py's schema instead of a store accessor.",
+  "review_run_id": "r-20261115T175028396054-review-of-signals-grouped-by-component-and-pattern-225707a21646",
+  "reviewed_base_sha": "e5ea75431aa77b351808144432080c0f82dde304",
+  "reviewed_head_sha": "225707a216465712e047754bcc3aacbdd2b58955",
+  "reviewed_run_id": "r-20261115T171542222928-signals-grouped-by-component-and-pattern",
+  "reviewer": {
+    "backend": "codex",
+    "effort_note": "node-local review",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261115T175028396054-review-of-signals-grouped-by-component-and-pattern-225707a21646"
+  },
+  "reviewer_run_id": "r-20261115T175028396054-review-of-signals-grouped-by-component-and-pattern-225707a21646",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T18:07:51.104680+00:00",
+  "total": 91
+}

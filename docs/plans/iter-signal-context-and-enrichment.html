@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="15">
+<meta name="plan-version" content="16">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -86,6 +86,15 @@
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
 <h2><span class="sec">§</span> Decisions</h2>
+<div class="r-dec" data-key="description-model" data-choice="paid-gpt-6.1-sol" data-by="lead" data-when="2026-11-15T17:14:08+00:00" data-sections="s6,s7">
+    <p class="r-dec-q">Which model writes ITER signal descriptions in the discovery pipeline?</p>
+    <p class="r-dec-ctx">The comparison in section 3 on 200 signals with identical full-context prompts: the local model delivered 130 of 200 with no response parsing unrepaired; the paid model delivered 200 of 200 for 0.95 US dollars.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="paid-gpt-6.1-sol">The paid model, gpt-6.1-sol</button>
+      <button class="r-opt" data-value="local-after-retest">The local model after a constrained retest</button>
+      </p>
+    <p class="r-dec-rat">The lead chose the paid model, gpt-6.1-sol, on 2026-11-15 at about 17:25 UTC through the decision census, relayed by the reckon session. With ICP access parked, no ICP-derived content is in scope for it.</p>
+    </div>
 <div class="r-dec" data-key="full-enrichment-cost-accepted" data-choice="" data-by="" data-when="" data-sections="s7">
     <p class="r-dec-q">Is the projected call count and cost of enriching the whole catalogue accepted?</p>
     <p class="r-dec-ctx">Decided after section 6 reports the pilot&#x27;s measured cost and the projection from the grouping.</p>
@@ -103,15 +112,6 @@
       <button class="r-opt" data-value="coordinator-curates">Not accepted: the coordinator curates and workers see only the graph</button>
       </p>
     <p class="r-dec-rat"></p>
-    </div>
-<div class="r-dec" data-key="description-model" data-choice="paid-gpt-6.1-sol" data-by="lead" data-when="2026-11-15T17:14:08+00:00" data-sections="s6,s7">
-    <p class="r-dec-q">Which model writes ITER signal descriptions in the discovery pipeline?</p>
-    <p class="r-dec-ctx">The comparison in section 3 on 200 signals with identical full-context prompts: the local model delivered 130 of 200 with no response parsing unrepaired; the paid model delivered 200 of 200 for 0.95 US dollars.</p>
-    <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="paid-gpt-6.1-sol">The paid model, gpt-6.1-sol</button>
-      <button class="r-opt" data-value="local-after-retest">The local model after a constrained retest</button>
-      </p>
-    <p class="r-dec-rat">The lead chose the paid model, gpt-6.1-sol, on 2026-11-15 at about 17:25 UTC through the decision census, relayed by the reckon session. With ICP access parked, no ICP-derived content is in scope for it.</p>
     </div>
 </section>
 
@@ -138,6 +138,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T143248915610-local-model-signal-enrichment-benchmark" data-who="reckon-build" data-when="2026-11-15T15:51:37Z">
     <div class="r-comment-body"><p>Full-context comparison of 200 JT-60SA signals across 26 domains: local 0/20 strict parses and 130/200 outputs versus paid 20/20 and 200/200 for USD0.9524577; blind paid/local/equivalent 120/34/46, manual agreement 22/40, reversal disagreement 11/40; stored properties byte-identical. Evidence: docs/evidence/fragments/iter-signal-context-and-enrichment/local-model-signal-enrichment-benchmark.html#local-model-signal-enrichment-benchmark-results. Lead choice remains open.</p></div>
+</div>
+<div class="r-comment" data-section="s5" data-id="c-run-r-20261115T175028396054-review-of-signals-grouped-by-component-and-pattern-225707a21646" data-who="reckon-build" data-when="2026-11-15T17:52:13.732Z">
+    <div class="r-comment-body"><p>Independent review of signals-grouped-by-component-and-pattern at head 225707a21 (base e5ea75431) scores goal_fidelity 16, evidence 17, scope_discipline 20, durability 18, fit 15, reuse 5 with added_failure_count 0 and three non-blocking findings (scan-complete rerun still pending, snapshot mechanism duplicated from variable_name_graph, runner coupling to the store schema); record at runs/r-20261115T171542222928-signals-grouped-by-component-and-pattern/review-records/ passes `reckon crew check --review`.</p></div>
 </div>
 </section>
 </main>
