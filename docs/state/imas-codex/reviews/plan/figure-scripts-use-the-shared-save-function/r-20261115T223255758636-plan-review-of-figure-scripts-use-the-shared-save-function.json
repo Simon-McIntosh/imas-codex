@@ -33,7 +33,30 @@
   "plan_slug": "figure-scripts-use-the-shared-save-function",
   "plan_version": 1,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "057515152daf4420be31b44593d8a7dcd998982e",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 1's done-when at version 2 tests both a four-trace and a six-trace legend on one row, so the stated limit is measured.",
+      "reason": "",
+      "when": "2026-11-15T22:58:51.112633+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "057515152daf4420be31b44593d8a7dcd998982e",
+      "commit_basis": "edit",
+      "note": "Section 1's done-when at version 2 tests both a four-trace and a six-trace legend on one row, so the stated limit is measured.",
+      "reason": "",
+      "when": "2026-11-15T22:58:51.112633+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/figure-scripts-use-the-shared-save-function/r-20261115T223255758636-plan-review-of-figure-scripts-use-the-shared-save-function.json",
   "review_run_id": "r-20261115T223255758636-plan-review-of-figure-scripts-use-the-shared-save-function",
   "reviewed_blob_sha": "c8cacd6cbb5cd79552075776f0c4066f13bd223c",
   "rubric": "content",
