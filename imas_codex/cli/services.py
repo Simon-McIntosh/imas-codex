@@ -200,13 +200,6 @@ def _graph_http_port() -> int:
     return resolve_neo4j(auto_tunnel=False).http_port
 
 
-def _llm_port() -> int:
-    """Return the configured LLM proxy port."""
-    from imas_codex.settings import get_llm_proxy_port
-
-    return get_llm_proxy_port()
-
-
 # ── Scheduler detection ─────────────────────────────────────────────────
 
 
@@ -383,32 +376,6 @@ def _run_remote(cmd: str, timeout: int = 30, check: bool = False) -> str:
     from imas_codex.remote.executor import run_command
 
     return run_command(cmd, ssh_host=_facility_ssh(), timeout=timeout, check=check)
-
-
-def _llm_ssh() -> str | None:
-    """SSH host for the LLM proxy node, or None if local.
-
-    The LLM proxy runs on the default facility SSH target — no
-    separate alias.  Returns the facility SSH host or None if local.
-    """
-    from imas_codex.remote.locations import is_location_local, resolve_location
-    from imas_codex.settings import get_llm_location
-
-    location = get_llm_location()
-    if location == "local":
-        return None
-    if is_location_local(location):
-        return None
-
-    info = resolve_location(location)
-    return info.ssh_host
-
-
-def _run_llm_remote(cmd: str, timeout: int = 30, check: bool = False) -> str:
-    """Run a command on the LLM proxy node (locally if already there)."""
-    from imas_codex.remote.executor import run_command
-
-    return run_command(cmd, ssh_host=_llm_ssh(), timeout=timeout, check=check)
 
 
 def _run_on_node(node: str, cmd: str, timeout: int = 30) -> str:
@@ -884,22 +851,6 @@ def _stop_login_services(job_name: str = "") -> None:
                     timeout=15,
                 )
                 click.echo("  Stopped login embed service")
-        except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
-            pass
-
-    # LLM proxy (always check)
-    if job_name == "":
-        try:
-            result = _run_remote(
-                "systemctl --user is-active imas-codex-llm 2>/dev/null || true",
-                timeout=10,
-            )
-            if "active" in result:
-                _run_remote(
-                    "systemctl --user stop imas-codex-llm 2>/dev/null || true",
-                    timeout=15,
-                )
-                click.echo("  Stopped login LLM proxy service")
         except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
             pass
 

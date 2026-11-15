@@ -53,7 +53,6 @@ _DEFERRED_MODULES = (
     "imas_codex.cli.graph",
     "imas_codex.cli.host",
     "imas_codex.cli.imas_dd",
-    "imas_codex.cli.llm_cli",
     "imas_codex.cli.release",
     "imas_codex.cli.sn",
     "imas_codex.cli.tools",

@@ -133,6 +133,18 @@ def _assert_chat_reply(model: str, owner: str | None = None) -> None:
         )
         parsed = result.parsed
         assert parsed.word, f"the lane serving {model!r} returned an empty reply"
+        print(
+            "SEAT_RECEIPT "
+            + json.dumps(
+                {
+                    "seat": owner or model,
+                    "requested_model": model,
+                    "content": parsed.word,
+                    "cost_usd": result.cost,
+                    "tokens": result.tokens,
+                }
+            )
+        )
         return
     response, cost = call_llm(
         model,
@@ -232,3 +244,9 @@ def _post_decisions_live(headers: dict[str, str], body: dict, timeout: float):
     except urllib.error.HTTPError as error:
         payload, status = error.read(), error.code
     return httpx.Response(status_code=status, content=payload)
+
+
+@pytest.mark.parametrize("seat", ["sn-compose", "cluster-labels"])
+def test_direct_route_answers_one_live_request(seat: str) -> None:
+    """One configured local seat and one OpenRouter seat return actual replies."""
+    _assert_chat_reply(get_model(seat), seat)

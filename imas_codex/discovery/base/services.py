@@ -292,49 +292,20 @@ def embed_health_check() -> tuple[bool, str]:
         return False, str(e)[:100]
 
 
-def llm_health_check(section: str) -> tuple[bool, str]:
-    """Check the health of the endpoint that a seat's model calls.
+def llm_health_check(
+    section: str, service: str = "facility-discovery"
+) -> tuple[bool, str]:
+    """Probe the endpoint a seat calls without generating model tokens."""
+    from imas_codex.settings import get_model_config
 
-    When the seat's model is served on an explicitly free local endpoint
-    (``endpoint-class = "local-free"``), the model call goes direct to that
-    endpoint's router rather than through the LiteLLM proxy, so the proxy's
-    readiness says nothing about it: probe the endpoint's own models listing
-    with a ``GET`` instead.
-
-    Otherwise, when a LiteLLM proxy is configured (``[llm].location`` is set),
-    probes ``GET /health/readiness`` which checks proxy process health and DB
-    connection only — no upstream LLM API calls are made. Falls back to a
-    minimal ``litellm.completion()`` call when no proxy is configured
-    (``location=local``).
-
-    Args:
-        section: Model section to check (a function seat, e.g. discovery-score).
-
-    Returns:
-        (healthy, detail) tuple where detail is the proxy location or the
-        local endpoint host
-    """
-    import os
-
-    from imas_codex.settings import (
-        get_llm_location,
-        is_explicit_free_local_endpoint,
-    )
-
-    llm_location = get_llm_location()
-
-    # --- Local-free seat: probe the endpoint the model actually calls ---
-    from imas_codex.settings import get_model
-
-    if is_explicit_free_local_endpoint(get_model(section)):
+    config = get_model_config(section)
+    if config["api_base"]:
         return _probe_local_endpoint_models(section)
-
-    # --- Proxy mode: lightweight readiness probe (no LLM API calls) ---
-    if llm_location != "local" or os.getenv("LITELLM_PROXY_URL"):
-        return _probe_litellm_readiness(llm_location)
-
-    # --- Local mode: minimal completion call ---
-    return _probe_litellm_local(section)
+    return _probe_provider_key(
+        _provider_key_url(decisions=config["model"].startswith("typesafe/")),
+        service,
+        10,
+    )
 
 
 def _probe_local_endpoint_models(section: str) -> tuple[bool, str]:
@@ -383,39 +354,40 @@ def decisions_health_check(
     service: str = "facility-discovery",
     timeout: int = 10,
 ) -> tuple[bool, str]:
-    """Cheap reachability probe of the decisions route a seat calls.
+    """Check credentials on the decisions endpoint's origin without a decision."""
+    return _probe_provider_key(_provider_key_url(decisions=True), service, timeout)
 
-    The code-relevance pipeline calls the OpenRouter decisions endpoint
-    directly, with the credential named by ``service``, rather than through the
-    LiteLLM proxy the chat seats use — so a proxy readiness probe says nothing
-    about whether those calls can reach the route. This sends one authenticated
-    ``GET`` to the key-info endpoint on the decisions route's own origin: it
-    carries no model, state or questions, so the decisions endpoint is never
-    asked to judge anything and no decision is billed.
 
-    Returns:
-        (healthy, detail) tuple where detail names the route host on success
-        and the refusal on failure (``endpoint refused``, ``auth refused
-        (401)``, ``endpoint timeout``, ...).
+def _provider_key_url(*, decisions: bool) -> str:
+    """Resolve the credential probe on the selected provider route's origin."""
+    from urllib.parse import urlsplit
+
+    from imas_codex.discovery.base.llm import DECISIONS_ENDPOINT
+
+    endpoint = DECISIONS_ENDPOINT if decisions else "https://openrouter.ai/api/v1"
+    origin = urlsplit(endpoint)
+    return f"{origin.scheme}://{origin.netloc}/api/v1/key"
+
+
+def _probe_provider_key(probe_url: str, service: str, timeout: int) -> tuple[bool, str]:
+    """Check provider reachability and credentials without generating tokens.
+
+    Chat and decisions requests to the same origin use the same service key.
+    This probe checks that shared credential, not whether a particular model
+    can generate a reply; live completion tests verify the latter separately.
     """
     import urllib.error
     import urllib.parse
     import urllib.request
 
-    from imas_codex.discovery.base.llm import (
-        DECISIONS_ENDPOINT,
-        _service_headers,
-        get_api_key_for_service,
-    )
+    from imas_codex.discovery.base.llm import _service_headers, get_api_key_for_service
 
     try:
         api_key = get_api_key_for_service(service)
     except Exception as e:  # noqa: BLE001 - a missing credential is a failure
         return False, f"no key: {str(e)[:60]}"
 
-    origin = urllib.parse.urlsplit(DECISIONS_ENDPOINT)
-    probe_url = f"{origin.scheme}://{origin.netloc}/api/v1/key"
-    label = origin.netloc or DECISIONS_ENDPOINT
+    label = urllib.parse.urlsplit(probe_url).netloc
     request_headers = {
         "Authorization": "Bearer " + api_key,
         **_service_headers(service),
@@ -450,78 +422,32 @@ def llm_health_check_with_decisions(
     scores files (``section``) and the OpenRouter decisions route the relevance
     seat calls. The panel's ``llm`` row is up only when both answer, so this
     reports the chat seat's own result when it fails, the decisions route's
-    when that fails, and the seat's detail when both succeed.
+    when that fails, and the seat's detail when both succeed. When both use
+    the same provider origin and service key, one credential probe covers
+    both; distinct origins each receive their own probe.
 
     Args:
         section: Chat model section to check (e.g. discovery-score).
         service: Service tag whose credential the decisions route needs.
     """
-    healthy, seat_detail = llm_health_check(section)
+    from imas_codex.settings import get_model_config
+
+    healthy, seat_detail = llm_health_check(section, service=service)
     if not healthy:
         return False, f"score ({seat_detail})"
+
+    config = get_model_config(section)
+    if not config["api_base"] and _provider_key_url(
+        decisions=config["model"].startswith("typesafe/")
+    ) == _provider_key_url(decisions=True):
+        # Both calls share an origin and service credential, so one check
+        # proves the reachability/authentication condition for both routes.
+        return True, seat_detail
 
     healthy, decisions_detail = decisions_health_check(service)
     if not healthy:
         return False, f"decisions ({decisions_detail})"
     return True, seat_detail
-
-
-def llm_deep_health_check(section: str) -> tuple[bool, str, dict]:
-    """Full model-level health check via /health — makes real LLM API calls.
-
-    WARNING: Sends completion requests to ALL configured models including cc:*
-    (billed to Claude Code key). Only for manual diagnostics via CLI.
-
-    Args:
-        section: Model section for the local-mode probe (a function seat, e.g.
-            discovery-score).
-
-    Returns:
-        (healthy, detail, data) — data includes the raw /health JSON response.
-    """
-    import json
-    import os
-    import urllib.error
-    import urllib.request
-
-    from imas_codex.settings import get_llm_location, get_llm_proxy_url
-
-    llm_location = get_llm_location()
-
-    if llm_location == "local" and not os.getenv("LITELLM_PROXY_URL"):
-        healthy, detail = _probe_litellm_local(section)
-        return healthy, detail, {}
-
-    proxy_url = get_llm_proxy_url()
-    health_url = f"{proxy_url}/health"
-    api_key = os.getenv("LITELLM_MASTER_KEY", "")
-
-    try:
-        req = urllib.request.Request(health_url)
-        if api_key:
-            req.add_header("Authorization", f"Bearer {api_key}")
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read())
-            healthy_count = data.get("healthy_count", 0)
-            unhealthy_count = data.get("unhealthy_count", 0)
-            if healthy_count > 0 and unhealthy_count == 0:
-                return True, _format_load_detail(llm_location), data
-            if healthy_count > 0:
-                reason = _classify_unhealthy_reason(data)
-                suffix = (
-                    f" ({unhealthy_count} {reason})"
-                    if reason
-                    else f" ({unhealthy_count} degraded)"
-                )
-                return True, _format_load_detail(llm_location, suffix), data
-            reason = _classify_unhealthy_reason(data)
-            return False, reason or "no healthy models", data
-    except urllib.error.HTTPError as e:
-        return False, f"HTTP {e.code}", {}
-    except urllib.error.URLError as e:
-        return False, str(e.reason)[:60], {}
-    except Exception as e:
-        return False, str(e)[:80], {}
 
 
 def _get_host_load() -> tuple[float, int] | None:
@@ -558,252 +484,6 @@ def _format_load_detail(location: str, suffix: str = "") -> str:
         normalized = min(load_per_core, 1.0)
         return f"{detail} ↑{normalized:.0%}"
     return detail
-
-
-def _probe_litellm_proxy(location: str) -> tuple[bool, str]:
-    """Full model health check via /health — makes real LLM API calls to EVERY model.
-
-    WARNING: Sends completion requests to all models including cc:* (Claude Code key).
-    Use only for manual diagnostics via llm_deep_health_check().
-    For automated polling, use _probe_litellm_readiness().
-    """
-    import json
-    import os
-    import urllib.error
-    import urllib.request
-
-    from imas_codex.settings import get_llm_proxy_url
-
-    proxy_url = get_llm_proxy_url()
-    health_url = f"{proxy_url}/health"
-    api_key = os.getenv("LITELLM_MASTER_KEY", "")
-
-    try:
-        req = urllib.request.Request(health_url)
-        if api_key:
-            req.add_header("Authorization", f"Bearer {api_key}")
-        with urllib.request.urlopen(req, timeout=30) as resp:
-            data = json.loads(resp.read())
-            healthy_count = data.get("healthy_count", 0)
-            unhealthy_count = data.get("unhealthy_count", 0)
-            if healthy_count > 0 and unhealthy_count == 0:
-                return True, _format_load_detail(location)
-            if healthy_count > 0:
-                # Check unhealthy reasons for budget/credit exhaustion
-                reason = _classify_unhealthy_reason(data)
-                suffix = (
-                    f" ({unhealthy_count} {reason})"
-                    if reason
-                    else f" ({unhealthy_count} degraded)"
-                )
-                return True, _format_load_detail(location, suffix)
-            # No healthy models — check if budget is the cause
-            reason = _classify_unhealthy_reason(data)
-            return False, reason or "no healthy models"
-    except urllib.error.HTTPError as e:
-        if e.code == 401:
-            return False, "auth error (401)"
-        return False, f"HTTP {e.code}"
-    except urllib.error.URLError as e:
-        reason = str(e.reason).lower()
-        if "refused" in reason:
-            return False, "proxy refused"
-        if "timed out" in reason or "timeout" in reason:
-            return False, "proxy timeout"
-        return False, str(e.reason)[:60]
-    except Exception as e:
-        return False, str(e)[:80]
-
-
-def _probe_litellm_readiness(location: str) -> tuple[bool, str]:
-    """Probe LiteLLM proxy via /health/readiness (no LLM API calls).
-
-    Checks proxy process health and DB connection only.
-    Does NOT verify API key validity or upstream provider reachability.
-    Requires authentication (master key or worker virtual key).
-    """
-    import json
-    import os
-    import urllib.error
-    import urllib.request
-
-    from imas_codex.settings import get_llm_proxy_url
-
-    proxy_url = get_llm_proxy_url()
-    readiness_url = f"{proxy_url}/health/readiness"
-
-    # Use same auth chain as _build_kwargs: prefer worker key, fall back to master
-    api_key = os.getenv("LITELLM_API_KEY") or os.getenv("LITELLM_MASTER_KEY", "")
-
-    try:
-        req = urllib.request.Request(readiness_url)
-        if api_key:
-            req.add_header("Authorization", f"Bearer {api_key}")
-        with urllib.request.urlopen(req, timeout=10) as resp:
-            data = json.loads(resp.read())
-            status = (data.get("status") or "").lower()
-            db_status = (data.get("db") or "").lower()
-
-            # LiteLLM 1.83+ returns status="healthy"; older releases used
-            # "connected". Accept either.
-            healthy_states = {"healthy", "connected"}
-            # db="Not connected" is expected when LITELLM_DATABASE_URL is unset
-            # (we don't run a LiteLLM DB). Only fail on explicit DB failure.
-            db_ok = db_status in {"", "connected", "not connected", "disabled"}
-
-            if status in healthy_states and db_ok:
-                return True, _format_load_detail(location)
-            if status in healthy_states:
-                return False, f"proxy ready but db {db_status}"
-            return False, f"proxy not ready ({status})"
-    except urllib.error.HTTPError as e:
-        if e.code == 401:
-            return False, "auth error (401)"
-        return False, f"HTTP {e.code}"
-    except urllib.error.URLError as e:
-        reason = str(e.reason).lower()
-        if "refused" in reason:
-            return False, "proxy refused"
-        if "timed out" in reason or "timeout" in reason:
-            return False, "proxy timeout"
-        return False, str(e.reason)[:60]
-    except Exception as e:
-        return False, str(e)[:80]
-
-
-def _canary_check(location: str) -> tuple[bool, str]:
-    """Lightweight model canary — one probe per credential class.
-
-    Tests upstream API key validity and provider reachability by sending
-    a max_tokens=1 request to the cheapest model in each routing class.
-    Only called once at pipeline startup, not on the 60s poll.
-
-    Bypasses _build_kwargs() to avoid producing "untagged" Langfuse entries.
-    """
-    import json
-    import os
-    import urllib.error
-    import urllib.request
-
-    from imas_codex.settings import get_llm_proxy_url
-
-    proxy_url = get_llm_proxy_url()
-    api_key = os.getenv("LITELLM_API_KEY") or os.getenv("LITELLM_MASTER_KEY", "")
-
-    # One cheap model per credential/routing class
-    canary_models = [
-        ("codex", "openrouter/google/gemini-3.8-flash"),
-        ("codex-anthropic", "openrouter/anthropic/claude-haiku-5.5"),
-    ]
-
-    results: list[tuple[str, bool, str]] = []
-    for class_name, model_id in canary_models:
-        try:
-            payload = json.dumps(
-                {
-                    "model": model_id,
-                    "messages": [{"role": "user", "content": "ping"}],
-                    "max_tokens": 1,
-                }
-            ).encode()
-            req = urllib.request.Request(
-                f"{proxy_url}/v1/chat/completions",
-                data=payload,
-                headers={
-                    "Content-Type": "application/json",
-                    "Authorization": f"Bearer {api_key}",
-                },
-            )
-            with urllib.request.urlopen(req, timeout=15) as resp:
-                if resp.status == 200:
-                    results.append((class_name, True, "ok"))
-                else:
-                    results.append((class_name, False, f"HTTP {resp.status}"))
-        except urllib.error.HTTPError as e:
-            results.append((class_name, False, f"HTTP {e.code}"))
-        except Exception as e:
-            results.append((class_name, False, str(e)[:60]))
-
-    failed = [(name, detail) for name, ok, detail in results if not ok]
-    if not failed:
-        return True, f"canary OK ({len(results)} classes)"
-    fail_details = ", ".join(f"{name}: {detail}" for name, detail in failed)
-    return False, f"canary failed: {fail_details}"
-
-
-def _classify_unhealthy_reason(data: dict) -> str | None:
-    """Extract a human-readable reason from proxy ``/health`` unhealthy endpoints.
-
-    Checks ``unhealthy_endpoints`` for common error patterns (budget exhaustion,
-    rate limiting, auth errors) and returns a concise label. Returns None if
-    no specific reason can be identified.
-    """
-    unhealthy = data.get("unhealthy_endpoints") or []
-    if not unhealthy:
-        return None
-
-    # Collect error messages from unhealthy endpoints
-    errors = []
-    for ep in unhealthy:
-        error = ""
-        if isinstance(ep, dict):
-            error = str(ep.get("error", "") or ep.get("error_message", "")).lower()
-        elif isinstance(ep, str):
-            error = ep.lower()
-        if error:
-            errors.append(error)
-
-    if not errors:
-        return None
-
-    # Check for budget/credit exhaustion (most actionable)
-    budget_keywords = ("402", "credit", "budget", "quota", "payment required", "afford")
-    if any(kw in err for err in errors for kw in budget_keywords):
-        return "no credit"
-
-    # Rate limiting
-    if any("429" in err or "rate limit" in err for err in errors):
-        return "rate limited"
-
-    # Auth errors
-    if any("401" in err or "auth" in err or "api_key" in err for err in errors):
-        return "auth error"
-
-    return None
-
-
-def _probe_litellm_local(section: str) -> tuple[bool, str]:
-    """Probe a local LLM via a minimal completion call."""
-    try:
-        from imas_codex.settings import get_model
-
-        model = get_model(section)
-
-        from imas_codex.discovery.base.llm import set_litellm_offline_env
-
-        set_litellm_offline_env()
-        import litellm
-
-        litellm.drop_params = False
-        response = litellm.completion(
-            model=model,
-            messages=[{"role": "user", "content": "ping"}],
-            max_tokens=1,
-            temperature=0,
-            timeout=30,
-        )
-        if response and response.choices:
-            return True, "local"
-        return False, "no response"
-    except Exception as e:
-        err = str(e).lower()
-        if "402" in err or "insufficient" in err or "budget" in err:
-            return False, "no credit (402)"
-        if "401" in err or "invalid api key" in err or "authentication" in err:
-            return False, "auth error (401)"
-        if "429" in err or "rate limit" in err:
-            return False, "rate limited (429)"
-        return False, str(e)[:80]
 
 
 # =============================================================================
@@ -1135,7 +815,7 @@ def create_service_monitor(
 
     - ``graph``: Neo4j connectivity
     - ``embed``: Embedding server health
-    - ``llm``: LLM service health (LiteLLM proxy)
+    - ``llm``: the model seat's endpoint health
     - ``ssh``: SSH connectivity to remote host (critical — workers pause)
     - ``auth``: Wiki page reachability via HTTP (critical — workers pause)
 

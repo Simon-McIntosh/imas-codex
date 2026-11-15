@@ -82,7 +82,6 @@ def test_predicate_false_for_litellm_routed_models(model):
 def test_local_model_reaches_synchronous_local_client(monkeypatch):
     """call_llm_structured sends a local model to the sync local client."""
     _register_local_endpoint(monkeypatch)
-    monkeypatch.setenv("LITELLM_PROXY_URL", "http://proxy.example.test/v1")
 
     clients: list[tuple[str, str | None]] = []
     received: dict[str, Any] = {}

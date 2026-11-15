@@ -9,16 +9,10 @@ Usage:
   imas-codex host iter --set-default 3
                                        Set iter SSH target to 3rd node
   imas-codex host iter --set-default   Auto-select least loaded node
-  imas-codex host iter --set-default 4 --set-llm 5
-                                       Default to node 4, pin LLM proxy to node 5
-  imas-codex host iter --set-llm 5     Pin LLM to node 5 without changing default
 
 Login nodes are discovered dynamically from /etc/hosts on the facility
 gateway — no individual node configuration needed.
 
-By default the ``{facility}-llm`` SSH alias follows ``--set-default``,
-so the LLM proxy moves with you when switching nodes.  Use
-``--set-llm <node>`` to pin the LLM proxy to a specific node instead.
 """
 
 from __future__ import annotations
@@ -92,7 +86,6 @@ def _get_load_info() -> dict:
 _CODEX_PATTERNS = [
     "imas-codex",
     "imas_codex",
-    "litellm",
     "neo4j",
     "sentence-transformers",
     "uvicorn.*embed",
@@ -688,15 +681,6 @@ def _build_survey_display(
                 f"  SSH target:   {facility} → [cyan]{current_target}[/cyan]"
             )
         )
-
-    # Show LLM alias if configured
-    llm_alias = f"{facility}-llm"
-    llm_target = _get_ssh_hostname(llm_alias)
-    if llm_target:
-        parts.append(
-            Text.from_markup(f"  LLM target:   {llm_alias} → [cyan]{llm_target}[/cyan]")
-        )
-
     return parts, best_node, best_load
 
 
@@ -903,7 +887,7 @@ def _migrate_from_node(
 
     Called automatically when ``--set-default`` switches to a different
     node.  Uses a single SSH call to:
-    1. Send SIGINT to imas-codex/litellm processes (graceful shutdown)
+    1. Send SIGINT to imas-codex processes (graceful shutdown)
     2. SIGTERM stragglers after a grace period
     3. Delete zellij sessions AND kill orphaned server daemons
     4. Detect lingering VS Code server sessions that could re-spawn
@@ -1063,49 +1047,6 @@ def _resolve_node_fqdn(spec: str, sorted_nodes: list[str], results: dict) -> str
         return candidate
 
 
-def _handle_llm_alias(
-    facility: str,
-    llm_fqdn: str,
-    results: dict,
-) -> None:
-    """Create or update the {facility}-llm SSH alias.
-
-    Args:
-        facility: Facility name (e.g. "iter").
-        llm_fqdn: Fully-qualified domain name for the LLM node.
-        results: Survey results dict (for reachability check).
-    """
-    llm_alias = f"{facility}-llm"
-
-    llm_short = llm_fqdn.split(".")[0]
-    if llm_short in results and results[llm_short] is None:
-        raise click.ClickException(
-            f"Node '{llm_short}' is unreachable — refusing "
-            f"to set as LLM host. Pick a reachable node."
-        )
-
-    existing = _get_ssh_hostname(llm_alias)
-    if existing == llm_fqdn:
-        click.echo(
-            click.style("  · ", fg="dim")
-            + f"LLM already set: {llm_alias} → "
-            + click.style(existing, fg="cyan")
-        )
-        return
-
-    if _ensure_ssh_alias(llm_alias, facility, llm_fqdn):
-        click.echo(
-            click.style("  ✓ ", fg="green")
-            + f"LLM host: {llm_alias} → "
-            + click.style(llm_fqdn, fg="cyan", bold=True)
-        )
-    else:
-        raise click.ClickException(
-            f"Could not create SSH alias '{llm_alias}'. "
-            f"Ensure a 'Host {facility}' block exists in ~/.ssh/config"
-        )
-
-
 # ── CLI ──────────────────────────────────────────────────────────────────
 
 
@@ -1139,8 +1080,6 @@ def host(ctx: click.Context) -> None:
       imas-codex host                    Local node load + processes
       imas-codex host iter               Survey ITER login nodes
       imas-codex host iter --set-default 3
-      imas-codex host iter --set-default 4 --set-llm 5
-      imas-codex host iter --set-llm 5   Pin LLM to specific node
       imas-codex host status             SSH connectivity check
       imas-codex host add <name>         Add SSH host entry
     """
@@ -1170,22 +1109,11 @@ def host(ctx: click.Context) -> None:
         "to auto-select least loaded"
     ),
 )
-@click.option(
-    "--set-llm",
-    "llm_node",
-    default=None,
-    help=(
-        "Pin LLM proxy to a specific node (index or hostname), "
-        "decoupling it from the default SSH target. "
-        "Without this flag, the LLM alias follows --set-default."
-    ),
-)
 def host_survey(
     facility: str,
     timeout: int,
     watch: bool,
     set_default: str | None,
-    llm_node: str | None,
 ) -> None:
     """Survey login nodes on a facility with load and process info.
 
@@ -1194,22 +1122,14 @@ def host_survey(
     per node.
 
     Use --set-default to update ~/.ssh/config to target a specific
-    login node for all future SSH/cx connections.  The {facility}-llm
-    alias follows automatically so the LLM proxy moves with you.
-
-    Use --set-llm to pin the LLM proxy to a different node, decoupled
-    from the default SSH target.  Useful when you want the proxy on a
-    less-loaded node.
+    login node for all future SSH/cx connections.
 
     \b
     Examples:
         imas-codex host iter                    # Survey ITER login nodes
         imas-codex host iter --watch            # Continuous monitoring
-        imas-codex host iter --set-default 3    # Pick node #3, LLM follows
-        imas-codex host iter --set-default      # Auto-pick, LLM follows
-        imas-codex host iter --set-default 4 --set-llm 5
-                                                # Default to #4, LLM on #5
-        imas-codex host iter --set-llm 5        # Pin LLM without changing default
+        imas-codex host iter --set-default 3    # Pick node #3
+        imas-codex host iter --set-default      # Auto-pick
     """
     from imas_codex.discovery.base.facility import get_facility
 
@@ -1355,11 +1275,7 @@ def host_survey(
 
                 # Kill ControlMaster sockets BEFORE config update so
                 # ssh -O exit resolves to the old (current) HostName.
-                sockets_to_kill = [facility]
-                llm_alias = f"{facility}-llm"
-                if _get_ssh_hostname(llm_alias) is not None:
-                    sockets_to_kill.append(llm_alias)
-                _kill_control_sockets(*sockets_to_kill)
+                _kill_control_sockets(facility)
 
                 if not _set_ssh_hostname(facility, target_fqdn):
                     raise click.ClickException(
@@ -1385,22 +1301,6 @@ def host_survey(
                         + ")"
                     )
 
-        # LLM alias: --set-llm pins to explicit node, otherwise follows default
-        if llm_node is not None:
-            llm_fqdn = _resolve_node_fqdn(llm_node, sorted_nodes, results)
-            _handle_llm_alias(facility, llm_fqdn, results)
-        elif target_fqdn:
-            # No --set-llm: LLM travels with the new default
-            _handle_llm_alias(facility, target_fqdn, results)
-
-        return
-
-    if llm_node is not None:
-        # --set-llm used without --set-default
-        results, nodes = _discover_and_survey()
-        sorted_nodes = sorted(results)
-        llm_fqdn = _resolve_node_fqdn(llm_node, sorted_nodes, results)
-        _handle_llm_alias(facility, llm_fqdn, results)
         return
 
     if watch:
@@ -1623,7 +1523,6 @@ def host_kill(
     Examples:
         imas-codex host kill iter                        # Preview all
         imas-codex host kill iter -y                     # Kill all
-        imas-codex host kill iter -i litellm -y          # Kill litellm
         imas-codex host kill iter -e "neo4j|serve" -y    # Kill all except
         imas-codex host kill iter -n 2 -y                # Kill on node #2
         imas-codex host kill iter -i discover -s KILL    # SIGKILL discover

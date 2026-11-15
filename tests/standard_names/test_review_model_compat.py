@@ -23,13 +23,7 @@ def _make_build_kwargs(model: str, temperature: float | None) -> dict:
     from imas_codex.discovery.base.llm import _build_kwargs
 
     messages = [{"role": "user", "content": "hello"}]
-    # get_llm_location is imported lazily inside _build_kwargs from settings
     with (
-        patch("imas_codex.settings.get_llm_location", return_value="local"),
-        patch(
-            "imas_codex.settings.get_llm_proxy_url",
-            return_value="http://localhost:18400",
-        ),
         patch(
             "imas_codex.discovery.base.llm.get_api_key_for_service",
             return_value="sk-test",

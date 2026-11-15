@@ -26,7 +26,7 @@ All model and tool settings live in `pyproject.toml` under `[tool.imas-codex]`. 
 | `[discovery]` | Discovery threshold for high-value processing | `get_discovery_threshold()` |
 | `[data-dictionary]` | DD version, include-ggd, include-error-fields | `get_dd_version()` |
 | `[dd-enrichment]` | DD enrichment worker concurrency and batching | `get_model("dd-enrichment")` |
-| `[llm]` | LLM proxy URL, timeouts, retry policy | — |
+| `[llm]` | Provider pricing, heartbeat cadence and retry policy | — |
 | `[sn]` | Standard names paths (staging-dir, isnc-dir), retry knobs | — |
 | `[sn-compose]` | SN name composition model, batch sizes, max-concurrency | `get_model("sn-compose")` |
 | `[sn-docs]` | SN documentation generation model | `get_model("sn-docs")` |

@@ -1490,8 +1490,8 @@ def build_servers_section(
             elif "connection refused" in detail or "refused" in detail:
                 label = "down"
                 style = "red"
-            elif "proxy" in detail or "502" in detail or "503" in detail:
-                label = "proxy down"
+            elif "502" in detail or "503" in detail:
+                label = "endpoint down"
                 style = "red"
             else:
                 # Short reasons from health checks pass through verbatim
@@ -1871,7 +1871,6 @@ class BaseProgressDisplay(ABC):
     _NOISY_LOGGERS: tuple[str, ...] = (
         "litellm",
         "LiteLLM",
-        "LiteLLM Proxy",
         "LiteLLM Router",
         "openai",
         "httpx",

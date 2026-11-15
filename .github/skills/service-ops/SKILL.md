@@ -1,6 +1,6 @@
 ---
 name: service-ops
-description: How to manage imas-codex services (Neo4j graph, embedding server, LLM proxy, SSH tunnels). Use when starting, stopping, checking status, or troubleshooting services.
+description: How to manage imas-codex services (Neo4j graph, embedding server, model endpoints, SSH tunnels). Use when starting, stopping, checking status, or troubleshooting services.
 ---
 
 # Service Operations
@@ -64,21 +64,23 @@ uv run imas-codex embed service install  # Install systemd service
 | Embedding calls timeout | Check tunnel: `lsof -i :18765` |
 | Rapid FAILED jobs | Check `imas-codex embed logs`; report a missing or stale node/root environment instead of rebuilding it |
 
-## LLM Proxy (LiteLLM)
+## Language-model endpoints
 
-```bash
-uv run imas-codex llm start           # Start LiteLLM proxy
-uv run imas-codex llm stop            # Stop
-uv run imas-codex llm restart         # Restart
-uv run imas-codex llm status          # Check status
-uv run imas-codex llm spend           # Cost tracking
-uv run imas-codex llm logs            # View logs
-```
+Seats resolve directly to the local model router, OpenRouter chat completions,
+or the provider decisions endpoint. `get_model_config()` resolves each seat's
+model, endpoint and credential name; an unrecognised route raises an error
+naming the seat. The `litellm` dependency is the client for provider requests.
 
-`sn generate` and `sn benchmark` require the LLM proxy to be running. Model names must use the
-`openrouter/` prefix (e.g. `openrouter/anthropic/claude-sonnet-4-5`) to preserve
-`cache_control` blocks — prompt caching is handled provider-side by OpenRouter, not by this
-codebase.
+Local seats use the configured `api-base` or named `model-route` and the key
+named by `api-key-env`. Provider calls use `OPENROUTER_API_KEY_<SERVICE>`,
+falling back to `OPENROUTER_API_KEY_IMAS_CODEX`. Keep the `openrouter/` model
+prefix for client prompt caching and response-cost accounting.
+
+Discovery checks the local router's models listing or the provider's key-info
+endpoint without generating tokens. Chat and decisions routes sharing a
+provider origin and service key share one probe per poll. These checks verify
+reachability and authentication; opt-in live seat tests verify an actual reply
+and can incur charges. The router's hosting service owns its lifecycle.
 
 ## SSH Tunnels
 

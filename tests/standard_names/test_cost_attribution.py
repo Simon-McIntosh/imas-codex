@@ -415,21 +415,9 @@ class TestCostSchemaFields:
 
 
 class TestDropParamsConfig:
-    """Verify LiteLLM config has drop_params: false."""
+    """The client must preserve optional request fields."""
 
-    def test_litellm_config_drop_params_false(self):
-        """litellm_config.yaml must have drop_params: false."""
-        import pathlib
+    def test_client_drop_params_false(self):
+        import litellm
 
-        import yaml
-
-        config_path = (
-            pathlib.Path(__file__).resolve().parents[2]
-            / "imas_codex"
-            / "config"
-            / "litellm_config.yaml"
-        )
-        with open(config_path) as f:
-            config = yaml.safe_load(f)
-
-        assert config["litellm_settings"]["drop_params"] is False
+        assert litellm.drop_params is False

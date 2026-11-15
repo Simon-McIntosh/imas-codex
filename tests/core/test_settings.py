@@ -93,13 +93,8 @@ class TestSettingsFunctions:
     def test_openrouter_prefix_present(self, monkeypatch, section):
         """OpenRouter-billed sections must carry the 'openrouter/' prefix.
 
-        Without it, calls silently route through the LiteLLM proxy, which
-        strips cache_control breakpoints (~80% cache discount lost) and
-        zeroes response_cost (cost telemetry broken). Regression guard.
-
-        Derived from ``_MODEL_ENV_VARS`` (minus the local-model sections) so
-        the guard auto-covers new sections and cannot rot — the previous
-        static list silently referenced a non-existent ``sn-enrich`` section.
+        Derived from ``_MODEL_ENV_VARS`` minus local and decisions seats,
+        so every provider-billed seat selects the client's OpenRouter adapter.
         """
         settings._load_pyproject_settings.cache_clear()
         env_var = settings._MODEL_ENV_VARS[section]
@@ -108,7 +103,7 @@ class TestSettingsFunctions:
         result = settings.get_model(section)
         assert result.startswith("openrouter/"), (
             f"[{section}] model='{result}' missing openrouter/ prefix — "
-            "this re-enables proxy routing which strips cache_control."
+            "the seat must explicitly select its provider route."
         )
 
     def test_get_labeling_batch_size_default(self, monkeypatch):
@@ -194,13 +189,6 @@ class TestModuleLevelConstants:
         assert isinstance(settings.INCLUDE_GGD, bool)
         assert isinstance(settings.INCLUDE_ERROR_FIELDS, bool)
         assert isinstance(settings.EMBEDDING_DIMENSION, int)
-
-
-def test_free_local_endpoint_requires_explicit_trusted_classification():
-    assert settings.is_explicit_free_local_endpoint("local/deepseek-v4.1-flash")
-    assert not settings.is_explicit_free_local_endpoint(
-        "openrouter/openai/gpt-5.6-luna"
-    )
 
 
 def test_checked_in_pricing_zeroes_uncharged_dimensions_and_stays_inactive():
@@ -359,8 +347,10 @@ class TestDiscoveryFunctionSeats:
         """A seat's model is overridable through its environment variable."""
         settings._load_pyproject_settings.cache_clear()
 
-        monkeypatch.setenv("IMAS_CODEX_DISCOVERY_SCORE_MODEL", "test-score-model")
-        assert settings.get_model("discovery-score") == "test-score-model"
+        monkeypatch.setenv(
+            "IMAS_CODEX_DISCOVERY_SCORE_MODEL", "openrouter/test/score-model"
+        )
+        assert settings.get_model("discovery-score") == "openrouter/test/score-model"
 
     def test_standard_name_judge_seat_resolves_the_pinned_jev_model(self):
         """The standard-name judge seat resolves its configured model.
@@ -393,7 +383,6 @@ class TestDiscoveryFunctionSeats:
             assert endpoint is not None, f"{seat} registered no endpoint"
             assert endpoint["api_base"] == route_api_base
             assert endpoint["endpoint_class"] == "local-free"
-            assert settings.is_explicit_free_local_endpoint(model)
 
     def test_provider_override_leaves_the_local_route(self, monkeypatch):
         """A seat moved to another provider drops its local route, key and class.
@@ -418,7 +407,6 @@ class TestDiscoveryFunctionSeats:
 
         settings.register_model_endpoints()
         assert settings.get_model_endpoint(moved) is None
-        assert not settings.is_explicit_free_local_endpoint(moved)
 
         source = settings.resolve_model_source("section:ids-mapping")
         assert source.api_base is None
@@ -573,22 +561,8 @@ class TestIdsMappingReasoningEffortForwarding:
         assert captured["reasoning_effort"] == "high"
 
 
-def test_no_gpt5_name_survives_in_the_fallback_slate_or_proxy_routes():
-    """The newest model of each OpenAI tier is the only one a fallback names.
-
-    A stale ``gpt-5.x`` entry in a bench slate or a proxy route is invisible
-    until a benchmark or a proxied call silently runs an older tier, so the
-    slates and the route table are asserted together here. ``gpt-6.1-terra``
-    is asserted priced as well: a slate entry with no checked-in rate bills
-    zero and would read as free.
-    """
-    from pathlib import Path
-
-    import yaml
-
-    # The module constants, not the accessors: an accessor can be steered by
-    # an environment override, and this assertion is about the fallback the
-    # code ships with. The route table is read from the packaged YAML.
+def test_fallback_slate_names_current_priced_models():
+    """Benchmark defaults contain only the configured OpenAI tiers."""
     defaults = settings._SN_BENCHMARK_DEFAULTS
     slate = [
         *defaults["compose-models"],
@@ -596,21 +570,8 @@ def test_no_gpt5_name_survives_in_the_fallback_slate_or_proxy_routes():
         defaults["reviewer-model"],
         *defaults["reviewer-models"],
     ]
-    routes_path = Path(settings.__file__).parent / "config" / "litellm_config.yaml"
-    routes_config = yaml.safe_load(routes_path.read_text())
-    routes = [
-        entry["model_name"]
-        for entry in routes_config.get("model_list", [])
-        if str(entry.get("model_name", "")).startswith("openrouter/openai/")
-    ]
-
-    stale = [
-        name for name in slate + routes if name.split("/")[-1].startswith("gpt-5.")
-    ]
-    assert stale == [], f"a gpt-5.x name survives: {stale}"
+    assert not any(name.split("/")[-1].startswith("gpt-5.") for name in slate)
     assert any("gpt-6.1-terra" in name for name in slate)
-    assert any("gpt-6.1-terra" in name for name in routes)
-
     terra = settings.get_openrouter_pricing("openrouter/openai/gpt-6.1-terra")
     assert terra["prompt"] > 0
     assert terra["completion"] > 0

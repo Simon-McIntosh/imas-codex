@@ -46,18 +46,19 @@ For path access (e.g., in tests), import `PROMPTS_DIR` from the same module — 
 - Pydantic schema injection via `get_pydantic_schema_json()` — never hardcode JSON examples in prompts
 - Each prompt declares `schema_needs` in frontmatter to load only required schema context
 
-### Routing: Direct vs Proxy
+### Model routing
 
-`call_llm_structured()` chooses between two paths automatically. Understanding both is critical because they have different cost-tracking and caching behavior.
+Model seats resolve to one of three routes: the configured local model router,
+OpenRouter chat completions directly, or the provider decisions endpoint directly.
+`get_model_config()` resolves a seat's endpoint and credentials; an unrecognised
+model identifier raises an error naming the seat. OpenRouter identifiers carry
+the `openrouter/` prefix so the client preserves prompt caching and response cost.
+The `litellm` dependency remains the client for direct provider requests.
 
-| Path | Trigger | Cost tracking | Prompt caching | Use for |
-|------|---------|---------------|----------------|---------|
-| **Direct (bypass)** | `supports_cache(model)` AND `OPENROUTER_API_KEY_IMAS_CODEX` set | ✅ `response_cost` populated | ✅ `cache_control` preserved | All cache-capable models on the codex billing account |
-| **Proxy** | Otherwise (no IMAS_CODEX key, or non-caching model) | ❌ `response_cost = 0` | ❌ `cache_control` stripped | Air-gapped clusters, models without caching, dev environments |
-
-Keep `OPENROUTER_API_KEY_IMAS_CODEX` set and use `openrouter/anthropic/<model>` (or unprefixed — `ensure_model_prefix()` normalizes) to get cost tracking + caching for free (empirically ~87% cheaper on a warm cache). Bypass logic in `imas_codex/discovery/base/llm.py`.
-
-**Anti-pattern: do not invent `cc:*` model strings.** A `cc:opus` / `cc:sonnet` / `cc:haiku` proxy alias exists in `litellm_config.yaml` for billing isolation to a separate OpenRouter account, but it routes via the **proxy path** which silently breaks both `response_cost` and `cache_control`. If you need spend isolation, add a per-service env var (`OPENROUTER_API_KEY_<SERVICE>`) and let the direct path handle routing — it preserves cost + cache.
+Use `OPENROUTER_API_KEY_<SERVICE>` for spend isolation, falling back to
+`OPENROUTER_API_KEY_IMAS_CODEX`. Local seats use the credential named by their
+`api-key-env` setting. Health monitoring checks the local router's models listing
+or the provider's key-info endpoint without generating model tokens.
 
 ### Service Tagging
 

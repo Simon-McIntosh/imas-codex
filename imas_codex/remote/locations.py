@@ -2,7 +2,7 @@
 
 Maps pyproject.toml location strings (``"iter"``, ``"titan"``, ``"local"``)
 to resolved service endpoints. This is the single source of truth for how
-to reach any remote service (Neo4j, embedding, LLM proxy).
+to reach any remote service (Neo4j and embedding).
 
 A location can be:
 

@@ -16,7 +16,6 @@ Usage::
     imas-codex tunnel start [HOST]           # All services
     imas-codex tunnel start [HOST] --neo4j   # Just graph ports
     imas-codex tunnel start [HOST] --embed   # Just embed port
-    imas-codex tunnel start [HOST] --llm     # Just LLM proxy port
     imas-codex tunnel start [HOST] --docs    # Just docs-server port
     imas-codex tunnel start [HOST] --clive   # Just the local model lane
     imas-codex tunnel stop [HOST]
@@ -273,7 +272,6 @@ def _get_tunnel_ports(
     host: str,
     neo4j: bool,
     embed: bool,
-    llm: bool = False,
     vllm: bool = False,
     docs: bool = False,
     ink: bool = False,
@@ -298,7 +296,6 @@ def _get_tunnel_ports(
     all_services = (
         not neo4j
         and not embed
-        and not llm
         and not vllm
         and not docs
         and not ink
@@ -312,9 +309,9 @@ def _get_tunnel_ports(
     try:
         from imas_codex.graph.profiles import get_graph_location
         from imas_codex.remote.locations import resolve_location
-        from imas_codex.settings import get_embedding_location, get_llm_location
+        from imas_codex.settings import get_embedding_location
 
-        locations = [get_graph_location(), get_embedding_location(), get_llm_location()]
+        locations = [get_graph_location(), get_embedding_location()]
         if any(resolve_location(loc).scheduler == "slurm" for loc in locations):
             compute_node = _discover_compute_node(host)
             if compute_node and emit_status:
@@ -379,13 +376,6 @@ def _get_tunnel_ports(
         remote_bind = compute_node or "127.0.0.1"
         # Embed uses same-port forwarding (no offset)
         ports.append((embed_port, embed_port, "embed", remote_bind, "L"))
-
-    if llm or all_services:
-        from imas_codex.settings import get_llm_proxy_port
-
-        llm_port = get_llm_proxy_port()
-        # LLM proxy runs on login node (needs outbound internet)
-        ports.append((llm_port, llm_port, "llm", "127.0.0.1", "L"))
 
     if vllm or all_services:
         from imas_codex.settings import get_vllm_port
@@ -468,7 +458,6 @@ def _service_file(host: str) -> Path:
 def _requested_services(
     neo4j_only: bool,
     embed_only: bool,
-    llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
@@ -478,7 +467,6 @@ def _requested_services(
     if (
         not neo4j_only
         and not embed_only
-        and not llm_only
         and not vllm_only
         and not docs_only
         and not ink_only
@@ -488,7 +476,6 @@ def _requested_services(
         return {
             "neo4j",
             "embed",
-            "llm",
             "vllm",
             "docs",
             "ink",
@@ -501,8 +488,6 @@ def _requested_services(
         selected.add("neo4j")
     if embed_only:
         selected.add("embed")
-    if llm_only:
-        selected.add("llm")
     if vllm_only:
         selected.add("vllm")
     if docs_only:
@@ -528,7 +513,7 @@ SERVICE_MANIFEST_PREFIX = "# tunnel-services: "
 # existed. New services added after this list ship MUST trigger a service
 # reinstall — they are intentionally absent from this frozen fallback so
 # `_installed_service_supports_request` returns False for them.
-_LEGACY_SERVICE_SET: frozenset[str] = frozenset({"neo4j", "embed", "llm", "vllm"})
+_LEGACY_SERVICE_SET: frozenset[str] = frozenset({"neo4j", "embed", "vllm"})
 
 
 def _service_selected_services(service_text: str) -> set[str]:
@@ -545,7 +530,6 @@ def _service_selected_services(service_text: str) -> set[str]:
         for flag, service in (
             ("--neo4j", "neo4j"),
             ("--embed", "embed"),
-            ("--llm", "llm"),
             ("--vllm", "vllm"),
             ("--docs", "docs"),
             ("--ink", "ink"),
@@ -560,7 +544,6 @@ def _installed_service_supports_request(
     host: str,
     neo4j_only: bool,
     embed_only: bool,
-    llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
@@ -577,7 +560,6 @@ def _installed_service_supports_request(
     requested = _requested_services(
         neo4j_only,
         embed_only,
-        llm_only,
         vllm_only,
         docs_only,
         ink_only,
@@ -963,7 +945,6 @@ def _run_service_supervisor(
     host: str,
     neo4j_only: bool,
     embed_only: bool,
-    llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
@@ -997,7 +978,6 @@ def _run_service_supervisor(
             host,
             neo4j_only,
             embed_only,
-            llm_only,
             vllm_only,
             docs_only,
             ink_only,
@@ -1111,7 +1091,6 @@ def _build_systemd_service_content(
     host: str,
     neo4j_only: bool,
     embed_only: bool,
-    llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
@@ -1128,8 +1107,6 @@ def _build_systemd_service_content(
         flag_args.append("--neo4j")
     if embed_only:
         flag_args.append("--embed")
-    if llm_only:
-        flag_args.append("--llm")
     if vllm_only:
         flag_args.append("--vllm")
     if docs_only:
@@ -1147,7 +1124,6 @@ def _build_systemd_service_content(
     services = _requested_services(
         neo4j_only,
         embed_only,
-        llm_only,
         vllm_only,
         docs_only,
         ink_only,
@@ -1396,7 +1372,6 @@ def tunnel() -> None:
       imas-codex tunnel start [HOST]           Start tunnels (all services)
       imas-codex tunnel start HOST --neo4j     Just graph ports
       imas-codex tunnel start HOST --embed     Just embedding port
-      imas-codex tunnel start HOST --llm       Just LLM proxy port
       imas-codex tunnel start HOST --vllm      Just vLLM inference port
       imas-codex tunnel start HOST --docs      Just docs-server port
       imas-codex tunnel start HOST --ink       Just ink display port
@@ -1416,7 +1391,6 @@ def tunnel() -> None:
 @click.argument("host", required=False)
 @click.option("--neo4j", "neo4j_only", is_flag=True, help="Tunnel Neo4j ports only")
 @click.option("--embed", "embed_only", is_flag=True, help="Tunnel embedding port only")
-@click.option("--llm", "llm_only", is_flag=True, help="Tunnel LLM proxy port only")
 @click.option(
     "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
 )
@@ -1444,7 +1418,6 @@ def tunnel_start(
     host: str | None,
     neo4j_only: bool,
     embed_only: bool,
-    llm_only: bool = False,
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
@@ -1472,7 +1445,6 @@ def tunnel_start(
       imas-codex tunnel start iter             # All services
       imas-codex tunnel start iter --neo4j     # Just graph
       imas-codex tunnel start iter --embed     # Just embedding
-      imas-codex tunnel start iter --llm       # Just LLM proxy
       imas-codex tunnel start iter --vllm      # Just vLLM inference
       imas-codex tunnel start iter --docs      # Just docs-server
       imas-codex tunnel start iter --ink       # Just ink display
@@ -1487,7 +1459,6 @@ def tunnel_start(
             target,
             neo4j_only,
             embed_only,
-            llm_only,
             vllm_only,
             docs_only,
             ink_only,
@@ -1530,7 +1501,6 @@ def tunnel_start(
         target,
         neo4j_only,
         embed_only,
-        llm_only,
         vllm_only,
         docs_only,
         ink_only,
@@ -1620,14 +1590,12 @@ def tunnel_status() -> None:
         get_docs_server_port,
         get_embed_server_port,
         get_ink_display_port,
-        get_llm_proxy_port,
         get_vllm_port,
         get_wsl_clip_port,
         get_wsl_ssh_port,
     )
 
     embed_port = get_embed_server_port()
-    llm_port = get_llm_proxy_port()
     vllm_port = get_vllm_port()
     docs_port = get_docs_server_port()
     ink_port = get_ink_display_port()
@@ -1658,7 +1626,6 @@ def tunnel_status() -> None:
         known_ports[HTTP_BASE_PORT] = "neo4j-http"
         known_ports[HTTP_BASE_PORT + TUNNEL_OFFSET] = "neo4j-http (tunneled)"
     known_ports[embed_port] = "embed"
-    known_ports[llm_port] = "llm"
     known_ports[vllm_port] = "vllm"
     known_ports[docs_port] = "docs"
     known_ports[ink_port] = "ink"
@@ -1676,12 +1643,11 @@ def tunnel_status() -> None:
         for p in known_ports:
             if p >= TUNNEL_OFFSET:
                 port_host[p] = host
-        # Same-port forwards (no TUNNEL_OFFSET offset) — embed, llm, vllm
-        # already land above TUNNEL_OFFSET (e.g. 18765, 18400), but docs
+        # Same-port forwards (no TUNNEL_OFFSET offset) — embed, vllm
+        # already land above TUNNEL_OFFSET (e.g. 18765), but docs
         # and ink live at 8765/8766 by default and would fall through to "(ssh)".
         for p in (
             embed_port,
-            llm_port,
             vllm_port,
             docs_port,
             ink_port,
@@ -1793,7 +1759,6 @@ def tunnel_reclaim(dry_run: bool) -> None:
 @click.argument("host", required=False)
 @click.option("--neo4j", "neo4j_only", is_flag=True, help="Tunnel Neo4j ports only")
 @click.option("--embed", "embed_only", is_flag=True, help="Tunnel embedding port only")
-@click.option("--llm", "llm_only", is_flag=True, help="Tunnel LLM proxy port only")
 @click.option(
     "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
 )
@@ -1826,7 +1791,6 @@ def tunnel_service(
     host: str | None,
     neo4j_only: bool,
     embed_only: bool,
-    llm_only: bool = False,
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
@@ -1837,7 +1801,7 @@ def tunnel_service(
     """Manage persistent SSH tunnels via systemd + autossh.
 
     Installs a systemd user service that maintains reconnecting SSH
-    tunnels to the specified HOST for Neo4j, embedding, LLM, vLLM,
+    tunnels to the specified HOST for Neo4j, embedding, vLLM,
     docs-server, and/or wsl-clip-server clipboard services.
 
     A reverse forward binds only on the login node the connection reached.
@@ -1850,7 +1814,6 @@ def tunnel_service(
       imas-codex tunnel service install iter           # All services
       imas-codex tunnel service install iter --neo4j   # Just graph
       imas-codex tunnel service install iter --embed   # Just embedding
-      imas-codex tunnel service install iter --llm     # Just LLM proxy
       imas-codex tunnel service install iter --vllm    # Just vLLM inference
       imas-codex tunnel service install iter --docs    # Just docs-server
       imas-codex tunnel service install iter --ink     # Just ink display
@@ -1883,7 +1846,6 @@ def tunnel_service(
             target,
             neo4j_only,
             embed_only,
-            llm_only,
             vllm_only,
             docs_only,
             ink_only,
@@ -1898,7 +1860,6 @@ def tunnel_service(
             target,
             neo4j_only,
             embed_only,
-            llm_only,
             vllm_only,
             docs_only,
             ink_only,
@@ -1996,7 +1957,6 @@ def tunnel_service(
 @click.argument("host", required=False)
 @click.option("--neo4j", "neo4j_only", is_flag=True, help="Tunnel Neo4j ports only")
 @click.option("--embed", "embed_only", is_flag=True, help="Tunnel embedding port only")
-@click.option("--llm", "llm_only", is_flag=True, help="Tunnel LLM proxy port only")
 @click.option(
     "--vllm", "vllm_only", is_flag=True, help="Tunnel vLLM inference port only"
 )
@@ -2028,7 +1988,6 @@ def tunnel_service_run(
     host: str | None,
     neo4j_only: bool,
     embed_only: bool,
-    llm_only: bool,
     vllm_only: bool = False,
     docs_only: bool = False,
     ink_only: bool = False,
@@ -2042,7 +2001,6 @@ def tunnel_service_run(
         target,
         neo4j_only,
         embed_only,
-        llm_only,
         vllm_only,
         docs_only,
         ink_only,

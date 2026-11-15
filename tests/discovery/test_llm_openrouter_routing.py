@@ -1,9 +1,4 @@
-"""Tests for proxy bypass logic in _build_kwargs.
-
-When the model supports cache_control (Anthropic/Gemini) and a direct
-OpenRouter API key is available, _build_kwargs should bypass the LiteLLM
-proxy to preserve prompt caching and actual cost reporting.
-"""
+"""Direct OpenRouter routing, service credentials and cache accounting."""
 
 from __future__ import annotations
 
@@ -14,26 +9,15 @@ import pytest
 
 from imas_codex.discovery.base import llm
 
-
-def _make_stub_settings(
-    monkeypatch, location="iter", proxy_url="http://127.0.0.1:18400"
-):
-    """Stub get_llm_location and get_llm_proxy_url (late imports in _build_kwargs)."""
-    monkeypatch.setattr("imas_codex.settings.get_llm_location", lambda: location)
-    monkeypatch.setattr("imas_codex.settings.get_llm_proxy_url", lambda: proxy_url)
-
-
 MESSAGES = [{"role": "user", "content": "test"}]
 
 
-class TestProxyBypass:
-    """Proxy bypass routing logic."""
+class TestOpenRouterRouting:
+    """Direct provider requests preserve cache and cost metadata."""
 
-    def test_proxy_used_when_no_direct_key(self, monkeypatch):
-        """Without OPENROUTER_API_KEY_IMAS_CODEX, always use proxy."""
-        _make_stub_settings(monkeypatch, location="iter")
+    def test_explicit_key_routes_directly(self, monkeypatch):
+        """An explicit provider credential still makes a direct request."""
         monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
-        monkeypatch.setenv("LITELLM_API_KEY", "proxy-key")
 
         kwargs = llm._build_kwargs(
             model="anthropic/claude-sonnet-4.6",
@@ -44,12 +28,12 @@ class TestProxyBypass:
             temperature=None,
             timeout=None,
         )
-        assert kwargs["api_base"] == "http://127.0.0.1:18400"
-        assert kwargs["model"].startswith("openai/")
+        assert "api_base" not in kwargs
+        assert kwargs["model"] == "openrouter/anthropic/claude-sonnet-4.6"
+        assert kwargs["api_key"] == "or-key"
 
-    def test_bypass_for_cache_model_with_direct_key(self, monkeypatch):
-        """With direct key + cache-capable model → bypass proxy."""
-        _make_stub_settings(monkeypatch, location="iter")
+    def test_cache_model_uses_service_credential(self, monkeypatch):
+        """Cache-capable models use the configured provider credential."""
         monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
 
         kwargs = llm._build_kwargs(
@@ -67,13 +51,9 @@ class TestProxyBypass:
         # Should use direct key
         assert kwargs["api_key"] == "direct-or-key"
 
-    def test_bypass_for_non_cache_openrouter_model(self, monkeypatch):
-        """Any OpenRouter-routable model bypasses the proxy when a direct
-        key is set — including non-cache models (eda8d029: bypass keeps
-        response_cost telemetry even without cache_control)."""
-        _make_stub_settings(monkeypatch, location="iter")
+    def test_non_cache_model_uses_service_credential(self, monkeypatch):
+        """Non-cache models use the same direct provider routing."""
         monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
-        monkeypatch.setenv("LITELLM_API_KEY", "proxy-key")
 
         kwargs = llm._build_kwargs(
             model="openai/gpt-5.4",
@@ -84,15 +64,13 @@ class TestProxyBypass:
             temperature=None,
             timeout=None,
         )
-        # Direct to OpenRouter: no proxy api_base, openrouter/ prefix
+        # The provider prefix selects OpenRouter directly.
         assert "api_base" not in kwargs
         assert kwargs["model"] == "openrouter/openai/gpt-5.4"
         assert kwargs["api_key"] == "direct-or-key"
 
-    def test_local_mode_bypasses_proxy(self, monkeypatch):
-        """Local mode (no proxy URL) always goes direct."""
-        _make_stub_settings(monkeypatch, location="local")
-        monkeypatch.delenv("LITELLM_PROXY_URL", raising=False)
+    def test_provider_model_keeps_its_prefix(self, monkeypatch):
+        """Provider model names are normalised for the client library."""
 
         kwargs = llm._build_kwargs(
             model="anthropic/claude-sonnet-4.6",
@@ -108,7 +86,6 @@ class TestProxyBypass:
 
     def test_standard_names_direct_request_carries_provider_rate_cap(self, monkeypatch):
         """Paid SN requests bind OpenRouter routing to the catalog ceiling."""
-        _make_stub_settings(monkeypatch, location="iter")
         monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
 
         kwargs = llm._build_kwargs(
@@ -128,11 +105,9 @@ class TestProxyBypass:
         assert ceiling["request"] == 0.0
         assert ceiling["image"] == 0.0
 
-    def test_standard_names_proxy_route_rejects_before_provider(self, monkeypatch):
+    def test_standard_names_custom_endpoint_rejects_before_provider(self, monkeypatch):
         """A route that cannot carry max_price is rejected before dispatch."""
-        _make_stub_settings(monkeypatch, location="iter")
         monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
-        monkeypatch.setenv("LITELLM_API_KEY", "proxy-key")
 
         with pytest.raises(llm.ProviderPricingUnbounded):
             llm._build_kwargs(
@@ -144,13 +119,13 @@ class TestProxyBypass:
                 temperature=None,
                 timeout=None,
                 service="standard-names",
+                api_base="https://custom.example.test/v1",
             )
 
     def test_separately_billed_reasoning_rejects_before_provider(self, monkeypatch):
         """A cataloged rate outside the text ceiling cannot dispatch."""
         import litellm
 
-        _make_stub_settings(monkeypatch, location="iter")
         monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
         monkeypatch.setattr(
             litellm,
@@ -215,7 +190,6 @@ class TestProxyBypass:
         assert paid_seats
         assert any("openai/" in model for model in paid_seats.values())
         assert any("x-ai/" in model for model in paid_seats.values())
-        _make_stub_settings(monkeypatch, location="iter")
         monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "direct-or-key")
 
         def _catalog_lag(_model):
@@ -249,8 +223,6 @@ class TestCacheControlInjection:
 
     def test_cache_control_injected_for_claude(self, monkeypatch):
         """Claude models get cache_control on system message."""
-        _make_stub_settings(monkeypatch, location="local")
-        monkeypatch.delenv("LITELLM_PROXY_URL", raising=False)
 
         messages = [
             {"role": "system", "content": "You are a physics expert."},
@@ -277,8 +249,6 @@ class TestCacheControlInjection:
 
     def test_no_cache_control_for_gpt(self, monkeypatch):
         """GPT models should NOT get cache_control injected."""
-        _make_stub_settings(monkeypatch, location="local")
-        monkeypatch.delenv("LITELLM_PROXY_URL", raising=False)
 
         messages = [
             {"role": "system", "content": "You are helpful."},

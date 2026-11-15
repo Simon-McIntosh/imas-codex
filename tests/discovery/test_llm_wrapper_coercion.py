@@ -629,6 +629,9 @@ class TestReasoningEffortProviderShape:
             temperature=0.0,
             timeout=None,
             service="test",
+            api_base="http://local.example.test/v1"
+            if model.startswith(("local/", "hosted_vllm/"))
+            else None,
             reasoning_effort="high",
         )
 
@@ -664,6 +667,9 @@ class TestReasoningEffortProviderShape:
             temperature=0.0,
             timeout=None,
             service="test",
+            api_base="http://local.example.test/v1"
+            if model.startswith(("local/", "hosted_vllm/"))
+            else None,
             reasoning_effort=effort,
         )
 

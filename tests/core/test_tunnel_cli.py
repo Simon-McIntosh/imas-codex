@@ -10,12 +10,12 @@ import pytest
 from click.testing import CliRunner
 
 from imas_codex.cli.tunnel import (
-    _clive_local_ports,
-    _clive_ports,
     _LISTENER_GRACE_SECONDS,
     SERVICE_MANIFEST_PREFIX,
     _build_foreground_tunnel_command,
     _build_systemd_service_content,
+    _clive_local_ports,
+    _clive_ports,
     _end_dropped_session,
     _get_tunnel_ports,
     _installed_service_supports_request,
@@ -156,7 +156,6 @@ class TestTunnelServiceHelpers:
                 "iter",
                 neo4j_only=False,
                 embed_only=False,
-                llm_only=False,
             )
 
         assert "tunnel service-run iter" in content
@@ -177,13 +176,11 @@ class TestTunnelServiceHelpers:
                 "iter",
                 neo4j_only=True,
                 embed_only=False,
-                llm_only=False,
             )
             assert _installed_service_supports_request(
                 "iter",
                 neo4j_only=False,
                 embed_only=True,
-                llm_only=False,
             )
 
     def test_installed_service_rejects_missing_service_flags(self, tmp_path):
@@ -197,13 +194,11 @@ class TestTunnelServiceHelpers:
                 "iter",
                 neo4j_only=True,
                 embed_only=False,
-                llm_only=False,
             )
             assert not _installed_service_supports_request(
                 "iter",
                 neo4j_only=False,
                 embed_only=True,
-                llm_only=False,
             )
 
     def test_docs_only_emits_docs_server_port(self):
@@ -211,7 +206,6 @@ class TestTunnelServiceHelpers:
             "iter",
             neo4j=False,
             embed=False,
-            llm=False,
             vllm=False,
             docs=True,
             emit_status=False,
@@ -236,7 +230,6 @@ class TestTunnelServiceHelpers:
                 "iter",
                 neo4j=False,
                 embed=False,
-                llm=False,
                 emit_status=False,
             )
 
@@ -246,7 +239,7 @@ class TestTunnelServiceHelpers:
     def test_installed_service_rejects_docs_when_absent(self, tmp_path):
         service_file = tmp_path / "imas-codex-tunnel-iter.service"
         service_file.write_text(
-            "ExecStart=/usr/bin/uv run --project /repo imas-codex tunnel service-run iter --llm\n"
+            "ExecStart=/usr/bin/uv run --project /repo imas-codex tunnel service-run iter --vllm\n"
         )
 
         with patch("imas_codex.cli.tunnel._service_file", return_value=service_file):
@@ -254,7 +247,6 @@ class TestTunnelServiceHelpers:
                 "iter",
                 neo4j_only=False,
                 embed_only=False,
-                llm_only=False,
                 docs_only=True,
             )
 
@@ -270,19 +262,17 @@ class TestTunnelServiceHelpers:
                 "iter",
                 neo4j_only=False,
                 embed_only=False,
-                llm_only=False,
             )
             # Subset flags → manifest lists only those.
             subset_content = _build_systemd_service_content(
                 "iter",
                 neo4j_only=True,
                 embed_only=False,
-                llm_only=False,
                 docs_only=True,
             )
 
         assert (
-            SERVICE_MANIFEST_PREFIX + "clive docs embed ink llm neo4j vllm wsl-clip"
+            SERVICE_MANIFEST_PREFIX + "clive docs embed ink neo4j vllm wsl-clip"
             in all_content
         )
         assert SERVICE_MANIFEST_PREFIX + "docs neo4j" in subset_content
@@ -311,7 +301,6 @@ class TestTunnelServiceHelpers:
                 "iter",
                 neo4j_only=True,
                 embed_only=False,
-                llm_only=False,
             )
             # Docs is not in the legacy frozen set — must return False so the
             # caller falls through to ad-hoc or prompts a reinstall.
@@ -319,7 +308,6 @@ class TestTunnelServiceHelpers:
                 "iter",
                 neo4j_only=False,
                 embed_only=False,
-                llm_only=False,
                 docs_only=True,
             )
 
@@ -817,7 +805,6 @@ class TestLocalModelLane:
                 "iter",
                 neo4j_only=False,
                 embed_only=False,
-                llm_only=False,
                 clive_only=True,
             )
         assert "--clive" in content
