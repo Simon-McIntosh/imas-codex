@@ -26,7 +26,6 @@ def test_registered_local_endpoint_uses_bare_served_model(monkeypatch):
         },
     )
     monkeypatch.setenv("TEST_LOCAL_API_KEY", "local-key")
-    monkeypatch.setenv("LITELLM_PROXY_URL", "http://proxy.example.test/v1")
 
     request = llm._build_kwargs(
         model=model,
@@ -67,29 +66,22 @@ def test_registered_local_endpoint_uses_bare_served_model(monkeypatch):
     assert received["model"] == served_model
 
 
-def test_unregistered_model_keeps_proxy_routing(monkeypatch):
-    """Models without a registered endpoint continue through the proxy."""
+def test_unregistered_openrouter_model_routes_directly(monkeypatch):
+    """Provider routing does not depend on a custom endpoint registration."""
     from imas_codex import settings
     from imas_codex.discovery.base import llm
 
-    proxy_url = "http://proxy.example.test/v1"
     monkeypatch.setattr(settings, "_MODEL_ENDPOINTS", {})
-    monkeypatch.setattr(settings, "get_llm_location", lambda: "remote")
-    monkeypatch.setattr(settings, "get_llm_proxy_url", lambda: proxy_url)
-    monkeypatch.setenv("LITELLM_PROXY_URL", proxy_url)
-    monkeypatch.setenv("LITELLM_API_KEY", "proxy-key")
     monkeypatch.delenv("OPENROUTER_API_KEY_IMAS_CODEX", raising=False)
-
     request = llm._build_kwargs(
         model="anthropic/claude-sonnet-4.6",
-        api_key="fallback-key",
+        api_key="explicit-key",
         messages=[{"role": "user", "content": "Reply with one word."}],
         response_format=None,
         max_tokens=1,
         temperature=None,
         timeout=10,
     )
-
-    assert request["api_base"] == proxy_url
-    assert request["api_key"] == "proxy-key"
-    assert request["model"] == "openai/openrouter/anthropic/claude-sonnet-4.6"
+    assert "api_base" not in request
+    assert request["api_key"] == "explicit-key"
+    assert request["model"] == "openrouter/anthropic/claude-sonnet-4.6"

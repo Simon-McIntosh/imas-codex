@@ -95,9 +95,7 @@ Add `--transport streamable-http` (containers/HTTP) or `--transport stdio`
 ```bash
 uv run imas-codex graph status          # Graph operations
 uv run imas-codex graph shell           # Interactive Cypher
-uv run imas-codex llm status            # LLM proxy status (lightweight, no API calls)
-uv run imas-codex llm status --deep     # Full model health check (makes real LLM API calls — billable)
 uv run pytest                           # Testing
 ```
 
-Automated health checks (e.g., Azure `/health/readiness`) make no LLM API calls and incur no token cost. Only `imas-codex llm status --deep` exercises the model endpoint and is billable.
+Discovery health checks probe the local model router or provider key-info endpoint without generating model tokens. Model endpoints are configured per seat; their serving lifecycle belongs to the service that hosts them.

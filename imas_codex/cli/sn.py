@@ -157,7 +157,7 @@ def _suppress_console_handlers() -> None:
     """Remove or silence all console StreamHandlers across all loggers.
 
     LiteLLM registers loggers with CamelCase names (``LiteLLM``,
-    ``LiteLLM Proxy``, ``LiteLLM Router``) that leak DEBUG messages
+    ``LiteLLM Router``) that leak DEBUG messages
     to stderr.  A targeted name list can't keep up with third-party
     loggers, so this sweeps **every** registered logger.
     """
@@ -1024,8 +1024,7 @@ def _run_sn_cmd(
     # Build harness config — the SERVERS row mirrors the endpoints this
     # run actually uses: graph, the local embedding server, the local GPU
     # compose endpoint (when [sn-compose].api-base is set), and OpenRouter
-    # (docs / refine / review quorum).  The LiteLLM proxy check is skipped —
-    # SN routes around the proxy.
+    # (docs / refine / review quorum). Each seat uses its own configured route.
     _llm_checks = _sn_llm_service_checks(
         use_rich=use_rich,
         dry_run=dry_run,
@@ -1043,7 +1042,7 @@ def _run_sn_cmd(
         check_embed=not dry_run and not drain_scope_id,
         check_ssh=False,
         check_auth=False,
-        check_model=False,  # proxy check is misleading — SN uses direct bypass
+        check_model=False,  # The seat probes below check each configured route.
         verbose=verbose,
         suppress_loggers=[
             "imas_codex.standard_names",

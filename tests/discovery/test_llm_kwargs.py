@@ -146,8 +146,6 @@ def test_build_kwargs_wraps_pydantic_for_all_models(model_name, monkeypatch):
     from imas_codex.discovery.base import llm
 
     # Stub out settings/proxy lookups
-    monkeypatch.setattr(llm, "get_llm_location", lambda: "local", raising=False)
-    monkeypatch.setattr(llm, "get_llm_proxy_url", lambda: None, raising=False)
 
     kwargs = llm._build_kwargs(
         model=model_name,
@@ -168,9 +166,6 @@ def test_build_kwargs_wraps_pydantic_for_all_models(model_name, monkeypatch):
 def test_build_kwargs_passes_dict_response_format_unchanged(monkeypatch):
     """Non-Pydantic response_format (e.g., raw dict) is passed through."""
     from imas_codex.discovery.base import llm
-
-    monkeypatch.setattr(llm, "get_llm_location", lambda: "local", raising=False)
-    monkeypatch.setattr(llm, "get_llm_proxy_url", lambda: None, raising=False)
 
     raw_format = {"type": "json_object"}
     kwargs = llm._build_kwargs(
@@ -327,8 +322,6 @@ class TestBuildKwargsServiceTag:
     def _build(self, monkeypatch, service="untagged", **overrides):
         from imas_codex.discovery.base import llm
 
-        monkeypatch.setattr(llm, "get_llm_location", lambda: "local", raising=False)
-        monkeypatch.setattr(llm, "get_llm_proxy_url", lambda: None, raising=False)
         # Paid Standard Names routing is admitted only on the direct OpenRouter
         # path, which needs a resolvable credential. Supply a placeholder so
         # header construction is asserted identically whether or not the
@@ -532,8 +525,6 @@ class TestBuildKwargsJsonGuard:
     def _build(self, monkeypatch, **overrides):
         from imas_codex.discovery.base import llm
 
-        monkeypatch.setattr(llm, "get_llm_location", lambda: "local", raising=False)
-        monkeypatch.setattr(llm, "get_llm_proxy_url", lambda: None, raising=False)
         defaults = {
             "model": "openrouter/qwen/qwen3.7-max",
             "api_key": "test-key",

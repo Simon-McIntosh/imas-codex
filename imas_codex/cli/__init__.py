@@ -67,11 +67,6 @@ _COMMANDS: dict[str, tuple[str, str, str]] = {
         "imas",
         "IMAS data dictionary, mappings, and IDS assembly.",
     ),
-    "llm": (
-        "imas_codex.cli.llm_cli",
-        "llm",
-        "Manage LiteLLM proxy server for centralized LLM routing.",
-    ),
     "release": (
         "imas_codex.cli.release",
         "release",
@@ -160,7 +155,6 @@ def main(ctx: click.Context, version: bool) -> None:
       imas-codex serve              Start the MCP server
       imas-codex graph start        Start Neo4j graph database
       imas-codex embed start        Start GPU embedding server
-      imas-codex llm start          Start LiteLLM proxy
       imas-codex tunnel start       Start SSH tunnels
       imas-codex config private     Manage private facility YAML
       imas-codex imas dd build       Build/update IMAS DD graph

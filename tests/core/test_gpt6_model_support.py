@@ -74,8 +74,6 @@ def test_unpriced_model_is_refused_by_call_layer(model, monkeypatch):
     "model", ["openrouter/openai/gpt-6.1-sol", "openrouter/openai/gpt-6-luna"]
 )
 def test_reasoning_model_uses_direct_structured_request(model, monkeypatch):
-    monkeypatch.setattr(settings, "get_llm_location", lambda: "remote")
-    monkeypatch.setattr(settings, "get_llm_proxy_url", lambda: "http://proxy.test/v1")
     monkeypatch.setattr(settings, "get_model_endpoint", lambda _model: None)
     monkeypatch.setenv("OPENROUTER_API_KEY_IMAS_CODEX", "test-direct-key")
     request = llm._build_kwargs(
@@ -102,4 +100,5 @@ def test_current_models_are_available_to_benchmark_defaults():
     candidates = settings._SN_BENCHMARK_DEFAULTS["candidate-models"]
     for bare in ("openai/gpt-6.1-sol", "openai/gpt-6-luna"):
         assert f"openrouter/{bare}" in compose
-        assert f"openrouter/{bare}" in candidates
+    assert candidates == settings._get_section("sn-benchmark")["candidate-models"]
+    assert all(settings.get_openrouter_pricing(model) for model in candidates)

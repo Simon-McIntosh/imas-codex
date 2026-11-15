@@ -286,10 +286,23 @@ def get_model(section: str) -> str:
             f"Unknown model section '{section}'. "
             f"Valid sections: {', '.join(sorted(MODEL_SECTIONS))}"
         )
-    if env_var := _MODEL_ENV_VARS.get(section):
-        if env := os.getenv(env_var):
-            return env
-    return _get_section(section).get("model", _MODEL_DEFAULTS[section])
+    env_var = _MODEL_ENV_VARS.get(section)
+    model = (os.getenv(env_var) if env_var else None) or _get_section(section).get(
+        "model", _MODEL_DEFAULTS[section]
+    )
+    if section != "embedding":
+        _validate_model_identifier(model, section)
+    return model
+
+
+def _validate_model_identifier(model: str, owner: str) -> None:
+    """Refuse a seat whose model does not identify a supported route."""
+    prefixes = ("openrouter/", "typesafe/", "local/", "hosted_vllm/", "ollama/")
+    if not isinstance(model, str) or not any(
+        model.startswith(prefix) and model.removeprefix(prefix).strip()
+        for prefix in prefixes
+    ):
+        raise ValueError(f"Model seat {owner!r} has no recognised route for {model!r}")
 
 
 def _resolve_model_route(config: dict[str, Any], owner: str) -> str | None:
@@ -336,7 +349,7 @@ def get_model_config(section: str) -> dict[str, str | None]:
     endpoint serving the model the section names. When the model environment
     variable names a model from another provider, for example an
     ``openrouter/`` model in place of a ``local/`` one, none of the three
-    applies: the model takes default proxy routing and its own pricing, unless
+    applies: the model takes direct OpenRouter routing and its own pricing, unless
     the API-base variable names an endpoint explicitly. Keeping them would send
     the model to an endpoint that does not serve it, and would book a paid call
     under a free endpoint class.
@@ -356,6 +369,9 @@ def get_model_config(section: str) -> dict[str, str | None]:
     # reads that secret later. This setting itself comes only from pyproject.
     api_key_env = (cfg.get("api-key-env") or None) if serves_model else None
     endpoint_class = (cfg.get("endpoint-class") or None) if serves_model else None
+
+    if model.startswith(_LOCAL_ENDPOINT_PREFIXES) and not api_base:
+        raise ValueError(f"Model seat {section!r} has no endpoint for {model!r}")
 
     return {
         "model": model,
@@ -381,7 +397,7 @@ _MODEL_ENDPOINTS: dict[str, dict[str, str | None]] = {}
 # Model-id prefixes that denote a locally-served endpoint. Only these are
 # safe to bind to a section's ``api-base`` when they appear in a mixed
 # ``models`` LIST — the openrouter/-prefixed entries in the same list must
-# keep default proxy routing.
+# keep direct OpenRouter routing.
 _LOCAL_ENDPOINT_PREFIXES = ("local/", "hosted_vllm/", "ollama/")
 
 
@@ -397,7 +413,7 @@ def register_model_endpoints() -> None:
     2. Any ``[tool.imas-codex.*]`` subsection carrying a ``model-route`` or
        ``api-base`` and a ``models`` list (e.g. review quorums): only the
        locally-served entries (``local/``, ``hosted_vllm/``, ``ollama/``)
-       bind to the endpoint; openrouter/-prefixed entries keep proxy routing.
+       bind to the endpoint; openrouter/-prefixed entries keep direct OpenRouter routing.
     """
     for section in MODEL_SECTIONS:
         try:
@@ -449,7 +465,7 @@ def get_model_endpoint(model: str) -> dict[str, str | None] | None:
     """Look up endpoint overrides for a model identifier.
 
     Returns ``None`` if the model has no per-section endpoint override
-    (i.e. it should use the default OpenRouter/proxy routing).
+    (i.e. it should use the direct OpenRouter routing).
     """
     return _MODEL_ENDPOINTS.get(model)
 
@@ -601,10 +617,11 @@ def resolve_model_source(
         api_base = _resolve_model_route(config, f"[tool.imas-codex.{source_id}]")
         api_key_env = config.get("api-key-env")
         endpoint_class = config.get("endpoint-class")
+    _validate_model_identifier(model, source_id)
     if model.startswith(_LOCAL_ENDPOINT_PREFIXES):
         if not api_base or not api_key_env or endpoint_class != "local-free":
             raise ValueError(
-                f"Local model {model!r} lacks a complete local-free endpoint contract"
+                f"Model seat {source_id!r}: local model {model!r} lacks a complete local-free endpoint contract"
             )
     elif any((api_base, api_key_env, endpoint_class)):
         raise ValueError(
@@ -765,11 +782,6 @@ def get_embed_host() -> str | None:
     return host
 
 
-# ─── LLM proxy settings ────────────────────────────────────────────────────
-
-LLM_BASE_PORT = 18400
-POSTGRES_BASE_PORT = 18450
-
 # ─── vLLM inference server settings ────────────────────────────────────────
 
 VLLM_PORT = 18800
@@ -920,129 +932,6 @@ def get_ink_display_port() -> int:
     if port:
         return int(port)
     return INK_DISPLAY_BASE_PORT
-
-
-def get_llm_proxy_port() -> int:
-    """Get the LLM proxy (LiteLLM) port.
-
-    Follows the same convention as embed/graph ports:
-    ``llm_port = 18400 + facility_offset``.
-
-    Priority: IMAS_CODEX_LLM_PORT env → LITELLM_PORT env → convention offset → 18400.
-    """
-    if env := os.getenv("IMAS_CODEX_LLM_PORT"):
-        return int(env)
-    if env := os.getenv("LITELLM_PORT"):
-        return int(env)
-    location = get_llm_location()
-    if location == "local":
-        return LLM_BASE_PORT
-    from imas_codex.remote.locations import get_port_offset
-
-    return LLM_BASE_PORT + get_port_offset(location)
-
-
-def get_postgres_port() -> int:
-    """Get the PostgreSQL port for LiteLLM's database.
-
-    Follows the same convention as other ports:
-    ``pg_port = 18450 + facility_offset``.
-
-    Priority: IMAS_CODEX_POSTGRES_PORT env → convention offset → 18450.
-    """
-    if env := os.getenv("IMAS_CODEX_POSTGRES_PORT"):
-        return int(env)
-    location = get_llm_location()
-    if location == "local":
-        return POSTGRES_BASE_PORT
-    from imas_codex.remote.locations import get_port_offset
-
-    return POSTGRES_BASE_PORT + get_port_offset(location)
-
-
-def get_llm_proxy_url() -> str:
-    """Get the LLM proxy URL.
-
-    When the proxy runs on a remote facility (``[llm].location`` is set),
-    resolves the login node hostname from facility config so that compute
-    nodes can reach the proxy directly.  Falls back to ``127.0.0.1`` when
-    running locally or when the hostname cannot be resolved.
-
-    Override: LITELLM_PROXY_URL env var.
-    """
-    if env := os.getenv("LITELLM_PROXY_URL"):
-        return env
-    port = get_llm_proxy_port()
-    host = _get_llm_proxy_host()
-    return f"http://{host}:{port}"
-
-
-def _get_llm_proxy_host() -> str:
-    """Resolve the host where the LLM proxy runs.
-
-    The LLM proxy always runs on the default SSH target node (no
-    separate alias).  Off-facility access goes through the SSH tunnel
-    at ``127.0.0.1``.  On-facility resolves to the current machine's
-    hostname.
-    """
-    import socket
-
-    location = get_llm_location()
-    if location == "local":
-        return "127.0.0.1"
-
-    from imas_codex.remote.locations import resolve_location
-
-    info = resolve_location(location)
-
-    # Proxy on SLURM compute node — access via localhost (tunnel or direct)
-    if info.scheduler == "slurm":
-        return "127.0.0.1"
-
-    # If we're NOT on the facility, use 127.0.0.1 (access via SSH tunnel)
-    try:
-        from imas_codex.remote.executor import is_local_host
-
-        if not is_local_host(info.ssh_host):
-            return "127.0.0.1"
-    except Exception:
-        return "127.0.0.1"
-
-    # On-facility: LLM runs on the same node we're on
-    return socket.gethostname().split(".")[0]
-
-
-def get_llm_location() -> str:
-    """Get the LLM proxy location — a facility name or ``"local"``.
-
-    When set to a facility name (e.g. ``"iter"``), the proxy runs on that
-    facility's compute node (reached via SSH tunnel).  ``"local"`` runs
-    the proxy on the current machine.
-
-    Priority: IMAS_CODEX_LLM_LOCATION env → [llm].location → 'local'.
-    """
-    if env := os.getenv("IMAS_CODEX_LLM_LOCATION"):
-        return env.lower()
-    location = _get_section("llm").get("location")
-    return str(location).lower() if location else "local"
-
-
-def get_llm_scheduler() -> str:
-    """Get the LLM proxy job scheduler.
-
-    Derived from the location — compute locations automatically resolve
-    to ``"slurm"``.
-
-    Priority: IMAS_CODEX_LLM_SCHEDULER env → location resolution → "none".
-    """
-    if env := os.getenv("IMAS_CODEX_LLM_SCHEDULER"):
-        return env.lower()
-    location = get_llm_location()
-    if location == "local":
-        return "none"
-    from imas_codex.remote.locations import resolve_location
-
-    return resolve_location(location).scheduler
 
 
 # ─── Discovery settings ─────────────────────────────────────────────────────

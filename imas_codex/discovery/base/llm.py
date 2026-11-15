@@ -517,7 +517,7 @@ class EmptyResponseError(ValueError):
     token budget — only ``finish_reason='length'`` does.
 
     Subclasses ``ValueError`` for backward compatibility with callers that
-    catch the old ``ValueError('LLM returned empty response content')``.
+    catch a ``ValueError`` for empty response content.
 
     The message always contains ``"empty response content"`` so it matches the
     retryable-pattern set.
@@ -902,7 +902,6 @@ def suppress_litellm_noise() -> None:
     # Suppress all litellm logging to ERROR level
     for logger_name in (
         "LiteLLM",
-        "LiteLLM Proxy",
         "LiteLLM Router",
         "httpx",
         "huggingface_hub",
@@ -998,35 +997,6 @@ def ensure_model_prefix(model: str) -> str:
     if not model.startswith("openrouter/"):
         return f"openrouter/{model}"
     return model
-
-
-_PREFIX_WARNED: set[str] = set()
-
-
-def _warn_if_missing_openrouter_prefix(model: str) -> None:
-    """Warn once per model if it lacks ``openrouter/`` and a direct key is set.
-
-    Unprefixed model IDs silently route through the LiteLLM proxy, which
-    strips ``cache_control`` (eliminating prompt-cache discounts of 80%+ on
-    warm calls) and zeroes ``response_cost`` (breaking cost telemetry).
-    Local model prefixes (ollama/, local/, hosted_vllm/, openai/localhost) are
-    intentionally exempt.
-    """
-    if model in _PREFIX_WARNED:
-        return
-    if any(model.startswith(p) for p in _LOCAL_MODEL_PREFIXES):
-        return
-    if model.startswith("openrouter/"):
-        return
-    if not os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"):
-        return
-    _PREFIX_WARNED.add(model)
-    logger.warning(
-        "model=%s missing openrouter/ prefix — cache_control will be "
-        "stripped and response_cost will be 0. Add the prefix in pyproject "
-        "or env override to restore cache discounts and cost telemetry.",
-        model,
-    )
 
 
 # ---------------------------------------------------------------------------
@@ -2069,23 +2039,15 @@ def _build_kwargs(
 ) -> dict[str, Any]:
     """Build litellm completion kwargs with model-aware defaults.
 
-    When *api_base* is provided (from ``get_model_config()``), the call
-    is routed directly to that endpoint — bypassing both the LiteLLM
-    proxy and OpenRouter.  This enables local/self-hosted models.
+    An explicit or registered *api_base* routes directly to a self-hosted
+    endpoint. Other chat models call OpenRouter directly.
 
     When max_tokens or timeout are not explicitly set, uses
     model-family defaults from MODEL_TOKEN_LIMITS.
     """
-    from imas_codex.settings import (
-        get_llm_location,
-        get_llm_proxy_url,
-        get_model_endpoint,
-    )
-
-    _warn_if_missing_openrouter_prefix(model)
+    from imas_codex.settings import get_model_endpoint
 
     limits = get_model_limits(model)
-    bypass_proxy = False
 
     # Auto-resolve endpoint from the model registry if not explicitly passed
     if not api_base:
@@ -2097,7 +2059,7 @@ def _build_kwargs(
 
     # ── Per-section endpoint override (local/self-hosted models) ──────
     if api_base:
-        # Direct call to a custom endpoint — no proxy, no OpenRouter.
+        # The endpoint serves the model under its own identifier.
         effective_key = api_key_override or api_key
         kwargs: dict[str, Any] = {
             "model": model,
@@ -2110,72 +2072,30 @@ def _build_kwargs(
             "messages": messages,
         }
         logger.debug(
-            "Direct endpoint for %s → %s (proxy/OpenRouter bypassed)",
+            "Direct endpoint for %s → %s",
             model,
             api_base,
         )
     else:
-        # ── Standard routing: proxy vs OpenRouter direct ─────────────
-        llm_location = get_llm_location()
-
-        # Inject cache_control for models that support explicit breakpoints.
+        if model.startswith(("local/", "hosted_vllm/")):
+            raise ValueError(f"Local model {model!r} requires a configured endpoint")
         if _supports_cache_control(model):
             messages = inject_cache_control(messages)
-
-        use_proxy = llm_location != "local" or bool(os.getenv("LITELLM_PROXY_URL"))
-        has_direct_key = bool(os.getenv("OPENROUTER_API_KEY_IMAS_CODEX"))
-        is_openrouter_model = "openrouter/" in model.lower() or any(
-            p in model.lower()
-            for p in (
-                "anthropic/",
-                "google/",
-                "openai/",
-                "deepseek/",
-                "meta-llama/",
-                "moonshotai/",
-                "qwen/",
-                "mistralai/",
-            )
-        )
-        bypass_proxy = has_direct_key and is_openrouter_model
-
-        if use_proxy and not bypass_proxy:
-            proxy_url = get_llm_proxy_url()
-            model_id = f"openai/{ensure_model_prefix(model)}"
-            proxy_key = os.getenv("LITELLM_API_KEY") or os.getenv(
-                "LITELLM_MASTER_KEY", api_key
-            )
-            kwargs = {
-                "model": model_id,
-                "api_key": proxy_key,
-                "api_base": proxy_url,
-                "max_tokens": max_tokens
-                if max_tokens is not None
-                else limits["max_tokens"],
-                "timeout": timeout if timeout is not None else limits["timeout"],
-                "messages": messages,
-            }
-        else:
-            model_id = ensure_model_prefix(model)
-            direct_key = get_api_key_for_service(service) if bypass_proxy else api_key
-
-            kwargs = {
-                "model": model_id,
-                "api_key": direct_key,
-                "max_tokens": max_tokens
-                if max_tokens is not None
-                else limits["max_tokens"],
-                "timeout": timeout if timeout is not None else limits["timeout"],
-                "messages": messages,
-            }
-
-            if bypass_proxy:
-                logger.debug(
-                    "Bypassing proxy for %s (cache_control preserved)", model_id
-                )
+        kwargs = {
+            "model": ensure_model_prefix(model),
+            "api_key": get_api_key_for_service(service)
+            if os.getenv("OPENROUTER_API_KEY_IMAS_CODEX")
+            or os.getenv(f"OPENROUTER_API_KEY_{service.upper().replace('-', '_')}")
+            else api_key,
+            "max_tokens": max_tokens
+            if max_tokens is not None
+            else limits["max_tokens"],
+            "timeout": timeout if timeout is not None else limits["timeout"],
+            "messages": messages,
+        }
 
     if service == "standard-names" and not _is_local_model(model):
-        if api_base or not bypass_proxy:
+        if api_base:
             raise ProviderPricingUnbounded(
                 "paid Standard Names calls require direct OpenRouter routing "
                 "with an enforceable max_price"
@@ -2185,8 +2105,7 @@ def _build_kwargs(
 
     if response_format is not None:
         # Always convert Pydantic models to explicit json_schema dicts.
-        # Passing raw Pydantic classes through LiteLLM proxy → OpenRouter
-        # does not reliably enforce structured output for all providers.
+        # Explicit schemas enforce structured output consistently across providers.
         # The explicit schema dict is provider-agnostic; strict=false lets
         # the model use it as guidance while our Pydantic parsing validates.
         if _is_pydantic_model(response_format):
@@ -2195,7 +2114,7 @@ def _build_kwargs(
             kwargs["response_format"] = response_format
         # Dashscope (qwen) rejects response_format unless the prompt mentions
         # "json". Inject a minimal instruction on the FINAL messages — covers
-        # every branch (api_base / proxy / direct) and preserves cache_control.
+        # both endpoint paths and preserves cache_control.
         kwargs["messages"] = _ensure_json_in_messages(kwargs["messages"])
     if temperature is not None:
         # GPT reasoning models reject temperature=0.0; use the provider default.
@@ -2209,8 +2128,6 @@ def _build_kwargs(
         kwargs["seed"] = seed
 
     # Per-service X-Title for OpenRouter dashboard visibility.
-    # Client extra_headers shallow-replaces proxy config extra_headers,
-    # so per-service titles override the proxy fallback "imas-codex".
     kwargs["extra_headers"] = _service_headers(service)
 
     kwargs["metadata"] = {

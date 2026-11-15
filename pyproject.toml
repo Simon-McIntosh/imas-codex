@@ -122,7 +122,6 @@ cpu = [
     "sentence-transformers>=5.0.0",
     "imas-codex[serve]",
 ]
-# LLM proxy runs via `uv tool run litellm[proxy]` — no venv deps needed.
 gpu = [
     "torch==2.5.1",
     "accelerate>=1.0.0",
@@ -177,7 +176,7 @@ dev = [
     "pytest-cov>=6.1.1",
     "pytest-timeout>=2.1.0",
     "xlwt>=1.3.0",
-    # --- Serve (embedding + LLM proxy) ---
+    # --- Embedding server ---
     "fastapi>=0.115.0",
     "uvicorn>=0.31.1",
     # --- Catalog preview (mkdocs-driven via 'standard-names serve') ---
@@ -230,7 +229,6 @@ imas-dd-version = ""
 # Facility locations — list position determines port offsets for all services.
 # Neo4j: bolt = 7687 + index, http = 7474 + index.
 # Embed: server = 18765 + index.
-# LLM proxy: port = 18400 + index.
 # Tunneled connections add +10000 (e.g. iter tunnel → bolt 17687).
 locations = ["iter", "tcv", "jt-60sa", "jet", "west", "mast-u", "asdex-u", "east", "diii-d", "kstar"]
 
@@ -400,9 +398,8 @@ reasoning-effort = "low"
 model = "openrouter/anthropic/claude-sonnet-5.5"
 
 [tool.imas-codex.dd-enrichment]
-# openrouter/ prefix required so direct-path bypass preserves cache_control
-# and response_cost. Without it, calls silently route through the proxy,
-# stripping cache discounts (often 80%+) and zeroing cost telemetry.
+# The provider prefix selects direct OpenRouter calls with prompt caching
+# and response-cost telemetry.
 model = "openrouter/anthropic/claude-sonnet-5.5"
 
 # ─── Discovery function seats ──────────────────────────────────────────────
@@ -857,9 +854,6 @@ fanout-max-charge-per-cycle-escalation = 0.10
 refine_name = true
 
 [tool.imas-codex.llm]
-# LiteLLM proxy settings. Port base = 18400, offset by location index.
-# Runs on login node (needs outbound HTTPS for OpenRouter/Anthropic).
-location = "iter"       # facility hosting LLM proxy (or "local" for in-process)
 
 # Rates are USD per million tokens, transcribed from each route's published
 # OpenRouter pricing. `cache-read` and `cache-write` are what the provider
@@ -1063,7 +1057,7 @@ max-input-tokens = 1048576
 # Host-wide HTML docs server (~/Code/dotfiles/docs-server/serve.py): fronts every
 # project's docs/plans-html/ under a single URL prefix and exposes a
 # /state/<project>/<doc> JSON store shared by browser and agents.
-# Runs on the login node — same lifetime pattern as the LLM proxy.
+# Runs on the login node as a persistent user service.
 # Forwarded by `imas-codex tunnel start <host> --docs` (port 8765).
 location = "iter"
 port = 8765
