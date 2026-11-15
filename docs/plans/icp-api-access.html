@@ -23,8 +23,8 @@
   <title>The pipeline reads ICP and IDM through an authenticated, read-only client | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="6">
-<meta name="plan-modified" content="2026-11-15">
+<meta name="plan-version" content="7">
+<meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
   <main class="plan-doc">
@@ -48,12 +48,12 @@
 
     <h2 id="s3">§3 — Plant structure and component records read through the API match ICP</h2>
     <section data-reckon="section" data-id="s3" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="icp-api-access#s2"></section>
-    <p><strong>Delivers.</strong> The client reads a plant breakdown structure node by code, its children, and the component lists that reference it, in bounded pages at a stated request rate, returning typed records with the source identity of each.</p>
+    <p><strong>Delivers.</strong> The client reads a plant breakdown structure node by code, its children, and the component lists that reference it, in bounded pages at a stated request rate, returning typed records with the source identity of each. It uses only the API's GET operations; the description offers GET reads for the breakdown tree and for a component's content by reference. Where a read this section needs is offered only through another method, the section does not use it: it names the operation in the landing record with the number of records left unread, and the lead decides whether to approve that named operation.</p>
     <p><strong>Done when.</strong> For twenty nodes chosen before the run, the code, title and parent read through the API equal those read through the ITER document assistant's record tools, with the count that agree in the landing record; a subtree of a stated size is read completely, with the number of requests, the elapsed time and the number of records the account was not permitted to see; and the measured request rate stays at or below the stated bound. Fetched records stay in private storage: none is stored as a fixture in the repository, and a search of the tracked tree for fetched identifiers and titles finds none. <strong>Negative control:</strong> a code that names no node returns an explicit not-found outcome, not an empty success.</p>
 
     <h2 id="s4">§4 — A document file is fetched from IDM by identity and version</h2>
     <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="icp-api-access#s2"></section>
-    <p><strong>Delivers.</strong> The client fetches one IDM document's file, given its identity and version, into private storage outside the repository, with its metadata and a digest, and reads a spreadsheet's rows through the project's existing spreadsheet extraction.</p>
+    <p><strong>Delivers.</strong> The client fetches one IDM document's file, given its identity and version, into private storage outside the repository, with its metadata and a digest, and reads a spreadsheet's rows through the project's existing spreadsheet extraction. The file is read through the integration instance, the only data host section 2 allows. If a document's file is served only from another host, the section fetches nothing from it: it reports that host privately to the lead, who decides whether to add it as a read-only host.</p>
     <p><strong>Done when.</strong> One spreadsheet and one PDF named before the run are each fetched at a stated version, with size and digest in the landing record and the stored path under the private cache; the spreadsheet's sheet names and row counts are recorded; a request for a version that does not exist returns an explicit outcome; and a search of the tracked tree finds none of the fetched content. <strong>Negative control:</strong> a document the account may not read is reported as not permitted, never as empty.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
