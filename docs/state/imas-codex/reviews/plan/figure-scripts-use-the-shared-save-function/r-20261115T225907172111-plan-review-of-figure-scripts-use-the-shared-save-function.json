@@ -17,7 +17,30 @@
   "plan_slug": "figure-scripts-use-the-shared-save-function",
   "plan_version": 2,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2e677f99ebf2709ea72181a330107ccb1feb6309",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 at version 3 decides it: every vector figure takes the physical size the shared function derives, figures that declared another size are listed before and after, and the invariant is the aspect ratio, not the declared size.",
+      "reason": "",
+      "when": "2026-11-15T23:28:39.725762+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2e677f99ebf2709ea72181a330107ccb1feb6309",
+      "commit_basis": "edit",
+      "note": "Section 2 at version 3 decides it: every vector figure takes the physical size the shared function derives, figures that declared another size are listed before and after, and the invariant is the aspect ratio, not the declared size.",
+      "reason": "",
+      "when": "2026-11-15T23:28:39.725762+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/figure-scripts-use-the-shared-save-function/r-20261115T225907172111-plan-review-of-figure-scripts-use-the-shared-save-function.json",
   "review_run_id": "r-20261115T225907172111-plan-review-of-figure-scripts-use-the-shared-save-function",
   "reviewed_blob_sha": "e64ae1fc9c93a3d333a4357e95fc98203773211b",
   "rubric": "content",
