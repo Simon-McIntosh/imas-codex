@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-15T14:04:30.419Z",
+  "dispatched_at": "2026-11-15T14:02:21Z",
+  "findings": [
+    {
+      "file": "tests/config/test_model_seats.py",
+      "line": "222",
+      "severity": "non-blocking",
+      "text": "non-blocking: _DECLARED is built with no non-vacuity assertion, so a pyproject key that no longer matches the _MODEL_KEY pattern at line 80 yields an empty parametrize list, which pytest reports as skipped rather than failed, and both 63-case guards vanish while gate-after.log stays green; the missing line is an assert naming a known owner such as sn-docs.model, and the only trace of the loss is the suite count dropping from 310."
+    },
+    {
+      "file": "tests/config/test_model_seats.py",
+      "line": "150",
+      "severity": "non-blocking",
+      "text": "non-blocking: the release-date ordering is unexercised \u2014 `max(members)` keeps every case green because on every cataloged line date order and string order agree (grok 4.20<4.3<4.5<4.6<4.7, opus 4.1 through 5.5, gpt-5.6<6<6.1) and the dated-build drop at line 147 already carries the deepseek case \u2014 so the fragment's probe table is the only statement of that mechanism and it is prose."
+    },
+    {
+      "file": "tests/config/test_model_seat_reachability.py",
+      "line": "152",
+      "severity": "non-blocking",
+      "text": "non-blocking: the chat assertion accepts any response carrying a finish_reason, so a route answering 200 with empty content passes the reachability arm, unlike the local arm at line 139 which requires parsed.word; only the hard-failure path is demonstrated by the negative control."
+    },
+    {
+      "file": "tests/config/test_model_seat_reachability.py",
+      "line": "52",
+      "severity": "non-blocking",
+      "text": "non-blocking: the module neutralises the suite-wide autouse guard tests/conftest.py:414 no_live_decisions_requests by shadowing its name with an empty fixture, which disables it for the whole file rather than for the one decisions probe, so a test added here spends on the paid live endpoint by default and a rename of the conftest fixture turns the bypass into a failure rather than a skip."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html",
+      "line": "123",
+      "severity": "non-blocking",
+      "text": "non-blocking: the landing record states \"17 passed in 24.12s\" while its cited log gate-live-head.log ends \"17 passed, 1 warning in 22.46s\" and no log in the run directory carries 24.12s, so the quoted measurement is not a number any recorded arm produced."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: the probe table's \"line it resolves into\" column reports anthropic/claude-sonnet without the route prefix, while _line at tests/config/test_model_seats.py:131 returns openrouter/anthropic/claude-sonnet, so the artifact misstates the derivation's output."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "one commit 5e95c4c against base d588fa7 touching four files (564 insertions, 36 deletions), read in full \u2014 the hand-written LATEST allow-list is replaced by _declared_models/_line/_newest_release over the catalog snapshot, three seat tests and one decisions-refusal test are added, and a new slow module answers one live request per distinct chat model and per decisions model.",
+    "done_when": "the measure is a landing record giving each declared seat's before, newest release and where that was established, zero added failures, one live request per changed seat with its response recorded, and a failing negative control; the manifest records gate-baseline.log \"203 passed\" EXIT=0 against gate-after.log \"310 passed, 17 deselected\" EXIT=0, gate-live-head.log \"17 passed\" EXIT=0 and negative-control-live.log \"1 failed\" EXIT=1, and the fragment's 63 seat rows match the 63 owners the derivation returns at head \u2014 the live-response clause is answered only vacuously because no seat changed.",
+    "goal": "the node goal is \"make every configured model seat name its model's latest available version, or record why it stays\"; I read tests/config/test_model_seats.py:_declared_models returned 63 owners from pyproject.toml at 5e95c4c and every one already equals its line's newest release in tests/config/data/model-catalog-2026-11-15.json, so the landed deliverable is the derivation instrument plus the landing record rather than a seat bump.",
+    "manifest": "read; status complete, changed_paths names the three tests/config files and the fragment, baseline_suite and after_suite carry revision, command, exit_status 0, log_path and completed true with zero failure ids, negative_control_log names negative-control-live.log, and its outside_scope records the imas_codex/settings.py _MODEL_DEFAULTS['ids-mapping'] disagreement the fence excluded.",
+    "write_paths": "the declared scope is pyproject.toml, imas_codex/config/, tests/config/, docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html and docs/figures/iter-signal-context-and-enrichment/model-seats-name-latest-versions; the diff's four paths are tests/config/test_model_seats.py, tests/config/test_model_seat_reachability.py, tests/config/data/model-catalog-2026-11-15.json and that fragment, with pyproject.toml untouched, so every path is inside the fence."
+  },
+  "justifications": {
+    "durability": "test_model_seats.py:280 fails when a seat is reverted to an older release, yet nothing asserts the declaration set is non-empty at test_model_seats.py:222 or separates release-date ordering from string ordering at test_model_seats.py:150, so a renamed model key or a switch to string ordering keeps every case green.",
+    "evidence": "the gate is recorded in gate-baseline.log and gate-after.log with EXIT lines and zero failures, but the done_when clause \"each changed seat answers one live request with its response recorded\" is satisfied only vacuously by gate-live-head.log \"17 passed\", which records pass or fail and no response bodies.",
+    "fit": "the modules carry docstrings, typed helpers and no plan or ticket names, but tests/config/test_model_seats.py:262 and :270 return without asserting for the local and embedding seats, and tests/config/test_model_seat_reachability.py:36 marks the module slow without the reachability skip idiom of tests/llm/test_health_endpoint.py:29, so an unnetworked `-m slow` run fails instead of skipping.",
+    "goal_fidelity": "all 63 owners _declared_models finds are checked against their line's newest release at tests/config/test_model_seats.py:280, but the goal's \"every configured model seat\" is bounded by the _MODEL_KEY pattern at tests/config/test_model_seats.py:80 and does not reach code-level defaults such as imas_codex/settings.py:176 _MODEL_DEFAULTS.",
+    "reuse": "no owner exists for enumerating declared seats or ordering model releases \u2014 imas_codex/settings.py:176 _MODEL_DEFAULTS is a fixed list and imas_codex/settings.py:266 get_model needs the section name \u2014 and the only overlap, reading pyproject, is imas_codex/settings.py:45-76 _load_pyproject_settings, which resolves from cwd and would make this test's subject depend on pytest's working directory.",
+    "scope_discipline": "all four diff paths lie inside the declared write paths and pyproject.toml is unmodified, but tests/config/test_model_seat_reachability.py:52 admits the live paid decisions endpoint suite-wide by shadowing a conftest guard, which the goal does not imply."
+  },
+  "notes": "Reviewed head 5e95c4c is not an ancestor of this review worktree's HEAD d57818f7; the diff and every cited line were read from the reviewed commit objects. Added failures were derived from the reviewed run's own gate logs with reckon.crew.review.gate_log_failure_ids and failure_ids_covered: gate-baseline.log names no failing id and gate-after.log names none, so the added set is empty. No suite was re-run; the derivation helpers were evaluated read-only against the head tree, which confirmed the five probe rows and that every cataloged line's release-date order coincides with its string order.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is \"make every configured model seat name its model's latest available version, or record why it stays\"; I read tests/config/test_model_seats.py:_declared_models returned 63 owners from pyproject.toml at 5e95c4c and every one already equals its line's newest release in tests/config/data/model-catalog-2026-11-15.json, so the landed deliverable is the derivation instrument plus the landing record rather than a seat bump.\nVERDICT done_when: the measure is a landing record giving each declared seat's before, newest release and where that was established, zero added failures, one live request per changed seat with its response recorded, and a failing negative control; the manifest records gate-baseline.log \"203 passed\" EXIT=0 against gate-after.log \"310 passed, 17 deselected\" EXIT=0, gate-live-head.log \"17 passed\" EXIT=0 and negative-control-live.log \"1 failed\" EXIT=1, and the fragment's 63 seat rows match the 63 owners the derivation returns at head \u2014 the live-response clause is answered only vacuously because no seat changed.\nVERDICT write_paths: the declared scope is pyproject.toml, imas_codex/config/, tests/config/, docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html and docs/figures/iter-signal-context-and-enrichment/model-seats-name-latest-versions; the diff's four paths are tests/config/test_model_seats.py, tests/config/test_model_seat_reachability.py, tests/config/data/model-catalog-2026-11-15.json and that fragment, with pyproject.toml untouched, so every path is inside the fence.\nVERDICT manifest: read; status complete, changed_paths names the three tests/config files and the fragment, baseline_suite and after_suite carry revision, command, exit_status 0, log_path and completed true with zero failure ids, negative_control_log names negative-control-live.log, and its outside_scope records the imas_codex/settings.py _MODEL_DEFAULTS['ids-mapping'] disagreement the fence excluded.\nVERDICT diff: one commit 5e95c4c against base d588fa7 touching four files (564 insertions, 36 deletions), read in full \u2014 the hand-written LATEST allow-list is replaced by _declared_models/_line/_newest_release over the catalog snapshot, three seat tests and one decisions-refusal test are added, and a new slow module answers one live request per distinct chat model and per decisions model.\nNOTE call_sites: the landed change is test-only so no production module imports it; the runtime code the new tests drive, read rather than changed, is imas_codex/settings.py:82 _get_section and imas_codex/settings.py:266 get_model, and imas_codex/discovery/base/llm.py:2258 call_llm_structured, :3111 call_llm and :3575 call_decisions.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: all 63 owners _declared_models finds are checked against their line's newest release at tests/config/test_model_seats.py:280, but the goal's \"every configured model seat\" is bounded by the _MODEL_KEY pattern at tests/config/test_model_seats.py:80 and does not reach code-level defaults such as imas_codex/settings.py:176 _MODEL_DEFAULTS.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate is recorded in gate-baseline.log and gate-after.log with EXIT lines and zero failures, but the done_when clause \"each changed seat answers one live request with its response recorded\" is satisfied only vacuously by gate-live-head.log \"17 passed\", which records pass or fail and no response bodies.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: all four diff paths lie inside the declared write paths and pyproject.toml is unmodified, but tests/config/test_model_seat_reachability.py:52 admits the live paid decisions endpoint suite-wide by shadowing a conftest guard, which the goal does not imply.\nSCORE durability: 13\nJUSTIFICATION durability: test_model_seats.py:280 fails when a seat is reverted to an older release, yet nothing asserts the declaration set is non-empty at test_model_seats.py:222 or separates release-date ordering from string ordering at test_model_seats.py:150, so a renamed model key or a switch to string ordering keeps every case green.\nSCORE fit: 15\nJUSTIFICATION fit: the modules carry docstrings, typed helpers and no plan or ticket names, but tests/config/test_model_seats.py:262 and :270 return without asserting for the local and embedding seats, and tests/config/test_model_seat_reachability.py:36 marks the module slow without the reachability skip idiom of tests/llm/test_health_endpoint.py:29, so an unnetworked `-m slow` run fails instead of skipping.\nSCORE reuse: 17\nJUSTIFICATION reuse: no owner exists for enumerating declared seats or ordering model releases \u2014 imas_codex/settings.py:176 _MODEL_DEFAULTS is a fixed list and imas_codex/settings.py:266 get_model needs the section name \u2014 and the only overlap, reading pyproject, is imas_codex/settings.py:45-76 _load_pyproject_settings, which resolves from cwd and would make this test's subject depend on pytest's working directory.\nFINDING tests/config/test_model_seats.py:222 non-blocking: _DECLARED is built with no non-vacuity assertion, so a pyproject key that no longer matches the _MODEL_KEY pattern at line 80 yields an empty parametrize list, which pytest reports as skipped rather than failed, and both 63-case guards vanish while gate-after.log stays green; the missing line is an assert naming a known owner such as sn-docs.model, and the only trace of the loss is the suite count dropping from 310.\nFINDING tests/config/test_model_seats.py:150 non-blocking: the release-date ordering is unexercised \u2014 `max(members)` keeps every case green because on every cataloged line date order and string order agree (grok 4.20<4.3<4.5<4.6<4.7, opus 4.1 through 5.5, gpt-5.6<6<6.1) and the dated-build drop at line 147 already carries the deepseek case \u2014 so the fragment's probe table is the only statement of that mechanism and it is prose.\nFINDING tests/config/test_model_seat_reachability.py:152 non-blocking: the chat assertion accepts any response carrying a finish_reason, so a route answering 200 with empty content passes the reachability arm, unlike the local arm at line 139 which requires parsed.word; only the hard-failure path is demonstrated by the negative control.\nFINDING tests/config/test_model_seat_reachability.py:52 non-blocking: the module neutralises the suite-wide autouse guard tests/conftest.py:414 no_live_decisions_requests by shadowing its name with an empty fixture, which disables it for the whole file rather than for the one decisions probe, so a test added here spends on the paid live endpoint by default and a rename of the conftest fixture turns the bypass into a failure rather than a skip.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html:123 non-blocking: the landing record states \"17 passed in 24.12s\" while its cited log gate-live-head.log ends \"17 passed, 1 warning in 22.46s\" and no log in the run directory carries 24.12s, so the quoted measurement is not a number any recorded arm produced.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html:32 non-blocking: the probe table's \"line it resolves into\" column reports anthropic/claude-sonnet without the route prefix, while _line at tests/config/test_model_seats.py:131 returns openrouter/anthropic/claude-sonnet, so the artifact misstates the derivation's output.",
+  "review_run_id": "r-20261115T140107906869-review-of-model-seats-name-latest-versions-5e95c4c21cc3",
+  "reviewed_base_sha": "d588fa703e76e54d4e39af1b742c31764b21dee7",
+  "reviewed_head_sha": "5e95c4c21cc315318d4a9f142436a90a0edfa6a8",
+  "reviewed_run_id": "r-20261115T104944405793-model-seats-name-latest-versions",
+  "rubric": "code",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 17,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T14:29:44.905265+00:00",
+  "total": 91
+}
