@@ -35,6 +35,16 @@
       "note": "The description-model decision was re-recorded at version 26: the locally served model writes ITER descriptions, the 'ICP access parked' premise is gone, and the rationale states that ICP-derived context stays inside ITER.",
       "reason": "",
       "when": "2026-11-15T22:31:25.776992+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fbcdb35c19e5e5087f77a1cf8e62bda6e93e2ca5",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The local-lane decision's rationale at version 27 separates the two: build workers may run on any lane; descriptions written from ICP-derived context stay on the locally served model, as section 1 states.",
+      "reason": "",
+      "when": "2026-11-15T22:31:40.707149+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The description-model decision was re-recorded at version 26: the locally served model writes ITER descriptions, the 'ICP access parked' premise is gone, and the rationale states that ICP-derived context stays inside ITER.",
       "reason": "",
       "when": "2026-11-15T22:31:25.776992+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "fbcdb35c19e5e5087f77a1cf8e62bda6e93e2ca5",
+      "commit_basis": "edit",
+      "note": "The local-lane decision's rationale at version 27 separates the two: build workers may run on any lane; descriptions written from ICP-derived context stay on the locally served model, as section 1 states.",
+      "reason": "",
+      "when": "2026-11-15T22:31:40.707149+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261115T213231670649-plan-review-of-iter-signal-context-and-enrichment.json",
