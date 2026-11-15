@@ -43,6 +43,16 @@
       "note": "The class is now any committed evidence script that uses a package name the tree no longer defines, in an import statement or as an attribute reached after a successful import, and the method is resolving every package name and attribute each script uses against the tree, not importing alone; all four named scripts fall inside it.",
       "reason": "",
       "when": "2026-11-15T21:15:06.832318+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The section no longer states a cause per script; it requires each script to be listed in the evidence with the missing name it shows, so the name-evidence script's failure on the removed worker queries is recorded as measured.",
+      "reason": "",
+      "when": "2026-11-15T21:15:18.067232+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The class is now any committed evidence script that uses a package name the tree no longer defines, in an import statement or as an attribute reached after a successful import, and the method is resolving every package name and attribute each script uses against the tree, not importing alone; all four named scripts fall inside it.",
       "reason": "",
       "when": "2026-11-15T21:15:06.832318+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788",
+      "commit_basis": "edit",
+      "note": "The section no longer states a cause per script; it requires each script to be listed in the evidence with the missing name it shows, so the name-evidence script's failure on the removed worker queries is recorded as measured.",
+      "reason": "",
+      "when": "2026-11-15T21:15:18.067232+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261115T210446983575-plan-review-of-sn-pipeline-hygiene.json",
