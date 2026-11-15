@@ -51,6 +51,16 @@
       "note": "The header no longer says the plan is parked: it states that the lead chose their own account and stored credentials, that section 2 is buildable, and that sections 3 and 4 follow it.",
       "reason": "",
       "when": "2026-11-15T21:11:26.247427+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "c8c40c9d9ade16df0a1367bb571b371556f7fcec",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "Section 1 now records the authenticated check that established the machine-readable description exists: it was read, with 793 paths and 815 operations of which 471 are GET, so section 2's figures are obtainable.",
+      "reason": "",
+      "when": "2026-11-15T21:11:33.249434+00:00"
     }
   ],
   "responses": {
@@ -62,6 +72,15 @@
       "note": "The header no longer says the plan is parked: it states that the lead chose their own account and stored credentials, that section 2 is buildable, and that sections 3 and 4 follow it.",
       "reason": "",
       "when": "2026-11-15T21:11:26.247427+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "c8c40c9d9ade16df0a1367bb571b371556f7fcec",
+      "commit_basis": "edit",
+      "note": "Section 1 now records the authenticated check that established the machine-readable description exists: it was read, with 793 paths and 815 operations of which 471 are GET, so section 2's figures are obtainable.",
+      "reason": "",
+      "when": "2026-11-15T21:11:33.249434+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261115T205649172727-plan-review-of-icp-api-access.json",
