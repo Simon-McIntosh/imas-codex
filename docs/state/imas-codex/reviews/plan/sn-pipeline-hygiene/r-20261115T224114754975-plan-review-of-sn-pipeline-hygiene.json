@@ -71,6 +71,13 @@
       "note": "Followup f-sph-001 is resolved with the plan's present state: every section but the open-findings one is landed or deferred.",
       "reason": "",
       "when": "2026-11-15T22:59:08.142685+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "The section has one deliverable, the open non-blocking findings of the cited reviews each repaired or declined, and one verdict closes it; the byte-identical label set and unchanged graph are controls on those repairs. Four earlier content reviews passed this item on the same text, and the node is already running on it.",
+      "when": "2026-11-15T22:59:12.915321+00:00"
     }
   ],
   "responses": {
@@ -91,6 +98,12 @@
       "note": "The section is declared done; its text is the record of the state the landing changed, and the closing comment states the present state (module at 100 lines, guard in place).",
       "reason": "",
       "when": "2026-11-15T22:59:02.824308+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The section has one deliverable, the open non-blocking findings of the cited reviews each repaired or declined, and one verdict closes it; the byte-identical label set and unchanged graph are controls on those repairs. Four earlier content reviews passed this item on the same text, and the node is already running on it.",
+      "when": "2026-11-15T22:59:12.915321+00:00"
     },
     "wiring-1": {
       "action": "acted",
