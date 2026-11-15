@@ -3,6 +3,7 @@
 import pytest
 from pydantic import ValidationError
 
+from imas_codex.config.codac_uda import create_archive_pulse
 from imas_codex.graph.models import ArchiveEndpoint, DataSource, Pulse, PulseCategory
 from imas_codex.graph.schema import GraphSchema
 
@@ -24,8 +25,7 @@ def test_pulse_and_categories_round_trip_without_losing_nanoseconds() -> None:
         description="Synthetic campaign category",
     )
     pulse_name = "DEMO:CAMPAIGN/commissioning-alpha"
-    pulse = Pulse(
-        id=f"{archive.id}:{pulse_name}",
+    pulse = create_archive_pulse(
         facility_id="demo",
         archive=archive.id,
         name=pulse_name,
@@ -53,8 +53,7 @@ def test_same_pulse_segment_in_distinct_categories_has_distinct_ids() -> None:
         )
         name = f"{category.name}/commissioning-alpha"
         pulses.append(
-            Pulse(
-                id=f"{archive}:{name}",
+            create_archive_pulse(
                 facility_id="demo",
                 archive=archive,
                 name=name,
@@ -69,7 +68,54 @@ def test_same_pulse_segment_in_distinct_categories_has_distinct_ids() -> None:
     }
     assert len({pulse.id for pulse in restored}) == 2
     assert len({pulse.categories[0] for pulse in restored}) == 2
-    assert all(pulse.id == f"{pulse.archive}:{pulse.name}" for pulse in restored)
+    assert {pulse.id for pulse in restored} == {
+        "demo:codac_uda:slow:DEMO:CAMPAIGN-ALPHA/commissioning-alpha",
+        "demo:codac_uda:slow:DEMO:CAMPAIGN-BETA/commissioning-alpha",
+    }
+
+
+@pytest.mark.parametrize(
+    "supplied_id",
+    [
+        "demo:codac_uda:slow:commissioning-alpha",
+        "demo:codac_uda:fast:DEMO:CAMPAIGN/commissioning-alpha",
+    ],
+    ids=["final-segment-only", "different-archive"],
+)
+def test_pulse_construction_refuses_mismatched_id(supplied_id: str) -> None:
+    with pytest.raises(ValueError, match="id disagrees with archive and full"):
+        create_archive_pulse(
+            id=supplied_id,
+            facility_id="demo",
+            archive="demo:codac_uda:slow",
+            name="DEMO:CAMPAIGN/commissioning-alpha",
+            start_ns=1_731_600_000_000_000_001,
+            end_ns=1_731_600_002_000_000_003,
+        )
+
+
+def test_pulse_construction_accepts_matching_supplied_id() -> None:
+    pulse = create_archive_pulse(
+        id="demo:codac_uda:slow:DEMO:CAMPAIGN/commissioning-alpha",
+        facility_id="demo",
+        archive="demo:codac_uda:slow",
+        name="DEMO:CAMPAIGN/commissioning-alpha",
+        start_ns=1_731_600_000_000_000_001,
+        end_ns=1_731_600_002_000_000_003,
+    )
+    assert pulse.id == "demo:codac_uda:slow:DEMO:CAMPAIGN/commissioning-alpha"
+
+
+@pytest.mark.parametrize("name", ["commissioning-alpha", "/pulse", "DEMO:CAMPAIGN/"])
+def test_pulse_construction_requires_category_qualified_name(name: str) -> None:
+    with pytest.raises(ValueError, match="include its archive category and pulse path"):
+        create_archive_pulse(
+            facility_id="demo",
+            archive="demo:codac_uda:slow",
+            name=name,
+            start_ns=1_731_600_000_000_000_001,
+            end_ns=1_731_600_002_000_000_003,
+        )
 
 
 def test_archive_relationships_are_schema_driven() -> None:

@@ -6,7 +6,9 @@ excluded host. Public configuration can omit hosts; connection resolution
 requires the private operator exclusion as well as the requested archive.
 Archive lists replace public entries wholesale during facility configuration
 merging, so private archive blocks must redeclare all roles and exclusions.
-Production readers share the host comparison through :func:`archive_host_key`.
+Configuration validation uses :func:`archive_host_key` for its host checks.
+:func:`create_archive_pulse` derives and validates graph pulse identities from
+the complete category-qualified archive name.
 """
 
 from __future__ import annotations
@@ -14,7 +16,7 @@ from __future__ import annotations
 import ipaddress
 import re
 from collections.abc import Mapping
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from imas_codex.config.models import (
     ArchiveEndpointConfig,
@@ -22,11 +24,53 @@ from imas_codex.config.models import (
     CodacUDAConfig,
 )
 
+if TYPE_CHECKING:
+    from imas_codex.graph.models import Pulse
+
+
+def create_archive_pulse(
+    *,
+    facility_id: str,
+    archive: str,
+    name: str,
+    start_ns: int,
+    end_ns: int,
+    categories: list[str] | None = None,
+    description: str | None = None,
+    id: str | None = None,
+) -> Pulse:
+    """Construct a pulse using its complete archive-reported identity.
+
+    The category-qualified name is preserved byte for byte in both the name
+    and derived graph ID. A supplied ID is checked rather than overwritten,
+    so importing an existing record cannot silently hide a namespace mismatch.
+    Construct scanner pulse records here instead of using the structural model.
+    """
+    from imas_codex.graph.models import Pulse
+
+    pulse = Pulse(
+        id=f"{archive}:{name}",
+        facility_id=facility_id,
+        archive=archive,
+        name=name,
+        start_ns=start_ns,
+        end_ns=end_ns,
+        categories=categories,
+        description=description,
+    )
+    if "/" not in pulse.name or any(not segment for segment in pulse.name.split("/")):
+        raise ValueError("pulse name must include its archive category and pulse path")
+    if id is not None and id != pulse.id:
+        raise ValueError(
+            "pulse id disagrees with archive and full archive-reported name"
+        )
+    return pulse
+
 
 def archive_host_key(host: str) -> str:
     """Canonical archive policy key: DNS short aliases or exact IP addresses.
 
-    Readers use this comparison rather than deriving exclusion keys themselves.
+    Endpoint policy validation calls this function for each configured host.
     IP address normalization preserves all address components; DNS names use
     their short alias so case and a domain suffix cannot evade an exclusion.
     """
