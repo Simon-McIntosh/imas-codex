@@ -107,6 +107,13 @@
       "note": "Section 6 now bounds its surface: the server gains at most one tool, the read is a mode of an existing signal tool where one already returns sample data, and the landing record gives the tool count before and after with the reason a new tool was needed if one was added.",
       "reason": "",
       "when": "2026-11-15T01:33:34.822946+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "finding": "interface_budget-2",
+      "reason": "The reviewer marks this as not changing the plan: section 11 already names the alias's removal and its zero-consumer check, so the alias's lifetime is bounded by that section.",
+      "when": "2026-11-15T01:33:44.836948+00:00"
     }
   ],
   "responses": {
@@ -145,6 +152,12 @@
       "note": "Section 6 now bounds its surface: the server gains at most one tool, the read is a mode of an existing signal tool where one already returns sample data, and the landing record gives the tool count before and after with the reason a new tool was needed if one was added.",
       "reason": "",
       "when": "2026-11-15T01:33:34.822946+00:00"
+    },
+    "interface_budget-2": {
+      "action": "declined",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "reason": "The reviewer marks this as not changing the plan: section 11 already names the alias's removal and its zero-consumer check, so the alias's lifetime is bounded by that section.",
+      "when": "2026-11-15T01:33:44.836948+00:00"
     },
     "thin_wrapper-1": {
       "action": "acted",
