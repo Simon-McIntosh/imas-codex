@@ -33,7 +33,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 42,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The class is now any committed evidence script that uses a package name the tree no longer defines, in an import statement or as an attribute reached after a successful import, and the method is resolving every package name and attribute each script uses against the tree, not importing alone; all four named scripts fall inside it.",
+      "reason": "",
+      "when": "2026-11-15T21:15:06.832318+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0c5d927a5f2aeb771bdd35e9ef7d8e10a12bb788",
+      "commit_basis": "edit",
+      "note": "The class is now any committed evidence script that uses a package name the tree no longer defines, in an import statement or as an attribute reached after a successful import, and the method is resolving every package name and attribute each script uses against the tree, not importing alone; all four named scripts fall inside it.",
+      "reason": "",
+      "when": "2026-11-15T21:15:06.832318+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261115T210446983575-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261115T210446983575-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "8ee32b98a72d63a54765e58d0425f4f8a342914c",
   "rubric": "content",
