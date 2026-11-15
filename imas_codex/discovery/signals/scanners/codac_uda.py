@@ -10,6 +10,8 @@ from pathlib import Path
 from typing import Any
 
 from imas_codex.discovery.signals.scanners.base import ScanResult, register_scanner
+from imas_codex.discovery.signals.variable_name_graph import persist_name_parses
+from imas_codex.discovery.signals.variable_names import parse_variable_name
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.models import (
     ArchiveEndpoint,
@@ -170,6 +172,14 @@ def _persist_signals(facility: str, cohort: str, signals: list[FacilitySignal]) 
             cohort=cohort,
             signals=[signal.model_dump(mode="json") for signal in signals],
         )
+        if rows and rows[0]["written"] == len(signals):
+            persist_name_parses(
+                graph,
+                [
+                    {"id": signal.id, "facility": facility, "selector": signal.accessor}
+                    for signal in signals
+                ],
+            )
     return rows[0]["written"] if rows else 0
 
 
@@ -405,6 +415,7 @@ class CodacUDAScanner:
             sampling_evidence=entry.get("sampling_evidence")
             if mode != "unknown"
             else None,
+            **parse_variable_name(name).properties(facility),
         )
 
     async def check(
