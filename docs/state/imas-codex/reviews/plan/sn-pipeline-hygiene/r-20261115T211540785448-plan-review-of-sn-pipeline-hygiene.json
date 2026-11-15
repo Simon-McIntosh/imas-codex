@@ -35,6 +35,16 @@
       "note": "The done-when now covers every non-blocking finding the cited head reviews leave open, each listed in the evidence by its review and repaired or declined; the prototype landing's review is cited beside the other three, and the heading names all four landings.",
       "reason": "",
       "when": "2026-11-15T21:38:06.891056+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "e8c61f0a2b22b4703c0a01a2e1094d57ca266554",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The discovery procedure is removed. The done-when states the observable: a committed evidence script that no longer runs as committed, listed with the missing name it reports when run.",
+      "reason": "",
+      "when": "2026-11-15T21:38:12.550910+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The done-when now covers every non-blocking finding the cited head reviews leave open, each listed in the evidence by its review and repaired or declined; the prototype landing's review is cited beside the other three, and the heading names all four landings.",
       "reason": "",
       "when": "2026-11-15T21:38:06.891056+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "e8c61f0a2b22b4703c0a01a2e1094d57ca266554",
+      "commit_basis": "edit",
+      "note": "The discovery procedure is removed. The done-when states the observable: a committed evidence script that no longer runs as committed, listed with the missing name it reports when run.",
+      "reason": "",
+      "when": "2026-11-15T21:38:12.550910+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261115T211540785448-plan-review-of-sn-pipeline-hygiene.json",
