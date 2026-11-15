@@ -1,0 +1,51 @@
+<section id="archive-pulse-schema-delivery">
+  <h3>Archive endpoints, pulses and facility configuration</h3>
+  <p>The LinkML schemas now represent a logical <code>ArchiveEndpoint</code>,
+  <code>PulseCategory</code> and <code>Pulse</code>, with facility ownership,
+  archive ownership and pulse-category membership. <code>DataSource.archive_endpoint</code>
+  links an archive without requiring an MDSplus server. Endpoint hosts remain
+  private and are absent from graph endpoint records.</p>
+  <p>The product commit is <code>5654dbf8ab0188abd5550ab4c229c76d477eabdb</code>.
+  ITER declares <code>data_systems.codac_uda</code>, its module setup and
+  interpreter, fast and slow readable roles, an excluded operator role, and
+  limits of 100,000 samples, 8,388,608 serialized bytes, 60,000,000,000 ns and
+  30 s per read. No real archive host, variable or pulse identity was added.</p>
+  <table>
+    <thead><tr><th>Measure</th><th>Result</th></tr></thead>
+    <tbody>
+      <tr><td>Baseline at <code>1c2476daf9f7c83e4eaa0d56c60fb0d132c05136</code></td><td>31 passed, 2 warnings in 6.18 s; exit 0</td></tr>
+      <tr><td>Generated models</td><td>Graph, data dictionary and facility configuration models built; exit 0</td></tr>
+      <tr><td>Focused gate with the delivered product diff</td><td>59 passed, 2 warnings in 8.32 s; exit 0; no added failures</td></tr>
+      <tr><td>Public facility configurations</td><td>ITER validates with the archive system; JET, JT-60SA and TCV validate with unchanged files</td></tr>
+      <tr><td>Invalid fixture control</td><td>1 failed, 1 warning in 2.49 s; exit 1; operator rejected as a readable role</td></tr>
+    </tbody>
+  </table>
+  <p>The baseline reproduction generated its model directly from the recorded
+  base schema in isolated scratch. Its positive control retained the existing
+  IMAS block, while <code>codac_uda_field_present: False</code> and
+  <code>reserved_config_accepted_and_discarded: True</code> showed the missing
+  typed configuration. The delivered generated model instead refuses the
+  operator role with <code>Input should be 'fast' or 'slow'</code>. All build and
+  positive-gate work ran in separate <code>all_debug</code> jobs; the single
+  invalid-fixture test ran in the assigned worker allocation.</p>
+  <p>The synthetic pulse <code>DEMO:CAMPAIGN/commissioning-alpha</code> round-trips
+  through JSON with start <code>1731600000000000001</code> ns and end
+  <code>1731600002000000003</code> ns, preserving its category and the exact
+  <code>2000000002</code> ns difference.</p>
+  <p>Connection callers must pass the merged public/private data-system block
+  to <code>imas_codex.config.codac_uda.resolve_archive_endpoint</code> before
+  constructing a client. Generated models enforce the readable-role vocabulary
+  and positive budgets; <code>validate_codac_uda_config</code> additionally
+  rejects duplicate roles, absent or excluded readable endpoints, and readable
+  hosts that alias an excluded host. The resolver requires the private operator
+  exclusion and requested host. Public configuration validates with unresolved
+  hosts but cannot yield a connectable endpoint.</p>
+  <p>Durable receipts are <code>baseline-build.log</code>,
+  <code>baseline-tests.log</code>, <code>reproduction.log</code>,
+  <code>head-build.log</code>, <code>head-tests.log</code> and
+  <code>negative-control.log</code> under the assigned run directory. The two
+  positive-gate warnings also occur in the baseline: the disabled pytest cache
+  plugin leaves a cache setting unknown, and a generated description contains
+  a Python escape warning. No graph or archive connection was needed for this
+  schema/configuration gate.</p>
+</section>
