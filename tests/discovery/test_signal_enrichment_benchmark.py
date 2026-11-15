@@ -240,3 +240,10 @@ async def test_fenced_response_stays_a_strict_failure_when_pipeline_recovers(tmp
     assert record["messages"] == [messages]
     assert record["prompt_digest"] == bench.digest([messages])
     db.close()
+
+
+def test_iter_reference_is_refused_before_any_graph_read(tmp_path):
+    with patch.object(bench, "GraphClient") as graph:
+        with pytest.raises(ValueError, match="non-ITER"):
+            bench.prepare(tmp_path, "iter")
+    graph.assert_not_called()
