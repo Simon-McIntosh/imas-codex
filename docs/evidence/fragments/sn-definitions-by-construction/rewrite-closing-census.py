@@ -51,18 +51,29 @@ OPERATORS = (
 #: reading before the first write and the reading after the rewrite are the
 #: same measure.
 SPECIES = [
-    "helium_3", "helium_4", "deuterium_tritium", "deuterium", "tritium",
-    "hydrogen", "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen",
-    "neon", "argon", "krypton", "xenon", "iron", "tungsten", "total_hydrogenic",
+    "helium_3", "helium_4", "deuterium_tritium",
+    "deuterium", "tritium",
+    "helium", "hydrogen", "lithium",
+    "beryllium", "boron", "carbon",
+    "nitrogen", "oxygen", "neon",
+    "argon", "krypton", "xenon",
+    "iron", "tungsten", "total_hydrogenic",
 ]
-SPECIES_WORDS = [
-    "helium-3", "helium-4", "deuterium-tritium", "deuterium-tritium",
-    "deuterium–tritium", "deuterium", "tritium", "hydrogenic", "hydrogen",
-    "lithium", "beryllium", "boron", "carbon", "nitrogen", "oxygen", "neon",
-    "argon", "krypton", "xenon", "iron", "tungsten",
-]
+
+
+def _species_words(species):
+    words = [name.replace("_", "-") for name in species]
+    return words + ["deuterium–tritium", "hydrogenic"]
+
+
+BASELINE_SPECIES = [name for name in SPECIES if name != "helium"]
+SPECIES_WORDS = _species_words(SPECIES)
+BASELINE_SPECIES_WORDS = _species_words(BASELINE_SPECIES)
+
 SPECIES_NAME_RE = re.compile(r"(?<![a-z])(" + "|".join(SPECIES) + r")(?![a-z])")
 SPECIES_WORD_RE = re.compile("|".join(SPECIES_WORDS), re.IGNORECASE)
+BASELINE_NAME_RE = re.compile(r"(?<![a-z])(" + "|".join(BASELINE_SPECIES) + r")(?![a-z])")
+BASELINE_WORD_RE = re.compile("|".join(BASELINE_SPECIES_WORDS), re.IGNORECASE)
 NEUTRAL_WORD_RE = re.compile(r"\bneutrals?\b|z\s*=\s*0", re.IGNORECASE)
 
 #: The readings taken before the first write, each beside the artifact holding
@@ -230,16 +241,18 @@ def operator_census(rows, before):
     return out
 
 
-def family_template(name):
-    return SPECIES_NAME_RE.sub("<X>", name)
+def family_template(name, name_re=None):
+    return (name_re or SPECIES_NAME_RE).sub("<X>", name)
 
 
-def family_census(rows, min_members=3):
+def family_census(rows, min_members=3, name_re=None, word_re=None):
     """Description wordings per species family: the measure the baseline used."""
 
+    name_re = name_re or SPECIES_NAME_RE
+    word_re = word_re or SPECIES_WORD_RE
     families = collections.defaultdict(list)
     for row in rows:
-        families[family_template(row["id"])].append(row)
+        families[family_template(row["id"], name_re)].append(row)
     species_families = {}
     for key, members in families.items():
         if "<X>" in key and len(members) >= min_members:
@@ -251,7 +264,7 @@ def family_census(rows, min_members=3):
     for key in sorted(species_families):
         members = species_families[key]
         templates = collections.Counter(
-            re.sub(r"\s+", " ", SPECIES_WORD_RE.sub("<X>", row["description"] or "")).strip()
+            re.sub(r"\s+", " ", word_re.sub("<X>", row["description"] or "")).strip()
             for row in members
         )
         units = collections.Counter((row.get("unit") or "") for row in members)
@@ -383,6 +396,24 @@ def sourceless(client):
     }
 
 
+def published_subset(rows, before):
+    """The same operator and family measures over the published names only.
+
+    The counts before the first write were taken over the published names, so
+    the comparison is only like for like on this subset.
+    """
+
+    published = [row for row in rows if row.get("name_stage") == "published"]
+    return {
+        "name_count": len(published),
+        "operators": operator_census(published, before),
+        "families": family_census(published),
+        "families_baseline_list": family_census(
+            published, name_re=BASELINE_NAME_RE, word_re=BASELINE_WORD_RE
+        ),
+    }
+
+
 def phase_live():
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.audits import live_unit_spelling_census
@@ -405,6 +436,10 @@ def phase_live():
             "live_name_rule": "name_stage <> 'superseded', the unit census rule",
             "operators": operator_census(rows, before),
             "families": family_census(rows),
+            "families_baseline_list": family_census(
+                rows, name_re=BASELINE_NAME_RE, word_re=BASELINE_WORD_RE
+            ),
+            "published_subset": published_subset(rows, before),
             "population": population_census(rows),
             "units": live_unit_spelling_census(client),
             "scores": score_census(rows, rewrite),
@@ -467,6 +502,11 @@ def phase_seat():
         )
         for verdict in verdicts:
             recorded[verdict["name"]] = verdict
+    stage = dict((row["id"], row["name_stage"]) for row in rows)
+
+    def stage_of(name):
+        return stage.get(name)
+
     flagged = sorted(n for n, v in recorded.items() if v["verdict"] == "flag")
     unanswered = sorted(n for n, v in recorded.items() if v["verdict"] == "unanswered")
     by_qualifier = collections.Counter(recorded[n].get("qualifier") or "unanswered" for n in flagged)
@@ -483,6 +523,11 @@ def phase_seat():
             float(census["phases"].get("seat", {}).get("cost_usd", 0.0)) + cost, 4
         ),
         "flagged_names": flagged,
+        "flagged_published": sum(
+            1 for n in flagged if stage_of(n) == "published"
+        ),
+        "judged_published": sum(1 for n in recorded if stage_of(n) == "published"),
+        "earlier": EARLIER["seat"],
     }
     save_census(census)
     print("seat judged %d flagged %d unanswered %d cost %.4f" % (len(recorded) - len(unanswered), len(flagged), len(unanswered), cost), flush=True)
