@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -150,9 +150,6 @@
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261115T021213562433-module-environment-script-run" data-who="reckon-build" data-when="2026-11-15T02:56:32Z">
     <div class="r-comment-body"><p>Local module setup and packaged CODAC reader implemented on both executor entry points; 21 focused tests pass and removing setup fails both import controls. Live slow-archive listings of the prototype's successful known-day variable returned 1 entry in 9.530946 s synchronously and 1 in 11.363129 s asynchronously; 2 of 4 authorized requests used and no operator endpoint contacted. Evidence at docs/evidence/fragments/codac-uda-signals/module-environment-script-run.html#module-environment-script-run-evidence.</p></div>
 </div>
-<div class="r-comment" data-section="s9" data-id="c-run-r-20261115T021326896806-current-name-consumer-inventory" data-who="reckon-build" data-when="2026-11-15T02:53:36Z">
-    <div class="r-comment-body"><p>docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html#current-name-consumer-inventory — Read-only inventory of eight surfaces with commands; 5 units, 2 scheduler services, 175 bin files, 53 root entries, 11 GHCR package identities, 3 external MCP definitions, 28 distinct node values across 11 nodes plus 17 historical relationship errors, and 23 reckon pointers; six predeclared controls passed; Azure explicitly not measured; recommendations fork-only, rename-package after at-rest gate, iter-cx-and-imas-dd; no rename or decision lock.</p></div>
-</div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T024952708941-review-of-archive-pulse-schema-179e16f1bee2" data-who="reckon-build" data-when="2026-11-15T03:56:30.143Z">
     <div class="r-comment-body"><p>Reviewed run r-20261115T021249205435-archive-pulse-schema at 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136..179e16f1bee2299fd628a85eeba20f2ff03c1a78; scores goal_fidelity 19, evidence 18, scope_discipline 19, durability 18, fit 19, reuse 14; added_failure_count 0 with an empty added_failure_ids; three non-blocking findings recorded on the Pulse identity collision, a forked host-key exclusion helper, and the private-overlay merge shape; the parsed record is stored at both declared paths and passes the review contract with findings []</p></div>
 </div>
@@ -161,6 +158,12 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T050058626678-review-of-archive-pulse-schema-f2a47423b91a" data-who="reckon-build" data-when="2026-11-15T05:21:22.910Z">
     <div class="r-comment-body"><p>Reviewed revision 2b82f0fd0dd3e4d8c2af89f43cd06f03b07bc109..f2a47423b91aef5cee2cdedc5d4fdbbb963ba511 (2636cdd0a fix, f2a47423b docs) and stored a parsed record scoring goal_fidelity 16, evidence 18, scope_discipline 19, durability 17, fit 17, reuse 20, with added_failure_count 0 and two non-blocking findings: the accept-path assertion at tests/graph/test_archive_schema.py:106 is not independent of the literal the test supplies, and create_archive_pulse at imas_codex/config/codac_uda.py:31 has no production caller so the identity guard remains opt-in.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261115T021249205435-archive-pulse-schema" data-who="reckon-build" data-when="2026-11-15T04:48:08Z">
+    <div class="r-comment-body"><p>Added create_archive_pulse as the scanner-facing ID derivation and validation boundary, replaced the self-supplied-ID collision example with constructor-driven coverage and corrected host-policy documentation to name its actual config-validation caller; 76 focused tests pass, a truncated supplied ID is refused, and pulse derivation/refusal mutations each fail a test that passes at head. Operator-readable configuration remains refused. Evidence: docs/evidence/fragments/codac-uda-signals/archive-pulse-schema.html#archive-pulse-schema-enforced-construction.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-run-r-20261115T021326896806-current-name-consumer-inventory" data-who="reckon-build" data-when="2026-11-15T02:53:36Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html#current-name-consumer-inventory — Read-only inventory of eight surfaces with commands; 5 units, 2 scheduler services, 175 bin files, 53 root entries, 11 GHCR package identities, 3 external MCP definitions, 28 distinct node values across 11 nodes plus 17 historical relationship errors, and 23 reckon pointers; six predeclared controls passed; Azure explicitly not measured; recommendations fork-only, rename-package after at-rest gate, iter-cx-and-imas-dd; no rename or decision lock.</p></div>
 </div>
 </section>
 </main>
