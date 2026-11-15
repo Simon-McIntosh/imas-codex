@@ -1,0 +1,88 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-15T20:49:12.595Z",
+  "dispatched_at": "2026-11-15T20:48:42Z",
+  "findings": [
+    {
+      "anchor": "scripts/figures_knowledge_graph_scale.py:673",
+      "id": "reuse_search-1",
+      "reason": "\u00a72's delivered-state and search criterion assume two copies; the tree has three definitions plus one cross-script importer, so the section's completion test as written is both under-counted and satisfiable while a copy survives.",
+      "text": "the plan's premise \"a fourth copy of a refusal that two figure scripts already implement for themselves\" is short by one, and the third copy is already shared: `scripts/figures_ai_stack.py:191`, `scripts/figures_icp_knowledge_map.py:740` and `scripts/figures_knowledge_graph_scale.py:673` each define `check_layout`, and `scripts/figures_mapping_flow.py:33` imports `check_layout` and `save` from figures_knowledge_graph_scale, so \u00a72's \"the scripts' own copies ... are gone\" leaves a fourth script with a dangling import unless the migration is planned against the real tree",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/figures/sn-catalog-grouping/scg-ids-domain-refresh/make_figure.py:68",
+      "id": "reuse_search-2",
+      "reason": "the repository-wide claim in \u00a72 is falsified by a census the section can run, so either the criterion narrows to the ten scripts or the scope grows; leaving it as written makes the section's own gate unachievable.",
+      "text": "\u00a72's done-when \"one definition of the text check in the repository\" cannot be met by migrating ten scripts: 13 further scripts under `docs/` carry their own clipped/overlap check, e.g. `docs/figures/sn-catalog-grouping/scg-ids-domain-refresh/make_figure.py:68`, `docs/figures/sn-harmonize-command/shc-boundary-final-apply/make_lint_and_spend_figure.py:134`, `docs/figures/sn-integrity-backlog/sib-compose-stranded-stubs/sourceless-roster-and-graph.py:68,82`, `docs/evidence/fragments/sn-review-through-jev/srtj-docs-measure-run.py:722`, `docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point-run.py:532`, `docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-diagnosis-run.py:376`, `docs/evidence/fragments/sn-review-through-jev/srtj-docs-score-arm-run.py:569`, `docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-jev-run.py:395,403`, `docs/evidence/fragments/sn-catalog-grouping/scg-name-domain-umbrella-measure-run.py:283,291`, `docs/evidence/fragments/sn-catalog-grouping/scg-ids-domain-design-run.py:337`, `docs/evidence/fragments/sn-integrity-backlog/sib-lineage-cycle-census-run.py:708,724`, `docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-ab-aggregate-run.py:436`, `docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py:427`",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/plotting/style.py:41",
+      "id": "deep_module-1",
+      "reason": "\u00a72's done-when counts call sites, not behaviour, so a ten-shim outcome passes it while adding the surface the rubric penalises; the plan should state the export capability the endpoint needs, not the number of callers.",
+      "text": "\u00a71 and \u00a72 ask for one call per script, but `save_figure` fixes dpi at 200, offers no `bbox_inches`, no white-facecolor argument, no receipt, no preview and no format beyond SVG/PNG, while the ten scripts need all of them: `scripts/plot_jet_limiter_epochs.py:233` (dpi=150), `scripts/plot_jet_epoch_evolution.py:289,514,639,711,798,872,1026` and `scripts/plot_jet_poloidal.py:380,457` (`bbox_inches=\"tight\"`), `scripts/plot_jet_composite_geometry.py:528` (arbitrary `args.output` suffix at dpi=200), `scripts/figures_discovery_to_mapping.py:308-325` (receipt dict with byte sizes and pixel dimensions), `scripts/figures_icp_knowledge_map.py:1032` (GIF). A migration that keeps each script's signature grows ten option-shims over the same export; the design that actually hides behaviour is one entry point in `style.py` whose keywords absorb dpi/bbox/format/preview/receipt",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/plotting/signals.py:217",
+      "id": "deep_module-2",
+      "reason": "\u00a71 routes a caller-signature defect into the export function, which is the spread-of-surface failure the rubric targets; placing it correctly keeps \u00a71's aspect work as the only export change.",
+      "text": "\u00a71 requires \"a figure-level legend that would wrap is laid out on one row\", but the wrap is created at the legend's own construction by `ncol=min(3, len(axis.lines))`: four traces give three columns and two rows. A legend is not reachable as \"figure-level\" from inside `save_figure` without guessing which artists the caller meant, and re-laying it out is matplotlib's own responsibility; the one-expression fix is at `signals.py:217` (`ncol=len(axis.lines)`), leaving `save_figure` as the check",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "scripts/figures_icp_knowledge_map.py:779",
+      "id": "thin_wrapper-1",
+      "reason": "a wrapper with no justification is a finding under this rubric unless the plan's endpoint is stated as an owner-level extension; the honest change is one owner signature with keyword options and no adapters.",
+      "text": "the design as it reads keeps a per-script adapter in front of the owner: `save_static`/`save_traffic` (`figures_icp_knowledge_map.py:779,1049`), `save` (`figures_discovery_to_mapping.py:308`, `figures_knowledge_graph_scale.py:697`), and the ai_stack export at `figures_ai_stack.py:650-660`; each would forward to `save_figure` and add only the preview/second-format branch, with no statement of why the owner cannot carry it",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/plotting/style.py:74",
+      "id": "duplicate_owner-1",
+      "reason": "a sixth copy of the declaration is the predictable outcome of migrating call sites one by one; extending `style.py:41` with the preview and declaration behaviours is the single owner, and the plan should say the migrated figure keeps the declared size rather than that each script declares it.",
+      "text": "SVG physical-size declaration and preview export are duplicated rather than owned: the slide rewrite `width=\"31.1cm\"` is written at `style.py:74`, `scripts/figures_ai_stack.py:660`, `scripts/figures_icp_knowledge_map.py:792` and `:1222`, `scripts/figures_knowledge_graph_scale.py:703`; SVG trailing-newline normalisation at `figures_discovery_to_mapping.py:313-314`; the dpi=100 preview PNG at `figures_ai_stack.py:651`, `figures_icp_knowledge_map.py:783` and `:1058`, `figures_knowledge_graph_scale.py:666`, `figures_mapping_flow.py:241`; and the canvas constants are re-declared at `figures_icp_knowledge_map.py:692` and `figures_knowledge_graph_scale.py:49` against `style.CANVAS` (style.py:11). `scripts/figures_jt60sa_mapping_study.py:135` declares no slide size at all. Two test files assert the literal `width=\"31.1cm\" height=\"16cm\"` (`tests/plotting/test_signals.py:149`, `scripts/codac_uda_prototype/test_reader.py:366`), so the declaration shape is a de-facto contract",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/plotting/style.py:32",
+      "id": "interface_budget-1",
+      "reason": "the section adds interface surface in its own text without the required accounting, and once the legend fix moves to `signals.py:217` the addition disappears entirely.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71 adds a refusal family (\"refused with the reason\" for a wrapping legend) beside the existing clipped/overlap/direct-label/format refusals at `imas_codex/plotting/style.py:32,35,49,62,66`, and says nothing about what it retires or merges or why nothing can be, while the aspect fix itself needs no new surface (style.py:73-74 becomes `31.1 * h / w`, which leaves the 14 x 7.2 default at 16 cm)",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4ed233528ff5627f971cea35905652e7090cca09",
+  "plan_fingerprint": "370d3d2df01fc44dfc36279e6c7e9948ca99746c23b2bf4e73f770851f4dab9f",
+  "plan_slug": "figure-scripts-use-the-shared-save-function",
+  "plan_version": 0,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261115T204759308091-plan-review-of-figure-scripts-use-the-shared-save-function",
+  "reviewed_blob_sha": "7983f514b5c0d8597ec7de08167d0621a9d2837e",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the ten scripts need dpi, bbox, format, preview and receipt behaviours that `style.py:41` does not offer, so a literal \"call save_figure\" migration becomes ten shallow option-shims instead of one deeper export entry point.",
+    "duplicate_owner": "a finding \u2014 SVG slide-size declaration, preview export and canvas constants are duplicated across `imas_codex/plotting/style.py` and five scripts, and the design must extend the owner rather than add a sixth copy.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71 adds a refusal reason for a wrapping legend without naming what it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 `imas_codex/plotting/style.py:41 save_figure` and `style.py:16 _validate_text` already are the mechanism \u00a72 wants, but the plan counts two script copies of the text check where there are three, one of them imported by a fourth script.",
+    "thin_wrapper": "a finding \u2014 per-script `save`/`save_static`/`save_traffic` wrappers and a save-time legend re-layout would both be thin layers over machinery (matplotlib's legend layout, the owner's export) that can be extended or fixed at its own call site."
+  },
+  "section_digests": {
+    "_document": "a54f27d05efc5590a78b831b1a2c0a730300f59d72eb6f4b6bf2a192195e9d70",
+    "s1": "bef2f04edfa0724b3ef60e9ba9130aecaad251de7a82b6a30865d3153636a9f0",
+    "s2": "406c775af3b8a02a9dcd64a0e1ba02f603d6c72c4c2fc9e1fefd833b4935c36f"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T21:05:45.637907+00:00",
+  "total": null
+}
