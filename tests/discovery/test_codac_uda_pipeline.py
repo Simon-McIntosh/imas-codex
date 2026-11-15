@@ -1,6 +1,6 @@
 """Exercise archive discovery and checking through the pipeline workers."""
 
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import AsyncMock, MagicMock, Mock
 
 import pytest
 
@@ -43,6 +43,9 @@ async def test_seed_reports_only_acknowledged_archive_signals(
     monkeypatch.setattr(parallel, "ingest_discovered_signals", ingest)
     monkeypatch.setattr(parallel, "persist_data_access", Mock())
     monkeypatch.setattr(catalogue, "_persist_archives", Mock())
+    monkeypatch.setattr(catalogue, "GraphClient", MagicMock())
+    parse = Mock()
+    monkeypatch.setattr(catalogue, "persist_name_parses", parse)
     monkeypatch.setattr(
         catalogue,
         "request_archive",
@@ -65,6 +68,10 @@ async def test_seed_reports_only_acknowledged_archive_signals(
     await parallel.seed_worker(state)
     assert state.discover_stats.processed == len(stored) == 1
     assert stored[0]["accessor"] == "DEMO:TEMP"
+    parse.assert_called_once()
+    assert parse.call_args.args[1] == [
+        {"id": stored[0]["id"], "facility": "demo", "selector": "DEMO:TEMP"}
+    ]
 
 
 @pytest.mark.asyncio
