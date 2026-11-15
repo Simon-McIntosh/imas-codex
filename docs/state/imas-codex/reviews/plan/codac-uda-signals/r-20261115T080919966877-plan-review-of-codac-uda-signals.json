@@ -61,9 +61,28 @@
       "note": "Section 14's coverage measure now names its population: the signals that carry a parsed component code. It reports how many of those link to a node, and separately how many catalogued signals carry no parsed code.",
       "reason": "",
       "when": "2026-11-15T08:37:39.306832+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "da4c390a6e83e1cf7ef0e24816b3f77878e566dd",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 12 now counts distinct variable selectors: the census gives each archive's count, the number listed by both, and the count of the union, and the graph count must equal the union. Each signal records every archive that lists it.",
+      "reason": "",
+      "when": "2026-11-15T08:37:42.927671+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "da4c390a6e83e1cf7ef0e24816b3f77878e566dd",
+      "commit_basis": "edit",
+      "note": "Section 12 now counts distinct variable selectors: the census gives each archive's count, the number listed by both, and the count of the union, and the graph count must equal the union. Each signal records every archive that lists it.",
+      "reason": "",
+      "when": "2026-11-15T08:37:42.927671+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
