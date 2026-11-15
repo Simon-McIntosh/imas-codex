@@ -125,6 +125,16 @@
       "note": "Section 6 now requires that component and pattern descriptions reach members through the one group enrichment mechanism the pipeline already has, with its claim, cost and status behaviour, and its done-when checks that no second propagation path exists.",
       "reason": "",
       "when": "2026-11-15T10:47:17.515993+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "Section 8 now accounts for its surface: the search extends the existing signal search with no new tool, and the read is the one added tool because no existing tool returns archive samples; the landing record names any tool it could retire or merge.",
+      "reason": "",
+      "when": "2026-11-15T10:47:21.857699+00:00"
     }
   ],
   "responses": {
@@ -145,6 +155,15 @@
       "note": "The plan states the endpoint; the node's brief cites this existing owner as the mechanism to extend and forbids a second one. Section 4 now states that ICP and IDM content is read through the project's existing authenticated document access, so no second reader appears.",
       "reason": "",
       "when": "2026-11-15T10:47:13.937089+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "note": "Section 8 now accounts for its surface: the search extends the existing signal search with no new tool, and the read is the one added tool because no existing tool returns archive samples; the landing record names any tool it could retire or merge.",
+      "reason": "",
+      "when": "2026-11-15T10:47:21.857699+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
