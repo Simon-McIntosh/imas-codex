@@ -182,6 +182,8 @@ async def replay_batch(
     messages=None,
     capture_context=False,
     arm="test",
+    call_options=None,
+    enrichment_options=None,
 ) -> dict:
     """Exercise production prompting or replay one exact captured request."""
     import litellm
@@ -214,6 +216,12 @@ async def replay_batch(
                 "served_model": response.model,
                 "seconds": time.monotonic() - started,
                 "finish_reason": response.choices[0].finish_reason,
+                "input_tokens": response.usage.prompt_tokens or 0,
+                "output_tokens": response.usage.completion_tokens or 0,
+                "reasoning_tokens": getattr(response.usage, "reasoning_tokens", 0),
+                "reasoning": getattr(
+                    response.choices[0].message, "reasoning_content", None
+                ),
             }
         )
         accounting["input_tokens"] += response.usage.prompt_tokens or 0
@@ -236,6 +244,7 @@ async def replay_batch(
         if capture_context:
             return SignalEnrichmentBatch(results=[]), 0.0, 0
         kwargs.update(max_retries=1, timeout=180, max_tokens=8192)
+        kwargs.update(call_options or {})
         try:
             return await original_call(**kwargs)
         except Exception as exc:
@@ -265,6 +274,13 @@ async def replay_batch(
 
     started = time.monotonic()
     with ExitStack() as stack:
+        if enrichment_options is not None:
+            stack.enter_context(
+                patch(
+                    "imas_codex.discovery.signals.enrichment.get_enrichment_options",
+                    return_value=enrichment_options,
+                )
+            )
         replacements = {
             "claim_signals_for_enrichment": claim,
             "prepare_signal_sources": lambda *a, **k: (0, 0, 0),

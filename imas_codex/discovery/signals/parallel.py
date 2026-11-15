@@ -4263,8 +4263,19 @@ async def enrich_worker(
     model = get_model("discovery-describe")
     reasoning_effort = get_reasoning_effort("discovery-describe")
 
+    from imas_codex.discovery.signals.enrichment import (
+        fit_enrichment_prompt,
+        get_enrichment_options,
+    )
+
+    enrichment_options = get_enrichment_options(model)
+    call_options = {"reasoning_effort": reasoning_effort}
+    call_options.update(enrichment_options.call_kwargs())
+
     # Render system prompt once (contains physics domains from schema)
     system_prompt = render_prompt("signals/enrichment")
+    if enrichment_options.fitted_prompt:
+        system_prompt = fit_enrichment_prompt(system_prompt)
 
     # Compute prompt hash for enrichment analytics tracking
     import hashlib
@@ -4609,7 +4620,7 @@ async def enrich_worker(
         signals = await asyncio.to_thread(
             claim_signals_for_enrichment,
             state.facility,
-            batch_size=20,
+            batch_size=enrichment_options.batch_size,
             scanner_types=state.scanner_types,
             categories=state.categories,
             **({"focus_items": state.focus_items} if state.focus_items else {}),
@@ -4972,8 +4983,8 @@ async def enrich_worker(
                 ],
                 response_model=SignalEnrichmentBatch,
                 temperature=0.3,
-                reasoning_effort=reasoning_effort,
                 service="facility-discovery",
+                **call_options,
             )
         except ProviderBudgetExhausted as e:
             log_worker_error(
