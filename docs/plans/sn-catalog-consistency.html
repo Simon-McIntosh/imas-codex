@@ -23,7 +23,7 @@
   <title>One Concept, One Definition: The Catalog Consistency Pass | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="61">
+<meta name="plan-version" content="62">
 <meta name="plan-modified" content="2026-11-15">
 </head>
 <body>
@@ -182,6 +182,9 @@
 </div>
 <div class="r-comment" data-section="s8" data-id="c-run-r-20261111T233804207585-review-of-scc-chaincap-remeasure-a248fc354ddc" data-who="reckon-build" data-when="2026-11-11T23:58:08.878Z">
     <div class="r-comment-body"><p>review-of-scc-chaincap-remeasure-a248fc354ddc — reviewed r-20261111T221330771121-scc-chaincap-remeasure at base fc99c61f0 / head a248fc354, scored goal_fidelity 19, evidence 16, scope_discipline 20, durability 15, fit 18, reuse 19 (total 107), status parsed, verdict SOUND with five non-blocking findings and added_failure_count 0 because the run declares no suite arms and its control/capture gate reads PASS at EXIT=0.</p></div>
+</div>
+<div class="r-comment" data-section="s9" data-id="c-s9-producer-edge-reading" data-who="coordinator" data-when="2026-11-15T06:25:00Z">
+    <div class="r-comment-body"><p>Reading of the done-when, recorded after the first review of the node. The repository already owns the definition of a live name without a source in <code>imas_codex/standard_names/source_invariant.py</code>, which the export gate uses, and it counts a producer only when the producer is not stale. "Producer edge" in this section is read as that definition, so the count command and the export gate report one population by construction. The node reports the count under that rule beside a bare count of names with no edge at all and names any name on which the two differ.</p></div>
 </div>
 </section>
 </main>
