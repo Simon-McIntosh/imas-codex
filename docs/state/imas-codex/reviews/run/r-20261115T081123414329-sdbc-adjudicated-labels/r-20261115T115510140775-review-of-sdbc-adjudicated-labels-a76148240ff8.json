@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "The reviewed run's manifest records baseline_suite null and after_suite null (its parsed manifest in classification.json carries the same two nulls), so there is no base arm and no after arm to difference: the run is an evidence node whose only gate is the shell script docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh, whose log ends EXIT=0 at a76148240, and the run's exit.json records no pytest suite. The count is therefore 0 by absence of arms, not by a measured difference.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-15T12:15:20.677Z",
+  "dispatched_at": "2026-11-15T12:15:02Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "class": "evidence_receipt",
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh",
+      "id": "gate-build-status-masked-1",
+      "line": "57",
+      "severity": "non-blocking",
+      "text": "non-blocking: build and report are sequential commands inside one subshell (lines 55-59), so the subshell's status is the last command's alone; a failed build leaves the committed JSON in the extracted tree, report regenerates the page from that committed file, both cmp arms then compare committed content with itself, and the gate closes EXIT=0 with the build failure unrecorded."
+    },
+    {
+      "class": "weak_assertion",
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py",
+      "id": "self-referential-rule-2",
+      "line": "458",
+      "severity": "non-blocking",
+      "text": "non-blocking: the label-error rule assertion compares adjudicated_verdict against next(iter(row[\"readings\"].values()))[\"verdict\"], the first reading carried by the same document, so it never asserts that both fresh readers agree; a row whose second reading was flipped still passes, and the check reads its expected value from the artefact it judges rather than from an independent source."
+    },
+    {
+      "class": "evidence_receipt",
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py",
+      "id": "unchecked-summary-blocks-3",
+      "line": "479",
+      "severity": "non-blocking",
+      "text": "non-blocking: mode_check compares only rows against a fresh build, so the document's controls, adjudicated summary and spend_usd blocks are never asserted; a regression inside control_agreement changes only the controls block and the page sentence, which stays green once both artifacts are regenerated."
+    },
+    {
+      "class": "scope",
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh",
+      "id": "unfenced-paths-4",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate and four committed input extracts (third-reader-readings.json, fresh-reader-classes.json, adopted-question-readings.json, question-split.json) land outside the node's three declared write paths, so the landed change is five files wider than the fence the coordinator set; the repair that required them did not extend the declared scope."
+    },
+    {
+      "class": "housekeeping",
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh",
+      "id": "scratch-outside-tmpdir-5",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the scratch tree is created with mktemp -d /tmp/... rather than under $TMPDIR, so a run on a compute node writes to node-local /tmp and a scratch sweep on another node cannot collect it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none",
+    "diff": "read all six commits 02fb4543..a76148240 commit by commit: 054ae0a79 adds the set (20714 lines), the page and the script; fd031c33 replaces the run-state and prototype-state reads with four committed extracts and drops the wilson/score copies; 40c87847 removes one dead variable; 51546dda renames read_but_not_adjudicated to disputes and adds fresh_reader_agreements; ea33e950b adds the 75-line gate; a76148240 relabels the gate's command line.",
+    "done_when": "read the node's five-clause measure and recomputed every clause from the landed artefacts: 2044 rows / 2044 distinct names / zero null adjudicated verdicts, readings on exactly 322 names (1722 with none, 322 with a reading, 80 of them at three readers, all 40 split names carrying the third reading), controls 40 read and 38 agreed, the original label file's sha256 88df49e4e5744423afa24968d5223081ad5ebc18a56d3516865f92789b15c2a8 with no diff to reader-verdicts.json, spend USD 1.354592 against the USD 5 ceiling, and sdbc-adjudicated-labels.html stating 1722 names never re-read and 1021 of 2044 scored.",
+    "durability": "the gate refuses a deliberately broken row (adjudicated-labels-gate.log:19 status=1), but the rebuild step's build status is dropped (adjudicated-labels-gate.sh:57-58) and the label-error assertion (adjudicated-labels.py:458) compares against the document's own first reading.",
+    "goal": "the node goal is to produce the adjudicated label set for the name-against-definition check; docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json carries 2044 rows over 2044 distinct names, each with original_verdict, adjudicated_verdict and reached, so the goal's deliverable is present.",
+    "manifest": "read; it records status complete, six commits, eight changed paths, the counts (2044 names, 161 disputed, 53 corrected, 40 settled, 68 upheld, 0 contested, 21 flagged-to-stands, 51 stands-to-flagged, 1722 never re-read), spend USD 1.354592, and the gate as its test, with baseline_suite and after_suite both null so no pytest arm exists.",
+    "write_paths": "the manifest declares three paths; git diff --stat 02fb4543 a76148240 reports eight changed files, so five -- docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh:1 and the four committed input extracts -- land outside the fence."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to produce the adjudicated label set for the name-against-definition check; docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json carries 2044 rows over 2044 distinct names, each with original_verdict, adjudicated_verdict and reached, so the goal's deliverable is present.\nVERDICT done_when: read the node's five-clause measure and recomputed every clause from the landed artefacts: 2044 rows / 2044 distinct names / zero null adjudicated verdicts, readings on exactly 322 names (1722 with none, 322 with a reading, 80 of them at three readers, all 40 split names carrying the third reading), controls 40 read and 38 agreed, the original label file's sha256 88df49e4e5744423afa24968d5223081ad5ebc18a56d3516865f92789b15c2a8 with no diff to reader-verdicts.json, spend USD 1.354592 against the USD 5 ceiling, and sdbc-adjudicated-labels.html stating 1722 names never re-read and 1021 of 2044 scored.\nVERDICT write_paths: the manifest declares three paths; git diff --stat 02fb4543 a76148240 reports eight changed files, so five -- docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh:1 and the four committed input extracts -- land outside the fence.\nVERDICT manifest: read; it records status complete, six commits, eight changed paths, the counts (2044 names, 161 disputed, 53 corrected, 40 settled, 68 upheld, 0 contested, 21 flagged-to-stands, 51 stands-to-flagged, 1722 never re-read), spend USD 1.354592, and the gate as its test, with baseline_suite and after_suite both null so no pytest arm exists.\nVERDICT diff: read all six commits 02fb4543..a76148240 commit by commit: 054ae0a79 adds the set (20714 lines), the page and the script; fd031c33 replaces the run-state and prototype-state reads with four committed extracts and drops the wilson/score copies; 40c87847 removes one dead variable; 51546dda renames read_but_not_adjudicated to disputes and adds fresh_reader_agreements; ea33e950b adds the 75-line gate; a76148240 relabels the gate's command line.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-name-definition-graph-reading/reader-verdicts-adjudicated.json holds 2044 rows, 2044 distinct names, zero null adjudicated_verdict, 161 dispute-labelled rows and the four reached values the brief names.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh:34 runs the check whose assertions at adjudicated-labels.py:442-483 cover row count, distinctness, the per-dispute rule and the unchanged input sha256, while spend_usd and the controls block are asserted nowhere.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: five of the eight changed paths (docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh:1 and the four input extracts) are outside the three write paths the manifest declares.\nSCORE durability: 13\nJUSTIFICATION durability: adjudicated-labels-gate.log:19 records the deliberately broken row refused at status=1, but docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh:57-58 lets a failed build pass as report's status and adjudicated-labels.py:458 asserts against the document's own first reading.\nSCORE fit: 16\nJUSTIFICATION fit: docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py:889-903 follows the prototype's module-constant and argparse-mode idiom, and the page's sdbc- name is the one the brief requires.\nSCORE reuse: 16\nJUSTIFICATION reuse: docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py:607 delegates scoring to prototype.score_arm and the wilson copy is gone, while build_rows at :308-317 restates the relabel rule owned at name-check-prototype.py:1210 without calling it.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh:57 non-blocking: build and report run as sequential commands inside one subshell (lines 55-59), so the subshell's status is report's alone; a failed build leaves the committed JSON in the extracted tree, report then regenerates the page from it, both cmp arms compare committed content with itself, and the gate closes EXIT=0 without recording the build failure.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py:458 non-blocking: the label-error assertion compares adjudicated_verdict against next(iter(row[\"readings\"].values())) -- the first reading carried by the same document -- so it never asserts that both fresh readers agree, and a row whose second reading was flipped to the opposite verdict still passes.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py:479 non-blocking: mode_check compares only rows against a fresh build, so the document's controls, adjudicated summary and spend_usd blocks, and the page's control-agreement figure, have no assertion behind them; a regression inside control_agreement stays green once the artifacts are regenerated.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels.py:1 non-blocking: the gate and four committed input extracts (third-reader-readings.json, fresh-reader-classes.json, adopted-question-readings.json, question-split.json) land outside the node's three declared write paths, so the landed change is five files wider than the fence the coordinator set.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/adjudicated-labels-gate.sh:15 non-blocking: the scratch tree is created with mktemp -d /tmp/... rather than under $TMPDIR, so the gate writes node-local /tmp and leaves a directory no scratch sweep on another node can collect.",
+  "review_node": "review-of-sdbc-adjudicated-labels-a76148240ff8",
+  "review_run_id": "r-20261115T115510140775-review-of-sdbc-adjudicated-labels-a76148240ff8",
+  "reviewed_base_sha": "02fb45437b641644e4c1760864b44a04334905da",
+  "reviewed_head_sha": "a76148240ff8f235d665da903405dd8f8167683d",
+  "reviewed_run_id": "r-20261115T081123414329-sdbc-adjudicated-labels",
+  "reviewer": "independent review worker",
+  "scores": {
+    "durability": 13,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T12:36:02.977525+00:00",
+  "total": 93
+}
