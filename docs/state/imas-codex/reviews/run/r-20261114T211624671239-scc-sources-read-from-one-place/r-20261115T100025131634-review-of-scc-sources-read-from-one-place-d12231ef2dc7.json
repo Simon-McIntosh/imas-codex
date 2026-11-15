@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T10:53:25.697Z",
+  "dispatched_at": "2026-11-15T10:00:51Z",
+  "findings": [
+    {
+      "file": "manifest.md",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "changed_paths lists 24 paths and omits imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:1501, worker_review_docs.py:157 and worker_review_names.py:1488, all of which the diff rewrites, so the record of what landed is incomplete exactly where a coordinator audits fidelity."
+    },
+    {
+      "file": "manifest.md",
+      "line": 48,
+      "severity": "non-blocking",
+      "text": "outside_scope names eight of the twenty-three code files written beyond the fence and omits imas_codex/standard_names/review/pipeline.py, promote.py, context.py, campaign_pricing.py, catalog_import.py, edit.py, review/checks.py and the four graph_store modules, so the disclosed overreach understates the gate's real footprint."
+    },
+    {
+      "file": "gate-base.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "the baseline arm's log opens with the pytest banner and carries no revision or tree line, so the baseline_suite.revision of 627f13045 in manifest.md:43 cannot be tied to this log from its own content, unlike baseline-gate.log:1 and final-gate.log:1 which name theirs."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-catalog-consistency/scc-sources-read-from-one-place.html",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "the done_when asks the reader agreement to be shown for the 85 live names, and the record quotes only the pre-change reading (\"Name search answered every one of the 85 with no source\"); no post-change search over those 85 is recorded, so the live-graph half of that clause rests on the projection being used rather than on a measurement."
+    },
+    {
+      "file": "tests/standard_names/test_source_reads.py",
+      "line": 189,
+      "severity": "non-blocking",
+      "text": "the done_when fixes the disposable-graph expectation as seven planted names reporting 2, and the fixture plants an eighth name with a stale-only producer and asserts count==3, so the literal figure the done_when states is asserted nowhere even though the stricter fixture excuses it."
+    },
+    {
+      "file": "imas_codex/standard_names/graph_store/graph_cost_and_claims.py",
+      "line": 665,
+      "severity": "non-blocking",
+      "text": "the twelve newly routed claim, promotion and worker Cypher statements are exercised by no gate, because both suite arms in gate-base.log and gate-head2.log ran the default markers that exclude @pytest.mark.graph and d12231ef2 has no execution of them, so a malformed projection composition in any of them would appear first in production."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that every reader of a name's sources agrees with its producer edges; imas_codex/standard_names/source_reads.py:36-53 is the one place, and imas_codex/standard_names/search.py:552, imas_codex/standard_names/benchmark_roles.py:335/410/469, imas_codex/standard_names/judgment_goldens.py:303/687, imas_codex/standard_names/review/pipeline.py:318 and the eleven claim, promote and worker queries all project the edges, with no reader left on the copied list (verified against a package-wide scan of .source_paths at d12231ef2).\nVERDICT done_when: the gate measures the done_when's parts unevenly \u2014 tests/standard_names/test_source_reads.py:148-202 asserts the planted-graph readers and the count, and gate-base.log:1135 / gate-head2.log:1135 both end 0 failed with EXIT=0, but the planted-graph suite ran eight names and asserts count==3 where the done_when states seven names and 2, and the 85-name live demonstration is quoted at docs/evidence/fragments/sn-catalog-consistency/scc-sources-read-from-one-place.html:10 from the pre-change read only.\nVERDICT write_paths: the declared grant was docs/evidence/fragments/sn-catalog-* plus the docs/figures directory set; the diff touches 27 files of which 24 are package or test code outside that grant, disclosed in manifest.md:48 outside_scope, though manifest.md:10-34 changed_paths omits the three worker_tasks modules and outside_scope omits eleven other touched files.\nVERDICT manifest: read manifest.md; it records eleven commits, status complete, the repaired review-state field derivation at a9ca8f6db, both suite arms with zero failures, the negative-control log and its note, measurement_module /tmp/mcintos-scc-final-1316867-SBKP/imas_codex/standard_names/source_reads.py and its cwd, and the frozen-corpus limitation.\nVERDICT diff: read all eleven commits from e103e0ed8f129308a0ebd11d9ca9f4e8172c34be to d12231ef2dc7cef060028176f61047a997e1492d \u2014 27 files, 3687 insertions, 100 deletions \u2014 and confirmed source_reads.py is new, that source_invariant.py:27-45 gains the two predicate builders the export gate now composes, and that d12231ef2 is docs-only (two files).\nCALL_SITES: imas_codex/standard_names/search.py:fetch_standard_names, imas_codex/standard_names/review/pipeline.py:_load_all_names, imas_codex/cli/sn.py:sn_sourceless, imas_codex/standard_names/promote.py:_load_review_node, imas_codex/graph/sn_cleanup.py:collect_purge_candidates, imas_codex/standard_names/context.py:fetch_review_neighbours, imas_codex/standard_names/benchmark_roles.py:load_docs_sample\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/source_reads.py:36 renders the projection every reader now uses, and imas_codex/graph/sn_cleanup.py:66 and imas_codex/standard_names/review/pipeline.py:318 are two of the fifteen routed readers, leaving no Cypher reader of sn.source_paths unsourced.\nSCORE evidence: 15\nJUSTIFICATION evidence: gate-base.log:1135 and gate-head2.log:1135 both record 0 failed with EXIT=0 and tests/standard_names/test_source_reads.py:189 asserts the count, but gate-base.log carries no revision header and the done_when's \"reports 2\" over seven names is asserted as 3 over eight.\nSCORE scope_discipline: 6\nJUSTIFICATION scope_discipline: the grant in manifest.md:3 is two documentation paths while the diff writes imas_codex/cli/sn.py:3893 and 23 other code paths, and manifest.md:10-34 under-declares three of them.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_source_reads.py:644 and :649 fail when a reader touches the copied list and again when a listed site disappears, and negative-control.log:43-46 shows two planted-graph assertions reddening when source_reads.py:44 is reverted to the copied list.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/standard_names/source_reads.py:1-19 follows the module-docstring and predicate-composition idiom of imas_codex/standard_names/source_invariant.py:27-45, and no symbol or filename carries a plan, ticket or version identifier.\nSCORE reuse: 18\nJUSTIFICATION reuse: normalize_source_ids at imas_codex/standard_names/source_reads.py:51 delegates to merge_source_paths (imas_codex/standard_names/source_paths.py:192) and count_live_names_without_source imports the predicates from imas_codex/standard_names/source_invariant.py:27-45, so the only new owner is the projection, which no prior module rendered.\nFINDING manifest.md:10 non-blocking: changed_paths lists 24 paths and omits imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:1501, worker_review_docs.py:157 and worker_review_names.py:1488, all of which the diff rewrites, so the record of what landed is incomplete exactly where a coordinator audits fidelity.\nFINDING manifest.md:48 non-blocking: outside_scope names eight of the twenty-three code files written beyond the fence and omits imas_codex/standard_names/review/pipeline.py, promote.py, context.py, campaign_pricing.py, catalog_import.py, edit.py, review/checks.py and the four graph_store modules, so the disclosed overreach understates the gate's real footprint.\nFINDING gate-base.log:1 non-blocking: the baseline arm's log opens with the pytest banner and carries no revision or tree line, so the baseline_suite.revision of 627f13045 in manifest.md:43 cannot be tied to this log from its own content, unlike baseline-gate.log:1 and final-gate.log:1 which name theirs.\nFINDING docs/evidence/fragments/sn-catalog-consistency/scc-sources-read-from-one-place.html:10 non-blocking: the done_when asks the reader agreement to be shown for the 85 live names, and the record quotes only the pre-change reading (\"Name search answered every one of the 85 with no source\"); no post-change search over those 85 is recorded, so the live-graph half of that clause rests on the projection being used rather than on a measurement.\nFINDING tests/standard_names/test_source_reads.py:189 non-blocking: the done_when fixes the disposable-graph expectation as seven planted names reporting 2, and the fixture plants an eighth name with a stale-only producer and asserts count==3, so the literal figure the done_when states is asserted nowhere even though the stricter fixture excuses it.\nFINDING imas_codex/standard_names/graph_store/graph_cost_and_claims.py:665 non-blocking: the twelve newly routed claim, promotion and worker Cypher statements are exercised by no gate, because both suite arms in gate-base.log and gate-head2.log ran the default markers that exclude @pytest.mark.graph and d12231ef2 has no execution of them, so a malformed projection composition in any of them would appear first in production.\n",
+  "review_run_id": "r-20261115T100025131634-review-of-scc-sources-read-from-one-place-d12231ef2dc7",
+  "reviewed_base_sha": "e103e0ed8f129308a0ebd11d9ca9f4e8172c34be",
+  "reviewed_head_sha": "d12231ef2dc7cef060028176f61047a997e1492d",
+  "reviewed_run_id": "r-20261114T211624671239-scc-sources-read-from-one-place",
+  "scores": {
+    "durability": 17,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 6
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T10:53:33.453673+00:00",
+  "total": 90
+}
