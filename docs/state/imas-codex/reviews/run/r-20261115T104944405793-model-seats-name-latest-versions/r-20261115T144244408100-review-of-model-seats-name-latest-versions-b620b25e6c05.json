@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/base/llm.py:3552 _post_decisions",
+    "imas_codex/discovery/base/llm.py:3575 call_decisions",
+    "imas_codex/settings.py get_model"
+  ],
+  "completed_at": "2026-11-15T14:45:56.925Z",
+  "dispatched_at": "2026-11-15T14:44:32Z",
+  "findings": [
+    {
+      "file": "tests/config/test_model_seat_reachability.py",
+      "id": "f5efe61c0d8",
+      "line": "161",
+      "severity": "non-blocking",
+      "text": "non-blocking: nothing reddens if the file-wide autouse override of conftest's no_live_decisions_requests is ever restored, because the decisions probe patches the same seam anyway, so the regression this commit repairs could be reintroduced green and a later test in the file would spend on the paid endpoint unnoticed."
+    },
+    {
+      "file": "tests/config/test_model_seat_reachability.py",
+      "id": "f5d21e6efd1",
+      "line": "188",
+      "severity": "non-blocking",
+      "text": "non-blocking: the stub repeats the literal \"https://openrouter.ai/api/alpha/decisions\" instead of llm.DECISIONS_ENDPOINT (imas_codex/discovery/base/llm.py:3305), so moving the constant leaves the probe spending on the old URL, which the guard's own host/path check at tests/conftest.py:433 no longer matches either."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html",
+      "id": "f93a383c0b7",
+      "line": "130",
+      "severity": "non-blocking",
+      "text": "non-blocking: the claim that \"a scratch test proved an unseamed decisions call in this tree still raises the guard's refusal\" has no log in the run directory and to cite it the fragment needed the committed proof already present at tests/discovery/test_llm_decisions.py:344, so the evidence artifact states a check no reader can re-run from the run."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T104944405793-model-seats-name-latest-versions/manifest.md",
+      "id": "f4503728778",
+      "line": "29",
+      "severity": "non-blocking",
+      "text": "non-blocking: rubric.verification says the head gate \"passes 310 tests\" while gate-after.log at the same revision records \"311 passed\", so the node's own self-check understates the suite it ran by the one test this commit added."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit (5e95c4c is the parent of b620b25, git diff 5e95c4c..b620b25, 93 insertions / 29 deletions across three files) \u2014 the file-wide live-decisions fixture is deleted, the decisions probe now replaces imas_codex/discovery/base/llm.py's _post_decisions seam with a urllib POST, the chat arm requires non-empty content instead of any finish_reason, and the seat scan gains a non-vacuity test; the fragment's probe-table prefixes and the stale \"24.12s\" figure are corrected.",
+    "done_when": "the measure is the landing record of every declared seat against the catalogs, zero added configuration-test failures, one live request per changed seat and a failing negative control; the manifest records gate-after.log (311 passed, 17 deselected, EXIT=0) against gate-baseline.log (203 passed, EXIT=0), gate-live-head.log (17 passed, EXIT=0) and negative-control-live.log (1 failed, EXIT=1), all four at the reviewed revisions.",
+    "goal": "the node goal is \"make every configured model seat name its model's latest available version, or record why it stays\"; at b620b25e6c05 none of the 63 owners returned by tests/config/test_model_seats.py:_declared_models lags its line, so the delta strengthens the instrument that proves that rather than moving a seat.",
+    "manifest": "read at the source run; status complete, both commits named, baseline_suite and after_suite carry log_path and zero failure ids, and negative_control_log names negative-control-live.log, with rubric.verification stating \"310 tests\" where gate-after.log records 311.",
+    "write_paths": "read the source node's declared scope (pyproject.toml, imas_codex/config/, tests/config/, the landing fragment); the delta's three paths are tests/config/test_model_seats.py, tests/config/test_model_seat_reachability.py and the fragment, all inside it, and pyproject.toml is untouched."
+  },
+  "justifications": {
+    "durability": "tests/config/test_model_seat_reachability.py:141 reddens when a route answers 200 with empty content and tests/config/test_model_seats.py:245 reddens when the pyproject key pattern stops matching, but no test reddens if the deleted file-wide guard override at the old line 51 is restored, so the regression this commit repairs is unguarded.",
+    "evidence": "gate-after.log at b620b25e6c05 ends \"311 passed, 17 deselected, 1 warning in 7.92s\" with EXIT=0 and re-reading it with reckon.crew.review.added_failures_from_gate_logs returns (0, []), but the fragment's guard claim at docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html:130 rests on an unrecorded scratch run.",
+    "fit": "the additions follow the module's existing private-helper and docstring idiom at tests/config/test_model_seat_reachability.py:188, though that helper restates the endpoint string the product owns rather than reading it.",
+    "goal_fidelity": "tests/config/test_model_seats.py:305 now fails with the newest release named and the refresh instruction, which is what the goal's \"or record why it stays\" needs, though the goal's \"every configured model seat\" still stops at the pyproject scan and not at imas_codex/settings.py's _MODEL_DEFAULTS.",
+    "reuse": "a search over tests/ and imas_codex/ found fake decisions transports at tests/discovery/test_llm_decisions.py:94 and the guard at tests/conftest.py:415 but no live non-httpx transport, so the new helper is the first of its capability, less one mark for hardcoding imas_codex/discovery/base/llm.py:3305 DECISIONS_ENDPOINT instead of using it.",
+    "scope_discipline": "the delta touches only tests/config/test_model_seats.py, tests/config/test_model_seat_reachability.py and docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html, all inside the declared write paths, and carries no seat change."
+  },
+  "notes": "Reviewed base 5e95c4c is the previously reviewed head and the parent of b620b25, so this record judges only the commit the run gained since review. Neither commit is an ancestor of this review worktree's HEAD 38f55dacd; files were read from the commit objects with git show. Added failures were derived from the reviewed run's own gate logs with reckon.crew.review.gate_log_failures: the reader's positive control is negative-control-live.log, where it returns the gpt-9-absent id while returning [] for gate-baseline.log and gate-after.log, so the zero is a measured zero. _declared_models was evaluated read-only against pyproject.toml at the head tree: 63 owners, including all three keys the non-vacuity test names. No suite was re-run.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is \"make every configured model seat name its model's latest available version, or record why it stays\"; at b620b25e6c05 none of the 63 owners returned by tests/config/test_model_seats.py:_declared_models lags its line, so the delta strengthens the instrument that proves that rather than moving a seat.\nVERDICT done_when: the measure is the landing record of every declared seat against the catalogs, zero added configuration-test failures, one live request per changed seat and a failing negative control; the manifest records gate-after.log (311 passed, 17 deselected, EXIT=0) against gate-baseline.log (203 passed, EXIT=0), gate-live-head.log (17 passed, EXIT=0) and negative-control-live.log (1 failed, EXIT=1), all four at the reviewed revisions.\nVERDICT write_paths: read the source node's declared scope (pyproject.toml, imas_codex/config/, tests/config/, the landing fragment); the delta's three paths are tests/config/test_model_seats.py, tests/config/test_model_seat_reachability.py and the fragment, all inside it, and pyproject.toml is untouched.\nVERDICT manifest: read at the source run; status complete, both commits named, baseline_suite and after_suite carry log_path and zero failure ids, and negative_control_log names negative-control-live.log, with rubric.verification stating \"310 tests\" where gate-after.log records 311.\nVERDICT diff: read commit by commit (5e95c4c is the parent of b620b25, git diff 5e95c4c..b620b25, 93 insertions / 29 deletions across three files) \u2014 the file-wide live-decisions fixture is deleted, the decisions probe now replaces imas_codex/discovery/base/llm.py's _post_decisions seam with a urllib POST, the chat arm requires non-empty content instead of any finish_reason, and the seat scan gains a non-vacuity test; the fragment's probe-table prefixes and the stale \"24.12s\" figure are corrected.\nCALL_SITES: imas_codex/discovery/base/llm.py:3552 _post_decisions, imas_codex/discovery/base/llm.py:3575 call_decisions, imas_codex/settings.py get_model\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: tests/config/test_model_seats.py:305 now fails with the newest release named and the refresh instruction, which is what the goal's \"or record why it stays\" needs, though the goal's \"every configured model seat\" still stops at the pyproject scan and not at imas_codex/settings.py's _MODEL_DEFAULTS.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate-after.log at b620b25e6c05 ends \"311 passed, 17 deselected, 1 warning in 7.92s\" with EXIT=0 and re-reading it with reckon.crew.review.added_failures_from_gate_logs returns (0, []), but the fragment's guard claim at docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html:130 rests on an unrecorded scratch run.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the delta touches only tests/config/test_model_seats.py, tests/config/test_model_seat_reachability.py and docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html, all inside the declared write paths, and carries no seat change.\nSCORE durability: 16\nJUSTIFICATION durability: tests/config/test_model_seat_reachability.py:141 reddens when a route answers 200 with empty content and tests/config/test_model_seats.py:245 reddens when the pyproject key pattern stops matching, but no test reddens if the deleted file-wide guard override at the old line 51 is restored, so the regression this commit repairs is unguarded.\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the module's existing private-helper and docstring idiom at tests/config/test_model_seat_reachability.py:188, though that helper restates the endpoint string the product owns rather than reading it.\nSCORE reuse: 16\nJUSTIFICATION reuse: a search over tests/ and imas_codex/ found fake decisions transports at tests/discovery/test_llm_decisions.py:94 and the guard at tests/conftest.py:415 but no live non-httpx transport, so the new helper is the first of its capability, less one mark for hardcoding imas_codex/discovery/base/llm.py:3305 DECISIONS_ENDPOINT instead of using it.\nFINDING tests/config/test_model_seat_reachability.py:161 non-blocking: nothing reddens if the file-wide autouse override of conftest's no_live_decisions_requests is ever restored, because the decisions probe patches the same seam anyway, so the regression this commit repairs could be reintroduced green and a later test in the file would spend on the paid endpoint unnoticed.\nFINDING tests/config/test_model_seat_reachability.py:188 non-blocking: the stub repeats the literal \"https://openrouter.ai/api/alpha/decisions\" instead of llm.DECISIONS_ENDPOINT (imas_codex/discovery/base/llm.py:3305), so moving the constant leaves the probe spending on the old URL, which the guard's own host/path check at tests/conftest.py:433 no longer matches either.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/model-seats-name-latest-versions.html:130 non-blocking: the claim that \"a scratch test proved an unseamed decisions call in this tree still raises the guard's refusal\" has no log in the run directory and to cite it the fragment needed the committed proof already present at tests/discovery/test_llm_decisions.py:344, so the evidence artifact states a check no reader can re-run from the run.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T104944405793-model-seats-name-latest-versions/manifest.md:29 non-blocking: rubric.verification says the head gate \"passes 310 tests\" while gate-after.log at the same revision records \"311 passed\", so the node's own self-check understates the suite it ran by the one test this commit added.\n",
+  "review_run_id": "r-20261115T144244408100-review-of-model-seats-name-latest-versions-b620b25e6c05",
+  "reviewed_base_sha": "5e95c4c21cc315318d4a9f142436a90a0edfa6a8",
+  "reviewed_head_sha": "b620b25e6c05cdc875f5732694b321fca23304f4",
+  "reviewed_run_id": "r-20261115T104944405793-model-seats-name-latest-versions",
+  "rubric": "code",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T15:05:21.486788+00:00",
+  "total": 101
+}
