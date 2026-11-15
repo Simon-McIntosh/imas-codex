@@ -43,6 +43,16 @@ imports:
 # =============================================================================
 
 enums:
+  SignalNameParseOutcome:
+    description: Syntactic coverage of an archive selector, independent of convention confirmation
+    permissible_values:
+      parsed:
+        description: Component prefix, control function and variable token match the parser grammar
+      partly_parsed:
+        description: A component prefix is recognised but the function or variable token is incomplete
+      not_conforming:
+        description: No unambiguous component prefix can be derived
+
   ArchiveSamplingMode:
     description: Sampling semantics established by archive metadata or a read
     permissible_values:
@@ -1683,6 +1693,36 @@ classes:
       description:
         description: What data this server hosts
 
+  PlantComponent:
+    description: >-
+      Candidate plant component identified by a hierarchical selector prefix.
+      A syntactic parent is not a verified engineering identity or PBS mapping.
+    class_uri: facility:PlantComponent
+    attributes:
+      id:
+        identifier: true
+        required: true
+        description: Composite key as facility_id:plant_component:code
+      facility_id:
+        required: true
+        range: Facility
+        annotations:
+          relationship_type: AT_FACILITY
+      code:
+        required: true
+        description: Complete selector prefix through this hierarchy level
+      name:
+        description: Local token at this level of the candidate hierarchy
+      description:
+        description: Explanation of this candidate component's origin
+      parent_component:
+        range: PlantComponent
+        description: Candidate parent derived by removing the final hyphen-delimited token
+        annotations:
+          relationship_type: PARENT_COMPONENT
+      parse_provenance:
+        description: Parser rule provenance; does not assert engineering identity
+
   ArchiveEndpoint:
     description: >-
       A named archive endpoint, independent of MDSplus infrastructure.
@@ -2880,6 +2920,28 @@ classes:
       archive_cohorts:
         description: Opaque fingerprints of declared archive cohorts that enumerated this selector
         multivalued: true
+      name_parse_outcome:
+        range: SignalNameParseOutcome
+        description: Syntactic parse coverage; parsed does not mean confirmed against a naming convention
+      name_parse_provenance:
+        description: Origin of the rules used to interpret the original accessor
+      name_parse_rule_status:
+        description: Whether the grammar has been confirmed against the naming convention
+      name_parse_reason:
+        description: Explanation of incomplete or unrecognised selector syntax
+      plant_system_code:
+        description: Candidate plant-system token derived from the first selector-prefix segment
+      plant_component_code:
+        description: Complete candidate component prefix before the colon
+      control_function:
+        description: Candidate control-function token between the colon and the variable delimiter
+      variable_token:
+        description: Variable suffix after the control-function delimiter, preserved verbatim
+      candidate_plant_component:
+        range: PlantComponent
+        description: Syntactically derived candidate, never a verified identity
+        annotations:
+          relationship_type: CANDIDATE_PLANT_COMPONENT
       sampling_mode:
         description: Archive-established sampling semantics, unknown when not established
         range: ArchiveSamplingMode
