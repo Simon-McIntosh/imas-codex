@@ -1,63 +1,82 @@
 <article id="icp-read-only-client-evidence">
-  <h2>Guarded integration client: implemented; live authentication blocked</h2>
-  <p>The client is committed at <code>7c46cc445a86208e8b5fc3a1d6760d2d1b8c66e0</code>.
-  The focused gate completed with <strong>115 passed</strong>. Removing the integration
-  method check made <strong>28 write-refusal tests fail</strong>, covering POST, PUT,
-  PATCH and DELETE through the client, session convenience methods, prepared requests,
-  base-session calls and direct adapter sends. Fixed-method client entry points reject
-  method overrides before any request. Missing stored credentials refuses before any
-  request even with environment credentials present. Session-renewal tests cover an
-  unauthorized response, the gateway reload page, the identity-provider redirect and
-  a relative gateway-policy redirect; persistent expiry is retried once and refused.</p>
-  <p><strong>Live blocker.</strong> The identity-provider exchange completed its login
-  steps, then attempted a POST to a third HTTPS origin. The configured origin policy
-  refused this handoff before transport. The instrumented receipt contains three
-  integration GETs, one identity-provider GET and three identity-provider POSTs; zero
-  non-read integration requests were sent. No authenticated API description was obtained
-  by this node. The coordinator must adjudicate the additional sign-in origin before
-  further live work. This record does not claim the live-access acceptance measure passed.</p>
-  <p>The first live attempt stopped before HTTP because the worktree lacked its ignored
-  private facility configuration and keyring forwarding selected the scheduler controller.
-  Linking the canonical private configuration restored keyring access; the stored
-  username was verified to be an email without recording its value. No credentials,
-  cookies, tokens, private origin, fetched records or full API description are committed.</p>
-  <h3>Offline description inventory</h3>
-  <p>The lead-supplied private description contains <strong>793 paths and 815 operations</strong>:
-  471 GET, 324 POST, 11 DELETE and 9 PUT. There are <strong>471 protocol read operations</strong>
-  and no declared HEAD operations. The declared <code>Bearer</code> security scheme is
-  HTTP bearer with JWT format. Cookie acceptance was established by the prior plan
-  evidence; it has not been independently verified by this node because of the live blocker.</p>
-  <p>Plant and component search GETs declare query parameters <code>start</code> (integer,
-  default 0) and <code>tot</code> (integer, default 10). List-view request schemas declare
-  integer <code>pageIndex</code>, nullable integer-array <code>pageIndexes</code>, and integer
+  <h2>Authenticated integration description read through the guarded client</h2>
+  <p>The client signs in with keyring credentials and reads the API description with gateway
+  session cookies, without configuring an API bearer token. API paths resolve directly from
+  the configured origin. The live description contains <strong>793 paths, 815 operations and
+  471 GET reads</strong>, matching the lead-supplied private copy. The operations are 471 GET,
+  324 POST, 11 DELETE and 9 PUT; no HEAD operation is declared. The declared <code>Bearer</code>
+  security scheme is HTTP bearer with JWT format.</p>
+  <p><strong>Live transport measure:</strong> 11 requests completed: <strong>six integration GETs</strong>,
+  one identity-provider GET, three identity-provider POSTs and one sign-in-gateway POST.
+  There were no integration writes or refused requests in this successful run. Nine requests
+  belonged to the bounded sign-in exchange; two were integration GETs after authentication.
+  Every sign-in receipt includes method, origin and path, without query, body, headers,
+  cookies or token values. The successful transport policy is committed at
+  <code>3e8e2326650d58b6b55ea7898da4a8b3199c3d9a</code>; the subsequent diagnostic-privacy repair
+  is committed at <code>4c2bf413989b5b030fbdbd8fc777cfd5687bb08f</code>.</p>
+  <h3>Authentication boundary and authorisation</h3>
+  <p>The first guarded exchange refused a POST to a third HTTPS origin. The later lead ruling
+  authorises form POSTs during sign-in on observed origins in ignored private configuration.
+  It supersedes the plan sentence: “The only other requests the client may issue are the
+  sign-in exchange with the identity provider's own login host.” The additional origin and
+  observed handoff path are recorded only in private receipts and private configuration.</p>
+  <p>A non-read request requires an explicit, unsigned sign-in exchange and a recognised
+  sign-in form POST. Credentials go only to configured identity-provider origins.
+  Integration-host POSTs additionally require an exact configured gateway path; API and
+  documentation paths remain GET/HEAD-only in every state, even if included in the gateway
+  configuration. After authentication every request is GET or HEAD to the integration origin.
+  Stale-session renewal clears the authenticated state and explicitly re-enters sign-in.
+  Sign-in has a 40-request total budget and the shared exchange's bounded redirect loop.</p>
+  <p>Missing keyring credentials refuses before HTTP, even when environment credentials exist.
+  No prompts, credential files or environment-password fallback are used. Cookies keep their
+  native domain/path scope in memory; they are not flattened into a cross-host persistent store.</p>
+  <h3>Checks and negative controls</h3>
+  <p>The committed source passed <strong>151 focused tests</strong>. POST, PUT, PATCH and DELETE
+  are refused before transport through the client, session convenience methods, prepared
+  requests, base-session calls and direct adapter sends. Fixed-method entry points reject
+  method overrides before transport. Removing the integration method check makes
+  <strong>28 write-refusal tests fail</strong>. Removing the unsigned-exchange state check makes
+  <strong>nine sign-in refusal tests fail</strong>. Tests also refuse foreign origins, a forged
+  Host header, replaced transport, disabled TLS verification, arbitrary POST bodies and
+  credentials sent to a gateway. API POSTs remain refused during and after sign-in.</p>
+  <p>Session-renewal tests cover an unauthorized response, gateway reload HTML, an identity
+  redirect and a relative gateway-policy redirect. Persistent expiry is retried once and
+  then refused. A synthetic privacy reproduction failed because shared sign-in diagnostics
+  logged the synthetic username; its repair checks that credentials, the configured
+  application origin and a redirect query value do not enter those diagnostics. Live probes
+  disabled library logging and recorded only explicit private request receipts.</p>
+  <h3>Paging, request rate and document leads</h3>
+  <p>Plant and component search GETs declare <code>start</code> (integer, default 0) and
+  <code>tot</code> (integer, default 10). List-view request schemas declare integer
+  <code>pageIndex</code>, nullable integer-array <code>pageIndexes</code>, and integer
   <code>pageSize</code>, without bounds or defaults in the examined schema. The plant list
-  operation <code>/api/machine-component/pbs/type/list-contents</code> uses POST and remains
-  refused. No explicit request-rate limit or retry header was found in the description;
-  the client spaces transport calls by 0.5 seconds by default (at most two per second
-  within one client). The parameter search found 790 parameter declarations, including
-  the named search parameters, so its absence findings are not based on an empty input.</p>
-  <p>The inventory below lists all 168 GET operations in the machine-component namespace
-  and the email-attachment stream GET. Generic <code>file/.../stream</code> and
-  <code>file/.../temp-url</code> routes provide file-related leads. A separate search of
-  all 793 paths for IDM, document or attachment names found the email-attachment route;
-  it found no explicitly named IDM or document route in this description. This does
-  not establish that IDM has no separate API. Several advertised GETs have administrative
-  names; the table records their declared HTTP method, not independent proof of their
-  application semantics. None of these operations was called by this node.</p>
-  <h3>Transport coverage and evidence</h3>
-  <p>A source search for request and send calls in the new package finds one HTTP adapter
-  send at <code>_GuardedAdapter.send</code>, preceded by <code>_RequestPolicy.check</code>.
-  Client preflight, session sends, direct adapter sends and redirected prepared requests
-  use that same check. The shared sign-in client is injected with this guarded session;
-  no separate HTTP transport is created for ICP. Tests exercise preserved-method redirects,
-  foreign origins, a forged Host header, transport replacement and disabled TLS verification.
-  No ICP origin literal is embedded in source or tests; application origin and description
-  path are required runtime settings with no fallback.</p>
-  <p>Private run receipts reside under the node's run directory:
-  <code>focused-hardened.log</code>, <code>negative-control.log</code>,
-  <code>live-instrumented.log</code>, <code>offline-summary.json</code> and
-  <code>source-audit.json</code>. The live receipt records only method, target role,
-  status and refusal reason. It contains no request URL, query, body or authentication data.</p>
+  operation <code>/api/machine-component/pbs/type/list-contents</code> uses POST and stays
+  refused, as do POST query operations. No explicit request-rate limit or retry header was
+  found in the description; the client spaces transport calls by 0.5 seconds by default,
+  at most two per second within one client. The search found 790 parameter declarations,
+  including the named search parameters, establishing a positive control for this inspection.</p>
+  <p>The table lists all 168 machine-component GET operations and the email-attachment GET.
+  Generic <code>file/.../stream</code> and <code>file/.../temp-url</code> routes provide file leads.
+  Searching all 793 paths for IDM, document or attachment names found the email-attachment
+  route and no explicitly named IDM or document route in this description. This does not
+  establish whether IDM has a separate API. Some advertised GETs have administrative names:
+  the table records their declared HTTP method, not independent proof of application semantics.
+  None of these record operations was called by this node.</p>
+  <h3>Source audit and durable receipts</h3>
+  <p>The request/send source search finds the HTTP adapter send at <code>_GuardedAdapter.send</code>,
+  preceded by <code>_RequestPolicy.check</code>. Client preflight, session sends, direct adapter
+  sends and redirected prepared requests use that same check. The shared sign-in exchange is
+  injected with this guarded session and creates no separate ICP transport. A tracked-tree
+  scan found zero private-origin literals. No credentials, cookies, token values, full API
+  description, fetched plant records or private origin are committed.</p>
+  <p>Private receipts in the node's run directory include <code>focused-committed.log</code>,
+  <code>negative-method-final.log</code>, <code>negative-state.log</code>,
+  <code>privacy-reproduction.log</code>, <code>live-authorised-sign-in.log</code>,
+  <code>live-summary.json</code>, <code>live-receipt-summary.json</code>,
+  <code>sign-in-observed-origins.json</code> and <code>source-audit.json</code>.
+  On integration, the coordinator transfers the private receipt's <code>configured</code>
+  object into the canonical ignored facility configuration's <code>icp</code> section and
+  owns the separately dispatched merged-head verification.</p>
   <h3>Declared read-operation inventory</h3>
   <table><thead><tr><th>Method</th><th>Origin-relative path</th></tr></thead><tbody>
 <tr><td>GET</td><td><code>/api/machine-component/gbs/building/content/{uid}</code></td></tr>
