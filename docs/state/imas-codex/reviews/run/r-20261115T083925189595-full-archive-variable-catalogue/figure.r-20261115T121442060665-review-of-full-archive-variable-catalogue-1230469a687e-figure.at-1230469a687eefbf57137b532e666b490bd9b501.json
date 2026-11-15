@@ -1,0 +1,55 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-15T12:33:00.993Z",
+  "dispatched_at": "2026-11-15T12:15:33Z",
+  "figures_reviewed": [
+    {
+      "attachment": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T121442060665-review-of-full-archive-variable-catalogue-1230469a687e-figure/image-0.png",
+      "caption_location": "docs/evidence/fragments/codac-uda-signals/full-archive-variable-catalogue.html, section full-archive-variable-catalogue-controls",
+      "path": "docs/figures/codac-uda-signals/full-archive-variable-catalogue/catalogue-recovery.svg",
+      "rubric_items": {
+        "contrast": "pass - blue headings #2878a5 at about 4.9:1 on white and near-black detail text both clear 4.5:1.",
+        "data_ink": "pass - only text and four thin arrows; nothing competes with the content.",
+        "decoration": "pass - no gradient, background fill, frame or grid; arrows are 1.2 pt neutral grey.",
+        "label_collision": "pass - nothing is clipped at the canvas edge, no label overlaps another, and every arrow sits in an inter-column or inter-row gap clear of text.",
+        "legibility": "pass - all six stage headings and their detail lines read at a glance; heading 16 pt and detail 14 pt on a 14 x 7.2 in canvas.",
+        "table_form": "pass - a staged process with directed dependencies is naturally a diagram; the counts it quotes are supporting facts inside the stages, not a dataset."
+      },
+      "script": "docs/figures/codac-uda-signals/full-archive-variable-catalogue/make_figure.py"
+    }
+  ],
+  "findings": [
+    {
+      "file": "docs/figures/codac-uda-signals/full-archive-variable-catalogue/make_figure.py",
+      "line": 36,
+      "severity": "non-blocking",
+      "summary": "The reader-design stage reads 'Disjoint selector ranges, at most eight / Type and full metadata; no data reads'. The quantity 'at most eight' is given no noun on the page (the source it summarises, imas_codex/remote/catalogue_scan.py, says 'one isolated native reader per calling thread, at most eight per scan'), and the author's line break puts 'Type' directly after 'eight', so the rendered sentence parses as 'at most eight Type'. A reader cannot tell what is limited to eight, and the caption does not recover it."
+    },
+    {
+      "file": "docs/figures/codac-uda-signals/full-archive-variable-catalogue/make_figure.py",
+      "line": 66,
+      "severity": "non-blocking",
+      "summary": "The arrow list draws only four transitions. In the rendered picture the flow runs census to readers to catalogue and then left into 'Resume or cached repeat', while 'Separate population audit' emits a leftward arrow into 'Frozen pilot graph'. The middle-left stage therefore has no outgoing arrow and the audit stage has no incoming one, so a reader cannot see where a cached repeat re-enters the scan or what the audit reads. The caption says the audit 'checks the frozen pilot graph', which the drawn direction (audit into graph) reverses."
+    }
+  ],
+  "project": "imas-codex",
+  "review_note": "Judged only from the rendered PNG at the attachment path above. The figure's numbers agree with the reviewed run's own record: 988,145 + 6,861 = 995,006 distinct selectors, and graph ITER signals before and after both 94,633. No blocking defect: no clipped, overlapping or unreadable label, and the figure's information is fully visible. Caption read as descriptive rather than a restatement of a title, since the figure carries no title and the figcaption states the contract, the SQLite commit rule, the scan's lack of graph connection, the audit's read-only nature, and that the rendered raster was inspected.",
+  "review_run_id": "r-20261115T121442060665-review-of-full-archive-variable-catalogue-1230469a687e-figure",
+  "reviewed_base_sha": "221b8473a8d95f828b29cb35e582a80d4de0241a",
+  "reviewed_head_sha": "1230469a687eefbf57137b532e666b490bd9b501",
+  "reviewed_run_id": "r-20261115T083925189595-full-archive-variable-catalogue",
+  "rubric": "figure",
+  "rubric_items": {
+    "contrast": "pass - stage headings render in blue #2878a5 at roughly 4.9:1 on white and detail text renders near-black; both clear the 4.5:1 minimum for normal text.",
+    "data_ink": "pass - text and four thin reference arrows only; no plotted marks competing for attention.",
+    "decoration": "pass - no gradient fill, no background shading, no frame or grid. The only non-text ink is four arrows, each carrying the flow.",
+    "label_collision": "pass - no text is clipped at the canvas boundary and no two text elements overlap; the four arrows are placed in inter-column and inter-row gaps, clear of every label and of each other.",
+    "legibility": "pass - all six stage headings and their detail lines are readable at a glance at the rendered size.",
+    "table_form": "pass - the picture depicts a staged process with directed dependencies, which is natural to a diagram rather than a table; the quantitative claims it carries (988,145 + 6,861 =  995,006 selectors; 94,633 signals) are supporting facts inside the stages, not a dataset."
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-15T12:34:39.483072+00:00",
+  "total": null
+}
