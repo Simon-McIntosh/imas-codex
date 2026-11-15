@@ -47,6 +47,8 @@ class ArchiveCatalogue:
             CREATE INDEX IF NOT EXISTS pending_metadata ON census(role) WHERE document IS NULL AND error IS NULL;
             CREATE INDEX IF NOT EXISTS pending_ingest ON census(role) WHERE document IS NOT NULL AND acknowledged=0;
             CREATE INDEX IF NOT EXISTS selector_membership ON census(name);
+            CREATE TABLE IF NOT EXISTS range_failures (role TEXT, names TEXT,
+                error TEXT, error_type TEXT, attempts INTEGER, recorded_at TEXT DEFAULT CURRENT_TIMESTAMP);
         """)
 
         columns = {row[1] for row in self.db.execute("PRAGMA table_info(census)")}
@@ -55,6 +57,8 @@ class ArchiveCatalogue:
                 ("attributes_checked", "INTEGER NOT NULL DEFAULT 0"),
                 ("metadata_state", "TEXT"),
                 ("error_code", "INTEGER"),
+                ("fetch_error", "TEXT"),
+                ("fetch_attempts", "INTEGER"),
             ):
                 if name not in columns:
                     self.db.execute(
@@ -133,7 +137,7 @@ class ArchiveCatalogue:
     def record(self, name: str) -> dict:
         """Read one selector with every listing and per-archive metadata outcome."""
         rows = self.db.execute(
-            "SELECT role,document,attributes_checked FROM census WHERE name=? ORDER BY role",
+            "SELECT role,document,attributes_checked,fetch_error,fetch_attempts FROM census WHERE name=? ORDER BY role",
             (name,),
         ).fetchall()
         if not rows:
@@ -145,15 +149,25 @@ class ArchiveCatalogue:
                 role: {
                     "completed": bool(checked),
                     "metadata": json.loads(document) if document else None,
+                    "fetch_state": "failed"
+                    if error
+                    else "complete"
+                    if checked
+                    else "pending",
+                    "fetch_error": error,
+                    "fetch_attempts": attempts,
                 }
-                for role, document, checked in rows
+                for role, document, checked, error, attempts in rows
             },
         }
 
     def save_batch(self, role: str, names: list[str], response: dict) -> None:
         """Validate a complete receipt before atomically replacing any metadata."""
         entries = metadata_entries(response)
-        answered = [item["name"] for item in entries]
+        failures = response.get("range_failures", [])
+        answered = [item["name"] for item in entries] + [
+            name for failure in failures for name in failure["names"]
+        ]
         if len(answered) != len(names) or set(answered) != set(names):
             raise RuntimeError("metadata receipt does not match requested selectors")
         documents = []
@@ -215,12 +229,34 @@ class ArchiveCatalogue:
             )
         with self.db:
             updated = self.db.executemany(
-                "UPDATE census SET document=?,error=?,error_code=?,metadata_state=?,attributes_checked=1 WHERE role=? AND name=? AND attributes_checked=0",
+                "UPDATE census SET document=?,error=?,error_code=?,metadata_state=?,attributes_checked=1,fetch_error=NULL,fetch_attempts=NULL WHERE role=? AND name=? AND attributes_checked=0",
                 documents,
             )
-            if updated.rowcount != len(names):
+            if updated.rowcount != len(entries):
                 raise RuntimeError(
                     "metadata range includes unknown or completed selectors"
+                )
+            for failure in failures:
+                updated = self.db.executemany(
+                    "UPDATE census SET fetch_error=?,fetch_attempts=? WHERE role=? AND name=? AND attributes_checked=0",
+                    (
+                        (failure["error"], failure["attempts"], role, name)
+                        for name in failure["names"]
+                    ),
+                )
+                if updated.rowcount != len(failure["names"]):
+                    raise RuntimeError(
+                        "failed range includes unknown or completed selectors"
+                    )
+                self.db.execute(
+                    "INSERT INTO range_failures(role,names,error,error_type,attempts) VALUES (?,?,?,?,?)",
+                    (
+                        role,
+                        json.dumps(failure["names"]),
+                        failure["error"],
+                        failure["error_type"],
+                        failure["attempts"],
+                    ),
                 )
 
     def summary(self) -> dict:
@@ -303,6 +339,12 @@ class ArchiveCatalogue:
             "unavailable_codes": codes,
             "archives": by_archive,
             "metadata_fields": coverage,
+            "failed_variables": self.db.execute(
+                "SELECT count(DISTINCT name) FROM census WHERE fetch_error IS NOT NULL"
+            ).fetchone()[0],
+            "failed_ranges_recorded": self.db.execute(
+                "SELECT count(*) FROM range_failures"
+            ).fetchone()[0],
         }
 
     def scan(
@@ -339,6 +381,7 @@ class ArchiveCatalogue:
         ).fetchone()[0]
         started = time.monotonic()
         submitted = fetched = batches = type_requests = full_requests = 0
+        attempted = failed = timeouts = restarts = submitted_full = submitted_type = 0
         after = dict.fromkeys(census["counts"], "")
         exhausted = set()
         active = {}
@@ -380,17 +423,34 @@ class ArchiveCatalogue:
                     role, names = request
                     cached = self.cached_type_documents(role, names)
                     future = pool.submit(fetch, role, names, cached)
-                    active[future] = (role, names, len(cached))
+                    active[future] = (role, names, set(cached))
                     submitted += 1
                 if not active:
                     break
                 ready, _ = wait(active, timeout=1, return_when=FIRST_COMPLETED)
                 for future in ready:
-                    role, names, cached_count = active.pop(future)
-                    self.save_batch(role, names, future.result())
-                    fetched += len(names)
-                    full_requests += len(names)
-                    type_requests += len(names) - cached_count
+                    role, names, cached_names = active.pop(future)
+                    response = future.result()
+                    self.save_batch(role, names, response)
+                    completed_names = {
+                        entry["name"] for entry in metadata_entries(response)
+                    }
+                    fetched += len(completed_names)
+                    attempted += len(names)
+                    failed += len(names) - len(completed_names)
+                    counters = response.get("request_counts", {})
+                    full_requests += counters.get("full_requests", len(completed_names))
+                    type_requests += counters.get(
+                        "type_requests", len(completed_names - cached_names)
+                    )
+                    timeouts += counters.get("timeouts", 0)
+                    restarts += counters.get("restarts", 0)
+                    submitted_full += counters.get(
+                        "submitted_full_requests", len(names)
+                    )
+                    submitted_type += counters.get(
+                        "submitted_type_requests", len(set(names) - cached_names)
+                    )
                     batches += 1
                     if progress:
                         elapsed = time.monotonic() - started
@@ -400,6 +460,12 @@ class ArchiveCatalogue:
                                 "metadata_batches": batches,
                                 "type_requests": type_requests,
                                 "full_requests": full_requests,
+                                "attempted_variables": attempted,
+                                "failed_variables_this_run": failed,
+                                "timeout_events": timeouts,
+                                "reader_restarts": restarts,
+                                "submitted_full_requests_upper_bound": submitted_full,
+                                "submitted_type_requests_upper_bound": submitted_type,
                                 "completed_memberships": initial_completed + fetched,
                                 "listed_memberships": initial_rows,
                                 "completed_membership_fraction": (
@@ -422,6 +488,12 @@ class ArchiveCatalogue:
             full_requests=full_requests,
             elapsed_seconds=elapsed,
             variables_per_second=fetched / elapsed if elapsed else 0,
+            attempted_variables=attempted,
+            failed_variables_this_run=failed,
+            timeout_events=timeouts,
+            reader_restarts=restarts,
+            submitted_full_requests_upper_bound=submitted_full,
+            submitted_type_requests_upper_bound=submitted_type,
             rows_added=self.db.execute("SELECT count(*) FROM census").fetchone()[0]
             - initial_rows,
         )

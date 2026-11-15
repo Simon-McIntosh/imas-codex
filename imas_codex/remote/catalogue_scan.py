@@ -19,6 +19,7 @@ import subprocess
 import sys
 import threading
 import time
+from collections import deque
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -42,13 +43,28 @@ def write_receipt(path: Path, data: dict) -> None:
 class MetadataReaders:
     """One isolated native reader per calling thread, at most eight per scan."""
 
-    def __init__(self, config: dict, *, timeout: float = 300):
+    def __init__(
+        self,
+        config: dict,
+        *,
+        timeout: float = 300,
+        max_retries: int = 3,
+        backoff: float = 1,
+    ):
+        if (
+            not 0 <= max_retries <= 5
+            or not 0 <= backoff <= 30
+            or not 0 < timeout <= 300
+        ):
+            raise ValueError("metadata timeout and retry bounds are invalid")
         self.settings = validate_codac_uda_config(config["data_systems"]["codac_uda"])
         for role in self.settings.readable_roles:
             resolve_archive_endpoint(self.settings, role)
         self.environment = resolve_remote_environment(config, "codac_uda")
         self.source = load_script_source("codac_uda.py")
         self.timeout = timeout
+        self.max_retries = max_retries
+        self.backoff = backoff
         self.local = threading.local()
         self.sessions = []
         self.lock = threading.Lock()
@@ -83,6 +99,7 @@ class MetadataReaders:
         session = {"role": role, "process": process, "buffer": bytearray()}
         with self.lock:
             self.sessions.append(session)
+        self.local.session = session
         if self._reply(session).get("ready") is not True:
             raise RuntimeError("native metadata reader did not acknowledge startup")
         return session
@@ -114,6 +131,95 @@ class MetadataReaders:
             buffer.extend(chunk)
 
     def fetch(self, role: str, names: list[str], cached: dict) -> dict:
+        """Restart and split stalled ranges within one shared retry budget.
+
+        Exhaustion is a fetch failure, not an archive metadata refusal. Returned
+        successes and failed subranges together account for the original range.
+        """
+        pending = deque([names])
+        entries, failures = [], []
+        counts = dict.fromkeys(
+            (
+                "timeouts",
+                "restarts",
+                "submitted_full_requests",
+                "submitted_type_requests",
+                "full_requests",
+                "type_requests",
+            ),
+            0,
+        )
+        attempts = 0
+        last_error = ""
+        while pending:
+            current = pending.popleft()
+            if attempts >= self.max_retries + 1:
+                for remaining in [current, *pending]:
+                    failures.append(
+                        {
+                            "names": remaining,
+                            "error": last_error,
+                            "error_type": "TimeoutError",
+                            "attempts": attempts,
+                        }
+                    )
+                break
+            selected_cache = {name: cached[name] for name in current if name in cached}
+            attempts += 1
+            counts["submitted_full_requests"] += len(current)
+            counts["submitted_type_requests"] += len(current) - len(selected_cache)
+            try:
+                result = self._fetch_once(role, current, selected_cache)
+            except TimeoutError as exc:
+                last_error = str(exc)
+                counts["timeouts"] += 1
+                self._restart()
+                counts["restarts"] += 1
+                if attempts >= self.max_retries + 1:
+                    for remaining in [current, *pending]:
+                        failures.append(
+                            {
+                                "names": remaining,
+                                "error": str(exc),
+                                "error_type": "TimeoutError",
+                                "attempts": attempts,
+                            }
+                        )
+                    break
+                half = max(1, len(current) // 2)
+                parts = [current[:half]] + ([current[half:]] if current[half:] else [])
+                pending.extendleft(reversed(parts))
+                time.sleep(min(30, self.backoff * 2 ** (counts["timeouts"] - 1)))
+            else:
+                entries.extend(result["entries"])
+                counts["full_requests"] += len(current)
+                counts["type_requests"] += len(current) - len(selected_cache)
+        return {
+            "entries": entries,
+            "range_failures": failures,
+            "request_counts": counts,
+        }
+
+    def _restart(self) -> None:
+        session = getattr(self.local, "session", None)
+        self.local.session = None
+        if session is None:
+            return
+        process = session["process"]
+        print(
+            f"Restarting timed-out owned metadata reader pid={process.pid}",
+            file=sys.stderr,
+            flush=True,
+        )
+        if process.poll() is None:
+            process.terminate()
+        try:
+            self._close(session, expected_stop=True)
+        finally:
+            with self.lock:
+                self.sessions = [item for item in self.sessions if item is not session]
+
+    def _fetch_once(self, role: str, names: list[str], cached: dict) -> dict:
         session = getattr(self.local, "session", None)
         if session is None or session["role"] != role:
             if session is not None:
@@ -136,7 +242,7 @@ class MetadataReaders:
         return receipt["result"]
 
     @staticmethod
-    def _close(session: dict) -> None:
+    def _close(session: dict, *, expected_stop: bool = False) -> None:
         process = session["process"]
         if process.stdin and not process.stdin.closed:
             try:
@@ -159,7 +265,7 @@ class MetadataReaders:
                 process.wait(timeout=10)
         if process.stdout:
             process.stdout.close()
-        if process.returncode:
+        if process.returncode and not expected_stop:
             raise RuntimeError(
                 f"metadata reader exited with status {process.returncode}"
             )
@@ -259,6 +365,11 @@ def run_scan(
             raise RuntimeError("private catalogue integrity check failed")
     except BaseException as exc:
         receipt.update(status="failed", error_type=type(exc).__name__, error=str(exc))
+        if store is not None:
+            try:
+                receipt["result"] = store.summary()
+            except Exception as snapshot_error:
+                receipt["snapshot_error"] = str(snapshot_error)
         raise
     finally:
         cleanup_errors = []
@@ -295,6 +406,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--batch-size", type=int, default=100)
     parser.add_argument("--max-batches", type=int)
     parser.add_argument("--max-seconds", type=float, default=82800)
+    parser.add_argument("--batch-timeout", type=float, default=60)
+    parser.add_argument("--retry-limit", type=int, choices=range(6), default=3)
     args = parser.parse_args(argv)
     stop = threading.Event()
     for signum in (signal.SIGTERM, signal.SIGINT):
@@ -311,6 +424,9 @@ def main(argv: list[str] | None = None) -> int:
             max_batches=args.max_batches,
             max_seconds=args.max_seconds,
             stop=stop,
+            reader_factory=lambda config: MetadataReaders(
+                config, timeout=args.batch_timeout, max_retries=args.retry_limit
+            ),
         )
         return 0
     except Exception as exc:

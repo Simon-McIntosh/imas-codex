@@ -448,3 +448,131 @@ def test_cleanup_failure_cannot_publish_a_complete_job_receipt(tmp_path):
     result = json.loads(receipt.read_text())
     assert result["status"] == "failed"
     assert result["error"] == "fixture reader cleanup failed"
+
+
+def timeout_reader(monkeypatch, permanent=False):
+    """Exercise the real fetch boundary with deterministic native batch receipts."""
+    import imas_codex.remote.catalogue_scan as scan
+
+    readers = MetadataReaders.__new__(MetadataReaders)
+    readers.local = threading.local()
+    readers.max_retries = 3
+    readers.backoff = 0.01
+    process = MagicMock()
+    requests = []
+    delays = []
+    readers._open = lambda role: {"role": role, "process": process}
+
+    def reply(session):
+        request = json.loads(process.stdin.write.call_args.args[0])
+        names = request["names"]
+        requests.append(names)
+        if (not permanent and len(requests) == 1) or (
+            permanent and "DEMO:TEMP-0" in names
+        ):
+            raise TimeoutError("fixture native batch deadline")
+        return {"ok": True, "result": {"entries": [available(name) for name in names]}}
+
+    readers._reply = reply
+    readers._restart = MagicMock(
+        side_effect=lambda: setattr(readers.local, "session", None)
+    )
+    monkeypatch.setattr(scan.time, "sleep", delays.append)
+    return readers, requests, delays
+
+
+def test_timeout_restarts_reader_halves_range_and_recovers_with_backoff(monkeypatch):
+    readers, requests, delays = timeout_reader(monkeypatch)
+    names = [f"DEMO:TEMP-{index}" for index in range(4)]
+    result = readers.fetch("slow", names, {})
+    assert requests == [names, names[:2], names[2:]]
+    assert [entry["name"] for entry in result["entries"]] == names
+    assert result["range_failures"] == []
+    readers._restart.assert_called_once()
+    assert delays == [0.01]
+
+
+def test_exhausted_timeout_range_is_durable_and_scan_moves_on(monkeypatch, tmp_path):
+    readers, requests, delays = timeout_reader(monkeypatch, permanent=True)
+    path = tmp_path / "timeouts.sqlite"
+    store = ArchiveCatalogue(path)
+    names = [f"DEMO:TEMP-{index}" for index in range(5)]
+    store.seed({"slow": names}, timestamp="fixture")
+    result = store.scan(readers.fetch, batch_size=4)
+    assert result["completed"] == 1 and result["failed_variables"] == 4
+    assert result["metadata_states"] == {"available": 1}
+    assert len(requests) == 5 and requests[-1] == [names[-1]]
+    assert delays == [0.01, 0.02, 0.04]
+    assert readers._restart.call_count == 4
+    failed = store.record(names[0])["archives"]["slow"]
+    assert (
+        failed["fetch_state"] == "failed"
+        and "fixture native batch deadline" in failed["fetch_error"]
+    )
+    assert failed["completed"] is False
+    store.close()
+    store = ArchiveCatalogue(path)
+    assert store.summary()["failed_variables"] == 4
+    retried = []
+
+    def healthy(role, pending, cached):
+        retried.extend(pending)
+        return {"entries": [available(name) for name in pending]}
+
+    resumed = store.scan(healthy)
+    assert resumed["complete"] and resumed["failed_variables"] == 0
+    assert retried == names[:4]
+    store.close()
+
+
+def test_timeout_restart_reaps_only_its_reader_and_accepts_expected_exit():
+    readers = MetadataReaders.__new__(MetadataReaders)
+    readers.local = threading.local()
+    readers.lock = threading.Lock()
+    process = MagicMock(pid=123, returncode=-15)
+    process.poll.return_value = None
+    process.stdin.closed = False
+    session = {"role": "slow", "process": process, "buffer": bytearray()}
+    readers.local.session = session
+    readers.sessions = [session]
+    readers._restart()
+    process.terminate.assert_called_once()
+    process.wait.assert_called_once()
+    assert readers.local.session is None and readers.sessions == []
+    readers.close()
+
+
+def test_unexpected_failure_receipt_reports_current_checkpoint_not_start(tmp_path):
+    path = tmp_path / "checkpoint.sqlite"
+    store = ArchiveCatalogue(path)
+    store.seed({"slow": ["DEMO:ONE", "DEMO:TWO"]}, timestamp="fixture")
+    store.close()
+
+    class Readers:
+        settings = SimpleNamespace(readable_roles=["slow"])
+        calls = 0
+
+        def __init__(self, config):
+            pass
+
+        def fetch(self, role, names, cached):
+            self.calls += 1
+            if self.calls == 2:
+                raise RuntimeError("fixture unexpected failure")
+            return {"entries": [available(name) for name in names]}
+
+        def close(self):
+            pass
+
+    receipt = tmp_path / "receipt.json"
+    with pytest.raises(RuntimeError, match="unexpected failure"):
+        run_scan(
+            store_path=path,
+            config={},
+            receipt_path=receipt,
+            batch_size=1,
+            reader_factory=Readers,
+        )
+    result = json.loads(receipt.read_text())
+    assert result["status"] == "failed"
+    assert result["before"]["completed"] == 0 and result["result"]["completed"] == 1
