@@ -50,7 +50,13 @@ def plot_grouping(receipt: dict, output: Path, preview: Path) -> None:
     axes[0].set_ylabel("groups at or below size [%]")
     axes[0].set_ylim(0, 105)
     axes[0].set_yticks([0, 25, 50, 75, 100])
-    axes[0].set_xlim(left=1)
+    maximum = max(
+        int(size)
+        for key in ("group_size_distribution", "control_group_size_distribution")
+        for size in data[key]
+    )
+    axes[0].set_xlim(1, maximum * 1.1)
+    axes[0].set_xticks([10**power for power in range(int(np.log10(maximum)) + 1)])
     figure.legend(
         *axes[0].get_legend_handles_labels(),
         loc="upper left",
@@ -62,11 +68,13 @@ def plot_grouping(receipt: dict, output: Path, preview: Path) -> None:
     bars = axes[1].bar([0, 1], values, color=SUBJECT, width=0.55, zorder=3)
     axes[1].set_xticks([0, 1], ["category + fields", "category only"])
     axes[1].set_ylabel("pattern descriptions")
-    axes[1].yaxis.set_major_locator(MaxNLocator(nbins=5, integer=True))
+    upper = max(values) * 1.22
+    ticks = MaxNLocator(nbins=5, integer=True).tick_values(0, upper)
+    axes[1].set_yticks([tick for tick in ticks if 0 <= tick <= upper])
     formatter = ScalarFormatter(useOffset=False)
     formatter.set_scientific(False)
     axes[1].yaxis.set_major_formatter(formatter)
-    axes[1].set_ylim(0, max(values) * 1.22)
+    axes[1].set_ylim(0, upper)
     for bar, value in zip(bars, values, strict=True):
         axes[1].text(
             bar.get_x() + bar.get_width() / 2,
