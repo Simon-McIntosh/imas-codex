@@ -97,6 +97,16 @@
       "note": "The decision's context now gives the comparison's figures as recorded: the local model produced 0 of 20 responses that parsed unrepaired and delivered 130 of 200 descriptions; the paid model 20 of 20 and 200 of 200.",
       "reason": "",
       "when": "2026-11-15T21:17:01.830937+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The rationale no longer claims ICP content is out of scope. ICP access is now un-parked, so section 6 would send ICP-derived context to the paid model; the decision's scope is narrowed to section 7's name-and-metadata-free path being ruled out, and a new open decision asks the lead whether ICP-derived context may be sent to an external provider before section 6 is dispatched.",
+      "reason": "",
+      "when": "2026-11-15T21:17:05.959899+00:00"
     }
   ],
   "responses": {
@@ -117,6 +127,15 @@
       "note": "The decision's context now gives the comparison's figures as recorded: the local model produced 0 of 20 responses that parsed unrepaired and delivered 130 of 200 descriptions; the paid model 20 of 20 and 200 of 200.",
       "reason": "",
       "when": "2026-11-15T21:17:01.830937+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "85954a2c7751296bce05b76a87d41dfac3931bde",
+      "commit_basis": "edit",
+      "note": "The rationale no longer claims ICP content is out of scope. ICP access is now un-parked, so section 6 would send ICP-derived context to the paid model; the decision's scope is narrowed to section 7's name-and-metadata-free path being ruled out, and a new open decision asks the lead whether ICP-derived context may be sent to an external provider before section 6 is dispatched.",
+      "reason": "",
+      "when": "2026-11-15T21:17:05.959899+00:00"
     },
     "wiring-1": {
       "action": "acted",
