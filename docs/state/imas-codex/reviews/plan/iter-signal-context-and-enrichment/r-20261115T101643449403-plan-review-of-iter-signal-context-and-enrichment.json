@@ -105,6 +105,16 @@
       "note": "The plan states the endpoint; the node's brief cites this existing owner as the mechanism to extend and forbids a second one.",
       "reason": "",
       "when": "2026-11-15T10:47:09.374125+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-2",
+      "note": "The plan states the endpoint; the node's brief cites this existing owner as the mechanism to extend and forbids a second one. Section 4 now states that ICP and IDM content is read through the project's existing authenticated document access, so no second reader appears.",
+      "reason": "",
+      "when": "2026-11-15T10:47:13.937089+00:00"
     }
   ],
   "responses": {
@@ -116,6 +126,15 @@
       "note": "The plan states the endpoint; the node's brief cites this existing owner as the mechanism to extend and forbids a second one.",
       "reason": "",
       "when": "2026-11-15T10:47:09.374125+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "3033c27a-2b8f-4e32-bb6d-7fca8603a9ff",
+      "commit": "246258a3fb75949c0b1ff2706a917e7601eaa98c",
+      "commit_basis": "edit",
+      "note": "The plan states the endpoint; the node's brief cites this existing owner as the mechanism to extend and forbids a second one. Section 4 now states that ICP and IDM content is read through the project's existing authenticated document access, so no second reader appears.",
+      "reason": "",
+      "when": "2026-11-15T10:47:13.937089+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
