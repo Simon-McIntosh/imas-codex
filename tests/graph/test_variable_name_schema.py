@@ -1,38 +1,49 @@
-"""Schema relationships keep candidate components separate from verified identity."""
+"""Control hierarchy and component identity remain separate schema entities."""
 
-from imas_codex.graph.models import FacilitySignal, PlantComponent
+from imas_codex.graph.models import ControlNode, FacilitySignal, PlantComponent
 from imas_codex.graph.schema import GraphSchema
 
 
-def test_candidate_component_schema_relationships_and_round_trip():
+def test_control_and_component_relationships_and_roundtrip():
     schema = GraphSchema()
     expected = {
+        "ControlNode": {
+            ("facility_id", "Facility", "AT_FACILITY"),
+            ("parent_control_node", "ControlNode", "PARENT_CONTROL_NODE"),
+        },
         "PlantComponent": {
             ("facility_id", "Facility", "AT_FACILITY"),
-            ("parent_component", "PlantComponent", "PARENT_COMPONENT"),
+            ("control_node", "ControlNode", "AT_CONTROL_NODE"),
         },
         "FacilitySignal": {
-            ("candidate_plant_component", "PlantComponent", "CANDIDATE_PLANT_COMPONENT")
+            (
+                "candidate_plant_component",
+                "PlantComponent",
+                "CANDIDATE_PLANT_COMPONENT",
+            ),
+            ("control_node", "ControlNode", "AT_CONTROL_NODE"),
         },
     }
     for label, relationships in expected.items():
-        declared = {
+        assert relationships <= {
             (r.slot_name, r.to_class, r.cypher_type)
             for r in schema.get_relationships_from(label)
         }
-        assert relationships <= declared
+    control = ControlNode(
+        id="demo:control_node:DEMO", facility_id="demo", code="DEMO", level=1
+    )
     component = PlantComponent(
-        id="demo:plant_component:DEMO-COOL",
+        id="demo:plant_component:DEMO:QAZ0001",
         facility_id="demo",
-        code="DEMO-COOL",
-        parent_component="demo:plant_component:DEMO",
+        code="DEMO:QAZ0001",
+        control_node=control.id,
     )
     assert PlantComponent.model_validate_json(component.model_dump_json()) == component
     signal = FacilitySignal(
         id="demo:example",
         facility_id="demo",
-        accessor="arbitrary text",
-        name_parse_outcome="not_conforming",
-        name_parse_rule_status="unconfirmed",
+        accessor="DEMO:STATUS",
+        name_parse_outcome="function_variable",
+        control_node=control.id,
     )
     assert FacilitySignal.model_validate_json(signal.model_dump_json()) == signal
