@@ -21,6 +21,7 @@ Phases:
 from __future__ import annotations
 
 import argparse
+import ast
 import collections
 import html as html_lib
 import json
@@ -964,10 +965,11 @@ def render_html(payload):
     scores = payload["selection"]["scores"]
     add(
         '<p class="muted">%d names carry a lower review score after the pass than '
-        "before, and %d accepted names sit below the %.2f floor; the lowest accepted "
-        "score is %s. A revised definition scores lower whenever the reviewer weighs "
-        "the stored sentences differently, so a drop is recorded rather than treated "
-        "as a defect; the floor is what holds a name back.</p>"
+        "before, and %d worked names sit below the %.2f floor; every one of them "
+        "is held rather than accepted, as the verify phase asserts, and the lowest "
+        "score after the pass is %s. A revised definition scores lower whenever the "
+        "reviewer weighs the stored sentences differently, so a drop is recorded "
+        "rather than treated as a defect; the floor is what holds a name back.</p>"
         % (
             scores["dropped"],
             scores["below_floor"],
@@ -1376,6 +1378,47 @@ def figure():
     return path
 
 
+def census_measure_copies(
+    source: str, *, species: frozenset[str], family_pattern: str | None
+) -> tuple[list[int], list[str]]:
+    """Species lists and family templates a module writes for itself.
+
+    The census module owns both measures, so a copy under any name is drift:
+    a list literal holding three or more of its species names, whatever the
+    assignment is called, and a function holding its species pattern, whatever
+    the template is called.
+    """
+    tree = ast.parse(source)
+    lists = [
+        node.lineno
+        for node in ast.walk(tree)
+        if isinstance(node, ast.List | ast.Tuple | ast.Set)
+        and len(
+            species
+            & {
+                element.value
+                for element in node.elts
+                if isinstance(element, ast.Constant)
+                and isinstance(element.value, str)
+            }
+        )
+        >= 3
+    ]
+    templates = [
+        node.name
+        for node in ast.walk(tree)
+        if isinstance(node, ast.FunctionDef)
+        and family_pattern is not None
+        and any(
+            isinstance(inner, ast.Constant)
+            and isinstance(inner.value, str)
+            and inner.value == family_pattern
+            for inner in ast.walk(node)
+        )
+    ]
+    return lists, templates
+
+
 def verify(delivered_path=None):
     """Re-derive every count the delivered report states, from the live graph.
 
@@ -1405,12 +1448,20 @@ def verify(delivered_path=None):
         checks.append((label, reported, live))
 
     # The species list and the family measure are the closing census's, so this
-    # script must not carry a second copy that can drift from them.
-    check(
-        "the species list and family measure come from the census module",
-        False,
-        "SPECIES" in globals() or "family_template" in globals(),
+    # script must not carry a second copy that can drift from them. Scanning
+    # this module's own literals catches a copy under any name — a renamed
+    # SPECIES_NAMES, an inlined tuple, or a re-implemented template holding the
+    # census's species pattern — where a test for two remembered identifiers
+    # caught only the two spellings that were deleted.
+    copied_lists, copied_templates = census_measure_copies(
+        Path(__file__).read_text(encoding="utf-8"),
+        species=frozenset(module.SPECIES),
+        family_pattern=getattr(
+            getattr(module, "SPECIES_NAME_RE", None), "pattern", None
+        ),
     )
+    check("this script carries no second species list", [], copied_lists)
+    check("this script carries no second family template", [], copied_templates)
 
     for key in ("family_count", "member_count", "one_wording_count", "divergent_count"):
         check(f"species families {key}", stated["families"][key], families[key])

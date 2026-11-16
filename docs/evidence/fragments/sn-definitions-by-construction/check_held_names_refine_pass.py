@@ -16,8 +16,9 @@ What it re-reads from the graph:
 It never writes: every call is a ``MATCH ... RETURN``, and ``--dry-run`` prints
 the checks it would make.
 
-``--inject-accepted`` is the red-arm control: it adds a count the graph does not
-hold, so the gate must fail. A gate that only ever runs green proves nothing.
+``--inject-accepted`` and ``--inject-spend`` are the red-arm controls: they add
+a count or a cost the graph does not hold, so the gate must fail. A gate that
+only ever runs green proves nothing.
 """
 
 from __future__ import annotations
@@ -55,6 +56,11 @@ RETURN s.name_stage AS ns, s.docs_stage AS ds,
        s.reviewer_score_name AS scn, s.reviewer_score_docs AS scd
 """
 
+LEDGER = """
+MATCH (c:LLMCost) WHERE c.llm_at >= $lo
+RETURN c.llm_cost AS cost, c.standard_name_ids AS ids
+"""
+
 
 def resolve_all(gc, names: list[str]) -> dict[str, str]:
     """Each name's live identity, resolved by the report module's rule."""
@@ -70,6 +76,13 @@ def main() -> int:
         default=0,
         help="add this many to the accepted count the gate expects, to prove the "
         "gate fails against a count the graph does not hold",
+    )
+    parser.add_argument(
+        "--inject-spend",
+        type=float,
+        default=0.0,
+        help="add this many USD to the recorded spend, to prove the gate fails "
+        "against a total the ledger does not hold",
     )
     parser.add_argument("--dry-run", action="store_true")
     args = parser.parse_args()
@@ -145,6 +158,26 @@ def main() -> int:
             )
         if doc["spend"]["total_usd"] > doc["spend"]["ceiling_usd"]:
             failures.append("spend exceeds the ceiling")
+        # The recorded total is asserted against the ledger it sums, not against
+        # another field of the same document: a total recorded below the true
+        # spend would otherwise pass.
+        report = _report_module()
+        credited_by = set(names)
+        ledger = 0.0
+        for entry in gc.query(LEDGER, lo=report.NODE_OPENED):
+            ids = entry["ids"]
+            if not isinstance(ids, list):
+                try:
+                    ids = json.loads(ids or "[]")
+                except json.JSONDecodeError:
+                    ids = []
+            if credited_by & {str(name) for name in ids}:
+                ledger = round(ledger + float(entry["cost"] or 0.0), 6)
+        recorded_spend = doc["spend"]["total_usd"] + args.inject_spend
+        if abs(ledger - recorded_spend) > 1e-4:
+            failures.append(
+                f"spend: ledger {ledger:.6f}, evidence {recorded_spend:.6f}"
+            )
 
     for line in failures:
         print(f"FAIL {line}")
