@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="35">
+<meta name="plan-version" content="36">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -115,11 +115,11 @@
       <button class="r-opt chosen" data-value="accepted">Accepted</button>
       <button class="r-opt" data-value="coordinator-curates">Not accepted: the coordinator curates and workers see only the graph</button>
       </p>
-    <p class="r-dec-rat">Narrowed by the lead&#x27;s later rulings on 2026-11-15. Two things are separate. Build workers that develop and test the pipeline, including the ICP client, may run on any lane; the lead&#x27;s own account is the identity for ICP access, and that access is read-only by code. The model that writes ITER signal descriptions from ICP-derived context is the locally served one, as section 1 states and the description-model decision records, so that context stays inside ITER.</p>
+    <p class="r-dec-rat">Narrowed by the lead&#x27;s later rulings on 2026-11-15. Build workers that develop and test the pipeline, including the ICP client, may run on any lane; the lead&#x27;s own account is the identity for ICP access, and that access is read-only by code. Which model writes ITER signal descriptions from ICP-derived context is not settled here: it is the open decision local-model-confirmed-on-quality. ICP-derived context stays inside ITER unless the lead chooses the paid model there, and no section that would send that context to a model is built until that decision is answered.</p>
     </div>
 <div class="r-dec" data-key="local-model-confirmed-on-quality" data-choice="" data-by="" data-when="" data-sections="s6,s7">
     <p class="r-dec-q">After the refinement result, which model writes ITER signal descriptions?</p>
-    <p class="r-dec-ctx">Reliability is settled for the locally served model: 197 of 200 raw responses parse and all 200 descriptions are delivered. Quality is not: a sealed blind reading preferred the paid model in 27 of 40 pairs and the local model in none, and 111 of the local model&#x27;s 200 descriptions were judged wrong against context, against 32 for the paid model. Choosing the paid model sends ICP-derived context outside ITER. Sections 6 and 7 are held on this decision.</p>
+    <p class="r-dec-ctx">Reliability is settled for the locally served model: 197 of 200 raw responses parse and all 200 descriptions are delivered. Quality is not. By hand, on 40 pairs read blind and sealed before the judge ran: the paid model&#x27;s description was preferred in 27, the local model&#x27;s in none, with 13 ties; 26 of the local model&#x27;s 40 descriptions were read as wrong against the signal&#x27;s context and none of the paid model&#x27;s. By the automated judge, on all 200: 111 of the local model&#x27;s descriptions and 32 of the paid model&#x27;s were scored wrong, and preference was nearly even (paid 75, local 71, tie 54); that judge agreed with the hand reading on 17 of the 40 pairs, so its figures carry less weight. Choosing the paid model sends ICP-derived context outside ITER. Sections 6 and 7 are held on this decision, and section 6&#x27;s quality bar (at most four wrong in forty, by hand) is the coordinator&#x27;s proposal for the lead to confirm or change with the answer.</p>
     <p class="r-dec-opts">
       <button class="r-opt" data-value="local-confirmed">The local model as now configured</button>
       <button class="r-opt" data-value="refine-for-correctness">One more refinement round aimed at correctness, then decide</button>
