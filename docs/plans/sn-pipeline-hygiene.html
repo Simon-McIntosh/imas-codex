@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="51">
+<meta name="plan-version" content="52">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -141,6 +141,9 @@
 </div>
 <div class="r-comment" data-section="s10" data-id="c-s10-closed-open-findings" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-16T04:00:00Z">
     <div class="r-comment-body"><p>Closed. The open non-blocking findings of the six landings are each repaired with a recorded red run or declined with the reason in the evidence; <code>name_definition_flagged</code> is gone. The whole standard-names directory run from an archive at the reviewed head shows 8,766 passed and two failures, both in <code>test_refine_model_dispatch.py</code> and both present at the base revision. They are still open: the model-seat route check rejects the placeholder identifiers those tests set, and no section owns the repair yet. The independent review of this landing left three non-blocking findings, also unowned: the ceiling test at <code>tests/standard_names/test_source_audit_gate.py:409</code> passes without the repair it guards; the suite arm logs name no revision; and <code>tests/standard_names/test_source_reads.py:923</code> accepts an inclusion form of the liveness rule with no arm that refuses one.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-s10-refine-dispatch-tests-repaired" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-16T06:55:00Z">
+    <div class="r-comment-body"><p>The two failures in <code>test_refine_model_dispatch.py</code> named above are repaired and on main. The tests were at fault: they set placeholder model identifiers the model-seat route check rightly refuses. Both assertions are kept with identifiers that have a recognised route, and the route check is unchanged. The whole standard-names directory run from an archive at the reviewed head shows 8,768 passed and no failure. The three non-blocking findings from this section's own review remain open and unowned.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-12T00:45:00Z">
     <div class="r-comment-body"><p>§2 closed (<code>sph-corrects-schema</code>, commits <code>9f4b800b3</code> and <code>09f49e776</code>, review 110). <code>StandardNameSourceRetry.corrects</code> is declared with relationship type <code>CORRECTS</code>; the generated relationships carry the pair; a new endpoint assertion in <code>tests/graph/test_schema_compliance.py</code> passes on the live graph's 20 <code>CORRECTS</code> edges (one declared label pair, none mislabelled) and fails on a <code>StandardNameSource</code>→<code>StandardName</code> edge planted in a disposable graph. Outside scope: the correction records also carry an undeclared <code>correction_of</code> property. <a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html">evidence</a></p></div>
