@@ -75,6 +75,73 @@ def test_fitted_prompt_retains_task_enums_valid_wrapper_and_schema_last():
     assert '"plant_systems"' in prompt.split("`physics_domain`:")[1].split("\n")[0]
 
 
+@pytest.mark.asyncio
+async def test_worker_claims_the_configured_batch_size():
+    from imas_codex.discovery.signals import parallel
+
+    state = parallel.DataDiscoveryState(facility="jt-60sa", scanner_types=[])
+    state.facility_config = {}
+    state.cost_limit = float("inf")
+
+    def stop_after_claim(*args, **kwargs):
+        state.stop_requested = True
+        return []
+
+    with (
+        patch(
+            "imas_codex.discovery.signals.enrichment.get_enrichment_options",
+            return_value=EnrichmentOptions(batch_size=3),
+        ),
+        patch.object(parallel, "prepare_signal_sources", return_value=(0, 0, 0)),
+        patch.object(
+            parallel, "claim_signals_for_enrichment", side_effect=stop_after_claim
+        ) as claim,
+    ):
+        await parallel.enrich_worker(state)
+    assert claim.call_args.kwargs["batch_size"] == 3
+
+
+@pytest.mark.asyncio
+async def test_worker_renders_fitted_prompt_before_capturing_context(tmp_path):
+    from scripts import benchmark_signal_enrichment as bench
+
+    signal = {
+        "id": "jt-60sa:synthetic",
+        "facility_id": "jt-60sa",
+        "name": "COOLING:TEMP",
+        "accessor": "COOLING:TEMP",
+        "source_description": "Temperature",
+        "unit": "K",
+        "discovery_source": "synthetic",
+    }
+    db = bench.open_store(tmp_path / "context.sqlite")
+    with (
+        patch.object(bench.parallel, "fetch_tree_context", return_value={}),
+        patch.object(bench.parallel, "fetch_epoch_context", return_value={}),
+        patch.object(bench.parallel, "fetch_signal_code_refs", return_value={}),
+        patch.object(bench.parallel, "_fetch_code_chunks", return_value=[]),
+        patch(
+            "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
+            return_value=[],
+        ),
+    ):
+        record = await bench.replay_batch(
+            [signal],
+            "jt-60sa",
+            db,
+            capture_context=True,
+            enrichment_options=EnrichmentOptions(fitted_prompt=True),
+        )
+    from imas_codex.llm.prompt_loader import render_prompt
+
+    assert record["messages"][0][0]["content"] == fit_enrichment_prompt(
+        render_prompt("signals/enrichment")
+    )
+    assert "Temperature" in record["messages"][0][1]["content"]
+    assert record["responses"] == []
+    db.close()
+
+
 def response(content):
     return SimpleNamespace(
         model="local/test",
