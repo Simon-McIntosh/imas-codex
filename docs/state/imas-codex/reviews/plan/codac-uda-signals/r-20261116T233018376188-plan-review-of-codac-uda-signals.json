@@ -71,6 +71,16 @@
       "note": "Section 18 at version 54 returns each pulse's end time where the archive gives one and returns an open-ended pulse as open-ended.",
       "reason": "",
       "when": "2026-11-16T23:49:08.992408+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 16 at version 54 says whether the archive returns pulses without an end is unmeasured, and that the run establishes it and reports the count.",
+      "reason": "",
+      "when": "2026-11-16T23:49:31.133158+00:00"
     }
   ],
   "responses": {
@@ -100,6 +110,15 @@
       "note": "Section 18 at version 54 returns each pulse's end time where the archive gives one and returns an open-ended pulse as open-ended.",
       "reason": "",
       "when": "2026-11-16T23:49:08.992408+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "note": "Section 16 at version 54 says whether the archive returns pulses without an end is unmeasured, and that the run establishes it and reports the count.",
+      "reason": "",
+      "when": "2026-11-16T23:49:31.133158+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261116T233018376188-plan-review-of-codac-uda-signals.json",
