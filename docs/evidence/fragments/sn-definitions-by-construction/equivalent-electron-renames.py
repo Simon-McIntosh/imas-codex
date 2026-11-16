@@ -32,11 +32,6 @@ JSON_OUTPUT = HERE / "equivalent-electron-renames.json"
 HTML_OUTPUT = HERE / "equivalent-electron-renames.html"
 SPEND_CEILING = 8.0
 PROBE_AVERAGE_CEILING = 0.20
-DERIVED_RECEIPT = Path(
-    "/home/ITER/mcintos/.config/reckon/crew/runs/"
-    "r-20261115T212654636291-sdbc-equivalent-electron-renames/"
-    "derived-children-1318712.jsonl"
-)
 
 READ_COST = """
 MATCH (run:SNRun)
@@ -129,7 +124,7 @@ def read_cost_receipt(scope_id: str | None, live_name: str) -> dict[str, Any]:
 
 
 def progress_by_name(
-    events: list[dict[str, Any]], expected: set[str]
+    events: list[dict[str, Any]], expected: set[str], *, allow_missing: bool = False
 ) -> dict[str, dict[str, dict[str, Any]]]:
     grouped: dict[str, dict[str, dict[str, Any]]] = {}
     for event in events:
@@ -142,7 +137,7 @@ def progress_by_name(
         for name in expected
         if name not in grouped or "settled" not in grouped[name]
     )
-    if missing:
+    if missing and not allow_missing:
         raise ValueError("unsettled names in progress ledger: " + ", ".join(missing))
     return grouped
 
@@ -188,12 +183,15 @@ def make_record(
         )
 
     spend = cost_receipt(graph, settled.get("run_id"), live_name)
+    final_outcome = outcome
+    if renamed:
+        final_outcome = "renamed" if outcome == "accepted" else f"renamed_{outcome}"
     return {
         "old_identity": old,
         "new_identity": after_identity if renamed else None,
         "live_identity": {"id": live_name},
         "left_reason": None if renamed else reason,
-        "outcome": "renamed" if renamed else outcome,
+        "outcome": final_outcome,
         "basis": population_row.get("basis", ""),
         "after": {
             "description": after.get("description"),
@@ -211,12 +209,23 @@ def make_record(
 
 def render_html(document: dict[str, Any]) -> str:
     summary = document["summary"]
+    stop_note = (
+        f"<p>Work stopped: {html.escape(document['stop_reason'])}</p>"
+        if document.get("stop_reason")
+        else ""
+    )
     rows = []
     for record in document["names"]:
         old = record["old_identity"]
         new = record["new_identity"]
         after = record["after"]
         scores_before = old["review_scores"]
+        before_unit = old["unit"] or "unit not recorded"
+        after_unit = after["unit"] or "unit not recorded"
+        description_text = (
+            f"{old['description'] or 'description not recorded'} [{before_unit}] → "
+            f"{after['description'] or 'description not recorded'} [{after_unit}]"
+        )
         if new:
             destination = f"<code>{html.escape(new['id'])}</code>"
         else:
@@ -231,6 +240,7 @@ def render_html(document: dict[str, Any]) -> str:
             "<tr>"
             f"<td><code>{html.escape(old['id'])}</code></td>"
             f"<td>{destination}</td>"
+            f"<td>{html.escape(description_text)}</td>"
             f"<td>{html.escape(record['outcome'])}</td>"
             f"<td>{html.escape(score_text)}</td>"
             f"<td>{html.escape(sources_before)} → {html.escape(sources_after)}</td>"
@@ -251,10 +261,12 @@ equivalent-electron basis in their identity; {summary["left"]} remain with a
 recorded reason. Recorded spend is USD {summary["spend_usd"]:.6f} against the
 USD {document["spend_ceiling_usd"]:.2f} ceiling. The live sourceless count is
 {document["sourceless"]["count"]}.</p>
+{stop_note}
 <table>
 <caption>Each original identity, its settled identity or reason left, review
 scores before and after, source bindings before and after, and unique-run spend</caption>
 <thead><tr><th>Old identity</th><th>New identity or reason left</th>
+<th>Description and unit before → after</th>
 <th>Outcome</th><th>Name / docs review scores before → after</th>
 <th>Source bindings before → after</th><th>Spend (USD)</th></tr></thead>
 <tbody>{"".join(rows)}</tbody>
@@ -300,7 +312,7 @@ def read_embedded_json(path: Path) -> dict[str, Any]:
 
 
 def dictionary_context(
-    graph: GraphClient, sources: list[str]
+    graph: GraphClient, sources: list[str], derived_receipt: Path | None = None
 ) -> tuple[bool, list[dict[str, Any]]]:
     prefixes: set[str] = set()
     source_paths: dict[str, list[str]] = {}
@@ -340,7 +352,9 @@ def dictionary_context(
             continue
 
         if source == "derived:source_rate_due_to_gas_injection":
-            receipt = read_embedded_json(DERIVED_RECEIPT)
+            if derived_receipt is None:
+                raise ValueError("derived source evidence requires --derived-receipt")
+            receipt = read_embedded_json(derived_receipt)
             children = [row["id"] for row in receipt.get("children", [])]
             child_rows = graph.query(READ_BATCH_IDENTITIES, ids=children) or []
             child_by_id = {row["requested_id"]: row for row in child_rows}
@@ -353,7 +367,7 @@ def dictionary_context(
                 }
             )
             child_supported, child_context = dictionary_context(
-                graph, child_all_sources
+                graph, child_all_sources, derived_receipt
             )
             children_supported = len(children) == 11 and all(
                 child_by_id.get(child, {}).get("id")
@@ -537,7 +551,9 @@ def run_batch(args: argparse.Namespace) -> int:
         states = live_rows(graph, current_ids)
         source_map = read_source_paths_by_name(graph, current_ids)
         source_support = {
-            row["name"]: dictionary_context(graph, source_map.get(row["name"], []))
+            row["name"]: dictionary_context(
+                graph, source_map.get(row["name"], []), args.derived_receipt
+            )
             for row in selected_rows
         }
 
@@ -703,7 +719,9 @@ def run_batch(args: argparse.Namespace) -> int:
                 reason = "The signed rename did not carry the original producing source bindings."
             if after_sources:
                 with GraphClient() as graph:
-                    after_source_evidence = dictionary_context(graph, after_sources)[1]
+                    after_source_evidence = dictionary_context(
+                        graph, after_sources, args.derived_receipt
+                    )[1]
             else:
                 after_source_evidence = []
             after = event_snapshot(
@@ -747,7 +765,9 @@ def run_batch(args: argparse.Namespace) -> int:
 
         if after_sources:
             with GraphClient() as graph:
-                after_source_evidence = dictionary_context(graph, after_sources)[1]
+                after_source_evidence = dictionary_context(
+                    graph, after_sources, args.derived_receipt
+                )[1]
         else:
             after_source_evidence = []
         after = event_snapshot(
@@ -818,6 +838,11 @@ def main() -> int:
     parser.add_argument("--sourceless-count", type=int)
     parser.add_argument("--sourceless-allowance", type=int, default=10)
     parser.add_argument("--spend-ceiling", type=float, default=8.0)
+    parser.add_argument("--derived-receipt", type=Path)
+    parser.add_argument(
+        "--stop-reason",
+        help="record why unsubmitted names remain after a required stop condition",
+    )
     parser.add_argument("--run-limit", type=int)
     parser.add_argument("--probe", action="store_true")
     parser.add_argument("--allow-wrap-job", action="append", default=[])
@@ -840,9 +865,40 @@ def main() -> int:
 
     previous = prior_renames(population, read_json_lines(args.prior_progress))
     current_names = expected - previous.keys()
-    current = progress_by_name(read_json_lines(args.progress), current_names)
+    current = progress_by_name(
+        read_json_lines(args.progress),
+        current_names,
+        allow_missing=bool(args.stop_reason),
+    )
+    missing_names = current_names - current.keys()
+    if missing_names and not args.stop_reason:
+        raise ValueError("unsubmitted names require an explicit stop reason")
 
     with GraphClient() as graph:
+        stopped: dict[str, dict[str, Any]] = {}
+        if missing_names:
+            stopped_rows = {
+                row["id"]: row
+                for row in graph.query(READ_IDENTITIES, ids=sorted(missing_names)) or []
+            }
+            if set(stopped_rows) != missing_names:
+                absent = sorted(missing_names - stopped_rows.keys())
+                raise ValueError(
+                    "unsubmitted identities disappeared before reporting: "
+                    + ", ".join(absent)
+                )
+            stopped_sources = read_source_paths_by_name(graph, sorted(missing_names))
+            for name in missing_names:
+                snapshot = event_snapshot(
+                    name, stopped_rows[name], stopped_sources.get(name, []), []
+                )
+                stopped[name] = {
+                    "outcome": "not_attempted_probe_stop",
+                    "reason": args.stop_reason,
+                    "run_id": None,
+                    "before": snapshot,
+                    "after": snapshot,
+                }
         records = []
         for population_row in population:
             old_id = population_row["name"]
@@ -850,7 +906,9 @@ def main() -> int:
                 settled = previous[old_id]
                 is_prior = True
             else:
-                settled = current[old_id]["settled"]
+                settled = (
+                    current[old_id]["settled"] if old_id in current else stopped[old_id]
+                )
                 is_prior = False
             records.append(
                 make_record(population_row, settled, graph=graph, prior=is_prior)
@@ -903,6 +961,8 @@ def main() -> int:
             "count": len(records),
         },
         "spend_ceiling_usd": args.spend_ceiling,
+        "status": "blocked" if args.stop_reason else "complete",
+        "stop_reason": args.stop_reason,
         "spend_source": "LLMCost joined once through each scoped SNRun",
         "spend_total_usd": spend_total,
         "sourceless": {

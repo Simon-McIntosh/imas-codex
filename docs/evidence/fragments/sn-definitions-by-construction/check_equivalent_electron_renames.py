@@ -20,6 +20,8 @@ UNWIND $ids AS wanted
 OPTIONAL MATCH (sn:StandardName {id: wanted})
 RETURN wanted AS requested_id,
        sn.id AS id,
+       sn.description AS description,
+       sn.unit AS unit,
        sn.status AS status,
        sn.name_stage AS name_stage,
        sn.docs_stage AS docs_stage,
@@ -77,11 +79,26 @@ def main() -> int:
                 old_id = row["old_identity"]["id"]
                 expected = row["live_identity"]["id"]
                 found = actual.get(expected)
+                new_identity = row.get("new_identity")
+                if new_identity is not None and new_identity.get("id") != expected:
+                    failures.append(
+                        f"{old_id}: new identity does not match live identity {expected!r}"
+                    )
+                if new_identity is None and old_id != expected:
+                    failures.append(
+                        f"{old_id}: unchanged identity points to {expected!r}"
+                    )
                 if not found or found.get("id") != expected:
                     failures.append(f"{old_id}: live identity {expected!r} is absent")
                     continue
 
                 after = row["after"]
+                for field in ("description", "unit"):
+                    if found.get(field) != after.get(field):
+                        failures.append(
+                            f"{old_id}: {field} is {found.get(field)!r}, "
+                            f"evidence says {after.get(field)!r}"
+                        )
                 for field, key in (
                     ("name_stage", "name_stage"),
                     ("docs_stage", "docs_stage"),
@@ -116,7 +133,7 @@ def main() -> int:
                         f"{old_id}: sources are {actual_sources!r}, "
                         f"evidence says {wanted_sources!r}"
                     )
-                if row.get("new_identity") is not None:
+                if new_identity is not None:
                     original_sources = sorted(
                         row["old_identity"].get("source_bindings", [])
                     )
