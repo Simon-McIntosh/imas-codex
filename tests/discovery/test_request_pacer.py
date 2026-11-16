@@ -34,15 +34,24 @@ def test_sync_wait_spaces_starts_and_skips_initial_sleep(monkeypatch):
 @pytest.mark.asyncio
 async def test_async_callers_cannot_share_a_request_slot(monkeypatch):
     now = [10.0]
+    yield_control = asyncio.sleep
 
     async def advance(delay):
-        now[0] += delay
+        deadline = now[0] + delay
+        await yield_control(0)
+        now[0] = max(now[0], deadline)
 
     sleep = AsyncMock(side_effect=advance)
     monkeypatch.setattr(module.time, "monotonic", lambda: now[0])
     monkeypatch.setattr(module.asyncio, "sleep", sleep)
     pacer = RequestPacer(0.5)
-    await asyncio.gather(*(pacer.wait_async() for _ in range(4)))
+
+    async def start():
+        await pacer.wait_async()
+        return now[0]
+
+    starts = await asyncio.gather(*(start() for _ in range(4)))
+    assert starts == [10.0, 10.5, 11.0, 11.5]
     assert [call.args[0] for call in sleep.call_args_list] == [0.5, 0.5, 0.5]
 
 
