@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:45:10.337Z",
+  "dispatched_at": "2026-11-16T23:44:36Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T233306320977-plan-review-of-iter-signal-context-and-enrichment/plan.html:125",
+      "id": "reasoning-1",
+      "reason": "the option must be removed (or restated as \"wait for the running round, then decide\") or the lead's one answer can be read either as a fresh dispatch or as a wait, and neither reading releases the two deferred sections unambiguously.",
+      "text": "the decision offers `refine-for-correctness` as a choice the lead may take, but the context six lines above says the correctness round is already running as the node ground-local-signal-descriptions-in-context and that its result will be added to this decision; an answer naming that option therefore records a request for work already in flight, and sections 6 and 7 stay deferred waiting on a round the answer would not start",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T233306320977-plan-review-of-iter-signal-context-and-enrichment/plan.html:20",
+      "id": "wiring-1",
+      "reason": "a build queue reads the declaration, so s8 or s9 can be dispatched against a pilot catalogue that s6/s7 have not produced, and either section then lands with an unmet done-when or must be re-taken.",
+      "text": "`plan-section-declarations` gives s8 `implementable` and s9 `implementable` while s8's dependency s7 and s9's dependencies s6 and s7 are `deferred`, and s8's done-when (\"a search for a described quantity returns a pilot-system signal\") and s9's (\"every node and link ... this work created for ITER\") cannot be met before those land; the earlier repair moved only s6 and s8's status was left as it was",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+  "plan_fingerprint": "2fee8865ded8d4593952559fb9619690520b739d712be4f868295cb339e2b969",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 41,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T233306320977-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "c1792e381435484f60aaf82f4ac9ace0fa85a3c8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/plans/codac-uda-signals.html` and `docs/plans/icp-api-access.html` exist in the tree, and the refinement evidence fragment named at line 122 exists with its figures.",
+    "done_when": "pass \u2014 each section names a countable landing-record measure with a declared negative control, and section 6's revised bar (at most four wrong and at least twenty-eight right of forty, with wrong/partly-right/right defined) can fail.",
+    "evidence_paths": "pass \u2014 figures are anchored in `docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html`, whose text records 197/200 parsing, 27 of 40 paid-preferring pairs with 13 ties, 26 local and zero paid wrong, 17/40 agreement, and 111/32 of 200 judged wrong, so the cited anchor resolves and holds the cited figures.",
+    "naming": "pass \u2014 the changed decision text introduces no plan label, stage name or ticket number into a code-facing name; the running node's name describes its mechanism.",
+    "reasoning": "a finding \u2014 the open decision's option set still offers \"One more refinement round aimed at correctness, then decide\" (line 125) while its own context (line 122) records that round as already dispatched and running, and the figures as pending it.",
+    "single_goal": "pass \u2014 each of the ten sections carries one deliverable; none bundles two independently closeable outcomes.",
+    "wiring": "a finding \u2014 `plan-section-declarations` (line 20) marks s8 `implementable` while its only dependency s7 is `deferred` and s8's done-when needs a search to return a pilot-system signal that only s6/s7's enrichment produces."
+  },
+  "section_digests": {
+    "_document": "d799e35f3837db9635799c9d38c7924b193e86ee961d489fc9d0fce00e2d9b06",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "0c790a3f0d65e4c65a76633b2c0e032bed39a211305c63913946cc77974eade8",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:54:46.395483+00:00",
+  "total": null
+}
