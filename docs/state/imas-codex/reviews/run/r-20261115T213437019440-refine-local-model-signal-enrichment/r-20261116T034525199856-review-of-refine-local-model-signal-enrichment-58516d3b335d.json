@@ -1,0 +1,70 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T04:18:11.362Z",
+  "dispatched_at": "2026-11-16T04:17:45Z",
+  "findings": [
+    {
+      "file": "tests/discovery/test_signal_enrichment_options.py",
+      "line": 41,
+      "severity": "non-blocking",
+      "summary": "The assertion `options.model_dump(by_alias=True) | settings == options.model_dump(by_alias=True)` compares the parsed options against the very settings dict the test itself supplied, so it holds by construction once validation succeeded and cannot redden on a value-handling regression that keeps validation green. The independent expectation is the literal in the same parametrize table at line 39 (`options.call_kwargs() == expected`)."
+    },
+    {
+      "file": "tests/discovery/test_signal_enrichment_options.py",
+      "line": 138,
+      "severity": "non-blocking",
+      "summary": "The assertion `record[\"messages\"][0][0][\"content\"] == fit_enrichment_prompt(render_prompt(\"signals/enrichment\"))` puts the same function applied to the same input on both sides, so it survives a regression that makes fit_enrichment_prompt return its baseline unchanged; only the wiring half of the guard (the worker stops calling fit at all) is covered here, and the content half rests on the separate literal assertions at lines 67-75."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html",
+      "line": 18,
+      "severity": "non-blocking",
+      "summary": "The brief's second declared control (brief.md:89-90: removing the schema constraint from the best combination lowers its measured raw parse rate) is reported falsified rather than demonstrated: the selected arm is already constraint-free and the measured direction is opposite (combination-one 177/200 = 88.5% raw with the constraint versus combination-one-without-schema 197/200 = 98.5% without, private/refinement-summary.json). The record states the falsification plainly at manifest.md:20 and substitutes the schema/JSON-mode forwarding mutation as its red control."
+    }
+  ],
+  "notes": "Read-only review: no repository or source-node file was modified; the two review-record paths are the only writes. The diff was read as git objects at 58516d3b335d because that head is not merged into this worktree's HEAD (6fec9b46a), so files were read through git show rather than the working tree. Outside the diff the reuse judgement opened imas_codex/discovery/base/llm.py:140-200, imas_codex/settings.py:82-100 and 266-315, and scripts/benchmark_signal_enrichment.py:640-730. No test was re-run: the recorded gate logs were read, per the review bound.",
+  "project": "imas-codex",
+  "review_lines": [
+    "CALL_SITES: imas_codex/discovery/signals/parallel.py:enrich_worker, imas_codex/discovery/base/llm.py:acall_llm_structured, scripts/benchmark_signal_enrichment.py:replay_batch, scripts/refine_signal_enrichment.py:run_variant",
+    "SCORE goal_fidelity: 19",
+    "JUSTIFICATION goal_fidelity: imas_codex/discovery/signals/parallel.py:4266-4276 threads the seat-scoped options and fitted prompt into the production worker, and pyproject.toml:438-445 sets the measured single-signal combination on the discovery-describe seat only, while every non-local or non-seat model still receives EnrichmentOptions() defaults at imas_codex/discovery/signals/enrichment.py:52-58.",
+    "SCORE evidence: 16",
+    "JUSTIFICATION evidence: baseline-pinned.log:143-144 and head-suite.log:141-142 both end in EXIT=0 with 0 failures, the head arm runs at c8229876a with only the 28-line evidence html landing after it, and the fragment's headline numbers reconcile with private/refinement-summary.json, but the brief's declared schema-removal control is refuted rather than demonstrated (manifest.md:20).",
+    "SCORE scope_discipline: 19",
+    "JUSTIFICATION scope_discipline: every path in git diff --stat 2c717071..58516d3b is inside the eight declared write paths of brief.md:73-81, and the pyproject change is confined to the discovery-describe signal-enrichment block at pyproject.toml:438-445.",
+    "SCORE durability: 17",
+    "JUSTIFICATION durability: negative-final.log shows four declared tests reddening under the applied mutation (including test_twice_invalid_response_is_failed_and_never_delivered at tests/discovery/test_signal_enrichment_options.py:238) while 45 pass and all four pass at head, but two added assertions at :41 and :138 rest on the same value they are handed.",
+    "SCORE fit: 18",
+    "JUSTIFICATION fit: imas_codex/discovery/signals/enrichment.py:16 uses the same ConfigDict(populate_by_name=True, extra=\"forbid\") alias style and hyphenated TOML keys the repository already uses at imas_codex/standard_names/vocab_adjudication.py:23, the function-scope import at parallel.py:4266 matches that file's own idiom, and no added name carries a plan or ticket identifier.",
+    "SCORE reuse: 19",
+    "JUSTIFICATION reuse: the change extends existing owners rather than forking them \u2014 imas_codex/discovery/base/llm.py:146-174 _local_call_kwargs already owns local wire translation and forwards extra_body, imas_codex/llm/prompts/signals/enrichment_output.md is rendered through prompt_loader.render_prompt, scripts/refine_signal_enrichment.py reuses benchmark_signal_enrichment.load_records/open_store/replay_batch/target_context, and scripts/plot_signal_enrichment_refinement.py reuses imas_codex.plotting.style.save_figure; the search over scripts/ and imas_codex/llm found no other seat-option reader, and the existing benchmark summarize at scripts/benchmark_signal_enrichment.py:646 aggregates only the fixed local/paid arms.",
+    "FINDING tests/discovery/test_signal_enrichment_options.py:41 non-blocking: the union-equality assertion compares the parsed options against the settings dict the test itself supplied, so it holds by construction once validation succeeds and cannot catch a value regression that leaves validation green; the literal at :39 is what carries that guarantee.",
+    "FINDING tests/discovery/test_signal_enrichment_options.py:138 non-blocking: the fitted-prompt assertion calls fit_enrichment_prompt(render_prompt(...)) on both sides, so it survives a regression that makes the fitted contract a no-op and only catches the worker dropping the call; the content guarantee rests on the independent literal assertions at :67-75.",
+    "FINDING docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html:18 non-blocking: the brief's schema-removal control (brief.md:89-90) could not be demonstrated because the selected arm carries no schema constraint and the measured direction is opposite (88.5% with the constraint versus 98.5% without in private/refinement-summary.json), so the record reports falsification and substitutes the forwarding mutation as its red control; the substitution is stated plainly at manifest.md:20."
+  ],
+  "review_run_id": "r-20261116T034525199856-review-of-refine-local-model-signal-enrichment-58516d3b335d",
+  "reviewed_base_sha": "2c717071f781c3a074ebff49fccae0759bf12734",
+  "reviewed_head_sha": "58516d3b335d0b73b16d103e8b99c6c3670ebea7",
+  "reviewed_run_id": "r-20261115T213437019440-refine-local-model-signal-enrichment",
+  "rubric": "independent",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T04:39:07.379798+00:00",
+  "total": 108,
+  "verdicts": {
+    "diff": "VERDICT diff: read all 13 commits of 2c717071f781c3a074ebff49fccae0759bf12734..58516d3b335d commit by commit; they add the option model and prompt template, repair the missing local response_format forwarding through extra_body, separate validation re-asks from provider retries, add the frozen-context variant harness and the rate figure, set the measured seat options, and record the evidence fragment, with no stray path in any commit.",
+    "done_when": "VERDICT done_when: the done_when (prompt.txt FENCE \u2014 EVIDENCE) asks for the fragment's per-variant parse, delivery, failure-class, calls-per-minute, wall-time and token figures, the best arm's blind paired judgement with forty sealed hand readings and the reversal control, zero added failures on tests/discovery against the base revision, and an identical other-facility enrichment digest; the manifest records the suite gate at manifest.md:16-17 with suite-summary.json (1718 versus 1746 passed, 0 added failures) and the fragment carries every clause except the declared schema-removal control, whose direction the measurements refute.",
+    "goal": "VERDICT goal: the goal is to fit the signal enrichment stage to the locally served model and measure the best configuration against the paid model's existing results (brief.md:5-7); imas_codex/discovery/signals/enrichment.py:11-66 adds the seat-scoped controls and fitted prompt, imas_codex/discovery/signals/parallel.py:4266-4276 wires them into enrich_worker, and the evidence fragment plus figure record the fourteen-arm measurement against the reused paid descriptions, so the deliverable is present.",
+    "manifest": "VERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T213437019440-refine-local-model-signal-enrichment/manifest.md; it reports baseline-suite.log (1718 passed, EXIT=0) and head-suite.log (1746 passed, EXIT=0) as zero-failure arms, records the negative control at negative-final.log with four failing ids, and its headline metrics reconcile with private/refinement-summary.json (best arm 197/200 raw, 200/200 delivered).",
+    "write_paths": "VERDICT write_paths: the declared paths are imas_codex/discovery/signals/, imas_codex/discovery/base/, imas_codex/llm/, pyproject.toml, scripts/, tests/discovery/, the named evidence html and the named figure directory; all 11 paths in git diff --stat 2c717071..58516d3b sit inside them."
+  }
+}
