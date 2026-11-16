@@ -9,6 +9,7 @@ SUBJECT = "#2878a5"
 REFERENCE = "#929292"
 LINE_STYLES = ("-", "--", "-.", ":")
 CANVAS = (14, 7.2)
+SLIDE_WIDTH_CM = 31.1
 BASE_STYLE = Path(__file__).with_name("data-ink.mplstyle")
 STYLE = {"axes.formatter.useoffset": False, "svg.fonttype": "none"}
 
@@ -68,10 +69,10 @@ def save_figure(figure, path: str | Path) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     figure.savefig(path, dpi=200)
     if path.suffix.lower() == ".svg":
-        height = 16 * figure.get_figheight() / CANVAS[1]
+        height = SLIDE_WIDTH_CM * figure.get_figheight() / figure.get_figwidth()
         content = re.sub(
             r'width="[^"]+pt" height="[^"]+pt"',
-            f'width="31.1cm" height="{height:g}cm"',
+            f'width="{SLIDE_WIDTH_CM:g}cm" height="{height:.3g}cm"',
             path.read_text(),
             count=1,
         )
