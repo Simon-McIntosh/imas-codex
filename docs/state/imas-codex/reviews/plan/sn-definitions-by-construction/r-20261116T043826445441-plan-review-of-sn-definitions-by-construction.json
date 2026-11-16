@@ -17,7 +17,30 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 66,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8239cdeb1314e10c1d81995af7909e1b2f167fd6",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause now names the class of fifty-six recorded by the first rewrite and states that eight are since renamed and forty-eight are not.",
+      "reason": "",
+      "when": "2026-11-16T06:16:06.821766+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8239cdeb1314e10c1d81995af7909e1b2f167fd6",
+      "commit_basis": "edit",
+      "note": "The clause now names the class of fifty-six recorded by the first rewrite and states that eight are since renamed and forty-eight are not.",
+      "reason": "",
+      "when": "2026-11-16T06:16:06.821766+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261116T043826445441-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261116T043826445441-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "7d227b09807caf980aec4ec0033c0e5f7bc6308d",
   "rubric": "content",
