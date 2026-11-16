@@ -32,9 +32,28 @@
       "finding": "reasoning-1",
       "reason": "The stored record carries the checks on all eight. Read from the live graph on 2026-11-16 through HAS_REVIEW with review_axis name: accumulated_neon_equivalent_electron_count has one name review (2026-11-15T17:23:37Z, typesafe/jev-1.14) answering source_fidelity_unsupported_qualifier 0.94 and over_qualified_modifier 0.81; accumulated_argon_equivalent_electron_count_due_to_gas_injection one (18:55:58Z) answering 0.95 and 0.81; ammonia 0.94 and 0.84; deuterium 0.89 and 0.79. The stated ranges 0.89 to 0.96 and 0.79 to 0.86 hold over eight names, so the eight each have a score to move below cutoff.",
       "when": "2026-11-16T04:37:36.230535+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6efc5ed240bfb2e27aabce543a5b8ab472fe31b4",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The wording section's control list now plants a name whose source's enclosing structure states an equivalent-electron basis and whose identifier lacks the qualifier, and requires the census to count it as missing.",
+      "reason": "",
+      "when": "2026-11-16T04:37:43.383822+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6efc5ed240bfb2e27aabce543a5b8ab472fe31b4",
+      "commit_basis": "edit",
+      "note": "The wording section's control list now plants a name whose source's enclosing structure states an equivalent-electron basis and whose identifier lacks the qualifier, and requires the census to count it as missing.",
+      "reason": "",
+      "when": "2026-11-16T04:37:43.383822+00:00"
+    },
     "reasoning-1": {
       "action": "declined",
       "by": "",
