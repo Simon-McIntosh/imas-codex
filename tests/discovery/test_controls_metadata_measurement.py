@@ -2,6 +2,7 @@
 
 import json
 import sqlite3
+import sys
 
 import pytest
 
@@ -156,3 +157,41 @@ def test_empty_response_fails_before_catalogue_comparison(tmp_path):
     with pytest.raises(measurement.MeasurementError, match="no entries"):
         measurement.measure(response, tmp_path / "absent.sqlite", {})
     assert not (tmp_path / "absent.sqlite").exists()
+
+
+@pytest.mark.parametrize(
+    ("body", "cause"),
+    [([], "no entries"), ({"message": "unavailable"}, "exactly one entry list")],
+    ids=["empty-response", "wrong-shape"],
+)
+def test_cli_reports_measurement_failure_without_coverage(
+    tmp_path, monkeypatch, capsys, body, cause
+):
+    response = tmp_path / "response.json"
+    response.write_text(json.dumps(body))
+    settings = tmp_path / "settings.json"
+    settings.write_text("{}")
+    output = tmp_path / "measurement.json"
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "measure-controls",
+            "--response",
+            str(response),
+            "--catalogue",
+            str(tmp_path / "absent.sqlite"),
+            "--settings",
+            str(settings),
+            "--output",
+            str(output),
+        ],
+    )
+    with pytest.raises(SystemExit) as error:
+        measurement.main()
+    assert error.value.code == 1
+    captured = capsys.readouterr()
+    assert "measurement failed: response" in captured.err
+    assert cause in captured.err
+    assert captured.out == ""
+    assert not output.exists()

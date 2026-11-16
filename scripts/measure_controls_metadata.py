@@ -247,8 +247,11 @@ def plot_coverage(result, path):
         axis.set_yticks(ys, [row["public_label"] for row in systems])
         axis.invert_yaxis()
         axis.set_xlabel("Archive names covered by exact feed match [%]")
-        axis.set_xlim(-0.3, max(1, max(values)) * 1.08)
-        axis.xaxis.set_major_locator(MaxNLocator(6))
+        right = max(1, max(values)) * 1.08
+        axis.set_xlim(-0.3, right)
+        axis.set_xticks(
+            [t for t in MaxNLocator(6).tick_values(0, right) if 0 <= t <= right]
+        )
         axis.spines[["left", "top", "right"]].set_visible(False)
         axis.tick_params(axis="y", length=0)
         save_figure(figure, path)
