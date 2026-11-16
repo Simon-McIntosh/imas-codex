@@ -33,7 +33,30 @@
   "plan_slug": "icp-api-access",
   "plan_version": 13,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d88a3673594044c7878df58e79402a81a397a18a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The parent of each of the twenty nodes was read independently by containment through the record tools on 2026-11-16 and agrees for all twenty; the private receipt and a section comment at version 14 record it.",
+      "reason": "",
+      "when": "2026-11-16T20:11:34.006063+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d88a3673594044c7878df58e79402a81a397a18a",
+      "commit_basis": "edit",
+      "note": "The parent of each of the twenty nodes was read independently by containment through the record tools on 2026-11-16 and agrees for all twenty; the private receipt and a section comment at version 14 record it.",
+      "reason": "",
+      "when": "2026-11-16T20:11:34.006063+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261116T194756427070-plan-review-of-icp-api-access.json",
   "review_run_id": "r-20261116T194756427070-plan-review-of-icp-api-access",
   "reviewed_blob_sha": "ff2dab371fce4474cf3be06084df8d71c8989c4f",
   "rubric": "content",
