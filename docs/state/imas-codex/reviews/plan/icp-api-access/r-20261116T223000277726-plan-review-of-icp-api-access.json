@@ -53,9 +53,28 @@
       "note": "Section 4 at version 17 says a production file read is not yet established, makes finding out its first result, and delivers the finding with no other method or host if none exists.",
       "reason": "",
       "when": "2026-11-16T23:32:51.054503+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 4's done-when at version 17 requires the stored PDF's file signature, a page count and the response content type.",
+      "reason": "",
+      "when": "2026-11-16T23:32:54.042060+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "note": "Section 4's done-when at version 17 requires the stored PDF's file signature, a page count and the response content type.",
+      "reason": "",
+      "when": "2026-11-16T23:32:54.042060+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
