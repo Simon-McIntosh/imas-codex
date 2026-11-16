@@ -161,6 +161,16 @@
       "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md forbids a new verb, wrapper or forwarding module; the section's recorded refusals are gate tests on planted groups.",
       "reason": "",
       "when": "2026-11-16T22:50:27.394290+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md requires the evidence to state how many refusal causes are added and which existing cause each folds into or sits beside, and expects no new command-line option.",
+      "reason": "",
+      "when": "2026-11-16T22:50:31.133719+00:00"
     }
   ],
   "responses": {
@@ -199,6 +209,15 @@
       "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/domain-groups.md extends audit_domains and its result with the ranking and split proposal and takes families from detect_families.",
       "reason": "",
       "when": "2026-11-16T22:50:22.372169+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md requires the evidence to state how many refusal causes are added and which existing cause each folds into or sits beside, and expects no new command-line option.",
+      "reason": "",
+      "when": "2026-11-16T22:50:31.133719+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
