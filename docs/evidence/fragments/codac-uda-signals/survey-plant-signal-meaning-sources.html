@@ -1,0 +1,288 @@
+<article id="survey-plant-signal-meaning-sources-evidence">
+  <h3>MINT supplies reusable signal sets and a route to HMI metadata; display files remain unlocated</h3>
+  <p>The installed MINT suite can contribute signal identities, aliases, plot groupings
+    and processing expressions immediately. Its optional controls-metadata interface
+    advertises descriptions, units and types for HMI variables, but this survey did
+    not contact it. No operator display definition was found in the eight named,
+    bounded file searches below. Widget metadata and display-to-archive overlap are
+    therefore <strong>not measured</strong>. This is a result about the searched
+    roots and formats, not a claim that the displays do not exist.</p>
+  <p>Read-only inspection on 2026-11-16, based on repository revision
+    <code>433f9901e80475fb601fd08c04efde1a43e31449</code> and the live
+    <a href="/imas-codex/plans/codac-uda-signals">archive signals plan</a>, version 50.
+    No application was launched, no installed package was imported, and no request
+    was made to an archive, service or website. No sign-in, graph operation or
+    product-source change was performed. The installation root used throughout is
+    <code>/work/imas/opt/EasyBuild/software/MINT/1.5.2-foss-2025b/lib/python3.13/site-packages/</code>,
+    abbreviated below as <code>packages/</code>. This is the newest version in the
+    named MINT installation root; the Intel build and older releases were not audited.</p>
+  <p>All real source/workspace identities, source-address values, selectors and
+    source-file hashes are confined to the private notes file
+    <code>/home/ITER/mcintos/.cache/imas-codex-codac-uda/meaning-sources/survey-private-notes.json</code>
+    (mode 0600). The notes include the 16 workspace contents, configuration, source
+    snapshots, search commands, exact join candidates and matches. The safe count
+    receipt is <code>measurement.json</code> in this run's directory, named in the manifest.</p>
+
+  <h4 id="meaning-variable-access">1. Variable discovery: archive names and a separate HMI metadata feed</h4>
+  <p>Files read: <code>packages/iplotDataAccess/dataAccess.py</code>,
+    <code>dataSource.py</code>, <code>udaAccess.py</code>,
+    <code>packages/iplotWidgets/variableBrowser/variableBrowser.py</code> and
+    <code>models/mtJsonModel.py</code>, plus <code>packages/mint/mydatasources.cfg</code>.
+    The configuration has four data-source entries: three <code>CODAC_UDA</code>
+    and one <code>IMASPY</code>; one of the three UDA entries sets
+    <code>controlsmetadata</code>. These are configured capabilities, not four
+    measured connections.</p>
+  <ul>
+    <li><code>DataAccess.load_config()</code> tries the explicit path,
+      <code>IPLOT_SOURCES_CONFIG</code>, then <code>mydatasources.cfg</code>.
+      <code>load_config_file()</code> instantiates and connects sources, so it is
+      unsuitable for offline extraction. Read the JSON directly instead.
+      UDA addresses resolve only through <code>host</code> and <code>port</code>;
+      related keys are <code>default</code>, <code>uda_for_export</code>,
+      <code>rturl</code>, <code>rtheaders</code>, <code>rtauth</code>,
+      <code>cache_size</code> and <code>variable_group_limit</code>.</li>
+    <li><code>UdaAccess.get_var_list(pattern, field)</code> calls
+      <code>UCR.getVariableList(pattern)</code>, or
+      <code>getVariableListWithFieldXX(field, pattern)</code> when a field is
+      supplied. It returns names, not descriptions or units. The browser converts
+      <code>*</code>/<code>?</code> input to regex and implements starts-with,
+      contains and ends-with searches; <code>name-pattern/field</code> selects a
+      structured field. <code>get_var_dict()</code>,
+      <code>parse_search_to_dict()</code> and <code>parse_vars_to_dict()</code>
+      construct a hierarchy from name separators. This is name-derived grouping,
+      not a measured physical topology.</li>
+    <li><code>get_cbs_list(sep, pattern, times)</code> calls
+      <code>getCbsList()</code>; <code>get_cbs_dict()</code> builds the browse tree.
+      <code>get_var_fields(variable, timestamp="-1")</code> calls
+      <code>getMetaTypeJSONCollapsed()</code> and flattens structured fields with
+      type, dimensionality, units and description. <code>get_unit()</code> uses
+      <code>getMeta()</code>; <code>get_var_enum()</code> uses
+      <code>getEnumLabels()</code>. The browser attaches these fields when a leaf
+      is expanded. None of these metadata values was fetched here.</li>
+    <li><code>DataSource.get_hmi_var_dict(refresh=False)</code> reads the server
+      configured by <code>controlsmetadata</code>, using the route
+      <code>/variable_hmi</code>, a 30-second timeout and an in-memory cache.
+      <code>_parse_hmi_body()</code> accepts a list or a wrapper containing a list,
+      uses <code>variable</code> or <code>name</code> as the selector, and normalizes
+      <code>description</code>, <code>unit</code>/<code>units</code> and
+      <code>data_type</code>/<code>data type</code>/<code>type</code> into
+      <code>{name: {description, units, type}}</code>. The browser's
+      <code>search_hmi()</code> filters these fields locally, case-insensitively;
+      <code>[K]</code> filters the unit exactly unless wildcards are given.
+      This feed does not expose widget location, display links or topology through
+      the fields this client retains.</li>
+  </ul>
+  <p>Offline positive control: the installed normalizer, extracted from its AST
+    without importing the package, maps one invented entry correctly in both bare
+    list and wrapper forms (2/2). This proves the response shape is understood,
+    not that the live feed is accessible, complete or semantically useful.
+    The implementation returns an empty dictionary both for an unconfigured feed
+    and for a failed request; such a result must not be counted as zero coverage.</p>
+
+  <h4 id="meaning-workspaces">2. Saved workspaces, aliases and groupings</h4>
+  <p>Files read: all 16 JSON files under <code>packages/mint/data/workspaces/</code>,
+    <code>packages/mint/data/blueprint.json</code>, <code>mint.schema.json</code>,
+    <code>packages/mint/models/mtSignalsModel.py</code>,
+    <code>models/utils/mtBlueprintParser.py</code>, <code>app/entryPoint.py</code>,
+    <code>app/createApp.py</code> and <code>data/help/manual.md</code>.
+    The app imports a workspace JSON through <code>main_win.import_json()</code>;
+    <code>MTSignalsModel.import_dict()</code> maps positional table cells using
+    the workspace's blueprint order, with <code>table</code> and legacy
+    <code>variables_table</code> accepted. Extraction must respect
+    <code>no_export</code> and skip schema keys rather than assume fixed columns.</p>
+  <p>The 16 files have <strong>199 table rows</strong>, 198 with a name cell:
+    190 literal-name rows and 8 expression rows. There are 128 distinct literal
+    name cells and 7 distinct expression cells; these are not 135 independent
+    archive signals. Nine files contain aliases: 121 nonempty alias cells,
+    36 distinct alias strings. Twenty rows set at least one x/y/z expression.
+    Per-file row counts, in the private notes' sorted source order, are
+    <code>6, 6, 2, 11, 4, 8, 3, 1, 4, 4, 16, 16, 2, 100, 10, 6</code>.</p>
+  <p>The saved canvases contain 117 plot records, 233 signal instances and 117
+    nonempty signal-label cells; pulse overlays and repeated plots duplicate
+    table signals. All 117 plot titles are empty. Sixteen of 236 axis records
+    have nonempty labels. There is no dedicated unit or description column in
+    these workspace tables. Labels and aliases can be shorthand or computed
+    legend text; their presence alone is not evidence of a signal definition.
+    Workspace membership, stack placement, aliases and source filenames provide
+    contextual grouping, with examples and stress layouts mixed together.</p>
+  <p>A representative structure, with identities replaced:</p>
+  <pre>{
+  "data_range": {"mode": "&lt;time-or-pulse-mode&gt;", "pulse_nb": ["&lt;pulse&gt;"]},
+  "signal_cfg": {"model": {
+    "blueprint": {"Variable": {"code_name": "name"}, "Alias": {"code_name": "alias"}, "...": "..."},
+    "table": [["&lt;source&gt;", "&lt;signal-name&gt;", "&lt;stack&gt;", "...", "&lt;alias&gt;", "..."]]
+  }},
+  "main_canvas": {"plots": ["&lt;axes, signal instances and layout&gt;"]}
+}</pre>
+  <p>As an additional check of immediate usefulness, exact indexed lookups in the
+    private <code>full-census/catalogue.sqlite</code> found <strong>126/128
+    (98.4375%)</strong> distinct literal name cells. The lookup first found a
+    previously catalogued selector from the completed controller-cohort declaration;
+    <code>EXPLAIN QUERY PLAN</code> confirmed the <code>selector_membership</code>
+    covering index. The database was opened read-only; no catalogue scan or live
+    request ran. The two unmatched cells are not assumed invalid. This is MINT
+    example coverage only, not the operator-display fraction requested below.</p>
+
+  <h4 id="meaning-time-pulses">3. Pulse and time-window requests</h4>
+  <p>Files read: <code>packages/iplotDataAccess/udaAccess.py</code>,
+    <code>packages/mint/models/accessModes/mtAbsoluteTime.py</code>,
+    <code>mtPulseId.py</code>, and <code>packages/mint/data/help/manual.md</code>.
+    The installed UI supports absolute time, relative time and pulse selection.
+    The absolute-time model retains whole seconds and a separate nine-digit
+    nanosecond fraction; the pulse model accepts comma-separated identities and
+    start/end offsets with seconds, minutes, hours or days converted to seconds.</p>
+  <p><code>get_uda_params()</code> accepts <code>varname</code>, <code>pulse</code>,
+    <code>nbp</code> (default 1000), <code>decType</code>, <code>tsS</code>,
+    <code>tsE</code>, <code>tsFormat</code> (default absolute),
+    <code>extremities</code> and <code>retType</code>.
+    <code>convert_to_nanos()</code> converts ISO strings containing a fractional
+    second to UTC epoch nanoseconds. <code>get_data_i()</code> builds the following
+    query shapes and the fetch methods pass them to <code>UCR.fetchData()</code>:</p>
+  <pre>variable=&lt;selector&gt;,tsFormat=&lt;format&gt;,decSamples=&lt;count&gt;,startTime=&lt;ns&gt;,endTime=&lt;ns&gt;
+variable=&lt;selector&gt;,tsFormat=&lt;format&gt;,decSamples=&lt;count&gt;,pulse=&lt;identity&gt;,startTime=&lt;seconds&gt;S,endTime=&lt;seconds&gt;S</pre>
+  <p>Optional fields append <code>extSamples</code>, <code>decType</code> and
+    <code>retType</code>. A pulse end may be omitted. Pulse reads first resolve
+    <code>getPulseInfo2()</code> for start/end and status; terminal number 0 means
+    latest, and negative numbers step back from <code>getLastPulse2()</code>.
+    Ongoing pulses use an end computed from the current time and bypass the
+    completed-pulse cache. <code>get_pulses_df(pattern="*:*/*")</code> calls
+    <code>getPulses2()</code> and returns six columns: Pulse, Time From, Time To,
+    Duration, Status and Description. <code>search_pulses_df(text)</code>
+    translates location/folder/number input to that pattern;
+    <code>get_pulse_categories()</code> calls <code>getPulseCategories()</code>.
+    This survey issued zero listings and makes no new pulse/category count claim.</p>
+  <p>Sampling semantics matter when reusing this language. Envelope reads set
+    <code>decType="env"</code>; <code>get_archive_window()</code> tries a
+    100,000-point read and falls back on the specific server limit error to an
+    envelope of 1,920 buckets unless overridden. The ordinary read path can add
+    held boundary values and clamp pulse endpoints. A plotted MINT trace is
+    therefore not automatically a record of untouched native samples.</p>
+
+  <h4 id="meaning-expressions">4. Processing expressions an agent can share with MINT</h4>
+  <p>Files read: <code>packages/iplotProcessing/tools/parsers.py</code>,
+    <code>default_modules.json</code>, <code>core/signal.py</code>,
+    <code>core/bobject.py</code>, <code>math/pre_processing/grid_mixing.py</code>,
+    <code>packages/iplotlib/interface/iplotSignalAdapter.py</code> and the manual.
+    The packaged module list has two entries, <code>numpy as np</code> and
+    <code>scipy.*</code>, and zero user entries. <code>IPLOT_PMODULE_PATH</code>
+    selects an alternate <code>default_modules.json</code>; it is not a signal catalogue.</p>
+  <p><code>Parser.set_expression()</code>, <code>replace_var()</code>,
+    <code>substitute_var()</code> and <code>eval_expr()</code> implement Python
+    expression evaluation with <code>${selector-or-alias}</code> references.
+    A bare reference selects <code>.data</code>; <code>.time</code> explicitly
+    selects time. Envelope references select <code>.dmin</code>,
+    <code>.dmax</code> or <code>.davg</code>. Invented examples are
+    <code>${input_a} + ${input_b}</code>, <code>${input_a} * (-2) + 10</code>,
+    <code>np.max(${input_a}.data) * np.ones(${input_a}.data.size)</code>, and
+    <code>${input_a}.time - 5s</code>. Time literals become NumPy timedeltas.
+    Variable, x, y and z columns can carry expressions; x/y allow value-versus-value
+    plots. An input with an empty stack can feed an expression without being drawn.</p>
+  <p>Arithmetic, array indexing, reductions and imported NumPy/SciPy functions are
+    the useful common language. The parser rejects <code>**</code>, text containing
+    <code>for </code> or <code>if </code>, double underscores and several empty
+    literal/call forms, then checks compiled names against injected members.
+    Do not infer expression support from all the operator overloads on
+    <code>Signal</code>: the parser's narrower validation is also applied.</p>
+  <p>Unequal time bases are aligned on their union. Although the manual describes
+    previous-value interpolation, the installed
+    <code>ParserHelper.resolve_alignment_kind()</code> uses an explicit signal
+    preference first, then in automatic mode chooses linear only when every
+    dependency is raw and has an observed rate of at least 100 Hz; otherwise it
+    chooses previous-value interpolation. This is an observed-rate heuristic,
+    not an archive sampling-kind declaration. <code>BufferObject.__array_ufunc__()</code>
+    clears result units, so derived units need an explicit decision. These are
+    source-level findings; no processing expression or live read was evaluated.</p>
+
+  <h4 id="meaning-display-location">5. Operator display files: bounded searches and access limit</h4>
+  <p>Eight reproducible definition searches completed with exit 0, each wrapped in
+    <code>timeout 15 find</code>, with the depth shown. The matcher selected
+    <code>*.opi</code>, <code>*.bob</code>, <code>*.edl</code>, <code>*.adl</code>
+    and <code>*.gdl</code>, pruning <code>.git</code>, <code>.svn</code>,
+    <code>.venv</code> and <code>__pycache__</code>. It found zero matching files
+    in these roots; all searches finished in under two seconds each:</p>
+  <ul>
+    <li><code>/home/ITER/mcintos/Code/codac</code> — depth 8.</li>
+    <li><code>/home/ITER/mcintos/Code/iter-uda</code> — depth 8.</li>
+    <li><code>/home/ITER/mcintos/Code/mctb</code> — depth 8.</li>
+    <li><code>/home/ITER/mcintos/Code/labels</code> — depth 6.</li>
+    <li><code>/home/ITER/mcintos/Code/tree-sitter-gdl</code> — depth 6.</li>
+    <li><code>/home/ITER/mcintos/data</code> — depth 6.</li>
+    <li><code>/work/imas/opt/bamboo_deploy</code> — depth 6.</li>
+    <li><code>/work/imas/opt/EasyBuild/software/MINT/1.5.2-foss-2025b</code> — depth 8.</li>
+  </ul>
+  <p>The same bounded find engine located all 16 known packaged workspace JSONs
+    as a positive control. This controls traversal, not every possible display
+    encoding. Additional 15-second-bounded reconnaissance checked installation
+    directory names under <code>/work/imas/opt</code> (depth 2),
+    <code>EasyBuild/software</code> and <code>EasyBuild-testing/software</code>
+    (depth 1) for CODAC, CSS, OPI or Phoebus names; no candidate installation was
+    found. Bounded source/config searches in the named local CODAC and archive
+    repositories also found no widget/display-file binding in XML, properties,
+    YAML or CFG files. The local CODAC tree contains archive-client sources;
+    that does not establish where the web site's definitions are deployed.</p>
+  <p>No filesystem or shared-storage root was searched, no remote repository was
+    queried, and no website was fetched. The dispatch's bootstrap-document finding
+    was accepted as context, not reproduced through a prohibited request.
+    The site's actual display format, deployment root, backing repository,
+    revision and read permissions remain undetermined. An operator-supplied
+    definition export or an explicitly named readable checkout is needed to
+    inspect the site's files. Other extensions, deeper files and roots outside
+    those listed were not excluded by this survey.</p>
+
+  <h4 id="meaning-display-sample">6. Per-widget content and archive overlap</h4>
+  <p><strong>Sample: 0 located operator definition files; no widget sample.</strong>
+    Variable names, labels, units, tooltips, display title and outbound display
+    links are all unmeasured for the actual operator site. The fraction of distinct
+    display variable names present in the private archive catalogue is
+    <strong>undefined (no denominator), not 0%</strong>. The HMI feed's client
+    schema is not a substitute for a display-file sample, and the MINT 126/128
+    result above is a separate population.</p>
+  <p>Once a real file is supplied, determine its format before choosing a parser.
+    For an XML OPI/BOB export, a candidate extraction would retain each widget's
+    variable/PV binding, literal text or label, unit/show-unit setting, tooltip,
+    geometry, container ancestry, macros and action targets, plus the display's
+    title and related-file links. Resolve macros and relative links in the
+    source context; keep dynamic or unresolved expressions explicit. Units may
+    be requested from a live PV rather than stored as literal text. These are
+    proposed fields to inspect, not observed fields in the unlocated files.
+    Match distinct resolved archive selectors byte for byte through the private
+    catalogue's existing index, recording the numerator, denominator and unresolved
+    binding count separately. Confirm a source-bound known display/selector pair
+    before interpreting unmatched names as a coverage result.</p>
+
+  <h4 id="meaning-source-comparison">What the two sources give per signal</h4>
+  <table>
+    <thead><tr><th>Source</th><th>Name</th><th>Label</th><th>Unit</th><th>Description</th><th>Grouping</th><th>Topology</th></tr></thead>
+    <tbody>
+      <tr><td>MINT, installed files and read interfaces</td><td>128 distinct literal workspace cells; archive name-pattern lookup</td><td>121 table aliases; saved signal labels; archive label getters</td><td>No dedicated workspace column; archive getters and HMI feed schema</td><td>No workspace description column; field metadata and HMI feed schema, values not fetched</td><td>Workspace, stack, pulse overlay and name-derived browse hierarchy</td><td>Plot layout observed; no verified plant topology</td></tr>
+      <tr><td>Operator display definitions behind the site</td><td>Not measured</td><td>Not measured</td><td>Not measured; literal versus live source unknown</td><td>Tooltips and descriptive text not measured</td><td>Display membership and links not measured</td><td>Potential spatial/container/link context; no file inspected</td></tr>
+    </tbody>
+  </table>
+
+  <h4 id="meaning-prototype-priorities">Ranked inputs for a prototype this week</h4>
+  <ol>
+    <li><strong>Mine the installed MINT workspaces now.</strong> Parse JSON and
+      each blueprint directly, preserve source hash, row and stack provenance,
+      and join the 126 known catalogue selectors. Keep examples and generated
+      legends labelled as such. This yields usable signal sets and expression
+      examples immediately, with sparse descriptive meaning; it requires no
+      service access.</li>
+    <li><strong>Obtain a private snapshot of the configured HMI metadata feed.</strong>
+      The installed client already defines a name-to-description/unit/type shape.
+      A separately authorized bounded read or an owner-provided export would let
+      the prototype reuse its normalizer, verify a known variable, count archive
+      matches and inspect whether descriptions improve on boilerplate. Coverage,
+      freshness, ACL and description quality remain unmeasured here.</li>
+    <li><strong>Obtain an operator definition checkout/export with one known display.</strong>
+      This is the route to spatial and navigational context, which the HMI feed
+      does not preserve. It first needs the actual root/repository and format,
+      then macro-aware static parsing and a measured catalogue join. No local
+      parser implementation is justified by the files found in this survey.</li>
+    <li><strong>Reuse MINT's UDA browse and expression conventions.</strong>
+      Name patterns, field metadata, pulse descriptions and the processing
+      language can make the prototype familiar. They require authorized archive
+      access for new values and do not by themselves add physical meaning to
+      generic archive descriptions. Preserve sampling, interpolation and derived-unit
+      choices explicitly when composing signals.</li>
+  </ol>
+</article>
