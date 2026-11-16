@@ -387,11 +387,11 @@ def test_low_level_tls_verification_cannot_be_disabled(
 
 
 def test_request_rate_is_applied_at_transport_boundary(client, transport, monkeypatch):
-    clock = Mock(side_effect=(10.0, 10.0, 10.1, 10.5))
+    clock = Mock(side_effect=(10.0, 10.0, 10.1, 10.5, 10.5))
     sleep = Mock()
     monkeypatch.setattr(module.time, "monotonic", clock)
     monkeypatch.setattr(module.time, "sleep", sleep)
-    client._policy.interval = 0.5
+    client._policy.pacer.interval = 0.5
     client.session.get(ORIGIN)
     client.session.head(ORIGIN)
     assert sleep.call_args.args[0] == pytest.approx(0.4)
@@ -483,9 +483,15 @@ def test_unlisted_origin_post_refused_during_exchange(client, transport):
 
 
 @pytest.mark.parametrize(
-    "target", (GATEWAY + "/assertion", ORIGIN + "/gateway/sign-in")
+    ("target", "expected_origin", "expected_path"),
+    (
+        (GATEWAY + "/assertion", GATEWAY, "/assertion"),
+        (ORIGIN + "/gateway/sign-in", ORIGIN, "/gateway/sign-in"),
+    ),
 )
-def test_observed_gateway_form_allowed_only_during_sign_in(client, transport, target):
+def test_observed_gateway_form_allowed_only_during_sign_in(
+    client, transport, target, expected_origin, expected_path
+):
     with client._sign_in_exchange():
         client.session.post(
             target, data={"SAMLResponse": "synthetic", "RelayState": "test"}
@@ -493,8 +499,8 @@ def test_observed_gateway_form_allowed_only_during_sign_in(client, transport, ta
     assert len(transport) == 1
     record = client.request_log[0]
     assert record.phase == "sign-in"
-    assert record.origin in {GATEWAY, ORIGIN}
-    assert record.path in {"/assertion", "/gateway/sign-in"}
+    assert record.origin == expected_origin
+    assert record.path == expected_path
     assert "synthetic" not in str(record)
     client._authenticated = True
     with pytest.raises(ICPRequestRefused):

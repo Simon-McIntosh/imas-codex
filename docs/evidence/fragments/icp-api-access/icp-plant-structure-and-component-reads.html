@@ -1,0 +1,72 @@
+<article id="icp-plant-structure-and-component-reads-evidence">
+  <h2>Typed GET record reads agree with the independent comparison set</h2>
+  <p>The supplied receipt selected twenty plant nodes through the ITER document assistant
+  before this run. Its production values and the guarded client's integration values agree
+  on code, title and derived parent code for <strong>20 of 20 nodes</strong>. There are
+  <strong>zero instance differences</strong>. Both instances' values remain in private storage.</p>
+  <table><thead><tr><th>Committed-source measure</th><th>Result</th></tr></thead><tbody>
+<tr><th>Preselected production nodes compared</th><td>20</td></tr>
+<tr><th>Agree on code, title and parent</th><td>20 / 20</td></tr>
+<tr><th>Production versus integration instance differences</th><td>0</td></tr>
+<tr><th>Complete advertised subtree</th><td>5 nodes</td></tr>
+<tr><th>Subtree transport requests</th><td>7</td></tr>
+<tr><th>Subtree elapsed time</th><td>3.744 s</td></tr>
+<tr><th>Subtree records denied / observed HTTP 403 responses</th><td>0 / 0</td></tr>
+<tr><th>All transport requests / elapsed time</th><td>108 / 65.391 s</td></tr>
+<tr><th>Post-authentication reads</th><td>99 GET; 0 other methods</td></tr>
+<tr><th>Bounded sign-in requests</th><td>9</td></tr>
+<tr><th>Minimum transport-start spacing</th><td>0.550036 s</td></tr>
+<tr><th>Maximum adjacent-start rate / stated bound</th><td>1.818 / 2.0 requests/s</td></tr>
+<tr><th>Average transport-start rate</th><td>1.746 requests/s</td></tr>
+<tr><th>Function-category / component contents read</th><td>1 / 1</td></tr>
+<tr><th>Missing-code outcome</th><td>explicit ICPNotFound in 1 GET</td></tr>
+  </tbody></table>
+  <p>The subtree was chosen as the first preselected node and its four advertised leaf children.
+  A fresh reader fetched all five contents, resolved the parent identity and read its complete
+  branch. There were zero observed permission denials. The API may omit nodes invisible to
+  the account; this establishes completeness of the advertised tree, without asserting a count
+  of silently hidden records. The live run used a 0.55-second pacing interval against a stated
+  bound of two requests per second, and included sign-in in the transport-spacing measure.</p>
+  <h3>Implementation and method boundary</h3>
+  <p><code>ICPRecords</code> uses the existing <code>ICPClient</code> and its guarded GET
+  transport. It returns typed plant, function-category and component records with the configured
+  instance, endpoint and native identity. Exact code lookup checks content rather than display
+  text, and parent codes come from parent identities. Search pages use the declared
+  <code>start</code> and <code>tot</code> parameters; empty continuing pages, repeats, exhausted
+  budgets, incomplete branches and mismatched identities fail explicitly. Component lists filter
+  a bounded GET search by the returned component's actual plant link.</p>
+  <p>The POST list-view operations <code>/api/machine-component/pbs/type/list-contents</code>, <code>/api/machine-component/type/list-contents</code>, <code>/api/machine-component/ttt-code/type/list-contents</code> were not called.
+  Zero records in this chosen measure were left unread because they required another method:
+  all sampled reads had GET routes. The live component and category checks each used a bounded
+  two-reference search page and one content read; the full component inventory was not enumerated.</p>
+  <h3>Shared pacing and receipt falsification</h3>
+  <p><code>RequestPacer</code> now owns the monotonic spacing calculation. The guarded transport,
+  Confluence, synchronous MediaWiki and asynchronous MediaWiki delegate to it. Zero copies of
+  the elapsed-time client-spacing formula remain in those clients. The helper offers synchronous
+  and asynchronous waits with their respective locks. The scraper and pipeline retain two per-item
+  scheduling delays; retry backoff, socket polling and authentication polling retain their own waits.</p>
+  <p>The sign-in receipt test now asserts the exact expected origin and path for each case.
+  Swapping the two cases' receipt values passes the archived original assertions
+  (<strong>2 passed</strong>) and fails both tightened cases (<strong>2 failed</strong>).
+  Returning empty success for a code with no node fails
+  <code>test_unknown_code_is_explicit_not_found</code> and
+  <code>test_fuzzy_match_is_not_an_exact_code_success</code>:
+  <strong>2 failed, 187 passed</strong>. The unmutated committed-source gate is
+  <strong>189 passed</strong>, including explicit synthetic permission-denied and partial-tree controls.</p>
+  <h3>Private storage and provenance</h3>
+  <p>No fetched fixture or record is committed. The tracked-tree search covers 200
+  identifier, title, reference and origin values from the private receipt and captured API payloads.
+  199 have zero tracked matches, including all
+  38 distinct preselected native identifiers and titles.
+  One ancillary actor identifier occurs as an existing literal in
+  266 files at both the starting revision and the delivered
+  tree; the matching file sets are identical and no added line contains it or any other scanned value.
+  A known client-class marker is found as a positive control for the search.</p>
+  <p>Private records are under <code>~/.cache/imas-codex-codac-uda/icp/</code>, including the
+  selection, both instances' comparison values, complete subtree, category, component,
+  captured record payloads and redacted transport receipts. The node run directory holds
+  <code>live-summary.json</code>, <code>privacy-scan.json</code>, <code>head.log</code>,
+  <code>notfound.log</code>, <code>receipt.log</code> and <code>receipt-base-swapped.log</code>.
+  Source digests in the live receipt match committed source at
+  <code>6e5fd309b353ef2730799042f7629d88f58f5f56</code>. The coordinator owns integration and the separate merged-result gate.</p>
+</article>
