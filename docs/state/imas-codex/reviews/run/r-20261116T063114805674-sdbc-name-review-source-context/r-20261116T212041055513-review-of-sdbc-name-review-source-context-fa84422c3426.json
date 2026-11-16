@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-16T21:22:08.565Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sdbc-name-review-source-context",
+      "recorded_at": "2026-11-16T21:34:15.587429+00:00"
+    }
+  },
   "dispatched_at": "2026-11-16T21:21:53Z",
   "emission": [
     "VERDICT goal: the node goal is to judge a qualifier against the source's enclosing structures; the change reads the statements (imas_codex/standard_names/worker_tasks/worker_review_names.py:76), shows them to the review (imas_codex/standard_names/review/jev_review.py:212) and settles the two source-support checks from them (:1597).",
