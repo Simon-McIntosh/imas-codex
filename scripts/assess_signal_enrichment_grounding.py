@@ -12,6 +12,7 @@ import json
 from pathlib import Path
 
 from scripts import benchmark_signal_enrichment as bench
+from scripts.refine_signal_enrichment import supplied_target_context
 
 
 def sheets(root: Path, output: Path, arms: list[str], sample: str) -> None:
@@ -56,7 +57,9 @@ def sheets(root: Path, output: Path, arms: list[str], sample: str) -> None:
                     "index": index,
                     "id": id,
                     "signal": signal,
-                    "context": bench.target_context(contexts[id], signal["accessor"]),
+                    "context": supplied_target_context(
+                        contexts[id], signal["accessor"]
+                    ),
                     "first": local if first else paid,
                     "second": paid if first else local,
                 }

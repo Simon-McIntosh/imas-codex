@@ -93,6 +93,23 @@ def subset_messages(messages: list[dict], indices: list[int]) -> list[dict]:
     return result
 
 
+def supplied_target_context(messages: list[dict], accessor: str) -> str:
+    """Retain all supplied shared evidence, including other groups' retrieval.
+
+    A shared document may explicitly describe the target even when retrieval
+    placed it under another group. Only other signals' own blocks are removed.
+    """
+    text = next(row["content"] for row in messages if row["role"] == "user")
+    match = re.search(r"^accessor: " + re.escape(accessor) + r"$", text, re.M)
+    if match is None:
+        raise ValueError("target accessor absent from supplied context")
+    preceding = [row for row in SIGNAL.finditer(text) if row.start() < match.start()]
+    if not preceding:
+        raise ValueError("target has no signal block")
+    subset = subset_messages(messages, [int(preceding[-1][1])])
+    return next(row["content"] for row in subset if row["role"] == "user")
+
+
 def failure_class(response: dict, *, terminal: bool = False) -> str:
     """Classify recorded failures without treating repaired text as raw JSON."""
     if response.get("finish_reason") == "abort":
@@ -301,8 +318,8 @@ async def run_variant(
             for id in ids:
                 accessor = refs[id]["properties"]["accessor"]
                 if normalized_context(
-                    bench.target_context(messages, accessor)
-                ) != normalized_context(bench.target_context(original, accessor)):
+                    supplied_target_context(messages, accessor)
+                ) != normalized_context(supplied_target_context(original, accessor)):
                     raise ValueError(
                         "subset changed the target's frozen retrieval context"
                     )

@@ -400,3 +400,34 @@ async def test_instruction_only_options_do_not_add_a_second_output_schema(option
     prompt = call.call_args.kwargs["messages"][0]["content"]
     assert "Original full task" in prompt
     assert "supersedes the schema above" not in prompt
+
+
+def test_reading_context_keeps_support_retrieved_under_another_group():
+    from scripts.refine_signal_enrichment import supplied_target_context
+
+    source = [
+        {
+            "role": "user",
+            "content": """Classify these 2 signals.
+## EDAS Category: analysis
+Wiki: FAME computes equilibria on a ten-millisecond grid after the discharge.
+### Signal 1
+accessor: FIT:FLAG
+source_description: An unrelated signal field
+## EDAS Category: FAME
+Wiki: Database access conventions
+### Signal 2
+accessor: FAME:ANGLE
+source_description: Field-line angle
+""",
+        }
+    ]
+    context = supplied_target_context(source, "FAME:ANGLE")
+    assert (
+        "FAME computes equilibria on a ten-millisecond grid after the discharge"
+        in context
+    )
+    assert "Database access conventions" in context
+    assert "Field-line angle" in context
+    assert "unrelated signal field" not in context
+    assert "Classify these 1 signals" in context
