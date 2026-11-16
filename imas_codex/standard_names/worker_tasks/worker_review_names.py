@@ -53,6 +53,56 @@ def _review_source_binding_sort_key(binding: dict[str, Any]) -> tuple[str, ...]:
     )
 
 
+# The enclosing structures a bound DD leaf sits under, read for the name
+# review. A qualifier a leaf's own text cannot carry — a counting basis, a
+# weighting, a qualifier or a unit convention — is often stated one or more
+# structures above it, so the review is shown those statements rather than the
+# leaf label alone. The depth is bounded so a review never walks a whole IDS.
+_ENCLOSING_STRUCTURE_DEPTH = 4
+
+_ENCLOSING_STRUCTURE_QUERY = f"""
+MATCH path = (leaf:IMASNode)-[:HAS_PARENT*1..{_ENCLOSING_STRUCTURE_DEPTH}]->(ancestor:IMASNode)
+WHERE leaf.id IN $paths
+WITH leaf, ancestor, min(length(path)) AS depth
+RETURN leaf.id AS leaf_path,
+       ancestor.id AS path,
+       depth,
+       coalesce(ancestor.documentation, '') AS documentation,
+       coalesce(ancestor.description, '') AS description
+ORDER BY leaf_path, depth
+"""
+
+
+def enclosing_structure_statements(
+    paths: Any,
+) -> dict[str, list[dict[str, str]]]:
+    """Read the statements made by the structures each bound DD path sits under.
+
+    Returns, per bound path, the nearest-first list of its enclosing
+    deterministically ordered structures that make a statement, each as
+    ``{"path", "text"}`` with the whitespace collapsed. A structure that makes
+    no statement (no documentation and no description) is left out: an empty
+    entry names nothing a name could be judged against.
+    """
+    wanted = sorted({str(path) for path in paths if path})
+    if not wanted:
+        return {}
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        rows = gc.query(_ENCLOSING_STRUCTURE_QUERY, paths=wanted)
+    by_leaf: dict[str, list[dict[str, str]]] = {}
+    for row in rows or ():
+        text = str(row.get("documentation") or "").strip()
+        text = text or str(row.get("description") or "").strip()
+        if not text:
+            continue
+        by_leaf.setdefault(str(row.get("leaf_path") or ""), []).append(
+            {"path": str(row.get("path") or ""), "text": " ".join(text.split())}
+        )
+    return by_leaf
+
+
 def _enrich_name_review_items(
     _worker_dependency, /, items: list[dict[str, Any]]
 ) -> None:
@@ -184,6 +234,30 @@ def _enrich_name_review_items(
             if source_id and source_id not in group["ids"]:
                 group["ids"].append(source_id)
         item["dd_source_docs"] = list(source_doc_groups.values())
+        try:
+            enclosing = enclosing_structure_statements(
+                source_id
+                for group in source_doc_groups.values()
+                for source_id in group["ids"]
+            )
+        except Exception:
+            logger.debug(
+                "review_name: enclosing-structure statements unavailable for %s",
+                item.get("id"),
+                exc_info=True,
+            )
+        else:
+            for group in source_doc_groups.values():
+                statements: list[dict[str, str]] = []
+                seen_paths: set[str] = set()
+                for source_id in group["ids"]:
+                    for statement in enclosing.get(source_id, ()):
+                        if statement["path"] in seen_paths:
+                            continue
+                        seen_paths.add(statement["path"])
+                        statements.append(statement)
+                if statements:
+                    group["enclosing_structures"] = statements
 
         parent_groups: dict[tuple[Any, ...], dict[str, Any]] = {}
         for binding in context_bindings:

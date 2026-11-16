@@ -209,6 +209,33 @@ def _source_cocos_label(item: Mapping[str, Any]) -> str | None:
     return None
 
 
+def enclosing_statements(item: Mapping[str, Any]) -> list[dict[str, str]] | None:
+    """The statements the bound source paths sit under, as one channel.
+
+    A leaf's own text is often its field label; the counting basis, weighting
+    or unit convention is stated by a structure that encloses it. The review is
+    shown those statements as their own channel, with the path that makes each
+    one, so a qualifier the leaf cannot state is read against the structure
+    that states it. ``None`` when no enclosing statement was assembled, which
+    the state records as unobserved rather than empty.
+    """
+    statements: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for source in item.get("dd_source_docs") or ():
+        if not isinstance(source, Mapping):
+            continue
+        for entry in source.get("enclosing_structures") or ():
+            if not isinstance(entry, Mapping):
+                continue
+            path = str(entry.get("path") or "")
+            text = str(entry.get("text") or "")
+            if not text or path in seen:
+                continue
+            seen.add(path)
+            statements.append({"path": path, "text": text})
+    return statements or None
+
+
 def _owner_segment(item: Mapping[str, Any]) -> str | None:
     """Read the owner from the DD reader's parent IMASNode path."""
     parent_path = item.get("parent_path")
@@ -290,6 +317,9 @@ def build_name_state(
         list(_physical_base_roster())
     )
     neighbourhood_block["owner_segment"] = _observed(_owner_segment(item))
+    neighbourhood_block["dd_enclosing_structures"] = _observed(
+        enclosing_statements(item)
+    )
 
     state: dict[str, Any] = {"name": name_block, "neighbourhood": neighbourhood_block}
     if sibling_note:
@@ -589,6 +619,132 @@ def comparison_sources(
             continue
         kept.append({key: value for key, value in source.items() if key not in empty})
     return kept
+
+
+# The checks that ask whether the source states what the name asserts. A
+# qualifier a leaf's own text cannot carry — a counting basis, a weighting, a
+# unit convention — is often stated by an enclosing structure of the bound
+# path, so these two are settled from the statement; the remaining checks ask
+# about the name itself and are left to the judge.
+SOURCE_SUPPORT_CHECKS: frozenset[str] = frozenset(
+    {"over_qualified_modifier", "source_fidelity_unsupported_qualifier"}
+)
+
+# Inflection is the only difference between a qualifier as a name spells it and
+# as a source states it ("equivalent_electron" against "equivalent electrons",
+# "flux_surface_averaged" against "flux surface average"), so both sides are
+# compared by a suffix-stripped stem. A suffix is only stripped when a word of
+# at least four letters remains, so short words ("gas", "ion") keep their form.
+_QUALIFIER_WORD_SUFFIXES = (
+    "ingly",
+    "edly",
+    "ing",
+    "ion",
+    "ed",
+    "es",
+    "ly",
+    "s",
+    "e",
+    "d",
+)
+
+
+def _qualifier_stem(word: str) -> str:
+    for suffix in _QUALIFIER_WORD_SUFFIXES:
+        if word.endswith(suffix) and len(word) - len(suffix) >= 4:
+            return word[: -len(suffix)]
+    return word
+
+
+def _statement_stems(text: Any) -> set[str]:
+    return {
+        _qualifier_stem(word)
+        for word in re.findall(r"[a-z0-9]+", str(text or "").lower())
+    }
+
+
+def states_token(text: Any, token: str) -> bool:
+    """True when *text* names every word of the grammar qualifier *token*.
+
+    "equivalent_electron" is stated by "in equivalent electrons";
+    "density_weighted" needs both "density" and "weighted" (or their stems).
+    """
+    words = [word for word in re.split(r"[^a-z0-9]+", token.lower()) if word]
+    if not words:
+        return False
+    stated = _statement_stems(text)
+    return all(_qualifier_stem(word) in stated for word in words)
+
+
+def enclosing_structure_support(item: Mapping[str, Any]) -> dict[str, Any] | None:
+    """Settle the name's qualifiers from the structures its source sits under.
+
+    A standard name states its qualifiers; a DD leaf often states only its own
+    field label ("Value", "Carbon"), while the counting basis, weighting or
+    unit convention is stated one or more structures above it. The review is
+    shown those statements (``enclosing_structures`` on each source, assembled
+    by the review enrichment) and this reads them: every grammar qualifier the
+    name carries must be stated by the leaf or by an enclosing structure, and
+    at least one of them must be stated only by an enclosing structure. A name
+    whose qualifier neither states yields ``None`` — it is left to the judge,
+    which is what keeps a genuinely unsupported qualifier failing this check.
+
+    Returns the stating structure of every qualifier, or ``None`` when the
+    statements do not settle the name.
+    """
+    try:
+        decomposition = parse_canonical_name(
+            str(item.get("id") or item.get("standard_name") or "")
+        ).ir.model_dump(mode="json")
+    except (TypeError, ValueError):
+        return None
+    tokens = list(
+        dict.fromkeys(
+            str(entry.get("token") or "")
+            for entry in decomposition.get("qualifiers") or ()
+            if isinstance(entry, Mapping) and entry.get("token")
+        )
+    )
+    if not tokens:
+        return None
+
+    leaves: list[dict[str, str]] = []
+    statements: list[dict[str, str]] = []
+    for source in item.get("dd_source_docs") or ():
+        if not isinstance(source, Mapping):
+            continue
+        leaf_text = source.get("documentation") or source.get("description") or ""
+        if leaf_text:
+            leaves.append({"path": str(source.get("id") or ""), "text": str(leaf_text)})
+        for entry in source.get("enclosing_structures") or ():
+            if not isinstance(entry, Mapping):
+                continue
+            text = str(entry.get("text") or "")
+            if text:
+                statements.append({"path": str(entry.get("path") or ""), "text": text})
+    if not statements:
+        return None
+
+    stated: list[dict[str, str]] = []
+    enclosing_stated = False
+    for token in tokens:
+        leaf = next(
+            (entry for entry in leaves if states_token(entry["text"], token)), None
+        )
+        if leaf is not None:
+            stated.append({**leaf, "token": token})
+            continue
+        enclosing = next(
+            (entry for entry in statements if states_token(entry["text"], token)),
+            None,
+        )
+        if enclosing is None:
+            return None
+        enclosing_stated = True
+        stated.append({**enclosing, "token": token})
+    if not enclosing_stated:
+        return None
+    return {"qualifiers": stated, "structures": statements}
 
 
 # A documented name that carries a locus or an aggregation qualifier of its own
@@ -1417,6 +1573,7 @@ def _item_record(
             )
 
     check_records: dict[str, Any] = {}
+    statement_support = enclosing_structure_support(item)
     for check in name_checks:
         if check.audit_finding_class is not None:
             finding = audit_finding_for(check, name_id, audit_report)
@@ -1437,6 +1594,22 @@ def _item_record(
             continue
         question_name = check_question_name(check.id)
         answer = answers.get(question_name)
+        if check.id in SOURCE_SUPPORT_CHECKS and statement_support is not None:
+            # The enclosing structure states the qualifier the check asks
+            # about, so the source supports it: record the stating structure
+            # beside the answer rather than the answer the leaf's own label
+            # would have produced.
+            check_records[check.id] = {
+                "answered": True,
+                "failed": False,
+                "failure_probability": 0.0,
+                "decision": "accept",
+                "answer": answer,
+                "question": questions.get(question_name),
+                "audit_finding": None,
+                "source_support": statement_support,
+            }
+            continue
         answered = answer is not None
         failed = check_failed(check, answer)
         check_records[check.id] = {
