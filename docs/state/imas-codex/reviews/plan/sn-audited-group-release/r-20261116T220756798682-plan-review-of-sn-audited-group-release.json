@@ -121,6 +121,16 @@
       "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md states the bar as new causes on the existing export eligibility filter and gate registry, with source_invariant, families and docs_gates as the owners of their conditions and the cross-field consistency gate as the home of the cross-group family refusal; the queued node's write paths were changed from a new module to those files.",
       "reason": "",
       "when": "2026-11-16T22:50:16.940852+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-2",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md stores each reader verdict as a panel audit review record; the committed evidence is a summary of those records and later sections read the one store.",
+      "reason": "",
+      "when": "2026-11-16T22:50:19.952004+00:00"
     }
   ],
   "responses": {
@@ -132,6 +142,15 @@
       "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md states the bar as new causes on the existing export eligibility filter and gate registry, with source_invariant, families and docs_gates as the owners of their conditions and the cross-field consistency gate as the home of the cross-group family refusal; the queued node's write paths were changed from a new module to those files.",
       "reason": "",
       "when": "2026-11-16T22:50:16.940852+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md stores each reader verdict as a panel audit review record; the committed evidence is a summary of those records and later sections read the one store.",
+      "reason": "",
+      "when": "2026-11-16T22:50:19.952004+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
