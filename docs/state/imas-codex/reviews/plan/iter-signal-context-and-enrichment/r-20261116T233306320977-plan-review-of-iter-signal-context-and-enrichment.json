@@ -35,9 +35,22 @@
       "note": "Sections 8 and 9 are declared deferred at version 42, beside sections 6 and 7.",
       "reason": "",
       "when": "2026-11-16T23:56:13.123065+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The decision's context already records that the correctness round is running and that its result is added there before the lead answers, so the option reads as waiting for that round. Removing the option was attempted twice through the plan tool, which reported success and left the options unchanged; that is reported to the tool's owner, and the plan file is not edited by hand.",
+      "when": "2026-11-16T23:56:16.780582+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The decision's context already records that the correctness round is running and that its result is added there before the lead answers, so the option reads as waiting for that round. Removing the option was attempted twice through the plan tool, which reported success and left the options unchanged; that is reported to the tool's owner, and the plan file is not edited by hand.",
+      "when": "2026-11-16T23:56:16.780582+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
