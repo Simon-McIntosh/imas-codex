@@ -35,9 +35,28 @@
       "note": "Section 6 at version 39 takes its model from the open decision on description quality and says no model is chosen until it is answered.",
       "reason": "",
       "when": "2026-11-16T21:51:00.133258+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6eecd42eaadba9ad4041dc8e21f541d5f1c2ab67",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The open decision at version 40 records the correctness round as running, says its figures are not yet final, and offers only the two remaining choices.",
+      "reason": "",
+      "when": "2026-11-16T21:51:04.466789+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6eecd42eaadba9ad4041dc8e21f541d5f1c2ab67",
+      "commit_basis": "edit",
+      "note": "The open decision at version 40 records the correctness round as running, says its figures are not yet final, and offers only the two remaining choices.",
+      "reason": "",
+      "when": "2026-11-16T21:51:04.466789+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
