@@ -1,0 +1,100 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T04:50:24.787Z",
+  "dispatched_at": "2026-11-16T04:50:08Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:100",
+      "id": "reasoning-1",
+      "reason": "a decision record for the confirmation is required, and s6/s7 must either be stored blocked behind it or the rationale must stop asserting the gate.",
+      "text": "the version-31 rationale says \"Sections 6 and 7 stay unbuilt until the lead confirms the local model on this result or chooses otherwise\", but the plan has no open decision for that confirmation (the only undecided faces are `full-enrichment-cost-accepted` and `local-lane-accepted`, on other questions), the `description-model` decision still carries `data-choice=\"local-after-retest\"` as a settled choice, `plan-section-declarations` marks s6 and s7 `implementable`, and section 3's done-when is met only formally (\"the lead's choice of model ... is recorded\"). A dispatch reading s6 therefore sees the local model already chosen and the section buildable, while the plan's own newest evidence (local description preferred in 0 of 40 pairs; 111 of 200 judged wrong against 32 for the paid model) says the choice is unresolved.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:70",
+      "id": "done_when-1",
+      "reason": "the confirmation the plan now demands cannot be made from a count with no threshold or comparison, so s6 needs a stated quality bar, or the paid arm beside it, before dispatch.",
+      "text": "section 6 requires \"for forty member signals chosen before the run, a hand comparison against the functional specification with the count that are right, partly right and wrong\" and nothing else about quality, so the section cannot fail on quality: any count satisfies it, and the lead has no figure to weigh against the paid model's 16% wrong rate that this plan records. With the version-31 rationale making quality the open question, the plan's deciding measure has no endpoint.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "d020421fd1d6469ae432bda7aada03e1f717f03c",
+  "plan_fingerprint": "3a962bd8cb3d96a437e8b35efcd6d0cd033ccea4484e4142aac363a9e8904a09",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 31,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Version 32 adds the open decision local-model-confirmed-on-quality scoped to sections 6 and 7, so both are held by a recorded decision and not by prose.",
+      "reason": "",
+      "when": "2026-11-16T06:12:19.259879+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 6's done-when at version 33 sets a bar of at most eight wrong in forty, taken from the paid model's measured 32 in 200, and says a miss is delivered as failed on quality for the lead to decide.",
+      "reason": "",
+      "when": "2026-11-16T06:12:43.904546+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+      "commit_basis": "edit",
+      "note": "Section 6's done-when at version 33 sets a bar of at most eight wrong in forty, taken from the paid model's measured 32 in 200, and says a miss is delivered as failed on quality for the lead to decide.",
+      "reason": "",
+      "when": "2026-11-16T06:12:43.904546+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+      "commit_basis": "edit",
+      "note": "Version 32 adds the open decision local-model-confirmed-on-quality scoped to sections 6 and 7, so both are held by a recorded decision and not by prose.",
+      "reason": "",
+      "when": "2026-11-16T06:12:19.259879+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-iter-signal-context-and-enrichment.v31.json",
+  "review_run_id": "r-20261116T044924964883-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "5a266e28df8c6768e62f260cc4d08452c9b8898b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited figure, upstream plans and their sections all resolve, and the snapshot is byte-identical to the live plan file.",
+    "done_when": "a finding \u2014 section 6 measures quality as a right/partly-right/wrong count with no acceptance threshold and no comparison arm, which the new rationale now makes the deciding question.",
+    "evidence_paths": "pass \u2014 the refinement figures sit in a durable evidence fragment on disk, not a scratchpad; the plan cites no path to it, so a later reader has to find it by name.",
+    "naming": "pass \u2014 the changed text introduces no plan label or ticket number, and no section names a code path, function or step sequence.",
+    "reasoning": "a finding \u2014 the rationale records that the local model is quality-unconfirmed and keeps sections 6 and 7 unbuilt pending a lead ruling, yet no decision record carries that ruling and both sections are declared `implementable`.",
+    "single_goal": "pass \u2014 each node names one deliverable; the changed unit adds no deliverable.",
+    "wiring": "pass \u2014 every declared `depends-on` resolves (s4\u2192icp-api-access#s3, #s4; s6\u2192s4, s5; s7\u2192s6; s8\u2192s7; s9\u2192s4, s6, s7, s10; s10\u2192codac-uda-signals#s12, s5), and the conditional gate the new rationale adds is scored under reasoning rather than duplicated here."
+  },
+  "section_digests": {
+    "_document": "df29351267671ab2e3cfb16b5eff821668a5550c7cbda05b0d53eec8ddffffff",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "631c30f031b35766fbc9b9bf62a0670bf0504adeef4f12b7676039b81fd14365",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T06:04:27.783909+00:00",
+  "total": null
+}
