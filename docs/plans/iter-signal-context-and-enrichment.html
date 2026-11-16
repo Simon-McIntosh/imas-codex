@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -97,7 +97,7 @@
       <button class="r-opt" data-value="paid-gpt-6.1-sol">The paid model, gpt-6.1-sol</button>
       <button class="r-opt chosen" data-value="local-after-retest">The local model after a constrained retest</button>
       </p>
-    <p class="r-dec-rat">The lead reverted the earlier choice of the paid model on 2026-11-15: ITER signal descriptions are written by the locally served model, and the pipeline is refined to suit it now that proper context is available. The comparison in section 3 ran that model with the pipeline&#x27;s defaults (0 of 20 responses parsed unrepaired, 130 of 200 descriptions delivered, against 20 of 20 and 200 of 200 for the paid model); a refinement round on batch size, schema-constrained output, reasoning mode and prompt is in progress, and its result is recorded here when it reports. ICP-derived context therefore stays inside ITER. Sections 6 and 7 are built only after that result is recorded here and the lead has confirmed the local model on it; if the refinement does not make the local model deliver reliably, the choice returns to the lead with the measured figures and neither section is built in the meantime.</p>
+    <p class="r-dec-rat">The lead reverted the earlier choice of the paid model on 2026-11-15: ITER signal descriptions are written by the locally served model, so ICP-derived context stays inside ITER. The comparison in section 3 ran that model with the pipeline&#x27;s defaults: 0 of 20 responses parsed unrepaired and 130 of 200 descriptions were delivered, against 20 of 20 and 200 of 200 for the paid model. The refinement round reported on 2026-11-16, on the same 200 signals and context. With one signal per call, a prompt fitted to the model and one re-ask on a validation failure, 197 of 200 raw responses parse and all 200 descriptions are delivered; schema-constrained output lowered parsing and is left off. Reliability is therefore settled. Quality is not: in a blind reading of 40 pairs sealed before the judge ran, the paid model&#x27;s description was preferred in 27, the local model&#x27;s in none, with 13 ties, and 111 of the local model&#x27;s 200 descriptions were judged wrong against the signal&#x27;s context, against 32 for the paid model. The automated judge read the two as nearly even (paid 75, local 71, tie 54) and was already known to agree poorly with hand reading. Sections 6 and 7 stay unbuilt until the lead confirms the local model on this result or chooses otherwise.</p>
     </div>
 <div class="r-dec" data-key="full-enrichment-cost-accepted" data-choice="" data-by="" data-when="" data-sections="s7">
     <p class="r-dec-q">Is the projected call count and cost of enriching the whole catalogue accepted?</p>
