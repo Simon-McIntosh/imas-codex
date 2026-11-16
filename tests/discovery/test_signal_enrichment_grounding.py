@@ -1,0 +1,213 @@
+"""Context references, local review refusal and opt-in description controls."""
+
+import json
+from unittest.mock import AsyncMock
+
+import pytest
+
+from imas_codex.discovery.signals.enrichment import (
+    CitedEnrichmentBatch,
+    CitedStatement,
+    DescriptionReview,
+    EnrichmentOptions,
+    context_items,
+    enrich_signal_batch,
+    filter_statements,
+)
+from imas_codex.discovery.signals.models import SignalEnrichmentBatch
+from tests.discovery.test_signal_enrichment_benchmark import answer
+
+
+def messages():
+    return [
+        {"role": "system", "content": "Original full task"},
+        {"role": "user", "content": "source_description: Cooling temperature\nunit: K"},
+    ]
+
+
+def draft(*, cited=False):
+    value = answer()
+    value["results"][0]["description"] = (
+        "Cooling temperature. Unsupported circuit detail."
+    )
+    if cited:
+        value["results"][0]["statements"] = [
+            {"text": "Cooling temperature.", "context_items": ["context-1"]},
+            {"text": "Unsupported circuit detail.", "context_items": ["context-999"]},
+            {"text": "Uncited detail.", "context_items": []},
+        ]
+    return (CitedEnrichmentBatch if cited else SignalEnrichmentBatch).model_validate(
+        value
+    )
+
+
+async def run(options, results=None, model="local/test"):
+    call = AsyncMock(
+        side_effect=results or [(draft(cited=options.claim_evidence), 0.1, 10)]
+    )
+    output = await enrich_signal_batch(
+        model=model,
+        messages=messages(),
+        options=options,
+        call=call,
+        temperature=0.3,
+        service="facility-discovery",
+    )
+    return output, call
+
+
+def test_nonexistent_context_item_is_dropped_and_counted():
+    items = context_items("Cooling temperature\n\nunit: K")
+    kept, drops = filter_statements(
+        [
+            CitedStatement(text="Cooling temperature.", context_items=["context-1"]),
+            CitedStatement(text="Invented circuit.", context_items=["context-999"]),
+            CitedStatement(text="Uncited circuit."),
+            CitedStatement(
+                text="Mixed citation.", context_items=["context-1", "missing"]
+            ),
+        ],
+        items,
+    )
+    assert kept == ["Cooling temperature."]
+    assert drops == 3
+    assert items["context-3"] == "unit: K"
+
+
+@pytest.mark.asyncio
+async def test_cited_description_cannot_bypass_filter_with_uncited_prose():
+    (batch, _, _), call = await run(EnrichmentOptions(claim_evidence=True))
+    assert batch.results[0].description == "Cooling temperature."
+    assert batch.evidence_drops == 2
+    assert (
+        "[context-1] source_description:"
+        in call.call_args.kwargs["messages"][1]["content"]
+    )
+    assert call.call_args.kwargs["response_model"] is CitedEnrichmentBatch
+
+
+@pytest.mark.asyncio
+async def test_all_claims_dropped_delivers_no_unsupported_text():
+    value = draft(cited=True)
+    value.results[0].statements[0].context_items = ["absent"]
+    (batch, _, _), _ = await run(
+        EnrichmentOptions(claim_evidence=True), [(value, 0, 1)]
+    )
+    assert batch.results[0].description == ""
+    assert batch.results[0].context_quality.value == "low"
+    assert batch.evidence_drops == 3
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("thinking", [True, False])
+async def test_separate_review_removes_claim_and_accounts_for_both_calls(thinking):
+    review = DescriptionReview.model_validate(
+        {
+            "results": [
+                {
+                    "signal_index": 1,
+                    "statements": [
+                        {
+                            "draft_index": 1,
+                            "text": "Cooling temperature in kelvin.",
+                            "context_items": ["context-1", "context-2"],
+                        }
+                    ],
+                }
+            ]
+        }
+    )
+    (batch, cost, tokens), call = await run(
+        EnrichmentOptions(review=True, review_thinking=thinking),
+        [(draft(), 0.1, 10), (review, 0.2, 20)],
+    )
+    assert batch.results[0].description == "Cooling temperature in kelvin."
+    assert batch.review_drops == 1
+    assert batch.review_revisions == 1
+    assert cost == pytest.approx(0.3)
+    assert tokens == 30
+    assert call.await_count == 2
+    request = call.call_args.kwargs
+    assert request["reasoning_effort"] == ("high" if thinking else None)
+    context = json.loads(request["messages"][1]["content"])
+    assert (
+        context["context_items"]["context-1"]
+        == "source_description: Cooling temperature"
+    )
+    assert context["drafts"]["1"][1] == "Unsupported circuit detail."
+
+
+@pytest.mark.asyncio
+async def test_review_failure_refuses_draft_instead_of_delivering_it():
+    with pytest.raises(ValueError, match="review unavailable"):
+        await run(
+            EnrichmentOptions(review=True),
+            [(draft(), 0, 1), ValueError("review unavailable")],
+        )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("rows", [[], [1, 1], [2]])
+async def test_incomplete_duplicate_or_unknown_review_signal_is_refused(rows):
+    review = DescriptionReview(
+        results=[{"signal_index": index, "statements": []} for index in rows]
+    )
+    with pytest.raises(ValueError, match="review"):
+        await run(EnrichmentOptions(review=True), [(draft(), 0, 1), (review, 0, 1)])
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("indices", [[0], [3], [1, 1]])
+async def test_review_cannot_add_or_duplicate_a_draft_statement(indices):
+    review = DescriptionReview(
+        results=[
+            {
+                "signal_index": 1,
+                "statements": [
+                    {
+                        "draft_index": index,
+                        "text": "Guess.",
+                        "context_items": ["context-1"],
+                    }
+                    for index in indices
+                ],
+            }
+        ]
+    )
+    with pytest.raises(ValueError, match="draft statements"):
+        await run(EnrichmentOptions(review=True), [(draft(), 0, 1), (review, 0, 1)])
+
+
+@pytest.mark.asyncio
+async def test_temperature_and_length_options_are_independent_and_defaults_preserve_prompt():
+    (batch, _, _), call = await run(EnrichmentOptions())
+    assert batch.results[0].description == draft().results[0].description
+    assert call.call_args.kwargs["messages"] == messages()
+    (batch, _, _), call = await run(
+        EnrichmentOptions(temperature=0, description_sentences=1)
+    )
+    assert batch.results[0].description == "Cooling temperature."
+    assert batch.length_drops == 1
+    assert call.call_args.kwargs["temperature"] == 0
+    assert "at most 1 short sentence" in call.call_args.kwargs["messages"][0]["content"]
+
+
+@pytest.mark.asyncio
+async def test_grounding_instruction_can_be_removed_without_changing_context():
+    _, grounded = await run(EnrichmentOptions(grounding=True))
+    _, ungrounded = await run(EnrichmentOptions())
+    assert (
+        "Say less when that context says less"
+        in grounded.call_args.kwargs["messages"][0]["content"]
+    )
+    assert "Say less when" not in ungrounded.call_args.kwargs["messages"][0]["content"]
+    assert (
+        grounded.call_args.kwargs["messages"][1]
+        == ungrounded.call_args.kwargs["messages"][1]
+    )
+
+
+@pytest.mark.asyncio
+async def test_paid_model_is_refused_for_grounding_or_review():
+    with pytest.raises(ValueError, match="local model"):
+        await run(EnrichmentOptions(review=True), model="openrouter/test")
