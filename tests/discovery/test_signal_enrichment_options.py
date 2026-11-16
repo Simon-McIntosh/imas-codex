@@ -407,7 +407,12 @@ def test_repaired_success_never_improves_raw_parse_rate_or_hides_failed_signals(
         "cost_usd": 0,
     }
     records = [
-        {**base, "ids": ["ok"], "responses": [bad, good], "outputs": [{"id": "ok"}]},
+        {
+            **base,
+            "ids": ["ok"],
+            "responses": [bad, good],
+            "outputs": [{"id": "ok", "description": "Supported description."}],
+        },
         {**base, "ids": ["failed"], "responses": [bad, bad], "outputs": []},
     ]
     summary = refine.summarize(records, {"order": ["ok", "failed"]})["repair"]
@@ -458,7 +463,7 @@ def test_partial_coverage_and_server_abort_have_distinct_failure_counts():
                     "score": {"parse_success": False, "error": "schema wrapper absent"},
                 }
             ],
-            "outputs": [{"id": "delivered"}],
+            "outputs": [{"id": "delivered", "description": "Supported description."}],
         },
         {
             **base,
@@ -499,7 +504,7 @@ def test_abort_retry_delivery_is_not_counted_as_validation_reask():
         "arm": "trial",
         "ids": ["signal"],
         "responses": [aborted, good],
-        "outputs": [{"id": "signal"}],
+        "outputs": [{"id": "signal", "description": "Supported description."}],
         "seconds": 1,
         "input_tokens": 2,
         "output_tokens": 3,

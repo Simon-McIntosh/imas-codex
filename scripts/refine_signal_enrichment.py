@@ -143,9 +143,7 @@ def replacement_kind(record: dict) -> str | None:
 
 def has_description(output: dict) -> bool:
     """An empty or fully filtered description is not a delivered description."""
-    return "description" not in output or bool(
-        (output.get("description") or "").strip()
-    )
+    return bool((output.get("description") or "").strip())
 
 
 def summarize(records: list[dict], cohort: dict) -> dict:

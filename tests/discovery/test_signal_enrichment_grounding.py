@@ -233,7 +233,10 @@ async def test_unconfigured_seat_preserves_description_whitespace():
     assert batch.results[0].description == value.results[0].description
 
 
-def test_empty_citation_results_are_not_counted_as_delivered():
+@pytest.mark.parametrize(
+    "fields", [{}, {"description": None}, {"description": ""}, {"description": "   "}]
+)
+def test_empty_citation_results_are_not_counted_as_delivered(fields):
     from scripts.refine_signal_enrichment import summarize
 
     records = [
@@ -245,7 +248,7 @@ def test_empty_citation_results_are_not_counted_as_delivered():
             "output_tokens": 1,
             "cost_usd": 0,
             "responses": [{"raw": "{}", "score": {"parse_success": True}}],
-            "outputs": [{"id": "signal", "description": ""}],
+            "outputs": [{"id": "signal", **fields}],
         }
     ]
     result = summarize(records, {"order": ["signal"]})["empty"]
