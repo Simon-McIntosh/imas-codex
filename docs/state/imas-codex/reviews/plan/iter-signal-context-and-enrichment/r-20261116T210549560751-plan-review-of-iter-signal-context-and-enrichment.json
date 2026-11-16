@@ -43,6 +43,16 @@
       "note": "Fixed at version 36: the local-lane decision's rationale says the description model is the open decision, and that ICP-derived context stays inside ITER unless the lead chooses the paid model there.",
       "reason": "",
       "when": "2026-11-16T21:28:05.855222+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b4c776eae213687dc7dd3cf583eafae6196fc7c5",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "Fixed at version 36: the open decision's context gives the hand reading and the judge's figures separately, each named, with the judge's 17-of-40 agreement.",
+      "reason": "",
+      "when": "2026-11-16T21:28:12.717261+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "Fixed at version 36: the local-lane decision's rationale says the description model is the open decision, and that ICP-derived context stays inside ITER unless the lead chooses the paid model there.",
       "reason": "",
       "when": "2026-11-16T21:28:05.855222+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b4c776eae213687dc7dd3cf583eafae6196fc7c5",
+      "commit_basis": "edit",
+      "note": "Fixed at version 36: the open decision's context gives the hand reading and the judge's figures separately, each named, with the judge's 17-of-40 agreement.",
+      "reason": "",
+      "when": "2026-11-16T21:28:12.717261+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T210549560751-plan-review-of-iter-signal-context-and-enrichment.json",
