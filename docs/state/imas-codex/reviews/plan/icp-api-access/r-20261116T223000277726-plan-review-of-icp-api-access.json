@@ -33,7 +33,30 @@
   "plan_slug": "icp-api-access",
   "plan_version": 16,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 2 at version 17 says requests go to the ICP hosts listed in private configuration, the integration instance at first and production since 2026-11-16, with every rule applied to each identically.",
+      "reason": "",
+      "when": "2026-11-16T23:32:48.126334+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "note": "Section 2 at version 17 says requests go to the ICP hosts listed in private configuration, the integration instance at first and production since 2026-11-16, with every rule applied to each identically.",
+      "reason": "",
+      "when": "2026-11-16T23:32:48.126334+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261116T223000277726-plan-review-of-icp-api-access.json",
   "review_run_id": "r-20261116T223000277726-plan-review-of-icp-api-access",
   "reviewed_blob_sha": "fbbd5f275ef39ec68ec6b826599976c22e048d19",
   "rubric": "content",
