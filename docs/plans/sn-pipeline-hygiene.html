@@ -23,8 +23,8 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="49">
-<meta name="plan-modified" content="2026-11-15">
+<meta name="plan-version" content="50">
+<meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
   <main class="plan-doc">
@@ -198,6 +198,9 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-s9-closed-calibration-module-reached" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-15T22:50:00Z">
     <div class="r-comment-body"><p>Closed. The twelve definitions of the calibration module that nothing reached are deleted (375 lines to 100) and a guard test fails on a planted callerless function. The whole standard-names directory run from an archive at the reviewed head shows two failures, both in <code>test_refine_model_dispatch.py</code> and both present at the base revision: the model-seat route check introduced on main the same afternoon rejects the placeholder model identifiers those tests set. They are not from this change and are carried to the open-findings section. The independent review left four non-blocking findings, which the open-findings section also covers.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261115T210103694033-sph-open-review-findings" data-who="reckon-build" data-when="2026-11-15T22:46:05Z">
+    <div class="r-comment-body"><p>Repaired 18 of the 25 non-blocking findings the six head reviews left open and declined 7 with reasons; the seat module carries no function without a caller, 37 evidence scripts that name deleted symbols carry frozen-record markers naming the revision and the missing name, pools.py reads the live-child rule from live_child_cypher, the adjudicated label set is byte-identical, and tests/standard_names adds no failure at head against base. Evidence page: docs/evidence/fragments/sn-pipeline-hygiene/sph-open-review-findings.html</p></div>
 </div>
 </section>
 </main>
