@@ -1,0 +1,75 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T04:18:20.491Z",
+  "dispatched_at": "2026-11-16T04:17:54Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/wiki/confluence.py",
+      "id": "f158a5f5048",
+      "line": "123",
+      "severity": "non-blocking",
+      "text": "RequestPacer landed in confluence.py:123 and mediawiki.py:129 and :722, paths outside the node's declared write paths, so the diff exceeds its fence; the brief's repair 1 ordered the migration and the manifest scope_note discloses it, so the coordinator must ratify the widened scope or revert those two files."
+    },
+    {
+      "file": "tests/discovery/test_icp_records.py",
+      "id": "fa7da6b47c6",
+      "line": "95",
+      "severity": "non-blocking",
+      "text": "assert result.source.uid == result.uid compares the uid the fixture supplied with the same uid the reader copied onto the record, so both sides move together and the line survives any regression in how source identity is derived; line 93 has the same shape against the mock's configured origin, and neither names a change that would redden it."
+    },
+    {
+      "file": "docs/evidence/fragments/icp-api-access/icp-plant-structure-and-component-reads.html",
+      "id": "f7eafcbd970",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "The fragment records 20/20 agreement on derived parent code, but the production side of that column is derived from the code by dropping its last dotted segment (pbs-comparison-receipt.json note) rather than read through the record tools the done_when names, so the parent column cannot disagree with the code column and is not independent evidence for the parent half of the measure."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T213921030036-icp-plant-structure-and-component-reads/receipt-base-swapped.log",
+      "id": "faa472ec7fe",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "The receipt baseline arm ran from the bare tree /tmp/receipt-assertions-FiFL rather than under $TMPDIR, against the run's own temporary-tree rule, and that tree no longer exists, so the base admission rests on a log whose scratch tree cannot be re-read."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "RequestPacer is reached from imas_codex/discovery/icp/client.py:263 (_RequestPolicy.throttle, called by the guarded adapter at client.py:279), imas_codex/discovery/wiki/confluence.py:153, imas_codex/discovery/wiki/mediawiki.py:191 and mediawiki.py:787; ICPRecords has no production caller beyond the package export at imas_codex/discovery/icp/__init__.py:13, so the reader is exercised only by tests and the private measure script.",
+    "diff": "Read all four commits against 166904e8: ten files, 977 insertions and 32 deletions, comprising a new RequestPacer with its tests, the records reader with its tests, the client's pacer and started_at wiring, three wiki clients moved onto the pacer, the tightened sign-in receipt assertions, and a 72-line evidence fragment.",
+    "done_when": "The done_when asks for a twenty-node preselected agreement count, a complete stated-size subtree with request, elapsed and denied counts, a rate at or below the stated bound, private storage with no fetched value in the tracked tree, and an explicit not-found outcome; live-summary.json records each, and I recomputed 20/20 agreement from /home/ITER/mcintos/.cache/imas-codex-codac-uda/icp/comparison.private.json and the 0.550036 s minimum spacing and 1.818 requests/s maximum rate from transport.private.json, which holds 108 records: 99 GET reads and 4 POSTs, all of them sign-in.",
+    "goal": "The node goal is to read plant structure, function-category and component records through the read-only client and check them against ICP; imas_codex/discovery/icp/records.py:212-390 delivers ICPRecords.plant_by_code, children, subtree, function_category, component_by_reference and components_for_plant on the existing ICPClient GET transport, and the live measure exercised every one of them.",
+    "manifest": "Read; it records status complete, four commits (105b9c02, 6e5fd30, 1816b58, 21bb64f6), an after_suite with 0 failures over 189 tests at head, notfound.log as the negative control with 2 failed and EXIT=1, and its caveats about the absent parent field in the reference receipt, the ancillary actor identifier already present in 266 tracked files and the receipt-baseline arm run from a bare /tmp tree.",
+    "write_paths": "Read the declared write paths from dispatch-detail.json - imas_codex/discovery/icp/, imas_codex/discovery/base/, imas_codex/graph/, tests/discovery/ and the icp-plant-structure-and-component-reads evidence fragment; two changed files, imas_codex/discovery/wiki/confluence.py:123 and imas_codex/discovery/wiki/mediawiki.py:129 and :722, sit outside every declared path and are disclosed only in the manifest scope_note."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_request_pacer.py:52 fails when the async lock is removed (pacer-unlocked.log, 1 failed), tests/discovery/test_icp_records.py:84-101 fails when plant_by_code returns empty success (notfound.log, 2 failed) and the swapped receipt fails both repaired cases (receipt.log, 2 failed), while tests/discovery/test_icp_records.py:95 and :93 assert a fixture's own value back and guard nothing.",
+    "evidence": "The head gate is recorded in head.log as 189 passed at revision 21bb64f6 with EXIT=0, the live counts are in live-summary.json whose source hashes match the delivered tree, and notfound.log shows the harness can fail with 2 failed and EXIT=1, though the gate command is a unit-test run while the done_when's live counts come from measure_live.py rather than from any test.",
+    "fit": "imas_codex/discovery/icp/records.py:60-112 follows the frozen-dataclass and typed-exception idiom already set by imas_codex/discovery/icp/client.py:80-100, the added names stay in the ICPClient/ICPRecords family, and ruff reports no findings on the four new or changed modules.",
+    "goal_fidelity": "imas_codex/discovery/icp/records.py:212-390 implements the node's plant, function-category and component reads on the existing ICPClient transport, and the live run returned 20/20 agreement with zero instance differences, so the stated deliverable is present and exercised.",
+    "reuse": "RequestPacer is the repository's first owner of request spacing - a capability search over imas_codex/ found only the in-flight concurrency governor at imas_codex/discovery/base/rate_governor.py:54, which is a different mechanism - and it replaces three inline elapsed-time loops instead of adding a fourth, while ICPRecords reuses ICPClient and its guarded adapter rather than opening a second session.",
+    "scope_discipline": "imas_codex/discovery/wiki/confluence.py:123 and imas_codex/discovery/wiki/mediawiki.py:129 lie outside the declared write paths, so the diff exceeds the fence the node was dispatched under even though the brief's repair 1 asked for that migration."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal is to read plant structure, function-category and component records through the read-only client and check them against ICP; imas_codex/discovery/icp/records.py:212-390 delivers ICPRecords.plant_by_code, children, subtree, function_category, component_by_reference and components_for_plant on the existing ICPClient GET transport, and the live measure exercised every one of them.\nVERDICT done_when: The done_when asks for a twenty-node preselected agreement count, a complete stated-size subtree with request, elapsed and denied counts, a rate at or below the stated bound, private storage with no fetched value in the tracked tree, and an explicit not-found outcome; live-summary.json records each, and I recomputed 20/20 agreement from /home/ITER/mcintos/.cache/imas-codex-codac-uda/icp/comparison.private.json and the 0.550036 s minimum spacing and 1.818 requests/s maximum rate from transport.private.json, which holds 108 records: 99 GET reads and 4 POSTs, all of them sign-in.\nVERDICT write_paths: Read the declared write paths from dispatch-detail.json - imas_codex/discovery/icp/, imas_codex/discovery/base/, imas_codex/graph/, tests/discovery/ and the icp-plant-structure-and-component-reads evidence fragment; two changed files, imas_codex/discovery/wiki/confluence.py:123 and imas_codex/discovery/wiki/mediawiki.py:129 and :722, sit outside every declared path and are disclosed only in the manifest scope_note.\nVERDICT manifest: Read; it records status complete, four commits (105b9c02, 6e5fd30, 1816b58, 21bb64f6), an after_suite with 0 failures over 189 tests at head, notfound.log as the negative control with 2 failed and EXIT=1, and its caveats about the absent parent field in the reference receipt, the ancillary actor identifier already present in 266 tracked files and the receipt-baseline arm run from a bare /tmp tree.\nVERDICT diff: Read all four commits against 166904e8: ten files, 977 insertions and 32 deletions, comprising a new RequestPacer with its tests, the records reader with its tests, the client's pacer and started_at wiring, three wiki clients moved onto the pacer, the tightened sign-in receipt assertions, and a 72-line evidence fragment.\nCALL_SITES: imas_codex/discovery/icp/client.py:263, imas_codex/discovery/wiki/confluence.py:153, imas_codex/discovery/wiki/mediawiki.py:191, imas_codex/discovery/wiki/mediawiki.py:787\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/icp/records.py:212-390 implements the node's plant, function-category and component reads on the existing ICPClient transport, and the live run returned 20/20 agreement with zero instance differences, so the stated deliverable is present and exercised.\nSCORE evidence: 16\nJUSTIFICATION evidence: The head gate is recorded in head.log as 189 passed at revision 21bb64f6 with EXIT=0, the live counts are in live-summary.json whose source hashes match the delivered tree, and notfound.log shows the harness can fail with 2 failed and EXIT=1, though the gate command is a unit-test run while the done_when's live counts come from measure_live.py rather than from any test.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: imas_codex/discovery/wiki/confluence.py:123 and imas_codex/discovery/wiki/mediawiki.py:129 lie outside the declared write paths, so the diff exceeds the fence the node was dispatched under even though the brief's repair 1 asked for that migration.\nSCORE durability: 17\nJUSTIFICATION durability: tests/discovery/test_request_pacer.py:52 fails when the async lock is removed (pacer-unlocked.log, 1 failed), tests/discovery/test_icp_records.py:84-101 fails when plant_by_code returns empty success (notfound.log, 2 failed) and the swapped receipt fails both repaired cases (receipt.log, 2 failed), while tests/discovery/test_icp_records.py:95 and :93 assert a fixture's own value back and guard nothing.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/discovery/icp/records.py:60-112 follows the frozen-dataclass and typed-exception idiom already set by imas_codex/discovery/icp/client.py:80-100, the added names stay in the ICPClient/ICPRecords family, and ruff reports no findings on the four new or changed modules.\nSCORE reuse: 20\nJUSTIFICATION reuse: RequestPacer is the repository's first owner of request spacing - a capability search over imas_codex/ found only the in-flight concurrency governor at imas_codex/discovery/base/rate_governor.py:54, which is a different mechanism - and it replaces three inline elapsed-time loops instead of adding a fourth, while ICPRecords reuses ICPClient and its guarded adapter rather than opening a second session.\nFINDING imas_codex/discovery/wiki/confluence.py:123 non-blocking: RequestPacer landed in confluence.py:123 and mediawiki.py:129 and :722, paths outside the node's declared write paths, so the diff exceeds its fence; the brief's repair 1 ordered the migration and the manifest scope_note discloses it, so the coordinator must ratify the widened scope or revert those two files.\nFINDING tests/discovery/test_icp_records.py:95 non-blocking: assert result.source.uid == result.uid compares the uid the fixture supplied with the same uid the reader copied onto the record, so both sides move together and the line survives any regression in how source identity is derived; line 93 has the same shape against the mock's configured origin, and neither names a change that would redden it.\nFINDING docs/evidence/fragments/icp-api-access/icp-plant-structure-and-component-reads.html:5 non-blocking: The fragment records 20/20 agreement on derived parent code, but the production side of that column is derived from the code by dropping its last dotted segment (pbs-comparison-receipt.json note) rather than read through the record tools the done_when names, so the parent column cannot disagree with the code column and is not independent evidence for the parent half of the measure.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T213921030036-icp-plant-structure-and-component-reads/receipt-base-swapped.log:5 non-blocking: The receipt baseline arm ran from the bare tree /tmp/receipt-assertions-FiFL rather than under $TMPDIR, against the run's own temporary-tree rule, and that tree no longer exists, so the base admission rests on a log whose scratch tree cannot be re-read.\n",
+  "review_run_id": "r-20261116T040900239445-review-of-icp-plant-structure-and-component-reads-21bb64f64115",
+  "reviewed_base": "166904e82f01f20acbc8bf6f5956e0c1e6e90d82",
+  "reviewed_base_sha": "166904e82f01f20acbc8bf6f5956e0c1e6e90d82",
+  "reviewed_commit": "21bb64f641156c804914a61112af325ae6f4d98d",
+  "reviewed_head_sha": "21bb64f641156c804914a61112af325ae6f4d98d",
+  "reviewed_run_id": "r-20261115T213921030036-icp-plant-structure-and-component-reads",
+  "rubric": "text",
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T04:41:28.519031+00:00",
+  "total": 100
+}

@@ -1,0 +1,87 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T11:51:29.898Z",
+  "dispatched_at": "2026-11-16T11:30:07Z",
+  "findings": [
+    {
+      "file": "docs/figures/sn-definitions-by-construction/sdbc-name-review-source-context/source-support-before-after.svg",
+      "id": "f2911d6dd58",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Row names render at roughly 7 pt (about 9 px of glyph band on the 1400x668 render) and the 'acc.' line above each at roughly 5.5 pt, about half the 14 pt tick-label floor, so at the ~900 px column width the reader is expected to read them at they fall to roughly 4.5 pt. The eight names are the only identifier of which row a reader is looking at, so this is the figure's most consequential legibility issue and should be raised to the mandated size before the figure is used in the plan. It does not hold the node under this rubric's blocking definition, because the names are legible at the supplied resolution."
+    },
+    {
+      "file": "docs/figures/sn-definitions-by-construction/sdbc-name-review-source-context/source-support-before-after.svg",
+      "id": "f2911d6dd58",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Vertical gridlines are drawn at every x tick in both panels (light grey rgb(191,191,191) at x=940, 1048, 1156, 1263 in the right panel at y=130) and the axes are a full box with the top spine at y=73 and the right spine at x=1371. Both are decorative ink the repository's plot style rules forbid, and the data would read unchanged without them."
+    },
+    {
+      "file": "docs/figures/sn-definitions-by-construction/sdbc-name-review-source-context/source-support-before-after.svg",
+      "id": "f2911d6dd58",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "A dashed grey vertical rule is drawn at the 0.5 cutoff in both panels (x=1101-1102 in the right panel) with no label, no annotation and no legend entry, so a reader sees an unexplained reference line; and neither panel carries an x-axis label, so the quantity on the axis is not named in the figure at all. The panel labels name the two checks but only the surrounding prose explains what 0 to 1 is and what the dashed line means."
+    },
+    {
+      "file": "docs/figures/sn-definitions-by-construction/sdbc-name-review-source-context/source-support-before-after.svg",
+      "id": "f2911d6dd58",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "Every row carries a third line of text, 'acc.', drawn in the same green as the 'after' marker, with no legend entry, no key and the same text on all eight rows. It abbreviates the route 'accept' that the prose explains and the table states in full, so as drawn it is an unkeyed abbreviation that reads like a third series. Reward: the same green appears once in the legend for 'after', which makes 'acc.' harder to tell apart from data."
+    },
+    {
+      "file": "docs/figures/sn-definitions-by-construction/sdbc-name-review-source-context/source-support-before-after.svg",
+      "id": "f2911d6dd58",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The 'after' marker for every row sits at exactly 0.0 and is clipped by the left axis boundary: green pixels occupy x=254-259 with column counts 12, 12, 11, 10, 7, 4 while the left spine sits at x=253, so each is drawn as a half-disc sitting on the axis rather than a full marker. The value still reads (the marker is centred on 0.0) but the half-disc looks unlike the full hollow 'before' circle in the same legend, so the two series do not present as the same mark shape."
+    },
+    {
+      "file": "docs/figures/sn-definitions-by-construction/sdbc-name-review-source-context/source-support-before-after.svg",
+      "id": "f2911d6dd58",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure repeats one comparison eight times: before values span only 0.80-0.85 and 0.90-0.95 and every after value is 0.0, so all eight rows are visually identical. The same eight values already appear as a table in the evidence fragment that reports this measurement, and that table also carries the route column the figure reduces to 'acc.', so the plot adds no reading a table lacks."
+    },
+    {
+      "file": "docs/figures/sn-definitions-by-construction/sdbc-name-review-source-context/source-support-before-after.svg",
+      "id": "f2911d6dd58",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The figure is orphaned at the reviewed head: git grep over 243cdcdd finds no reference to source-support-before-after in any document, the evidence fragment sdbc-name-review-source-context.html carries no <img> and no figure element, and the figure has no caption. No script draws it either \u2014 the run's diff adds no plotting module \u2014 so a reader of the section never sees the figure and a future editor cannot regenerate it."
+    }
+  ],
+  "item_verdicts": {
+    "contrast": "pass \u2014 measured on the rendered PNG against the white background: row-name text rgb(63,63,63) is 10.4:1, the green accent rgb(31,111,63) used for 'acc.' is 6.1:1, and tick and spine grey rgb(127,127,127) is 4.0:1; the blue segment rgb(43,140,190) is 3.7:1 against white and the markers are darker still, so every text and mark clears its background.",
+    "data_ink": "pass \u2014 the ink is the data: eight rows each carry one blue connecting segment between two markers, plus one two-entry legend; the background is pure white, no gradient, no legend patch fill, no box shading, and no panel carries a second plotted series or an area fill.",
+    "decoration": "fails \u2014 vertical gridlines are drawn at every x tick in both panels (light grey rgb(191,191,191) at x=940, 1048, 1156 and 1263 of the right panel at y=130, and the matching set in the left), the axes are a full box (black top spine at y=73 and a right spine at x=1371 of the right panel, plus the black left spine at x=253 and bottom spine at y=626), and a dashed grey vertical rule sits at x=0.5 in both panels (x=1101-1102 in the right panel) with no legend entry and no label, so a reader meets an unkeyed threshold and a grid that add no measurement to the eight rows.",
+    "label_collision": "pass \u2014 measured on the rendered PNG: no text touches the canvas edge (the longest row name starts at x=47 and the topmost 'acc.' at y=91), no two text runs overlap, the two-line row labels sit clear of the neighbouring rows 71.9 px apart, and the single legend box in the lower right of the left panel covers no marker or segment (its left edge sits at x\u2248707, clear of the eighth row's 'before' marker at x\u2248693).",
+    "legibility": "fails \u2014 measured on the supplied 1400x668 render: the eight y-row names, which are the only thing identifying a row, are about 9 px tall at the glyph band (rows y=103..110, cap ~6-7 px), roughly 7 pt at 100 dpi and about half the 14 pt tick-label floor, so at the ~900 px column width the page uses they fall to roughly 4.5 pt; the 'acc.' line above each row is smaller still (~5.5 pt). The suptitle, the two panel labels ('over-qualified modifier', 'unsupported qualifier') and the 0.0-1.0 tick values do read at a glance, and every row is present, so the figure is not unreadable \u2014 it is readable only by leaning in.",
+    "table_form": "fails \u2014 the figure plots eight rows whose values are the same to within two hundredths in the before column (0.80-0.85 and 0.90-0.95) and identical to the hundredth in the after column (0.0 on both checks for all eight), so the shape carries one statement ('all eight collapse to zero') repeated eight times; that same eight-row table is already rendered beside this figure in docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-review-source-context.html (the eight-rows table), where a reader gets the exact values and the route column the figure abbreviates to 'acc.'."
+  },
+  "notes": "Read-only figure review of the rendered PNG named in this review. Only that PNG was opened, plus crops of it; no SVG and no other image was read, and no file was edited, created, moved, deleted, redrawn, relabelled or reformatted. Findings are anchored to the figure's repository path with line of the script that draws it, because the run's diff shows no plotting script. No scores are recorded: a figure review runs no suite and makes no text-dimension judgement.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261116T112923940369-review-of-sdbc-name-review-source-context-243cdcdd04e3-figure",
+  "reviewed_base_sha": "4d632fba19d80bc529691d2d9e74a4fec7e6c645",
+  "reviewed_commits": [
+    "243cdcdd04e3c73b0bf2e6ac40ab1cf42122f588"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": null,
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T112923940369-review-of-sdbc-name-review-source-context-243cdcdd04e3-figure/image-0.png",
+      "pixels": "1400x668",
+      "rendered_from": "docs/figures/sn-definitions-by-construction/sdbc-name-review-source-context/source-support-before-after.svg"
+    }
+  ],
+  "reviewed_head_sha": "243cdcdd04e3c73b0bf2e6ac40ab1cf42122f588",
+  "reviewed_run_id": "r-20261116T063114805674-sdbc-name-review-source-context",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T12:45:00Z",
+  "total": null
+}

@@ -51,6 +51,15 @@ EXCERPT = 320
 
 FIGURE_SRC = "/imas-codex/figures/sn-held-names-refine-pass/outcomes-by-hold-kind.svg"
 
+#: A rename settles several names in one paid step, and the ledger credits its
+#: cost to every id that step named, so the per-kind column is a share of the
+#: spend and not a partition of it: the column sums above the total.
+SHARED_COST_NOTE = (
+    "The per-kind spend column credits each paid step's cost to every name a "
+    "step settled, so it shares a rename's cost among the names it moved and "
+    "sums above the headline total rather than partitioning it."
+)
+
 # What each undecided identity must be bound to, read from the decision note
 # this pass recorded and, where the note names a relative, from the graph's own
 # HAS_PARENT link. A fold names the accepted identity the DD path should point
@@ -441,6 +450,7 @@ def build() -> dict:
         "outcomes": {
             "counts": dict(totals),
             "by_hold_kind": by_hold_kind,
+            "by_hold_kind_note": SHARED_COST_NOTE,
         },
         "spend": {
             "total_usd": total_spend,
@@ -569,15 +579,17 @@ def render(doc: dict) -> str:
         f"<tr><td><strong>all</strong></td>"
         f"<td><strong>{doc['holds_before']['open_hold_count']}</strong></td></tr>"
     )
-    parts.append("</p>")
+    parts.append("</table>")
 
     parts.append("<h3>Outcome by hold kind</h3>")
     parts.append(
         "<table><caption>Names, acceptances and spend per hold kind "
-        "(hold kind as classified from the open hold nodes)</caption>"
+        "(hold kind as classified from the open holds as the pass opened). "
+        f"{SHARED_COST_NOTE}</caption>"
     )
     parts.append(
-        "<tr><th>Hold kind</th><th>Names</th><th>Accepted</th><th>Spend (USD)</th></tr>"
+        "<tr><th>Hold kind</th><th>Names</th><th>Accepted</th>"
+        "<th>Spend (USD)</th><th>Per name (USD)</th></tr>"
     )
     for kind, slot in sorted(
         doc["outcomes"]["by_hold_kind"].items(), key=lambda kv: -kv[1]["names"]

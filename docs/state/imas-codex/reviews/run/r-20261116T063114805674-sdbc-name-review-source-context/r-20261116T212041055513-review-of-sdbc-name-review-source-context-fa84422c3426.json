@@ -1,0 +1,108 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T21:22:08.565Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "sdbc-name-review-source-context",
+      "recorded_at": "2026-11-16T21:34:15.587429+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-16T21:21:53Z",
+  "emission": [
+    "VERDICT goal: the node goal is to judge a qualifier against the source's enclosing structures; the change reads the statements (imas_codex/standard_names/worker_tasks/worker_review_names.py:76), shows them to the review (imas_codex/standard_names/review/jev_review.py:212) and settles the two source-support checks from them (:1597).",
+    "VERDICT done_when: the only command-asserted clause is the whole tests/standard_names directory, and suite_head.log's header records revision 702645387, three commits before the landed head fa84422c3, three tests more than base (8783 vs 8780 selected) and the same two failures in both arms; the class census, eight, planted and sample clauses are measured in the run directory and reported in docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-review-source-context.html.",
+    "VERDICT write_paths: read the source dispatch's six declared paths and the landed diff; five of six changed files are inside them and imas_codex/standard_names/worker_tasks/__init__.py:263 is not.",
+    "VERDICT manifest: read; it reports status complete, seven commits, 2 failures in each suite arm with the same ids, the negative control at 1 failed/2 passed, and the class pass at USD 0.2022 with 867 of 1,184 members settled at 0.0.",
+    "VERDICT diff: read commit by commit from 4d632fba1 to fa84422c3 over six files \u2014 the resolver and graph walk, one table line, three tests, the fragment and its data file, and the deletion of an orphaned figure; no unrelated file is touched.",
+    "SCORE goal_fidelity: 15",
+    "JUSTIFICATION goal_fidelity: imas_codex/standard_names/review/jev_review.py:1597 records accept/noul 0.0 for the whole settled class rather than letting the judge answer the two checks from the statement it is now shown.",
+    "SCORE evidence: 11",
+    "JUSTIFICATION evidence: suite_head.log:1 records revision 702645387 rather than the landed head fa84422c3, and sdbc-name-review-source-context.html:133 records 199 names against the two hundred the done_when fixes.",
+    "SCORE scope_discipline: 10",
+    "JUSTIFICATION scope_discipline: imas_codex/standard_names/worker_tasks/__init__.py:263 adds a table entry outside the node's declared write paths, and no module requests that name through _worker_dependency.",
+    "SCORE durability: 13",
+    "JUSTIFICATION durability: tests/standard_names/test_name_review_source_context.py:84 is proven to fire by negative_control.log, but imas_codex/standard_names/worker_tasks/worker_review_names.py:76's query, dedupe and nearest-first ordering have no test.",
+    "SCORE fit: 16",
+    "JUSTIFICATION fit: imas_codex/standard_names/review/jev_review.py:212 follows the module's existing _observed state-channel idiom and the surrounding docstring style.",
+    "SCORE reuse: 5",
+    "JUSTIFICATION reuse: imas_codex/standard_names/worker_tasks/worker_review_names.py:63 writes its own HAS_PARENT ancestor walk where imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:498 already owns one."
+  ],
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/worker_tasks/__init__.py",
+      "line": 263,
+      "severity": "blocking",
+      "summary": "The one-line addition of \"enclosing_structure_statements\" to _OWNERS_BY_MODULE sits outside the node's declared write paths, so the landed change is not inside the exclusive fence it was dispatched with. It is also unused: the only definition and the only call are in worker_review_names.py (:76 and :238) and no module passes the string to _worker_dependency, so neither tests/standard_names/test_worker_dependency_table.py nor any runtime path resolves that name. Repair is to delete the line, which also brings the diff back inside the fence."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_review_names.py",
+      "line": 63,
+      "severity": "non-blocking",
+      "summary": "_ENCLOSING_STRUCTURE_QUERY duplicates a capability the repository already owns: imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:498 _ANCESTOR_CONTEXT_QUERY walks the same (n:IMASNode)-[:HAS_PARENT*1..]->(a:IMASNode) chain for the ancestor's description/documentation and returns depth and path ordered nearest-first. The addition is a second Cypher with a batch id list and depth 4 instead of extending or wrapping the owner, so the depth limit, the documentation-else-description precedence and the whitespace collapse now have two homes that can drift."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": 1597,
+      "severity": "non-blocking",
+      "summary": "Both source-support checks are overwritten with answered=true, failed=false, decision=accept and noul 0.0 whenever the resolver fires, so for the settled class the judge's answer is discarded rather than corrected, and the class measure 'no name answers above cutoff' is true partly by construction. The trigger is a stem match of every qualifier word anywhere in any enclosing structure's text (states_token at :676), with no negation or proximity handling, so a structure saying 'not in equivalent electrons', or naming the words while describing another quantity, settles the check as supported. The recorded source_support keeps the statement, so the value can be re-read, but nothing narrows the match."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T063114805674-sdbc-name-review-source-context/manifest.md",
+      "line": 28,
+      "severity": "non-blocking",
+      "summary": "after_suite records revision 702645387, not the landed head fa84422c3: three commits landed after the arm, one of them eb9fb78af which changes product source (:275 in worker_tasks/__init__.py). The whole-directory clause of the done_when therefore has no receipt covering the tree it landed in. A re-run of the same command at fa84422c3 would close it; the two arms differ only by that one table line, which no test asserts."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-review-source-context.html",
+      "line": 133,
+      "severity": "non-blocking",
+      "summary": "The sample states 199 accepted names where the done_when fixes the sample at two hundred. The skip is recorded in the source manifest (one name dropped on the same stale DD resolution that left five class members unmeasurable), so the deviation is explained, but the number measured is not the number the measure proposes, and nothing states why 199 closes a two-hundred name sample."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_review_names.py",
+      "line": 76,
+      "severity": "non-blocking",
+      "summary": "The 43 lines that decide what the review is told have no test: enclosing_structure_statements' query, its documentation-else-description precedence, its whitespace collapse, its empty-statement skip and its per-leaf dedupe are unexercised by tests/standard_names/test_name_review_source_context.py, which supplies dd_source_docs items directly. The only evidence the graph side works is the one-off class pass, which is not a regression guard, and eb9fb78af is a fix in exactly this area whose defect no assertion would catch if it returned."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified the change is reached from imas_codex/standard_names/worker_tasks/worker_review_names.py:997 (the review batch resolving _enrich_name_review_items, which calls enclosing_structure_statements at :238), imas_codex/standard_names/review/jev_review.py:1518 (build_name_state, which calls enclosing_statements at :321), jev_review.py:1541 (the _item_record call site whose body calls enclosing_structure_support at :1576), and imas_codex/standard_names/campaign_pricing.py:371 (the pricing path that calls _enrich_name_review_items directly).",
+    "diff": "Read commit by commit from 4d632fba1 to fa84422c3: 88fa1eaed adds the resolver, the graph walk and three tests; 96e568267 records the settled answer with its statement; 702645387 adds the evidence fragment, the data file and a figure; 5b2af1ff9 replaces a pending-suite paragraph with the measured comparison; eb9fb78af adds one ownership-table line; 243cdcdd0 rewrites the data file down to the census and drops the per-member dump; fa84422c3 deletes the orphaned SVG. 588 insertions over six files, net of the 1,946-line figure added and deleted.",
+    "done_when": "Read in full at the source prompt (line 116). Its clauses map to: a class census listed with stating structure (docs/evidence/fragments/sn-definitions-by-construction/name-review-source-context.json: population.structures + members_list, class_pass.members 1184, reviewed 1184, both_settled_at_zero 867, above_cutoff 221, above_cutoff_explained 145); the eight (eight.json, seven accept, carbon refine at 0.68); the planted name (planted.json, 0.58/0.75 above cutoff); a fixed sample (199 of the 200 the clause names, html:133). The whole-directory clause is the only one asserted by a command, and its head arm measures revision 702645387 (suite_head.log header), three commits before the landed head fa84422c3, one of those being the product commit eb9fb78af.",
+    "goal": "The node goal is to make the name review judge a qualifier against what the source's enclosing structures state. The landed change does that by two routes: it shows the statements to the review as their own observed channel (imas_codex/standard_names/review/jev_review.py:212, written into the state at :321), and it settles the two source-support checks from those statements (jev_review.py:679, applied at :1597). The graph side is imas_codex/standard_names/worker_tasks/worker_review_names.py:76 walking HAS_PARENT up to 4 levels for ancestor documentation/description, attached at :238. Delivery is via code settlement rather than the judge reading the statement for the settled class, which is a narrower reading of 'judge' than the goal's wording.",
+    "manifest": "Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T063114805674-sdbc-name-review-source-context/manifest.md: status complete, seven commits, class pass 1,179 of 1,184 stored at USD 0.2022, 867 both checks at 0.0, 145 above cutoff all explained, suite arms 2 failures each with the same ids, negative control 1 failed/2 passed. Its tests line is the literal pytest command; suite_base/suite_head logs both carry a summary line and EXIT=1.",
+    "write_paths": "Declared in the source dispatch: jev_review.py, worker_review_names.py, tests/standard_names/test_name_review_source_context.py, the two fragments under docs/evidence/fragments/sn-definitions-by-construction/ and the figures directory sdbc-name-review-source-context. The landed diff is six files: five are inside that list; imas_codex/standard_names/worker_tasks/__init__.py:263 (+1 line) is not, and the source manifest's own orientation_write_paths had already widened the list to include it."
+  },
+  "node": "sdbc-name-review-source-context",
+  "notes": "Read-only review. Files opened: the source run's prompt (goal, done_when, fence), manifest, suite_base.log, suite_head.log, negative_control.log, suite_base.json, suite_head.json, eight.json, residual.json, population.json, planted.json, sample.json; the plan section s11; and the source worktree at fa84422c3 (git log per commit, git diff against 4d632fba1, and the touched files). added_failure_count is 0 because both arms name the same two tests/standard_names/test_refine_model_dispatch.py ids and no other. One read outside the diff was taken for the reuse judgement (worker_extraction_and_enrichment.py:498). No file was modified; the only writes are this run's review records.",
+  "plan": "imas-codex:sn-definitions-by-construction#s11",
+  "project": "imas-codex",
+  "review_run_id": "r-20261116T212041055513-review-of-sdbc-name-review-source-context-fa84422c3426",
+  "reviewed_base_sha": "4d632fba19d80bc529691d2d9e74a4fec7e6c645",
+  "reviewed_commits": [
+    "88fa1eaed",
+    "96e568267",
+    "702645387",
+    "5b2af1ff9",
+    "eb9fb78af",
+    "243cdcdd0",
+    "fa84422c3"
+  ],
+  "reviewed_head_sha": "fa84422c342666bfca0a5d0397f6ad0fa5035822",
+  "reviewed_run_id": "r-20261116T063114805674-sdbc-name-review-source-context",
+  "rubric": "node",
+  "scores": {
+    "durability": 13,
+    "evidence": 11,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 5,
+    "scope_discipline": 10
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:44:00Z",
+  "total": 70
+}

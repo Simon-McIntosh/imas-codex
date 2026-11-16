@@ -239,17 +239,24 @@ def test_omits_shared_wording_block_when_no_parts():
 
 
 def test_shared_parts_built_for_species_density():
-    """The worker builds the population part from the name, not from the hint."""
+    """The worker builds the family and population parts from the name."""
     from imas_codex.standard_names.docs_gates import fixed_shared_parts
 
+    # A family member's sentence is stored per family and needs no grammar
+    # conventions to render: the species is already in the rendered sentence.
     parts = fixed_shared_parts("volume_averaged_oxygen_density", None)
-    assert parts == ()
+    assert [p["anchor"] for p in parts] == [
+        "species_family:volume_averaged_<X>_density"
+    ]
 
     class _Conventions:
         concepts: list = []
 
     parts = fixed_shared_parts("volume_averaged_oxygen_density", _Conventions())
-    assert [p["anchor"] for p in parts] == ["population:species"]
+    assert [p["anchor"] for p in parts] == [
+        "species_family:volume_averaged_<X>_density",
+        "population:species",
+    ]
     rendered = render_prompt(
         "sn/refine_docs_user", _minimal_ctx(shared_parts=list(parts))
     )

@@ -1,0 +1,74 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T04:45:23.936Z",
+  "dispatched_at": "2026-11-16T04:44:48Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261116T043826445441-plan-review-of-sn-definitions-by-construction/plan.html:113",
+      "id": "done_when-1",
+      "reason": "the population a node must count and the count it reports against are fixed by this clause, so the 56/48 mislabel sends the measure at the wrong set unless the sentence states the class (56) or the waiting set (48).",
+      "text": "\u00a76's first bullet requires the equivalent-electron population to carry `equivalent_electron` \"or is listed by name with the source evidence for leaving it, the fifty-six names of the first rewrite's waiting list among them\", but the class has 56 members of which only 48 wait: \u00a711 at plan.html:157 states \"Eight names are renamed and live; forty-eight wait\", and `live-rewrite-manifest.json` records `totals_by_class[\"equivalent-electron\"] = 56` with no status on any of the 56 entries. The clause therefore names a 56-name \"waiting list\" that does not exist, and a node measuring a 56-name waiting list finds 48 and must decide whether to treat the 8 already renamed/live names as waiting, unmeasured, or in-scope",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "6efc5ed240bfb2e27aabce543a5b8ab472fe31b4",
+  "plan_fingerprint": "16d7722d0997dfd7a144f4027b2ed6afb3a12c8573bbfc1503847dde6b8df154",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 66,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "8239cdeb1314e10c1d81995af7909e1b2f167fd6",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The clause now names the class of fifty-six recorded by the first rewrite and states that eight are since renamed and forty-eight are not.",
+      "reason": "",
+      "when": "2026-11-16T06:16:06.821766+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "8239cdeb1314e10c1d81995af7909e1b2f167fd6",
+      "commit_basis": "edit",
+      "note": "The clause now names the class of fifty-six recorded by the first rewrite and states that eight are since renamed and forty-eight are not.",
+      "reason": "",
+      "when": "2026-11-16T06:16:06.821766+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261116T043826445441-plan-review-of-sn-definitions-by-construction.json",
+  "review_run_id": "r-20261116T043826445441-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "7d227b09807caf980aec4ec0033c0e5f7bc6308d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every artifact and section \u00a76 cites exists: `rewrite-closing-census.json`, `family-wording-pass.json`, `sdbc-live-rewrite-bulk.html`, and sections s2/s3/s5/s10/s11 of the plan.",
+    "done_when": "a finding \u2014 \u00a76's first done-when bullet calls 56 names \"the first rewrite's waiting list\" while \u00a711 and the rename manifest split that class into 8 renamed live and 48 waiting.",
+    "evidence_paths": "pass \u2014 the counts and controls \u00a76 names resolve to committed artifacts under `docs/evidence/fragments/sn-definitions-by-construction/` (`rewrite-closing-census.json`, `family-wording-pass.json`, `sdbc-live-rewrite-bulk.html`), and no scratch or node-local path appears in the section.",
+    "naming": "pass \u2014 \u00a76 names no symbol, file or function for the added control; the qualifier string `equivalent_electron` is the name's own identifier token, not a plan label.",
+    "reasoning": "pass \u2014 \u00a76's root clause follows the cited evidence (the rename class of 56 across the rewrite manifest, 8 renamed live from \u00a711), and the added census control gives the qualifier clause a plant it can fail on.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, the live catalog brought to \u00a72's wording, \u00a73's unit spelling and \u00a75's dispositions, and the added control extends that same deliverable.",
+    "wiring": "pass \u2014 \u00a76 hangs off the sections its endpoint needs (s2, s3, s4, s5, s10, s11), each key in `plan-section-depends-on` resolves, and `plan-effort-hours` 46.0 equals the eleven sections' `data-effort-hours` sum (0.5+7+3+3+5+6+2.5+4+4+6+5)."
+  },
+  "section_digests": {
+    "_document": "61c39d5ad51e7b68047ca7a43e243612440fe22ae0ec2c34eb1364c28ff0e306",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s11": "469da7cec1a94cba0366b89883ccbdb8ef92a07016c4482eb907048e2bd9b1d3",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "f753fb9d73900e7ca2bafe9327c183ce98f43a1960bb575de0469724558b8be8",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T06:03:54.311170+00:00",
+  "total": null
+}

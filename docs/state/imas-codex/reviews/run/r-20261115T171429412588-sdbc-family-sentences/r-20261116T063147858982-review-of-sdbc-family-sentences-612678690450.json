@@ -1,0 +1,93 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "3deb0340321c8874851dc52563537123afb242ba",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:624 _documentation_with_registry_form",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:855 fixed_shared_parts",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:927 description_with_population",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:930 refuse_altered_shared_parts",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:126 fixed_shared_parts",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:304 description_with_population",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:307 refuse_altered_shared_parts"
+  ],
+  "completed_at": "2026-11-16T07:05:06.333Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "The node's two declared write paths were too narrow for its goal, which requires the source and guard-test edits; the review found the changes within the goal. The fence was under-specified at dispatch, a coordinator fault, not a change out of substance.",
+      "recorded_at": "2026-11-16T10:42:25.275929+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-16T07:04:43Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "842",
+      "severity": "non-blocking",
+      "text": "non-blocking: eleven of the thirteen changed files (docs_gates.py, worker_generate_docs.py and nine test files) are outside the node's two declared write paths, so the landed diff does not sit inside its granted scope even though the goal's 'held where the operator wordings of \u00a72 are held' and guard-test clauses require those edits."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-sentences.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: a 1069-line evidence page lands at a filename the fence does not grant, since the declared evidence path is sdbc-family-sentences.html, and the landing record points a reader at it."
+    },
+    {
+      "file": "negative-control-description-branch.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the red log names revision e8c13ec45 but its content exists only in 612678690, since the failure quotes 'Written in the model's own words, variant 0' which that commit added, and its mtime 2026-11-16T04:41:37 predates the commit at 04:45:10, so it records a run on uncommitted content under the previous revision's name; negative-control-family-sentence.log:1 has the same shape (mtime 23:18:30, commit at 23:21:36)."
+    },
+    {
+      "file": "manifest.md",
+      "line": "after_suite",
+      "severity": "non-blocking",
+      "text": "non-blocking: the after_suite record names job 1319049 on 98dci4-clu-3144 while standard-names-612678690450b1b9b5a31d11e1159f4b04f924f3.log:7 names 98dci4-clu-3142, a mis-transcription in one of the manifest's provenance fields."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "955",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new SPECIES_FAMILY_SENTENCES dict closes at :954 with a single blank line before _OPERATOR_TOKENS at :955, where every other top-level definition in the module is separated by two."
+    }
+  ],
+  "head_log_revision": "612678690450b1b9b5a31d11e1159f4b04f924f3",
+  "item_verdicts": {
+    "diff": "read all six commits 3deb0340..612678690: bd21dcf9f adds the stored sentences and family matcher, 381efd3d8 and 8db80bf53 land the evidence page and its count, 2cbad44d3 routes a member's description through its family, e8c13ec45 renders the page, and 612678690 replaces the collapse test's identical shared string with three distinct variants and adds the direct assertion at tests/standard_names/test_family_sentences.py:155.",
+    "done_when": "the done_when at prompt.txt:109 splits into measured and unmeasured clauses: 'the whole tests/standard_names directory adds no failure' is measured by the baseline_suite and after_suite keys in manifest.md against logs that end with EXIT=1 and the same two failing ids at base and head, while the live re-render, closing census, 0.85 review-score floor, planted-family census and sourceless-count clauses are unmeasured because stage two did not run.",
+    "goal": "the goal is to store one sentence per species family and re-render its members from it; imas_codex/standard_names/docs_gates.py:871 stores 23 sentences with <X> the only variable and :1173 renders a member's description from its family sentence, but the reviewed manifest records status blocked with the 316 live members named as not yet rewritten.",
+    "manifest": "read; it records head 612678690, six commits, both suite arms as JSON with log paths and identical failure ids, status blocked and both negative-control logs, though its after_suite names the head arm's host as 98dci4-clu-3144 where the log header reads 98dci4-clu-3142.",
+    "write_paths": "the fence granted only docs/evidence/fragments/sn-definitions-by-construction/sdbc-family-sentences.html and docs/figures/sn-definitions-by-construction/sdbc-family-sentences, while git diff 3deb0340..612678690 changes 13 files: the two evidence pages, docs_gates.py, worker_generate_docs.py and nine test files."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_family_sentences.py:155 asserts description_with_population(member, <arbitrary text>) equals species_family_description(member), which reddens for every family when the family branch is removed as negative-control-description-branch.log shows ('1 failed, 6 passed, EXIT=1'), and :153 reddens on the same deletion because the three variants no longer collapse to one template.",
+    "evidence": "both arms at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/family-sentences/standard-names-3deb0340321c8874851dc52563537123afb242ba.log and standard-names-612678690450b1b9b5a31d11e1159f4b04f924f3.log ran to their summary line with the same two failing ids at base and head, but the live re-render, closing census, 0.85 score floor and planted-family census clauses of prompt.txt:109 are unmeasured.",
+    "fit": "the stored sentences sit beside SPECIES_POPULATION_SENTENCE at imas_codex/standard_names/docs_gates.py:793 and introduce no plan or ticket identifier, but :955 leaves a single blank line after the new dict and :1081 defines species_family_description as a bare pass-through of species_family_sentence.",
+    "goal_fidelity": "imas_codex/standard_names/docs_gates.py:871 stores the 23 sentences and :1173 returns the family sentence as a member's description, so the route exists, but no live StandardName was re-rendered and the manifest's status is blocked, which leaves the goal's second half unexercised on live members.",
+    "reuse": "searched imas_codex/standard_names for an owner of a stored species-family sentence mapping and found none: families.py:1 owns grammar-axis family detection, context.py:862 fetch_sibling_family reads live graph siblings for prompt grounding, and audits.py:3076 is a compound-subject audit list, so docs_gates.py:842 extends the module's own stored-wording home rather than forking a capability.",
+    "scope_discipline": "imas_codex/standard_names/docs_gates.py:842 and nine test files plus a second evidence page are outside the two declared write paths, although the goal's 'held where the operator wordings of \u00a72 are held' and its guard-test clause imply them."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node's goal against the landed change; imas_codex/standard_names/docs_gates.py:871 stores 23 sentences with <X> the only variable and :1173 renders a member's description from its family sentence, but the reviewed manifest records status blocked with the 316 live members named as not yet rewritten.\nVERDICT done_when: read prompt.txt:109 clause by clause against manifest.md; the whole tests/standard_names adds no failure clause is measured by the baseline_suite and after_suite keys with the same two failing ids at base and head, while the live re-render, closing census, 0.85 score floor, planted-family census and sourceless-count clauses are unmeasured.\nVERDICT write_paths: the fence granted only docs/evidence/fragments/sn-definitions-by-construction/sdbc-family-sentences.html and docs/figures/sn-definitions-by-construction/sdbc-family-sentences, while the diff changes 13 files including docs_gates.py, worker_generate_docs.py and nine test files outside it.\nVERDICT manifest: read; it records head 612678690, six commits, both suite arms as JSON with log paths and identical failure ids, status blocked and both negative-control logs, but names the head arm's host as 98dci4-clu-3144 where its log header reads 98dci4-clu-3142.\nVERDICT diff: read all six commits 3deb0340..612678690; the stored sentences, family matcher, evidence page and description route land, and 612678690 makes the collapse test deletion-sensitive with three distinct written variants and the direct assertion at tests/standard_names/test_family_sentences.py:155.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_generate_docs.py:624 _documentation_with_registry_form, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:855 fixed_shared_parts, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:927 description_with_population, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:930 refuse_altered_shared_parts, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:126 fixed_shared_parts, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:304 description_with_population, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:307 refuse_altered_shared_parts\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/docs_gates.py:871 stores the 23 sentences and :1173 returns the family sentence as a member's description, but no live StandardName was re-rendered and the goal's second half stays unexercised.\nSCORE evidence: 12\nJUSTIFICATION evidence: both arms under /home/ITER/mcintos/.cache/imas-codex-live-rewrite/family-sentences/ (standard-names-3deb0340321c8874851dc52563537123afb242ba.log and standard-names-612678690450b1b9b5a31d11e1159f4b04f924f3.log) ran to their summary line with the same two failing ids, but the live re-render, census, 0.85 score and planted-family clauses of prompt.txt:109 are unmeasured.\nSCORE scope_discipline: 8\nJUSTIFICATION scope_discipline: imas_codex/standard_names/docs_gates.py:842 and nine test files plus a second evidence page are outside the two declared write paths.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_family_sentences.py:155 and :153 both redden when the family branch is removed, as negative-control-description-branch.log records with 1 failed and 6 passed.\nSCORE fit: 15\nJUSTIFICATION fit: the stored sentences sit beside SPECIES_POPULATION_SENTENCE at imas_codex/standard_names/docs_gates.py:793, but :955 leaves one blank line after the new dict and :1081 duplicates species_family_sentence as species_family_description.\nSCORE reuse: 20\nJUSTIFICATION reuse: searched imas_codex/standard_names and found no owner of a stored species-family sentence; families.py:1 detects grammar-axis families and context.py:862 reads live graph siblings, so docs_gates.py:842 extends the stored-wording home.\nFINDING imas_codex/standard_names/docs_gates.py:842 non-blocking: eleven of thirteen changed files are outside the two declared write paths, so the diff leaves its granted scope.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-sentences.html:1 non-blocking: a 1069-line evidence page lands at a filename the fence does not grant and the landing record points a reader at it.\nFINDING negative-control-description-branch.log:1 non-blocking: the red log names revision e8c13ec45 while the content it exercises exists only in 612678690 and its mtime predates that commit.\nFINDING manifest.md:83 non-blocking: the after_suite record names host 98dci4-clu-3144 while the head arm log header names 98dci4-clu-3142, a mis-transcription in a provenance field.\nFINDING imas_codex/standard_names/docs_gates.py:955 non-blocking: a single blank line separates the new SPECIES_FAMILY_SENTENCES dict at :954 from _OPERATOR_TOKENS where the module uses two.",
+  "review_run_id": "r-20261116T063147858982-review-of-sdbc-family-sentences-612678690450",
+  "reviewed_base_sha": "3deb0340321c8874851dc52563537123afb242ba",
+  "reviewed_head_sha": "612678690450b1b9b5a31d11e1159f4b04f924f3",
+  "reviewed_run_id": "r-20261115T171429412588-sdbc-family-sentences",
+  "reviewer_run_id": "r-20261116T063147858982-review-of-sdbc-family-sentences-612678690450",
+  "scores": {
+    "durability": 17,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 20,
+    "scope_discipline": 8
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T07:29:02.008871+00:00",
+  "total": 85
+}

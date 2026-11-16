@@ -1,0 +1,85 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/pools.py:299 PoolAdmits.cypher (identity_state_expressions at :387, also :604 and :684)",
+    "imas_codex/standard_names/ledger.py:58 classify_sourceless_standard_names",
+    "imas_codex/standard_names/export.py:3067 classify_sourceless_standard_names",
+    "imas_codex/standard_names/graph_store/__init__.py:570 re-export of classify_sourceless_standard_names",
+    "imas_codex/standard_names/worker_tasks/worker_review_docs.py:745 name_definition_note"
+  ],
+  "completed_at": "2026-11-16T03:15:54.879Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "The node was queued with no write paths listed, so every changed file reads as outside scope; the review found the changed files within the section's goal. The fence was under-specified at dispatch, a coordinator fault, not a change out of substance.",
+      "recorded_at": "2026-11-16T03:46:33.447227+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-16T03:15:16Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_source_audit_gate.py",
+      "line": "409",
+      "severity": "non-blocking",
+      "text": "non-blocking: the ceiling assertion passes on the defect it is cited for. The fake clock advances 11s per read, so the names read already crosses the ceiling without the repair at imas_codex/standard_names/graph_store/graph_supersession.py:3079; measured by running this test body against a tree whose :3079 still calls find_sourceless_live_name_rows(gc, None, ...) \u2014 1 passed in 62.11s \u2014 so the evidence page's row claiming \"a test fails if that read exceeds ten seconds\" is overstated and that row's repair rests on reading, not on a running guard. A discriminating test would make only the population read cross the ceiling."
+    },
+    {
+      "file": "scratch/gate/run3.sh",
+      "line": "9",
+      "severity": "non-blocking",
+      "text": "non-blocking: the two suite arms' logs carry no revision header and their archive trees are gone. run3.sh reuses WORK=/tmp/sph-gate2-oRROX7, a directory no recorded extraction of this run created (scratch/gate/run2.log records work=/tmp/sph-gate2-WVJrWe and head=f62b409ba), and base.log and head.log begin at \"test session starts\", so a reader cannot tie the 24/24 result to a revision; the page's claim of head 71a4b606a is contradicted by the only recorded arm line, and the result survives only because the commits after f62b409ba touch docs/evidence alone \u2014 a fact read from the diff, not from the logs."
+    },
+    {
+      "file": "tests/standard_names/test_source_reads.py",
+      "line": "923",
+      "severity": "non-blocking",
+      "text": "non-blocking: the widened liveness detector accepts any statement spelling \"status\" and \"$terminal\", including the inclusion form sn.status IN $terminal and any clause whose $terminal parameter holds non-terminal statuses, while the docstring at :913-916 says the parameter carries 'superseded'; the planted-query test at :975 asserts only that the recognizer fires, so nothing asserts it does not over-accept, and a restored enumeration using the inclusion form would pass the scan."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified five production call sites \u2014 pools.py:299 PoolAdmits.cypher through identity_state_expressions, ledger.py:58 and export.py:3067 classify_sourceless_standard_names, graph_store/__init__.py:570 re-export of it, and worker_tasks/worker_review_docs.py:745 name_definition_note.",
+    "diff": "read the seven commits against dce0a4d52: three source files (graph_supersession.py, pools.py, name_definition_seat.py), three test files, 37 frozen-record headers, regenerated generators, one new check script and the page; 71a4b606a, e77b7c1a1 and bd3f019a0 touch docs/evidence only.",
+    "done_when": "the done_when's suite clause is asserted by two concurrent archive arms \u2014 scratch/gate/base.log \"24 failed, 8739 passed, 12 skipped\" and scratch/gate/head.log \"24 failed, 8744 passed, 12 skipped\" with no head-only failing id \u2014 and the labels clause by scratch/adjudicated-labels-gate.log (both artefacts \"identical\", EXIT=0); the graph-write clause is answered only by reading the diff, which adds no MERGE/SET/CREATE/DELETE.",
+    "goal": "the node goal is to close or decline each open review finding on the name check, the source readers and the labels gate; docs/evidence/fragments/sn-pipeline-hygiene/sph-open-review-findings.html:25-25 answers 25 findings row by row, 18 repaired and 7 declined with cost, and the sampled repairs are in the tree.",
+    "manifest": "read manifest.md of r-20261115T210103694033-sph-open-review-findings: status complete, seven commits 0bd7b0a8c..bd3f019a0, changed_paths 55, tests and test_logs naming both suite arms and every red arm, with baseline_suite and after_suite absent as keys.",
+    "write_paths": "read the node's declared write paths from dispatch-detail.json: the list is empty, while the diff touches 55 files under docs/evidence, imas_codex/standard_names and tests/standard_names; the mismatch is recorded in the worker's manifest outside_scope and in the page's scope paragraph."
+  },
+  "justifications": {
+    "durability": "the seat-caller guard is proven by scratch/negative-controls/seat-dead-function.log (FAILED ... these seat functions have no caller: ['name_definition_flagged']), while tests/standard_names/test_source_audit_gate.py:409 passes on the un-repaired code.",
+    "evidence": "the done_when's suite clause is measured by the run's own arms \u2014 scratch/gate/base.log reads \"24 failed, 8739 passed\" and scratch/gate/head.log \"24 failed, 8744 passed\" with identical FAILED id sets in scratch/gate/base.failures and head.failures \u2014 but neither log names the revision it ran at and the archive trees are gone.",
+    "fit": "the frozen-record header is stated once and repeated verbatim (name-definition-check-run.py:1-5), the added test names say what they hold, and the commits carry conventional subjects with bodies and no plan identifiers.",
+    "goal_fidelity": "the evidence page docs/evidence/fragments/sn-pipeline-hygiene/sph-open-review-findings.html:25-25 answers 25 findings row by row, and the sampled repairs are landed \u2014 name_definition_seat.py drops name_definition_flagged, pools.py:427 projects live_child_cypher(), and the 37 scripts carry the frozen-record header.",
+    "reuse": "pools.py:427 calls source_invariant.live_child_cypher(), the owner export.py:720 already reads, and graph_supersession.py:3079 wraps the function's existing read() ceiling rather than adding a second limiter.",
+    "scope_discipline": "dispatch-detail.json gives the node write_paths as an empty list, so no path in the 55-file diff dce0a4d..bd3f019a lies inside a declared fence, though the worker lists the overrun in its manifest outside_scope rather than hiding it."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to close or decline each open review finding on the name check, the source readers and the labels gate; docs/evidence/fragments/sn-pipeline-hygiene/sph-open-review-findings.html:25-25 answers 25 findings row by row, 18 repaired and 7 declined with cost, and the sampled repairs are in the tree.\nVERDICT done_when: the done_when's suite clause is asserted by two concurrent archive arms \u2014 scratch/gate/base.log \"24 failed, 8739 passed, 12 skipped\" and scratch/gate/head.log \"24 failed, 8744 passed, 12 skipped\" \u2014 with no head-only failing id, and its labels clause by scratch/adjudicated-labels-gate.log (both artefacts identical, EXIT=0); the graph-write clause is answered only by reading the diff, which adds no MERGE/SET/CREATE/DELETE.\nVERDICT write_paths: the node's declared paths read from dispatch-detail.json are an empty list, while the diff touches 55 files under docs/evidence, imas_codex/standard_names and tests/standard_names; the overrun is disclosed in the worker manifest's outside_scope and in the page.\nVERDICT manifest: read manifest.md of r-20261115T210103694033-sph-open-review-findings \u2014 status complete, seven commits 0bd7b0a8c..bd3f019a0, changed_paths 55, test_logs naming both arms and every red arm, and no baseline_suite or after_suite key.\nVERDICT diff: read the seven commits against dce0a4d52 \u2014 three source files, three test files, 37 frozen-record headers, regenerated generators, one new check script and the page \u2014 with the last three commits confined to docs/evidence.\nCALL_SITES: imas_codex/standard_names/pools.py:299 PoolAdmits.cypher (identity_state_expressions at :387, also :604 and :684), imas_codex/standard_names/ledger.py:58 classify_sourceless_standard_names, imas_codex/standard_names/export.py:3067 classify_sourceless_standard_names, imas_codex/standard_names/graph_store/__init__.py:570 re-export of classify_sourceless_standard_names, imas_codex/standard_names/worker_tasks/worker_review_docs.py:745 name_definition_note\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-pipeline-hygiene/sph-open-review-findings.html:25-25 answers 25 findings row by row and the sampled repairs are landed in name_definition_seat.py, pools.py:427 and the 37 frozen-record headers.\nSCORE evidence: 15\nJUSTIFICATION evidence: scratch/gate/base.log reads \"24 failed, 8739 passed\" and scratch/gate/head.log \"24 failed, 8744 passed\" with identical FAILED id sets, but neither log names the revision it ran at and the archive trees are gone.\nSCORE scope_discipline: 8\nJUSTIFICATION scope_discipline: dispatch-detail.json declares an empty write_paths list, so no path in the 55-file diff dce0a4d..bd3f019a is inside a declared fence, though the worker lists the overrun in its manifest outside_scope.\nSCORE durability: 14\nJUSTIFICATION durability: scratch/negative-controls/seat-dead-function.log reddens the seat-caller guard, while tests/standard_names/test_source_audit_gate.py:409 passes on the un-repaired code as measured at 1 passed in 62.11s.\nSCORE fit: 18\nJUSTIFICATION fit: the frozen-record header is stated once and repeated verbatim at name-definition-check-run.py:1-5, and the added test names say what they hold.\nSCORE reuse: 19\nJUSTIFICATION reuse: pools.py:427 calls source_invariant.live_child_cypher(), the owner export.py:720 already reads, and graph_supersession.py:3079 wraps the function's own read() ceiling.\nFINDING tests/standard_names/test_source_audit_gate.py:409 non-blocking: the ceiling assertion passes on the defect it is cited for, because the fake clock crosses the ceiling on the names read without the repair at graph_supersession.py:3079 (measured: 1 passed in 62.11s against a tree that still passes gc directly).\nFINDING scratch/gate/run3.sh:9 non-blocking: run3.sh reuses WORK=/tmp/sph-gate2-oRROX7, a tree no recorded extraction created (run2.log records work=/tmp/sph-gate2-WVJrWe and head=f62b409ba), so the arm logs cannot be tied to a revision.\nFINDING tests/standard_names/test_source_reads.py:923 non-blocking: the widened detector accepts any statement with \"status\" and \"$terminal\", including sn.status IN $terminal, while the docstring at :913-916 claims the parameter carries 'superseded'.",
+  "review_run_id": "r-20261116T031326751751-review-of-sph-open-review-findings-bd3f019a0482",
+  "reviewed_base_sha": "dce0a4d526f7bc55d9f5d939bbd9576db2b2d720",
+  "reviewed_head_sha": "bd3f019a0482748c603efdfcd0d2216ccaedd8d6",
+  "reviewed_run_id": "r-20261115T210103694033-sph-open-review-findings",
+  "reviewer": {
+    "backend": "omp-local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261116T031326751751-review-of-sph-open-review-findings-bd3f019a0482"
+  },
+  "reviewer_run_id": "r-20261116T031326751751-review-of-sph-open-review-findings-bd3f019a0482",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 8
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T03:34:00.487822+00:00",
+  "total": 92
+}

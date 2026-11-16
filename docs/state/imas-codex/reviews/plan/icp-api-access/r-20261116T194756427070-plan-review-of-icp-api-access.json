@@ -1,0 +1,121 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T20:00:12.262Z",
+  "dispatched_at": "2026-11-16T19:59:44Z",
+  "findings": [
+    {
+      "anchor": "plan.html:52",
+      "id": "done_when-1",
+      "reason": "the done-when must either drop parent or name the derivation as accepted, and a `done` declaration resting on a non-independent column has to be re-earned.",
+      "text": "\u00a73's done-when requires \"the code, title and parent read through the API equal those read through the ITER document assistant's record tools\", but the receipt behind the cited evidence states \"parent_code is derived here from the code by dropping its last dot-separated segment; the record tool returns no parent field\" (/home/ITER/mcintos/.cache/imas-codex-codac-uda/icp/pbs-comparison-receipt.json), so the reference side of the parent column is computed from the same code it is meant to check and cannot disagree; \u00a73 is then declared `done` at plan.html:50 on a parent measure its named reference cannot supply, and the s3 comment (plan.html:96) even records the review as having \"no total score\" when the stored review total is 100",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:69",
+      "id": "reasoning-1",
+      "reason": "as written, a node dispatched at \u00a74 spends its budget rediscovering that the allowed route serves no file, and the plan must settle the decision (or defer \u00a74) before the section is declared buildable.",
+      "text": "the new `document-source` decision is recorded with no choice, no author and no date, yet \u00a74 (plan.html:55-56) is `implementable` and asserts \"The file is read through the integration instance, the only data host section 2 allows\", while that decision's own context measures the opposite: the integration instance holds no production documents, its only document-like records declare no file property, and file requests were refused 401 before and after a session renewal; \u00a74's done-when (plan.html:57) requires one spreadsheet and one PDF fetched at a stated version, an outcome the plan's own measurement says the allowed host does not serve, and `iter-signal-context-and-enrichment#s4` depends on this section for the pilot documents",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:50",
+      "id": "done_when-2",
+      "reason": "if the widened scope is not ratified the delivered change is reverted, so the section cannot stand as done until the ratification is answered and cited.",
+      "text": "\u00a73 is declared `done` while its own comment records a review whose findings include a delivered change outside the node's declared write paths that \"the coordinator must ratify the widened scope or revert those two files\" (docs/state/imas-codex/reviews/run/r-20261115T213921030036-icp-plant-structure-and-component-reads/r-20261116T040900239445-review-of-icp-plant-structure-and-component-reads-21bb64f64115.json, finding f158a5f5048), and the plan's comment (plan.html:96) names neither that record nor the open item",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2567e23873958f9455c47e9d453c323dbd032ded",
+  "plan_fingerprint": "15b625cdc0248e41aca3bb6c1c1a457fa894946abf6d08ee099adfe56605674c",
+  "plan_slug": "icp-api-access",
+  "plan_version": 13,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d88a3673594044c7878df58e79402a81a397a18a",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The parent of each of the twenty nodes was read independently by containment through the record tools on 2026-11-16 and agrees for all twenty; the private receipt and a section comment at version 14 record it.",
+      "reason": "",
+      "when": "2026-11-16T20:11:34.006063+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d88a3673594044c7878df58e79402a81a397a18a",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 4 is declared deferred at version 14 while the open document-source decision holds it.",
+      "reason": "",
+      "when": "2026-11-16T20:11:36.869381+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d88a3673594044c7878df58e79402a81a397a18a",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The section comment at version 14 records that the two wiki-client files were ordered by the coordinator's brief and ratified at landing, so nothing is reverted.",
+      "reason": "",
+      "when": "2026-11-16T20:11:39.645081+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d88a3673594044c7878df58e79402a81a397a18a",
+      "commit_basis": "edit",
+      "note": "The parent of each of the twenty nodes was read independently by containment through the record tools on 2026-11-16 and agrees for all twenty; the private receipt and a section comment at version 14 record it.",
+      "reason": "",
+      "when": "2026-11-16T20:11:34.006063+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "d88a3673594044c7878df58e79402a81a397a18a",
+      "commit_basis": "edit",
+      "note": "The section comment at version 14 records that the two wiki-client files were ordered by the coordinator's brief and ratified at landing, so nothing is reverted.",
+      "reason": "",
+      "when": "2026-11-16T20:11:39.645081+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d88a3673594044c7878df58e79402a81a397a18a",
+      "commit_basis": "edit",
+      "note": "Section 4 is declared deferred at version 14 while the open document-source decision holds it.",
+      "reason": "",
+      "when": "2026-11-16T20:11:36.869381+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261116T194756427070-plan-review-of-icp-api-access.json",
+  "review_run_id": "r-20261116T194756427070-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "ff2dab371fce4474cf3be06084df8d71c8989c4f",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `icp-api-access#s2`, `#s3` and `#s4` resolve in the snapshot (plan.html:45, 49, 54); the two evidence anchors resolve in their fragment files; the review record cited by the s3 comment resolves at docs/state/imas-codex/reviews/run/r-20261115T213921030036-icp-plant-structure-and-component-reads/r-20261116T040900239445-review-of-icp-plant-structure-and-component-reads-21bb64f64115.json.",
+    "done_when": "a finding \u2014 \u00a73's done-when (plan.html:52) measures the parent field against a reference that the recorded receipt says returns no parent field, and \u00a73 is nonetheless declared `done` at plan.html:50.",
+    "evidence_paths": "pass \u2014 the s2 and s3 comments cite `docs/evidence/fragments/icp-api-access/icp-read-only-client.html#icp-read-only-client-evidence` and `.../icp-plant-structure-and-component-reads.html#icp-plant-structure-and-component-reads-evidence`, both of which exist and carry those ids; live values sit in the private cache, not the repository.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or stage names appear in \u00a72's refusal family or in the delivered names the s2 comment reports; prose about \"the first section\" is presentation, not a symbol.",
+    "reasoning": "a finding \u2014 the new `document-source` decision records, from a measurement, that the integration instance yields no document file, while \u00a74 stays `implementable` on the premise that the file is read through that instance.",
+    "single_goal": "pass \u2014 \u00a72 delivers one guarded session, \u00a73 the plant/component reads, \u00a74 one document fetch; each done-when closes on its own verdict.",
+    "wiring": "pass \u2014 every declared dependency resolves: `plan-blocks` names `iter-signal-context-and-enrichment`, whose own `plan-section-depends-on` names `icp-api-access#s3` and `icp-api-access#s4` (docs/plans/iter-signal-context-and-enrichment.html:21), and \u00a73/:50 and \u00a74/:55 link `icp-api-access#s2`, which exists at plan.html:45 \u2014 but see FINDING reasoning for the consequence of \u00a74's deliverable resting on an open decision."
+  },
+  "section_digests": {
+    "_document": "72975fc38769fea258e8d276b117b02f17829647e3ad501a340d25fca21a407b",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "9f4cb22f6c0cfb55fdeab779a476c6ef86aec3491e606fbf13c47bbc39d2aaba",
+    "s3": "66e329fb1086b96e19afdeacc4d5c59fb4e2b0161056d483336f969c8e6ea1ee",
+    "s4": "b64ddbbf09a1c70a8188d60a1c2cdd28586389b0aa2d4a21e956a026092ba56a"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T20:10:00.033225+00:00",
+  "total": null
+}

@@ -27,7 +27,6 @@ from __future__ import annotations
 import logging
 import random
 import re
-import time
 import warnings
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
@@ -37,6 +36,7 @@ import httpx
 import requests
 import urllib3
 
+from imas_codex.discovery.base.request_pacer import RequestPacer
 from imas_codex.discovery.wiki.auth import CredentialManager, require_credentials
 
 if TYPE_CHECKING:
@@ -126,7 +126,7 @@ class MediaWikiClient:
 
         self._session: requests.Session | None = None
         self._creds = CredentialManager()
-        self._last_request_time = 0.0
+        self._request_pacer = RequestPacer(RATE_LIMIT_DELAY)
         self._authenticated = False
         self._redirect_retry_attempted = False  # Track retry to prevent recursion
         # Reentrant lock for session operations (requests.Session is not thread-safe)
@@ -190,10 +190,7 @@ class MediaWikiClient:
 
     def _rate_limit(self) -> None:
         """Apply rate limiting between requests."""
-        elapsed = time.time() - self._last_request_time
-        if elapsed < RATE_LIMIT_DELAY:
-            time.sleep(RATE_LIMIT_DELAY - elapsed)
-        self._last_request_time = time.time()
+        self._request_pacer.wait()
 
     def _is_tequila_redirect(self, response: Response) -> bool:
         """Check if response is a Tequila login redirect."""
@@ -722,7 +719,7 @@ class AsyncMediaWikiClient:
 
         self._client: httpx.AsyncClient | None = None
         self._creds = CredentialManager()
-        self._last_request_time = 0.0
+        self._request_pacer = RequestPacer(RATE_LIMIT_DELAY)
         self._authenticated = False
         self._redirect_retry_attempted = False
         # Async lock for session operations
@@ -787,12 +784,7 @@ class AsyncMediaWikiClient:
 
     async def _rate_limit(self) -> None:
         """Apply rate limiting between requests."""
-        import asyncio
-
-        elapsed = time.time() - self._last_request_time
-        if elapsed < RATE_LIMIT_DELAY:
-            await asyncio.sleep(RATE_LIMIT_DELAY - elapsed)
-        self._last_request_time = time.time()
+        await self._request_pacer.wait_async()
 
     def _is_tequila_redirect(self, response: httpx.Response) -> bool:
         """Check if response is a Tequila login redirect."""

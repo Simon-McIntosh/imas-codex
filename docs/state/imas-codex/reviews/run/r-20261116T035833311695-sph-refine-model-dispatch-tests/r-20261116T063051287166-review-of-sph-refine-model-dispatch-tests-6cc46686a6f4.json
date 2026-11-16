@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "bd3f019a0482748c603efdfcd0d2216ccaedd8d6",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-16T06:47:27.190Z",
+  "dispatched_at": "2026-11-16T06:31:43Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/manifest.md",
+      "line": "22",
+      "severity": "non-blocking",
+      "text": "non-blocking: `after_suite.revision` is 4b282ddc4, the code commit, rather than the landed head 6cc46686a, so the zero-failure archive receipt is not taken at the revision the review reads; the two intervening commits are docs-only (76 added lines in the evidence fragment, none in code or tests), so the measure is unaffected but the pair should be stated plainly."
+    }
+  ],
+  "head_log_revision": "4b282ddc4527b420b3a1b188ba60b21004f0ab2d",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the three commits against base 966e6a087 \u2014 4b282ddc4 rewrites the three identifiers, repairs the seat docstring and removes the stale `E3` implementation label from the alias-test description; 23cde8fdb adds the 76-line evidence fragment; 6cc46686a repoints that fragment's receipts at the run-directory logs; no production source is touched.",
+    "done_when": "the done_when asks that the file pass with both assertions kept and that the whole tests/standard_names directory show zero failures at head from an archive on all_debug; the manifest records 6 passed EXIT=0 for the file and 8768 passed, 0 failed, EXIT=0 for the archive head arm, whose own log header names all_debug's /tmp archive, tree and the `pytest -p no:cacheprovider tests/standard_names/` command, against a base arm that reproduces the same two REFINE failures at EXIT=1.",
+    "goal": "the goal is to repair the two red refine model dispatch tests by their cause; the landed change at tests/standard_names/test_refine_model_dispatch.py:69-72 and :84-89 replaces the unrouted placeholders with `openrouter/test/...` identifiers, and the evidence fragment states the cause established from imas_codex/settings.py:298-305, where `_validate_model_identifier` requires a non-empty model behind an openrouter/typesafe/local prefix, so the two tests were at fault and the check was left alone.",
+    "manifest": "read; status complete, three commits (4b282ddc4, 23cde8fdb, 6cc46686a), baseline_suite (bd3f019a, 2 failures, the two refine tests) and after_suite (4b282ddc4, 0 failures) as JSON with commands, log paths and exit statuses, the measurement module and cwd of each archive run, and a negative-control log whose own text records the mutation; one shortfall is that after_suite's revision is the code commit rather than the landed head.",
+    "write_paths": "the declared fence was tests/standard_names/test_refine_model_dispatch.py and docs/evidence/fragments/sph-refine-model-dispatch-tests.html; `git diff --name-status 966e6a087..6cc46686a` lists exactly those two paths and nothing else."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_refine_model_dispatch.py:88-89 reddens under the recorded mutation (refine delegating to the compose seat) as refine-model-dispatch-negative-control.log shows at EXIT=1, and a revert to the unprefixed placeholders raises ValueError from imas_codex/settings.py:305.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/head-standard-names.log ends `EXIT=0` with 8768 passed against baseline-standard-names.log's `EXIT=1` 2-failure arm, but the head arm declares revision 4b282ddc4 rather than the landed head 6cc46686a.",
+    "fit": "the new identifiers follow the repository's existing synthetic-route idiom, e.g. tests/core/test_settings.py:351 and tests/standard_names/conftest.py:149, and the edit removes the `E3` plan label the naming rules forbid.",
+    "goal_fidelity": "tests/standard_names/test_refine_model_dispatch.py:71-72 keeps both seat assertions and the replacement `openrouter/test/refine-only` satisfies imas_codex/settings.py:300-305 while still returning through `get_model` unaltered.",
+    "reuse": "the diff adds no function, class or module \u2014 it changes literals and prose in tests/standard_names/test_refine_model_dispatch.py, so the route-validation capability remains owned by imas_codex/settings.py:298 and nothing is forked.",
+    "scope_discipline": "`git diff --name-status 966e6a087..6cc46686a` names only tests/standard_names/test_refine_model_dispatch.py and docs/evidence/fragments/sn-pipeline-hygiene/sph-refine-model-dispatch-tests.html, the two declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to repair the two red refine model dispatch tests by their cause; the landed change at tests/standard_names/test_refine_model_dispatch.py:69-72 and :84-89 replaces the unrouted placeholders with `openrouter/test/...` identifiers, and the evidence fragment states the cause established from imas_codex/settings.py:298-305, where `_validate_model_identifier` requires a non-empty model behind an openrouter/typesafe/local prefix, so the two tests were at fault and the check was left alone.\nVERDICT done_when: the done_when asks that the file pass with both assertions kept and that the whole tests/standard_names directory show zero failures at head from an archive on all_debug; the manifest records 6 passed EXIT=0 for the file and 8768 passed, 0 failed, EXIT=0 for the archive head arm, whose own log header names all_debug's /tmp archive, tree and the `pytest -p no:cacheprovider tests/standard_names/` command, against a base arm that reproduces the same two REFINE failures at EXIT=1.\nVERDICT write_paths: the declared fence was tests/standard_names/test_refine_model_dispatch.py and docs/evidence/fragments/sph-refine-model-dispatch-tests.html; `git diff --name-status 966e6a087..6cc46686a` lists exactly those two paths and nothing else.\nVERDICT manifest: read; status complete, three commits (4b282ddc4, 23cde8fdb, 6cc46686a), baseline_suite (bd3f019a, 2 failures, the two refine tests) and after_suite (4b282ddc4, 0 failures) as JSON with commands, log paths and exit statuses, the measurement module and cwd of each archive run, and a negative-control log whose own text records the mutation; one shortfall is that after_suite's revision is the code commit rather than the landed head.\nVERDICT diff: read the three commits against base 966e6a087 \u2014 4b282ddc4 rewrites the three identifiers, repairs the seat docstring and removes the stale `E3` implementation label from the alias-test description; 23cde8fdb adds the 76-line evidence fragment; 6cc46686a repoints that fragment's receipts at the run-directory logs; no production source is touched.\nCALL_SITES: none\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: tests/standard_names/test_refine_model_dispatch.py:71-72 keeps both seat assertions and the replacement `openrouter/test/refine-only` satisfies imas_codex/settings.py:300-305 while still returning through `get_model` unaltered.\nSCORE evidence: 18\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/head-standard-names.log ends `EXIT=0` with 8768 passed against baseline-standard-names.log's `EXIT=1` 2-failure arm, but the head arm declares revision 4b282ddc4 rather than the landed head 6cc46686a.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: `git diff --name-status 966e6a087..6cc46686a` names only tests/standard_names/test_refine_model_dispatch.py and docs/evidence/fragments/sn-pipeline-hygiene/sph-refine-model-dispatch-tests.html, the two declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/standard_names/test_refine_model_dispatch.py:88-89 reddens under the recorded mutation (refine delegating to the compose seat) as refine-model-dispatch-negative-control.log shows at EXIT=1, and a revert to the unprefixed placeholders raises ValueError from imas_codex/settings.py:305.\nSCORE fit: 19\nJUSTIFICATION fit: the new identifiers follow the repository's existing synthetic-route idiom, e.g. tests/core/test_settings.py:351 and tests/standard_names/conftest.py:149, and the edit removes the `E3` plan label the naming rules forbid.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module \u2014 it changes literals and prose in tests/standard_names/test_refine_model_dispatch.py, so the route-validation capability remains owned by imas_codex/settings.py:298 and nothing is forked.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/manifest.md:22 non-blocking: `after_suite.revision` is 4b282ddc4, the code commit, rather than the landed head 6cc46686a, so the zero-failure archive receipt is not taken at the revision the review reads; the two intervening commits are docs-only (76 added lines in the evidence fragment, none in code or tests), so the measure is unaffected but the pair should be stated plainly.",
+  "review_run_id": "r-20261116T063051287166-review-of-sph-refine-model-dispatch-tests-6cc46686a6f4",
+  "reviewed_base_sha": "966e6a087ac54d97f69e44edb2f2aa7adc3dda2a",
+  "reviewed_head_sha": "6cc46686a6f4cf0ccff5697705d086454166d244",
+  "reviewed_run_id": "r-20261116T035833311695-sph-refine-model-dispatch-tests",
+  "reviewer": {
+    "backend": "clive",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261116T063051287166-review-of-sph-refine-model-dispatch-tests-6cc46686a6f4"
+  },
+  "reviewer_run_id": "r-20261116T063051287166-review-of-sph-refine-model-dispatch-tests-6cc46686a6f4",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T06:47:32.811569+00:00",
+  "total": 115
+}

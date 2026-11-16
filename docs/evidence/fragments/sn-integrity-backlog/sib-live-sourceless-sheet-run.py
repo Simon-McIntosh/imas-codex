@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 8ad5c42747d4fa9b0e3fb0b1d07609f18a026838, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Build a read-only adjudication sheet for live names without DD sources."""
 
 from __future__ import annotations

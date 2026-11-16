@@ -1,0 +1,165 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T20:59:04.728Z",
+  "dispatched_at": "2026-11-16T20:46:08Z",
+  "figures": {
+    "docs/figures/ai-stack/ai-stack.svg": {
+      "contrast": "pass - near-black text on white and on the pale tints.",
+      "data_ink": "pass - the blue user-share bars and the pale category tints carry the meaning the legend defines (deterministic, frontier, open-weight).",
+      "decoration": "pass - no gradient or background fill; dashed outlines group the two boxed tool sets.",
+      "label_collision": "pass - no label meets another label or a box edge; the 'domain dashboards' group label occupies rows 221-230 and its dashed border sits at row 240 (measured).",
+      "legibility": "pass - layer names (users, interfaces, functions, graph, ICP4) and every box title read at 1400 px.",
+      "table_form": "pass - a layered architecture diagram, not tabular data."
+    },
+    "docs/figures/discovery-to-mapping/mapping-lifecycle.svg": {
+      "contrast": "pass - dark text on white throughout.",
+      "data_ink": "pass - text, arrows and one refusal mark only.",
+      "decoration": "pass - no fill, gradient or frame.",
+      "label_collision": "pass - the refusal bar stands clear of 'activate without validation: REFUSE'; the closing caveat line is separate from the diagram.",
+      "legibility": "pass - generated, validated and active read at a glance, with the verb of each transition above the arrow.",
+      "table_form": "pass - a three-state policy diagram, not tabular data."
+    },
+    "docs/figures/discovery-to-mapping/pf-coil-current.svg": {
+      "contrast": "pass - measured body #242424 at 15.5:1, keys #062873 at 13.5:1 and string green #3f9357 at 3.8:1 on white, at this figure's 14 pt.",
+      "data_ink": "pass - two text panels and nothing else.",
+      "decoration": "pass - none beyond Pygments syntax colour.",
+      "label_collision": "pass - ink stops 34 px from the left edge and 62 px from the right; the two columns never meet.",
+      "legibility": "pass - monospaced 14 pt JSON in two panels; this panel's strings are short enough to stay on one line.",
+      "table_form": "pass - the hand-off row and its live projection are the literal documents compared; a table would not show the record."
+    },
+    "docs/figures/discovery-to-mapping/pickup-probe.svg": {
+      "contrast": "pass - body #242424 at 15.5:1, keys #062873 at 13.5:1, string green #3f9357 at 3.8:1 on white.",
+      "data_ink": "pass - two text panels and nothing else.",
+      "decoration": "pass - none beyond Pygments syntax colour.",
+      "label_collision": "pass - ink stays 62 px inside the right edge; no glyph of one column reaches the other.",
+      "legibility": "states a defect: the live-projection strings are hard-wrapped at a fixed character count, splitting words across lines ('i n tesla', 'provi ding', 'equ il ibrium'), so a reader has to reassemble the prose; everything else reads cleanly at 14 pt.",
+      "table_form": "pass - as for the fixture panel: the literal record is the subject."
+    },
+    "docs/figures/discovery-to-mapping/pipeline.svg": {
+      "contrast": "pass - ink and muted grey on white, both well above 4.5:1.",
+      "data_ink": "pass - five stage labels, their counts and the arrows; the counts are the data and nothing competes with them.",
+      "decoration": "pass - no fill, gradient or frame.",
+      "label_collision": "pass - the three counts under 'Signals enrich + check' stack without touching; each label clears its arrow (measured bounding boxes).",
+      "legibility": "pass - each stage name sits over its own inventory count, and the solid/dashed arrow key is stated below.",
+      "table_form": "pass - a stages-and-inputs diagram whose arrows carry the dependency the counts cannot."
+    },
+    "docs/figures/icp-knowledge-map/icp-map-a-data-systems.svg": {
+      "contrast": "pass - names #2b2b2b and codes #6b6b6b on white, the codes measuring 5.3:1.",
+      "data_ink": "pass - open circles, two weight classes of town name and the road network are the ink.",
+      "decoration": "pass - the pale land outline and the orange ITER emblem sit at the edge of the drawing and do not compete with the data marks.",
+      "label_collision": "pass - no glyph overlap measured; each town label carries a white halo that stops a road at the letters.",
+      "legibility": "pass - ten town names at 14 pt bold and their system codes at 11 pt read at 1400 px.",
+      "table_form": "pass - a geographic map, not tabular data."
+    },
+    "docs/figures/icp-knowledge-map/icp-map-b-france.svg": {
+      "contrast": "pass - names #2b2b2b and codes #6b6b6b on white (5.3:1).",
+      "data_ink": "pass - icons, names and codes; the land outline is the only other ink.",
+      "decoration": "pass - the ITER emblem is the one brand mark and it sits clear of every town.",
+      "label_collision": "pass - no label meets another; ink stops 213 px from the left edge and 196 px from the right.",
+      "legibility": "pass - the same ten towns as the data-systems stage, each now carrying its icon and its code.",
+      "table_form": "pass - a map; the towns' positions are the data."
+    },
+    "docs/figures/icp-knowledge-map/icp-map-c-relationships.svg": {
+      "contrast": "pass - verbs in the relation magenta on white, names and codes at 5.3:1 or better.",
+      "data_ink": "pass - the roads and verbs are the data; the town markers anchor them.",
+      "decoration": "pass - no fill or gradient; each verb carries a white backing so the road stops at it.",
+      "label_collision": "pass - the tightest pair is 'states' (ends x=1034) and 'Requirements' (starts x=1045), a 10 px gap; measured 0 rows where a purple verb and a dark name share glyph columns.",
+      "legibility": "pass - each verb is bold on its own road with a chevron pointing subject to object.",
+      "table_form": "pass - a relationship map whose edge labels are inherently graph data, not rows."
+    },
+    "docs/figures/icp-knowledge-map/icp-map-d-live-graph.gif": {
+      "contrast": "pass - same label colours as the static relationships stage.",
+      "data_ink": "pass - roads, verbs and moving markers; no fill or gradient.",
+      "decoration": "pass - the highlight rings track the moving markers and mark where the traffic is, not decoration.",
+      "label_collision": "pass - scanned all 150 frames: no ink reaches any canvas edge (0 edge pixels across frames), and the moving markers draw beneath the labels.",
+      "legibility": "pass - the relationships stage with travelling markers; the labels stay put and readable while the traffic moves.",
+      "table_form": "pass - an animated map of movement, which a table cannot show."
+    },
+    "docs/figures/icp-knowledge-map/icp-map-e-many-models.gif": {
+      "contrast": "pass - unchanged label colours.",
+      "data_ink": "pass - roads, verbs and markers only.",
+      "decoration": "pass - none beyond the marker shapes.",
+      "label_collision": "pass - all 150 frames keep every mark inside the canvas (0 edge pixels); markers sit under the labels.",
+      "legibility": "pass - the same stage with several models in flight; verbs and names remain readable in every frame read.",
+      "table_form": "pass - motion over a graph, not tabular data."
+    },
+    "docs/figures/icp-knowledge-map/icp-map-f-whole-fleet.gif": {
+      "contrast": "pass - unchanged label colours.",
+      "data_ink": "pass - roads, verbs and markers.",
+      "decoration": "pass - none.",
+      "label_collision": "pass - all 150 frames keep every mark inside the canvas (0 edge pixels); the marker glyphs pass over roads, never over text.",
+      "legibility": "pass - the busiest of the three animations; the larger markers crowd the roads near Interfaces at some frames but never cover a label.",
+      "table_form": "pass - motion over a graph."
+    },
+    "docs/figures/icp-knowledge-map/icp-map-repositories.svg": {
+      "contrast": "pass - titles #2b2b2b and system lines #6b6b6b on white (5.3:1).",
+      "data_ink": "pass - icons and two lines of text per card; no chart furniture.",
+      "decoration": "pass - plain white background, no fill or gradient.",
+      "label_collision": "states a defect: the 'NCR' code sits at y=336 while the other four first-row codes sit at y=300, because the wrapped 'Non-Conformance Reports' title pushes it down one line, so the subtitle row is ragged; nothing overlaps and nothing is clipped.",
+      "legibility": "pass - ten cards, each with an icon, a 20 pt title and a 16 pt system line.",
+      "table_form": "pass - the card grid pairs each system with its icon, which a table cannot do; the same names and codes are tabulated in the report body."
+    },
+    "docs/figures/jt60sa-mapping-study/agreement.svg": {
+      "contrast": "states a defect: the white count numerals sit on the agreeing green #1baf7a at 2.81:1 and the unplaced grey #9a9892 at 2.86:1, just under the 3:1 large-text floor; the numerals are legible but marginal.",
+      "data_ink": "pass - 100%-normalised stacked bars with no gridlines or frame; the fills are the data.",
+      "decoration": "pass - flat fills, white separators, no gradient or shading.",
+      "label_collision": "pass - the refused count '1' is placed above its bar inside the canvas (ink rows 23-40 of 640); no label touches another.",
+      "legibility": "pass - six section rows, counts direct-labelled in their segments and the absolute total at each bar end.",
+      "table_form": "pass - composition across six sections is what the bar form shows, and the report carries the counts as a table beside it."
+    },
+    "docs/figures/knowledge-graph-scale/knowledge-graph-scale.svg": {
+      "contrast": "pass - facility colours measured 3.36:1 (JET), 4.25:1 (JT-60SA), 4.76:1 (ITER), 4.87:1 (Standard Names) and 5.28:1 (TCV) on white.",
+      "data_ink": "pass - the node clouds and their links are the only ink; no axes, gridlines or frame.",
+      "decoration": "pass - no fill or gradient behind the clouds.",
+      "label_collision": "pass - the ITER cluster is small at 7.02 k nodes, but its label is clear of it and of TCV's; no label meets another.",
+      "legibility": "pass - five facility names at 20 pt with node counts beneath, and cluster names beside their clouds.",
+      "table_form": "pass - relative scale between facilities is the point, and only the clouds show it."
+    },
+    "docs/figures/knowledge-graph-scale/mapping-flow.svg": {
+      "contrast": "pass - every label sampled #4a4a4a on white, 8.9:1 including the pale-fill '1.21 k to map' and '14 k proposed'.",
+      "data_ink": "pass - the ribbons carry the counts; no axes, frame or shading.",
+      "decoration": "pass - flat ribbon fills only.",
+      "label_collision": "pass - IDS labels end 2 px clear of their bars; no ribbon crosses a label (0 ribbon pixels in the text rows of 'spectrometer mass'; the few beside 'ece' sit between its glyphs and its count).",
+      "legibility": "pass - both facilities, the IDS layer and the three status totals read at a glance.",
+      "table_form": "pass - a flow between three populations, which a table cannot show."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/jt60sa-mapping-study/agreement.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "White count numerals sit on the agreeing green (#1baf7a, 2.81:1) and the unplaced grey (#9a9892, 2.86:1) segments, just under the 3:1 floor for large text. The counts are legible but marginal, and a reader with reduced contrast sensitivity will lose them first; a darker fill or a dark numeral would settle it. Cause: scripts/figures_jt60sa_mapping_study.py:101."
+    },
+    {
+      "file": "docs/figures/discovery-to-mapping/pickup-probe.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The live projection's long strings are hard-wrapped at a fixed character count, so words break across lines with a space inserted ('i n tesla', 'provi ding', 'equ il ibrium'). A reader must reassemble the description by eye, and the introduced space can read as content. Wrapping on word boundaries, or truncating with an ellipsis, would keep the prose intact. Cause: scripts/figures_discovery_to_mapping.py:450."
+    },
+    {
+      "file": "docs/figures/discovery-to-mapping/pf-coil-current.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The provenance line under the panel title prints a machine-local absolute path (/home/ITER/mcintos/Code/imas-codex/tests/fixtures/mapping_handoff_example.json). In a published report it names a directory no reader can resolve and exposes a home path; the repository-relative path or the document's own identity would carry the same provenance. Cause: scripts/figures_discovery_to_mapping.py:470."
+    },
+    {
+      "file": "docs/figures/icp-knowledge-map/icp-map-repositories.svg",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "The wrapped 'Non-Conformance Reports' title pushes the NCR card's code line down one line, so it sits at y=336 while the other four first-row codes sit at y=300 and the row reads ragged. Nothing overlaps or clips; a fixed subtitle baseline, or reserving two title lines for every card, would align them. Cause: scripts/figures_icp_knowledge_map.py:1148."
+    }
+  ],
+  "method": "Each attached PNG was opened and read as a rendered image; readings were then confirmed or corrected by measuring the PNG itself (ink extents against the canvas edge, text-row and glyph-class profiles, and WCAG contrast of sampled colours). All 150 frames of each GIF were scanned for ink outside the canvas. No SVG was opened.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261116T204424596908-review-of-figure-scripts-save-through-shared-function-a2cf01a77dee-figure",
+  "reviewed_base_sha": "4c66fcbcdf7c7b8a7eb8210d9f677c2cae2ff07f",
+  "reviewed_head_sha": "a2cf01a77deefcc1ab54aefb91b912276978ab30",
+  "reviewed_run_id": "r-20261116T194709389742-figure-scripts-save-through-shared-function",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:06:16.440332+00:00",
+  "total": null
+}

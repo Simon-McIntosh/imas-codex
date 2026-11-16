@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at e4def604bbabcf2fa6551640c99113360658f61e, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Settle each unchained-holder name against the holder of its own DD source.
 
 A name in the ``unchained_holder`` population recorded a DD source that another

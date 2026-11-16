@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 47bec63c465972b8c46962651b8815db7d6b6db2, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.grammar_sync.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Record the three statements of the ISN version and prove each comparison fires.
 
 Reads the pin from ``pyproject.toml``, the installed distribution version from

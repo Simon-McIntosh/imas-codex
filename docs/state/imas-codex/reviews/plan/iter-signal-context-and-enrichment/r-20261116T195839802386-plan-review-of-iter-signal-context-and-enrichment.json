@@ -1,0 +1,100 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T19:59:23.467Z",
+  "dispatched_at": "2026-11-16T19:59:05Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T195839802386-plan-review-of-iter-signal-context-and-enrichment/plan.html:118",
+      "id": "reasoning-1",
+      "reason": "the ratified premise that keeps ICP-derived context inside ITER would be recorded as contingent on the open decision instead of settled, which is what stops a coordinator dispatching section 6 under a confidentiality claim the lead may withdraw.",
+      "text": "the local-lane-accepted rationale asserts \"The model that writes ITER signal descriptions from ICP-derived context is the locally served one, as section 1 states and the description-model decision records, so that context stays inside ITER\", but the description-model decision now reads that it \"no longer governs sections 6 and 7\" and the open decision attached to those sections offers \"The paid model, with ICP-derived context leaving ITER\" as a live option; the lane decision therefore claims a settled confidentiality premise that its own cited decision has just disclaimed, and a reader of the accepted lane decision has no signal that the premise is conditional, or that choosing the third open option withdraws it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T195839802386-plan-review-of-iter-signal-context-and-enrichment/plan.html:122",
+      "id": "reasoning-2",
+      "reason": "the decision that gates sections 6 and 7 must state each figure against the instrument that produced it, or the lead's answer to the open model decision rests on a judge the plan itself records as unreliable.",
+      "text": "the open decision's context reads \"a sealed blind reading preferred the paid model in 27 of 40 pairs and the local model in none, and 111 of the local model's 200 descriptions were judged wrong against context, against 32 for the paid model\", running the sealed hand reading straight into the automated judge's tally; the cited evidence (docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html, \"Context-based assessment\") gives the hand reading as 27/0/13 preference with 26 local and 0 paid wrong of 40, and 111/32 of 200 only for the configured judge, whose preference agrees with the hand reading in 17 of 40 pairs \u2014 the version-35 rewrite at line 100 makes exactly this distinction, so the decision is the one place that still merges them; the lead answers this decision and would weigh 111/200 as a hand count",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+  "plan_fingerprint": "79eec425b7d5068ce0d4103d402a6abf05e90ddf361ab4679d8d0dcfa6ba2359",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 35,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "024b66e9a67fc17174084e6094dd67c9643a2a91",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The local-lane decision's rationale at version 36 says the description model is the open decision and that ICP-derived context stays inside ITER unless the lead chooses the paid model there.",
+      "reason": "",
+      "when": "2026-11-16T21:07:00.908727+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "024b66e9a67fc17174084e6094dd67c9643a2a91",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The open decision's context at version 36 gives the hand reading (27/0/13 preference, 26 and 0 wrong of 40) and the judge's figures (111 and 32 of 200) separately, with the judge's 17-of-40 agreement stated.",
+      "reason": "",
+      "when": "2026-11-16T21:07:06.576020+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "024b66e9a67fc17174084e6094dd67c9643a2a91",
+      "commit_basis": "edit",
+      "note": "The local-lane decision's rationale at version 36 says the description model is the open decision and that ICP-derived context stays inside ITER unless the lead chooses the paid model there.",
+      "reason": "",
+      "when": "2026-11-16T21:07:00.908727+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "024b66e9a67fc17174084e6094dd67c9643a2a91",
+      "commit_basis": "edit",
+      "note": "The open decision's context at version 36 gives the hand reading (27/0/13 preference, 26 and 0 wrong of 40) and the judge's figures (111 and 32 of 200) separately, with the judge's 17-of-40 agreement stated.",
+      "reason": "",
+      "when": "2026-11-16T21:07:06.576020+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T195839802386-plan-review-of-iter-signal-context-and-enrichment.json",
+  "review_run_id": "r-20261116T195839802386-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "4536409ea1bfb57fa20d4b3feb9021046ccc57ec",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/figures/iter-signal-context-and-enrichment/pipeline.svg exists, codac-uda-signals.html carries id=\"s12\", icp-api-access.html carries id=\"s3\" and id=\"s4\", and the decision key `local-model-confirmed-on-quality` named in the rewritten rationale resolves at plan.html:120.",
+    "done_when": "pass \u2014 each section names a measurable record plus a declared negative control (s4 withheld-node archive count, s5 unparsed-name ungrouped state, s6 member of a failed group carries no composed description, s7 failed enrichment not counted as enriched, s8 refused endpoint and unbounded window, s9 facility-less node found by the count, s10 field-set change leaves no unreferenced pattern).",
+    "evidence_paths": "pass \u2014 the plan's records are landing records and evidence fragments under docs/evidence/fragments/iter-signal-context-and-enrichment/; no section or decision routes evidence to a node-local or ephemeral path.",
+    "naming": "pass \u2014 the plan names no symbol, module or function, and the new rationale text introduces no plan label, ticket number or version tag.",
+    "reasoning": "a finding \u2014 the rewritten description-model rationale (plan.html:100) is instrument-accurate against its evidence, but the local-lane decision it no longer supports still cites it as settling the model (plan.html:118), and the open decision the sections are held on states its evidence with two instruments merged (plan.html:122).",
+    "single_goal": "pass \u2014 each section delivers one endpoint (s1 context, s2 seats, s3 comparison, s4 context in graph, s5 grouping, s6 pilot enrichment, s7 catalogue enrichment, s8 server read, s9 protected archive, s10 re-run).",
+    "wiring": "pass \u2014 every depends-on target resolves (iter-signal-context-and-enrichment#s4/#s5/#s6/#s7/#s10, codac-uda-signals#s12, icp-api-access#s3/#s4), and the version-35 declarations defer s6 and s7 while s8 and s9 remain `implementable` behind unbroken depends-on edges to them, so no listed dependency is missing or mispointed."
+  },
+  "section_digests": {
+    "_document": "4e0e8def2b41a35520d707976d75422922b468481a5077b8bc471cfc6da7650e",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "c5e0fdbc73872136bee918c31d6a991ed8c2cd51f26591a5afb67eb1a6cc94dc",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:05:56.207900+00:00",
+  "total": null
+}

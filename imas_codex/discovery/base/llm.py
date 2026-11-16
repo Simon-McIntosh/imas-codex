@@ -2376,6 +2376,9 @@ async def acall_llm_structured(
     service: str = "untagged",
     reasoning_effort: str | None = None,
     before_attempt: Callable[[int, int], None] | None = None,
+    local_schema_constraint: bool = False,
+    local_json_mode: bool = False,
+    validation_reask: bool = False,
 ) -> LLMResult:
     """Async version of call_llm_structured.
 
@@ -2427,6 +2430,22 @@ async def acall_llm_structured(
         service=service,
         reasoning_effort=reasoning_effort,
     )
+    if local_schema_constraint:
+        if not _is_local_client_model(model):
+            raise ValueError("local_schema_constraint requires a local model")
+        # The SDK merges extra_body into the request after translating options.
+        kwargs.setdefault("extra_body", {})["response_format"] = kwargs[
+            "response_format"
+        ]
+    if local_json_mode:
+        if not _is_local_client_model(model) or local_schema_constraint:
+            raise ValueError(
+                "local_json_mode requires a local model without a schema constraint"
+            )
+        kwargs.setdefault("extra_body", {})["response_format"] = {"type": "json_object"}
+    if validation_reask:
+        # One initial request and at most one validation-directed replacement.
+        max_retries = 2
 
     last_error: Exception | None = None
     total_cost = 0.0
@@ -2502,8 +2521,30 @@ async def acall_llm_structured(
                 content = response.choices[0].message.content
                 _reject_unusable_reply(response, content)
 
-                content = _sanitize_content(content)
-                parsed = _parse_structured_content(content, response_model, model)
+                try:
+                    if validation_reask:
+                        parsed = response_model.model_validate_json(content)
+                    else:
+                        content = _sanitize_content(content)
+                        parsed = _parse_structured_content(
+                            content, response_model, model
+                        )
+                except ValidationError as validation_error:
+                    if not validation_reask or attempt != 0:
+                        raise
+                    kwargs["messages"] = [
+                        *kwargs["messages"],
+                        {"role": "assistant", "content": content},
+                        {
+                            "role": "user",
+                            "content": "The response failed validation:\n"
+                            + str(validation_error)
+                            + "\nReturn one corrected JSON object for the same inputs. "
+                            "Use the required field types and enumeration values. "
+                            "Do not add fences or commentary.",
+                        },
+                    ]
+                    continue
 
                 _ACTIVITY.record_completed()
                 succeeded = True

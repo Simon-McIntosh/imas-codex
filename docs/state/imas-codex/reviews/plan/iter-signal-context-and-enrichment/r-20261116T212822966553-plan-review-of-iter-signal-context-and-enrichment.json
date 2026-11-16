@@ -1,0 +1,100 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T21:30:15.465Z",
+  "dispatched_at": "2026-11-16T21:30:01Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:69",
+      "id": "wiring-1",
+      "reason": "the section's model source points at a decision the plan has retired from it, which is exactly how a deferred section gets built on an unconfirmed choice.",
+      "text": "section 6 states \"The language model that writes them is the one the lead chose after the comparison in section 3\", and the only decision that records a choice made after that comparison is `description-model`, whose own rationale says it \"no longer governs sections 6 and 7\"; the version-38 `local-lane-accepted` rationale instead says the choice \"is the open decision local-model-confirmed-on-quality\", so the plan names two different sources for the same model and a worker building section 6 can read the local model as already settled",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:125",
+      "id": "reasoning-1",
+      "reason": "the decision is the surface the lead answers on, and an option that is already in flight can be chosen again, duplicating a round the plan says is running.",
+      "text": "the open decision's second option is \"One more refinement round aimed at correctness, then decide\", but the comment this version adds (line 142) records that round as already dispatched as `ground-local-signal-descriptions-in-context`, and the decision's context neither mentions the round's existence nor marks the second option as taken, so the surface holding sections 6 and 7 presents evidence as final and an option as still available that a coordinator choosing it would re-dispatch",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b4c776eae213687dc7dd3cf583eafae6196fc7c5",
+  "plan_fingerprint": "4386b612a328d0e07cb25a23e390780071c592877e9bbd08eac8e79e922a5fd0",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 38,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6eecd42eaadba9ad4041dc8e21f541d5f1c2ab67",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 6 at version 39 takes its model from the open decision on description quality and says no model is chosen until it is answered.",
+      "reason": "",
+      "when": "2026-11-16T21:51:00.133258+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6eecd42eaadba9ad4041dc8e21f541d5f1c2ab67",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The open decision at version 40 records the correctness round as running, says its figures are not yet final, and offers only the two remaining choices.",
+      "reason": "",
+      "when": "2026-11-16T21:51:04.466789+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6eecd42eaadba9ad4041dc8e21f541d5f1c2ab67",
+      "commit_basis": "edit",
+      "note": "The open decision at version 40 records the correctness round as running, says its figures are not yet final, and offers only the two remaining choices.",
+      "reason": "",
+      "when": "2026-11-16T21:51:04.466789+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6eecd42eaadba9ad4041dc8e21f541d5f1c2ab67",
+      "commit_basis": "edit",
+      "note": "Section 6 at version 39 takes its model from the open decision on description quality and says no model is chosen until it is answered.",
+      "reason": "",
+      "when": "2026-11-16T21:51:00.133258+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T212822966553-plan-review-of-iter-signal-context-and-enrichment.json",
+  "review_run_id": "r-20261116T212822966553-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "15ed5d6901253262ca26d54f3cdb4264956eb04d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the new fragment path and the promoted run archive both resolve on disk; every other cited target is unchanged since a review resolved it.",
+    "done_when": "pass \u2014 section 6's bar and negative control are unchanged by this version and still state a failing condition on both quality and failed-group composition; the deferred sections still carry negative controls.",
+    "evidence_paths": "pass \u2014 the open decision's figures now name `docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html`, which exists and records 197/200 parsing, 27/0/13 manual preference, 26/0 manual wrong, 75/71/54 judge preference, 111/32 judge wrong and 17/40 agreement; the run's receipts resolve under `~/.config/reckon/crew/archive/runs/r-20261115T213437019440-refine-local-model-signal-enrichment/` with `private/` and `comparison/` populated.",
+    "naming": "pass \u2014 the changed text introduces no plan label, stage name, ticket number or version tag into anything a symbol or code comment would carry.",
+    "reasoning": "a finding \u2014 the open decision offers \"One more refinement round aimed at correctness, then decide\" as a future branch while the comment added in this version records that round already dispatched and in flight, so the decision surface reads as answerable now on figures the running round intends to supersede.",
+    "single_goal": "pass \u2014 no section or decision gained a second deliverable in the changed units.",
+    "wiring": "a finding \u2014 section 6 (snapshot line 69) names section 3's comparison as the source of the model choice, while the plan's own decision registry holds that choice in the open decision `local-model-confirmed-on-quality`."
+  },
+  "section_digests": {
+    "_document": "6ed74ade3650e05bb3646a4b4c587a1fb1ea13f57733084f39871a677e4c83bf",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "c5e0fdbc73872136bee918c31d6a991ed8c2cd51f26591a5afb67eb1a6cc94dc",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:49:33.749015+00:00",
+  "total": null
+}

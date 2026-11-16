@@ -1,5 +1,6 @@
 """Adversarial export controls and sampling-aware signal summaries."""
 
+import re
 from importlib.resources import files
 from pathlib import Path
 from types import SimpleNamespace
@@ -10,6 +11,7 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 import numpy as np
 import pytest
+from matplotlib.ticker import MaxNLocator
 
 from imas_codex.plotting import save_figure, signals as signal_plot, style
 
@@ -149,6 +151,43 @@ def test_valid_export_passes_and_declares_slide_canvas(tmp_path):
     assert 'width="31.1cm" height="16cm"' in content
     assert "elapsed time [s]" in content
     assert "demonstration" in content
+
+
+def _declared_centimetres(content: str) -> tuple[float, float]:
+    match = re.search(r'width="([\d.]+)cm" height="([\d.]+)cm"', content)
+    assert match is not None, content[:300]
+    return float(match.group(1)), float(match.group(2))
+
+
+@pytest.mark.parametrize(
+    "canvas",
+    [style.CANVAS, (28.0, 7.2), (7.0, 9.0)],
+    ids=["default", "wide", "narrow"],
+)
+def test_exported_aspect_ratio_matches_the_drawn_canvas(tmp_path, canvas):
+    figure, axis = plt.subplots(figsize=canvas)
+    axis.plot([0.0, 1.0], [0.0, 1.0], label="trace")
+    axis.set_xlabel("time [s]")
+    axis.set_ylabel("signal [A]")
+    axis.xaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
+    axis.yaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
+    figure.subplots_adjust(left=0.13, right=0.97, bottom=0.14, top=0.88)
+    path = tmp_path / f"aspect-{canvas[0]:g}x{canvas[1]:g}.svg"
+    try:
+        save_figure(figure, path)
+    finally:
+        plt.close(figure)
+    width, height = _declared_centimetres(path.read_text())
+    drawn = canvas[0] / canvas[1]
+    assert abs(width / height - drawn) <= drawn / 1000
+
+
+@pytest.mark.parametrize("count", [4, 6])
+def test_legend_stays_on_one_row_up_to_six_traces(tmp_path, count):
+    traces = [signal(values=(float(index), 2.0, 3.0)) for index in range(count)]
+    labels = [f"trace {index}" for index in range(count)]
+    receipt = signal_plot.plot(traces, tmp_path / f"legend-{count}.svg", labels=labels)
+    assert receipt["legend_rows"] == 1
 
 
 def test_overlay_uses_common_origin_and_held_steps(tmp_path, monkeypatch):

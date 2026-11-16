@@ -802,6 +802,10 @@ SOURCE_RULE_SITES: dict[tuple[str, str], str] = {
         "reconcile_source_status_liveness",
     ): "repair",
     (
+        "standard_names/graph_store/graph_audits.py",
+        "reconcile_sourceless_pipeline_names",
+    ): "repair",
+    (
         "standard_names/graph_store/graph_claim_release.py",
         "_READ_REFINE_CLAIM_RELEASE_QUERY",
     ): "guard",
@@ -905,12 +909,18 @@ def _statement_strings(tree: ast.Module) -> list[tuple[int, str]]:
 def _states_liveness(text: str) -> bool:
     """Does this statement apply the live-name half of the rule?
 
-    Either by naming the owner's predicate, or by spelling the superseded
-    status and name stage itself.
+    Either by naming the owner's predicate, by spelling the superseded status
+    and name stage itself, or by excluding terminal statuses through the
+    parameter list a restored enumeration would pass in. That last spelling —
+    ``NOT sn.status IN $terminal`` with ``'superseded'`` in the parameter — was
+    the source audit's own query before it was deleted, so a scan that did not
+    recognise it would license the query coming back.
     """
     if "live_name_cypher" in text:
         return True
-    return "superseded" in text and ("name_stage" in text or "status" in text)
+    if "superseded" in text and ("name_stage" in text or "status" in text):
+        return True
+    return "status" in text and re.search(r"\$terminal\b", text) is not None
 
 
 def _states_producerless(text: str) -> bool:
@@ -941,6 +951,38 @@ def sourceless_rule_sites(root: Path) -> dict[tuple[str, str], set[int]]:
                 site = (module, _carrying_statement(tree, line))
                 sites.setdefault(site, set()).add(line)
     return sites
+
+
+def test_the_pool_projection_reads_the_live_child_rule() -> None:
+    """``pools.py`` reads the rule rather than restating its stage half."""
+    from imas_codex.standard_names.pools import identity_state_expressions
+    from imas_codex.standard_names.source_invariant import live_child_cypher
+
+    expression = identity_state_expressions()["has_live_child"]
+    assert expression == live_child_cypher()
+    assert "status" in expression, (
+        "the rule must test the child's status as well as its name stage"
+    )
+
+
+def test_the_planted_source_audit_query_is_refused(tmp_path: Path) -> None:
+    """The audit's deleted query is seen by the scan and refused.
+
+    It stated the liveness half as ``NOT sn.status IN $terminal`` with
+    ``'superseded'`` in the parameter, so the scan has to recognise a
+    parameterised terminal exclusion as well as the literal spelling.
+    """
+    (tmp_path / "restored_audit.py").write_text(
+        'POPULATION = """\n'
+        "MATCH (sn:StandardName)\n"
+        "WHERE NOT sn.status IN $terminal\n"
+        "  AND NOT EXISTS { (source:StandardNameSource)-[:PRODUCED_NAME]->(sn)\n"
+        "                   WHERE coalesce(source.status, '') <> 'stale' }\n"
+        'RETURN sn.id AS id\n"""\n',
+        encoding="utf-8",
+    )
+
+    assert sourceless_rule_sites(tmp_path) == {("restored_audit.py", "POPULATION"): {1}}
 
 
 def test_no_second_enumeration_of_the_sourceless_population() -> None:

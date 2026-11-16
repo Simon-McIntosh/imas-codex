@@ -12,7 +12,7 @@ PAGE=docs/evidence/fragments/sn-definitions-by-construction/sdbc-adjudicated-lab
 export UV_NO_SYNC=1
 export UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv
 export PYTHONPATH="$ROOT"
-T=$(mktemp -d /tmp/adjudicated-labels-gate-XXXXXX) || exit 2
+T=$(mktemp -d "${TMPDIR:-/tmp}/adjudicated-labels-gate-XXXXXX") || exit 2
 trap 'rm -rf "$T"' EXIT
 rc=0
 
@@ -54,7 +54,9 @@ mkdir -p "$T/head"
 git archive HEAD | tar -x -C "$T/head"
 (
   cd "$T/head" || exit 2
-  PYTHONPATH="$T/head" uv run --no-sync python "$SCRIPT" build
+  # Sequential commands in one subshell report only the last one's status, so a
+  # failed build followed by a report from the committed JSON would close EXIT=0.
+  PYTHONPATH="$T/head" uv run --no-sync python "$SCRIPT" build || exit $?
   PYTHONPATH="$T/head" uv run --no-sync python "$SCRIPT" report
 )
 status=$?

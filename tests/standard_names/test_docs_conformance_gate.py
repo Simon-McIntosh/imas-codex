@@ -52,8 +52,14 @@ _PLASMA_BOUNDARY_SENTENCE = (
     r"$\psi = \psi_{\mathrm{LCFS}}$, $\psi$ is poloidal magnetic flux; "
     r"$\psi_{\mathrm{LCFS}}$ is its value on the last closed flux surface."
 )
+_FAMILY_SENTENCE = (
+    "Flux-surface-averaged number density of argon ions at the plasma boundary. "
+    "The density counts ions summed over all charge states; neutral atoms are "
+    "excluded."
+)
 _PROSE = "\n\n".join(
     (
+        _FAMILY_SENTENCE,
         "See [flux_surface_averaged_electron_density_at_plasma_boundary]"
         "(name:flux_surface_averaged_electron_density_at_plasma_boundary) for "
         "the electron counterpart.",

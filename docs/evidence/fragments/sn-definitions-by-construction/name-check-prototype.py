@@ -2128,14 +2128,26 @@ def trade_sentence(scored, contenders, reference: str = "A") -> str:
             f"{TRADE_NAMES.get(arm, arm)} gains {_points(d_recall)} points of recall and loses {_points(-d_spec)} points of specificity."
         )
     both_down = [d for d in deltas if d[1] <= 0 and d[2] <= 0]
-    if both_down:
-        names = [TRADE_NAMES.get(d[0], d[0]) for d in both_down]
-        subject = (
-            names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
-        )
-        sentences.append(
-            f"{subject} {'is' if len(names) == 1 else 'are'} worse on both measures."
-        )
+    for arm, d_recall, d_spec in both_down:
+        name = TRADE_NAMES.get(arm, arm)
+        if d_recall == 0 and d_spec == 0:
+            sentences.append(f"{name} ties the adopted question on both measures.")
+        elif d_recall == 0:
+            sentences.append(
+                f"{name} ties the adopted question on recall and loses "
+                f"{_points(-d_spec)} points of specificity."
+            )
+        elif d_spec == 0:
+            sentences.append(
+                f"{name} loses {_points(-d_recall)} points of recall and ties "
+                "the adopted question on specificity."
+            )
+        else:
+            sentences.append(
+                f"{name} is worse on both measures, giving up "
+                f"{_points(-d_recall)} points of recall and {_points(-d_spec)} "
+                "points of specificity."
+            )
     return " ".join(text[0].upper() + text[1:] if text else text for text in sentences)
 
 

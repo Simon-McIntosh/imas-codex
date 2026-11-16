@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at c598c47f94583bdd8cc71831c8095905dc5d35fa, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.workers._DD_CONTEXT_QUERY.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Measure source-backed name review against the frozen golden labels."""
 
 from __future__ import annotations

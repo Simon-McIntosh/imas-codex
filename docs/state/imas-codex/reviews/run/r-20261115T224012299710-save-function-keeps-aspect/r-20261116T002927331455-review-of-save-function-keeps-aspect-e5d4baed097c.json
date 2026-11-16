@@ -1,0 +1,86 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/plotting/__init__.py:4 re-export of save_figure",
+    "imas_codex/plotting/__init__.py:3 re-export of signals.plot",
+    "imas_codex/plotting/signals.py:237 calls save_figure",
+    "scripts/codac_uda_prototype/loader.py:183 calls save_figure from the envelope-mode loader"
+  ],
+  "completed_at": "2026-11-16T00:43:04.190Z",
+  "dispatched_at": "2026-11-16T00:35:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-16T01:46:50.704802+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261115T224012299710-save-function-keeps-aspect"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-16T01:46:50.704802+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261115T224012299710-save-function-keeps-aspect"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-16T01:46:50.704802+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261115T224012299710-save-function-keeps-aspect"
+    }
+  },
+  "findings": [
+    {
+      "file": "imas_codex/plotting/style.py",
+      "line": "72",
+      "severity": "non-blocking",
+      "text": "non-blocking: this file, imas_codex/plotting/signals.py and tests/plotting/test_signals.py are all changed although FENCE \u2014 SCOPE at prompt.txt:85-87 granted only the evidence fragment and the docs/figures node directory, so the three files the goal requires were outside the node's declared write paths, and imas_codex/plotting is also declared by the sibling node scripts-save-through-shared-function."
+    },
+    {
+      "file": "imas_codex/plotting/signals.py",
+      "line": "218",
+      "severity": "non-blocking",
+      "text": "non-blocking: `columns = min(len(axis.lines), 6)` caps legend columns at six regardless of entry count, so an envelope signal (three legend entries per trace, reachable from the export path at scripts/codac_uda_prototype/loader.py:183) still wraps to two rows at four traces; the \"one row up to six traces\" claim in docs/plans/figure-scripts-use-the-shared-save-function.html section 1 Delivers therefore holds only for scalar signals, and tests/plotting/test_signals.py:186 builds scalar signals only."
+    },
+    {
+      "file": "manifest.md",
+      "line": "6",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest checkpoint states the gate is green \"on the committed head\", but logs/gate-tests-plotting.log:1 names revision 3fac2cde42de8681bd649a69a303bd090a554c2c while head is e5d4baed0 (a docs-only commit), and the run records no baseline arm and no baseline_suite/after_suite keys, so the after arm's \"26 passed, 1 warning in 5.63s\" is the only suite receipt."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit from e92333ed: aaaa9bc2f changes the SVG height formula and legend column count plus a measured legend_rows receipt, 3fac2cde4 adds the three-canvas aspect test and the four/six-trace legend test with a regex size helper, and e5d4baed0 adds only the 42-line evidence fragment.",
+    "done_when": "The measure (prompt.txt:116) asks for three canvases within one part in a thousand, the default slide size, four- and six-trace legend rows, and a width-pinned negative control; tests/plotting/test_signals.py:167 and :186 implement exactly those assertions, logs/gate-tests-plotting.log closes with \"26 passed, 1 warning in 5.63s\" and a bare EXIT=0, and logs/negative-control-width-pin.log fails the wide and narrow arms with \"1.9451388888888888 <= (3.888888888888889 / 1000)\" and \"0.7772222222222224 <= (0.7777777777777778 / 1000)\" while the default arm passes.",
+    "goal": "The goal (prompt.txt:38) is that the shared save function exports any canvas without distortion and the signal plot's legend sits on one row; imas_codex/plotting/style.py:72 now derives the SVG height as SLIDE_WIDTH_CM * figheight / figwidth and imas_codex/plotting/signals.py:217-218 sizes the legend to min(lines, 6) columns, both matching the goal, with the envelope-mode caveat at signals.py:218, and the default canvas still declares 31.1cm x 16cm.",
+    "manifest": "Read; manifest.md:7 names commits aaaa9bc2f, 3fac2cde4 and e5d4baed0, :12 names the plotting-suite command, :13 and :14 name the gate and negative-control logs, and :6 claims the gate green at the head although the gate log's revision header reads 3fac2cde4.",
+    "write_paths": "The source dispatch's FENCE \u2014 SCOPE (prompt.txt:85-87) grants only docs/evidence/fragments/figure-scripts-use-the-shared-save-function/save-function-keeps-aspect.html and the docs/figures node directory, yet git diff --stat e92333ed e5d4baed0 also changes imas_codex/plotting/style.py, imas_codex/plotting/signals.py and tests/plotting/test_signals.py."
+  },
+  "justifications": {
+    "durability": "tests/plotting/test_signals.py:182 fails if the height formula reverts to the pinned 16cm derivation (the negative-control log shows exactly that failure), but the legend guard at :190 asserts a row count that the production block at imas_codex/plotting/signals.py:233 computes from the legend under test, so a measurement that always reported one row would leave it green, and the envelope path is untested.",
+    "evidence": "logs/gate-tests-plotting.log closes with \"26 passed, 1 warning in 5.63s\" and a bare EXIT=0 at revision 3fac2cde4, and logs/negative-control-width-pin.log shows the two non-default aspect arms FAILED under the restored pre-fix formula with EXIT=1, matching every clause of the done_when, though neither arm names a baseline revision.",
+    "fit": "imas_codex/plotting/style.py:12 names the slide width as SLIDE_WIDTH_CM beside the existing CANVAS constant and imas_codex/plotting/signals.py:244 adds the receipt key in the same dict as time_base and summaries, though legend_rows is assigned twice at :224 and :233.",
+    "goal_fidelity": "imas_codex/plotting/style.py:72 derives the declared height from the figure's own width-to-height ratio under the fixed slide width, so every canvas exports at its drawn ratio, and imas_codex/plotting/signals.py:237 keeps the single checked export path.",
+    "reuse": "the change extends the existing owner at imas_codex/plotting/style.py:42 save_figure rather than forking it, but the envelope legend layout at imas_codex/plotting/signals.py:218 keeps a fixed six-column cap instead of extending the same measurement it uses for the receipt.",
+    "scope_discipline": "git diff --stat e92333ed e5d4baed0 lists four paths, three of which lie outside the two paths FENCE \u2014 SCOPE granted at prompt.txt:86-87."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal (prompt.txt:38) is that the shared save function exports any canvas without distortion and the signal plot's legend sits on one row; imas_codex/plotting/style.py:72 now derives the SVG height as SLIDE_WIDTH_CM * figheight / figwidth and imas_codex/plotting/signals.py:217-218 sizes the legend to min(lines, 6) columns, both matching the goal, with the envelope-mode caveat at signals.py:218, and the default canvas still declares 31.1cm x 16cm.\nVERDICT done_when: The measure (prompt.txt:116) asks for three canvases within one part in a thousand, the default slide size, four- and six-trace legend rows, and a width-pinned negative control; tests/plotting/test_signals.py:167 and :186 implement exactly those assertions, logs/gate-tests-plotting.log closes with \"26 passed, 1 warning in 5.63s\" and a bare EXIT=0, and logs/negative-control-width-pin.log fails the wide and narrow arms with \"1.9451388888888888 <= (3.888888888888889 / 1000)\" and \"0.7772222222222224 <= (0.7777777777777778 / 1000)\" while the default arm passes.\nVERDICT write_paths: The source dispatch's FENCE \u2014 SCOPE (prompt.txt:85-87) grants only docs/evidence/fragments/figure-scripts-use-the-shared-save-function/save-function-keeps-aspect.html and the docs/figures node directory, yet git diff --stat e92333ed e5d4baed0 also changes imas_codex/plotting/style.py, imas_codex/plotting/signals.py and tests/plotting/test_signals.py.\nVERDICT manifest: Read; manifest.md:7 names commits aaaa9bc2f, 3fac2cde4 and e5d4baed0, :12 names the plotting-suite command, :13 and :14 name the gate and negative-control logs, and :6 claims the gate green at the head although the gate log's revision header reads 3fac2cde4.\nVERDICT diff: Read commit by commit from e92333ed: aaaa9bc2f changes the SVG height formula and legend column count plus a measured legend_rows receipt, 3fac2cde4 adds the three-canvas aspect test and the four/six-trace legend test with a regex size helper, and e5d4baed0 adds only the 42-line evidence fragment.\nCALL_SITES: imas_codex/plotting/__init__.py:4 re-export of save_figure, imas_codex/plotting/__init__.py:3 re-export of signals.plot, imas_codex/plotting/signals.py:237 calls save_figure, scripts/codac_uda_prototype/loader.py:183 calls save_figure from the envelope-mode loader\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/plotting/style.py:72 derives the declared height from the figure's own width-to-height ratio under the fixed slide width, so every canvas exports at its drawn ratio, and imas_codex/plotting/signals.py:237 keeps the single checked export path.\nSCORE evidence: 18\nJUSTIFICATION evidence: logs/gate-tests-plotting.log closes with \"26 passed, 1 warning in 5.63s\" and a bare EXIT=0 at revision 3fac2cde4, and logs/negative-control-width-pin.log shows the two non-default aspect arms FAILED under the restored pre-fix formula with EXIT=1, matching every clause of the done_when, though neither arm names a baseline revision.\nSCORE scope_discipline: 7\nJUSTIFICATION scope_discipline: git diff --stat e92333ed e5d4baed0 lists four paths, three of which lie outside the two paths FENCE \u2014 SCOPE granted at prompt.txt:86-87.\nSCORE durability: 15\nJUSTIFICATION durability: tests/plotting/test_signals.py:182 fails if the height formula reverts to the pinned 16cm derivation (the negative-control log shows exactly that failure), but the legend guard at :190 asserts a row count that the production block at imas_codex/plotting/signals.py:233 computes from the legend under test, so a measurement that always reported one row would leave it green, and the envelope path is untested.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/plotting/style.py:12 names the slide width as SLIDE_WIDTH_CM beside the existing CANVAS constant and imas_codex/plotting/signals.py:244 adds the receipt key in the same dict as time_base and summaries, though legend_rows is assigned twice at :224 and :233.\nSCORE reuse: 18\nJUSTIFICATION reuse: the change extends the existing owner at imas_codex/plotting/style.py:42 save_figure rather than forking it, but the envelope legend layout at imas_codex/plotting/signals.py:218 keeps a fixed six-column cap instead of extending the same measurement it uses for the receipt.\nFINDING imas_codex/plotting/style.py:72 non-blocking: this file, imas_codex/plotting/signals.py and tests/plotting/test_signals.py are all changed although FENCE \u2014 SCOPE at prompt.txt:85-87 granted only the evidence fragment and the docs/figures node directory, so the three files the goal requires were outside the node's declared write paths, and imas_codex/plotting is also declared by the sibling node scripts-save-through-shared-function.\nFINDING imas_codex/plotting/signals.py:218 non-blocking: `columns = min(len(axis.lines), 6)` caps legend columns at six regardless of entry count, so an envelope signal (three legend entries per trace, reachable from the export path at scripts/codac_uda_prototype/loader.py:183) still wraps to two rows at four traces; the \"one row up to six traces\" claim in docs/plans/figure-scripts-use-the-shared-save-function.html section 1 Delivers therefore holds only for scalar signals, and tests/plotting/test_signals.py:186 builds scalar signals only.\nFINDING manifest.md:6 non-blocking: the manifest checkpoint states the gate is green \"on the committed head\", but logs/gate-tests-plotting.log:1 names revision 3fac2cde42de8681bd649a69a303bd090a554c2c while head is e5d4baed0 (a docs-only commit), and the run records no baseline arm and no baseline_suite/after_suite keys, so the after arm's \"26 passed, 1 warning in 5.63s\" is the only suite receipt.",
+  "review_run_id": "r-20261116T002927331455-review-of-save-function-keeps-aspect-e5d4baed097c",
+  "reviewed_base_sha": "e92333ed48198375182c1fe8fe74056d0be48e06",
+  "reviewed_head_sha": "e5d4baed097cca2cf620f94fe040a35efa8c6c7e",
+  "reviewed_run_id": "r-20261115T224012299710-save-function-keeps-aspect",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 7
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T01:05:04.088027+00:00",
+  "total": 93
+}

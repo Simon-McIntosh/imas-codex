@@ -8,8 +8,8 @@
   <meta name="plan-slug" content="figure-scripts-use-the-shared-save-function">
   <meta name="plan-title" content="Figure scripts save through the shared, checked save function">
   <meta name="plan-summary" content="Every figure script saves through one function that refuses clipped or overlapping text and exports correctly at any canvas size">
-  <meta name="plan-status" content="draft">
-  <meta name="plan-roi" content="medium">
+  <meta name="plan-status" content="in-progress">
+  <meta name="plan-roi" content="mid">
   <meta name="plan-effort-hours" content="5.0">
   <meta name="plan-capability-version" content="1.0">
   <meta name="plan-capability-class" content="general">
@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="figures,plotting">
   <meta name="plan-after" content="codac-uda-signals">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;figure-scripts-use-the-shared-save-function#s1&quot;]}">
   <title>Figure scripts save through the shared, checked save function | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="4">
+<meta name="plan-version" content="11">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -38,14 +38,14 @@
     <p>The save function landed with the signal plotting work in <code>imas_codex/plotting/</code>. Its independent reviews recorded that the exported width is fixed while the height follows the figure, so a figure drawn at another width is exported with a distorted aspect ratio, and that the signal plot's four-entry legend wraps onto a second row. The text check is duplicated: three figure scripts under <code>scripts/</code> each define their own, and a fourth imports one of those. Ten tracked scripts under <code>scripts/</code> call the plotting library's save directly, six named for figures and four for JET plots, and between them they rely on export behaviours the shared function does not yet offer: another resolution, a tight bounding box, a raster or animated format, a preview image and a receipt of what was written. The declared slide size and the preview export are written out separately in five of them. Thirteen further scripts under <code>docs/</code> carry their own text check; they are frozen records of past measurements and are outside this plan.</p>
 
     <h2 id="s1">§1 — The save function exports a figure of any size without distortion</h2>
-    <section data-reckon="section" data-id="s1" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s1" data-effort-hours="1.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
     <p><strong>Delivers.</strong> A figure saved through the shared function keeps its drawn aspect ratio in the exported file at any canvas width and height, and the file declares a physical size derived from the figure. The default full-width canvas and its declared slide size are unchanged. The signal plot draws its legend on one row for up to six traces. The save function gains no new refusal.</p>
     <p><strong>Done when.</strong> Tests in the plotting test directory show that for three canvas sizes, one of them the default, the exported width-to-height ratio equals the drawn ratio within one part in a thousand, and that the default canvas still declares its slide size; tests show a four-trace and a six-trace signal plot's legend each occupy one row. <strong>Negative control:</strong> with the width fixed as it is today, the test for a non-default canvas fails.</p>
 
     <h2 id="s2">§2 — Every figure script saves through the shared function</h2>
     <section data-reckon="section" data-id="s2" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links="figure-scripts-use-the-shared-save-function#s1"></section>
     <p><strong>Delivers.</strong> Every script under <code>scripts/</code> that writes a figure saves through the shared function, and no script defines or imports its own clipped-text and overlap check. The scripts still write every file they write today, in the same formats and with the same drawn aspect ratio, including their previews and receipts. Every vector figure declares the physical size the shared function derives from its canvas; a figure that declared another size, or none, takes the shared one, and the landing record lists each such figure with its declared size before and after. No script keeps a figure-export function of its own, and the slide-size declaration is written in one place. Every figure the scripts produce that is tracked under <code>docs/figures/</code> is regenerated through it, or the landing record states why a script could not be run and leaves its figure untouched. A figure the check refuses is repaired by moving its labels, never by bypassing the check.</p>
-    <p><strong>Done when.</strong> A search recorded in the landing record finds no direct call to the plotting library's save under <code>scripts/</code>, no function in a script that exports a figure other than by calling the shared one (helpers that save data files are not in scope), one definition of the text check and one of the slide-size declaration across <code>scripts/</code> and <code>imas_codex/</code>, with the number of public definitions and options the plotting package gained stated; the list of files each script wrote before and after is the same, each figure file's exported width-to-height ratio is unchanged within one part in a thousand, and the landing record lists every vector figure's declared size and ratio before and after; the landing record lists each script with one of regenerated, refused and repaired, or not run with its reason; each regenerated figure was rendered and looked at, and the count of figures that changed is given; the net change in lines under <code>scripts/</code> is stated. Any script that reads live data runs on a compute partition (<code>all_debug</code>). <strong>Negative control:</strong> a script given a label beyond the canvas writes no file.</p>
+    <p><strong>Done when.</strong> A search recorded in the landing record finds no direct call to the plotting library's save under <code>scripts/</code>, no function in a script that exports a figure other than by calling the shared one (helpers that save data files are not in scope), one definition of the text check and one of the slide-size declaration across <code>scripts/</code> and <code>imas_codex/</code>, with the number of public definitions and options the plotting package gained stated; the list of files each script wrote before and after is the same, each figure file's exported width-to-height ratio, taken from a vector file's coordinate box and from a raster file's pixel size, equals its drawn canvas ratio within one part in a thousand, and a vector file's declared physical size carries that same ratio within one part in a thousand, which the shared function's declared size must be precise enough to meet, and the landing record lists every vector figure's declared size and ratio before and after; a file that was exported with a content crop until now is listed with its pixel size before and after, and is exempt from comparison with its earlier ratio, since that ratio followed live content; the landing record lists each script with one of regenerated, refused and repaired, or not run with its reason; each regenerated figure was rendered and looked at, and the count of figures that changed is given; the net change in lines under <code>scripts/</code> is stated. Any script that reads live data runs on a compute partition (<code>all_debug</code>). <strong>Negative control:</strong> a script given a label beyond the canvas writes no file.</p>
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
@@ -55,6 +55,20 @@
     <pre class="r-fu-prompt">/reckon-build figure-scripts-use-the-shared-save-function</pre>
     </article>
 </section>
-  </main>
+  <section data-reckon="comments" id="comments" class="r-comments">
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261116T002927331455-review-of-save-function-keeps-aspect-e5d4baed097c" data-who="reckon-build" data-when="2026-11-16T00:43:04.190Z">
+    <div class="r-comment-body"><p>review of save-function-keeps-aspect at e5d4baed0 — scores goal_fidelity 18, evidence 18, scope_discipline 7, durability 15, fit 17, reuse 18 (total 93); three non-blocking findings: three code files changed outside the docs-only fence, the six-column legend cap still wraps envelope plots, and the manifest's "gate green on the committed head" claim is not what the log's revision header (3fac2cde4) records.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261115T224012299710-save-function-keeps-aspect" data-who="reckon-build" data-when="2026-11-15T23:21:42Z">
+    <div class="r-comment-body"><p>save-function-keeps-aspect — `save_figure` now derives the SVG's declared height from the figure's own width-to-height ratio under the fixed 31.1cm slide width (default canvas still declares 31.1cm x 16cm), and the signal plot's legend fits up to six lines in one row and reports the measured `legend_rows`; three canvases measure within -3.57e-4 of their drawn ratio (limit 1e-3) and four- and six-trace legends each measure one row.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261116T204424596908-review-of-figure-scripts-save-through-shared-function-a2cf01a77dee-figure" data-who="reckon-build" data-when="2026-11-16T20:59:04.728Z">
+    <div class="r-comment-body"><p>Figure review of a2cf01a7 stored parsed: 15 figures x 6 rubric items all answered, 4 non-blocking findings (agreement.svg in-bar white numerals at 2.81-2.86:1, pickup-probe.svg mid-word hard wrap, pf-coil-current.svg machine-local provenance path, icp-map-repositories.svg ragged NCR subtitle row), no blocking defects.</p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261116T210000338392-review-of-figure-scripts-save-through-shared-function-a2cf01a77dee" data-who="reckon-build" data-when="2026-11-16T21:02:07.217Z">
+    <div class="r-comment-body"><p>Independent review of r-20261116T194709389742-figure-scripts-save-through-shared-function at a2cf01a77 (base 4c66fcbc): parsed record scoring goal_fidelity 18, evidence 15, scope_discipline 18, durability 12, fit 18, reuse 16 (total 97), added_failure_count 0, with four non-blocking findings in tests/plotting/test_figure_scripts.py:59 and :80, imas_codex/plotting/style.py:116 and scripts/figures_mapping_flow.py:139; no blocking finding, so the node may land.</p></div>
+</div>
+</section>
+</main>
 </body>
 </html>

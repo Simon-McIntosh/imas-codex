@@ -1,0 +1,95 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T04:17:06.940Z",
+  "dispatched_at": "2026-11-16T04:16:41Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-definitions-by-construction.html:157",
+      "id": "reasoning-1",
+      "reason": "a node repairing the review would assert a diagnosis over eight names where the record supports four and would find four names whose checks are absent, so the evidence sentence and the eight-name done-when clause have to be restated over the names that actually carry the checks.",
+      "text": "\u00a711 states \"The newest stored name review of every one of the eight renamed names, accepted or not, answers the same two source-support checks above their 0.5 cutoff, between 0.89 and 0.96 on one and between 0.79 and 0.86 on the other\". Read from the live `StandardNameReview` record, the newest review per name gives `source_fidelity_unsupported_qualifier` / `over_qualified_modifier` as: `accumulated_ammonia_deuterated_equivalent_electron_count` 0.90 / 0.82, `accumulated_carbon_equivalent_electron_count_due_to_gas_injection` 0.94 / 0.86, `accumulated_deuterated_methane_prefill_equivalent_electron_count` 0.96 / 0.83, `accumulated_ethane_equivalent_electron_count` 0.93 / 0.82 \u2014 and nothing for `accumulated_ammonia_equivalent_electron_count` (2026-11-15T18:54:51), `accumulated_argon_equivalent_electron_count_due_to_gas_injection` (19:00:09, zero checks recorded), `accumulated_deuterium_equivalent_electron_count_due_to_gas_injection` (23:44:48) and `accumulated_neon_equivalent_electron_count` (17:26:49), whose newest reviews predate the check set and carry no such check. So the range is 0.90\u20130.96 and 0.82\u20130.83 over four names, not 0.89\u20130.96 and 0.79\u20130.86 over eight; and because the other four have no such check, \u00a711's done-when clause \"the eight renamed names are in that class and, reviewed again, each has both source-support checks below cutoff\" has no reading the worker can take from the stored record \u2014 four vacuous passes and no score to move below cutoff, exactly the \"no other check is above its cutoff on all eight\" sentence that also holds vacuously for them",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-definitions-by-construction.html:112",
+      "id": "done_when-1",
+      "reason": "without a planted equivalent-electron name the new clause cannot be shown to fire, and the clause is the only place the 48 waiting renames are measured, so a census regression would pass the section.",
+      "text": "\u00a76's first bullet adds \"every live name whose source states an equivalent-electron counting basis \u2026 carries `equivalent_electron` in its identifier or is listed by name with the source evidence for leaving it\", but the bullet's negative controls at the end of the list plant only a divergent family and two operator names; no name carrying such a basis is planted, so a census that reports the equivalent-electron cohort as empty (or never measures it) satisfies the clause silently, and the \"or is listed with the source evidence for leaving it\" escape lets every member of the cohort be listed without the guard ever firing",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2739861a8f8bf7f6a347b912863ee0a96bf23d8c",
+  "plan_fingerprint": "26572c2d59a9b2ca4442b6d0fe8e34517d4806193b68064b683a81ad5f832aab",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 65,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The stored record carries the checks on all eight. Read from the live graph on 2026-11-16 through HAS_REVIEW with review_axis name: accumulated_neon_equivalent_electron_count has one name review (2026-11-15T17:23:37Z, typesafe/jev-1.14) answering source_fidelity_unsupported_qualifier 0.94 and over_qualified_modifier 0.81; accumulated_argon_equivalent_electron_count_due_to_gas_injection one (18:55:58Z) answering 0.95 and 0.81; ammonia 0.94 and 0.84; deuterium 0.89 and 0.79. The stated ranges 0.89 to 0.96 and 0.79 to 0.86 hold over eight names, so the eight each have a score to move below cutoff.",
+      "when": "2026-11-16T04:37:36.230535+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6efc5ed240bfb2e27aabce543a5b8ab472fe31b4",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The wording section's control list now plants a name whose source's enclosing structure states an equivalent-electron basis and whose identifier lacks the qualifier, and requires the census to count it as missing.",
+      "reason": "",
+      "when": "2026-11-16T04:37:43.383822+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6efc5ed240bfb2e27aabce543a5b8ab472fe31b4",
+      "commit_basis": "edit",
+      "note": "The wording section's control list now plants a name whose source's enclosing structure states an equivalent-electron basis and whose identifier lacks the qualifier, and requires the census to count it as missing.",
+      "reason": "",
+      "when": "2026-11-16T04:37:43.383822+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The stored record carries the checks on all eight. Read from the live graph on 2026-11-16 through HAS_REVIEW with review_axis name: accumulated_neon_equivalent_electron_count has one name review (2026-11-15T17:23:37Z, typesafe/jev-1.14) answering source_fidelity_unsupported_qualifier 0.94 and over_qualified_modifier 0.81; accumulated_argon_equivalent_electron_count_due_to_gas_injection one (18:55:58Z) answering 0.95 and 0.81; ammonia 0.94 and 0.84; deuterium 0.89 and 0.79. The stated ranges 0.89 to 0.96 and 0.79 to 0.86 hold over eight names, so the eight each have a score to move below cutoff.",
+      "when": "2026-11-16T04:37:36.230535+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261116T034509999752-plan-review-of-sn-definitions-by-construction.json",
+  "review_run_id": "r-20261116T034509999752-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "b96e6d5f21db9311d90857fac6f3fd804cf3d170",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `rewrite-closing-census.json` and `live-rewrite-bulk.json` resolve in `docs/evidence/fragments/sn-definitions-by-construction/`, and the live graph confirms the eight renamed identities and the carbon review's 0.94/0.86 and decision score 0.59 that \u00a711 quotes.",
+    "done_when": "a finding \u2014 \u00a76's first bullet now carries an equivalent-electron clause with no planted control, so only that clause can pass on an empty census (finding 2).",
+    "evidence_paths": "pass \u2014 \u00a76 cites `docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.json` and \u00a711 cites the pipeline's own cost records, both durable under the evidence directory; nothing lands in a scratchpad.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number enters a symbol or a comment in either changed unit; `equivalent_electron` is the grammar's own qualifier.",
+    "reasoning": "a finding \u2014 \u00a711's diagnosis now rests on a statement about the newest review of all eight renamed names that the record does not support: four of the eight carry no source-support check at all (finding 1).",
+    "single_goal": "pass \u2014 \u00a711 delivers one thing, the review's reading of enclosing structures, and the 48 renames it defers are measured in \u00a76; \u00a76 remains the single deliverable \"the catalog rewritten\", whose added clause is the same pass's work.",
+    "wiring": "pass \u2014 `plan-section-depends-on` makes \u00a76 wait on \u00a72, \u00a73, \u00a74, \u00a75, \u00a710 and \u00a711, matching the sections its text consumes; \u00a711 needs no done-dependency of its own, and `plan-effort-hours` 46.0 now equals the eleven sections' sum (0.5+7.0+3.0+3.0+5.0+6.0+2.5+4.0+4.0+6.0+5.0)."
+  },
+  "section_digests": {
+    "_document": "61c39d5ad51e7b68047ca7a43e243612440fe22ae0ec2c34eb1364c28ff0e306",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s11": "469da7cec1a94cba0366b89883ccbdb8ef92a07016c4482eb907048e2bd9b1d3",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "92e61fd1a13d4c753cfed4abedd3e4c10990c65eeff50c971acc7ea43495087d",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T04:36:24.884271+00:00",
+  "total": null
+}

@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at cd446eacb75baf1bc4efbd39db037d21af253021, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.audits.name_definition_agreement_check.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Measure the name-versus-definition check against held-out labels and the catalog.
 
 Two arms, one pass each:

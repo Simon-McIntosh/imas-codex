@@ -40,6 +40,7 @@ from urllib.parse import urlparse
 
 import requests
 
+from imas_codex.discovery.base.request_pacer import RequestPacer
 from imas_codex.discovery.wiki.auth import CredentialManager, require_credentials
 
 logger = logging.getLogger(__name__)
@@ -119,7 +120,7 @@ class ConfluenceClient:
 
         self._session: requests.Session | None = None
         self._creds = CredentialManager()
-        self._last_request_time = 0.0
+        self._request_pacer = RequestPacer(RATE_LIMIT_DELAY)
         self._authenticated = False
 
     @property
@@ -150,10 +151,7 @@ class ConfluenceClient:
 
     def _rate_limit(self) -> None:
         """Apply rate limiting between requests."""
-        elapsed = time.time() - self._last_request_time
-        if elapsed < RATE_LIMIT_DELAY:
-            time.sleep(RATE_LIMIT_DELAY - elapsed)
-        self._last_request_time = time.time()
+        self._request_pacer.wait()
 
     def _request(
         self,

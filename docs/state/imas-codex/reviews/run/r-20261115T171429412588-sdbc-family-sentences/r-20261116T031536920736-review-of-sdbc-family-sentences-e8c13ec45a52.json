@@ -1,0 +1,94 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "3deb0340321c8874851dc52563537123afb242ba",
+  "call_site_count": 7,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:624 _documentation_with_registry_form",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:855 fixed_shared_parts",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:927 description_with_population",
+    "imas_codex/standard_names/worker_tasks/worker_generate_docs.py:930 refuse_altered_shared_parts",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:126 fixed_shared_parts",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:304 description_with_population",
+    "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:307 refuse_altered_shared_parts"
+  ],
+  "completed_at": "2026-11-16T03:17:59.887Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "folded",
+      "node": "sdbc-family-sentences",
+      "recorded_at": "2026-11-16T03:43:01.077454+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-16T03:17:19Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171429412588-sdbc-family-sentences/manifest.md",
+      "line": "1",
+      "severity": "blocking",
+      "text": "blocking: the two suite arms are recorded only in the 'Gate' prose and neither baseline_suite nor after_suite key is present, so reckon/crew/promotion_checks.py:2345 and :2379 read no comparison arm and the done_when's 'adds no failure at the merged head' clause cannot be read from the record, although both logs exist at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/family-sentences/."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "842",
+      "severity": "non-blocking",
+      "text": "non-blocking: eleven of the thirteen changed files are outside docs/evidence/fragments/sn-definitions-by-construction/sdbc-family-sentences.html and docs/figures/sn-definitions-by-construction/sdbc-family-sentences, the only two declared write paths; the goal's 'held where the operator wordings of \u00a72 are held' and its guard-test clause require the source and test edits, so the fence was under-specified rather than the change out of substance, but the landed diff does not sit inside its granted scope."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/family-sentences.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: a 1069-line evidence page lands at a filename the fence does not grant (the declared evidence path is sdbc-family-sentences.html), and the landing record links to it, so the artefact a reader is sent to is the one outside the node's exclusive scope."
+    },
+    {
+      "file": "tests/standard_names/test_family_sentences.py",
+      "line": "123",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_the_members_of_a_family_carry_one_description renders three members that were handed the identical string 'Text the model wrote for this member.', so deleting the family branch of description_with_population returns that same string three times and len(templates) == 1 still holds; the assertion does not fail on the regression the test names, and the rendering is guarded only by tests/standard_names/test_generate_docs.py:826."
+    },
+    {
+      "file": "imas_codex/standard_names/docs_gates.py",
+      "line": "955",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new SPECIES_FAMILY_SENTENCES block closes at :954 with a single blank line before _OPERATOR_TOKENS, while every other top-level definition in the module is separated by two."
+    }
+  ],
+  "head_log_revision": "e8c13ec45a52decf49d3dddaf01183a81fecc997",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read all five commits 3deb0340..e8c13ec4 commit by commit: docs_gates.py adds SPECIES_FAMILY_WORDS, SPECIES_FAMILY_SENTENCES, species_family, species_family_sentence, species_family_description (+230 lines), worker_generate_docs.py:621-626 renders a family member without conventions, ten test files follow, and two evidence pages land.",
+    "done_when": "the done_when's clauses split: the guard test clause is met by tests/standard_names/test_family_sentences.py:89 and the 'test/standard_names adds no failure' clause is measured by the two gate logs (0 added ids), while the live re-render, the closing census, the review-score floor and the planted-family census are unmeasured because stage two was deferred.",
+    "goal": "the goal is to store one sentence per species family and re-render its members from it; imas_codex/standard_names/docs_gates.py:871 holds 23 stored sentences and :1173 returns the rendered sentence per member, but the live re-render never ran - the reviewed manifest records status blocked and names stage two as unstarted.",
+    "manifest": "read the reviewed manifest; it records head commits bd21dcf9f..e8c13ec45, the guard test and its negative control, the two arms as prose in 'Gate', and status blocked; it carries no baseline_suite or after_suite key, so reckon/crew/promotion_checks.py:2345 and :2379 read no arm.",
+    "write_paths": "the fence named only docs/evidence/fragments/sn-definitions-by-construction/sdbc-family-sentences.html and docs/figures/sn-definitions-by-construction/sdbc-family-sentences, yet the diff changes 13 files: 11 source and test files plus a second evidence page at family-sentences.html are outside it."
+  },
+  "justifications": {
+    "durability": "the recorded negative control (species_family_sentence returning None) reddens 3 of the 7 tests at tests/standard_names/test_family_sentences.py:98, :119 and :152, so those assertions fail on a real regression, while test_the_members_of_a_family_carry_one_description at :123 stays green when the family branch of description_with_population is deleted.",
+    "evidence": "the two arm logs at /home/ITER/mcintos/.cache/imas-codex-live-rewrite/family-sentences/standard-names-{3deb0340,e8c13ec4}....log both ran to their summary line with the same 2 failing ids, but the reviewed manifest (/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171429412588-sdbc-family-sentences/manifest.md) carries no baseline_suite or after_suite key, so reckon/crew/promotion_checks.py:2345 cannot read either arm.",
+    "fit": "the added block follows the module's stored-wording idiom beside SPECIES_POPULATION_SENTENCE at imas_codex/standard_names/docs_gates.py:794 and uses no plan or ticket identifier, but :954 closes the new dict with no blank line before _OPERATOR_TOKENS at :955, and species_family_description at :1081 is a bare re-export of species_family_sentence.",
+    "goal_fidelity": "imas_codex/standard_names/docs_gates.py:871 stores the 23 sentences and :1173 returns the family sentence as every member's description, so the route exists and is exercised, but no live StandardName was re-rendered, which the goal's second half names.",
+    "reuse": "searched imas_codex/standard_names for an owner of a name-to-family-sentence mapping and found none: families.py:437 owns pattern families over grammar segments and carries no sentence, so docs_gates.py:871 extends the module's own stored-wording home rather than forking a capability.",
+    "scope_discipline": "only docs/evidence/fragments/sn-definitions-by-construction/sdbc-family-sentences.html is inside the declared write paths; imas_codex/standard_names/docs_gates.py:842 and ten test files are outside them, and the 1069-line evidence page lands at family-sentences.html, which the fence does not name."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to store one sentence per species family and re-render its members from it; imas_codex/standard_names/docs_gates.py:871 holds 23 stored sentences and :1173 returns the rendered sentence per member, but no live name was re-rendered and the reviewed manifest records status blocked with stage two unstarted.\nVERDICT done_when: the guard-test clause is met by tests/standard_names/test_family_sentences.py:89 and the 'test/standard_names adds no failure' clause is measured by the two gate logs (0 added ids), while the live re-render, the closing census, the 0.85 review-score floor and the planted-family census are unmeasured because stage two was deferred.\nVERDICT write_paths: the fence named only docs/evidence/fragments/sn-definitions-by-construction/sdbc-family-sentences.html and docs/figures/sn-definitions-by-construction... declared figures directory, yet imas_codex/standard_names/docs_gates.py:842, worker_generate_docs.py:621 and ten test files are outside it.\nVERDICT manifest: read the reviewed manifest; head commits bd21dcf9f..e8c13ec45, the guard test and its negative control, the two arms as prose in 'Gate', status blocked, and no baseline_suite or after_suite key, so reckon/crew/promotion_checks.py:2345 reads no arm.\nVERDICT diff: read all five commits 3deb0340..e8c13ec4 commit by commit; docs_gates.py adds SPECIES_FAMILY_WORDS at :842, SPECIES_FAMILY_SENTENCES at :871 and the three family functions at :1051, worker_generate_docs.py:621-626 renders a family member without conventions, ten test files follow, two evidence pages land.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_generate_docs.py:624 _documentation_with_registry_form, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:855 fixed_shared_parts, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:927 description_with_population, imas_codex/standard_names/worker_tasks/worker_generate_docs.py:930 refuse_altered_shared_parts, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:126 fixed_shared_parts, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:304 description_with_population, imas_codex/standard_names/worker_tasks/worker_refine_docs.py:307 refuse_altered_shared_parts\nSCORE goal_fidelity: 13\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/docs_gates.py:871 stores the 23 sentences and :1173 returns the family sentence as every member's description, but no live StandardName was re-rendered, which the goal's second half names.\nSCORE evidence: 10\nJUSTIFICATION evidence: both arm logs ran to their summary line with the same 3deb0340 and e8c13ec4 failure ids, but the reviewed manifest carries no baseline_suite or after_suite key, so reckon/crew/promotion_checks.py:2345 reads neither arm.\nSCORE scope_discipline: 8\nJUSTIFICATION scope_discipline: only docs/evidence/fragments/sn-definitions-by-construction/sdbc-family-sentences.html is inside the declared write paths, while imas_codex/standard_names/docs_gates.py:842 and ten test files are outside them.\nSCORE durability: 15\nJUSTIFICATION durability: the recorded negative control reddens 3 of the 7 tests at tests/standard_names/test_family_sentences.py:98, :119 and :152, while test_the_members_of_a_family_carry_one_description at :123 stays green when the family branch of description_with_population is deleted.\nSCORE fit: 15\nJUSTIFICATION fit: the block follows the stored-wording idiom beside SPECIES_POPULATION_SENTENCE at imas_codex/standard_names/docs_gates.py:794, but :954 closes the new dict with one blank line before _OPERATOR_TOKENS and species_family_description at :1080 is a bare re-export.\nSCORE reuse: 16\nJUSTIFICATION reuse: no owner of a name-to-family-sentence mapping exists; imas_codex/standard_names/families.py:437 owns pattern families over grammar segments and carries no sentence, so docs_gates.py:871 extends the module's stored-wording home.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T171429412588-sdbc-family-sentences/manifest.md:1 blocking: the two suite arms appear only in the 'Gate' prose and neither baseline_suite nor after_suite is present, so reckon/crew/promotion_checks.py:2345 reads no comparison arm and the done_when's 'adds no failure' clause cannot be read from the record although both logs exist.\nFINDING imas_codex/standard_names/docs_gates.py:842 non-blocking: eleven of the thirteen changed files are outside the two declared write paths; the goal's 'held where the operator wordings of \u00a72 are held' and its guard-test clause require them, so the fence was under-specified rather than the change out of substance.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/family-sentences.html:1 non-blocking: a 1069-line evidence page lands at a filename the fence does not grant, and the landing record links to it.\nFINDING tests/standard_names/test_family_sentences.py:123 non-blocking: the test renders three members handed the identical string, so deleting the family branch of description_with_population leaves len(templates) == 1 true; the rendering is guarded only by tests/standard_names/test_generate_docs.py:826.\nFINDING imas_codex/standard_names/docs_gates.py:955 non-blocking: the new dict closes at :954 with one blank line before _OPERATOR_TOKENS where the module uses two.\n",
+  "review_run_id": "r-20261116T031536920736-review-of-sdbc-family-sentences-e8c13ec45a52",
+  "reviewed_base_sha": "3deb0340321c8874851dc52563537123afb242ba",
+  "reviewed_head_sha": "e8c13ec45a52decf49d3dddaf01183a81fecc997",
+  "reviewed_run_id": "r-20261115T171429412588-sdbc-family-sentences",
+  "reviewer_run_id": "r-20261116T031536920736-review-of-sdbc-family-sentences-e8c13ec45a52",
+  "scores": {
+    "durability": 15,
+    "evidence": 10,
+    "fit": 15,
+    "goal_fidelity": 13,
+    "reuse": 16,
+    "scope_discipline": 8
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T03:33:26.467394+00:00",
+  "total": 77
+}

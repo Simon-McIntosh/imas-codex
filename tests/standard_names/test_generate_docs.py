@@ -825,13 +825,13 @@ def test_description_states_the_settled_population():
     written = description_with_population(
         "argon_density", "Number density of argon in the plasma."
     )
-    assert "neutral atoms excluded" in written
-    # A description that already names the population is left as written.
+    assert "neutral atoms are excluded" in written
+    # A bare species density outside the stored families keeps the written description.
     assert (
         description_with_population(
-            "argon_density", "Number density of argon ions, neutral atoms excluded."
+            "methane_density", "Number density of methane ions, neutral atoms excluded."
         )
-        == "Number density of argon ions, neutral atoms excluded."
+        == "Number density of methane ions, neutral atoms excluded."
     )
     # A quantity that is not a species density carries no species population.
     assert (

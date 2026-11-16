@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at e5aa326f89de7b349f736709087de785a7963623, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.workers._collect_nearby_name_comparators.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Build the comparator label sheet: both orders per item, for coordinator grading.
 
 For each drawn DD source this records the comparator block twice — the

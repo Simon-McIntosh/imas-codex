@@ -1,0 +1,33 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T04:44:09.432Z",
+  "dispatched_at": "2026-11-16T04:43:32Z",
+  "findings": [],
+  "plan_commit": "4c0fa98e4ddc9ca27b941923c2fd3c0201a401fe",
+  "plan_fingerprint": "80372ff62620d37f7c9ae22207128ff0c0e436f4afcab332a178fcf36967ef13",
+  "plan_slug": "figure-scripts-use-the-shared-save-function",
+  "plan_version": 9,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T042504348229-plan-review-of-figure-scripts-use-the-shared-save-function",
+  "reviewed_blob_sha": "407c34df4749cc1c1f525ae83cb42460c7eb9951",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every path \u00a72 names resolves in the repository: `scripts/`, `imas_codex/`, `docs/figures/` and the `all_debug` partition; no file or commit citation was renamed or deleted.",
+    "done_when": "pass \u2014 \u00a72's done-when is measurable (a recorded search, the same file list, per-file ratios, a before/after declared-size table, a per-script disposition, a changed-figure count, a line delta) and names the negative control \"a script given a label beyond the canvas writes no file\"; the new ratio measure can fail, since the shared function's current three-significant-digit height declaration misses the one-in-a-thousand declared-ratio tolerance on the 14x6.4 (1.2e-3), 18x8 (1.6e-3), 18x10 (1.3e-3), 18x12 (1.6e-3) and 20x10 (3.2e-3) canvases the ten scripts draw.",
+    "evidence_paths": "pass \u2014 \u00a72 requires the search, listings and counts to be recorded \"in the landing record\", the durable run record, and names no scratch path or node-local temporary directory.",
+    "naming": "pass \u2014 \u00a72's text introduces no plan label, stage name, ticket number or version tag into a symbol or comment, and its new wording (\"coordinate box\", \"pixel size\") describes a mechanism, not a tracker entry.",
+    "reasoning": "pass \u2014 the tightened measure matches its cited quantity: I measured the shared function's current output at canvas 14x7.2 as `viewBox=\"0 0 1008 518.4\"` with `width=\"31.1cm\" height=\"16cm\"`, so the coordinate box carries the drawn ratio exactly (1.94444) while the declared size carries it at 31.1/16 = 3.57e-4, and a canvas such as 18x12 gives viewBox 1296/864 = 1.5 against declared 31.1/20.7 = 1.6e-3 off; the endpoint is obtainable (a taller-precision height declaration meets it) and the measure is able to fail on the unfixed function; the sentence states no code path, step sequence or formula, only the quantity and its tolerance.",
+    "single_goal": "pass \u2014 the changed paragraph keeps \u00a72's single deliverable (figure scripts save through the shared function with the same outputs) and adds only a refinement of one measure, not a second deliverable.",
+    "wiring": "pass \u2014 \u00a72's `data-links` and the plan's `plan-section-depends-on` both resolve to the existing \u00a71 anchor (`#s1`), and no dependency is declared missing; the tightened declared-size requirement is carried by \u00a72, whose Delivers sentence already owns the declared-size outcome."
+  },
+  "section_digests": {
+    "_document": "4dea64427d72247ec7267de4bc6f56d85c0ade04effc8f525bbda5516b514f60",
+    "s1": "dcf0721a9e37aac700d6f736a0ffe707b876997971a1b1a050ab25c00c7e4cb5",
+    "s2": "b81d609320bec377ef6f4f46c916544722f9c68d93f8f307609bdf2d6793f999"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T04:58:24.534581+00:00",
+  "total": null
+}

@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Save function keeps the drawn aspect; legend one row | save-function-keeps-aspect</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+<main>
+  <h1 id="save-function-keeps-aspect-title">The shared save function keeps the drawn aspect at any canvas size, and the signal legend fits one row</h1>
+
+  <h2 id="save-function-keeps-aspect-defect">Defect</h2>
+  <p id="save-function-keeps-aspect-defect-svg">The SVG post-processing in <code>imas_codex/plotting</code>&rsquo;s <code>save_figure</code> declared a fixed width of <code>31.1cm</code> and derived the height from the <em>default</em> canvas height (<code>16 * figheight / 7.2</code>). Any figure drawn at another width was exported with a wrong declared size: a 28&times;7.2&nbsp;in canvas was declared 31.1&times;16&nbsp;cm, a ratio of 1.944 instead of the drawn 3.889.</p>
+  <p id="save-function-keeps-aspect-defect-legend">The signal plot asked for <code>ncol=min(3, len(lines))</code>, so a four-trace and a six-trace legend both wrapped onto two rows.</p>
+
+  <h2 id="save-function-keeps-aspect-fix">Fix</h2>
+  <p id="save-function-keeps-aspect-fix-svg">The declared height now follows the figure's own ratio under the fixed slide width: <code>SLIDE_WIDTH_CM * figheight / figwidth</code>, formatted with three significant digits. The default 14&times;7.2&nbsp;in canvas still declares <code>width="31.1cm" height="16cm"</code>, because its ratio matches the slide ratio within the formatting precision.</p>
+  <p id="save-function-keeps-aspect-fix-legend">The legend fits up to six lines into one row (<code>ncol=min(len(lines), 6)</code>; wider legends still wrap by column count), the top margin is derived from that column count, and <code>plot()</code> reports the measured <code>legend_rows</code> in its receipt so the rendered layout, not the request, is checkable.</p>
+
+  <h2 id="save-function-keeps-aspect-measure">Measure</h2>
+  <table id="save-function-keeps-aspect-measure-table">
+    <thead><tr><th>Canvas (in)</th><th>Declared (cm)</th><th>Exported ratio</th><th>Drawn ratio</th><th>Relative difference</th></tr></thead>
+    <tbody>
+      <tr><td>14 &times; 7.2 (default)</td><td>31.1 &times; 16.0</td><td>1.943750</td><td>1.944444</td><td>&minus;3.57e&minus;4</td></tr>
+      <tr><td>28 &times; 7.2</td><td>31.1 &times; 8.0</td><td>3.887500</td><td>3.888889</td><td>&minus;3.57e&minus;4</td></tr>
+      <tr><td>7 &times; 9</td><td>31.1 &times; 40.0</td><td>0.777500</td><td>0.777778</td><td>&minus;3.57e&minus;4</td></tr>
+    </tbody>
+  </table>
+  <p id="save-function-keeps-aspect-measure-ratio">Every canvas declares its physical size from the figure and stays within the required one part in a thousand (3.57&eacute;4 from the three-significant-digit formatting). The default canvas keeps its slide size assertion (<code>width="31.1cm" height="16cm"</code>), covered by <code>test_valid_export_passes_and_declares_slide_canvas</code>.</p>
+  <p id="save-function-keeps-aspect-measure-legend">Four traces: <code>legend_rows = 1</code>. Six traces: <code>legend_rows = 1</code>, measured from the rendered legend text extents.</p>
+
+  <h2 id="save-function-keeps-aspect-negative">Negative control</h2>
+  <p id="save-function-keeps-aspect-negative-body">Restoring the pre-fix height formula makes the non-default arms fail while the default arm still passes: <code>[wide]</code> and <code>[narrow]</code> fail with <code>AssertionError</code> (measured ratios 1.945 vs drawn 3.889, and 0.7772 vs 0.7778 at one-part-per-thousand), <code>[default]</code> passes, run ends with <code>EXIT=1</code>. Log: <code>logs/negative-control-width-pin.log</code> in the run directory.</p>
+
+  <h2 id="save-function-keeps-aspect-tests">Gate</h2>
+  <p id="save-function-keeps-aspect-tests-body"><code>uv run --no-sync pytest .../tests/plotting -p no:cacheprovider</code> &rarr; <code>26 passed, 1 warning in 5.63s</code>, <code>EXIT=0</code>. New tests: <code>test_exported_aspect_ratio_matches_the_drawn_canvas[default|wide|narrow]</code> and <code>test_legend_stays_on_one_row_up_to_six_traces[4|6]</code>.</p>
+
+  <h2 id="save-function-keeps-aspect-outside">Outside scope</h2>
+  <p id="save-function-keeps-aspect-outside-body">The shared text check counts a tick label the axis never renders (an AutoLocator tick just past the view limit) as clipped figure text, so a plain figure without pruned locators is refused with <code>clipped figure text: 1.2</code>. The signal plot avoids it with <code>MaxNLocator(prune="both")</code>; the aspect test does the same. Not changed here because the section forbids new refusals and this is a pre-existing false refusal, reported for triage.</p>
+</main>
+</body>
+</html>

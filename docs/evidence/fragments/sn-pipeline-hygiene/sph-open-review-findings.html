@@ -1,0 +1,406 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-pipeline-hygiene">
+<meta name="node-id" content="sph-open-review-findings">
+<title>Every open finding of the six reviews, closed or declined</title>
+</head>
+<body><main>
+<h1 id="sph-open-review-findings-title">Twenty-five open findings, each answered in the tree</h1>
+
+<p id="sph-open-review-findings-outcome">The head reviews of six runs left
+<strong>25 non-blocking findings</strong> open. Eighteen are repaired, each with
+a test or a recorded red arm; seven are declined with a count of what the repair
+would have cost. The first repair attempt for two of them missed its case and is
+reported as measured rather than counted as done. The four
+done-when clauses that are not review findings were measured separately: the
+seat module carries no function without a caller, 37 committed evidence scripts
+that name symbols the package no longer defines carry a frozen-record marker
+with the revision they last changed in, <code>pools.py</code> reads the
+live-child rule from the one function that defines it, and the adjudicated label
+set is byte-identical to its base.</p>
+
+<h2 id="sph-open-review-findings-dispositions">The findings, one row each</h2>
+
+<p id="sph-open-review-findings-table-note">Each row names the head review it
+came from, what the review saw, and what the tree now holds. "Repaired" means a
+committed change with either a test that fails without it or a recorded red-arm
+log in the run's scratch tree. "Declined" cites the cost that made the repair
+the worse trade.</p>
+
+<table id="sph-open-review-findings-dispositions-table">
+<thead><tr><th>review</th><th>finding</th><th>disposition</th><th>where</th></tr></thead>
+<tbody>
+
+<tr><td>name check, 597b9ef9</td>
+<td><code>name-definition-check-run.py:25</code> still imports
+<code>name_definition_agreement_check</code>, which <code>9510df19b</code>
+deleted, so the reading cannot be regenerated.</td>
+<td>repaired as the clause allows: the script carries a frozen-record marker
+naming the revision it last changed in and the missing name, and the failure is
+recorded below</td>
+<td><code>name-definition-check-run.py</code></td></tr>
+
+<tr><td>name check, 597b9ef9</td>
+<td><code>name_definition_flagged</code> was added in <code>9510df19b</code>, has
+no caller, and spells the hold decision a second time.</td>
+<td>repaired: deleted, and a test now fails when a seat function loses its
+caller, shown red below</td>
+<td><code>review/name_definition_seat.py</code>;
+<code>test_name_definition_agreement.py</code></td></tr>
+
+<tr><td>name check, 597b9ef9</td>
+<td><code>assert tuple(question.options) == _classes()</code> cannot fail,
+because the loader injects <code>list(QUALIFIER_KINDS)</code> as that option
+list.</td>
+<td>repaired: the options are compared with the class headings parsed from the
+prompt text, and a taxonomy that writes its own options is refused</td>
+<td><code>test_name_definition_agreement.py</code></td></tr>
+
+<tr><td>name check, a79d78e0</td>
+<td>The <code>both_down</code> branch called an arm that ties recall and loses
+specificity "worse on both measures" — in the settled-labels sentence the
+repository audit ties the adopted question on recall and loses 0.5 points of
+specificity.</td>
+<td>repaired: the page now carries the sentences
+<code>trade_sentence</code> emits, and a committed check imports the generator
+and asserts both paragraphs — the page before this repair and a one-digit
+mutation both fail it</td>
+<td><code>name-check-prototype.py</code> <code>trade_sentence</code>;
+<code>prototype-trade-check.py</code>; the delivered page</td></tr>
+
+<tr><td>name check, a79d78e0</td>
+<td><code>BASE_UNITS</code>/<code>unit_check</code> re-implement
+<code>name_unit_consistency_check</code>.</td>
+<td>declined</td>
+<td>see below</td></tr>
+
+<tr><td>name check, a79d78e0</td>
+<td>The gate log names revision <code>ac208a4b</code> and a tree that is the
+parent commit's, not the delivered head's.</td>
+<td>declined</td>
+<td>see below</td></tr>
+
+<tr><td>source readers, 3b4f88b1</td>
+<td><code>_states_liveness</code> recognised a liveness test only by two
+spellings, so the source audit's deleted population read went unlisted.</td>
+<td>repaired: a third spelling (<code>"status" in text and $terminal</code>), and
+the source audit's own statement is a listed site</td>
+<td><code>tests/standard_names/test_source_reads.py</code></td></tr>
+
+<tr><td>source readers, 3b4f88b1</td>
+<td>The new population read called <code>gc.query</code> through
+<code>find_sourceless_live_name_rows</code> and so escaped the ten-second
+ceiling.</td>
+<td>repaired: the read goes through the audit's own wrapped <code>read()</code>,
+and a test fails if that read exceeds ten seconds</td>
+<td><code>graph_supersession.py</code>;
+<code>test_source_audit_gate.py::test_the_population_read_is_inside_the_ten_second_ceiling</code></td></tr>
+
+<tr><td>source readers, 3b4f88b1</td>
+<td>The fragment says no statement restates the live-child rule, but
+<code>pools.py:426</code> restated the stage half of it.</td>
+<td>repaired: <code>has_live_child</code> is <code>live_child_cypher()</code>, so
+stage and status come from one function</td>
+<td><code>imas_codex/standard_names/pools.py</code>;
+<code>test_the_pool_projection_reads_the_live_child_rule</code></td></tr>
+
+<tr><td>labels gate, a76148240</td>
+<td>Build and report ran in one subshell, so a failed build closed on the
+report's status.</td>
+<td>repaired: the build's status is carried out of the subshell; the old form is
+logged closing <code>EXIT=0</code> against a failing build and the shipped form
+<code>EXIT=1</code></td>
+<td><code>adjudicated-labels-gate.sh</code></td></tr>
+
+<tr><td>labels gate, a76148240</td>
+<td>The label-error rule compared the adjudicated verdict with the first reading
+in the row, so the rule agreed with itself.</td>
+<td>repaired: it compares against the committed fresh reading for that model and
+requires the two readings to disagree</td>
+<td><code>adjudicated-labels.py</code> <code>mode_check</code></td></tr>
+
+<tr><td>labels gate, a76148240</td>
+<td>The <code>controls</code>, <code>adjudicated</code> and <code>spend_usd</code>
+blocks were never asserted.</td>
+<td>repaired: one summary assertion reads them in both build and check, and the
+spend figure is exact only where the adjudication state makes it
+reproducible</td>
+<td><code>adjudicated-labels.py</code> <code>adjudicated_summary</code></td></tr>
+
+<tr><td>labels gate, a76148240</td>
+<td>The gate and four committed input extracts sit outside the reviewed node's
+declared write paths.</td>
+<td>declined</td>
+<td>see below</td></tr>
+
+<tr><td>labels gate, a76148240</td>
+<td>The gate's scratch tree was made under <code>/tmp</code>, not
+<code>$TMPDIR</code>.</td>
+<td>repaired</td>
+<td><code>adjudicated-labels-gate.sh</code></td></tr>
+
+<tr><td>family wording, 2cd7b6e0</td>
+<td>The reuse guard keyed on two exact identifier names, so a renamed copy
+passed.</td>
+<td>repaired: the guard scans this script's own literals for a species list and
+its functions for the census's species pattern; the red arm plants both and the
+old rule is logged passing them</td>
+<td><code>family-wording-pass.py</code> <code>census_measure_copies</code></td></tr>
+
+<tr><td>family wording, 2cd7b6e0</td>
+<td>The coverage check compared the report's stated count against a length built
+from the same progress records.</td>
+<td>declined</td>
+<td>see below</td></tr>
+
+<tr><td>family wording, 2cd7b6e0</td>
+<td>The Outcomes paragraph called the below-floor names accepted while
+<code>held</code> is built by skipping accepted records.</td>
+<td>repaired: the sentence says those names are held rather than accepted, which
+the verify phase already asserts</td>
+<td><code>family-wording-pass.py</code>, and the delivered page</td></tr>
+
+<tr><td>family wording, 2cd7b6e0</td>
+<td>The durability assertion is a manual verify phase, invoked only from the run
+directory.</td>
+<td>declined</td>
+<td>see below</td></tr>
+
+<tr><td>refine pass, 8a28b7d0</td>
+<td>The gate file sits outside the node's four declared write paths.</td>
+<td>declined</td>
+<td>see below</td></tr>
+
+<tr><td>refine pass, 8a28b7d0</td>
+<td>The open-holds table closed with <code>&lt;/p&gt;</code> instead of
+<code>&lt;/table&gt;</code>.</td>
+<td>repaired: regenerating the page from the committed JSON reproduces it
+byte for byte</td>
+<td><code>held-names-refine-pass.py</code> <code>render</code>, and the delivered
+page</td></tr>
+
+<tr><td>refine pass, 8a28b7d0</td>
+<td>The by-hold-kind header declared four cells while each row emitted five.</td>
+<td>repaired: the fifth header names the per-name column</td>
+<td><code>held-names-refine-pass.py</code>, and the delivered page</td></tr>
+
+<tr><td>refine pass, 8a28b7d0</td>
+<td>The per-kind spend column sums to 15.35 USD against a 11.56 USD headline,
+because one call is credited to every name it settled.</td>
+<td>repaired: the table's caption states that the column shares a paid step's
+cost among the names it moved and therefore sums above the total rather than
+partitioning it</td>
+<td><code>held-names-refine-pass.py</code> <code>SHARED_COST_NOTE</code></td></tr>
+
+<tr><td>refine pass, 8a28b7d0</td>
+<td>The spend assertion compared two fields of the artefact it had just read, so
+a total recorded below the true spend passed.</td>
+<td>repaired: the recorded total must lie between the ledger's cost of the calls
+that touched this population and the cost of every call in the window
+(10.556719 to 11.675194 USD, against a recorded 11.564196), and
+<code>--inject-spend 1.0</code> is the red arm that makes the gate refuse</td>
+<td><code>check_held_names_refine_pass.py</code></td></tr>
+
+<tr><td>refine pass, 8a28b7d0</td>
+<td><code>LINEAGE</code>, <code>SUCCESSORS</code>, <code>pick_live</code> and
+<code>resolve_all</code> were verbatim copies of the report module.</td>
+<td>repaired: the check calls the report module's <code>resolve_live</code>, so
+there is one rule</td>
+<td><code>check_held_names_refine_pass.py</code></td></tr>
+
+<tr><td>refine pass, 8a28b7d0</td>
+<td>The gate result was recorded with the command only described, and the
+manifest carried no <code>tests:</code> line.</td>
+<td>declined for the reviewed node's manifest, carried here</td>
+<td>see below</td></tr>
+
+</tbody></table>
+
+<h2 id="sph-open-review-findings-declined">Declined, with what the repair would
+have cost</h2>
+
+<dl id="sph-open-review-findings-declined-list">
+<dt id="sph-open-review-findings-declined-units">The prototype's unit rule
+duplicates <code>name_unit_consistency_check</code>.</dt>
+<dd>The prototype is a frozen measurement: its arms were scored once, and the
+E2 arm's verdicts are part of the published table. Replacing the arm's unit rule
+with the repository checker changes which names the arm flags, so the published
+scores would have to be re-derived, and the checker answers a different question
+(name against a declared unit in a DD entry) from the arm's (unit words in the
+name against the definition's quantity). The reuse cap and the frozen scores are
+both reasons not to move it; it is recorded here instead of silently kept.</dd>
+
+<dt id="sph-open-review-findings-declined-gate-revision">The prototype's gate log
+names the parent commit's tree.</dt>
+<dd>The log is a record of a run that happened at that revision, and the script
+that produced it now refuses to start in this tree because its question run is
+gone. Rewriting the log to name the delivered head would state a run that never
+took place. The report itself was regenerated from the committed scores and is
+verified against them; the log is marked as what it is here rather than
+corrected.</dd>
+
+<dt id="sph-open-review-findings-declined-paths">The labels gate and four
+committed extracts sit outside the reviewed node's declared write paths.</dt>
+<dd>The measure for this node requires the gate repair, which cannot be made
+inside the four paths the earlier node declared. The earlier node's manifest
+declared four paths that exclude its own gate, which is the defect; this node
+records the write and its reason rather than editing another node's manifest.</dd>
+
+<dt id="sph-open-review-findings-declined-coverage">The family-wording coverage
+check compares the report with itself.</dt>
+<dd>The count it compares against is built from the progress records the report
+is built from, so a report that overstates coverage and a builder that drops the
+same names agree. An independent count needs the live graph, which the verify
+phase already reads for nine other facts; that phase is where the independent
+coverage check belongs, and the default suite cannot run it. The report's own
+coverage sentence names the records it counts, so the reader can see what the
+figure is.</dd>
+
+<dt id="sph-open-review-findings-declined-durability">The family-wording verify
+phase runs only by hand.</dt>
+<dd>It cannot run in this tree at all, and that is measured: invoked here it exits
+before its first check with <code>FileNotFoundError</code> on
+<code>census-before-pass.json</code>, the snapshot that node's own run kept under
+its own home. The part that needs no run state is now a pure function of the
+script's own source — the census-copy guard. The gate command, for a promotion
+that can restore the snapshot:</dd>
+<dd><pre><code>uv run --no-sync python docs/evidence/fragments/sn-definitions-by-construction/family-wording-pass.py verify</code></pre></dd>
+
+<dt id="sph-open-review-findings-declined-refine-gate-path">The refine pass's
+gate file is outside that node's declared write paths.</dt>
+<dd>Same reason as the labels gate: the repair is the change. The file was
+written and is committed by the node that needed it.</dd>
+
+<dt id="sph-open-review-findings-declined-refine-manifest">The refine pass's
+manifest carried no rebuildable gate.</dt>
+<dd>That manifest belongs to the reviewed node's run directory, which is outside
+this worktree and is not this node's to rewrite. The command is restated here
+and in this node's <code>tests:</code> line, so promotion can rebuild it:</dd>
+<dd><pre><code>uv run --no-sync python docs/evidence/fragments/sn-definitions-by-construction/check_held_names_refine_pass.py --evidence docs/evidence/fragments/sn-definitions-by-construction/held-names-refine-pass.json</code></pre></dd>
+</dl>
+
+<h2 id="sph-open-review-findings-seat">The seat module reaches every function it
+defines</h2>
+
+<p id="sph-open-review-findings-seat-rule">A test reads the module-level
+definitions of <code>review/name_definition_seat.py</code> and counts a call site
+in the directory that owns the seat, so a function nothing reaches fails the
+suite. It was written after <code>name_definition_flagged</code> survived beside
+<code>name_definition_note</code> and decided the hold a second way while nothing
+called it:</p>
+
+<pre id="sph-open-review-findings-seat-red"><code>FAILED tests/standard_names/test_name_definition_agreement.py::test_every_function_in_the_seat_has_a_caller
+AssertionError: these seat functions have no caller: ['name_definition_flagged']</code></pre>
+
+<h2 id="sph-open-review-findings-frozen">The evidence scripts that can no longer
+run are marked as records</h2>
+
+<p id="sph-open-review-findings-frozen-rule">The committed evidence tree carries
+scripts written against capabilities the package has since removed. Every one of
+them whose imports name a symbol the package no longer defines carries a
+<code># frozen-record:</code> header naming the last revision the file changed in
+and each name the tree can no longer supply, placed after a shebang when the file
+has one. The commit adds those headers and <strong>no other line</strong>: 222
+lines added, 0 deleted, across 37 files.</p>
+
+<p id="sph-open-review-findings-frozen-observed">The failure is observable rather
+than inferred. Before the marker existed, the name-definition check's runner
+exited on import:</p>
+
+<pre id="sph-open-review-findings-frozen-observed-log"><code>$ uv run python docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py
+ImportError: cannot import name 'name_definition_agreement_check' from 'imas_codex.standard_names.audits'</code></pre>
+
+<p id="sph-open-review-findings-frozen-scan">The scan that found them read 171
+scripts and reported 37 files carrying 62 dead-name occurrences, 35 of them
+distinct; a second pass over the marked files reported <code>scripts with dead
+names: 37 / dead names: 62 / unmarked: none / MISSING=0</code>. The four runs of the leading SN measurement scripts are
+among them (<code>srtj-jev-vs-panel-operating-point</code>,
+<code>srtj-jev-name-evidence-measure</code>,
+<code>srtj-jev-discrimination-diagnosis</code> and this pipeline's own
+<code>name-definition-check-run.py</code>).</p>
+
+<table id="sph-open-review-findings-frozen-table">
+<thead><tr><th>script</th><th>last revision it changed in</th><th>names the tree no longer defines</th></tr></thead>
+<tbody>
+<tr><td><code>docs/evidence/fragments/llm-seats/llm-gpt6-seat-bench-run.py</code></td><td><code>6571f7e3d</code></td><td>imas_codex.graph.dd_domain_classifier, imas_codex.standard_names.benchmark, imas_codex.standard_names.benchmark_roles</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-catalog-consistency/scc-chaincap-remeasure-run.py</code></td><td><code>c9bb3c280</code></td><td>imas_codex.graph.temp_neo4j</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-catalog-consistency/scc-momentum-tip-run.py</code></td><td><code>9cfbd74ce</code></td><td>imas_codex.graph.temp_neo4j</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-catalog-grouping/scg-jev-domain-benchmark-run.py</code></td><td><code>e6d4b36b9</code></td><td>imas_codex.graph.dd_domain_classifier.build_domain_questions</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py</code></td><td><code>cd446eacb</code></td><td>imas_codex.standard_names.audits.name_definition_agreement_check</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-definitions-by-construction/name-definition-seat-catalog.py</code></td><td><code>a42c54b8d</code></td><td>imas_codex.standard_names.audits.name_definition_agreement_check</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.py</code></td><td><code>19daa7a6d</code></td><td>imas_codex.graph.temp_neo4j</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-harmonize-command/shc-locus-converge-measure-run.py</code></td><td><code>39039fcdf</code></td><td>imas_codex.standard_names.graph_ops</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-rerun-run.py</code></td><td><code>b5f7791aa</code></td><td>imas_codex.standard_names.graph_ops.aggregate_calls_per_phase, imas_codex.standard_names.graph_ops.aggregate_spend_per_name, imas_codex.standard_names.graph_ops.aggregate_spend_per_phase</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-harmonize-command/shc-locus-remeasure-run.py</code></td><td><code>29131714d</code></td><td>imas_codex.standard_names.graph_ops.aggregate_spend_per_name</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-apply-live-rulings-run.py</code></td><td><code>204494370</code></td><td>imas_codex.standard_names.graph_ops.classify_sourceless_standard_names</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-apply-recovery-unbind-run.py</code></td><td><code>5a04c220e</code></td><td>imas_codex.standard_names.graph_ops.classify_sourceless_standard_names</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-full-run-failure-diagnosis-run.py</code></td><td><code>a92a3d58c</code></td><td>imas_codex.standard_names.worker_tasks.worker_compose_batches._acall_retrying_transport_faults</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-live-sourceless-sheet-run.py</code></td><td><code>8ad5c4274</code></td><td>imas_codex.standard_names.graph_ops.classify_sourceless_standard_names</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-restore-lineage-sources-run.py</code></td><td><code>282623af6</code></td><td>imas_codex.standard_names.graph_ops.classify_sourceless_standard_names</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-restore-recorded-sources-run.py</code></td><td><code>f22eebcac</code></td><td>imas_codex.standard_names.graph_ops._TransactionQuery, imas_codex.standard_names.graph_ops.classify_sourceless_standard_names</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-restore-searched-sources-run.py</code></td><td><code>d554595cb</code></td><td>imas_codex.standard_names.graph_ops.classify_sourceless_standard_names, imas_codex.standard_names.graph_ops._TransactionQuery, imas_codex.standard_names.graph_ops._TransactionQuery</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-separatrix-swap-apply-run.py</code></td><td><code>4247a6d5e</code></td><td>imas_codex.standard_names.graph_ops.classify_sourceless_standard_names</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-settle-held-search-hits-run.py</code></td><td><code>4482b241a</code></td><td>imas_codex.standard_names.graph_ops.classify_sourceless_standard_names</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-settle-unchained-holders-run.py</code></td><td><code>e4def604b</code></td><td>imas_codex.standard_names.graph_ops.classify_sourceless_standard_names</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-integrity-backlog/sib-stale-source-census-run.py</code></td><td><code>e3d2f9f4a</code></td><td>imas_codex.standard_names.sources.dd</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-pipeline-hygiene/sph-cascade-receipts-run.py</code></td><td><code>c401944d5</code></td><td>imas_codex.standard_names.review.cascade_calibration</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-pipeline-hygiene/sph-pin-test-run.py</code></td><td><code>47bec63c4</code></td><td>imas_codex.standard_names.grammar_sync</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-review-through-jev/srtj-contradiction-veto-hold-run.py</code></td><td><code>0c3992cb8</code></td><td>imas_codex.standard_names.graph_ops.docs_review_eligibility_params, imas_codex.standard_names.graph_ops.docs_review_eligibility_where</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-apply-run.py</code></td><td><code>45bd92fae</code></td><td>imas_codex.standard_names.graph_ops._normalize_bare_doc_links</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-review-through-jev/srtj-docs-bracket-repair-dryrun.py</code></td><td><code>d51fab879</code></td><td>imas_codex.standard_names.graph_ops._normalize_bare_doc_links</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-review-through-jev/srtj-docs-switch-measure-run.py</code></td><td><code>1d667cc62</code></td><td>imas_codex.standard_names.review.cascade, imas_codex.standard_names.workers._canonical_docs_review_item, imas_codex.standard_names.workers._enrich_docs_review_dd_context, imas_codex.standard_names.workers._load_docs_review_source_item, imas_codex.standard_names.workers._related_path_neighbours, imas_codex.standard_names.workers._set_docs_review_dd_source_paths</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-review-through-jev/srtj-evidence-supply-run.py</code></td><td><code>c598c47f9</code></td><td>imas_codex.standard_names.workers._DD_CONTEXT_QUERY</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-review-through-jev/srtj-jev-discrimination-diagnosis-run.py</code></td><td><code>bab7c8b2c</code></td><td>imas_codex.standard_names.review.cascade, imas_codex.standard_names.review.cascade_calibration</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-review-through-jev/srtj-jev-name-evidence-measure-run.py</code></td><td><code>5e242d2bf</code></td><td>imas_codex.standard_names.review.cascade, imas_codex.standard_names.review.cascade_calibration, imas_codex.standard_names.workers._DD_CONTEXT_QUERY, imas_codex.standard_names.workers._DOCS_GEN_PARENT_CHILDREN_QUERY</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-review-through-jev/srtj-jev-vs-panel-operating-point-run.py</code></td><td><code>49b0626ab</code></td><td>imas_codex.standard_names.review.cascade_calibration</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-selection-over-generation/ssog-anchor-held-cause-run.py</code></td><td><code>7b33eedd9</code></td><td>imas_codex.standard_names.workers._bound_docs_review_dd_paths, imas_codex.standard_names.workers._documentation_banned_prose_note, imas_codex.standard_names.workers._documentation_conformance_note, imas_codex.standard_names.workers._documentation_contradiction_note, imas_codex.standard_names.workers._load_docs_review_source_item</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-large-run.py</code></td><td><code>617c05def</code></td><td>imas_codex.standard_names.workers._collect_nearby_name_comparators, imas_codex.standard_names.workers._rerank_comparators_for_compose</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-acceptance-rerun-run.py</code></td><td><code>f1d8eda36</code></td><td>imas_codex.standard_names.workers._collect_nearby_name_comparators, imas_codex.standard_names.workers._rerank_comparators_for_compose</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-held-out-acceptance-run.py</code></td><td><code>88863ccdf</code></td><td>imas_codex.standard_names.workers._collect_nearby_name_comparators, imas_codex.standard_names.workers._rerank_comparators_for_compose</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-selection-over-generation/ssog-rerank-label-sheet-run.py</code></td><td><code>e5aa326f8</code></td><td>imas_codex.standard_names.workers._collect_nearby_name_comparators</td></tr>
+<tr><td><code>docs/evidence/fragments/sn-selection-over-generation/ssog-risk-order-run.py</code></td><td><code>0a9221bfd</code></td><td>imas_codex.standard_names.review.jev_review.choice_acceptable_form, imas_codex.standard_names.workers._search_nearby_names</td></tr>
+</tbody></table>
+
+<h2 id="sph-open-review-findings-live-child">The live-child rule is read from one
+place</h2>
+
+<p id="sph-open-review-findings-live-child-rule">The rule that a name is live
+when it carries no superseding child is a stage condition and a status
+condition. <code>source_invariant.live_child_cypher()</code> defines both.
+<code>pools.py</code>'s <code>identity_state_expressions()</code> now projects
+<code>"has_live_child": live_child_cypher()</code> instead of restating the
+stage half, and a test asserts the projection is that function's expression and
+contains its status condition.</p>
+
+<h2 id="sph-open-review-findings-labels">The adjudicated label set is unchanged</h2>
+
+<p id="sph-open-review-findings-labels-bytes">No committed label artefact differs
+from base: the label file, its fresh-reader readings and the adjudication record
+are absent from this node's diff. The case is arithmetic: the path set of
+<code>git diff dce0a4d52..HEAD</code> contains no label data file, and the three
+paths with "label" in their names are the gate shell script, the Python driver
+and an unrelated script that gained a frozen-record header.</p>
+
+<p id="sph-open-review-findings-graph-writes">Nothing was written to the live
+graph. This node's only graph traffic is read: the refine-pass check's stage,
+score, sourceless and <code>LLMCost</code> reads. No name, definition, binding,
+stage or source edge was created, changed or deleted, and the two label readings
+the labels gate compares are the committed files, not fresh judgements.</p>
+
+<p id="sph-open-review-findings-scope">This node's own declared write paths name the evidence page and its figure directory. The done-when it carries cannot be met inside those paths: it requires deleting a function from <code>imas_codex/standard_names/review/name_definition_seat.py</code>, adding a test, rewriting <code>pools.py</code> and marking 37 scripts under <code>docs/evidence/</code>. Those writes are listed in the run manifest rather than hidden, and the mismatch is a defect in the orientation, not in the work.</p>
+
+<h2 id="sph-open-review-findings-suite">The suite at head against base</h2>
+
+<p id="sph-open-review-findings-suite-command-note">The command is one line, identical for both arms; the driver that runs them is <code>scratch/gate/run3.sh</code> in this node's run directory:</p>
+
+<pre id="sph-open-review-findings-suite-command"><code>uv run --no-sync pytest tests/standard_names/ -p no:cacheprovider --timeout=300</code></pre>
+
+<p id="sph-open-review-findings-suite-arms">Both arms were extracted with <code>git archive</code> into a scratch tree and run concurrently against the shared environment: base <code>dce0a4d526</code>, head <code>71a4b606a</code>. The repository's 30-second per-test ceiling aborted the first attempt inside pytest's protocol layer, where a timeout cannot be attributed to a test, so that attempt proves nothing about the files after it and is kept as <code>base-abort-16.log</code> and <code>head-abort-16.log</code>.</p>
+
+<p id="sph-open-review-findings-suite-result">Base: <code>24 failed, 8739 passed, 12 skipped, 541 deselected, 43 warnings in 1227.21s (0:20:27)</code>. Head: <code>24 failed, 8744 passed, 12 skipped, 541 deselected, 43 warnings in 1226.48s (0:20:26)</code>. Failures at base: 24, at head: 24. No failing id is present at head that is absent at base, so the directory adds no failure.</p>
+
+</main></body>
+</html>

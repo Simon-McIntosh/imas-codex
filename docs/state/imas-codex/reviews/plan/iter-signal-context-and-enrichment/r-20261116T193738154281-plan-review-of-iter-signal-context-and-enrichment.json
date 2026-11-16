@@ -1,0 +1,127 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T19:42:19.750Z",
+  "dispatched_at": "2026-11-16T19:39:21Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:20",
+      "id": "wiring-1",
+      "reason": "the declaration is the only machine-readable state a dispatcher reads, so leaving it `implementable` makes the recorded hold inert and sends a node into section 6 against the decision that is meant to gate it.",
+      "text": "`plan-section-declarations` marks s6, s7 and s8 `implementable`, but the decision added at line 120 is unanswered and its own context reads \"Sections 6 and 7 are held on this decision\"; a build queue reads the declaration, so s6 is dispatchable with no model chosen even though section 6's own text says the writer is \"the one the lead chose\"",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:70",
+      "id": "done_when-1",
+      "reason": "the one number the section can fail on is set from a different instrument than the one that measures it, so the author must restate the bar from the hand reading or say which instrument's rate it borrows.",
+      "text": "the bar of \"at most eight of the forty are wrong\" is justified as \"the paid model's measured rate of 32 wrong in 200\", but 32 in 200 is 16% and eight in forty is 20%, and the 32 figure is the automated judge's count in refine-local-model-signal-enrichment.html while section 6 measures by hand, the instrument on which the same paid model measured 0 wrong in 40 and the local model 26 in 40; the bar therefore passes a quality the cited instrument would fail and is claimed to be the cited rate when it is a quarter looser",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:93",
+      "id": "reasoning-1",
+      "reason": "the plan currently carries a settled answer and an open answer to the same question for the same sections, and the held decision is only meaningful if the earlier choice is cleared or recorded as superseded.",
+      "text": "the `description-model` decision remains locked to `local-after-retest` with the local option marked chosen, and its rationale ends \"Sections 6 and 7 stay unbuilt until the lead confirms the local model on this result or chooses otherwise\", while the plan records that confirmation as a new open decision at line 120 whose options include the paid model; two decision elements with `data-sections=\"s6,s7\"` now answer the same question in opposite states and no line says the earlier choice is superseded, so a reader who takes the locked choice at line 93 dispatches sections 6 and 7 on the local model",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+  "plan_fingerprint": "b038cdfb923ee728cc129cc6bb900b3a0b537f9c1004819cb5c8808566e99f24",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 33,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Version 35 declares sections 6 and 7 deferred while the open model decision holds them; section 8 waits on section 7.",
+      "reason": "",
+      "when": "2026-11-16T19:58:20.040378+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Version 34 restates the bar from the hand reading: at most four wrong in forty, beside the paid model's none and the local model's 26 on that instrument, marked as the coordinator's proposal for the lead to change.",
+      "reason": "",
+      "when": "2026-11-16T19:58:26.452433+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Version 35 removes sections 6 and 7 from the earlier decision's scope and its rationale says it no longer governs them; the open decision is the only one attached to those sections.",
+      "reason": "",
+      "when": "2026-11-16T19:58:33.216329+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "note": "Version 34 restates the bar from the hand reading: at most four wrong in forty, beside the paid model's none and the local model's 26 on that instrument, marked as the coordinator's proposal for the lead to change.",
+      "reason": "",
+      "when": "2026-11-16T19:58:26.452433+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "note": "Version 35 removes sections 6 and 7 from the earlier decision's scope and its rationale says it no longer governs them; the open decision is the only one attached to those sections.",
+      "reason": "",
+      "when": "2026-11-16T19:58:33.216329+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "note": "Version 35 declares sections 6 and 7 deferred while the open model decision holds them; section 8 waits on section 7.",
+      "reason": "",
+      "when": "2026-11-16T19:58:20.040378+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T193738154281-plan-review-of-iter-signal-context-and-enrichment.json",
+  "review_run_id": "r-20261116T193738154281-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "233df4197a66e250ae98b2138332aca74ce09fdc",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited figure docs/figures/iter-signal-context-and-enrichment/pipeline.svg, the plans icp-api-access and codac-uda-signals, and the refinement evidence fragment all resolve on disk.",
+    "done_when": "a finding \u2014 section 6's new bar at line 70 is drawn from the automated judge's 32 wrong in 200 while the section measures that count by hand, an instrument on which the same paid model measured 0 wrong in 40.",
+    "evidence_paths": "pass \u2014 the refinement figures the new decision rests on are on the durable fragment docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html, whose receipt root is a crew run directory.",
+    "naming": "pass \u2014 the new decision key and the section text carry no ticket number, plan label or changelog prose into anything a builder would name.",
+    "reasoning": "a finding \u2014 the decision at line 93 still records `data-choice=\"local-after-retest\"` as settled beside a new open decision at line 120 asking the same question for the same sections, with the plan recording no supersession.",
+    "single_goal": "pass \u2014 section 6 names one deliverable, the pilot system's group enrichment, with its measurement as the done-when rather than a second deliverable.",
+    "wiring": "a finding \u2014 `plan-section-declarations` at docs/plans/iter-signal-context-and-enrichment.html:20 still marks s6 and s7 `implementable` while the decision added at line 120 records that both are held on an unanswered question."
+  },
+  "section_digests": {
+    "_document": "4c42df22446843ce19b962e07323c2092fc1ca315d4e1e4a6fe8a33b1e3dc288",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "cb3b907d2ce14aa0b8a746d6d4e849865985063c96b2aa3e9a147f715cddc3d4",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T19:56:26.322213+00:00",
+  "total": null
+}

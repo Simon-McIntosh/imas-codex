@@ -119,5 +119,11 @@ def test_refine_worker_puts_settled_shared_wording_in_the_prompt(monkeypatch):
     user_context = recorded[-1]
     parts = user_context.get("shared_parts")
     assert parts, "the refine context carried no settled shared wording"
-    assert [p["anchor"] for p in parts] == ["population:species"]
-    assert parts[0]["sentence"] == _SPECIES_SENTENCE
+    assert [p["anchor"] for p in parts] == [
+        "species_family:volume_averaged_<X>_density",
+        "population:species",
+    ]
+    assert parts[0]["sentence"].startswith(
+        "Volume-averaged number density of oxygen ions."
+    )
+    assert parts[1]["sentence"] == _SPECIES_SENTENCE

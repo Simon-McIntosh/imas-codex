@@ -105,14 +105,44 @@ def test_the_prompt_names_the_classes_in_order() -> None:
 
 
 def test_the_review_question_offers_the_same_classes() -> None:
+    """The question's options are checked against a source it does not derive from.
+
+    ``load_review_checks`` injects the seat's own tuple as the option list, so
+    comparing the options with ``_classes()`` would pass on any content. The
+    assertion is made against the prompt's headings below instead: a class
+    renamed in the seat and not in the prompt reddens here as well as in
+    :func:`test_the_prompt_names_the_classes_in_order`.
+    """
     from imas_codex.standard_names.review.checks import load_review_checks
 
     checks, _ = load_review_checks()
     [check] = [entry for entry in checks if entry.id == CHECK_ID]
     question = check.question
     assert question is not None, "the review taxonomy no longer asks the question"
-    assert tuple(question.options) == _classes()
+    headings = tuple(
+        re.findall(
+            r"^- \*\*([a-z][a-z-]*)\*\*",
+            SYSTEM_PROMPT.read_text(encoding="utf-8"),
+            re.MULTILINE,
+        )
+    )
+    assert tuple(question.options) == headings
     assert question.conforming == ["agrees"]
+
+
+def test_a_taxonomy_written_class_list_is_refused() -> None:
+    """A second list of classes in the taxonomy is refused, not preferred."""
+    import pytest
+
+    from imas_codex.standard_names.review.checks import _inject_name_definition_options
+
+    with pytest.raises(ValueError, match="carries its own options"):
+        _inject_name_definition_options(
+            {
+                "id": CHECK_ID,
+                "question": {"options": ["agrees"], "conforming": ["agrees"]},
+            }
+        )
 
 
 def test_the_question_has_no_second_judge() -> None:
@@ -250,3 +280,55 @@ def test_a_document_the_seat_passes_carries_no_hold() -> None:
         )
         == []
     )
+
+
+def test_every_function_in_the_seat_has_a_caller() -> None:
+    """A function nothing calls is a second spelling waiting to drift.
+
+    ``name_definition_flagged`` survived beside ``name_definition_note`` and
+    decided the hold a second way while nothing reached it; this holds the
+    module to reachable code.
+    """
+    import ast
+
+    module = PACKAGE / "standard_names" / "review" / "name_definition_seat.py"
+    tree = ast.parse(module.read_text(encoding="utf-8"))
+    functions = [
+        node.name
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    ]
+    assert functions, "the seat module exposes no function at all"
+
+    roots = [
+        module.parent,
+        PACKAGE / "standard_names" / "worker_tasks",
+        Path(__file__).resolve().parent,
+    ]
+    called: set[str] = set()
+    for root in roots:
+        for path in root.rglob("*.py"):
+            if "__pycache__" in path.parts:
+                continue
+            text = path.read_text(encoding="utf-8")
+            # A call site names the function, so a file that does not spell any
+            # of them cannot reach one; parsing only the rest keeps the scan to
+            # a handful of modules instead of the whole package.
+            if not any(name in text for name in functions):
+                continue
+            for node in ast.walk(ast.parse(text)):
+                if not isinstance(node, ast.Call):
+                    continue
+                target = node.func
+                name = (
+                    target.id
+                    if isinstance(target, ast.Name)
+                    # A call through a module attribute still reaches the
+                    # definition, so the last attribute is the name to count.
+                    else getattr(target, "attr", None)
+                )
+                if name in functions:
+                    called.add(name)
+
+    unused = sorted(set(functions) - called)
+    assert not unused, f"these seat functions have no caller: {unused}"

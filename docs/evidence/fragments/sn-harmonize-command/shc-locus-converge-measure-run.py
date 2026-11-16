@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 39039fcdf9227cdde108f0c0a1d2b01585493d34, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Re-measure one non-WEST locus family through ``sn harmonize``.
 
 The read-only subcommands snapshot a family's plan, report and status.  The
