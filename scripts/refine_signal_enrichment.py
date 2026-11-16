@@ -113,6 +113,20 @@ def failure_class(response: dict, *, terminal: bool = False) -> str:
     return "schema_or_coverage"
 
 
+def replacement_kind(record: dict) -> str | None:
+    """Distinguish validation-directed messages from ordinary provider retries."""
+    if len(record["responses"]) < 2:
+        return None
+    second = record["responses"][1]
+    directed = second.get("validation_reask")
+    if directed is None:
+        # Frozen receipts identify the branch from its first reply: unusable
+        # content is rejected before structured validation can append a re-ask.
+        first = record["responses"][0]
+        directed = bool(first.get("raw")) and first.get("finish_reason") != "abort"
+    return "validation_reask" if directed else "retry"
+
+
 def summarize(records: list[dict], cohort: dict) -> dict:
     summary = {}
     for arm in dict.fromkeys(r["arm"] for r in records):
@@ -149,8 +163,17 @@ def summarize(records: list[dict], cohort: dict) -> dict:
                 len(r["outputs"]) for r in batches if len(r["responses"]) == 1
             ),
             "delivered_after_reask": sum(
-                len(r["outputs"]) for r in batches if len(r["responses"]) == 2
+                len(r["outputs"])
+                for r in batches
+                if replacement_kind(r) == "validation_reask"
             ),
+            "delivered_after_retry": sum(
+                len(r["outputs"]) for r in batches if replacement_kind(r) == "retry"
+            ),
+            "validation_reasks": sum(
+                replacement_kind(r) == "validation_reask" for r in batches
+            ),
+            "other_retries": sum(replacement_kind(r) == "retry" for r in batches),
             "delivered": len(outputs),
             "delivery_rate": len(outputs) / len(cohort["order"]),
             "failed_signals_by_class": dict(failed),

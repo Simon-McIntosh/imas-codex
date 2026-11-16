@@ -299,6 +299,7 @@ async def test_twice_invalid_worker_response_produces_no_private_description(tmp
     assert len(calls) == 2
     assert record["outputs"] == []
     assert all(not r["score"]["parse_success"] for r in record["responses"])
+    assert [r["validation_reask"] for r in record["responses"]] == [False, True]
     db.close()
 
 
@@ -471,3 +472,35 @@ def test_partial_coverage_and_server_abort_have_distinct_failure_counts():
         "trial"
     ]
     assert result["failed_signals_by_class"] == {"coverage": 1, "provider_abort": 1}
+
+
+def test_abort_retry_delivery_is_not_counted_as_validation_reask():
+    from scripts import (
+        benchmark_signal_enrichment as bench,
+        refine_signal_enrichment as refine,
+    )
+
+    good = {
+        "raw": json.dumps(answer()),
+        "score": bench.score_response(json.dumps(answer()), 1),
+    }
+    aborted = {
+        "raw": "{",
+        "finish_reason": "abort",
+        "score": bench.score_response("{", 1),
+    }
+    record = {
+        "arm": "trial",
+        "ids": ["signal"],
+        "responses": [aborted, good],
+        "outputs": [{"id": "signal"}],
+        "seconds": 1,
+        "input_tokens": 2,
+        "output_tokens": 3,
+        "cost_usd": 0,
+    }
+    result = refine.summarize([record], {"order": ["signal"]})["trial"]
+    assert result["delivered"] == 1
+    assert result["raw_parse_rate"] == 0
+    assert result["delivered_after_reask"] == 0
+    assert result["delivered_after_retry"] == 1

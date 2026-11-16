@@ -209,7 +209,7 @@ async def replay_batch(
         state.stop_requested = True
         return []
 
-    async def observe(awaitable):
+    async def observe(awaitable, request_messages):
         started = time.monotonic()
         response = await awaitable
         raw = response.choices[0].message.content
@@ -220,6 +220,14 @@ async def replay_batch(
                 "served_model": response.model,
                 "seconds": time.monotonic() - started,
                 "finish_reason": response.choices[0].finish_reason,
+                "validation_reask": bool(
+                    request_messages
+                    and request_messages[-1].get("role") == "user"
+                    and isinstance(request_messages[-1].get("content"), str)
+                    and request_messages[-1]["content"].startswith(
+                        "The response failed validation:\n"
+                    )
+                ),
                 "input_tokens": response.usage.prompt_tokens or 0,
                 "output_tokens": response.usage.completion_tokens or 0,
                 "reasoning_tokens": getattr(response.usage, "reasoning_tokens", 0),
@@ -236,10 +244,10 @@ async def replay_batch(
         return response
 
     async def local_call(kwargs):
-        return await observe(original_local(kwargs))
+        return await observe(original_local(kwargs), kwargs.get("messages", []))
 
     async def paid_call(**kwargs):
-        return await observe(original_paid(**kwargs))
+        return await observe(original_paid(**kwargs), kwargs.get("messages", []))
 
     async def call_once(**kwargs):
         if messages is not None:

@@ -32,8 +32,8 @@ def plot(summary_path: Path, output: Path, preview: Path):
         "batch-five": "Batch size five",
         "batch-three": "Batch size three",
         "batch-one": "Batch size one",
-        "combination": "Selected combination",
-        "combination-without-schema": "Combination, constraint removed",
+        "combination": "Combined changes, JSON mode",
+        "combination-without-schema": "Combined changes, no constraint",
     }
     arms = [arm for arm in names if arm in summary]
     plt.style.use(BASE_STYLE)
