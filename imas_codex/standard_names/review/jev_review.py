@@ -1604,7 +1604,11 @@ def _item_record(
                 "failed": False,
                 "failure_probability": 0.0,
                 "decision": "accept",
-                "answer": answer,
+                "answer": {
+                    **(answer if isinstance(answer, Mapping) else {}),
+                    "noul": 0.0,
+                    "source_support": statement_support,
+                },
                 "question": questions.get(question_name),
                 "audit_finding": None,
                 "source_support": statement_support,

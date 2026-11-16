@@ -95,6 +95,10 @@ def test_qualifier_stated_only_by_an_enclosing_states_is_recorded_as_supported()
             "path": STRUCTURE,
             "text": STATEMENT,
         } in support["qualifiers"]
+        # The recorded answer is the settled one, and it carries the statement
+        # a reader reconciles it with.
+        assert check["answer"]["noul"] == 0.0
+        assert check["answer"]["source_support"] == support
 
 
 def test_qualifier_no_structure_states_stays_with_the_judge() -> None:
