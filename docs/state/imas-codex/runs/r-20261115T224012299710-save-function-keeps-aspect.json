@@ -86,6 +86,24 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "uv run --no-sync pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/save-function-keeps-aspect/tests/plotting -p no:cacheprovider",
+    "integrated_revision": "972d830a235bb5db553d1183d7cb0d56cce20b42",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261115T224012299710-save-function-keeps-aspect/review-landing/gate-972d830a235bb5db553d1183d7cb0d56cce20b42.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'uv run --no-sync pytest ./tests/plotting -p no:cacheprovider'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/save-function-keeps-aspect"
+    ]
+  },
   "lane": null,
   "lane_advisory": {
     "backend": "omp-local",
