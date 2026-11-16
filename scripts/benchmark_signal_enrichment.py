@@ -182,10 +182,16 @@ async def replay_batch(
     messages=None,
     capture_context=False,
     arm="test",
+    call_options=None,
+    enrichment_options=None,
 ) -> dict:
     """Exercise production prompting or replay one exact captured request."""
     import litellm
 
+    from imas_codex.discovery.signals.enrichment import EnrichmentOptions
+
+    if enrichment_options is None:
+        enrichment_options = EnrichmentOptions()
     state = parallel.DataDiscoveryState(facility=facility, scanner_types=[])
     state.facility_config = get_facility(facility)
     state.cost_limit = float("inf")
@@ -203,7 +209,7 @@ async def replay_batch(
         state.stop_requested = True
         return []
 
-    async def observe(awaitable):
+    async def observe(awaitable, request_messages):
         started = time.monotonic()
         response = await awaitable
         raw = response.choices[0].message.content
@@ -214,6 +220,20 @@ async def replay_batch(
                 "served_model": response.model,
                 "seconds": time.monotonic() - started,
                 "finish_reason": response.choices[0].finish_reason,
+                "validation_reask": bool(
+                    request_messages
+                    and request_messages[-1].get("role") == "user"
+                    and isinstance(request_messages[-1].get("content"), str)
+                    and request_messages[-1]["content"].startswith(
+                        "The response failed validation:\n"
+                    )
+                ),
+                "input_tokens": response.usage.prompt_tokens or 0,
+                "output_tokens": response.usage.completion_tokens or 0,
+                "reasoning_tokens": getattr(response.usage, "reasoning_tokens", 0),
+                "reasoning": getattr(
+                    response.choices[0].message, "reasoning_content", None
+                ),
             }
         )
         accounting["input_tokens"] += response.usage.prompt_tokens or 0
@@ -224,10 +244,10 @@ async def replay_batch(
         return response
 
     async def local_call(kwargs):
-        return await observe(original_local(kwargs))
+        return await observe(original_local(kwargs), kwargs.get("messages", []))
 
     async def paid_call(**kwargs):
-        return await observe(original_paid(**kwargs))
+        return await observe(original_paid(**kwargs), kwargs.get("messages", []))
 
     async def call_once(**kwargs):
         if messages is not None:
@@ -236,6 +256,7 @@ async def replay_batch(
         if capture_context:
             return SignalEnrichmentBatch(results=[]), 0.0, 0
         kwargs.update(max_retries=1, timeout=180, max_tokens=8192)
+        kwargs.update(call_options or {})
         try:
             return await original_call(**kwargs)
         except Exception as exc:
@@ -265,6 +286,12 @@ async def replay_batch(
 
     started = time.monotonic()
     with ExitStack() as stack:
+        stack.enter_context(
+            patch(
+                "imas_codex.discovery.signals.enrichment.get_enrichment_options",
+                return_value=enrichment_options,
+            )
+        )
         replacements = {
             "claim_signals_for_enrichment": claim,
             "prepare_signal_sources": lambda *a, **k: (0, 0, 0),
@@ -300,6 +327,7 @@ async def replay_batch(
         output["unit"] = by_id[output["id"]].get("unit")
     record = {
         "arm": arm,
+        "options": enrichment_options.model_dump(),
         "facility": facility,
         "ids": list(by_id),
         "responses": captured,
