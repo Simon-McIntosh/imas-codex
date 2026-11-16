@@ -24,6 +24,7 @@ from urllib.parse import parse_qsl, unquote, urljoin, urlsplit
 import requests
 
 from imas_codex.discovery.base.facility import get_facility_infrastructure
+from imas_codex.discovery.base.request_pacer import RequestPacer
 from imas_codex.discovery.wiki.auth import CredentialManager
 from imas_codex.discovery.wiki.confluence import ConfluenceClient
 
@@ -87,6 +88,7 @@ class RequestRecord:
     phase: str
     origin: str | None = None
     path: str | None = None
+    started_at: float | None = None
 
 
 class _RequestPolicy:
@@ -100,7 +102,7 @@ class _RequestPolicy:
         description_path: str,
     ) -> None:
         self.origin = origin
-        self.interval = interval
+        self.pacer = RequestPacer(interval)
         self.identity_origins = identity_origins
         self.sign_in_origins = sign_in_origins
         self.gateway_paths = gateway_paths
@@ -110,8 +112,6 @@ class _RequestPolicy:
         self.records: list[RequestRecord] = []
         self.sign_in_requests = 0
         self.max_sign_in_requests = 40
-        self._last_send: float | None = None
-        self._lock = threading.Lock()
 
     def check(self, request: requests.PreparedRequest) -> str:
         """Refuse a method or origin before any transport can send it."""
@@ -262,11 +262,7 @@ class _RequestPolicy:
                 raise ICPRequestRefused("The sign-in request budget was exhausted")
 
     def throttle(self) -> None:
-        with self._lock:
-            now = time.monotonic()
-            if self._last_send is not None:
-                time.sleep(max(0.0, self.interval - (now - self._last_send)))
-            self._last_send = time.monotonic()
+        self.pacer.wait()
 
 
 class _GuardedAdapter(requests.adapters.HTTPAdapter):
@@ -282,6 +278,7 @@ class _GuardedAdapter(requests.adapters.HTTPAdapter):
             raise ICPRequestRefused("TLS verification is required")
         self._policy.before_send()
         self._policy.throttle()
+        started_at = time.monotonic()
         signing_in = self._policy.authenticating
         response = None
         try:
@@ -295,6 +292,7 @@ class _GuardedAdapter(requests.adapters.HTTPAdapter):
                     "sign-in" if signing_in else "read",
                     _origin(request.url) if signing_in else None,
                     urlsplit(request.url).path if signing_in else None,
+                    started_at,
                 )
             )
         return response
