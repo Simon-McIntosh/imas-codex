@@ -688,7 +688,7 @@ z
   </g>
   <g id="text_2">
    <!-- IDM -->
-   <g style="fill: #6b6b6b" transform="translate(99.7775 222.9397) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(99.7775 249.8965) scale(0.16 -0.16)">
     <defs>
      <path id="DejaVuSans-2c" d="M 628 4666
 L 1259 4666
@@ -844,7 +844,7 @@ z
   </g>
   <g id="text_4">
    <!-- CATIA -->
-   <g style="fill: #6b6b6b" transform="translate(286.44375 222.93095) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(286.44375 249.88775) scale(0.16 -0.16)">
     <defs>
      <path id="DejaVuSans-26" d="M 4122 4306
 L 4122 3641
@@ -902,7 +902,7 @@ z
     <use xlink:href="#DejaVuSans-24" transform="translate(221.046875 0)"/>
    </g>
    <!-- Dassault Systèmes -->
-   <g style="fill: #6b6b6b" transform="translate(233.40625 240.2422) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(233.40625 267.199) scale(0.16 -0.16)">
     <defs>
      <path id="DejaVuSans-44" d="M 2194 1759
 Q 1497 1759 1228 1600
@@ -1508,7 +1508,7 @@ z
   </g>
   <g id="text_8">
    <!-- SMDD -->
-   <g style="fill: #6b6b6b" transform="translate(674.09875 222.93095) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(674.09875 249.88775) scale(0.16 -0.16)">
     <use xlink:href="#DejaVuSans-36"/>
     <use xlink:href="#DejaVuSans-30" transform="translate(63.484375 0)"/>
     <use xlink:href="#DejaVuSans-27" transform="translate(149.765625 0)"/>
@@ -1557,7 +1557,7 @@ z
   </g>
   <g id="text_10">
    <!-- simulation archive -->
-   <g style="fill: #6b6b6b" transform="translate(819.1925 223.0722) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(819.1925 250.029) scale(0.16 -0.16)">
     <defs>
      <path id="DejaVuSans-4c" d="M 603 3500
 L 1178 3500
@@ -1717,7 +1717,7 @@ z
   </g>
   <g id="text_12">
    <!-- functional references -->
-   <g style="fill: #6b6b6b" transform="translate(30.48625 478.6722) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(30.48625 505.629) scale(0.16 -0.16)">
     <defs>
      <path id="DejaVuSans-49" d="M 2375 4863
 L 2375 4384
@@ -1855,7 +1855,7 @@ z
   </g>
   <g id="text_14">
    <!-- PBS -->
-   <g style="fill: #6b6b6b" transform="translate(294.34875 478.53095) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(294.34875 505.48775) scale(0.16 -0.16)">
     <defs>
      <path id="DejaVuSans-33" d="M 1259 4147
 L 1259 2394
@@ -1942,7 +1942,7 @@ z
   </g>
   <g id="text_16">
    <!-- interface sheets -->
-   <g style="fill: #6b6b6b" transform="translate(439.39125 478.6722) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(439.39125 505.629) scale(0.16 -0.16)">
     <use xlink:href="#DejaVuSans-4c"/>
     <use xlink:href="#DejaVuSans-51" transform="translate(27.78125 0)"/>
     <use xlink:href="#DejaVuSans-57" transform="translate(91.15625 0)"/>
@@ -2008,7 +2008,7 @@ z
   </g>
   <g id="text_18">
    <!-- RQM -->
-   <g style="fill: #6b6b6b" transform="translate(679.64125 477.61345) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(679.64125 504.57025) scale(0.16 -0.16)">
     <defs>
      <path id="DejaVuSans-34" d="M 2522 4238
 Q 1834 4238 1429 3725
@@ -2058,7 +2058,7 @@ z
   </g>
   <g id="text_20">
    <!-- procurement · SAP -->
-   <g style="fill: #6b6b6b" transform="translate(818.1375 476.98095) scale(0.16 -0.16)">
+   <g style="fill: #6b6b6b" transform="translate(818.1375 503.93775) scale(0.16 -0.16)">
     <defs>
      <path id="DejaVuSans-53" d="M 1159 525
 L 1159 -1331
