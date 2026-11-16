@@ -17,7 +17,30 @@
   "plan_slug": "figure-scripts-use-the-shared-save-function",
   "plan_version": 8,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "4c0fa98e4ddc9ca27b941923c2fd3c0201a401fe",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 2's done-when at version 9 takes the ratio from a vector file's coordinate box or a raster's pixel size, and requires the declared physical size to carry the same ratio within one part in a thousand, so the shared function must declare it precisely enough.",
+      "reason": "",
+      "when": "2026-11-16T04:24:54.048666+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "4c0fa98e4ddc9ca27b941923c2fd3c0201a401fe",
+      "commit_basis": "edit",
+      "note": "Section 2's done-when at version 9 takes the ratio from a vector file's coordinate box or a raster's pixel size, and requires the declared physical size to carry the same ratio within one part in a thousand, so the shared function must declare it precisely enough.",
+      "reason": "",
+      "when": "2026-11-16T04:24:54.048666+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/figure-scripts-use-the-shared-save-function/r-20261116T031848043206-plan-review-of-figure-scripts-use-the-shared-save-function.json",
   "review_run_id": "r-20261116T031848043206-plan-review-of-figure-scripts-use-the-shared-save-function",
   "reviewed_blob_sha": "e289c869453b9b72498bf35bc0f3070c658a1630",
   "rubric": "content",
