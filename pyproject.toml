@@ -435,6 +435,15 @@ model-route = "ambix-local"
 api-key-env = "AMBIX_API_KEY"
 endpoint-class = "local-free"
 
+[tool.imas-codex.discovery-describe.signal-enrichment]
+# Single-signal calls keep validation failures local to one description.
+batch-size = 1
+max-tokens = 8192
+fitted-prompt = true
+validation-reask = true
+schema-constraint = false
+json-mode = false
+
 [tool.imas-codex.discovery-vision]
 # Wiki and document image scoring.
 model = "local/deepseek-v4.1-flash"
