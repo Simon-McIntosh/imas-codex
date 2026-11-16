@@ -1,86 +1,108 @@
 <article id="idm-document-fetch-evidence">
-  <h2>Private multi-host guard landed; document reads stopped at an unclear production response</h2>
-  <p>The shared records client and request pacer were merged before extending
-  access. The readable application hosts now come from ignored private facility
-  configuration. A constructor or environment origin selects an allowed host;
-  it cannot grant another host access. The same session and adapter checks
-  refuse writes and unlisted hosts before transport on every allowed host.
-  Production details remain private.</p>
+  <h2>Controlled production reads find records but no IDM document-serving route</h2>
+  <p>The retained advertised API does not provide an IDM document-serving route.
+  A known-present plant-by-code control returned HTTP 200 and its preselected
+  native identity, while all <strong>13 selected alternate-application
+  document-reference readers returned HTTP 204</strong> for the first named
+  document. No document reader returned HTTP 200, so the authorized conditional
+  sequence did not proceed to versions, file bytes or the second document.
+  <strong>Zero document files were fetched.</strong></p>
 
-  <h3>Guard and credential evidence</h3>
+  <h3>Offline route inventory and controlled continuation</h3>
+  <p>Before any further request, the retained cross-application description was
+  searched by path and tag for <code>document</code>, <code>idm</code>,
+  <code>version</code>, <code>file</code>, <code>attachment</code> and
+  <code>download</code>. It yielded <strong>1,187 candidate GET operations</strong>,
+  including 22 document-named content readers and 36 IDM-named GETs. The latter
+  belong to an F4E transfer application. Creation-style GETs and transfer
+  operations were excluded from live reads. No document version-list GET was
+  found; the same search found an unrelated published component-attribute
+  all-versions GET as a positive control.</p>
+  <p>Response schemas distinguish document containers and references from IDM
+  documents themselves. Thirteen document-named readers contain explicit IDM
+  document/version or engineering-document-version references and were selected
+  before live probing. Their published templates, schema fields, exclusions and
+  response codes are recorded privately. No operation directly names the
+  <code>IdmGenericDocument</code> response schema; the same reference scanner
+  found five operations naming the known plant response schema.</p>
+  <table>
+    <thead><tr><th>Check</th><th>Observed result</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>Known-present plant by code</td><td>One published GET, HTTP 200, expected preselected native identity returned</td><td>The records application and authenticated session work on production.</td></tr>
+      <tr><td>Alternate-application document readers</td><td>13 published GETs; all HTTP 204 with no content</td><td>None of the selected document-reference containers serves the first named IDM identity.</td></tr>
+      <tr><td>Authentication/permission/server stop boundary</td><td>No production HTTP 401, 403 or 5xx observed</td><td>The run did not renew around a forbidden response or reinterpret one as empty content.</td></tr>
+      <tr><td>Version, file and second-document continuation</td><td>Not entered: no document reader returned HTTP 200</td><td>No document metadata, version, revision mapping or file property was obtained.</td></tr>
+    </tbody>
+  </table>
+  <p>The continuation made <strong>18 production GETs of the 25 allowed</strong>:
+  fourteen published data API reads and four GETs in the authorized sign-in and
+  verification exchange. All eighteen count against the ceiling. The seven
+  unused requests were unnecessary because no reader enabled the version/file
+  continuation. There were zero production requests using any other method.
+  The client used the shared pacer with a one-second minimum interval. Every
+  request has a private method, path-template/path, phase and status receipt;
+  gateway navigation is explicitly distinguished from published data routes.
+  The session is closed.</p>
+  <p>Including the prior attempt, the application host received exactly
+  <strong>27 GET, 0 HEAD, 0 POST, 0 PUT, 0 PATCH and 0 DELETE requests</strong>.
+  The prior attempt made nine GETs, including the first candidate's empty exact
+  UID lookup and generic records-reader HTTP 204. That observation was initially
+  left unclassified. The controlled continuation tests the alternative-application
+  hypothesis; the known-present control passes but no selected application
+  returns the document. A setup probe refused its own unpublished pre-exchange
+  verification GET before transport, producing zero requests; it was corrected
+  to enter the already authorized sign-in exchange explicitly.</p>
+
+  <h3>Delivered host and credential guards</h3>
+  <p>The shared records client and request pacer were merged before extending
+  access. Readable application hosts now come from ignored private facility
+  configuration. Constructor and environment origin selectors cannot widen the
+  allowlist. The same method, sign-in, redirect, session and adapter checks
+  apply to every allowed host; production details remain private.</p>
   <p>The merged baseline passed <strong>196 tests</strong>. Before the host
-  repair, new checks reproduced <strong>22 failures</strong>: a second privately
-  listed host was refused, an environment selector could grant an unlisted
-  host, and malformed readable-host configuration was ignored. The focused
-  gate now passes <strong>378 tests</strong>, including the existing client
-  refusal suite parametrized over two synthetic application hosts, records,
-  pacing and credential forwarding. A test-fixture header that matched the
-  second host was corrected; no product guard was weakened to satisfy it.</p>
-  <p>The refusal tests attempt POST, PUT, PATCH and DELETE through the client,
-  session convenience methods, prepared requests, base session methods and
-  direct adapter sends. They also exercise API POSTs before sign-in, during
-  the unsigned exchange and after sign-in; gateway forms; redirects; forged
-  Host headers; TLS verification; and unlisted origin selectors. With the
-  application method check deliberately permitting writes in the test process,
-  <strong>86 tests failed</strong>, including production API POST refusals in
-  all three authentication states. The unmutated head has none of those
-  failing test IDs.</p>
-  <p>The earlier credential repair remains included: a socket appearing after
-  five seconds reproduced a three-second timeout, returning <code>False</code>
-  and logging <code>D-Bus forward socket did not appear in time</code>. The
-  forward now waits at most fifteen seconds and reports early SSH exit stderr.
+  repair, new checks reproduced 22 failures. The committed focused gate passed
+  <strong>378 tests</strong>, including the refusal suite on two synthetic
+  application hosts, records, pacing and credential forwarding. Deliberately
+  permitting application writes in the test process caused
+  <strong>86 refusal tests to fail</strong>, including API POSTs before, during
+  and after sign-in on the synthetic production host. No corresponding failing
+  IDs occur in the unmutated head arm. Product source and tests did not change
+  during this controlled continuation, so that gate was not rerun.</p>
+  <p>The credential repair remains included: a socket appearing after five
+  seconds reproduced a three-second timeout, returning <code>False</code> and
+  logging <code>D-Bus forward socket did not appear in time</code>. The forward
+  now waits at most fifteen seconds and reports early SSH exit stderr.
   Unavailable keyring access raises a distinct error instead of appearing to
   mean no credentials are stored. Its mutation produced four failed checks
   against the passing head.</p>
 
-  <h3>Bounded production request record</h3>
-  <p>Sign-in succeeded using the previously listed sign-in origins. No new
-  sign-in origin was needed. The application host received exactly
-  <strong>9 GET, 0 HEAD, 0 POST, 0 PUT, 0 PATCH and 0 DELETE requests</strong>.
-  Across all hosts there were 10 GET and four sign-in POST requests; all four
-  POSTs went to the listed sign-in service during the bounded exchange.
-  Every transport call used the shared pacer with a one-second minimum interval.
-  No listing or general content search was performed. One exact UID search
-  concerned only the first named document.</p>
-  <table>
-    <thead><tr><th>Step</th><th>Observed response</th><th>Outcome boundary</th></tr></thead>
-    <tbody>
-      <tr><td>Authenticated live descriptions</td><td>Both returned HTTP 200 JSON</td><td>The module reported 774 paths before redaction. Private retained inventories contain 771 module paths and 11,678 application-wide paths, including 461 and 6,697 GET operations respectively. These are retained, filtered counts, not a claim of complete unredacted coverage.</td></tr>
-      <tr><td>First candidate, exact UID lookup</td><td>HTTP 200, empty array</td><td>No matching reference was returned. This is not classified as not found or not permitted without a known-present document control.</td></tr>
-      <tr><td>First candidate, advertised content reader</td><td>HTTP 204, no body; the live operation declares only HTTP 200</td><td>First unclear response. Live access stopped here, without further probing.</td></tr>
-      <tr><td>Second candidate</td><td>Not requested after the stop boundary</td><td>No identity, content type or version outcome claimed.</td></tr>
-      <tr><td>Revision mapping and file reads</td><td>Not attempted</td><td>Neither metadata/current version nor a valid file property was obtained.</td></tr>
-      <tr><td>Missing version and document permission controls</td><td>Not established</td><td>No empty response or authentication response is represented as an explicit document denial.</td></tr>
-    </tbody>
-  </table>
-  <p>The private receipt's initial <code>found</code> label for the UID search
-  means HTTP JSON success; the normalized outcome records its actual zero
-  matches and leaves the document outcome unclassified. A receipt-read attempt
-  overlapped a write and failed JSON parsing; after the session closed, the
-  complete final receipt was parsed successfully. No failed read was treated
-  as an empty result.</p>
-
-  <h3>Remaining measure and private boundary</h3>
-  <p><strong>Blocked:</strong> clarify whether this advertised content reader
-  supports the named IDM identities and what its undocumented HTTP 204 means,
-  or provide the correct authorized reader. The locked production authorization
-  stands; no second-host decision is inferred from this response. Continuation
-  needs that interpretation and authorization to resume the stopped sequence.
-  Zero document files were fetched, so spreadsheet/PDF versions, stored file
-  paths, sizes, digests, sheet names and row counts remain unmeasured.</p>
-  <p>A tracked-tree search found none of the private application origin or the
-  two preselected identities. The same instrument found the known tracked
-  <code>ICPClient</code> source as a positive control. No file content was
-  fetched or committed. Private configuration was appended in this worktree
-  without reserializing it. Credentials, cookies and tokens were not printed
-  or retained by the probes.</p>
-  <p>The private run directory retains <code>merged-focused.log</code>,
-  <code>host-reproduction.log</code>, <code>hosts-focused.log</code>,
-  <code>hosts-corrected.log</code>, <code>hosts-committed.log</code>,
-  <code>negative-host-method.log</code>, <code>production-description.json</code>,
-  <code>production-session.json</code>, <code>production-outcome-summary.json</code>
-  and <code>production-tracked-boundary.json</code>, alongside the earlier
-  credential and integration receipts. Application and sign-in receipts contain
-  method, origin, phase, status and timing; sign-in paths contain no query or
-  authentication values.</p>
+  <h3>Unmet document measure and next decision</h3>
+  <p><strong>Blocked:</strong> the document fetch needs a decision on the legacy
+  IDM document route and host referenced by the source documentation, or an
+  approved alternate document-file source. That host was not contacted.
+  The retained plan names a legacy current-version service and download route
+  but does not retain their concrete endpoint; an existing private receipt
+  pointer was requested from the coordinator rather than guessing a host.
+  Private route details belong only in the run receipts.</p>
+  <p>Spreadsheet/PDF versions, stored file paths, sizes, digests, sheet names and
+  row counts remain unmeasured. Missing-version and not-permitted document
+  controls are <strong>not established</strong>. An empty reference result or
+  HTTP 204 is never represented as explicit document permission denial.</p>
+  <p>The tracked-tree search includes the private application origin, both
+  preselected document identities and native identities/reference text returned
+  by the plant control. Known client source is the positive search control.
+  No fetched file content exists. Private configuration remains appended without
+  reserialization; credentials, cookies and tokens were neither printed nor
+  retained by these probes.</p>
+  <p>Private continuation receipts are
+  <code>production-document-route-candidates.json</code>,
+  <code>production-document-probe-selection.json</code>,
+  <code>production-resume-presend-refusal.json</code>,
+  <code>production-resumed-session.json</code>,
+  <code>production-resumed-outcome.json</code>,
+  <code>production-resumed-boundary.json</code> and
+  <code>legacy-document-route-pointers.json</code>, alongside the earlier guard,
+  credential and production receipts. Inventory counts describe the retained
+  filtered description; the earlier auth-key redaction removed some path keys,
+  so these are not claimed as complete unredacted API totals.</p>
 </article>
