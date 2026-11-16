@@ -57,7 +57,24 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 3,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "The refusal the bar needs for shared wording is already on main: refuse_altered_shared_parts and shared_part_findings in docs_gates, landed with the operator wordings and the stored family sentences. Section 11 of the definitions plan is the name review's source context, a different mechanism the bar does not gate on, so no wait on it is added to section 3; section 4, which regenerates names, already waits on it.",
+      "when": "2026-11-16T23:15:01.641477+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The refusal the bar needs for shared wording is already on main: refuse_altered_shared_parts and shared_part_findings in docs_gates, landed with the operator wordings and the stored family sentences. Section 11 of the definitions plan is the name review's source context, a different mechanism the bar does not gate on, so no wait on it is added to section 3; section 4, which regenerates names, already waits on it.",
+      "when": "2026-11-16T23:15:01.641477+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261116T220812123447-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261116T220812123447-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "8e4bce3a1c2594914ee8fb7e01429d4113ced9f6",
   "rubric": "content",
