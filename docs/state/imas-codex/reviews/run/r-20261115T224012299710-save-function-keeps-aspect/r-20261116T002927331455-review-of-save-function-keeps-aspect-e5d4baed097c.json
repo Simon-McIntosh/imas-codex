@@ -10,6 +10,14 @@
   ],
   "completed_at": "2026-11-16T00:43:04.190Z",
   "dispatched_at": "2026-11-16T00:35:15Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-16T01:46:50.704802+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261115T224012299710-save-function-keeps-aspect"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/plotting/style.py",
