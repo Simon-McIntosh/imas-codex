@@ -1081,16 +1081,15 @@ def species_family_sentence(name: str) -> str | None:
 def species_family_description(name: str) -> str | None:
     """The one wording a family states its members' description in.
 
-    The stored sentence may state the definition in more than one sentence; the
-    description is a one-line summary, so it is the stored sentence's first
-    sentence. Only the species varies, so the members of a family carry one
-    description per family apart from the species.
+    The description is the family's stored sentence whole, not a clipped first
+    sentence: a density family's sentence opens with the quantity and closes
+    with the population it counts, and both belong to the one-line description
+    the way a non-family species density's description carries the settled
+    population. Only the species varies, so a family's members carry one
+    description apart from the species.
     """
 
-    sentence = species_family_sentence(name)
-    if sentence is None:
-        return None
-    return sentence.split(". ", 1)[0].rstrip(".") + "."
+    return species_family_sentence(name)
 
 
 def shared_part_sentences(

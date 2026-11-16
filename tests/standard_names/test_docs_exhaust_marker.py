@@ -11,6 +11,7 @@ steering-edit clause fails here rather than silently passing a mocked marker.
 from __future__ import annotations
 
 import asyncio
+from contextlib import ExitStack
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -172,11 +173,11 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
 
         answer = RefinedDocs(
             description=(
-                "Argon density summed over all charge states, including neutral atoms."
+                "Methane density summed over all charge states, including neutral atoms."
             ),
             documentation=(
-                "The argon density is summed over all charge states, including "
-                "neutral atoms, from neutral argon at Z=0."
+                "The methane density is summed over all charge states, including "
+                "neutral atoms, from neutral methane at Z=0."
             ),
             links=[],
         )
@@ -184,7 +185,22 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
         persist_name = "persist_refined_docs"
         release_name = "release_refine_docs_failed_claims"
         processor = process_refine_docs_batch
-        item = _make_refine_docs_item(sn_id="argon_density", score=0.4)
+        item = _make_refine_docs_item(sn_id="methane_density", score=0.4)
+
+    # A stored family member's refinement is rewritten to the family sentence
+    # before the refusal sees it, so the departure this arm has to reach the
+    # marker with is a non-family species density whose description keeps the
+    # model's population in other words.
+    refine_conventions = []
+    if writer == "refine":
+        from imas_standard_names.grammar.terms import AppliedConventions
+
+        refine_conventions.append(
+            patch(
+                "imas_codex.standard_names.context.conventions_context_for",
+                return_value=AppliedConventions(),
+            )
+        )
 
     async def _answer(model, messages, response_model, service, **kwargs):
         return (answer, 0.01, 100)
@@ -193,7 +209,7 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
     mgr = MagicMock()
     mgr.reserve = MagicMock(return_value=MagicMock())
 
-    with (
+    patches = [
         patch(
             "imas_codex.discovery.base.llm.acall_llm_structured",
             side_effect=_answer,
@@ -207,7 +223,11 @@ async def test_writer_paths_reach_the_marker_with_the_graph_client_replaced(
         patch(f"{module}.{persist_name}", MagicMock(return_value="drafted")),
         patch(f"{module}.{release_name}", MagicMock(return_value=1)),
         patch("asyncio.to_thread", new=_passthrough),
-    ):
+    ]
+    patches.extend(refine_conventions)
+    with ExitStack() as stack:
+        for manager in patches:
+            stack.enter_context(manager)
         await processor([item], mgr, asyncio.Event())
 
     mark_calls = [

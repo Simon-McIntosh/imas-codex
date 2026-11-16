@@ -185,7 +185,7 @@ async def test_refined_description_carries_the_settled_population():
 
     assert persist.call_count == 1, "the conforming refinement was not stored"
     stored_description = persist.call_args.kwargs["description"]
-    assert "neutral atoms excluded" in stored_description
+    assert "neutral atoms are excluded" in stored_description
     assert "charge states" in stored_description
 
 
