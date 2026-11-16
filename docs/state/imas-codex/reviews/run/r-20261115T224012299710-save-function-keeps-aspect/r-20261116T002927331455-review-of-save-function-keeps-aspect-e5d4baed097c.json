@@ -22,6 +22,12 @@
       "recorded_at": "2026-11-16T01:46:50.704802+00:00",
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261115T224012299710-save-function-keeps-aspect"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-16T01:46:50.704802+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261115T224012299710-save-function-keeps-aspect"
     }
   },
   "findings": [
