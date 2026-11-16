@@ -1,0 +1,85 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T22:46:35.649Z",
+  "dispatched_at": "2026-11-16T22:46:01Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:21",
+      "id": "wiring-1",
+      "reason": "adding `sn-definitions-by-construction#s11` to s3's depends-on is what stops that node being dispatched ahead of the mechanism the bar checks.",
+      "text": "\u00a73 requires the release cut to refuse when a member's shared wording is not the rendering of its stored sentence, which is exactly the capability `sn-definitions-by-construction#s11` delivers, but the section-declaration map gives s3 only `sn-audited-group-release#s1`; a node dispatched on s3 would be asked to gate on machinery another plan has not yet built and would report the refusal as unproducible",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:37",
+      "id": "done_when-1",
+      "reason": "one line naming which reading the bar gates on and requiring the after-rate audit turns a release gate that a repaired group cannot pass into a checkable one.",
+      "text": "the bar's refusal condition is \"the group's audited defect rate is above the ruled bar or was never measured\", and \u00a74 audits each group member once, before repair; \u00a74 and \u00a75 then require the release notes to state the after rate, so either the cut is gated on a rate the repair has invalidated or the after rate is reported with no audit that produces it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:29",
+      "id": "done_when-2",
+      "reason": "naming where the planted labels come from (independently built fixtures versus the very labels the note distrusts) decides whether the control measures the readers or merely repeats the old label set.",
+      "text": "\u00a71's negative control plants \"twenty names known to be defective and twenty known to be sound\", but the section's own premise is that neither the review score nor the stored label set measures correctness, and no provenance for those forty labels is named; the readers' recall and false-alarm rates therefore rest on ground truth the section has just argued does not exist",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:29",
+      "id": "done_when-3",
+      "reason": "the sample floor decides whether \u00a72's ranking and \u00a74's first-group choice rest on a measurable quantity or on an interval too wide to order anything.",
+      "text": "the stratified sample is \"at least 150\" over every group of twenty or more live names, and the graph holds 23 such groups, so each contributes ~6-7 names, while \u00a72 (line 33) requires \"the count the audit of \u00a71 reads as wrong-domain with its interval\" per group and \u00a74 ranks groups on that reading; at n\u22487 an interval spans tens of percentage points and cannot separate groups at 88-96% agreement",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:29,33,37,41,45",
+      "id": "evidence_paths-1",
+      "reason": "naming one durable evidence location makes \u00a73's refusals and \u00a75's table review at all, and it is the only way the done-whens can be checked after the nodes end.",
+      "text": "every section hands its result to \"the evidence\" or to \"a recorded run\" (\u00a73's planted-fault refusals, \u00a75's one group-by-group table) and the plan never names the path those live on, so a later reader has nothing to open and a node can satisfy the wording with a scratchpad",
+      "type": "evidence_paths",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:41",
+      "id": "reasoning-1",
+      "reason": "the plan currently locks the first group before the ranking exists, so a lead ruling that orders any other group first contradicts \u00a74 outright and leaves \u00a75 to re-do it.",
+      "text": "\u00a74 asserts \"The first group is the one \u00a72 ranks best defined; on today's reading that is equilibrium (210 live names, 200 with a domain among their sources')\", but \u00a72 measures agreement as a ratio and its own quoted numbers put spectroscopy (50 of 52, 96%) and magnetic field systems (121 of 126, 96%) above equilibrium (200 of 210, 95%), while \u00a72's done-when defers the order to the lead and requires \"the measure used stated\"; the section therefore fixes a choice \u00a72 has not made, on a measure \u00a72 has not fixed",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+  "plan_fingerprint": "39b6e62fc7938ef5b2429dfd2b3b4e1e5981be85fdd08ac2bf043a55a8c24b53",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T220812123447-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "8e4bce3a1c2594914ee8fb7e01429d4113ced9f6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `plan-after` sn-definitions-by-construction resolves and its #s11 exists, `tests/standard_names` exists, and the snapshot is identical to the authored plan; no href needs an extension resolved.",
+    "done_when": "a finding \u2014 \u00a73 gates a release on \"the group's audited defect rate\" while no section re-audits a group after regeneration, so the regenerated group is cut on the rate measured before repair.",
+    "evidence_paths": "a finding \u2014 the plan refers to \"the evidence\" and to \"a recorded run\" repeatedly and names no durable path for either.",
+    "naming": "pass \u2014 the plan names no symbol, file or function for the work to create, and carries no tracker labels or version tags into anything it would write.",
+    "reasoning": "a finding \u2014 \u00a74 fixes equilibrium as the first group on a measure \u00a72 never states and which \u00a72's own quoted ratios do not rank equilibrium first on.",
+    "single_goal": "pass \u2014 each of s1..s2..s3..s4..s5 names one deliverable (a defect rate, a ranking and ruled order, a bar that refuses, the first group at that bar, each further group in turn).",
+    "wiring": "a finding \u2014 \u00a73's bar refuses on \"a member's shared wording is not the rendering of its stored sentence\", which is `sn-definitions-by-construction#s11`'s deliverable, yet only \u00a74 declares that dependency (plan.html:21, s3 depends on s1 alone)."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "5707c944d00055edbe3e28cb23ff4ef31e6d6617201f0d8cf12aba0bcc595b6c",
+    "s2": "4027901fb1235bfa7fe596c987afbb514b9f3d5e90be4fb09e2bcf6321a30101",
+    "s3": "7cd0801ace66c9abc53fb809b6e5e4dabdb7d5ca962884adb187bef0187b4014",
+    "s4": "3a6231f13dc1dd52403cfc37cba28e3ebcc13c54c9cc09b8c3a141af50b105c0",
+    "s5": "1783b91a2fe66a458064a13e118dd570189b9abf83d060e250d33699230fd3b6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:05:38.395540+00:00",
+  "total": null
+}
