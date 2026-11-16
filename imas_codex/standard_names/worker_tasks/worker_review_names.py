@@ -76,7 +76,7 @@ def enclosing_structure_statements(
     that make a statement, each as ``{"path", "text"}``. The walk, the depth
     bound, the documentation-else-description precedence, the whitespace
     collapse and the dedupe of a repeated statement all come from
-    :func:`~...worker_extraction_and_enrichment.ancestor_statements`, so a
+    :func:`~...worker_common.ancestor_statements`, so a
     review and a compose prompt cannot read one lineage two ways. A structure
     that makes no statement is left out: an empty entry names nothing a name
     could be judged against.

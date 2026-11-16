@@ -12,7 +12,7 @@ from unittest.mock import patch
 
 import imas_codex.graph.client as graph_client
 from imas_codex.standard_names.worker_tasks import worker_review_names
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from imas_codex.standard_names.worker_tasks.worker_common import (
     _ANCESTOR_CONTEXT_QUERY,
     ancestor_statements,
 )
