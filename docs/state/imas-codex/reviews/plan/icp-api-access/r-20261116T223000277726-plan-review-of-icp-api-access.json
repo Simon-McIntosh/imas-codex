@@ -43,6 +43,16 @@
       "note": "Section 2 at version 17 says requests go to the ICP hosts listed in private configuration, the integration instance at first and production since 2026-11-16, with every rule applied to each identically.",
       "reason": "",
       "when": "2026-11-16T23:32:48.126334+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "Section 4 at version 17 says a production file read is not yet established, makes finding out its first result, and delivers the finding with no other method or host if none exists.",
+      "reason": "",
+      "when": "2026-11-16T23:32:51.054503+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "Section 2 at version 17 says requests go to the ICP hosts listed in private configuration, the integration instance at first and production since 2026-11-16, with every rule applied to each identically.",
       "reason": "",
       "when": "2026-11-16T23:32:48.126334+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "note": "Section 4 at version 17 says a production file read is not yet established, makes finding out its first result, and delivers the finding with no other method or host if none exists.",
+      "reason": "",
+      "when": "2026-11-16T23:32:51.054503+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261116T223000277726-plan-review-of-icp-api-access.json",
