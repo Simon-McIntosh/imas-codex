@@ -99,15 +99,7 @@ def supplied_target_context(messages: list[dict], accessor: str) -> str:
     A shared document may explicitly describe the target even when retrieval
     placed it under another group. Only other signals' own blocks are removed.
     """
-    text = next(row["content"] for row in messages if row["role"] == "user")
-    match = re.search(r"^accessor: " + re.escape(accessor) + r"$", text, re.M)
-    if match is None:
-        raise ValueError("target accessor absent from supplied context")
-    preceding = [row for row in SIGNAL.finditer(text) if row.start() < match.start()]
-    if not preceding:
-        raise ValueError("target has no signal block")
-    subset = subset_messages(messages, [int(preceding[-1][1])])
-    return next(row["content"] for row in subset if row["role"] == "user")
+    return bench.target_context(messages, accessor)
 
 
 def failure_class(response: dict, *, terminal: bool = False) -> str:
