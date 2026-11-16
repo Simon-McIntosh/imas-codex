@@ -444,6 +444,11 @@ class ICPClient:
         self._auth_lock = threading.RLock()
 
     @property
+    def origin(self) -> str:
+        """The configured integration origin attached to record identities."""
+        return self._origin
+
+    @property
     def session(self) -> requests.Session:
         """The guarded session; direct use retains the same refusal policy."""
         return self._session
