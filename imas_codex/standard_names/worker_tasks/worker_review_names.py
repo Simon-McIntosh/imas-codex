@@ -32,7 +32,7 @@ from typing import TYPE_CHECKING, Any
 from imas_codex.standard_names import vocabulary_definitions as vocabulary_source
 from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
 from imas_codex.standard_names.source_reads import source_paths_projection
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from imas_codex.standard_names.worker_tasks.worker_common import (
     _ANCESTOR_CONTEXT_QUERY,
     ancestor_statements,
 )
