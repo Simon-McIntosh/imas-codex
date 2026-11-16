@@ -280,3 +280,55 @@ def test_a_document_the_seat_passes_carries_no_hold() -> None:
         )
         == []
     )
+
+
+def test_every_function_in_the_seat_has_a_caller() -> None:
+    """A function nothing calls is a second spelling waiting to drift.
+
+    ``name_definition_flagged`` survived beside ``name_definition_note`` and
+    decided the hold a second way while nothing reached it; this holds the
+    module to reachable code.
+    """
+    import ast
+
+    module = PACKAGE / "standard_names" / "review" / "name_definition_seat.py"
+    tree = ast.parse(module.read_text(encoding="utf-8"))
+    functions = [
+        node.name
+        for node in tree.body
+        if isinstance(node, ast.FunctionDef | ast.AsyncFunctionDef)
+    ]
+    assert functions, "the seat module exposes no function at all"
+
+    roots = [
+        module.parent,
+        PACKAGE / "standard_names" / "worker_tasks",
+        Path(__file__).resolve().parent,
+    ]
+    called: set[str] = set()
+    for root in roots:
+        for path in root.rglob("*.py"):
+            if "__pycache__" in path.parts:
+                continue
+            text = path.read_text(encoding="utf-8")
+            # A call site names the function, so a file that does not spell any
+            # of them cannot reach one; parsing only the rest keeps the scan to
+            # a handful of modules instead of the whole package.
+            if not any(name in text for name in functions):
+                continue
+            for node in ast.walk(ast.parse(text)):
+                if not isinstance(node, ast.Call):
+                    continue
+                target = node.func
+                name = (
+                    target.id
+                    if isinstance(target, ast.Name)
+                    # A call through a module attribute still reaches the
+                    # definition, so the last attribute is the name to count.
+                    else getattr(target, "attr", None)
+                )
+                if name in functions:
+                    called.add(name)
+
+    unused = sorted(set(functions) - called)
+    assert not unused, f"these seat functions have no caller: {unused}"
