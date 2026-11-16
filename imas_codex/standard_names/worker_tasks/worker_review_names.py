@@ -15,8 +15,10 @@ wrapper — is reached through the batch processor's positional-only
 ``_worker_dependency`` resolver, so a patch on ``workers.<name>`` stays visible
 inside the moved code and the persisting wrapper a caller sees is the
 entrypoint's own object, which is what the panel audit recognises structurally.
-Only standard-library modules are imported directly; ``BudgetManager`` is
-imported for typing alone.
+Only standard-library modules are imported directly, with one exception: the
+ancestor read below is the extraction owner's query and statement rule, imported
+rather than restated so a review and a compose prompt read one lineage one way.
+``BudgetManager`` is imported for typing alone.
 """
 
 from __future__ import annotations
@@ -30,6 +32,10 @@ from typing import TYPE_CHECKING, Any
 from imas_codex.standard_names import vocabulary_definitions as vocabulary_source
 from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
 from imas_codex.standard_names.source_reads import source_paths_projection
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+    _ANCESTOR_CONTEXT_QUERY,
+    ancestor_statements,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -53,24 +59,12 @@ def _review_source_binding_sort_key(binding: dict[str, Any]) -> tuple[str, ...]:
     )
 
 
-# The enclosing structures a bound DD leaf sits under, read for the name
-# review. A qualifier a leaf's own text cannot carry — a counting basis, a
-# weighting, a qualifier or a unit convention — is often stated one or more
-# structures above it, so the review is shown those statements rather than the
-# leaf label alone. The depth is bounded so a review never walks a whole IDS.
-_ENCLOSING_STRUCTURE_DEPTH = 4
-
-_ENCLOSING_STRUCTURE_QUERY = f"""
-MATCH path = (leaf:IMASNode)-[:HAS_PARENT*1..{_ENCLOSING_STRUCTURE_DEPTH}]->(ancestor:IMASNode)
-WHERE leaf.id IN $paths
-WITH leaf, ancestor, min(length(path)) AS depth
-RETURN leaf.id AS leaf_path,
-       ancestor.id AS path,
-       depth,
-       coalesce(ancestor.documentation, '') AS documentation,
-       coalesce(ancestor.description, '') AS description
-ORDER BY leaf_path, depth
-"""
+# The enclosing statements a bound DD leaf is read against. A qualifier a
+# leaf's own text cannot carry — a counting basis, a weighting, a qualifier or
+# a unit convention — is often stated one or more structures above it, so the
+# review is shown those statements rather than the leaf label alone. The read
+# itself is the extraction owner's: one HAS_PARENT walk, one depth bound and one
+# statement rule serve both the review and the compose prompt.
 
 
 def enclosing_structure_statements(
@@ -78,28 +72,28 @@ def enclosing_structure_statements(
 ) -> dict[str, list[dict[str, str]]]:
     """Read the statements made by the structures each bound DD path sits under.
 
-    Returns, per bound path, the nearest-first list of its enclosing
-    deterministically ordered structures that make a statement, each as
-    ``{"path", "text"}`` with the whitespace collapsed. A structure that makes
-    no statement (no documentation and no description) is left out: an empty
-    entry names nothing a name could be judged against.
+    Returns, per bound path, the nearest-first list of its enclosing structures
+    that make a statement, each as ``{"path", "text"}``. The walk, the depth
+    bound, the documentation-else-description precedence, the whitespace
+    collapse and the dedupe of a repeated statement all come from
+    :func:`~...worker_extraction_and_enrichment.ancestor_statements`, so a
+    review and a compose prompt cannot read one lineage two ways. A structure
+    that makes no statement is left out: an empty entry names nothing a name
+    could be judged against.
     """
     wanted = sorted({str(path) for path in paths if path})
     if not wanted:
         return {}
     from imas_codex.graph.client import GraphClient
 
-    with GraphClient() as gc:
-        rows = gc.query(_ENCLOSING_STRUCTURE_QUERY, paths=wanted)
     by_leaf: dict[str, list[dict[str, str]]] = {}
-    for row in rows or ():
-        text = str(row.get("documentation") or "").strip()
-        text = text or str(row.get("description") or "").strip()
-        if not text:
-            continue
-        by_leaf.setdefault(str(row.get("leaf_path") or ""), []).append(
-            {"path": str(row.get("path") or ""), "text": " ".join(text.split())}
-        )
+    with GraphClient() as gc:
+        for path in wanted:
+            statements = ancestor_statements(
+                gc.query(_ANCESTOR_CONTEXT_QUERY, path=path), limit=None
+            )
+            if statements:
+                by_leaf[path] = statements
     return by_leaf
 
 

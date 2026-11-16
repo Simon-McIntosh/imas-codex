@@ -2,10 +2,10 @@
 
 A DD leaf often states only its field label ("Value", "Carbon") while the
 counting basis, weighting or unit convention the name carries is stated one or
-more structures above it. These tests fix what the review is shown and what it
-records: the statement, with the structure that makes it, reaches the review's
-state and the source-support check's answer, and a qualifier no structure
-states is left to the judge rather than settled by the review.
+more structures above it. These tests fix what the review is shown, what it
+records, and where it refuses to read: a statement that negates the qualifier or
+that names another quantity's physical base is left to the judge, and the judge's
+own answer is recorded beside every settled one.
 """
 
 from __future__ import annotations
@@ -13,7 +13,7 @@ from __future__ import annotations
 import asyncio
 from unittest.mock import patch
 
-from imas_codex.standard_names.review import jev_review  # noqa: F401
+from imas_codex.standard_names.review import jev_review
 
 CARBON = "accumulated_carbon_equivalent_electron_count_due_to_gas_injection"
 LEAF = "summary/gas_injection_accumulated/carbon/value"
@@ -22,16 +22,18 @@ STRUCTURE = "summary/gas_injection_accumulated"
 STATEMENT = (
     "Accumulated injected gas since the plasma breakdown in equivalent electrons"
 )
+NEGATED = "Accumulated injected gas, not counted in equivalent electrons"
+OTHER_QUANTITY = "Equivalent electrons in the electron density of the edge plasma"
 
 
-def _item(name: str = CARBON) -> dict:
+def _item(name: str = CARBON, statement: str = STATEMENT) -> dict:
     return {
         "id": name,
         "kind": "scalar",
         "unit": "1",
         "description": (
             "Cumulative post-breakdown carbon inventory from gas injection, "
-            "weighted by density, expressed as equivalent-electron counts."
+            "expressed as equivalent-electron counts."
         ),
         "source_paths": [LEAF],
         "dd_source_docs": [
@@ -40,12 +42,12 @@ def _item(name: str = CARBON) -> dict:
                 "ids": [LEAF],
                 "unit": "1",
                 "description": "",
-                "documentation": "Value",
+                "documentation": "Carbon",
                 "dd_version": "4.1.0",
                 "snapshot_pinned": True,
                 "enclosing_structures": [
                     {"path": PARENT, "text": "Carbon"},
-                    {"path": STRUCTURE, "text": STATEMENT},
+                    {"path": STRUCTURE, "text": statement},
                 ],
             }
         ],
@@ -73,16 +75,13 @@ def _review(item: dict, probability: float = 0.9) -> dict:
     return result.items[0]
 
 
-def test_qualifier_stated_only_by_an_enclosing_states_is_recorded_as_supported() -> (
-    None
-):
-    """The statement reaches the review's state and settles both checks."""
-    item = _item()
-    record = _review(item)
+def test_qualifier_stated_only_by_an_enclosing_structure_settles_the_check() -> None:
+    """The statement reaches the state and settles both source-support checks."""
+    record = _review(_item())
 
-    enclosing = record["state"]["neighbourhood"]["dd_enclosing_structures"]
-    assert enclosing["observed"] is True
-    assert {"path": STRUCTURE, "text": STATEMENT} in enclosing["value"]
+    observed = record["state"]["neighbourhood"]["dd_enclosing_structures"]
+    assert observed["observed"] is True
+    assert {"path": STRUCTURE, "text": STATEMENT} in observed["value"]
 
     for check_id in jev_review.SOURCE_SUPPORT_CHECKS:
         check = record["checks"][check_id]
@@ -95,10 +94,38 @@ def test_qualifier_stated_only_by_an_enclosing_states_is_recorded_as_supported()
             "path": STRUCTURE,
             "text": STATEMENT,
         } in support["qualifiers"]
-        # The recorded answer is the settled one, and it carries the statement
-        # a reader reconciles it with.
         assert check["answer"]["noul"] == 0.0
         assert check["answer"]["source_support"] == support
+        # The judge answered these checks too; its answer is kept beside the
+        # settled one rather than being lost.
+        assert check["judge_failure_probability"] == 0.9
+
+
+def test_negated_statement_is_left_to_the_judge() -> None:
+    """A structure that names the words and denies them does not support them."""
+    item = _item(statement=NEGATED)
+    assert jev_review.enclosing_structure_support(item) is None
+
+    record = _review(item, probability=0.86)
+
+    for check_id in jev_review.SOURCE_SUPPORT_CHECKS:
+        check = record["checks"][check_id]
+        assert check["failure_probability"] == 0.86
+        assert check["failed"] is True
+        assert "source_support" not in check
+
+
+def test_statement_about_another_quantity_is_left_to_the_judge() -> None:
+    """A statement that names a different physical base does not support the name."""
+    item = _item(statement=OTHER_QUANTITY)
+    assert jev_review.enclosing_structure_support(item) is None
+
+    record = _review(item, probability=0.86)
+
+    for check_id in jev_review.SOURCE_SUPPORT_CHECKS:
+        check = record["checks"][check_id]
+        assert check["failure_probability"] == 0.86
+        assert "source_support" not in check
 
 
 def test_qualifier_no_structure_states_stays_with_the_judge() -> None:

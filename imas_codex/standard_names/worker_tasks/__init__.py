@@ -260,7 +260,6 @@ _OWNERS_BY_MODULE = {
         "_review_source_binding_sort_key",
         "_run_rd_quorum_cycles",
         "_unfunded_cause",
-        "enclosing_structure_statements",
         "process_review_name_batch",
         "quorum_incomplete_snapshot",
         "reset_quorum_incomplete",

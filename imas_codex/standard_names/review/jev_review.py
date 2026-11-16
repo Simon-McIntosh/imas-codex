@@ -676,6 +676,72 @@ def states_token(text: Any, token: str) -> bool:
     return all(_qualifier_stem(word) in stated for word in words)
 
 
+# A statement that negates or contrasts a qualifier names its words and says
+# the opposite of stating it, so it does not support the name. The word list is
+# the small closed set a DD structure's prose uses to deny, to exclude or to set
+# one thing against another; a statement carrying one of them is left to the
+# judge rather than read as support.
+_QUALIFIER_CONTRASTS = frozenset(
+    {
+        "not",
+        "no",
+        "never",
+        "without",
+        "excluding",
+        "except",
+        "unless",
+        "other",
+        "rather",
+        "instead",
+        "unlike",
+        "neither",
+        "nor",
+    }
+)
+
+
+def _statement_sentences(text: Any) -> list[str]:
+    return [part for part in re.split(r"[.!?;\n]+", str(text or "")) if part.strip()]
+
+
+def _contrasts(sentence: str) -> bool:
+    return any(
+        word in _QUALIFIER_CONTRASTS for word in re.findall(r"[a-z]+", sentence.lower())
+    )
+
+
+@lru_cache(maxsize=1)
+def _physical_base_stems() -> frozenset[str]:
+    return frozenset(_qualifier_stem(base) for base in _physical_base_roster())
+
+
+def _names_a_physical_base(sentence: str) -> bool:
+    """True when the sentence describes a quantity by naming a physical base.
+
+    A sentence that says "equivalent electrons in the electron density" is
+    about a density; the qualifier inside it is not a statement about this
+    name's quantity. Such a sentence is left to the judge rather than read as
+    support for the name.
+    """
+    return bool(_statement_stems(sentence) & _physical_base_stems())
+
+
+def _structure_states_token(text: Any, token: str) -> bool:
+    """True when one sentence of *text* states *token* without denying it.
+
+    The words must fall in one sentence — a qualifier spread over two sentences
+    is not a statement — and that sentence must neither negate nor contrast the
+    qualifier nor describe another quantity by naming a physical base.
+    """
+    for sentence in _statement_sentences(text):
+        if not states_token(sentence, token):
+            continue
+        if _contrasts(sentence) or _names_a_physical_base(sentence):
+            continue
+        return True
+    return False
+
+
 def enclosing_structure_support(item: Mapping[str, Any]) -> dict[str, Any] | None:
     """Settle the name's qualifiers from the structures its source sits under.
 
@@ -735,7 +801,11 @@ def enclosing_structure_support(item: Mapping[str, Any]) -> dict[str, Any] | Non
             stated.append({**leaf, "token": token})
             continue
         enclosing = next(
-            (entry for entry in statements if states_token(entry["text"], token)),
+            (
+                entry
+                for entry in statements
+                if _structure_states_token(entry["text"], token)
+            ),
             None,
         )
         if enclosing is None:
@@ -1595,10 +1665,15 @@ def _item_record(
         question_name = check_question_name(check.id)
         answer = answers.get(question_name)
         if check.id in SOURCE_SUPPORT_CHECKS and statement_support is not None:
-            # The enclosing structure states the qualifier the check asks
-            # about, so the source supports it: record the stating structure
-            # beside the answer rather than the answer the leaf's own label
-            # would have produced.
+            # A structure the source sits under states the qualifier the check
+            # asks about, so the source supports it. The reading is narrow: a
+            # sentence that negates or contrasts the qualifier, or one that
+            # names another quantity's physical base, is not support and is
+            # left to the judge (``_structure_states_token``). The judge's own
+            # answer is recorded beside the settled one, because the judge
+            # fails these checks on most settled names even when the
+            # statements sit in its evidence; a reader has to see what the
+            # judge said.
             check_records[check.id] = {
                 "answered": True,
                 "failed": False,
@@ -1609,6 +1684,7 @@ def _item_record(
                     "noul": 0.0,
                     "source_support": statement_support,
                 },
+                "judge_failure_probability": check_failure_probability(check, answer),
                 "question": questions.get(question_name),
                 "audit_finding": None,
                 "source_support": statement_support,

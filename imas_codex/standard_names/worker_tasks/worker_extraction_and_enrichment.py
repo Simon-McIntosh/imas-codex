@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 import re as _re
-from collections.abc import Callable, Sequence
+from collections.abc import Callable, Iterable, Mapping, Sequence
 from typing import TYPE_CHECKING, Any
 
 logger = logging.getLogger(__name__)
@@ -505,6 +505,41 @@ _MEMBER_DOC_MAX_CHARS = 240
 _IDS_CONTEXT_QUERY = "\nMATCH (ids:IDS {id: $ids_name})\nOPTIONAL MATCH (child:IMASNode)-[:IN_IDS]->(ids)\nWHERE child.id STARTS WITH $ids_prefix\n  AND child.data_type IN ['STRUCTURE', 'STRUCT_ARRAY', 'FLT_1D']\n  AND size([x IN split(child.id, '/') WHERE true]) = 2\nWITH ids,\n     collect(DISTINCT {\n         name: child.id, description: child.description, data_type: child.data_type\n     })[0..10] AS top_sections\nRETURN ids.description AS ids_description,\n       ids.documentation AS ids_documentation,\n       top_sections\n"
 
 
+# The number of ancestor statements a compose prompt carries: the nearest ones
+# state the placement, and the rest only lengthen the prompt.
+_ANCESTOR_STATEMENT_LIMIT = 4
+
+
+def ancestor_statements(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    limit: int | None = _ANCESTOR_STATEMENT_LIMIT,
+) -> list[dict[str, str]]:
+    """Read the statements ancestor rows make, nearest first.
+
+    The one place the ancestor read's precedence lives: an ancestor's
+    documentation when it carries that, its description otherwise, whitespace
+    collapsed and a text already stated by a nearer ancestor dropped. The order
+    is the query's, which returns nearest first.
+
+    Args:
+        rows: The ``_ANCESTOR_CONTEXT_QUERY`` rows for one path.
+        limit: Cap on the statements returned; ``None`` keeps them all.
+    """
+    statements: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for row in rows or ():
+        text = " ".join(str(row.get("documentation") or "").split())
+        text = text or " ".join(str(row.get("description") or "").split())
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        statements.append({"path": str(row.get("path") or ""), "text": text})
+        if limit is not None and len(statements) >= limit:
+            break
+    return statements
+
+
 def _enrich_ids_context(_worker_dependency, /, ids_name: str) -> dict | None:
     """Fetch IDS-level context for batch header.
 
@@ -852,24 +887,12 @@ def _enrich_batch_items(_worker_dependency, /, items: list[dict]) -> None:
                     item["description"] = rich
                 item["documentation"] = node_doc or node_desc
             if not item.get("ancestor_context"):
-                anc_rows = list(
+                lineage = ancestor_statements(
                     gc.query(
                         _worker_dependency("_ANCESTOR_CONTEXT_QUERY"),
                         path=grounding_path,
                     )
                 )
-                lineage: list[dict[str, str]] = []
-                seen_text: set[str] = set()
-                for a in anc_rows:
-                    a_desc = (a.get("description") or "").strip()
-                    a_doc = (a.get("documentation") or "").strip()
-                    text = a_desc or a_doc
-                    if not text or text in seen_text:
-                        continue
-                    seen_text.add(text)
-                    lineage.append({"path": a.get("path") or "", "text": text})
-                    if len(lineage) >= 4:
-                        break
                 if lineage:
                     item["ancestor_context"] = lineage
             if item.get("unit") and path:
