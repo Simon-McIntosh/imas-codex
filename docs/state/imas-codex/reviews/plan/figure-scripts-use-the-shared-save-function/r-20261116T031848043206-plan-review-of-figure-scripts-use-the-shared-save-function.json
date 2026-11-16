@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T03:22:20.561Z",
+  "dispatched_at": "2026-11-16T03:21:37Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/figure-scripts-use-the-shared-save-function/r-20261116T031848043206-plan-review-of-figure-scripts-use-the-shared-save-function/plan.html:48",
+      "id": "done_when-1",
+      "reason": "a worker that regenerates those figures through the shared function measures up to 2.24e-3 against a stated 1e-3 and has no authority to widen the tolerance, so the gate fails on the shared function's declared-size precision or the criterion is quietly loosened; the plan has to say which quantity carries the ratio (and that the shared function must preserve it) or state a tolerance the declared-size precision can meet.",
+      "text": "\u00a72's new invariant (\"each figure file's exported width-to-height ratio equals its drawn canvas ratio within one part in a thousand\") is unreachable for three tracked vector figures the section requires to be regenerated through the shared function, because that function declares the SVG height rounded to three significant digits (`imas_codex/plotting/style.py:75`, `height:.3g`): measured at the repository's HEAD, a 14x5.3in canvas (`docs/figures/discovery-to-mapping/mapping-lifecycle.svg`, drawn ratio 2.641509) exports as `31.1cm x 11.8cm`, ratio 2.635593, relative error 2.24e-3; a 14x10.32in canvas (`pickup-probe.svg`) gives 1.10e-3; and a 14x6.4in canvas (`docs/figures/ai-stack/ai-stack.svg`, drawn ratio 2.1875) gives 1.21e-3 against today's 14.22cm, which the script itself derives at two decimals \u2014 so the change replaces an invariant the current files meet with one the migration breaks, and the tolerance is exceeded for a reason unrelated to the migration itself",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "bc101cc809dd0c3613a68c5474d179550f296155",
+  "plan_fingerprint": "e64f1d9b02e3b94239ea41989e042797becd402667e034a64a9ae4fd2b3cc98d",
+  "plan_slug": "figure-scripts-use-the-shared-save-function",
+  "plan_version": 8,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T031848043206-plan-review-of-figure-scripts-use-the-shared-save-function",
+  "reviewed_blob_sha": "e289c869453b9b72498bf35bc0f3070c658a1630",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `scripts/`, `imas_codex/`, `docs/figures/`, `#s1` and the `all_debug` partition named in \u00a72 all resolve (partition state `up`); the snapshot's extensionless hrefs resolve as `.html` under the house convention.",
+    "done_when": "a finding \u2014 \u00a72's changed sentence at line 48 requires every figure file's exported ratio to equal its drawn canvas ratio within one part in a thousand, which the shared function's three-significant-digit declared SVG height cannot meet for three named tracked figures.",
+    "evidence_paths": "pass \u2014 the evidence \u00a72 asks for is a search, before/after file lists, declared sizes and script statuses recorded in the repository's landing record, not a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 \u00a72's changed text introduces no plan label, stage name, ticket number or version tag into anything it names in code.",
+    "reasoning": "pass \u2014 \u00a72's root cause matches the cited evidence and the section prescribes no implementation; the endpoint's one unreachable measure is recorded under done_when.",
+    "single_goal": "pass \u2014 \u00a72 carries one deliverable (the figure scripts move onto the shared save), and its regenerated/refused/not-run record is evidence for that deliverable, not a second one.",
+    "wiring": "pass \u2014 \u00a72 declares depends-on `figure-scripts-use-the-shared-save-function#s1`, \u00a71 exists as `id=\"s1\"` and is `data-status=\"done\"`, and no relationship in the snapshot points at a node that is not there."
+  },
+  "section_digests": {
+    "_document": "4dea64427d72247ec7267de4bc6f56d85c0ade04effc8f525bbda5516b514f60",
+    "s1": "dcf0721a9e37aac700d6f736a0ffe707b876997971a1b1a050ab25c00c7e4cb5",
+    "s2": "ab11c249ebe9ef396444055912aeb1a2db1ddb6f0c252771406c46ab4a472f12"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T03:37:32.631846+00:00",
+  "total": null
+}
