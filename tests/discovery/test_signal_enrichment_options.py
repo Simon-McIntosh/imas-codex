@@ -27,6 +27,12 @@ from tests.discovery.test_signal_enrichment_benchmark import answer
         ({"max-tokens": 32768}, {"max_tokens": 32768}),
         ({"batch-size": 3}, {}),
         ({"fitted-prompt": True}, {}),
+        ({"grounding": True}, {}),
+        ({"claim-evidence": True}, {}),
+        ({"review": True}, {}),
+        ({"review-thinking": True}, {}),
+        ({"temperature": 0}, {}),
+        ({"description-sentences": 1}, {}),
     ],
 )
 def test_each_seat_option_is_explicit_and_other_models_keep_defaults(
