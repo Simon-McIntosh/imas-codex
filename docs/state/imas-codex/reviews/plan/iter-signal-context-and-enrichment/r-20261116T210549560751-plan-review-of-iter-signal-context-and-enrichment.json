@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T21:08:24.602Z",
+  "dispatched_at": "2026-11-16T21:07:28Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T210549560751-plan-review-of-iter-signal-context-and-enrichment/plan.html:118",
+      "id": "reasoning-1",
+      "reason": "the two decisions now disagree on whether the description model is settled, so the one that gates section 6 has to carry that statement itself.",
+      "text": "the `local-lane-accepted` rationale states that the model writing ITER descriptions from ICP-derived context is the locally served one \"as section 1 states and the description-model decision records\", but that decision is now scoped to section 3, a landed comparison, and its own rationale says it no longer governs sections 6 and 7; a reader taking the locked `local-lane-accepted` decision as the standing ruling on lanes would believe descriptions stay local, while the only decision governing sections 6 and 7 offers the paid model",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T210549560751-plan-review-of-iter-signal-context-and-enrichment/plan.html:122",
+      "id": "reasoning-2",
+      "reason": "the lead answers this gate on the quality figures it shows, and a figure this far from the hand reading, with its instrument unlabelled, is what the decision turns on.",
+      "text": "the open decision's context reads \"111 of the local model's 200 descriptions were judged wrong against context, against 32 for the paid model\" without naming the automated judge, and omits the sealed hand reading that records 26 of 40 local and none of the paid; the changed rationale at line 100 states that the judge agreed with the hand reading on only 17 of 40 pairs, so the decision that holds sections 6 and 7 rests on a wrong-count four times the hand measurement and from the instrument the plan itself discounts",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T210549560751-plan-review-of-iter-signal-context-and-enrichment/plan.html:100",
+      "id": "evidence_paths-1",
+      "reason": "the figures backing a decision the lead must answer cannot be checked by the reader who answers it unless the plan names the record, as its other measured sections do.",
+      "text": "the new figures (197 of 200 parsing, 26 of 40 wrong by hand, 17 of 40 judge agreement) are stated with no anchor, and the refinement fragment that records them, `docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html`, is referenced nowhere in the plan even though sections 3 and 5 cite their own fragments; the refinement run's private receipts path recorded in that fragment no longer resolves either",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+  "plan_fingerprint": "79eec425b7d5068ce0d4103d402a6abf05e90ddf361ab4679d8d0dcfa6ba2359",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 35,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T210549560751-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "4536409ea1bfb57fa20d4b3feb9021046ccc57ec",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 both cited evidence fragments exist, and the cross-plan section anchors resolve with extensionless hrefs read as `<path>.html`.",
+    "done_when": "pass \u2014 the changed unit alters declarations and decision text only; no section's done-when changed, and section 6's bar and each section's negative control were set and reviewed at version 34.",
+    "evidence_paths": "a finding \u2014 the refinement figures written into the decisions point at no durable record, while the refinement evidence fragment that holds them is cited nowhere in the plan.",
+    "naming": "pass \u2014 no symbol, file or comment is added by this change, and the decision rationale is archival prose rather than a name.",
+    "reasoning": "a finding \u2014 the changed description-model decision is re-scoped away from sections 6 and 7, but the local-lane rationale still cites it as the record that the local model writes descriptions, and the open decision's context gives the local model's wrong count from the automated judge alone, at odds with the hand reading the same decision's sibling rationale now records.",
+    "single_goal": "pass \u2014 every section still names one deliverable, and the deferral of sections 6 and 7 adds no second deliverable.",
+    "wiring": "pass \u2014 sections 6 and 7 are declared deferred under the open decision `local-model-confirmed-on-quality`, section 8 waits on section 7 and section 9 on sections 4, 6, 7 and 10, and every cross-plan wait (`icp-api-access#s3`, `icp-api-access#s4`, `codac-uda-signals#s12`) resolves to a section that exists."
+  },
+  "section_digests": {
+    "_document": "4e0e8def2b41a35520d707976d75422922b468481a5077b8bc471cfc6da7650e",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "c5e0fdbc73872136bee918c31d6a991ed8c2cd51f26591a5afb67eb1a6cc94dc",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:27:23.624798+00:00",
+  "total": null
+}
