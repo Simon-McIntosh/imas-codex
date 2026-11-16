@@ -43,9 +43,28 @@
       "note": "Version 35 declares sections 6 and 7 deferred while the open model decision holds them; section 8 waits on section 7.",
       "reason": "",
       "when": "2026-11-16T19:58:20.040378+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Version 34 restates the bar from the hand reading: at most four wrong in forty, beside the paid model's none and the local model's 26 on that instrument, marked as the coordinator's proposal for the lead to change.",
+      "reason": "",
+      "when": "2026-11-16T19:58:26.452433+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "note": "Version 34 restates the bar from the hand reading: at most four wrong in forty, beside the paid model's none and the local model's 26 on that instrument, marked as the coordinator's proposal for the lead to change.",
+      "reason": "",
+      "when": "2026-11-16T19:58:26.452433+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
