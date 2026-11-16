@@ -211,3 +211,65 @@ async def test_grounding_instruction_can_be_removed_without_changing_context():
 async def test_paid_model_is_refused_for_grounding_or_review():
     with pytest.raises(ValueError, match="local model"):
         await run(EnrichmentOptions(review=True), model="openrouter/test")
+
+
+def test_bracketed_identifiers_refer_to_the_same_supplied_context_item():
+    kept, drops = filter_statements(
+        [
+            CitedStatement(text="Temperature.", context_items=["[context-1]"]),
+            CitedStatement(text="Guess.", context_items=["[context-999]"]),
+        ],
+        context_items("Temperature"),
+    )
+    assert kept == ["Temperature."]
+    assert drops == 1
+
+
+@pytest.mark.asyncio
+async def test_unconfigured_seat_preserves_description_whitespace():
+    value = draft()
+    value.results[0].description = "  Temperature.\n\n  Source detail.  "
+    (batch, _, _), _ = await run(EnrichmentOptions(), [(value, 0, 1)])
+    assert batch.results[0].description == value.results[0].description
+
+
+def test_empty_citation_results_are_not_counted_as_delivered():
+    from scripts.refine_signal_enrichment import summarize
+
+    records = [
+        {
+            "arm": "empty",
+            "ids": ["signal"],
+            "seconds": 1,
+            "input_tokens": 1,
+            "output_tokens": 1,
+            "cost_usd": 0,
+            "responses": [{"raw": "{}", "score": {"parse_success": True}}],
+            "outputs": [{"id": "signal", "description": ""}],
+        }
+    ]
+    result = summarize(records, {"order": ["signal"]})["empty"]
+    assert result["delivered"] == 0
+    assert result["empty_descriptions"] == 1
+    assert result["delivery_rate"] == 0
+
+
+def test_manual_seal_refuses_missing_readings_and_later_edits(tmp_path):
+    from scripts.assess_signal_enrichment_grounding import seal, summarize
+
+    (tmp_path / "sheets.json").write_text(json.dumps([{"packet": "blind", "rows": 1}]))
+    (tmp_path / "readings.jsonl").write_text("")
+    with pytest.raises(ValueError, match="exactly once"):
+        seal(tmp_path)
+    row = {
+        "packet": "blind",
+        "index": 0,
+        "preference": "first",
+        "reason": "Source states temperature.",
+        "quality": {"first": "right", "second": "wrong"},
+    }
+    (tmp_path / "readings.jsonl").write_text(json.dumps(row) + "\n")
+    seal(tmp_path)
+    (tmp_path / "readings.jsonl").write_text(json.dumps(row) + "\n\n")
+    with pytest.raises(ValueError, match="changed after sealing"):
+        summarize(tmp_path)

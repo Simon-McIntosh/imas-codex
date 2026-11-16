@@ -145,10 +145,14 @@ def filter_statements(
     """Refuse absent citations; item existence alone does not prove entailment."""
     kept = []
     for statement in statements:
+        references = [
+            item[1:-1] if item.startswith("[") and item.endswith("]") else item
+            for item in statement.context_items
+        ]
         if (
             statement.text.strip()
-            and statement.context_items
-            and all(item in items for item in statement.context_items)
+            and references
+            and all(item in items for item in references)
         ):
             kept.append(statement.text.strip())
     return kept, len(statements) - len(kept)
@@ -174,6 +178,15 @@ async def enrich_signal_batch(*, model, messages, options, call, **kwargs):
     active = options.grounding or options.claim_evidence or options.review
     if active and not model.startswith("local/"):
         raise ValueError("grounded signal enrichment requires a local model")
+    if options.temperature is not None:
+        kwargs["temperature"] = options.temperature
+    if not active and not options.description_sentences:
+        return await call(
+            model=model,
+            messages=messages,
+            response_model=SignalEnrichmentBatch,
+            **kwargs,
+        )
     messages = copy.deepcopy(messages)
     user = next(message for message in messages if message["role"] == "user")
     items = context_items(user["content"])
@@ -194,8 +207,6 @@ async def enrich_signal_batch(*, model, messages, options, call, **kwargs):
         )
     if options.claim_evidence:
         user["content"] = "\n".join(f"[{key}] {text}" for key, text in items.items())
-    if options.temperature is not None:
-        kwargs["temperature"] = options.temperature
     draft, cost, tokens = await call(
         model=model, messages=messages, response_model=response_model, **kwargs
     )

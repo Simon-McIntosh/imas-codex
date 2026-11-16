@@ -136,13 +136,18 @@ def summarize(records: list[dict], cohort: dict) -> dict:
         firsts = [r["responses"][0] for r in batches]
         responses = [response for r in batches for response in r["responses"]]
         seconds = sum(r["seconds"] for r in batches)
-        outputs = {o["id"]: o for r in batches for o in r["outputs"]}
+        all_outputs = {o["id"]: o for r in batches for o in r["outputs"]}
+        outputs = {
+            id: row for id, row in all_outputs.items() if row.get("description", True)
+        }
         failed = Counter()
         raw_failed = Counter()
         for r in batches:
             if not r["responses"][0]["score"]["parse_success"]:
                 raw_failed[failure_class(r["responses"][0])] += len(r["ids"])
-            absent = set(r["ids"]) - {o["id"] for o in r["outputs"]}
+            absent = set(r["ids"]) - {
+                o["id"] for o in r["outputs"] if o.get("description", True)
+            }
             if absent:
                 last = r["responses"][-1]
                 cause = (
@@ -175,6 +180,7 @@ def summarize(records: list[dict], cohort: dict) -> dict:
             ),
             "other_retries": sum(replacement_kind(r) == "retry" for r in batches),
             "delivered": len(outputs),
+            "empty_descriptions": len(all_outputs) - len(outputs),
             "delivery_rate": sum(
                 bool(o.get("description", True)) for o in outputs.values()
             )
