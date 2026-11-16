@@ -1,0 +1,42 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T07:09:01.386Z",
+  "dispatched_at": "2026-11-16T07:08:40Z",
+  "findings": [],
+  "plan_commit": "8239cdeb1314e10c1d81995af7909e1b2f167fd6",
+  "plan_fingerprint": "e78f896d527125fdf70cef75cc054ed4a3dd7bda5916831305169ae875d8a3fb",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 67,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T063319281486-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "998adafaa2ee4b154feaa845e2bde9383c801afd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every section anchor in the changed bullet (s2, s3, s10, s11) resolves in the snapshot and the cited census file exists; extensionless hrefs are resolved as `<path>.html` per the docs surface.",
+    "done_when": "pass \u2014 the changed count is correct against the cited record and the live graph (56 recorded = 8 superseded by rename + 48 live lacking the qualifier), and the bullet's control list still plants a name whose enclosing structure states the basis while its id lacks `equivalent_electron`, requiring the census to count it as missing, so the clause can fail.",
+    "evidence_paths": "pass \u2014 the bullet's baseline record `rewrite-closing-census.json` resolves on the committed evidence path `docs/evidence/fragments/sn-definitions-by-construction/`, and \u00a76's other figures are live-graph counts, not a session scratchpad.",
+    "naming": "pass \u2014 the changed clause introduces no code symbol, plan label, stage name or ticket number; its terms are the endpoint's own (identifier, counting basis, enclosing structure).",
+    "reasoning": "pass \u2014 on the changed clause all three checks hold: the stated membership matches the cited evidence (8 `REFINED_FROM` renames, every one drawn from the recorded 56-name class, leaving 48 live without the qualifier); the endpoint is obtainable and falsifiable from the live graph plus the census; and the bullet names no code path, step sequence or function to extend.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable (the live catalog rewritten to the settled wording); the unit census and name check are re-runs of that section's own measures, not a second goal.",
+    "wiring": "pass \u2014 \u00a76's `plan-section-depends-on` lists six sections (s2, s3, s4, s5, s10, s11) that all exist, and \u00a711 declares the reciprocal route (\"the forty-eight are then renamed under the wording section, which waits on this one\"), so the changed clause's dependency is declared."
+  },
+  "section_digests": {
+    "_document": "61c39d5ad51e7b68047ca7a43e243612440fe22ae0ec2c34eb1364c28ff0e306",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s11": "469da7cec1a94cba0366b89883ccbdb8ef92a07016c4482eb907048e2bd9b1d3",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "be3bba7a6c0c34e2eaabff635af4f43905aee0b0b0b94e3ea4b097ce2777d04a",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T07:29:16.598003+00:00",
+  "total": null
+}
