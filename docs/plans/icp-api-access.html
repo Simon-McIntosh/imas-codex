@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="discovery,signals">
   <meta name="plan-blocks" content="iter-signal-context-and-enrichment">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;deferred&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;icp-api-access#s2&quot;],&quot;s4&quot;:[&quot;icp-api-access#s2&quot;]}">
   <title>The pipeline reads ICP and IDM through an authenticated, read-only client | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="13">
+<meta name="plan-version" content="14">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -52,7 +52,7 @@
     <p><strong>Done when.</strong> For twenty nodes chosen before the run, the code, title and parent read through the API equal those read through the ITER document assistant's record tools, with the count that agree in the landing record; a subtree of a stated size is read completely, with the number of requests, the elapsed time and the number of records the account was not permitted to see; and the measured request rate stays at or below the stated bound. Fetched records stay in private storage: none is stored as a fixture in the repository, and a search of the tracked tree for fetched identifiers and titles finds none. <strong>Negative control:</strong> a code that names no node returns an explicit not-found outcome, not an empty success.</p>
 
     <h2 id="s4">§4 — A document file is fetched from IDM by identity and version</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="icp-api-access#s2"></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="deferred" data-links="icp-api-access#s2"></section>
     <p><strong>Delivers.</strong> The client fetches one IDM document's file, given its identity and version, into private storage outside the repository, with its metadata and a digest, and reads a spreadsheet's rows through the project's existing spreadsheet extraction. The file is read through the integration instance, the only data host section 2 allows. If a document's file is served only from another host, the section fetches nothing from it: it reports that host privately to the lead, who decides whether to add it as a read-only host.</p>
     <p><strong>Done when.</strong> One spreadsheet and one PDF named before the run are each fetched at a stated version, with size and digest in the landing record and the stored path under the private cache; the spreadsheet's sheet names and row counts are recorded; a request for a version that does not exist returns an explicit outcome; and a search of the tracked tree finds none of the fetched content. <strong>Negative control:</strong> a document the account may not read is reported as not permitted, never as empty.</p>
 
@@ -97,6 +97,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T213921030036-icp-plant-structure-and-component-reads" data-who="reckon-build" data-when="2026-11-16T04:00:51Z">
     <div class="r-comment-body"><p>docs/evidence/fragments/icp-api-access/icp-plant-structure-and-component-reads.html#icp-plant-structure-and-component-reads-evidence — 20/20 preselected nodes agree across code, title and parent; zero instance differences; complete five-node advertised subtree in 7 requests and 3.744 s; 0 observed denials; maximum 1.818 requests/s below 2; 189 focused tests pass, empty-success mutation fails 2 and swapped-receipt mutation fails 2.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s3-parent-and-scope" data-who="reckon-build" data-when="2026-11-16T20:15:00Z">
+    <div class="r-comment-body"><p>Two items the section's review left open are closed here. First, the parent half of the twenty-node comparison: the reference parent in the first receipt was derived from each node's code, so it could not disagree. On 2026-11-16 the parent of each of the twenty nodes was read independently through the document assistant's record tools by containment (the children of the three parent nodes), and all twenty were returned under the parent their code implies; the private comparison receipt carries that check, and the derived and independently read parents are identical for all twenty. Second, scope: the delivery moved request pacing in the two wiki clients onto the shared helper, outside the node's first declared paths. The coordinator's brief ordered that move, and both files were ratified at landing; nothing is to be reverted.</p></div>
 </div>
 </section>
 </main>
