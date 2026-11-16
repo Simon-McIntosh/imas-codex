@@ -1,10 +1,13 @@
 <article id="idm-document-fetch-evidence">
-  <h2>Credential forwarding repaired; IDM fetching needs a host decision</h2>
-  <p>The authenticated live integration description advertises no GET route that
-  returns IDM document metadata or a file by document identity and version.
-  <strong>No documents were fetched.</strong> The document-fetch section needs
-  the lead's decision on a second read-only data host before work can continue.
-  No other application host was contacted.</p>
+  <h2>Content UID requests find integration records; revision and file mapping remain unresolved</h2>
+  <p><strong>Correction to the earlier inventory-only conclusion:</strong> the
+  793-path description covers one API module. A request to the advertised
+  <code>GET /api/main/landing/openapi</code> returned a broader description with
+  <strong>11,789 paths and 6,735 GET operations</strong> across applications,
+  including document-bearing content types. The earlier second-host request
+  is withdrawn: no response identified a different file host. The remaining
+  failure is at revision/file mapping and same-host file authorization.
+  <strong>No document files were fetched.</strong></p>
 
   <h3>Credential-forward repair and regression evidence</h3>
   <p>A socket appearing after five seconds reproduced the defect against the
@@ -25,43 +28,60 @@
   The mutation did not change source files. The repair is committed at
   <code>aeafd8f40184977cdabfac319586fc0e774dc1fa</code>.</p>
 
-  <h3>Live route inventory</h3>
-  <p>The first resumed sign-in attempt reported an unavailable keyring, with a
-  three-second backend-discovery timeout in its private diagnostic receipt.
-  The second attempt, after a sixty-second pause, authenticated and read the
-  live description. The inventory contains <strong>793 paths, 815 operations
-  and 471 GET operations</strong>. The inspection covered all GET operation
-  declarations, 610 GET parameter declarations, 282 component schemas and
-  1656 schema fields. No GET declaration, schema name or schema field named
-  IDM or documents; no GET parameter named a document version.</p>
+  <h3>Live content, revision and file requests</h3>
+  <p>The two preselected production candidate UIDs returned no content from the
+  exercised integration content reader (HTTP 204). UID searches returned HTTP
+  200 with zero matches, both without a type filter and with the advertised
+  <code>IdmGenericDocument</code> type. Their content types were not resolved.
+  A known-present UID returned a complete content record and one match through
+  the same global UID search, validating the absence instrument.</p>
+  <p>The integration instance's discoverable document set differs from those
+  production candidates. A bounded search discovered two
+  <code>SmddDrawingVersionDataSheet</code> UIDs whose content reads both returned
+  HTTP 200. They are revisions <strong>1 and 2 of one drawing</strong>, not two
+  independent document files. Identities and titles remain private.</p>
   <table>
-    <thead><tr><th>Advertised read family</th><th>Count</th><th>Identity and meaning</th></tr></thead>
+    <thead><tr><th>Requested step</th><th>Observed outcome</th><th>What it establishes</th></tr></thead>
     <tbody>
-      <tr><td>File streams</td><td>26</td><td>ICP content UID and file-property routes, plus an email attachment index; no IDM identity/version contract.</td></tr>
-      <tr><td>Temporary file URLs</td><td>24</td><td>ICP content UID and property name; no IDM identity/version contract.</td></tr>
-      <tr><td>Content revision readers</td><td>24</td><td>ICP revision ID returning a typed content record, such as <code>PbsViewDto</code>.</td></tr>
-      <tr><td>GET routes with a version-named parameter</td><td>0</td><td>The description offers no document-version selection.</td></tr>
+      <tr><td>Read the two production candidate UIDs</td><td>Not found through the exercised reads: HTTP 204 and zero-match HTTP 200 lookups</td><td>No current record or content type was obtained; no permission denial is inferred from an empty lookup.</td></tr>
+      <tr><td>Read two discovered integration UIDs</td><td>Found: HTTP 200 for both; type <code>SmddDrawingVersionDataSheet</code></td><td>Drawing revision metadata is available for versions 1 and 2.</td></tr>
+      <tr><td>Resolve content revisions</td><td>HTTP 404 when each known drawing-version UID was supplied to the content-revision reader</td><td>A drawing-version UID has not been demonstrated to be a content-revision ID. No valid mapping or revision listing was obtained.</td></tr>
+      <tr><td>Inspect the live file-property definition</td><td>25 properties; zero file properties</td><td>Neither found record supplied a file property to select for a valid file transfer.</td></tr>
+      <tr><td>Probe the advertised file route</td><td>The literal <code>file</code> property was diagnostic and is not declared by this type. Both probes ended in authentication refusal; the second retained HTTP 401 before and after one renewal.</td><td>No bytes were returned. This is not a successful test of a valid file property, a proven document ACL denial, or evidence of another host.</td></tr>
+      <tr><td>Request a nonexistent revision reference</td><td>HTTP 404</td><td>A not-found revision reference was observed, but the missing-document-version control remains unestablished because the known version UID aliases also returned 404.</td></tr>
+      <tr><td>Observe a not-permitted document</td><td>No explicit document-level denial established</td><td>The HTTP 401 file responses are authentication refusals. They are retained as refusals, never empty successes.</td></tr>
     </tbody>
   </table>
-  <p>Positive controls found 179 UID parameters, 24 revision-ID parameters and
-  the expected <code>PbsViewDto</code> response schema. The generic file and
-  revision routes were inspected rather than equating a keyword-search zero
-  with absence. This result concerns the advertised live API; it makes no
-  claim about undocumented routes or a separate IDM host.</p>
+  <p>The broader description advertises a generic history operation at
+  <code>POST /api/main/history/content/with-sub-contents-history</code>;
+  it was not called. No GET version-list operation for the exercised SMDD type
+  was found. Other applications advertise their own version-list GETs, so this
+  result is scoped to these records and their type. No API POST or other data
+  host was used. The existing bounded sign-in exchange remains the only
+  non-GET traffic.</p>
 
   <h3>Document measures and private receipts</h3>
-  <p>The two candidate identities remain only in private receipts. Their current
-  document versions, file sizes, digests, spreadsheet sheet names and row counts
-  were not measured because no supported document route was found. The missing-version
-  and not-permitted controls are <strong>not established</strong>; zero identity
-  attempts were made against an undocumented route. The tracked tree contains
-  neither candidate identity, and a search for known tracked client source
-  confirmed that the search instrument sees present content. No document bytes
-  exist from this run to scan or commit.</p>
+  <p>The file-fetch measure remains unmet: no spreadsheet or PDF was stored, so
+  file sizes, digests, sheet names and row counts are unmeasured. The
+  missing-version and not-permitted controls are explicitly
+  <strong>not established</strong>. A usable integration document with a
+  declared file property, a validated GET version-to-revision mapping and file
+  authorization is needed before transfer can proceed. These observations do
+  not justify authorizing a second host.</p>
+  <p>A tracked-tree search found none of the six private identity/title search
+  terms and successfully found known tracked client source. Metadata responses
+  remain in the private run directory; no fetched identity, title or file
+  content is committed. Raw probe receipts initially used <code>found</code>
+  for a nonempty HTTP body, including a serialized empty array. The normalized
+  summary uses the actual zero-match bodies and the one-match positive control
+  to distinguish HTTP success from finding an object.</p>
   <p>The run directory retains <code>credential-reproduction.log</code>,
   <code>credential-committed.log</code>, <code>negative-credential-forward.log</code>,
   <code>live-attempts-summary.json</code>, <code>live-route-inventory.json</code>,
-  <code>route-inventory-summary.json</code> and <code>tracked-tree-scan.json</code>.
+  <code>route-inventory-summary.json</code>, <code>uid-record-receipt.json</code>,
+  <code>uid-discovery-receipt.json</code>, <code>document-uid-batch-receipt.json</code>,
+  <code>remaining-document-reads.json</code>, <code>file-route-outcome.json</code>
+  and <code>uid-request-summary.json</code>.
   Request receipts contain methods, phases and statuses; sign-in receipts add
   only origins and paths. Credentials, cookies and tokens were neither printed
   nor stored by these probes.</p>
