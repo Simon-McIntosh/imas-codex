@@ -710,9 +710,34 @@ def _contrasts(sentence: str) -> bool:
     )
 
 
+# The physical bases a quantity is measured in, as opposed to the roster's
+# carrier and geometry words ("phase", "surface"): the guard below asks whether
+# the qualifier's words modify another *quantity*, so only these can answer it.
+_QUANTITY_BASE_WORDS = (
+    "area",
+    "charge",
+    "count",
+    "current",
+    "density",
+    "energy",
+    "flux",
+    "mass",
+    "momentum",
+    "power",
+    "pressure",
+    "speed",
+    "temperature",
+    "velocity",
+    "volume",
+)
+
+
 @lru_cache(maxsize=1)
-def _physical_base_stems() -> frozenset[str]:
-    return frozenset(_qualifier_stem(base) for base in _physical_base_roster())
+def _quantity_base_stems() -> frozenset[str]:
+    roster = _physical_base_roster()
+    return frozenset(
+        _qualifier_stem(word) for word in _QUANTITY_BASE_WORDS if word in roster
+    )
 
 
 def _token_followed_by_a_base(sentence: str, token: str) -> bool:
@@ -727,7 +752,7 @@ def _token_followed_by_a_base(sentence: str, token: str) -> bool:
     words = [word for word in re.split(r"[^a-z0-9]+", sentence.lower()) if word]
     token_words = [word for word in re.split(r"[^a-z0-9]+", token.lower()) if word]
     stems = [_qualifier_stem(word) for word in token_words]
-    bases = _physical_base_stems()
+    bases = _quantity_base_stems()
     for start in range(len(words) - len(stems) + 1):
         window = [_qualifier_stem(word) for word in words[start : start + len(stems)]]
         if window != stems:
