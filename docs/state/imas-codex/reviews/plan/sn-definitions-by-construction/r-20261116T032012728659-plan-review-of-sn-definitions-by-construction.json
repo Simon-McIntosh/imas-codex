@@ -43,9 +43,28 @@
       "note": "The wording section's first measure now counts every live name whose source states an equivalent-electron counting basis, the fifty-six waiting names among them, each carrying the qualifier or listed with the source evidence; the new section says the renames run under that section once the review is repaired.",
       "reason": "",
       "when": "2026-11-16T03:43:39.038770+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2739861a8f8bf7f6a347b912863ee0a96bf23d8c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The measure is now the verdict over a counted class: every live name carrying a qualifier its source states only on an enclosing structure, listed with the stating structure, has no source-support check above cutoff for that qualifier in its newest review.",
+      "reason": "",
+      "when": "2026-11-16T03:44:02.268736+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2739861a8f8bf7f6a347b912863ee0a96bf23d8c",
+      "commit_basis": "edit",
+      "note": "The measure is now the verdict over a counted class: every live name carrying a qualifier its source states only on an enclosing structure, listed with the stating structure, has no source-support check above cutoff for that qualifier in its newest review.",
+      "reason": "",
+      "when": "2026-11-16T03:44:02.268736+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
