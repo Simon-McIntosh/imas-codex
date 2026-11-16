@@ -53,6 +53,16 @@
       "note": "Version 34 restates the bar from the hand reading: at most four wrong in forty, beside the paid model's none and the local model's 26 on that instrument, marked as the coordinator's proposal for the lead to change.",
       "reason": "",
       "when": "2026-11-16T19:58:26.452433+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Version 35 removes sections 6 and 7 from the earlier decision's scope and its rationale says it no longer governs them; the open decision is the only one attached to those sections.",
+      "reason": "",
+      "when": "2026-11-16T19:58:33.216329+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "Version 34 restates the bar from the hand reading: at most four wrong in forty, beside the paid model's none and the local model's 26 on that instrument, marked as the coordinator's proposal for the lead to change.",
       "reason": "",
       "when": "2026-11-16T19:58:26.452433+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "note": "Version 35 removes sections 6 and 7 from the earlier decision's scope and its rationale says it no longer governs them; the open decision is the only one attached to those sections.",
+      "reason": "",
+      "when": "2026-11-16T19:58:33.216329+00:00"
     },
     "wiring-1": {
       "action": "acted",
