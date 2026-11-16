@@ -25,7 +25,30 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 4,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5cb361c74f16ea5cc53b81aba4020aa4bcde9805",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The done-when now states both repairs (regeneration, or one agent proposal through the signed edit path), the seeded assignment within each defect class, the reporting of a cause shared by three or more members as a pipeline defect, and what the comparison reports per arm and class.",
+      "reason": "",
+      "when": "2026-11-16T23:39:22.151885+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5cb361c74f16ea5cc53b81aba4020aa4bcde9805",
+      "commit_basis": "edit",
+      "note": "The done-when now states both repairs (regeneration, or one agent proposal through the signed edit path), the seeded assignment within each defect class, the reporting of a cause shared by three or more members as a pipeline defect, and what the comparison reports per arm and class.",
+      "reason": "",
+      "when": "2026-11-16T23:39:22.151885+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261116T231517842280-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261116T231517842280-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "52788aef5c182b30afe36a49e4cc38bb273b8e38",
   "rubric": "content",
