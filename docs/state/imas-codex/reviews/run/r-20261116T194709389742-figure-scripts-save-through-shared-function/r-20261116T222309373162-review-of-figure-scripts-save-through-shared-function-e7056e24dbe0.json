@@ -1,0 +1,62 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 8,
+  "call_sites": [
+    "imas_codex/plotting/signals.py:237",
+    "scripts/figures_ai_stack.py:599",
+    "scripts/figures_discovery_to_mapping.py:329",
+    "scripts/figures_icp_knowledge_map.py:758",
+    "scripts/figures_icp_knowledge_map.py:1011",
+    "scripts/figures_jt60sa_mapping_study.py:140",
+    "scripts/figures_knowledge_graph_scale.py:577",
+    "scripts/figures_mapping_flow.py:139"
+  ],
+  "completed_at": "2026-11-16T23:13:56.990Z",
+  "dispatched_at": "2026-11-16T23:13:35Z",
+  "findings": [
+    {
+      "file": "tests/plotting/test_figure_text.py",
+      "id": "f6684a8490c",
+      "line": "101",
+      "severity": "non-blocking",
+      "text": "non-blocking: the baseline assertion requires exactly two distinct system-label heights, which is the current two-row grid rather than the property under test, so adding a third card row fails the test although the shared baseline still holds, while a uniform shift of every system label would keep it green."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit from a2cf01a77 to e7056e24d; 67585fb80 carries all code (style.py gains title_strip at :31 and decoration at :103-134, the refusal now covers every visible line, plus shown_path, _wrapped, figure_decoration, GRID_TITLE_LINES=2 and the darkened fills) while also rewriting the two receipt-reading assertions and adding tests/plotting/test_figure_text.py, 0db7d7ac0 regenerates four figures and the discovery evidence receipt, and e7056e24d records the repairs in the fragment.",
+    "done_when": "the done-when fence asks for a recorded search (0 savefig, 0 export functions, exactly 1 text check and 1 slide-size declaration), tests/plotting passing including the label-beyond-canvas refusal, each file's drawn/declared ratio within 1e-3, and a landing record listing each script and each vector file's declared size before and after plus the net scripts/ line change; gate-plotting-tests.log records \"35 passed, 2 warnings in 3.42s\" and EXIT=0 at e7056e24d with tests/plotting/test_figure_scripts.py::test_a_script_given_a_label_beyond_the_canvas_writes_no_file among the passers, I reproduced the counts by grep at head, and docs/evidence/fragments/figure-scripts-use-the-shared-save-function/figure-scripts-save-through-shared-function.html:87-113 and :202 carry the declared-size table and \"Net change under scripts/: +174 / -328\".",
+    "goal": "the reviewed node's goal is that every figure script under scripts/ saves through the shared function with no check or export function of its own; at head e7056e24d git grep finds 0 savefig under scripts/, exactly one save_figure definition (imas_codex/plotting/style.py:103), one clipped-text refusal (imas_codex/plotting/style.py:87) and one slide-size declaration (imas_codex/plotting/style.py:50), so the round-two commits keep the goal intact while repairing the figures.",
+    "manifest": "read; it records the three commits, the gate's 35 passed at e7056e24d, the negative-control log whose mutation restores the underscore label convention and reports \"DID NOT RAISE\" with EXIT=1, and both suite arms as unreadable -- baseline-suite.log and after-suite.log each abort at collection with EXIT=4 and no failing test id.",
+    "write_paths": "the node declared 21 paths at prompt.txt:85-107; the diff a2cf01a77dee..e7056e24dbe0 touches exactly the 14 paths this review is scoped to and every one of them -- imas_codex/plotting/style.py, the five scripts/, the two tests/plotting files, docs/figures/{discovery-to-mapping,icp-knowledge-map,jt60sa-mapping-study} files and the landing fragment -- lies inside those declared paths, with nothing outside."
+  },
+  "justifications": {
+    "durability": "tests/plotting/test_figure_scripts.py:113 reddens on the restored underscore-label convention (mutation log DID NOT RAISE, EXIT=1) and tests/plotting/test_figure_text.py:70 reddens on the old fixed-column wrap, which I replayed: it breaks at 'th|e' and 'diagnost|ic', both bigrams present in the prose the assertion rejects; the repository-relative provenance is guarded only through the regenerated files at tests/plotting/test_figure_text.py:123, so a shown_path edit without a re-render stays green.",
+    "evidence": "gate-plotting-tests.log records 35 passed and EXIT=0 at e7056e24d and its header names the revision and the resolved module, but the ratio, declared-size, line-change and search measures the fence also asks for sit in the landing record and the manifest rather than in the gate.",
+    "fit": "the additions follow the surrounding idiom -- title_strip at imas_codex/plotting/style.py:31 is a plain artist factory beside _declared_size, and figure_decoration at scripts/figures_icp_knowledge_map.py:743 reads a fig attribute exactly as the existing figure_marks does -- and introduce no forbidden name.",
+    "goal_fidelity": "the shared export remains the only exporter (0 savefig under scripts/ at e7056e24d, one definition at imas_codex/plotting/style.py:103) and the round adds nothing that bypasses it.",
+    "reuse": "title_strip at imas_codex/plotting/style.py:31 replaces two identical Rectangle constructions in scripts/figures_knowledge_graph_scale.py:577 and scripts/figures_mapping_flow.py:139, and decoration at :111 extends the existing save_figure owner; the only repeated item is the five-line test import shim at tests/plotting/test_figure_text.py:27, a shim the repository inlines in dozens of test modules with no owning helper.",
+    "scope_discipline": "every path in git diff a2cf01a77dee..e7056e24dbe0 falls inside prompt.txt:85-107, and the only content beyond the repairs is the regenerated docs/figures/discovery-to-mapping/evidence.json that re-running the script necessarily rewrites."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is that every figure script under scripts/ saves through the shared function with no check or export function of its own; at head e7056e24d git grep finds 0 savefig under scripts/, exactly one save_figure definition (imas_codex/plotting/style.py:103), one clipped-text refusal (imas_codex/plotting/style.py:87) and one slide-size declaration (imas_codex/plotting/style.py:50), so the round-two commits keep the goal intact while repairing the figures.\nVERDICT done_when: the done-when fence asks for a recorded search (0 savefig, 0 export functions, exactly 1 text check and 1 slide-size declaration), tests/plotting passing including the label-beyond-canvas refusal, each file's drawn/declared ratio within 1e-3, and a landing record listing each script and each vector file's declared size before and after plus the net scripts/ line change; gate-plotting-tests.log records \"35 passed, 2 warnings in 3.42s\" and EXIT=0 at e7056e24d with tests/plotting/test_figure_scripts.py::test_a_script_given_a_label_beyond_the_canvas_writes_no_file among the passers, I reproduced the counts by grep at head, and docs/evidence/fragments/figure-scripts-use-the-shared-save-function/figure-scripts-save-through-shared-function.html:87-113 and :202 carry the declared-size table and \"Net change under scripts/: +174 / -328\".\nVERDICT write_paths: the node declared 21 paths at prompt.txt:85-107; the diff a2cf01a77dee..e7056e24dbe0 touches exactly the 14 paths this review is scoped to and every one of them -- imas_codex/plotting/style.py, the five scripts/, the two tests/plotting files, docs/figures/{discovery-to-mapping,icp-knowledge-map,jt60sa-mapping-study} files and the landing fragment -- lies inside those declared paths, with nothing outside.\nVERDICT manifest: read; it records the three commits, the gate's 35 passed at e7056e24d, the negative-control log whose mutation restores the underscore label convention and reports \"DID NOT RAISE\" with EXIT=1, and both suite arms as unreadable -- baseline-suite.log and after-suite.log each abort at collection with EXIT=4 and no failing test id.\nVERDICT diff: read commit by commit from a2cf01a77 to e7056e24d; 67585fb80 carries all code (style.py gains title_strip at :31 and decoration at :103-134, the refusal now covers every visible line, plus shown_path, _wrapped, figure_decoration, GRID_TITLE_LINES=2 and the darkened fills) while also rewriting the two receipt-reading assertions and adding tests/plotting/test_figure_text.py, 0db7d7ac0 regenerates four figures and the discovery evidence receipt, and e7056e24d records the repairs in the fragment.\nCALL_SITES: imas_codex/plotting/signals.py:237, scripts/figures_ai_stack.py:599, scripts/figures_discovery_to_mapping.py:329, scripts/figures_icp_knowledge_map.py:758, scripts/figures_icp_knowledge_map.py:1011, scripts/figures_jt60sa_mapping_study.py:140, scripts/figures_knowledge_graph_scale.py:577, scripts/figures_mapping_flow.py:139\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: the shared export remains the only exporter (0 savefig under scripts/ at e7056e24d, one definition at imas_codex/plotting/style.py:103) and the round adds nothing that bypasses it.\nSCORE evidence: 17\nJUSTIFICATION evidence: gate-plotting-tests.log records 35 passed and EXIT=0 at e7056e24d and its header names the revision and the resolved module, but the ratio, declared-size, line-change and search measures the fence also asks for sit in the landing record and the manifest rather than in the gate.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff a2cf01a77dee..e7056e24dbe0 falls inside prompt.txt:85-107, and the only content beyond the repairs is the regenerated docs/figures/discovery-to-mapping/evidence.json that re-running the script necessarily rewrites.\nSCORE durability: 18\nJUSTIFICATION durability: tests/plotting/test_figure_scripts.py:113 reddens on the restored underscore-label convention (mutation log DID NOT RAISE, EXIT=1) and tests/plotting/test_figure_text.py:70 reddens on the old fixed-column wrap, which I replayed: it breaks at 'th|e' and 'diagnost|ic', both bigrams present in the prose the assertion rejects; the repository-relative provenance is guarded only through the regenerated files at tests/plotting/test_figure_text.py:123, so a shown_path edit without a re-render stays green.\nSCORE fit: 18\nJUSTIFICATION fit: the additions follow the surrounding idiom -- title_strip at imas_codex/plotting/style.py:31 is a plain artist factory beside _declared_size, and figure_decoration at scripts/figures_icp_knowledge_map.py:743 reads a fig attribute exactly as the existing figure_marks does -- and introduce no forbidden name.\nSCORE reuse: 18\nJUSTIFICATION reuse: title_strip at imas_codex/plotting/style.py:31 replaces two identical Rectangle constructions in scripts/figures_knowledge_graph_scale.py:577 and scripts/figures_mapping_flow.py:139, and decoration at :111 extends the existing save_figure owner; the only repeated item is the five-line test import shim at tests/plotting/test_figure_text.py:27, a shim the repository inlines in dozens of test modules with no owning helper.\nFINDING tests/plotting/test_figure_text.py:101 non-blocking: the baseline assertion requires exactly two distinct system-label heights, which is the current two-row grid rather than the property under test, so adding a third card row fails the test although the shared baseline still holds, while a uniform shift of every system label would keep it green.\n",
+  "review_run_id": "r-20261116T222309373162-review-of-figure-scripts-save-through-shared-function-e7056e24dbe0",
+  "reviewed_base_sha": "a2cf01a77deefcc1ab54aefb91b912276978ab30",
+  "reviewed_head_sha": "e7056e24dbe0a67c4dc54a6f755b8d643cf5697a",
+  "reviewed_run_id": "r-20261116T194709389742-figure-scripts-save-through-shared-function",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:38:49.604049+00:00",
+  "total": 108
+}
