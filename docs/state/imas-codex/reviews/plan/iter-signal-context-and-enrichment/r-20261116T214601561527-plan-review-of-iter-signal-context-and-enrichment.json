@@ -17,7 +17,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 38,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 6's bar at version 41 requires at most four wrong and at least twenty-eight right of forty, and defines wrong, partly right and right.",
+      "reason": "",
+      "when": "2026-11-16T23:32:57.590903+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "note": "Section 6's bar at version 41 requires at most four wrong and at least twenty-eight right of forty, and defines wrong, partly right and right.",
+      "reason": "",
+      "when": "2026-11-16T23:32:57.590903+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T214601561527-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261116T214601561527-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "15ed5d6901253262ca26d54f3cdb4264956eb04d",
   "rubric": "content",
