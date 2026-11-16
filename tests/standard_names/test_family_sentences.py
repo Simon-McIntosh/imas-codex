@@ -121,7 +121,14 @@ def test_a_rendered_member_carries_its_family_sentence() -> None:
 
 
 def test_the_members_of_a_family_carry_one_description() -> None:
-    """Every member's description is the family's one wording, species apart."""
+    """Every member's description is the family's one wording, species apart.
+
+    Each member is handed a written description of its own, differing in a way
+    the species substitution cannot collapse, and the stored description is
+    asserted directly. Deleting the family branch of
+    ``description_with_population`` leaves three distinct templates and three
+    written descriptions here, so this test goes red on that deletion.
+    """
 
     for key in SPECIES_FAMILY_SENTENCES:
         members = [key.replace("<X>", token) for token in ("argon", "neon", "iron")]
@@ -136,13 +143,18 @@ def test_the_members_of_a_family_carry_one_description() -> None:
                 word_re.sub(
                     "<X>",
                     description_with_population(
-                        member, "Text the model wrote for this member."
+                        member,
+                        f"Written in the model's own words, variant {members.index(member)}.",
                     ),
                 ),
             )
             for member in members
         }
         assert len(templates) == 1, (key, templates)
+        for member in members:
+            assert description_with_population(
+                member, "Any other wording the model offered."
+            ) == species_family_description(member), key
 
 
 def test_a_family_sentence_is_carried_beside_the_operator_wording() -> None:
