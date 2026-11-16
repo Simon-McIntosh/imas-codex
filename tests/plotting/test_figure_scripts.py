@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import importlib.util
+import re
 from pathlib import Path
 
 import matplotlib
@@ -12,6 +13,7 @@ import matplotlib.pyplot as plt
 import pytest
 from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Rectangle
+from PIL import Image
 
 from imas_codex.plotting import save_figure, style
 
@@ -52,14 +54,18 @@ def test_animated_export_writes_a_gif_at_the_canvas_ratio(tmp_path):
     )
     path = tmp_path / "animation.gif"
     try:
-        receipt = save_figure(figure, path, dpi=100, animation=animation, fps=5)
+        save_figure(figure, path, dpi=100, animation=animation, fps=5)
     finally:
         plt.close(figure)
     assert path.is_file()
-    assert receipt["pixel_size"][0] / receipt["pixel_size"][1] == pytest.approx(
+    with Image.open(path) as written:
+        pixels = written.size
+        frames = getattr(written, "n_frames", 1)
+    assert frames == 2
+    assert pixels[0] / pixels[1] == pytest.approx(
         style.CANVAS[0] / style.CANVAS[1], rel=1e-3
     )
-    print(f"GIF {receipt['pixel_size']} bytes={receipt['bytes']}")
+    print(f"GIF {pixels} frames={frames} bytes={path.stat().st_size}")
 
 
 def test_declared_slide_size_keeps_the_ratio_of_any_canvas(tmp_path):
@@ -72,10 +78,14 @@ def test_declared_slide_size_keeps_the_ratio_of_any_canvas(tmp_path):
     figure.subplots_adjust(left=0.13, right=0.97, bottom=0.1, top=0.94)
     path = tmp_path / "tall.svg"
     try:
-        receipt = save_figure(figure, path)
+        save_figure(figure, path)
     finally:
         plt.close(figure)
-    width, height = receipt["declared_cm"]
+    declared = re.search(
+        r'width="([\d.]+)cm" height="([\d.]+)cm"', path.read_text()
+    )
+    assert declared is not None
+    width, height = (float(value) for value in declared.groups())
     drawn = canvas[0] / canvas[1]
     assert abs(width / height - drawn) <= drawn / 1000
     print(f"DECLARED {width}x{height}cm drawn_ratio={drawn:.5f}")
@@ -95,6 +105,25 @@ def test_a_mark_covering_text_is_refused(tmp_path):
         assert not path.exists()
         # the same figure exports once the mark is not held clear of text
         save_figure(figure, path)
+        assert path.is_file()
+    finally:
+        plt.close(figure)
+
+
+def test_a_label_over_an_unlabelled_data_line_is_refused(tmp_path):
+    """A trace the legend never names is still data a reader can confuse."""
+    figure, axis = plt.subplots(figsize=style.CANVAS)
+    axis.plot([0.0, 1.0], [0.5, 0.5])
+    axis.text(0.5, 0.5, "7.4", ha="center", va="center")
+    axis.set(xlim=(0, 1), ylim=(0, 1))
+    figure.subplots_adjust(left=0.13, right=0.97, bottom=0.14, top=0.88)
+    path = tmp_path / "unlabelled.svg"
+    try:
+        with pytest.raises(ValueError, match="direct label overlaps data"):
+            save_figure(figure, path)
+        assert not path.exists()
+        # naming the line as decoration is the way to except it, and then it exports
+        save_figure(figure, path, decoration=axis.lines)
         assert path.is_file()
     finally:
         plt.close(figure)

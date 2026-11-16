@@ -705,9 +705,22 @@ def base(stage: str):
     labels = draw_town_labels(ax)
     if stage == "c":
         routes = relation_routes(load_roads())
+        roads = []
         for points in routes:
             xs, ys = zip(*points, strict=True)
-            ax.plot(xs, ys, color=INK, linewidth=3.0, solid_capstyle="round", zorder=3)
+            roads.append(
+                ax.plot(
+                    xs,
+                    ys,
+                    color=INK,
+                    linewidth=3.0,
+                    solid_capstyle="round",
+                    zorder=3,
+                )[0]
+            )
+        # the highways the relationships run along: the map's substrate, not a
+        # value the reader takes off them, so a place or verb label may sit on one
+        fig.route_lines = roads
         labels += draw_relation_labels(ax, routes[: len(RELATIONS)], labels)
     return fig, ax, labels, routes
 
@@ -727,14 +740,34 @@ def figure_marks(fig) -> list:
     return list(getattr(fig, "relation_arrows", ()))
 
 
+def figure_decoration(fig) -> list:
+    """The highway lines the relationships are routed along.
+
+    A highway is the cartographic base of the map: a place name and a verb both
+    sit beside the road they belong to, and their white backing keeps them
+    legible over one. They carry no value of their own, so they are named as
+    decoration and the direct-label refusal passes over them; the arrowheads and
+    the stage's own data stay in the check.
+    """
+    return list(getattr(fig, "route_lines", ()))
+
+
 def save_static(stage: str, draft: Path | None) -> Path:
     fig, _, _, _ = base(stage)
     if draft is not None:
-        save_figure(fig, draft, dpi=100, clear_of=figure_marks(fig))
+        save_figure(
+            fig,
+            draft,
+            dpi=100,
+            clear_of=figure_marks(fig),
+            decoration=figure_decoration(fig),
+        )
         plt.close(fig)
         return draft
     svg = FIGURES / f"{STEMS[stage]}.svg"
-    save_figure(fig, svg, clear_of=figure_marks(fig))
+    save_figure(
+        fig, svg, clear_of=figure_marks(fig), decoration=figure_decoration(fig)
+    )
     plt.close(fig)
     print(svg.relative_to(ROOT))
     return svg
@@ -982,6 +1015,7 @@ def save_gif(fig, update, frames: int, stem: str) -> Path:
         animation=animation,
         fps=FPS,
         clear_of=figure_marks(fig),
+        decoration=figure_decoration(fig),
     )
     plt.close(fig)
     print(
@@ -999,7 +1033,13 @@ def save_traffic(stage: str, draft: Path | None) -> Path:
     frames = int(LOOP_SECONDS * FPS)
     if draft is not None:
         layer.update(LOOP_SECONDS * 0.37)
-        save_figure(fig, draft, dpi=100, clear_of=figure_marks(fig))
+        save_figure(
+            fig,
+            draft,
+            dpi=100,
+            clear_of=figure_marks(fig),
+            decoration=figure_decoration(fig),
+        )
         plt.close(fig)
         return draft
     return save_gif(fig, lambda f: layer.update(f / FPS), frames, STEMS[stage])
@@ -1009,6 +1049,10 @@ def save_traffic(stage: str, draft: Path | None) -> Path:
 
 # Names too wide for a card at presentation size, broken over two lines.
 GRID_NAMES = {"ncr": "Non-Conformance\nReports"}
+
+# The title block is two lines tall on every card: the 20 pt name at 1.1 line
+# spacing, so a name that wraps does not push its card's next line down.
+GRID_TITLE_LINES = 2
 GRID_SYSTEMS = {"cad": "CATIA\nDassault Systèmes"}
 
 # Repositories in reading order for the full-width grid: five above, five below.
@@ -1131,7 +1175,6 @@ def grid_figure(thumbnails: Path | None) -> Path:
         cx = (x0 + card_w / 2) / SLIDE_WIDTH
         name_y = (top - image_h - 0.12) / HEIGHT
         name = GRID_NAMES.get(key, town.name)
-        lines = name.count("\n") + 1
         fig.text(
             cx,
             name_y,
@@ -1143,9 +1186,11 @@ def grid_figure(thumbnails: Path | None) -> Path:
             color=INK,
             linespacing=1.1,
         )
+        # Every card reserves the same title height, so the line below the title
+        # sits on one baseline across the row even where a name wraps to two.
         fig.text(
             cx,
-            name_y - 0.052 * lines - 0.006,
+            name_y - 0.052 * GRID_TITLE_LINES - 0.006,
             GRID_SYSTEMS.get(key, town.system),
             ha="center",
             va="top",

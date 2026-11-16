@@ -33,11 +33,10 @@ from imas_codex.graph.client import GraphClient
 from imas_codex.plotting.style import CANVAS, save_figure, use_style
 
 ROOT = Path(__file__).resolve().parents[1]
-MAIN = Path("/home/ITER/mcintos/Code/imas-codex")
 LIVE_HANDOFF = Path(
     "/work/projects/imas_gpu/jt60sa/handoff/jt-60sa-mapping-handoff.json"
 )
-FIXTURE = MAIN / "tests/fixtures/mapping_handoff_example.json"
+FIXTURE = ROOT / "tests/fixtures/mapping_handoff_example.json"
 FIGURES = ROOT / "docs/figures/discovery-to-mapping"
 REPORT = ROOT / "docs/research/discovery-to-mapping-pipeline.html"
 PRESENTATION = Path("/work/projects/imas_gpu/jt60sa/presentation")
@@ -64,6 +63,24 @@ EDGE_FIELDS = (
 
 def dumps(value: Any) -> str:
     return json.dumps(value, indent=2, ensure_ascii=False, default=str)
+
+
+def shown_path(path: Path | str) -> str:
+    """The path as a figure or receipt should print it.
+
+    A path inside the repository is printed repository-relative: a
+    machine-local absolute path names the checkout that rendered the figure,
+    not the file, and is unreadable beside a slide. A path outside the
+    repository, such as the live hand-off, keeps its own form because that is
+    what identifies it.
+    """
+    path = Path(path)
+    if not path.is_absolute():
+        return str(path)
+    try:
+        return str(path.resolve().relative_to(ROOT))
+    except ValueError:
+        return str(path)
 
 
 def check_schema() -> dict[str, Any]:
@@ -437,25 +454,44 @@ def lifecycle(presentation: Path) -> dict[str, Any]:
 
 
 def styled_lines(value: Any, columns: int = 52) -> list[list[tuple[str, str]]]:
+    """JSON, syntax-coloured, with lines wrapped at word boundaries.
+
+    A break falls back to the column only when the run carries no space to
+    break at, so a long identifier is split rather than spilling into the
+    neighbouring column, while prose keeps every word whole.
+    """
     style = get_style_by_name(PYGMENTS_STYLE)
-    lines: list[list[tuple[str, str]]] = [[]]
-    used = 0
+    logical: list[list[tuple[str, str]]] = [[]]
     for token, text in lex(dumps(value), JsonLexer()):
         colour = style.style_for_token(token)["color"] or "242424"
         for char in text:
             if char == "\n":
-                lines.append([])
-                used = 0
+                logical.append([])
             else:
-                if used == columns:
-                    lines.append([])
-                    used = 0
-                if lines[-1] and lines[-1][-1][1] == colour:
-                    previous, _ = lines[-1][-1]
-                    lines[-1][-1] = (previous + char, colour)
-                else:
-                    lines[-1].append((char, colour))
-                used += 1
+                logical[-1].append((char, colour))
+    lines: list[list[tuple[str, str]]] = []
+    for row in logical:
+        lines.extend(_wrapped(row, columns))
+    return lines
+
+
+def _wrapped(chars: list[tuple[str, str]], columns: int) -> list[list[tuple[str, str]]]:
+    lines: list[list[tuple[str, str]]] = []
+    current: list[tuple[str, str]] = []
+    for char, colour in chars:
+        if len(current) == columns:
+            cut = next(
+                (
+                    index + 1
+                    for index in range(len(current) - 1, -1, -1)
+                    if current[index][0] == " "
+                ),
+                len(current),
+            )
+            lines.append(current[:cut])
+            current = current[cut:]
+        current.append((char, colour))
+    lines.append(current)
     return lines
 
 
@@ -467,7 +503,7 @@ def json_figure(
     height = max(7.0, 2.8 + max(len(left), len(right)) * 0.235)
     fig, ax = figure(height)
     ax.text(0.35, height - 0.45, source_kind, fontsize=20, color=INK)
-    for index, part in enumerate(textwrap.wrap(str(source), width=108)):
+    for index, part in enumerate(textwrap.wrap(shown_path(source), width=108)):
         ax.text(0.35, height - 0.82 - index * 0.27, part, fontsize=12, color=REFERENCE)
     for x, label in [(0.35, "Hand-off signal row"), (7.3, "Live graph projection")]:
         ax.text(x, height - 1.65, label, fontsize=20, color=INK)
@@ -522,7 +558,10 @@ def select_examples(reader: Reader, document: dict[str, Any]) -> list[dict[str, 
             ]
             if not candidates:
                 raise ValueError(f"Neither hand-off document has a {title} row")
-            origin = {"source_path": FIXTURE, "source_kind": "CONTRACT FIXTURE"}
+            origin = {
+                "source_path": shown_path(FIXTURE),
+                "source_kind": "CONTRACT FIXTURE",
+            }
         entry, row = candidates[0]
         graph = read_record(reader, row, stem)
         missing = [name for name, value in graph.items() if value is None]
@@ -705,7 +744,7 @@ def main() -> None:
         "schema_sha256": check_schema(),
         "renderer_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
         "source": {
-            "path": str(source),
+            "path": shown_path(source),
             "kind": source_kind,
             "sha256": hashlib.sha256(source.read_bytes()).hexdigest(),
             "exported_at": document.get("exported_at"),

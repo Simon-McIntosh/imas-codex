@@ -34,11 +34,11 @@ from figures_knowledge_graph_scale import (  # noqa: E402
     TITLE_SPACE,
     human,
 )
-from matplotlib.patches import Rectangle  # noqa: E402
 
 from imas_codex.plotting.style import (  # noqa: E402
     CANVAS,
     save_figure,
+    title_strip,
     use_style,
 )
 
@@ -136,15 +136,7 @@ def draw(data: dict, out, draft) -> None:
 
     use_style(**FONT)
     fig = plt.figure(figsize=CANVAS)
-    reserved = Rectangle(
-        (0, 1 - TITLE_SPACE / HEIGHT),
-        1,
-        TITLE_SPACE / HEIGHT,
-        transform=fig.transFigure,
-        facecolor="none",
-        edgecolor="none",
-    )
-    fig.add_artist(reserved)
+    reserved = title_strip(fig, TITLE_SPACE / HEIGHT)
     ax = fig.add_axes((0, 0, 1, 1))
     ax.set_xlim(0, SLIDE_WIDTH)
     ax.set_ylim(0, HEIGHT)

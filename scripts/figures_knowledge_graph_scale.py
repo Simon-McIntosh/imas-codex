@@ -36,11 +36,11 @@ import matplotlib.pyplot as plt  # noqa: E402
 import networkx as nx  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.collections import LineCollection  # noqa: E402
-from matplotlib.patches import Rectangle  # noqa: E402
 
 from imas_codex.plotting.style import (  # noqa: E402
     CANVAS,
     save_figure,
+    title_strip,
     use_style,
 )
 
@@ -574,15 +574,7 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
     use_style(**FONT)
     fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
     # the strip the slide draws its own title into; no figure text may enter it
-    reserved = Rectangle(
-        (0, 1 - TITLE_SPACE / HEIGHT),
-        1,
-        TITLE_SPACE / HEIGHT,
-        transform=fig.transFigure,
-        facecolor="none",
-        edgecolor="none",
-    )
-    fig.add_artist(reserved)
+    reserved = title_strip(fig, TITLE_SPACE / HEIGHT)
     ax = fig.add_axes((0, 0, 1, 1))
     ax.axis("off")
     ax.set(xlim=(0, SLIDE_WIDTH), ylim=(0, HEIGHT), aspect="equal")
