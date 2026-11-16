@@ -15,6 +15,13 @@
     "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:307 refuse_altered_shared_parts"
   ],
   "completed_at": "2026-11-16T07:05:06.333Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "exempted",
+      "reason": "The node's two declared write paths were too narrow for its goal, which requires the source and guard-test edits; the review found the changes within the goal. The fence was under-specified at dispatch, a coordinator fault, not a change out of substance.",
+      "recorded_at": "2026-11-16T10:42:25.275929+00:00"
+    }
+  },
   "dispatched_at": "2026-11-16T07:04:43Z",
   "findings": [
     {
