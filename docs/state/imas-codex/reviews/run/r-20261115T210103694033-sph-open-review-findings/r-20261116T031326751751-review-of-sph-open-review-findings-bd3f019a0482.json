@@ -15,8 +15,8 @@
   "dimension_dispositions": {
     "scope_discipline": {
       "kind": "exempted",
-      "reason": "The node was queued with no write paths listed, so every changed file reads as outside scope; the section it implements names the six landings whose findings it closes, and the review found the 55 changed files within that goal. The fence was under-specified at dispatch, a coordinator fault, not a change out of substance.",
-      "recorded_at": "2026-11-16T03:42:54.042311+00:00"
+      "reason": "The node was queued with no write paths listed, so every changed file reads as outside scope; the review found the changed files within the section's goal. The fence was under-specified at dispatch, a coordinator fault, not a change out of substance.",
+      "recorded_at": "2026-11-16T03:46:33.447227+00:00"
     }
   },
   "dispatched_at": "2026-11-16T03:15:16Z",
