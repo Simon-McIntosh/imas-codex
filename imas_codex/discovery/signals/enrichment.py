@@ -193,7 +193,7 @@ async def enrich_signal_batch(*, model, messages, options, call, **kwargs):
     response_model = (
         CitedEnrichmentBatch if options.claim_evidence else SignalEnrichmentBatch
     )
-    if active or options.description_sentences:
+    if options.grounding or options.claim_evidence or options.description_sentences:
         system = next(message for message in messages if message["role"] == "system")
         system["content"] = render_prompt(
             "signals/enrichment_grounding",

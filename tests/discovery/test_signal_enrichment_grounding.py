@@ -359,3 +359,25 @@ async def test_production_private_sink_never_receives_missing_citation_statement
     assert record["outputs"][0]["description"] == "Cooling temperature."
     assert record["grounding_counts"]["evidence_drops"] == 2
     assert "Unsupported circuit detail" not in json.dumps(record["outputs"])
+
+
+@pytest.mark.asyncio
+async def test_review_only_keeps_the_drafting_prompt_byte_identical():
+    review = DescriptionReview(results=[{"signal_index": 1, "statements": []}])
+    _, call = await run(
+        EnrichmentOptions(review=True), [(draft(), 0, 1), (review, 0, 1)]
+    )
+    assert call.call_args_list[0].kwargs["messages"] == messages()
+    assert call.call_args_list[0].kwargs["temperature"] == 0.3
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "options",
+    [EnrichmentOptions(grounding=True), EnrichmentOptions(description_sentences=1)],
+)
+async def test_instruction_only_options_do_not_add_a_second_output_schema(options):
+    _, call = await run(options)
+    prompt = call.call_args.kwargs["messages"][0]["content"]
+    assert "Original full task" in prompt
+    assert "supersedes the schema above" not in prompt

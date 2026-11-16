@@ -34,5 +34,7 @@ Use at most {{ sentence_limit }} short sentence(s) in the description. Prefer
 the source's explicit quantity and role over additional background detail.
 {% endif %}
 
+{% if claim_evidence %}
 Return JSON only using this output schema, which supersedes the schema above:
 {{ output_schema | tojson }}
+{% endif %}
