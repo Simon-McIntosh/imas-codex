@@ -35,6 +35,16 @@
       "note": "The renames are now their own section waiting on the review-context repair; the family section waits on that repair and on the renames; the wording section waits on the family section. The order is review context, renames, family re-render, wording census.",
       "reason": "",
       "when": "2026-11-16T22:49:57.208493+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9cdee54b4013754998939d492acc8311cec68e1",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "The summary no longer mentions a recut and the open followup is resolved with the descope and the remaining order.",
+      "reason": "",
+      "when": "2026-11-16T22:50:06.437306+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The renames are now their own section waiting on the review-context repair; the family section waits on that repair and on the renames; the wording section waits on the family section. The order is review context, renames, family re-render, wording census.",
       "reason": "",
       "when": "2026-11-16T22:49:57.208493+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9cdee54b4013754998939d492acc8311cec68e1",
+      "commit_basis": "edit",
+      "note": "The summary no longer mentions a recut and the open followup is resolved with the descope and the remaining order.",
+      "reason": "",
+      "when": "2026-11-16T22:50:06.437306+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261116T221825877539-plan-review-of-sn-definitions-by-construction.json",
