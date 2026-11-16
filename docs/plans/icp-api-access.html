@@ -23,7 +23,7 @@
   <title>The pipeline reads ICP and IDM through an authenticated, read-only client | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="9">
+<meta name="plan-version" content="10">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -74,6 +74,16 @@
       <button class="r-opt chosen" data-value="personal-for-development">The lead&#x27;s own account for development, a service account before any scheduled use</button>
       </p>
     <p class="r-dec-rat">The lead said on 2026-11-15 to use their own account. A service account is still to be arranged before any scheduled use.</p>
+    </div>
+<div class="r-dec" data-key="document-source" data-choice="" data-by="" data-when="" data-sections="s4">
+    <p class="r-dec-q">Where does the pipeline read IDM document files from?</p>
+    <p class="r-dec-ctx">Measured on 2026-11-16 with GET only: the integration instance does not hold the production documents (two production identities returned zero matches), the only document-like records found there declare no file property, and file requests were refused with 401 before and after a session renewal. No file was fetched and no other host was contacted. The pilot context in the enrichment plan needs the pilot system&#x27;s signal list and functional specification.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="production-read-only">Read named documents from production ICP with the same read-only client and sign-in guardrails</button>
+      <button class="r-opt" data-value="assistant-file-tool">Fetch the pilot documents once through the document assistant&#x27;s file tool into the private cache</button>
+      <button class="r-opt" data-value="defer-documents">Defer documents and build pilot context from structure records and component lists only</button>
+      </p>
+    <p class="r-dec-rat"></p>
     </div>
 </section>
 
