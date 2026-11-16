@@ -16,7 +16,7 @@ from imas_codex.discovery.icp import (
     ICPRequestRefused,
     client as module,
 )
-from imas_codex.discovery.wiki.auth import CredentialManager
+from imas_codex.discovery.wiki.auth import CredentialManager, CredentialStoreUnavailable
 from imas_codex.discovery.wiki.confluence import ConfluenceClient
 
 ORIGIN = "https://integration.example.test"
@@ -413,16 +413,32 @@ def test_keyring_lookup_does_not_use_environment_or_prompt(monkeypatch):
     manager._keyring_available = False
     monkeypatch.setenv("ITER_USERNAME", "environment@example.test")
     monkeypatch.setenv("ITER_PASSWORD", "environment-secret")
-    assert manager.get_stored_credentials("iter") is None
+    with pytest.raises(CredentialStoreUnavailable, match="keyring is unavailable"):
+        manager.get_stored_credentials("iter")
     manager._keyring_available = True
     monkeypatch.setattr(
         manager,
         "_keyring_op",
-        lambda operation: json.dumps(
+        lambda operation, **kwargs: json.dumps(
             {"username": "stored@example.test", "password": "test"}
         ),
     )
     assert manager.get_stored_credentials("iter") == ("stored@example.test", "test")
+
+
+def test_unreadable_credential_store_reports_unavailable_before_http(
+    monkeypatch, transport
+):
+    monkeypatch.setenv("IMAS_CODEX_ICP_ORIGIN", ORIGIN)
+    monkeypatch.setenv("IMAS_CODEX_ICP_DESCRIPTION_PATH", "/openapi.json")
+    manager = Mock(spec=CredentialManager)
+    manager.get_stored_credentials.side_effect = CredentialStoreUnavailable(
+        "System keyring is unavailable; credential storage could not be read"
+    )
+    monkeypatch.setattr(module, "CredentialManager", lambda: manager)
+    with pytest.raises(ICPAuthenticationError, match="keyring is unavailable"):
+        ICPClient()
+    assert transport == []
 
 
 @pytest.mark.parametrize(
@@ -431,7 +447,7 @@ def test_keyring_lookup_does_not_use_environment_or_prompt(monkeypatch):
 def test_malformed_keyring_credentials_refuse(monkeypatch, value):
     manager = CredentialManager.__new__(CredentialManager)
     manager._keyring_available = True
-    monkeypatch.setattr(manager, "_keyring_op", lambda operation: value)
+    monkeypatch.setattr(manager, "_keyring_op", lambda operation, **kwargs: value)
     assert manager.get_stored_credentials("iter") is None
 
 

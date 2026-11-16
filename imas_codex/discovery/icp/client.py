@@ -24,7 +24,7 @@ from urllib.parse import parse_qsl, unquote, urljoin, urlsplit
 import requests
 
 from imas_codex.discovery.base.facility import get_facility_infrastructure
-from imas_codex.discovery.wiki.auth import CredentialManager
+from imas_codex.discovery.wiki.auth import CredentialManager, CredentialStoreUnavailable
 from imas_codex.discovery.wiki.confluence import ConfluenceClient
 
 _READ_METHODS = frozenset({"GET", "HEAD"})
@@ -425,7 +425,10 @@ class ICPClient:
             raise ICPConfigurationError("Gateway sign-in paths must be absolute paths")
         self.timeout = timeout
         self._creds = CredentialManager()
-        self._credentials = self._creds.get_stored_credentials(service)
+        try:
+            self._credentials = self._creds.get_stored_credentials(service)
+        except CredentialStoreUnavailable as exc:
+            raise ICPAuthenticationError(str(exc)) from exc
         if not self._credentials:
             raise ICPAuthenticationError("No stored credentials for the ICP sign-in")
         if "@" not in self._credentials[0]:
