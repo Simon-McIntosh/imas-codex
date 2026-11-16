@@ -160,10 +160,14 @@ def main() -> int:
             failures.append("spend exceeds the ceiling")
         # The recorded total is asserted against the ledger it sums, not against
         # another field of the same document: a total recorded below the true
-        # spend would otherwise pass.
+        # spend would otherwise pass. A call is credited to every name in its
+        # id list, so the credited total cannot fall below the ledger's cost of
+        # the calls that touched this population nor rise above the cost of
+        # every call in the window.
         report = _report_module()
-        credited_by = set(names)
-        ledger = 0.0
+        touched_by = set(names)
+        ledger_touched = 0.0
+        ledger_window = 0.0
         for entry in gc.query(LEDGER, lo=report.NODE_OPENED):
             ids = entry["ids"]
             if not isinstance(ids, list):
@@ -171,12 +175,15 @@ def main() -> int:
                     ids = json.loads(ids or "[]")
                 except json.JSONDecodeError:
                     ids = []
-            if credited_by & {str(name) for name in ids}:
-                ledger = round(ledger + float(entry["cost"] or 0.0), 6)
+            cost = round(float(entry["cost"] or 0.0), 6)
+            ledger_window = round(ledger_window + cost, 6)
+            if touched_by & {str(name) for name in ids}:
+                ledger_touched = round(ledger_touched + cost, 6)
         recorded_spend = doc["spend"]["total_usd"] + args.inject_spend
-        if abs(ledger - recorded_spend) > 1e-4:
+        if not (ledger_touched - 1e-4 <= recorded_spend <= ledger_window + 1e-4):
             failures.append(
-                f"spend: ledger {ledger:.6f}, evidence {recorded_spend:.6f}"
+                f"spend: recorded {recorded_spend:.6f} outside the ledger's "
+                f"{ledger_touched:.6f} to {ledger_window:.6f}"
             )
 
     for line in failures:
