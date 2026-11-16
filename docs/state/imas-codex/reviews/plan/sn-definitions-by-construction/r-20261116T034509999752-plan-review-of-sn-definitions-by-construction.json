@@ -25,7 +25,24 @@
   "plan_slug": "sn-definitions-by-construction",
   "plan_version": 65,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The stored record carries the checks on all eight. Read from the live graph on 2026-11-16 through HAS_REVIEW with review_axis name: accumulated_neon_equivalent_electron_count has one name review (2026-11-15T17:23:37Z, typesafe/jev-1.14) answering source_fidelity_unsupported_qualifier 0.94 and over_qualified_modifier 0.81; accumulated_argon_equivalent_electron_count_due_to_gas_injection one (18:55:58Z) answering 0.95 and 0.81; ammonia 0.94 and 0.84; deuterium 0.89 and 0.79. The stated ranges 0.89 to 0.96 and 0.79 to 0.86 hold over eight names, so the eight each have a score to move below cutoff.",
+      "when": "2026-11-16T04:37:36.230535+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The stored record carries the checks on all eight. Read from the live graph on 2026-11-16 through HAS_REVIEW with review_axis name: accumulated_neon_equivalent_electron_count has one name review (2026-11-15T17:23:37Z, typesafe/jev-1.14) answering source_fidelity_unsupported_qualifier 0.94 and over_qualified_modifier 0.81; accumulated_argon_equivalent_electron_count_due_to_gas_injection one (18:55:58Z) answering 0.95 and 0.81; ammonia 0.94 and 0.84; deuterium 0.89 and 0.79. The stated ranges 0.89 to 0.96 and 0.79 to 0.86 hold over eight names, so the eight each have a score to move below cutoff.",
+      "when": "2026-11-16T04:37:36.230535+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261116T034509999752-plan-review-of-sn-definitions-by-construction.json",
   "review_run_id": "r-20261116T034509999752-plan-review-of-sn-definitions-by-construction",
   "reviewed_blob_sha": "b96e6d5f21db9311d90857fac6f3fd804cf3d170",
   "rubric": "content",
