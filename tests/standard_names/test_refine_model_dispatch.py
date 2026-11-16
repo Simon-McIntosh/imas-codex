@@ -7,7 +7,7 @@ bulk-content tier).
 
 This guards the failure mode where a cheap tier refines: a flash-lite or
 haiku model lifted reviewed, critiqued names at about 5% against about
-42% for the compose tier.  Refine therefore keeps its own pyproject
+42% for the compose tier. Refine therefore keeps its own pyproject
 section, so its model can diverge from compose without coupling, and the
 fallback in ``settings._MODEL_DEFAULTS`` holds the same capable tier the
 section names; a fallback left behind would silently change the model
@@ -66,26 +66,27 @@ def test_refine_env_override_independent_of_compose(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     """``IMAS_CODEX_SN_REFINE_MODEL`` is honoured without leaking to compose."""
-    monkeypatch.setenv("IMAS_CODEX_SN_REFINE_MODEL", "test/refine-only")
-    monkeypatch.setenv("IMAS_CODEX_SN_COMPOSE_MODEL", "test/compose-only")
-    assert settings.get_model("sn-refine") == "test/refine-only"
-    assert settings.get_model("sn-compose") == "test/compose-only"
+    monkeypatch.setenv("IMAS_CODEX_SN_REFINE_MODEL", "openrouter/test/refine-only")
+    monkeypatch.setenv("IMAS_CODEX_SN_COMPOSE_MODEL", "openrouter/test/compose-only")
+    assert settings.get_model("sn-refine") == "openrouter/test/refine-only"
+    assert settings.get_model("sn-compose") == "openrouter/test/compose-only"
 
 
 def test_refine_does_not_alias_compose(monkeypatch: pytest.MonkeyPatch) -> None:
     """Dispatch contract: refine and compose resolve via *different* keys.
 
     Future regressions where refine is silently routed back through
-    ``get_model("sn-compose")`` would re-introduce the E3 failure mode.
+    ``get_model("sn-compose")`` would send critiqued names through the
+    higher-throughput compose seat.
     Override only the refine env var and assert compose is unaffected
     (this is the property we care about — distinct dispatch keys).
     """
-    monkeypatch.setenv("IMAS_CODEX_SN_REFINE_MODEL", "test/refine-canary")
+    monkeypatch.setenv("IMAS_CODEX_SN_REFINE_MODEL", "openrouter/test/refine-canary")
     monkeypatch.delenv("IMAS_CODEX_SN_COMPOSE_MODEL", raising=False)
     refine = settings.get_model("sn-refine")
     compose = settings.get_model("sn-compose")
-    assert refine == "test/refine-canary"
-    assert compose != "test/refine-canary"
+    assert refine == "openrouter/test/refine-canary"
+    assert compose != "openrouter/test/refine-canary"
 
 
 # ─── Worker-level dispatch ───────────────────────────────────────────
