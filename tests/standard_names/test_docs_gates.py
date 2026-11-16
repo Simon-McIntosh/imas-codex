@@ -679,11 +679,16 @@ def test_a_definition_that_already_carries_the_stored_wording_is_unchanged() -> 
     to the stored wording cannot reach it.
     """
 
-    from imas_codex.standard_names.docs_gates import replace_altered_shared_parts
-
-    documentation = (
-        f"Number density of argon ions in the plasma.\n\n{ARGON_POPULATION_SENTENCE}"
+    from imas_codex.standard_names.docs_gates import (
+        replace_altered_shared_parts,
+        species_family_sentence,
     )
+
+    # A rendered definition carries each shared part in its stored wording: the
+    # family's sentence, which states the population as ruled, and nothing else.
+    family_sentence = species_family_sentence("argon_density")
+    assert family_sentence is not None
+    documentation = f"{family_sentence}\n\n{ARGON_POPULATION_SENTENCE}"
 
     assert replace_altered_shared_parts(documentation, _argon_parts()) == documentation
 
