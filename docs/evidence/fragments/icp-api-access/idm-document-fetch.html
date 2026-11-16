@@ -1,0 +1,68 @@
+<article id="idm-document-fetch-evidence">
+  <h2>Credential forwarding repaired; IDM fetching needs a host decision</h2>
+  <p>The authenticated live integration description advertises no GET route that
+  returns IDM document metadata or a file by document identity and version.
+  <strong>No documents were fetched.</strong> The document-fetch section needs
+  the lead's decision on a second read-only data host before work can continue.
+  No other application host was contacted.</p>
+
+  <h3>Credential-forward repair and regression evidence</h3>
+  <p>A socket appearing after five seconds reproduced the defect against the
+  starting revision: the forward returned <code>False</code> and logged
+  <code>D-Bus forward socket did not appear in time</code> after three seconds.
+  The baseline also delayed an SSH exit diagnostic until three seconds and
+  treated an unavailable keyring as an empty credential store. Four regression
+  checks failed before the repair.</p>
+  <p>The forward now polls for up to fifteen seconds, reports an early SSH exit
+  immediately with its stderr, and uses a late socket for the session bus.
+  Strict stored-credential reads raise an explicit store-unavailable error when
+  the keyring cannot be read. A readable store with no saved credentials still
+  returns the distinct empty-store outcome. The ICP client preserves this
+  distinction through its authentication error boundary.</p>
+  <p>The focused gate passed <strong>158 tests</strong>. A test-process mutation
+  shortened the socket deadline to three seconds and returned an empty result
+  for an unavailable store: <strong>four tests failed and 154 passed</strong>.
+  The mutation did not change source files. The repair is committed at
+  <code>aeafd8f40184977cdabfac319586fc0e774dc1fa</code>.</p>
+
+  <h3>Live route inventory</h3>
+  <p>The first resumed sign-in attempt reported an unavailable keyring, with a
+  three-second backend-discovery timeout in its private diagnostic receipt.
+  The second attempt, after a sixty-second pause, authenticated and read the
+  live description. The inventory contains <strong>793 paths, 815 operations
+  and 471 GET operations</strong>. The inspection covered all GET operation
+  declarations, 610 GET parameter declarations, 282 component schemas and
+  1656 schema fields. No GET declaration, schema name or schema field named
+  IDM or documents; no GET parameter named a document version.</p>
+  <table>
+    <thead><tr><th>Advertised read family</th><th>Count</th><th>Identity and meaning</th></tr></thead>
+    <tbody>
+      <tr><td>File streams</td><td>26</td><td>ICP content UID and file-property routes, plus an email attachment index; no IDM identity/version contract.</td></tr>
+      <tr><td>Temporary file URLs</td><td>24</td><td>ICP content UID and property name; no IDM identity/version contract.</td></tr>
+      <tr><td>Content revision readers</td><td>24</td><td>ICP revision ID returning a typed content record, such as <code>PbsViewDto</code>.</td></tr>
+      <tr><td>GET routes with a version-named parameter</td><td>0</td><td>The description offers no document-version selection.</td></tr>
+    </tbody>
+  </table>
+  <p>Positive controls found 179 UID parameters, 24 revision-ID parameters and
+  the expected <code>PbsViewDto</code> response schema. The generic file and
+  revision routes were inspected rather than equating a keyword-search zero
+  with absence. This result concerns the advertised live API; it makes no
+  claim about undocumented routes or a separate IDM host.</p>
+
+  <h3>Document measures and private receipts</h3>
+  <p>The two candidate identities remain only in private receipts. Their current
+  document versions, file sizes, digests, spreadsheet sheet names and row counts
+  were not measured because no supported document route was found. The missing-version
+  and not-permitted controls are <strong>not established</strong>; zero identity
+  attempts were made against an undocumented route. The tracked tree contains
+  neither candidate identity, and a search for known tracked client source
+  confirmed that the search instrument sees present content. No document bytes
+  exist from this run to scan or commit.</p>
+  <p>The run directory retains <code>credential-reproduction.log</code>,
+  <code>credential-committed.log</code>, <code>negative-credential-forward.log</code>,
+  <code>live-attempts-summary.json</code>, <code>live-route-inventory.json</code>,
+  <code>route-inventory-summary.json</code> and <code>tracked-tree-scan.json</code>.
+  Request receipts contain methods, phases and statuses; sign-in receipts add
+  only origins and paths. Credentials, cookies and tokens were neither printed
+  nor stored by these probes.</p>
+</article>
