@@ -74,6 +74,16 @@
       "note": "Every member whose text changed is read again by the same two readers after repair, blind to which changed; the bar is applied to that second reading, and the cut refuses an audit taken before the newest change to any member's text.",
       "reason": "",
       "when": "2026-11-16T23:15:04.237856+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a7934ffa6d8e1b054ecec9de31241e2889964a0e",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Each planted name's verdict must have been fixed independently of the pipeline's review and of both readers, by a physicist's ruling or a facility audit already committed, cited row by row.",
+      "reason": "",
+      "when": "2026-11-16T23:15:07.208063+00:00"
     }
   ],
   "responses": {
@@ -85,6 +95,15 @@
       "note": "Every member whose text changed is read again by the same two readers after repair, blind to which changed; the bar is applied to that second reading, and the cut refuses an audit taken before the newest change to any member's text.",
       "reason": "",
       "when": "2026-11-16T23:15:04.237856+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "a7934ffa6d8e1b054ecec9de31241e2889964a0e",
+      "commit_basis": "edit",
+      "note": "Each planted name's verdict must have been fixed independently of the pipeline's review and of both readers, by a physicist's ruling or a facility audit already committed, cited row by row.",
+      "reason": "",
+      "when": "2026-11-16T23:15:07.208063+00:00"
     },
     "wiring-1": {
       "action": "declined",
