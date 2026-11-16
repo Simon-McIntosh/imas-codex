@@ -434,3 +434,38 @@ source_description: Field-line angle
     assert "Field-line angle" in context
     assert "unrelated signal field" not in context
     assert "Classify these 1 signals" in context
+
+
+@pytest.mark.parametrize(
+    "text,expected",
+    [
+        ("Ref. of ion temperature gradient.", ["Ref. of ion temperature gradient."]),
+        (
+            "Control Algorithm No. (CS1-PS). Unrelated detail.",
+            ["Control Algorithm No. (CS1-PS).", "Unrelated detail."],
+        ),
+        (
+            "A parameter, e.g. a temperature. Another quantity.",
+            ["A parameter, e.g. a temperature.", "Another quantity."],
+        ),
+        (
+            "Temperature is 1.2 K. Current is 3 A.",
+            ["Temperature is 1.2 K.", "Current is 3 A."],
+        ),
+    ],
+)
+def test_description_boundaries_preserve_abbreviations(text, expected):
+    from imas_codex.discovery.signals.enrichment import description_statements
+
+    assert description_statements(text) == expected
+
+
+@pytest.mark.asyncio
+async def test_one_sentence_limit_preserves_the_reference_quantity():
+    value = draft()
+    value.results[0].description = "Ref. of ion temperature gradient. Unrelated detail."
+    (batch, _, _), _ = await run(
+        EnrichmentOptions(description_sentences=1), [(value, 0, 1)]
+    )
+    assert batch.results[0].description == "Ref. of ion temperature gradient."
+    assert batch.length_drops == 1

@@ -162,7 +162,18 @@ def description_statements(text: str) -> list[str]:
     """Split prose at sentence boundaries for review and the length bound."""
     import re
 
-    return [part.strip() for part in re.split(r"(?<=[.!?])\s+", text) if part.strip()]
+    statements = []
+    for part in re.split(r"(?<=[.!?])\s+", text):
+        part = part.strip()
+        if not part:
+            continue
+        if statements and re.search(
+            r"\b(?:ref|no|e\.g|i\.e|etc|vs|fig|eq)\.$", statements[-1], re.I
+        ):
+            statements[-1] += " " + part
+        else:
+            statements.append(part)
+    return statements
 
 
 async def enrich_signal_batch(*, model, messages, options, call, **kwargs):
