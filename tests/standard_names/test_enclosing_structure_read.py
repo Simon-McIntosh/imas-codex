@@ -1,10 +1,9 @@
-"""The ancestor read one precedence, one collapse and one dedupe rule.
+"""The ancestor read's one rule: both fields, collapsed, deduped, nearest first.
 
 The review and the compose prompt read the structures above a DD leaf through
-one query and one statement rule, so a qualifier a structure states reaches both
-views with the same text. These tests hold that rule: documentation before
-description, whitespace collapsed, an unstated structure dropped, a repeated
-statement kept once, and the nearest statement first.
+one query and one statement rule, so both views see the same text: documentation
+and description, documentation first, whitespace collapsed, an unstated
+structure dropped, a repeated statement kept once, and the nearest first.
 """
 
 from __future__ import annotations
@@ -29,11 +28,11 @@ def _row(path: str, *, documentation: str = "", description: str = "") -> dict:
     }
 
 
-def test_documentation_is_preferred_over_description() -> None:
-    """A structure that documents itself is read through its documentation."""
+def test_documentation_and_description_are_both_read() -> None:
+    """A structure states a qualifier in one field and a label in the other."""
     assert ancestor_statements(
         [_row("a", documentation="Total injected gas", description="Gas")]
-    ) == [{"path": "a", "text": "Total injected gas"}]
+    ) == [{"path": "a", "text": "Total injected gas Gas"}]
 
 
 def test_description_answers_when_documentation_is_empty() -> None:

@@ -517,9 +517,11 @@ def ancestor_statements(
 ) -> list[dict[str, str]]:
     """Read the statements ancestor rows make, nearest first.
 
-    The one place the ancestor read's precedence lives: an ancestor's
-    documentation when it carries that, its description otherwise, whitespace
-    collapsed and a text already stated by a nearer ancestor dropped. The order
+    The one place the ancestor read's rule lives: an ancestor's documentation
+    and its description, documentation first, whitespace collapsed, and a
+    statement a nearer ancestor already made dropped. Both fields are read
+    because a DD structure states a qualifier in one of them and a field label
+    in the other; preferring either alone hides half of what it says. The order
     is the query's, which returns nearest first.
 
     Args:
@@ -529,8 +531,11 @@ def ancestor_statements(
     statements: list[dict[str, str]] = []
     seen: set[str] = set()
     for row in rows or ():
-        text = " ".join(str(row.get("documentation") or "").split())
-        text = text or " ".join(str(row.get("description") or "").split())
+        parts = [
+            " ".join(str(row.get(field) or "").split())
+            for field in ("documentation", "description")
+        ]
+        text = " ".join(part for part in parts if part)
         if not text or text in seen:
             continue
         seen.add(text)

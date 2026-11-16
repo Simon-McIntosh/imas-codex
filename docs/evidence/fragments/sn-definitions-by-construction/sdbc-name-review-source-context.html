@@ -37,14 +37,21 @@
     <code>line_integrated</code> and <code>flux_surface_averaged</code> are not
     qualifiers and are never examined. Every text the review holds is then
     collected into two sets: the leaf documentation of each bound source path, and
-    the documentation/description of every structure above it. A qualifier is
-    <em>stated</em> by a text when every word of the token appears in that text as
-    a stem — case-folded, with a plural or suffix-stripped form accepted when at
-    least four letters remain, so <code>equivalent_electron</code> matches
-    <q>equivalent electrons</q> and <code>gas</code> and <code>ion</code> keep
-    their own form. The check settles only when all of the name's qualifiers are
-    stated by leaf-or-structure <em>and</em> at least one is stated only by a
-    structure; otherwise it returns nothing and the judge's own answer stands.
+    the statements made by the structures above it — anchored at each bound path,
+    read by the one <code>HAS_PARENT*1..8</code> walk the extraction enrichment
+    already owns, nearest first, with each structure's documentation and
+    description both read (documentation first), whitespace collapsed, a
+    structure stating nothing dropped and a repeated sentence kept once. A qualifier is <em>stated</em> when every word of its token appears in
+    one sentence as a stem — case-folded, with a plural or suffix-stripped form
+    accepted when at least four letters remain, so
+    <code>equivalent_electron</code> matches <q>equivalent electrons</q> and
+    <code>gas</code>/<code>ion</code> keep their own form. A structure states a
+    qualifier only when that sentence neither negates nor contrasts it
+    (<q>not</q>, <q>never</q>, <q>without</q>, <q>rather than</q>, <q>instead</q>,
+    <q>other than</q>) and does not name another quantity by its physical base
+    instead. The check settles only when all of the name's qualifiers are stated
+    by leaf-or-structure <em>and</em> at least one is stated only by a structure;
+    otherwise it returns nothing and the judge's own answer stands.
   </p>
   <p id="sdbc-name-review-source-context-rule-example-label">
     Worked example, a label chain: for
@@ -80,6 +87,40 @@
     <code>over_qualified_modifier</code> and 0.47 / 0.47 / 0.49 on
     <code>source_fidelity_unsupported_qualifier</code>, none settled. A statement
     that exists is not a statement that answers the question.
+  </p>
+
+
+  <h3 id="sdbc-name-review-source-context-judge">The judge, measured without the code path</h3>
+  <p id="sdbc-name-review-source-context-judge-note">
+    The settlement is only defensible if the judge cannot do it, so the judge was
+    measured doing it. Both check questions now tell the judge to read the
+    enclosing structures, and both check texts were re-judged with the enclosing
+    statements present in its evidence and <strong>no code path at all</strong>.
+    It fails on the names whose qualifiers the structures state: all eight renamed
+    names fail <code>source_fidelity_unsupported_qualifier</code> (0.64–0.89) and
+    three of them fail <code>over_qualified_modifier</code> as well (0.62–0.78).
+    On the planted name it answers 0.63 / 0.73, as it does with the settled code,
+    because no leaf and no structure states <q>total</q>. The code path is
+    therefore kept and narrowed rather than removed.
+  </p>
+  <table id="sdbc-name-review-source-context-judge-table">
+    <caption>398 sample check answers and 199 judged names, all under the same
+    criterion text</caption>
+    <thead>
+      <tr><th>Arm</th><th>Answers at or above 0.5</th><th>Route moves against the withheld arm</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Enclosing statements withheld</td><td>152 of 398</td><td>baseline</td></tr>
+      <tr><td>Statements shown, no code path (judge alone)</td><td>167 of 398</td><td>12: 4 toward accept, 8 toward refine</td></tr>
+      <tr><td>Statements shown, narrowed code path</td><td>132 of 398</td><td>19: 18 toward accept, 1 toward refine</td></tr>
+    </tbody>
+  </table>
+  <p id="sdbc-name-review-source-context-judge-conclusion">
+    The judge alone makes eight names worse for every four it improves; the
+    narrowed path improves eighteen and worsens one. The narrowed path is what
+    keeps both readings honest: the judge still answers every name no structure
+    settles, and its probability is recorded beside the settled answer on every
+    name one does, so the discard is visible rather than silent.
   </p>
 
   <h3 id="sdbc-name-review-source-context-eight">The eight live names</h3>
@@ -130,42 +171,48 @@ The pass ran to completion over the class: 1179 of 1184 names re-reviewed and st
 
   <h3 id="sdbc-name-review-source-context-sample">Accepted names before and after</h3>
   <p id="sdbc-name-review-source-context-sample-note">
-    199 accepted names drawn round-robin across 30 domains (seed 20261116) were
-    judged twice: once with the enclosing statement withheld (what the base review
-    sees) and once as enriched. Nine moved. Eight moved
-    <code>refine</code>→<code>accept</code>, each on a statement that states the
-    qualifier (<q>Accumulated injected gas during the prefill in equivalent
-    electrons</q>, <q>Deuterated methane (CD4)</q>, <q>Hydrogen</q>, or a dimension
-    score that no longer had a veto). One name was skipped at enrichment on a
-    stale DD resolution fault.
+199 of the 200 accepted names the measure fixes were measurable the same
+    way; the two-hundredth, <code>x_second_measurement_direction_unit_vector_of_strain_gauge</code>,
+    was skipped at enrichment on the stale DD resolution that also left five
+    class members unmeasurable, and the measure is stated on the 199. Each was
+    judged twice, round-robin across 30 domains (seed 20261116): once with the
+    enclosing statements withheld and once with them present under the narrowed
+    rule. 19 moved. 18 moved <code>refine</code>→<code>accept</code> — 4 settled
+    by a statement that states the qualifier, and 14 on the judge's other answers
+    with both source-support checks unsettled — and one moved the other way.
   </p>
   <p id="sdbc-name-review-source-context-sample-regression">
-    The ninth move,
-    <code>line_integrated_neutral_beam_radiance_at_spectral_line</code>, went
-    <code>accept</code>→<code>refine</code>, and <strong>no statement moved it</strong>.
-    Its two source-support checks read 0.38 and 0.47 in the accept row and 0.29 and
-    0.40 in the refine row — unchanged in decision and unsettled in both, because
-    the structures above its leaf state <q>Beam Emission Spectroscopy</q> and
-    <q>channels (lines-of-sight)</q> and never state <code>neutral_beam</code>.
-    Three fresh before/after pairs put the same name at <code>refine</code> in both
-    arms (scores 0.655–0.823 before, 0.664–0.845 after), so the single
-    <code>accept</code> was a knife-edge score, not a statement: the checks that
-    hover on the 0.5 cutoff for this name are
-    <code>bare_shape_parameter_missing_surface</code> (0.47–0.50),
-    <code>non_canonical_locus_token</code> and <code>bound_to_wrong_object</code>,
-    and their answers move by up to 0.17 between identical calls. It is listed as
-    a move this change did not intend and did not cause.
+The one move the change did not intend,
+    <code>flux_due_to_pumping</code>, went <code>accept</code>→<code>refine</code>
+    with both source-support checks at 0.14 and no statement involved: a
+    different check held the name back. The reverse case is recorded rather
+    than hidden too: <code>line_integrated_neutral_beam_radiance_at_spectral_line</code>
+    is the name the rule deliberately does not settle — its structures say
+    <q>Beam Emission Spectroscopy</q> and never <code>neutral_beam</code> — and its
+    checks read 0.45 and 0.55 unsettled in the after row. Its
+    <code>refine</code>→<code>accept</code> is score noise on other checks, the same
+    knife-edge reading documented for its earlier <code>accept</code>→<code>refine</code>.
   </p>
   <ul id="sdbc-name-review-source-context-sample-moves">
-    <li><code>vertical_coordinate_of_poloidal_magnetic_field_probe</code>: refine → accept</li>
-    <li><code>radial_coordinate_of_optical_element</code>: refine → accept</li>
-    <li><code>total_counter_passing_particle_pressure</code>: refine → accept</li>
-    <li><code>deuterated_methane_source_rate</code>: refine → accept — Deuterated methane (CD4)</li>
-    <li><code>coolant_temperature_at_outlet</code>: refine → accept</li>
-    <li><code>accumulated_helium_3_prefill_count_due_to_gas_injection</code>: refine → accept — Accumulated injected gas during the prefill in equivalent electrons</li>
-    <li><code>hydrogen_source_rate_due_to_gas_injection</code>: refine → accept — Hydrogen</li>
-    <li><code>toroidal_coordinate_of_polarizer</code>: refine → accept</li>
-    <li><code>line_integrated_neutral_beam_radiance_at_spectral_line</code>: accept → refine</li>
+    <li><code>accumulated_propane_count_due_to_gas_injection</code>: refine → accept — <q>Propane (C3H8)</q></li>
+    <li><code>coolant_temperature_at_outlet</code>: refine → accept — dimension score only</li>
+    <li><code>deuterated_methane_source_rate</code>: refine → accept — <q>Deuterated methane (CD4)</q></li>
+    <li><code>electron_kinetic_energy_flux_at_wall_due_to_surface_emission</code>: refine → accept — dimension score only</li>
+    <li><code>energy_flux_maximum_at_first_wall</code>: refine → accept — dimension score only</li>
+    <li><code>hydrogen_source_rate_due_to_gas_injection</code>: refine → accept — <q>Hydrogen</q></li>
+    <li><code>line_integrated_neutral_beam_radiance_at_spectral_line</code>: refine → accept — dimension score only</li>
+    <li><code>neutron_emissivity</code>: refine → accept — dimension score only</li>
+    <li><code>normal_wave_magnetic_field</code>: refine → accept — <q>Components of the wave magnetic field</q></li>
+    <li><code>orbit_integral</code>: refine → accept — dimension score only</li>
+    <li><code>parallel_current_due_to_non_inductive_current_drive</code>: refine → accept — dimension score only</li>
+    <li><code>photon_energy</code>: refine → accept — dimension score only</li>
+    <li><code>poloidal_magnetic_flux_at_plasma_boundary</code>: refine → accept — dimension score only</li>
+    <li><code>toroidal_angle_of_toroidal_magnetic_field_probe</code>: refine → accept — dimension score only</li>
+    <li><code>toroidal_coordinate_at_beam_tracing_point</code>: refine → accept — dimension score only</li>
+    <li><code>toroidal_current_density</code>: refine → accept — dimension score only</li>
+    <li><code>toroidal_total_torque</code>: refine → accept — dimension score only</li>
+    <li><code>volume_averaged_effective_hydrogenic_mass</code>: refine → accept — dimension score only</li>
+    <li><code>flux_due_to_pumping</code>: accept → refine — dimension score only</li>
   </ul>
 
   <h3 id="sdbc-name-review-source-context-verification">Verification</h3>
