@@ -91,6 +91,16 @@
       "note": "The node brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md names _stratified_sample and the goldens sampler as the sampler to use or extend; the plan states only the stratification endpoint.",
       "reason": "",
       "when": "2026-11-16T22:50:08.843060+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "reuse_search-2",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md makes the two blind readers seats of the advisory panel and panel audit machinery.",
+      "reason": "",
+      "when": "2026-11-16T22:50:11.297131+00:00"
     }
   ],
   "responses": {
@@ -102,6 +112,15 @@
       "note": "The node brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md names _stratified_sample and the goldens sampler as the sampler to use or extend; the plan states only the stratification endpoint.",
       "reason": "",
       "when": "2026-11-16T22:50:08.843060+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md makes the two blind readers seats of the advisory panel and panel audit machinery.",
+      "reason": "",
+      "when": "2026-11-16T22:50:11.297131+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261116T220756798682-plan-review-of-sn-audited-group-release.json",
