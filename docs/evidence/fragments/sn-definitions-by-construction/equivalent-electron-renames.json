@@ -1,0 +1,2859 @@
+{
+  "generated_at_utc": "2026-11-16T00:12:27.357566+00:00",
+  "names": [
+    {
+      "after": {
+        "description": "Accumulated ammonia count is the cumulative amount of NH3 delivered by gas injection after plasma breakdown, expressed as ten equivalent electrons per injected molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9405510251440758,
+        "score_name": 0.852572510454222,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ammonia/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count with ten count units assigned to each neutral NH3 molecule",
+      "cost": {
+        "calls": 5,
+        "run_id": "21405018-c352-40e8-84e1-b2f27957c8fa",
+        "spend_usd": 0.093738
+      },
+      "edit_scope_id": "sn-edit-20261115T185347Z",
+      "left_reason": null,
+      "live_identity": {
+        "id": "accumulated_ammonia_equivalent_electron_count"
+      },
+      "new_identity": {
+        "description": "Accumulated ammonia count is the cumulative amount of NH3 delivered by gas injection after plasma breakdown, expressed as ten equivalent electrons per injected molecule.",
+        "id": "accumulated_ammonia_equivalent_electron_count",
+        "review_scores": {
+          "docs": 0.9405510251440758,
+          "name": 0.852572510454222
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ammonia/value"
+        ],
+        "unit": "1"
+      },
+      "old_identity": {
+        "description": "Accumulated ammonia count is the cumulative equivalent-electron count of ammonia (NH3) molecules delivered by gas injection after plasma breakdown, with ten equivalent electrons per molecule. By definition the count is restricted to the gas-injection delivery mechanism and to the post-breakdown phase.",
+        "id": "accumulated_ammonia_count",
+        "review_scores": {
+          "docs": 0.9360841239786859,
+          "name": 0.9375
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ammonia/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "renamed",
+      "settled_after": {
+        "description": "Accumulated ammonia count is the cumulative amount of NH3 delivered by gas injection after plasma breakdown, expressed as ten equivalent electrons per injected molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9405510251440758,
+        "score_name": 0.852572510454222,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ammonia/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative post-breakdown inventory of neutral deuterated ammonia (ND3), expressed as an equivalent-electron count with ten count units per molecule.",
+        "docs_stage": "pending",
+        "name_stage": "reviewed",
+        "score_docs": null,
+        "score_name": 0.8307661611916187,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ammonia_deuterated/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "an equivalent-electron count with ten count units per molecule",
+      "cost": {
+        "calls": 4,
+        "run_id": "0a01309b-33a4-44d7-8ba5-598cf742c3f0",
+        "spend_usd": 0.000516
+      },
+      "edit_scope_id": "sn-edit-20261115T233908Z",
+      "left_reason": null,
+      "live_identity": {
+        "id": "accumulated_ammonia_deuterated_equivalent_electron_count"
+      },
+      "new_identity": {
+        "description": "Cumulative post-breakdown inventory of neutral deuterated ammonia (ND3), expressed as an equivalent-electron count with ten count units per molecule.",
+        "id": "accumulated_ammonia_deuterated_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.8307661611916187
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ammonia_deuterated/value"
+        ],
+        "unit": "1"
+      },
+      "old_identity": {
+        "description": "Cumulative post-breakdown inventory of neutral deuterated ammonia (ND3), expressed as an equivalent-electron count with ten count units per molecule.",
+        "id": "accumulated_ammonia_deuterated_count",
+        "review_scores": {
+          "docs": 0.9375,
+          "name": 0.875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ammonia_deuterated/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "renamed_review_not_accepted",
+      "settled_after": {
+        "description": "Cumulative post-breakdown inventory of neutral deuterated ammonia (ND3), expressed as an equivalent-electron count with ten count units per molecule.",
+        "docs_stage": "pending",
+        "name_stage": "reviewed",
+        "score_docs": null,
+        "score_name": 0.8307661611916187,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ammonia_deuterated/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron count of argon delivered by gas injection after plasma breakdown, assigning 18 counts to each injected neutral atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9320765404207425,
+        "score_name": 0.8755016947126212,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/argon/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "the cumulative equivalent-electron inventory of argon atoms delivered by gas injection after plasma breakdown",
+      "cost": {
+        "calls": 8,
+        "run_id": "c3d80e0b-93e5-415b-a323-fe14171c81fd",
+        "spend_usd": 0.220295
+      },
+      "edit_scope_id": "sn-edit-20261115T185545Z",
+      "left_reason": null,
+      "live_identity": {
+        "id": "accumulated_argon_equivalent_electron_count_due_to_gas_injection"
+      },
+      "new_identity": {
+        "description": "Cumulative equivalent-electron count of argon delivered by gas injection after plasma breakdown, assigning 18 counts to each injected neutral atom.",
+        "id": "accumulated_argon_equivalent_electron_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9320765404207425,
+          "name": 0.8755016947126212
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/argon/value"
+        ],
+        "unit": "1"
+      },
+      "old_identity": {
+        "description": "Accumulated argon count is the cumulative amount of argon delivered by gas injection after plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per atom. Although the name states only an accumulated count, the quantity is by definition restricted to the gas-injection delivery mechanism and the post-breakdown phase, and uses the equivalent-electron counting convention rather than a plain atom count.",
+        "id": "accumulated_argon_count",
+        "review_scores": {
+          "docs": 0.9280390269862382,
+          "name": 0.9
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/argon/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "renamed",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron count of argon delivered by gas injection after plasma breakdown, assigning 18 counts to each injected neutral atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9320765404207425,
+        "score_name": 0.8755016947126212,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/argon/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative post-breakdown carbon inventory from gas injection, expressed as six equivalent-electron counts for every injected neutral carbon atom.",
+        "docs_stage": "pending",
+        "name_stage": "reviewed",
+        "score_docs": null,
+        "score_name": 0.5907119344267014,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/carbon/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as six equivalent-electron counts for every injected neutral carbon atom",
+      "cost": {
+        "calls": 4,
+        "run_id": "0bf12d42-920e-4642-b4c1-e679c521468f",
+        "spend_usd": 0.000516
+      },
+      "edit_scope_id": "sn-edit-20261115T234041Z",
+      "left_reason": null,
+      "live_identity": {
+        "id": "accumulated_carbon_equivalent_electron_count_due_to_gas_injection"
+      },
+      "new_identity": {
+        "description": "Cumulative post-breakdown carbon inventory from gas injection, expressed as six equivalent-electron counts for every injected neutral carbon atom.",
+        "id": "accumulated_carbon_equivalent_electron_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.5907119344267014
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/carbon/value"
+        ],
+        "unit": "1"
+      },
+      "old_identity": {
+        "description": "Cumulative post-breakdown carbon inventory from gas injection, expressed as six equivalent-electron counts for every injected neutral carbon atom.",
+        "id": "accumulated_carbon_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9125,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/carbon/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "renamed_review_not_accepted",
+      "settled_after": {
+        "description": "Cumulative post-breakdown carbon inventory from gas injection, expressed as six equivalent-electron counts for every injected neutral carbon atom.",
+        "docs_stage": "pending",
+        "name_stage": "reviewed",
+        "score_docs": null,
+        "score_name": 0.5907119344267014,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/carbon/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative pre-breakdown inventory of deuterated methane (CD4), weighted by ten equivalent electrons per molecule rather than reported as a molecular count.",
+        "docs_stage": "pending",
+        "name_stage": "reviewed",
+        "score_docs": null,
+        "score_name": 0.43528596279858545,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/methane_deuterated/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 4,
+        "run_id": "01359cb3-fada-4c5f-ad8c-4f36a51705f6",
+        "spend_usd": 0.00052
+      },
+      "edit_scope_id": "sn-edit-20261115T234214Z",
+      "left_reason": null,
+      "live_identity": {
+        "id": "accumulated_deuterated_methane_prefill_equivalent_electron_count"
+      },
+      "new_identity": {
+        "description": "Cumulative pre-breakdown inventory of deuterated methane (CD4), weighted by ten equivalent electrons per molecule rather than reported as a molecular count.",
+        "id": "accumulated_deuterated_methane_prefill_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.43528596279858545
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/methane_deuterated/value"
+        ],
+        "unit": "1"
+      },
+      "old_identity": {
+        "description": "Cumulative pre-breakdown inventory of deuterated methane (CD4), weighted by ten equivalent electrons per molecule rather than reported as a molecular count.",
+        "id": "accumulated_deuterated_methane_prefill_count",
+        "review_scores": {
+          "docs": 0.91875,
+          "name": 0.95625
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/methane_deuterated/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "renamed_review_not_accepted",
+      "settled_after": {
+        "description": "Cumulative pre-breakdown inventory of deuterated methane (CD4), weighted by ten equivalent electrons per molecule rather than reported as a molecular count.",
+        "docs_stage": "pending",
+        "name_stage": "reviewed",
+        "score_docs": null,
+        "score_name": 0.43528596279858545,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/methane_deuterated/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron count of deuterium delivered by gas injection after plasma breakdown, assigning one count per deuterium nucleus.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9334114978202239,
+        "score_name": 0.8622539055833444,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/deuterium/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 6,
+        "run_id": "c68f488c-0736-4788-b62f-b760cdfcef31",
+        "spend_usd": 0.108934
+      },
+      "edit_scope_id": "sn-edit-20261115T234346Z",
+      "left_reason": null,
+      "live_identity": {
+        "id": "accumulated_deuterium_equivalent_electron_count_due_to_gas_injection"
+      },
+      "new_identity": {
+        "description": "Cumulative equivalent-electron count of deuterium delivered by gas injection after plasma breakdown, assigning one count per deuterium nucleus.",
+        "id": "accumulated_deuterium_equivalent_electron_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9334114978202239,
+          "name": 0.8622539055833444
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/deuterium/value"
+        ],
+        "unit": "1"
+      },
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of deuterium delivered by gas injection after plasma breakdown.",
+        "id": "accumulated_deuterium_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9375,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/deuterium/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "renamed",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron count of deuterium delivered by gas injection after plasma breakdown, assigning one count per deuterium nucleus.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9334114978202239,
+        "score_name": 0.8622539055833444,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/deuterium/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory of ethane molecules injected after plasma breakdown, assigning 18 equivalent-electron counts to each neutral C2H6 molecule.",
+        "docs_stage": "pending",
+        "name_stage": "reviewed",
+        "score_docs": null,
+        "score_name": 0.7344938263659369,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ethane/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "the post-breakdown cumulative ethane-gas inventory expressed as an equivalent-electron count",
+      "cost": {
+        "calls": 4,
+        "run_id": "96d1b0c4-55d1-4991-8652-1056b85fcf12",
+        "spend_usd": 0.000512
+      },
+      "edit_scope_id": "sn-edit-20261115T234536Z",
+      "left_reason": null,
+      "live_identity": {
+        "id": "accumulated_ethane_equivalent_electron_count"
+      },
+      "new_identity": {
+        "description": "Cumulative equivalent-electron inventory of ethane molecules injected after plasma breakdown, assigning 18 equivalent-electron counts to each neutral C2H6 molecule.",
+        "id": "accumulated_ethane_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.7344938263659369
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ethane/value"
+        ],
+        "unit": "1"
+      },
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of ethane molecules injected after plasma breakdown, assigning 18 equivalent-electron counts to each neutral C2H6 molecule.",
+        "id": "accumulated_ethane_count",
+        "review_scores": {
+          "docs": 0.9125,
+          "name": 0.925
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ethane/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "renamed_review_not_accepted",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory of ethane molecules injected after plasma breakdown, assigning 18 equivalent-electron counts to each neutral C2H6 molecule.",
+        "docs_stage": "pending",
+        "name_stage": "reviewed",
+        "score_docs": null,
+        "score_name": 0.7344938263659369,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/ethane/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory of helium-3 atoms delivered by gas injection after plasma breakdown, assigning two count units to each atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.96875,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/helium_3/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count ... two count units to each atom",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_helium_3_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of helium-3 atoms delivered by gas injection after plasma breakdown, assigning two count units to each atom.",
+        "id": "accumulated_helium_3_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.96875,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/helium_3/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory of helium-3 atoms delivered by gas injection after plasma breakdown, assigning two count units to each atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.96875,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/helium_3/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory of helium-3 atoms introduced by gas injection during plasma prefill before plasma breakdown, with two count units assigned per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/helium_3/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "with two count units assigned per atom",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_helium_3_prefill_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of helium-3 atoms introduced by gas injection during plasma prefill before plasma breakdown, with two count units assigned per atom.",
+        "id": "accumulated_helium_3_prefill_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.94375,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/helium_3/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory of helium-3 atoms introduced by gas injection during plasma prefill before plasma breakdown, with two count units assigned per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/helium_3/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative post-breakdown equivalent-electron inventory of neutral hydrogen delivered by gas injection, with one count unit assigned to each hydrogen atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.875,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/hydrogen/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_hydrogen_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative post-breakdown equivalent-electron inventory of neutral hydrogen delivered by gas injection, with one count unit assigned to each hydrogen atom.",
+        "id": "accumulated_hydrogen_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.875,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/hydrogen/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative post-breakdown equivalent-electron inventory of neutral hydrogen delivered by gas injection, with one count unit assigned to each hydrogen atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.875,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/hydrogen/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative number of krypton atoms injected into the machine since plasma breakdown, expressed as 36 equivalent electrons for each krypton atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9437500000000001,
+        "score_name": 0.8625,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/krypton/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as 36 equivalent electrons for each krypton atom ... with a fixed species multiplier",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_krypton_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative number of krypton atoms injected into the machine since plasma breakdown, expressed as 36 equivalent electrons for each krypton atom.",
+        "id": "accumulated_krypton_count",
+        "review_scores": {
+          "docs": 0.9437500000000001,
+          "name": 0.8625
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/krypton/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative number of krypton atoms injected into the machine since plasma breakdown, expressed as 36 equivalent electrons for each krypton atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9437500000000001,
+        "score_name": 0.8625,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/krypton/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative post-breakdown lithium inventory delivered by gas injection, expressed as three equivalent-electron counts per injected lithium atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/lithium/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_lithium_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative post-breakdown lithium inventory delivered by gas injection, expressed as three equivalent-electron counts per injected lithium atom.",
+        "id": "accumulated_lithium_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.95,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/lithium/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative post-breakdown lithium inventory delivered by gas injection, expressed as three equivalent-electron counts per injected lithium atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/lithium/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory of lithium introduced by gas injection during plasma prefill, assigning three count units to each lithium atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/lithium/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "the equivalent-electron inventory of lithium introduced by gas injection before plasma breakdown. Each lithium atom cont",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_lithium_prefill_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of lithium introduced by gas injection during plasma prefill, assigning three count units to each lithium atom.",
+        "id": "accumulated_lithium_prefill_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.95,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/lithium/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory of lithium introduced by gas injection during plasma prefill, assigning three count units to each lithium atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/lithium/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory of carbon-13-labeled methane delivered by gas injection after plasma breakdown, with ten count units assigned to each neutral 13CH4 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9437500000000001,
+        "score_name": 0.8928306868395934,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/methane/value",
+          "dd:summary/gas_injection_accumulated/methane_carbon_13/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "the cumulative equivalent-electron inventory of neutral carbon-13-labeled methane ... with ten count units assigned to e",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_methane_carbon_13_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of carbon-13-labeled methane delivered by gas injection after plasma breakdown, with ten count units assigned to each neutral 13CH4 molecule.",
+        "id": "accumulated_methane_carbon_13_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9437500000000001,
+          "name": 0.8928306868395934
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/methane/value",
+          "dd:summary/gas_injection_accumulated/methane_carbon_13/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory of carbon-13-labeled methane delivered by gas injection after plasma breakdown, with ten count units assigned to each neutral 13CH4 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9437500000000001,
+        "score_name": 0.8928306868395934,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/methane/value",
+          "dd:summary/gas_injection_accumulated/methane_carbon_13/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Accumulated neon count is the cumulative equivalent-electron inventory delivered by gas injection after plasma breakdown, with ten equivalent electrons assigned per injected atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.93531246516022,
+        "score_name": 0.8564503480485901,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/neon/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "each injected neon atom contributes $Z_{\\mathrm{Ne}}=10$ equivalent electrons",
+      "cost": {
+        "calls": 5,
+        "run_id": "53191f98-ec7d-44ae-8e74-ad62dfa734ed",
+        "spend_usd": 0.112241
+      },
+      "edit_scope_id": "sn-edit-20261115T172326Z",
+      "left_reason": null,
+      "live_identity": {
+        "id": "accumulated_neon_equivalent_electron_count"
+      },
+      "new_identity": {
+        "description": "Accumulated neon count is the cumulative equivalent-electron inventory delivered by gas injection after plasma breakdown, with ten equivalent electrons assigned per injected atom.",
+        "id": "accumulated_neon_equivalent_electron_count",
+        "review_scores": {
+          "docs": 0.93531246516022,
+          "name": 0.8564503480485901
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/neon/value"
+        ],
+        "unit": "1"
+      },
+      "old_identity": {
+        "description": "Accumulated neon count is the cumulative equivalent-electron count of neutral neon atoms delivered by gas injection after plasma breakdown, with ten equivalent electrons per atom. By definition the count is restricted to the gas-injection delivery mechanism and to the post-breakdown phase.",
+        "id": "accumulated_neon_count",
+        "review_scores": {
+          "docs": 0.9436180850234734,
+          "name": 0.94375
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/neon/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "renamed",
+      "settled_after": {
+        "description": "Accumulated neon count is the cumulative amount of neon delivered by gas injection after plasma breakdown, expressed as ten equivalent-electron counts per injected atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9368426274913816,
+        "score_name": 0.8564503480485901,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/neon/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative post-breakdown nitrogen inventory delivered by gas injection, expressed as seven equivalent-electron counts for each injected nitrogen atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.91875,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/nitrogen/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_nitrogen_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative post-breakdown nitrogen inventory delivered by gas injection, expressed as seven equivalent-electron counts for each injected nitrogen atom.",
+        "id": "accumulated_nitrogen_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.91875,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/nitrogen/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative post-breakdown nitrogen inventory delivered by gas injection, expressed as seven equivalent-electron counts for each injected nitrogen atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.91875,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/nitrogen/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative oxygen gas introduced during the prefill phase by gas injection, expressed as an equivalent-electron count where each oxygen atom contributes 8 count units equal to its atomic number.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.85,
+        "score_name": 0.9375,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/oxygen/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count where each oxygen atom contributes 8 count units equal to its atomic number",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_oxygen_prefill_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative oxygen gas introduced during the prefill phase by gas injection, expressed as an equivalent-electron count where each oxygen atom contributes 8 count units equal to its atomic number.",
+        "id": "accumulated_oxygen_prefill_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.85,
+          "name": 0.9375
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/oxygen/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative oxygen gas introduced during the prefill phase by gas injection, expressed as an equivalent-electron count where each oxygen atom contributes 8 count units equal to its atomic number.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.85,
+        "score_name": 0.9375,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/oxygen/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative post-breakdown propane inventory delivered by gas injection, expressed as 26 equivalent electrons for each neutral molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9312499999999999,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/propane/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_propane_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative post-breakdown propane inventory delivered by gas injection, expressed as 26 equivalent electrons for each neutral molecule.",
+        "id": "accumulated_propane_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9312499999999999,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/propane/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative post-breakdown propane inventory delivered by gas injection, expressed as 26 equivalent electrons for each neutral molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9312499999999999,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/propane/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative post-breakdown inventory of silane molecules delivered by gas injection, expressed as an equivalent-electron count with 18 equivalent electrons per neutral SiH4 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.99375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/silane/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_silane_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative post-breakdown inventory of silane molecules delivered by gas injection, expressed as an equivalent-electron count with 18 equivalent electrons per neutral SiH4 molecule.",
+        "id": "accumulated_silane_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.99375,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/silane/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative post-breakdown inventory of silane molecules delivered by gas injection, expressed as an equivalent-electron count with 18 equivalent electrons per neutral SiH4 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.99375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/silane/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory of all gas species delivered by injection after plasma breakdown, summed across species.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9875,
+        "score_name": 0.9125,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/total/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_total_gas_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of all gas species delivered by injection after plasma breakdown, summed across species.",
+        "id": "accumulated_total_gas_count",
+        "review_scores": {
+          "docs": 0.9875,
+          "name": 0.9125
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/total/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory of all gas species delivered by injection after plasma breakdown, summed across species.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9875,
+        "score_name": 0.9125,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/total/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory of all gas species introduced by injection during the plasma prefill phase, summed over species.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.89375,
+        "score_name": 0.86875,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/total/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_total_prefill_gas_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of all gas species introduced by injection during the plasma prefill phase, summed over species.",
+        "id": "accumulated_total_prefill_gas_count",
+        "review_scores": {
+          "docs": 0.89375,
+          "name": 0.86875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/total/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory of all gas species introduced by injection during the plasma prefill phase, summed over species.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.89375,
+        "score_name": 0.86875,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/total/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative post-breakdown xenon inventory delivered by gas injection, expressed as an equivalent-electron count with 54 count units assigned to each xenon atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/xenon/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_xenon_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative post-breakdown xenon inventory delivered by gas injection, expressed as an equivalent-electron count with 54 count units assigned to each xenon atom.",
+        "id": "accumulated_xenon_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.95,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/xenon/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative post-breakdown xenon inventory delivered by gas injection, expressed as an equivalent-electron count with 54 count units assigned to each xenon atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_accumulated/xenon/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory of neutral xenon introduced during plasma prefill, ending at plasma breakdown, with 54 count units per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.88125,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/xenon/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "the equivalent-electron inventory of neutral xenon gas ... with 54 count units per atom",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "accumulated_xenon_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory of neutral xenon introduced during plasma prefill, ending at plasma breakdown, with 54 count units per atom.",
+        "id": "accumulated_xenon_prefill_count",
+        "review_scores": {
+          "docs": 0.88125,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/xenon/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory of neutral xenon introduced during plasma prefill, ending at plasma breakdown, with 54 count units per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.88125,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/xenon/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Deuterated ammonia prefill count is the total amount of neutral ND3 introduced before plasma breakdown, expressed as an equivalent-electron count with 10 count units per molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9624999999999999,
+        "score_name": 0.98125,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ammonia_deuterated/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count with 10 count units per molecule ... seven from nitrogen and one from each of ",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "ammonia_deuterated_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Deuterated ammonia prefill count is the total amount of neutral ND3 introduced before plasma breakdown, expressed as an equivalent-electron count with 10 count units per molecule.",
+        "id": "ammonia_deuterated_prefill_count",
+        "review_scores": {
+          "docs": 0.9624999999999999,
+          "name": 0.98125
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ammonia_deuterated/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Deuterated ammonia prefill count is the total amount of neutral ND3 introduced before plasma breakdown, expressed as an equivalent-electron count with 10 count units per molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9624999999999999,
+        "score_name": 0.98125,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ammonia_deuterated/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Ammonia prefill count is the total amount of NH3 introduced before plasma breakdown, expressed as an equivalent-electron count of 10 per neutral molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ammonia/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count. Each neutral NH3 molecule contributes ten count units",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "ammonia_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Ammonia prefill count is the total amount of NH3 introduced before plasma breakdown, expressed as an equivalent-electron count of 10 per neutral molecule.",
+        "id": "ammonia_prefill_count",
+        "review_scores": {
+          "docs": 0.9,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ammonia/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Ammonia prefill count is the total amount of NH3 introduced before plasma breakdown, expressed as an equivalent-electron count of 10 per neutral molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ammonia/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous ammonia source rate expressed as equivalent-electron count per time, assigning ten count units to each neutral NH3 molecule introduced into the plasma vessel.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.93125,
+        "score_name": 0.96875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ammonia/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "ammonia_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous ammonia source rate expressed as equivalent-electron count per time, assigning ten count units to each neutral NH3 molecule introduced into the plasma vessel.",
+        "id": "ammonia_source_rate",
+        "review_scores": {
+          "docs": 0.93125,
+          "name": 0.96875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ammonia/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous ammonia source rate expressed as equivalent-electron count per time, assigning ten count units to each neutral NH3 molecule introduced into the plasma vessel.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.93125,
+        "score_name": 0.96875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ammonia/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Argon prefill count is the total amount of neutral argon (Ar) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 0.98125,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/argon/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count. Each neutral argon atom contributes 18 equivalent electrons.",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "argon_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Argon prefill count is the total amount of neutral argon (Ar) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 per atom.",
+        "id": "argon_prefill_count",
+        "review_scores": {
+          "docs": 0.94375,
+          "name": 0.98125
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/argon/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Argon prefill count is the total amount of neutral argon (Ar) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 0.98125,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/argon/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron argon source rate delivered to the plasma vessel by gas injection systems, where each injected argon atom with Z = 18 contributes 18 equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.91875,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/argon/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "Instantaneous equivalent-electron argon source rate delivered to the plasma vessel by gas injection systems, where each ",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "argon_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron argon source rate delivered to the plasma vessel by gas injection systems, where each injected argon atom with Z = 18 contributes 18 equivalent-electron counts.",
+        "id": "argon_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.91875,
+          "name": 0.9875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/argon/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron argon source rate delivered to the plasma vessel by gas injection systems, where each injected argon atom with Z = 18 contributes 18 equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.91875,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/argon/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/beryllium/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "beryllium_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
+        "id": "beryllium_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9375,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/beryllium/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/beryllium/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Cumulative equivalent-electron inventory introduced as carbon gas during plasma prefill, with six count units assigned to each injected carbon atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.89375,
+        "score_name": 0.8875,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/carbon/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "Cumulative equivalent-electron inventory introduced as carbon gas ... with six count units assigned to each injected car",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "carbon_prefill_count_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Cumulative equivalent-electron inventory introduced as carbon gas during plasma prefill, with six count units assigned to each injected carbon atom.",
+        "id": "carbon_prefill_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.89375,
+          "name": 0.8875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/carbon/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Cumulative equivalent-electron inventory introduced as carbon gas during plasma prefill, with six count units assigned to each injected carbon atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.89375,
+        "score_name": 0.8875,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/carbon/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each injected carbon atom contributing six equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 0.875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/carbon/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each ",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "carbon_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each injected carbon atom contributing six equivalent-electron counts.",
+        "id": "carbon_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9375,
+          "name": 0.875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/carbon/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each injected carbon atom contributing six equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 0.875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/carbon/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous injection rate of deuterated methane (CD4), counted as equivalent electrons rather than molecules.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.91875,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/methane_deuterated/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "deuterated_methane_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous injection rate of deuterated methane (CD4), counted as equivalent electrons rather than molecules.",
+        "id": "deuterated_methane_source_rate",
+        "review_scores": {
+          "docs": 0.91875,
+          "name": 0.9875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/methane_deuterated/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous injection rate of deuterated methane (CD4), counted as equivalent electrons rather than molecules.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.91875,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/methane_deuterated/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Rate at which particles represented as equivalent electrons are removed from the plasma region by wall pumping, giving global electron-equivalent exhaust throughput.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 1.0,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:wall/global_quantities/electrons/pumping_speed"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "electron_particle_flux_at_wall_due_to_pumping"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Rate at which particles represented as equivalent electrons are removed from the plasma region by wall pumping, giving global electron-equivalent exhaust throughput.",
+        "id": "electron_particle_flux_at_wall_due_to_pumping",
+        "review_scores": {
+          "docs": 1.0,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:wall/global_quantities/electrons/pumping_speed"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Rate at which particles represented as equivalent electrons are removed from the plasma region by wall pumping, giving global electron-equivalent exhaust throughput.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 1.0,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:wall/global_quantities/electrons/pumping_speed"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Ethane prefill count is the total amount of neutral ethane (C2H6) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9750000000000001,
+        "score_name": 0.975,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ethane/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "the total amount of neutral ethane introduced before plasma breakdown, expressed as an equivalent-electron count with 18",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "ethane_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Ethane prefill count is the total amount of neutral ethane (C2H6) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per molecule.",
+        "id": "ethane_prefill_count",
+        "review_scores": {
+          "docs": 0.9750000000000001,
+          "name": 0.975
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ethane/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Ethane prefill count is the total amount of neutral ethane (C2H6) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9750000000000001,
+        "score_name": 0.975,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ethane/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous ethane-gas injection rate into the plasma vessel, expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.925,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ethane/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "ethane_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous ethane-gas injection rate into the plasma vessel, expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule.",
+        "id": "ethane_source_rate",
+        "review_scores": {
+          "docs": 0.925,
+          "name": 0.9875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ethane/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous ethane-gas injection rate into the plasma vessel, expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.925,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ethane/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Ethylene prefill count is the total amount of neutral ethylene (C2H4) introduced before plasma breakdown, expressed as an equivalent-electron count with 16 equivalent electrons per molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9625,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ethylene/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count. Each neutral ethylene molecule contributes sixteen equivalent electrons",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "ethylene_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Ethylene prefill count is the total amount of neutral ethylene (C2H4) introduced before plasma breakdown, expressed as an equivalent-electron count with 16 equivalent electrons per molecule.",
+        "id": "ethylene_prefill_count",
+        "review_scores": {
+          "docs": 0.9625,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ethylene/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Ethylene prefill count is the total amount of neutral ethylene (C2H4) introduced before plasma breakdown, expressed as an equivalent-electron count with 16 equivalent electrons per molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9625,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ethylene/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel, expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ethylene/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "each molecule is assigned 16 equivalent electrons",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "ethylene_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel, expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons.",
+        "id": "ethylene_source_rate",
+        "review_scores": {
+          "docs": 0.9375,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ethylene/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel, expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ethylene/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron helium-3 source rate delivered to the plasma vessel by gas injection systems, where each injected helium-3 atom contributes two equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 1.0,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/helium_3/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "expressed as an equivalent-electron count rate. Each helium-3 atom contributes two equivalent-electron counts",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "helium_3_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron helium-3 source rate delivered to the plasma vessel by gas injection systems, where each injected helium-3 atom contributes two equivalent-electron counts.",
+        "id": "helium_3_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 1.0,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/helium_3/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron helium-3 source rate delivered to the plasma vessel by gas injection systems, where each injected helium-3 atom contributes two equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 1.0,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/helium_3/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron source rate of helium-4 delivered to the plasma vessel by gas injection, with each helium-4 atom contributing two equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/helium_4/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "Each helium-4 atom contributes two counts because helium has atomic number 2",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "helium_4_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron source rate of helium-4 delivered to the plasma vessel by gas injection, with each helium-4 atom contributing two equivalent-electron counts.",
+        "id": "helium_4_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.94375,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/helium_4/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron source rate of helium-4 delivered to the plasma vessel by gas injection, with each helium-4 atom contributing two equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/helium_4/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Krypton prefill count is the total amount of neutral krypton introduced before plasma breakdown, expressed as an equivalent-electron count with 36 count units per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/krypton/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count ... 36 count units per atom",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "krypton_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Krypton prefill count is the total amount of neutral krypton introduced before plasma breakdown, expressed as an equivalent-electron count with 36 count units per atom.",
+        "id": "krypton_prefill_count",
+        "review_scores": {
+          "docs": 0.9375,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/krypton/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Krypton prefill count is the total amount of neutral krypton introduced before plasma breakdown, expressed as an equivalent-electron count with 36 count units per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/krypton/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron krypton source rate delivered to the plasma vessel by gas injection systems, where each injected krypton atom with Z = 36 contributes 36 equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 1.0,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/krypton/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "expressed as an equivalent-electron count rate",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "krypton_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron krypton source rate delivered to the plasma vessel by gas injection systems, where each injected krypton atom with Z = 36 contributes 36 equivalent-electron counts.",
+        "id": "krypton_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 1.0,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/krypton/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron krypton source rate delivered to the plasma vessel by gas injection systems, where each injected krypton atom with Z = 36 contributes 36 equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 1.0,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/krypton/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron lithium source rate delivered to the plasma vessel by gas injection systems, with each injected lithium atom contributing three equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95625,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/lithium/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "each injected lithium atom contributing three equivalent-electron counts",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "lithium_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron lithium source rate delivered to the plasma vessel by gas injection systems, with each injected lithium atom contributing three equivalent-electron counts.",
+        "id": "lithium_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.95625,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/lithium/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron lithium source rate delivered to the plasma vessel by gas injection systems, with each injected lithium atom contributing three equivalent-electron counts.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95625,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/lithium/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous injection rate of carbon-13-labeled methane into the plasma vessel, expressed as an equivalent-electron rate with 10 equivalent electrons assigned to each neutral molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/methane_carbon_13/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "Each neutral carbon-13-labeled methane molecule contributes 10 equivalent electrons",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "methane_carbon_13_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous injection rate of carbon-13-labeled methane into the plasma vessel, expressed as an equivalent-electron rate with 10 equivalent electrons assigned to each neutral molecule.",
+        "id": "methane_carbon_13_source_rate",
+        "review_scores": {
+          "docs": 0.94375,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/methane_carbon_13/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous injection rate of carbon-13-labeled methane into the plasma vessel, expressed as an equivalent-electron rate with 10 equivalent electrons assigned to each neutral molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/methane_carbon_13/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Neon prefill count is the total amount of neutral neon (Ne) introduced before plasma breakdown, expressed as an equivalent-electron count with 10 equivalent electrons per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9875,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/neon/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count. Each neutral neon atom contributes 10 equivalent electrons",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "neon_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Neon prefill count is the total amount of neutral neon (Ne) introduced before plasma breakdown, expressed as an equivalent-electron count with 10 equivalent electrons per atom.",
+        "id": "neon_prefill_count",
+        "review_scores": {
+          "docs": 0.9875,
+          "name": 0.9875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/neon/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Neon prefill count is the total amount of neutral neon (Ne) introduced before plasma breakdown, expressed as an equivalent-electron count with 10 equivalent electrons per atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9875,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/neon/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous injection rate of neon gas into the plasma vessel, expressed as an equivalent-electron count rate with ten counts assigned to each injected neon atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95625,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/neon/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "the time rate of increase of the equivalent-electron count associated with injected neon. The equivalent-electron conven",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "neon_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous injection rate of neon gas into the plasma vessel, expressed as an equivalent-electron count rate with ten counts assigned to each injected neon atom.",
+        "id": "neon_source_rate",
+        "review_scores": {
+          "docs": 0.95625,
+          "name": 0.9875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/neon/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous injection rate of neon gas into the plasma vessel, expressed as an equivalent-electron count rate with ten counts assigned to each injected neon atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.95625,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/neon/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Nitrogen prefill count is the total amount of neutral nitrogen (N or N\u2082) introduced before plasma breakdown, expressed as an equivalent-electron count with 7 per atom or 14 per N\u2082 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9437500000000001,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/nitrogen/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "the total amount of neutral nitrogen (N or N2) introduced before plasma breakdown, expressed as an equivalent-electron c",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "nitrogen_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Nitrogen prefill count is the total amount of neutral nitrogen (N or N\u2082) introduced before plasma breakdown, expressed as an equivalent-electron count with 7 per atom or 14 per N\u2082 molecule.",
+        "id": "nitrogen_prefill_count",
+        "review_scores": {
+          "docs": 0.9437500000000001,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/nitrogen/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Nitrogen prefill count is the total amount of neutral nitrogen (N or N\u2082) introduced before plasma breakdown, expressed as an equivalent-electron count with 7 per atom or 14 per N\u2082 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9437500000000001,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/nitrogen/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous rate of neutral molecular nitrogen admitted to the plasma vessel, expressed as equivalent-electron particles with fourteen counts assigned to each molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.925,
+        "score_name": 0.9125,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/nitrogen/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "the equivalent-electron source rate carried by neutral molecular nitrogen ... fourteen counts assigned to each molecule",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "nitrogen_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous rate of neutral molecular nitrogen admitted to the plasma vessel, expressed as equivalent-electron particles with fourteen counts assigned to each molecule.",
+        "id": "nitrogen_source_rate",
+        "review_scores": {
+          "docs": 0.925,
+          "name": 0.9125
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/nitrogen/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous rate of neutral molecular nitrogen admitted to the plasma vessel, expressed as equivalent-electron particles with fourteen counts assigned to each molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.925,
+        "score_name": 0.9125,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/nitrogen/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous oxygen injection rate from gas fueling, expressed on an equivalent-electron basis with eight equivalent electrons assigned to each oxygen atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9624999999999999,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/oxygen/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "oxygen_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous oxygen injection rate from gas fueling, expressed on an equivalent-electron basis with eight equivalent electrons assigned to each oxygen atom.",
+        "id": "oxygen_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9624999999999999,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/oxygen/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous oxygen injection rate from gas fueling, expressed on an equivalent-electron basis with eight equivalent electrons assigned to each oxygen atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9624999999999999,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/oxygen/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Propane prefill count is the total amount of C3H8 introduced before plasma breakdown, expressed as an equivalent-electron count with 26 count units per neutral propane molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.925,
+        "score_name": 0.975,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/propane/value"
+        ],
+        "unit": "1"
+      },
+      "basis": "expressed as an equivalent-electron count. Each propane molecule contributes 26 equivalent electrons",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "propane_prefill_count"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Propane prefill count is the total amount of C3H8 introduced before plasma breakdown, expressed as an equivalent-electron count with 26 count units per neutral propane molecule.",
+        "id": "propane_prefill_count",
+        "review_scores": {
+          "docs": 0.925,
+          "name": 0.975
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/propane/value"
+        ],
+        "unit": "1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Propane prefill count is the total amount of C3H8 introduced before plasma breakdown, expressed as an equivalent-electron count with 26 count units per neutral propane molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.925,
+        "score_name": 0.975,
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/propane/value"
+        ],
+        "unit": "1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous propane (C3H8) injection rate into the plasma vessel, converted from molecules to equivalent electrons using 26 electrons per neutral molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/propane/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "converted from molecules to equivalent electrons using 26 electrons per neutral molecule",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "propane_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous propane (C3H8) injection rate into the plasma vessel, converted from molecules to equivalent electrons using 26 electrons per neutral molecule.",
+        "id": "propane_source_rate",
+        "review_scores": {
+          "docs": 0.9,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/propane/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous propane (C3H8) injection rate into the plasma vessel, converted from molecules to equivalent electrons using 26 electrons per neutral molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/propane/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous injection rate of silane (SiH4) gas into the plasma vessel, expressed as an electron-equivalent particle rate with 18 equivalent electrons for each SiH4 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/silane/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "expressed on an electron-equivalent particle-counting basis ... 18 equivalent electrons for each SiH4 molecule",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "silane_source_rate"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous injection rate of silane (SiH4) gas into the plasma vessel, expressed as an electron-equivalent particle rate with 18 equivalent electrons for each SiH4 molecule.",
+        "id": "silane_source_rate",
+        "review_scores": {
+          "docs": 0.94375,
+          "name": 0.9875
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/silane/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous injection rate of silane (SiH4) gas into the plasma vessel, expressed as an electron-equivalent particle rate with 18 equivalent electrons for each SiH4 molecule.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.94375,
+        "score_name": 0.9875,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/silane/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron source rate delivered to the plasma vessel by gas injection systems, where each injected atom contributes Z equivalent electrons per second according to its atomic number.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.925,
+        "score_name": null,
+        "source_bindings": [
+          "derived:source_rate_due_to_gas_injection"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "Instantaneous equivalent-electron source rate delivered to the plasma vessel by gas injection systems",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron source rate delivered to the plasma vessel by gas injection systems, where each injected atom contributes Z equivalent electrons per second according to its atomic number.",
+        "id": "source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.925,
+          "name": null
+        },
+        "source_bindings": [
+          "derived:source_rate_due_to_gas_injection"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron source rate delivered to the plasma vessel by gas injection systems, where each injected atom contributes Z equivalent electrons per second according to its atomic number.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.925,
+        "score_name": null,
+        "source_bindings": [
+          "derived:source_rate_due_to_gas_injection"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous total rate at which neutral gas is introduced into the lower vacuum-vessel region by gas injection valves, summed over lower-region valves and expressed using the equivalent-electron convention across injected species.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9125000000000001,
+        "score_name": 0.925,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/bottom/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "the lower-region aggregate equivalent-electron source rate due to gas injection",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous total rate at which neutral gas is introduced into the lower vacuum-vessel region by gas injection valves, summed over lower-region valves and expressed using the equivalent-electron convention across injected species.",
+        "id": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.9125000000000001,
+          "name": 0.925
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/bottom/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous total rate at which neutral gas is introduced into the lower vacuum-vessel region by gas injection valves, summed over lower-region valves and expressed using the equivalent-electron convention across injected species.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9125000000000001,
+        "score_name": 0.925,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/bottom/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron source rate of neutral gas introduced into the vessel by gas injection, summed over all injected species.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.93125,
+        "score_name": 0.95625,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/total/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "total_neutral_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron source rate of neutral gas introduced into the vessel by gas injection, summed over all injected species.",
+        "id": "total_neutral_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.93125,
+          "name": 0.95625
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/total/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron source rate of neutral gas introduced into the vessel by gas injection, summed over all injected species.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.93125,
+        "score_name": 0.95625,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/total/value"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Total equivalent-electron rate of neutral and ion particles re-emitted from all divertor surfaces into the plasma by recycling.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 0.975,
+        "source_bindings": [
+          "dd:divertors/divertor/particle_flux_recycled_total"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "total_particle_source_rate_of_divertor_due_to_recycling"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Total equivalent-electron rate of neutral and ion particles re-emitted from all divertor surfaces into the plasma by recycling.",
+        "id": "total_particle_source_rate_of_divertor_due_to_recycling",
+        "review_scores": {
+          "docs": 0.9375,
+          "name": 0.975
+        },
+        "source_bindings": [
+          "dd:divertors/divertor/particle_flux_recycled_total"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Total equivalent-electron rate of neutral and ion particles re-emitted from all divertor surfaces into the plasma by recycling.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.9375,
+        "score_name": 0.975,
+        "source_bindings": [
+          "dd:divertors/divertor/particle_flux_recycled_total"
+        ],
+        "unit": "s^-1"
+      }
+    },
+    {
+      "after": {
+        "description": "Instantaneous equivalent-electron source rate for xenon atoms supplied by gas injection, assigning 54 equivalent electrons to each xenon atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.93125,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/xenon/value"
+        ],
+        "unit": "s^-1"
+      },
+      "basis": "",
+      "cost": {
+        "calls": 0,
+        "run_id": null,
+        "spend_usd": 0.0
+      },
+      "edit_scope_id": null,
+      "left_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+      "live_identity": {
+        "id": "xenon_source_rate_due_to_gas_injection"
+      },
+      "new_identity": null,
+      "old_identity": {
+        "description": "Instantaneous equivalent-electron source rate for xenon atoms supplied by gas injection, assigning 54 equivalent electrons to each xenon atom.",
+        "id": "xenon_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": 0.93125,
+          "name": 1.0
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/xenon/value"
+        ],
+        "unit": "s^-1"
+      },
+      "outcome": "not_attempted_probe_stop",
+      "settled_after": {
+        "description": "Instantaneous equivalent-electron source rate for xenon atoms supplied by gas injection, assigning 54 equivalent electrons to each xenon atom.",
+        "docs_stage": "accepted",
+        "name_stage": "accepted",
+        "score_docs": 0.93125,
+        "score_name": 1.0,
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/xenon/value"
+        ],
+        "unit": "s^-1"
+      }
+    }
+  ],
+  "population": {
+    "count": 56,
+    "source": "live-rewrite-bulk.json"
+  },
+  "sourceless": {
+    "allowance": 10,
+    "count": 10
+  },
+  "spend_ceiling_usd": 8.0,
+  "spend_source": "LLMCost joined once through each scoped SNRun",
+  "spend_total_usd": 0.537272,
+  "status": "blocked",
+  "stop_reason": "The five-name probe accepted 1 of 5, below the required three; remaining names were not submitted.",
+  "summary": {
+    "left": 48,
+    "population": 56,
+    "renamed": 8,
+    "spend_usd": 0.537272
+  }
+}
