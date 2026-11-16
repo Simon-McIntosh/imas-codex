@@ -25,7 +25,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 35,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "024b66e9a67fc17174084e6094dd67c9643a2a91",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The local-lane decision's rationale at version 36 says the description model is the open decision and that ICP-derived context stays inside ITER unless the lead chooses the paid model there.",
+      "reason": "",
+      "when": "2026-11-16T21:07:00.908727+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "024b66e9a67fc17174084e6094dd67c9643a2a91",
+      "commit_basis": "edit",
+      "note": "The local-lane decision's rationale at version 36 says the description model is the open decision and that ICP-derived context stays inside ITER unless the lead chooses the paid model there.",
+      "reason": "",
+      "when": "2026-11-16T21:07:00.908727+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T195839802386-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261116T195839802386-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "4536409ea1bfb57fa20d4b3feb9021046ccc57ec",
   "rubric": "content",
