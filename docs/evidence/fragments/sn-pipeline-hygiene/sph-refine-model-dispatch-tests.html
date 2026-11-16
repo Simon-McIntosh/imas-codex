@@ -34,18 +34,21 @@
       </tr>
       <tr>
         <td><code>tests/standard_names</code></td>
-        <td>2 failed, 8766 passed, 12 skipped, 541 deselected, 43 warnings in 852.50s</td>
+        <td>2 failed, 8766 passed, 12 skipped, 541 deselected, 43 warnings in 791.44s</td>
         <td>8768 passed, 12 skipped, 541 deselected, 43 warnings in 810.85s</td>
       </tr>
     </tbody>
   </table>
   <p>
     The whole-directory base log is
-    <code>/home/ITER/mcintos/.cache/imas-codex-live-rewrite/merged-head/standard-names-bd3f019a0.log</code>;
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/baseline-standard-names.log</code>;
     the head log is
-    <code>/home/ITER/mcintos/.cache/imas-codex-live-rewrite/refine-model-dispatch-standard-names.log</code>.
-    The head arm ran from an archive at
-    <code>4b282ddc4527b420b3a1b188ba60b21004f0ab2d</code> on
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/head-standard-names.log</code>.
+    The base arm ran at
+    <code>bd3f019a0482748c603efdfcd0d2216ccaedd8d6</code> and imported settings
+    from its archive's <code>/tmp/imas-codex-standard-names-base-pGSS2N/tree/imas_codex/settings.py</code>;
+    it reproduced both failures and ended with <code>EXIT=1</code>. The head
+    arm ran at <code>4b282ddc4527b420b3a1b188ba60b21004f0ab2d</code> on
     <code>all_debug</code>, imported settings from its own temporary tree, and
     ended with <code>EXIT=0</code>.
   </p>
@@ -56,7 +59,7 @@
     received <code>local/deepseek-v4.1-flash</code> instead of
     <code>openrouter/test/refine-canary</code> (1 failed, <code>EXIT=1</code>).
     Its log is
-    <code>/home/ITER/mcintos/.cache/imas-codex-live-rewrite/refine-model-dispatch-negative-control.log</code>.
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/refine-model-dispatch-negative-control.log</code>.
   </p>
   <p>
     The other seat overrides found under <code>tests/</code> use recognized
