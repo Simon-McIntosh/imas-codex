@@ -1,7 +1,7 @@
 """Context references, local review refusal and opt-in description controls."""
 
 import json
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -313,3 +313,49 @@ def test_review_call_is_not_a_provider_retry_or_draft_reask():
     assert result["review_validation_reasks"] == 1
     assert result["other_retries"] == 0
     assert result["validation_reasks"] == 0
+
+
+@pytest.mark.asyncio
+async def test_production_private_sink_never_receives_missing_citation_statement(
+    tmp_path,
+):
+    from imas_codex.discovery.base import llm
+    from scripts import benchmark_signal_enrichment as bench
+    from tests.discovery.test_signal_enrichment_options import response
+
+    raw = draft(cited=True).model_dump_json()
+    db = bench.open_store(tmp_path / "private.sqlite")
+    with (
+        patch.object(llm, "get_api_key", return_value="test"),
+        patch.object(llm, "_is_local_api_base", return_value=True),
+        patch.object(
+            llm,
+            "_build_kwargs",
+            return_value={
+                "api_base": "http://localhost:8000/v1",
+                "model": "local/test",
+                "messages": messages(),
+                "response_format": llm._to_json_schema_format(CitedEnrichmentBatch),
+            },
+        ),
+    ):
+        record = await bench.replay_batch(
+            [
+                {
+                    "id": "jt-60sa:synthetic",
+                    "name": "TEMP",
+                    "accessor": "TEMP",
+                    "unit": "K",
+                }
+            ],
+            "jt-60sa",
+            db,
+            transport=AsyncMock(return_value=response(raw)),
+            messages=messages(),
+            enrichment_options=EnrichmentOptions(claim_evidence=True),
+        )
+    db.close()
+    assert len(record["outputs"]) == 1
+    assert record["outputs"][0]["description"] == "Cooling temperature."
+    assert record["grounding_counts"]["evidence_drops"] == 2
+    assert "Unsupported circuit detail" not in json.dumps(record["outputs"])
