@@ -372,6 +372,46 @@ def _run_export_with_audit(
     return report, fetch
 
 
+def test_the_population_read_is_inside_the_ten_second_ceiling() -> None:
+    """The audit's own read carries the whole function's ceiling.
+
+    The population read is the largest statement the audit issues, so leaving
+    it on the bare client — as it was before this guard — was the only statement
+    in the function with no ceiling.
+    """
+    from imas_codex.standard_names.graph_store import graph_supersession
+
+    class _SlowClock:
+        def __init__(self) -> None:
+            self.readings = 0
+
+        def monotonic(self) -> float:
+            self.readings += 1
+            return self.readings * 11.0
+
+    class _Services:
+        time = _SlowClock()
+
+    class _Client:
+        def query(self, cypher: str, **params: object) -> list[dict]:
+            return [
+                {
+                    "id": "live_loss",
+                    "origin": "pipeline",
+                    "name_stage": "accepted",
+                    "derived_parent": False,
+                    "live_children": 0,
+                }
+            ]
+
+    services = _Services()
+    with patch.object(graph_supersession.foundation, "get_services", lambda: services):
+        with pytest.raises(
+            RuntimeError, match="source audit query exceeded ten seconds"
+        ):
+            classify_sourceless_standard_names(_Client())
+
+
 def test_exhausted_sourceless_row_is_dormant_not_blocking(tmp_path: Path) -> None:
     """An exhausted name never ships, so its missing source is dormant."""
     report, fetch = _run_export_with_audit(

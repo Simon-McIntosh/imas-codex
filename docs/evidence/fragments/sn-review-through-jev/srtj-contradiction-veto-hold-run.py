@@ -1,4 +1,10 @@
 #!/usr/bin/env python
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 0c3992cb8739df6a231a7009198211e44b1f75f6, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops.docs_review_eligibility_params, imas_codex.standard_names.graph_ops.docs_review_eligibility_where.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Read back the documentation contradiction-veto firings and their consequences.
 
 Three questions are answered from two durable sources and the code paths that

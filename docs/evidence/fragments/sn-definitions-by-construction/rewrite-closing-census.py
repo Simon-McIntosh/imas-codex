@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 19daa7a6db6e1a0212c2be6cd4c82b11957e0cd5, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.graph.temp_neo4j.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Closing census of the live standard-name catalog after the wording rewrite.
 
 Measures every clause of the section's done-when over every live name. The live

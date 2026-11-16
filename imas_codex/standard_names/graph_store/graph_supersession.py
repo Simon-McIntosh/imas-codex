@@ -13,6 +13,7 @@ from __future__ import annotations
 import functools
 import inspect
 import logging
+from types import SimpleNamespace
 from typing import Any
 
 from imas_codex.discovery.base.claims import retry_on_deadlock
@@ -3075,7 +3076,7 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
     population = [
         row["id"]
         for row in find_sourceless_live_name_rows(
-            gc, None, derived_parents_exempt=False
+            SimpleNamespace(query=read), None, derived_parents_exempt=False
         )
     ]
     if not population:

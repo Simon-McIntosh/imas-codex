@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at bab7c8b2c2adf60fa8526336fb82ad8f73712e30, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.review.cascade, imas_codex.standard_names.review.cascade_calibration.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Diagnose frozen review discrimination without making judge or graph calls."""
 
 from __future__ import annotations

@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 49b0626ab2b8c652c36315fee8efc4466a23e296, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.review.cascade_calibration.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Compare frozen reviewers at matched acceptance operating points."""
 
 from __future__ import annotations

@@ -390,6 +390,7 @@ def identity_state_expressions() -> dict[str, str | _CategoricalProjection]:
         docs_review_winner_query_body,
     )
     from imas_codex.standard_names.review.holds import has_open_docs_hold_where
+    from imas_codex.standard_names.source_invariant import live_child_cypher
 
     return {
         **{
@@ -423,7 +424,7 @@ def identity_state_expressions() -> dict[str, str | _CategoricalProjection]:
         "rename_resubmit_capped": "coalesce(sn.edit_mode, '') = 'rename' AND coalesce(sn.review_resubmit_count, 0) >= $rotation_cap",
         "review_quorum_shortfall": "sn.review_quorum_shortfall IS NOT NULL",
         "docs_review_quorum_shortfall": "sn.docs_review_quorum_shortfall IS NOT NULL",
-        "has_live_child": "EXISTS { MATCH (child:StandardName)-[:HAS_PARENT]->(sn) WHERE NOT coalesce(child.name_stage, '') IN ['superseded', 'exhausted', 'contested'] }",
+        "has_live_child": live_child_cypher(),
         "has_winning_docs_review": f"EXISTS {{{docs_review_winner_query_body()}}}",
         "has_open_docs_hold": has_open_docs_hold_where(),
         "claim_active": "sn.claim_token IS NOT NULL OR sn.claimed_at IS NOT NULL",

@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 7b33eedd90048a1a2043f319842423698ee440b8, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.workers._bound_docs_review_dd_paths, imas_codex.standard_names.workers._documentation_banned_prose_note, imas_codex.standard_names.workers._documentation_conformance_note, imas_codex.standard_names.workers._documentation_contradiction_note, imas_codex.standard_names.workers._load_docs_review_source_item.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Attribute the 0.849 documentation hold on each rewritten anchor member.
 
 The anchor A/B of the Jev-anchor campaign recorded a documentation score of

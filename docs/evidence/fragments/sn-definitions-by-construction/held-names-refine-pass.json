@@ -109,7 +109,8 @@
     "spend_usd": 0.102812,
     "rate_per_name_usd": 0.1028
    }
-  }
+  },
+  "by_hold_kind_note": "The per-kind spend column credits each paid step's cost to every name a step settled, so it shares a rename's cost among the names it moved and sums above the headline total rather than partitioning it."
  },
  "spend": {
   "total_usd": 11.564196,

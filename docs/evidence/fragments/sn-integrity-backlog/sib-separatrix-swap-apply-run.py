@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 4247a6d5e0a55261c6cac175c0f2c8c4e15d1ce7, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.graph_ops.classify_sourceless_standard_names.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Apply the separatrix temperature DD-source swap through the signed exchange writer.
 
 Phases (each writes its own log whose final line is a real ``EXIT=``):

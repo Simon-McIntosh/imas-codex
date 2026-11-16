@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 1d667cc62507383e6d8295a0cdeadcdb3f359365, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.review.cascade, imas_codex.standard_names.workers._canonical_docs_review_item, imas_codex.standard_names.workers._enrich_docs_review_dd_context, imas_codex.standard_names.workers._load_docs_review_source_item, imas_codex.standard_names.workers._related_path_neighbours, imas_codex.standard_names.workers._set_docs_review_dd_source_paths.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Measure the decision the documentation change would make over the 77 labelled rows.
 
 Every labelled row is rebuilt the way the cascade expects it -- documentation,

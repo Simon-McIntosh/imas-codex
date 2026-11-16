@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at 0a9221bfde65e386943e5a392cc6396cd2693843, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.standard_names.review.jev_review.choice_acceptable_form, imas_codex.standard_names.workers._search_nearby_names.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Measure how well a Jev risk composite founds known defects first.
 
 The composite is fixed before anything is measured. For each golden item the

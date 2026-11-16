@@ -1,3 +1,9 @@
+# frozen-record: this script no longer runs as committed. Its committed reading
+# is the record of the revision it ran at, not a reading this tree can
+# regenerate. Ran at c9bb3c280bb41384e8588a733b41a5d45e87fde3, the last revision this file changed in.
+# Names the tree no longer defines: imas_codex.graph.temp_neo4j.
+# The format is deliberate: it is a record, not a description of a
+# defect still to repair.
 """Re-measure chain-cap identities with no sourced ancestor, and the share a
 whole-catalog cut would publish.
 
