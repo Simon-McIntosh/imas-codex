@@ -177,8 +177,10 @@
     catalogue read-only behaviour, separate normalisation counts, collisions,
     wrapper/key variants and description distributions.</p>
   <p>The deliberate negative control changes the parser's refusals to return
-    an empty list. The corresponding refusal tests then fail; the final gate and
-    red mutation log are in the run record named by the manifest.
+    an empty list. The committed implementation passes all 17 focused tests;
+    the mutation gives 11 failed and six passed, including both CLI failure
+    controls. The final gate and red mutation log are in the run record named
+    by the manifest.
     The first figure save correctly refused a clipped automatic tick. Its tick
     positions were constrained to the displayed limits and the figure was saved
     from the stored measurement receipt, without another catalogue scan or GET.</p>
