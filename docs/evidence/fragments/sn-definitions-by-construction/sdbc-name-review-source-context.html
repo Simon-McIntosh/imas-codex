@@ -1,0 +1,154 @@
+<section id="sdbc-name-review-source-context" class="landing-fragment">
+  <h2 id="sdbc-name-review-source-context-title">A qualifier the source states above its leaf</h2>
+
+  <p id="sdbc-name-review-source-context-problem">
+    The two source-support checks read the DD leaf the name is bound to. For
+    <code>accumulated_carbon_equivalent_electron_count_due_to_gas_injection</code>
+    the leaf is <code>summary/gas_injection_accumulated/carbon/value</code>, whose
+    documentation is <q>Value</q>; its parent is <q>Carbon</q>; the structure
+    above both is <q>Accumulated injected gas since the plasma breakdown in
+    equivalent electrons</q>. The name's <code>accumulated</code> and
+    <code>equivalent_electron</code> are stated by that structure and by nothing
+    else, so a review shown only the leaf answered both checks at 0.80–0.95 for
+    all eight live equivalent-electron names.
+  </p>
+
+  <h3 id="sdbc-name-review-source-context-mechanism">What the review now reads</h3>
+  <p id="sdbc-name-review-source-context-channel">
+    Review enrichment walks <code>HAS_PARENT</code> from each bound source path to
+    depth four and attaches every documentation/description statement it finds,
+    with its path, to the exact source group it belongs to. The name state gains
+    those statements as an observed channel,
+    <code>neighbourhood.dd_enclosing_structures</code>, beside the leaf text.
+    <code>enclosing_structure_support</code> then reconciles the name's grammar
+    qualifiers against leaf plus structures: when every qualifier is stated
+    somewhere and at least one is stated only by a structure, the two
+    source-support checks are answered zero and the stating structure is recorded
+    on the check. A qualifier no leaf and no structure states leaves the answer to
+    the judge, so an unsupported qualifier still records its failure.
+  </p>
+
+  <h3 id="sdbc-name-review-source-context-eight">The eight live names</h3>
+  <p id="sdbc-name-review-source-context-eight-note">
+    Before is the newest stored name review from the day before this change; after
+    is the row written by this change. Both source-support checks read 0.0 in every
+    stored after-row. <code>accumulated_carbon_equivalent_electron_count_due_to_gas_injection</code>
+    still routes <code>refine</code>, and no check holds it: the score mapping does
+    (its dimension answers score 0.68).
+  </p>
+  <table id="sdbc-name-review-source-context-eight-table">
+    <thead>
+      <tr>
+        <th>name</th>
+        <th>over_qualified_modifier before → after</th>
+        <th>source_fidelity_unsupported_qualifier before → after</th>
+        <th>route</th>
+      </tr>
+    </thead>
+    <tbody id="sdbc-name-review-source-context-eight-rows"></tbody>
+  </table>
+
+  <h3 id="sdbc-name-review-source-context-planted">The planted qualifier still fails</h3>
+  <p id="sdbc-name-review-source-context-planted-note">
+    <code>accumulated_total_carbon_equivalent_electron_count_due_to_gas_injection</code>
+    parses, and no leaf or structure states <q>total</q>. Enclosing support
+    returns none, so the judge keeps its answer: 0.58 on
+    <code>over_qualified_modifier</code> and 0.75 on
+    <code>source_fidelity_unsupported_qualifier</code>, both above the 0.5 cutoff,
+    route <code>refine</code>. The statement channel does not launder an unsupported
+    qualifier.
+  </p>
+
+  <h3 id="sdbc-name-review-source-context-population">How wide the class is</h3>
+  <p id="sdbc-name-review-source-context-population-note">
+    Every live name bound to a DD source was classified by the same rule: 1,184 of
+    3,359 carry at least one grammar qualifier that no leaf states and at least one
+    structure does. They are listed name-by-name in the data file with the stating
+    structure index, together with the 687 distinct statements involved. Domains
+    and qualifier frequencies are in the data file; the largest are
+    <code>momentum</code>, <code>ion</code>, <code>neutral</code>,
+    <code>energy</code> and <code>electron</code>, and the largest domain is
+    <code>transport</code>.
+  </p>
+  <p id="sdbc-name-review-source-context-population-residual">
+    The re-review pass over the parallel class stopped after 3½ minutes on a stale
+    DD resolution (<code>x_second_measurement_direction_unit_vector_of_strain_gauge</code>,
+    version not exact) with the batch loop aborting. Measured afterwards: of the
+    1,184 members, 1,172 have a stored name review; 212 of those store both checks
+    at 0.0, and 125 still store a source-support answer at or above 0.5. A further
+    782 members' newest name review predates this change and carries no stored
+    judgment answers at all, so the class clause is measured in part, not
+    satisfied: the resolver settles every name it runs on, and names whose newest
+    review is older than the change keep their old answer until the pipeline
+    re-reviews them.
+  </p>
+
+  <h3 id="sdbc-name-review-source-context-sample">Accepted names before and after</h3>
+  <p id="sdbc-name-review-source-context-sample-note">
+    199 accepted names drawn round-robin across 30 domains (seed 20261116) were
+    judged twice: once with the enclosing statement withheld (what the base review
+    sees) and once as enriched. Nine moved. Eight moved
+    <code>refine</code>→<code>accept</code>, each on a statement that states the
+    qualifier (<q>Accumulated injected gas during the prefill in equivalent
+    electrons</q>, <q>Deuterated methane (CD4)</q>, <q>Hydrogen</q>, or a dimension
+    score that no longer had a veto). One moved the other way,
+    <code>line_integrated_neutral_beam_radiance_at_spectral_line</code>
+    <code>accept</code>→<code>refine</code>, on a check the statement channel does
+    not settle; it is listed here as a move this change did not intend and did not
+    explain. One name was skipped at enrichment on the same stale DD resolution
+    fault.
+  </p>
+  <ul id="sdbc-name-review-source-context-sample-moves">
+    <li><code>vertical_coordinate_of_poloidal_magnetic_field_probe</code>: refine → accept</li>
+    <li><code>radial_coordinate_of_optical_element</code>: refine → accept</li>
+    <li><code>total_counter_passing_particle_pressure</code>: refine → accept</li>
+    <li><code>deuterated_methane_source_rate</code>: refine → accept — Deuterated methane (CD4)</li>
+    <li><code>coolant_temperature_at_outlet</code>: refine → accept</li>
+    <li><code>accumulated_helium_3_prefill_count_due_to_gas_injection</code>: refine → accept — Accumulated injected gas during the prefill in equivalent electrons</li>
+    <li><code>hydrogen_source_rate_due_to_gas_injection</code>: refine → accept — Hydrogen</li>
+    <li><code>toroidal_coordinate_of_polarizer</code>: refine → accept</li>
+    <li><code>line_integrated_neutral_beam_radiance_at_spectral_line</code>: accept → refine</li>
+  </ul>
+
+  <h3 id="sdbc-name-review-source-context-verification">Verification</h3>
+  <p id="sdbc-name-review-source-context-tests">
+    Three tests in <code>tests/standard_names/test_name_review_source_context.py</code>
+    fix the record: a qualifier stated only by an enclosing structure is recorded
+    as supported with the stating structure on the check and zero as the answer; a
+    qualifier no structure states keeps the judge's answer; a leaf that states its
+    own qualifiers needs no statement. With the enclosing-structure statement
+    withheld from the review, the first test fails
+    (<code>negative_control.log</code>), which is the negative control the landing
+    requires.
+  </p>
+  <p id="sdbc-name-review-source-context-suite">
+    <strong>Suite: incomplete.</strong> The two-arm
+    <code>tests/standard_names</code> run was submitted as one <code>all_debug</code>
+    job (1319285, both arms against the shared environment and this tree's
+    <code>PYTHONPATH</code>); at the time of writing the head arm is at 54% with no
+    failures reported and the base arm has not started. No green suite result is
+    claimed here.
+  </p>
+
+  <p id="sdbc-name-review-source-context-spend">
+    Decisions spend: USD 0.0011 for the eight, USD 0.00014 for the planted name,
+    USD 0.060 for the 398-sample judgements, and USD 0.0036 for the 36 class names
+    re-reviewed before the pass aborted.
+  </p>
+
+  <script>
+    const data = {"eight": [{"name": "accumulated_ammonia_deuterated_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.82, "source_fidelity_unsupported_qualifier": 0.91}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_ammonia_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.84, "source_fidelity_unsupported_qualifier": 0.94}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_argon_equivalent_electron_count_due_to_gas_injection", "route": "accept", "before": {"over_qualified_modifier": 0.81, "source_fidelity_unsupported_qualifier": 0.95}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_carbon_equivalent_electron_count_due_to_gas_injection", "route": "accept", "before": {"over_qualified_modifier": 0.85, "source_fidelity_unsupported_qualifier": 0.94}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_deuterated_methane_prefill_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.81, "source_fidelity_unsupported_qualifier": 0.95}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_deuterium_equivalent_electron_count_due_to_gas_injection", "route": "accept", "before": {"over_qualified_modifier": 0.8, "source_fidelity_unsupported_qualifier": 0.9}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_ethane_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.81, "source_fidelity_unsupported_qualifier": 0.94}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_neon_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.81, "source_fidelity_unsupported_qualifier": 0.94}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}]};
+    const rows = document.getElementById("sdbc-name-review-source-context-eight-rows");
+    for (const row of data.eight) {
+      const tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td><code>" + row.name + "</code></td>" +
+        "<td>" + row.before.over_qualified_modifier.toFixed(2) + " → " +
+        row.after.over_qualified_modifier.toFixed(2) + "</td>" +
+        "<td>" + row.before.source_fidelity_unsupported_qualifier.toFixed(2) + " → " +
+        row.after.source_fidelity_unsupported_qualifier.toFixed(2) + "</td>" +
+        "<td>" + row.route + "</td>";
+      rows.appendChild(tr);
+    }
+  </script>
+</section>
