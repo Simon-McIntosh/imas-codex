@@ -38,8 +38,9 @@ grep -rn "31\.1\|SLIDE_WIDTH_CM\|SLIDE_SIZE_CM\|\"16cm\"" scripts/ imas_codex/ -
   <p id="figure-scripts-save-through-shared-function-api">
   The plotting package gained one public function, <code>use_style()</code>,
   which applies the packaged <code>data-ink</code> style plus the caller's rc
-  overrides. <code>save_figure</code> gained four options — <code>dpi</code>,
-  <code>animation</code>, <code>fps</code> and <code>clear_of</code> — and now
+  overrides, and one module-level declaration of the slide size as a pair of
+  constants. <code>save_figure</code> gained four options &mdash; <code>dpi</code>,
+  <code>animation</code>, <code>fps</code> and <code>clear_of</code> &mdash; and now
   returns a receipt (<code>path</code>, <code>format</code>,
   <code>export_dpi</code>, <code>pixel_size</code>, <code>bytes</code>, and
   <code>declared_cm</code> for a vector file). It gained no new refusal: every
@@ -122,20 +123,73 @@ style file, or library style name</code></pre>
   <li><strong><code>figures_discovery_to_mapping.py</code></strong> keeps a <code>save()</code> helper, but it only calls the shared function twice and composes its existing receipt from the returned pixel size and byte count.</li>
   </ul>
 
-  <h2 id="figure-scripts-save-through-shared-function-unseen">What a reader cannot see here</h2>
-  <p id="figure-scripts-save-through-shared-function-unseen-limit">
-  No vision-capable model is configured on this node, so the figures were not
-  looked at by eye. They were rendered instead: each regenerated vector file was
-  rasterized at 96&nbsp;dpi and compared with the committed one, and its
-  <code>&lt;text&gt;</code> runs were compared element by element.
-  <code>ai-stack</code>, <code>knowledge-graph-scale</code>,
-  <code>mapping-flow</code> and <code>icp-map-repositories</code> are identical
-  apart from element ids (57, 21, 27 and 0 text runs respectively, none
-  differing); <code>mapping-lifecycle</code> is identical apart from ids;
-  <code>pipeline</code> differs because its labels carry live graph counts.
-  <code>agreement.svg</code> moves in geometry because it now renders in the
-  packaged style it always asked for, which changes the tick label sizes and
-  therefore the axes' margins.
+<h2 id="figure-scripts-save-through-shared-function-rendered">Each regenerated figure, rendered and read</h2>
+  <p id="figure-scripts-save-through-shared-function-rendered-limit">
+  No vision-capable model serves this node, so the figures were read by a
+  raster-and-compare instrument rather than by eye: the one model the router
+  lists is text-only, and the package's own vision seat points at it.
+  </p>
+  <pre id="figure-scripts-save-through-shared-function-rendered-models"><code>$ curl -s http://98dci4-gpu-0003:18802/v1/models
+{"object":"list","data":[{"id":"deepseek-v4.1-flash","object":"model",
+  "created":1794861289,"owned_by":"sglang","root":"deepseek-v4.1-flash",
+  "parent":null,"max_model_len":262144}]}
+$ grep -A5 'tool.imas-codex.discovery-vision' pyproject.toml
+[tool.imas-codex.discovery-vision]
+model = "local/deepseek-v4.1-flash"
+model-route = "ambix-local"</code></pre>
+  <p id="figure-scripts-save-through-shared-function-rendered-substitute">
+  What a reader would catch by looking — a blank canvas, content crammed into a
+  corner, ink cut off at an edge, a drawing that silently changed — is measured
+  instead: each committed SVG is rasterized at 96&nbsp;dpi, its ink bounds are
+  taken from the new raster, and the pixels are differenced against the same
+  raster of the committed file. Every figure carries ink on a canvas with a
+  margin of at least 5&nbsp;px at 96&nbsp;dpi on all four edges, and none is
+  blank (3.5&ndash;36&nbsp;% ink).
+  </p>
+  <pre id="figure-scripts-save-through-shared-function-rendered-table"><code>figure                        size      ink%   margins L,T,R,B px   differ from HEAD
+agreement.svg                 1175x537  23.99  L 11 T 16 R 18 B 27        21.57%
+ai-stack.svg                  1175x537  36.29  L 51 T 11 R 30 B 20         0.00%
+icp-map-a-data-systems.svg    1175x605   3.47  L179 T  7 R164 B  5         0.07%
+icp-map-c-relationships.svg   1175x605   5.94  L179 T  7 R164 B  5         0.07%
+icp-map-repositories.svg      1175x605   6.52  L 36 T 67 R 28 B 44         0.00%
+knowledge-graph-scale.svg     1175x605  15.46  L 45 T100 R 33 B 21         0.00%
+mapping-flow.svg              1175x605  14.49  L 67 T117 R 73 B 20         0.00%
+mapping-lifecycle.svg         1175x445   4.00  L 40 T 54 R 88 B 32         2.81%
+pf-coil-current.svg           1175x590   5.88  L 28 T 20 R181 B 20         7.12%
+pickup-probe.svg              1175x926   6.65  L 28 T 20 R 52 B 21        11.41%
+pipeline.svg                  1175x839   3.63  L 39 T 24 R100 B 45         3.47%</code></pre>
+  <p id="figure-scripts-save-through-shared-function-rendered-reading">
+  Five of the twelve vector files are unchanged drawings: their text runs match
+  one for one (57, 21 and 27 for <code>ai-stack</code>,
+  <code>knowledge-graph-scale</code> and <code>mapping-flow</code>, none
+  differing), their element sets differ only in generated ids, and their
+  rasters differ by 0.00&nbsp;%. <code>mapping-lifecycle</code> differs only in
+  ids as well; its 2.81&nbsp;% is the resampling of text at a changed physical
+  width. <code>pipeline</code> differs because its labels carry live graph
+  counts. <code>pickup-probe</code> and <code>pf-coil-current</code> gain height
+  with the live series count. <code>agreement.svg</code> moves in geometry
+  because it now renders in the packaged style it had always asked for, which
+  changes the tick label sizes and so the axes' margins. The three GIFs are
+  re-rendered for the halo change. <strong>Fifteen files were regenerated and
+  seven of them changed as drawings</strong>; the fifteen files the scripts write
+  under <code>docs/figures/</code> are all regenerated and accounted for.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-crop">The content-cropped files</h2>
+  <p id="figure-scripts-save-through-shared-function-crop-body">
+  The four JET plots were the ones exported with a content crop
+  (<code>bbox_inches="tight"</code>), so their pixel size followed live content
+  rather than the canvas. No tracked file among them was regenerated, because
+  the graph holds no JET geometry: the seven PNGs
+  <code>plot_jet_epoch_evolution.py</code> writes
+  (<code>jet_wall_limiter_evolution</code>, <code>jet_magnetics_evolution</code>,
+  <code>jet_passive_circuit_evolution</code>, <code>jet_pf_coil_evolution</code>,
+  <code>jet_component_overview</code>, <code>jet_epoch_summary</code>,
+  <code>jet_limiter_contours</code>), the three <code>jet_poloidal_p*.png</code>
+  files and <code>jet_limiter_comparison.png</code> from
+  <code>plot_jet_poloidal.py</code>, <code>jet_limiter_epochs.png</code> and
+  <code>jet_composite_geometry.png</code> keep the pixel sizes they had before
+  this change, and no before/after ratio comparison is claimed for them.
   </p>
 
   <h2 id="figure-scripts-save-through-shared-function-lines">Lines and files</h2>
@@ -143,8 +197,15 @@ style file, or library style name</code></pre>
   Net change under <code>scripts/</code>: <strong>+174 / &minus;328, net
   &minus;154 lines</strong> across the ten scripts. No script's set of output
   files changed; the twelve vector files and three GIFs above are the same files
-  the scripts wrote before, and the five untracked-to-this-node JET PNGs are
+  the scripts wrote before, and the thirteen PNGs the four JET scripts write are
   untouched.
+  </p>
+  <p id="figure-scripts-save-through-shared-function-lines-partition">
+  Every run that reads live data ran in place inside this node's allocation on
+  <code>98dci4-clu-3051</code> (job 1319171), a compute node: the graph resolved
+  through the shared environment without a tunnel, and no run was made on a login
+  node. The two scripts that need whole-graph reads were the scale and mapping-flow
+  builders, whose queries are the bounded ones those scripts already carried.
   </p>
 
   <h2 id="figure-scripts-save-through-shared-function-control">Negative control</h2>
