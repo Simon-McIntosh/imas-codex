@@ -1,0 +1,39 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-16T04:09:10.649Z",
+  "dispatched_at": "2026-11-16T03:47:05Z",
+  "figures": {
+    "docs/figures/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment/rates.svg": {
+      "contrast": "pass \u2014 measured from the rendered pixels: darkest text #52514e on white is 7.94:1, grey markers #929292 are 3.11:1 and blue markers #2878a5 are 4.86:1; every label and every marker clears its background.",
+      "data_ink": "pass \u2014 two marker series (grey circles for raw first-response parsing, blue diamonds for final delivery) and one bottom axis; no fills, gridlines or shading compete with the marks.",
+      "decoration": "pass \u2014 the left, top and right spines are hidden, the legend is frameless and parked in the top margin, and there is no background fill, gradient or band.",
+      "label_collision": "pass \u2014 no text is clipped and no two texts overlap; the longest row label clears the axis by about 11 px, and markers dodged by \u00b10.13 row keep the equal-value rows (0/0, 10/10, 98.5/100) as two distinguishable marks without marker overlap.",
+      "legibility": "pass \u2014 fourteen variant rows carry their own left-hand label, one shared 0\u2013100% axis is ticked at 0/25/50/75/100 and labelled, and every marker is visible at a glance including the arms sitting at 0% and 100%.",
+      "table_form": "pass \u2014 this is not a table drawn as a picture: the per-variant gap between raw parse rate and final delivery is the shape the reader needs, and a 14-row by 2-column table of percentages would bury it in digits."
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/plot_signal_enrichment_refinement.py",
+      "line": 69,
+      "severity": "non-blocking",
+      "summary": "The axis label \"Share [%]\" names the unit but not what the share is of, while the two series carry different denominators: the grey series is the mean first-response parse success per request and the blue series is delivered signals per cohort signal (raw_parse_rate over batches, delivery_rate over the 200-signal cohort at scripts/refine_signal_enrichment.py:159-178). A reader seeing the plot without its caption can read the grey-to-blue gap as one conversion of the same population when a single request covers up to ten signals. Nothing is hidden in the published artifact \u2014 the evidence caption already states that parsing is measured per request and coverage per signal \u2014 so this does not hold the node; naming the denominators in the two series labels or the axis label would let the figure stand on its own."
+    }
+  ],
+  "notes": "Read-only figure review. Judged the rendered PNG only (/image-0.png, 1399x840, opened with the Read tool); no SVG, markup or script output was used as visual evidence. The attachment is the reviewed figure's render: its markers were located from pixels and converted through the drawn axis mapping to 28 shares that match private/refinement-summary.json to within 0.05 percentage points (65.00, 65.50, 0, 10.00, 75.50, 60.00, 95.00, 64.50, 92.50, 98.50, 89.50, 98.50, 98.00, 99.99 for delivery and 0, 0, 0, 10.00, 80.00, 5.00, 0, 2.50, 7.50, 2.00, 76.25, 95.00, 88.50, 98.50 for raw parsing), and its 2800x1680 px preview geometry is exactly twice the attachment. Nothing was edited, redrawn or relabelled.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261116T034557491719-review-of-refine-local-model-signal-enrichment-58516d3b335d-figure",
+  "reviewed_base_sha": "2c717071f781c3a074ebff49fccae0759bf12734",
+  "reviewed_head_sha": "58516d3b335d0b73b16d103e8b99c6c3670ebea7",
+  "reviewed_images": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T034557491719-review-of-refine-local-model-signal-enrichment-58516d3b335d-figure/image-0.png",
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T213437019440-refine-local-model-signal-enrichment/rates-preview.png"
+  ],
+  "reviewed_run_id": "r-20261115T213437019440-refine-local-model-signal-enrichment",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T04:13:51.288811+00:00",
+  "total": null
+}
