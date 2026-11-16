@@ -35,9 +35,28 @@
       "note": "The review-context section now says the forty-eight are renamed under the renames section and that the wording section only counts them.",
       "reason": "",
       "when": "2026-11-16T23:28:16.111439+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c877548591ddc32576d680186191d633d7b1bd7f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Acceptance on name now covers every renamed name, the eight and the forty-eight, and a refusal for source support of the qualifier fails the section.",
+      "reason": "",
+      "when": "2026-11-16T23:28:27.813424+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c877548591ddc32576d680186191d633d7b1bd7f",
+      "commit_basis": "edit",
+      "note": "Acceptance on name now covers every renamed name, the eight and the forty-eight, and a refusal for source support of the qualifier fails the section.",
+      "reason": "",
+      "when": "2026-11-16T23:28:27.813424+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
