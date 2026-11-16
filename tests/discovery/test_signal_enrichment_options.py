@@ -276,6 +276,40 @@ source_description: Cooling temperature
         ) == refine.normalized_context(bench.target_context(messages, accessor))
 
 
+def test_frozen_prompt_group_order_can_differ_from_the_claimed_cohort_order():
+    from scripts import refine_signal_enrichment as refine
+
+    messages = [
+        {
+            "role": "user",
+            "content": "Classify these 3 signals.\n## EDAS Category: coil\n### Signal 1\naccessor: CURRENT\n### Signal 2\naccessor: VOLTAGE\n## EDAS Category: cooling\n### Signal 3\naccessor: TEMP\n",
+        }
+    ]
+    signals = [
+        {"id": "current", "accessor": "CURRENT"},
+        {"id": "temperature", "accessor": "TEMP"},
+        {"id": "voltage", "accessor": "VOLTAGE"},
+    ]
+    assert refine.frozen_signal_order(messages, signals) == [
+        "current",
+        "voltage",
+        "temperature",
+    ]
+    selected = refine.subset_messages(messages, [1, 2])
+    assert refine.frozen_signal_order(selected, [signals[0], signals[2]]) == [
+        "current",
+        "voltage",
+    ]
+    with pytest.raises(ValueError, match="does not match"):
+        refine.frozen_signal_order(messages, signals[:2])
+    empty_accessor = [
+        {"role": "user", "content": "### Signal 1\naccessor: \nname: Clock time\n"}
+    ]
+    assert refine.frozen_signal_order(
+        empty_accessor, [{"id": "time", "accessor": ""}]
+    ) == ["time"]
+
+
 def test_repaired_success_never_improves_raw_parse_rate_or_hides_failed_signals():
     from scripts import (
         benchmark_signal_enrichment as bench,

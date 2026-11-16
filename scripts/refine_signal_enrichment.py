@@ -36,6 +36,29 @@ def normalized_context(value: str) -> str:
     return SIGNAL.sub("### Signal", value)
 
 
+def frozen_signal_order(messages: list[dict], signals: list[dict]) -> list[str]:
+    """Resolve the rendered group order instead of assuming claim order."""
+    by_accessor = {signal["accessor"]: signal["id"] for signal in signals}
+    if len(by_accessor) != len(signals):
+        raise ValueError("frozen signal accessors must be unique")
+    text = next(row["content"] for row in messages if row["role"] == "user")
+    headers = list(SIGNAL.finditer(text))
+    order = []
+    for position, header in enumerate(headers):
+        end = (
+            headers[position + 1].start() if position + 1 < len(headers) else len(text)
+        )
+        match = re.search(r"^accessor: ([^\n]*)$", text[header.end() : end], re.M)
+        if match is None or match[1] not in by_accessor:
+            raise ValueError(
+                "frozen prompt accessor does not match the selected cohort"
+            )
+        order.append(by_accessor[match[1]])
+    if len(order) != len(signals) or len(set(order)) != len(signals):
+        raise ValueError("frozen prompt does not identify each selected signal once")
+    return order
+
+
 def subset_messages(messages: list[dict], indices: list[int]) -> list[dict]:
     """Change only the target signal blocks and their output indices."""
     result = copy.deepcopy(messages)
@@ -170,9 +193,12 @@ async def run_variant(root: Path, arm: str, options: EnrichmentOptions) -> None:
     bench.assert_unchanged(cohort["reference"], bench.snapshot(cohort["order"]))
     for context in contexts:
         original = context["messages"][0]
-        for offset in range(0, len(context["ids"]), options.batch_size):
-            ids = context["ids"][offset : offset + options.batch_size]
-            if any(r["ids"] == ids for r in done):
+        order = frozen_signal_order(
+            original, [bench.input_signal(refs[id]) for id in context["ids"]]
+        )
+        for offset in range(0, len(order), options.batch_size):
+            ids = order[offset : offset + options.batch_size]
+            if any(set(r["ids"]) == set(ids) for r in done):
                 continue
             messages = (
                 original
