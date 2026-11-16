@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:13:51.349Z",
+  "dispatched_at": "2026-11-16T23:13:28Z",
+  "findings": [
+    {
+      "anchor": "plan.html:56",
+      "id": "reasoning-1",
+      "reason": "the plan's host allow-list is the mechanism the read depends on, and either \u00a72's rule and done-when must be widened to name the production host or \u00a74 is unbuildable; the conflicting arms cannot be satisfied at once.",
+      "text": "\u00a74 reads the file \"from the production instance\", but \u00a72 (plan.html:46-47, `done`) states \"Requests go only to the integration instance\" and its done-when refuses \"a request to any host other than the integration instance and the listed sign-in hosts\"; \u00a74's own done-when then asks that \"every write-refusal and host-refusal test of section 2 holds for the production host\", which, as \u00a72 is written, refuses the very host \u00a74 must read, so the two arms cannot both pass",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:56",
+      "id": "reasoning-2",
+      "reason": "a section declared `implementable` on an endpoint its own evidence does not show to exist sends the worker at a GET file read that may not be offered, and the only visible fallbacks are the non-GET service call and the legacy host the guardrails refuse, so the node stalls or reaches the forbidden path.",
+      "text": "\u00a74 asserts a file served by production under GET/HEAD as an established endpoint, while the decision behind it records \"No file was fetched and no other host was contacted\", and \u00a71 (plan.html:40) records that for IDM downloads \"the plan's only leads are a legacy service call returning a document's current version and a legacy download path\", so no evidence in the plan shows a production GET operation returns file bytes",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:57",
+      "id": "done_when-1",
+      "reason": "the arm cannot fail on the most likely wrong outcome of the read this section delivers; it needs a stated check on the stored bytes (the spreadsheet arm already has one through sheet names and row counts).",
+      "text": "the PDF half of \u00a74's done-when records only that a body of some size and digest was stored, with no check that the bytes are the document, so a 401 page or an HTML login redirect \u2014 the failure the decision context itself records \u2014 passes the arm unchanged",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8c059e920869f2f994c39e9d3fc1edeff8aadf38",
+  "plan_fingerprint": "e087e583040cd304e2f9760325b499a679ded55dc48188281ada440aaa1b4438",
+  "plan_slug": "icp-api-access",
+  "plan_version": 16,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T223000277726-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "fbbd5f275ef39ec68ec6b826599976c22e048d19",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the extensionless `icp-api-access#s2` link resolves as `icp-api-access.html#s2`, `s4`'s `data-sections=\"s4\"` decision link resolves, and both cited evidence fragments exist; no anchor names a renamed or deleted target.",
+    "done_when": "a finding \u2014 \u00a74's PDF arm records only size and digest, so a login or error body satisfies it (plan.html:57).",
+    "evidence_paths": "pass \u2014 the evidence targets named in the section comments are `docs/evidence/fragments/icp-api-access/icp-read-only-client.html` and `.../icp-plant-structure-and-component-reads.html`, both present in the tracked tree.",
+    "naming": "pass \u2014 the changed units add no plan label, stage name, ticket number or version tag; the added text states access rules rather than tracker knowledge; the new comment states the mechanism (parent read by containment, pacing moved to a shared helper) rather than its plan entry.",
+    "reasoning": "a finding \u2014 \u00a74 now requires reads from the production instance while \u00a72, on which \u00a74 depends and which is declared `done`, permits requests only to the integration instance and its sign-in hosts.",
+    "single_goal": "pass \u2014 \u00a74's one deliverable is fetching and reading one document file by identity and version; the extraction and guard checks are conditions on that same fetch, with the production guard contradiction raised under `reasoning`.",
+    "wiring": "pass \u2014 `plan-blocks` names `iter-signal-context-and-enrichment`, whose own `plan-section-depends-on` for `s4` names `icp-api-access#s3` and `icp-api-access#s4`; `s3` and `s4` each depend on `s2`, and both `data-links` targets (`icp-api-access#s2`) resolve."
+  },
+  "section_digests": {
+    "_document": "86c1a8aea5604dc507982d9398768fdde8bb0fe0ee57036fe372995309e31878",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "9f4cb22f6c0cfb55fdeab779a476c6ef86aec3491e606fbf13c47bbc39d2aaba",
+    "s3": "66e329fb1086b96e19afdeacc4d5c59fb4e2b0161056d483336f969c8e6ea1ee",
+    "s4": "7a1fccb17a1b05d65b1caed4b140c517c767b06f7e486273232e11e6b72bab11"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:29:59.252908+00:00",
+  "total": null
+}
