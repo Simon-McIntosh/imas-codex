@@ -98,7 +98,7 @@ style file, or library style name</code></pre>
   <tr><td>mapping-flow.svg</td><td>31.1 &times; 16&nbsp;cm</td><td>31.1 &times; 16&nbsp;cm</td><td>1.94444</td><td>1.94375</td><td>3.57e-4</td></tr>
   <tr><td>pipeline.svg</td><td>1008 &times; 720&nbsp;pt</td><td>31.1 &times; 22.21&nbsp;cm</td><td>1.40000</td><td>1.40027</td><td>1.93e-4</td></tr>
   <tr><td>mapping-lifecycle.svg</td><td>1008 &times; 381.6&nbsp;pt</td><td>31.1 &times; 11.77&nbsp;cm</td><td>2.64151</td><td>2.64231</td><td>3.03e-4</td></tr>
-  <tr><td>pickup-probe.svg</td><td>1008 &times; 743.04&nbsp;pt</td><td>31.1 &times; 24.49&nbsp;cm</td><td>1.26984</td><td>1.26991</td><td>5.10e-5</td></tr>
+  <tr><td>pickup-probe.svg</td><td>1008 &times; 743.04&nbsp;pt</td><td>31.1 &times; 25.01&nbsp;cm</td><td>1.24334</td><td>1.24350</td><td>1.29e-4</td></tr>
   <tr><td>pf-coil-current.svg</td><td>1008 &times; 504&nbsp;pt</td><td>31.1 &times; 15.62&nbsp;cm</td><td>1.99147</td><td>1.99104</td><td>2.15e-4</td></tr>
   </tbody>
   </table>
@@ -106,7 +106,8 @@ style file, or library style name</code></pre>
   <p id="figure-scripts-save-through-shared-function-raster">
   The three animated files are 1400&times;720&nbsp;px, ratio 1.944444, against the
   drawn 14&nbsp;&times;&nbsp;7.2&nbsp;in canvas. Two discovery canvases moved with
-  their live content: <code>pickup-probe</code> from 1.35659 to 1.26984 and
+  their live content: <code>pickup-probe</code> from 1.35659 to 1.26984 on the
+  first delivery and to 1.24334 once its JSON wrapped on word boundaries, and
   <code>pf-coil-current</code> from 2.00000 to 1.99147, because
   <code>json_figure</code> sets its height from the number of styled lines the
   live graph projection returns. Each regenerated file's declared size carries
@@ -146,20 +147,21 @@ model-route = "ambix-local"</code></pre>
   margin of at least 5&nbsp;px at 96&nbsp;dpi on all four edges, and none is
   blank (3.5&ndash;36&nbsp;% ink).
   </p>
-  <pre id="figure-scripts-save-through-shared-function-rendered-table"><code>figure                        size      ink%   margins L,T,R,B px   differ from HEAD
-agreement.svg                 1175x537  23.99  L 11 T 16 R 18 B 27        21.57%
-ai-stack.svg                  1175x537  36.29  L 51 T 11 R 30 B 20         0.00%
-icp-map-a-data-systems.svg    1175x605   3.47  L179 T  7 R164 B  5         0.07%
-icp-map-c-relationships.svg   1175x605   5.94  L179 T  7 R164 B  5         0.07%
-icp-map-repositories.svg      1175x605   6.52  L 36 T 67 R 28 B 44         0.00%
-knowledge-graph-scale.svg     1175x605  15.46  L 45 T100 R 33 B 21         0.00%
-mapping-flow.svg              1175x605  14.49  L 67 T117 R 73 B 20         0.00%
-mapping-lifecycle.svg         1175x445   4.00  L 40 T 54 R 88 B 32         2.81%
-pf-coil-current.svg           1175x590   5.88  L 28 T 20 R181 B 20         7.12%
-pickup-probe.svg              1175x926   6.65  L 28 T 20 R 52 B 21        11.41%
-pipeline.svg                  1175x839   3.63  L 39 T 24 R100 B 45         3.47%</code></pre>
+  <pre id="figure-scripts-save-through-shared-function-rendered-table"><code>figure                        size      ink%   margins L,T,R,B px   differ from the base
+ai-stack.svg                 1175x537  36.29    L 51 T 11 R 30 B 20    0.000%
+mapping-lifecycle.svg        1175x445   4.00    L 40 T 54 R 88 B 32    2.809%
+pf-coil-current.svg          1175x590   5.68    L 28 T 20 R181 B 20    7.278%
+pickup-probe.svg             1175x945   6.55    L 28 T 20 R 61 B 20   11.606%
+pipeline.svg                 1175x839   3.63    L 39 T 24 R100 B 45    3.468%
+icp-map-a-data-systems.svg   1175x605   3.47    L179 T  7 R164 B  5    0.066%
+icp-map-b-france.svg         1175x605   3.23    L179 T  7 R164 B  5    0.066%
+icp-map-c-relationships.svg  1175x605   5.94    L179 T  7 R164 B  5    0.066%
+icp-map-repositories.svg     1175x605   6.51    L 36 T 67 R 28 B 13    1.890%
+agreement.svg                1175x537  24.00    L 11 T 16 R 18 B 27   30.598%
+knowledge-graph-scale.svg    1175x605  15.46    L 45 T100 R 33 B 21    0.000%
+mapping-flow.svg             1175x605  14.49    L 67 T117 R 73 B 20    0.000%</code></pre>
   <p id="figure-scripts-save-through-shared-function-rendered-reading">
-  Five of the twelve vector files are unchanged drawings: their text runs match
+Three of the twelve vector files are unchanged drawings: their text runs match
   one for one (57, 21 and 27 for <code>ai-stack</code>,
   <code>knowledge-graph-scale</code> and <code>mapping-flow</code>, none
   differing), their element sets differ only in generated ids, and their
@@ -167,12 +169,15 @@ pipeline.svg                  1175x839   3.63  L 39 T 24 R100 B 45         3.47%
   ids as well; its 2.81&nbsp;% is the resampling of text at a changed physical
   width. <code>pipeline</code> differs because its labels carry live graph
   counts. <code>pickup-probe</code> and <code>pf-coil-current</code> gain height
-  with the live series count. <code>agreement.svg</code> moves in geometry
-  because it now renders in the packaged style it had always asked for, which
-  changes the tick label sizes and so the axes' margins. The three GIFs are
-  re-rendered for the halo change. <strong>Fifteen files were regenerated and
-  seven of them changed as drawings</strong>; the fifteen files the scripts write
-  under <code>docs/figures/</code> are all regenerated and accounted for.
+  with the live series count, and <code>pickup-probe</code>'s 11.61&nbsp;% is the
+  word-boundary wrap moving its JSON lines. <code>icp-map-repositories</code>'
+  1.89&nbsp;% is the reserved title height and the shortened bottom margin. The
+  three ICP stage files differ by 0.07&nbsp;%: the halo path set. The
+  <code>agreement.svg</code> 30.60&nbsp;% is its darkening palette measured
+  against the base revision, together with the packaged style's tick sizes. The
+  three GIFs are re-rendered for the halo change. <strong>Fifteen files were
+  regenerated and every one of them is accounted for above</strong>; the fifteen
+  files the scripts write under <code>docs/figures/</code> are all present.
   </p>
 
   <h2 id="figure-scripts-save-through-shared-function-crop">The content-cropped files</h2>
@@ -216,6 +221,82 @@ pipeline.svg                  1175x839   3.63  L 39 T 24 R100 B 45         3.47%
   fails with <code>Failed: DID NOT RAISE &lt;class 'ValueError'&gt;</code> and the
   run exits 1. The same test passes on the committed tree, where the study script
   refuses a bar-end note wider than its canvas and writes no file.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-round-two">The review's repairs</h2>
+  <p id="figure-scripts-save-through-shared-function-round-two-body">
+  Seven repairs, each inside this node's write paths, all in commits
+  <code>67585fb80</code> and <code>0db7d7ac0</code>.
+  </p>
+  <ol id="figure-scripts-save-through-shared-function-round-two-list">
+  <li id="figure-scripts-save-through-shared-function-round-two-refusal">
+  <strong>The narrowed refusal is restored.</strong> The direct-label check skipped
+  any line whose legend label began with an underscore, so a label sitting on an
+  unnamed trace passed. It now refuses every visible line, and the single escape is
+  explicit: <code>save_figure(decoration=[...])</code> names the line artists that
+  are paint rather than data. Restoring it refused the ICP relationships stage,
+  where every town and verb label is placed on the highway network the
+  relationships are routed along; those highway polylines are named as decoration
+  in <code>figure_decoration()</code>, while the relationship arrowheads stay in
+  the text check. The new test
+  <code>test_a_label_over_an_unlabelled_data_line_is_refused</code> fails
+  <code>DID NOT RAISE</code> when the label convention is put back, which is this
+  round's negative control.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-path">
+  <strong>Provenance is repository-relative.</strong>
+  <code>shown_path()</code> prints a path inside the repository relative to it and
+  leaves a path outside it alone, because that is what identifies it. The fixture
+  is now resolved from the repository rather than from a sibling checkout, so
+  <code>pf-coil-current.svg</code> prints
+  <code>tests/fixtures/mapping_handoff_example.json</code> and its receipt records
+  the same. A search over the five figure directories returns no absolute home
+  path (<code>grep -rn "/home/[A-Za-z]\|/Users/[A-Za-z]"</code> exits 1), and
+  <code>test_no_published_figure_names_a_machine_home_path</code> holds it.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-wrap">
+  <strong>The JSON wraps between words.</strong> <code>styled_lines</code> builds
+  the coloured characters first and <code>_wrapped</code> breaks at the last space
+  before the column, falling back to a hard break only for a run with no space, so
+  a long identifier still fits its column. Read back from the rendered SVG, the two
+  columns carry 36 and 102 source tokens with every one arriving whole.
+  <code>test_a_wrapped_json_line_breaks_between_words</code> holds it.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-contrast">
+  <strong>The count numerals clear 4.5:1.</strong> Every segment fill is now dark
+  enough for its white numeral, measured on the rasterized figure: agreeing
+  5.37:1, chain-differ 5.16:1, disagreeing 4.87:1, unplaced 5.17:1, refused
+  8.56:1, against 2.82:1 and 2.88:1 before on the green and the grey. The fills
+  keep each disposition's hue, and
+  <code>test_every_segment_fill_carries_its_white_numeral</code> holds the bound.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-cards">
+  <strong>Every card reserves the common block two title lines.</strong>
+  <code>GRID_TITLE_LINES</code> sets one title height, so the line below the title
+  sits at y=0.5469 (upper row) and y=0.0539 (lower row) on all ten cards, including
+  the one whose name wraps. <code>test_card_system_lines_share_one_baseline</code>
+  holds it.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-tests">
+  <strong>The two assertions read the written file.</strong> The animated export is
+  measured with <code>PIL.Image.open</code> on the GIF (1400x720, two frames,
+  ratio 1.94444); the declared size is read back from the SVG's own
+  <code>width=</code>/<code>height=</code> attributes with a regex rather than from
+  the receipt the same figure returned.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-strip">
+  <strong>The title strip has one owner.</strong>
+  <code>imas_codex.plotting.style.title_strip(figure, share)</code> builds it, and
+  both knowledge-graph scripts call it and pass the result as
+  <code>clear_of</code>; neither constructs a rectangle any more.
+  </li>
+  </ol>
+  <p id="figure-scripts-save-through-shared-function-round-two-render">
+  Each regenerated figure was rendered at 96&nbsp;dpi and read: every one carries
+  ink with a margin of at least 5&nbsp;px on all four edges, the three GIFs are
+  1400x720 in 150 frames, and the pixel difference from the base revision is 0.00&nbsp;%
+  for the three figures whose drawing was not meant to move. The gate log carries
+  the rendered table beside the test run.
   </p>
 </main>
 </body>
