@@ -8,7 +8,7 @@
   <meta name="plan-slug" content="sn-domain-per-family">
   <meta name="plan-title" content="A Family Shares One Domain: Domain Decided Per Concept, Not Per Source">
   <meta name="plan-summary" content="Decide a standard name&#x27;s physics domain once per concept family, so siblings stop landing in different catalog files, and repair the live names.">
-  <meta name="plan-status" content="active">
+  <meta name="plan-status" content="superseded">
   <meta name="plan-roi" content="high">
   <meta name="plan-effort-hours" content="9.5">
   <meta name="plan-capability-version" content="1.0">
@@ -19,13 +19,13 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="standard-names,catalog-release">
   <meta name="plan-blocks" content="sn-catalog-consistency">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;done&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;descoped&quot;,&quot;s4&quot;:&quot;descoped&quot;,&quot;s5&quot;:&quot;done&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;sn-domain-per-family#s2&quot;,&quot;sn-domain-per-family#s5&quot;,&quot;sn-definitions-by-construction#s6&quot;],&quot;s4&quot;:[&quot;sn-domain-per-family#s3&quot;],&quot;s5&quot;:[&quot;sn-domain-per-family#s2&quot;]}">
   <title>A Family Shares One Domain: Domain Decided Per Concept, Not Per Source | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="35">
-<meta name="plan-modified" content="2026-11-14">
+<meta name="plan-version" content="37">
+<meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
   <main class="plan-doc">
@@ -63,7 +63,7 @@
     </ul>
 
     <h2 id="s3">§3 — The live names brought to one domain per family</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="descoped" data-descope-reason="Lead ruling 2026-11-16: the catalog is released one physics-domain group at a time after a blind audit. Bringing the live names to one domain per family is done per group under sn-audited-group-release, whose second section measures the split families and puts the group order to the lead, and whose fourth and fifth sections bring each group to the bar; a catalog-wide domain pass ahead of that measurement is no longer run." data-links=""></section>
     <p>The per-family decision is applied to every live family. A family, here and in §4, is the family §2 defines: the pattern family with the locus held fixed, so a quantity at the magnetic axis and the same quantity at the pedestal top are two families. The evidence for this section is recorded under <code>docs/evidence/fragments/sn-domain-per-family/</code>. A family of two or more members that the decision reports undecided under the options §5 gives it, whatever it read under §2's narrower options, is not left split unseen; a single name below the floor cannot be split, keeps its stored domain and is listed, as §5 states. The lead ruled on 2026-11-12 that such a family is held split, each member decided as a single name under §5's options with its own sources as evidence; that ruling is the recorded correction for every family §5's listing names, and a family the live pass leaves undecided that is not in that listing is brought to the lead with its options and members. The options every family is offered are those of §5, so this section applies §5's decision, not §2's alone. <code>sn-catalog-consistency</code> §5 declares a wait on this section: its family-agreement endpoint reads the same grouping census this section moves, and its domain-audit endpoint stays its own. A graph checkpoint is taken before the first write, with every graph-touching worker at rest.</p>
     <p>Done when:</p>
     <ul>
@@ -77,7 +77,7 @@
     </ul>
 
     <h2 id="s4">§4 — A cut refuses a split family</h2>
-    <section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="implementable" data-links=""></section>
+    <section data-reckon="section" data-id="s4" data-effort-hours="2.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="standard" data-capability-verification="strict" data-capability-risk="moderate" data-status="descoped" data-descope-reason="Lead ruling 2026-11-16: the refusal of a split family at the cut is one clause of the release bar in sn-audited-group-release, third section, which refuses a group when a family of the group has a member in another group and shows the refusal on a planted fault. It is built there, once, with the rest of the bar." data-links=""></section>
     <p>The agreement holds for names created later. A name that joins an existing family takes the family's stored domain, and a catalog export reports any family it would publish across more than one domain file. That report is one more check in the export's existing blocking gates and uses the exclusion vocabulary the export already carries; it adds no command option and no second pass over the candidates.</p>
     <p>Done when:</p>
     <ul>
@@ -94,10 +94,11 @@
 
     <section data-reckon="followups" id="followups" class="r-followups">
 <h2><span class="sec">§</span> Followups</h2>
-<article class="r-fu" data-id="f-sdpf-001" data-status="open" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-12" data-recommends-skill="" data-resolved-at="" data-resolved-by="">
+<article class="r-fu" data-id="f-sdpf-001" data-status="resolved" data-capability-version="1.0" data-capability-class="orchestrator" data-written-by="reckon-create" data-written-at="2026-11-12" data-recommends-skill="" data-resolved-at="2026-11-16T22:15:21+00:00" data-resolved-by="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9">
     <h4 class="r-fu-title">Build the per-family domain decision</h4>
     <div class="r-fu-body"><p>§2 has landed. §5 widens the options of §2's decision and is next. §3 writes the live graph and waits for §5 and for the lead's ruling on the twelve disputed sheet items; §4 waits for §3.</p></div>
     <pre class="r-fu-prompt">/reckon-build sn-domain-per-family §5</pre>
+    <p class="r-fu-outcome">The domain decision per family is built and stored. The live pass and the cut refusal are carried by sn-audited-group-release, which releases the catalog one audited physics-domain group at a time (lead ruling 2026-11-16).</p>
     </article>
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
