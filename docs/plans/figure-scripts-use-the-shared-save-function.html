@@ -23,7 +23,7 @@
   <title>Figure scripts save through the shared, checked save function | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="5">
+<meta name="plan-version" content="6">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -57,7 +57,10 @@
 </section>
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261116T002927331455-review-of-save-function-keeps-aspect-e5d4baed097c" data-who="reckon-build" data-when="2026-11-16T00:43:04.190Z">
-    <div class="r-comment-body"><p>review of save-function-keeps-aspect at e5d4baed0 — scores goal_fidelity 18, evidence 18, scope_discipline 7, durability 15, fit 17, reuse 18 (total 93); three non-blocking findings: three code files changed outside the docs-only fence, the six-column legend cap still wraps envelope plots, and the manifest&#x27;s &quot;gate green on the committed head&quot; claim is not what the log&#x27;s revision header (3fac2cde4) records.</p></div>
+    <div class="r-comment-body"><p>review of save-function-keeps-aspect at e5d4baed0 — scores goal_fidelity 18, evidence 18, scope_discipline 7, durability 15, fit 17, reuse 18 (total 93); three non-blocking findings: three code files changed outside the docs-only fence, the six-column legend cap still wraps envelope plots, and the manifest's "gate green on the committed head" claim is not what the log's revision header (3fac2cde4) records.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261115T224012299710-save-function-keeps-aspect" data-who="reckon-build" data-when="2026-11-15T23:21:42Z">
+    <div class="r-comment-body"><p>save-function-keeps-aspect — `save_figure` now derives the SVG&#x27;s declared height from the figure&#x27;s own width-to-height ratio under the fixed 31.1cm slide width (default canvas still declares 31.1cm x 16cm), and the signal plot&#x27;s legend fits up to six lines in one row and reports the measured `legend_rows`; three canvases measure within -3.57e-4 of their drawn ratio (limit 1e-3) and four- and six-trace legends each measure one row.</p></div>
 </div>
 </section>
 </main>
