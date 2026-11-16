@@ -33,7 +33,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 31,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Version 32 records the open decision local-model-confirmed-on-quality scoped to sections 6 and 7; the queue reports section 7 held on it, and section 8 waits on section 7.",
+      "reason": "",
+      "when": "2026-11-16T19:38:08.151217+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+      "commit_basis": "edit",
+      "note": "Version 32 records the open decision local-model-confirmed-on-quality scoped to sections 6 and 7; the queue reports section 7 held on it, and section 8 waits on section 7.",
+      "reason": "",
+      "when": "2026-11-16T19:38:08.151217+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T050329552098-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261116T050329552098-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "5a266e28df8c6768e62f260cc4d08452c9b8898b",
   "rubric": "content",
