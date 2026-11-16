@@ -17,7 +17,30 @@
   "plan_slug": "figure-scripts-use-the-shared-save-function",
   "plan_version": 4,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "bc101cc809dd0c3613a68c5474d179550f296155",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 2's done-when at version 7 anchors the invariant on the drawn canvas ratio and exempts files that were content-cropped until now from comparison with their earlier ratio, listing their pixel sizes before and after.",
+      "reason": "",
+      "when": "2026-11-16T03:18:23.285412+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "bc101cc809dd0c3613a68c5474d179550f296155",
+      "commit_basis": "edit",
+      "note": "Section 2's done-when at version 7 anchors the invariant on the drawn canvas ratio and exempts files that were content-cropped until now from comparison with their earlier ratio, listing their pixel sizes before and after.",
+      "reason": "",
+      "when": "2026-11-16T03:18:23.285412+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/figure-scripts-use-the-shared-save-function/r-20261116T000158565524-plan-review-of-figure-scripts-use-the-shared-save-function.json",
   "review_run_id": "r-20261116T000158565524-plan-review-of-figure-scripts-use-the-shared-save-function",
   "reviewed_blob_sha": "e13bbdce4db287519ba0c40851e18f2a5de8bfe3",
   "rubric": "content",
