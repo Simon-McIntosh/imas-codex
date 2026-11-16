@@ -15,6 +15,13 @@
     "imas_codex/standard_names/worker_tasks/worker_refine_docs.py:307 refuse_altered_shared_parts"
   ],
   "completed_at": "2026-11-16T03:17:59.887Z",
+  "dimension_dispositions": {
+    "scope_discipline": {
+      "kind": "folded",
+      "node": "sdbc-family-sentences",
+      "recorded_at": "2026-11-16T03:43:01.077454+00:00"
+    }
+  },
   "dispatched_at": "2026-11-16T03:17:19Z",
   "findings": [
     {
