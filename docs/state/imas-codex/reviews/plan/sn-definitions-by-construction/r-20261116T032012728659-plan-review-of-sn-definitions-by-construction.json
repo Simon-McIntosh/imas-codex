@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T03:23:11.081Z",
+  "dispatched_at": "2026-11-16T03:22:28Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261116T032012728659-plan-review-of-sn-definitions-by-construction/plan.html:156",
+      "id": "wiring-1",
+      "reason": "an unowned remainder means the release can be cut with 48 names missing the qualifier the plan says the source states, and the new \u00a76 dependency buys nothing.",
+      "text": "\u00a711 states \"Eight names are renamed and live; forty-eight wait\", yet no section's endpoint carries those 48: \u00a76 now waits on \u00a711 but its done-when measures operators, families, the population statement, the whole test directory and the rename path, never the equivalent-electron renames, and \u00a711 forbids any stored change, so the equivalent-electron class leaves this plan still unqualified in 48 names with nobody accountable for it",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261116T032012728659-plan-review-of-sn-definitions-by-construction/plan.html:157",
+      "id": "done_when-1",
+      "reason": "the endpoint must be the verdict over a counted class (no qualifying live name refused for a qualifier its source states at any level), otherwise the section closes on a reporting change while the defect the body describes persists.",
+      "text": "the first clause requires that \"the stored name review's evidence for the source-support checks carries that statement and the name's qualifier\", which a review can satisfy while still answering the source-support checks against the leaf and refusing the name; the only verdict-level clause covers the eight renamed names, and it accepts \"listed with a recorded reason that is not source support\", so a review that still refuses a correctly qualified name for source support outside those eight is not caught, and the clause states no counted population for the class it names",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261116T032012728659-plan-review-of-sn-definitions-by-construction/plan.html:157",
+      "id": "reasoning-1",
+      "reason": "a node that repairs only the leaf-scope cause can pass the evidence clause and still have three of the eight refused, and it has no stated way to tell whether those are the same defect.",
+      "text": "the section diagnoses the probe stop from one stored review (carbon: `source_fidelity_unsupported_qualifier` 0.94, `over_qualified_modifier` 0.86, evidence the leaf's `Carbon.`/`Value`) and then requires all eight renamed names to come out accepted; the record shows the other refusals at name scores 0.83, 0.73 and 0.44 whose reviews the plan never cites, so the fix is aimed at one evidenced cause for four refusals and its second clause will report three unknown causes as satisfied by any non-source reason",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "742dc7b52b03c44bcbf164683984cffb9567d989",
+  "plan_fingerprint": "712e188bd75393bfbb050662795e4960f8b59ac2a77dbaa3b587f1f14fddb14d",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 63,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T032012728659-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "4ac9c979e10882deff3aa6a40cc898b4a25cdc60",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited run id resolves on disk, `summary/gas_injection_accumulated` is a graph path, and `tests/standard_names` and `all_debug` both exist; no cited repository path dangles (the 56-row artifact is committed at `3d888241e` off main, but the plan cites only the run).",
+    "done_when": "a finding \u2014 \u00a711's first clause measures what the review's evidence records, not the verdict it reaches, so the wrong refusal that stopped the probe can survive every qualifying name outside the eight, and its population is not counted.",
+    "evidence_paths": "pass \u2014 the comment's figures reconcile with the run it cites: `~/.config/reckon/crew/runs/r-20261115T212654636291-sdbc-equivalent-electron-renames` exists and its record reports 8 renamed, 48 left, USD 0.537272, sourceless 10.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number reaches s11's text.",
+    "reasoning": "a finding \u2014 the stated cause is evidenced for the carbon rename only (1.00 to 0.59, review evidence being the leaf's `Carbon.`/`Value`), while the other three refusals' reviews are not cited, and the section's fix and its eight-name clause rest on that one record.",
+    "single_goal": "pass \u2014 \u00a711 carries one deliverable (the name review reads the enclosing structures) with its verification clauses.",
+    "wiring": "a finding \u2014 \u00a711 is declared `implementable` with `data-links=\"\"` and no entry in `plan-section-depends-on`, while \u00a76 was made to wait on it and \u00a711's own body keeps 48 renamed names waiting with no section owning them."
+  },
+  "section_digests": {
+    "_document": "61c39d5ad51e7b68047ca7a43e243612440fe22ae0ec2c34eb1364c28ff0e306",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s11": "ff4c62327e3168519e3da7c5d07aaade63f9d32223ea0d1a8701a2fca3264ca0",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "0d62d87956c33ada83f0aff033ba93eba8bc40bdde9dff0aec52c0d6894ec7b0",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T03:37:34.846083+00:00",
+  "total": null
+}
