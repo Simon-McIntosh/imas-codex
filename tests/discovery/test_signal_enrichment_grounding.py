@@ -252,6 +252,25 @@ def test_empty_citation_results_are_not_counted_as_delivered():
     assert result["delivered"] == 0
     assert result["empty_descriptions"] == 1
     assert result["delivery_rate"] == 0
+    assert result["delivered_first"] == 0
+    assert result["failed_signals_by_class"] == {"empty_description": 1}
+
+
+def test_review_raw_score_checks_the_review_schema_without_draft_errors():
+    from scripts.benchmark_signal_enrichment import score_response
+
+    raw = DescriptionReview(
+        results=[{"signal_index": 1, "statements": []}]
+    ).model_dump_json()
+    assert score_response(raw, 1)["parse_success"] is False
+    score = score_response(raw, 1, response_model=DescriptionReview)
+    assert score["parse_success"] is True
+    assert score["complete"] is True
+    assert "error" not in score
+    assert (
+        score_response("not JSON", 1, response_model=DescriptionReview)["parse_success"]
+        is False
+    )
 
 
 def test_manual_seal_refuses_missing_readings_and_later_edits(tmp_path):

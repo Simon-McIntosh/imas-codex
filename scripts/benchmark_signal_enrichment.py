@@ -145,7 +145,9 @@ def input_signal(row: dict) -> dict:
     return signal
 
 
-def score_response(content: str | None, expected: int) -> dict:
+def score_response(
+    content: str | None, expected: int, *, response_model=SignalEnrichmentBatch
+) -> dict:
     """A malformed response is a strict failure even if production recovers it."""
     result = {
         "parse_success": False,
@@ -153,7 +155,7 @@ def score_response(content: str | None, expected: int) -> dict:
         "matched": 0,
     }
     try:
-        batch = SignalEnrichmentBatch.model_validate_json(content or "")
+        batch = response_model.model_validate_json(content or "")
     except ValueError as exc:
         result["error"] = str(exc)
         return result
@@ -234,12 +236,7 @@ async def replay_batch(
         started = time.monotonic()
         response = await awaitable
         raw = response.choices[0].message.content
-        score = score_response(raw, len(signals))
-        try:
-            current_response_model.model_validate_json(raw)
-            score["parse_success"] = True
-        except (ValueError, TypeError):
-            score["parse_success"] = False
+        score = score_response(raw, len(signals), response_model=current_response_model)
         captured.append(
             {
                 "raw": raw,

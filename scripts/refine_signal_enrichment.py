@@ -132,6 +132,13 @@ def replacement_kind(record: dict) -> str | None:
     return "validation_reask" if directed else "retry"
 
 
+def has_description(output: dict) -> bool:
+    """An empty or fully filtered description is not a delivered description."""
+    return "description" not in output or bool(
+        (output.get("description") or "").strip()
+    )
+
+
 def summarize(records: list[dict], cohort: dict) -> dict:
     summary = {}
     for arm in dict.fromkeys(r["arm"] for r in records):
@@ -142,17 +149,16 @@ def summarize(records: list[dict], cohort: dict) -> dict:
         responses = [response for r in batches for response in r["responses"]]
         seconds = sum(r["seconds"] for r in batches)
         all_outputs = {o["id"]: o for r in batches for o in r["outputs"]}
-        outputs = {
-            id: row for id, row in all_outputs.items() if row.get("description", True)
-        }
+        outputs = {id: row for id, row in all_outputs.items() if has_description(row)}
         failed = Counter()
         raw_failed = Counter()
         for r in batches:
             if not r["responses"][0]["score"]["parse_success"]:
                 raw_failed[failure_class(r["responses"][0])] += len(r["ids"])
-            absent = set(r["ids"]) - {
-                o["id"] for o in r["outputs"] if o.get("description", True)
-            }
+            failed["empty_description"] += sum(
+                not has_description(o) for o in r["outputs"]
+            )
+            absent = set(r["ids"]) - {o["id"] for o in r["outputs"]}
             if absent:
                 last = r["responses"][-1]
                 cause = (
@@ -170,7 +176,7 @@ def summarize(records: list[dict], cohort: dict) -> dict:
             / len(firsts),
             "raw_failed_signals_by_class": dict(raw_failed),
             "delivered_first": sum(
-                len(r["outputs"])
+                sum(has_description(o) for o in r["outputs"])
                 for r in batches
                 if sum(
                     row.get("response_schema") != "DescriptionReview"
@@ -179,12 +185,14 @@ def summarize(records: list[dict], cohort: dict) -> dict:
                 == 1
             ),
             "delivered_after_reask": sum(
-                len(r["outputs"])
+                sum(has_description(o) for o in r["outputs"])
                 for r in batches
                 if replacement_kind(r) == "validation_reask"
             ),
             "delivered_after_retry": sum(
-                len(r["outputs"]) for r in batches if replacement_kind(r) == "retry"
+                sum(has_description(o) for o in r["outputs"])
+                for r in batches
+                if replacement_kind(r) == "retry"
             ),
             "validation_reasks": sum(
                 replacement_kind(r) == "validation_reask" for r in batches
@@ -211,11 +219,10 @@ def summarize(records: list[dict], cohort: dict) -> dict:
             ),
             "delivered": len(outputs),
             "empty_descriptions": len(all_outputs) - len(outputs),
-            "delivery_rate": sum(
-                bool(o.get("description", True)) for o in outputs.values()
-            )
-            / sum(len(r["ids"]) for r in batches),
-            "failed_signals_by_class": dict(failed),
+            "delivery_rate": len(outputs) / sum(len(r["ids"]) for r in batches),
+            "failed_signals_by_class": {
+                key: count for key, count in failed.items() if count
+            },
             "seconds": seconds,
             "calls_per_minute": len(responses) * 60 / seconds,
             "seconds_per_thousand": seconds
