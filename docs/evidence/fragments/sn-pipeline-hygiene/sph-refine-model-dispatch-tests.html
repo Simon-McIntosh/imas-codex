@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+</head>
+<body>
+<section id="sph-refine-model-dispatch-tests-summary">
+  <h3>The route check is right; two test identifiers lacked a recognized prefix</h3>
+  <p>
+    The focused reproduction failed in both environment-override tests with
+    <code>ValueError: Model seat 'sn-refine' has no recognised route for 'test/refine-only'</code>
+    and, in the second test,
+    <code>ValueError: Model seat 'sn-refine' has no recognised route for 'test/refine-canary'</code>.
+    <code>settings._validate_model_identifier</code> requires a non-empty model
+    after an OpenRouter, Typesafe, or configured local prefix. The test values
+    had no prefix, so the guard correctly refused them.
+  </p>
+  <p>
+    The tests now use <code>openrouter/test/refine-only</code>,
+    <code>openrouter/test/compose-only</code> and
+    <code>openrouter/test/refine-canary</code>. These getter-only tests make no
+    model request. Both environment-override assertions remain, as does the
+    assertion that a compose-seat fallback cannot replace the refine setting.
+  </p>
+  <table id="sph-refine-model-dispatch-tests-measures">
+    <thead>
+      <tr><th>measure</th><th>base archive</th><th>committed head archive</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td><code>test_refine_model_dispatch.py</code></td>
+        <td>2 failed, 4 passed</td>
+        <td>6 passed</td>
+      </tr>
+      <tr>
+        <td><code>tests/standard_names</code></td>
+        <td>2 failed, 8766 passed, 12 skipped, 541 deselected, 43 warnings in 791.44s</td>
+        <td>8768 passed, 12 skipped, 541 deselected, 43 warnings in 810.85s</td>
+      </tr>
+    </tbody>
+  </table>
+  <p>
+    The whole-directory base log is
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/baseline-standard-names.log</code>;
+    the head log is
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/head-standard-names.log</code>.
+    The base arm ran at
+    <code>bd3f019a0482748c603efdfcd0d2216ccaedd8d6</code> and imported settings
+    from its archive's <code>/tmp/imas-codex-standard-names-base-pGSS2N/tree/imas_codex/settings.py</code>;
+    it reproduced both failures and ended with <code>EXIT=1</code>. The head
+    arm ran at <code>4b282ddc4527b420b3a1b188ba60b21004f0ab2d</code> on
+    <code>all_debug</code>, imported settings from its own temporary tree, and
+    ended with <code>EXIT=0</code>.
+  </p>
+  <p>
+    The declared fallback negative control changed the scratch copy so
+    <code>get_model("sn-refine")</code> delegated to the compose seat.
+    <code>test_refine_does_not_alias_compose</code> failed as required: it
+    received <code>local/deepseek-v4.1-flash</code> instead of
+    <code>openrouter/test/refine-canary</code> (1 failed, <code>EXIT=1</code>).
+    Its log is
+    <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T035833311695-sph-refine-model-dispatch-tests/refine-model-dispatch-negative-control.log</code>.
+  </p>
+  <p>
+    The other seat overrides found under <code>tests/</code> use recognized
+    values: <code>openrouter/x-ai/grok-4.7</code>,
+    <code>openrouter/test/score-model</code>,
+    <code>openrouter/deepseek/deepseek-v4.1-flash</code> and
+    <code>local/another-model</code>. The remaining
+    <code>IMAS_CODEX_EMBEDDING_MODEL</code> overrides use the embedding getter,
+    which does not apply this model-route validator. No other seat override
+    repeats the invalid <code>test/...</code> pattern.
+  </p>
+</section>
+</body>
+</html>
