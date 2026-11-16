@@ -1,0 +1,45 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "caption_check": "The figcaption does not merely repeat the title: it names the ordering rule (decreasing archive population), the visible split (five groups have a match, thirteen none), and points to the table for the one share the scale cannot show. No caption finding.",
+  "completed_at": "2026-11-16T23:51:49.909Z",
+  "dispatched_at": "2026-11-16T23:37:57Z",
+  "figures": {
+    "docs/figures/codac-uda-signals/measure-controls-metadata-feed/coverage.svg": {
+      "contrast": "pass \u2014 near-black labels on white, and the blue subject marks measure about 4.9:1 against white, clearing the 3:1 bar for a graphical object.",
+      "data_ink": "pass \u2014 the marks are eighteen small dots on a bare axis; nothing is spent on fills, bands or a legend, so the data carry the weight.",
+      "decoration": "pass \u2014 no gradient, background fill or styled theme; the left, top and right spines are hidden and there are no gridlines.",
+      "label_collision": "pass \u2014 no label is clipped by the canvas, the right-aligned group labels clear the marks, and the axis label and tick labels do not overlap each other or the data.",
+      "legibility": "pass \u2014 all eighteen group labels and the axis label read cleanly at a glance, the 0-10 tick scale is legible, and the one dominant point (Plant system 05 at 9.28%) is easy to locate; thirteen rows sit at exactly zero and separate as individual dots.",
+      "table_form": "pass \u2014 a single value per category for eighteen categories could be tabular, but the figure earns its place: it states the distribution shape (thirteen groups at zero, four small, one dominant) that no table row conveys at a glance, and the page does carry the same numbers as a table above it."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/codac-uda-signals/measure-controls-metadata-feed/coverage.svg",
+      "id": "f11b169b9db",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "One data point is invisible in the rendering. The x axis spans 0-10.4% to fit Plant system 05 at 9.28%, so Plant system 16's 0.000584% (one matched archive name out of 171,219) lands about 0.06 pixel from the origin and its dot is indistinguishable from the thirteen true-zero dots. A reader scanning the figure reads sixteen zero groups, not fifteen, and the caption has to say so in prose. The plotted values are correct and the four small nonzero groups stay separable from zero, so the figure still shows its shape; a broken or log-scaled inset, or annotating the single match, would let the reader see the point rather than be told about it. The drawing line is scripts/measure_controls_metadata.py:251, whose linear set_xlim(-0.3, right) fixes the sub-pixel position."
+    }
+  ],
+  "project": "imas-codex",
+  "read_only": true,
+  "review_run_id": "r-20261116T233545135954-review-of-measure-controls-metadata-feed-9c03cb2286ef-figure",
+  "reviewed_base_sha": "e2d140122ee32347b3f126e79b505aafa9cc2637",
+  "reviewed_head_sha": "9c03cb2286efecb69f45e3968d92c31fc09624bf",
+  "reviewed_run_id": "r-20261116T224415783700-measure-controls-metadata-feed",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility: pass \u2014 all eighteen group labels and the axis label read cleanly at a glance; thirteen zero rows separate as individual dots.",
+    "RUBRIC data_ink: pass \u2014 eighteen small dots on a bare axis; no fills, bands or legend.",
+    "RUBRIC decoration: pass \u2014 no gradient, background fill or styled theme; three spines hidden, no gridlines.",
+    "RUBRIC contrast: pass \u2014 near-black labels on white; the blue subject marks are about 4.9:1 on white.",
+    "RUBRIC table_form: pass \u2014 one value per category for eighteen categories, but the figure conveys a distribution shape a table row set does not show at a glance.",
+    "RUBRIC label_collision: pass \u2014 nothing clipped, nothing overlapping; group labels are right-aligned clear of the marks."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:54:56.975839+00:00",
+  "total": null
+}
