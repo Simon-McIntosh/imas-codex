@@ -53,9 +53,28 @@
       "note": "Fixed at version 36: the open decision's context gives the hand reading and the judge's figures separately, each named, with the judge's 17-of-40 agreement.",
       "reason": "",
       "when": "2026-11-16T21:28:12.717261+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b4c776eae213687dc7dd3cf583eafae6196fc7c5",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "Version 38 names the refinement evidence fragment in the open decision's context and says the run's private receipts moved to the run archive on promotion.",
+      "reason": "",
+      "when": "2026-11-16T21:28:18.195234+00:00"
     }
   ],
   "responses": {
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b4c776eae213687dc7dd3cf583eafae6196fc7c5",
+      "commit_basis": "edit",
+      "note": "Version 38 names the refinement evidence fragment in the open decision's context and says the run's private receipts moved to the run archive on promotion.",
+      "reason": "",
+      "when": "2026-11-16T21:28:18.195234+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
