@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="discovery,signals">
   <meta name="plan-blocks" content="iter-signal-context-and-enrichment">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;implementable&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;icp-api-access#s2&quot;],&quot;s4&quot;:[&quot;icp-api-access#s2&quot;]}">
   <title>The pipeline reads ICP and IDM through an authenticated, read-only client | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="10">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-11-16">
 </head>
 <body>
@@ -47,7 +47,7 @@
     <p><strong>Done when.</strong> The landing record gives the number of operations in the description and the number that are reads, the list of read operations relevant to plant structure, components and documents, and the declared authentication scheme; a test shows a stale session is detected and renewed; a test attempts POST, PUT, PATCH and DELETE against an ICP host through every public entry point of the client and through its underlying session, and each is refused with no request sent; a test shows a request to any host other than the integration instance and the listed sign-in hosts is refused; tests show a non-read request is refused to an API path during sign-in and after it, to an unlisted host during sign-in, and to a listed sign-in host once signed in; the live run's sign-in requests are logged as method, host and path only; and the request log of the live run shows only GET and HEAD against the integration host outside the gateway's sign-in path. A search recorded in the landing record finds no code path that reaches an ICP host without passing the method check. <strong>Negative control:</strong> with no stored credentials the client refuses before any request; and with the method check removed, the write-refusal tests fail.</p>
 
     <h2 id="s3">§3 — Plant structure and component records read through the API match ICP</h2>
-    <section data-reckon="section" data-id="s3" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="icp-api-access#s2"></section>
+    <section data-reckon="section" data-id="s3" data-effort-hours="3.5" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links="icp-api-access#s2"></section>
     <p><strong>Delivers.</strong> The client reads a plant breakdown structure node by code, its children, and the component lists that reference it, in bounded pages at a stated request rate, returning typed records with the source identity of each. It uses only the API's GET operations; the description offers GET reads for the breakdown tree and for a component's content by reference. Where a read this section needs is offered only through another method, the section does not use it: it names the operation in the landing record with the number of records left unread, and the lead decides whether to approve that named operation.</p>
     <p><strong>Done when.</strong> For twenty nodes chosen before the run, the code, title and parent read through the API equal those read through the ITER document assistant's record tools, with the count that agree in the landing record; a subtree of a stated size is read completely, with the number of requests, the elapsed time and the number of records the account was not permitted to see; and the measured request rate stays at or below the stated bound. Fetched records stay in private storage: none is stored as a fixture in the repository, and a search of the tracked tree for fetched identifiers and titles finds none. <strong>Negative control:</strong> a code that names no node returns an explicit not-found outcome, not an empty success.</p>
 
@@ -66,15 +66,6 @@
       </p>
     <p class="r-dec-rat">The lead stored credentials for the ITER single-sign-on service with the project&#x27;s credentials command on 2026-11-15. No agent handled the password.</p>
     </div>
-<div class="r-dec" data-key="pipeline-identity" data-choice="personal-for-development" data-by="lead" data-when="2026-11-15T20:56:15+00:00" data-sections="s2,s3,s4">
-    <p class="r-dec-q">Which identity does the pipeline sign in with?</p>
-    <p class="r-dec-ctx">The ITER document assistant reads ICP through a service account. A personal account works for development but ties a pipeline to one person&#x27;s permissions. The team that runs the assistant will know the sanctioned route.</p>
-    <p class="r-dec-opts">
-      <button class="r-opt" data-value="service-account">A service account requested for this pipeline</button>
-      <button class="r-opt chosen" data-value="personal-for-development">The lead&#x27;s own account for development, a service account before any scheduled use</button>
-      </p>
-    <p class="r-dec-rat">The lead said on 2026-11-15 to use their own account. A service account is still to be arranged before any scheduled use.</p>
-    </div>
 <div class="r-dec" data-key="document-source" data-choice="" data-by="" data-when="" data-sections="s4">
     <p class="r-dec-q">Where does the pipeline read IDM document files from?</p>
     <p class="r-dec-ctx">Measured on 2026-11-16 with GET only: the integration instance does not hold the production documents (two production identities returned zero matches), the only document-like records found there declare no file property, and file requests were refused with 401 before and after a session renewal. No file was fetched and no other host was contacted. The pilot context in the enrichment plan needs the pilot system&#x27;s signal list and functional specification.</p>
@@ -85,12 +76,24 @@
       </p>
     <p class="r-dec-rat"></p>
     </div>
+<div class="r-dec" data-key="pipeline-identity" data-choice="personal-for-development" data-by="lead" data-when="2026-11-15T20:56:15+00:00" data-sections="s2,s3,s4">
+    <p class="r-dec-q">Which identity does the pipeline sign in with?</p>
+    <p class="r-dec-ctx">The ITER document assistant reads ICP through a service account. A personal account works for development but ties a pipeline to one person&#x27;s permissions. The team that runs the assistant will know the sanctioned route.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt" data-value="service-account">A service account requested for this pipeline</button>
+      <button class="r-opt chosen" data-value="personal-for-development">The lead&#x27;s own account for development, a service account before any scheduled use</button>
+      </p>
+    <p class="r-dec-rat">The lead said on 2026-11-15 to use their own account. A service account is still to be arranged before any scheduled use.</p>
+    </div>
 </section>
 
     
   <section data-reckon="comments" id="comments" class="r-comments">
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261115T213811919846-icp-read-only-client" data-who="reckon-build" data-when="2026-11-15T23:09:59Z">
     <div class="r-comment-body"><p>Authenticated read-only client delivered: live description has 793 paths, 815 operations and 471 GET reads; all 6 integration requests were GET. Focused gate 151 passed; method-check mutation 28 failed; state-check mutation 9 failed. Full inventory and the authorised bounded sign-in exception are recorded in docs/evidence/fragments/icp-api-access/icp-read-only-client.html#icp-read-only-client-evidence.</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261116T040900239445-review-of-icp-plant-structure-and-component-reads-21bb64f64115" data-who="reckon-build" data-when="2026-11-16T04:18:20.491Z">
+    <div class="r-comment-body"><p>review stored with no total score; 4 finding(s)</p></div>
 </div>
 </section>
 </main>
