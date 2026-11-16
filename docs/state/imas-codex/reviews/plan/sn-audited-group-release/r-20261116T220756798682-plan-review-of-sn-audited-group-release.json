@@ -131,6 +131,16 @@
       "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md stores each reader verdict as a panel audit review record; the committed evidence is a summary of those records and later sections read the one store.",
       "reason": "",
       "when": "2026-11-16T22:50:19.952004+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-3",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/domain-groups.md extends audit_domains and its result with the ranking and split proposal and takes families from detect_families.",
+      "reason": "",
+      "when": "2026-11-16T22:50:22.372169+00:00"
     }
   ],
   "responses": {
@@ -151,6 +161,15 @@
       "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md stores each reader verdict as a panel audit review record; the committed evidence is a summary of those records and later sections read the one store.",
       "reason": "",
       "when": "2026-11-16T22:50:19.952004+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/domain-groups.md extends audit_domains and its result with the ranking and split proposal and takes families from detect_families.",
+      "reason": "",
+      "when": "2026-11-16T22:50:22.372169+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
