@@ -104,6 +104,16 @@
       "note": "Each section names docs/evidence/fragments/sn-audited-group-release/ as where its evidence is committed, and the group table has a named file.",
       "reason": "",
       "when": "2026-11-16T23:15:12.728450+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a7934ffa6d8e1b054ecec9de31241e2889964a0e",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 4 no longer names a first group: it is the group the lead rules first in section 2, with the four best-defined candidates listed by their agreement counts.",
+      "reason": "",
+      "when": "2026-11-16T23:15:15.331847+00:00"
     }
   ],
   "responses": {
@@ -142,6 +152,15 @@
       "note": "Each section names docs/evidence/fragments/sn-audited-group-release/ as where its evidence is committed, and the group table has a named file.",
       "reason": "",
       "when": "2026-11-16T23:15:12.728450+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a7934ffa6d8e1b054ecec9de31241e2889964a0e",
+      "commit_basis": "edit",
+      "note": "Section 4 no longer names a first group: it is the group the lead rules first in section 2, with the four best-defined candidates listed by their agreement counts.",
+      "reason": "",
+      "when": "2026-11-16T23:15:15.331847+00:00"
     },
     "wiring-1": {
       "action": "declined",
