@@ -17,7 +17,30 @@
   "plan_slug": "figure-scripts-use-the-shared-save-function",
   "plan_version": 3,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d4e73c94f45bc3b99681c1d8bf4c10d893f2ccf1",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 2's done-when at version 4 measures each figure file's exported ratio and requires the listing of every vector figure's declared size and ratio before and after.",
+      "reason": "",
+      "when": "2026-11-15T23:59:51.044951+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d4e73c94f45bc3b99681c1d8bf4c10d893f2ccf1",
+      "commit_basis": "edit",
+      "note": "Section 2's done-when at version 4 measures each figure file's exported ratio and requires the listing of every vector figure's declared size and ratio before and after.",
+      "reason": "",
+      "when": "2026-11-15T23:59:51.044951+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/figure-scripts-use-the-shared-save-function/r-20261115T232939456847-plan-review-of-figure-scripts-use-the-shared-save-function.json",
   "review_run_id": "r-20261115T232939456847-plan-review-of-figure-scripts-use-the-shared-save-function",
   "reviewed_blob_sha": "5bb6a6d87e395c3525764fecdc43abe4f8ab0d49",
   "rubric": "content",
