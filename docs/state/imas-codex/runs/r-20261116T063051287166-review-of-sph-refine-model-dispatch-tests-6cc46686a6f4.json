@@ -1027,6 +1027,46 @@
   "plan_link": null,
   "promoted_by": null,
   "promoted_revision": "4d632fba19d80bc529691d2d9e74a4fec7e6c645",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "gate verdict 'not-run' is not passing; cited arms retained as evidence",
+    "process_signalled": false,
+    "process_withheld": "process is not alive",
+    "run_archived": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261116T063051287166-review-of-sph-refine-model-dispatch-tests-6cc46686a6f4",
+    "scratch_bytes": 0,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261116T063051287166-review-of-sph-refine-model-dispatch-tests-6cc46686a6f4",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 0,
+        "path": "/tmp/reckon-crew-scratch/r-20261116T063051287166-review-of-sph-refine-model-dispatch-tests-6cc46686a6f4"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 0,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "available": false,
+          "detail": "tree is no longer available",
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/review-of-sph-refine-model-dispatch-tests-6cc46686a6f4",
+          "unavailable_state": "missing"
+        }
+      ]
+    },
+    "worktree_released": true,
+    "worktree_trash_left": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/_trash/r-20261116T063051287166-review-of-sph-refine-model-dispatch-tests-6cc46686a6f4-20261116T064735665901Z"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
