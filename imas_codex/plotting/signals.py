@@ -214,18 +214,24 @@ def plot(signals: Sequence[LoadedSignal], path: str | Path, *, labels: Sequence[
                     zorder=3 if index == 0 else 2,
                     label=alias,
                 )
-        figure.legend(loc="upper center", ncol=min(3, len(axis.lines)))
+        columns = min(len(axis.lines), 6)
+        legend = figure.legend(loc="upper center", ncol=columns)
         axis.set_xlabel(f"elapsed time [{time_unit}]")
         axis.set_ylabel(f"signal [{unit}]")
         axis.xaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
         axis.yaxis.set_major_locator(MaxNLocator(nbins=7, prune="both"))
         axis.ticklabel_format(style="plain", axis="both", useOffset=False)
-        legend_rows = (len(axis.lines) + 2) // 3
+        legend_rows = -(-len(axis.lines) // columns)
         figure.subplots_adjust(
             left=0.13,
             right=0.97,
             bottom=0.14,
             top=min(0.86, 0.94 - 0.055 * legend_rows),
+        )
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        legend_rows = len(
+            {round(text.get_window_extent(renderer).y0) for text in legend.get_texts()}
         )
         try:
             save_figure(figure, path)
@@ -235,5 +241,6 @@ def plot(signals: Sequence[LoadedSignal], path: str | Path, *, labels: Sequence[
         "time_origin": origin,
         "time_base": signals[0].metadata["time_base"],
         "summaries": summaries,
+        "legend_rows": legend_rows,
         "path": str(Path(path).resolve()),
     }
