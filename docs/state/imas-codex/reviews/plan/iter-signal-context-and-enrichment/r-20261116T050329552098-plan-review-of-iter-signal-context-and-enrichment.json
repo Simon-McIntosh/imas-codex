@@ -43,9 +43,28 @@
       "note": "Version 32 records the open decision local-model-confirmed-on-quality scoped to sections 6 and 7; the queue reports section 7 held on it, and section 8 waits on section 7.",
       "reason": "",
       "when": "2026-11-16T19:38:08.151217+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 6's done-when at version 33 sets a bar of at most eight wrong in forty, from the paid model's measured 32 in 200, and a miss is delivered as failed on quality.",
+      "reason": "",
+      "when": "2026-11-16T19:38:24.418185+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9b801e6b905c430ff2e8ae8050281f73f419ffb",
+      "commit_basis": "edit",
+      "note": "Section 6's done-when at version 33 sets a bar of at most eight wrong in forty, from the paid model's measured 32 in 200, and a miss is delivered as failed on quality.",
+      "reason": "",
+      "when": "2026-11-16T19:38:24.418185+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
