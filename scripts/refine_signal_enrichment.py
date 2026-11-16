@@ -115,14 +115,19 @@ def failure_class(response: dict, *, terminal: bool = False) -> str:
 
 def replacement_kind(record: dict) -> str | None:
     """Distinguish validation-directed messages from ordinary provider retries."""
-    if len(record["responses"]) < 2:
+    responses = [
+        row
+        for row in record["responses"]
+        if row.get("response_schema") != "DescriptionReview"
+    ]
+    if len(responses) < 2:
         return None
-    second = record["responses"][1]
+    second = responses[1]
     directed = second.get("validation_reask")
     if directed is None:
         # Frozen receipts identify the branch from its first reply: unusable
         # content is rejected before structured validation can append a re-ask.
-        first = record["responses"][0]
+        first = responses[0]
         directed = bool(first.get("raw")) and first.get("finish_reason") != "abort"
     return "validation_reask" if directed else "retry"
 
@@ -165,7 +170,13 @@ def summarize(records: list[dict], cohort: dict) -> dict:
             / len(firsts),
             "raw_failed_signals_by_class": dict(raw_failed),
             "delivered_first": sum(
-                len(r["outputs"]) for r in batches if len(r["responses"]) == 1
+                len(r["outputs"])
+                for r in batches
+                if sum(
+                    row.get("response_schema") != "DescriptionReview"
+                    for row in r["responses"]
+                )
+                == 1
             ),
             "delivered_after_reask": sum(
                 len(r["outputs"])
@@ -179,6 +190,25 @@ def summarize(records: list[dict], cohort: dict) -> dict:
                 replacement_kind(r) == "validation_reask" for r in batches
             ),
             "other_retries": sum(replacement_kind(r) == "retry" for r in batches),
+            "review_calls": sum(
+                row.get("response_schema") == "DescriptionReview" for row in responses
+            ),
+            "review_raw_parses": sum(
+                next(
+                    (
+                        row["score"]["parse_success"]
+                        for row in r["responses"]
+                        if row.get("response_schema") == "DescriptionReview"
+                    ),
+                    False,
+                )
+                for r in batches
+            ),
+            "review_validation_reasks": sum(
+                row.get("response_schema") == "DescriptionReview"
+                and row.get("validation_reask", False)
+                for row in responses
+            ),
             "delivered": len(outputs),
             "empty_descriptions": len(all_outputs) - len(outputs),
             "delivery_rate": sum(

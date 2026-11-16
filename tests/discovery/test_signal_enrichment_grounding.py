@@ -273,3 +273,43 @@ def test_manual_seal_refuses_missing_readings_and_later_edits(tmp_path):
     (tmp_path / "readings.jsonl").write_text(json.dumps(row) + "\n\n")
     with pytest.raises(ValueError, match="changed after sealing"):
         summarize(tmp_path)
+
+
+def test_review_call_is_not_a_provider_retry_or_draft_reask():
+    from scripts.refine_signal_enrichment import replacement_kind, summarize
+
+    record = {
+        "arm": "review",
+        "ids": ["signal"],
+        "seconds": 2,
+        "input_tokens": 3,
+        "output_tokens": 4,
+        "cost_usd": 0,
+        "responses": [
+            {
+                "raw": "{}",
+                "response_schema": "SignalEnrichmentBatch",
+                "score": {"parse_success": True},
+            },
+            {
+                "raw": "{}",
+                "response_schema": "DescriptionReview",
+                "score": {"parse_success": False},
+            },
+            {
+                "raw": "{}",
+                "response_schema": "DescriptionReview",
+                "validation_reask": True,
+                "score": {"parse_success": True},
+            },
+        ],
+        "outputs": [{"id": "signal", "description": "Temperature."}],
+    }
+    assert replacement_kind(record) is None
+    result = summarize([record], {"order": ["signal"]})["review"]
+    assert result["total_calls"] == 3
+    assert result["review_calls"] == 2
+    assert result["review_raw_parses"] == 0
+    assert result["review_validation_reasks"] == 1
+    assert result["other_retries"] == 0
+    assert result["validation_reasks"] == 0
