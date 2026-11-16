@@ -32,14 +32,16 @@ def plot(summary_path: Path, output: Path, preview: Path):
         "batch-five": "Batch size five",
         "batch-three": "Batch size three",
         "batch-one": "Batch size one",
-        "combination": "Combined changes, JSON mode",
-        "combination-without-schema": "Combined changes, no constraint",
+        "combination": "Batch three, combined, JSON mode",
+        "combination-without-schema": "Batch three, combined, no constraint",
+        "combination-one": "Batch one, combined, JSON mode",
+        "combination-one-without-schema": "Batch one, combined, no constraint",
     }
     arms = [arm for arm in names if arm in summary]
     plt.style.use(BASE_STYLE)
     plt.rcParams.update(STYLE)
-    fig, ax = plt.subplots(figsize=CANVAS)
-    fig.subplots_adjust(left=0.31, right=0.94, bottom=0.13, top=0.85)
+    fig, ax = plt.subplots(figsize=(CANVAS[0], max(CANVAS[1], len(arms) * 0.6)))
+    fig.subplots_adjust(left=0.36, right=0.94, bottom=0.13, top=0.85)
     y = list(range(len(arms)))
     ax.scatter(
         [100 * summary[a]["raw_parse_rate"] for a in arms],
