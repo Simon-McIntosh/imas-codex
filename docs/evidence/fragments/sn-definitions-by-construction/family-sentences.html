@@ -43,7 +43,7 @@ $$
 
 where $n_{\mathrm{Ar}}$ is the argon-ion number density, $q$ is the positive integer charge-state index, $n_{\mathrm{Ar}^{q+}}$ is the number density of argon ions in charge state $q$, and 18 is the atomic number of argon.
 
-The quantity may be specified locally or as a spatial average, with the averaging domain set by the specific form. The [line-averaged argon density](name:line_averaged_argon_density) is the average along a specified plasma path, and the [volume-averaged argon density](name:volume_averaged_argon_density) is the average over the confined plasma volume. Both are averages of the local density, not unnormalized line or volume integrals, and both keep the same charge-state-summed i</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions.<br><strong>documentation: </strong><span class="muted">Number density of argon. The charge-state sum is
+The quantity may be specified locally or as a spatial average, with the averaging domain set by the specific form. The [line-averaged argon density](name:line_averaged_argon_density) is the average along a specified plasma path, and the [volume-averaged argon density](name:volume_averaged_argon_density) is the average over the confined plasma volume. Both are averages of the local density, not unnormalized line or volume integrals, and both keep the same charge-state-summed i</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. The charge-state sum is
 
 $$
 n_{\mathrm{Ar}} = \sum_{q=1}^{18} n_{\mathrm{Ar}^{q+}}
@@ -66,7 +66,7 @@ where $n_{\mathrm{Be}}$ is the beryllium-ion number density, $\mathcal{N}_{\math
 
 Spatial averaging is not intrinsic to the unqualified density. The [line-averaged beryllium density](name:line_averaged_beryllium_density) is its path integral divided by the chord length, whereas the [volume-averaged beryllium density](name:volume_averaged_beryllium_density) is its volume integral divided by the confined plasma volume. In contrast, [beryllium density at the magnetic axis](name:beryllium_density_at_magnetic_axis) specifies a local evaluation rather than a spatial average.
 
-The density counts ions summed over all charge states; neutral atoms are excluded.</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. $$
+The density counts ions summed over all charge states; neutral atoms are excluded.</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. $$
 n_{\mathrm{Be}} = \frac{d\mathcal{N}_{\mathrm{Be}}}{dV}
 $$
 
@@ -88,7 +88,7 @@ $$
 
 where $n_{\mathrm{Ar}}$ is the total argon-ion number density, $n_{\mathrm{Ar}^{q+}}$ is the local number density of argon ions with positive charge state $q$, and $q$ is the integer argon charge-state index.
 
-This quantity applies to the argon-ion population immediately upstream of the electrostatic sheath at a divertor target and is summed over all positive argon charge states from singly ionized through fully stripped argon. Neutral argon atoms and other neutral argon forms are excluded, as are ele</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the divertor target.<br><strong>documentation: </strong><span class="muted">Number density of argon. The charge-state-summed argon number density is defined by
+This quantity applies to the argon-ion population immediately upstream of the electrostatic sheath at a divertor target and is summed over all positive argon charge states from singly ionized through fully stripped argon. Neutral argon atoms and other neutral argon forms are excluded, as are ele</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the divertor target. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. The charge-state-summed argon number density is defined by
 
 $$
 n_{\mathrm{Ar}} = \sum_{q=1}^{18} n_{\mathrm{Ar}^{q+}}
@@ -109,7 +109,7 @@ $$
 
 where $n_{\mathrm{Be}}$ is the beryllium-ion number density, $N_{\mathrm{Be}}$ is the number of beryllium ions in the volume, and $V$ is a small plasma volume centered at the sheath entrance.
 
-This quantity applies to the ionized beryllium population immediately adjacent to the divertor target and is summed over all positive beryllium ionization states, with each ion counted once regardless of charge state. Neutral beryllium atoms are excluded; the quantity is a local number </span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the divertor target.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The local beryllium-ion number density is defined by the differential particle count:
+This quantity applies to the ionized beryllium population immediately adjacent to the divertor target and is summed over all positive beryllium ionization states, with each ion counted once regardless of charge state. Neutral beryllium atoms are excluded; the quantity is a local number </span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the divertor target. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The local beryllium-ion number density is defined by the differential particle count:
 
 $$
 n_{\mathrm{Be}} = \frac{dN_{\mathrm{Be}}}{dV}
@@ -133,7 +133,7 @@ $$
 n = \lim_{\Delta V\to 0}\frac{\Delta N}{\Delta V}
 $$
 
-where $n$ is number density, $N$ is the number of counted particles, and $V$ is volume. For argon, the count is summed over all ionic charge states and excludes neutral argon. This species-specific quantity is a member of [density at the internal transport barrier](name:density_at_internal_transport_barrier), alongside [boron density at the internal transport barrier](name:boron_density_at_internal_transport_barrier). The internal transport barrier is the designated flux-surface location where reduced cross-field turbulent transport permits steep density gradients.</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the internal transport barrier.<br><strong>documentation: </strong><span class="muted">Number density of argon. The number density is defined by
+where $n$ is number density, $N$ is the number of counted particles, and $V$ is volume. For argon, the count is summed over all ionic charge states and excludes neutral argon. This species-specific quantity is a member of [density at the internal transport barrier](name:density_at_internal_transport_barrier), alongside [boron density at the internal transport barrier](name:boron_density_at_internal_transport_barrier). The internal transport barrier is the designated flux-surface location where reduced cross-field turbulent transport permits steep density gradients.</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the internal transport barrier. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. The number density is defined by
 
 $$
 n = \lim_{\Delta V\to 0}\frac{\Delta N}{\Delta V}
@@ -150,7 +150,7 @@ $$
 n_{\mathrm{Be,ITB}} = \sum_{q=1}^{4} n_{\mathrm{Be}^{q+},\mathrm{ITB}}
 $$
 
-where $n_{\mathrm{Be,ITB}}$ is the beryllium ion number density on the internal-transport-barrier flux surface, $n_{\mathrm{Be}^{q+},\mathrm{ITB}}$ is the number density of beryllium charge state </span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the internal transport barrier.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The charge-state aggregation is defined by
+where $n_{\mathrm{Be,ITB}}$ is the beryllium ion number density on the internal-transport-barrier flux surface, $n_{\mathrm{Be}^{q+},\mathrm{ITB}}$ is the number density of beryllium charge state </span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the internal transport barrier. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The charge-state aggregation is defined by
 
 $$
 n_{\mathrm{Be,ITB}} = \sum_{q=1}^{4} n_{\mathrm{Be}^{q+},\mathrm{ITB}}
@@ -174,7 +174,7 @@ $$
 
 where $n_{\mathrm{Ar}}$ and $n_{\mathrm{Ar}^{q+}}$ are number densities in m$^{-3}$, $q$ is the positive argon ionization state, and $\mathbf{r}_L$ is the limiter-side position in the right-handed cylindrical $(R, \phi, Z)$ frame.
 
-This is the argon-specific member of [density at a limiter](name:density_at_limiter). It counts argon ions rather than the electrons represented by [electron density at a limiter](name:electron_density_at_limiter), and is local rather than the flux-surface aver</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the limiter.<br><strong>documentation: </strong><span class="muted">Number density of argon. The charge-state-summed density is defined by
+This is the argon-specific member of [density at a limiter](name:density_at_limiter). It counts argon ions rather than the electrons represented by [electron density at a limiter](name:electron_density_at_limiter), and is local rather than the flux-surface aver</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the limiter. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. The charge-state-summed density is defined by
 
 $$
 n_{\mathrm{Ar}}(\mathbf{r}_L)=\sum_{q&gt;0} n_{\mathrm{Ar}^{q+}}(\mathbf{r}_L)
@@ -195,7 +195,7 @@ $$
 
 where $n_{\mathrm{Be}^{z+}}$ is the number density of beryllium ions in ionization state $z$, spanning all four stages accessible under edge-plasma conditions.
 
-Beryllium is used as a plasma-facing material in several tokamak devices; sputtering of beryllium limiter surfaces introduces impurity ions into the scrape-off layer, w</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the limiter.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The charge-state-summed density is defined as:
+Beryllium is used as a plasma-facing material in several tokamak devices; sputtering of beryllium limiter surfaces introduces impurity ions into the scrape-off layer, w</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the limiter. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The charge-state-summed density is defined as:
 
 $$
 n_\mathrm{Be} = \sum_{z=1}^{4} n_{\mathrm{Be}^{z+}}
@@ -219,7 +219,7 @@ $$
 
 where $n_{\mathrm{Ar},\mathrm{axis}}$ is the argon-ion number density at the magnetic axis, $N_{\mathrm{Ar}}$ is the number of argon ions summed over all ionic charge states, and $V$ is physical volume.
 
-The quantity is local to the magnetic axis, the innermost location of nested closed poloidal magnetic-flux surfaces where the gradient of the poloidal magnetic flux vanishes. It applies to the complete ionic argon population at that location and is charge-state summed; neutral argon is exclu</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the magnetic axis.<br><strong>documentation: </strong><span class="muted">Number density of argon. The defining relation is
+The quantity is local to the magnetic axis, the innermost location of nested closed poloidal magnetic-flux surfaces where the gradient of the poloidal magnetic flux vanishes. It applies to the complete ionic argon population at that location and is charge-state summed; neutral argon is exclu</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the magnetic axis. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. The defining relation is
 
 $$
 n_{\mathrm{Ar},\mathrm{axis}} = \left.\frac{dN_{\mathrm{Ar}}}{dV}\right|_{\mathrm{axis}}
@@ -244,7 +244,7 @@ $$
 
 where $n_{\mathrm{Be},\mathrm{axis}}$ is the total beryllium-ion number density at the magnetic axis, $n_{\mathrm{Be}^{Z+},\mathrm{axis}}$ is the number density of beryllium ions in charge state $Z$, $Z$ is the ionic charge-state number, $N_{\mathrm{Be}}$ is the number of beryllium ions included in the sum, and $V$ is physical volume.
 
-The quantity is local to the magnetic axis, the innermost location of nested closed p</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the magnetic axis.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The defining relation is
+The quantity is local to the magnetic axis, the innermost location of nested closed p</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the magnetic axis. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The defining relation is
 
 $$
 n_{\mathrm{Be},\mathrm{axis}} = \sum_Z n_{\mathrm{Be}^{Z+},\mathrm{axis}} = \left.\frac{dN_{\mathrm{Be}}}{dV}\right|_{\mathrm{axis}}
@@ -268,7 +268,7 @@ $$
 
 where $n_{\mathrm{Ar}}$ is the total local argon-ion number density, $z$ is the positive integer argon charge state, and $n_{\mathrm{Ar}^{z+}}$ is the local number density of argon ions in charge state $z$. The sum includes Ar+ through Ar18+.
 
-The quantity is evaluated at the top of the H-mode edge pedestal, whose location is defined by the [normalized poloidal flux coordinate of the pedestal](name:normalized_poloidal_flux_coordinate_of_pedestal). It is a locus-specific form of [argon density](name:argon_density), whereas [line-averaged argon density](name:line_averaged_argon_dens</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the pedestal top.<br><strong>documentation: </strong><span class="muted">Number density of argon. $$
+The quantity is evaluated at the top of the H-mode edge pedestal, whose location is defined by the [normalized poloidal flux coordinate of the pedestal](name:normalized_poloidal_flux_coordinate_of_pedestal). It is a locus-specific form of [argon density](name:argon_density), whereas [line-averaged argon density](name:line_averaged_argon_dens</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the pedestal top. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. $$
 n_{\mathrm{Ar}} = \sum_{z=1}^{18} n_{\mathrm{Ar}^{z+}}
 $$
 
@@ -289,7 +289,7 @@ where $n_{\mathrm{Be}}$ is the total beryllium-ion number density, $n_{\mathrm{B
 
 The quantity is evaluated locally at the pedestal top, whose position is defined by the [normalized poloidal flux coordinate of the pedestal](name:normalized_poloidal_flux_coordinate_of_pedestal). It applies to ionized beryllium only and is summed over all included beryllium ion charge states; neutral beryllium is excluded, and individual charge-state densities are not reported separately.
 
-This is the pedestal</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the pedestal top.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The total beryllium-ion density is defined by
+This is the pedestal</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the pedestal top. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The total beryllium-ion density is defined by
 
 $$
 n_{\mathrm{Be}} = \sum_{q=1}^{4} n_{\mathrm{Be}^{q+}}
@@ -313,7 +313,7 @@ $$
 n_{\mathrm{Ar}} = \sum_{q=1}^{18} n_{\mathrm{Ar}^{q+}}
 $$
 
-where $n_{\mathrm{Ar}}$ is the argon ion number density, $q$ is the argon ion charge-state index, and $n_{\mathrm{Ar}^{q+}}$ is the number density of argon ions in charge state $q$. Neutral argon is excluded. Unlike flux-surface-averaged argon density at the plasma boundary, this quantity denotes the local value at the separatrix.</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the plasma boundary.<br><strong>documentation: </strong><span class="muted">Number density of argon. The charge-state-summed density is defined by
+where $n_{\mathrm{Ar}}$ is the argon ion number density, $q$ is the argon ion charge-state index, and $n_{\mathrm{Ar}^{q+}}$ is the number density of argon ions in charge state $q$. Neutral argon is excluded. Unlike flux-surface-averaged argon density at the plasma boundary, this quantity denotes the local value at the separatrix.</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of argon ions at the plasma boundary. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. The charge-state-summed density is defined by
 
 $$
 n_{\mathrm{Ar}} = \sum_{q=1}^{18} n_{\mathrm{Ar}^{q+}}
@@ -332,7 +332,7 @@ $$
 n_{\mathrm{Be}}(\mathbf{x}_b,t)=\sum_{z\in\mathcal{Z}_{\mathrm{Be}}}\int f_{\mathrm{Be},z}(\mathbf{x}_b,\mathbf{v},t)\,d^3\mathbf{v}
 $$
 
-where $n_{\mathrm{Be}}$ is the beryllium-ion number density, $\mathbf{x}_b$ is a point on the plasma boundary, $t$ is time, $z$ identifies a beryllium ionization state, $\mathcal{Z}_{\mathrm{Be}}$ is the set of included beryllium ionization states, $\mathbf{v}$ is particle velocity, $f_{\mathrm{Be},z}$ is the velocity distribution f</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the plasma boundary.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The defining density is the zeroth velocity-space moment, summed over all beryllium ionization states:
+where $n_{\mathrm{Be}}$ is the beryllium-ion number density, $\mathbf{x}_b$ is a point on the plasma boundary, $t$ is time, $z$ identifies a beryllium ionization state, $\mathcal{Z}_{\mathrm{Be}}$ is the set of included beryllium ionization states, $\mathbf{v}$ is particle velocity, $f_{\mathrm{Be},z}$ is the velocity distribution f</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Number density of beryllium ions at the plasma boundary. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. The defining density is the zeroth velocity-space moment, summed over all beryllium ionization states:
 
 $$
 n_{\mathrm{Be}}(\mathbf{x}_b,t)=\sum_{z\in\mathcal{Z}_{\mathrm{Be}}}\int f_{\mathrm{Be},z}(\mathbf{x}_b,\mathbf{v},t)\,d^3\mathbf{v}
@@ -622,7 +622,7 @@ Each ion is counted once, without charge weighting; neutral argon is excluded. T
 
 It specializes [density at the plasma boundary](name:density_at_plasma_boundary) by selecting the argon-ion population and the flux-surface-averaged rather than local value.
 
-The last closed magnetic flux surface: the outermost flux surface on</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Flux-surface-averaged number density of argon ions at the plasma boundary.<br><strong>documentation: </strong><span class="muted">Number density of argon. $$\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$
+The last closed magnetic flux surface: the outermost flux surface on</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Flux-surface-averaged number density of argon ions at the plasma boundary. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. $$\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$
 
 where $n_{\mathrm{Ar}}$ is the local [argon-ion number density](name:argon_density), $n_{\mathrm{Ar}^{z+}}$ is the local number density of argon ions with positive charge number $z$, and angle brackets denote the flux-surface average at the plasma boundary. The sum includes all positive charge states of argon.
 
@@ -641,7 +641,7 @@ where $n_{\mathrm{Be}}$ is the local [beryllium-ion number density at the plasma
 
 All beryllium ion charge states are included, with each ion counted once rather than weighted by its charge; neutral beryllium is excluded. This quantity is the flux-surface-averaged form of the local boundary density, not a local point value, volume average, or chord average.
 
-The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined </span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Flux-surface-averaged number density of beryllium ions at the plasma boundary.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. $$\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$
+The last closed magnetic flux surface: the outermost flux surface on which field lines close on themselves, bounding the confined </span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Flux-surface-averaged number density of beryllium ions at the plasma boundary. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. $$\langle f\rangle = \oint f\,dS/|\nabla\psi| \,/\, \oint dS/|\nabla\psi|$$
 
 where $n_{\mathrm{Be}}$ is the local [beryllium-ion number density at the plasma boundary](name:beryllium_density_at_plasma_boundary), $n_{\mathrm{Be}^{q+}}$ is the local number density of beryllium ions with positive integer charge number $q$, and angle brackets denote the flux-surface average over the plasma boundary.
 
@@ -704,7 +704,7 @@ This chord-specific average is not a local value at an individual point; it equa
 
 The line average is the integral of a quantity along a stated chord divided by the chord length.
 
-T</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Line-averaged number density of argon ions.<br><strong>documentation: </strong><span class="muted">Number density of argon. $$
+T</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Line-averaged number density of argon ions. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. $$
 \bar{n}_{\mathrm{Ar}} = \frac{1}{L}\int_0^L n_{\mathrm{Ar}}\,dl
 $$
 
@@ -727,7 +727,7 @@ This quantity averages the local beryllium density over the stated chord rather 
 
 The line average is the integral of a quantity along a stated chord divided by the chord length.
 
-The density counts ions summed over all c</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Line-averaged number density of beryllium ions.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. $$
+The density counts ions summed over all c</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Line-averaged number density of beryllium ions. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. $$
 \bar{n}_{\mathrm{Be}} = \frac{1}{L}\int_0^L n_{\mathrm{Be}}\,dl
 $$
 
@@ -751,7 +751,7 @@ where $n_{\mathrm{Ar}}$ is the local argon-ion number density, $\langle n_{\math
 
 The contributing argon charge numbers range from one through eighteen, and both thermal and nonthermal ions contribute. Each ion contributes one particle, without weighting by electric charge or mass.
 
-This is the argon-specific instance of [volume-averaged ion density](name:volume_averaged_ion_density), not the all-species [volume-averaged total ion density](name:volume_averaged_total_ion_density). It differs from [line-averaged argon density](name:line_averaged_argon_density), which aver</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Volume-averaged number density of argon ions.<br><strong>documentation: </strong><span class="muted">Number density of argon. $$
+This is the argon-specific instance of [volume-averaged ion density](name:volume_averaged_ion_density), not the all-species [volume-averaged total ion density](name:volume_averaged_total_ion_density). It differs from [line-averaged argon density](name:line_averaged_argon_density), which aver</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Volume-averaged number density of argon ions. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of argon. $$
 \langle n_{\mathrm{Ar}}\rangle_V = \frac{1}{V}\int_V n_{\mathrm{Ar}}\,dV
 $$
 
@@ -774,7 +774,7 @@ where $n_{\mathrm{Be}}$ is the local beryllium-ion number density, $\langle n_{\
 
 The contributing beryllium charge numbers range from one through four, and both thermal and nonthermal ions contribute. Each ion counts once, without electric-charge or mass weighting. This is a single-species number density, not an all-species total, charge density, or mass density; the spatial mean is distinct from a local value or a chord mean.
 
-This is the beryllium-specific member of the [volume-averaged ion density](name:volume_averaged_ion_density) family. Multiplying it by the averaging volume gives the nu</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Volume-averaged number density of beryllium ions.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. $$
+This is the beryllium-specific member of the [volume-averaged ion density](name:volume_averaged_ion_density) family. Multiplying it by the averaging volume gives the nu</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Volume-averaged number density of beryllium ions. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Number density of beryllium. $$
 \langle n_{\mathrm{Be}}\rangle_V = \frac{1}{V}\int_V n_{\mathrm{Be}}\,dV
 $$
 
@@ -800,7 +800,7 @@ where $R_{\mathrm{H}/e}$ is the protium-to-electron abundance ratio, $n_{\mathrm
 
 The numerator includes all positive charge states of protium, consisting only of singly charged protium ions. Neutral protium, deuterium, and tritium are excluded from the numerator. The denominator must be nonzero. This ratio is not the protium fraction among hydrogenic ions, because its reference population is free electrons rather than hydrogenic ions.
 
-The [volume-ave</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Ratio of the hydrogen ion number density to the electron number density.<br><strong>documentation: </strong><span class="muted">Ratio of hydrogen (protium) ion number density to free-electron number density. It compares particle populations rather than electric charge or mass.
+The [volume-ave</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Ratio of the hydrogen ion number density to the electron number density. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Ratio of hydrogen (protium) ion number density to free-electron number density. It compares particle populations rather than electric charge or mass.
 
 The underlying local abundance ratio is
 
@@ -827,7 +827,7 @@ $$
 
 where $R_{\mathrm{Fe}/e}$ is the iron-to-electron abundance ratio, $n_{\mathrm{Fe}}$ is the iron-ion number density summed over all positive charge states, $n_e$ is the [free-electron number density](name:electron_density), $n_{\mathrm{Fe}^{z+}}$ is the number density of iron ions with charge number $z$, and $z$ indexes the positive iron charge states from 1 through 26.
 
-Each iron ion contributes once to the numerator, regardless of charge state; neutral iron is excluded. Both densities are local quantities, with no spatial averaging implied. The ratio is defined only when </span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Ratio of the iron ion number density to the electron number density.<br><strong>documentation: </strong><span class="muted">Ratio of iron-ion number density to free-electron number density at the same plasma location and time. It compares particle populations rather than electric charge or mass.
+Each iron ion contributes once to the numerator, regardless of charge state; neutral iron is excluded. Both densities are local quantities, with no spatial averaging implied. The ratio is defined only when </span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Ratio of the iron ion number density to the electron number density. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Ratio of iron-ion number density to free-electron number density at the same plasma location and time. It compares particle populations rather than electric charge or mass.
 
 The local iron abundance is defined by
 
@@ -853,7 +853,7 @@ $$\langle f\rangle_V = \frac{1}{V}\int_V f\,dV$$
 
 where $a_{\mathrm{Ar},V}$ is this argon abundance ratio, $\langle n_{\mathrm{Ar}}\rangle_V$ is the [volume-averaged argon density](name:volume_averaged_argon_density), $\langle n_e\rangle_V$ is the volume-averaged free-electron number density, and $V$ is the plasma volume enclosed by the last closed flux surface. The underlying quantities $n_{\mathrm{Ar}}$ and $n_e$ are the local [argon-ion number density](name:argon_density) and free-electron number density, respectively.
 
-Both averages use the same confined plasma volume and evaluation time; the supplied composition context specifies the time of peak electron density. The argon p</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Ratio of the volume-averaged argon ion number density to the volume-averaged electron number density.<br><strong>documentation: </strong><span class="muted">Ratio of volume-averaged argon-ion number density to volume-averaged free-electron number density. It compares particle populations rather than electric charge or mass.
+Both averages use the same confined plasma volume and evaluation time; the supplied composition context specifies the time of peak electron density. The argon p</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Ratio of the volume-averaged argon ion number density to the volume-averaged electron number density. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Ratio of volume-averaged argon-ion number density to volume-averaged free-electron number density. It compares particle populations rather than electric charge or mass.
 
 The argon abundance ratio is defined by
 
@@ -876,7 +876,7 @@ $$\langle f\rangle_V = \frac{1}{V}\int_V f\,dV$$
 
 where $R_{\mathrm{Be}/e,V}$ denotes this abundance ratio, $\langle n_{\mathrm{Be}}\rangle_V$ is the [volume-averaged beryllium density](name:volume_averaged_beryllium_density), $\langle n_e\rangle_V$ is the volume-averaged free-electron number density, and $V$ is the confined plasma volume enclosed by the last closed flux surface. The local densities $n_{\mathrm{Be}}$ and $n_e$ denote beryllium-ion and free-electron number density, respectively.
 
-Both averages use the same plasma volume and are evaluated at the time of peak electron density. The [local beryllium density](name:beryllium_density) includes all positive charge states: $n_</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Ratio of the volume-averaged beryllium ion number density to the volume-averaged electron number density.<br><strong>documentation: </strong><span class="muted">Ratio of volume-averaged beryllium-ion number density to volume-averaged free-electron number density. It compares particle populations rather than electric charge or mass.
+Both averages use the same plasma volume and are evaluated at the time of peak electron density. The [local beryllium density](name:beryllium_density) includes all positive charge states: $n_</span></td><td><strong>family sentence installed: </strong>yes<br><strong>description: </strong>Ratio of the volume-averaged beryllium ion number density to the volume-averaged electron number density. The density counts ions summed over all charge states; neutral atoms are excluded.<br><strong>documentation: </strong><span class="muted">Ratio of volume-averaged beryllium-ion number density to volume-averaged free-electron number density. It compares particle populations rather than electric charge or mass.
 
 The beryllium abundance ratio is
 
@@ -1064,6 +1064,6 @@ Density-weighted toroidal velocity of beryllium ions at the plasma boundary.</sp
 </tbody></table>
 <p>The members with no source at all are <code>accumulated_argon_count</code>, <code>accumulated_neon_count</code>, <code>line_averaged_neon_density</code>; they belong to the catalog's sourceless population, which this node does not raise.</p>
 <h3 id="sdbc-family-sentences-guard">The test that fails when a member departs from its family sentence</h3>
-<p><code>tests/standard_names/test_family_sentences.py</code> makes the guarded thing happen. For every one of the 23 families it hands the writer's own refusal a definition that does not carry the family's sentence and asserts the refusal, then renders a member and asserts the sentence is present with the species substituted. It also asserts the ruled population statement is in every density family's sentence as ruled, that no sentence states an inclusive population, and that the members of one family render one description apart from the species — the last read from the stored sentence, without the graph. A declared mutation of the renderer (<code>species_family_sentence</code> returning <code>None</code>) turns 3 of the 7 tests red and leaves the other 4 passing, so the suite separates the sentence route from the wording rules; the red log is <code>negative-control-family-sentence.log</code> beside this node's manifest.</p>
+<p><code>tests/standard_names/test_family_sentences.py</code> makes the guarded thing happen. For every one of the 23 families it hands the writer's own refusal a definition that does not carry the family's sentence and asserts the refusal, then renders a member and asserts the sentence is present with the species substituted. It also asserts the ruled population statement is in every density family's sentence as ruled, that no sentence states an inclusive population, and that the members of one family render one description apart from the species. A declared mutation of the renderer turns those tests red; the red log is recorded with this node.</p>
 <p>Rendered over every member's live text, each family carries one description template: <code>&lt;X&gt;_density</code> 1, <code>&lt;X&gt;_density_at_divertor_target</code> 1, <code>&lt;X&gt;_density_at_internal_transport_barrier</code> 1, <code>&lt;X&gt;_density_at_limiter</code> 1, <code>&lt;X&gt;_density_at_magnetic_axis</code> 1, <code>&lt;X&gt;_density_at_pedestal_top</code> 1, <code>&lt;X&gt;_density_at_plasma_boundary</code> 1, <code>&lt;X&gt;_prefill_count</code> 1, <code>&lt;X&gt;_source_rate_due_to_gas_injection</code> 1, <code>accumulated_&lt;X&gt;_count</code> 1, <code>accumulated_&lt;X&gt;_count_due_to_gas_injection</code> 1, <code>accumulated_&lt;X&gt;_prefill_count</code> 1, <code>accumulated_&lt;X&gt;_prefill_count_due_to_gas_injection</code> 1, <code>flux_surface_averaged_&lt;X&gt;_density_at_plasma_boundary</code> 1, <code>flux_surface_averaged_toroidal_&lt;X&gt;_velocity_at_plasma_boundary</code> 1, <code>line_averaged_&lt;X&gt;_density</code> 1, <code>volume_averaged_&lt;X&gt;_density</code> 1, <code>ratio_of_&lt;X&gt;_density_to_electron_density</code> 1, <code>ratio_of_volume_averaged_&lt;X&gt;_density_to_volume_averaged_electron_density</code> 1, <code>toroidal_&lt;X&gt;_velocity_at_internal_transport_barrier</code> 1, <code>toroidal_&lt;X&gt;_velocity_at_magnetic_axis</code> 1, <code>toroidal_&lt;X&gt;_velocity_at_pedestal_top</code> 1, <code>toroidal_&lt;X&gt;_velocity_at_plasma_boundary</code> 1. The closing census, which measures descriptions, is not re-run here; the figure is the rendering's own count over the live rows.</p>
 </section>
