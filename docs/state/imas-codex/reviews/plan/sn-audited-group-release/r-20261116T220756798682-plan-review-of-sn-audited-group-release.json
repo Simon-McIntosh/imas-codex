@@ -101,6 +101,16 @@
       "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md makes the two blind readers seats of the advisory panel and panel audit machinery.",
       "reason": "",
       "when": "2026-11-16T22:50:11.297131+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "reuse_search-3",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md draws the planted names from the committed golden sheets and requires that no golden label comes from a model that is a reader.",
+      "reason": "",
+      "when": "2026-11-16T22:50:14.428780+00:00"
     }
   ],
   "responses": {
@@ -121,6 +131,15 @@
       "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md makes the two blind readers seats of the advisory panel and panel audit machinery.",
       "reason": "",
       "when": "2026-11-16T22:50:11.297131+00:00"
+    },
+    "reuse_search-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md draws the planted names from the committed golden sheets and requires that no golden label comes from a model that is a reader.",
+      "reason": "",
+      "when": "2026-11-16T22:50:14.428780+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261116T220756798682-plan-review-of-sn-audited-group-release.json",
