@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T19:26:15.416Z",
+  "dispatched_at": "2026-11-16T19:25:00Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:20",
+      "id": "wiring-1",
+      "reason": "the hold exists only as prose, so the recorded state and the queue both contradict it until the pending choice is recorded as a gate on those sections.",
+      "text": "`plan-section-declarations` marks s6, s7 and s8 `implementable`, while the description-model rationale at line 100 says sections 6 and 7 stay unbuilt until the lead confirms the local model on the reported result or chooses otherwise; a build queue reads the declaration, not the rationale, so s6 is dispatchable on a model the plan itself says is unconfirmed, and s8 inherits through s7",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:70",
+      "id": "done_when-1",
+      "reason": "a done-when with no bar cannot fail on the quality the plan has just shown to be the deciding risk, so the section would close on the very result the decision calls inadequate.",
+      "text": "section 6's done-when requires a hand comparison of forty member signals \"with the count that are right, partly right and wrong\" and names no acceptable count, so the section lands whatever the quality; the plan's own refinement measured 111 of 200 local descriptions wrong against context, a rate that would satisfy this done-when as written",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:100",
+      "id": "reasoning-1",
+      "reason": "a decided face with reasoning that records evidence against the decision is what sends section 6 at the wrong model, which is why the open choice has to be a decision of its own rather than a caveat inside a ratified one.",
+      "text": "the decision element still carries `data-choice=\"local-after-retest\"` with the local option marked chosen, while its own rationale records a sealed 40-pair reading preferring the paid model in 27 pairs and the local model in none, 13 ties, and 111 of 200 local descriptions judged wrong against 32, and no open decision carries the resulting question; the element therefore reads as a settled ratification and its `data-sections=\"s6,s7\"` attaches a settled model to the two sections the rationale holds",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "d020421fd1d6469ae432bda7aada03e1f717f03c",
+  "plan_fingerprint": "3a962bd8cb3d96a437e8b35efcd6d0cd033ccea4484e4142aac363a9e8904a09",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 31,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T050329552098-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "5a266e28df8c6768e62f260cc4d08452c9b8898b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the figure `imas-codex/figures/iter-signal-context-and-enrichment/pipeline.svg` exists, and the section dependencies `icp-api-access#s3`, `icp-api-access#s4` and `codac-uda-signals#s12` each resolve in their plans.",
+    "done_when": "a finding \u2014 section 6's hand comparison reports counts of right, partly right and wrong with no acceptance bar, so the section is done at any quality.",
+    "evidence_paths": "pass \u2014 landing records, the private catalogue store and the sealed reading are named as durable artefacts, and the figures the rationale now reports resolve to `docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html`, not to a session scratchpad.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers reach any symbol, and the largest-pattern tables use invented names in tracked files.",
+    "reasoning": "a finding \u2014 the `description-model` decision still records the local model as the lead's chosen answer while the rationale in the same element reports a sealed reading that prefers the paid model 27 to 0 and finds 111 local descriptions wrong against 32.",
+    "single_goal": "pass \u2014 each section names one deliverable (seats, comparison, one system's context, grouping, pilot enrichment, whole-catalogue enrichment, one read tool, one protected archive, one re-run).",
+    "wiring": "a finding \u2014 sections 6, 7 and 8 are declared `implementable` in `plan-section-declarations` while the description-model rationale holds them until the lead confirms the local model, and no dependency or open decision records that gate."
+  },
+  "section_digests": {
+    "_document": "df29351267671ab2e3cfb16b5eff821668a5550c7cbda05b0d53eec8ddffffff",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "631c30f031b35766fbc9b9bf62a0670bf0504adeef4f12b7676039b81fd14365",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T19:37:11.807997+00:00",
+  "total": null
+}
