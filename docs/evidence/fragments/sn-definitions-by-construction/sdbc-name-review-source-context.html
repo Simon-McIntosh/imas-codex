@@ -122,12 +122,16 @@
     requires.
   </p>
   <p id="sdbc-name-review-source-context-suite">
-    <strong>Suite: incomplete.</strong> The two-arm
-    <code>tests/standard_names</code> run was submitted as one <code>all_debug</code>
-    job (1319285, both arms against the shared environment and this tree's
-    <code>PYTHONPATH</code>); at the time of writing the head arm is at 54% with no
-    failures reported and the base arm has not started. No green suite result is
-    claimed here.
+    <code>tests/standard_names</code> at this tree, run as an
+    <code>all_debug</code> job against the shared environment:
+    <strong>24 failed, 8748 passed, 11 skipped</strong> (1084 s). All 24 are in
+    the release-notes and exclusion-report files and fail on
+    <code>no catalog checkout is resolved</code>; the same 24 test ids fail at the
+    base commit: <code>24 failed, 42 passed</code> across those five files, and the
+    two failure sets are identical. The change adds no suite failure. The base arm
+    of the whole suite never ran — the job hit its 30-minute limit after the head
+    arm, so the base comparison is the failing subset at base, not a second full
+    run.
   </p>
 
   <p id="sdbc-name-review-source-context-spend">
