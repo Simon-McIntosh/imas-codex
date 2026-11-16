@@ -715,15 +715,27 @@ def _physical_base_stems() -> frozenset[str]:
     return frozenset(_qualifier_stem(base) for base in _physical_base_roster())
 
 
-def _names_a_physical_base(sentence: str) -> bool:
-    """True when the sentence describes a quantity by naming a physical base.
+def _token_followed_by_a_base(sentence: str, token: str) -> bool:
+    """True when the qualifier's words modify a physical base noun.
 
-    A sentence that says "equivalent electrons in the electron density" is
-    about a density; the qualifier inside it is not a statement about this
-    name's quantity. Such a sentence is left to the judge rather than read as
-    support for the name.
+    A sentence that says "equivalent electron density" names the qualifier's
+    words but describes a density, not the count the name denotes. The words are
+    read as modifiers of the base that immediately follows them, which is the
+    one construction in a DD statement where a qualifier names another quantity;
+    a sentence that merely mentions a base elsewhere still states the qualifier.
     """
-    return bool(_statement_stems(sentence) & _physical_base_stems())
+    words = [word for word in re.split(r"[^a-z0-9]+", sentence.lower()) if word]
+    token_words = [word for word in re.split(r"[^a-z0-9]+", token.lower()) if word]
+    stems = [_qualifier_stem(word) for word in token_words]
+    bases = _physical_base_stems()
+    for start in range(len(words) - len(stems) + 1):
+        window = [_qualifier_stem(word) for word in words[start : start + len(stems)]]
+        if window != stems:
+            continue
+        following = start + len(stems)
+        if following < len(words) and _qualifier_stem(words[following]) in bases:
+            return True
+    return False
 
 
 def _structure_states_token(text: Any, token: str) -> bool:
@@ -736,7 +748,7 @@ def _structure_states_token(text: Any, token: str) -> bool:
     for sentence in _statement_sentences(text):
         if not states_token(sentence, token):
             continue
-        if _contrasts(sentence) or _names_a_physical_base(sentence):
+        if _contrasts(sentence) or _token_followed_by_a_base(sentence, token):
             continue
         return True
     return False

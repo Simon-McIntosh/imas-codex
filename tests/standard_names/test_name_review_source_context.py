@@ -23,7 +23,7 @@ STATEMENT = (
     "Accumulated injected gas since the plasma breakdown in equivalent electrons"
 )
 NEGATED = "Accumulated injected gas, not counted in equivalent electrons"
-OTHER_QUANTITY = "Equivalent electrons in the electron density of the edge plasma"
+OTHER_QUANTITY = "The equivalent electron density of the trapped population"
 
 
 def _item(name: str = CARBON, statement: str = STATEMENT) -> dict:
@@ -116,7 +116,7 @@ def test_negated_statement_is_left_to_the_judge() -> None:
 
 
 def test_statement_about_another_quantity_is_left_to_the_judge() -> None:
-    """A statement that names a different physical base does not support the name."""
+    """A statement whose qualifier modifies another quantity's base does not support it."""
     item = _item(statement=OTHER_QUANTITY)
     assert jev_review.enclosing_structure_support(item) is None
 
