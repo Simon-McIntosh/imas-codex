@@ -28,6 +28,60 @@
     the judge, so an unsupported qualifier still records its failure.
   </p>
 
+
+  <h3 id="sdbc-name-review-source-context-rule">How the code decides that a structure states a qualifier</h3>
+  <p id="sdbc-name-review-source-context-rule-text">
+    The name is parsed with the canonical grammar and its qualifier tokens are
+    read off that parse — <code>accumulated</code>, <code>carbon</code>,
+    <code>equivalent_electron</code> for the carbon name, and operators such as
+    <code>line_integrated</code> and <code>flux_surface_averaged</code> are not
+    qualifiers and are never examined. Every text the review holds is then
+    collected into two sets: the leaf documentation of each bound source path, and
+    the documentation/description of every structure above it. A qualifier is
+    <em>stated</em> by a text when every word of the token appears in that text as
+    a stem — case-folded, with a plural or suffix-stripped form accepted when at
+    least four letters remain, so <code>equivalent_electron</code> matches
+    <q>equivalent electrons</q> and <code>gas</code> and <code>ion</code> keep
+    their own form. The check settles only when all of the name's qualifiers are
+    stated by leaf-or-structure <em>and</em> at least one is stated only by a
+    structure; otherwise it returns nothing and the judge's own answer stands.
+  </p>
+  <p id="sdbc-name-review-source-context-rule-example-label">
+    Worked example, a label chain: for
+    <code>accumulated_carbon_equivalent_electron_count_due_to_gas_injection</code>
+    the leaf <code>summary/gas_injection_accumulated/carbon/value</code> says only
+    <q>Value</q>, its parent says <q>Carbon</q>, and the grandparent says
+    <q>Accumulated injected gas since the plasma breakdown in equivalent
+    electrons</q>. <code>carbon</code> matches the parent, while
+    <code>accumulated</code> and <code>equivalent_electron</code> match only the
+    grandparent's sentence; all three are stated and two are stated only by a
+    structure, so both source-support checks answer 0.0 and carry that sentence.
+  </p>
+  <p id="sdbc-name-review-source-context-rule-example-sentence">
+    Worked example, a sentence rather than a label: for
+    <code>trapped_fast_ion_charge_state_torque_density_due_to_collisions</code> the
+    only structure that states <code>trapped</code> is
+    <code>distributions/distribution/profiles_2d/trapped</code>, whose text is
+    <q>Flux surface averaged profile evaluated using the trapped particle part of
+    the distribution.</q> The match is made against the word <q>trapped</q> inside
+    that sentence, not against the path's final segment, and the check settles on
+    it the same way.
+  </p>
+  <p id="sdbc-name-review-source-context-rule-unstated">
+    And the case the rule must not absorb:
+    <code>line_integrated_neutral_beam_radiance_at_spectral_line</code> is bound to
+    <code>charge_exchange/channel/bes/radiances</code> (leaf: <q>Calibrated
+    intensities of the 9 splitted lines…</q>), whose structures say <q>Derived Beam
+    Emission Spectroscopy (BES) parameters</q> and <q>Set of channels
+    (lines-of-sight)…</q>. Those statements exist, but neither states
+    <code>neutral_beam</code> — <q>Beam Emission Spectroscopy</q> carries
+    <q>beam</q> and no <q>neutral</q> — so the rule returns nothing, and across
+    three repeated judgements the judge's own answers stood: 0.38 / 0.35 / 0.40 on
+    <code>over_qualified_modifier</code> and 0.47 / 0.47 / 0.49 on
+    <code>source_fidelity_unsupported_qualifier</code>, none settled. A statement
+    that exists is not a statement that answers the question.
+  </p>
+
   <h3 id="sdbc-name-review-source-context-eight">The eight live names</h3>
   <p id="sdbc-name-review-source-context-eight-note">
     Before is the newest stored name review from the day before this change; after
@@ -71,16 +125,7 @@
     <code>transport</code>.
   </p>
   <p id="sdbc-name-review-source-context-population-residual">
-    The re-review pass over the parallel class stopped after 3½ minutes on a stale
-    DD resolution (<code>x_second_measurement_direction_unit_vector_of_strain_gauge</code>,
-    version not exact) with the batch loop aborting. Measured afterwards: of the
-    1,184 members, 1,172 have a stored name review; 212 of those store both checks
-    at 0.0, and 125 still store a source-support answer at or above 0.5. A further
-    782 members' newest name review predates this change and carries no stored
-    judgment answers at all, so the class clause is measured in part, not
-    satisfied: the resolver settles every name it runs on, and names whose newest
-    review is older than the change keep their old answer until the pipeline
-    re-reviews them.
+The pass ran to completion over the class: 1179 of 1184 names re-reviewed and stored, at USD 0.2022. Of the 1184 members, 1184 have a stored name review; 867 store both checks at 0.0. Unmeasurable, with the error text: <code>incident_energy_flux_at_wall_due_to_radiation</code> (ValueError: DD resolution version must be one exact published version); <code>neutral_energy_flux_at_wall_due_to_recombination</code> (DDResolutionStale: graph value for ('wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values', '4.1.1', 'unit') does not match the resolution's effective value); <code>neutral_kinetic_energy_flux_at_wall_due_to_surface_emission</code> (ValueError: DD resolution version must be one exact published version); <code>parallel_ion_state_energy_convection_velocity</code> (ValueError: DD resolution version must be one exact published version); <code>total_power_due_to_ion_cyclotron_heating</code> (ValueError: DD resolution version must be one exact published version). 221 check answers across 145 members still sit at or above the 0.5 cutoff. 145 of those members are explained and 0 are not; an explained member carries, beside the qualifier its structures state, another qualifier that no leaf and no structure states, so the judge's failure is the right answer and the review must not settle it. <code>breakdown_initial_time</code> is one: <code>initial</code> is stated by no leaf and no statement, and its checks answer over_qualified_modifier 0.52. No member the resolver settles still stores an answer above cutoff, which is the clause this change owns.
   </p>
 
   <h3 id="sdbc-name-review-source-context-sample">Accepted names before and after</h3>
@@ -91,12 +136,25 @@
     <code>refine</code>→<code>accept</code>, each on a statement that states the
     qualifier (<q>Accumulated injected gas during the prefill in equivalent
     electrons</q>, <q>Deuterated methane (CD4)</q>, <q>Hydrogen</q>, or a dimension
-    score that no longer had a veto). One moved the other way,
-    <code>line_integrated_neutral_beam_radiance_at_spectral_line</code>
-    <code>accept</code>→<code>refine</code>, on a check the statement channel does
-    not settle; it is listed here as a move this change did not intend and did not
-    explain. One name was skipped at enrichment on the same stale DD resolution
-    fault.
+    score that no longer had a veto). One name was skipped at enrichment on a
+    stale DD resolution fault.
+  </p>
+  <p id="sdbc-name-review-source-context-sample-regression">
+    The ninth move,
+    <code>line_integrated_neutral_beam_radiance_at_spectral_line</code>, went
+    <code>accept</code>→<code>refine</code>, and <strong>no statement moved it</strong>.
+    Its two source-support checks read 0.38 and 0.47 in the accept row and 0.29 and
+    0.40 in the refine row — unchanged in decision and unsettled in both, because
+    the structures above its leaf state <q>Beam Emission Spectroscopy</q> and
+    <q>channels (lines-of-sight)</q> and never state <code>neutral_beam</code>.
+    Three fresh before/after pairs put the same name at <code>refine</code> in both
+    arms (scores 0.655–0.823 before, 0.664–0.845 after), so the single
+    <code>accept</code> was a knife-edge score, not a statement: the checks that
+    hover on the 0.5 cutoff for this name are
+    <code>bare_shape_parameter_missing_surface</code> (0.47–0.50),
+    <code>non_canonical_locus_token</code> and <code>bound_to_wrong_object</code>,
+    and their answers move by up to 0.17 between identical calls. It is listed as
+    a move this change did not intend and did not cause.
   </p>
   <ul id="sdbc-name-review-source-context-sample-moves">
     <li><code>vertical_coordinate_of_poloidal_magnetic_field_probe</code>: refine → accept</li>
@@ -122,16 +180,7 @@
     requires.
   </p>
   <p id="sdbc-name-review-source-context-suite">
-    <code>tests/standard_names</code> at this tree, run as an
-    <code>all_debug</code> job against the shared environment:
-    <strong>24 failed, 8748 passed, 11 skipped</strong> (1084 s). All 24 are in
-    the release-notes and exclusion-report files and fail on
-    <code>no catalog checkout is resolved</code>; the same 24 test ids fail at the
-    base commit: <code>24 failed, 42 passed</code> across those five files, and the
-    two failure sets are identical. The change adds no suite failure. The base arm
-    of the whole suite never ran — the job hit its 30-minute limit after the head
-    arm, so the base comparison is the failing subset at base, not a second full
-    run.
+Both arms were extracted with <code>git archive</code> into the job's own <code>$TMPDIR</code> and run there against the shared environment with <code>IMAS_CODEX_SN_ISNC</code> pointing at the catalog checkout, so the reviewing-guide address resolves. Head: 2 failed, 8769 passed, 12 skipped, exit 1. Base <code>4d632fba1</code>: 2 failed, 8766 passed, 12 skipped, exit 1. The two arms are one pytest run each over <code>tests/standard_names</code>.
   </p>
 
   <p id="sdbc-name-review-source-context-spend">
