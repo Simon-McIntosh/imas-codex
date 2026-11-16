@@ -27,6 +27,7 @@ import numpy as np
 from matplotlib.patches import FancyBboxPatch, Rectangle
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.plotting.style import save_figure
 
 ALL_LAYERS = {"limiter", "pf", "probes", "mcfg", "iron", "flux", "passive", "timeline"}
 
@@ -524,8 +525,10 @@ def main():
     ax.legend(loc="upper right", fontsize=7, ncol=2)
     ax.grid(True, alpha=0.2)
 
-    fig.tight_layout()
-    fig.savefig(args.output, dpi=200)
+    # keep the rotated y labels on the canvas, not past its left edge
+    fig.tight_layout(rect=(0.015, 0, 1, 1))
+    save_figure(fig, args.output, dpi=200)
+    plt.close(fig)
 
     print(f"\nSaved: {args.output}")
     for d in drawn:

@@ -26,6 +26,8 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from imas_codex.plotting.style import save_figure, use_style
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs/figures/jt60sa-mapping-study/agreement.svg"
 
@@ -53,7 +55,7 @@ ROWS = [
 
 
 def render() -> Path:
-    plt.style.use("data-ink")
+    use_style()
     fig, ax = plt.subplots(figsize=(14, 6.4))
     labels = [r[0] for r in ROWS]
     series = [
@@ -131,8 +133,7 @@ def render() -> Path:
     ax.margins(y=0.08)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncols=5)
     fig.tight_layout()
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT)
+    save_figure(fig, OUT)
     plt.close(fig)
     return OUT
 

@@ -28,16 +28,21 @@ import matplotlib.pyplot as plt  # noqa: E402
 import numpy as np  # noqa: E402
 from figures_knowledge_graph_scale import (  # noqa: E402
     FIGURES,
-    HEIGHT,
+    FONT,
     SLATE,
-    SLIDE_WIDTH,
     SYSTEMS,
     TITLE_SPACE,
-    check_layout,
     human,
-    save,
+)
+from matplotlib.patches import Rectangle  # noqa: E402
+
+from imas_codex.plotting.style import (  # noqa: E402
+    CANVAS,
+    save_figure,
     use_style,
 )
+
+SLIDE_WIDTH, HEIGHT = CANVAS
 
 DATA = FIGURES / "mapping-flow-graph.json"
 SVG = FIGURES / "mapping-flow.svg"
@@ -129,19 +134,27 @@ def draw(data: dict, out, draft) -> None:
     columns = {f: sum(totals[f, s] for s in STAGES) for f in FACILITIES}
     unit = (TOP - BOTTOM - GAP * len(order)) / max(*columns.values(), whole)
 
-    use_style()
-    fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT))
+    use_style(**FONT)
+    fig = plt.figure(figsize=CANVAS)
+    reserved = Rectangle(
+        (0, 1 - TITLE_SPACE / HEIGHT),
+        1,
+        TITLE_SPACE / HEIGHT,
+        transform=fig.transFigure,
+        facecolor="none",
+        edgecolor="none",
+    )
+    fig.add_artist(reserved)
     ax = fig.add_axes((0, 0, 1, 1))
     ax.set_xlim(0, SLIDE_WIDTH)
     ax.set_ylim(0, HEIGHT)
     ax.axis("off")
-    labels = []
 
     def text(x, y, s, **kw):
         kw.setdefault("fontsize", 15)
         kw.setdefault("color", INK)
         kw.setdefault("va", "center")
-        labels.append(ax.text(x, y, s, zorder=6, **kw))
+        ax.text(x, y, s, zorder=6, **kw)
 
     # the middle column: one bar per IDS, fed from both sides, spread over the
     # full height so every IDS can carry its name
@@ -236,10 +249,12 @@ def draw(data: dict, out, draft) -> None:
                 cursor -= hh
             y -= h
 
-    check_layout(fig, labels, refuse=draft is None)
     if draft:
-        fig.savefig(draft, dpi=100, facecolor="white")
-    save(fig, out)
+        save_figure(fig, draft, dpi=100, clear_of=[reserved])
+        return
+    save_figure(fig, out, clear_of=[reserved])
+    plt.close(fig)
+    print(out.relative_to(FIGURES.parents[1]))
 
 
 def main() -> None:

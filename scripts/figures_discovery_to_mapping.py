@@ -30,6 +30,7 @@ from pygments.lexers import JsonLexer
 from pygments.styles import get_style_by_name
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.plotting.style import CANVAS, save_figure, use_style
 
 ROOT = Path(__file__).resolve().parents[1]
 MAIN = Path("/home/ITER/mcintos/Code/imas-codex")
@@ -298,9 +299,9 @@ def load_handoff(path: Path | None) -> tuple[Path, dict[str, Any], str]:
 
 
 def figure(height: float) -> tuple[Any, Any]:
-    fig, ax = plt.subplots(figsize=(14, height), dpi=100)
+    fig, ax = plt.subplots(figsize=(CANVAS[0], height), dpi=100)
     fig.subplots_adjust(left=0, right=1, top=1, bottom=0)
-    ax.set(xlim=(0, 14), ylim=(0, height))
+    ax.set(xlim=(0, CANVAS[0]), ylim=(0, height))
     ax.axis("off")
     return fig, ax
 
@@ -308,20 +309,16 @@ def figure(height: float) -> tuple[Any, Any]:
 def save(fig: Any, stem: str, presentation: Path) -> dict[str, Any]:
     svg = FIGURES / f"{stem}.svg"
     png = presentation / f"{stem}.png"
-    fig.savefig(svg, format="svg", metadata={"Date": None}, facecolor="white")
-    svg.write_text(
-        "\n".join(line.rstrip() for line in svg.read_text().splitlines()) + "\n"
-    )
-    fig.savefig(png, dpi=200, facecolor="white")
-    width, height = fig.get_size_inches()
+    drawn = save_figure(fig, svg)
+    pictured = save_figure(fig, png)
     plt.close(fig)
     result = {
         "svg": str(svg.relative_to(ROOT)),
         "png": str(png),
-        "svg_bytes": svg.stat().st_size,
-        "png_bytes": png.stat().st_size,
-        "png_width": round(width * 200),
-        "png_height": round(height * 200),
+        "svg_bytes": drawn["bytes"],
+        "png_bytes": pictured["bytes"],
+        "png_width": pictured["pixel_size"][0],
+        "png_height": pictured["pixel_size"][1],
     }
     print("ARTIFACT " + json.dumps(result), flush=True)
     return result
@@ -696,14 +693,7 @@ def main() -> None:
     )
     parser.add_argument("--presentation-dir", type=Path, default=PRESENTATION)
     args = parser.parse_args()
-    plt.style.use("data-ink")
-    plt.rcParams.update(
-        {
-            "svg.fonttype": "none",
-            "svg.hashsalt": "discovery-to-mapping",
-            "font.family": "DejaVu Sans",
-        }
-    )
+    use_style(**{"svg.fonttype": "none", "font.family": "DejaVu Sans"})
     FIGURES.mkdir(parents=True, exist_ok=True)
     args.presentation_dir.mkdir(parents=True, exist_ok=True)
     source, document, source_kind = load_handoff(args.handoff)

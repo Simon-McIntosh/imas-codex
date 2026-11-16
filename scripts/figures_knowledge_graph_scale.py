@@ -27,7 +27,6 @@ import math
 import random
 import subprocess
 from collections import Counter, defaultdict
-from itertools import combinations
 from pathlib import Path
 
 import matplotlib
@@ -37,6 +36,13 @@ import matplotlib.pyplot as plt  # noqa: E402
 import networkx as nx  # noqa: E402
 import numpy as np  # noqa: E402
 from matplotlib.collections import LineCollection  # noqa: E402
+from matplotlib.patches import Rectangle  # noqa: E402
+
+from imas_codex.plotting.style import (  # noqa: E402
+    CANVAS,
+    save_figure,
+    use_style,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs" / "figures" / "knowledge-graph-scale"
@@ -46,7 +52,7 @@ CACHE = Path.home() / ".cache" / "imas-codex-knowledge-graph-scale"
 SAMPLE = CACHE / "graph-sample.json"
 LAYOUT = CACHE / "layout.json"
 
-SLIDE_WIDTH, HEIGHT = 14.0, 7.2  # in: the slide canvas, declared at 31.1 x 16 cm
+SLIDE_WIDTH, HEIGHT = CANVAS  # in: the shared slide canvas
 TITLE_SPACE = 1.1  # in kept clear at the top for the slide's own title
 
 NODES_PER_SAMPLE = 250  # one sampled node stands for this many in the graph
@@ -514,11 +520,6 @@ FONT = {
 }
 
 
-def use_style() -> None:
-    plt.style.use("data-ink")
-    plt.rcParams.update(FONT)
-
-
 def human(n: float) -> str:
     if n >= 1e6:
         return f"{n / 1e6:.2f} M"
@@ -570,8 +571,18 @@ def directional_text(ax, x, y, angle, text, **kw):
 
 
 def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) -> None:
-    use_style()
+    use_style(**FONT)
     fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
+    # the strip the slide draws its own title into; no figure text may enter it
+    reserved = Rectangle(
+        (0, 1 - TITLE_SPACE / HEIGHT),
+        1,
+        TITLE_SPACE / HEIGHT,
+        transform=fig.transFigure,
+        facecolor="none",
+        edgecolor="none",
+    )
+    fig.add_artist(reserved)
     ax = fig.add_axes((0, 0, 1, 1))
     ax.axis("off")
     ax.set(xlim=(0, SLIDE_WIDTH), ylim=(0, HEIGHT), aspect="equal")
@@ -611,24 +622,21 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
         size = np.array([1.0 + 1.5 * math.sqrt(degree[n]) for n in members])
         ax.scatter(*pts.T, s=np.minimum(size, 14), color=colour, lw=0, zorder=3)
 
-    labels = []
     # sub-cluster names, just outside each cluster
     for system, angles in CATEGORY_LABEL_ANGLE.items():
         for cat, angle in angles.items():
             gx, gy, r = geo[f"{system}/{cat}"]
             a = math.radians(angle)
             reach = r + 0.08
-            labels.append(
-                directional_text(
-                    ax,
-                    gx + reach * math.cos(a),
-                    gy + reach * math.sin(a),
-                    a,
-                    cat,
-                    fontsize=14,
-                    color=CATEGORY_INK,
-                    zorder=6,
-                )
+            directional_text(
+                ax,
+                gx + reach * math.cos(a),
+                gy + reach * math.sin(a),
+                a,
+                cat,
+                fontsize=14,
+                color=CATEGORY_INK,
+                zorder=6,
             )
 
     for key, (name, colour, _, _, side) in SYSTEMS.items():
@@ -647,63 +655,25 @@ def draw(stats: dict, sample: dict, pos: dict, out: Path, draft: Path | None) ->
             (name, name_y, 22, "bold", colour),
             (detail, name_y - 0.45, 16, "normal", INK),
         ):
-            labels.append(
-                ax.text(
-                    lx,
-                    y,
-                    text,
-                    ha=ha,
-                    va="top",
-                    fontsize=size,
-                    fontweight=weight,
-                    color=c,
-                    zorder=6,
-                )
+            ax.text(
+                lx,
+                y,
+                text,
+                ha=ha,
+                va="top",
+                fontsize=size,
+                fontweight=weight,
+                color=c,
+                zorder=6,
             )
 
     if draft is not None:
-        check_layout(fig, labels, refuse=False)
-        fig.savefig(draft, dpi=100, facecolor="white")
+        save_figure(fig, draft, dpi=100, clear_of=[reserved])
         plt.close(fig)
         return
-    check_layout(fig, labels)
-    save(fig, out)
-
-
-def check_layout(fig, labels, *, refuse: bool = True) -> None:
-    """Refuse a figure whose text leaves the canvas, enters the title space, or
-    collides."""
-    fig.canvas.draw()
-    renderer = fig.canvas.get_renderer()
-    top = fig.bbox.y1 * (1 - TITLE_SPACE / HEIGHT)
-    boxes = [(t, t.get_window_extent(renderer)) for t in labels]
-    faults = [
-        f"off canvas: {t.get_text()!r}"
-        for t, b in boxes
-        if b.x0 < 0 or b.y0 < 0 or b.x1 > fig.bbox.x1 or b.y1 > top
-    ]
-    faults += [
-        f"overlap: {t1.get_text()!r} / {t2.get_text()!r}"
-        for (t1, b1), (t2, b2) in combinations(boxes, 2)
-        if b1.overlaps(b2)
-    ]
-    if faults:
-        message = "layout check refused the figure:\n  " + "\n  ".join(faults)
-        if refuse:
-            raise SystemExit(message)
-        print(message)
-
-
-def save(fig, svg: Path) -> None:
-    svg.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(svg, format="svg", metadata={"Date": None}, facecolor="white")
+    save_figure(fig, out, clear_of=[reserved])
     plt.close(fig)
-    text = svg.read_text()
-    # declared at slide height (16 cm) so it drops onto a slide at that size
-    text = text.replace(f'width="{SLIDE_WIDTH * 72:g}pt"', 'width="31.1cm"', 1)
-    text = text.replace(f'height="{HEIGHT * 72:g}pt"', 'height="16cm"', 1)
-    svg.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n")
-    print(svg.relative_to(ROOT))
+    print(out.relative_to(ROOT))
 
 
 def main() -> None:

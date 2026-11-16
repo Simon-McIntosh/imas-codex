@@ -47,7 +47,6 @@ import math
 import random
 import re
 from dataclasses import dataclass
-from itertools import combinations
 from pathlib import Path
 
 import matplotlib
@@ -56,11 +55,13 @@ matplotlib.use("Agg")
 
 import matplotlib.patheffects as pe
 import matplotlib.pyplot as plt
-from matplotlib.animation import FuncAnimation, PillowWriter
+from matplotlib.animation import FuncAnimation
 from matplotlib.patches import Circle, Ellipse, PathPatch, Polygon, Rectangle
 from matplotlib.path import Path as MplPath
 from matplotlib.text import Text
 from matplotlib.transforms import Bbox
+
+from imas_codex.plotting.style import CANVAS, save_figure, use_style
 
 ROOT = Path(__file__).resolve().parents[1]
 DATA = ROOT / "scripts/figure_data"
@@ -71,7 +72,7 @@ FIGURES = ROOT / "docs/figures/icp-knowledge-map"
 
 COS_LAT = math.cos(math.radians(46.5))  # equirectangular scale at mid-France
 LON, LAT = (-4.95, 8.35), (42.25, 51.2)  # mainland France, Corsica outside
-HEIGHT = 7.2  # in; the width follows France so the country fills the frame
+SLIDE_WIDTH, HEIGHT = CANVAS  # in; the map's width follows France inside it
 WIDTH = round(HEIGHT * (LON[1] - LON[0]) * COS_LAT / (LAT[1] - LAT[0]), 2)
 
 LAND = "white"  # France as an outline: no fill, so nothing competes with the links
@@ -552,31 +553,7 @@ def place_shape(coords, x, y, heading, size):
 # --------------------------------------------------------------------------- labels
 
 
-def halo_over_land(ax, text: Text, land: list[Polygon] | None, width: float) -> None:
-    """Draw a land-coloured halo behind text, clipped to the land so it never shows on white."""
-    if land is None:
-        return
-    halo = ax.annotate(
-        text.get_text(),
-        text.xy,
-        xytext=text.xyann,
-        textcoords=text.anncoords,
-        ha=text.get_ha(),
-        va=text.get_va(),
-        fontsize=text.get_fontsize(),
-        fontweight=text.get_fontweight(),
-        fontstyle=text.get_fontstyle(),
-        color=LAND,
-        zorder=text.get_zorder() - 0.5,
-        path_effects=[pe.Stroke(linewidth=width, foreground=LAND)],
-    )
-    clip = MplPath.make_compound_path(
-        *[p.get_path().transformed(p.get_patch_transform()) for p in land]
-    )
-    halo.set_clip_path(clip, ax.transData)
-
-
-def draw_town_labels(ax, land) -> list[Text]:
+def draw_town_labels(ax) -> list[Text]:
     labels = []
     for town in TOWNS:
         x, y = place(town.key)
@@ -594,6 +571,8 @@ def draw_town_labels(ax, land) -> list[Text]:
             fontweight="bold",
             color=INK,
             zorder=11,
+            # a white ring, so a road stops cleanly at the letters
+            path_effects=[pe.withStroke(linewidth=3, foreground=LAND)],
         )
         sub = ax.annotate(
             town.system,
@@ -605,9 +584,8 @@ def draw_town_labels(ax, land) -> list[Text]:
             fontsize=11,
             color=MUTED,
             zorder=11,
+            path_effects=[pe.withStroke(linewidth=3, foreground=LAND)],
         )
-        for t in (name, sub):
-            halo_over_land(ax, t, land, 3)
         labels += [name, sub]
     return labels
 
@@ -689,13 +667,10 @@ def draw_relation_labels(ax, routes, others: list[Text]) -> list[Text]:
 # --------------------------------------------------------------------------- stages
 
 
-SLIDE_WIDTH = 14.0  # in: the full-width slide canvas
-
-
 def base(stage: str):
     """Draw one stage on the full-width slide canvas with France centred, at one
     size and position, so every image and animation stacks on the last."""
-    plt.style.use("data-ink")
+    use_style()
     fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
     ax = fig.add_axes(((1 - WIDTH / SLIDE_WIDTH) / 2, 0, WIDTH / SLIDE_WIDTH, 1))
     ax.axis("off")
@@ -727,7 +702,7 @@ def base(stage: str):
             if hub:
                 ax.plot(x, y, "o", markersize=5.5, color=INK, zorder=8)
         draw_emblem(ax)
-    labels = draw_town_labels(ax, land)
+    labels = draw_town_labels(ax)
     if stage == "c":
         routes = relation_routes(load_roads())
         for points in routes:
@@ -735,35 +710,6 @@ def base(stage: str):
             ax.plot(xs, ys, color=INK, linewidth=3.0, solid_capstyle="round", zorder=3)
         labels += draw_relation_labels(ax, routes[: len(RELATIONS)], labels)
     return fig, ax, labels, routes
-
-
-def check_layout(fig, labels, *, refuse: bool = True) -> None:
-    """Refuse a figure whose text leaves the canvas or collides."""
-    fig.canvas.draw()
-    renderer = fig.canvas.get_renderer()
-    boxes = [(t, t.get_window_extent(renderer)) for t in labels]
-    faults = [
-        f"off canvas: {t.get_text()!r}"
-        for t, b in boxes
-        if b.x0 < 0 or b.y0 < 0 or b.x1 > fig.bbox.x1 or b.y1 > fig.bbox.y1
-    ]
-    faults += [
-        f"overlap: {t1.get_text()!r} / {t2.get_text()!r}"
-        for (t1, b1), (t2, b2) in combinations(boxes, 2)
-        if b1.overlaps(b2)
-    ]
-    for arrow in getattr(fig, "relation_arrows", []):
-        extent = arrow.get_window_extent(renderer)
-        faults += [
-            f"arrowhead on text: {t.get_text()!r}"
-            for t, b in boxes
-            if extent.overlaps(b)
-        ]
-    if faults:
-        message = "layout check refused the figure:\n  " + "\n  ".join(faults)
-        if refuse:
-            raise SystemExit(message)
-        print(message)
 
 
 STEMS = {
@@ -776,22 +722,19 @@ STEMS = {
 }
 
 
+def figure_marks(fig) -> list:
+    """The arrowheads the relationships carry, which must stay clear of text."""
+    return list(getattr(fig, "relation_arrows", ()))
+
+
 def save_static(stage: str, draft: Path | None) -> Path:
-    fig, _, labels, _ = base(stage)
+    fig, _, _, _ = base(stage)
     if draft is not None:
-        check_layout(fig, labels, refuse=False)
-        fig.savefig(draft, dpi=100, facecolor="white")
+        save_figure(fig, draft, dpi=100, clear_of=figure_marks(fig))
         plt.close(fig)
         return draft
-    check_layout(fig, labels)
-    FIGURES.mkdir(parents=True, exist_ok=True)
     svg = FIGURES / f"{STEMS[stage]}.svg"
-    fig.savefig(svg, format="svg", metadata={"Date": None}, facecolor="white")
-    text = svg.read_text()
-    # declared at slide height (16 cm) so it drops onto a slide at that size
-    text = text.replace(f'width="{SLIDE_WIDTH * 72:g}pt"', 'width="31.1cm"', 1)
-    text = text.replace(f'height="{HEIGHT * 72:g}pt"', 'height="16cm"', 1)
-    svg.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n")
+    save_figure(fig, svg, clear_of=figure_marks(fig))
     plt.close(fig)
     print(svg.relative_to(ROOT))
     return svg
@@ -1030,13 +973,15 @@ class TrafficLayer:
 
 
 def save_gif(fig, update, frames: int, stem: str) -> Path:
-    FIGURES.mkdir(parents=True, exist_ok=True)
     gif = FIGURES / f"{stem}.gif"
-    FuncAnimation(fig, update, frames=frames, blit=False).save(
+    animation = FuncAnimation(fig, update, frames=frames, blit=False)
+    save_figure(
+        fig,
         gif,
-        writer=PillowWriter(fps=FPS),
         dpi=100,
-        savefig_kwargs={"facecolor": "white"},
+        animation=animation,
+        fps=FPS,
+        clear_of=figure_marks(fig),
     )
     plt.close(fig)
     print(
@@ -1052,10 +997,9 @@ def save_traffic(stage: str, draft: Path | None) -> Path:
     graph = relation_graph(routes)
     layer = TrafficLayer(ax, traffic(stage, graph), loop=LOOP_SECONDS)
     frames = int(LOOP_SECONDS * FPS)
-    check_layout(fig, labels)
     if draft is not None:
         layer.update(LOOP_SECONDS * 0.37)
-        fig.savefig(draft, dpi=100, facecolor="white")
+        save_figure(fig, draft, dpi=100, clear_of=figure_marks(fig))
         plt.close(fig)
         return draft
     return save_gif(fig, lambda f: layer.update(f / FPS), frames, STEMS[stage])
@@ -1146,11 +1090,10 @@ def grid_figure(thumbnails: Path | None) -> Path:
     """ITER's data repositories as a regular full-width grid of cards."""
     from PIL import Image
 
-    plt.style.use("data-ink")
+    use_style()
     fig = plt.figure(figsize=(SLIDE_WIDTH, HEIGHT), dpi=100)
     card_w, gap, image_h = 2.4, 0.3, 2.05
     row_top = (HEIGHT - 0.3, HEIGHT - 0.3 - image_h - 1.5)
-    texts = []
     for i, key in enumerate(GRID_ORDER):
         row, col = (0, i) if i < 5 else (1, i - 5)
         per_row = 5 if row == 0 else len(GRID_ORDER) - 5
@@ -1189,43 +1132,34 @@ def grid_figure(thumbnails: Path | None) -> Path:
         name_y = (top - image_h - 0.12) / HEIGHT
         name = GRID_NAMES.get(key, town.name)
         lines = name.count("\n") + 1
-        texts.append(
-            fig.text(
-                cx,
-                name_y,
-                name,
-                ha="center",
-                va="top",
-                fontsize=20,
-                fontweight="bold",
-                color=INK,
-                linespacing=1.1,
-            )
+        fig.text(
+            cx,
+            name_y,
+            name,
+            ha="center",
+            va="top",
+            fontsize=20,
+            fontweight="bold",
+            color=INK,
+            linespacing=1.1,
         )
-        texts.append(
-            fig.text(
-                cx,
-                name_y - 0.052 * lines - 0.006,
-                GRID_SYSTEMS.get(key, town.system),
-                ha="center",
-                va="top",
-                fontsize=16,
-                linespacing=1.15,
-                color=MUTED,
-            )
+        fig.text(
+            cx,
+            name_y - 0.052 * lines - 0.006,
+            GRID_SYSTEMS.get(key, town.system),
+            ha="center",
+            va="top",
+            fontsize=16,
+            linespacing=1.15,
+            color=MUTED,
         )
-    check_layout(fig, texts)
     if thumbnails is None:
         out = FIGURES / "icp-map-repositories.svg"
-        fig.savefig(out, format="svg", metadata={"Date": None}, facecolor="white")
-        text = out.read_text()
-        text = text.replace(f'width="{SLIDE_WIDTH * 72:g}pt"', 'width="31.1cm"', 1)
-        text = text.replace(f'height="{HEIGHT * 72:g}pt"', 'height="16cm"', 1)
-        out.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n")
+        save_figure(fig, out)
     else:
-        PRIVATE.mkdir(parents=True, exist_ok=True)
         out = PRIVATE / "icp-map-repositories-thumbnails.png"
-        fig.savefig(out, dpi=200, facecolor="white")
+        PRIVATE.mkdir(parents=True, exist_ok=True)
+        save_figure(fig, out)
     plt.close(fig)
     print(out.relative_to(ROOT))
     return out
