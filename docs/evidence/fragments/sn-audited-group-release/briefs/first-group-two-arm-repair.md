@@ -2,6 +2,11 @@
 
 Lead ruling, 2026-11-16: for the members of the first release group that the audit reads as defective, plain regeneration and agent-proposed repair are run side by side and compared by the audited result. This brief fixes how that comparison is run. It serves section 4 of `sn-audited-group-release` and changes nothing in that section's done-when.
 
+## Reuse
+- The audit is the one built for section 1: its sampler, reader seats, planted goldens and review-record shape (see `blind-audit.md`). The group is read in full with the same instructions.
+- The cut is `sn release --domain <group>` against the release gates carrying the bar's causes (see `release-bar.md`); add no cut path of your own.
+- Regeneration uses the pipeline's own reset and stages; agent proposals use `sn edit` and the signed rename path.
+
 ## Inputs
 - The first group and its full audit: every member read by the two blind readers of section 1, with one defect class or none each. Use that record as it stands; do not re-read to pick the population.
 - The release bar ruled in section 3.
