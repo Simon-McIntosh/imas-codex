@@ -84,6 +84,16 @@
       "note": "Each planted name's verdict must have been fixed independently of the pipeline's review and of both readers, by a physicist's ruling or a facility audit already committed, cited row by row.",
       "reason": "",
       "when": "2026-11-16T23:15:07.208063+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a7934ffa6d8e1b054ecec9de31241e2889964a0e",
+      "commit_basis": "edit",
+      "finding": "done_when-3",
+      "note": "The sample is at least 300; rates are stated per class over the whole sample, and per group only where the group's share supports an interval narrower than twenty points. Section 2 takes the wrong-domain reading as a count; a group's own rate comes from its full reading.",
+      "reason": "",
+      "when": "2026-11-16T23:15:09.716990+00:00"
     }
   ],
   "responses": {
@@ -104,6 +114,15 @@
       "note": "Each planted name's verdict must have been fixed independently of the pipeline's review and of both readers, by a physicist's ruling or a facility audit already committed, cited row by row.",
       "reason": "",
       "when": "2026-11-16T23:15:07.208063+00:00"
+    },
+    "done_when-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "a7934ffa6d8e1b054ecec9de31241e2889964a0e",
+      "commit_basis": "edit",
+      "note": "The sample is at least 300; rates are stated per class over the whole sample, and per group only where the group's share supports an interval narrower than twenty points. Section 2 takes the wrong-domain reading as a count; a group's own rate comes from its full reading.",
+      "reason": "",
+      "when": "2026-11-16T23:15:09.716990+00:00"
     },
     "wiring-1": {
       "action": "declined",
