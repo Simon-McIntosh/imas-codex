@@ -33,7 +33,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 33,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Version 35 declares sections 6 and 7 deferred while the open model decision holds them; section 8 waits on section 7.",
+      "reason": "",
+      "when": "2026-11-16T19:58:20.040378+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "fe2f3eebbf9ad205182dbefba6e4814d80002e4c",
+      "commit_basis": "edit",
+      "note": "Version 35 declares sections 6 and 7 deferred while the open model decision holds them; section 8 waits on section 7.",
+      "reason": "",
+      "when": "2026-11-16T19:58:20.040378+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T193738154281-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261116T193738154281-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "233df4197a66e250ae98b2138332aca74ce09fdc",
   "rubric": "content",
