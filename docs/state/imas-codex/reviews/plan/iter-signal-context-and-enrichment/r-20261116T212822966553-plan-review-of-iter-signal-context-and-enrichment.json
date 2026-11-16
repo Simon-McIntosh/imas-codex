@@ -25,7 +25,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 38,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "6eecd42eaadba9ad4041dc8e21f541d5f1c2ab67",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 6 at version 39 takes its model from the open decision on description quality and says no model is chosen until it is answered.",
+      "reason": "",
+      "when": "2026-11-16T21:51:00.133258+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "6eecd42eaadba9ad4041dc8e21f541d5f1c2ab67",
+      "commit_basis": "edit",
+      "note": "Section 6 at version 39 takes its model from the open decision on description quality and says no model is chosen until it is answered.",
+      "reason": "",
+      "when": "2026-11-16T21:51:00.133258+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T212822966553-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261116T212822966553-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "15ed5d6901253262ca26d54f3cdb4264956eb04d",
   "rubric": "content",
