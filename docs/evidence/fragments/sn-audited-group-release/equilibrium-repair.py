@@ -256,11 +256,9 @@ def command(member, arguments):
         costs = list(
             gc.query(
                 "MATCH (c:LLMCost) WHERE toString(c.llm_at) >= $since "
-                "AND any(name IN c.standard_name_ids WHERE name IN $ids) "
                 "RETURN c.id AS id, c.run_id AS run_id, c.llm_cost AS cost, "
                 "c.standard_name_ids AS names",
                 since=stamp,
-                ids=ids,
             )
         )
     spent = sum(float(c["cost"] or 0.0) for c in costs)
@@ -364,7 +362,27 @@ def render(record):
     ]
     for r in record["members"]:
         after = r.get("after") or {}
-        proposals = "\n".join(json.dumps(p, ensure_ascii=False) for p in r["proposals"])
+        summaries = []
+        for proposal in r["proposals"]:
+            args = proposal["arguments"]
+            text = " ".join(args[:2])
+            for flag in ("--rename", "--docs", "--hint", "--reason"):
+                if flag in args:
+                    text += "\n" + flag + ": " + args[args.index(flag) + 1]
+            scores = [
+                (v["axis"], v["score"])
+                for v in proposal["reviews"]
+                if v.get("score") is not None
+            ]
+            text += f"\nreview scores: {scores}; exit: {proposal['exit_status']}; USD {proposal['cost_usd']:.6f}"
+            summaries.append(text)
+        proposals = "\n\n".join(summaries)
+        if r.get("intended_proposal"):
+            proposals += "\nProposed correction: " + r["intended_proposal"]
+        if r.get("parked_gate"):
+            proposals += "\nRefusing gate: " + r["parked_gate"]
+        if r.get("source_words"):
+            proposals += "\nSource words: " + r["source_words"]
         content.append(
             f"<tr><td><code>{e(r['id'])}</code> → <code>{e(after.get('id'))}</code>"
             f"<p>{e((r.get('before') or {}).get('description'))}</p><p>{e(after.get('description'))}</p>"
