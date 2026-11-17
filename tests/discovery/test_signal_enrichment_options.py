@@ -569,3 +569,14 @@ async def test_worker_fanout_obeys_only_its_local_seat_limit(
             "jt-60sa", enrich_only=True, num_enrich_workers=requested
         )
     assert observed == [expected]
+
+
+def test_description_seat_enables_qualified_grounded_recovery():
+    from imas_codex.settings import get_model
+
+    options = get_enrichment_options(get_model("discovery-describe"))
+    assert options.grounding and options.review and options.review_thinking
+    assert options.recovery_attempts == 1 and options.source_fallback
+    assert options.description_sentences == 1 and options.max_workers == 3
+    assert options.review_batch_size == 1 and not options.review_if_unsupported
+    assert not options.schema_constraint and not options.json_mode

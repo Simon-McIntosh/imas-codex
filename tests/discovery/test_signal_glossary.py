@@ -12,6 +12,7 @@ from imas_codex.discovery.signals.models import (
     SignalEnrichmentBatch,
     SignalEnrichmentResult,
 )
+from tests.discovery.enrichment_fixtures import with_description_review
 
 
 async def _enrichment_prompt(signals: list[dict]) -> str:
@@ -62,7 +63,10 @@ async def _enrichment_prompt(signals: list[dict]) -> str:
             "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", side_effect=llm),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=with_description_review(llm),
+        ),
     ):
         await parallel.enrich_worker(state)
 
@@ -182,11 +186,15 @@ def test_a_source_is_swept_for_its_representative_not_its_member_edge():
 
         def query(self, cypher, **params):
             recorded.append(cypher)
-            return [{"representative_id": "jt-60sa:general/cs1_temsnur11", "enrichment": {}}]
+            return [
+                {"representative_id": "jt-60sa:general/cs1_temsnur11", "enrichment": {}}
+            ]
 
     with (
         patch.object(parallel, "GraphClient", StubGraph),
-        patch.object(parallel, "propagate_source_enrichment", return_value=7) as propagate,
+        patch.object(
+            parallel, "propagate_source_enrichment", return_value=7
+        ) as propagate,
     ):
         assert parallel.sweep_source_enrichment("jt-60sa") == 7
 

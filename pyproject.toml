@@ -438,11 +438,18 @@ endpoint-class = "local-free"
 [tool.imas-codex.discovery-describe.signal-enrichment]
 # Single-signal calls keep validation failures local to one description.
 batch-size = 1
+max-workers = 3
 max-tokens = 8192
 fitted-prompt = true
 validation-reask = true
 schema-constraint = false
 json-mode = false
+grounding = true
+description-sentences = 1
+review = true
+review-thinking = true
+recovery-attempts = 1
+source-fallback = true
 
 [tool.imas-codex.discovery-vision]
 # Wiki and document image scoring.

@@ -31,6 +31,7 @@ import pytest
 
 from imas_codex.discovery.base import judgment, reset as base_reset
 from imas_codex.discovery.signals import parallel
+from tests.discovery.enrichment_fixtures import with_description_review
 
 _STATUS_IN_RE = re.compile(r"s\.status IN \[([^\]]*)\]")
 
@@ -207,7 +208,9 @@ def test_failed_judgement_stores_no_role(monkeypatch):
     sweep's population still names it, ready for the next run.
     """
 
-    async def failing_decision(model, state, questions, *, service, record_release=None):
+    async def failing_decision(
+        model, state, questions, *, service, record_release=None
+    ):
         raise RuntimeError("decision endpoint refused")
 
     graph = _RoleGraph(
@@ -474,7 +477,10 @@ async def test_enrichment_does_not_judge_an_underspecified_signal():
             "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", side_effect=llm),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=with_description_review(llm),
+        ),
     ):
         await parallel.enrich_worker(state)
 
