@@ -3100,6 +3100,9 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
     sources = read(
         """MATCH (source:StandardNameSource)
         RETURN source.id AS id, source.source_id AS source_id,
+               source.status AS status, source.attempt_count AS attempt_count,
+               source.claimed_at AS claimed_at, source.claim_token AS claim_token,
+               COUNT { (source)-[:PRODUCED_NAME]->() } AS producer_count,
                source.produced_sn_id AS mirror,
                [(source)-[:PRODUCED_NAME]->(holder:StandardName)
                 WHERE NOT holder.status IN $terminal | holder.id] AS holders
@@ -3119,7 +3122,8 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
     )
     changes = read(
         """MATCH (change:StandardNameChange)
-        RETURN change.from_name AS predecessor, change.to_name AS successor,
+        RETURN change.id AS id,
+               change.from_name AS predecessor, change.to_name AS successor,
                change.operation AS operation LIMIT 20000"""
     )
     projections = read(
@@ -3167,6 +3171,7 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
         links[old].add(new)
         links[new].add(old)
     receipts: dict[str, set[str]] = foundation.get_services().defaultdict(set)
+    migration_receipts: dict[str, set[str]] = foundation.get_services().defaultdict(set)
     detachment_paths: dict[str, set[str]] = foundation.get_services().defaultdict(set)
     for change in changes:
         old, new, operation = (
@@ -3190,6 +3195,14 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
             "rebind_sources",
         }:
             receipts[new].add(operation)
+        if (
+            operation == "source_migration_manifest"
+            and new in all_name_ids
+            and old
+            and old != new
+            and change["id"]
+        ):
+            migration_receipts[new].add(change["id"])
     projection_paths: dict[str, set[str]] = foundation.get_services().defaultdict(set)
     for projection in projections:
         if projection["path"]:
@@ -3207,6 +3220,7 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
         return seen | {start}
 
     classified = []
+    source_records = {source["id"]: source for source in sources}
     for name in names:
         identifier = name["id"]
         tokens = set(name["paths"] or []) | set(name["resolutions"] or [])
@@ -3231,6 +3245,32 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
             for holder in holders[source]
             if holder not in linked
         }
+        # A released source remains authority for the identity that recorded it.
+        # A migration receipt proves a source was transferred into this exact
+        # identity even when recycling removed its last recorded source id.
+        released_sources = [
+            source_records[source]
+            for source in sorted(own_sources)
+            if source_records[source].get("status") == "extracted"
+            and source_records[source].get("attempt_count") == 0
+            and not source_records[source]["mirror"]
+            and source_records[source]["claimed_at"] is None
+            and source_records[source]["claim_token"] is None
+            and source_records[source]["producer_count"] == 0
+        ]
+        former_source_evidence = {}
+        if (
+            name["stage"] == "exhausted"
+            and name["origin"] != "derived"
+            and (
+                (released_sources and not unresolved)
+                or (not tokens and not own_sources and migration_receipts[identifier])
+            )
+        ):
+            former_source_evidence = {
+                "released_sources": released_sources,
+                "migration_receipt_ids": sorted(migration_receipts[identifier]),
+            }
         if name["derived_parent"]:
             population = "derived_parent"
         elif not tokens and not own_sources and not receipts[identifier]:
@@ -3260,6 +3300,7 @@ def classify_sourceless_standard_names(gc: Any) -> list[dict[str, Any]]:
                 "recorded_source_ids": sorted(own_sources),
                 "unresolved_tokens": sorted(unresolved),
                 "unchained_holders": sorted(unchained),
+                "former_source_retirement_evidence": former_source_evidence,
             }
         )
     return classified
@@ -3270,6 +3311,7 @@ def _exhausted_orphan_supersession_authority(
     name_ids: list[str],
     reason: str,
     eligible_ids: set[str],
+    former_source_evidence: dict[str, Any] | None = None,
 ) -> tuple[dict[str, Any], list[dict[str, Any]], list[dict[str, str]]]:
     rows = query_handle.query(
         """
@@ -3296,6 +3338,10 @@ def _exhausted_orphan_supersession_authority(
     refusals: list[dict[str, str]] = []
     for raw in rows:
         participant = dict(raw)
+        if former_source_evidence and raw["requested_id"] in former_source_evidence:
+            participant["former_source_evidence"] = former_source_evidence[
+                raw["requested_id"]
+            ]
         participant["producers"] = sorted(
             (dict(producer) for producer in participant.get("producers") or []),
             key=lambda producer: (
@@ -3365,6 +3411,12 @@ def supersede_exhausted_standard_name_orphans(
     Omitting ``name_ids`` computes the fresh complete eligible cohort. Explicit
     ids retain refusal evidence for names outside that cohort. Apply requires
     the exact preview hash and writes one durable change row for every name.
+
+    Former bindings are proven by this identity's recorded source ids whose
+    sources are released and unclaimed, or by its own completed source-migration
+    receipt when no source id survives. The signed manifest carries that evidence
+    and rechecks it after locking the names. Retirement preserves stored text,
+    source nodes and recorded model spend.
     """
     if not reason.strip():
         raise ValueError("exhausted orphan supersession requires a non-empty reason")
@@ -3387,13 +3439,21 @@ def supersede_exhausted_standard_name_orphans(
             transaction = session.begin_transaction()
             query_handle = foundation.get_services()._TransactionQuery(transaction)
             try:
-                eligible_ids = {
-                    row["id"]
-                    for row in foundation.get_services().classify_sourceless_standard_names(
+                audit_rows = (
+                    foundation.get_services().classify_sourceless_standard_names(
                         query_handle
                     )
-                    if row["population"] == "orphan_awaiting_retirement"
+                )
+                former_source_evidence = {
+                    row["id"]: row["former_source_retirement_evidence"]
+                    for row in audit_rows
+                    if row.get("former_source_retirement_evidence")
                 }
+                eligible_ids = {
+                    row["id"]
+                    for row in audit_rows
+                    if row["population"] == "orphan_awaiting_retirement"
+                } | former_source_evidence.keys()
                 requested = (
                     sorted(name_ids) if name_ids is not None else sorted(eligible_ids)
                 )
@@ -3456,7 +3516,11 @@ def supersede_exhausted_standard_name_orphans(
 
                 manifest, actions, refusals = (
                     foundation.get_services()._exhausted_orphan_supersession_authority(
-                        query_handle, requested, reason, eligible_ids
+                        query_handle,
+                        requested,
+                        reason,
+                        eligible_ids,
+                        former_source_evidence,
                     )
                 )
                 computed_hash = foundation.get_services()._authority_payload_hash(
@@ -3512,9 +3576,16 @@ def supersede_exhausted_standard_name_orphans(
                     raise foundation.get_services().ExhaustedOrphanSupersessionConflict(
                         "orphan participant set changed while acquiring locks"
                     )
+                locked_evidence = {
+                    row["id"]: row["former_source_retirement_evidence"]
+                    for row in foundation.get_services().classify_sourceless_standard_names(
+                        query_handle
+                    )
+                    if row.get("former_source_retirement_evidence")
+                }
                 locked_manifest, locked_actions, locked_refusals = (
                     foundation.get_services()._exhausted_orphan_supersession_authority(
-                        query_handle, requested, reason, eligible_ids
+                        query_handle, requested, reason, eligible_ids, locked_evidence
                     )
                 )
                 if (
