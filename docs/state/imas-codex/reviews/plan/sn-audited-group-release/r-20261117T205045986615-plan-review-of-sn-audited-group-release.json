@@ -17,7 +17,30 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 27,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "bf4d11062ee1da036861478e70ff7926bb9bfed8",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 3's staleness refusal is now per member: the cut refuses when the rate rests on a verdict for any member taken before the newest change to that member's own stored text.",
+      "reason": "",
+      "when": "2026-11-17T22:56:28.793436+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "bf4d11062ee1da036861478e70ff7926bb9bfed8",
+      "commit_basis": "edit",
+      "note": "Section 3's staleness refusal is now per member: the cut refuses when the rate rests on a verdict for any member taken before the newest change to that member's own stored text.",
+      "reason": "",
+      "when": "2026-11-17T22:56:28.793436+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T205045986615-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261117T205045986615-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "d73ed88a7b2ff87fff5cc46e0f274a79acc0e137",
   "rubric": "content",
