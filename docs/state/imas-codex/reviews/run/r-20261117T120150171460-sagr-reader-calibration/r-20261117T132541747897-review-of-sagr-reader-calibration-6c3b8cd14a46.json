@@ -10,6 +10,14 @@
   ],
   "completed_at": "2026-11-17T13:26:46.179Z",
   "dispatched_at": "2026-11-17T13:26:33Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-17T14:06:23.925481+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261117T120150171460-sagr-reader-calibration"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-audited-group-release/reader-calibration.py",
