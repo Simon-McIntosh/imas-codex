@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:58:49.521Z",
+  "dispatched_at": "2026-11-16T23:58:20Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261116T233928085929-plan-review-of-sn-audited-group-release/plan.html:29",
+      "id": "reasoning-1",
+      "reason": "without a stated exclusion the measured rate is biased by the planted known-defective share and the bar is compared against a rate from a different population, so the decision the section exists to support is wrong by a measurable margin.",
+      "text": "\u00a71 requires \"the evidence reports the names read as defective in any class, and per class over the whole sample\" while the same sentence plants \"twenty names known to be defective and twenty known to be sound\" into that sample; nothing excludes them from the counts, so on 300 names the reported rate carries twenty names that are known defective by construction, about six points high, and \u00a73 fixes the bar from that number while \u00a74 audits a full group with nothing planted, so the bar is calibrated on a population the group it gates is not",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261116T233928085929-plan-review-of-sn-audited-group-release/plan.html:41",
+      "id": "done_when-1",
+      "reason": "the comparison is the deliverable s4's lead ruling asks for, and without a rule excluding classes one arm cannot repair the reported winner measures which classes fell to which arm.",
+      "text": "\u00a74 assigns \"each remaining member the audit reads as defective ... by a seeded split within its defect class to one of two repairs, regeneration through the pipeline from its source ... or one proposal from an agent\", but \u00a71's class list holds classes no regeneration can produce a fix for (duplicate of another live name needs a withdrawal or a rename against the other member; wrong physics domain is not restated by the source text), so a seeded draw puts those members in the regeneration arm and the arm fails for a reason that is not repair quality, and the report's \"which arm did better\" is then an artifact of the class mix the seed happened to hand it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261116T233928085929-plan-review-of-sn-audited-group-release/plan.html:41",
+      "id": "done_when-2",
+      "reason": "the split's unit and the class-cell denominator are undefined for a multi-class member, so two nodes running the same done-when would report different per-class counts from the same reading.",
+      "text": "\u00a71 now records \"every class of a fixed list that applies to it, so a name with two defects is counted once in each class\", but \u00a74 splits members \"within its defect class\" and reports outcomes \"per arm and per defect class\"; a member carrying two classes has no single class to split on and would be counted in one arm's class cell while \u00a71 counts it in both, so the per-class comparison cells either double-count the member across arms or silently drop one of its classes",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5cb361c74f16ea5cc53b81aba4020aa4bcde9805",
+  "plan_fingerprint": "742b21a94377154ae2a199dc38dcdaf903f7e740614452641b9268311f066cb7",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 5,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T233928085929-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "a6a2767bc59fda503e59f7dd62d7635ca54c3241",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every section reference (\u00a71, \u00a72, \u00a73, #s11), the evidence directory and the cited group figures resolve; the four groups s4 lists as best defined are the four highest agreement ratios quoted in \u00a72 (spectroscopy 50/52, magnetic field systems 121/126, equilibrium 200/210, magnetohydrodynamics 138/147, ahead of divertor physics 61/69).",
+    "done_when": "a finding \u2014 \u00a74's seeded split assigns members of classes regeneration cannot repair (duplicate of another live name, wrong physics domain) to the regeneration arm, so the per-arm comparison measures capability mismatch rather than repair quality; a second finding \u2014 \u00a74 assigns each defective member \"within its defect class\" but \u00a71 now allows a name several classes, leaving the per-class arm cells undefined for a multi-class member.",
+    "evidence_paths": "pass \u2014 s1 and s4 commit their page, data file and class list under docs/evidence/fragments/sn-audited-group-release/, which exists in the repository, and the path survives the run.",
+    "naming": "pass \u2014 s1 and s4 carry no plan label, stage name or ticket number into a symbol; \"the signed edit path\" names a committed mechanism rather than a plan identifier.",
+    "reasoning": "a finding \u2014 \u00a71 counts the forty randomly planted names inside the per-class counts and the defective rate it reports, while \u00a73 fixes the bar from those rates and \u00a74/\u00a75 apply it to full-group audits that plant nothing, so the two rates are measured on populations a known-defective share apart.",
+    "single_goal": "pass \u2014 \u00a71 delivers one measured defect rate, \u00a74's comparison is an instrument inside the one deliverable of bringing the first group to the bar.",
+    "wiring": "pass \u2014 s4's depends-on (s2, s3, sn-definitions-by-construction#s11) all resolve in the snapshot and in docs/plans/sn-definitions-by-construction.html, and the repair routes s4 names (`sn-definitions-by-construction#s11` for regeneration, the committed signed-edit path for proposals) are the ones it declares."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "23fde63009f5e3afdf77029fa1614f6226350b7cf676dc119e28901ffd1429f5",
+    "s2": "64e5908c42b7c37fecd6c49edbecc9b64b4e448bc4ac1e9d4db7457e0ae27e81",
+    "s3": "5bf1856d8a3ca2ec61b972901c47af6a328eeb66c301c9fb3a5e691d0f22020a",
+    "s4": "50e4f3ee917638e7a1915422e5348745a96899113ccc8100239e78facc34c734",
+    "s5": "f0ee018e09aed5387d06a0afa7fed73304ba3b121e2598ec77e830c5db06e9ae"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:14:18.540932+00:00",
+  "total": null
+}
