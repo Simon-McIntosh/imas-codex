@@ -1325,8 +1325,8 @@ def _page_checks(node: str, payload: dict[str, Any]) -> list[str]:
 
 
 def render_page(payload: dict[str, Any]) -> str:
-    """The evidence page. Every element id begins with the node id."""
-    node = "sagr-data-structure-groups"
+    """The evidence page. Its element ids carry the page's own prefix."""
+    node = "sagr-data-structure-groups-page"
     out = _page_head(node, payload)
     out += _page_rule(node)
     out += _page_catalog(node, payload)
