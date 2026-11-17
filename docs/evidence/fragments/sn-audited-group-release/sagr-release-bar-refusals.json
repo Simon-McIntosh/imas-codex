@@ -188,7 +188,7 @@
       "details": [
         {
           "type": "group_audit_never_measured",
-          "detail": "no audit record for group 'equilibrium' at /tmp/reckon-crew-scratch/r-20261116T221753697517-sagr-release-bar/tmp_6n5a5_a/absent/equilibrium.json"
+          "detail": "no audit record for group 'equilibrium' at <audit-dir>/absent/equilibrium.json"
         }
       ]
     },
