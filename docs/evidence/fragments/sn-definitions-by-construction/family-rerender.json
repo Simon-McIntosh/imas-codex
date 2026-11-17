@@ -1,0 +1,2359 @@
+{
+ "census": {
+  "after_probe": {
+   "divergent": 20,
+   "families": 21,
+   "held_scores": 11,
+   "members": 305,
+   "one_wording": 1,
+   "one_wording_families": [
+    "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection"
+   ],
+   "population_departing": 39,
+   "sourceless": 10
+  },
+  "before_this_node": {
+   "families": 21,
+   "members": 305,
+   "one_wording": 0,
+   "source": "the census run on the live graph before any edit"
+  },
+  "planted": {
+   "control_form_count": 1,
+   "divergent_member": "helium_density",
+   "family": [
+    "argon_density",
+    "boron_density",
+    "helium_density",
+    "iron_density",
+    "neon_density"
+   ],
+   "family_count": 1,
+   "family_divergent_count": 1,
+   "family_divergent_families": [
+    "<X>_density"
+   ],
+   "population_form_count": 2
+  },
+  "recorded_before_the_rewrite": {
+   "families": 23,
+   "members": 316,
+   "one_wording": 0,
+   "source": "docs/evidence/fragments/sn-definitions-by-construction/rewrite-closing-census.json phases.live"
+  }
+ },
+ "changed_paths": [
+  "imas_codex/standard_names/docs_gates.py",
+  "tests/standard_names/test_family_sentences.py",
+  "docs/evidence/fragments/sn-definitions-by-construction/family-rerender.py"
+ ],
+ "members": [
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "argon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "beryllium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "boron_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "carbon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "deuterium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "deuterium_tritium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "helium_3_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "helium_4_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "hydrogen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "iron_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "krypton_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "neon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "nitrogen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "oxygen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "total_hydrogenic_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "tritium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "tungsten_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density",
+   "name": "xenon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "argon_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "beryllium_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "boron_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "carbon_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "deuterium_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "deuterium_tritium_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "helium_3_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "helium_4_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "hydrogen_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "iron_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "krypton_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "lithium_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "neon_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "nitrogen_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "oxygen_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "tritium_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "tungsten_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_divertor_target",
+   "name": "xenon_density_at_divertor_target",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "argon_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "beryllium_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "boron_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "carbon_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "deuterium_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "deuterium_tritium_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "helium_3_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "helium_4_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "hydrogen_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "iron_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "krypton_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "lithium_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "neon_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "nitrogen_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "oxygen_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "tritium_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "tungsten_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_internal_transport_barrier",
+   "name": "xenon_density_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "argon_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "beryllium_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "boron_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "carbon_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "deuterium_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "deuterium_tritium_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "helium_3_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "helium_4_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "hydrogen_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "iron_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "krypton_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "lithium_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "neon_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "nitrogen_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "oxygen_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "tritium_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "tungsten_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_limiter",
+   "name": "xenon_density_at_limiter",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "argon_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "beryllium_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "boron_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "carbon_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "deuterium_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "deuterium_tritium_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "helium_3_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "helium_4_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "hydrogen_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "iron_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "krypton_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "lithium_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "neon_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "nitrogen_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "oxygen_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "tritium_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "tungsten_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_magnetic_axis",
+   "name": "xenon_density_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "argon_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "beryllium_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "boron_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "carbon_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "deuterium_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "deuterium_tritium_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "helium_3_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "helium_4_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "hydrogen_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "iron_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "krypton_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "lithium_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "neon_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "nitrogen_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "oxygen_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "tritium_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "tungsten_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_pedestal_top",
+   "name": "xenon_density_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "argon_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "beryllium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "boron_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "carbon_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "deuterium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "deuterium_tritium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "helium_3_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "helium_4_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "hydrogen_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "iron_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "krypton_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "lithium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "neon_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "nitrogen_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "oxygen_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "tritium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "tungsten_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_density_at_plasma_boundary",
+   "name": "xenon_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "argon_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "beryllium_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "carbon_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "helium_3_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "helium_4_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "krypton_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "lithium_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "oxygen_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "name": "xenon_equivalent_electron_source_rate_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "s^-1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_prefill_equivalent_electron_count",
+   "name": "argon_prefill_equivalent_electron_count",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_prefill_equivalent_electron_count",
+   "name": "krypton_prefill_equivalent_electron_count",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_prefill_equivalent_electron_count",
+   "name": "neon_prefill_equivalent_electron_count",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "<X>_prefill_equivalent_electron_count",
+   "name": "nitrogen_prefill_equivalent_electron_count",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count",
+   "name": "accumulated_krypton_equivalent_electron_count",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count",
+   "name": "accumulated_neon_equivalent_electron_count",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_argon_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_carbon_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_deuterium_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_helium_3_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_hydrogen_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_lithium_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_nitrogen_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_xenon_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "accumulated_<X>_prefill_equivalent_electron_count",
+   "name": "accumulated_xenon_prefill_equivalent_electron_count",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": true,
+   "family": "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_helium_3_prefill_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": true,
+   "family": "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_lithium_prefill_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": true,
+   "family": "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection",
+   "name": "accumulated_oxygen_prefill_equivalent_electron_count_due_to_gas_injection",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_argon_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_beryllium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_boron_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_carbon_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_deuterium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_helium_3_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_helium_4_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_hydrogen_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_iron_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_krypton_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_lithium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_neon_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_nitrogen_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_oxygen_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_tritium_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_tungsten_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_<X>_density_at_plasma_boundary",
+   "name": "flux_surface_averaged_xenon_density_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_argon_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_beryllium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_carbon_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_deuterium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_helium_3_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_helium_4_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_hydrogen_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_iron_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_krypton_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_lithium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_neon_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_nitrogen_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_oxygen_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_tritium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_tungsten_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "flux_surface_averaged_toroidal_xenon_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_argon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_beryllium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_boron_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_carbon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_deuterium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_deuterium_tritium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_helium_3_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_helium_4_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_hydrogen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_iron_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_krypton_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_lithium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_neon_density",
+   "source_count": 0,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_nitrogen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_oxygen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_tritium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_tungsten_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "line_averaged_<X>_density",
+   "name": "line_averaged_xenon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_<X>_density_to_electron_density",
+   "name": "ratio_of_hydrogen_density_to_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_<X>_density_to_electron_density",
+   "name": "ratio_of_iron_density_to_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_<X>_density_to_electron_density",
+   "name": "ratio_of_lithium_density_to_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_argon_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_beryllium_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_boron_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_carbon_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_deuterium_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_deuterium_tritium_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_helium_3_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_helium_4_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_krypton_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_neon_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_nitrogen_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_oxygen_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_tritium_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density",
+   "name": "ratio_of_volume_averaged_tungsten_density_to_volume_averaged_electron_density",
+   "source_count": 1,
+   "unit": "1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_argon_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_beryllium_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_carbon_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_deuterium_tritium_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_deuterium_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_helium_3_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_helium_4_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_hydrogen_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_iron_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_krypton_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_lithium_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_neon_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_nitrogen_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_oxygen_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_tritium_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_tungsten_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_internal_transport_barrier",
+   "name": "toroidal_xenon_velocity_at_internal_transport_barrier",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_argon_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_beryllium_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_carbon_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_deuterium_tritium_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_deuterium_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_helium_3_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_helium_4_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_hydrogen_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_iron_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_krypton_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_lithium_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_neon_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_nitrogen_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_oxygen_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_tritium_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_tungsten_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_magnetic_axis",
+   "name": "toroidal_xenon_velocity_at_magnetic_axis",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_argon_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_beryllium_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_carbon_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_deuterium_tritium_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_deuterium_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_helium_3_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_helium_4_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_hydrogen_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_iron_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_krypton_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_lithium_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_neon_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_nitrogen_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_oxygen_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_tritium_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_tungsten_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_pedestal_top",
+   "name": "toroidal_xenon_velocity_at_pedestal_top",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_argon_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_beryllium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_carbon_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_deuterium_tritium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_deuterium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_helium_3_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_helium_4_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_hydrogen_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_iron_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_krypton_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_lithium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_neon_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_nitrogen_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_oxygen_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_tritium_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_tungsten_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "toroidal_<X>_velocity_at_plasma_boundary",
+   "name": "toroidal_xenon_velocity_at_plasma_boundary",
+   "source_count": 1,
+   "unit": "m.s^-1"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_argon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_beryllium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_boron_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_carbon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_deuterium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_deuterium_tritium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_helium_3_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_helium_4_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_hydrogen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_iron_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_krypton_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_lithium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_neon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_nitrogen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_oxygen_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_tritium_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_tungsten_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  },
+  {
+   "edited": false,
+   "family": "volume_averaged_<X>_density",
+   "name": "volume_averaged_xenon_density",
+   "source_count": 1,
+   "unit": "m^-3"
+  }
+ ],
+ "node": "sdbc-family-rerender",
+ "placement": {
+  "conflict": "prepending the family sentence as the documentation opening raises template_opening, because the selected registry template requires the documentation to open with its own wording (e.g. Number density of {subject}) and averaged families open Flux-surface-averaged ...",
+  "experiment": "prepending was applied and reverted; tests/standard_names/test_house_style_checks.py::test_fixture_census_counts_each_class_once and tests/standard_names/test_docs_conformance_gate.py failed, the latter naming the off-template opening",
+  "ruling": "the writer rewrites a member opening so the family sentence comes first; the renderer appending it at the end is not used",
+  "stored_after_probe": "the family sentence is the last paragraph of each probe member documentation and the description is the sentence whole"
+ },
+ "plan_section": "sn-definitions-by-construction#s10",
+ "population": {
+  "census_families_3plus": 21,
+  "census_members": 305,
+  "families": {
+   "<X>_density": 18,
+   "<X>_density_at_divertor_target": 18,
+   "<X>_density_at_internal_transport_barrier": 18,
+   "<X>_density_at_limiter": 18,
+   "<X>_density_at_magnetic_axis": 18,
+   "<X>_density_at_pedestal_top": 18,
+   "<X>_density_at_plasma_boundary": 18,
+   "<X>_equivalent_electron_source_rate_due_to_gas_injection": 9,
+   "<X>_prefill_equivalent_electron_count": 4,
+   "accumulated_<X>_equivalent_electron_count": 2,
+   "accumulated_<X>_equivalent_electron_count_due_to_gas_injection": 8,
+   "accumulated_<X>_prefill_equivalent_electron_count": 1,
+   "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection": 3,
+   "flux_surface_averaged_<X>_density_at_plasma_boundary": 17,
+   "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary": 17,
+   "line_averaged_<X>_density": 18,
+   "ratio_of_<X>_density_to_electron_density": 3,
+   "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density": 14,
+   "toroidal_<X>_velocity_at_internal_transport_barrier": 17,
+   "toroidal_<X>_velocity_at_magnetic_axis": 17,
+   "toroidal_<X>_velocity_at_pedestal_top": 17,
+   "toroidal_<X>_velocity_at_plasma_boundary": 17,
+   "volume_averaged_<X>_density": 18
+  },
+  "rekeyed": [
+   "<X>_prefill_equivalent_electron_count",
+   "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+   "accumulated_<X>_equivalent_electron_count",
+   "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+   "accumulated_<X>_prefill_equivalent_electron_count",
+   "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection"
+  ],
+  "stored_families": 23,
+  "stored_members": 308,
+  "why_rekeyed": "the equivalent-electron renames moved these six families onto spellings carrying the qualifier; the old keys matched no live name, so 23 members rendered no sentence"
+ },
+ "probe": {
+  "average_usd": 0.073213,
+  "family": "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection",
+  "members": [
+   {
+    "cost_events": 4,
+    "description_after": "Cumulative equivalent-electron count of the neutral helium-3 atoms delivered by gas injection as prefill before plasma breakdown.",
+    "description_before": "Cumulative helium-3 prefill count from gas injection before plasma breakdown, expressed as two equivalent electrons per injected neutral atom.",
+    "documentation_ends_with": "Cumulative equivalent-electron count of the neutral helium-3 atoms delivered by gas injection as prefill before plasma breakdown.",
+    "documentation_opens_with": "Accumulated helium-3 prefill count weights each atom by its electron content rather than its instantaneous ionization state, assigning two counts per atom inste",
+    "elapsed_s": 121.7,
+    "family": "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T225104371014-sdbc-family-rerender/omp-home/.cache/imas-codex-live-rewrite/family-rerender-logs/accumulated_helium_3_prefill_equivalent_electron_count_due_to_gas_injection.log",
+    "name": "accumulated_helium_3_prefill_equivalent_electron_count_due_to_gas_injection",
+    "outcome": "accepted",
+    "phases": [
+     "generate_docs",
+     "review_docs"
+    ],
+    "run_ids": [
+     "a406492f-abb6-4120-8130-3be24d3c303a"
+    ],
+    "score_after": 0.9178590091306476,
+    "score_before": 0.911234786184946,
+    "spend_usd": 0.116614
+   },
+   {
+    "cost_events": 4,
+    "description_after": "Cumulative equivalent-electron count of the neutral lithium atoms delivered by gas injection as prefill before plasma breakdown.",
+    "description_before": "Cumulative lithium prefill count delivered by gas injection before plasma breakdown, expressed as three equivalent electrons per injected neutral atom.",
+    "documentation_ends_with": "Cumulative equivalent-electron count of the neutral lithium atoms delivered by gas injection as prefill before plasma breakdown.",
+    "documentation_opens_with": "Accumulated lithium prefill count weights each atom by its electron content rather than its instantaneous ionization state, assigning three counts per atom inst",
+    "elapsed_s": 118.7,
+    "family": "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T225104371014-sdbc-family-rerender/omp-home/.cache/imas-codex-live-rewrite/family-rerender-logs/accumulated_lithium_prefill_equivalent_electron_count_due_to_gas_injection.log",
+    "name": "accumulated_lithium_prefill_equivalent_electron_count_due_to_gas_injection",
+    "outcome": "accepted",
+    "phases": [
+     "generate_docs",
+     "review_docs"
+    ],
+    "run_ids": [
+     "acb715b6-9364-407a-9627-09a0cf95f0b6"
+    ],
+    "score_after": 0.9278665222427276,
+    "score_before": 0.9269307793652897,
+    "spend_usd": 0.061369
+   },
+   {
+    "cost_events": 4,
+    "description_after": "Cumulative equivalent-electron count of the neutral oxygen atoms delivered by gas injection as prefill before plasma breakdown.",
+    "description_before": "Accumulated oxygen prefill count is the cumulative equivalent-electron inventory delivered by gas injection before plasma breakdown, assigning eight counts per oxygen atom.",
+    "documentation_ends_with": "Cumulative equivalent-electron count of the neutral oxygen atoms delivered by gas injection as prefill before plasma breakdown.",
+    "documentation_opens_with": "Accumulated oxygen prefill count weights each atom by its electron content rather than its instantaneous ionization state, assigning eight counts per atom inste",
+    "elapsed_s": 121.0,
+    "family": "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection",
+    "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T225104371014-sdbc-family-rerender/omp-home/.cache/imas-codex-live-rewrite/family-rerender-logs/accumulated_oxygen_prefill_equivalent_electron_count_due_to_gas_injection.log",
+    "name": "accumulated_oxygen_prefill_equivalent_electron_count_due_to_gas_injection",
+    "outcome": "accepted",
+    "phases": [
+     "generate_docs",
+     "review_docs"
+    ],
+    "run_ids": [
+     "d2caad8d-f558-4567-88c0-ac653bb31ae8"
+    ],
+    "score_after": 0.9348252809305839,
+    "score_before": 0.9397315618710873,
+    "spend_usd": 0.041657
+   }
+  ],
+  "projection_usd_over_stored_members": 22.55,
+  "spend_ceiling_usd": 30.0,
+  "stop_fired": true,
+  "stop_rule": "probe average over USD 0.05 a member",
+  "total_usd": 0.21964
+ },
+ "schema": "family-rerender/1",
+ "sourceless_live": {
+  "after": 10,
+  "before": 10,
+  "names": [
+   "beta",
+   "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+   "deposited_power_at_divertor_target",
+   "electron_temperature_at_plasma_boundary",
+   "line_averaged_neon_density",
+   "poloidal_total_momentum_convection_velocity",
+   "radius_of_soft_xray_detector",
+   "ratio_of_diamagnetic_vorticity_to_major_radius",
+   "voltage_of_diagnostic_antenna",
+   "volume_averaged_electron_number_density_over_scrape_off_layer"
+  ]
+ },
+ "sources_audit": {
+  "members_in_population": 308,
+  "members_with_a_producing_source": 307,
+  "members_without_a_source": [
+   "line_averaged_neon_density"
+  ],
+  "positive_control": "summary/gas_injection_rates/argon/value is returned for argon_equivalent_electron_source_rate_due_to_gas_injection",
+  "suspects_including_neutrals_or_one_charge_state": 0
+ }
+}

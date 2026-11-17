@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>The species-family re-render: its three-member probe, its cost, and the placement conflict</title>
+</head>
+<body>
+<article>
+
+<h2 id="sdbc-family-rerender-title">The species-family re-render: its three-member probe, its cost, and the placement conflict</h2>
+
+<p>The live re-render did not run past its probe. Two findings stop it, both
+measured here: the probe family averaged <strong>USD 0.073 a member</strong>,
+above the USD 0.05 the brief allows; and the placement the lead ruled — the
+family sentence first in a member's definition — contradicts the registry
+template-opening conformance the same review gate holds on.</p>
+
+<h3 id="sdbc-family-rerender-population">The population, re-read after the renames</h3>
+
+<p>The stored sentences were keyed on six gas-family spellings that the
+equivalent-electron renames had already moved: <code>&lt;X&gt;_prefill_count</code>,
+<code>&lt;X&gt;_source_rate_due_to_gas_injection</code>,
+<code>accumulated_&lt;X&gt;_count</code>,
+<code>accumulated_&lt;X&gt;_count_due_to_gas_injection</code>,
+<code>accumulated_&lt;X&gt;_prefill_count</code> and
+<code>accumulated_&lt;X&gt;_prefill_count_due_to_gas_injection</code>. No live
+name matched those keys except the eight names the renames left un-renamed, so
+<code>argon_equivalent_electron_source_rate_due_to_gas_injection</code> — and 26
+other live names — rendered no family sentence at all. The six keys now carry
+the renamed spellings, and a test holds each key to the spelling its live member now has.
+</p>
+
+<p>Read from the live graph after the re-key, the store matches
+<strong>23 families and 308 members</strong>. The closing census, unchanged,
+counts <strong>21 families and 305 members</strong> because its family floor is
+three members and two of the renamed families now hold one and two members. Its
+reading before this node was <strong>0 of 21 families at one wording</strong>,
+against the recorded <strong>0 of 23</strong> of the wording section's own
+census. After the probe family, the census reports
+<strong>1 of 21 at one wording</strong>, the probe family itself.</p>
+
+<h3 id="sdbc-family-rerender-probe">The probe</h3>
+
+<p>Every member was edited with <code>sn edit --axis docs</code>, one at a time,
+which resets the docs pipeline and regenerates through the writer that installs
+the family sentence. No member's documentation score fell: all three settled
+above 0.91. The spend is the <code>LLMCost</code> rows charged to each member's
+own run, joined by name and the window the serial edit held it.</p>
+
+<table id="sdbc-family-rerender-probe-table">
+<thead>
+<tr><th>member</th><th>score before</th><th>score after</th><th>spend</th><th>seconds</th></tr>
+</thead>
+<tbody>
+<tr><td>accumulated_helium_3_prefill_equivalent_electron_count_due_to_gas_injection</td><td>0.911</td><td>0.918</td><td>USD 0.1166</td><td>122</td></tr>
+<tr><td>accumulated_lithium_prefill_equivalent_electron_count_due_to_gas_injection</td><td>0.927</td><td>0.928</td><td>USD 0.0614</td><td>119</td></tr>
+<tr><td>accumulated_oxygen_prefill_equivalent_electron_count_due_to_gas_injection</td><td>0.940</td><td>0.935</td><td>USD 0.0417</td><td>121</td></tr>
+</tbody>
+</table>
+
+<p>Total USD 0.2197, average <strong>USD 0.0732 a member</strong>. At that rate
+the 308 members project to <strong>USD 22.55</strong>, under the USD 30 ceiling
+but over the USD 0.05 per-member bar the probe is gated on. The stop is the bar,
+not the ceiling. The per-member cost is dominated by one <code>generate_docs</code>
+call (USD 0.033 to USD 0.091 across the three); the docs review is about USD 0.03.
+</p>
+
+<h3 id="sdbc-family-rerender-placement">The placement conflict</h3>
+
+<p>The lead ruled that the writer rewrites a member's opening so the family
+sentence comes first, and that the renderer appending it at the end is not used.
+The pipeline as merged does append it: the probe member's stored documentation
+opens with its own prose and closes with
+“Cumulative equivalent-electron count of the neutral helium-3 atoms delivered by
+gas injection as prefill before plasma breakdown.” Its <code>description</code>
+is the family sentence whole, which is what the census measures and what puts
+the family at one wording.</p>
+
+<p>Making the family sentence the documentation opening was implemented and
+measured, then reverted. Two tests went red:
+<code>test_house_style_checks.py::test_fixture_census_counts_each_class_once</code>
+counted four <code>template_opening</code> findings instead of one, and
+<code>test_docs_conformance_gate.py</code> reported “documentation opens as
+'Flux-surface-averaged number density of argon ions at the pl', which does not
+follow any selected template: Number density of {subject}”. Every averaged
+family's sentence begins with its operator word, and the selected registry
+template requires the bare quantity opening, so the two settled wordings cannot
+either of them be first. The review gate holds on
+<code>registry_conformance</code>, so prepending would send every member back.</p>
+
+<p>This is a decision the plan does not settle: either the family sentence
+supersedes the template opening for a family member and the conformance check
+learns that exemption, or the family sentence is not the documentation's
+opening and the ruling means the description, which already carries it. The
+three probe members are left with the description rendering and the sentence
+appended, listed as exceptions until that is ruled.</p>
+
+<h3 id="sdbc-family-rerender-state">What is left</h3>
+
+<p>304 members stand unedited and keep their earlier text; their scores and
+descriptions are recorded in <code>family-rerender.json</code>. Live names
+without a source are 10 before and 10 after, at the ceiling the brief allows.
+No member of the population has a Data Dictionary source that names neutral
+atoms or a single charge state; the audit scanned every producing source of all
+308 members and returns none, with a positive control on
+<code>summary/gas_injection_rates/argon/value</code>.</p>
+
+</article>
+</body>
+</html>

@@ -74,10 +74,18 @@ RETURN sn.id AS id,
        sources
 """
 
+#: An edit's own spend, read from the cost records of the names it touched.
+#:
+#: The pool charges its LLMCost rows to its own run id, not to the edit's, so
+#: the join is the member name and the window the edit held it for: edits run
+#: serially, so no other writer charges this name inside that window.
 SPEND_QUERY = """
-MATCH (c:LLMCost {run_id: $run_id})
+MATCH (c:LLMCost)
+WHERE $name IN c.standard_name_ids
+  AND c.llm_at >= datetime($since)
 RETURN coalesce(sum(c.llm_cost), 0.0) AS spend, count(c) AS events,
-       collect(DISTINCT c.phase) AS phases
+       collect(DISTINCT c.phase) AS phases,
+       collect(DISTINCT c.run_id) AS run_ids
 """
 
 SOURCELESS_QUERY = """
@@ -125,15 +133,14 @@ def read_state(gc, name: str) -> dict:
     return row
 
 
-def read_spend(gc, run_id: str) -> dict:
-    if not run_id:
-        return {"spend": 0.0, "events": 0, "phases": []}
-    rows = gc.query(SPEND_QUERY, run_id=run_id)
+def read_spend(gc, name: str, since: str) -> dict:
+    rows = gc.query(SPEND_QUERY, name=name, since=since)
     row = dict(rows[0]) if rows else {}
     return {
         "spend": round(float(row.get("spend") or 0.0), 6),
         "events": int(row.get("events") or 0),
-        "phases": sorted(row.get("phases") or []),
+        "phases": sorted(p for p in (row.get("phases") or []) if p),
+        "run_ids": sorted(r for r in (row.get("run_ids") or []) if r),
     }
 
 
@@ -184,6 +191,7 @@ def edit_command(name: str, cost_limit: float) -> list[str]:
 def run_member(gc, name: str, family: str, cost_limit: float) -> dict:
     LOGDIR.mkdir(parents=True, exist_ok=True)
     before = read_state(gc, name)
+    window_start = datetime.now(UTC).isoformat(timespec="seconds")
     submitted = {
         "stage": "submitted",
         "at": now(),
@@ -212,7 +220,7 @@ def run_member(gc, name: str, family: str, cost_limit: float) -> dict:
     if match:
         run_id = match.group(1)
     after = read_state(gc, name)
-    spend = read_spend(gc, run_id or after.get("run_id", ""))
+    spend = read_spend(gc, name, window_start)
     score_before = before.get("score_docs")
     score_after = after.get("score_docs")
     settled = {
@@ -270,16 +278,24 @@ def main(argv: list[str] | None = None) -> int:
         return 0
 
     if args.settled_spend:
-        total = 0.0
+        by_name: dict[str, float] = {}
         if PROGRESS.exists():
             for line in PROGRESS.read_text().splitlines():
                 try:
                     entry = json.loads(line)
                 except json.JSONDecodeError:
                     continue
+                name = entry.get("name")
+                if not name:
+                    continue
+                value = float(entry.get("spend", {}).get("spend") or 0.0)
                 if entry.get("stage") == "settled":
-                    total += float(entry.get("spend", {}).get("spend") or 0.0)
-        print(f"settled spend ${total:.4f}")
+                    by_name[name] = value
+                elif entry.get("stage") == "spend-recomputed":
+                    by_name[name] = value
+        print(
+            f"settled spend ${sum(by_name.values()):.4f} over {len(by_name)} member(s)"
+        )
         return 0
 
     targets: list[tuple[str, str]] = []
@@ -322,9 +338,12 @@ def main(argv: list[str] | None = None) -> int:
                 continue
             if entry.get("stage") == "settled":
                 total_spend += float(entry.get("spend", {}).get("spend") or 0.0)
+    worked = 0
     for _key, name in targets:
         if name in settled:
             continue
+        if args.limit and worked >= args.limit:
+            break
         with GraphClient() as gc:
             if total_spend >= args.spend_ceiling:
                 print(f"spend ceiling reached: ${total_spend:.4f}")
@@ -348,8 +367,7 @@ def main(argv: list[str] | None = None) -> int:
                 f"${result['spend']['spend']:.4f}  {result['elapsed_s']}s",
                 flush=True,
             )
-            if args.limit and len(settled) >= args.limit:
-                break
+            worked += 1
     print(f"spend so far ${total_spend:.4f}")
     return 0
 
