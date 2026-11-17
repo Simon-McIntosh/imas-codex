@@ -1,0 +1,60 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/discovery/signals/controls_metadata.py:263 import_controls_metadata calls write_signal_descriptions with precomputed_embeddings",
+    "imas_codex/discovery/signals/parallel.py:1876 in-module description writer, default embedding path",
+    "imas_codex/discovery/signals/parallel.py:2140 in-module description writer, default embedding path",
+    "imas_codex/discovery/signals/parallel.py:2228 in-module description writer, default embedding path",
+    "imas_codex/discovery/signals/parallel.py:2699 in-module description writer, default embedding path",
+    "imas_codex/discovery/signals/parallel.py:5496 in-module description writer, default embedding path",
+    "imas_codex/llm/search_tools.py:998 reads the description_source and description_source_updated_at properties the provenance clause now clears"
+  ],
+  "completed_at": "2026-11-17T04:23:32.127Z",
+  "dispatched_at": "2026-11-17T04:23:14Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": 1609,
+      "severity": "non-blocking",
+      "summary": "the coverage sentinel `raise ValueError('precomputed embeddings must cover every description')` is reached by no test: `grep -rn precomputed_embeddings tests/` returns only tests/graph/test_controls_metadata.py:165-202 and tests/discovery/test_controls_metadata_import.py:95, every one of which supplies a receipt for the id it writes, so deleting this guard reddens nothing and a caller can once again pass an incomplete batch and admit an unembedded signal."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T212212585198-ground-local-signal-descriptions-in-context/manifest.md",
+      "line": 21,
+      "severity": "non-blocking",
+      "summary": "baseline_suite ran three test files to 54 passed while after_suite ran four files to 96 passed, so the recorded added_failure_count 0 compares arms over different selections rather than the same suite at two revisions; the base arm excludes tests/discovery/test_signal_enrichment_grounding.py, which is the file holding every new guard, so the base arm cannot show what those tests did before the change."
+    },
+    {
+      "file": "imas_codex/discovery/signals/parallel.py",
+      "line": 1611,
+      "severity": "non-blocking",
+      "summary": "the precomputed branch stores the caller's vector while stamping `embedded_text_hash` from the text the writer derived, so a vector obtained for different text is written with a hash that matches the stored description and the re-embed sweep at _SIGNAL_HASH_MISMATCH_WHERE never repairs it, which is the stale-vector state the writer's own docstring says it exists to prevent."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed brief's goal at brief.md:5-8 is correct descriptions against the supplied context measured by hand against the paid model's descriptions; the delta this review covers, git diff 2d50d54cf5988dbf..d0ab1106f2868697 restricted to the two named paths, adds six lines of reconciled-gate prose to the fragment and the precomputed-embedding and description-provenance hunks in imas_codex/discovery/signals/parallel.py, and neither extends nor contradicts that goal.\nVERDICT done_when: brief.md:79-87 asks for the fragment's baseline-and-variant figures, one figure saved through imas_codex.plotting and looked at, and tests for each new option, the unsupported-statement drop and the second pass; the worker's gate (resume-merged-gate.log, 96 passed, EXIT=0) runs exactly tests/discovery/test_signal_enrichment_grounding.py, test_signal_enrichment_options.py, test_signal_enrichment_benchmark.py and test_enrich_result_matching.py, and the fragment's new table at line 34 cites that receipt.\nVERDICT write_paths: the source brief's write paths at brief.md:99-106 include the fragment docs/evidence/fragments/iter-signal-context-and-enrichment/ground-local-signal-descriptions-in-context.html and imas_codex/discovery/signals/; both changed paths are inside them and the delta contains no generated file.\nVERDICT manifest: read in full; it records after_suite 96 passed at EXIT=0 in resume-merged-gate.log, baseline_suite 54 passed at EXIT=0 in base-suite.log, the negative control 5 failed at EXIT=1 in resume-negative-control.log, delivery_head_sha d0ab1106f286, and rubric.* answered for all six dimensions.\nVERDICT diff: read commit by commit: d0ab1106f286 adds 6 lines to the fragment at lines 32-35 and the parallel.py hunks arrive through merge e947a5f30, whose parents are 2d50d54cf598 and f777968a92f, carrying primary commit c47bba5d0.\nCALL_SITES: imas_codex/discovery/signals/controls_metadata.py:263 import_controls_metadata, imas_codex/discovery/signals/parallel.py:1876, imas_codex/discovery/signals/parallel.py:2140, imas_codex/discovery/signals/parallel.py:2228, imas_codex/discovery/signals/parallel.py:2699, imas_codex/discovery/signals/parallel.py:5496, imas_codex/llm/search_tools.py:998\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the fragment addition at docs/evidence/fragments/iter-signal-context-and-enrichment/ground-local-signal-descriptions-in-context.html:32-35 records the reconciled gate and the refusal cause without changing any measured figure, which is what the reviewed brief.md:79-87 asks the fragment to state.\nSCORE evidence: 14\nJUSTIFICATION evidence: the manifest's after_suite at .../manifest.md:22 is a readable 96-passed EXIT=0 receipt in resume-merged-gate.log, but its baseline_suite at .../manifest.md:21 ran a different file set to 54 passed, so the added_failure_count it derives is not measured on the same suite.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: both changed paths in git diff 2d50d54cf598..d0ab1106f286 -- docs/evidence/fragments/iter-signal-context-and-enrichment/ground-local-signal-descriptions-in-context.html and imas_codex/discovery/signals/parallel.py -- sit inside the write paths declared at brief.md:99-106.\nSCORE durability: 14\nJUSTIFICATION durability: no assertion is added anywhere in this delta, and the one guard it adds at imas_codex/discovery/signals/parallel.py:1609 is covered by no test in tests/, while the covering tests for its other hunks live in the graph-marked tests/graph/test_controls_metadata.py:154 and outside the gate.\nSCORE fit: 18\nJUSTIFICATION fit: the added hunks in imas_codex/discovery/signals/parallel.py:1605-1611 and 1701-1706 follow the module's existing shape of f-string Cypher arms and an explicit arm per case, and introduce no name the naming rules forbid.\nSCORE reuse: 18\nJUSTIFICATION reuse: the default path still routes through embed_descriptions_batch at imas_codex/discovery/signals/parallel.py:1606, and the nearest same-named parameter, imas_codex/ids/tools.py:792, computes embeddings rather than writing descriptions, so no owned capability is duplicated.\nFINDING imas_codex/discovery/signals/parallel.py:1609 non-blocking: the coverage sentinel raise is reached by no test, since every test that passes precomputed_embeddings supplies a receipt, so deleting the guard reddens nothing.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T212212585198-ground-local-signal-descriptions-in-context/manifest.md:21 non-blocking: the base arm ran three files to 54 passed while the after arm ran four to 96, so added_failure_count 0 compares different selections and the base arm omits the file holding every new guard.\nFINDING imas_codex/discovery/signals/parallel.py:1611 non-blocking: a supplied vector is stored beside a hash derived from the writer's own text, so a vector for other text matches the stored hash and the re-embed sweep never repairs it.\n",
+  "review_run_id": "r-20261117T042257085248-review-of-ground-local-signal-descriptions-in-context-d0ab1106f286",
+  "reviewed_base_sha": "2d50d54cf5988dbf23c02f48b7f1b641e77446f3",
+  "reviewed_head_sha": "d0ab1106f2868697bb6e39cf2248a00e47a5bbaf",
+  "reviewed_run_id": "r-20261116T212212585198-ground-local-signal-descriptions-in-context",
+  "scores": {
+    "durability": 14,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T04:33:42.293063+00:00",
+  "total": 101,
+  "verdicts": {
+    "diff": "read commit by commit: d0ab1106f286 adds 6 lines to the fragment (lines 32-35) and the parallel.py hunks arrive through merge e947a5f30, whose parents are 2d50d54cf598 and f777968a92f, carrying primary commit c47bba5d0; the fragment's claim of 96 identical failures reproduces against review-landing/gate-b705d43a964a75fccf31896d6852c6d55c9f6a3f.log (96 ERROR lines, 96 FileNotFoundError, EXIT=1).",
+    "done_when": "brief.md:79-87 asks for the fragment's baseline-and-variant figures, one figure saved through imas_codex.plotting and looked at, and tests for each new option, the unsupported-statement drop and the second pass; the worker's gate (resume-merged-gate.log, 96 passed, EXIT=0) runs exactly tests/discovery/test_signal_enrichment_grounding.py, test_signal_enrichment_options.py, test_signal_enrichment_benchmark.py and test_enrich_result_matching.py, and the fragment's new table at line 34 cites that receipt.",
+    "goal": "the reviewed brief's goal at brief.md:5-8 is correct descriptions against the supplied context measured by hand against the paid model's descriptions; the delta this review covers, `git diff 2d50d54cf5988dbf..d0ab1106f2868697` restricted to the two named paths, adds six lines of reconciled-gate prose to the fragment and the precomputed-embedding and description-provenance hunks in imas_codex/discovery/signals/parallel.py, and neither extends nor contradicts that goal.",
+    "manifest": "read in full; it records after_suite 96 passed at EXIT=0 in resume-merged-gate.log, baseline_suite 54 passed at EXIT=0 in base-suite.log, the negative control 5 failed at EXIT=1 in resume-negative-control.log, delivery_head_sha d0ab1106f286, and rubric.* answered for all six dimensions.",
+    "write_paths": "the source brief's write paths at brief.md:99-106 include the fragment docs/evidence/fragments/iter-signal-context-and-enrichment/ground-local-signal-descriptions-in-context.html and imas_codex/discovery/signals/; both changed paths are inside them and the delta contains no generated file (`git diff --name-only 2d50d54c..d0ab1106f | grep -E 'models.py|dd_models|schema-reference|schema_context_data'` is empty)."
+  }
+}

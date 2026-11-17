@@ -1,0 +1,48 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:4978"
+  ],
+  "completed_at": "2026-11-17T01:23:41.436Z",
+  "dispatched_at": "2026-11-17T01:22:29Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/enrichment.py",
+      "line": 285,
+      "severity": "non-blocking",
+      "summary": "A review statement whose citation names an absent context item increments result.evidence_drops as well as being counted in review_drops at :291, so one removal is counted in both columns; the evidence fragment's 'code evidence / review removal' split therefore attributes review-side refusals to code filtering, and the reported evidence-drop count is not a pure count of the drafting filter's drops."
+    },
+    {
+      "file": "scripts/assess_signal_enrichment_grounding.py",
+      "line": 102,
+      "severity": "non-blocking",
+      "summary": "seal() rewrites seal.json unconditionally, so re-running `seal` after editing readings.jsonl replaces the digest that summarize() at :117 uses to refuse post-seal edits; the guard covered by tests/discovery/test_signal_enrichment_grounding.py:279 is one command away from being cleared, and the fragment's 'every digest precedes its key' claim rests on that unenforced convention."
+    }
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source brief's goal at brief.md:5-8 is correctness of the local model's descriptions against their given context, measured by hand against the paid model's existing descriptions; the landed change adds opt-in grounding, citation filtering, a local review pass, temperature and sentence-limit controls (imas_codex/discovery/signals/enrichment.py:179) and reports a sealed blind reading of 2/40 and 1/40 wrong beside the paid descriptions (private/report.json), so the goal is met and the best combination stated.\nVERDICT done_when: brief.md:79-87 asks for the fragment's figures for baseline and each variant plus a rendered, looked-at figure saved through imas_codex.plotting and tests for each new option, the unsupported-statement drop and the second pass; the gate recorded in the manifest is a 96-test pytest run (head-injection-abbreviations.log:33) covering those tests, while the figure half is asserted by the separate figure record review-records/r-20261116T212212585198-ground-local-signal-descriptions-in-context.figure.json rather than by this gate.\nVERDICT write_paths: the manifest's orientation_write_paths and brief.md:99-106 name imas_codex/discovery/signals/, imas_codex/discovery/base/, imas_codex/llm/, pyproject.toml, scripts/, tests/discovery/ and the fragment and figure directories; all 13 files in `git diff --stat 21d0b6cc..2d50d54c` fall inside them.\nVERDICT manifest: read in full; it records the commit list, baseline_suite 54 passed at EXIT=0 in base-suite.log, after_suite 96 passed at EXIT=0 in head-injection-abbreviations.log, the negative control in negative-verified-suite.log (5 failed, EXIT=1), the measurements in private/report.json, and rubric.* answered for all six dimensions.\nVERDICT diff: read commit by commit, 21 commits from 21d0b6cc to 2d50d54c over 13 files (enrichment.py +217, two prompt templates, four scripts, three test files, the evidence fragment and the SVG); the feature is opt-in per seat, and pyproject.toml is untouched.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:4978\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/enrichment.py:179 adds the controls and private/report.json records the sealed 2/40 and 1/40 wrong readings, but the brief.md:96-98 rule to set the seat's options once the bar was met was withheld and pyproject.toml is unchanged.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-injection-abbreviations.log:33 records 96 passed and the log ends EXIT=0 at ba1910f2 with base-suite.log recording 54 passed, so the added-failure count is 0, while the figure half of done_when rests on the separate figure record review-records/r-20261116T212212585198-ground-local-signal-descriptions-in-context.figure.json rather than this gate.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in `git diff --stat 21d0b6cc..2d50d54c` lies inside the write paths at brief.md:99-106, and pyproject.toml, a declared path, is untouched.\nSCORE durability: 18\nJUSTIFICATION durability: negative-verified-suite.log shows removing the citation-existence guard reddens tests/discovery/test_signal_enrichment_grounding.py:78 and :328 among 5 ids absent from the 96-pass head, though the empty-description refusal at :90 and the abbreviation cases at :461 are pinned only by fixtures the test itself supplies.\nSCORE fit: 17\nJUSTIFICATION fit: the new helpers follow the module's existing function-local-import and render_prompt idiom (imas_codex/discovery/signals/enrichment.py:58,209), but enrich_signal_batch at :179 carries no type annotations where the rest of the module is annotated.\nSCORE reuse: 19\nJUSTIFICATION reuse: prompts go through imas_codex.llm.prompt_loader.render_prompt and the figure through imas_codex.plotting.save_figure, and a search of imas_codex for sentence splitting found only the inline splitter at imas_codex/standard_names/audits.py:960, which lacks the abbreviation handling description_statements adds.\nFINDING imas_codex/discovery/signals/enrichment.py:285 non-blocking: a review statement whose citation names an absent item increments evidence_drops as well as review_drops at :291, so one removal is counted in both columns and the fragment's code-evidence drop count includes review-side refusals.\nFINDING scripts/assess_signal_enrichment_grounding.py:102 non-blocking: seal() rewrites seal.json unconditionally, so re-running seal after editing readings.jsonl clears the post-seal-edit refusal that summarize() at :117 enforces and that tests/discovery/test_signal_enrichment_grounding.py:279 asserts.",
+  "review_run_id": "r-20261117T003951484455-review-of-ground-local-signal-descriptions-in-context-2d50d54cf598",
+  "reviewed_base_sha": "21d0b6cc69d4672d9e6eb69f153f90295bcfb225",
+  "reviewed_head_sha": "2d50d54cf5988dbf23c02f48b7f1b641e77446f3",
+  "reviewed_run_id": "r-20261116T212212585198-ground-local-signal-descriptions-in-context",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:39:57.787388+00:00",
+  "total": 108,
+  "verdicts": {
+    "diff": "read commit by commit, 21 commits from 21d0b6cc to 2d50d54c over 13 files (enrichment.py +217, two prompt templates, four scripts, three test files, the evidence fragment and the SVG); the feature is opt-in per seat, and pyproject.toml is untouched.",
+    "done_when": "brief.md:79-87 asks for the fragment's figures for baseline and each variant plus a rendered, looked-at figure saved through imas_codex.plotting and tests for each new option, the unsupported-statement drop and the second pass; the gate recorded in the manifest is a 96-test pytest run (head-injection-abbreviations.log:33) covering those tests, while the figure half is asserted by the separate figure record review-records/r-20261116T212212585198-ground-local-signal-descriptions-in-context.figure.json rather than by this gate.",
+    "goal": "the source brief's goal at brief.md:5-8 is correctness of the local model's descriptions against their given context, measured by hand against the paid model's existing descriptions; the landed change adds opt-in grounding, citation filtering, a local review pass, temperature and sentence-limit controls (imas_codex/discovery/signals/enrichment.py:179) and reports a sealed blind reading of 2/40 and 1/40 wrong beside the paid descriptions (private/report.json), so the goal is met and the best combination stated.",
+    "manifest": "read in full; it records the commit list, baseline_suite 54 passed at EXIT=0 in base-suite.log, after_suite 96 passed at EXIT=0 in head-injection-abbreviations.log, the negative control in negative-verified-suite.log (5 failed, EXIT=1), the measurements in private/report.json, and rubric.* answered for all six dimensions.",
+    "write_paths": "the manifest's orientation_write_paths and brief.md:99-106 name imas_codex/discovery/signals/, imas_codex/discovery/base/, imas_codex/llm/, pyproject.toml, scripts/, tests/discovery/ and the fragment and figure directories; all 13 files in `git diff --stat 21d0b6cc..2d50d54c` fall inside them."
+  }
+}

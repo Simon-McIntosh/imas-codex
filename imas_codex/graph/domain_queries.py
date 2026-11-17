@@ -16,6 +16,7 @@ from typing import Any
 from imas_codex.core.node_categories import SEARCHABLE_CATEGORIES
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.query_builder import render_chunk_source
+from imas_codex.graph.signal_descriptions import searchable_description_predicate
 from imas_codex.graph.vector_search import build_vector_search
 
 # ---------------------------------------------------------------------------
@@ -136,7 +137,7 @@ def signal_vector_search_block(
     parameters.
     """
     prefilter_clauses = [f"{node_alias}.facility_id = $facility"]
-    where_clauses: list[str] = []
+    where_clauses: list[str] = [searchable_description_predicate(node_alias)]
     if diagnostic:
         where_clauses.append(f"{node_alias}.diagnostic = $diagnostic")
     if physics_domain:

@@ -294,6 +294,10 @@ class ArchiveReader:
             }
         return {"success": True, "signal": signal}
 
+    def pulse_categories(self, *, limit: int = 10000) -> list[str]:
+        """List all archive-declared categories, including empty categories."""
+        return self._request("pulse_categories", limit=limit)["categories"]
+
     def pulses(self, pattern: str, *, limit: int = 1000):
         """Construct validated graph pulse identities from an archive listing."""
         result = self._request("pulses", pattern=pattern, limit=limit)
@@ -303,7 +307,8 @@ class ArchiveReader:
                 archive=self.archive,
                 name=item["id"],
                 start_ns=item["start_ns"],
-                end_ns=item["end_ns"],
+                end_ns=item.get("end_ns"),
+                description=item.get("description"),
                 categories=[
                     f"{self.archive}:{category}"
                     for category in result["categories"]
@@ -378,6 +383,10 @@ class ArchiveSignalLoader:
             pulse = pulses[0]
             relative = parameters.get("time_format", "absolute") == "relative"
             if start is None and end is None:
+                if pulse["end_ns"] is None:
+                    raise ArchiveReadError(
+                        "limit", "open-ended pulse requires an explicit bounded window"
+                    )
                 start, end = (
                     (0.0, (pulse["end_ns"] - pulse["start_ns"]) / 1e9)
                     if relative

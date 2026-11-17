@@ -1927,8 +1927,7 @@ classes:
         required: true
         range: integer
       end_ns:
-        description: Absolute end time in Unix epoch nanoseconds
-        required: true
+        description: Absolute end time in Unix epoch nanoseconds, absent for an open-ended pulse
         range: integer
       categories:
         description: Archive-declared category memberships
@@ -3014,6 +3013,14 @@ classes:
           relationship_type: CHECKED_WITH
       description:
         description: What this signal measures (physics description)
+      description_source:
+        description: >-
+          Source supplying the current description, unit and type, such as a
+          controls metadata feed. Does not assert engineering validation.
+      description_source_updated_at:
+        description: >-
+          Update timestamp supplied by the description source, preserved as
+          reported. A timestamp without a timezone is not assumed to be UTC.
       source_description:
         description: Catalogue wording supplied by the source data system, independent of enrichment
       metadata_archive:

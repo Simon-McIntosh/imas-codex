@@ -258,25 +258,47 @@ def metadata(client, request: dict) -> dict:
     return {"entries": entries, "warnings": warnings, "failed": failed}
 
 
+def pulse_categories(client, request: dict) -> dict:
+    """List category identities without requiring any category to have pulses."""
+    limit = int(request.get("limit", 10000))
+    if limit < 1:
+        raise ValueError("category limit must be positive")
+    found = [str(item) for item in client.getPulseCategories()]
+    if client.getErrorCode() != 0:
+        raise ReadError("archive category listing failed: " + str(client.getErrorMsg()))
+    if len(found) > limit:
+        raise ReadError("category catalogue exceeds limit")
+    if any(not name for name in found) or len(set(found)) != len(found):
+        raise ReadError("category listing contains empty or duplicate identities")
+    return {"categories": found}
+
+
 def pulses(client, request: dict) -> dict:
     """Serialize SWIG pulse objects explicitly rather than relying on repr()."""
     pattern = _token(request["pattern"])
     if not pattern.endswith("/*"):
         pattern = pattern.rstrip("/") + "/*"
-    found = list(client.getPulses2(pattern))
     limit = int(request.get("limit", 1000))
-    if limit < 1 or len(found) > limit:
+    if limit < 1:
+        raise ValueError("pulse limit must be positive")
+    found = list(client.getPulses2(pattern))
+    if client.getErrorCode() != 0:
+        raise ReadError("archive pulse listing failed: " + str(client.getErrorMsg()))
+    if len(found) > limit:
         raise ReadError("pulse catalogue exceeds limit; narrow the pattern")
     return {
         "pulses": [
             {
                 "id": str(item.pulseID),
                 "start_ns": int(item.timeFrom),
-                "end_ns": int(item.timeTo),
+                "end_ns": None if item.timeTo in (None, "") else int(item.timeTo),
+                "description": str(item.description)
+                if item.description is not None
+                else None,
             }
             for item in found
         ],
-        "categories": [str(item) for item in client.getPulseCategories()],
+        "categories": pulse_categories(client, {})["categories"],
     }
 
 
@@ -617,6 +639,8 @@ def dispatch(client, request: dict) -> dict:
         return metadata(client, request)
     if operation == "pulses":
         return pulses(client, request)
+    if operation == "pulse_categories":
+        return pulse_categories(client, request)
     if operation == "read":
         return read(client, request)
     raise ValueError("unknown operation")

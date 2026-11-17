@@ -1,8 +1,9 @@
-"""Guard the integration transport, session renewal and keyring-only sign-in."""
+"""Guard each application transport, session renewal and keyring-only sign-in."""
 
 import io
 import json
 import logging
+import sys
 from contextlib import nullcontext
 from unittest.mock import Mock
 
@@ -16,22 +17,26 @@ from imas_codex.discovery.icp import (
     ICPRequestRefused,
     client as module,
 )
-from imas_codex.discovery.wiki.auth import CredentialManager
+from imas_codex.discovery.wiki.auth import CredentialManager, CredentialStoreUnavailable
 from imas_codex.discovery.wiki.confluence import ConfluenceClient
 
 ORIGIN = "https://integration.example.test"
+APPLICATION_ORIGINS = (ORIGIN, "https://production.example.test")
 IDENTITY = "https://login.microsoftonline.com"
 GATEWAY = "https://gateway.example.test"
 DESCRIPTION = {"openapi": "3.0.0", "paths": {"/items": {"get": {}}}}
 WRITES = ("POST", "PUT", "PATCH", "DELETE")
 
 
-@pytest.fixture(autouse=True)
-def private_config(monkeypatch):
+@pytest.fixture(autouse=True, params=APPLICATION_ORIGINS)
+def private_config(monkeypatch, request):
+    monkeypatch.setattr(sys.modules[__name__], "ORIGIN", request.param)
     config = {
+        "origin": ORIGIN,
+        "readable_origins": list(APPLICATION_ORIGINS),
         "credential_service": "iter",
         "identity_origins": [IDENTITY],
-        "sign_in_origins": [IDENTITY, GATEWAY, ORIGIN],
+        "sign_in_origins": [IDENTITY, GATEWAY, *APPLICATION_ORIGINS],
         "gateway_sign_in_paths": ["/gateway/sign-in"],
     }
     monkeypatch.setenv("IMAS_CODEX_ICP_FACILITY", "test-facility")
@@ -124,18 +129,19 @@ def test_fixed_method_entry_points_reject_method_override(
 @pytest.mark.parametrize(
     "url",
     (
-        "https://production.example.test/items",
+        "https://unlisted.example.test/items",
         "https://unrelated.example.test/items",
-        "http://integration.example.test/items",
-        "https://integration.example.test.evil.test/items",
-        "https://integration.example.test:444/items",
-        "https://reader@integration.example.test/items",
+        "http://{host}/items",
+        "https://{host}.evil.test/items",
+        "https://{host}:444/items",
+        "https://reader@{host}/items",
         "https://login.microsoftonline.com.evil.test/items",
         "//unrelated.example.test/items",
     ),
 )
 @pytest.mark.parametrize("entry", ("client", "session", "prepared", "adapter"))
 def test_other_origin_refused(client, transport, url, entry):
+    url = url.format(host=ORIGIN.removeprefix("https://"))
     with pytest.raises((ICPRequestRefused, requests.exceptions.RequestException)):
         if entry == "client":
             client.get(url)
@@ -225,7 +231,7 @@ def test_stale_session_is_renewed_once(client, transport, monkeypatch, expired):
     def sign_in(*credentials):
         assert client.session.cookies.get("stale") is None
         client.session.cookies.set(
-            "renewed", "synthetic", domain="integration.example.test"
+            "renewed", "synthetic", domain=ORIGIN.removeprefix("https://")
         )
         return True
 
@@ -331,7 +337,7 @@ def test_description_read_and_origin_rooted_paths(client, transport):
     client.head("/api/items")
     assert [r.url for r in transport][-2:] == [ORIGIN + "/api/items"] * 2
     assert {r.method for r in client.request_log} == {"GET", "HEAD"}
-    assert {r.target for r in client.request_log} == {"integration"}
+    assert {r.target for r in client.request_log} == {"application"}
     assert not any(ORIGIN in str(r) for r in client.request_log)
 
 
@@ -352,7 +358,7 @@ def test_missing_stored_credentials_refuses_before_any_request(monkeypatch, tran
 
 @pytest.mark.parametrize("entry", ("client", "session", "adapter"))
 def test_host_header_cannot_route_to_another_application(client, transport, entry):
-    headers = {"Host": "production.example.test"}
+    headers = {"Host": "unlisted.example.test"}
     with pytest.raises(ICPRequestRefused):
         if entry == "client":
             client.get("/items", headers=headers)
@@ -401,8 +407,56 @@ def test_request_rate_is_applied_at_transport_boundary(client, transport, monkey
 @pytest.mark.parametrize(
     "setting", ("IMAS_CODEX_ICP_ORIGIN", "IMAS_CODEX_ICP_DESCRIPTION_PATH")
 )
-def test_no_implicit_application_configuration(client, monkeypatch, setting, transport):
+def test_no_implicit_application_configuration(
+    client, monkeypatch, setting, transport, private_config
+):
     monkeypatch.delenv(setting)
+    if setting == "IMAS_CODEX_ICP_ORIGIN":
+        private_config.pop("origin")
+    with pytest.raises(ICPConfigurationError):
+        ICPClient()
+    assert transport == []
+
+
+def test_each_private_application_origin_is_readable(client, transport):
+    client._authenticated = True
+    for origin in APPLICATION_ORIGINS:
+        client.get(origin + "/items")
+        client.head(origin + "/items")
+    assert [r.method for r in transport] == ["GET", "HEAD", "GET", "HEAD"]
+
+
+@pytest.mark.parametrize("selector", ("environment", "constructor"))
+def test_selector_cannot_authorise_an_unlisted_host(
+    client, monkeypatch, transport, selector
+):
+    kwargs = {}
+    if selector == "environment":
+        monkeypatch.setenv("IMAS_CODEX_ICP_ORIGIN", "https://unlisted.example.test")
+    else:
+        kwargs["origin"] = "https://unlisted.example.test"
+    with pytest.raises(ICPConfigurationError, match="private readable"):
+        ICPClient(**kwargs)
+    assert transport == []
+
+
+@pytest.mark.parametrize(
+    "origins",
+    (
+        [],
+        "https://integration.example.test",
+        ["http://other.example.test"],
+        ["https://other.example.test/path"],
+        ["https://other.example.test?query=yes"],
+        ["https://other.example.test#fragment"],
+        [IDENTITY],
+        [None],
+    ),
+)
+def test_invalid_private_readable_allowlist_refused(
+    client, private_config, transport, origins
+):
+    private_config["readable_origins"] = origins
     with pytest.raises(ICPConfigurationError):
         ICPClient()
     assert transport == []
@@ -413,16 +467,32 @@ def test_keyring_lookup_does_not_use_environment_or_prompt(monkeypatch):
     manager._keyring_available = False
     monkeypatch.setenv("ITER_USERNAME", "environment@example.test")
     monkeypatch.setenv("ITER_PASSWORD", "environment-secret")
-    assert manager.get_stored_credentials("iter") is None
+    with pytest.raises(CredentialStoreUnavailable, match="keyring is unavailable"):
+        manager.get_stored_credentials("iter")
     manager._keyring_available = True
     monkeypatch.setattr(
         manager,
         "_keyring_op",
-        lambda operation: json.dumps(
+        lambda operation, **kwargs: json.dumps(
             {"username": "stored@example.test", "password": "test"}
         ),
     )
     assert manager.get_stored_credentials("iter") == ("stored@example.test", "test")
+
+
+def test_unreadable_credential_store_reports_unavailable_before_http(
+    monkeypatch, transport
+):
+    monkeypatch.setenv("IMAS_CODEX_ICP_ORIGIN", ORIGIN)
+    monkeypatch.setenv("IMAS_CODEX_ICP_DESCRIPTION_PATH", "/openapi.json")
+    manager = Mock(spec=CredentialManager)
+    manager.get_stored_credentials.side_effect = CredentialStoreUnavailable(
+        "System keyring is unavailable; credential storage could not be read"
+    )
+    monkeypatch.setattr(module, "CredentialManager", lambda: manager)
+    with pytest.raises(ICPAuthenticationError, match="keyring is unavailable"):
+        ICPClient()
+    assert transport == []
 
 
 @pytest.mark.parametrize(
@@ -431,7 +501,7 @@ def test_keyring_lookup_does_not_use_environment_or_prompt(monkeypatch):
 def test_malformed_keyring_credentials_refuse(monkeypatch, value):
     manager = CredentialManager.__new__(CredentialManager)
     manager._keyring_available = True
-    monkeypatch.setattr(manager, "_keyring_op", lambda operation: value)
+    monkeypatch.setattr(manager, "_keyring_op", lambda operation, **kwargs: value)
     assert manager.get_stored_credentials("iter") is None
 
 
@@ -455,12 +525,13 @@ def test_api_post_refused_in_every_authentication_state(client, transport, state
 
 
 @pytest.mark.parametrize(
-    "target", (IDENTITY + "/login", GATEWAY + "/assertion", ORIGIN + "/gateway/sign-in")
+    "target", (IDENTITY + "/login", GATEWAY + "/assertion", "/gateway/sign-in")
 )
 @pytest.mark.parametrize("state", ("before", "signed-in", "inconsistent"))
 def test_sign_in_post_refused_outside_unsigned_exchange(
     client, transport, target, state
 ):
+    target = ORIGIN + target if target.startswith("/") else target
     client._authenticated = state != "before"
     client._policy.authenticating = state == "inconsistent"
     form = (
@@ -486,12 +557,14 @@ def test_unlisted_origin_post_refused_during_exchange(client, transport):
     ("target", "expected_origin", "expected_path"),
     (
         (GATEWAY + "/assertion", GATEWAY, "/assertion"),
-        (ORIGIN + "/gateway/sign-in", ORIGIN, "/gateway/sign-in"),
+        ("/gateway/sign-in", None, "/gateway/sign-in"),
     ),
 )
 def test_observed_gateway_form_allowed_only_during_sign_in(
     client, transport, target, expected_origin, expected_path
 ):
+    target = ORIGIN + target if target.startswith("/") else target
+    expected_origin = expected_origin or ORIGIN
     with client._sign_in_exchange():
         client.session.post(
             target, data={"SAMLResponse": "synthetic", "RelayState": "test"}
@@ -508,9 +581,7 @@ def test_observed_gateway_form_allowed_only_during_sign_in(
     assert len(transport) == 1
 
 
-@pytest.mark.parametrize(
-    "target", (GATEWAY + "/assertion", ORIGIN + "/gateway/sign-in")
-)
+@pytest.mark.parametrize("target", (GATEWAY + "/assertion", "/gateway/sign-in"))
 @pytest.mark.parametrize(
     "form",
     (
@@ -522,6 +593,7 @@ def test_observed_gateway_form_allowed_only_during_sign_in(
 def test_gateway_refuses_credentials_and_non_login_forms(
     client, transport, target, form
 ):
+    target = ORIGIN + target if target.startswith("/") else target
     with client._sign_in_exchange(), pytest.raises(ICPRequestRefused):
         client.session.post(target, data=form)
     assert transport == []
@@ -557,3 +629,57 @@ def test_api_path_cannot_be_configured_as_a_gateway_exception(client, transport)
             with pytest.raises(ICPRequestRefused):
                 client.session.post(ORIGIN + path, data={"SAMLResponse": "synthetic"})
     assert transport == []
+
+
+def test_selected_gateway_has_identical_unsigned_boundary(client, transport):
+    target = ORIGIN + "/gateway/sign-in"
+    with client._sign_in_exchange():
+        client.session.post(target, data={"SAMLResponse": "synthetic"})
+        with pytest.raises(ICPRequestRefused):
+            client.session.post(target, data={"passwd": "synthetic"})
+    client._authenticated = True
+    with pytest.raises(ICPRequestRefused):
+        client.session.post(target, data={"SAMLResponse": "synthetic"})
+    assert len(transport) == 1
+    assert client.request_log[0].origin == ORIGIN
+
+
+@pytest.mark.parametrize("listed", (True, False))
+def test_redirect_checks_the_destination_host(client, transport, monkeypatch, listed):
+    destination = (
+        next(origin for origin in APPLICATION_ORIGINS if origin != ORIGIN)
+        if listed
+        else "https://unlisted.example.test"
+    )
+
+    def send(adapter, request, **kwargs):
+        transport.append(request)
+        if request.url == ORIGIN + "/redirect":
+            return response(
+                request, status=302, headers={"Location": destination + "/items"}
+            )
+        return response(request)
+
+    monkeypatch.setattr(requests.adapters.HTTPAdapter, "send", send)
+    client._authenticated = True
+    if listed:
+        client.get("/redirect", allow_redirects=True)
+        assert len(transport) == 2
+        assert client.request_log[-1].origin == destination
+    else:
+        with pytest.raises(ICPRequestRefused):
+            client.get("/redirect", allow_redirects=True)
+        assert len(transport) == 1
+
+
+def test_private_single_origin_configuration_remains_readable(
+    client, private_config, transport
+):
+    private_config.pop("readable_origins")
+    with ICPClient(min_interval=0) as single:
+        single._authenticated = True
+        single.get("/items")
+        other = next(origin for origin in APPLICATION_ORIGINS if origin != ORIGIN)
+        with pytest.raises(ICPRequestRefused):
+            single.get(other + "/items")
+    assert len(transport) == 1

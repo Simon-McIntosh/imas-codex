@@ -13,6 +13,7 @@ in ``server.py`` via ``@self.mcp.tool()``.
 from __future__ import annotations
 
 import logging
+import re
 from collections.abc import Callable
 from typing import Any
 
@@ -23,6 +24,10 @@ from imas_codex.graph.client import GraphClient
 from imas_codex.graph.domain_queries import signal_vector_search_block
 from imas_codex.graph.models import SignalRole
 from imas_codex.graph.query_builder import render_chunk_source
+from imas_codex.graph.signal_descriptions import (
+    description_is_name,
+    searchable_description_predicate,
+)
 from imas_codex.graph.vector_search import build_vector_search
 from imas_codex.llm.search_formatters import (
     format_code_report,
@@ -209,11 +214,14 @@ def _signal_rerank_state(query: str, candidate: dict[str, Any]) -> dict[str, Any
     of the same quantity. When the signal carries a stored role, the state
     includes it so the judgement sees the measured role beside the raw fields.
     """
+    description = candidate.get("description") or ""
+    if description_is_name(
+        description, candidate.get("name") or "", candidate.get("accessor") or ""
+    ):
+        description = ""
     candidate_state = {
         "name": candidate.get("name") or "",
-        "description": (candidate.get("description") or "")[
-            :_SIGNAL_RERANK_DESCRIPTION_CHARS
-        ],
+        "description": description[:_SIGNAL_RERANK_DESCRIPTION_CHARS],
         "unit": candidate.get("unit") or "",
         "data_class": candidate.get("data_class") or "",
         "accessor": candidate.get("accessor") or "",
@@ -326,6 +334,8 @@ def _rank_signals(
     diagnostic: str | None = None,
     physics_domain: str | None = None,
     role: str | None = None,
+    *,
+    matches: dict[str, list[str]] | None = None,
 ) -> tuple[list[str], dict[str, float]]:
     """Rank facility signals by reciprocal rank fusion; return (ordered ids, scores).
 
@@ -341,6 +351,15 @@ def _rank_signals(
     )
 
     text_signals = _text_search_signals(gc, query, facility, SIGNAL_TEXT_POOL, role)
+
+    if matches is not None:
+        for sid in signal_ids:
+            matches[sid] = ["description_semantic"]
+        for row in text_signals:
+            fields = matches.setdefault(row["id"], [])
+            fields.extend(
+                field for field in row.get("match_fields", []) if field not in fields
+            )
 
     fused = rrf_fuse([signal_ids, text_signals])
     ranked = [sid for sid, _ in fused][:k]
@@ -410,8 +429,17 @@ def _search_signals(
         pool = max(k, RERANK_POOL) if rerank else k
 
         # Step 1: Rank signals by the tool's own hybrid rule
+        matches: dict[str, list[str]] = {}
         signal_ids, scores = _rank_signals(
-            gc, embedding, query, facility, pool, diagnostic, physics_domain, role
+            gc,
+            embedding,
+            query,
+            facility,
+            pool,
+            diagnostic,
+            physics_domain,
+            role,
+            matches=matches,
         )
         fused_ranks = {sid: rank for rank, sid in enumerate(signal_ids, 1)}
 
@@ -429,6 +457,8 @@ def _search_signals(
 
         # Step 2: Enrich with graph traversals
         enriched = _enrich_signals(gc, signal_ids)
+        for signal in enriched:
+            signal["match_fields"] = matches.get(signal["id"], [])
         enriched.sort(
             key=lambda sig: fused_ranks.get(sig.get("id"), len(signal_ids) + 1)
         )
@@ -810,33 +840,48 @@ def _text_search_signals(
     k: int,
     role: str | None = None,
 ) -> list[dict[str, Any]]:
-    """Text-based search on signals by the words a searcher types.
+    """Retrieve keyword matches with the fields that actually supplied them.
 
-    The ``facility_signal_text`` fulltext index covers ``name``, ``description``,
-    ``node_path``, ``keywords``, ``aliases``, ``unit`` and
-    ``source_description``, so a catalogue phrase or an alias code matches. Uses
-    the index for BM25 scoring when available and falls back to a CONTAINS scan
-    over ``name``, ``description`` and ``node_path`` otherwise.
-
-    A ``role`` predicate is applied inside each branch, before the branch's own
-    cut, so a role-filtered search draws its hits from the fulltext/CONTAINS
-    matches rather than losing them to the cut.
+    Field-scoped fulltext queries exclude descriptions that repeat an identity
+    before scoring and limiting; those values remain stored and discoverable
+    through the name field. The fallback applies the same eligibility rule.
+    Facility and role narrow matches before the cut in either branch.
     """
     role_clause = "          AND s.signal_role = $role\n" if role is not None else ""
     role_param = {"role": role} if role is not None else {}
+    eligible = searchable_description_predicate(text="s[field]")
+    field_guard = (
+        f"(NOT (field IN ['description', 'source_description']) OR {eligible})"
+    )
+    escaped = re.sub(r'([+\-!(){}\[\]^"~*?:\\/])', r"\\\1", query)
+    fields = [
+        "name",
+        "description",
+        "node_path",
+        "keywords",
+        "aliases",
+        "unit",
+        "source_description",
+    ]
 
     # Try fulltext index first (BM25 scoring)
     try:
         cypher = f"""
-            CALL db.index.fulltext.queryNodes('facility_signal_text', $search_query)
+            UNWIND $fields AS field
+            CALL db.index.fulltext.queryNodes('facility_signal_text', field + ':(' + $search_query + ')')
             YIELD node AS s, score
             WHERE s.facility_id = $facility
-{role_clause}            RETURN s.id AS id, score
+{role_clause}              AND {field_guard}
+            WITH s, field, score ORDER BY field
+            RETURN s.id AS id, max(score) AS score,
+                   collect(DISTINCT field) AS match_fields
+            ORDER BY score DESC, id
             LIMIT $limit
         """
         results = gc.query(
             cypher,
-            search_query=query,
+            fields=fields,
+            search_query=escaped,
             facility=facility,
             limit=k * 2,
             **role_param,
@@ -851,20 +896,34 @@ def _text_search_signals(
 
     # Fallback: CONTAINS with fixed score
     query_lower = query.lower()
+    fallback_fields = ["name", "description", "node_path", "source_description"]
+    conditions = " OR ".join(
+        f"(toLower(s.{field}) CONTAINS $query_lower"
+        + (
+            f" AND {searchable_description_predicate(text=f's.{field}')}"
+            if field in {"description", "source_description"}
+            else ""
+        )
+        + ")"
+        for field in fallback_fields
+    )
     cypher = f"""
         MATCH (s:FacilitySignal)
         WHERE s.facility_id = $facility
-{role_clause}          AND (
-            toLower(s.name) CONTAINS $query_lower
-            OR toLower(s.description) CONTAINS $query_lower
-            OR toLower(s.node_path) CONTAINS $query_lower
-          )
-        RETURN s.id AS id, 0.6 AS score
+{role_clause}          AND ({conditions})
+        UNWIND $fields AS field
+        WITH s, field
+        WHERE toLower(s[field]) CONTAINS $query_lower
+          AND {field_guard}
+        WITH s, field ORDER BY field
+        RETURN s.id AS id, 0.6 AS score, collect(DISTINCT field) AS match_fields
+        ORDER BY id
         LIMIT $limit
     """
     return gc.query(
         cypher,
         facility=facility,
+        fields=fallback_fields,
         query_lower=query_lower,
         limit=k * 2,
         **role_param,
@@ -936,6 +995,8 @@ def _enrich_signals(
              collect(DISTINCT {title: wp.title, id: wp.id}) AS documented_pages
         RETURN s.id AS id, s.name AS name, s.description AS description,
                s.physics_domain AS physics_domain, s.unit AS unit,
+               s.description_source AS description_source,
+               s.description_source_updated_at AS description_source_updated_at,
                s.data_class AS data_class,
                s.keywords AS keywords, s.aliases AS aliases,
                s.sign_convention AS sign_convention, s.cocos AS cocos,

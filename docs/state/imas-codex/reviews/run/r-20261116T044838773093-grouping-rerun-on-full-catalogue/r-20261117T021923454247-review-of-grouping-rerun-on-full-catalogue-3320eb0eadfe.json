@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own records: classification.json carries baseline_suite null and after_suite null, so the run declares no suite arms and the baseline-to-after set difference is empty; the logs it does record are measurement and control logs (grouping-measure.log EXIT=0, component-population.log EXIT=0, metadata-duty.log EXIT=0, negative-control-green.log EXIT=0) with the two red arms product-gate.log EXIT=1 and negative-control-red.log EXIT=1 red by design as the declared negative control.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/signals/archive_grouping_graph.py:164-168 name_parse_items and PARSE_QUERY inside persist_archive_grouping, which writes the CANDIDATE_PLANT_COMPONENT links the 623 count reports",
+    "imas_codex/discovery/signals/archive_grouping_graph.py:189 RETIRE_UNUSED_GROUPS_QUERY applied inside persist_archive_grouping",
+    "imas_codex/remote/catalogue_grouping.py:77 persist_archive_grouping call that ran the projection and its repeat"
+  ],
+  "completed_at": "2026-11-17T02:23:53.814Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-grouping-rerun-on-full-catalogue-3320eb0eadfe",
+      "recorded_at": "2026-11-17T02:43:34.653236+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T02:22:58Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "100",
+      "severity": "non-blocking",
+      "text": "non-blocking: the relation counts the table states (2,234 IN_ARCHIVE_COMPONENT, 623 CANDIDATE_PLANT_COMPONENT only, 100 no signal relation) are recorded only in the session transcript resume-2.jsonl entries 2319-2326, while the fragment's own artefact list at line 124 points a reader at component-population.log and component-population.json, whose breakdown query groups by c.parse_provenance (component-probe.py:26-33); the cited evidence therefore cannot reproduce the table."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "105",
+      "severity": "non-blocking",
+      "text": "non-blocking: 'The 623 were absent from the pre-run probe, which counted 100 PlantComponent nodes in total with no signal relation' repeats a pre-run reading no artefact holds - the pre-run probe wrote grouping-measurement.json before the repeat overwrote it, and the surviving no_signal_link_at_all=100 is the post-run query in resume-2.jsonl entry 2320 - and '91 seconds apart' is 90.06 s between the two readings at 2026-11-17T02:14:29.961 and 02:16:00.023 in component-population.json."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "122",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence presents metadata-duty.log as evidence that the metadata duty refuses an empty receipt, but that log's -c body re-types the predicate from measure_grouping.py:142-147 instead of importing it and prints two booleans with EXIT=0 unconditionally, so it cannot fail when the gate's own duty changes."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read the single commit faec73bae..3320eb0ea; it deletes the two PlantComponent rows and the concurrent-import paragraph, adds the 'Component nodes and signal reference' h4 with a three-row table, rewrites the metadata-duty sentence, and extends the private-log list",
+    "done_when": "plan section 10 (docs/plans/iter-signal-context-and-enrichment.html:89) asks for every section-5 measure, zero unreferenced component and pattern nodes, a repeat that adds no groups and all_debug; the fragment's tables at lines 93-104 report the zeros and the component census, and the census's relation labels are backed by a live query whose results survive only in the session transcript",
+    "goal": "the reviewed node's goal is to re-run component and field-pattern grouping over the completed private catalogue with the superseded groups and patterns retired; commit 3320eb0ea changes only docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html, so this review reads the fragment's correction of the run's component accounting rather than a new deliverable",
+    "manifest": "read the reviewed run's manifest; it is status complete with commits 0f4f00558 9a20d0e51 faec73bae 3320eb0ea, names measure_grouping.py and the logs component-population.log, metadata-duty.log and product-gate.log, and carries no baseline_suite or after_suite key, which classification.json confirms with both null",
+    "write_paths": "the node declared docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html and the docs/figures/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue directory; git diff faec73bae 3320eb0ea touches only the fragment, 10 insertions and 5 deletions"
+  },
+  "justifications": {
+    "durability": "the commit is prose only, and the check it adds, metadata-duty.log, re-evaluates a hand-copied expression and exits 0, so nothing reddens if measure_grouping.py:140-147 or the component census regresses.",
+    "evidence": "the relation counts at fragment lines 100-103 were measured by the query recorded in resume-2.jsonl entries 2319-2326 but are absent from either cited artefact, component-population.log and component-population.json, whose breakdown is by parse_provenance.",
+    "fit": "the added h4 and table at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:98-104 follow the h4/table idiom of the preceding section at lines 90-97, and the commit uses a conventional docs(signals) subject.",
+    "goal_fidelity": "the fragment at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:98-105 replaces the wrong concurrent-import attribution with a relation census whose 723, 623, 100 and 2,234 were each read from the live graph.",
+    "reuse": "the diff adds no function, class or module and names the existing owners of both mechanisms it cites, PARSE_QUERY at imas_codex/discovery/signals/variable_name_graph.py:11 and RETIRE_UNUSED_GROUPS_QUERY at imas_codex/discovery/signals/archive_grouping_graph.py:73.",
+    "scope_discipline": "git diff faec73bae 3320eb0ea names only docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html, inside the first declared write path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is to re-run component and field-pattern grouping over the completed private catalogue with the superseded groups and patterns retired; commit 3320eb0ea changes only docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html, so this review reads the fragment's correction of the run's component accounting rather than a new deliverable.\nVERDICT done_when: plan section 10 (docs/plans/iter-signal-context-and-enrichment.html:89) asks for every section-5 measure, zero unreferenced component and pattern nodes, a repeat that adds no groups and all_debug; the fragment's tables at lines 93-104 report the zeros and the component census, and the census's relation labels are backed by a live query whose results survive only in the session transcript.\nVERDICT write_paths: the node declared docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html and the docs/figures/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue directory; git diff faec73bae 3320eb0ea touches only the fragment, 10 insertions and 5 deletions.\nVERDICT manifest: read the reviewed run's manifest; it is status complete with commits 0f4f00558 9a20d0e51 faec73bae 3320eb0ea, names measure_grouping.py and the logs component-population.log, metadata-duty.log and product-gate.log, and carries no baseline_suite or after_suite key, which classification.json confirms with both null.\nVERDICT diff: read the single commit faec73bae..3320eb0ea; it deletes the two PlantComponent rows and the concurrent-import paragraph, adds the 'Component nodes and signal reference' h4 with a three-row table, rewrites the metadata-duty sentence, and extends the private-log list.\nCALL_SITES: imas_codex/discovery/signals/archive_grouping_graph.py:164-168 name_parse_items and PARSE_QUERY inside persist_archive_grouping; imas_codex/discovery/signals/archive_grouping_graph.py:189 RETIRE_UNUSED_GROUPS_QUERY; imas_codex/remote/catalogue_grouping.py:77 persist_archive_grouping call\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the fragment at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:98-105 replaces the wrong concurrent-import attribution with a relation census whose 723, 623, 100 and 2,234 were each read from the live graph.\nSCORE evidence: 15\nJUSTIFICATION evidence: the relation counts at fragment lines 100-103 were measured by the query recorded in resume-2.jsonl entries 2319-2326 but are absent from either cited artefact, component-population.log and component-population.json, whose breakdown is by parse_provenance.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff faec73bae 3320eb0ea names only docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html, inside the first declared write path.\nSCORE durability: 8\nJUSTIFICATION durability: the commit is prose only, and the check it adds, metadata-duty.log, re-evaluates a hand-copied expression and exits 0, so nothing reddens if measure_grouping.py:140-147 or the component census regresses.\nSCORE fit: 18\nJUSTIFICATION fit: the added h4 and table at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:98-104 follow the h4/table idiom of the preceding section at lines 90-97, and the commit uses a conventional docs(signals) subject.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module and names the existing owners of both mechanisms it cites, PARSE_QUERY at imas_codex/discovery/signals/variable_name_graph.py:11 and RETIRE_UNUSED_GROUPS_QUERY at imas_codex/discovery/signals/archive_grouping_graph.py:73.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:100 non-blocking: the relation counts the table states (2,234 IN_ARCHIVE_COMPONENT, 623 CANDIDATE_PLANT_COMPONENT only, 100 no signal relation) are recorded only in the session transcript resume-2.jsonl entries 2319-2326, while the fragment's own artefact list at line 124 points a reader at component-population.log and component-population.json, whose breakdown query groups by c.parse_provenance (component-probe.py:26-33); the cited evidence therefore cannot reproduce the table.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:105 non-blocking: 'The 623 were absent from the pre-run probe, which counted 100 PlantComponent nodes in total with no signal relation' repeats a pre-run reading no artefact holds - the pre-run probe wrote grouping-measurement.json before the repeat overwrote it, and the surviving no_signal_link_at_all=100 is the post-run query in resume-2.jsonl entry 2320 - and '91 seconds apart' is 90.06 s between the two readings at 2026-11-17T02:14:29.961 and 02:16:00.023 in component-population.json.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:122 non-blocking: the sentence presents metadata-duty.log as evidence that the metadata duty refuses an empty receipt, but that log's -c body re-types the predicate from measure_grouping.py:142-147 instead of importing it and prints two booleans with EXIT=0 unconditionally, so it cannot fail when the gate's own duty changes.",
+  "review_node": "review-of-grouping-rerun-on-full-catalogue-3320eb0eadfe",
+  "review_run_id": "r-20261117T021923454247-review-of-grouping-rerun-on-full-catalogue-3320eb0eadfe",
+  "reviewed_base_sha": "faec73baed72fae9b731e9a70374c7dcb0fb41da",
+  "reviewed_head_sha": "3320eb0eadfee13bf7db9bbd535a123917f43ee2",
+  "reviewed_run_id": "r-20261116T044838773093-grouping-rerun-on-full-catalogue",
+  "reviewer": {
+    "backend": "deepseek",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T021923454247-review-of-grouping-rerun-on-full-catalogue-3320eb0eadfe"
+  },
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T02:37:05.853508+00:00",
+  "total": 99
+}

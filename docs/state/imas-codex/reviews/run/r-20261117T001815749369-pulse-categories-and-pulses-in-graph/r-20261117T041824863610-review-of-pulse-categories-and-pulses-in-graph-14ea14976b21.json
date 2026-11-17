@@ -1,0 +1,70 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "b2efb3a240bfab259ea94903b797b0103200d21c",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/remote/pulse_catalogue.py:main calls pulse_distribution at :103 and import_pulses at :115",
+    "imas_codex/discovery/signals/scanners/codac_uda.py:persist_archive_endpoints at :98, reached from archive_pulses.py:96 and _persist_archives at :131",
+    "scripts/check_archive_pulses.sh runs the archive pulse gate against the head tree at :15-20"
+  ],
+  "completed_at": "2026-11-17T04:20:30.347Z",
+  "dispatched_at": "2026-11-17T04:19:25Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/archive_pulses.py",
+      "line": "96",
+      "severity": "non-blocking",
+      "text": "non-blocking: the live acceptance figures the landing quotes (743 categories = 743 in graph, 5934 pulses, 20/20 bounds, second import 0) were measured at revision 5a8246e (import-measure.log:1) and never re-measured at the promoted head 14ea14976b, whose gate covers only a disposable graph, so section 16's live measure is unverified for the code that now ships; re-run import-measure.py at the promoted head before quoting the figures beside it."
+    },
+    {
+      "file": "scripts/check_archive_pulses.sh",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the promoted gate's selection omits tests/graph/test_archive_schema.py, tests/remote/test_codac_uda.py and tests/graph/test_archive_schema.py's required-field parametrisation that ran in the 67-test arm the landing still cites, so the head receipt covers less than the pre-merge gate and a schema regression in those declarations would not be seen by the shipped gate."
+    }
+  ],
+  "head_log_revision": "14ea14976b215eccba7ccd59a797e9f9c2e70db9",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read d71365862 and 14ea14976b against 56172736: four of the six named files are byte-identical to the previously reviewed head, 14ea14976b adds scripts/check_archive_pulses.sh (21 lines, self-allocated scratch and EXIT receipts), and facility.yaml is the only file both parents changed, where main's description_source fields survive beside the node's optional end_ns so no upstream change was dropped.",
+    "done_when": "the measure asks for archive-vs-graph category equality, the pulses-per-category distribution with the empty count, end/without-end totals summing to the total, twenty preregistered pulses with equal bounds, every node reaching ITER, a zero-node second import and passing graph-marked statements; acceptance-summary.json records 743=743, the distribution to 4359 with empty_categories 0, 5934+0=5934, 20/20, nodes_created 0 on repeat, and merged-head.log records '21 passed' with EXIT=0, but those live figures were produced at revision 5a8246e.",
+    "goal": "section 16's goal is every pulse category the archive lists and every pulse of each category with its start and an end where one exists in the graph under the ITER facility, and imas_codex/discovery/signals/archive_pulses.py:11-34 writes both node kinds with facility and archive links while the merge preserved the optional end_ns declaration in imas_codex/schemas/facility.yaml:1929.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/manifest.md; it names commits 8db4796/d8f1b64/5a8246e/56172736/d7136586/14ea14976, baseline 56 passed at b2efb3a (baseline-receipt.log:64) against head 21 passed at 14ea14976, the merged pulse control at 2 failed/19 passed, and the reuse inverse at 2 failed.",
+    "write_paths": "the declared scope is imas_codex/schemas/, imas_codex/remote/, imas_codex/discovery/signals/, imas_codex/graph/, scripts/, tests/ plus the fragment and figure paths; the two gained commits touch scripts/check_archive_pulses.sh and, through the merge, imas_codex/schemas/facility.yaml, both inside it."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_archive_pulses.py:47-66 reddens under merged-pulse-control.log's reinstated invented ends and omitted empty categories (2 failed/19 passed), but nothing fails if the gate script itself is narrowed or deleted, and no assertion was added in this window.",
+    "evidence": "the done_when's live figures are acceptance-summary.json at revision 5a8246e (import-measure.log:1), while the promoted head gate scripts/check_archive_pulses.sh runs 21 tests on a disposable graph and asserts none of the count equality, distribution, 20-pulse readback or second-import measures.",
+    "fit": "scripts/check_archive_pulses.sh:1-21 follows the shell idiom already in scripts/ (set -eu, quoted expansion, revision/tree/command and EXIT receipts) and is named for what it checks, with no plan or ticket identifier.",
+    "goal_fidelity": "imas_codex/discovery/signals/archive_pulses.py:11-34 still writes PulseCategory and Pulse with AT_FACILITY, IN_ARCHIVE and IN_PULSE_CATEGORY, and the merge kept imas_codex/schemas/facility.yaml's end_ns non-required ('absent for an open-ended pulse') rather than main's required: true.",
+    "reuse": "no owner exists for a checked-in gate harness: scripts/ holds only ingress and apptainer scripts, the Makefile exposes no scoped-gate target, and mkdtemp/TemporaryDirectory use in imas_codex/ is Python scratch, so the script reuses the existing suite unchanged.",
+    "scope_discipline": "only scripts/check_archive_pulses.sh (new, 21 lines) and imas_codex/schemas/facility.yaml (+8 lines arriving from main through the merge) differ from the reviewed head 56172736, and both lie inside the declared imas_codex/schemas/ and scripts/ paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: section 16 asks for every pulse category the archive lists and every pulse of each category with its start and an end where one exists in the graph under the ITER facility, and imas_codex/discovery/signals/archive_pulses.py:11-34 still writes PulseCategory and Pulse with AT_FACILITY, IN_ARCHIVE and IN_PULSE_CATEGORY while the merge kept imas_codex/schemas/facility.yaml's end_ns non-required against main's required: true.\nVERDICT done_when: the measure asks for archive-vs-graph category equality, the distribution with the empty count, end/without-end totals summing to the total, twenty preregistered pulses with equal bounds, every node reaching ITER, a zero-node second import and passing graph-marked statements; acceptance-summary.json records 743=743, 5934+0=5934, 20/20 and 0 nodes on repeat, but at revision 5a8246e, and the head gate scripts/check_archive_pulses.sh re-runs 21 tests and asserts none of those live figures.\nVERDICT write_paths: the declared scope covers imas_codex/schemas/, imas_codex/remote/, imas_codex/discovery/signals/, imas_codex/graph/, scripts/ and tests/; the gained commits change scripts/check_archive_pulses.sh and, through the merge, imas_codex/schemas/facility.yaml, both inside it.\nVERDICT manifest: read manifest.md; it names commits 8db4796 through 14ea14976, baseline 56 passed at b2efb3a and head 21 passed at 14ea14976, with merged-pulse-control.log at 2 failed/19 passed and merged-reuse-control.log at 2 failed.\nVERDICT diff: read d71365862 and 14ea14976b against 56172736; four of the six named files are byte-identical to the previously reviewed head, 14ea14976b adds the 21-line gate script, and facility.yaml is the only both-parents file, where main's description_source fields survive beside the node's optional end_ns.\nCALL_SITES: imas_codex/remote/pulse_catalogue.py:main, imas_codex/discovery/signals/scanners/codac_uda.py:persist_archive_endpoints, scripts/check_archive_pulses.sh\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/archive_pulses.py:11-34 and the surviving optional end_ns at imas_codex/schemas/facility.yaml:1929 carry the delivered shape through the merge.\nSCORE evidence: 12\nJUSTIFICATION evidence: the live figures sit at import-measure.log:1's revision 5a8246e while the head gate at scripts/check_archive_pulses.sh:15-20 only replays 21 tests on a disposable graph.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: only scripts/check_archive_pulses.sh and imas_codex/schemas/facility.yaml differ from 56172736, both inside the declared scripts/ and imas_codex/schemas/ paths.\nSCORE durability: 15\nJUSTIFICATION durability: tests/graph/test_archive_pulses.py:47-66 reddens under merged-pulse-control.log's reinstated invented ends, but nothing fails if the gate script is narrowed or removed and no assertion was added in this window.\nSCORE fit: 18\nJUSTIFICATION fit: scripts/check_archive_pulses.sh:2-21 follows the set -eu, quoted, revision- and EXIT-receipt shell idiom already used in scripts/.\nSCORE reuse: 20\nJUSTIFICATION reuse: no checked-in gate-harness owner exists in scripts/, the Makefile or imas_codex/'s scratch helpers, and the script drives the existing suite unchanged.\nFINDING imas_codex/discovery/signals/archive_pulses.py:96 non-blocking: the landing's live figures (743=743, 5934, 20/20, second import 0) were measured at 5a8246e and never re-measured at head 14ea14976b, whose gate is a disposable-graph suite.\nFINDING scripts/check_archive_pulses.sh:15 non-blocking: the promoted gate's selection drops tests/graph/test_archive_schema.py and tests/remote/test_codac_uda.py that ran in the 67-test arm the landing cites, so the head receipt covers less than the pre-merge gate.\n",
+  "review_run_id": "r-20261117T041824863610-review-of-pulse-categories-and-pulses-in-graph-14ea14976b21",
+  "reviewed_base_sha": "56172736ad79098997557a96c79a8a83e6b6cc80",
+  "reviewed_head_sha": "14ea14976b215eccba7ccd59a797e9f9c2e70db9",
+  "reviewed_run_id": "r-20261117T001815749369-pulse-categories-and-pulses-in-graph",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T041824863610-review-of-pulse-categories-and-pulses-in-graph-14ea14976b21"
+  },
+  "reviewer_run_id": "r-20261117T041824863610-review-of-pulse-categories-and-pulses-in-graph-14ea14976b21",
+  "scores": {
+    "durability": 15,
+    "evidence": 12,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T04:29:57.527900+00:00",
+  "total": 101
+}

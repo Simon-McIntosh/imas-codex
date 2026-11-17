@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T00:39:36.617Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-survey-plant-signal-meaning-sources-7361354d6274",
+      "recorded_at": "2026-11-17T01:13:51.056750+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T00:36:16Z",
+  "emission": [
+    "VERDICT goal: read the reviewed brief's Goal section and the landed fragment; docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html:1-18 states what the installed MINT suite contributes and what the operator-display definitions could contribute, matching the node goal.",
+    "VERDICT done_when: read the brief's Done when and the named gate; the fragment answers all six questions as h4 headings, ends with the ranked list at docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html:262, names the private notes path at :21 and carries the six-column comparison table at :254, and validate_survey.py:33-36 asserts those same structural clauses.",
+    "VERDICT write_paths: read the reviewed brief's Scope line granting docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html alone; git diff --stat from 433f9901e80475fb601fd08c04efde1a43e31449 to 7361354d627437f06a6b562c59adb55156490ce7 shows that one file and 288 insertions, all inside the declared scope.",
+    "VERDICT manifest: read the reviewed manifest.md; it records status complete, commit 7361354d6274, one changed path, the literal gate command, gate.log with four PASS lines and EXIT=0, and empty baseline_suite/after_suite because no suite ran.",
+    "VERDICT diff: read the committed fragment from 433f9901e80 to 7361354d6274 commit by commit: one new HTML article of 288 lines with no product source, and its sha256 recomputed from the commit equals the d54684a0727ff5b1d5d5647de426ae7ee7bac34562618234b53a4a9d40d12cb9 the gate recorded.",
+    "CALL_SITES: none",
+    "SCORE goal_fidelity: 18",
+    "JUSTIFICATION goal_fidelity: docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html:197-217 reports the eight searched roots with the timeout and exit status the brief's read rule requires, and :233-241 answers the display question with undefined rather than 0%.",
+    "SCORE evidence: 15",
+    "JUSTIFICATION evidence: the gate binds the committed bytes by digest (d54684a0 equals the blob at 7361354d) and validate_survey.py:43-53 reconciles 16 workspaces, 199 rows, 198 named rows and 121 aliases against the private notes and measurement.json, though its log header names revision 433f9901 rather than the landed head.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: git diff --stat 433f9901e80..7361354d6274 contains one path, docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html, exactly the brief's Scope write path, with no product source touched.",
+    "SCORE durability: 8",
+    "JUSTIFICATION durability: no repository test covers docs/evidence/fragments/ content and the only check, validate_survey.py:54-55, tests one sentence and the notes path rather than the counts at survey-plant-signal...html:93 and :118, so reinstating a transposed count there leaves the gate green.",
+    "SCORE fit: 16",
+    "JUSTIFICATION fit: docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html:1-5 uses the family's id-bearing container with an h3 headline and h4 sections, as archive-pulse-schema.html:1-2 does at the reviewed base, and keeps private identities in the shared ~/.cache/imas-codex-codac-uda/meaning-sources directory; no forbidden name appears.",
+    "SCORE reuse: 20",
+    "JUSTIFICATION reuse: the diff adds one document into the family docs/evidence/fragments/codac-uda-signals/ already owns, and searching that directory, docs/AGENTS.md and tests/docs/test_documentation_layout.py found no existing mechanism the file re-implements.",
+    "FINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T222544206493-survey-plant-signal-meaning-sources/validate_survey.py:54 non-blocking: the gate reads the fragment's text only for the six table headers, one sentence and the notes path, never comparing a quoted count (199 rows at survey-plant-signal-meaning-sources.html:93, 126/128 at :118, 117 plot titles at :99) with measurement.json, so a transposed count in the landed fragment leaves the recorded gate green.",
+    "FINDING docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html:1 non-blocking: the fragment lands with no in-repository check, since its only gate is validate_survey.py inside the run directory that run retention removes and tests/docs/test_documentation_layout.py does not cover fragments, so a later regression has nothing that reddens."
+  ],
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T222544206493-survey-plant-signal-meaning-sources/validate_survey.py",
+      "line": 54,
+      "severity": "non-blocking",
+      "summary": "The gate reads the fragment's text in only three places \u2014 line 36 for the six comparison-table headers, line 54 for one sentence and line 55 for the private-notes path \u2014 and never compares a count quoted in the fragment against measurement.json. The numbers the survey's credibility rests on, 199 table rows at .../survey-plant-signal-meaning-sources.html:93, 126/128 at :118 and 117 plots with zero titles at :99, are asserted only inside the receipt (lines 43-53 check the private notes and measurement.json agree with the constants), so an edit that transposed a landed count in the fragment would keep the recorded gate green while leaving the receipt it cites unchanged."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The fragment lands with no check in the repository: its only gate is validate_survey.py under the run's own directory, which run retention removes, and no test under tests/docs covers docs/evidence/fragments/ contents. A later edit to a quoted count or a section heading therefore has nothing that reddens, which is the durability the node's own negative_control of none already concedes."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read the committed blob commit by commit from 433f9901e80 to 7361354d6274: one new HTML fragment, 288 lines, no product source, and its sha256 recomputed from the commit equals the digest the gate recorded as d54684a0727ff5b1d5d5647de426ae7ee7bac34562618234b53a4a9d40d12cb9.",
+    "done_when": "read the brief's Done when and the gate it names; the fragment answers all six numbered questions as h4 sections, ends with the four-item ranked list at line 262, names the private notes path at line 21 and carries one comparison table with source/name/label/unit/description/grouping/topology at line 254, and validate_survey.py:33-36 asserts exactly those structural clauses.",
+    "goal": "read the reviewed brief's Goal section and the landed fragment; docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html:1-18 states what the installed MINT suite contributes and what the operator display definitions could contribute and how each would be read, which is the node goal.",
+    "manifest": "read the reviewed manifest; it records status complete, commit 7361354d6274, one changed path, the literal gate command, gate.log scoring four PASS lines and EXIT=0, and baseline_suite/after_suite empty because the node ran no suite.",
+    "write_paths": "read the brief's Scope line, which grants only docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html; git diff --stat 433f9901e80 does to 7361354d6274 shows that single file and 288 insertions, so every changed path is inside the declared scope."
+  },
+  "node": "survey-plant-signal-meaning-sources",
+  "notes": "Read-only review of run r-20261116T222544206493-survey-plant-signal-meaning-sources at head 7361354d627437f06a6b562c59adb55156490ce7 against base 433f9901e80475fb601fd08c04efde1a43e31449 (the commit's own parent, which the reviewed manifest records as its orientation base). Read: the source brief, manifest.md, landing.md, gate.log, validate_survey.py, measurement.json, and the committed fragment by git show. Verified by recomputation rather than assertion: the committed blob's sha256 equals the digest the gate printed; the quoted counts 199/198/121/36/117/233/236/16/20 and 126-128 reconcile with measurement.json field by field; 126/128 is 98.4375%; all eight display searches record exit 0 within 1.7471 s, so the fragment's under-two-seconds claim holds. Instrument check on the headline negative claim: find over /home/ITER/mcintos/Code/tree-sitter-gdl at depth 4 returns no .gdl file and that root holds only LICENSE and plans, so the zero is plausible; the gate's find positive control located the 16 packaged workspace JSONs (validate_survey.py:51). Private notes exist at mode 0600. added_failure_count is 0 because the reviewed node ran no baseline or after suite arm, so there is no head arm that fails; its only gate is validate_survey.py at 433f9901 with four PASS lines and EXIT=0. The sibling fragment measure-controls-metadata-feed.html is absent at the reviewed base, so the survey's treatment of the HMI feed as unmeasured is not an omission at its revision. Production call sites: none \u2014 the landed artefact is a documentation page that no runtime code reads; the only reference to its path is the brief in docs/evidence/fragments/codac-uda-signals/briefs/.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261117T002359802995-review-of-survey-plant-signal-meaning-sources-7361354d6274",
+  "reviewed_base_sha": "433f9901e80475fb601fd08c04efde1a43e31449",
+  "reviewed_commits": [
+    "7361354d627437f06a6b562c59adb55156490ce7"
+  ],
+  "reviewed_head_sha": "7361354d627437f06a6b562c59adb55156490ce7",
+  "reviewed_run_id": "r-20261116T222544206493-survey-plant-signal-meaning-sources",
+  "rubric": "node",
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:22:00Z",
+  "total": 99
+}

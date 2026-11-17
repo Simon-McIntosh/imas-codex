@@ -145,7 +145,9 @@ def input_signal(row: dict) -> dict:
     return signal
 
 
-def score_response(content: str | None, expected: int) -> dict:
+def score_response(
+    content: str | None, expected: int, *, response_model=SignalEnrichmentBatch
+) -> dict:
     """A malformed response is a strict failure even if production recovers it."""
     result = {
         "parse_success": False,
@@ -153,7 +155,7 @@ def score_response(content: str | None, expected: int) -> dict:
         "matched": 0,
     }
     try:
-        batch = SignalEnrichmentBatch.model_validate_json(content or "")
+        batch = response_model.model_validate_json(content or "")
     except ValueError as exc:
         result["error"] = str(exc)
         return result
@@ -188,6 +190,7 @@ async def replay_batch(
     """Exercise production prompting or replay one exact captured request."""
     import litellm
 
+    from imas_codex.discovery.signals import enrichment
     from imas_codex.discovery.signals.enrichment import EnrichmentOptions
 
     if enrichment_options is None:
@@ -202,6 +205,26 @@ async def replay_batch(
     original_local = transport or llm._acompletion_local
     original_paid = litellm.acompletion
     original_query = GraphClient.query
+    original_enrich = enrichment.enrich_signal_batch
+    grounding_counts = {}
+    current_response_model = SignalEnrichmentBatch
+
+    async def replay_enrichment(**kwargs):
+        if messages is not None:
+            kwargs["messages"] = messages
+        result, cost, tokens = await original_enrich(**kwargs)
+        grounding_counts.update(
+            {
+                key: getattr(result, key, 0)
+                for key in (
+                    "evidence_drops",
+                    "review_drops",
+                    "review_revisions",
+                    "length_drops",
+                )
+            }
+        )
+        return result, cost, tokens
 
     def claim(*args, **kwargs):
         if pending:
@@ -213,10 +236,12 @@ async def replay_batch(
         started = time.monotonic()
         response = await awaitable
         raw = response.choices[0].message.content
+        score = score_response(raw, len(signals), response_model=current_response_model)
         captured.append(
             {
                 "raw": raw,
-                "score": score_response(raw, len(signals)),
+                "score": score,
+                "response_schema": current_response_model.__name__,
                 "served_model": response.model,
                 "seconds": time.monotonic() - started,
                 "finish_reason": response.choices[0].finish_reason,
@@ -250,8 +275,8 @@ async def replay_batch(
         return await observe(original_paid(**kwargs), kwargs.get("messages", []))
 
     async def call_once(**kwargs):
-        if messages is not None:
-            kwargs["messages"] = messages
+        nonlocal current_response_model
+        current_response_model = kwargs["response_model"]
         requests.append(kwargs["messages"])
         if capture_context:
             return SignalEnrichmentBatch(results=[]), 0.0, 0
@@ -319,6 +344,9 @@ async def replay_batch(
             stack.enter_context(patch.object(parallel, name, replacement))
         stack.enter_context(patch.object(GraphClient, "query", guarded_query))
         stack.enter_context(patch.object(llm, "acall_llm_structured", call_once))
+        stack.enter_context(
+            patch.object(enrichment, "enrich_signal_batch", replay_enrichment)
+        )
         stack.enter_context(patch.object(llm, "_acompletion_local", local_call))
         stack.enter_context(patch.object(litellm, "acompletion", paid_call))
         await parallel.enrich_worker(state)
@@ -335,6 +363,7 @@ async def replay_batch(
         "prompt_digest": digest(requests),
         "outputs": outputs,
         "seconds": time.monotonic() - started,
+        "grounding_counts": grounding_counts,
         "context_cost_usd": state.enrich_stats.cost if capture_context else 0.0,
         **accounting,
     }
@@ -534,15 +563,17 @@ def target_context(messages: list[dict], accessor: str) -> str:
             re.M,
         )
     )
-    ends = [row.start() for row in signal_headers + groups if row.start() > start]
-    end = min(ends) if ends else len(text)
-    before = [row.start() for row in groups if row.start() < start]
-    group_start = before[-1] if before else 0
-    group_first = next(
-        row.start() for row in signal_headers if row.start() >= group_start
-    )
-    global_prefix = text[: groups[0].start()] if groups else ""
-    return global_prefix + text[group_start:group_first] + text[start:end]
+    boundaries = [row.start() for row in signal_headers + groups]
+    for header in reversed(signal_headers):
+        end = min(
+            (position for position in boundaries if position > header.start()),
+            default=len(text),
+        )
+        block = text[header.start() : end] if header.start() == start else ""
+        if block:
+            block = re.sub(r"^### Signal \d+", "### Signal 1", block, count=1)
+        text = text[: header.start()] + block + text[end:]
+    return re.sub(r"Classify these \d+ signals\.", "Classify these 1 signals.", text)
 
 
 def blind_state(row: dict, reverse: bool) -> dict:

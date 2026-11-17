@@ -51,6 +51,9 @@ def _bind_task(function: Any) -> Any:
 _OWNERS_BY_MODULE = {
     "worker_common": (
         "Any",
+        "_ANCESTOR_CONTEXT_QUERY",
+        "_ANCESTOR_STATEMENT_LIMIT",
+        "ancestor_statements",
         "_DOMAIN_UK_US",
         "_GRAMMAR_FIELDS",
         "_GREEK_CMD_RE",
@@ -143,7 +146,6 @@ _OWNERS_BY_MODULE = {
         "process_enrich_parents_batch",
     ),
     "worker_extraction_and_enrichment": (
-        "_ANCESTOR_CONTEXT_QUERY",
         "_AXIS_LEAVES",
         "_COMPOSE_DOMAIN_STATE_QUERY",
         "_CROSS_IDS_QUERY",

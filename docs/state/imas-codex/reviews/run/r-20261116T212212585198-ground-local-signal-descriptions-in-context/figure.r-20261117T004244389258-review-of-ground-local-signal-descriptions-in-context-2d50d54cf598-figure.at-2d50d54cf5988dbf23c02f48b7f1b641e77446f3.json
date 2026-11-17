@@ -1,0 +1,50 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T00:58:15.617Z",
+  "dispatched_at": "2026-11-17T00:43:47Z",
+  "figures": {
+    "docs/figures/iter-signal-context-and-enrichment/ground-local-signal-descriptions-in-context/grounding-correctness.svg": {
+      "contrast": "defect \u2014 the nine non-selected rows' value labels and dots are drawn in #929292, measured at 3.0:1 against white, below the 4.5:1 bar for 14 pt text and light beside the row labels; row labels (#52514E, about 7.8:1) and the selected blue (#2878A5, about 4.9:1) clear it, so only the comparison population is affected",
+      "data_ink": "passes \u2014 two panels of ten dots, two axis lines and the value labels carry all the ink; no gridlines, no connecting lines, no fills",
+      "decoration": "passes \u2014 white background, no gradient or shaded band, no frame; the single blue row is emphasis rather than decoration",
+      "label_collision": "passes \u2014 checked on the rendered PNG and at 200 % over the label column, the left axis and the right edge: no label is clipped at a boundary, no two labels overlap, and no label sits on a dot",
+      "legibility": "passes \u2014 ten rows and both scales read at a glance, and every dot carries its own numeric value so no value has to be estimated from the axis",
+      "table_form": "passes \u2014 the figure answers a magnitude comparison across ten variants and the selected row's standing against them, which a dot plot carries better than a table would; every value is also given as a label, so nothing is left to estimation"
+    }
+  },
+  "findings": [
+    {
+      "file": "scripts/plot_signal_grounding.py",
+      "line": 46,
+      "severity": "non-blocking",
+      "summary": "The reference-grey mark colour is reused for the value annotations of the nine non-selected rows, so the numbers a reader scans to compare variants render in a colour that measures 3.0:1 against white on the rendered PNG \u2014 below the 4.5:1 bar for 14 pt regular text, and lighter still when the 1399 px image is scaled into the evidence page's column. The row labels and the selected row's blue annotations both clear the bar, so only the comparison population reads faintly; on a projector or a discounted display those nine values are the first thing to fade."
+    },
+    {
+      "file": "scripts/plot_signal_grounding.py",
+      "line": 32,
+      "severity": "non-blocking",
+      "summary": "This is the evidence fragment's decision graphic, and the left panel carries no mark for the bar the decision turns on. The plan sets at most four wrong in forty, which on this fixed screening twenty is two, and the figure shows two rows at one, eight rows at three or more and none at two. Without a threshold mark a reader cannot see from the picture that only those two rows clear the bar, nor that the selected combination's margin over the baseline (one against eleven) is far larger than its margin over the grounding-removal ablation, which scores the same one and so meets the bar on this screen as well."
+    },
+    {
+      "file": "scripts/plot_signal_grounding.py",
+      "line": 24,
+      "severity": "non-blocking",
+      "summary": "Rows follow the experiment's own order \u2014 baseline, the five single changes, the two combinations, then the ablation \u2014 rather than the measured wrong count, so the two rows that meet the plan's bar sit at the bottom of the list and the baseline sits at the top. Every value is labelled directly, so each row is readable on its own; the cost is that the ranking has to be assembled by scanning all ten numbers rather than seen."
+    }
+  ],
+  "findings_note": "All three findings are non-blocking: none stops a reader reading the figure. Judged from the rendered PNG attached to this review and from 200 % crops of its label column, left axis and right edge; no SVG was opened.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261117T004244389258-review-of-ground-local-signal-descriptions-in-context-2d50d54cf598-figure",
+  "reviewed_base_sha": "21d0b6cc69d4672d9e6eb69f153f90295bcfb225",
+  "reviewed_figures": [
+    "docs/figures/iter-signal-context-and-enrichment/ground-local-signal-descriptions-in-context/grounding-correctness.svg"
+  ],
+  "reviewed_head_sha": "2d50d54cf5988dbf23c02f48b7f1b641e77446f3",
+  "reviewed_run_id": "r-20261116T212212585198-ground-local-signal-descriptions-in-context",
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:22:40.874758+00:00",
+  "total": null
+}
