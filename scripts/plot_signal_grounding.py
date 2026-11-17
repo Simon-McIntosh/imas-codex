@@ -22,9 +22,10 @@ def draw(report: dict, output: Path, preview: Path) -> None:
     figure, axes = plt.subplots(1, 2, figsize=CANVAS, sharey=True)
     figure.subplots_adjust(left=0.31, right=0.96, bottom=0.15, top=0.96, wspace=0.3)
     y = list(range(len(rows)))
-    axes[0].scatter([row["wrong"] for row in rows], y, color=SUBJECT, s=70, zorder=3)
+    colors = [SUBJECT if row.get("selected") else REFERENCE for row in rows]
+    axes[0].scatter([row["wrong"] for row in rows], y, color=colors, s=70, zorder=3)
     axes[1].scatter(
-        [100 * row["delivery"] for row in rows], y, color=REFERENCE, s=70, zorder=3
+        [100 * row["delivery"] for row in rows], y, color=colors, s=70, zorder=3
     )
     axes[0].set_yticks(y, [f"{row['label']} (n={row['n']})" for row in rows])
     axes[0].invert_yaxis()
@@ -42,7 +43,7 @@ def draw(report: dict, output: Path, preview: Path) -> None:
             xytext=(9, 0),
             textcoords="offset points",
             va="center",
-            color=SUBJECT,
+            color=colors[index],
             fontsize=14,
         )
         axes[1].annotate(
@@ -51,6 +52,7 @@ def draw(report: dict, output: Path, preview: Path) -> None:
             xytext=(9, 0),
             textcoords="offset points",
             va="center",
+            color=colors[index],
             fontsize=14,
         )
     for axis in axes:
