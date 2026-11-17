@@ -1,0 +1,187 @@
+<article id="measure-controls-metadata-feed-evidence">
+  <h3>Controls metadata is useful for search, but covers a small archive subset</h3>
+  <p>The configured feed contains <strong>2,912 unique variables</strong> with
+    2,910 nonempty descriptions, 1,710 nonempty units and 2,912 nonempty types.
+    Its 1,832 distinct nonempty descriptions are substantially more informative
+    than the archive boilerplate: the ten most common account for only 95 entries
+    (3.2624% of all entries). A fixed-hash hand reading judged <strong>21/30
+    informative, 9/30 generic or opaque, and 0/30 demonstrably wrong</strong>.
+    This is good enough to use as a provenance-labelled search input for its
+    covered subset; it is not a validated engineering definition for every entry.</p>
+  <p><strong>Archive coverage is 2,898/995,006 names (0.291255%).</strong>
+    Of the feed's names, 2,898/2,912 (99.5192%) occur in the catalogue and 14 do
+    not. The magnet cold-test facility cohort has <strong>1,445/47,423 archive
+    names covered (3.047045%)</strong>; the feed contains 1,450 cohort names,
+    five absent from the catalogue. Descriptions cannot replace enrichment of the
+    remaining archive population. Exact membership counts do not assert that
+    every matching description is informative.</p>
+
+  <h4>Request boundary and private provenance</h4>
+  <p>The installed <code>mint/mydatasources.cfg</code> has one
+    <code>controlsmetadata</code> entry. Its SHA-256 and that of the installed
+    <code>iplotDataAccess/dataSource.py</code> match the source survey snapshots.
+    The operator exclusion was read from the privately supplied catalogue and
+    controller-cohort configurations; their excluded operator identities agree.
+    Before the request, short host names differed and DNS-resolved address sets
+    were disjoint. No archive endpoint was contacted.</p>
+  <p>Exactly <strong>one GET</strong> of <code>/variable_hmi</code> used the
+    installed client's <code>timeout=30</code> and
+    <code>proxies={"http": None, "https": None}</code>, with no explicit
+    credentials. It returned HTTP 200, no redirects, in 0.071835 s at
+    2026-11-16T23:10:57 UTC. No retry was needed. The response is a bare list of
+    2,912 objects with <code>name</code>, <code>project_name</code>,
+    <code>unit</code>, <code>data_type</code>, <code>description</code>,
+    <code>insertion_time</code> and <code>update_time</code> fields.</p>
+  <p>The <strong>673,345-byte</strong> response is retained privately as
+    <code>~/.cache/imas-codex-codac-uda/meaning-sources/controls-feed-response.bin</code>,
+    SHA-256 <code>c81f7dbdb5c74828fb6af753b383d00199e057bbc04dd7eb3cd8f931177f459f</code>.
+    The same private directory holds the request receipt (including the host
+    comparison), measurement settings, full measurement receipt, anonymous-to-real
+    system mapping, and the thirty entries with per-entry hand judgments and reasons.
+    Real hosts, selectors and descriptions are absent from tracked artifacts.
+    No graph write or product-source change was made.</p>
+
+  <h4>Description and field quality</h4>
+  <table>
+    <thead><tr><th>Measure</th><th>Count</th><th>Share of 2,912 entries</th></tr></thead>
+    <tbody>
+      <tr><td>Nonempty description</td><td>2,910</td><td>99.9313%</td></tr>
+      <tr><td>Nonempty unit</td><td>1,710</td><td>58.7225%</td></tr>
+      <tr><td>Nonempty type</td><td>2,912</td><td>100%</td></tr>
+      <tr><td>Distinct nonempty descriptions</td><td>1,832</td><td>Distinct strings, not entries</td></tr>
+      <tr><td>Distinct descriptions including empty</td><td>1,833</td><td>One empty string category</td></tr>
+      <tr><td>Ten most common nonempty descriptions combined</td><td>95</td><td>3.2624%</td></tr>
+      <tr><td>Description equals the selector or its colon suffix</td><td>210</td><td>7.2115%</td></tr>
+      <tr><td>Duplicate variable-name entries</td><td>0</td><td>0%</td></tr>
+    </tbody>
+  </table>
+  <p>The ten individual description frequencies are
+    <code>16, 15, 13, 13, 8, 7, 7, 6, 5, 5</code>. Ties at fifth occurrence
+    do not affect their combined share. Empty fields are counted after stripping
+    surrounding whitespace; missing and null optional fields count as empty.
+    A blank unit is not by itself a defect for a state or configuration field.</p>
+  <table>
+    <thead><tr><th>Description length [characters]</th><th>Entries</th></tr></thead>
+    <tbody>
+      <tr><td>Empty</td><td>2</td></tr>
+      <tr><td>1–9</td><td>94</td></tr>
+      <tr><td>10–19</td><td>431</td></tr>
+      <tr><td>20–39</td><td>2,385</td></tr>
+      <tr><td>40–79</td><td>0</td></tr>
+      <tr><td>80 or more</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>Nearest-rank character-length quantiles including empty entries are:
+    minimum 0, tenth percentile 14, lower quartile 22, median 27, upper quartile 36,
+    ninetieth percentile 38, ninety-fifth percentile 39, maximum 39.
+    The raw stored JSON independently has the same maximum of 39 characters,
+    with 247 descriptions at that maximum. The measurement applies no length
+    truncation. This ceiling may reflect a source field limit; this single response
+    cannot establish its cause or recover fuller wording.</p>
+
+  <h4>Exact and independently normalised archive comparisons</h4>
+  <p>The catalogue was opened with SQLite <code>mode=ro</code> and
+    <code>query_only=ON</code>. A previously known archive selector from the private
+    survey notes was found before the scan. The comparison streamed distinct names
+    on <code>rigel</code>, job <code>1320999</code>, obtaining 995,006 names.
+    Duplicate archive-role rows cannot inflate this denominator.</p>
+  <table>
+    <thead><tr><th>Transformation applied to both name sets</th><th>Feed names matched</th><th>Archive names covered</th><th>Archive share</th></tr></thead>
+    <tbody>
+      <tr><td>None: exact string identity</td><td>2,898</td><td>2,898</td><td>0.291255%</td></tr>
+      <tr><td>Strip outer whitespace only</td><td>2,898</td><td>2,898</td><td>0.291255%</td></tr>
+      <tr><td>Case folding only</td><td>2,898</td><td>2,898</td><td>0.291255%</td></tr>
+      <tr><td>Replace colon with hyphen only</td><td>2,898</td><td>2,898</td><td>0.291255%</td></tr>
+      <tr><td>Replace colon with dot only</td><td>2,898</td><td>2,898</td><td>0.291255%</td></tr>
+      <tr><td>Strip, case fold, collapse runs of colon/dot/underscore/hyphen to hyphen</td><td>2,898</td><td>2,898</td><td>0.291255%</td></tr>
+    </tbody>
+  </table>
+  <p>Each row is a separate comparison against the original names, not a
+    cumulative increment. Each adds zero matches. All transformations have zero
+    collisions among feed keys and zero collisions among matched archive keys.
+    Separator folding is a diagnostic of spelling differences, not a declaration
+    of semantic equivalence. The fourteen unmatched names remain unmatched under
+    every tested transformation and are not thereby declared invalid.</p>
+
+  <h4>Coverage by the first name field</h4>
+  <p>The first field before a hyphen (in the component segment before the colon)
+    defines the eighteen naming groups below. These groups are not independently
+    verified plant-breakdown identities. Labels replace real first-field codes;
+    the private receipt preserves the mapping. All six comparisons give identical
+    per-group results, so the match column is their common count.</p>
+  <table>
+    <thead><tr><th>Anonymous first-field group</th><th>Archive names</th><th>Feed names</th><th>Matched archive names</th><th>Archive share</th></tr></thead>
+    <tbody>
+      <tr><td>Plant system 18</td><td>331,690</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 17</td><td>268,177</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 16</td><td>171,219</td><td>1</td><td>1</td><td>0.000584%</td></tr>
+      <tr><td>Plant system 14</td><td>88,232</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 12</td><td>77,921</td><td>1,353</td><td>1,346</td><td>1.727391%</td></tr>
+      <tr><td>Plant system 02</td><td>14,492</td><td>145</td><td>144</td><td>0.993652%</td></tr>
+      <tr><td>Plant system 05</td><td>14,071</td><td>1,312</td><td>1,306</td><td>9.281501%</td></tr>
+      <tr><td>Plant system 11</td><td>12,380</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 15</td><td>7,141</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 09</td><td>5,575</td><td>101</td><td>101</td><td>1.811659%</td></tr>
+      <tr><td>Plant system 06</td><td>3,445</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 04</td><td>303</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 03</td><td>285</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 08</td><td>54</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 13</td><td>18</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 01</td><td>1</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 07</td><td>1</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+      <tr><td>Plant system 10</td><td>1</td><td>0</td><td>0</td><td>0.000000%</td></tr>
+    </tbody>
+  </table>
+  <figure>
+    <img src="/imas-codex/figures/codac-uda-signals/measure-controls-metadata-feed/coverage.svg"
+      alt="Exact archive-name coverage in eighteen anonymised first-field groups, ordered by decreasing catalogue population.">
+    <figcaption>Exact feed coverage within each naming group, ordered by decreasing
+      archive population. Each blue point is matched archive names divided by
+      that group's archive names; five groups have a match and thirteen have none.
+      The tiny nonzero share in Plant system 16 is resolved numerically in the table.
+      The figure uses the shared existing subject colour and checked
+      <code>imas_codex.plotting.save_figure</code>; its SVG was rendered and inspected.</figcaption>
+  </figure>
+  <p>The cold-test cohort is counted across namespaces by matching the entire
+    facility token in any hyphen-delimited component field before the colon.
+    That token comes from the supplied private controller-cohort configuration;
+    limiting the cohort to the magnet first-field group would miss diagnostic
+    names for the same facility. Its 47,423 archive names, 1,450 feed names and
+    1,445 exact matches are separate from the all-archive denominator.</p>
+
+  <h4>Fixed-hash hand reading and freshness limits</h4>
+  <p>The sample is the thirty entries whose UTF-8 name SHA-256 digests sort first
+    in ascending order, with name as a tie-break. No substitution was made.
+    Informative means the description identifies a physical quantity, equipment
+    state, configuration field or operational role beyond an opaque identifier.
+    Generic includes a repeated code/selector or an unqualified analogue-input
+    label. Wrong means an observable contradiction with the name, unit or type.
+    The result is 21 informative (70%), nine generic (30%), zero demonstrably wrong;
+    it is not an engineering-drawing validation or a guarantee about unsampled entries.</p>
+  <p>The response records insertion and update timestamps on all 2,912 rows,
+    spanning 2026-08-04 to 2026-11-09. There are four distinct insertion timestamps
+    and four distinct update timestamps; two rows have an update timestamp different
+    from insertion. These are per-record stamps without an explicit timezone.
+    The payload has no version or refresh schedule, and the HTTP response supplies
+    neither ETag nor Last-Modified. Its Date header timestamps this request only.
+    There is evidence of recorded updates, but automatic refresh cadence,
+    current completeness and a versioned feed contract are not established.
+    The snapshot digest above provides reproducibility for this measurement.</p>
+
+  <h4>Refusal controls and delivery</h4>
+  <p>The offline measurement rejects an empty list with
+    <code>response contains no entries</code> and a wrapper without an entry list
+    with <code>response wrapper must contain exactly one entry list</code>.
+    CLI tests require exit 1, the cause on stderr, no stdout coverage and no
+    output file. Invented fixtures also check the known-name positive control,
+    catalogue read-only behaviour, separate normalisation counts, collisions,
+    wrapper/key variants and description distributions.</p>
+  <p>The deliberate negative control changes the parser's refusals to return
+    an empty list. The committed implementation passes all 17 focused tests;
+    the mutation gives 11 failed and six passed, including both CLI failure
+    controls. The final gate and red mutation log are in the run record named
+    by the manifest.
+    The first figure save correctly refused a clipped automatic tick. Its tick
+    positions were constrained to the displayed limits and the figure was saved
+    from the stored measurement receipt, without another catalogue scan or GET.</p>
+</article>
