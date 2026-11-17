@@ -35,6 +35,16 @@
       "note": "The next version takes the failure form's control from the records host: a known-present plant-structure read through the same sign-in, which is independent of the documents and makes no further request to the document host.",
       "reason": "",
       "when": "2026-11-17T15:58:39.838947+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2c64f7f2f3664eb78f0e4e1ef5045b2321b3569f",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The next version ties the checks to the two mandatory documents: the signal list is the spreadsheet whose sheet names and row counts are recorded, and the functional specification is verified by file signature and page count.",
+      "reason": "",
+      "when": "2026-11-17T15:58:44.106502+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The next version takes the failure form's control from the records host: a known-present plant-structure read through the same sign-in, which is independent of the documents and makes no further request to the document host.",
       "reason": "",
       "when": "2026-11-17T15:58:39.838947+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "2c64f7f2f3664eb78f0e4e1ef5045b2321b3569f",
+      "commit_basis": "edit",
+      "note": "The next version ties the checks to the two mandatory documents: the signal list is the spreadsheet whose sheet names and row counts are recorded, and the functional specification is verified by file signature and page count.",
+      "reason": "",
+      "when": "2026-11-17T15:58:44.106502+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261117T154516547716-plan-review-of-icp-api-access.json",
