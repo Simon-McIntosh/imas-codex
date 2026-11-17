@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:45:02.265Z",
+  "dispatched_at": "2026-11-16T23:44:20Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/icp-api-access.html:57",
+      "id": "done_when-1",
+      "reason": "a worker whose measured first result is that no GET returns a file cannot close the section, so the legitimate negative outcome must be a named completion condition of the done-when.",
+      "text": "\u00a74's done-when requires \"one spreadsheet and one PDF named before the run are each fetched at a stated version\", while \u00a74's Delivers (line 56) states the section's first result is whether a published GET operation on production returns a document's versions and its file, and that if none does it \"fetches nothing\" and reports the routes tried; the gate therefore has no passing form for the section's own declared legitimate outcome, and its \"document the account may not read\" negative control is unreachable when no file route exists.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/icp-api-access.html:47",
+      "id": "done_when-2",
+      "reason": "the refusal test's allowed-host set is the gate a worker writes, and leaving the old set in place makes the production fetch and the s2 refusal test mutually unsatisfiable.",
+      "text": "\u00a72's done-when still requires \"a test shows a request to any host other than the integration instance and the listed sign-in hosts is refused\", while \u00a72's Delivers (line 46) now allows the production instance and \u00a74 (line 57) requires \"every write-refusal and host-refusal test of section 2 holds for the production host as for the integration host\"; the gates contradict, one demanding production be refused and the other requiring a fetch from it.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "8c059e920869f2f994c39e9d3fc1edeff8aadf38",
+  "plan_fingerprint": "e087e583040cd304e2f9760325b499a679ded55dc48188281ada440aaa1b4438",
+  "plan_slug": "icp-api-access",
+  "plan_version": 16,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T232616468039-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "fbbd5f275ef39ec68ec6b826599976c22e048d19",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a74's link to icp-api-access#s2 resolves, the document-source decision points at s4, and the cited evidence fragment docs/evidence/fragments/icp-api-access/icp-read-only-client.html exists.",
+    "done_when": "two findings \u2014 \u00a74's done-when requires two fetched files unconditionally although its Delivers makes that fetch conditional; \u00a72's done-when still refuses every host other than the integration instance, contradicting \u00a72's Delivers and \u00a74's production read.",
+    "evidence_paths": "pass \u2014 \u00a74's evidence is the landing record and the private cache under the stored path, durable and outside the repository; the tracked-tree search keeps fetched content out of the repo.",
+    "naming": "pass \u2014 the changed text introduces no plan labels, stage names or ticket identifiers.",
+    "reasoning": "pass \u2014 \u00a74's root cause matches its decision context (the integration instance holds none of the documents and refuses file reads), the production file read is stated as unestablished rather than asserted, and no code path, step sequence or function is prescribed.",
+    "single_goal": "pass \u2014 \u00a74 names one deliverable, the fetch and parse of a named document at a stated version.",
+    "wiring": "pass \u2014 \u00a74 declares depends-on s2 (plan.html:22), that dependency resolves, and the downstream plan's s4 names icp-api-access#s3 and #s4."
+  },
+  "section_digests": {
+    "_document": "86c1a8aea5604dc507982d9398768fdde8bb0fe0ee57036fe372995309e31878",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "9f4cb22f6c0cfb55fdeab779a476c6ef86aec3491e606fbf13c47bbc39d2aaba",
+    "s3": "66e329fb1086b96e19afdeacc4d5c59fb4e2b0161056d483336f969c8e6ea1ee",
+    "s4": "7a1fccb17a1b05d65b1caed4b140c517c767b06f7e486273232e11e6b72bab11"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:09:51.500065+00:00",
+  "total": null
+}
