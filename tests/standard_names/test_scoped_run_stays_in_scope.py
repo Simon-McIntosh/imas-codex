@@ -499,12 +499,13 @@ def test_scoped_run_leaves_a_planted_out_of_scope_name_unchanged(
 
     summary = asyncio.run(_run_scoped_pools(f"sn-edit-probe-{token}"))
 
-    # The guard arm: the scoped run recorded the bypass and left the planted
-    # name's properties and relationships exactly as it found them.
-    assert "reconcile_standard_name_sources" in summary.bypassed_maintenance_passes
+    # The guard arm: the planted name's properties and relationships are exactly
+    # as they were, and the run records which pass it did not run.
     with GraphClient() as gc:
         assert _digest(gc, guard_id) == guard_before
 
+    assert "reconcile_standard_name_sources" in summary.bypassed_maintenance_passes
+    with GraphClient() as gc:
         # The control arm: run the same maintenance directly and show it is a
         # pass this planted state would move, so the guard's equality above is
         # an absence of effect and not an inert fixture.
