@@ -53,6 +53,18 @@ token.</p>
 </tbody>
 </table>
 
+<p id="sph-scoped-run-stays-in-scope-focus-clear">A focus run's one pre-seeding
+write — clearing stale <code>run_id</code> stamps from a previous run of the
+same paths — was a whole-catalogue statement. It is now
+<code>FOCUS_STAMP_CLEAR_CYPHER</code> in <code>imas_codex/cli/sn.py</code>: one
+statement over the run's own <code>StandardNameSource</code> ids and the names
+those sources produced, so an out-of-scope source keeps its stamp and its name
+keeps its own. The graph-marked test
+<code>::test_focus_stamp_clear_is_bounded_by_the_named_sources</code> plants an
+in-scope and an out-of-scope source, runs the statement, and reads both stamps
+back: the named pair is <code>null</code>, the other pair still reads
+<code>previous-run</code>.</p>
+
 <h2 id="sph-scoped-run-stays-in-scope-disposable">A recorded run on a disposable graph&nbsp;</h2>
 <p id="sph-scoped-run-stays-in-scope-disposable-method">Two names are planted
 outside the scope, each with a <code>StandardNameSource</code> that has no
@@ -101,6 +113,23 @@ which calls <code>_run_sn_cmd</code> with a scope and no flag and observes
 <code>skip_global_maintenance=True</code>.</p>
 
 <h2 id="sph-scoped-run-stays-in-scope-gate">The suite at head and base&nbsp;</h2>
-<p id="sph-scoped-run-stays-in-scope-gate-result">PLACEHOLDER GATE RESULT</p>
+<p id="sph-scoped-run-stays-in-scope-gate-result">The whole
+<code>tests/standard_names</code> directory ran on the compute node
+<code>98dci4-clu-3026</code> (SLURM job 1319168), once from this worktree and
+once from a scratch extraction of base <code>3fb991aa</code>:</p>
+<table>
+<thead><tr><th>arm</th><th>revision</th><th>result</th><th>failures</th></tr></thead>
+<tbody>
+<tr><td>head</td><td><code>7d64fd7d2</code></td><td>8808 passed, 11 skipped, 543 deselected (824.52 s)</td><td>0</td></tr>
+<tr><td>base</td><td><code>3fb991aa6</code></td><td>8789 passed, 12 skipped, 541 deselected (796.93 s)</td><td>0</td></tr>
+</tbody>
+</table>
+<p>Added failures: <strong>0</strong>. Logs:
+<code>logs/gate-head-standard_names.log</code> and
+<code>logs/gate-base-standard_names.log</code> under the run directory, each
+ending <code>EXIT=0</code>. The two graph-marked tests ran separately
+(<code>logs/graph-scoped-run-tests.log</code>, 2 passed, <code>EXIT=0</code>)
+because the default markers exclude <code>graph</code>; no live graph was
+written.</p>
 </main></body>
 </html>
