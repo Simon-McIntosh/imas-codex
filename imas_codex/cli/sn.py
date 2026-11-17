@@ -1780,7 +1780,9 @@ def _reject_unscoped_accepted_reset(
         "For a run bounded by --focus/--batch, --name, or --scope-run-id, "
         "bypass all "
         "global startup, background, and post-drain maintenance writes while "
-        "running the normal scoped worker pools. Invalid without an explicit "
+        "running the normal scoped worker pools. A scoped run bypasses that "
+        "maintenance whether or not this flag is given, so the flag is only "
+        "needed to state the intent explicitly. Invalid without an explicit "
         "scope and with reset/reseed/revalidate or maintenance-only modes. With "
         "--dry-run, validate and preview the scope without graph mutation."
     ),
