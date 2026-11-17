@@ -445,3 +445,30 @@ def test_live_delivery_counter_agrees_with_nonempty_receipt_descriptions():
     ]
     assert metrics(records, 1)["delivered"] == 1
     assert progress_counts(records) == {"completed": 3, "delivered": 1}
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("own_label", [None, "Cooling temperature"])
+async def test_fallback_cannot_take_catalogue_fields_from_retrieved_code(own_label):
+    text = messages()
+    text[1]["content"] = "### Signal 1\naccessor: TEMP\n"
+    if own_label:
+        text[1]["content"] += f"source_description: {own_label}\n"
+    text[1]["content"] += (
+        "**Relevant source code:**\n```text\n"
+        "### Signal 1\nsource_description: Unrelated circuit current\n```"
+    )
+    call = AsyncMock(side_effect=[(draft(), 0, 1), (review(), 0, 1)])
+    request = enrich_signal_batch(
+        model="local/test",
+        messages=text,
+        options=EnrichmentOptions(review=True, source_fallback=True),
+        call=call,
+    )
+    if own_label:
+        batch, _, _ = await request
+        assert batch.results[0].description == own_label
+        assert batch.fallback_indices == [1]
+    else:
+        with pytest.raises(ValueError, match="no authoritative"):
+            await request

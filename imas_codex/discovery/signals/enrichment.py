@@ -153,12 +153,19 @@ def signal_source_items(items: dict[str, str]) -> dict[int, dict[str, tuple[str,
     in_signal = not any(
         re.match(r"### Signal \d+\s*$", line) for line in items.values()
     )
+    in_fence = False
     for key, line in items.items():
+        if line.startswith("```"):
+            in_fence = not in_fence
+            in_signal = False
+            continue
+        if in_fence:
+            continue
         match = re.match(r"### Signal (\d+)\s*$", line)
         if match:
             index, in_signal = int(match[1]), True
             sources.setdefault(index, {})
-        elif line.startswith("## "):
+        elif line.startswith(("## ", "**")):
             in_signal = False
         elif in_signal:
             for field in ("source_description", "unit"):
