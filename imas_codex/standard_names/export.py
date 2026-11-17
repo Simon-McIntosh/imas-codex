@@ -1607,9 +1607,24 @@ def audited_text_digest(
     it; a group audit records this digest per member, so a cut compares the
     stored text with the text that was read rather than trusting a timestamp
     that any idempotent writeback also moves.
+
+    The digest is the repository's own content identity for that pair, the
+    ``content_hashes.combined_sha256`` a refine claim records (see
+    ``graph_claim_release``), taken through the same hashing service rather
+    than restated here: one text therefore has one identity, and an audit's
+    digest can be compared with the claim ledger's for the same name instead
+    of being a second, incomparable spelling of it.
     """
-    payload = json.dumps([description or "", documentation or ""], ensure_ascii=False)
-    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        _authority_payload_hash,
+    )
+
+    return _authority_payload_hash(
+        {
+            "description": description or "",
+            "documentation": documentation or "",
+        }
+    )
 
 
 @dataclass(frozen=True)
