@@ -32,9 +32,28 @@
       "finding": "naming-1",
       "reason": "the bar is already fixed in words in the preceding sentence, so removing or restating the identifier leaves the cut's behaviour and its done-when exactly as they are; an implementer takes the quantity, not the spelling, from the plan.FINDING done_when docs/plans/sn-audited-group-release.html:37 \u2014 a bare claim",
       "when": "2026-11-17T22:10:30.320704+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "bf4d11062ee1da036861478e70ff7926bb9bfed8",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 3 now leaves a member the lead has ruled an exception, listed by name on the plan, out of the rate and names it in the release notes.",
+      "reason": "",
+      "when": "2026-11-17T22:57:30.531047+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "bf4d11062ee1da036861478e70ff7926bb9bfed8",
+      "commit_basis": "edit",
+      "note": "Section 3 now leaves a member the lead has ruled an exception, listed by name on the plan, out of the rate and names it in the release notes.",
+      "reason": "",
+      "when": "2026-11-17T22:57:30.531047+00:00"
+    },
     "naming-1": {
       "action": "noted",
       "by": "plan-review-reflex",
