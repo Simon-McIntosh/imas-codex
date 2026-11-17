@@ -12,6 +12,13 @@
     "imas_codex/remote/scripts/codac_uda.py:639 dispatch (remote operation router)"
   ],
   "completed_at": "2026-11-17T01:26:01.167Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-pulse-categories-and-pulses-in-graph-5a8246e821e5",
+      "recorded_at": "2026-11-17T01:56:23.442737+00:00"
+    }
+  },
   "dispatched_at": "2026-11-17T01:25:24Z",
   "findings": [
     {
