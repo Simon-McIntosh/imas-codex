@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T00:11:19.016Z",
+  "dispatched_at": "2026-11-17T00:10:47Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T235112967137-plan-review-of-iter-signal-context-and-enrichment/plan.html:125",
+      "id": "reasoning-1",
+      "reason": "the answer recorded against this decision is what releases sections 6 and 7, so an option whose action is already under way produces an answer that means something other than what the decision's own context says is pending, and the previous repair that was meant to leave two choices did not remove it.",
+      "text": "the open decision's option `refine-for-correctness` reads \"One more refinement round aimed at correctness, then decide\", but the context at line 122 added in this version states that this round was asked for on 2026-11-16 and \"is running as the node ground-local-signal-descriptions-in-context\"; a lead answering the decision from the options list would choose a round that is already in flight, and the option set no longer states the remaining choices (the round's result is awaited, then the model is chosen), so the recorded answer would contradict the context that holds the sections",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T235112967137-plan-review-of-iter-signal-context-and-enrichment/plan.html:122",
+      "id": "done_when-1",
+      "reason": "the decision is what the lead reads when setting the bar, and stating only the wrong-count there reopens the failure the right-count limb was added to close.",
+      "text": "the decision's context calls section 6's quality bar \"(at most four wrong in forty, by hand), the coordinator's proposal for the lead to confirm or change\", while section 6 at line 70 defines the same bar as at most four wrong *and* at least twenty-eight right of forty with partly-right defined as everything a wrong/right pair of classes does not cover; a lead confirming the bar from the decision page confirms a weaker condition under which a run of forty with thirty-six partly-right descriptions passes, so the limb that made the bar able to fail on quality is dropped exactly where the lead is asked to fix it",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+  "plan_fingerprint": "2fee8865ded8d4593952559fb9619690520b739d712be4f868295cb339e2b969",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 41,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T235112967137-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "c1792e381435484f60aaf82f4ac9ace0fa85a3c8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/figures/iter-signal-context-and-enrichment/pipeline.svg`, the refinement fragment, the plan slugs `icp-api-access` and `codac-uda-signals`, and section ids s1\u2013s10 all resolve; no anchor names a renamed or deleted target.",
+    "done_when": "a finding \u2014 the open decision's context (line 122) states section 6's quality bar as \"at most four wrong in forty\" only, while section 6 at line 70 requires at most four wrong *and* at least twenty-eight right of forty.",
+    "evidence_paths": "pass \u2014 the decision's cited fragment `docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html` resolves in the tracked tree, and the correctness round the context names as running has its durable record under the crew run directory `r-20261116T212212585198-ground-local-signal-descriptions-in-context`.",
+    "naming": "pass \u2014 the changed paragraph carries no plan label, stage name, ticket number or version tag into any symbol, file or comment, and `ground-local-signal-descriptions-in-context` is a node name used only in plan prose.",
+    "reasoning": "a finding \u2014 the decision still offers \"One more refinement round aimed at correctness, then decide\" as an answerable option after its own context records that round as already running.",
+    "single_goal": "pass \u2014 each of the ten sections names one deliverable and one set of figures.",
+    "wiring": "pass \u2014 every `depends-on` in `plan-section-depends-on` resolves to a section or an external plan that exists, sections 6 and 7 are declared `deferred` under the open decision `local-model-confirmed-on-quality`, and section 8's dependency on the deferred section 7 is declared, so a queue holds it rather than dispatch it."
+  },
+  "section_digests": {
+    "_document": "d799e35f3837db9635799c9d38c7924b193e86ee961d489fc9d0fce00e2d9b06",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "0c790a3f0d65e4c65a76633b2c0e032bed39a211305c63913946cc77974eade8",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:24:55.960524+00:00",
+  "total": null
+}
