@@ -28,7 +28,10 @@ from imas_codex.standard_names.defaults import (
     REVIEW_DOCS_BACKLOG_CAP,
     REVIEW_NAME_BACKLOG_CAP,
 )
-from imas_codex.standard_names.pipeline import resolve_scope_maintenance
+from imas_codex.standard_names.pipeline import (
+    GRAPH_WIDE_ONLY_PHASES,
+    resolve_scope_maintenance,
+)
 from imas_codex.standard_names.turn import TURN_PHASES
 
 logger = logging.getLogger(__name__)
@@ -895,11 +898,23 @@ def _run_sn_cmd(
     # this boundary as a run id (focus, exact-name and edit launches all stamp
     # one) or as the edits predicate, so the graph-wide maintenance passes are
     # dropped here whichever caller assembled the run and whether or not it
-    # repeated the explicit flag.
+    # repeated the explicit flag.  An edits-only run names its scope by
+    # predicate and the loop accepts a bypass only for a run id, so bind its
+    # pending successors here: every caller then hands the loop a scope it can
+    # honour, and no pending successor means there is nothing to run.
+    if edits_only and scope_run_id is None:
+        scope_run_id = _bind_pending_edit_scope(dry_run=dry_run)
+        if scope_run_id is None:
+            logger.info("sn run: --edits found no pending edit successors")
+            return None
+
     maintenance_policy = resolve_scope_maintenance(
         scope_run_id=scope_run_id,
         edits_only=edits_only,
+        only_phase=only,
     )
+    if maintenance_policy.refusal is not None:
+        raise ValueError(maintenance_policy.refusal)
     if maintenance_policy.bypass_global_maintenance:
         skip_global_maintenance = True
 
@@ -1429,6 +1444,73 @@ def _reject_unscoped_accepted_reset(
             "(--retry-quarantined / --below-score / --since / --before / --tier), "
             "or drop --include-accepted."
         )
+
+
+#: StandardName edit successors awaiting review.  This set *is* the scope of an
+#: edits-only run: no DD path, exact name or run id was supplied, so the run's
+#: claim predicates select exactly these rows (``edit_status='open'``) once the
+#: run id below is stamped on them.  Terminal successors are excluded: a stale
+#: ``edit_status`` left on a superseded or exhausted name is not work, and
+#: including it would refuse the whole run at the exact-name preflight.
+PENDING_EDIT_SCOPE_QUERY = (
+    "MATCH (sn:StandardName) "
+    "WHERE coalesce(sn.edit_status, '') = 'open' "
+    "  AND NOT coalesce(sn.name_stage, '') IN $terminal_name_stages "
+    "  AND NOT coalesce(sn.status, '') IN $terminal_statuses "
+    "RETURN sn.id AS id ORDER BY sn.id"
+)
+
+
+def _bind_pending_edit_scope(*, dry_run: bool = False) -> str | None:
+    """Give an edits-only run a run id over its pending successors.
+
+    ``sn run --edits`` is a scoped run whose scope is the edits predicate, and
+    the loop accepts a maintenance bypass only for a run that names its scope
+    by run id.  This reads the pending successors, binds exactly them to a
+    fresh run id with the same preflight an exact-name run uses (so a run's
+    provenance and stale-stamp handling apply), and returns that id.  Returns
+    ``None`` when no edit successor is pending, which is a no-op rather than an
+    empty scoped run.
+    """
+    import uuid as _uuid
+
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_store import (
+        graph_claim_scope,
+        graph_foundation,
+    )
+    from imas_codex.standard_names.graph_store.graph_claim_scope import (
+        ExactNameScopeConflict,
+        scope_exact_standard_names,
+    )
+
+    with GraphClient() as gc:
+        name_ids = [
+            str(row["id"])
+            for row in gc.query(
+                PENDING_EDIT_SCOPE_QUERY,
+                terminal_name_stages=sorted(
+                    graph_claim_scope._EXACT_SCOPE_TERMINAL_NAME_STAGES
+                ),
+                terminal_statuses=sorted(
+                    graph_claim_scope._EXACT_SCOPE_TERMINAL_STATUSES
+                ),
+            )
+        ]
+    if not name_ids:
+        return None
+
+    scope_run_id = str(_uuid.uuid4())
+    try:
+        scope_exact_standard_names(
+            name_ids,
+            scope_run_id,
+            dry_run=dry_run,
+            services=graph_foundation.services_for_call(),
+        )
+    except ExactNameScopeConflict as exc:
+        raise click.UsageError(str(exc)) from exc
+    return scope_run_id
 
 
 @sn.command("run")
@@ -2377,7 +2459,7 @@ def sn_run(
             raise click.UsageError(
                 "--skip-global-maintenance cannot be combined with --revalidate"
             )
-        if only_phase in {"reconcile", "attach", "validate", "link"}:
+        if only_phase in GRAPH_WIDE_ONLY_PHASES:
             raise click.UsageError(
                 f"--skip-global-maintenance cannot be combined with --only {only_phase}"
             )
@@ -2516,6 +2598,7 @@ def sn_run(
     if exact_names:
         import uuid as _uuid
 
+        from imas_codex.standard_names.graph_store import graph_foundation
         from imas_codex.standard_names.graph_store.graph_claim_scope import (
             ExactNameScopeConflict,
             scope_exact_standard_names,
@@ -2524,7 +2607,10 @@ def sn_run(
         exact_scope_run_id = str(_uuid.uuid4())
         try:
             scoped = scope_exact_standard_names(
-                list(exact_names), exact_scope_run_id, dry_run=dry_run
+                list(exact_names),
+                exact_scope_run_id,
+                dry_run=dry_run,
+                services=graph_foundation.services_for_call(),
             )
         except ExactNameScopeConflict as exc:
             raise click.UsageError(str(exc)) from exc
@@ -2694,12 +2780,19 @@ def sn_run(
         #    re-staging in-flight items churns the hard tail (each pass re-shoots
         #    exhausted names). --reseed opts into the blunt re-stage-to-pending;
         #    targeted resets use --reset-to (handled above, before scope routing).
+        from imas_codex.standard_names.graph_store import graph_foundation
         from imas_codex.standard_names.graph_store.graph_claim_scope import (
             scope_focus_names,
         )
 
         with GraphClient() as gc:
-            scope_focus_names(sns_ids, scope_run_id, reset=reseed, gc=gc)
+            scope_focus_names(
+                sns_ids,
+                scope_run_id,
+                reset=reseed,
+                gc=gc,
+                services=graph_foundation.services_for_call(),
+            )
 
         # 5. Route through the pool orchestrator with scope_run_id.
         _run_sn_cmd(
