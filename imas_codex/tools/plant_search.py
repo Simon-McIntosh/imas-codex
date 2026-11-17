@@ -14,7 +14,7 @@ _DESCRIPTION_CHARS = 2048
 _SIGNAL_FIELDS = """s { .id, .name, .accessor, .unit, .control_path,
     .component_category, .component_sequence, .field_code, .field_discriminator,
     .name_parse_outcome, .candidate_plant_component,
-    description: s.description[..$description_chars],
+    description: substring(s.description, 0, $description_chars),
     description_truncated: coalesce(size(s.description), 0) > $description_chars }"""
 
 
@@ -190,7 +190,7 @@ def search_pulse_catalogue(
             "MATCH (c:PulseCategory {facility_id: $facility})",
             "(toLower(c.name) CONTAINS $designation OR toLower(coalesce(c.description, '')) CONTAINS $designation)",
             """c { .id, .name, .archive,
-                description: c.description[..$description_chars],
+                description: substring(c.description, 0, $description_chars),
                 description_truncated: coalesce(size(c.description), 0) > $description_chars,
                 pulse_count: COUNT { MATCH (p:Pulse)-[:IN_PULSE_CATEGORY]->(c) WHERE p.facility_id = $facility } }""",
             "c.id",
@@ -211,7 +211,7 @@ def search_pulse_catalogue(
             "EXISTS { MATCH (p)-[:IN_PULSE_CATEGORY]->(:PulseCategory {id: $category_id, facility_id: $facility}) }",
             """p { .id, .name, .archive, .start_ns, .end_ns,
                 open_ended: p.end_ns IS NULL,
-                description: p.description[..$description_chars],
+                description: substring(p.description, 0, $description_chars),
                 description_truncated: coalesce(size(p.description), 0) > $description_chars }""",
             "p.start_ns, p.id",
             {
@@ -255,9 +255,9 @@ def fetch_signal_context(
         WITH s, c, control, ancestor ORDER BY ancestor.level
         RETURN {_SIGNAL_FIELDS} AS signal, s.facility_id AS facility,
             c {{ .id, .code, .name, .component_category, .component_sequence,
-                 description: c.description[..$description_chars] }} AS component,
+                 description: substring(c.description, 0, $description_chars) }} AS component,
             collect(ancestor {{ .id, .code, .name, .level,
-                 description: ancestor.description[..$description_chars] }}) AS control_hierarchy
+                 description: substring(ancestor.description, 0, $description_chars) }}) AS control_hierarchy
         LIMIT 1""",
         resource=resource,
         description_chars=_DESCRIPTION_CHARS,

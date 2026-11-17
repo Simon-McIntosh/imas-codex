@@ -74,6 +74,7 @@ def test_category_search_empty_control_paging_and_literal_designation(plant_grap
         )
     )
     assert categories["total"] == 2 and categories["count"] == 1
+    assert categories["items"][0]["description"] == "Coil Alpha cold test"
     assert categories["items"][0]["pulse_count"] == 2
     assert categories["next_offset"] == 1
     arguments = categories["continuation"]["arguments"]
@@ -172,6 +173,38 @@ def test_signal_walk_retains_candidate_identity_and_excludes_self_and_other_faci
     assert unparsed["component"] is unparsed["system"] is None
     assert unparsed["total"] == 0 and unparsed["items"] == []
     assert fetch_signal_context(plant_graph, "demo-alpha:missing") is None
+
+
+def test_descriptions_are_bounded_strings_with_explicit_truncation(plant_graph):
+    description = "x" * 3000
+    plant_graph.query(
+        """MATCH (n) WHERE n.facility_id = $facility
+        AND (n:FacilitySignal OR n:Pulse OR n:PulseCategory OR n:PlantComponent OR n:ControlNode)
+        SET n.description = $description""",
+        facility="demo-alpha",
+        description=description,
+    )
+    pages = [
+        search_pulse_catalogue(plant_graph, "demo-alpha", designation="Coil Alpha"),
+        search_pulse_catalogue(
+            plant_graph, "demo-alpha", category_id="demo-alpha:test:coil-alpha"
+        ),
+        list_plant_signals(plant_graph, "demo-alpha", field="ABCD"),
+        fetch_signal_context(plant_graph, "demo-alpha:signal:0"),
+    ]
+    for encoded in pages:
+        page = json.loads(encoded)
+        assert page["items"]
+        for item in page["items"]:
+            assert item["description"] == description[:2048]
+            assert item["description_truncated"] is True
+    context = json.loads(pages[-1])
+    assert context["signal"]["description"] == description[:2048]
+    assert context["component"]["description"] == description[:2048]
+    assert all(
+        node["description"] == description[:2048]
+        for node in context["control_hierarchy"]
+    )
 
 
 @pytest.mark.asyncio
