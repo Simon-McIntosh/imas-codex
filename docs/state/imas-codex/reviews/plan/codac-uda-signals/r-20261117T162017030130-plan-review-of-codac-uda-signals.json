@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:38:26.306Z",
+  "dispatched_at": "2026-11-17T16:37:46Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261117T162017030130-plan-review-of-codac-uda-signals/plan.html:140",
+      "id": "done_when-1",
+      "reason": "the section needs a constructed, invented-name category whose name offers a kind-like word with nothing supporting it, plus the refusal that it stays unlabelled, so the guard is shown to fire rather than asserted over live categories that happen to be left bare.",
+      "text": "the control \"a category whose name and pulses show no kind is left without one and counted, never given a guessed kind\" selects its subject by the classifier's own output, so a run that guessed a kind on a genuinely ambiguous category simply does not select that category, and the control passes on any classifier, including a wrong one \u2014 unlike the section's second control, which now uses a constructed pulse, this one has no constructed input that a guessing rule must decline",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "85d72d7f6861739d3572d4f78201f59ccea949b2",
+  "plan_fingerprint": "ee1eddaecca9e68712d0586f6246de1753a11ae3321e4d28204feac90737ac57",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 67,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T162017030130-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "78e90730916120ccc74388b6e13693a65c5ec61a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the section's only references are its two data-links, and `#s16` and `#s18` both resolve in the snapshot; the cited 2026-11-17 trial exists at `docs/evidence/fragments/codac-uda-signals/try-the-lead-s-example-end-to-end.html`, whose line \"Category descriptions are null for all seven\" matches the section's claim.",
+    "done_when": "a finding \u2014 \u00a720's first negative-control clause names only a category that shows no kind after classification, so it can be satisfied by every category left unlabelled and cannot show the \"never a guessed kind\" guard firing (`plan.html:140`).",
+    "evidence_paths": "pass \u2014 the landing record is the stated durable home; the twenty-pulse private file's digest is recorded there rather than in a scratch path, and the section names no node-local temporary location.",
+    "naming": "pass \u2014 the new attributes are described by what they hold (a status, a kind and its source); no plan label, section number or ticket identifier is carried into a symbol or comment.",
+    "reasoning": "pass \u2014 the corrected premise holds: `Pulse.description` is populated from the archive (`imas_codex/remote/scripts/codac_uda.py:295`, `imas_codex/config/codac_uda.py:34-54`) and persisted (`imas_codex/discovery/signals/archive_pulses.py:104-112`, `SET p += props` over the dumped model), so \"the pulse import already keeps each pulse's description\" is true; `Pulse` and `PulseCategory` (`imas_codex/schemas/facility.yaml:1863-1950`) carry no status or kind, so the two schema changes are exactly the gap; the survey fragment's six-column `get_pulses_df` (Pulse, Time From, Time To, Duration, Status, Description) supports the status claim; the endpoint figures are measurable and the section prescribes no code path.",
+    "single_goal": "pass \u2014 \u00a720's pulse record completion (status) and category kind label are one deliverable: a test category and its pulses selectable by kind through one search, closed by one landing record.",
+    "wiring": "pass \u2014 \u00a720 declares waits on \u00a716 and \u00a718 both in `plan-section-depends-on` and in its own `data-links`, and both targets exist in the snapshot (`plan.html:122`, `:130`); nothing in its delivery needs a node it does not wait on."
+  },
+  "section_digests": {
+    "_document": "77f13d39818879b6258db687609d7bd6c855092729463ff92bf55aec1e53d973",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "5b6478a19c4933df522a5f65b5029c4d8c8fbaa56108cf7537380f3b2160b330",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:54:31.139672+00:00",
+  "total": null
+}
