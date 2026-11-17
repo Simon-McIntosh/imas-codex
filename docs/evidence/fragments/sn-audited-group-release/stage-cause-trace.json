@@ -1,0 +1,447 @@
+{
+ "plan_surface": "sn-audited-group-release section 7",
+ "source_record": {
+  "path": "docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.json",
+  "collection_revision": "52766883007dfae58b25699d72e1c6e28538d57a",
+  "collected_at": "2026-11-17T15:57:39.145046+00:00",
+  "verdict_completed_at": "2026-11-17T16:20:37.351254+00:00",
+  "population": 208,
+  "shared_causes": 14,
+  "cause_instances": 89
+ },
+ "stages": {
+  "compose_name": {
+   "label": "naming (compose) stage",
+   "file": "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py",
+   "function": "_compose_batch_body",
+   "files_secondary": [
+    "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+   ],
+   "given": "DD path, enriched leaf description, unit, data type, keywords, sibling fields, hybrid and related neighbours, identifier enums and reviewer history, plus an item['ancestor_context'] list of enclosing-structure statements attached by worker_extraction_and_enrichment.py::_enrich_batch_items",
+   "drops": "In names batching mode _compose_batch_body renders sn/generate_name_dd_names, whose per-item block emits item.path, item.description, item.unit and the neighbour blocks but no item.ancestor_context and no item.documentation; the full-mode template sn/generate_name_dd does render the lineage block, so the enclosing text the extraction stage attached never reaches the composer that writes the identity."
+  },
+  "attach_guard": {
+   "label": "source-binding (attach) gate",
+   "file": "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py",
+   "function": "_is_attachment_consistent",
+   "files_secondary": [
+    "imas_codex/standard_names/attachment_audit.py"
+   ],
+   "given": "The candidate DD path's spelling, the DD unit and the name's unit, the name's spelling (tense, state, shape surface, vector-field axis, geometry representation, hardware device tokens) and the paths already bound to the name",
+   "drops": "The sources' stated descriptions and operations: the guard has no text parameter, so two sources whose stated operations differ are admitted to one name and the definition stage must then write a single definition from them."
+  },
+  "locus_binding": {
+   "label": "locus-token binding and its documentation injection",
+   "file": "imas_codex/standard_names/context.py",
+   "function": "locus_context_for",
+   "files_secondary": [
+    "imas_codex/llm/prompts/sn/generate_name_system.md"
+   ],
+   "given": "The source's boundary-selection clause as recorded in the packet (psi_norm = 99.x% of the separatrix, near-separatrix, or LCFS-or-99.x% for a fixed-boundary code) and, at documentation time, the ISN locus registry definition for the name's locus token",
+   "drops": "The selection. generate_name_system.md binds every plasma-shape parameter to _of_plasma_boundary for the LCFS contour, and locus_context_for injects the registry definition of plasma_boundary, which is categorical: 'the outermost flux surface on which field lines close on themselves'. The documentation stage then states the boundary as that surface."
+  },
+  "definition_construction": {
+   "label": "definition (documentation) stage",
+   "file": "imas_codex/standard_names/worker_tasks/worker_generate_docs.py",
+   "function": "_enrich_for_docs_gen",
+   "files_secondary": [
+    "imas_codex/llm/prompts/sn/generate_docs_user.md"
+   ],
+   "given": "Up to five bound sources' enriched descriptions and DD context, the nearest ancestor lineage (capped at four), sibling family and nearby names",
+   "drops": "Nothing from the text it receives; it writes one definition and has no obligation to cover every binding's stated operation, and it may substitute a base quantity or a different geometric scope for the named transform."
+  },
+  "domain_assignment": {
+   "label": "physics-domain assignment",
+   "file": "imas_codex/standard_names/domain_decision.py",
+   "function": "decide_domain_for",
+   "files_secondary": [
+    "imas_codex/standard_names/domain_audit.py"
+   ],
+   "given": "The name, its description, and a mapping of each source to its DD physics domain",
+   "drops": "It resolves a domain for the name as a whole; a name whose sources sit on an equilibrium consumer rather than on the structural quantity it names keeps the consumer's domain."
+  }
+ },
+ "causes": [
+  {
+   "id": "physical_scope_qualifier_lost",
+   "count": 18,
+   "stage": "compose_name",
+   "same_repair_as": null,
+   "repair": {
+    "smallest": "Render the enclosing-structure lineage that the extraction stage already attaches: add the item.ancestor_context block from sn/generate_name_dd.md to the per-item block of sn/generate_name_dd_names.md, so the composer sees the clause that states the component, geometric reference or locus and can emit the token or a vocab_gap for it.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+    ],
+    "note": "The prompt already forbids silently generalising a source-stated axis; the defect survives because the text stating the axis is never rendered in names mode."
+   },
+   "traced": [
+    {
+     "id": "current_of_passive_structure",
+     "name": "current_of_passive_structure",
+     "evidence_line": 57,
+     "evidence_excerpt": "Current in a set of axisymmetric passive conductors",
+     "evidence_text": "  equilibrium/time_slice/constraints/pf_passive_current: Current in a set of axisymmetric passive conductors Current in a set of axisymmetric passive conductors used as a constraint in MHD equilibrium reconstruction. Stores measured and reconstructed values along with fit quality metrics for comparing to the equilibrium solver solution.",
+     "drop_site": "enclosing_input",
+     "absent_from_name": [
+      "axisymmetric"
+     ],
+     "given_segment": "the enclosing pf_passive_current statement names the conductor scope the leaf omits",
+     "drops_segment": "the name keeps the generic 'passive_structure' carrier and the axisymmetric scope is gone",
+     "stage": "compose_name"
+    },
+    {
+     "id": "gap_at_outboard_midplane",
+     "name": "gap_at_outboard_midplane",
+     "evidence_line": 386,
+     "evidence_excerpt": "Distance between the inner and outer separatrices",
+     "evidence_text": "    description: Distance between the inner and outer separatrices measured in the major radius direction at the plasma outboard side, at the height of the maximum R of the inner separatrix. Relevant for double-null or near-double-null configurations.",
+     "drop_site": "leaf_input",
+     "absent_from_name": [
+      "separatrices"
+     ],
+     "given_segment": "the leaf description names the two surfaces whose separation is measured",
+     "drops_segment": "the name keeps only the midplane locus, so which surfaces are separated is lost",
+     "stage": "compose_name"
+    },
+    {
+     "id": "inner_radius_of_plasma_filament",
+     "name": "inner_radius_of_plasma_filament",
+     "evidence_line": 409,
+     "evidence_excerpt": "Inner radius of an annular cross-section element",
+     "evidence_text": "    description: Inner radius of an annular cross-section element representing a discrete plasma current-carrying filament in the pf_plasma IDS. Defines the inner boundary of the annulus in axisymmetric plasma current distribution modelling.",
+     "drop_site": "leaf_input",
+     "absent_from_name": [
+      "annular"
+     ],
+     "given_segment": "the leaf description states the annular cross-section the radius belongs to",
+     "drops_segment": "the name reads as the filament's inboard major radius, not a cross-sectional radius",
+     "stage": "compose_name"
+    },
+    {
+     "id": "rotational_transform",
+     "name": "rotational_transform",
+     "evidence_line": 1860,
+     "evidence_excerpt": "Parameters at r_eff_norm = 2/3",
+     "evidence_text": "  summary/local/r_eff_norm_2_3: Parameters at r_eff_norm = 2/3, where r_eff_norm is the stellarator effective minor radius normalised to its value at the last closed flux surface",
+     "drop_site": "enclosing_input",
+     "absent_from_name": [
+      "r_eff_norm"
+     ],
+     "given_segment": "the enclosing summary/local/r_eff_norm_2_3 node selects the evaluation locus",
+     "drops_segment": "the name and definition state a general flux-surface transform, with no evaluation locus",
+     "stage": "compose_name"
+    }
+   ]
+  },
+  {
+   "id": "source_bindings_conflate_distinct_definitions",
+   "count": 13,
+   "stage": "attach_guard",
+   "same_repair_as": null,
+   "repair": {
+    "smallest": "Give the pairing guard the text it is missing: pass the candidate's dd_description and the already-bound sources' descriptions into _is_attachment_consistent and reject a second binding whose stated operation contradicts the first's (the pairing-guard query and attachment_audit._attachment_consistency already select dd_documentation).",
+    "files": [
+     "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py",
+     "imas_codex/standard_names/attachment_audit.py"
+    ],
+    "note": "The definition stage is not the smallest point of repair: it receives the sources but has no rule that it must cover each binding, and correcting a definition cannot unbind a wrong source."
+   },
+   "traced": [
+    {
+     "id": "plasma_resistance",
+     "name": "plasma_resistance",
+     "evidence_line": 902,
+     "evidence_excerpt": "the ratio of loop voltage to plasma current",
+     "evidence_text": "    description: Plasma electrical resistance (R), the ratio of loop voltage to plasma current, characterizing resistive dissipation in the plasma. Related to plasma temperature and effective charge via Spitzer conductivity.",
+     "drop_site": "definition_written_from_one_binding",
+     "definition_line": 894,
+     "absent_from_definition": [
+      "loop voltage"
+     ],
+     "given_segment": "one bound source states the resistance as the loop-voltage-to-current ratio",
+     "drops_segment": "the stored definition asserts the volume-integrated E.J over Ip^2 power ratio instead",
+     "stage": "attach_guard"
+    },
+    {
+     "id": "toroidal_magnetic_field",
+     "name": "toroidal_magnetic_field",
+     "evidence_line": 2138,
+     "evidence_excerpt": "averaged over sensor volume",
+     "evidence_text": "    documentation: Magnetic field component in direction of sensor normal axis (n) averaged over sensor volume defined by area and length, where n = cos(poloidal_angle)*cos(toroidal_angle)*grad(R) - sin(poloidal_angle)*grad(Z) + cos(poloidal_angle)*sin(toroidal_angle)*grad(Phi)/norm(grad(Phi))",
+     "drop_site": "definition_written_from_one_binding",
+     "definition_line": 2129,
+     "absent_from_definition": [
+      "averaged"
+     ],
+     "given_segment": "a bound probe source states the value is the normal-axis component averaged over the sensor volume",
+     "drops_segment": "the definition states a point component of the local induction along the toroidal direction",
+     "stage": "attach_guard"
+    },
+    {
+     "id": "poloidal_angle_of_flux_surface",
+     "name": "poloidal_angle_of_flux_surface",
+     "evidence_line": 929,
+     "evidence_excerpt": "Poloidal angle of the sensitive axis orientation",
+     "evidence_text": "    description: Poloidal angle of the sensitive axis orientation of a poloidal field (Bp) probe coil, defining its alignment relative to the poloidal direction. Used together with the toroidal angle to fully specify the coil orientation in 3D space.",
+     "drop_site": "definition_written_from_one_binding",
+     "definition_line": 915,
+     "absent_from_definition": [
+      "coil"
+     ],
+     "given_segment": "a bound magnetics source states the angle is the coil's sensitive-axis orientation",
+     "drops_segment": "the name and definition make it a spatial angle on a flux surface about the magnetic axis",
+     "stage": "attach_guard"
+    },
+    {
+     "id": "vertical_coordinate_of_measurement_position",
+     "name": "vertical_coordinate_of_measurement_position",
+     "evidence_line": 1588,
+     "evidence_excerpt": "Average position of the measurements derived from multiple collectors",
+     "evidence_text": "  langmuir_probes/reciprocating/plunge/position_average: Average position of the measurements derived from multiple collectors",
+     "drop_site": "definition_written_from_one_binding",
+     "definition_line": 2428,
+     "absent_from_definition": [
+      "average"
+     ],
+     "given_segment": "a bound collector source states the position is the average of several collector signals",
+     "drops_segment": "the definition makes it a single pointwise projection and excludes averaging",
+     "stage": "attach_guard"
+    }
+   ]
+  },
+  {
+   "id": "boundary_forced_to_lcfs",
+   "count": 11,
+   "stage": "locus_binding",
+   "same_repair_as": null,
+   "repair": {
+    "smallest": "Bind the locus to the selection the source states: in the naming rules, reserve _of_/_at_plasma_boundary for a source that names the LCFS, and require a qualifier for a selected boundary (psi_norm = 0.99 or near-separatrix) or a vocab_gap when the grammar has no such qualifier; the documentation stage then inherits the selection instead of the registry's categorical LCFS.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_system.md",
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+    ],
+    "note": "The registry definition of plasma_boundary lives in imas_standard_names and is not edited here; the repair is the codex-side rule that decides when that token is the right identity."
+   },
+   "traced": [
+    {
+     "id": "elongation_of_plasma_boundary",
+     "name": "elongation_of_plasma_boundary",
+     "evidence_line": 178,
+     "evidence_excerpt": "typically chosen at psi_norm = 99.x% of the separatrix",
+     "evidence_text": "  equilibrium/time_slice/boundary: Description of the plasma boundary used by fixed-boundary codes and typically chosen at psi_norm = 99.x% of the separatrix",
+     "drop_site": "enclosing_input_to_locus_token",
+     "name_locus_token": "plasma_boundary",
+     "given_segment": "the enclosing equilibrium/time_slice/boundary node lets the boundary be chosen at 99.x% of the separatrix",
+     "drops_segment": "the name's _of_plasma_boundary resolves through the locus registry to the categorical LCFS",
+     "stage": "locus_binding"
+    },
+    {
+     "id": "lower_triangularity_of_plasma_boundary",
+     "name": "lower_triangularity_of_plasma_boundary",
+     "evidence_line": 178,
+     "evidence_excerpt": "typically chosen at psi_norm = 99.x% of the separatrix",
+     "evidence_text": "  equilibrium/time_slice/boundary: Description of the plasma boundary used by fixed-boundary codes and typically chosen at psi_norm = 99.x% of the separatrix",
+     "drop_site": "enclosing_input_to_locus_token",
+     "name_locus_token": "plasma_boundary",
+     "given_segment": "the same enclosing node states the boundary is selectable",
+     "drops_segment": "the lower triangularity is documented on the last closed flux surface instead",
+     "stage": "locus_binding"
+    },
+    {
+     "id": "minor_radius_of_plasma_boundary",
+     "name": "minor_radius_of_plasma_boundary",
+     "evidence_line": 178,
+     "evidence_excerpt": "typically chosen at psi_norm = 99.x% of the separatrix",
+     "evidence_text": "  equilibrium/time_slice/boundary: Description of the plasma boundary used by fixed-boundary codes and typically chosen at psi_norm = 99.x% of the separatrix",
+     "drop_site": "enclosing_input_to_locus_token",
+     "name_locus_token": "plasma_boundary",
+     "given_segment": "the enclosing node states the selectable boundary and one summary source names the LCFS",
+     "drops_segment": "the documentation forces the minor radius to be that of the last closed flux surface",
+     "stage": "locus_binding"
+    },
+    {
+     "id": "poloidal_magnetic_flux_at_plasma_boundary",
+     "name": "poloidal_magnetic_flux_at_plasma_boundary",
+     "evidence_line": 1249,
+     "evidence_excerpt": "Typically set at a near-separatrix flux surface",
+     "evidence_text": "    description: Poloidal magnetic flux (ψ) at the plasma boundary surface used by fixed-boundary equilibrium codes. Typically set at a near-separatrix flux surface (psi_norm ≈ 99%) as the boundary condition for the equilibrium solution.",
+     "drop_site": "leaf_input_to_locus_token",
+     "name_locus_token": "plasma_boundary",
+     "given_segment": "the equilibrium boundary-leaf source sets the boundary at a near-separatrix surface (psi_norm about 0.99)",
+     "drops_segment": "the name's _at_plasma_boundary makes the boundary the last closed flux surface",
+     "stage": "locus_binding"
+    }
+   ]
+  },
+  {
+   "id": "normalization_or_weighting_qualifier_lost",
+   "count": 6,
+   "stage": "compose_name",
+   "same_repair_as": "physical_scope_qualifier_lost",
+   "same_repair_verdict": "covered",
+   "same_repair_why": "The same lineage-and-leaf text repair reaches the composer; the qualifier then needs a registered token or a vocab_gap.",
+   "repair": {
+    "smallest": "Render the enclosing lineage in the file with the composer, so the stated normalization or weighting reaches it and is carried as a qualifier or reported as a vocab_gap.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "coordinate_reference_qualifier_lost",
+   "count": 6,
+   "stage": "compose_name",
+   "same_repair_as": "physical_scope_qualifier_lost",
+   "same_repair_verdict": "partial",
+   "same_repair_why": "The text repair puts the coordinate convention in front of the composer, but choosing the right convention token is a separate rule.",
+   "repair": {
+    "smallest": "Render the lineage, and require the composer to name the source's coordinate convention when the source states one rather than defaulting to the DD reference frame.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md",
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "vacuum_source_qualifier_lost",
+   "count": 6,
+   "stage": "compose_name",
+   "same_repair_as": "physical_scope_qualifier_lost",
+   "same_repair_verdict": "covered",
+   "same_repair_why": "Vacuum is a source-contribution qualifier carried in the enclosing statement; the text repair makes it visible and the prompt already requires preservation.",
+   "repair": {
+    "smallest": "Render the lineage so the vacuum contribution restriction is visible, and keep it as the source qualifier the prompt already forbids dropping.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "pressure_pedestal_qualifier_lost",
+   "count": 5,
+   "stage": "compose_name",
+   "same_repair_as": "physical_scope_qualifier_lost",
+   "same_repair_verdict": "covered",
+   "same_repair_why": "The pedestal top is a registered locus the enumerable vocabulary already offers; the name loses it because the enclosing text naming the pedestal is not rendered.",
+   "repair": {
+    "smallest": "Render the lineage so the pedestal locus is stated, and bind it to the registered pedestal_top locus rather than the generic pedestal token.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "transformation_equation_replaced_by_base_quantity",
+   "count": 4,
+   "stage": "definition_construction",
+   "same_repair_as": null,
+   "same_repair_verdict": "not_covered",
+   "same_repair_why": "A definition-stage rule: the definition must state the named transform or derivative rather than substitute a base quantity.",
+   "repair": {
+    "smallest": "Add a definition rule: when the name carries a transform or derivative, the definition must state that operation, not substitute the base quantity.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_docs_user.md",
+     "imas_codex/llm/prompts/sn/generate_docs_system.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "averaging_qualifier_lost",
+   "count": 4,
+   "stage": "compose_name",
+   "same_repair_as": "physical_scope_qualifier_lost",
+   "same_repair_verdict": "partial",
+   "same_repair_why": "The text repair exposes the averaging clause; expressing it needs the aggregation token or prefix the grammar provides, and a rule binding them.",
+   "repair": {
+    "smallest": "Render the lineage so the averaging clause reaches the composer, and require the aggregation token the source states rather than a pointwise definition.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md",
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "absolute_extremum_substituted_for_signed_extremum",
+   "count": 4,
+   "stage": "locus_binding",
+   "same_repair_as": "boundary_forced_to_lcfs",
+   "same_repair_verdict": "partial",
+   "same_repair_why": "Same stage and the same 'bind the source-stated selection' repair shape, but the selection is signed-minimum versus minimum-of-absolute, not the boundary kind.",
+   "repair": {
+    "smallest": "Require the extremum locus token to follow the source's selection: the minimum of the signed quantity, not of its absolute value.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "population_basis_qualifier_lost",
+   "count": 3,
+   "stage": "compose_name",
+   "same_repair_as": "physical_scope_qualifier_lost",
+   "same_repair_verdict": "partial",
+   "same_repair_why": "The text repair exposes thermal-versus-total; the subject segment must carry it, which is a token-selection rule.",
+   "repair": {
+    "smallest": "Render the lineage and require the population basis (thermal or total) in the subject segment when the source states it.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md",
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "physical_scope_qualifier_replaced",
+   "count": 3,
+   "stage": "definition_construction",
+   "same_repair_as": null,
+   "same_repair_verdict": "not_covered",
+   "same_repair_why": "A definition-stage rule: the definition may not substitute a different geometric or coordinate scope for the source's.",
+   "repair": {
+    "smallest": "Add a definition rule: the definition may not substitute a geometric or coordinate scope the source does not state.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_docs_user.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "locus_template_overrides_source",
+   "count": 3,
+   "stage": "locus_binding",
+   "same_repair_as": "boundary_forced_to_lcfs",
+   "same_repair_verdict": "covered",
+   "same_repair_why": "The same repair: the source's stated branch or point-selection rule outranks the generic template.",
+   "repair": {
+    "smallest": "Require the source's stated branch or point-selection rule to outrank the generic geometric template when choosing the locus token.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
+   "traced": []
+  },
+  {
+   "id": "consumer_context_used_as_quantity_domain",
+   "count": 3,
+   "stage": "domain_assignment",
+   "same_repair_as": null,
+   "same_repair_verdict": "not_covered",
+   "same_repair_why": "The domain stage resolves a domain from the sources' DD domains; a structural quantity reached only through an equilibrium consumer needs its own domain source.",
+   "repair": {
+    "smallest": "Resolve the domain from the structural quantity's own DD source where one exists, so a quantity reached only through an equilibrium consumer does not inherit that consumer's domain.",
+    "files": [
+     "imas_codex/standard_names/domain_decision.py",
+     "imas_codex/standard_names/domain_audit.py"
+    ]
+   },
+   "traced": []
+  }
+ ]
+}
