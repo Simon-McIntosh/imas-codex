@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T13:00:49.358Z",
+  "dispatched_at": "2026-11-17T12:59:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261117T124214016654-plan-review-of-iter-signal-context-and-enrichment/plan.html:58",
+      "id": "wiring-1",
+      "reason": "either section 4's declaration becomes `deferred` until `icp-api-access#s5` lands or the dependency is dropped, and the plan currently says both that section 4 is buildable and that it waits.",
+      "text": "section 4 is declared `implementable` while its newly declared dependency `icp-api-access#s5` is `implementable` (unbuilt) in docs/plans/icp-api-access.html:21, and the plan's followup outcome says section 4 waits on that plan; a dispatcher reading declarations alone would build section 4 against a document client that does not exist",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261117T124214016654-plan-review-of-iter-signal-context-and-enrichment/plan.html:58",
+      "id": "reasoning-1",
+      "reason": "section 4 must state what it delivers (for example PDS nodes only) when section 5 returns no document, or state that the assistant-fetched cache is its source, or a builder is left to invent that choice or stall.",
+      "text": "section 4 sources its signal list rows, data file rows, functional specification and function-category meanings from `icp-api-access#s5`, whose own done-when (docs/plans/icp-api-access.html:61) closes \"in one of two ways\" and states the host serving these files \"is not yet established\" and that on failure \"the document source goes back to the lead\", while comment c-s4-documents-via-assistant at plan.html:145 says the pilot's documents arrive by a one-off ITER document assistant, which \"the pipeline cannot repeat\": section 4 states no branch for the no-document outcome and no statement of which route feeds it",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "07d12e06ad00541bd3a2313465ba9af5a358bc01",
+  "plan_fingerprint": "72349ba5b3eaea29d19c12cbd40969f62343227c0ce2c25cd4b5aa8bcf2cc107",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 53,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T124214016654-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "e84cafe5fa342d8621b2fde9fd84d909d759d824",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `icp-api-access#s5` resolves to docs/plans/icp-api-access.html:59 with a body and a done-when, `icp-api-access#s3`/`#s4` resolve, `docs/plans/icp-api-access.html` exists, and the cited figure docs/figures/iter-signal-context-and-enrichment/pipeline.svg exists.",
+    "done_when": "pass for this change \u2014 the changed unit alters no done-when; section 4's done-when and its three negative controls are unchanged, and the earlier section 2 control finding is unchanged by this version, so it is not re-raised.",
+    "evidence_paths": "pass \u2014 the change touches only the dependency declarations; the plan's landed evidence continues to sit under docs/evidence/fragments/iter-signal-context-and-enrichment/ and the crew reports directory, not a scratch path.",
+    "naming": "pass \u2014 no plan labels, ticket numbers or changelog prose enter any symbol in this change.",
+    "reasoning": "a finding \u2014 section 1's document route and section 4's delivery claim do not survive the section 5 done-when they now rest on: section 5 can close with no document fetched, while section 4 says its content reaches the graph \"through the read-only client that the plan `icp-api-access` delivers\" and states no branch for that outcome.",
+    "single_goal": "pass for this change \u2014 the changed unit adds no deliverable; section 4's archive-versus-context overlap is unchanged from the earlier record.",
+    "wiring": "a finding \u2014 section 4 at plan.html:58 now declares `icp-api-access#s5` and that anchor resolves, but section 4 stays `implementable` while its new dependency is itself only `implementable`, and the plan's own followup outcome says \"Section 4 waits on the ICP access plan\"."
+  },
+  "section_digests": {
+    "_document": "d3cce138b25f7af05c872739e2dd6b78b18c009f0680bbbe3add7c27516bbb38",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "718dd3f96dd21031506b561ce54982d7fee0ac8c2d5e6f5f626f32df4d13f5fc",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:12:50.165235+00:00",
+  "total": null
+}
