@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import base64
+import hashlib
 import importlib.util
 import json
 import os
@@ -374,11 +375,103 @@ def check(path=DATA):
     )
 
 
+def collect_comparison():
+    """Read historical judgments only after the independent verdict seal exists."""
+    check()
+    verdict_sha, frozen = committed_snapshot("verdicts-frozen")
+    from imas_codex.graph.client import GraphClient
+
+    audit = sibling("blind-audit")
+    third_path = ROOT / "frontier-third-reader.json"
+    third = load(third_path)
+    members = set(frozen["members"])
+    earlier = {}
+    for kind in ("flagged", "control", "planted"):
+        for row in third[kind]["rows"]:
+            if row["name"] not in members:
+                continue
+            classes = row["C"]
+            if isinstance(classes, dict):
+                if not row.get("read"):
+                    continue
+                classes = classes["classes"]
+            earlier.setdefault(row["name"], {})["C"] = sorted(classes)
+    gc = GraphClient()
+    try:
+        rows = list(
+            gc.query(
+                """
+                UNWIND $ids AS name
+                MATCH (sn:StandardName {id: name})-[:HAS_REVIEW]->(r:StandardNameReview)
+                WHERE r.review_group_id = $group AND r.resolution_role = 'audit'
+                RETURN sn.id AS name, r.standard_name_id AS back_reference,
+                       r.comments AS comments
+                """,
+                ids=sorted(members),
+                group=audit.PRIOR_GROUP,
+            )
+        )
+    finally:
+        gc.close()
+    assert rows, "Historical audit query missed known-present comparison names"
+    for row in rows:
+        assert row["name"] == row["back_reference"]
+        payload = json.loads(row["comments"])
+        seat = payload["reader_seat"]
+        assert seat in ("A", "B")
+        classes = sorted(payload["defect_classes"])
+        assert set(classes) <= set(audit.CLASS_KEYS)
+        target = earlier.setdefault(row["name"], {})
+        assert seat not in target or target[seat] == classes
+        target[seat] = classes
+    controls = 0
+    for kind in ("flagged", "control"):
+        for row in third[kind]["rows"]:
+            if row["name"] in members:
+                for seat in ("A", "B"):
+                    assert earlier[row["name"]][seat] == sorted(row[seat])
+                    controls += 1
+    assert controls > 0, "No known-present cross-source historical control"
+    calibration = sibling("reader-calibration")
+    corrected_path = calibration.RUN / "corrected-readings.jsonl"
+    corrected = {}
+    for row in calibration.recorded_calls():
+        if row.get("error") or row["name"] not in members:
+            continue
+        target = corrected.setdefault(row["name"], {})
+        assert row["seat"] not in target
+        target[row["seat"]] = sorted(row["defect_classes"])
+    receipt = {
+        "verdict_commit_before_exposure": verdict_sha,
+        "opened_after_verdict_commit_at": datetime.now(UTC).isoformat(),
+        "graph_audit_group": audit.PRIOR_GROUP,
+        "bounded_member_ids": sorted(members),
+        "graph_rows": len(rows),
+        "known_present_cross_source_matches": controls,
+        "third_reader_source": str(third_path),
+        "third_reader_sha256": hashlib.sha256(third_path.read_bytes()).hexdigest(),
+        "corrected_reader_source": str(corrected_path),
+        "corrected_reader_sha256": hashlib.sha256(
+            corrected_path.read_bytes()
+        ).hexdigest(),
+        "earlier": earlier,
+        "corrected": corrected,
+        "graph_writes": 0,
+        "model_calls": 0,
+    }
+    save(receipt, RUN / "comparison-inputs.json")
+    print(
+        f"COMPARISON: {len(rows)} bounded historical rows; {controls} known-present cross-source matches; "
+        f"earlier members {len(earlier)}; corrected members {len(corrected)}; graph writes 0; model calls 0"
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--collect", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--seal-verdicts", action="store_true")
+    parser.add_argument("--collect-comparison", action="store_true")
     parser.add_argument("--data", type=Path, default=DATA)
     args = parser.parse_args()
     if args.collect:
@@ -387,6 +480,8 @@ def main():
         check(args.data)
     elif args.seal_verdicts:
         seal_verdicts()
+    elif args.collect_comparison:
+        collect_comparison()
 
 
 if __name__ == "__main__":
