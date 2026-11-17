@@ -35,6 +35,16 @@
       "note": "Section 4's done-when at version 18 has two closing forms: files fetched, or a recorded finding that no published GET returns a file, with a known-present control read.",
       "reason": "",
       "when": "2026-11-17T00:10:36.951281+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "56dde51e45b1b7bc71859084a8d47aeff49a44bd",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 2's refusal test at version 18 names the ICP hosts listed in private configuration, matching its delivers paragraph and section 4.",
+      "reason": "",
+      "when": "2026-11-17T00:10:52.255995+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Section 4's done-when at version 18 has two closing forms: files fetched, or a recorded finding that no published GET returns a file, with a known-present control read.",
       "reason": "",
       "when": "2026-11-17T00:10:36.951281+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "56dde51e45b1b7bc71859084a8d47aeff49a44bd",
+      "commit_basis": "edit",
+      "note": "Section 2's refusal test at version 18 names the ICP hosts listed in private configuration, matching its delivers paragraph and section 4.",
+      "reason": "",
+      "when": "2026-11-17T00:10:52.255995+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261116T232616468039-plan-review-of-icp-api-access.json",
