@@ -25,7 +25,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 41,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7febb7f0b326676760597c420d3afbcb756c2997",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The open decision's context at version 43 states the bar in full: at most four wrong and at least twenty-eight right of forty, by hand.",
+      "reason": "",
+      "when": "2026-11-17T00:25:33.725350+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7febb7f0b326676760597c420d3afbcb756c2997",
+      "commit_basis": "edit",
+      "note": "The open decision's context at version 43 states the bar in full: at most four wrong and at least twenty-eight right of forty, by hand.",
+      "reason": "",
+      "when": "2026-11-17T00:25:33.725350+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T235112967137-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261116T235112967137-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "c1792e381435484f60aaf82f4ac9ace0fa85a3c8",
   "rubric": "content",
