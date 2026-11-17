@@ -373,3 +373,62 @@ def test_measurement_keeps_the_publication_that_admitted_it(tmp_path):
         "requested_concurrency": 3,
         "lane": value,
     }
+
+
+def test_pooled_retry_accounting_distinguishes_requests_from_signals():
+    from scripts.measure_signal_enrichment_recovery import metrics
+
+    draft_request = [
+        {"role": "system", "content": "Draft"},
+        {"role": "user", "content": "Temperature"},
+    ]
+    review_request = [
+        {"role": "system", "content": "Review"},
+        {
+            "role": "user",
+            "content": json.dumps(
+                {"context_items": {}, "drafts": {1: ["Temperature."]}}
+            ),
+        },
+    ]
+    retry_request = [
+        *review_request,
+        {"role": "user", "content": "The response failed validation:\ncoverage"},
+    ]
+    draft_response = {
+        "response_schema": "SignalEnrichmentBatch",
+        "score": {"parse_success": True},
+        "input_tokens": 1,
+        "output_tokens": 1,
+    }
+    review_response = {
+        "response_schema": "DescriptionReview",
+        "score": {"parse_success": True},
+        "input_tokens": 1,
+        "output_tokens": 1,
+    }
+    rows = [
+        {
+            "ids": ["one"],
+            "outputs": [{"description": "Temperature."}],
+            "grounding_counts": {"review_retries": 1},
+            "messages": [draft_request, review_request, retry_request],
+            "responses": [
+                draft_response,
+                review_response,
+                review_response | {"validation_reask": True},
+                review_response | {"validation_reask": True},
+            ],
+        },
+        {
+            "ids": ["two"],
+            "outputs": [{"description": "Temperature."}],
+            "grounding_counts": {"review_retries": 1},
+            "messages": [draft_request],
+            "responses": [draft_response],
+        },
+    ]
+    result = metrics(rows, 1)
+    assert result["recoveries"]["review_retries"] == 2
+    assert result["recoveries"]["review_validation_reasks"] == 1
+    assert result["input_tokens"] == result["output_tokens"] == 5

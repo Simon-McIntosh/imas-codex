@@ -71,6 +71,28 @@ def metrics(records, wall_seconds):
             "review_skips",
         )
     }
+    replacement_calls = {"draft": 0, "review": 0}
+    for row in records:
+        for request in row.get("messages", []):
+            if not request or request[-1].get("role") != "user":
+                continue
+            feedback = request[-1].get("content", "")
+            if not isinstance(feedback, str) or not feedback.startswith(
+                "The response failed validation:\n"
+            ):
+                continue
+            try:
+                payload = json.loads(request[1]["content"])
+            except (ValueError, TypeError):
+                payload = None
+            stage = (
+                "review"
+                if isinstance(payload, dict)
+                and "drafts" in payload
+                and "context_items" in payload
+                else "draft"
+            )
+            replacement_calls[stage] += 1
     for stage, schema in (
         ("draft", "SignalEnrichmentBatch"),
         ("review", "DescriptionReview"),
@@ -80,8 +102,10 @@ def metrics(records, wall_seconds):
             for row in responses
             if row.get("response_schema") == schema
         )
+        # A pooled replacement can serve several signal retries in one call.
+        recoveries[stage + "_replacement_calls"] = replacement_calls[stage]
         recoveries[stage + "_validation_reasks"] = max(
-            0, directed - recoveries[stage + "_retries"]
+            0, directed - replacement_calls[stage]
         )
     return {
         "signals": sum(len(row["ids"]) for row in records),
