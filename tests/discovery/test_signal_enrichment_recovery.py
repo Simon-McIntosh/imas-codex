@@ -266,3 +266,37 @@ async def test_full_cohort_delivery_requires_bounded_retry():
         delivered += bool(batch.results[0].description.strip())
     print(f"Full cohort delivered: {delivered}/200")
     assert delivered == 200
+
+
+@pytest.mark.asyncio
+async def test_pooled_review_retains_failed_validation_feedback():
+    batcher = ReviewBatcher(2)
+    call = AsyncMock(
+        return_value=(
+            DescriptionReview(
+                results=[{"signal_index": index, "statements": []} for index in (1, 2)]
+            ),
+            0,
+            2,
+        )
+    )
+    kwargs = {
+        "messages": [
+            {"role": "system", "content": "Review"},
+            {
+                "role": "user",
+                "content": json.dumps(
+                    {"context_items": {}, "drafts": {1: ["Temperature."]}}
+                ),
+            },
+            {
+                "role": "user",
+                "content": "The response failed validation:\nreview must cover every drafted signal exactly once",
+            },
+        ]
+    }
+    await asyncio.gather(batcher.submit(call, kwargs), batcher.submit(call, kwargs))
+    assert (
+        "The response failed validation:"
+        in call.call_args.kwargs["messages"][-1]["content"]
+    )

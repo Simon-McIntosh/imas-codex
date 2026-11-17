@@ -91,6 +91,15 @@ class ReviewBatcher:
                         ),
                     },
                 ]
+                feedback = [
+                    message["content"]
+                    for request in requests
+                    for message in request.kwargs["messages"][2:]
+                ]
+                if feedback:
+                    kwargs["messages"].append(
+                        {"role": "user", "content": "\n".join(dict.fromkeys(feedback))}
+                    )
                 merged, cost, tokens = await requests[0].call(**kwargs)
                 indices = [row.signal_index for row in merged.results]
                 if set(indices) != set(bindings) or len(indices) != len(bindings):
