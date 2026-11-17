@@ -29,6 +29,13 @@
     "SCORE reuse: 5",
     "JUSTIFICATION reuse: imas_codex/standard_names/worker_tasks/worker_review_names.py:63 writes its own HAS_PARENT ancestor walk where imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:498 already owns one."
   ],
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "sdbc-name-review-source-context",
+      "recorded_at": "2026-11-17T00:33:20.097533+00:00"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/worker_tasks/__init__.py",
