@@ -341,7 +341,7 @@ def validate(data):
 def seal_verdicts():
     data = load()
     assert data["phase"] == "packets-frozen" and not data["judgments"]
-    check()
+    check(include_report=False)
     judgments = [
         json.loads(line)
         for line in (RUN / "blind-judgments.jsonl").read_text().splitlines()
@@ -381,6 +381,11 @@ def check(path=DATA, include_report=True):
         assert git("merge-base", packet_sha, verdict_sha) == packet_sha
     else:
         assert not data["judgments"], "Verdicts require an independent committed seal"
+    if include_report and data["judgments"]:
+        assert data.get("source_completeness", {}).get("complete") is True, (
+            "Full source-packet completeness not established: inherited ancestor cap omitted source text; blind recovery requires an unexposed adjudicator"
+        )
+        assert "report" in data, "Completed adjudication requires its report"
     if include_report and "report" in data:
         report = data["report"]
         assert report == summarize(data, report["comparison_inputs"])
@@ -399,7 +404,7 @@ def check(path=DATA, include_report=True):
 
 def collect_comparison():
     """Read historical judgments only after the independent verdict seal exists."""
-    check()
+    check(include_report=False)
     verdict_sha, frozen = committed_snapshot("verdicts-frozen")
     from imas_codex.graph.client import GraphClient
 
@@ -607,6 +612,7 @@ def summarize(data, comparison):
     special_classes = {"duplicate_of_live_name", "wrong_physics_domain"}
     return {
         "population": n,
+        "source_completeness": data.get("source_completeness"),
         "verdicts": {
             v: share(counts[v], n) for v in ("sound", "defective", "undecidable")
         },
@@ -681,6 +687,7 @@ def render_page(data):
         "<title>Equilibrium source adjudication and lead review</title>",
         "<style>body{font:16px/1.5 system-ui,sans-serif;max-width:1400px;margin:2rem auto;padding:0 1.5rem;color:#222}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{padding:.55rem;text-align:left;vertical-align:top;border-bottom:1px solid #ccc;overflow-wrap:anywhere}th{font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.45 ui-monospace,monospace}summary{cursor:pointer;font-weight:600}details{margin:1rem 0}textarea{min-height:8rem;width:95%;font:inherit}code{overflow-wrap:anywhere}.review-card{margin:3rem 0;padding-top:1rem;border-top:1px solid #777}a{color:#245c91}small{font-size:.85em}@media print{body{max-width:none}.review-card{break-before:page}}</style></head><body>",
         "<h1>Equilibrium: judge the source packet first</h1>",
+        "<p><strong>INCOMPLETE EVIDENCE — do not use this census to proceed with the group.</strong> A final completeness probe found six enclosing-text omissions in two frozen packets: <code>radial_coordinate_of_conductor_cross_section</code> and <code>vertical_outline</code>. The inherited context helper kept only four ancestor statements per source. Earlier reader comparisons had already been opened when this was discovered, so these verdicts cannot be upgraded to full-packet blind adjudications in this session. The original packets and verdicts are preserved. An unexposed adjudicator must complete a new full-packet blind pass. The twenty selected review packets are unaffected by these observed omissions, but their review does not close the cohort defect.</p>",
         "<p>Twenty members were drawn by a recorded seed from the complete frozen equilibrium cohort. Read each packet, enter your own verdict in the blank column, then open the disclosure to compare. Every packet below is complete and contains no earlier reader verdict, score or adjudication. Fields are blank in this file; entered text is not automatically saved.</p>",
         f"<p>Packet seal <code>{report['packet_commit']}</code>; blind verdict seal <code>{report['verdict_commit']}</code>. The verdict seal predates all individual reader exposure. No model calls, paid reader calls or graph writes were made for this adjudication.</p>",
     ]
@@ -712,7 +719,7 @@ def render_page(data):
         [
             '<details id="audit-results"><summary>Open census, methods, comparisons and all 210 committed verdicts after reviewing</summary>',
             "<h2>Full-cohort census</h2>",
-            "<p>Every live equilibrium member at collection is included: 210 names, 699 distinct producer sources, including 661 Data Dictionary paths and 38 derived sources. All 72 spanning families touching equilibrium contribute structural context. Raw producer text and the ancestry of every DD source are retained; 655 DD chains contain enclosing text. One name has no producer source. Text is whitespace-normalized without clipping. The compact JSON stores lossless compressed packet and verdict payloads; this script decodes them. The freeze is a point-in-time snapshot, not a claim about later graph changes.</p>",
+            "<p>Every live equilibrium member at collection is included: 210 names, 699 distinct producer sources, including 660 Data Dictionary paths and 39 derived sources. All 72 spanning families touching equilibrium contribute structural context. Raw producer text is retained; 655 DD chains contain enclosing text, subject to the four-statement cap disclosed above. There are 661 DD producer/name memberships, distinct from the 660 unique DD paths. One name has no producer source. Text is whitespace-normalized without clipping after context selection. The compact JSON stores lossless compressed packet and verdict payloads; this script decodes them. The freeze is a point-in-time snapshot, not a claim about later graph changes.</p>",
             table(
                 ["Verdict", "Count / 210", "Share", "95% Wilson interval"],
                 [
@@ -875,7 +882,7 @@ def render_page(data):
             f"<p>Seed <code>{SEED}</code>. {e(report['lead_review']['algorithm'])}. Allocation: {e(json.dumps(report['lead_review']['allocation'], sort_keys=True))}. All twenty lead verdicts remain blank. The lead must complete this independent check before the group proceeds; this document grants no release authority.</p>",
             f"<p>Comparison opened at {e(comparison['opened_after_verdict_commit_at'])} after verdict commit <code>{comparison['verdict_commit_before_exposure']}</code>. The bounded graph query returned {comparison['graph_rows']} rows; {comparison['known_present_cross_source_matches']} known-present A/B class sets match the independent retained third-reader file. Non-pair audit seats are excluded using the existing helper’s rule.</p>",
             "<p>The seven classes and reconciled omission instruction come from the existing blind-audit helper. A source-stated component, locus, basis, coordinate, weight or normalization omitted from a name is a defect; stylistic preferences and unstated qualifiers are not. Missing source text yields undecidable unless a source-independent class can be established. Derived producer descriptions are retained as evidence, not invented DD text. Generic-versus-specific derived identities and ambiguous source conventions remain matters for the lead where the committed reason says so.</p>",
-            "<p>Run <code>uv run --no-sync python docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py --check</code> in the repository environment. The check compares packets and verdicts to independent git commits, recomputes all results and the seeded draw, and reproduces this HTML exactly. Altering a verdict and recomputing its digest still fails against the committed seal. No paid calls were authorized or made: actual reader spend USD 0; authorized paid-call ceiling USD 0.</p>",
+            "<p>Run <code>uv run --no-sync python docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py --check</code> in the repository environment. The final gate deliberately fails on the incomplete source packets. The earlier integrity-only gate reproduced counts, intervals, the seeded draw and this page, but did not measure ancestor completeness. Altering a verdict and recomputing its digest, or erasing every verdict, is independently refused against the committed seal. No paid calls were authorized or made: actual reader spend USD 0; authorized paid-call ceiling USD 0.</p>",
             "<h2>Every committed verdict</h2>",
             "<table><thead><tr><th>Name and stored definition</th><th>Quoted source binding</th><th>Verdict and classes</th><th>Quoted reason</th></tr></thead><tbody>",
         ]
