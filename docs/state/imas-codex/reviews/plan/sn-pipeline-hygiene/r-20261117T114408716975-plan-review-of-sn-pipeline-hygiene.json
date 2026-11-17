@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T11:53:09.893Z",
+  "dispatched_at": "2026-11-17T11:52:56Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:93",
+      "id": "done_when-1",
+      "reason": "as written the section cannot close on its own terms after the node takes the escape hatch it explicitly grants, so the endpoint must either forbid that case or exempt the names it leaves.",
+      "text": "\u00a711 permits a live name to be \"listed with the reason neither applies\" instead of being retired or having its source bound back, yet the same done-when then requires the live names without a source to be \"exactly the ten that had none before 2026-11-17\"; a name whose stage is accepted, or whose returned source another name has since taken, leaves the count at eleven and fails a criterion the section's own allowed branch makes unreachable",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:89",
+      "id": "done_when-2",
+      "reason": "the closing clause must name \u00a79's and \u00a710's own landings, or the findings the plan promises to close become unowned once \u00a710 is marked done.",
+      "text": "\u00a710's done-when is scoped to \"the head reviews of the six runs cited above\", while \u00a79's closing comment (`plan.html` comment `c-s9-closed-calibration-module-reached`) says its independent review left four non-blocking findings that \"the open-findings section also covers\", and \u00a710's own comment `c-s10-closed-open-findings` records that the three findings of \u00a710's own landing \"remain open and unowned\"; a node satisfying \u00a710 to the letter closes `done` leaving seven findings the plan itself says it carries",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:91",
+      "id": "single_goal-1",
+      "reason": "a node can land the policy and its tests yet fail on the live remediation (or the reverse), leaving the section neither closable nor reviewable on one verdict.",
+      "text": "\u00a711 delivers the pass's stage rule with two negative controls and, in the same section, a one-time remediation of the 13 already-orphaned live names through the signed write path plus a lead listing; the evidence folder already shows those halves splitting across nodes (`briefs/retire-name-with-recycled-source-landing.md` records a validated patch that could not land because its write paths excluded the file holding the pass), so one gate cannot prove both",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-pipeline-hygiene.html:89",
+      "id": "reasoning-1",
+      "reason": "the narrative already identifies `pools.py` as the site of the second spelling, so the clause adds no implementation freedom and would most likely be declined as the defective location rather than a method.",
+      "text": "the live-child clause reads \"the live-child rule is stated in one place and `pools.py` reads it\", fixing which module must read the rule; the endpoint is that one definition exists and no second spelling survives, and a worker that moved the consumer elsewhere would satisfy the endpoint while failing the sentence",
+      "type": "reasoning",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "a965030084b7a63d058fff7602a4408ae908175d",
+  "plan_fingerprint": "b79ee37f7de0d4909dedad5e8414aa5cf3e8bb6016170c5ea35e316641a145b7",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 57,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T114408716975-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "800fd3583a60a196285ae4debfb4fa3cae9f2c10",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `~/.config/reckon/crew/reports/imas-codex/code-review/d6c322cc9d29/report.md`, `docs/evidence/fragments/sn-definitions-by-construction/name-definition-check-run.py`, the three `docs/evidence/fragments/sn-review-through-jev/srtj-jev-*-run.py` scripts, the six review directories and both evidence directories resolve, and the extensionless `sn-integrity-backlog#s17` link resolves to `docs/plans/sn-integrity-backlog.html#s17`.",
+    "done_when": "a finding \u2014 \u00a711's exact-ten closure criterion is contradicted by \u00a711's own escape clause for the 13 names it remediates, and \u00a710's measure covers only six landings while the plan's own comments carry \u00a79's four and \u00a710's three findings into it.",
+    "evidence_paths": "pass \u2014 the two open sections direct their evidence to the committed `docs/evidence/fragments/sn-pipeline-hygiene/`, \u00a710's quoted findings sit under the committed `docs/state/imas-codex/reviews/run/`, and \u00a79's landed evidence is committed at `docs/evidence/fragments/sn-pipeline-hygiene/sph-unreached-calibration-code.html`; no section sends a gate log to a scratchpad or a node-local path (\u00a79 names no path, and its record already lives in that fragment directory).",
+    "naming": "pass \u2014 no section names a symbol, test or comment the work must create, and nothing in the plan text carries a plan label, stage name, ticket or version tag into code.",
+    "reasoning": "a finding \u2014 \u00a710's done-when fixes `pools.py` as the reader of the live-child rule, an implementation location rather than an endpoint; \u00a711's and \u00a712's stated root causes do match their cited evidence (the 24 returned sources and the scoped-run log), and their other measures can fail.",
+    "single_goal": "a finding \u2014 \u00a711 carries the maintenance-pass policy change plus a one-time live-graph remediation of 13 existing names and a lead listing, which a single node can land and fail separately.",
+    "wiring": "pass \u2014 every cross-plan anchor resolves (`sn-integrity-backlog` \u00a717 at `docs/plans/sn-integrity-backlog.html:165`, `sn-review-through-jev`, the six stored reviews under `docs/state/imas-codex/reviews/run/`, the code-review report `d6c322cc9d29/report.md`); the plan declares no `depends-on`/`informs`/`gates` and needs none, because both open sections (\u00a711, \u00a712) produce their own evidence and no live plan cites this one as a dependency."
+  },
+  "section_digests": {
+    "_document": "645e0d26c10adf6b7710052b78d34f4d4b29176a3f92d1b92e56e8c5cc2f07c7",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "74688d482ee00f0f28ed1052be32bb9bb31527aa48192d5a4a5fc24b9676c610",
+    "s11": "3cc8ef6b37a24a901c30863cbb7c6bd07d95d776c0092f7641217f06b4060fc5",
+    "s12": "1ff22a20672ed136c4ed617c41e5313f6ab56bb1e4e59eb195d56f5192a06306",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:03:34.548623+00:00",
+  "total": null
+}
