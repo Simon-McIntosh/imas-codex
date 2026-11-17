@@ -298,7 +298,7 @@ def pulses(client, request: dict) -> dict:
             }
             for item in found
         ],
-        "categories": pulse_categories(client, request)["categories"],
+        "categories": pulse_categories(client, {})["categories"],
     }
 
 

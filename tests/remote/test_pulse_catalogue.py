@@ -98,7 +98,9 @@ def test_native_pulse_listing_keeps_missing_end_and_description(end):
             description="Demonstration pulse",
         )
     ]
-    result = native.dispatch(client, {"operation": "pulses", "pattern": "DEMO:ACTIVE"})
+    result = native.dispatch(
+        client, {"operation": "pulses", "pattern": "DEMO:ACTIVE", "limit": 1}
+    )
     assert result["pulses"][0]["end_ns"] == (None if end in (None, "") else end)
     assert result["pulses"][0]["description"] == "Demonstration pulse"
     client.fetchData.assert_not_called()
