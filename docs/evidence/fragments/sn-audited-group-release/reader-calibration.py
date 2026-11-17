@@ -455,6 +455,7 @@ async def read_corrected(*, pilot_only, through=0):
             "output_token_ceilings": ceilings,
             "provider_filter_removed": ["A"],
             "max_attempts_per_call": 1,
+            "max_inflight_calls": 1 if pilot_only else 6,
         },
     )
     records = recorded_calls()
@@ -469,26 +470,44 @@ async def read_corrected(*, pilot_only, through=0):
         )
         assert pilot["names"] == order[:6]
     names = order[:6] if pilot_only else (order[:through] if through else order)
-    for index, name in enumerate(names):
-        for reader in readers:
-            if (reader["seat"], name) in done:
-                continue
-            account = budget_account(records, packets, system, rates)
+    gate = asyncio.Semaphore(1 if pilot_only else 6)
+    condition = asyncio.Condition()
+    held = 0.0
+    active = 0
+    stopped = None
+    completed_names = {n for n in names if all((r["seat"], n) in done for r in readers)}
+
+    async def one(reader, name):
+        nonlocal held, active, stopped
+        async with gate:
             worst = call_bound(
                 packets[name], system, rates[reader["model"]], ceilings[reader["seat"]]
             )
-            save(
-                RUN / "spend-status.json",
-                account
-                | {
-                    "next_name": name,
-                    "next_reader": reader["seat"],
-                    "next_call_bound_usd": worst,
-                },
-            )
-            assert account["charged_usd"] + worst <= CEILING, (
-                f"Next call cannot fit: charged {account['charged_usd']:.6f} + bound {worst:.6f} > {CEILING}"
-            )
+            async with condition:
+                while True:
+                    if stopped:
+                        return
+                    account = budget_account(records, packets, system, rates)
+                    if account["charged_usd"] + held + worst <= CEILING:
+                        break
+                    if not active:
+                        stopped = f"Next call cannot fit: charged {account['charged_usd']:.6f} + bound {worst:.6f} > {CEILING}"
+                        condition.notify_all()
+                        return
+                    await condition.wait()
+                held += worst
+                active += 1
+                save(
+                    RUN / "spend-status.json",
+                    account
+                    | {
+                        "inflight_reserved_usd": held,
+                        "active_calls": active,
+                        "next_name": name,
+                        "next_reader": reader["seat"],
+                        "next_call_bound_usd": worst,
+                    },
+                )
             reply = await audit.judge_one(
                 reader,
                 packets[name],
@@ -502,23 +521,46 @@ async def read_corrected(*, pilot_only, through=0):
                 output_token_ceiling=ceilings[reader["seat"]],
                 worst_case_usd=worst,
             )
-            with (RUN / "corrected-readings.jsonl").open("a") as handle:
-                handle.write(json.dumps(reply, ensure_ascii=False) + "\n")
-            records.append(reply)
-            account = budget_account(records, packets, system, rates)
-            save(RUN / "spend-status.json", account)
-            assert account["charged_usd"] <= CEILING
-            if reply.get("error"):
-                raise RuntimeError(
-                    "Reader call failed; null-cost receipt reserved at worst case: "
-                    + reply["error"]
+            async with condition:
+                with (RUN / "corrected-readings.jsonl").open("a") as handle:
+                    handle.write(json.dumps(reply, ensure_ascii=False) + "\n")
+                records.append(reply)
+                held -= worst
+                active -= 1
+                account = budget_account(records, packets, system, rates)
+                save(
+                    RUN / "spend-status.json",
+                    account
+                    | {"inflight_reserved_usd": max(0.0, held), "active_calls": active},
                 )
-            done.add((reader["seat"], name))
-        account = budget_account(records, packets, system, rates)
-        print(
-            f"{index + 1}/{len(names)} names complete; priced USD {account['priced_usd']:.6f}; charged USD {account['charged_usd']:.6f} / {CEILING:.2f}",
-            flush=True,
+                assert account["charged_usd"] + held <= CEILING + 1e-9
+                if reply.get("error"):
+                    stopped = (
+                        "Reader call failed; null-cost receipt reserved at worst case: "
+                        + reply["error"]
+                    )
+                else:
+                    done.add((reader["seat"], name))
+                    if name not in completed_names and all(
+                        (r["seat"], name) in done for r in readers
+                    ):
+                        completed_names.add(name)
+                        print(
+                            f"{len(completed_names)}/{len(names)} names complete; priced USD {account['priced_usd']:.6f}; charged USD {account['charged_usd']:.6f} / {CEILING:.2f}",
+                            flush=True,
+                        )
+                condition.notify_all()
+
+    await asyncio.gather(
+        *(
+            one(reader, name)
+            for name in names
+            for reader in readers
+            if (reader["seat"], name) not in done
         )
+    )
+    if stopped:
+        raise RuntimeError(stopped)
     if pilot_only:
         good = [r for r in records if not r.get("error") and r["name"] in names]
         assert len(good) == 18
@@ -970,7 +1012,7 @@ def render_page(data):
         + " reader by balanced accuracy, with recall used to break ties. This measurement does not itself authorize a group release or choose an interim deciding rule where none is fit.</p>",
         "<h2>Spend and the six-name pilot</h2>",
         f"<p>Recorded priced spend: <strong>USD {account['priced_usd']:.6f}</strong>; the one null-cost failed call is charged <strong>USD {account['unpriced_reserved_usd']:.6f}</strong> at its worst-case bound. Budget-accounted total: <strong>USD {account['charged_usd']:.6f} / USD {CEILING:.2f}</strong>. There are {len(records)} successful readings and {result['spend']['attempts'] - len(records)} retained failed attempt(s). No null receipt is counted as free.</p>",
-        f"<p>The seeded six-name pilot completed all 18 successful readings for USD {pilot['spend_usd']:.6f}. Scaling that cost to 84 names and adding the failed-call reserve projected <strong>USD {pilot['projected_usd']:.6f} / USD {CEILING:.2f}</strong>; the full read began afterward. Two readings paid before resumption were retained. The initial local reservation refusal made no calls; the next attempt returned reader A’s price-filter refusal while B and C returned paid readings. After adjudication, A’s provider max-price filter was removed and every next call was checked against the running charged total plus its worst-case token cost.</p>",
+        f"<p>The seeded six-name pilot completed all 18 successful readings for USD {pilot['spend_usd']:.6f}. Scaling that cost to 84 names and adding the failed-call reserve projected <strong>USD {pilot['projected_usd']:.6f} / USD {CEILING:.2f}</strong>; the full read began afterward. Two readings paid before resumption were retained. The initial local reservation refusal made no calls; the next attempt returned reader A’s price-filter refusal while B and C returned paid readings. After adjudication, A’s provider max-price filter was removed and every next call was checked against the running charged total plus its worst-case token cost, including the reserved bounds of any other calls in flight.</p>",
         "<p>Calls use the original audit’s <code>judge_one</code> and shared structured-call owner. On resumption, output ceilings are A 4000, B 8000 and C 4000 tokens with one provider attempt per call. The inherited B receipt includes its earlier length retry. Reader A is reserved at conservative text rates of USD 20 / 100 per million input/output tokens; the other readers use the recorded bounded text prices. These budget controls and any text drift limit causal attribution solely to the omission sentence.</p>",
         "<h2>The omission instruction: before and after</h2>",
         "<p>The unchanged class definition says that a qualifier stated by the source and absent from the name is a defect. The later rule contradicted it:</p>",
