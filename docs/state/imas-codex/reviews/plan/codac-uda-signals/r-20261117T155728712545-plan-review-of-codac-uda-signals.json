@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T15:58:14.638Z",
+  "dispatched_at": "2026-11-17T15:57:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261117T155728712545-plan-review-of-codac-uda-signals/plan.html:140",
+      "id": "reasoning-1",
+      "reason": "the section overstates its schema work but names a true defect for one of the two; the description half of the section would be spent adding an existing property and its description-coverage number, already true on the unfixed code, cannot show the guard fires.",
+      "text": "\u00a720 declares two schema changes and states \"The installed plotting suite lists a description and a status for each pulse, which the import did not keep\", but `Pulse.description` is already in `imas_codex/schemas/facility.yaml` (attribute introduced at 5654dbf8a, before the pulse import) and the landed import preserves it \u2014 `create_archive_pulse(..., description=...)` in `imas_codex/config/codac_uda.py` is fed `item.get(\"description\")` by `imas_codex/remote/codac_uda.py:311` and written by the pulse upsert; the landing commit 8db4796ff's own message says \"Preserve ... descriptions\" \u2014 so a node told to add the property and backfill descriptions works on a gap that does not exist, while the one real gap (status, absent from the reader's pulse payload) is one of the two named changes",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261117T155728712545-plan-review-of-codac-uda-signals/plan.html:140",
+      "id": "done_when-1",
+      "reason": "the control as written can pass without firing, and the same section's sibling control was fixed to a constructed pulse for exactly this reason.",
+      "text": "the second negative control requires \"a pulse the archive describes with an empty string\" and no measurement in the plan or its evidence establishes that any such pulse exists (the trial fragment records 34 closed pulses and only that the seven *category* descriptions are null), so a run either skips the control or has to hunt the archive for a case that may not be there",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261117T155728712545-plan-review-of-codac-uda-signals/plan.html:140",
+      "id": "done_when-2",
+      "reason": "the section needs the same private-file-plus-digest record it already asks of the \u00a715 pre-registrations, or this measure reduces to a self-reported count.",
+      "text": "the done-when compares \"twenty pulses chosen before the run\" against the archive, while the same section forbids any real pulse text in a tracked file, so the pre-registration that makes the comparison meaningful has no stated durable record and a later reader cannot tell a pre-chosen set from one picked after the fact",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "1ddbfed7767cdf87cdabb6d375fb3acdcc9111e2",
+  "plan_fingerprint": "7965ce19ef2ee1ce152918127877bf4e9ee6c8626cf8ee6b09a745f063399b49",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 66,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T155728712545-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "7b5d51bde2b61c89a77474e6c1c7914b4a3b01cb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a720's only anchors are the section links `#s16` and `#s18`, which resolve in the snapshot; it cites no file or commit, which is not a defect.",
+    "done_when": "a finding \u2014 \u00a720's second negative-control clause (a pulse the archive describes with an empty string) is conditional on live archive data the plan never establishes exists, and its twenty-pulse pre-registration cannot be recorded under the section's own no-real-pulse-text rule without a digest.",
+    "evidence_paths": "pass \u2014 \u00a720 names a landing record in the plan's house convention (evidence fragment plus the run record), not a scratchpad, and its rigel import is recorded durably.",
+    "naming": "pass \u2014 \u00a720 introduces `kind`/`source` as plain mechanism words, with no plan labels, section numbers or version tags carried into the records it names.",
+    "reasoning": "a finding \u2014 \u00a720 says a pulse \"gains a description and a status\" and that the import \"did not keep\" them, but `Pulse.description` already exists and the landed import already preserves it; only status is missing.",
+    "single_goal": "pass \u2014 \u00a720 carries one deliverable, finding a test by kind through the server pulse search; the pulse description/status and category kind are the records that deliverable needs.",
+    "wiring": "pass \u2014 \u00a720's declared wait on \u00a716 and \u00a718 is present in both `plan-section-depends-on` and the section's own `data-links`, and both sections exist; `s20` is the only newly declared section and it resolves."
+  },
+  "section_digests": {
+    "_document": "77f13d39818879b6258db687609d7bd6c855092729463ff92bf55aec1e53d973",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "26af6b08e82e3933786a6dcdc485b2ec0210c1ebaf5b7c88cf8e9cb18637c1cd",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:13:43.532885+00:00",
+  "total": null
+}
