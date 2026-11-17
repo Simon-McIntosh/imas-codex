@@ -71,6 +71,13 @@
       "note": "The cut now also refuses when any one defect class is above the maximum ruled for that class.",
       "reason": "",
       "when": "2026-11-17T09:04:24.629436+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "naming-1",
+      "reason": "The pages are evidence files named after their node ids, which reckon derives; the plan prescribes no file name, and renaming a landed evidence page would break the links that cite it.",
+      "when": "2026-11-17T09:05:31.322726+00:00"
     }
   ],
   "responses": {
@@ -82,6 +89,12 @@
       "note": "A group's rate after repair is taken over every member: the second reading of each member that changed and the first reading of each that did not.",
       "reason": "",
       "when": "2026-11-17T09:03:13.191779+00:00"
+    },
+    "naming-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The pages are evidence files named after their node ids, which reckon derives; the plan prescribes no file name, and renaming a landed evidence page would break the links that cite it.",
+      "when": "2026-11-17T09:05:31.322726+00:00"
     },
     "reasoning-1": {
       "action": "acted",
