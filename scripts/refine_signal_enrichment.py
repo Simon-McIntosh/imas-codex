@@ -93,6 +93,15 @@ def subset_messages(messages: list[dict], indices: list[int]) -> list[dict]:
     return result
 
 
+def supplied_target_context(messages: list[dict], accessor: str) -> str:
+    """Retain all supplied shared evidence, including other groups' retrieval.
+
+    A shared document may explicitly describe the target even when retrieval
+    placed it under another group. Only other signals' own blocks are removed.
+    """
+    return bench.target_context(messages, accessor)
+
+
 def failure_class(response: dict, *, terminal: bool = False) -> str:
     """Classify recorded failures without treating repaired text as raw JSON."""
     if response.get("finish_reason") == "abort":
@@ -115,16 +124,26 @@ def failure_class(response: dict, *, terminal: bool = False) -> str:
 
 def replacement_kind(record: dict) -> str | None:
     """Distinguish validation-directed messages from ordinary provider retries."""
-    if len(record["responses"]) < 2:
+    responses = [
+        row
+        for row in record["responses"]
+        if row.get("response_schema") != "DescriptionReview"
+    ]
+    if len(responses) < 2:
         return None
-    second = record["responses"][1]
+    second = responses[1]
     directed = second.get("validation_reask")
     if directed is None:
         # Frozen receipts identify the branch from its first reply: unusable
         # content is rejected before structured validation can append a re-ask.
-        first = record["responses"][0]
+        first = responses[0]
         directed = bool(first.get("raw")) and first.get("finish_reason") != "abort"
     return "validation_reask" if directed else "retry"
+
+
+def has_description(output: dict) -> bool:
+    """An empty or fully filtered description is not a delivered description."""
+    return bool((output.get("description") or "").strip())
 
 
 def summarize(records: list[dict], cohort: dict) -> dict:
@@ -136,12 +155,16 @@ def summarize(records: list[dict], cohort: dict) -> dict:
         firsts = [r["responses"][0] for r in batches]
         responses = [response for r in batches for response in r["responses"]]
         seconds = sum(r["seconds"] for r in batches)
-        outputs = {o["id"]: o for r in batches for o in r["outputs"]}
+        all_outputs = {o["id"]: o for r in batches for o in r["outputs"]}
+        outputs = {id: row for id, row in all_outputs.items() if has_description(row)}
         failed = Counter()
         raw_failed = Counter()
         for r in batches:
             if not r["responses"][0]["score"]["parse_success"]:
                 raw_failed[failure_class(r["responses"][0])] += len(r["ids"])
+            failed["empty_description"] += sum(
+                not has_description(o) for o in r["outputs"]
+            )
             absent = set(r["ids"]) - {o["id"] for o in r["outputs"]}
             if absent:
                 last = r["responses"][-1]
@@ -160,36 +183,82 @@ def summarize(records: list[dict], cohort: dict) -> dict:
             / len(firsts),
             "raw_failed_signals_by_class": dict(raw_failed),
             "delivered_first": sum(
-                len(r["outputs"]) for r in batches if len(r["responses"]) == 1
+                sum(has_description(o) for o in r["outputs"])
+                for r in batches
+                if sum(
+                    row.get("response_schema") != "DescriptionReview"
+                    for row in r["responses"]
+                )
+                == 1
             ),
             "delivered_after_reask": sum(
-                len(r["outputs"])
+                sum(has_description(o) for o in r["outputs"])
                 for r in batches
                 if replacement_kind(r) == "validation_reask"
             ),
             "delivered_after_retry": sum(
-                len(r["outputs"]) for r in batches if replacement_kind(r) == "retry"
+                sum(has_description(o) for o in r["outputs"])
+                for r in batches
+                if replacement_kind(r) == "retry"
             ),
             "validation_reasks": sum(
                 replacement_kind(r) == "validation_reask" for r in batches
             ),
             "other_retries": sum(replacement_kind(r) == "retry" for r in batches),
+            "review_calls": sum(
+                row.get("response_schema") == "DescriptionReview" for row in responses
+            ),
+            "review_raw_parses": sum(
+                next(
+                    (
+                        row["score"]["parse_success"]
+                        for row in r["responses"]
+                        if row.get("response_schema") == "DescriptionReview"
+                    ),
+                    False,
+                )
+                for r in batches
+            ),
+            "review_validation_reasks": sum(
+                row.get("response_schema") == "DescriptionReview"
+                and row.get("validation_reask", False)
+                for row in responses
+            ),
             "delivered": len(outputs),
-            "delivery_rate": len(outputs) / len(cohort["order"]),
-            "failed_signals_by_class": dict(failed),
+            "empty_descriptions": len(all_outputs) - len(outputs),
+            "delivery_rate": len(outputs) / sum(len(r["ids"]) for r in batches),
+            "failed_signals_by_class": {
+                key: count for key, count in failed.items() if count
+            },
             "seconds": seconds,
             "calls_per_minute": len(responses) * 60 / seconds,
-            "seconds_per_thousand": seconds * 1000 / len(cohort["order"]),
+            "seconds_per_thousand": seconds
+            * 1000
+            / sum(len(r["ids"]) for r in batches),
             "input_tokens": sum(r["input_tokens"] for r in batches),
             "output_tokens": sum(r["output_tokens"] for r in batches),
             "reasoning_tokens": sum(r.get("reasoning_tokens") or 0 for r in responses),
             "cost_usd": sum(r["cost_usd"] for r in batches),
             "options": batches[0].get("options", {}),
+            "grounding_counts": {
+                key: sum(r.get("grounding_counts", {}).get(key, 0) for r in batches)
+                for key in (
+                    "evidence_drops",
+                    "review_drops",
+                    "review_revisions",
+                    "length_drops",
+                )
+            },
         }
     return summary
 
 
-async def run_variant(root: Path, arm: str, options: EnrichmentOptions) -> None:
+async def run_variant(
+    root: Path,
+    arm: str,
+    options: EnrichmentOptions,
+    selected_ids: list[str] | None = None,
+) -> None:
     """Checkpoint each production replay to the existing private SQLite sink."""
     model = get_model("discovery-describe")
     if not model.startswith("local/"):
@@ -205,6 +274,10 @@ async def run_variant(root: Path, arm: str, options: EnrichmentOptions) -> None:
     if len(contexts) != 20 or sum(len(r["ids"]) for r in contexts) != 200:
         raise ValueError("need the original twenty frozen context batches")
     refs = {r["id"]: r for r in cohort["reference"]}
+    if selected_ids is not None and (
+        not selected_ids or not set(selected_ids) <= set(refs)
+    ):
+        raise ValueError("selected ids must belong to the sealed cohort")
     done = [r for r in records if r["arm"] == arm]
     if any(
         EnrichmentOptions.model_validate(r.get("options", {})).model_dump()
@@ -221,20 +294,22 @@ async def run_variant(root: Path, arm: str, options: EnrichmentOptions) -> None:
         )
         for offset in range(0, len(order), options.batch_size):
             ids = order[offset : offset + options.batch_size]
+            if selected_ids is not None:
+                ids = [id for id in ids if id in selected_ids]
+                if not ids:
+                    continue
             if any(set(r["ids"]) == set(ids) for r in done):
                 continue
             messages = (
                 original
                 if len(ids) == len(context["ids"])
-                else subset_messages(
-                    original, list(range(offset + 1, offset + 1 + len(ids)))
-                )
+                else subset_messages(original, [order.index(id) + 1 for id in ids])
             )
             for id in ids:
                 accessor = refs[id]["properties"]["accessor"]
                 if normalized_context(
-                    bench.target_context(messages, accessor)
-                ) != normalized_context(bench.target_context(original, accessor)):
+                    supplied_target_context(messages, accessor)
+                ) != normalized_context(supplied_target_context(original, accessor)):
                     raise ValueError(
                         "subset changed the target's frozen retrieval context"
                     )
@@ -279,6 +354,13 @@ def main():
     parser.add_argument("--max-tokens", type=int, default=8192)
     parser.add_argument("--fitted-prompt", action="store_true")
     parser.add_argument("--validation-reask", action="store_true")
+    parser.add_argument("--grounding", action="store_true")
+    parser.add_argument("--claim-evidence", action="store_true")
+    parser.add_argument("--review", action="store_true")
+    parser.add_argument("--review-thinking", action="store_true")
+    parser.add_argument("--temperature", type=float)
+    parser.add_argument("--description-sentences", type=int)
+    parser.add_argument("--ids-file", type=Path)
     args = parser.parse_args()
     options = EnrichmentOptions(
         batch_size=args.batch_size,
@@ -288,8 +370,15 @@ def main():
         max_tokens=args.max_tokens,
         fitted_prompt=args.fitted_prompt,
         validation_reask=args.validation_reask,
+        grounding=args.grounding,
+        claim_evidence=args.claim_evidence,
+        review=args.review,
+        review_thinking=args.review_thinking,
+        temperature=args.temperature,
+        description_sentences=args.description_sentences,
     )
-    asyncio.run(run_variant(args.store, args.variant, options))
+    selected_ids = json.loads(args.ids_file.read_text()) if args.ids_file else None
+    asyncio.run(run_variant(args.store, args.variant, options, selected_ids))
 
 
 if __name__ == "__main__":

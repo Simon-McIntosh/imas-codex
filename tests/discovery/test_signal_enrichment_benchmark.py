@@ -263,7 +263,7 @@ source_description: Coil current
 accessor: COIL:VOLTAGE
 source_description: Distracting voltage
 ## EDAS Category: cooling
-Wiki: unrelated cooling evidence
+Wiki: cooling evidence; target coil current uses sign convention X.
 ### Signal 1
 accessor: WATER:TEMP
 source_description: Distracting temperature
@@ -282,7 +282,7 @@ source_description: Distracting temperature
     assert "Preserve source snippet" in state["context"]
     assert "Coil current" in state["context"]
     assert "Distracting" not in state["context"]
-    assert "unrelated cooling" not in state["context"]
+    assert "target coil current uses sign convention X" in state["context"]
     assert "first_arm" not in state
     assert "local" not in json.dumps(state)
     swapped = bench.blind_state(row, True)

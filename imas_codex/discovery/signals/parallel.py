@@ -4276,7 +4276,6 @@ async def enrich_worker(
     )
     from imas_codex.discovery.signals.models import (
         ContextQuality,
-        SignalEnrichmentBatch,
     )
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.settings import get_model, get_reasoning_effort
@@ -4286,6 +4285,7 @@ async def enrich_worker(
     reasoning_effort = get_reasoning_effort("discovery-describe")
 
     from imas_codex.discovery.signals.enrichment import (
+        enrich_signal_batch,
         fit_enrichment_prompt,
         get_enrichment_options,
     )
@@ -4997,13 +4997,14 @@ async def enrich_worker(
         # acall_llm_structured handles: retry, backoff, noise suppression,
         # API key, model prefix, JSON sanitization, cost tracking
         try:
-            batch_result, batch_cost, total_tokens = await acall_llm_structured(
+            batch_result, batch_cost, total_tokens = await enrich_signal_batch(
+                call=acall_llm_structured,
+                options=enrichment_options,
                 model=model,
                 messages=[
                     {"role": "system", "content": system_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
-                response_model=SignalEnrichmentBatch,
                 temperature=0.3,
                 service="facility-discovery",
                 **call_options,
