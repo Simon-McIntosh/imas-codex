@@ -35,9 +35,28 @@
       "note": "The group ruling now settles every cross-group family one of three ways (members into one group, the groups cut together, or a ruled exception), and the bar refuses only a family that ruling does not cover.",
       "reason": "",
       "when": "2026-11-17T00:30:06.180480+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "dc94a37f47efbbbd3ab756a7ad45e2a69348baeb",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The census must sum to the live total and a recorded run shows it counting one planted name whose domain is among its sources' and one whose domain is not.",
+      "reason": "",
+      "when": "2026-11-17T00:30:27.762885+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "dc94a37f47efbbbd3ab756a7ad45e2a69348baeb",
+      "commit_basis": "edit",
+      "note": "The census must sum to the live total and a recorded run shows it counting one planted name whose domain is among its sources' and one whose domain is not.",
+      "reason": "",
+      "when": "2026-11-17T00:30:27.762885+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
