@@ -1,0 +1,46 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T20:51:32.482Z",
+  "dispatched_at": "2026-11-17T20:51:17Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:37",
+      "id": "reasoning-1",
+      "reason": "the condition must be stated per member (each reading postdates that member's own newest text change) or \u00a74's cut is refused by \u00a73's own gate, costing a second full adjudication pass inside a USD 40 ceiling.",
+      "text": "\u00a73's cut refuses when the group's audited defect rate \"was measured before the newest change to any member's stored text\", but the same section defines that rate per member, and \u00a74 (line 41) composes the post-repair rate \"from the second reading of each member that changed and the first reading of each that did not\", so every unchanged member's reading necessarily predates the newest change to another member; a gate implemented at the stated granularity refuses the first group's valid cut or forces a full re-adjudication of all of its members",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "4128eecb175b82368086ace24e245a014bcb14e1",
+  "plan_fingerprint": "a6de5d85a701c21c5158109cdbc44058a32caa578dad295127cfa575f4c438f1",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T205045986615-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "d73ed88a7b2ff87fff5cc46e0f274a79acc0e137",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sagr-blind-audit.html`, `sagr-domain-groups.html`, `sagr-frontier-third-reader.html`, `reader-calibration.html` and `domain-groups.json` exist, `sn-definitions-by-construction.html#s11` resolves, `tests/standard_names` exists, and `group-release-table.json` is named only as a future deliverable rather than as an existing anchor.",
+    "done_when": "pass \u2014 every section names a planted negative control that can fail: \u00a71 plants 20 defective and 20 sound names outside the sample counts, \u00a72 plants one settled and one not-among census name, \u00a73 requires a refusal run per fault plus a fault-free group that is cut, \u00a74 plants a shared cause on three members and a disposable group above the bar, \u00a75 repeats the not-cut run, \u00a76 plants one moved and one untouched name on a disposable graph.",
+    "evidence_paths": "pass \u2014 every evidence page, data file and refusal run is committed under `docs/evidence/fragments/sn-audited-group-release/`; no section writes its evidence to a scratch or node-local path.",
+    "naming": "pass \u2014 no plan label, stage name or ticket identifier reaches a symbol or comment in the sections, and the section text states mechanisms rather than tracker entries.",
+    "reasoning": "a finding \u2014 \u00a73's freshness refusal is stated at group granularity while \u00a74 composes the group rate from readings taken at different times, so the gate and the rate it guards cannot both hold as written.",
+    "single_goal": "pass \u2014 each section delivers one artifact (\u00a73 the bar and its cut gate, \u00a74 the first group's cut, \u00a76 the transport division); \u00a74's two-arm repair comparison is explicitly subordinated to the cut by the section's own closing sentence.",
+    "wiring": "pass \u2014 the section-dependency graph is complete and correct (s2\u2190s1; s3\u2190s1,s2; s4\u2190s2,s3,sn-definitions-by-construction#s11, whose target exists and is done; s5\u2190s4,s6; s6\u2190s2); extensionless relationship fields absent from the house convention are not required, and the one cross-plan dependency resolves to the section \u00a74 needs (the name review's enclosing-structure context)."
+  },
+  "section_digests": {
+    "_document": "3a1f5b884da22b0f9f7513f167fc23ed231b5462b07c24908c13cb258da75fe9",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "3073ba4c58fc1374d8568d8e8798f5c1fac407860517b8ac0c4e0ca15a6a4a2b",
+    "s3": "e46d8f558b021da5ea7cae745afd90e0f6e60f2603876bf27142cdfe43692431",
+    "s4": "4640fdf2831f8ca044d9ed3f60314f8e79cc23053b199cb1f7491f7df26aeb50",
+    "s5": "61674c50c2e89474d21672aad5679437c4d08736b700aabf9ebf00fc989477fb",
+    "s6": "90a0463c758d22b32611805f931c843f2382e2bc89a2e1ef318231acd72f2fca"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T21:03:24.782361+00:00",
+  "total": null
+}
