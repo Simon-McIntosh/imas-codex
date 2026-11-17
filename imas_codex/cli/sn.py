@@ -28,6 +28,7 @@ from imas_codex.standard_names.defaults import (
     REVIEW_DOCS_BACKLOG_CAP,
     REVIEW_NAME_BACKLOG_CAP,
 )
+from imas_codex.standard_names.pipeline import resolve_scope_maintenance
 from imas_codex.standard_names.turn import TURN_PHASES
 
 logger = logging.getLogger(__name__)
@@ -874,6 +875,18 @@ def _run_sn_cmd(
         run_sn_pools,
         summary_table,
     )
+
+    # A run that carries a scope changes nothing outside it. The scope reaches
+    # this boundary as a run id (focus, exact-name and edit launches all stamp
+    # one) or as the edits predicate, so the graph-wide maintenance passes are
+    # dropped here whichever caller assembled the run and whether or not it
+    # repeated the explicit flag.
+    maintenance_policy = resolve_scope_maintenance(
+        scope_run_id=scope_run_id,
+        edits_only=edits_only,
+    )
+    if maintenance_policy.bypass_global_maintenance:
+        skip_global_maintenance = True
 
     run_id = str(_uuid.uuid4())
     use_rich = not quiet and not dry_run and use_rich_output()
@@ -2299,6 +2312,20 @@ def sn_run(
     # Coerce override_edits tuple to list for downstream
     _override_edits = list(override_edits) if override_edits else None
 
+    # A scope is a promise about that scope's names: the graph-wide
+    # maintenance passes are resolved here, once, from the concrete scope the
+    # flags produced. Actions that cannot be bounded by a scope refuse with a
+    # reason instead of quietly widening it.
+    maintenance_policy = resolve_scope_maintenance(
+        scope_run_id=scope_run_id,
+        focus_paths=tuple(flat_focus),
+        exact_names=tuple(exact_names),
+        edits_only=edits_only,
+        only_phase=only_phase,
+        reset_to=reset_to,
+        revalidate=revalidate,
+    )
+
     # ── Validate --flush constraints ──────────────────────────────────
     if flush and flat_focus:
         raise click.UsageError("--flush and --focus are mutually exclusive")
@@ -2353,6 +2380,27 @@ def sn_run(
                 "no graph writes performed"
             )
             return
+
+    # The bypass is a property of a scoped run, not an opt-in. The pool
+    # orchestrator applies the same policy at its own boundary, so the scope's
+    # promise holds whether the run arrives through this command or a direct
+    # caller. A scoped run whose action cannot be bounded refuses here.
+    if maintenance_policy.refusal is not None:
+        raise click.UsageError(maintenance_policy.refusal)
+    if maintenance_policy.bypass_global_maintenance:
+        logger.info(
+            "sn run: scope supplied — graph-wide maintenance is bypassed "
+            "(scope_run_id=%s, focus=%d, exact=%d, edits=%s)",
+            scope_run_id,
+            len(flat_focus),
+            len(exact_names),
+            edits_only,
+        )
+        if not quiet:
+            console.print(
+                "[dim]Scoped run: graph-wide maintenance is bypassed; "
+                "only this scope's names are touched.[/dim]"
+            )
 
     # ── Guard the unscoped graph-wide accepted-wipe footgun ───────────
     # Fires before either reset branch so it covers --reset-only and the
@@ -2546,8 +2594,13 @@ def sn_run(
         # 1. Clear stale run_ids from previous focused runs. Both node labels
         #    are cleared in a single statement so the reset is atomic and the
         #    scoping invariant (no residual run_id survives a fresh focus run)
-        #    holds even if a preceding read query interposes.
-        if not skip_global_maintenance:
+        #    holds even if a preceding read query interposes. A scoped run does
+        #    not own the rest of the catalogue, so it leaves other runs' stamps
+        #    alone: its own claim predicates read this run's id, not the
+        #    absence of others'.
+        if not (
+            skip_global_maintenance or maintenance_policy.bypass_global_maintenance
+        ):
             with GraphClient() as gc:
                 gc.query(
                     "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
