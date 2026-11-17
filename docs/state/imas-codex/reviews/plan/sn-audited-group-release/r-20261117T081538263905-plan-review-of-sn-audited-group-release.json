@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T08:16:40.753Z",
+  "dispatched_at": "2026-11-17T08:16:27Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:37",
+      "id": "reasoning-1",
+      "reason": "a worker dispatched on \u00a73 would rule the bar from the 51.3 % either-reader figure the plan itself says is biased, and \u00a74 would carry the rejected readers into every group audit, so the bar and the group readings both rest on an instrument the plan's own record has disqualified.",
+      "text": "\u00a73 says \"The bar here is fixed once, from what \u00a71 measures\", while \u00a71's own close comment says the readers caught only 45 %/55 % of the known-defective plants and flagged 25 % of the known-sound ones and that \"a bar fixed from them would carry that error\", and the committed lead ruling of 2026-11-17 (`docs/evidence/fragments/sn-audited-group-release/briefs/frontier-third-reader.md:3`, commit 757626386) states the two readers are \"too weak to fix a release bar from\" and adds a frontier third reader for that purpose; \u00a74:41 then fixes \"the same two readers\" as the readers for every group audit",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:41",
+      "id": "done_when-1",
+      "reason": "the worker must either report a rate over the changed subset and fail \u00a73's precondition at the cut, or re-read the whole group and contradict \u00a74's own sentence, and nothing in the plan chooses between them.",
+      "text": "\u00a74 fixes \"the group's rate after repair is that second reading\", where that second reading covers \"every member whose stored text changed\", while \u00a73:37 refuses any cut whose group rate \"was never measured over every member\"; for a group that leaves any member unchanged the two conditions cannot both hold",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:37",
+      "id": "reasoning-2",
+      "reason": "the gate as written enforces the aggregate and leaves every per-class maximum unenforced, which is the distinction the bar was defined around.",
+      "text": "the bar is defined as \"the largest audited defect rate a group may carry, per defect class where the classes differ in consequence\", but the refusal clause tests only \"the group's audited defect rate\", the any-class rate \u00a71 reports as its headline figure, so a group whose aggregate is under the bar passes with one class arbitrarily high",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/evidence/fragments/sn-audited-group-release/sagr-blind-audit.html:1",
+      "id": "naming-1",
+      "reason": "the plan text prescribes no file name and the review is of the plan's content, so renaming the evidence page changes no decision the plan makes.",
+      "text": "the audit evidence page, and the `sagr-frontier-third-reader.html` page the pending brief plans, encode the plan slug `sn-audited-group-release` as `sagr`, a name that means nothing outside this plan's tracker entry",
+      "type": "naming",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "757626386351100cb0a1e4549a561d1579ae06e2",
+  "plan_fingerprint": "9079ab3bb459ed6dca2711e6f2cfc5b6315f900fcbae50e43695c96e370365a2",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 14,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T081538263905-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "9feeac251aa7df1722e3b81bd83ad48157fc1ffd",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited evidence page and data file exist (`docs/evidence/fragments/sn-audited-group-release/sagr-blind-audit.html`, `blind-audit.json`), the comment's href resolves under the docs root, commits `dccd83ff4`, `d4f2a7d2c` (both in the s1 review comments) and `1e87f877f` all resolve in the repository, `tests/standard_names` exists, and `sn-definitions-by-construction#s11` resolves.",
+    "done_when": "a finding \u2014 \u00a74 fixes the group's after-repair rate to the re-read of changed members only, which \u00a73's own cut precondition rejects, so the section's gate cannot be satisfied for any group with an unchanged member.",
+    "evidence_paths": "pass \u2014 every artifact is committed under `docs/evidence/fragments/sn-audited-group-release/`, no gate or log is placed in a node-local or temporary path.",
+    "naming": "a finding \u2014 the evidence page and its planned successor carry the plan abbreviation in their file names, a name that is unreadable without the plan slug.",
+    "reasoning": "two findings \u2014 \u00a73 fixes the bar from an instrument the plan's own \u00a71 evidence and the committed lead ruling call too weak, and \u00a73 defines a per-class bar but writes the refusal against a single aggregate rate.",
+    "single_goal": "pass \u2014 each section names one deliverable (audit, group census and order, bar, first cut, remaining groups), and \u00a74 explicitly makes its repair comparison non-closing evidence rather than a second deliverable.",
+    "wiring": "pass \u2014 s2 depends on s1, s3 on s1+s2, s4 on s2+s3 and on `sn-definitions-by-construction#s11` (that section exists and is declared done), s5 on s4; no plan under `docs/plans/` declares `informs` or `gates`, so their absence here is the house convention rather than a missing edge."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "aa90814bf7fe5b0dc6fc4403fa5241ca76667bad628c7228a5c12b5713272289",
+    "s3": "61c0bf24837424e7947e5995446a4e28f16861c2eae6710b3d7f3de6474192f2",
+    "s4": "49d26185d2862b5f98a3f9388762951cec1041241a97a344d719d62abbc4e3b1",
+    "s5": "a2f0b01700b8c8cb79bcd7145c31c0af85e63c939ec7ef4ebb63bdf44d51035d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T08:25:00.622352+00:00",
+  "total": null
+}
