@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T11:41:00.498Z",
+  "dispatched_at": "2026-11-17T11:40:45Z",
+  "findings": [
+    {
+      "anchor": "plan.html:59",
+      "id": "wiring-1",
+      "reason": "the enrichment section can be dispatched as soon as s3 and s4 are satisfied, which is today, and will find no document route \u2014 repeating the dead end \u00a74 already measured.",
+      "text": "this plan declares `plan-blocks` = `iter-signal-context-and-enrichment`, and that plan's \u00a74 is `implementable` while depending only on `icp-api-access#s3` (done) and `#s4` (done); its \u00a74 delivers \"the rows of its signal list and data file, and references to its functional specification\", which \u00a74 of this plan closed as unfetchable and which \u00a75 is now the only route to, so the blocked plan's dependency is missing exactly the section that closes its need.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:61",
+      "id": "reasoning-1",
+      "reason": "the endpoint rests on a lead allowance; a plan whose decision record contradicts that allowance sends the build at the wrong source or leaves the authority unrecorded, and this section cannot be audited from its own record.",
+      "text": "\u00a75 states \"on 2026-11-17 the lead allowed guarded GET requests for named documents from the IDM document host\", but the plan's decisions block (plan.html:63-92) holds three entries, none dated 2026-11-17, and its `document-source` decision (plan.html:73, choice `production-read-only`, 2026-11-16) records production ICP as the document source with the context \"No file was fetched and no other host was contacted\", while \u00a74's landing comment (plan.html:99) says the document source \"goes back to the lead\"; a worker building \u00a75 therefore acts on an allowance the plan's own record denies and does not carry.",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:61",
+      "id": "done_when-1",
+      "reason": "a stated maximum per document is the only form of this arm a later reader can check, and without one the guard cannot be shown to fire.",
+      "text": "the request-log arm of \u00a75's done-when reads \"with the number of requests, which is small and stated\"; the same worker states the count and judges it small, and no figure fails the arm \u2014 unlike \u00a74's \"with the number of requests made\", which at least fixes the figure a reader can compare against a stated ceiling.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:61",
+      "id": "reasoning-2",
+      "reason": "\u00a74 was given a second closing form at version 17 because the file route was unestablished; \u00a75 reintroduces a single-outcome endpoint on an establishment its own text never records, so a host that refuses one identity or serves only a draft version blocks the node with no stated endpoint.",
+      "text": "\u00a75's done-when delivers all seven fetches with one closing outcome, yet no plan text establishes that the IDM document host serves these files: \u00a71 (plan.html:40) records only \"a legacy service call returning a document's current version and a legacy download path\", \u00a74's Delivers (plan.html:56) calls those \"an older service call and download path that this client does not use\", and \u00a74's evidence fragment states \"The retained advertised API does not provide an IDM document-serving route\"; the request form exists only in the node brief, not in the plan.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a325c5b1f0dbb7f76b9da7c95e1c901d57d900d2",
+  "plan_fingerprint": "821ca80281a516363688448542503e9632eec6b4abd15271d5ad1a0ccd2c1900",
+  "plan_slug": "icp-api-access",
+  "plan_version": 23,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T113941787042-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "736f22784c8d8ff57a73b36938abc82631903500",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a75's `data-links` resolve to `#s2` and `#s4` in the same document, the declarations and `plan-section-depends-on` agree with them, and the cited evidence fragment exists.",
+    "done_when": "a finding \u2014 \u00a75's request-log arm (plan.html:61) requires \"the number of requests, which is small and stated\", a bound no stated count can violate since the same worker supplies both figures.",
+    "evidence_paths": "pass \u2014 \u00a75 writes to private storage, a private receipt and the landing record; a comment elsewhere in the plan cites `docs/evidence/fragments/icp-api-access/idm-document-fetch.html`, which resolves on disk.",
+    "naming": "pass \u2014 \u00a75 names no symbol; \"IDM document host\" and \"document assistant\" are domain names, carrying no plan label, stage or ticket.",
+    "reasoning": "two findings \u2014 \u00a75 (plan.html:61) asserts a 2026-11-17 lead authorisation for the IDM document host that the plan's decisions block does not contain and that its only document-source decision contradicts; and \u00a75's done-when (plan.html:61) admits one closing outcome for a route whose establishment no plan text records, unlike \u00a74's two closing forms.",
+    "single_goal": "pass \u2014 \u00a75 names one deliverable, the seven pilot documents sitting in private storage with their content readable.",
+    "wiring": "a finding \u2014 \u00a75 (plan.html:59-62) delivers the pilot system's signal list and functional specification, the exact content `iter-signal-context-and-enrichment` \u00a74 (`docs/plans/iter-signal-context-and-enrichment.html:58`) delivers, but that plan's `plan-section-depends-on` names only `icp-api-access#s3` and `icp-api-access#s4`, and this plan's \u00a74 closed with no file."
+  },
+  "section_digests": {
+    "_document": "5445c109912a0c7a51c9d24bf61af9de407de26b79640ef31a3751390bc8ee13",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "a67c89d3d13fc2d150d8c305334b48a40a1479a2b166bd1daaa7eebac1a5fd56",
+    "s3": "dcfe744278ad8f7b812902b66cbd7c4e6eba42cd9cca8c338b00164b75dd4f55",
+    "s4": "4df24fd8de94abfdf9430b8cc0a70ab71824a0084529a3db2136c0401a52eed6",
+    "s5": "bdb5b25c1952704c21ffa2442a73a4aecc204b67d6e880ad3111c61cd541b8c5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T11:53:00.564030+00:00",
+  "total": null
+}
