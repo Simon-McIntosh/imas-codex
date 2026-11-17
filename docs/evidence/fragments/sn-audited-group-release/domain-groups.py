@@ -35,12 +35,11 @@ graph.
 
 from __future__ import annotations
 
-import argparse
 import collections
 import hashlib
 import html
+import importlib.util
 import json
-import math
 import platform
 import subprocess
 import sys
@@ -48,6 +47,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from imas_codex.standard_names.benchmark_roles import spearman_rho
 from imas_codex.standard_names.domain_audit import (
     LIVE_NAME_STAGES,
     DomainAuditResult,
@@ -179,30 +179,18 @@ def ranked_rows(rows: dict[str, dict[str, Any]]) -> list[dict[str, Any]]:
     return table
 
 
-def _average_ranks(values: list[float]) -> list[float]:
-    order = sorted(range(len(values)), key=lambda i: values[i])
-    ranks = [0.0] * len(values)
-    i = 0
-    while i < len(order):
-        j = i
-        while j + 1 < len(order) and values[order[j + 1]] == values[order[i]]:
-            j += 1
-        shared = (i + j) / 2 + 1
-        for k in range(i, j + 1):
-            ranks[order[k]] = shared
-        i = j + 1
-    return ranks
+def _rank_agreement(xs: list[float], ys: list[float]) -> float | None:
+    """Spearman rank agreement over the ranked groups, ``None`` when undefined.
 
-
-def spearman(xs: list[float], ys: list[float]) -> float | None:
-    """Spearman's rho, average ranks on ties; None when a side is constant."""
-    if len(xs) < 2:
+    :func:`spearman_rho` is the repository's one implementation; it returns 0.0
+    for degenerate input, which here would print as a measured agreement of zero
+    where nothing was measured, so that sentinel is converted back to ``None``.
+    """
+    if len(xs) < 2 or len(xs) != len(ys):
         return None
-    rx, ry = _average_ranks(xs), _average_ranks(ys)
-    mx, my = sum(rx) / len(rx), sum(ry) / len(ry)
-    num = sum((a - mx) * (b - my) for a, b in zip(rx, ry, strict=True))
-    den = math.sqrt(sum((a - mx) ** 2 for a in rx) * sum((b - my) ** 2 for b in ry))
-    return num / den if den else None
+    if len(set(xs)) < 2 or len(set(ys)) < 2:
+        return None
+    return spearman_rho(xs, ys)
 
 
 def sensitivity(table: list[dict[str, Any]]) -> dict[str, Any]:
@@ -242,9 +230,9 @@ def sensitivity(table: list[dict[str, Any]]) -> dict[str, Any]:
         for entry in ranked
     ]
     return {
-        "rho_m1_m2": spearman(m1, m2),
-        "rho_m1_m3": spearman(m1, m3),
-        "rho_m2_m3": spearman(m2, m3),
+        "rho_m1_m2": _rank_agreement(m1, m2),
+        "rho_m1_m3": _rank_agreement(m1, m3),
+        "rho_m2_m3": _rank_agreement(m2, m3),
         "largest_move_m2": max(abs(move["move_m2"]) for move in moves) if moves else 0,
         "largest_move_m3": max(abs(move["move_m3"]) for move in moves) if moves else 0,
         "moves": moves,
@@ -259,14 +247,27 @@ def sensitivity(table: list[dict[str, Any]]) -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
-def wilson(k: int, n: int, z: float = 1.959963984540054) -> tuple[float, float]:
-    """Wilson score interval for k of n, the interval section 1 reports."""
-    if not n:
-        return (0.0, 1.0)
-    p = k / n
-    centre = (p + z * z / (2 * n)) / (1 + z * z / n)
-    half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / (1 + z * z / n)
-    return (max(0.0, centre - half), min(1.0, centre + half))
+def _section_one_wilson() -> Any:
+    """The Wilson interval section 1 reports, from the sibling blind-audit run.
+
+    ``blind-audit.py`` is a script rather than an importable module (its file
+    name is not a valid module name), so it is loaded by path. It carries a
+    ``__main__`` guard, so loading it executes only its definitions.
+    """
+    spec = importlib.util.spec_from_file_location(
+        "sn_audited_group_release_blind_audit", FRAGMENTS / "blind-audit.py"
+    )
+    if spec is None or spec.loader is None:
+        raise RuntimeError("cannot load the sibling blind-audit.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module.wilson
+
+
+#: The 95 % interval section 1's per-group counts are stated with, read from the
+#: sibling fragment so both report one interval rather than two copies of the
+#: same arithmetic.
+WILSON = _section_one_wilson()
 
 
 def narrowest_group_interval(sampled: int) -> dict[str, float]:
@@ -275,7 +276,7 @@ def narrowest_group_interval(sampled: int) -> dict[str, float]:
     The best case is no wrong-domain name at all, so the width reported is the
     ceiling of what the group's sample supports.
     """
-    low, high = wilson(0, sampled)
+    low, high = WILSON(0, sampled)
     return {
         "sampled": sampled,
         "width_pp_best_case": (high - low) * 100.0,
@@ -375,10 +376,10 @@ def family_evidence(source_rows: list[dict[str, Any]]) -> dict[str, Any]:
         members = sorted(
             member.dd_path for member in family.members if member.dd_path in path_names
         )
-        by_group: dict[str, list[str]] = collections.defaultdict(list)
+        by_group: dict[str, set[str]] = collections.defaultdict(set)
         for path in members:
-            for name in sorted(path_names[path]):
-                by_group[name_group[name]].append(name)
+            for name in path_names[path]:
+                by_group[name_group[name]].add(name)
         named_groups = {
             group: names for group, names in by_group.items() if group != NO_DOMAIN
         }
@@ -411,6 +412,45 @@ def family_evidence(source_rows: list[dict[str, Any]]) -> dict[str, Any]:
         "detected": len(families),
         "source_paths": len(path_names),
         "spanning": spanning,
+        "member_check": family_member_check(spanning, path_names),
+    }
+
+
+def family_member_check(
+    families: list[dict[str, Any]], path_names: dict[str, set[str]]
+) -> dict[str, Any]:
+    """Recount every family's live names from its paths and refuse a repeat.
+
+    A name produced from two paths of one family is one member of that family,
+    and the aggregation above enforces that. This recomputes each family's
+    population from the recorded paths and compares it with what was recorded,
+    so the per-path append that counts such a name once per path shows up as a
+    repeated name and as a total above the family's distinct names.
+    """
+    repeated: list[dict[str, Any]] = []
+    miscounted: list[dict[str, Any]] = []
+    members = 0
+    for family in families:
+        seen = {name for path in family["members"] for name in path_names.get(path, ())}
+        listed = [name for names in family["member_groups"].values() for name in names]
+        members += len(seen)
+        duplicates = sorted({name for name in listed if listed.count(name) > 1})
+        if duplicates:
+            repeated.append({"family": family["id"], "names": duplicates})
+        elif len(listed) != len(seen) or set(listed) != seen:
+            miscounted.append(
+                {
+                    "family": family["id"],
+                    "listed": len(listed),
+                    "distinct": len(seen),
+                }
+            )
+    return {
+        "families": len(families),
+        "distinct_members": members,
+        "repeated": repeated,
+        "miscounted": miscounted,
+        "passed": not repeated and not miscounted,
     }
 
 
@@ -1226,12 +1266,15 @@ def render_page(payload: dict[str, Any]) -> str:
         f'<pre id="{node}-reproduce">UV_NO_SYNC=1 '
         "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv "
         "PYTHONPATH=$PWD uv run --no-sync python "
-        "docs/evidence/fragments/sn-audited-group-release/domain-groups.py --check</pre>\n"
+        "docs/evidence/fragments/sn-audited-group-release/domain-groups.py</pre>\n"
+        f'<p id="{node}-checks-head">The run writes its files only after every '
+        "instrument arm passes; a failed arm leaves the committed evidence "
+        "untouched and exits non-zero.</p>\n"
     )
     parts.append(
         f'<p id="{node}-environment">Read at {_esc(environment["generated_at"])} on '
-        f"{_esc(environment['host'])} ({_esc(environment['python'])}) by commit "
-        f"<code>{_esc(environment['revision'])}</code>.</p>\n"
+        f"{_esc(environment['host'])} ({_esc(environment['python'])}) on measured "
+        f"base revision <code>{_esc(environment['measured_base'])}</code>.</p>\n"
     )
     parts.append("</main></body></html>\n")
     return "".join(parts)
@@ -1242,17 +1285,28 @@ def render_page(payload: dict[str, Any]) -> str:
 # ---------------------------------------------------------------------------
 
 
-def _revision() -> str:
-    try:
-        return subprocess.run(
-            ["git", "rev-parse", "HEAD"],
-            cwd=FRAGMENTS,
-            capture_output=True,
-            text=True,
-            check=True,
-        ).stdout.strip()
-    except (OSError, subprocess.CalledProcessError):
-        return "unknown"
+def _measured_base() -> str:
+    """The commit this measurement stands on, not the commit that carries it.
+
+    The page names the base its run was taken from rather than the commit that
+    contains it, so a run never needs a follow-up commit to restamp itself and
+    the evidence does not describe the commit it is stored in. The base is the
+    merge base of the worktree with the branch it was cut from.
+    """
+    for reference in ("origin/main", "main"):
+        try:
+            base = subprocess.run(
+                ["git", "merge-base", "HEAD", reference],
+                cwd=FRAGMENTS,
+                capture_output=True,
+                text=True,
+                check=True,
+            ).stdout.strip()
+        except (OSError, subprocess.CalledProcessError):
+            continue
+        if base:
+            return base
+    return "unknown"
 
 
 def mismatch_shapes(
@@ -1345,6 +1399,7 @@ def build(gc: Any) -> dict[str, Any]:
         "mismatches": mismatches,
         "instrument": {
             "census_plant": plant,
+            "family_members": families["member_check"],
             "census_sum": partition["live"],
             "audit_live_names": result.live_names,
             "sum_matches_read": partition["live"] == result.live_names,
@@ -1354,36 +1409,21 @@ def build(gc: Any) -> dict[str, Any]:
             "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
             "host": platform.node(),
             "python": platform.python_version(),
-            "revision": _revision(),
+            "measured_base": _measured_base(),
             "live_stages": sorted(LIVE_NAME_STAGES),
         },
     }
 
 
-def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument(
-        "--check",
-        action="store_true",
-        help="enforce the instrument checks and fail non-zero when one does not hold",
-    )
-    args = parser.parse_args(argv)
-
-    from imas_codex.graph.client import GraphClient
-
-    with GraphClient() as gc:
-        payload = build(gc)
-
-    OUT_JSON.write_text(
-        json.dumps(payload, separators=(",", ":")) + "\n", encoding="utf-8"
-    )
-    OUT_HTML.write_text(render_page(payload) + "\n", encoding="utf-8")
-
-    plant = payload["instrument"]["census_plant"]
-    checks = [
+def instrument_checks(payload: dict[str, Any]) -> list[tuple[str, bool]]:
+    """Every way the run could be wrong, one arm each so every one can fail."""
+    instrument = payload["instrument"]
+    plant = instrument["census_plant"]
+    members = instrument["family_members"]
+    return [
         (
             "census rows sum to the live names read",
-            payload["instrument"]["sum_matches_read"],
+            instrument["sum_matches_read"],
         ),
         ("planted settled member counted once", plant["delta_settled"] == 1),
         ("planted unsettled member counted once", plant["delta_not_among"] == 1),
@@ -1393,9 +1433,27 @@ def main(argv: list[str] | None = None) -> int:
         ),
         (
             "no planted name in the audit sample",
-            not payload["instrument"]["planted_in_sample"],
+            not instrument["planted_in_sample"],
+        ),
+        (
+            "every family lists each of its members once",
+            members["passed"] and not members["repeated"],
+        ),
+        (
+            "every family's listed members are its paths' distinct names",
+            not members["miscounted"],
         ),
     ]
+
+
+def main() -> int:
+    """Measure, check, and only then write: a failed arm leaves the files alone."""
+    from imas_codex.graph.client import GraphClient
+
+    with GraphClient() as gc:
+        payload = build(gc)
+
+    checks = instrument_checks(payload)
     for description, ok in checks:
         print(f"{'PASS' if ok else 'FAIL'} {description}")
     print(
@@ -1405,9 +1463,16 @@ def main(argv: list[str] | None = None) -> int:
         f"spanning_families={len(payload['families']['spanning'])} "
         f"transport_live={payload['transport']['live']}"
     )
-    print(f"wrote {OUT_JSON.name} and {OUT_HTML.name}")
-    if args.check and not all(ok for _, ok in checks):
+    if not all(ok for _, ok in checks):
+        print(
+            f"not written: {OUT_JSON.name} and {OUT_HTML.name} keep the last run that passed"
+        )
         return 1
+    OUT_JSON.write_text(
+        json.dumps(payload, separators=(",", ":")) + "\n", encoding="utf-8"
+    )
+    OUT_HTML.write_text(render_page(payload) + "\n", encoding="utf-8")
+    print(f"wrote {OUT_JSON.name} and {OUT_HTML.name}")
     return 0
 
 
