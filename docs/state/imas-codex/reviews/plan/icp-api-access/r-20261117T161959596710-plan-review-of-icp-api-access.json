@@ -17,7 +17,24 @@
   "plan_slug": "icp-api-access",
   "plan_version": 28,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "wiring-1",
+      "reason": "Section 5 fetches exactly the seven documents the lead named, and that set is right. The mismatch is in the enrichment plan's deferred section 4, which names a data file; that section's inputs will be restated against section 5's receipt before it is un-deferred, and it stays deferred until then.",
+      "when": "2026-11-17T22:29:29.345902+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Section 5 fetches exactly the seven documents the lead named, and that set is right. The mismatch is in the enrichment plan's deferred section 4, which names a data file; that section's inputs will be restated against section 5's receipt before it is un-deferred, and it stays deferred until then.",
+      "when": "2026-11-17T22:29:29.345902+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261117T161959596710-plan-review-of-icp-api-access.json",
   "review_run_id": "r-20261117T161959596710-plan-review-of-icp-api-access",
   "reviewed_blob_sha": "d252ef4e373adcf055112e11846322cb654f338a",
   "rubric": "content",
