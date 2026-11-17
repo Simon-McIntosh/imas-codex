@@ -355,6 +355,24 @@ uv run --no-sync imas-codex sn resolve --help
 If help and this recipe disagree, stop and update the recipe before operating. Keep `BATCH`, `ISNC`, `PR`,
 `PR_NUMBER`, `PR_REPO`, `RC`, `BODY`, `PREVIEW`, `RESTORE`, and `ARTIFACT` bound to one release identity.
 
+### A group cut refuses unless the ruled bar exists
+
+`sn release --export-only --domain <group>` runs the group bar gate beside the
+other gates. It reads the ruled release bar from
+`IMAS_CODEX_SN_GROUP_RELEASE_BAR` (or
+`[tool.imas-codex.sn].group-release-bar`) and the group's audit record from
+`IMAS_CODEX_SN_GROUP_AUDIT_DIR` / `[tool.imas-codex.sn].group-audit-dir`, at
+`<dir>/<group>.json` with one row per member carrying the digest of the text
+the audit read. With no ruling configured the cut refuses with
+`release_bar_not_ruled` rather than guessing a threshold; with no record it
+refuses with `group_audit_never_measured`. Other causes: a member not accepted
+on name or documentation, a member with no producing source and no ruled
+exception, a family of the group with a member in another group and no ruling,
+a written definition that is not its stored shared sentence, and a defect rate
+above the ruled maximum, above a class maximum, incomplete over the members, or
+stale against their stored text. A full (unscoped) export runs none of these:
+the group is the cut, so the bar applies to the cut that selects one.
+
 ### The segment sweep is a scheduled operation, not a rotation side effect
 
 `reconcile_grammar_segments` is a startup maintenance step of an unscoped

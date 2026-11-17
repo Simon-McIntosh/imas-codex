@@ -4751,6 +4751,11 @@ def _run_export_cli(
                 status = "[dim]SKIP[/dim]"
             issues = f" ({len(gr.issues)} issue(s))" if gr.issues else ""
             console.print(f"  {gr.gate}: {status}{issues}")
+            if not gr.passed and gr.issues:
+                # Name the cause, not only the count: a refusal a reader cannot
+                # name is a refusal they have to re-derive from the report.
+                causes = sorted({str(issue.get("type")) for issue in gr.issues})
+                console.print(f"    refused: {', '.join(causes)}")
 
     # ── Divergence entries ─────────────────────────────────
     if report.divergence_entries:
