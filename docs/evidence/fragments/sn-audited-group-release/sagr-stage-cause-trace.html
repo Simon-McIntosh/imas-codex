@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-audited-group-release">
+<meta name="node-id" content="sagr-stage-cause-trace">
+<title>Three shared defect causes traced to the stage that makes them</title>
+</head>
+<body>
+<main>
+<h1 id="sagr-stage-cause-trace-title">Three shared defect causes traced to the stage that makes them</h1>
+<p id="sagr-stage-cause-trace-summary">Reading the 208 judgments of the equilibrium adjudication gives <strong>14 causes shared by three or more defective members, 89 defect instances in all</strong> — the plan's figures exactly. The three largest are traced here to the stage that produces each: <strong><code>physical_scope_qualifier_lost</code> (18 members) to the naming (compose) stage</strong>, <strong><code>source_bindings_conflate_distinct_definitions</code> (13) to the source-binding attach gate</strong>, and <strong><code>boundary_forced_to_lcfs</code> (11) to the locus-token binding and its documentation injection</strong>. <strong>12 traced members</strong> are shown from their recorded packets, four per cause, each with the line of the record that states the qualifier the artifact loses. The remaining eleven causes are listed with their stage and whether the same repair reaches them: 3 covered, 4 partial, 4 needing their own repair. No product source changed and the graph was not written.</p>
+
+<p id="sagr-stage-cause-trace-links">Full page: <a href="stage-cause-trace.html"><code>stage-cause-trace.html</code></a>. Trace data: <a href="stage-cause-trace.json"><code>stage-cause-trace.json</code></a>. The page is rendered from that data by <a href="stage-cause-trace.py"><code>stage-cause-trace.py</code></a>, whose <code>--check</code> re-derives every claim from the adjudication record and from the product source.</p>
+
+<h2 id="sagr-stage-cause-trace-stages">The stages and what each drops</h2>
+<table id="sagr-stage-cause-trace-stage-table"><thead><tr><th>Stage</th><th>File and function</th><th>Given</th><th>Drops</th></tr></thead><tbody>
+<tr><td><code>compose_name</code></td><td><code>worker_tasks/worker_compose_and_validate.py::_compose_batch_body</code> rendering <code>sn/generate_name_dd_names.md</code></td><td>DD path, enriched leaf description, unit, neighbours, identifier enums, reviewer history, and an <code>ancestor_context</code> list of enclosing-structure statements attached by <code>_enrich_batch_items</code></td><td>The per-item block of the names-mode template renders no <code>ancestor_context</code> and no <code>documentation</code>, while the full-mode template does render the lineage block: the enclosing text that states the component, geometric reference or locus never reaches the composer that writes the identity</td></tr>
+<tr><td><code>attach_guard</code></td><td><code>worker_tasks/worker_extraction_and_enrichment.py::_is_attachment_consistent</code>, called by <code>attachment_audit.guard_source_pairings</code></td><td>DD path spelling, DD and name units, the name's spelling (tense, state, shape surface, vector-field axis, geometry representation, hardware device tokens), and the paths already bound</td><td>The sources' stated descriptions and operations: the guard takes no text parameter, so bindings whose stated operations differ are admitted to one name</td></tr>
+<tr><td><code>locus_binding</code></td><td><code>standard_names/context.py::locus_context_for</code> and the <code>_of_plasma_boundary</code> rule in <code>sn/generate_name_system.md</code></td><td>The source's boundary-selection clause (psi_norm = 99.x% of the separatrix, near-separatrix, or LCFS-or-99.x% for a fixed-boundary code) and the ISN locus-registry entry for the name's locus token</td><td>The selection: <code>plasma_boundary</code> is defined in the registry as the last closed magnetic flux surface, so the documentation stage states a boundary the source lets be chosen</td></tr>
+</tbody></table>
+
+<h2 id="sagr-stage-cause-trace-members">Traced members, from their recorded inputs</h2>
+<table id="sagr-stage-cause-trace-member-table"><thead><tr><th>Member</th><th>Stage</th><th>Recorded line that states it</th><th>What the artifact keeps</th></tr></thead><tbody>
+<tr><td><code>current_of_passive_structure</code></td><td><code>compose_name</code></td><td>57: “Current in a set of axisymmetric passive conductors”</td><td>name carries no <code>axisymmetric</code>; only the generic <code>passive_structure</code> carrier survives</td></tr>
+<tr><td><code>gap_at_outboard_midplane</code></td><td><code>compose_name</code></td><td>386: “Distance between the inner and outer separatrices”</td><td>name keeps the midplane locus and loses which two surfaces are separated</td></tr>
+<tr><td><code>inner_radius_of_plasma_filament</code></td><td><code>compose_name</code></td><td>409: “Inner radius of an annular cross-section element”</td><td>name loses <code>annular</code>, so the radius reads as the filament's inboard major radius</td></tr>
+<tr><td><code>rotational_transform</code></td><td><code>compose_name</code></td><td>1860: “Parameters at r_eff_norm = 2/3”</td><td>name and definition state a general flux-surface quantity</td></tr>
+<tr><td><code>plasma_resistance</code></td><td><code>attach_guard</code></td><td>902: “the ratio of loop voltage to plasma current”</td><td>stored definition (894) asserts the volume-integrated E·J over I<sub>p</sub>² ratio instead</td></tr>
+<tr><td><code>toroidal_magnetic_field</code></td><td><code>attach_guard</code></td><td>2138: “averaged over sensor volume”</td><td>definition (2129) states a point component along the toroidal direction</td></tr>
+<tr><td><code>poloidal_angle_of_flux_surface</code></td><td><code>attach_guard</code></td><td>929: “Poloidal angle of the sensitive axis orientation”</td><td>name and definition (915) make it a spatial angle on a flux surface about the magnetic axis</td></tr>
+<tr><td><code>vertical_coordinate_of_measurement_position</code></td><td><code>attach_guard</code></td><td>1588: “Average position of the measurements derived from multiple collectors”</td><td>definition (2428) makes it a pointwise projection and excludes averaging</td></tr>
+<tr><td><code>elongation_of_plasma_boundary</code></td><td><code>locus_binding</code></td><td>178: “typically chosen at psi_norm = 99.x% of the separatrix”</td><td><code>_of_plasma_boundary</code> resolves to the categorical LCFS</td></tr>
+<tr><td><code>lower_triangularity_of_plasma_boundary</code></td><td><code>locus_binding</code></td><td>178: the same selectable-boundary statement</td><td>the lower coefficient is documented on the last closed flux surface</td></tr>
+<tr><td><code>minor_radius_of_plasma_boundary</code></td><td><code>locus_binding</code></td><td>178: the same selectable-boundary statement</td><td>the minor radius is forced to that of the last closed flux surface</td></tr>
+<tr><td><code>poloidal_magnetic_flux_at_plasma_boundary</code></td><td><code>locus_binding</code></td><td>1249: “Typically set at a near-separatrix flux surface”</td><td><code>_at_plasma_boundary</code> makes the boundary the last closed flux surface</td></tr>
+</tbody></table>
+
+<h2 id="sagr-stage-cause-trace-repairs">Smallest repair per cause</h2>
+<ul id="sagr-stage-cause-trace-repair-list">
+<li><code>physical_scope_qualifier_lost</code>: render the lineage the extraction stage already attaches — add the <code>item.ancestor_context</code> block from <code>sn/generate_name_dd.md</code> to the per-item block of <code>sn/generate_name_dd_names.md</code>, so the composer can emit the token or a <code>vocab_gap</code> for the stated axis. One file.</li>
+<li><code>source_bindings_conflate_distinct_definitions</code>: pass the candidate's and the already-bound sources' descriptions into <code>_is_attachment_consistent</code> and reject a second binding whose stated operation contradicts the first's; the pairing-guard query already selects <code>dd_documentation</code>. Two files.</li>
+<li><code>boundary_forced_to_lcfs</code>: reserve <code>_of_/ _at_plasma_boundary</code> for a source that names the LCFS, and require a qualifier for a selected boundary (psi_norm = 0.99 or near-separatrix) or a <code>vocab_gap</code>. Two prompt files; the registry definition is external and untouched.</li>
+</ul>
+
+<h2 id="sagr-stage-cause-trace-remaining">The remaining eleven causes</h2>
+<table id="sagr-stage-cause-trace-remaining-table"><thead><tr><th>Cause</th><th>Members</th><th>Stage</th><th>Same repair</th><th>Why</th></tr></thead><tbody>
+<tr><td><code>normalization_or_weighting_qualifier_lost</code></td><td>6</td><td><code>compose_name</code></td><td>covered by the first repair</td><td>the text repair exposes the qualifier; it then needs a token or a <code>vocab_gap</code></td></tr>
+<tr><td><code>coordinate_reference_qualifier_lost</code></td><td>6</td><td><code>compose_name</code></td><td>partial</td><td>the convention reaches the composer, but choosing the convention token is a separate rule</td></tr>
+<tr><td><code>vacuum_source_qualifier_lost</code></td><td>6</td><td><code>compose_name</code></td><td>covered by the first repair</td><td>the vacuum restriction is stated in the enclosing text the repair renders</td></tr>
+<tr><td><code>pressure_pedestal_qualifier_lost</code></td><td>5</td><td><code>compose_name</code></td><td>covered by the first repair</td><td>the pedestal top is a registered locus the vocabulary already offers</td></tr>
+<tr><td><code>transformation_equation_replaced_by_base_quantity</code></td><td>4</td><td><code>definition_construction</code></td><td>not covered</td><td>a definition-stage rule: state the named transform or derivative</td></tr>
+<tr><td><code>averaging_qualifier_lost</code></td><td>4</td><td><code>compose_name</code></td><td>partial</td><td>the averaging clause is exposed, but the aggregation token must be selected deliberately</td></tr>
+<tr><td><code>absolute_extremum_substituted_for_signed_extremum</code></td><td>4</td><td><code>locus_binding</code></td><td>partial</td><td>the same bind-the-stated-selection repair, on signed-minimum versus minimum-of-absolute</td></tr>
+<tr><td><code>population_basis_qualifier_lost</code></td><td>3</td><td><code>compose_name</code></td><td>partial</td><td>thermal-versus-total reaches the composer; the subject segment must carry it</td></tr>
+<tr><td><code>physical_scope_qualifier_replaced</code></td><td>3</td><td><code>definition_construction</code></td><td>not covered</td><td>a definition-stage rule: no substituted geometric or coordinate scope</td></tr>
+<tr><td><code>locus_template_overrides_source</code></td><td>3</td><td><code>locus_binding</code></td><td>covered by the third repair</td><td>the source's stated branch outranks the generic template</td></tr>
+<tr><td><code>consumer_context_used_as_quantity_domain</code></td><td>3</td><td><code>domain_assignment</code></td><td>not covered</td><td>a structural quantity reached only through an equilibrium consumer needs its own domain source</td></tr>
+</tbody></table>
+
+<h2 id="sagr-stage-cause-trace-reproduction">How the trace is checked</h2>
+<p id="sagr-stage-cause-trace-check">The check re-reads the adjudication record and the product source, prints one line per traced member, and exits 1 if fewer than 9 are printed. It fails when a traced member's recorded stage disagrees with the stage table, when a quoted line leaves the packet, when the recorded name changes, when the definition starts carrying the operation it was accused of dropping, when the names-mode template starts rendering the lineage, when the binding guard gains a text parameter, or when the locus registry redefines <code>plasma_boundary</code>. Three mutations were run against it in a shadow tree: altering one traced member's stage, adding an ancestor render to the names-mode prompt, and adding a <code>dd_documentation</code> parameter to the attachment guard. All three exit 1 with the reason; the unmutated shadow tree exits 0.</p>
+</main>
+</body>
+</html>
