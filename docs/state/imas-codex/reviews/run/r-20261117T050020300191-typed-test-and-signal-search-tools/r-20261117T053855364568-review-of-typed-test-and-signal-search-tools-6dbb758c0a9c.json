@@ -1,0 +1,124 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "fails_if": "the designation predicate stops being a literal case-insensitive substring: an emptied or regex-interpreted predicate returns items where the test requires total==2 and page-2 pulse_count==0, and the negative control's ' OR true // and .* cases return rows instead of an empty page.",
+      "lines": "tests/graph/test_plant_search.py:72-90"
+    },
+    {
+      "fails_if": "pulse times are converted, rounded or a null end becomes a value: the fixture's 1700000000000000001/1700000002000000003 and the null end are compared as exact integers and open_ended must flip with them.",
+      "lines": "tests/graph/test_plant_search.py:93-118"
+    },
+    {
+      "fails_if": "a filter is dropped or pagination repeats rows: totals 4/4/3 come from selectors the test wrote, and every continuation page must be disjoint until exactly expected identities are collected.",
+      "lines": "tests/graph/test_plant_search.py:121-148"
+    },
+    {
+      "fails_if": "the walk stops resolving the CANDIDATE_PLANT_COMPONENT/AT_CONTROL_NODE chain or leaks other-facility siblings: component code, the three-name hierarchy, the self-exclusion and the 2-signal total are fixed fixture facts.",
+      "lines": "tests/graph/test_plant_search.py:151-175"
+    },
+    {
+      "fails_if": "description bounding reverts to Cypher list slicing or drops the truncation flag: 3000-character descriptions must round-trip as the first 2048 characters with description_truncated true on items, signal, component and every hierarchy node.",
+      "lines": "tests/graph/test_plant_search.py:178-208"
+    },
+    {
+      "fails_if": "search_pulses or fetch_content stop being facility tools or enter the DD-only surface: the negative control's DD-only mutation reddens this assertion (20 versus 15 tools).",
+      "lines": "tests/llm/test_plant_search_tools.py:44-58"
+    },
+    {
+      "fails_if": "the schema regains a required query, a raw query/cypher/endpoint key appears, or an absent designation becomes an error; the call_args.kwargs check at :76 is only a forwarding echo, not a guard.",
+      "lines": "tests/llm/test_plant_search_tools.py:60-78"
+    },
+    {
+      "fails_if": "a plant listing reaches the embedding path (the test fails the run) or the continuation dict regresses: the expected arguments dict is built independently with offset 1.",
+      "lines": "tests/llm/test_plant_search_tools.py:81-112"
+    },
+    {
+      "fails_if": "pagination bounds stop being enforced before the graph read, the page byte cap stops advancing by delivered items, or an oversized identity is silently truncated instead of refused.",
+      "lines": "tests/llm/test_plant_search_tools.py:115-181"
+    }
+  ],
+  "assertion_independence": "One added assertion is not independent: tests/llm/test_plant_search_tools.py:76 compares the query kwarg to the already-lowercase designation literal the test supplied, so it cannot fail for any forwarding implementation. The remaining assertions compare against fixture literals, independent totals, or independently built continuation dicts.",
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/llm/server.py:2417 search_signals -> imas_codex/llm/search_tools.py:370 _search_signals",
+    "imas_codex/llm/server.py:2499 search_pulses -> imas_codex/tools/plant_search.py:146 search_pulse_catalogue",
+    "imas_codex/llm/server.py:3222 fetch_content -> imas_codex/llm/search_tools.py:1422 _fetch",
+    "imas_codex/llm/search_tools.py:422 _search_signals -> list_plant_signals",
+    "imas_codex/llm/search_tools.py:1496 _fetch -> fetch_signal_context",
+    "benchmarks/bench_mcp_facility_tools.py:45 search_signals keyword invocation"
+  ],
+  "completed_at": "2026-11-17T05:43:01.608Z",
+  "dispatched_at": "2026-11-17T05:41:19Z",
+  "failure_evidence": {
+    "after_suite": {
+      "command": "env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/typed-test-and-signal-search-tools uv run --no-sync python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050020300191-typed-test-and-signal-search-tools/run_tests.py head -p no:cacheprovider -m 'not slow' /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/typed-test-and-signal-search-tools/tests/llm/test_plant_search_tools.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/typed-test-and-signal-search-tools/tests/llm/test_search_tools.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/typed-test-and-signal-search-tools/tests/llm/test_tool_schemas.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/typed-test-and-signal-search-tools/tests/graph/test_plant_search.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050020300191-typed-test-and-signal-search-tools/head-described.log",
+      "revision": "6dbb758c0a9c632e95bab92f688e3fb2da8b08b3"
+    },
+    "baseline_suite": {
+      "command": "env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/typed-test-and-signal-search-tools uv run --no-sync python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050020300191-typed-test-and-signal-search-tools/run_tests.py base -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/typed-test-and-signal-search-tools/tests/llm/test_plant_search_tools.py::test_plant_tools_absent_from_dd_only_with_full_mode_positive_control /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/typed-test-and-signal-search-tools/tests/llm/test_plant_search_tools.py::test_mcp_schema_exposes_typed_plant_filters_without_query_requirement",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 2,
+      "failure_ids": [
+        "tests/llm/test_plant_search_tools.py::test_plant_tools_absent_from_dd_only_with_full_mode_positive_control",
+        "tests/llm/test_plant_search_tools.py::test_mcp_schema_exposes_typed_plant_filters_without_query_requirement"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050020300191-typed-test-and-signal-search-tools/reproduction.log",
+      "revision": "e0798a4062a2ef75d221bf661c1c1db1f8f76edc"
+    }
+  },
+  "findings": [
+    "imas_codex/cli/AGENTS.md:60 non-blocking: the documented usage search_signals(\"plasma current\", facility=\"tcv\") is invalid after the landed signature reorder at imas_codex/llm/server.py:2417, which makes facility the first positional parameter, so the documented call raises a duplicate-argument error and no longer describes the tool.",
+    "tests/llm/test_plant_search_tools.py:76 non-blocking: the assertion compares graph.query.call_args.kwargs[\"designation\"] to \"absent-coil\", the same already-lowercase literal the test passed in, so it holds for any forwarding path and would not redden if the lowercase comparison at imas_codex/tools/plant_search.py:198 were removed for a mixed-case designation."
+  ],
+  "item_verdicts": {
+    "diff": "read both commits individually against e0798a4062a2: 81c945f61 adds imas_codex/tools/plant_search.py and its two test files, extends imas_codex/llm/search_tools.py:370 and :1422, and registers search_pulses and widened fetch_content at imas_codex/llm/server.py:2499,3222; 6dbb758c0 swaps four Cypher list-slice projections for substring in imas_codex/tools/plant_search.py:17,193,214,258 and adds the truncation regression test.",
+    "done_when": "s18's done_when requires the three live walks with counts, the before/after tool count with a merge justification, and no over-bound response; live-http-described.log and the manifest landing line record categories 1, pulses 1, listings 620/264/63, walk 1/1/53, tool counts 38->39 and 31->32 with DD-only 15->15, and max_response_bytes 2382.",
+    "goal": "the plan section s18 goal and the node goal ask for typed, query-free access to tests, pulses and plant signals with a walk from a signal; imas_codex/tools/plant_search.py:1-295 plus the server wiring at imas_codex/llm/server.py:2417,2499,3222 deliver all three directions.",
+    "manifest": "read; status complete with commits 81c945f614871ffb727ba4d546b754dadf210b89 and 6dbb758c0a9c632e95bab92f688e3fb2da8b08b3, after_suite 165 passed/8 skipped exit 0 at head, baseline_suite 2 failures exit 1 at e0798a40, negative_control_log negative-described.log contains two FAILED ids and EXIT=1, and the live HTTP counts are recorded in evidence_inputs.",
+    "write_paths": "the node prompt declares imas_codex/tools/, imas_codex/llm/, imas_codex/graph/, imas_codex/discovery/signals/, tests/tools/, tests/llm/, tests/graph/ and two documentation paths; the six changed files all fall inside the source and test grants and the two documentation paths were left unused."
+  },
+  "justifications": {
+    "durability": "tests/llm/test_plant_search_tools.py:63-78 and tests/graph/test_plant_search.py:72-90 redden when the negative control removes the DD-only registration guard and empties the designation predicate (negative-described.log FAILED ids), and tests/graph/test_plant_search.py:178-208 fails if substring truncation reverts to list slicing, but tests/llm/test_plant_search_tools.py:76 compares the query kwarg to the literal the test itself passed in.",
+    "evidence": "the head arm in head-described.log:41 records 165 passed, 8 skipped with EXIT=0 and the live HTTP measure in live-http-described.log records categories 1, pulses 1 (with_end 1, open_ended 0), listings 620/264/63 with working continuations, a walk of 1 component/1 system/53 siblings and max_response_bytes 2382, so the done_when counts are measured rather than claimed, though the open-ended pulse case is only covered by the isolated graph test, not live.",
+    "fit": "imas_codex/tools/plant_search.py follows the private-function style of imas_codex/llm/search_tools.py:370-443 and reuses its existing GraphClient query idiom, though it sits in imas_codex/tools/ beside class-based @mcp_tool modules such as imas_codex/tools/graph_search.py:376 and the parameter reorder at imas_codex/llm/server.py:2417 leaves imas_codex/cli/AGENTS.md:60 documenting a call shape that now raises.",
+    "goal_fidelity": "imas_codex/tools/plant_search.py:146 search_pulse_catalogue serves designation->categories->pulse windows and :119 list_plant_signals serves plant-system/function/category/field->signals while :236 fetch_signal_context returns component, root-level system and paged siblings, all reachable from imas_codex/llm/server.py:2499 and :3222 with no query text.",
+    "reuse": "list_plant_signals extends the existing _search_signals dispatch at imas_codex/llm/search_tools.py:422 and fetch_signal_context extends the existing _fetch at imas_codex/llm/search_tools.py:1496 rather than adding parallel tools, and a capability search over imas_codex/ for next_offset/continuation/PAGE_MAX found no owner of a bounded page envelope, so _page_json at imas_codex/tools/plant_search.py:41 is the first.",
+    "scope_discipline": "git diff --stat e0798a4062a2ef75d221bf661c1c1db1f8f76edc 6dbb758c0a9c632e95bab92f688e3fb2da8b08b3 lists only imas_codex/llm/search_tools.py, imas_codex/llm/server.py, imas_codex/tools/plant_search.py, tests/graph/test_plant_search.py, tests/llm/test_plant_search_tools.py and tests/llm/test_tool_schemas.py, every one inside the node's declared imas_codex/{tools,llm}/ and tests/{llm,graph}/ paths."
+  },
+  "negative_control": {
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050020300191-typed-test-and-signal-search-tools/negative-described.log",
+    "reproduction": "FAILED tests/llm/test_plant_search_tools.py::test_plant_tools_absent_from_dd_only_with_full_mode_positive_control and FAILED tests/graph/test_plant_search.py::test_category_search_empty_control_paging_and_literal_designation",
+    "result": "2 failed, 2 warnings in 64.31s; EXIT=1"
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the plan section s18 goal and the node goal ask for typed, query-free access to test categories, pulse windows and plant signals plus a walk from a signal; imas_codex/tools/plant_search.py:119,146,236 and the wiring at imas_codex/llm/server.py:2417,2499,3222 deliver all three directions.\nVERDICT done_when: s18's measure is the live server walk with counts plus the before/after tool count; live-http-described.log records categories 1, pulses 1 (with_end 1, open_ended 0), listings 620/264/63 with working continuations, a walk of 1 component/1 system/53 siblings, tool counts 38->39 and 31->32 with DD-only 15->15, and max_response_bytes 2382, and head-described.log:41 records 165 passed, 8 skipped, EXIT=0.\nVERDICT write_paths: the node declared imas_codex/tools/, imas_codex/llm/, imas_codex/graph/, imas_codex/discovery/signals/, tests/tools/, tests/llm/, tests/graph/ and two documentation paths; the six changed files in git diff e0798a40..6dbb758c0 are all inside the source and test grants.\nVERDICT manifest: read; status complete, commits 81c945f61 and 6dbb758c0, after_suite 165 passed/8 skipped exit 0 at head and baseline_suite 2 failures exit 1 at base, with negative-described.log carrying two FAILED ids and EXIT=1.\nVERDICT diff: read both commits separately against e0798a40; 81c945f61 adds the 295-line plant_search module, the plant filters and signal-context dispatch in imas_codex/llm/search_tools.py:370,1422, and the search_pulses/widened fetch_content registration in imas_codex/llm/server.py:2499,3222; 6dbb758c0 replaces four Cypher list-slice projections with substring and adds the truncation test.\nCALL_SITES: imas_codex/llm/server.py:2417 search_signals, imas_codex/llm/server.py:2499 search_pulses, imas_codex/llm/server.py:3222 fetch_content, imas_codex/llm/search_tools.py:422, imas_codex/llm/search_tools.py:1496, benchmarks/bench_mcp_facility_tools.py:45\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/tools/plant_search.py:146 and :236 answer designation->categories->pulses and signal->component/system/siblings with no query text, and imas_codex/llm/server.py:2499 keeps search_pulses out of the DD-only surface.\nSCORE evidence: 18\nJUSTIFICATION evidence: head-described.log:41 records 165 passed with EXIT=0 and live-http-described.log records every done_when count against a real HTTP server, though open-ended pulses are 0 live and rest on the isolated graph test at tests/graph/test_plant_search.py:93.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: the six files in git diff --stat e0798a40..6dbb758c0 are all inside the declared imas_codex/{tools,llm}/ and tests/{llm,graph}/ grants.\nSCORE durability: 17\nJUSTIFICATION durability: negative-described.log reddens the DD-only registration guard and the empty-designation predicate, but tests/llm/test_plant_search_tools.py:76 asserts a value against the literal the test itself passed in, so that one assertion guards nothing.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/tools/plant_search.py:41 mirrors the private-function style of imas_codex/llm/search_tools.py:370, but the parameter reorder at imas_codex/llm/server.py:2417 leaves imas_codex/cli/AGENTS.md:60 documenting a call that now raises.\nSCORE reuse: 18\nJUSTIFICATION reuse: the change extends _search_signals at imas_codex/llm/search_tools.py:422 and _fetch at :1496 instead of adding parallel tools, and a search over imas_codex/ found no owner of a bounded page envelope, so _page_json is the first.\nFINDING imas_codex/cli/AGENTS.md:60 non-blocking: the documented search_signals(\"plasma current\", facility=\"tcv\") call is invalid after the landed signature reorder at imas_codex/llm/server.py:2417, so the documented usage now raises.\nFINDING tests/llm/test_plant_search_tools.py:76 non-blocking: the assertion compares the query kwarg to the already-lowercase literal the test itself passed in, so it holds for any forwarding implementation and does not guard the case-folding at imas_codex/tools/plant_search.py:198.\n",
+  "review_run_id": "r-20261117T053855364568-review-of-typed-test-and-signal-search-tools-6dbb758c0a9c",
+  "reviewed_base_sha": "e0798a4062a2ef75d221bf661c1c1db1f8f76edc",
+  "reviewed_commits": [
+    "81c945f614871ffb727ba4d546b754dadf210b89",
+    "6dbb758c0a9c632e95bab92f688e3fb2da8b08b3"
+  ],
+  "reviewed_head_sha": "6dbb758c0a9c632e95bab92f688e3fb2da8b08b3",
+  "reviewed_run_id": "r-20261117T050020300191-typed-test-and-signal-search-tools",
+  "revision_note": "Read at the delivered head 6dbb758c0a9c632e95bab92f688e3fb2da8b08b3 in the reviewed worktree; this review's own worktree is at the base e0798a4062a2ef75d221bf661c1c1db1f8f76edc.",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T05:52:20.187080+00:00",
+  "total": 108
+}
