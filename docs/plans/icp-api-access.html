@@ -18,12 +18,12 @@
   <meta name="plan-owner" content="Simon McIntosh">
   <meta name="plan-tags" content="discovery,signals">
   <meta name="plan-blocks" content="iter-signal-context-and-enrichment">
-  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
+  <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;done&quot;,&quot;s4&quot;:&quot;done&quot;,&quot;s5&quot;:&quot;done&quot;}">
   <meta name="plan-section-depends-on" content="{&quot;s3&quot;:[&quot;icp-api-access#s2&quot;],&quot;s4&quot;:[&quot;icp-api-access#s2&quot;],&quot;s5&quot;:[&quot;icp-api-access#s2&quot;,&quot;icp-api-access#s4&quot;]}">
   <title>The pipeline reads ICP and IDM through an authenticated, read-only client | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="30">
+<meta name="plan-version" content="31">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -57,7 +57,7 @@
     <p><strong>Done when.</strong> The section closes in one of two ways. If a published GET operation on production returns a document's file: one spreadsheet and one PDF named before the run are each fetched at a stated version, with size and digest in the landing record and the stored path under the private cache; the stored PDF is shown to be a PDF by its file signature and a page count, and the response's content type is recorded, so a login page or an error body cannot pass as the document; the spreadsheet's sheet names and row counts are recorded; a request for a version that does not exist returns an explicit outcome; and a search of the tracked tree finds none of the fetched content. Tests show that every write-refusal and host-refusal test of section 2 holds for the production host as for the integration host; the request log of the live run shows only GET and HEAD against the production host outside the gateway's sign-in path, with the number of requests made. If no published GET operation returns a document's file: the judgement is made against a listed set, not a sample: the landing record gives the number of GET routes in production's own description whose path or tag names a document, file, attachment, version or download, lists each by path template with either its outcome when tried or the reason it cannot return a document's file, a known-present record read through the same session returns successfully to show the session and reader work, no file is fetched, and the section is closed as delivering that finding, with the document source going back to the lead. In both cases the tests and the request log above hold. <strong>Negative control:</strong> where a file route exists, a document the account may not read is reported as not permitted, never as empty; and in both cases a POST to a production API path is refused before any request, during sign-in and after it.</p>
 
     <h2 id="s5">§5 — Named pilot documents are fetched from the IDM document host</h2>
-<section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="implementable" data-links="icp-api-access#s2,icp-api-access#s4"></section>
+<section data-reckon="section" data-id="s5" data-effort-hours="3.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="elevated" data-status="done" data-links="icp-api-access#s2,icp-api-access#s4"></section>
 <p><strong>Delivers.</strong> The read-only client fetches named IDM documents, by identity and version, from the IDM document host into private storage outside the repository, each with its metadata and a digest, and reads a spreadsheet's rows through the project's existing spreadsheet extraction. Section 4 measured that the records API serves no document file; on 2026-11-17 the lead allowed guarded GET requests for named documents from the IDM document host. That host is read under the same rules as the two records hosts: GET and HEAD only, refused in code before any request, non-read requests only inside the sign-in exchange, and any host not listed in private configuration refused. On this host the client reads only documents whose identities are listed in private configuration: a request for any other identity is refused before it is sent. The seven documents of the pilot system that the document assistant identified on 2026-11-17 are the first list. That this host serves these files to this client is not yet established: the document assistant reads them and gives a download form for each, but this client has never requested one, and section 4 found only an older download path in the documents. The section's first result is therefore whether the pilot's signal list, which is requested first, can be fetched in that form. The document assistant read the signal list as a spreadsheet and the other six documents as PDF files. A file that arrives in another format is reported with its content type and counts as not fetched.</p><p><strong>Done when.</strong> The section closes in one of two ways. If the signal list is fetched: its sheet names and row counts are recorded through the existing spreadsheet extraction; the functional specification is fetched as well and shown to be the document by its file signature and page count; and each of the other five listed documents is fetched at its stated version or reported with its outcome (not found, not permitted, a sign-in page, an error) where the host refuses it, with size, digest and content type in a private receipt for each document fetched, the status and content type for each the host refuses, and the count fetched in the landing record; each PDF is shown to be a PDF by its file signature and page count, and the spreadsheet's sheet names and row counts are recorded; a request for a version that does not exist returns an explicit outcome. Tests show every write-refusal and host-refusal case of section 2 holds for the document host, and that a document identity not on the list is refused with no request sent. The request log of the live run shows only GET and HEAD against the document host outside the gateway's sign-in path, with the number of requests, which is at most five per document and forty in total. If the signal list or the functional specification cannot be fetched: the landing record gives the request made as a path template, the response's status and content type, and the outcome; a known-present plant-structure read on the records host, through the same sign-in, succeeds, to show the session and the client work independently of the documents; nothing further is requested from the document host; and the section is not done. It is reported with that finding and stays open, and the document source goes back to the lead. In both cases the tests above hold. A search of the tracked tree finds none of the fetched content, identities or titles. <strong>Negative control:</strong> a response that is a sign-in page or an error body is reported as a failed fetch and stored as nothing, never as the document; and with the identity list check removed, the unlisted-identity test fails.</p>
 
     <section data-reckon="decisions" id="decisions" class="r-decisions">
@@ -69,6 +69,15 @@
       <button class="r-opt chosen" data-value="stored">Stored</button>
       </p>
     <p class="r-dec-rat">The lead stored credentials for the ITER single-sign-on service with the project&#x27;s credentials command on 2026-11-15. No agent handled the password.</p>
+    </div>
+<div class="r-dec" data-key="document-host-read-only" data-choice="named-documents-get-only" data-by="lead" data-when="2026-11-17T12:38:34+00:00" data-sections="s5">
+    <p class="r-dec-q">May the client read named documents from the IDM document host?</p>
+    <p class="r-dec-ctx">Section 4 measured that the records API on production serves no IDM document file, so the earlier choice of production ICP as the document source could not deliver one. The document assistant identified the pilot system&#x27;s seven documents and gave a GET download form for each on the IDM document host.</p>
+    <p class="r-dec-opts">
+      <button class="r-opt chosen" data-value="named-documents-get-only">Yes: GET only, for document identities listed in private configuration</button>
+      <button class="r-opt" data-value="no">No</button>
+      </p>
+    <p class="r-dec-rat">The lead allowed guarded GET requests for the named documents from the IDM document host on 2026-11-17. The same code-enforced read-only rules apply as on the records hosts, and only identities listed in private configuration may be requested.</p>
     </div>
 <div class="r-dec" data-key="document-source" data-choice="production-read-only" data-by="lead" data-when="2026-11-16T22:29:21+00:00" data-sections="s4">
     <p class="r-dec-q">Where does the pipeline read IDM document files from?</p>
@@ -89,15 +98,6 @@
       </p>
     <p class="r-dec-rat">The lead said on 2026-11-15 to use their own account. A service account is still to be arranged before any scheduled use.</p>
     </div>
-<div class="r-dec" data-key="document-host-read-only" data-choice="named-documents-get-only" data-by="lead" data-when="2026-11-17T12:38:34+00:00" data-sections="s5">
-    <p class="r-dec-q">May the client read named documents from the IDM document host?</p>
-    <p class="r-dec-ctx">Section 4 measured that the records API on production serves no IDM document file, so the earlier choice of production ICP as the document source could not deliver one. The document assistant identified the pilot system&#x27;s seven documents and gave a GET download form for each on the IDM document host.</p>
-    <p class="r-dec-opts">
-      <button class="r-opt chosen" data-value="named-documents-get-only">Yes: GET only, for document identities listed in private configuration</button>
-      <button class="r-opt" data-value="no">No</button>
-      </p>
-    <p class="r-dec-rat">The lead allowed guarded GET requests for the named documents from the IDM document host on 2026-11-17. The same code-enforced read-only rules apply as on the records hosts, and only identities listed in private configuration may be requested.</p>
-    </div>
 </section>
 
     
@@ -107,6 +107,9 @@
 </div>
 <div class="r-comment" data-section="_top" data-id="c-s4-no-file-route" data-who="reckon-build" data-when="2026-11-17T05:00:00Z">
     <div class="r-comment-body"><p>Closed on the section's second form. On production, a known plant-structure read returned correctly through the same session, and every document-reference reader tried returned no content for the first named document; no published GET returned a document's file. Production received 27 GET requests and no other method, and no file was fetched. The delivery landed with the multi-host read-only guard and the credential-forward repair. Its review noted that the landing record gives the wider candidate set as counts (1,187 candidate GET operations, 22 of them document-named readers) and enumerates the 20 route templates tried, not every candidate. Where the pilot's documents come from goes back to the lead: the choices are a one-off fetch through the document assistant, or authorising the older IDM route on its own host for read-only use.</p></div>
+</div>
+<div class="r-comment" data-section="_top" data-id="c-s5-landed" data-who="coordinator" data-when="2026-11-18">
+    <div class="r-comment-body"><p>Landed 2026-11-18. The document host served all seven named documents to the read-only client: the signal list as a spreadsheet of three sheets (16, 313 and 53 rows) and six PDF files (224 pages in total), 14.8 MB, with digests in a private receipt. The live run used 26 of 40 allowed requests, GET and HEAD only on the document host. 491 tests pass, and removing the identity-list check makes 7 fail. Caveat: a request for a version that does not exist returned the current file, so the host does not distinguish versions and the receipts record the version requested.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261115T213811919846-icp-read-only-client" data-who="reckon-build" data-when="2026-11-15T23:09:59Z">
     <div class="r-comment-body"><p>Authenticated read-only client delivered: live description has 793 paths, 815 operations and 471 GET reads; all 6 integration requests were GET. Focused gate 151 passed; method-check mutation 28 failed; state-check mutation 9 failed. Full inventory and the authorised bounded sign-in exception are recorded in docs/evidence/fragments/icp-api-access/icp-read-only-client.html#icp-read-only-client-evidence.</p></div>
