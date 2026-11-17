@@ -368,7 +368,7 @@ def _rank_signals(
 
 
 def _search_signals(
-    query: str,
+    query: str | None,
     facility: str,
     *,
     diagnostic: str | None = None,
@@ -381,6 +381,11 @@ def _search_signals(
     rerank: bool = False,
     gc: GraphClient | None = None,
     encoder: Encoder | None = None,
+    plant_system: str | None = None,
+    function: str | None = None,
+    component_category: str | None = None,
+    field: str | None = None,
+    offset: int = 0,
 ) -> str:
     """Search facility signals with graph enrichment.
 
@@ -403,7 +408,43 @@ def _search_signals(
         check_status: "passed", "failed", or "unchecked"
         error_type: filter by error classification (e.g. "not_available_for_shot")
         include_check_details: include CHECKED_WITH relationship data in results
+
+    With query=None, plant codes select a deterministic catalogue page without
+    embeddings or reranking. The page includes its total and next tool call.
     """
+    plant_filters = {
+        "plant_system": plant_system,
+        "function": function,
+        "component_category": component_category,
+        "field": field,
+    }
+    if query is None or any(value is not None for value in plant_filters.values()):
+        from imas_codex.tools.plant_search import list_plant_signals
+
+        if query is not None:
+            raise ValueError("omit query when listing by plant codes")
+        if any(
+            (
+                diagnostic,
+                physics_domain,
+                role,
+                check_status,
+                error_type,
+                include_check_details,
+            )
+        ):
+            raise ValueError("plant listings accept plant-code filters only")
+        if gc is not None:
+            return list_plant_signals(
+                gc, facility, **plant_filters, limit=k, offset=offset
+            )
+        with GraphClient() as graph:
+            return list_plant_signals(
+                graph, facility, **plant_filters, limit=k, offset=offset
+            )
+    if offset:
+        raise ValueError("offset is available for plant-code listings only")
+
     if role is not None and role not in SIGNAL_ROLES:
         return _SIGNAL_ROLE_REFUSAL.format(role=role)
 
@@ -1423,6 +1464,8 @@ def _fetch(
     resource: str,
     *,
     gc: GraphClient | None = None,
+    limit: int = 20,
+    offset: int = 0,
 ) -> str:
     """Fetch full content for a graph resource identified by ID or URL.
 
@@ -1430,6 +1473,7 @@ def _fetch(
     resource to its node type and returns all available content.
 
     Supported node types (resolved in order):
+    - FacilitySignal: candidate component, control hierarchy and paged siblings
     - WikiPage: all chunks in reading order
     - Document: all parsed document chunks
     - CodeFile: all code chunks with function names
@@ -1449,6 +1493,12 @@ def _fetch(
         return f"Error connecting to graph: {e}"
 
     try:
+        from imas_codex.tools.plant_search import fetch_signal_context
+
+        signal = fetch_signal_context(gc, resource, limit=limit, offset=offset)
+        if signal is not None:
+            return signal
+
         # Try each node type in order until we find a match
         for resolver in [
             _fetch_wiki_page,

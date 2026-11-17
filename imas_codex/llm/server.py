@@ -1,16 +1,17 @@
 """
 Agents MCP Server - Streamlined tools for LLM-driven facility exploration.
 
-This server provides 15 MCP tools organized by purpose:
+This server provides MCP tools organized by purpose:
 
 Unified Search (primary interface):
 - search_signals: Signal search with data access and IMAS enrichment
+- search_pulses: Test-category search and paged pulse windows
 - search_docs: Wiki/document/image search with cross-links
 - search_code: Code search with data reference enrichment
 - search_dd_paths: IMAS DD search with cluster and facility cross-refs
 
 Retrieval:
-- fetch: Full content retrieval by ID or URL (WikiPage, Document, CodeFile, Image)
+- fetch_content: Content retrieval by ID or URL, including signal component context
 
 Graph Operations:
 - get_graph_schema: Schema introspection for query generation
@@ -1798,14 +1799,14 @@ def _reload_repl() -> str:
 
 
 # =============================================================================
-# MCP Server with 9 Core Tools
+# MCP server
 # =============================================================================
 
 
 @dataclass
 class AgentsServer:
     """
-    MCP server with 7 core tools for facility exploration.
+    MCP server for facility exploration and data-dictionary access.
 
     Uses lazy initialization for the REPL — the first python() call
     triggers GraphClient connection and encoder setup. This avoids
@@ -1813,6 +1814,8 @@ class AgentsServer:
 
     Tools:
     - search_signals: Signal search with data access and IMAS enrichment
+    - search_pulses: Test categories and exact pulse windows
+    - fetch_content: Resource content and signal component/system/sibling context
     - search_docs: Wiki/document/image search with cross-links
     - search_code: Code search with data reference enrichment
     - search_dd_paths: IMAS DD search with cluster and facility cross-refs
@@ -1847,6 +1850,7 @@ class AgentsServer:
     FACILITY_TOOLS: ClassVar[frozenset[str]] = frozenset(
         {
             "search_signals",
+            "search_pulses",
             "signal_analytics",
             "search_docs",
             "search_code",
@@ -2411,8 +2415,8 @@ class AgentsServer:
 
             @self.mcp.tool()
             def search_signals(
-                query: str,
                 facility: str,
+                query: str | None = None,
                 diagnostic: str | None = None,
                 physics_domain: str | None = None,
                 role: str | None = None,
@@ -2420,16 +2424,22 @@ class AgentsServer:
                 error_type: str | None = None,
                 include_check_details: bool = False,
                 k: int = 20,
+                plant_system: str | None = None,
+                function: str | None = None,
+                component_category: str | None = None,
+                field: str | None = None,
+                offset: int = 0,
             ) -> str:
-                """Find facility signals by physics concept and return data-access details.
+                """Find signals by physics concept, or page signals by parsed plant codes.
 
                 Hybrid search (vector similarity + keyword) over FacilitySignal
                 descriptions, enriched with DataAccess templates, IMAS mappings,
                 diagnostic context, and related MDSplus/TDI tree nodes.
 
                 Args:
-                    query: Natural-language description of the quantity to find
+                    query: Optional natural-language description of the quantity to find
                         (e.g. "plasma current", "electron density profile").
+                        Omit for a plant-code listing, which needs no embedding.
                     facility: Facility identifier (required). One of: tcv, jet,
                         iter, jt-60sa, west, mast-u, etc.
                     diagnostic: Keep only signals from this diagnostic system
@@ -2447,13 +2457,23 @@ class AgentsServer:
                         (e.g. "not_available_for_shot"). Implies check_status="failed".
                     include_check_details: If true, append per-signal check metadata
                         (shot, shape, error, timestamp) to each result.
-                    k: Maximum results to return (default 20).
+                    k: Maximum results to return (default 20); plant listings allow 1 to 100.
+                    plant_system: Control-path prefix, matched at a hyphen boundary.
+                        This is a naming code, not a verified PBS identity.
+                    function: Exact FunctionID (complete parsed control path).
+                    component_category: Exact component function-category letters.
+                    field: Exact parsed field code, without its discriminator.
+                    offset: Zero-based page offset for plant listings. Combine plant
+                        filters with AND and omit query and semantic filters.
 
                 Returns:
                     Formatted text report. Each signal entry includes: signal id,
                     description, diagnostic, data-access template, IMAS mapping
                     path (if mapped), and related tree node paths. A secondary
                     section lists raw tree-node matches from the SignalNode index.
+                    Plant listings return JSON with items, total, count and a
+                    continuation containing the next tool call. Fetch a returned
+                    signal id with fetch_content for component/system/sibling context.
                 """
                 from imas_codex.llm.search_tools import _search_signals as _ss
 
@@ -2468,7 +2488,54 @@ class AgentsServer:
                     include_check_details=include_check_details,
                     k=k,
                     rerank=_rerank_signals,
+                    plant_system=plant_system,
+                    function=function,
+                    component_category=component_category,
+                    field=field,
+                    offset=offset,
                 )
+
+            @self.mcp.tool()
+            def search_pulses(
+                facility: str,
+                designation: str | None = None,
+                category_id: str | None = None,
+                limit: int = 20,
+                offset: int = 0,
+            ) -> str:
+                """Find test categories by coil/system designation, then list a category's pulses.
+
+                Supply exactly one of designation or category_id. The designation
+                matches a literal, case-insensitive substring of category names
+                and descriptions. Pass a returned category id to list its pulses.
+                No query language, archive endpoint or sample-data read is involved.
+
+                Args:
+                    facility: Facility identifier, for example iter.
+                    designation: Coil or system designation to find in test categories.
+                    category_id: Exact category id from a preceding category search.
+                    limit: Page size, 1 to 100 (default 20).
+                    offset: Zero-based page offset (default 0).
+
+                Returns:
+                    Bounded JSON: items, total, count and continuation with the next
+                    tool call, or an explicit empty items list with total 0.
+                    Categories include pulse_count. Pulses include exact start_ns,
+                    end_ns (null when absent), open_ended and descriptions. Times
+                    are absolute Unix epoch nanoseconds; an absent end stays absent.
+                """
+                from imas_codex.graph.client import GraphClient
+                from imas_codex.tools.plant_search import search_pulse_catalogue
+
+                with GraphClient() as graph:
+                    return search_pulse_catalogue(
+                        graph,
+                        facility,
+                        designation=designation,
+                        category_id=category_id,
+                        limit=limit,
+                        offset=offset,
+                    )
 
             @self.mcp.tool()
             def signal_analytics(
@@ -3152,7 +3219,7 @@ class AgentsServer:
         if not self.dd_only:
 
             @self.mcp.tool()
-            def fetch_content(resource: str) -> str:
+            def fetch_content(resource: str, limit: int = 20, offset: int = 0) -> str:
                 """Fetch full text content of a graph resource by ID, URL, or title.
 
                 Use after search_docs/search_code/search_signals returns a
@@ -3165,14 +3232,20 @@ class AgentsServer:
                         - Graph node ID from search results (e.g. "jet:Fishbone_proposal_2018.ppt")
                         - Full URL (e.g. "https://wiki.jetdata.eu/tf/...")
                         - Partial title for fuzzy matching against indexed pages
+                    limit: For a FacilitySignal id, sibling page size (1 to 100).
+                    offset: For a FacilitySignal id, zero-based sibling page offset.
 
                 Returns:
                     str: Full content report with metadata header and all chunks,
                     or an error message if the resource is not found.
+                    An exact FacilitySignal id returns bounded JSON with signal,
+                    candidate component, system (root control node), ordered control
+                    hierarchy and sibling items with total/count/continuation. Codes
+                    are syntactic candidates and do not establish PBS identities.
                 """
                 from imas_codex.llm.search_tools import _fetch as _f
 
-                return _f(resource)
+                return _f(resource, limit=limit, offset=offset)
 
         # =====================================================================
         # Standard Name tools

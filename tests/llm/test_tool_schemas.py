@@ -213,6 +213,7 @@ BASE_TOOL_NAMES = {
             "search_dd_paths",
             "search_docs",
             "search_signals",
+            "search_pulses",
             "search_standard_names",
             "signal_analytics",
             "tail_logs",
@@ -250,6 +251,7 @@ BASE_TOOL_NAMES = {
             "search_dd_paths",
             "search_docs",
             "search_signals",
+            "search_pulses",
             "search_standard_names",
             "signal_analytics",
             "trace_standard_name_provenance",
@@ -286,7 +288,5 @@ BASE_TOOL_NAMES = {
     ],
 )
 def test_tool_names_per_serve_mode(mode, kwargs) -> None:
-    """The server answers with the same tool names it exposed before the
-    command group resolved its command modules on demand.
-    """
+    """Each server mode exposes its declared tool surface."""
     assert _tool_names(AgentsServer(**kwargs)) == BASE_TOOL_NAMES[mode]
