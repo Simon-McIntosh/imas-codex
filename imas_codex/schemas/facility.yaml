@@ -1927,8 +1927,7 @@ classes:
         required: true
         range: integer
       end_ns:
-        description: Absolute end time in Unix epoch nanoseconds
-        required: true
+        description: Absolute end time in Unix epoch nanoseconds, absent for an open-ended pulse
         range: integer
       categories:
         description: Archive-declared category memberships
