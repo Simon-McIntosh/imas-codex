@@ -43,9 +43,28 @@
       "note": "The next version corrects the premise: pulse descriptions are already imported, so the section measures how many pulses carry one, and its schema changes are a pulse status and a category kind with its source.",
       "reason": "",
       "when": "2026-11-17T16:18:24.805171+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1ddbfed7767cdf87cdabb6d375fb3acdcc9111e2",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The next version takes the empty-description control from a constructed pulse in a test, independent of whether the live archive holds one.",
+      "reason": "",
+      "when": "2026-11-17T16:18:30.877277+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1ddbfed7767cdf87cdabb6d375fb3acdcc9111e2",
+      "commit_basis": "edit",
+      "note": "The next version takes the empty-description control from a constructed pulse in a test, independent of whether the live archive holds one.",
+      "reason": "",
+      "when": "2026-11-17T16:18:30.877277+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
