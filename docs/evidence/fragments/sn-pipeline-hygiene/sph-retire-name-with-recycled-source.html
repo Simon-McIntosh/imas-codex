@@ -285,3 +285,14 @@ current source/status tables are retained.</p>
 <p>The protected-stage test now uses <code>refining</code>, and a live refine claim is explicitly preserved. The production maintenance caller now logs the count of exhausted names retired. The admission-removal mutation reports <code>5 failed, 16 passed, EXIT=1</code>; the non-exhausted-admission mutation reports <code>10 failed, 11 passed, EXIT=1</code>. Their failing ids pass at implementation head. Both mutations and every graph run used <code>all_debug</code>.</p>
 <p>Durable receipts, full manifests and logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog</code>. The data file’s <code>signed_backlog_retirement</code> record carries each name, its authority, review score, description, change id, signed digest and the complete ten-name read-back. Historical readings above and the original data fields remain as recorded.</p>
 </section>
+
+<section id="signed-retirement-suite-comparison">
+<h2>Archived whole-directory comparison</h2>
+<p>Independent <code>all_debug</code> jobs measured <code>tests/standard_names</code> at the stated base and implementation head. Each archive used copied generated models, the shared environment without sync, an explicit source import path printed in its log, a private pytest basetemp and direct log capture. The completed results add zero failure ids:</p>
+<table><thead><tr><th>Revision</th><th>Result</th><th>Exit</th></tr></thead><tbody>
+<tr><td><code>d12142b478667cd114095d1e1a1309ef551204e9</code></td><td>8789 passed, 12 skipped, 553 deselected, 43 warnings in 881.15s (0:14:41)</td><td>0</td></tr>
+<tr><td><code>4345f519303afa9ede6aee6280f607be0bc1b415</code></td><td>8789 passed, 12 skipped, 575 deselected, 43 warnings in 781.99s (0:13:01)</td><td>0</td></tr>
+</tbody></table>
+<p>The new graph cases and recovery checks were measured separately; both declared mutation controls fail on ids that pass at implementation head. No product code changed after these measurements were submitted. The original captures are retained in the run directory; private temporary directories and direct capture were used for the final comparable measurements.</p>
+<ul><li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/baseline_suite_isolated.log</code></li><li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/after_suite_isolated.log</code></li></ul>
+</section>
