@@ -54,26 +54,30 @@ taken</td>
 <p>Patch <code>graph_audits-retire-recycled-source.patch</code> (in the run
 directory) changes the orphan branch in three ways: a source whose targets
 include a <code>contested</code> name is no longer taken at all; the query
-returns the ids of the names it emptied; and each emptied target that is
-<code>exhausted</code>, non-derived and carries no catalog approval is retired in
-the same pass — <code>name_stage='superseded'</code>,
-<code>status='superseded'</code>, claims cleared — through
-<code>provenance_lifecycle.record_standard_name_change</code> with
-<code>operation='retire_recycled_source_name'</code>. Superseded history still
-releases its source as before. The patch also adds
-<code>names_retired</code> to the pass's result and log line, which required the
-two expectations in
-<code>tests/standard_names/test_pipeline_recovery_mechanics.py</code> to carry
-the new key (<code>tests-result-key-update.patch</code>).</p>
+carries the names it emptied; and, in the same statement — so no interruption
+between releasing a source and retiring its name can strand the pair — each
+emptied target that is <code>exhausted</code>, non-derived, carries no catalog
+approval and has no remaining producer is retired: <code>name_stage</code> and
+<code>status</code> become <code>'superseded'</code>, its claims are cleared,
+and a <code>StandardNameChange</code> row with operation
+<code>retire_recycled_source_name</code> and a deterministic
+<code>sn-change:recycled-source:&lt;name&gt;</code> id is attached through
+<code>HAS_INTERNAL_CHANGE</code>. Superseded history still releases its source as
+before. The patch adds <code>names_retired</code> to the pass's result and log
+line, which required the two expectations in
+<code>tests/standard_names/test_pipeline_recovery_mechanics.py</code> to carry the
+new key (<code>tests-result-key-update.patch</code>).</p>
 
 <table>
 <tr><th>arm</th><th>command</th><th>result</th></tr>
-<tr><td>patch, three planted cases</td>
+<tr><td>patch, four planted cases: an exhausted name plus its only source; a
+contested name plus a bound source; a superseded name plus a source; an
+exhausted name that keeps another producer</td>
 <td><code>pytest tests/standard_names/test_recycled_source_retires_name.py -m graph</code>
-in the scratch tree</td><td>3 passed</td></tr>
-<tr><td>negative control: retirement disabled in the same tree</td>
+in the scratch tree</td><td>4 passed</td></tr>
+<tr><td>negative control: the retirement predicate disabled in the same tree</td>
 <td>same command</td>
-<td><code>1 failed, 2 passed</code>, failing id
+<td><code>1 failed, 3 passed</code>, failing id
 <code>test_exhausted_name_is_retired_when_its_source_is_recycled</code>
 (<code>EXIT=1</code>)</td></tr>
 </table>
