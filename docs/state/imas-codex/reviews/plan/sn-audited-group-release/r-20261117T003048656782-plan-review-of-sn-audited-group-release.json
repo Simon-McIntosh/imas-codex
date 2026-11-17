@@ -41,7 +41,30 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 7,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c69df97a9c6e9ae4574c96f915d93d088a98849c",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 3 now waits on section 2 as well as section 1.",
+      "reason": "",
+      "when": "2026-11-17T00:41:23.256343+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c69df97a9c6e9ae4574c96f915d93d088a98849c",
+      "commit_basis": "edit",
+      "note": "Section 3 now waits on section 2 as well as section 1.",
+      "reason": "",
+      "when": "2026-11-17T00:41:23.256343+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T003048656782-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261117T003048656782-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "b899c3fe63404600a422f093f66c8648a863e8d3",
   "rubric": "content",
