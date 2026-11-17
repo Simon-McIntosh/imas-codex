@@ -1,0 +1,89 @@
+{
+  "added_assertions": "read each added check against the regression it guards: re-adding item.ancestor_context to the names-mode per-item block reddens stage-cause-trace.py:176 (negative-control arm 2 shows it); adding a dd_documentation parameter to _is_attachment_consistent reddens stage-cause-trace.py:191 (arm 3); moving a traced member's recorded stage reddens stage-cause-trace.py:285 (arm 1, reproduced); deleting or retyping an evidence line, excerpt or name reddens stage-cause-trace.py:283-305 against the record's own verdicts \u2014 none of these compares a value with the input the check itself supplied; the one gap is the traced-set/three-largest property, demonstrated unguarded below.",
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate receipts on disk: its manifest carries no baseline_suite and no after_suite block (the node wrote no test file, so no suite pair was armed), so the set difference over suite failures is empty and no suite log names a failure id; the reviewed run's own gate is the fragment's --check, whose log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T230018011751-sagr-stage-cause-trace/gate.log ends EXIT=0 at revision 1229d5a97, and whose negative-control.log head arm ends head exit=0, adding no failing id either.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T23:39:26.032Z",
+  "dispatched_at": "2026-11-17T23:39:13Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py",
+      "line": "244",
+      "severity": "non-blocking",
+      "text": "non-blocking: --check verifies that three causes carry traced members; it never requires those to be the three largest. Demonstrated: emptying the 18-member cause's traced list and giving its three members to the 3-member consumer_context_used_as_quantity_domain still prints \"traced members: 11 across 3 causes ... PASS\" with exit 0, so the page's headline claim that the three largest are traced has no guard."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py",
+      "line": "409",
+      "severity": "non-blocking",
+      "text": "non-blocking: --render writes stage-cause-trace.html but --check never re-renders and compares, so a hand-edited page would pass; the committed page happens to be byte-identical to --render at head."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py",
+      "line": "65",
+      "severity": "non-blocking",
+      "text": "non-blocking: decode_record duplicates equilibrium-adjudication.py's decode_record and load functions, which own the record's compressed layout in the same directory, rather than importing it through the existing sibling() helper."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py",
+      "line": "527",
+      "severity": "non-blocking",
+      "text": "non-blocking: `parser.print_parser_help = None` invents an attribute on the ArgumentParser and does nothing; the following two lines already print help and return 2."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py",
+      "line": "281",
+      "severity": "non-blocking",
+      "text": "non-blocking: `if len(cause[\"traced\"]) not in (0, 0) and len(...) < 3` is a no-op comparison (not in a 2-tuple of the same value is len != 0) that reads as a typo; it does assert the intended 0 < len < 3."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py",
+      "line": "191",
+      "severity": "non-blocking",
+      "text": "non-blocking: the parameter guard `re.search(r\"descri|documentation|text\", param)` runs the alternation unanchored over the parameter name, so a benign future parameter containing the substring 'text' would redden the gate falsely; failing closed is the right direction but the check will misfire on a rename."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit against c07af833: 27587427d adds the tracer, trace data, rendered page and landing fragment; 1229d5a97 adds a smallest repair and file list to each of the eleven untraced causes in the JSON and the page, plus the file-existence assertion, and all four paths lie inside the declared scope.",
+    "done_when": "the done_when asks for the stage, file and function, given and drops per cause on at least three members from recorded inputs, the remaining eleven with their stage and whether one repair covers them, a smallest repair and file list per cause, no product source change and no graph write, and --check exiting 0 with at least 9 traced members and 1 on an altered member stage; the gate log prints 12 traced members across 3 causes (4 each), census 14 shared causes and 89 instances, the JSON has 14 causes each with repair.smallest and existing files, the diff touches only the four fragment paths, and I reproduced PASS at head with exit 0 and exit 1 on an altered member stage.",
+    "goal": "the node's goal is to trace the three largest shared defect causes of the equilibrium adjudication to the stage that produces each; docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.json carries physical_scope_qualifier_lost (18) to compose_name, source_bindings_conflate_distinct_definitions (13) to attach_guard and boundary_forced_to_lcfs (11) to locus_binding, each with the stage's file, function, given and drops, and the page renders it.",
+    "manifest": "read; it reports status complete with commits 27587427d and 1229d5a97, the gate command and its log path, census 14 causes / 89 instances and 12 traced members, and the negative control's three arms; I opened gate.log, negative-control.log and both commit diffs and re-ran the check at head content myself.",
+    "write_paths": "the declared paths are the three stage-cause-trace.* files, sagr-stage-cause-trace.html and the figures directory; the delivered diff c07af833..1229d5a97 adds exactly four of them, with the declared figures path unused and no write anywhere else."
+  },
+  "justifications": {
+    "durability": "the check reddens on an altered traced-member stage, on the names prompt rendering ancestor_context, on the binding guard taking a text parameter, and on a quoted line leaving the packet, as stage-cause-trace.py:157-231 and the negative control's three arms show; the largest-cause property at stage-cause-trace.py:244 and the page at stage-cause-trace.py:409 are unguarded.",
+    "evidence": "the gate is stage-cause-trace.py --check, its PASS and EXIT=0 are recorded in the run's gate.log at 1229d5a97 and I re-ran it at head content for exit 0 and 1 on an altered stage, but stage-cause-trace.py:244 never asserts the traced causes are the three largest, so part of the measured claim is unguarded.",
+    "fit": "the module follows the sibling evidence-fragment idiom (from __future__ import annotations, pathlib constants, ast-based source reads, argparse main returning an int) as in equilibrium-adjudication.py:1-120, and its names decode_record, census, check_trace and render use no banned vocabulary; stage-cause-trace.py:527 leaves a nonsense attribute assignment.",
+    "goal_fidelity": "stage-cause-trace.json:1-14 names each of the three largest causes with its stage and count and stage-cause-trace.html renders the given/drops text per stage, so the trace the goal asks for is delivered.",
+    "reuse": "stage-cause-trace.py:65 decode_record re-implements equilibrium-adjudication.py:63-70 decode_record and load, which own the same zlib/base85 record expansion in the same directory, and the sibling() reuse helper at equilibrium-adjudication.py:43-50 is not used, so this dimension is capped at 5.",
+    "scope_discipline": "git diff --stat c07af833..1229d5a97 lists only the four fragment paths, no product source and no graph write, which is exactly the no-product-change clause the done_when requires."
+  },
+  "negative_control": "I applied two mutations to the trace JSON in the scratch tree and recorded the observable result: altering causes[0].traced[0].stage to attach_guard gives 'FAIL physical_scope_qualifier_lost/current_of_passive_structure: recorded member stage ... but the stage table says compose_name' with exit 1; emptying causes[0].traced and giving its three members to consumer_context_used_as_quantity_domain (3 members, so the largest cause untraced) still prints 'traced members: 11 across 3 causes ... PASS' with exit 0, which is the unguarded property reported at stage-cause-trace.py:244.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to trace the three largest shared defect causes of the equilibrium adjudication to the stage that produces each; stage-cause-trace.json carries physical_scope_qualifier_lost (18), source_bindings_conflate_distinct_definitions (13) and boundary_forced_to_lcfs (11) each to compose_name, attach_guard and locus_binding, with the stage file, function, given and drops; the page renders them.\nVERDICT done_when: the done_when asks for stage, file and function, given and drops on at least three members from recorded inputs, the eleven remaining with stage and same-repair verdict, a smallest repair and file list per cause, no product source change, and --check exit 0 with at least 9 traced members and exit 1 on an altered member stage; gate.log at 1229d5a97 records PASS EXIT=0 with 12 traced members and census 14/89, and I reproduced PASS and the exit-1 arm.\nVERDICT write_paths: the diff c07af833..1229d5a97 adds stage-cause-trace.py, stage-cause-trace.json, stage-cause-trace.html and sagr-stage-cause-trace.html, all inside the declared paths, with the declared figures directory unused.\nVERDICT manifest: read; it records status complete, commits 27587427d and 1229d5a97, the gate command and logs, census 14/89, 12 traced members and a three-arm negative control, and the claims match the logs I opened.\nVERDICT diff: read both commits against the base: 27587427d adds the tracer, data, page and landing fragment, 1229d5a97 adds repair.smallest and files to the eleven untraced causes plus the file-existence assertion, four paths total.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: stage-cause-trace.json and its rendered stage-cause-trace.html trace each of the three largest causes to a named stage with its given and drops, shown on four recorded members per cause.\nSCORE evidence: 14\nJUSTIFICATION evidence: gate.log at 1229d5a97 records PASS EXIT=0 and I reproduced it, but stage-cause-trace.py:244 does not assert that the traced causes are the three largest, so part of the done_when is unguarded.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat c07af833..1229d5a97 lists only the four declared fragment paths, with no product source and no graph write.\nSCORE durability: 13\nJUSTIFICATION durability: stage-cause-trace.py:157-231 reddens on the three seeded regressions the negative control exercised, while stage-cause-trace.py:244 and:409 leave the largest-cause property and the committed page unguarded.\nSCORE fit: 16\nJUSTIFICATION fit: the module follows the sibling fragment idiom of equilibrium-adjudication.py, and stage-cause-trace.py:527 leaves a dead parser.print_parser_help assignment.\nSCORE reuse: 5\nJUSTIFICATION reuse: stage-cause-trace.py:65 decode_record re-implements the record decoder owned at equilibrium-adjudication.py:63 without extending it or using the sibling() helper.\nFINDING docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py:244 non-blocking: --check accepts any three traced causes, so untracing the 18-member cause and tracing a 3-member one still prints PASS with exit 0 (reproduced), leaving the page's headline claim unguarded.\nFINDING docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py:409 non-blocking: the committed page is never compared with --render output, so a stale or hand-edited stage-cause-trace.html passes the check; it is byte-identical to --render at head today.\nFINDING docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py:65 non-blocking: decode_record duplicates the record decoder and loader at equilibrium-adjudication.py:63 rather than extending that owner or importing it through sibling().\nFINDING docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py:527 non-blocking: parser.print_parser_help = None assigns a nonexistent attribute and does nothing before the existing help-and-return-2 path.\nFINDING docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py:281 non-blocking: `len(cause[\"traced\"]) not in (0, 0)` is a no-op comparison that reads as a typo for the intended 0 < len < 3 guard.\nFINDING docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py:191 non-blocking: the unanchored parameter alternation descri|documentation|text would redden falsely on any future parameter whose name merely contains 'text'.",
+  "review_node": "review-of-sagr-stage-cause-trace-1229d5a97d19",
+  "review_run_id": "r-20261117T233848617849-review-of-sagr-stage-cause-trace-1229d5a97d19",
+  "reviewed_base_sha": "c07af8334c4fb532aaf8f3d7e18497a4f207c601",
+  "reviewed_head_sha": "1229d5a97d19347ccfe38be9dfb192d2aeb2f079",
+  "reviewed_run_id": "r-20261117T230018011751-sagr-stage-cause-trace",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T233848617849-review-of-sagr-stage-cause-trace-1229d5a97d19"
+  },
+  "rubric_note": "six dimension lines emitted; the review's own re-run of the gate was a scratch-tree measurement at the reviewed head content with the reviewed tree's product source (git diff 1229d5a9..HEAD over the checked product paths is empty), so the exit statuses quoted are the reviewed code's.",
+  "scores": {
+    "durability": 13,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T23:55:46.090659+00:00",
+  "total": 87
+}
