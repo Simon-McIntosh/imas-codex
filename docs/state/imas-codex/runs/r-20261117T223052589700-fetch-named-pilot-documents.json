@@ -2594,6 +2594,25 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/fetch-named-pilot-documents uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/fetch-named-pilot-documents/tests/discovery/test_icp_client.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/fetch-named-pilot-documents/tests/discovery/test_icp_records.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/fetch-named-pilot-documents/tests/discovery/test_icp_documents.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/fetch-named-pilot-documents/tests/discovery/test_transfer.py",
+    "integrated_revision": "13f970c63ac07b9b751974027710ad6a1d677697",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261117T223052589700-fetch-named-pilot-documents/review-landing/gate-13f970c63ac07b9b751974027710ad6a1d677697.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'env UV_PROJECT_ENVIRONMENT=./.venv PYTHONPATH=. uv run --no-sync pytest -p no:cacheprovider ./tests/discovery/test_icp_client.py ./tests/discovery/test_icp_records.py ./tests/discovery/test_icp_documents.py ./tests/discovery/test_transfer.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/fetch-named-pilot-documents",
+      "/home/ITER/mcintos/Code/imas-codex"
+    ]
+  },
   "lane": "codex",
   "lane_advisory": {
     "backend": "codex",
