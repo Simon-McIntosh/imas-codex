@@ -805,6 +805,17 @@ def reconcile_source_status_liveness(
     Upstream-stale sources and active extracted claims are never revived or
     modified here.
 
+    A source whose targets include a non-exhausted live name is left alone:
+    taking its source would leave live work without a producer. Derived names
+    and catalog content also keep their sources because this pass cannot
+    retire them. A source whose only targets are
+    ``superseded`` history or an ``exhausted`` dead end returns to the pool;
+    each emptied target that is ``exhausted``, non-derived and not catalog
+    content is retired in the same statement — ``name_stage='superseded'``,
+    its claims cleared, and one ``retire_recycled_source_name`` change row —
+    so the pass cannot leave a live name without a producer. A target that
+    still has another producer is not retired.
+
     ``source_ids`` optionally restricts every repair direction to exact source
     identities; the default remains the whole graph. Idempotent once status,
     edge, and scalar liveness agree.
@@ -847,6 +858,14 @@ def reconcile_source_status_liveness(
                 MATCH (sns)-[:PRODUCED_NAME]->(live:StandardName)
                 WHERE NOT (coalesce(live.name_stage, '') IN
                            ['superseded', 'exhausted', 'contested'])
+              }
+              // Every live target must be eligible for atomic retirement.
+              AND NOT EXISTS {
+                MATCH (sns)-[:PRODUCED_NAME]->(open:StandardName)
+                WHERE coalesce(open.name_stage, '') <> 'superseded'
+                  AND (coalesce(open.name_stage, '') <> 'exhausted'
+                       OR coalesce(open.origin, '') = 'derived'
+                       OR open.catalog_pr_number IS NOT NULL)
               }
             OPTIONAL MATCH (sns)-[r:PRODUCED_NAME]->(terminal:StandardName)
             WITH sns, collect(DISTINCT r) AS stale_edges,
@@ -902,6 +921,7 @@ def reconcile_source_status_liveness(
             )
             WITH sns, stale_edges,
                  collect(DISTINCT removable_projection) AS stale_projections,
+                 collect(DISTINCT terminal) AS recycled_targets,
                  sum(CASE WHEN had_source_path THEN 1 ELSE 0 END)
                      AS source_paths_removed
             FOREACH (edge IN stale_edges | DELETE edge)
@@ -912,13 +932,52 @@ def reconcile_source_status_liveness(
                 sns.claim_token = null,
                 sns.produced_sn_id = null,
                 sns.composed_at = null
-            RETURN count(DISTINCT sns) AS n,
-                   sum(size(stale_edges)) AS edges,
-                   sum(size(stale_projections)) AS projections,
-                   sum(source_paths_removed) AS source_paths
+            WITH count(DISTINCT sns) AS n,
+                 sum(size(stale_edges)) AS edges,
+                 sum(size(stale_projections)) AS projections,
+                 sum(source_paths_removed) AS source_paths,
+                 collect(recycled_targets) AS target_batches
+            WITH n, edges, projections, source_paths,
+                 reduce(targets = [], batch IN target_batches |
+                   targets + [name IN batch WHERE NOT name IN targets])
+                     AS recycled_targets
+            WITH n, edges, projections, source_paths,
+                 [name IN recycled_targets
+                  WHERE name IS NOT NULL
+                    AND coalesce(name.name_stage, '') = 'exhausted'
+                    AND coalesce(name.origin, '') <> 'derived'
+                    AND name.catalog_pr_number IS NULL
+                    AND NOT EXISTS {
+                      MATCH (producer:StandardNameSource)-[:PRODUCED_NAME]->(name)
+                      WHERE coalesce(producer.status, '') <> 'stale'
+                    }] AS retiring
+            FOREACH (name IN retiring |
+              SET name.updated_at = datetime(),
+                  name.name_stage = 'superseded',
+                  name.status = 'superseded',
+                  name.claimed_at = null,
+                  name.claim_token = null
+              CREATE (change:StandardNameChange {
+                id: 'sn-change:recycled-source:' + name.id,
+                from_name: name.id,
+                to_name: name.id,
+                operation: 'retire_recycled_source_name',
+                reason: $retirement_reason,
+                origin: 'source_recycling',
+                changed_at: datetime(),
+                internal: true
+              })
+              CREATE (name)-[:HAS_INTERNAL_CHANGE]->(change)
+            )
+            RETURN n, edges, projections, source_paths,
+                   [[name IN retiring | name.id]] AS retired_name_id_batches
             """,
             terminal_stages=sorted(foundation._TERMINAL_BINDING_NAME_STAGES),
             source_ids=source_ids,
+            retirement_reason=(
+                "the name was exhausted and its last source was returned to "
+                "the compose pool"
+            ),
         )
         orphaned_reset = orphan_rows[0]["n"] if orphan_rows else 0
         terminal_edges_dropped = (
@@ -929,6 +988,22 @@ def reconcile_source_status_liveness(
         )
         terminal_source_paths_dropped = (
             int(orphan_rows[0].get("source_paths") or 0) if orphan_rows else 0
+        )
+
+        names_retired = len(
+            {
+                str(name_id)
+                for batch in (
+                    (
+                        orphan_rows[0].get("retired_name_id_batches")
+                        if orphan_rows
+                        else None
+                    )
+                    or []
+                )
+                for name_id in (batch or [])
+                if name_id
+            }
         )
 
         projection_rows = client.query(
@@ -1005,18 +1080,20 @@ def reconcile_source_status_liveness(
         if own:
             client.close()
 
-    if live_realigned or orphaned_reset or projection_ghosts_reset:
+    if live_realigned or orphaned_reset or projection_ghosts_reset or names_retired:
         logger.info(
             "reconcile_source_status_liveness: realigned %d source(s) with a "
             "live target; returned %d source(s) without one to extracted "
             "(%d stale edge(s), %d projection(s), and %d source-path entry(s) "
-            "dropped); cleaned %d projection-only ghost source(s) "
+            "dropped); retired %d exhausted name(s) whose last source left; "
+            "cleaned %d projection-only ghost source(s) "
             "(%d projection(s), %d source-path entry(s))",
             live_realigned,
             orphaned_reset,
             terminal_edges_dropped,
             terminal_projections_dropped,
             terminal_source_paths_dropped,
+            names_retired,
             projection_ghosts_reset,
             ghost_projections_dropped,
             ghost_source_paths_dropped,
@@ -1027,6 +1104,7 @@ def reconcile_source_status_liveness(
         "terminal_edges_dropped": terminal_edges_dropped,
         "terminal_projections_dropped": terminal_projections_dropped,
         "terminal_source_paths_dropped": terminal_source_paths_dropped,
+        "names_retired": names_retired,
         "projection_ghosts_reset": projection_ghosts_reset,
         "ghost_projections_dropped": ghost_projections_dropped,
         "ghost_source_paths_dropped": ghost_source_paths_dropped,
