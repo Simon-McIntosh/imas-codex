@@ -25,7 +25,30 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 16,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "a965030084b7a63d058fff7602a4408ae908175d",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 4 now requires a recorded run showing a disposable group planted with a rate above the bar reported with its rate, causes and spend, and not cut.",
+      "reason": "",
+      "when": "2026-11-17T11:36:34.834259+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "a965030084b7a63d058fff7602a4408ae908175d",
+      "commit_basis": "edit",
+      "note": "Section 4 now requires a recorded run showing a disposable group planted with a rate above the bar reported with its rate, causes and spend, and not cut.",
+      "reason": "",
+      "when": "2026-11-17T11:36:34.834259+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T110623410909-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261117T110623410909-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "d2b4467150027a5bc569d9c283fce073e7a29c43",
   "rubric": "content",
