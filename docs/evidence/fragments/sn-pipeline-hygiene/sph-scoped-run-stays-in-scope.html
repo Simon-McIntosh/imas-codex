@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="plan-slug" content="sn-pipeline-hygiene">
+<meta name="node-id" content="sph-scoped-run-stays-in-scope">
+<title>A run given a scope touches only that scope</title>
+</head>
+<body><main>
+<h1 id="sph-scoped-run-stays-in-scope-title">A scoped run no longer starts the graph-wide maintenance passes</h1>
+
+<p id="sph-scoped-run-stays-in-scope-outcome">A review of one edit's names
+(<code>sn run --only review_name --edits --scope-run-id &lt;edit-run-id&gt;</code>)
+asked the orchestrator for a scoped run and still forwarded
+<code>skip_global_maintenance=False</code>, so the run executed the whole
+maintenance sequence — the pass that returned 24 unrelated names' sources to
+the pool. The scope is now resolved once, by
+<code>resolve_scope_maintenance()</code> in
+<code>imas_codex/standard_names/pipeline.py</code>: a run given a run id, focus
+paths, exact names, or the edits predicate carries the bypass whether or not
+<code>--skip-global-maintenance</code> was repeated, and an action that cannot
+be bounded by a scope refuses with a reason. The decision is applied at both
+seams a scoped run crosses: the CLI's own graph-wide startup writes (the
+global <code>run_id</code> clear) and the orchestrator entrance
+(<code>_run_sn_cmd</code>), which drops the passes for every caller.</p>
+
+<h2 id="sph-scoped-run-stays-in-scope-reproduction">The defect, recorded before the fix&nbsp;</h2>
+<p id="sph-scoped-run-stays-in-scope-repro-method">A throwaway driver invokes the
+real command with the pool orchestrator's entry point recorded, so the
+maintenance decision is read where the CLI hands it over. Before-and-after logs:
+<code>logs/repro-scoped-run-base.log</code> and
+<code>logs/repro-scoped-run-head.log</code> under the run directory.</p>
+<pre id="sph-scoped-run-stays-in-scope-repro-command"><code>imas-codex sn run --scope-run-id sn-edit-probe --edits --only review_name --quiet</code></pre>
+<pre id="sph-scoped-run-stays-in-scope-repro-before"><code># at base 3fb991aa (no policy): exit 0, run_sn_pools called once
+skip_global_maintenance = False</code></pre>
+<pre id="sph-scoped-run-stays-in-scope-repro-after"><code># at head (policy applied): exit 0, run_sn_pools called once
+skip_global_maintenance = True</code></pre>
+
+<h2 id="sph-scoped-run-stays-in-scope-policy">What the policy decides&nbsp;</h2>
+<p id="sph-scoped-run-stays-in-scope-policy-table">Scoped inputs come from the
+concrete flags after manifests, batches and <code>--name</code> conflicts have
+resolved, so a manifest URL is judged as its expanded focus paths, not as a
+token.</p>
+<table>
+<thead><tr><th>run</th><th>maintenance</th><th>why</th></tr></thead>
+<tbody>
+<tr><td>no scope</td><td>full sequence</td><td>the catalogue-wide run</td></tr>
+<tr><td>run id, focus paths, exact names, or <code>--edits</code></td><td>bypassed</td><td>the run is about those names only</td></tr>
+<tr><td>scoped + <code>--only reconcile/attach/validate/link</code></td><td>refused</td><td>the phase is itself graph-wide</td></tr>
+<tr><td>scoped + <code>--reset-to</code> without focus paths</td><td>refused</td><td>every matching name is rewritten</td></tr>
+<tr><td>scoped + <code>--revalidate</code></td><td>refused</td><td>the whole validation backlog is cleared</td></tr>
+</tbody>
+</table>
+
+<h2 id="sph-scoped-run-stays-in-scope-disposable">A recorded run on a disposable graph&nbsp;</h2>
+<p id="sph-scoped-run-stays-in-scope-disposable-method">Two names are planted
+outside the scope, each with a <code>StandardNameSource</code> that has no
+<code>FROM_DD_PATH</code> edge and is not stale — a state
+<code>reconcile_standard_name_sources()</code> acts on by marking the source
+stale and resolving the name it produced. The digest covers the name's stored
+properties and every one-hop relationship with its neighbour's properties.</p>
+<ol>
+<li><strong>Guard arm.</strong> A real <code>run_sn_pools</code> is driven with
+the scope and with every other graph-wide writer silenced, so the one writer
+that can reach the planted names is the source reconciliation. The guard name's
+digest before and after the run is equal, and the run's own summary lists
+<code>reconcile_standard_name_sources</code> under
+<code>bypassed_maintenance_passes</code>.</li>
+<li><strong>Control arm.</strong> The same reconciliation is then run directly
+and marks at least one source stale, and the identical planted name (the
+control twin) changes digest. The equality in the guard arm is therefore the
+pass not reaching the name, not an inert fixture.</li>
+</ol>
+<p id="sph-scoped-run-stays-in-scope-negative">The declared negative control
+removes the bypass (<code>resolve_scope_maintenance</code> returns
+<code>False</code> for a scoped run) and the planted-name test fails on the
+digest itself: <code>assert '9a2c…' == '4932…'</code>, against the unmodified
+test. The log is
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T084125357765-sph-scoped-run-stays-in-scope/logs/negative-control-scoped-run.log</code>
+and ends <code>EXIT=1</code>.</p>
+
+<h2 id="sph-scoped-run-stays-in-scope-review">Reviewing one edit's names&nbsp;</h2>
+<p id="sph-scoped-run-stays-in-scope-review-steps">The documented way is the
+command's own scope, in three steps:</p>
+<pre id="sph-scoped-run-stays-in-scope-review-commands"><code># 1. the names this edit would put in front of the reviewer, zero writes
+imas-codex sn run --only review_name --edits --scope-run-id &lt;edit-run-id&gt; --dry-run
+
+# 2. review exactly those names
+imas-codex sn run --only review_name --edits --scope-run-id &lt;edit-run-id&gt;
+
+# 3. read the outcome back for the same run id
+imas-codex sn status</code></pre>
+<p id="sph-scoped-run-stays-in-scope-review-recorded">Step 2 is recorded by
+<code>tests/standard_names/test_scoped_run_stays_in_scope.py::test_edits_scoped_review_forwards_the_bypass_without_the_flag</code>,
+which drives the command and observes the orchestrator receiving the edit's own
+scope, the edits predicate, and the bypass. The orchestrator entrance is
+recorded by
+<code>::test_orchestrator_entrance_forces_the_bypass_for_a_direct_caller</code>,
+which calls <code>_run_sn_cmd</code> with a scope and no flag and observes
+<code>skip_global_maintenance=True</code>.</p>
+
+<h2 id="sph-scoped-run-stays-in-scope-gate">The suite at head and base&nbsp;</h2>
+<p id="sph-scoped-run-stays-in-scope-gate-result">PLACEHOLDER GATE RESULT</p>
+</main></body>
+</html>
