@@ -17,6 +17,7 @@ import sys
 import matplotlib.pyplot as plt
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.plotting.style import save_figure
 
 # Color palette for limiter epochs
 EPOCH_COLORS = [
@@ -230,7 +231,8 @@ def main():
         print(f"  Found {len(probes)} probes")
 
     fig = plot_epochs(limiters, jec2020, pf_coils, probes)
-    fig.savefig(args.output, dpi=150)
+    save_figure(fig, args.output, dpi=150)
+    plt.close(fig)
     print(f"Saved to {args.output}")
 
 

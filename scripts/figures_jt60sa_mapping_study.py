@@ -26,16 +26,22 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
+from imas_codex.plotting.style import save_figure, use_style
+
 ROOT = Path(__file__).resolve().parents[1]
 OUT = ROOT / "docs/figures/jt60sa-mapping-study/agreement.svg"
 
 # Colour names a disposition and keeps naming it across the study. Chain-differ
 # is a variant of disagreement (same coil, other chain) and takes a distinct hue
 # separated from disagreeing by its direct count label and legend entry.
-AGREE = "#1baf7a"
-CHAIN_DIFFERS = "#4f8fc0"
-DISAGREE = "#eb6834"
-UNPLACED = "#9a9892"
+# Every segment keeps its count numeral white inside the fill, so each fill is
+# dark enough for white to reach 4.5:1 against it (WCAG AA for the 20 px
+# numeral): agreeing 5.37:1, chain-differ 5.16:1, disagreeing 4.87:1, unplaced
+# 5.17:1, refused 8.56:1. The darker shades keep each disposition's hue.
+AGREE = "#14795a"
+CHAIN_DIFFERS = "#31739d"
+DISAGREE = "#c4491a"
+UNPLACED = "#6f6d68"
 REFUSED = "#4a3aa7"
 
 # Per section: (label, agreeing, chain-differs, disagreeing, unplaced, refused,
@@ -53,7 +59,7 @@ ROWS = [
 
 
 def render() -> Path:
-    plt.style.use("data-ink")
+    use_style()
     fig, ax = plt.subplots(figsize=(14, 6.4))
     labels = [r[0] for r in ROWS]
     series = [
@@ -131,8 +137,7 @@ def render() -> Path:
     ax.margins(y=0.08)
     ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), ncols=5)
     fig.tight_layout()
-    OUT.parent.mkdir(parents=True, exist_ok=True)
-    fig.savefig(OUT)
+    save_figure(fig, OUT)
     plt.close(fig)
     return OUT
 

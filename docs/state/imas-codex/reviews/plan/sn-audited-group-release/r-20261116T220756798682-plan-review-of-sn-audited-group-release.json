@@ -1,0 +1,282 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T22:21:20.981Z",
+  "dispatched_at": "2026-11-16T22:20:32Z",
+  "findings": [
+    {
+      "anchor": "imas_codex/standard_names/benchmark_roles.py:283",
+      "id": "reuse_search-1",
+      "reason": "the plan's \u00a71 sampling and golden-set wording must say it reuses/extend these, otherwise the node builds a fourth sampler.",
+      "text": "`_stratified_sample(rows, sample, seed, key=\"physics_domain\")` already draws a deterministic round-robin sample balanced across every physics domain, which is \u00a71's stratification rule, and `imas_codex/standard_names/judgment_goldens.py:117` `_sample` does the same across physics_domain \u00d7 pattern_family with a fixed seed; \u00a71 does not state that its sample is this mechanism extended, so a new sampler is implied.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/advisory_panel.py:29",
+      "id": "reuse_search-2",
+      "reason": "\u00a71's reader construction and agreement interval should extend the panel seat/report code rather than add a parallel reader harness.",
+      "text": "an existing multi-seat, multi-model panel already preserves each seat's judgment and derives panel statistics in memory (`PanelSeatJudgment`, `PanelAdjudication`), and `imas_codex/standard_names/review/panel_audit.py:253` `panel_audit_report` (with `audit_selected`:70 and `panel_audit_rate`:63) already reports drift between two judges over a fixed sample; \u00a71's \"two readers of different model families, neither a third-family model the pipeline composes with\" is this mechanism's seat machinery, not new.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/judgment_goldens.py:26",
+      "id": "reuse_search-3",
+      "reason": "the plan should draw planted rows from the committed goldens (and say how unseen rows are kept unseen) instead of re-planting a fresh twenty-forty.",
+      "text": "the planted-known-good/known-bad set \u00a71 asks for already exists as four committed golden sheets (name-acceptable, description-object, near-duplicate, documentation-acceptable) built from independent West audits (`_west_verdicts`:156) and expert rulings (`_expert_verdicts`:190), each row carrying a `label`; \u00a71's twenty-defective/twenty-sound plant duplicates it and `judgment_goldens._finish`:225 already tracks review coverage.",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/export.py:181",
+      "id": "duplicate_owner-1",
+      "reason": "\u00a73 must be expressed as new gate conditions on the existing gate registry/refusal order, or the plan should state which owner it merges into.",
+      "text": "the release bar of \u00a73 (\"not accepted on name and on documentation\", \"no source\", \"family member in another group\", \"shared wording not the rendering of its stored sentence\") each already refuses inside the export gate path: the eligibility filter at `export.py:893`-`export.py:925` refuses `name_not_accepted`, `missing_physics_domain`, `outside_requested_domain` and `invalid_validation_status`; the gate registry at `export.py:181`-`export.py:189` (GATE_A\u2026GATE_D, exclusion accounting, export population) carries `all_gates_passed` (`export.py:405`, `export.py:3363`, `export.py:3370`); `imas_codex/standard_names/source_invariant.py:204` `find_sourceless_live_name_rows` owns the no-source condition; `imas_codex/standard_names/families.py:215` `detect_families` owns family membership; `imas_codex/standard_names/docs_gates.py:1337` `refuse_altered_shared_parts` (raising `SharedPartAltered`:1333 off `shared_part_findings`:1238) already refuses a definition whose shared part is not the rendering of the stored sentence. The only condition without a wired owner is family-spanning across groups \u2014 and its natural home is `export.py:1066` `_run_gate_b` (cross_field_consistency), which already censuses cross-domain ordering edges at `export.py:1940`-`export.py:1995`. A second bar beside these will drift from the export gates that actually cut the candidate.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/review/panel_audit.py:153",
+      "id": "duplicate_owner-2",
+      "reason": "the audit record store is a shared owner; a parallel evidence file forces a join and re-derives cost/usage accounting already recorded per review.",
+      "text": "an audit record shape already exists: `_audit_record` builds a non-deciding review record through `review.pipeline._build_review_record`, with model, cost, axis, `resolution_role` and a skip reason; \u00a71's per-reader verdict rows and \u00a74's attached audit record are this shape again, and \u00a75's group table then joins a second store to the one every other audit already lands in.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/domain_audit.py:365",
+      "id": "duplicate_owner-3",
+      "reason": "\u00a72 should be stated as extending the domain audit result with a rank and a split proposal, not as a new measurement, which also fixes the measure it must state.",
+      "text": "\u00a72's per-group figures (live count per domain, count whose domain is among its sources', agreement) are already produced by `audit_domains`, whose `DomainAuditResult` (`domain_audit.py:182`) carries per-name `NameDomainState` (`domain_audit.py:140`) and `DomainCheck` (`domain_audit.py:119`); the plan's 3,266/29/63 % reading is this function's output. Ranking and the split proposal are the only new work.",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/sn.py:4910",
+      "id": "deep_module-1",
+      "reason": "naming one deep group-cut entry point (with \u00a72's rank and \u00a73's bar data as arguments it records) is what keeps \u00a75 from being a fifth script.",
+      "text": "the group cut already has a parameter: `sn release` (`sn.py:4736`) accepts a single physics domain via `--domain` ([export] filter) on `--export-only`; the plan's \u00a73/\u00a74/\u00a75 route (audit group \u2192 bar \u2192 regenerate \u2192 cut \u2192 table) would most cheaply be one group-cut operation parameterised by group, hiding the read, the bar evaluation, the regeneration and the attach behind it. As written, five sections each carry their own evidence step, which spreads the same graph reads over five code paths.",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/publish.py:9",
+      "id": "thin_wrapper-1",
+      "reason": "if \u00a73's refusals are gate conditions, \u00a73's \"a recorded run shows each refusal\" is a gate test on a planted group, which changes the section's evidence from a new verb to a mutation of an exported candidate set.",
+      "text": "a per-group bar layer \u2014 a new verb/function that validates the group then forwards to export+publish \u2014 would add no behaviour the export gates and publish's refusal order (`publish.py:9`-`publish.py:19`, `check_catalog`) lack; the honest change is another gate condition plus a refusal cause, and the plan offers no reason the gate path cannot refuse. A wrapper with no such justification is the finding.",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/cli/sn.py:4736",
+      "id": "interface_budget-1",
+      "reason": "\u00a73 must say which of the existing export/publish refusal causes these replace or fold into, and state the refusal-family count delta in its own text.",
+      "text": "public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds six group-bar refusal causes (unaccepted on name, unaccepted on documentation, no source, family spans groups, shared wording not rendered, audited rate above bar or never measured) without naming one existing refusal family it retires or merges, or stating why nothing can be. The CLI surface need not grow (`--domain` already scopes export), so the unaccounted growth is the refusal family alone.",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+  "plan_fingerprint": "39b6e62fc7938ef5b2429dfd2b3b4e1e5981be85fdd08ac2bf043a55a8c24b53",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 3,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "reuse_search-1",
+      "note": "The node brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md names _stratified_sample and the goldens sampler as the sampler to use or extend; the plan states only the stratification endpoint.",
+      "reason": "",
+      "when": "2026-11-16T22:50:08.843060+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "reuse_search-2",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md makes the two blind readers seats of the advisory panel and panel audit machinery.",
+      "reason": "",
+      "when": "2026-11-16T22:50:11.297131+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "reuse_search-3",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md draws the planted names from the committed golden sheets and requires that no golden label comes from a model that is a reader.",
+      "reason": "",
+      "when": "2026-11-16T22:50:14.428780+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md states the bar as new causes on the existing export eligibility filter and gate registry, with source_invariant, families and docs_gates as the owners of their conditions and the cross-field consistency gate as the home of the cross-group family refusal; the queued node's write paths were changed from a new module to those files.",
+      "reason": "",
+      "when": "2026-11-16T22:50:16.940852+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-2",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md stores each reader verdict as a panel audit review record; the committed evidence is a summary of those records and later sections read the one store.",
+      "reason": "",
+      "when": "2026-11-16T22:50:19.952004+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-3",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/domain-groups.md extends audit_domains and its result with the ranking and split proposal and takes families from detect_families.",
+      "reason": "",
+      "when": "2026-11-16T22:50:22.372169+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "deep_module-1",
+      "note": "The briefs for the first group and the further groups cut with sn release --domain against the gates and add no cut path; the group record is the audit records plus the domain audit result, read by every section.",
+      "reason": "",
+      "when": "2026-11-16T22:50:24.855790+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md forbids a new verb, wrapper or forwarding module; the section's recorded refusals are gate tests on planted groups.",
+      "reason": "",
+      "when": "2026-11-16T22:50:27.394290+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md requires the evidence to state how many refusal causes are added and which existing cause each folds into or sits beside, and expects no new command-line option.",
+      "reason": "",
+      "when": "2026-11-16T22:50:31.133719+00:00"
+    }
+  ],
+  "responses": {
+    "deep_module-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The briefs for the first group and the further groups cut with sn release --domain against the gates and add no cut path; the group record is the audit records plus the domain audit result, read by every section.",
+      "reason": "",
+      "when": "2026-11-16T22:50:24.855790+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md states the bar as new causes on the existing export eligibility filter and gate registry, with source_invariant, families and docs_gates as the owners of their conditions and the cross-field consistency gate as the home of the cross-group family refusal; the queued node's write paths were changed from a new module to those files.",
+      "reason": "",
+      "when": "2026-11-16T22:50:16.940852+00:00"
+    },
+    "duplicate_owner-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md stores each reader verdict as a panel audit review record; the committed evidence is a summary of those records and later sections read the one store.",
+      "reason": "",
+      "when": "2026-11-16T22:50:19.952004+00:00"
+    },
+    "duplicate_owner-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/domain-groups.md extends audit_domains and its result with the ranking and split proposal and takes families from detect_families.",
+      "reason": "",
+      "when": "2026-11-16T22:50:22.372169+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md requires the evidence to state how many refusal causes are added and which existing cause each folds into or sits beside, and expects no new command-line option.",
+      "reason": "",
+      "when": "2026-11-16T22:50:31.133719+00:00"
+    },
+    "reuse_search-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The node brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md names _stratified_sample and the goldens sampler as the sampler to use or extend; the plan states only the stratification endpoint.",
+      "reason": "",
+      "when": "2026-11-16T22:50:08.843060+00:00"
+    },
+    "reuse_search-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md makes the two blind readers seats of the advisory panel and panel audit machinery.",
+      "reason": "",
+      "when": "2026-11-16T22:50:11.297131+00:00"
+    },
+    "reuse_search-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/blind-audit.md draws the planted names from the committed golden sheets and requires that no golden label comes from a model that is a reader.",
+      "reason": "",
+      "when": "2026-11-16T22:50:14.428780+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f19d4172b50afc104fee6e7504a7398d75e7a80b",
+      "commit_basis": "edit",
+      "note": "The brief docs/evidence/fragments/sn-audited-group-release/briefs/release-bar.md forbids a new verb, wrapper or forwarding module; the section's recorded refusals are gate tests on planted groups.",
+      "reason": "",
+      "when": "2026-11-16T22:50:27.394290+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261116T220756798682-plan-review-of-sn-audited-group-release.json",
+  "review_run_id": "r-20261116T220756798682-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "8e4bce3a1c2594914ee8fb7e01429d4113ced9f6",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 \u00a71/\u00a72/\u00a73/\u00a74/\u00a75 each independently read live names by domain, producing three separate evidence shapes that \u00a75 must then join into \"one table\", instead of one group record reused by every section.",
+    "duplicate_owner": "a finding \u2014 \u00a73's six refusal conditions each duplicate an owner that already refuses on that condition: `export.py` eligibility and gate registry, `source_invariant.find_sourceless_live_name_rows`, `families.detect_families`, `docs_gates.shared_part_findings`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a73 adds a new refusal family (six group-bar causes) without naming which existing gate/refusal family it retires or merges, or why nothing can be.",
+    "reuse_search": "a finding \u2014 the stratified by-physics-domain sample, the multi-model seat panel and the planted independent-verdict goldens that \u00a71 needs already exist in `benchmark_roles._stratified_sample`, `advisory_panel`/`review/panel_audit` and `judgment_goldens`, so \u00a71 proposes a fourth audit harness instead of extending them.",
+    "thin_wrapper": "a finding \u2014 a per-group \"bar\" cut added beside `sn release`'s existing domain-scoped export-and-gate path would be a layer that only forwards to those gates, and the plan gives no reason the gates cannot simply refuse."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "5707c944d00055edbe3e28cb23ff4ef31e6d6617201f0d8cf12aba0bcc595b6c",
+    "s2": "4027901fb1235bfa7fe596c987afbb514b9f3d5e90be4fb09e2bcf6321a30101",
+    "s3": "7cd0801ace66c9abc53fb809b6e5e4dabdb7d5ca962884adb187bef0187b4014",
+    "s4": "3a6231f13dc1dd52403cfc37cba28e3ebcc13c54c9cc09b8c3a141af50b105c0",
+    "s5": "1783b91a2fe66a458064a13e118dd570189b9abf83d060e250d33699230fd3b6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T22:47:24.295404+00:00",
+  "total": null
+}

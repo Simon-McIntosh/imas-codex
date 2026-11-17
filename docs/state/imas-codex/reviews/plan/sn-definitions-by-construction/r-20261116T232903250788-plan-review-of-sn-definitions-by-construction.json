@@ -1,0 +1,43 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:30:09.255Z",
+  "dispatched_at": "2026-11-16T23:29:45Z",
+  "findings": [],
+  "plan_commit": "c877548591ddc32576d680186191d633d7b1bd7f",
+  "plan_fingerprint": "ac20dd1607b1ba1aefb9b25d6567b328435a4a8df5f57910b64a80b84d5955e8",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 74,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261116T232903250788-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "84872209f294627c49f39c9ccbfb50f307c5acd6",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every cited evidence path under `docs/evidence/fragments/` resolves on disk, `sdbc-live-rewrite-bulk.html` and `family-wording-pass.html` resolve inside the fragments directory, the cross-plan section anchors exist in the named plans, and s12 itself cites no file anchor that could dangle.",
+    "done_when": "pass \u2014 the changed clause now covers every renamed name, the eight and the forty-eight, and removes the class that could otherwise be listed away (a refusal for source support of `equivalent_electron` is a failure), so the measure rejects exactly the outcome \u00a711 exists to prevent; the identity-count negative control with one recorded red run remains named, and \u00a76's planted enclosing-structure control covers the qualifier-carrying route the first clause uses.",
+    "evidence_paths": "pass \u2014 \u00a712 names no scratch path; the evidence it reads (stored name reviews, the pipeline's cost records, the rename history) and the record it produces sit where the plan's other sections put theirs, `docs/evidence/fragments/sn-definitions-by-construction/` under the release recipe's evidence rule.",
+    "naming": "pass \u2014 the section's title and body state the mechanism (\"names stated in equivalent electrons carry the qualifier\"); no plan label, stage name, ticket number or version tag reaches a symbol, and no changelog prose is present.",
+    "reasoning": "pass \u2014 the stated cause matches the cited evidence the plan carries (the stored reviews answer the two source-support checks above cutoff against a leaf that reads \"Carbon.\"/\"Value\" while the counting basis is stated on `summary/gas_injection_accumulated`), the endpoint is reachable (the eight live qualifier-bearing names were counted on 2026-11-16, the remaining forty-eight follow at 56-8, and post-rename acceptance reads stored review records), and the section prescribes no code path, step sequence, formula or function: the rename route and the cost records are named as endpoints, not as implementation.",
+    "single_goal": "pass \u2014 \u00a712 delivers one thing, the equivalent-electron identifiers for the fifty-six recorded names, with acceptance and collision handling as parts of that one verdict.",
+    "wiring": "pass \u2014 `plan-section-depends-on` carries s12 waiting on s11 and s10 waiting on both s11 and s12, which is the order the s10 lead ruling (2026-11-16) and the s11 closing prose state: review context, renames, family re-render, wording census."
+  },
+  "section_digests": {
+    "_document": "79c72dc4b5058b477430e92af4465a32502aad7c970532e64b02d7d785cc4dc2",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s11": "5bea08b68e624fa3cccecb84fef9380222c12e9c3b8109e735808c399bdc7505",
+    "s12": "c5beb099c684188a26dd614504fc66a946d4122c5abd4a241b9de9498f3dfc73",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "be3bba7a6c0c34e2eaabff635af4f43905aee0b0b0b94e3ea4b097ce2777d04a",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:47:33.850794+00:00",
+  "total": null
+}

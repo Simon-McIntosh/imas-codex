@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8" standalone="no"?>
 <!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
   "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="1008pt" height="381.6pt" viewBox="0 0 1008 381.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="31.1cm" height="11.77cm" viewBox="0 0 1008 381.6" xmlns="http://www.w3.org/2000/svg" version="1.1">
  <metadata>
   <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
    <cc:Work>
@@ -32,12 +32,12 @@ z
     <path d="M 151.2 201.6
 L 151.2 273.6
 L 504 273.6
-" clip-path="url(#p9f80fe1d43)" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #666666; stroke-width: 1.2"/>
+" clip-path="url(#pbdfd3129d7)" style="fill: none; stroke-dasharray: 1.2,1.98; stroke-dashoffset: 0; stroke: #666666; stroke-width: 1.2"/>
    </g>
    <g id="line2d_2">
     <path d="M 504 291.6
 L 504 255.6
-" clip-path="url(#p9f80fe1d43)" style="fill: none; stroke: #242424; stroke-width: 2.6; stroke-linecap: square"/>
+" clip-path="url(#pbdfd3129d7)" style="fill: none; stroke: #242424; stroke-width: 2.6; stroke-linecap: square"/>
    </g>
    <g id="text_1">
     <text style="font-size: 24px; font-family: 'DejaVu Sans'; text-anchor: middle; fill: #242424" x="151.2" y="136.8" transform="rotate(-0 151.2 136.8)">generated</text>
@@ -61,18 +61,18 @@ L 504 255.6
     <path d="M 253.999512 126
 Q 324.000882 126 392.660611 126
 " style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
-    <path d="M 384.660611 122
+    <path d="M 387.060611 123.2
 L 392.660611 126
-L 384.660611 130
+L 387.060611 128.8
 " style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
    </g>
    <g id="patch_3">
     <path d="M 613.997314 126
 Q 676.799814 126 738.260673 126
 " style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
-    <path d="M 730.260673 122
+    <path d="M 732.660673 123.2
 L 738.260673 126
-L 730.260673 130
+L 732.660673 128.8
 " style="fill: none; stroke: #666666; stroke-width: 1.2; stroke-linecap: round"/>
    </g>
    <g id="text_7">
@@ -93,7 +93,7 @@ L 730.260673 130
   </g>
  </g>
  <defs>
-  <clipPath id="p9f80fe1d43">
+  <clipPath id="pbdfd3129d7">
    <rect x="0" y="0" width="1008" height="381.6"/>
   </clipPath>
  </defs>

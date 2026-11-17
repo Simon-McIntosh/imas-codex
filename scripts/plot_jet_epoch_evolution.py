@@ -27,6 +27,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.plotting.style import save_figure
 
 OUTPUT_DIR = Path("docs/images")
 
@@ -282,11 +283,10 @@ def plot_wall_limiter(epochs, limiters) -> None:
         "JET First Wall & Limiter Evolution",
         fontsize=13,
         fontweight="bold",
-        y=1.01,
     )
     plt.tight_layout()
     out = OUTPUT_DIR / "jet_wall_limiter_evolution.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close(fig)
 
@@ -507,11 +507,10 @@ def plot_pf_coils(epochs, comp_counts, jec2020_pf) -> None:
         "JET PF Coil System Evolution",
         fontsize=14,
         fontweight="bold",
-        y=1.01,
     )
     plt.tight_layout()
     out = OUTPUT_DIR / "jet_pf_coil_evolution.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close(fig)
 
@@ -632,11 +631,10 @@ def plot_magnetics(epochs, comp_counts) -> None:
         "JET Magnetics System Evolution",
         fontsize=14,
         fontweight="bold",
-        y=1.01,
     )
     plt.tight_layout()
     out = OUTPUT_DIR / "jet_magnetics_evolution.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close(fig)
 
@@ -704,11 +702,10 @@ def plot_passives_circuits(epochs, comp_counts) -> None:
         "JET Passive Structures & PF Circuits",
         fontsize=14,
         fontweight="bold",
-        y=1.01,
     )
     plt.tight_layout()
     out = OUTPUT_DIR / "jet_passive_circuit_evolution.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close(fig)
 
@@ -791,11 +788,10 @@ def plot_component_overview(epochs, comp_counts) -> None:
         "JET Machine Description — Component Inventory",
         fontsize=14,
         fontweight="bold",
-        y=1.01,
     )
     plt.tight_layout()
     out = OUTPUT_DIR / "jet_component_overview.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close(fig)
 
@@ -865,11 +861,11 @@ def plot_limiter_contours(limiters) -> None:
         "JET Limiter Contour Evolution — 7 Physical Configurations",
         fontsize=14,
         fontweight="bold",
-        y=1.01,
     )
-    plt.tight_layout()
+    # the rotated tick labels need room below the axes to stay on the canvas
+    plt.tight_layout(rect=(0, 0.03, 1, 1))
     out = OUTPUT_DIR / "jet_limiter_contours.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close(fig)
 
@@ -1019,11 +1015,10 @@ def plot_summary(epochs, comp_counts, limiters) -> None:
         "JET Machine Description Evolution — Summary",
         fontsize=14,
         fontweight="bold",
-        y=1.005,
     )
     plt.tight_layout(h_pad=1.2)
     out = OUTPUT_DIR / "jet_epoch_summary.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight", facecolor="white")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close(fig)
 

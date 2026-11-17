@@ -17,9 +17,11 @@ from __future__ import annotations
 
 import sys
 
+import matplotlib.pyplot as plt
 import numpy as np
 
 from imas_codex.graph.client import GraphClient
+from imas_codex.plotting.style import save_figure
 
 
 def _parse_multi_value(raw: str | float | int | None) -> list[float]:
@@ -174,7 +176,6 @@ def get_significant_epochs() -> list[dict]:
 def plot_poloidal(data: dict, epoch: str = "p89440") -> None:
     """Create a poloidal cross-section plot from graph data."""
     import matplotlib.patches as mpatches
-    import matplotlib.pyplot as plt
     from matplotlib.collections import PatchCollection
 
     fig, ax = plt.subplots(1, 1, figsize=(10, 14))
@@ -375,17 +376,16 @@ def plot_poloidal(data: dict, epoch: str = "p89440") -> None:
         fontstyle="italic",
     )
 
-    plt.tight_layout()
+    # keep the outermost tick labels on the canvas, not past its edge
+    plt.tight_layout(rect=(0.01, 0.02, 0.99, 0.99))
     out = f"jet_poloidal_{epoch}.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close()
 
 
 def plot_limiter_comparison() -> None:
     """Overlay all first-wall / divertor contours, color-coded by era."""
-    import matplotlib.pyplot as plt
-
     with GraphClient() as gc:
         limiters = gc.query("""
             MATCH (dn:DataNode)
@@ -452,9 +452,10 @@ def plot_limiter_comparison() -> None:
         fontstyle="italic",
     )
 
-    plt.tight_layout()
+    # keep the outermost tick labels on the canvas, not past its edge
+    plt.tight_layout(rect=(0.01, 0.02, 0.99, 0.99))
     out = "jet_limiter_comparison.png"
-    fig.savefig(out, dpi=200, bbox_inches="tight")
+    save_figure(fig, out, dpi=200)
     print(f"Saved: {out}")
     plt.close()
 

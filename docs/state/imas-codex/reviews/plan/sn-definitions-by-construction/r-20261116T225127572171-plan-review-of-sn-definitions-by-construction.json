@@ -1,0 +1,102 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:08:24.629Z",
+  "dispatched_at": "2026-11-16T23:08:11Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261116T225127572171-plan-review-of-sn-definitions-by-construction/plan.html:157",
+      "id": "wiring-1",
+      "reason": "the sentence routes the 48 renames to a node whose done-when only measures them, and a \u00a76 dispatch acts on that sentence by renaming or by reporting what \u00a712 already did.",
+      "text": "\u00a711 ends \"This section repairs the review and changes no stored text; the forty-eight are then renamed under the wording section, which waits on this one and whose first measure counts them\", but version 73 extracts those renames into \u00a712, whose body says the work \"stands here on its own so that the family re-render can wait on it\"; a reader of \u00a711 would take \u00a76 to be the renaming unit, and the dependency map gives no \u00a76\u2192\u00a712 edge (only the transitive \u00a76\u2192\u00a710\u2192\u00a712), so two sections read as owning the same write",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261116T225127572171-plan-review-of-sn-definitions-by-construction/plan.html:161",
+      "id": "done_when-1",
+      "reason": "the acceptance clause must cover every name this section renames, or the plan ships 48 renames the repaired review still refuses with no gate that fails.",
+      "text": "\u00a712 renames 48 names and requires review acceptance only for \"each of the eight already renamed\", while the 48 new identifiers must merely carry `equivalent_electron` (or be listed with source evidence); \u00a711's own record shows a rename path that stores the name and leaves it reviewed-and-not-accepted (\"four of five renamed names ended reviewed and not accepted\", plan.html:157), so the section whose cause is a review rejecting the qualifier can complete green while 48 new names are rejected exactly as the eight were",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a9cdee54b4013754998939d492acc8311cec68e1",
+  "plan_fingerprint": "b95fac6c7f9f33d67a4fce4e18e1117e365fc4762d1c89851b3e97d611df31ad",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 73,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c877548591ddc32576d680186191d633d7b1bd7f",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The review-context section now says the forty-eight are renamed under the renames section and that the wording section only counts them.",
+      "reason": "",
+      "when": "2026-11-16T23:28:16.111439+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c877548591ddc32576d680186191d633d7b1bd7f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Acceptance on name now covers every renamed name, the eight and the forty-eight, and a refusal for source support of the qualifier fails the section.",
+      "reason": "",
+      "when": "2026-11-16T23:28:27.813424+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c877548591ddc32576d680186191d633d7b1bd7f",
+      "commit_basis": "edit",
+      "note": "Acceptance on name now covers every renamed name, the eight and the forty-eight, and a refusal for source support of the qualifier fails the section.",
+      "reason": "",
+      "when": "2026-11-16T23:28:27.813424+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c877548591ddc32576d680186191d633d7b1bd7f",
+      "commit_basis": "edit",
+      "note": "The review-context section now says the forty-eight are renamed under the renames section and that the wording section only counts them.",
+      "reason": "",
+      "when": "2026-11-16T23:28:16.111439+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261116T225127572171-plan-review-of-sn-definitions-by-construction.json",
+  "review_run_id": "r-20261116T225127572171-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "5a4d480c2691022a9b43fa92a34bf6c26c2de615",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the only hrefs are the two shared stylesheets, every \u00a7N and plan reference in the changed units resolves, and the class figure is confirmed by `live-rewrite-bulk.json` (56 `waiting_equivalent_electron` records, `sourceless` now 10).",
+    "done_when": "a finding \u2014 section 12 (plan.html:161) requires review acceptance only for the eight names already renamed, so nothing fails if the review repair does not make a rename acceptable.",
+    "evidence_paths": "pass \u2014 the plan cites durable evidence under `docs/evidence/fragments/sn-definitions-by-construction/`, and the cited plan files (`sn-audited-group-release.html`, `sn-domain-per-family.html`, `sn-catalog-consistency.html`) all resolve on disk.",
+    "naming": "pass \u2014 section 12's prose names no plan label, stage identifier or ticket number, and no code symbol is named.",
+    "reasoning": "pass \u2014 section 12's stated cause (the review marking the qualifier unsupported) is the cause \u00a711's stored reviews record, and both changed units state endpoints without naming a code path, function or step sequence.",
+    "single_goal": "pass \u2014 every section names one deliverable; section 12's sourceless-count and spend clauses are guards on its own rename work rather than a second deliverable.",
+    "wiring": "a finding \u2014 the plan's declarations, effort total (49.0 = sum of twelve sections) and dependency map are consistent, but section 11 (plan.html:157) still says the forty-eight unrenamed names \"are then renamed under the wording section\", while the new section 12 owns those renames and section 10 and 6 wait on it."
+  },
+  "section_digests": {
+    "_document": "79c72dc4b5058b477430e92af4465a32502aad7c970532e64b02d7d785cc4dc2",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s11": "469da7cec1a94cba0366b89883ccbdb8ef92a07016c4482eb907048e2bd9b1d3",
+    "s12": "77e5f857dfb88786d919731fa1733745c31cf16487ecc31701b9b38188982b9b",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "be3bba7a6c0c34e2eaabff635af4f43905aee0b0b0b94e3ea4b097ce2777d04a",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:27:05.127184+00:00",
+  "total": null
+}

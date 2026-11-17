@@ -1,30 +1,64 @@
 {
-  "revision": "5161872bccb681ad44a5191e21e6b277e1412500",
-  "observed_started_at": "2026-10-09T03:45:08.183455+00:00",
+  "revision": "a2cf01a77deefcc1ab54aefb91b912276978ab30",
+  "observed_started_at": "2026-11-16T21:25:56.212884+00:00",
   "schema_sha256": {
-    "facility.yaml": "45aabd047cffc21ac9bf3269482b43491acafc1d1bc55f01ed041b0a76730507",
+    "facility.yaml": "22b535098dc017c0b1403b6dad451200e71a2c40a9d9e491af6e798b57dfacc8",
     "imas_dd.yaml": "78fe27dc782ff33e9422cf23295988c8fb15a3669f9741b5b7b87438f8254a5b",
-    "common.yaml": "8ad1491a5cce17ea65fe52593ec77c432ded5023aa828753112c466c2f95de9a"
+    "common.yaml": "7e1c362f464f407d1feea981fc1a0275712229c840b84cdc9ad037506e1169bd"
   },
-  "renderer_sha256": "85bf4bfb2881a74804c8c828879819125c07a441408a0155b4ac16f67c2cff09",
+  "renderer_sha256": "a7a71a7a18ecd75e72396ed64dba1970560139fd8b63b855ff9e5ab9a88e8961",
   "source": {
     "path": "/work/projects/imas_gpu/jt60sa/handoff/jt-60sa-mapping-handoff.json",
     "kind": "LIVE EXPORT",
-    "sha256": "94e952484f1f52d70ef5beb2914250c200b4e6993f804960618fbb14e4332a92",
-    "exported_at": "2026-10-09T03:44:34Z"
+    "sha256": "2d6a95486c8777aacd380f04950ef34c73ff23bff0c9a31baeccc3f27946949b",
+    "exported_at": "2026-10-09T11:21:44Z"
   },
   "handoff": {
     "format": "imas-codex-mapping-handoff",
     "format_version": 1,
     "facility": "jt-60sa",
     "dd_version": "4.1.1",
-    "exported_at": "2026-10-09T03:44:34Z",
+    "exported_at": "2026-10-09T11:21:44Z",
     "ids": [
       {
         "ids_name": "magnetics",
         "mapping_id": "jt-60sa:magnetics",
         "status": "generated",
         "signals": [
+          {
+            "signal_id": "jt-60sa:general/dcsv_tmagres",
+            "source_id": "jt-60sa:eddbreadOne('E101173', 'DCSV', 'TMagReS', None, 0, 0)",
+            "data_source": "edas",
+            "source_group": "DCSV",
+            "source_array": "TMagReS",
+            "member_identifier": null,
+            "source_property": "value",
+            "target_path": "magnetics/time",
+            "transform_expression": "value",
+            "source_units": "s",
+            "target_units": "s",
+            "cocos_label": "none",
+            "cocos_label_source": "none",
+            "confidence": 0.55,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc5",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC5",
+            "member_identifier": "5",
+            "source_property": "time",
+            "target_path": "magnetics/b_field_pol_probe/field/time",
+            "transform_expression": "value",
+            "source_units": "s",
+            "target_units": "s",
+            "cocos_label": "none",
+            "cocos_label_source": "none",
+            "confidence": 0.6,
+            "evidence": ""
+          },
           {
             "signal_id": "jt-60sa:general/mdac_magpbtc5",
             "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
@@ -37,491 +71,404 @@
             "transform_expression": "value",
             "source_units": "T",
             "target_units": "T",
-            "cocos_label": null,
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.88,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc8",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC8', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC8",
+            "member_identifier": "8",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc2",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC2', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC2",
+            "member_identifier": "2",
+            "source_property": "time",
+            "target_path": "magnetics/b_field_phi_probe/field/time",
+            "transform_expression": "value",
+            "source_units": "s",
+            "target_units": "s",
+            "cocos_label": "none",
+            "cocos_label_source": "none",
+            "confidence": 0.6,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc2",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC2', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC2",
+            "member_identifier": "2",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_phi_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.75,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magflxlp6",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magFlxLp6', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magFlxLp6",
+            "member_identifier": "6",
+            "source_property": "time",
+            "target_path": "magnetics/flux_loop/flux/time",
+            "transform_expression": "value",
+            "source_units": "s",
+            "target_units": "s",
+            "cocos_label": "none",
+            "cocos_label_source": "none",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magflxlp6",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magFlxLp6', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magFlxLp6",
+            "member_identifier": "6",
+            "source_property": "value",
+            "target_path": "magnetics/flux_loop/flux/data",
+            "transform_expression": "value",
+            "source_units": "Wb",
+            "target_units": "Wb",
+            "cocos_label": "psi_like",
+            "cocos_label_source": "inferred_forward",
+            "confidence": 0.9,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc10",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC10",
+            "member_identifier": "10",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc11",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC11",
+            "member_identifier": "11",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc12",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC12",
+            "member_identifier": "12",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc13",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC13",
+            "member_identifier": "13",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc14",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC14",
+            "member_identifier": "14",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc15",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC15",
+            "member_identifier": "15",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc16",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC16",
+            "member_identifier": "16",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc17",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC17",
+            "member_identifier": "17",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc18",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC18",
+            "member_identifier": "18",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc19",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC19",
+            "member_identifier": "19",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc20",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC20",
+            "member_identifier": "20",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc21",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC21",
+            "member_identifier": "21",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc22",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC22",
+            "member_identifier": "22",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magpbtc23",
+            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magPbTC23",
+            "member_identifier": "23",
+            "source_property": "value",
+            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "transform_expression": "value",
+            "source_units": "T",
+            "target_units": "T",
+            "cocos_label": "one_like",
+            "cocos_label_source": "xml",
+            "confidence": 0.85,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_magflxlp2",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magFlxLp2', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "magFlxLp2",
+            "member_identifier": "2",
+            "source_property": "value",
+            "target_path": "magnetics/flux_loop/flux/data",
+            "transform_expression": "value",
+            "source_units": "Wb",
+            "target_units": "Wb",
+            "cocos_label": "psi_like",
+            "cocos_label_source": "inferred_forward",
             "confidence": 0.92,
             "evidence": ""
           },
           {
-            "signal_id": "jt-60sa:general/mdac_magpbtc10",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "signal_id": "jt-60sa:general/mdac_magflxlp1",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magFlxLp1', t1, t2)",
             "data_source": "edas",
             "source_group": "MDAC",
-            "source_array": "magPbTC10",
-            "member_identifier": "10",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc11",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC11",
-            "member_identifier": "11",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc12",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC12",
-            "member_identifier": "12",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc13",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC13",
-            "member_identifier": "13",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc14",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC14",
-            "member_identifier": "14",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc15",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC15",
-            "member_identifier": "15",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc16",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC16",
-            "member_identifier": "16",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc17",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC17",
-            "member_identifier": "17",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc18",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC18",
-            "member_identifier": "18",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc19",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC19",
-            "member_identifier": "19",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc20",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC20",
-            "member_identifier": "20",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc21",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC21",
-            "member_identifier": "21",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc22",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC22",
-            "member_identifier": "22",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc23",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC23",
-            "member_identifier": "23",
-            "source_property": "time",
-            "target_path": "magnetics/b_field_pol_probe/field/time",
-            "transform_expression": "value",
-            "source_units": "s",
-            "target_units": "s",
-            "cocos_label": null,
-            "confidence": 0.8,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc10",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC10",
-            "member_identifier": "10",
+            "source_array": "magFlxLp1",
+            "member_identifier": "1",
             "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "target_path": "magnetics/flux_loop/flux/data",
             "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
+            "source_units": "Wb",
+            "target_units": "Wb",
+            "cocos_label": "psi_like",
+            "cocos_label_source": "inferred_forward",
+            "confidence": 0.92,
+            "evidence": ""
+          },
+          {
+            "signal_id": "jt-60sa:general/mdac_voldmagl1",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'volDmagL1', t1, t2)",
+            "data_source": "edas",
+            "source_group": "MDAC",
+            "source_array": "volDmagL1",
+            "member_identifier": "1",
+            "source_property": "time",
+            "target_path": "magnetics/flux_loop/voltage/time",
+            "transform_expression": "value",
+            "source_units": "s",
+            "target_units": "s",
+            "cocos_label": "none",
+            "cocos_label_source": "none",
             "confidence": 0.85,
             "evidence": ""
           },
           {
-            "signal_id": "jt-60sa:general/mdac_magpbtc11",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
+            "signal_id": "jt-60sa:general/mdac_voldmagl1",
+            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'volDmagL1', t1, t2)",
             "data_source": "edas",
             "source_group": "MDAC",
-            "source_array": "magPbTC11",
-            "member_identifier": "11",
+            "source_array": "volDmagL1",
+            "member_identifier": "1",
             "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
+            "target_path": "magnetics/flux_loop/voltage/data",
             "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc12",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC12",
-            "member_identifier": "12",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc13",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC13",
-            "member_identifier": "13",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc14",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC14",
-            "member_identifier": "14",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc15",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC15",
-            "member_identifier": "15",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc16",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC16",
-            "member_identifier": "16",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc17",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC17",
-            "member_identifier": "17",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc18",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC18",
-            "member_identifier": "18",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc19",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC19",
-            "member_identifier": "19",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc20",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC20",
-            "member_identifier": "20",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc21",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC21",
-            "member_identifier": "21",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc22",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC22",
-            "member_identifier": "22",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
-          },
-          {
-            "signal_id": "jt-60sa:general/mdac_magpbtc23",
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "data_source": "edas",
-            "source_group": "MDAC",
-            "source_array": "magPbTC23",
-            "member_identifier": "23",
-            "source_property": "value",
-            "target_path": "magnetics/b_field_pol_probe/field/data",
-            "transform_expression": "value",
-            "source_units": "T",
-            "target_units": "T",
-            "cocos_label": null,
-            "confidence": 0.85,
-            "evidence": ""
+            "source_units": "V",
+            "target_units": "V",
+            "cocos_label": "none",
+            "cocos_label_source": "none",
+            "confidence": 0.9,
+            "evidence": "retargeted from structure magnetics/flux_loop/voltage to its data child"
           }
         ],
-        "unexpanded": [
-          {
-            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
-            "target_path": "magnetics/b_field_pol_probe/field/data_error_lower",
-            "reason": "Error mapping derived from the value signal bound to magnetics/b_field_pol_probe/field/data; no error signal exists"
-          },
-          {
-            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
-            "target_path": "magnetics/b_field_pol_probe/field/data_error_upper",
-            "reason": "Error mapping derived from the value signal bound to magnetics/b_field_pol_probe/field/data; no error signal exists"
-          },
-          {
-            "source_id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
-            "target_path": "magnetics/b_field_pol_probe/field/data_error_index",
-            "reason": "Error mapping derived from the value signal bound to magnetics/b_field_pol_probe/field/data; no error signal exists"
-          },
-          {
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "target_path": "magnetics/b_field_pol_probe/field/data_error_lower",
-            "reason": "Error mapping derived from the value signal bound to magnetics/b_field_pol_probe/field/data; no error signal exists"
-          },
-          {
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "target_path": "magnetics/b_field_pol_probe/field/data_error_upper",
-            "reason": "Error mapping derived from the value signal bound to magnetics/b_field_pol_probe/field/data; no error signal exists"
-          },
-          {
-            "source_id": "jt-60sa:eddbreadTime('ENNN', 'MDAC', 'magPbTCNNN', t1, t2)",
-            "target_path": "magnetics/b_field_pol_probe/field/data_error_index",
-            "reason": "Error mapping derived from the value signal bound to magnetics/b_field_pol_probe/field/data; no error signal exists"
-          }
-        ]
+        "unexpanded": []
       }
     ]
   },
@@ -531,45 +478,67 @@
     "Document": 1057,
     "WikiPage": 4484,
     "FacilitySignal": 15111,
-    "SignalSource": 5180,
-    "IMASMapping": 1,
+    "SignalSource": 6865,
+    "IMASMapping": 7,
     "signal_statuses": [
       {
         "status": "checked",
-        "count": 4600
-      },
-      {
-        "status": "discovered",
-        "count": 10158
+        "count": 4473
       },
       {
         "status": "enriched",
-        "count": 262
+        "count": 10413
       },
       {
         "status": "underspecified",
-        "count": 91
+        "count": 225
       }
     ],
     "candidate_routes": [
       {
         "route": "escalated",
-        "count": 151
-      },
-      {
-        "route": "selected",
-        "count": 5
+        "count": 6338
       },
       {
         "route": null,
-        "count": 5024
+        "count": 527
       }
     ],
-    "routed_sources": 156,
-    "bindings": 9,
+    "routed_sources": 6338,
+    "bindings": 159,
     "mapping_statuses": [
       {
+        "ids": "calorimetry",
+        "status": "generated",
+        "count": 1
+      },
+      {
+        "ids": "ec_launchers",
+        "status": "generated",
+        "count": 1
+      },
+      {
+        "ids": "gas_injection",
+        "status": "generated",
+        "count": 1
+      },
+      {
         "ids": "magnetics",
+        "status": "generated",
+        "count": 1
+      },
+      {
+        "ids": "operational_instrumentation",
+        "status": "generated",
+        "count": 1
+      },
+      {
+        "ids": "pf_active",
+        "status": "generated",
+        "count": 1
+      },
+      {
+        "ids": "tf",
         "status": "generated",
         "count": 1
       }
@@ -591,13 +560,14 @@
         "transform_expression": "value",
         "source_units": "T",
         "target_units": "T",
-        "cocos_label": null,
-        "confidence": 0.92,
+        "cocos_label": "one_like",
+        "cocos_label_source": "xml",
+        "confidence": 0.88,
         "evidence": ""
       },
       "graph": {
         "SignalSource": {
-          "description": "Magnetic field measurement from probe TC-5 used for real-time plasma control. Measures the local poloidal magnetic field to provide feedback for plasma position and shape control.",
+          "description": "Magnetic field measurement from tangential (poloidal-field) magnetic probe TC-(5), in tesla. This probe is part of the SELENE diagnostic set and is used for real-time plasma control, providing information about the poloidal magnetic field at the probe location. The signal is critical for equilibrium reconstruction and feedback control.",
           "id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
           "group_key": "eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
           "status": "enriched"
@@ -606,7 +576,7 @@
           "source_units": "T",
           "mapping_type": "direct",
           "evidence": "",
-          "confidence": 0.92,
+          "confidence": 0.88,
           "error_type": null,
           "transform_expression": "value",
           "derived_from": null,
@@ -640,7 +610,8 @@
         "transform_expression": null,
         "source_units": "A",
         "target_units": "A",
-        "cocos_label": null,
+        "cocos_label": "ip_like",
+        "cocos_label_source": "xml",
         "confidence": 0.83,
         "evidence": "MMSYS PF coil current channel"
       },
@@ -657,7 +628,7 @@
       "mapping_id": "jt-60sa:pf_active",
       "status": "generated",
       "note": "No matching live SignalSource, MAPS_TO_IMAS.",
-      "source_path": "/home/ITER/mcintos/Code/imas-codex/tests/fixtures/mapping_handoff_example.json",
+      "source_path": "tests/fixtures/mapping_handoff_example.json",
       "source_kind": "CONTRACT FIXTURE"
     }
   ],
@@ -678,7 +649,7 @@
           "IMASNode"
         ]
       },
-      "seconds": 0.0122,
+      "seconds": 0.0095,
       "rows": [
         {
           "labelsOrTypes": [
@@ -1236,7 +1207,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0008,
+      "seconds": 0.0007,
       "rows": [
         {
           "id": "jt-60sa"
@@ -1249,7 +1220,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0325,
+      "seconds": 0.0345,
       "rows": [
         {
           "total": 9916,
@@ -1264,7 +1235,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.1208,
+      "seconds": 0.1238,
       "rows": [
         {
           "total": 68268,
@@ -1294,7 +1265,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0115,
+      "seconds": 0.0117,
       "rows": [
         {
           "total": 4484,
@@ -1309,7 +1280,7 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0217,
+      "seconds": 0.0296,
       "rows": [
         {
           "total": 15111,
@@ -1324,12 +1295,12 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0052,
+      "seconds": 0.0085,
       "rows": [
         {
-          "total": 5180,
-          "with_facility_id": 5180,
-          "with_status": 5180
+          "total": 6865,
+          "with_facility_id": 6865,
+          "with_status": 6865
         }
       ]
     },
@@ -1339,12 +1310,12 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0009,
+      "seconds": 0.0007,
       "rows": [
         {
-          "total": 1,
-          "with_facility_id": 1,
-          "with_status": 1
+          "total": 7,
+          "with_facility_id": 7,
+          "with_status": 7
         }
       ]
     },
@@ -1354,23 +1325,19 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0202,
+      "seconds": 0.028,
       "rows": [
         {
           "status": "checked",
-          "count": 4600
-        },
-        {
-          "status": "discovered",
-          "count": 10158
+          "count": 4473
         },
         {
           "status": "enriched",
-          "count": 262
+          "count": 10413
         },
         {
           "status": "underspecified",
-          "count": 91
+          "count": 225
         }
       ]
     },
@@ -1380,19 +1347,15 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0054,
+      "seconds": 0.0061,
       "rows": [
         {
           "route": "escalated",
-          "count": 151
-        },
-        {
-          "route": "selected",
-          "count": 5
+          "count": 6338
         },
         {
           "route": null,
-          "count": 5024
+          "count": 527
         }
       ]
     },
@@ -1402,10 +1365,10 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0047,
+      "seconds": 0.0114,
       "rows": [
         {
-          "count": 9
+          "count": 159
         }
       ]
     },
@@ -1415,10 +1378,40 @@
       "parameters": {
         "facility": "jt-60sa"
       },
-      "seconds": 0.0007,
+      "seconds": 0.0008,
       "rows": [
         {
+          "ids": "calorimetry",
+          "status": "generated",
+          "count": 1
+        },
+        {
+          "ids": "ec_launchers",
+          "status": "generated",
+          "count": 1
+        },
+        {
+          "ids": "gas_injection",
+          "status": "generated",
+          "count": 1
+        },
+        {
           "ids": "magnetics",
+          "status": "generated",
+          "count": 1
+        },
+        {
+          "ids": "operational_instrumentation",
+          "status": "generated",
+          "count": 1
+        },
+        {
+          "ids": "pf_active",
+          "status": "generated",
+          "count": 1
+        },
+        {
+          "ids": "tf",
           "status": "generated",
           "count": 1
         }
@@ -1431,11 +1424,11 @@
         "source": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
         "facility": "jt-60sa"
       },
-      "seconds": 0.0007,
+      "seconds": 0.0006,
       "rows": [
         {
           "record": {
-            "description": "Magnetic field measurement from probe TC-5 used for real-time plasma control. Measures the local poloidal magnetic field to provide feedback for plasma position and shape control.",
+            "description": "Magnetic field measurement from tangential (poloidal-field) magnetic probe TC-(5), in tesla. This probe is part of the SELENE diagnostic set and is used for real-time plasma control, providing information about the poloidal magnetic field at the probe location. The signal is critical for equilibrium reconstruction and feedback control.",
             "id": "jt-60sa:eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
             "group_key": "eddbreadTime('E101173', 'MDAC', 'magPbTC5', t1, t2)",
             "status": "enriched"
@@ -1451,14 +1444,14 @@
         "target": "magnetics/b_field_pol_probe/field/data",
         "facility": "jt-60sa"
       },
-      "seconds": 0.0012,
+      "seconds": 0.0009,
       "rows": [
         {
           "record": {
             "source_units": "T",
             "mapping_type": "direct",
             "evidence": "",
-            "confidence": 0.92,
+            "confidence": 0.88,
             "error_type": null,
             "transform_expression": "value",
             "derived_from": null,
@@ -1475,7 +1468,7 @@
       "parameters": {
         "target": "magnetics/b_field_pol_probe/field/data"
       },
-      "seconds": 0.0007,
+      "seconds": 0.0009,
       "rows": [
         {
           "record": {
@@ -1494,7 +1487,7 @@
         "source": "jt-60sa:pf_active:coil_current",
         "facility": "jt-60sa"
       },
-      "seconds": 0.0008,
+      "seconds": 0.0005,
       "rows": []
     },
     {
@@ -1505,7 +1498,7 @@
         "target": "pf_active/coil/current/data",
         "facility": "jt-60sa"
       },
-      "seconds": 0.0005,
+      "seconds": 0.0006,
       "rows": []
     },
     {
@@ -1514,7 +1507,7 @@
       "parameters": {
         "target": "pf_active/coil/current/data"
       },
-      "seconds": 0.0007,
+      "seconds": 0.0011,
       "rows": [
         {
           "record": {
@@ -1527,39 +1520,39 @@
       ]
     }
   ],
-  "observed_finished_at": "2026-10-09T03:45:18.197056+00:00",
+  "observed_finished_at": "2026-11-16T21:26:03.531525+00:00",
   "artifacts": [
     {
       "svg": "docs/figures/discovery-to-mapping/pipeline.svg",
-      "png": "/work/projects/imas_gpu/jt60sa/presentation/pipeline.png",
-      "svg_bytes": 8930,
-      "png_bytes": 255143,
+      "png": "/tmp/reckon-crew-scratch/r-20261116T194709389742-figure-scripts-save-through-shared-function/fss/discovery-main2/presentation/pipeline.png",
+      "svg_bytes": 8793,
+      "png_bytes": 244156,
       "png_width": 2800,
       "png_height": 2000
     },
     {
       "svg": "docs/figures/discovery-to-mapping/mapping-lifecycle.svg",
-      "png": "/work/projects/imas_gpu/jt60sa/presentation/mapping-lifecycle.png",
-      "svg_bytes": 4462,
-      "png_bytes": 106233,
+      "png": "/tmp/reckon-crew-scratch/r-20261116T194709389742-figure-scripts-save-through-shared-function/fss/discovery-main2/presentation/mapping-lifecycle.png",
+      "svg_bytes": 4470,
+      "png_bytes": 106111,
       "png_width": 2800,
       "png_height": 1060
     },
     {
       "svg": "docs/figures/discovery-to-mapping/pickup-probe.svg",
-      "png": "/work/projects/imas_gpu/jt60sa/presentation/pickup-probe.png",
-      "svg_bytes": 47174,
-      "png_bytes": 402783,
+      "png": "/tmp/reckon-crew-scratch/r-20261116T194709389742-figure-scripts-save-through-shared-function/fss/discovery-main2/presentation/pickup-probe.png",
+      "svg_bytes": 296312,
+      "png_bytes": 560535,
       "png_width": 2800,
-      "png_height": 2064
+      "png_height": 2252
     },
     {
       "svg": "docs/figures/discovery-to-mapping/pf-coil-current.svg",
-      "png": "/work/projects/imas_gpu/jt60sa/presentation/pf-coil-current.png",
-      "svg_bytes": 28470,
-      "png_bytes": 255123,
+      "png": "/tmp/reckon-crew-scratch/r-20261116T194709389742-figure-scripts-save-through-shared-function/fss/discovery-main2/presentation/pf-coil-current.png",
+      "svg_bytes": 135275,
+      "png_bytes": 305917,
       "png_width": 2800,
-      "png_height": 1400
+      "png_height": 1406
     }
   ]
 }

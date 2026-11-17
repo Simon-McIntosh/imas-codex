@@ -2,6 +2,11 @@
 
 Lead ruling, 2026-11-16: for the members of the first release group that the audit reads as defective, plain regeneration and agent-proposed repair are run side by side and compared by the audited result. This brief fixes how that comparison is run. It serves section 4 of `sn-audited-group-release` and changes nothing in that section's done-when.
 
+## Reuse
+- The audit is the one built for section 1: its sampler, reader seats, planted goldens and review-record shape (see `blind-audit.md`). The group is read in full with the same instructions.
+- The cut is `sn release --domain <group>` against the release gates carrying the bar's causes (see `release-bar.md`); add no cut path of your own.
+- Regeneration uses the pipeline's own reset and stages; agent proposals use `sn edit` and the signed rename path.
+
 ## Inputs
 - The first group and its full audit: every member read by the two blind readers of section 1, with one defect class or none each. Use that record as it stands; do not re-read to pick the population.
 - The release bar ruled in section 3.
@@ -14,7 +19,7 @@ For every member both readers call defective, state the cause in one line and pu
 Members only one reader calls defective are listed separately and are not repaired here.
 
 ## Step two: assign arms without choosing
-Split the singular members into two arms by a seeded shuffle within each defect class (record the seed), so each class is spread across both arms. An odd member goes to arm A.
+A member whose only defect classes are ones regeneration cannot repair (a duplicate of another live name, a wrong physics domain) is not in the comparison: settle it by an agent proposal or the lead's ruling and report it beside the comparison. The member is the unit of assignment. Split the remaining singular members into two arms by a seeded shuffle among the members sharing the same set of defect classes (record the seed), so each combination is spread across both arms. An odd member goes to arm A. In the per-class table a member with two classes is counted in each of its classes, within its one arm.
 
 ## Arm A: regeneration
 Each member is reset and regenerated from its source through the pipeline's own stages, with the enclosing-structure context, and reviewed by the pipeline. No steer beyond what the pipeline itself supplies.

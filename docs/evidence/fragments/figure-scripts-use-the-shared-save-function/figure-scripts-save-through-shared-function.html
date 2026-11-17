@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Figure scripts save through the shared function | figure-scripts-save-through-shared-function</title>
+  <link rel="stylesheet" href="/_shared/foundation.css">
+</head>
+<body>
+<main>
+  <h1 id="figure-scripts-save-through-shared-function-title">Every figure script saves through the shared, checked save function</h1>
+
+  <p id="figure-scripts-save-through-shared-function-summary">
+  All ten tracked figure scripts under <code>scripts/</code> now export through
+  <code>imas_codex.plotting.style.save_figure</code>. No script calls
+  <code>savefig</code> directly, none defines or imports a clipped-text check, and
+  none writes the slide-size declaration. Fifteen tracked figure files were
+  regenerated through it, the four JET plots are left untouched because the live
+  graph carries no JET geometry to draw, and the worst declared-versus-coordinate
+  ratio error across the twelve regenerated vector files is
+  <strong>3.57e-4</strong> against the 1e-3 limit.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-searches">The searches</h2>
+  <pre id="figure-scripts-save-through-shared-function-searches-block"><code>grep -rn "savefig" scripts/ --include=*.py
+  (no output: 0 direct calls to matplotlib's save under scripts/)
+
+grep -rn "def _validate_text\|def check_layout\|def validate_text\|clipped figure text\|escapes its box\|off canvas" scripts/ imas_codex/ --include=*.py
+  imas_codex/plotting/style.py:53: def _validate_text(...)          (1 definition)
+  imas_codex/plotting/style.py:67: "clipped figure text: ..."       (1 message)
+
+grep -rn "31\.1\|SLIDE_WIDTH_CM\|SLIDE_SIZE_CM\|\"16cm\"" scripts/ imas_codex/ --include=*.py
+  imas_codex/plotting/style.py:17: SLIDE_WIDTH_CM = 31.1
+  imas_codex/plotting/style.py:18: SLIDE_SIZE_CM = (SLIDE_WIDTH_CM, 16.0)
+  scripts/codac_uda_prototype/test_reader.py:366: assert 'width="31.1cm" height="16cm"' in ...
+  (one declaration; the third line is a test's assertion of the shared
+   function's output in a path outside this node's write scope)</code></pre>
+
+  <p id="figure-scripts-save-through-shared-function-api">
+  The plotting package gained one public function, <code>use_style()</code>,
+  which applies the packaged <code>data-ink</code> style plus the caller's rc
+  overrides, and one module-level declaration of the slide size as a pair of
+  constants. <code>save_figure</code> gained four options &mdash; <code>dpi</code>,
+  <code>animation</code>, <code>fps</code> and <code>clear_of</code> &mdash; and now
+  returns a receipt (<code>path</code>, <code>format</code>,
+  <code>export_dpi</code>, <code>pixel_size</code>, <code>bytes</code>, and
+  <code>declared_cm</code> for a vector file). It gained no new refusal: every
+  refusal it raises was already there. Animated exports need the
+  <code>Animation</code> and write a GIF.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-defect">Defect reproduced before the repair</h2>
+  <p id="figure-scripts-save-through-shared-function-defect-style">
+  Every one of the six illustration scripts called
+  <code>plt.style.use("data-ink")</code>, and no code registers that name, so a
+  bare run of the committed script could not render at all:</p>
+  <pre id="figure-scripts-save-through-shared-function-defect-run"><code>$ uv run python -c "import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt; plt.style.use('data-ink')"
+OSError: 'data-ink' is not a valid package style, path of style file, URL of
+style file, or library style name</code></pre>
+  <p id="figure-scripts-save-through-shared-function-defect-tight">
+  The four JET plots placed their titles above the canvas
+  (<code>fig.suptitle(..., y=1.01)</code>) and exported with
+  <code>bbox_inches="tight"</code>, so the file they wrote had neither the drawn
+  canvas's ratio nor a declared size. Exported without the crop, the shared check
+  named them: <code>clipped-figure-text: JET First Wall &amp; Limiter Evolution</code>
+  (<code>ValueError: clipped figure text: JET First Wall &amp; Limiter Evolution</code>),
+  and <code>plot_jet_poloidal.py</code> refused two tick labels,
+  <code>−0.4</code> and <code>0.4</code>, outside a 10&times;14&nbsp;in canvas.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-scripts">Each script</h2>
+  <table id="figure-scripts-save-through-shared-function-scripts-table">
+  <thead><tr><th>script</th><th>status</th><th>files it writes</th></tr></thead>
+  <tbody>
+  <tr><td><code>figures_ai_stack.py</code></td><td>regenerated</td><td><code>docs/figures/ai-stack/ai-stack.svg</code></td></tr>
+  <tr><td><code>figures_knowledge_graph_scale.py</code></td><td>regenerated</td><td><code>docs/figures/knowledge-graph-scale/knowledge-graph-scale.svg</code></td></tr>
+  <tr><td><code>figures_mapping_flow.py</code></td><td>regenerated</td><td><code>docs/figures/knowledge-graph-scale/mapping-flow.svg</code></td></tr>
+  <tr><td><code>figures_icp_knowledge_map.py</code></td><td>regenerated</td><td>stages a, b, c <code>.svg</code>; stages d, e, f <code>.gif</code>; <code>icp-map-repositories.svg</code> (the thumbnail PNG stays in the gitignored private directory)</td></tr>
+  <tr><td><code>figures_jt60sa_mapping_study.py</code></td><td>regenerated</td><td><code>docs/figures/jt60sa-mapping-study/agreement.svg</code></td></tr>
+  <tr><td><code>figures_discovery_to_mapping.py</code></td><td>regenerated (figures only)</td><td><code>docs/figures/discovery-to-mapping/{pipeline,mapping-lifecycle,pickup-probe,pf-coil-current}.svg</code> plus one PNG per figure in the presentation directory. Its <code>main()</code> also writes an HTML report into <code>docs/research/</code> and PNGs into <code>/work/projects/imas_gpu/jt60sa/presentation</code>, both outside this node's write scope; the figure builders were driven directly at the live hand-off, with PNGs into scratch, so those two paths are untouched.</td></tr>
+  <tr><td><code>plot_jet_epoch_evolution.py</code></td><td>refused and repaired; not run</td><td>seven PNGs in <code>docs/images/</code>. Its titles sat above the canvas and one rotated tick label below it, and both are repaired. It is not run because the live graph carries no JET <code>DataNode</code> geometry (count 0), so every bar is empty and the twenty epochs each draw a <code>no XML</code> note at the same height, which the check refuses; a graph-populated run is needed to regenerate its figures.</td></tr>
+  <tr><td><code>plot_jet_poloidal.py</code></td><td>refused and repaired; not run</td><td><code>jet_poloidal_&lt;epoch&gt;.png</code>, <code>jet_limiter_comparison.png</code>. Two tick labels left the canvas; the layout now reserves the margin and the comparison figure exports cleanly to a scratch path at 2000&times;2800. Tracked copies under <code>docs/images/</code> are left untouched for the same missing JET geometry.</td></tr>
+  <tr><td><code>plot_jet_composite_geometry.py</code></td><td>refused and repaired; not run</td><td><code>docs/images/jet_composite_geometry.png</code>. A rotated <code>Z [m]</code> label left the left edge; the layout now reserves 1.5% of the width and the 14&times;20&nbsp;in figure exports cleanly to scratch. Tracked copy untouched.</td></tr>
+  <tr><td><code>plot_jet_limiter_epochs.py</code></td><td>not run</td><td><code>--output</code> PNG (default <code>jet_limiter_epochs.png</code>). Its own query finds no limiter <code>DataNode</code> and the script exits before drawing; its export path was exercised by building its empty figure and exporting it to scratch at 1500&times;2100.</td></tr>
+  </tbody>
+  </table>
+
+  <h2 id="figure-scripts-save-through-shared-function-declared">Every vector file's declared size, before and after</h2>
+  <table id="figure-scripts-save-through-shared-function-declared-table">
+  <thead><tr><th>file</th><th>before</th><th>after</th><th>coordinate-box ratio</th><th>declared ratio</th><th>error</th></tr></thead>
+  <tbody>
+  <tr><td>ai-stack.svg</td><td>31.1 &times; 14.22&nbsp;cm</td><td>31.1 &times; 14.22&nbsp;cm</td><td>2.18750</td><td>2.18706</td><td>2.01e-4</td></tr>
+  <tr><td>icp-map-a-data-systems.svg</td><td>31.1 &times; 16&nbsp;cm</td><td>31.1 &times; 16&nbsp;cm</td><td>1.94444</td><td>1.94375</td><td>3.57e-4</td></tr>
+  <tr><td>icp-map-b-france.svg</td><td>31.1 &times; 16&nbsp;cm</td><td>31.1 &times; 16&nbsp;cm</td><td>1.94444</td><td>1.94375</td><td>3.57e-4</td></tr>
+  <tr><td>icp-map-c-relationships.svg</td><td>31.1 &times; 16&nbsp;cm</td><td>31.1 &times; 16&nbsp;cm</td><td>1.94444</td><td>1.94375</td><td>3.57e-4</td></tr>
+  <tr><td>icp-map-repositories.svg</td><td>31.1 &times; 16&nbsp;cm</td><td>31.1 &times; 16&nbsp;cm</td><td>1.94444</td><td>1.94375</td><td>3.57e-4</td></tr>
+  <tr><td>agreement.svg</td><td>1008 &times; 460.8&nbsp;pt</td><td>31.1 &times; 14.22&nbsp;cm</td><td>2.18750</td><td>2.18706</td><td>2.01e-4</td></tr>
+  <tr><td>knowledge-graph-scale.svg</td><td>31.1 &times; 16&nbsp;cm</td><td>31.1 &times; 16&nbsp;cm</td><td>1.94444</td><td>1.94375</td><td>3.57e-4</td></tr>
+  <tr><td>mapping-flow.svg</td><td>31.1 &times; 16&nbsp;cm</td><td>31.1 &times; 16&nbsp;cm</td><td>1.94444</td><td>1.94375</td><td>3.57e-4</td></tr>
+  <tr><td>pipeline.svg</td><td>1008 &times; 720&nbsp;pt</td><td>31.1 &times; 22.21&nbsp;cm</td><td>1.40000</td><td>1.40027</td><td>1.93e-4</td></tr>
+  <tr><td>mapping-lifecycle.svg</td><td>1008 &times; 381.6&nbsp;pt</td><td>31.1 &times; 11.77&nbsp;cm</td><td>2.64151</td><td>2.64231</td><td>3.03e-4</td></tr>
+  <tr><td>pickup-probe.svg</td><td>1008 &times; 743.04&nbsp;pt</td><td>31.1 &times; 25.01&nbsp;cm</td><td>1.24334</td><td>1.24350</td><td>1.29e-4</td></tr>
+  <tr><td>pf-coil-current.svg</td><td>1008 &times; 504&nbsp;pt</td><td>31.1 &times; 15.62&nbsp;cm</td><td>1.99147</td><td>1.99104</td><td>2.15e-4</td></tr>
+  </tbody>
+  </table>
+
+  <p id="figure-scripts-save-through-shared-function-raster">
+  The three animated files are 1400&times;720&nbsp;px, ratio 1.944444, against the
+  drawn 14&nbsp;&times;&nbsp;7.2&nbsp;in canvas. Two discovery canvases moved with
+  their live content: <code>pickup-probe</code> from 1.35659 to 1.26984 on the
+  first delivery and to 1.24334 once its JSON wrapped on word boundaries, and
+  <code>pf-coil-current</code> from 2.00000 to 1.99147, because
+  <code>json_figure</code> sets its height from the number of styled lines the
+  live graph projection returns. Each regenerated file's declared size carries
+  the ratio its own canvas was drawn at; no file is compared with the ratio of a
+  different canvas.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-repairs">What moved to satisfy the check</h2>
+  <ul id="figure-scripts-save-through-shared-function-repairs-list">
+  <li><strong>ICP town labels</strong> carried a second <code>Text</code> artist as a white halo, which the check saw as overlapping text. The halo is now a <code>withStroke</code> path effect on the label itself. The three stage files shrink from about 45&nbsp;000 to about 12&nbsp;000&ndash;14&nbsp;000 lines (<code>icp-map-a</code> 1&nbsp;126&nbsp;752 &rarr; 389&nbsp;316 bytes) and render within 0.07% of the earlier pixels; only the halo path set changed.</li>
+  <li><strong>The knowledge-graph title strip</strong> and the <code>mapping-flow</code> strip stayed reserved through the check's <code>clear_of</code>, given a transparent full-width rectangle over the strip, so a label drifting into the slide's title area is still refused.</li>
+  <li><strong>The ICP arrowheads</strong> reach the same check as <code>clear_of</code> marks, so an arrowhead drawn over a verb is still refused.</li>
+  <li><strong>The four JET plots</strong> lost their titles above the canvas (the default <code>y</code> is inside it) and their tight crop, and three of them reserve a slightly smaller axes rectangle so their outermost tick labels sit on the canvas. <code>plot_jet_epoch_evolution.py</code> also stops paying for a tight layout it no longer uses.</li>
+  <li><strong><code>figures_discovery_to_mapping.py</code></strong> keeps a <code>save()</code> helper, but it only calls the shared function twice and composes its existing receipt from the returned pixel size and byte count.</li>
+  </ul>
+
+<h2 id="figure-scripts-save-through-shared-function-rendered">Each regenerated figure, rendered and read</h2>
+  <p id="figure-scripts-save-through-shared-function-rendered-limit">
+  No vision-capable model serves this node, so the figures were read by a
+  raster-and-compare instrument rather than by eye: the one model the router
+  lists is text-only, and the package's own vision seat points at it.
+  </p>
+  <pre id="figure-scripts-save-through-shared-function-rendered-models"><code>$ curl -s http://98dci4-gpu-0003:18802/v1/models
+{"object":"list","data":[{"id":"deepseek-v4.1-flash","object":"model",
+  "created":1794861289,"owned_by":"sglang","root":"deepseek-v4.1-flash",
+  "parent":null,"max_model_len":262144}]}
+$ grep -A5 'tool.imas-codex.discovery-vision' pyproject.toml
+[tool.imas-codex.discovery-vision]
+model = "local/deepseek-v4.1-flash"
+model-route = "ambix-local"</code></pre>
+  <p id="figure-scripts-save-through-shared-function-rendered-substitute">
+  What a reader would catch by looking — a blank canvas, content crammed into a
+  corner, ink cut off at an edge, a drawing that silently changed — is measured
+  instead: each committed SVG is rasterized at 96&nbsp;dpi, its ink bounds are
+  taken from the new raster, and the pixels are differenced against the same
+  raster of the committed file. Every figure carries ink on a canvas with a
+  margin of at least 5&nbsp;px at 96&nbsp;dpi on all four edges, and none is
+  blank (3.5&ndash;36&nbsp;% ink).
+  </p>
+  <pre id="figure-scripts-save-through-shared-function-rendered-table"><code>figure                        size      ink%   margins L,T,R,B px   differ from the base
+ai-stack.svg                 1175x537  36.29    L 51 T 11 R 30 B 20    0.000%
+mapping-lifecycle.svg        1175x445   4.00    L 40 T 54 R 88 B 32    2.809%
+pf-coil-current.svg          1175x590   5.68    L 28 T 20 R181 B 20    7.278%
+pickup-probe.svg             1175x945   6.55    L 28 T 20 R 61 B 20   11.606%
+pipeline.svg                 1175x839   3.63    L 39 T 24 R100 B 45    3.468%
+icp-map-a-data-systems.svg   1175x605   3.47    L179 T  7 R164 B  5    0.066%
+icp-map-b-france.svg         1175x605   3.23    L179 T  7 R164 B  5    0.066%
+icp-map-c-relationships.svg  1175x605   5.94    L179 T  7 R164 B  5    0.066%
+icp-map-repositories.svg     1175x605   6.51    L 36 T 67 R 28 B 13    1.890%
+agreement.svg                1175x537  24.00    L 11 T 16 R 18 B 27   30.598%
+knowledge-graph-scale.svg    1175x605  15.46    L 45 T100 R 33 B 21    0.000%
+mapping-flow.svg             1175x605  14.49    L 67 T117 R 73 B 20    0.000%</code></pre>
+  <p id="figure-scripts-save-through-shared-function-rendered-reading">
+Three of the twelve vector files are unchanged drawings: their text runs match
+  one for one (57, 21 and 27 for <code>ai-stack</code>,
+  <code>knowledge-graph-scale</code> and <code>mapping-flow</code>, none
+  differing), their element sets differ only in generated ids, and their
+  rasters differ by 0.00&nbsp;%. <code>mapping-lifecycle</code> differs only in
+  ids as well; its 2.81&nbsp;% is the resampling of text at a changed physical
+  width. <code>pipeline</code> differs because its labels carry live graph
+  counts. <code>pickup-probe</code> and <code>pf-coil-current</code> gain height
+  with the live series count, and <code>pickup-probe</code>'s 11.61&nbsp;% is the
+  word-boundary wrap moving its JSON lines. <code>icp-map-repositories</code>'
+  1.89&nbsp;% is the reserved title height and the shortened bottom margin. The
+  three ICP stage files differ by 0.07&nbsp;%: the halo path set. The
+  <code>agreement.svg</code> 30.60&nbsp;% is its darkening palette measured
+  against the base revision, together with the packaged style's tick sizes. The
+  three GIFs are re-rendered for the halo change. <strong>Fifteen files were
+  regenerated and every one of them is accounted for above</strong>; the fifteen
+  files the scripts write under <code>docs/figures/</code> are all present.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-crop">The content-cropped files</h2>
+  <p id="figure-scripts-save-through-shared-function-crop-body">
+  The four JET plots were the ones exported with a content crop
+  (<code>bbox_inches="tight"</code>), so their pixel size followed live content
+  rather than the canvas. No tracked file among them was regenerated, because
+  the graph holds no JET geometry: the seven PNGs
+  <code>plot_jet_epoch_evolution.py</code> writes
+  (<code>jet_wall_limiter_evolution</code>, <code>jet_magnetics_evolution</code>,
+  <code>jet_passive_circuit_evolution</code>, <code>jet_pf_coil_evolution</code>,
+  <code>jet_component_overview</code>, <code>jet_epoch_summary</code>,
+  <code>jet_limiter_contours</code>), the three <code>jet_poloidal_p*.png</code>
+  files and <code>jet_limiter_comparison.png</code> from
+  <code>plot_jet_poloidal.py</code>, <code>jet_limiter_epochs.png</code> and
+  <code>jet_composite_geometry.png</code> keep the pixel sizes they had before
+  this change, and no before/after ratio comparison is claimed for them.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-lines">Lines and files</h2>
+  <p id="figure-scripts-save-through-shared-function-lines-net">
+  Net change under <code>scripts/</code>: <strong>+174 / &minus;328, net
+  &minus;154 lines</strong> across the ten scripts. No script's set of output
+  files changed; the twelve vector files and three GIFs above are the same files
+  the scripts wrote before, and the thirteen PNGs the four JET scripts write are
+  untouched.
+  </p>
+  <p id="figure-scripts-save-through-shared-function-lines-partition">
+  Every run that reads live data ran in place inside this node's allocation on
+  <code>98dci4-clu-3051</code> (job 1319171), a compute node: the graph resolved
+  through the shared environment without a tunnel, and no run was made on a login
+  node. The two scripts that need whole-graph reads were the scale and mapping-flow
+  builders, whose queries are the bounded ones those scripts already carried.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-control">Negative control</h2>
+  <p id="figure-scripts-save-through-shared-function-control-body">
+  The declared mutation disables the clipped-text refusal in
+  <code>_validate_text</code>. With it applied,
+  <code>tests/plotting/test_figure_scripts.py::test_a_script_given_a_label_beyond_the_canvas_writes_no_file</code>
+  fails with <code>Failed: DID NOT RAISE &lt;class 'ValueError'&gt;</code> and the
+  run exits 1. The same test passes on the committed tree, where the study script
+  refuses a bar-end note wider than its canvas and writes no file.
+  </p>
+
+  <h2 id="figure-scripts-save-through-shared-function-round-two">The review's repairs</h2>
+  <p id="figure-scripts-save-through-shared-function-round-two-body">
+  Seven repairs, each inside this node's write paths, all in commits
+  <code>67585fb80</code> and <code>0db7d7ac0</code>.
+  </p>
+  <ol id="figure-scripts-save-through-shared-function-round-two-list">
+  <li id="figure-scripts-save-through-shared-function-round-two-refusal">
+  <strong>The narrowed refusal is restored.</strong> The direct-label check skipped
+  any line whose legend label began with an underscore, so a label sitting on an
+  unnamed trace passed. It now refuses every visible line, and the single escape is
+  explicit: <code>save_figure(decoration=[...])</code> names the line artists that
+  are paint rather than data. Restoring it refused the ICP relationships stage,
+  where every town and verb label is placed on the highway network the
+  relationships are routed along; those highway polylines are named as decoration
+  in <code>figure_decoration()</code>, while the relationship arrowheads stay in
+  the text check. The new test
+  <code>test_a_label_over_an_unlabelled_data_line_is_refused</code> fails
+  <code>DID NOT RAISE</code> when the label convention is put back, which is this
+  round's negative control.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-path">
+  <strong>Provenance is repository-relative.</strong>
+  <code>shown_path()</code> prints a path inside the repository relative to it and
+  leaves a path outside it alone, because that is what identifies it. The fixture
+  is now resolved from the repository rather than from a sibling checkout, so
+  <code>pf-coil-current.svg</code> prints
+  <code>tests/fixtures/mapping_handoff_example.json</code> and its receipt records
+  the same. A search over the five figure directories returns no absolute home
+  path (<code>grep -rn "/home/[A-Za-z]\|/Users/[A-Za-z]"</code> exits 1), and
+  <code>test_no_published_figure_names_a_machine_home_path</code> holds it.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-wrap">
+  <strong>The JSON wraps between words.</strong> <code>styled_lines</code> builds
+  the coloured characters first and <code>_wrapped</code> breaks at the last space
+  before the column, falling back to a hard break only for a run with no space, so
+  a long identifier still fits its column. Read back from the rendered SVG, the two
+  columns carry 36 and 102 source tokens with every one arriving whole.
+  <code>test_a_wrapped_json_line_breaks_between_words</code> holds it.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-contrast">
+  <strong>The count numerals clear 4.5:1.</strong> Every segment fill is now dark
+  enough for its white numeral, measured on the rasterized figure: agreeing
+  5.37:1, chain-differ 5.16:1, disagreeing 4.87:1, unplaced 5.17:1, refused
+  8.56:1, against 2.82:1 and 2.88:1 before on the green and the grey. The fills
+  keep each disposition's hue, and
+  <code>test_every_segment_fill_carries_its_white_numeral</code> holds the bound.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-cards">
+  <strong>Every card reserves the common block two title lines.</strong>
+  <code>GRID_TITLE_LINES</code> sets one title height, so the line below the title
+  sits at y=0.5469 (upper row) and y=0.0539 (lower row) on all ten cards, including
+  the one whose name wraps. <code>test_card_system_lines_share_one_baseline</code>
+  holds it.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-tests">
+  <strong>The two assertions read the written file.</strong> The animated export is
+  measured with <code>PIL.Image.open</code> on the GIF (1400x720, two frames,
+  ratio 1.94444); the declared size is read back from the SVG's own
+  <code>width=</code>/<code>height=</code> attributes with a regex rather than from
+  the receipt the same figure returned.
+  </li>
+  <li id="figure-scripts-save-through-shared-function-round-two-strip">
+  <strong>The title strip has one owner.</strong>
+  <code>imas_codex.plotting.style.title_strip(figure, share)</code> builds it, and
+  both knowledge-graph scripts call it and pass the result as
+  <code>clear_of</code>; neither constructs a rectangle any more.
+  </li>
+  </ol>
+  <p id="figure-scripts-save-through-shared-function-round-two-render">
+  Each regenerated figure was rendered at 96&nbsp;dpi and read: every one carries
+  ink with a margin of at least 5&nbsp;px on all four edges, the three GIFs are
+  1400x720 in 150 frames, and the pixel difference from the base revision is 0.00&nbsp;%
+  for the three figures whose drawing was not meant to move. The gate log carries
+  the rendered table beside the test run.
+  </p>
+</main>
+</body>
+</html>
