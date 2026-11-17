@@ -1830,6 +1830,10 @@ def summarize_third(
         "control": control_summary,
         "reestimate": reestimate,
         "verdict": verdict,
+        "disagreement_rule": (
+            "a sampled name whose third-reader defective-or-not verdict "
+            "differs from both earlier readers' verdicts"
+        ),
         "disagreements": disagreements,
         "spend": spend,
         "errors": errors[:20],
@@ -2056,9 +2060,13 @@ def render_third_page(summary: dict[str, Any]) -> str:
         '<h2 id="sagr-frontier-third-reader-disagreements">Where it disagrees '
         "with both earlier readers</h2>"
         f'<p id="sagr-frontier-third-reader-disagreements-note">'
-        f"{len(disagreements)} sampled names carry a third-reader verdict that "
-        "differs from each earlier reader's. All three readings are given"
-        + ("; the first twenty are shown." if len(disagreements) > 20 else ".")
+        f"{len(disagreements)} sampled names carry a third-reader "
+        "defective-or-not verdict that differs from each earlier reader's"
+        + (
+            "; fewer than twenty such names exist, so all of them are listed."
+            if len(disagreements) < 20
+            else "; the first twenty are shown."
+        )
         + '</p><table id="sagr-frontier-third-reader-disagreements-table">'
         "<thead><tr><th>Name</th><th>Set</th><th>Reader A</th><th>Reader B</th>"
         "<th>Third reader</th></tr></thead><tbody>"
