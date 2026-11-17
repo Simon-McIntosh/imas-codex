@@ -10,6 +10,7 @@ from that prefix is retained in the reader experiment. No graph writes are made.
 from __future__ import annotations
 
 import argparse
+import asyncio
 import hashlib
 import importlib.util
 import json
@@ -216,13 +217,16 @@ def collect(count):
 def main():
     p = argparse.ArgumentParser(description=__doc__)
     p.add_argument("--collect", type=int)
+    p.add_argument("--pilot", action="store_true")
+    p.add_argument("--read", action="store_true")
+    p.add_argument("--check-blind", action="store_true")
     args = p.parse_args()
     if args.collect:
         collect(args.collect)
-
-
-if __name__ == "__main__":
-    main()
+    elif args.check_blind:
+        check_blind(load(DATA))
+    elif args.pilot or args.read:
+        asyncio.run(read_corrected(pilot_only=args.pilot))
 
 
 def source_packets(data):
@@ -295,3 +299,156 @@ def check_blind(data):
     print(
         "PASS: source-only cohort has at least 40 defective and 40 sound; all 26 standing labels retained; quoted sources and lossless packets verified"
     )
+
+
+BLIND_COMMIT = "4aed6185c57bf6eb1e9de7ca86b324aa3bdb6869"
+
+
+def frozen_record():
+    raw = subprocess.check_output(
+        ["git", "-C", str(ROOT), "show", f"{BLIND_COMMIT}:{RELATIVE_DATA}"]
+    )
+    frozen = json.loads(raw)
+    assert frozen["phase"] == "judgments-frozen"
+    assert not {"results", "scores", "comparison"} & frozen.keys()
+    subprocess.run(
+        ["git", "-C", str(ROOT), "merge-base", "--is-ancestor", BLIND_COMMIT, "HEAD"],
+        check=True,
+    )
+    current = load(DATA)
+    for key, value in frozen.items():
+        if key != "phase":
+            assert current[key] == value, (
+                "Frozen field changed after blind commit: " + key
+            )
+    check_blind(frozen)
+    return frozen
+
+
+def reading_order(data):
+    order = sorted(data["cohort"])
+    random.Random(SEED + 1).shuffle(order)
+    return order
+
+
+def recorded_calls():
+    path = RUN / "corrected-readings.jsonl"
+    return (
+        [json.loads(line) for line in path.read_text().splitlines()]
+        if path.exists()
+        else []
+    )
+
+
+async def read_corrected(*, pilot_only):
+    """Use the audit's call owner with the frozen exact source-only user text."""
+    from imas_codex.discovery.base.llm import get_openrouter_max_price
+
+    data = frozen_record()
+    audit = audit_module()
+    readers = (*audit.READERS, audit.third_reader())
+    audit.assert_readers_not_pipeline(readers)
+    packets = {p["id"]: p for p in source_packets(data)}
+    # Preserve the original rendered packet byte for byte; only the system
+    # omission instruction differs. The call still owns schema, retries,
+    # token cap, prompt blindness, receipt fields and service attribution.
+    audit.render_user_prompt = lambda row: row["reader_visible_text"]
+    order = reading_order(data)
+    system = audit.system_prompt()
+    save(
+        RUN / "corrected-prompt.json",
+        {
+            "system": system,
+            "readers": readers,
+            "blind_commit": BLIND_COMMIT,
+            "order": order,
+        },
+    )
+    records = recorded_calls()
+    assert not any(r.get("error") or r.get("cost") is None for r in records), (
+        "An unpriced or failed call requires adjudication before retry"
+    )
+    spent = sum(r["cost"] for r in records)
+    done = {(r["seat"], r["name"]) for r in records}
+    assert len(done) == len(records), "Duplicate billed call"
+    if not pilot_only:
+        pilot = load(RUN / "pilot.json")
+        assert pilot["complete"] and pilot["projected_usd"] <= CEILING, (
+            "Pilot projection exceeds ceiling"
+        )
+        assert pilot["names"] == order[:6]
+    names = order[:6] if pilot_only else order
+    for index, name in enumerate(names):
+        todo = [r for r in readers if (r["seat"], name) not in done]
+        reserves = []
+        for reader in todo:
+            rates = get_openrouter_max_price(reader["model"])
+            # UTF-8 bytes bound text tokens conservatively, with schema and
+            # message overhead. Three attempts are the audit call's retry cap.
+            input_bound = (
+                len((system + packets[name]["reader_visible_text"]).encode()) + 4096
+            )
+            reserves.append(
+                3
+                * (
+                    input_bound * rates["prompt"] / 1e6
+                    + audit.MAX_TOKENS * rates["completion"] / 1e6
+                    + rates["request"]
+                )
+            )
+        assert spent + sum(reserves) <= CEILING, (
+            f"Cannot reserve bounded calls within USD {CEILING}; spent {spent}"
+        )
+        spend = {"total": spent}
+        replies = await asyncio.gather(
+            *(
+                audit.judge_one(reader, packets[name], spend, ceiling=CEILING)
+                for reader in todo
+            )
+        )
+        for reply in replies:
+            reply["instruction_digest"] = digest(system)
+            reply["packet_digest"] = digest(packets[name])
+            reply["recorded_at"] = datetime.now(UTC).isoformat()
+            with (RUN / "corrected-readings.jsonl").open("a") as handle:
+                handle.write(json.dumps(reply, ensure_ascii=False) + "\n")
+        records.extend(replies)
+        assert not any(r.get("error") or r.get("cost") is None for r in replies), (
+            "Failed or unpriced call; stopped without retrying the experiment"
+        )
+        spent = sum(r["cost"] for r in records)
+        assert spent <= CEILING
+        print(
+            f"{index + 1}/{len(names)} names complete; recorded spend USD {spent:.6f} / {CEILING:.2f}",
+            flush=True,
+        )
+    if pilot_only:
+        pilot_records = [r for r in records if r["name"] in names]
+        assert len(pilot_records) == 18
+        paid = sum(r["cost"] for r in pilot_records)
+        projection = paid / 6 * len(order)
+        receipt = {
+            "names": names,
+            "calls": len(pilot_records),
+            "complete": True,
+            "spend_usd": paid,
+            "projected_usd": projection,
+            "ceiling_usd": CEILING,
+            "all_names": len(order),
+            "method": "Recorded cost of six names through all three readers, multiplied by cohort size / 6",
+            "per_reader_usd": {
+                r["seat"]: sum(
+                    x["cost"] for x in pilot_records if x["seat"] == r["seat"]
+                )
+                for r in readers
+            },
+        }
+        save(RUN / "pilot.json", receipt)
+        print("PILOT " + json.dumps(receipt), flush=True)
+        assert projection <= CEILING, (
+            "Pilot projection exceeds USD 10; no full run authorized by the protocol"
+        )
+
+
+if __name__ == "__main__":
+    main()
