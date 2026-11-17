@@ -2500,7 +2500,7 @@
   "added_failures": [],
   "attribution": "all 22 fail with ReviewingGuideLinkError: no catalog checkout is resolved, so the reviewing guide has no reviewable address; identical ids at base, so none is this node's",
   "base": {
-   "command": "cd <archive> && UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=<archive> uv run --no-sync pytest -p no:cacheprovider tests/standard_names",
+   "command": "cd /tmp/reckon-crew-scratch/r-20261116T225104371014-sdbc-family-rerender/sdbc-base-arm && UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261116T225104371014-sdbc-family-rerender/sdbc-base-arm uv run --no-sync pytest -p no:cacheprovider tests/standard_names",
    "completed": true,
    "exit_status": 1,
    "failure_count": 22,
