@@ -1,15 +1,17 @@
 """A group release cut refuses a group that does not meet the ruled bar.
 
 Each refusal is exercised on a group planted with that one fault, and a group
-planted with none is cut. The bar itself is read from the ruling document, so
-an unruled bar refuses rather than guessing a threshold; the tests state their
-own test bar and record the group's audit records in a temporary directory.
+planted with none is cut. The bar is the lead's ruling, read from the document
+the cut reads, so the tests run against the ruled numbers rather than a test
+value; a bar nobody ruled refuses rather than guessing a threshold. Audit
+records are written into a temporary directory.
 """
 
 from __future__ import annotations
 
 import json
 from contextlib import ExitStack
+from dataclasses import replace
 from pathlib import Path
 from unittest.mock import patch
 
@@ -17,6 +19,8 @@ import pytest
 
 from imas_codex.standard_names.export import (
     GATE_GROUP_BAR,
+    GROUP_AUDIT_DEFECT_CLASSES,
+    RULED_GROUP_RELEASE_BAR,
     ExclusionRecord,
     GateResult,
     GroupReleaseRuling,
@@ -60,9 +64,27 @@ def _member(name: str, **overrides) -> dict:
     return candidate
 
 
-def _ruling(**overrides) -> GroupReleaseRuling:
-    """The stated test bar. The lead's ruling replaces these numbers."""
-    fields: dict = {"max_defect_rate": 0.2}
+def _ruled() -> GroupReleaseRuling:
+    """The bar the cut reads: the lead's ruling, committed beside the package."""
+    ruling, problem = load_group_release_ruling(RULED_GROUP_RELEASE_BAR)
+    assert ruling is not None, problem
+    return ruling
+
+
+def _ruled_with(**overrides) -> GroupReleaseRuling:
+    """The ruled bar with one ruled field restated, for a test of that field."""
+    return replace(_ruled(), **overrides)
+
+
+def _mechanism_ruling(**overrides) -> GroupReleaseRuling:
+    """A bar stated for one mechanism test, where a ruled zero cannot separate it.
+
+    The ruled zero bar refuses a defective member through the group rate and
+    through that member's class at once, so a class maximum that differs from
+    the group bar has no instance in the ruled document, and the code that
+    honours one is exercised here instead.
+    """
+    fields: dict = {"max_defect_rate": 0.4}
     fields.update(overrides)
     return GroupReleaseRuling(**fields)
 
@@ -72,6 +94,7 @@ def _write_audit_record(
     candidates: dict[str, dict],
     defects: dict[str, list[str]],
     *,
+    undecided: tuple[str, ...] = (),
     group: str = GROUP,
     drop: tuple[str, ...] = (),
     text: dict[str, str] | None = None,
@@ -88,6 +111,13 @@ def _write_audit_record(
                 "name": name,
                 "text_sha256": audited_text_digest(
                     candidate["description"], documentation
+                ),
+                "verdict": (
+                    "undecided"
+                    if name in undecided
+                    else "defective"
+                    if defects.get(name)
+                    else "sound"
                 ),
                 "defects": defects.get(name, []),
             }
@@ -122,7 +152,7 @@ def _gate(
         candidates=candidates,
         exclusions=exclusions or [],
         sourceless_ids=sourceless_ids or [],
-        ruling=ruling if ruling is not None else _ruling(),
+        ruling=ruling if ruling is not None else _ruled(),
         bar_problem="",
         audit_dir=audit_dir,
     )
@@ -229,7 +259,7 @@ def test_ruled_source_exception_clears_a_sourceless_member(tmp_path: Path) -> No
         members={"plasma_current": "accepted"},
         candidates=candidates,
         sourceless_ids=["plasma_current"],
-        ruling=_ruling(sourceless_exceptions=frozenset({"plasma_current"})),
+        ruling=_ruled_with(sourceless_exceptions=frozenset({"plasma_current"})),
         audit_dir=tmp_path,
     )
 
@@ -288,7 +318,7 @@ def _family_paths(rows) -> list[dict]:
 
 
 def test_family_with_a_member_in_another_group_refuses() -> None:
-    issues = _group_family_issues(_family_paths(_family_rows()), GROUP, _ruling())
+    issues = _group_family_issues(_family_paths(_family_rows()), GROUP, _ruled())
 
     assert [issue["type"] for issue in issues] == ["family_spans_groups"]
     issue = issues[0]
@@ -297,19 +327,19 @@ def test_family_with_a_member_in_another_group_refuses() -> None:
 
 
 def test_ruled_family_exception_or_a_joint_cut_clears_the_family() -> None:
-    family_id = _group_family_issues(_family_paths(_family_rows()), GROUP, _ruling())[
-        0
-    ]["family"]
+    family_id = _group_family_issues(_family_paths(_family_rows()), GROUP, _ruled())[0][
+        "family"
+    ]
 
     as_exception = _group_family_issues(
         _family_paths(_family_rows()),
         GROUP,
-        _ruling(family_exceptions=frozenset({family_id})),
+        _ruled_with(family_exceptions=frozenset({family_id})),
     )
     cut_together = _group_family_issues(
         _family_paths(_family_rows()),
         GROUP,
-        _ruling(
+        _ruled_with(
             groups_cut_together=frozenset(
                 {frozenset({GROUP, "magnetic_field_systems"})}
             )
@@ -335,14 +365,11 @@ def _three_members() -> dict[str, dict]:
 
 def test_defect_rate_above_the_bar_refuses(tmp_path: Path) -> None:
     candidates = _three_members()
-    # Two of three members defective: 0.667 against a 0.2 bar.
+    # One of three members defective: 0.333 against the ruled zero bar.
     _write_audit_record(
         tmp_path,
         candidates,
-        defects={
-            "plasma_current": ["name_omits_source"],
-            "electron_temperature": ["name_definition_disagree"],
-        },
+        defects={"plasma_current": ["name_omits_source"]},
     )
 
     result = _gate(
@@ -351,14 +378,33 @@ def test_defect_rate_above_the_bar_refuses(tmp_path: Path) -> None:
         audit_dir=tmp_path,
     )
 
-    assert _causes(result) == ["group_defect_rate_above_bar"]
-    issue = result.issues[0]
-    assert issue["defective"] == 2
-    assert issue["members"] == 3
-    assert issue["bar"] == 0.2
+    # At a zero bar the one defective member is above the bar and above its
+    # class maximum, so the refusal names both, with the class it broke.
+    assert _causes(result) == [
+        "group_defect_class_rate_above_bar",
+        "group_defect_rate_above_bar",
+    ]
+    rate_issue = next(
+        issue
+        for issue in result.issues
+        if issue["type"] == "group_defect_rate_above_bar"
+    )
+    class_issue = next(
+        issue
+        for issue in result.issues
+        if issue["type"] == "group_defect_class_rate_above_bar"
+    )
+    assert rate_issue["defective"] == 1
+    assert rate_issue["members"] == 3
+    assert rate_issue["bar"] == 0
+    assert rate_issue["names"] == ["plasma_current"]
+    assert class_issue["defect_class"] == "name_omits_source"
+    assert class_issue["maximum"] == 0
 
 
-def test_class_rate_above_the_class_maximum_refuses(tmp_path: Path) -> None:
+def test_a_class_maximum_tighter_than_the_group_bar_refuses_that_class(
+    tmp_path: Path,
+) -> None:
     candidates = _three_members()
     # One of three is defective (0.333 under the 0.4 group bar) but the class
     # maximum for that class is 0.1.
@@ -371,8 +417,7 @@ def test_class_rate_above_the_class_maximum_refuses(tmp_path: Path) -> None:
     result = _gate(
         members=dict.fromkeys(candidates, "accepted"),
         candidates=candidates,
-        ruling=_ruling(
-            max_defect_rate=0.4,
+        ruling=_mechanism_ruling(
             class_maxima={"name_contradicts_source": 0.1},
         ),
         audit_dir=tmp_path,
@@ -382,6 +427,157 @@ def test_class_rate_above_the_class_maximum_refuses(tmp_path: Path) -> None:
     issue = result.issues[0]
     assert issue["defect_class"] == "name_contradicts_source"
     assert issue["defective"] == 1
+
+
+def test_a_class_without_its_own_maximum_is_governed_by_the_group_bar(
+    tmp_path: Path,
+) -> None:
+    candidates = _three_members()
+    _write_audit_record(
+        tmp_path,
+        candidates,
+        defects={"plasma_current": ["wrong_physics_domain"]},
+    )
+
+    result = _gate(
+        members=dict.fromkeys(candidates, "accepted"),
+        candidates=candidates,
+        ruling=_mechanism_ruling(max_defect_rate=0.4),
+        audit_dir=tmp_path,
+    )
+
+    # 0.333 in a class the ruling gives no maximum of its own: under the 0.4
+    # group bar, so the cut proceeds and the member is not counted defective.
+    assert result.passed, result.issues
+
+
+def test_a_member_the_adjudication_cannot_decide_counts_defective(
+    tmp_path: Path,
+) -> None:
+    candidates = _three_members()
+    _write_audit_record(tmp_path, candidates, defects={}, undecided=("plasma_current",))
+
+    result = _gate(
+        members=dict.fromkeys(candidates, "accepted"),
+        candidates=candidates,
+        audit_dir=tmp_path,
+    )
+
+    rate_issue = next(
+        issue
+        for issue in result.issues
+        if issue["type"] == "group_defect_rate_above_bar"
+    )
+    assert rate_issue["defective"] == 1
+    assert rate_issue["undecided"] == 1
+    assert rate_issue["names"] == ["plasma_current"]
+    assert "could not decide" in rate_issue["detail"]
+
+
+def test_a_ruled_member_exception_lets_a_defective_member_stand(
+    tmp_path: Path,
+) -> None:
+    candidates = _three_members()
+    _write_audit_record(
+        tmp_path,
+        candidates,
+        defects={"plasma_current": ["name_omits_source"]},
+    )
+
+    result = _gate(
+        members=dict.fromkeys(candidates, "accepted"),
+        candidates=candidates,
+        ruling=_ruled_with(defect_exceptions=frozenset({"plasma_current"})),
+        audit_dir=tmp_path,
+    )
+
+    assert result.passed, result.issues
+
+
+def test_a_defective_member_reads_defective_without_a_ruled_exception(
+    tmp_path: Path,
+) -> None:
+    candidates = _three_members()
+    _write_audit_record(
+        tmp_path,
+        candidates,
+        defects={"plasma_current": ["name_omits_source"]},
+    )
+
+    # The ruled document names no member as an exception, so the same record
+    # that stands above does not stand here.
+    assert _ruled().defect_exceptions == frozenset()
+    result = _gate(
+        members=dict.fromkeys(candidates, "accepted"),
+        candidates=candidates,
+        audit_dir=tmp_path,
+    )
+
+    assert not result.passed
+
+
+def test_an_audit_record_that_names_no_verdict_cannot_be_read(
+    tmp_path: Path,
+) -> None:
+    candidates = {"plasma_current": _member("plasma_current")}
+    (tmp_path / f"{GROUP}.json").write_text(
+        json.dumps(
+            {
+                "group": GROUP,
+                "members": [
+                    {
+                        "name": "plasma_current",
+                        "text_sha256": audited_text_digest(
+                            candidates["plasma_current"]["description"],
+                            candidates["plasma_current"]["documentation"],
+                        ),
+                        "verdict": "unsure",
+                        "defects": [],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    record, problem = load_group_audit_record(tmp_path, GROUP)
+    assert record is None
+    assert "not sound, defective or undecided" in problem
+
+    result = _gate(
+        members={"plasma_current": "accepted"},
+        candidates=candidates,
+        audit_dir=tmp_path,
+    )
+    assert _causes(result) == ["group_audit_never_measured"]
+    assert "not sound, defective or undecided" in result.issues[0]["detail"]
+
+
+def test_a_defective_verdict_must_name_its_class(tmp_path: Path) -> None:
+    candidates = {"plasma_current": _member("plasma_current")}
+    (tmp_path / f"{GROUP}.json").write_text(
+        json.dumps(
+            {
+                "group": GROUP,
+                "members": [
+                    {
+                        "name": "plasma_current",
+                        "text_sha256": audited_text_digest(
+                            candidates["plasma_current"]["description"],
+                            candidates["plasma_current"]["documentation"],
+                        ),
+                        "verdict": "defective",
+                        "defects": [],
+                    }
+                ],
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    record, problem = load_group_audit_record(tmp_path, GROUP)
+    assert record is None
+    assert "without naming a defect class" in problem
 
 
 def test_group_never_measured_refuses(tmp_path: Path) -> None:
@@ -441,6 +637,20 @@ def test_audit_measured_before_a_text_change_refuses(tmp_path: Path) -> None:
 # ---------------------------------------------------------------------------
 
 
+def test_the_committed_ruling_is_the_bar_the_cut_reads() -> None:
+    ruling = _ruled()
+
+    assert ruling.max_defect_rate == 0
+    # Zero is the bar for the group and for every defect class, so a class
+    # cannot be left unguarded by omission.
+    assert set(ruling.class_maxima) == set(GROUP_AUDIT_DEFECT_CLASSES)
+    assert set(ruling.class_maxima.values()) == {0}
+    # Section 2 ruled every family that spans groups an exception for the
+    # first cut, and its list is the one the bar carries.
+    assert ruling.family_exceptions
+    assert ruling.defect_exceptions == frozenset()
+
+
 def test_unruled_bar_refuses(tmp_path: Path) -> None:
     candidates = {"plasma_current": _member("plasma_current")}
     _write_audit_record(tmp_path, candidates, defects={})
@@ -468,6 +678,7 @@ def test_ruling_document_is_read_or_reported(tmp_path: Path) -> None:
             {
                 "max_defect_rate": 0.05,
                 "class_maxima": {"name_omits_source": 0.02},
+                "defect_exceptions": ["electron_temperature"],
                 "sourceless_exceptions": ["plasma_current"],
                 "family_exceptions": ["equilibrium/foo|physical_vector|abc12345"],
                 "groups_cut_together": [["equilibrium", "magnetohydrodynamics"]],
@@ -481,6 +692,7 @@ def test_ruling_document_is_read_or_reported(tmp_path: Path) -> None:
     assert ruling is not None
     assert ruling.max_defect_rate == 0.05
     assert ruling.class_maxima == {"name_omits_source": 0.02}
+    assert ruling.defect_exceptions == frozenset({"electron_temperature"})
     assert ruling.sourceless_exceptions == frozenset({"plasma_current"})
     assert ruling.cut_with("equilibrium", "magnetohydrodynamics")
     assert not ruling.cut_with("equilibrium", "transport")
@@ -519,9 +731,6 @@ def test_domain_scoped_cut_refuses_and_writes_no_catalog(tmp_path: Path) -> None
     audit_dir = tmp_path / "audit"
     candidates = {"plasma_current": _member("plasma_current")}
     _write_audit_record(audit_dir, candidates, defects={})
-    ruling_path = tmp_path / "ruling.json"
-    ruling_path.write_text(json.dumps({"max_defect_rate": 0.2}), encoding="utf-8")
-
     with ExitStack() as stack:
         stack.enter_context(
             patch(
@@ -559,10 +768,12 @@ def test_domain_scoped_cut_refuses_and_writes_no_catalog(tmp_path: Path) -> None
                 return_value=_ReadOnlyGraphClient(),
             )
         )
+        # No configured path: the cut reads the ruling committed beside the
+        # package, which is the bar every checkout sees.
         stack.enter_context(
             patch(
                 "imas_codex.settings.get_sn_group_release_bar",
-                return_value=ruling_path,
+                return_value=None,
             )
         )
         stack.enter_context(
@@ -582,5 +793,8 @@ def test_domain_scoped_cut_refuses_and_writes_no_catalog(tmp_path: Path) -> None
     )
     assert not group_bar.passed
     assert "group_member_not_accepted" in _causes(group_bar)
+    # The ruled document was read: the unruled-bar refusal is not among the
+    # causes, and the refusal is the eligibility one.
+    assert "release_bar_not_ruled" not in _causes(group_bar)
     assert not report.all_gates_passed
     assert not (staging / "catalog.yml").exists()

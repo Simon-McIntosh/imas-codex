@@ -188,6 +188,10 @@ GATE_IDENTITY_TOKEN_COLLISION = "identity_token_collision"
 GATE_CATALOG_STATUS = "catalog_status"
 GATE_MANIFEST_GENERABILITY = "manifest_generability"
 GATE_GROUP_BAR = "group_release_bar"
+#: The document the group cut reads its bar from when no other path is
+#: configured. It carries the lead's ruling as recorded on the plan, so the
+#: bar is reviewable in the repository rather than in a user's environment.
+RULED_GROUP_RELEASE_BAR = Path(__file__).with_name("release_bar.json")
 
 # Fields that must NOT appear in exported YAML
 _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
@@ -1474,15 +1478,18 @@ class GroupReleaseRuling:
     """The ruled release bar and the exceptions it grants.
 
     ``max_defect_rate`` is the largest share of a group's live members an audit
-    may read as defective in any class. ``class_maxima`` bounds one class where
-    the classes differ in consequence. ``sourceless_exceptions`` are member ids
-    a ruling lets stand without a producing source, ``family_exceptions`` are
-    family ids allowed to span groups, and ``groups_cut_together`` are group
-    pairs released as one cut.
+    may read as defective in any class. A class whose rate differs in
+    consequence carries its own bound in ``class_maxima``; a class left out is
+    governed by ``max_defect_rate``. ``defect_exceptions`` are member ids a
+    ruling lets stand even though the audit read them as defective,
+    ``sourceless_exceptions`` are member ids a ruling lets stand without a
+    producing source, ``family_exceptions`` are family ids allowed to span
+    groups, and ``groups_cut_together`` are group pairs released as one cut.
     """
 
     max_defect_rate: float
     class_maxima: Mapping[str, float] = field(default_factory=dict)
+    defect_exceptions: frozenset[str] = frozenset()
     sourceless_exceptions: frozenset[str] = frozenset()
     family_exceptions: frozenset[str] = frozenset()
     groups_cut_together: frozenset[frozenset[str]] = frozenset()
@@ -1506,12 +1513,18 @@ def load_group_release_ruling(
     The document is JSON (YAML is accepted, since it is the same loader)::
 
         {
-          "max_defect_rate": 0.05,
-          "class_maxima": {"name_omits_source": 0.02},
+          "max_defect_rate": 0,
+          "class_maxima": {"name_omits_source": 0},
+          "defect_exceptions": ["<standard_name_id>"],
           "sourceless_exceptions": ["<standard_name_id>"],
           "family_exceptions": ["<parent_path>|<family_type>|<digest>"],
           "groups_cut_together": [["equilibrium", "magnetohydrodynamics"]]
         }
+
+    A member named in ``defect_exceptions`` may stand although the blind
+    adjudication read it as defective or could not decide it; that is the
+    ruling's one way past the audit, and it is recorded by name for that
+    reason.
     """
     ruling_path = Path(path)
     if not ruling_path.is_file():
@@ -1554,6 +1567,7 @@ def load_group_release_ruling(
         return frozenset(str(value) for value in values)
 
     try:
+        defect_exceptions = _names("defect_exceptions")
         sourceless = _names("sourceless_exceptions")
         families = _names("family_exceptions")
     except ValueError as exc:
@@ -1573,6 +1587,7 @@ def load_group_release_ruling(
         GroupReleaseRuling(
             max_defect_rate=float(rate),
             class_maxima=maxima,
+            defect_exceptions=defect_exceptions,
             sourceless_exceptions=sourceless,
             family_exceptions=families,
             groups_cut_together=together,
@@ -1601,15 +1616,20 @@ def audited_text_digest(
 class GroupAuditRecord:
     """One group's audit: every member read, with the text read and its verdict.
 
-    ``defects`` maps a member id to the classes the audit assigned it, empty
-    for a member read as sound. ``text_digests`` maps the same id to the digest
-    of the stored text the audit read, which is what makes a later change to a
-    member's text detectable.
+    ``defects`` maps a member id to the classes the blind adjudication assigned
+    it, empty for a member it judged sound. ``undecided`` holds the members the
+    adjudication could not decide: the ruled bar counts those as defective
+    until the lead rules on them, so they are kept apart rather than folded
+    into ``defects``, which would attribute a class the adjudication did not
+    name. ``text_digests`` maps every read member to the digest of the stored
+    text the audit read, which is what makes a later change to a member's text
+    detectable.
     """
 
     group: str
     read_at: datetime | None
     defects: Mapping[str, frozenset[str]]
+    undecided: frozenset[str]
     text_digests: Mapping[str, str]
 
 
@@ -1628,9 +1648,14 @@ def load_group_audit_record(
           "read_at": "2026-11-17T12:00:00+00:00",
           "members": [
             {"name": "<standard_name_id>", "text_sha256": "<digest>",
-             "defects": ["name_omits_source"]}
+             "verdict": "defective", "defects": ["name_omits_source"]}
           ]
         }
+
+    ``verdict`` is ``sound``, ``defective`` or ``undecided``. A defective
+    verdict names at least one class and a sound or undecided verdict names
+    none, because a class the adjudication did not name cannot be counted in
+    that class's rate.
     """
     record_path = Path(directory) / f"{group}.json"
     if not record_path.is_file():
@@ -1651,6 +1676,7 @@ def load_group_audit_record(
         return None, f"the audit record at {record_path} carries no members list"
 
     defects: dict[str, frozenset[str]] = {}
+    undecided: set[str] = set()
     digests: dict[str, str] = {}
     for row in rows:
         if not isinstance(row, dict) or not isinstance(row.get("name"), str):
@@ -1658,11 +1684,29 @@ def load_group_audit_record(
                 f"the audit record at {record_path} carries a member row with no name"
             )
         name = row["name"]
+        verdict = row.get("verdict")
+        if verdict not in {"sound", "defective", "undecided"}:
+            return None, (
+                f"the audit record at {record_path} gives member {name!r} the "
+                f"verdict {verdict!r}, which is not sound, defective or undecided"
+            )
         classes = row.get("defects") or []
         if isinstance(classes, str) or not isinstance(classes, list):
             return None, (
                 f"the audit record at {record_path} gives member {name!r} a "
                 "defects value that is not a list"
+            )
+        classes = frozenset(str(value) for value in classes)
+        if verdict == "defective" and not classes:
+            return None, (
+                f"the audit record at {record_path} reads member {name!r} as "
+                "defective without naming a defect class"
+            )
+        if verdict != "defective" and classes:
+            return None, (
+                f"the audit record at {record_path} gives member {name!r} the "
+                f"verdict {verdict!r} and also defect classes, which only a "
+                "defective verdict may carry"
             )
         digest = row.get("text_sha256")
         if not isinstance(digest, str) or not digest:
@@ -1670,7 +1714,9 @@ def load_group_audit_record(
                 f"the audit record at {record_path} gives member {name!r} no "
                 "text_sha256, so a later text change cannot be detected"
             )
-        defects[name] = frozenset(str(value) for value in classes)
+        defects[name] = classes
+        if verdict == "undecided":
+            undecided.add(name)
         digests[name] = digest
 
     read_at: datetime | None = None
@@ -1682,7 +1728,11 @@ def load_group_audit_record(
             read_at = None
 
     return GroupAuditRecord(
-        group=group, read_at=read_at, defects=defects, text_digests=digests
+        group=group,
+        read_at=read_at,
+        defects=defects,
+        undecided=frozenset(undecided),
+        text_digests=digests,
     ), ""
 
 
@@ -1807,10 +1857,15 @@ def _group_audit_issues(
 ) -> list[dict[str, Any]]:
     """Refuse a group whose audited defect rate cannot be read against the bar.
 
-    The rate is the share of the group's live members the audit read as
-    defective in any class. It is refused when it was never measured, when the
-    record does not cover every member, when the text read is not the text the
-    cut would ship, and when the rate or a class rate stands above the ruling.
+    The rate is the share of the group's live members the blind adjudication
+    read as defective in any class, taken over every member and uncorrected;
+    a member it could not decide is counted defective and reported as its own
+    share, and a member the ruling names as a defect exception is not counted.
+    It is refused when it was never measured, when the record does not cover
+    every member, when the text read is not the text the cut would ship, and
+    when the rate or a class rate stands above the ruling. A class the ruling
+    gives no maximum of its own is governed by ``max_defect_rate``, so a zero
+    group bar is a zero bound in every class.
     """
     if audit_dir is not None:
         record, problem = load_group_audit_record(audit_dir, group)
@@ -1826,7 +1881,7 @@ def _group_audit_issues(
         ]
 
     issues: list[dict[str, Any]] = []
-    read = set(record.defects)
+    read = set(record.defects) | set(record.undecided)
     missing = sorted(set(members) - read)
     not_a_member = sorted(read - set(members))
     unknown_classes = sorted(
@@ -1879,7 +1934,14 @@ def _group_audit_issues(
 
     total = len(members)
     if ruling is not None and total:
-        defective = [name for name in members if record.defects.get(name)]
+        allowed = set(ruling.defect_exceptions)
+        undecided = [name for name in sorted(members) if name in record.undecided]
+        defective = [
+            name
+            for name in members
+            if (record.defects.get(name) or name in record.undecided)
+            and name not in allowed
+        ]
         rate = len(defective) / total
         if rate > ruling.max_defect_rate:
             issues.append(
@@ -1889,15 +1951,25 @@ def _group_audit_issues(
                     "rate": round(rate, 6),
                     "bar": ruling.max_defect_rate,
                     "defective": len(defective),
+                    "undecided": len(
+                        [name for name in undecided if name not in allowed]
+                    ),
                     "members": total,
+                    "names": defective[:20],
+                    "detail": (
+                        "the adjudicated share read as defective, with the "
+                        "members it could not decide counted defective"
+                        if undecided
+                        else "the adjudicated share read as defective"
+                    ),
                 }
             )
         for defect_class in GROUP_AUDIT_DEFECT_CLASSES:
-            maximum = ruling.class_maxima.get(defect_class)
-            if maximum is None:
-                continue
+            maximum = ruling.class_maxima.get(defect_class, ruling.max_defect_rate)
             in_class = sum(
-                1 for name in members if defect_class in record.defects.get(name, ())
+                1
+                for name in members
+                if defect_class in record.defects.get(name, ()) and name not in allowed
             )
             class_rate = in_class / total
             if class_rate > maximum:
@@ -3725,17 +3797,17 @@ def run_export(
         waived_paths,
     )
     # The ruled bar every refusal in this cut reads. One document, read once,
-    # so the source-exception list and the group gate cannot disagree.
+    # so the source-exception list and the group gate cannot disagree. The
+    # lead's ruling is committed beside the package, so a checkout reads the
+    # same bar on every host; the environment and pyproject keys override it
+    # when a ruling is being tried before it lands.
     from imas_codex.settings import (
         get_sn_group_audit_dir,
         get_sn_group_release_bar,
     )
 
-    bar_path = get_sn_group_release_bar()
-    if bar_path is None:
-        bar_ruling, bar_problem = None, "no release bar ruling is configured"
-    else:
-        bar_ruling, bar_problem = load_group_release_ruling(bar_path)
+    bar_path = get_sn_group_release_bar() or RULED_GROUP_RELEASE_BAR
+    bar_ruling, bar_problem = load_group_release_ruling(bar_path)
     ruled_source_exceptions = (
         bar_ruling.sourceless_exceptions if bar_ruling is not None else frozenset()
     )

@@ -358,20 +358,27 @@ If help and this recipe disagree, stop and update the recipe before operating. K
 ### A group cut refuses unless the ruled bar exists
 
 `sn release --export-only --domain <group>` runs the group bar gate beside the
-other gates. It reads the ruled release bar from
-`IMAS_CODEX_SN_GROUP_RELEASE_BAR` (or
-`[tool.imas-codex.sn].group-release-bar`) and the group's audit record from
-`IMAS_CODEX_SN_GROUP_AUDIT_DIR` / `[tool.imas-codex.sn].group-audit-dir`, at
-`<dir>/<group>.json` with one row per member carrying the digest of the text
-the audit read. With no ruling configured the cut refuses with
-`release_bar_not_ruled` rather than guessing a threshold; with no record it
-refuses with `group_audit_never_measured`. Other causes: a member not accepted
-on name or documentation, a member with no producing source and no ruled
-exception, a family of the group with a member in another group and no ruling,
-a written definition that is not its stored shared sentence, and a defect rate
-above the ruled maximum, above a class maximum, incomplete over the members, or
-stale against their stored text. A full (unscoped) export runs none of these:
-the group is the cut, so the bar applies to the cut that selects one.
+other gates. It reads the ruled release bar from `release_bar.json` beside this
+package, which carries the lead's ruling as recorded on the plan: zero known
+defects, so `max_defect_rate` is 0 for the group and for every defect class.
+`IMAS_CODEX_SN_GROUP_RELEASE_BAR` (or `[tool.imas-codex.sn].group-release-bar`)
+overrides the path for a ruling being tried before it lands; an unreadable or
+absent document refuses with `release_bar_not_ruled` rather than guessing a
+threshold. The audit record is read from `IMAS_CODEX_SN_GROUP_AUDIT_DIR` /
+`[tool.imas-codex.sn].group-audit-dir`, at `<dir>/<group>.json`, one row per
+member carrying the verdict (`sound`, `defective` with at least one class, or
+`undecided`) and the digest of the text the audit read; with no record the cut
+refuses with `group_audit_never_measured`. The rate the bar reads is the
+adjudicated defective share over every member, uncorrected, with `undecided`
+members counted defective and reported as their own share; a member the ruling
+names in `defect_exceptions` is the one way past that. Other causes: a member
+not accepted on name or documentation, a member with no producing source and no
+ruled exception, a family of the group with a member in another group and no
+ruling, a written definition that is not its stored shared sentence, and a rate
+above the bar or above a class maximum (a class with no maximum of its own is
+governed by `max_defect_rate`), incomplete over the members, or stale against
+their stored text. A full (unscoped) export runs none of these: the group is the
+cut, so the bar applies to the cut that selects one.
 
 ### The segment sweep is a scheduled operation, not a rotation side effect
 

@@ -1,15 +1,21 @@
 {
-  "recorded_at_host": "98dci4-clu-3051",
-  "gate": "group_release_bar",
-  "test_bar": {
-    "max_defect_rate": 0.2,
+  "bar": {
+    "document": "imas_codex/standard_names/release_bar.json",
+    "ruled": "2026-11-17",
+    "recorded_at": "plan sn-audited-group-release section 3",
+    "max_defect_rate": 0.0,
     "class_maxima": {
-      "name_contradicts_source": 0.1
+      "definition_contradicts_source": 0.0,
+      "duplicate_of_live_name": 0.0,
+      "name_contradicts_source": 0.0,
+      "name_definition_disagree": 0.0,
+      "name_omits_source": 0.0,
+      "unit_wrong": 0.0,
+      "wrong_physics_domain": 0.0
     },
-    "note": "stated test values; the lead's ruling replaces them"
+    "family_exceptions": 225,
+    "defect_exceptions": []
   },
-  "module": "imas_codex/standard_names/export.py",
-  "tests": "tests/standard_names/test_release_group_bar.py",
   "rows": [
     {
       "fault": "none (the group is cut)",
@@ -113,7 +119,38 @@
       ]
     },
     {
-      "fault": "defect rate above the bar",
+      "fault": "defect rate above the ruled bar",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_defect_class_rate_above_bar",
+        "group_defect_rate_above_bar"
+      ],
+      "details": [
+        {
+          "type": "group_defect_rate_above_bar",
+          "rate": 0.333333,
+          "bar": 0.0,
+          "defective": 1,
+          "undecided": 0,
+          "members": 3,
+          "names": [
+            "plasma_current"
+          ],
+          "detail": "the adjudicated share read as defective"
+        },
+        {
+          "type": "group_defect_class_rate_above_bar",
+          "defect_class": "name_omits_source",
+          "rate": 0.333333,
+          "maximum": 0.0,
+          "defective": 1,
+          "members": 3
+        }
+      ]
+    },
+    {
+      "fault": "member the adjudication could not decide",
       "gate": "group_release_bar",
       "passed": false,
       "causes": [
@@ -122,30 +159,24 @@
       "details": [
         {
           "type": "group_defect_rate_above_bar",
-          "rate": 0.666667,
-          "bar": 0.2,
-          "defective": 2,
-          "members": 3
+          "rate": 0.333333,
+          "bar": 0.0,
+          "defective": 1,
+          "undecided": 1,
+          "members": 3,
+          "names": [
+            "electron_temperature"
+          ],
+          "detail": "the adjudicated share read as defective, with the members it could not decide counted defective"
         }
       ]
     },
     {
-      "fault": "class rate above its maximum",
+      "fault": "defective member a ruling names as an exception (the group is cut)",
       "gate": "group_release_bar",
-      "passed": false,
-      "causes": [
-        "group_defect_class_rate_above_bar"
-      ],
-      "details": [
-        {
-          "type": "group_defect_class_rate_above_bar",
-          "defect_class": "name_contradicts_source",
-          "rate": 0.333333,
-          "maximum": 0.1,
-          "defective": 1,
-          "members": 3
-        }
-      ]
+      "passed": true,
+      "causes": [],
+      "details": []
     },
     {
       "fault": "never measured",
@@ -157,7 +188,7 @@
       "details": [
         {
           "type": "group_audit_never_measured",
-          "detail": "no audit record for group 'equilibrium' at /tmp/reckon-crew-scratch/r-20261116T221753697517-sagr-release-bar/tmp6w0kh6sq/absent/equilibrium.json"
+          "detail": "no audit record for group 'equilibrium' at /tmp/reckon-crew-scratch/r-20261116T221753697517-sagr-release-bar/tmp_6n5a5_a/absent/equilibrium.json"
         }
       ]
     },
@@ -207,7 +238,7 @@
       "details": [
         {
           "type": "release_bar_not_ruled",
-          "detail": "no release bar ruling is configured"
+          "detail": "no release bar ruling is recorded at release_bar.json"
         }
       ]
     }
