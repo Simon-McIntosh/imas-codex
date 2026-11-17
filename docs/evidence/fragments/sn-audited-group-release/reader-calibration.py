@@ -832,6 +832,7 @@ def catalog_estimate(data, judgments, earlier, corrected, chosen, replicates=100
         "limits": [
             "Projected corrected-instruction flag share, not a full corrected rereading of all 339 names.",
             "Assumes reader recall and false alarms transport from this selected calibration cohort to the catalog.",
+            "The interval conditions on the selected reader and fixed hand labels; it does not include reader-selection uncertainty or mistakes in manual adjudication.",
             "Equal allocation across earlier-reader strata, sequential stopping at forty sound labels, undecidable exclusions, accidental-exposure exclusions and inherited plants can produce spectrum and selection bias; the interval does not remove these biases.",
             "The original 339-name sample was itself stratified by physics domain; this estimates that sample, not a population-weighted census rate for the entire live catalog.",
             "Old audit packets were not retained; changes of stored text between earlier calls and these versioned packets cannot be separated from the instruction change.",
