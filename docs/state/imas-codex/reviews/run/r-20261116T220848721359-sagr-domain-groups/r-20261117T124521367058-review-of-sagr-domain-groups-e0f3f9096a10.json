@@ -1,0 +1,65 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed node ran an evidence gate (domain-groups.py, no pytest arm), not a test suite: its manifest carries no baseline_suite or after_suite object from which a failure delta could be taken, so the delta is empty; domain-groups-gate.log records seven PASS arms and EXIT=0 and domain-groups-mutation.log is the red control, not a baseline arm.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T13:00:49.449Z",
+  "dispatched_at": "2026-11-17T13:00:06Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/domain-groups.py",
+      "line": "415",
+      "severity": "non-blocking",
+      "text": "non-blocking: family_member_check is called with spanning only (225 of the 498 detected families), while the arms it feeds are printed as \"every family lists each of its members once\" and the docstring claims every family's names are recounted, so the guard's wording claims a scope wider than the check performs."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/domain-groups.py",
+      "line": "250",
+      "severity": "non-blocking",
+      "text": "non-blocking: _section_one_wilson names a plan section in a symbol and its WILSON constant executes the sibling plan artefact blind-audit.py by file path at import, so renaming or removing that artefact breaks this fragment at import with a RuntimeError that names no caller and makes a plan-section label permanent in the code."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T220848721359-sagr-domain-groups/domain-groups-gate.log",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate log names only the measured base revision 5f882bc76 and the worktree path, never the head commit it ran against, so the seven PASS lines cannot be tied to e0f3f9096 from the log alone."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit from 5f882bc76 to e0f3f9096 \u2014 3bf2a13dd adds the fragment, 61e0027cf records the ruling as data, c90b7997b stamps the revision, and e0f3f9096 replaces the per-path list append with per-group sets at domain-groups.py:376 and adds family_member_check, the shared spearman_rho and the sibling wilson, touching only the three fragment files.",
+    "done_when": "every named element is present on the page except the per-group wrong-domain interval, which sagr-domain-groups.html:84 refuses with a stated reason (a group would carry a 20.4 pp wide interval at its sample size), and the gate at domain-groups.py:1418 asserts only the census and family invariants, leaving the 15-of-15 join and the ranking unasserted.",
+    "goal": "the goal is a per-group measure of how well each physics-domain group's membership is defined plus a proposed release order; at e0f3f9096 domain-groups.py:1301 build() produces the census, the ranking, the section-1 wrong-domain join and the 225 spanning families, and domain-groups.json ruling.sequence carries the lead's ruled 29-position order with transport last.",
+    "manifest": "the reviewed manifest.md reads status complete with four commits (3bf2a13dd, 61e0027cf, c90b7997b, e0f3f9096), the three changed paths, the exact gate command, two logs, and rubric lines for all six dimensions.",
+    "write_paths": "dispatch-detail.json node.write_paths names three fragment files and docs/figures/sn-audited-group-release/sagr-domain-groups, and git diff --name-status 5f882bc76..e0f3f9096 adds exactly the three declared fragment files and no figure."
+  },
+  "justifications": {
+    "durability": "domain-groups-mutation.log shows the restored per-path append reddens the arm at domain-groups.py:1439 with EXIT=1 and leaves the files unwritten, but the sibling arm at domain-groups.py:1443 cannot fire while duplicates exist and no mutation or test covers it.",
+    "evidence": "domain-groups-gate.log records seven PASS arms and EXIT=0, but the arms listed at domain-groups.py:1418 assert only the census sum, the plants and the family recount, so the section-1 join and the ranking they report are printed rather than measured.",
+    "fit": "the fragment follows the sibling blind-audit.py conventions and ruff check and format pass on the head file, but _section_one_wilson at domain-groups.py:250 puts a plan section number into a symbol name.",
+    "goal_fidelity": "sagr-domain-groups.html:314 renders the 72 equilibrium-touching families and domain-groups.json ruling.sequence carries the 29-position ruled order the done_when asks to be recorded.",
+    "reuse": "domain-groups.py:182 wraps spearman_rho from imas_codex/standard_names/benchmark_roles.py:175 and domain-groups.py:250 loads the wilson blind-audit.py:672 owns, so no added definition re-implements an owner it could have extended.",
+    "scope_discipline": "every path in git diff --name-status 5f882bc76..e0f3f9096 is one of the three declared fragment files, with no product source, test or stored-domain change."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a per-group measure of how well each physics-domain group's membership is defined plus a proposed release order; at e0f3f9096 domain-groups.py:1301 build() produces the census, the ranking, the section-1 wrong-domain join and the 225 spanning families, and domain-groups.json ruling.sequence carries the lead's ruled 29-position order with transport last.\nVERDICT done_when: every named element is present on the page except the per-group wrong-domain interval, which sagr-domain-groups.html:84 refuses with a stated reason (a group would carry a 20.4 pp wide interval at its sample size), and the gate at domain-groups.py:1418 asserts only the census and family invariants, leaving the 15-of-15 join and the ranking unasserted.\nVERDICT write_paths: dispatch-detail.json node.write_paths names three fragment files and docs/figures/sn-audited-group-release/sagr-domain-groups, and git diff --name-status 5f882bc76..e0f3f9096 adds exactly the three declared fragment files and no figure.\nVERDICT manifest: the reviewed manifest.md reads status complete with four commits (3bf2a13dd, 61e0027cf, c90b7997b, e0f3f9096), the three changed paths, the exact gate command, two logs, and rubric lines for all six dimensions.\nVERDICT diff: read commit by commit from 5f882bc76 to e0f3f9096 \u2014 3bf2a13dd adds the fragment, 61e0027cf records the ruling as data, c90b7997b stamps the revision, and e0f3f9096 replaces the per-path list append with per-group sets at domain-groups.py:376 and adds family_member_check, the shared spearman_rho and the sibling wilson, touching only the three fragment files.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: sagr-domain-groups.html:314 renders the 72 equilibrium-touching families and domain-groups.json ruling.sequence carries the 29-position ruled order the done_when asks to be recorded.\nSCORE evidence: 13\nJUSTIFICATION evidence: domain-groups-gate.log records seven PASS arms and EXIT=0, but the arms listed at domain-groups.py:1418 assert only the census sum, the plants and the family recount, so the section-1 join and the ranking they report are printed rather than measured.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in git diff --name-status 5f882bc76..e0f3f9096 is one of the three declared fragment files, with no product source, test or stored-domain change.\nSCORE durability: 13\nJUSTIFICATION durability: domain-groups-mutation.log shows the restored per-path append reddens the arm at domain-groups.py:1439 with EXIT=1 and leaves the files unwritten, but the sibling arm at domain-groups.py:1443 cannot fire while duplicates exist and no mutation or test covers it.\nSCORE fit: 15\nJUSTIFICATION fit: the fragment follows the sibling blind-audit.py conventions and ruff check and format pass on the head file, but _section_one_wilson at domain-groups.py:250 puts a plan section number into a symbol name.\nSCORE reuse: 19\nJUSTIFICATION reuse: domain-groups.py:182 wraps spearman_rho from imas_codex/standard_names/benchmark_roles.py:175 and domain-groups.py:250 loads the wilson blind-audit.py:672 owns, so no added definition re-implements an owner it could have extended.\nFINDING docs/evidence/fragments/sn-audited-group-release/domain-groups.py:415 non-blocking: family_member_check is called with spanning only (225 of the 498 detected families), while the arms it feeds are printed as \"every family lists each of its members once\" and the docstring claims every family's names are recounted, so the guard's wording claims a scope wider than the check performs.\nFINDING docs/evidence/fragments/sn-audited-group-release/domain-groups.py:250 non-blocking: _section_one_wilson names a plan section in a symbol and its WILSON constant executes the sibling plan artefact blind-audit.py by file path at import, so renaming or removing that artefact breaks this fragment at import with a RuntimeError that names no caller and makes a plan-section label permanent in the code.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T220848721359-sagr-domain-groups/domain-groups-gate.log:3 non-blocking: the gate log names only the measured base revision 5f882bc76 and the worktree path, never the head commit it ran against, so the seven PASS lines cannot be tied to e0f3f9096 from the log alone.",
+  "review_run_id": "r-20261117T124521367058-review-of-sagr-domain-groups-e0f3f9096a10",
+  "reviewed_base_sha": "5f882bc76c8cd51cb61cdc0ac17bd251232a10e6",
+  "reviewed_head_sha": "e0f3f9096a10f1c7da2358ceb105a04d8c6f3bdf",
+  "reviewed_run_id": "r-20261116T220848721359-sagr-domain-groups",
+  "scores": {
+    "durability": 13,
+    "evidence": 13,
+    "fit": 15,
+    "goal_fidelity": 17,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:21:32.765799+00:00",
+  "total": 97
+}
