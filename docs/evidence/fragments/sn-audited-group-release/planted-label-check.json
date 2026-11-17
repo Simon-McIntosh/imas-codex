@@ -1,5 +1,5 @@
 {
-  "phase": "source-only",
+  "phase": "compared",
   "collected_at": "2026-11-17T11:42:37.216978+00:00",
   "collection_revision": "a325c5b1f0dbb7f76b9da7c95e1c901d57d900d2",
   "collection_receipt": {
@@ -891,5 +891,1887 @@
       "reason": "The name omits the launch reference explicitly stated by the reflectometer and refractometer sources, which distinguishes a phase difference from an arbitrary wave phase.",
       "decidable_from_text": true
     }
-  ]
+  ],
+  "comparison": [
+    {
+      "id": "accumulated_total_gas_count",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=15",
+      "original_audited_source_path": "summary/gas_injection_accumulated/total/value",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Cumulative equivalent-electron inventory of all gas species delivered by injection after plasma breakdown, summed across species.",
+      "source_sentence_path": "stored description",
+      "label_reason": "The unqualified gas count names a particle count, while the stored definition specifies a charge-weighted equivalent-electron count and a post-breakdown injection inventory.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "The source specifies the total is \"expressed in equivalent electrons\", a counting basis omitted by the name. Consequently, the stored name describes a particle or gas count (accumulated_total_gas_count), whereas the stored definition defines an equivalent-electron inventory ($N_{\\mathrm{eq}} = \\sum z_s N_s$), causing name and definition to disagree on the quantity.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The enclosing source states “Accumulated gas injected since plasma breakdown” and a total “expressed in equivalent electrons.” The name accumulated_total_gas_count omits the injection locus, post-breakdown phase, and equivalent-electron counting basis. The stored definition and unit 1 otherwise match the cumulative, species-summed quantity.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_definition_disagree"
+          ],
+          "rationale": "“accumulated_total_gas_count” names a gas count, but the definition specifies a “Cumulative equivalent-electron inventory.” Documentation defines it as “N_eq(t) = sum_s z_s N_s(t),” weighting gas particles by their equivalent-electron contributions rather than counting the gas particles themselves.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "area_of_diagnostic_aperture",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit.md:row=37",
+      "original_audited_source_path": "hard_x_rays/channel/detector/surface",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Surface specification of detector.",
+      "source_sentence_path": "soft_x_rays/channel/detector/surface",
+      "label_reason": "An aperture opening excludes the detector face that this bound source explicitly measures; reflector and detector sources cannot all denote aperture area.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Surface area of a diagnostic aperture opening.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_contradicts_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "The stored scope is “the diagnostic aperture opening” and “distinct from … surface_area_of_detector.” The sources instead include “Surface specification of detector,” “Surface specification of antenna emission,” and reflector documentation “Surface of the object.” Thus the aperture-only name and definition contradict source loci beyond apertures.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_contradicts_source",
+            "definition_contradicts_source",
+            "wrong_physics_domain"
+          ],
+          "rationale": "Sources specify “Surface specification of detector” and “Surface specification of reflector,” contradicting the aperture-only name and definition, “Area of the diagnostic aperture opening in its own plane.” The source “nbi/unit/aperture/surface” also describes a neutral-beam-injection aperture, not a diagnostic aperture; its domain is not “radiation_measurement_diagnostics”.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "coolant_mass_flow_rate",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=9",
+      "original_audited_source_path": "calorimetry/cooling_loop/mass_flow",
+      "independent_verdict": "defective",
+      "label_verdict": "undecidable",
+      "source_sentence": "Mass flow rate of the fluid",
+      "source_sentence_path": "balance_of_plant/power_plant/system/component/port/mass_flow",
+      "label_reason": "The source names a broader object; the shown text does not establish whether this particular instance satisfies the narrower qualifier. Provisional defective reading is excluded from calibration.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The sources describe the mass flow rate of fluid or coolant passing through a balance-of-plant port, calorimetry component, or cooling loop. The name, definition, kg.s^-1 unit, and assigned physics domain accurately capture this shared quantity without contradiction or omission.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The sources share coolant/fluid mass throughput per unit time: “Mass flow rate (ṁ) of coolant passing through a calorimetry component”, through a cooling loop, or fluid “at a component port”. The stored dm_pass/dt definition matches, and kg.s^-1 and mechanical_measurement_diagnostics fit.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is coolant mass flow rate: “Mass flow of the coolant going through the component” and “Mass flow of the coolant going through the loop”. The port source describes fluid throughput in circuits including “e.g. divertor cooling loop”. The definition’s “mass of coolant … per unit time” and unit “kg.s^-1” agree.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-equilibrium-boundary-to-profiles.md:row=34",
+      "original_audited_source_path": "equilibrium/time_slice/profiles_1d/dvolume_dpsi",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Radial derivative of the volume enclosed in the flux surface with respect to Psi",
+      "source_sentence_path": "equilibrium/time_slice/profiles_1d/dvolume_dpsi",
+      "label_reason": "The name, enclosed-volume derivative definition and inverse-weber cubic-metre unit identify the same poloidal-flux derivative.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Derivative of the volume enclosed by a flux surface with respect to poloidal flux coordinate (dV/dψ).",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Source: “Radial derivative of the volume enclosed by a flux surface with respect to poloidal flux (dV/dψ).” The name and definition state this same enclosed-volume derivative; “Wb^-1.m^3” fits m³ per Wb, and the source path places it in equilibrium.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source states “Radial derivative of the volume enclosed by a flux surface with respect to poloidal flux (dV/dψ).” The name and stored definition identify this same geometric derivative. The unit Wb^-1.m^3 and equilibrium domain are appropriate.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=48",
+      "original_audited_source_path": "tf/delta_b_field_phi_vacuum_r",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Variation of (vacuum field times major radius in the toroidal field magnet) from the start of the plasma.",
+      "source_sentence_path": "tf/delta_b_field_phi_vacuum_r",
+      "label_reason": "The present-minus-initial vacuum poloidal current function is the stated change of vacuum toroidal field times radius, with the correct tesla-metre unit.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, name, and definition describe the change in the vacuum toroidal magnetic field product with major radius, known as the vacuum poloidal current function, relative to its initial value at the start of plasma.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source’s “Change in the vacuum toroidal field product … from the start of plasma” matches the stored “ΔF_vac=F_vac−F_vac,initial=R B_φ,vac−R B_φ,vac,initial”: one signed change in vacuum field times major radius. The unit T.m and domain magnetic_field_systems fit.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source specifies “from the start of plasma” and “in the TF magnet system.” The name’s “initial_vacuum_poloidal_current_function” does not identify the plasma-start reference, and the name leaves the TF-magnet scope unstated.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "effective_turn_count_of_passive_loop",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-magnetics-to-spectrometer-visible.md:row=16",
+      "original_audited_source_path": "pf_passive/loop/element/turns_with_sign",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Number of effective turns in the element for calculating magnetic fields of the coil/loop; includes the sign of the number of turns (positive means current is counter-clockwise when seen from above)",
+      "source_sentence_path": "pf_passive/loop/element/turns_with_sign",
+      "label_reason": "The name drops the signed character and element scope explicitly stated by the source; the enclosing structure distinguishes a loop from its cross-section elements.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source path pf_passive/loop/element/turns_with_sign and description state the locus as a \"passive conductor loop element\" (\"Each loop is comprised of a number of cross-section elements described individually\"), but the standard name omits the element locus, naming only the passive loop.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source leaf `pf_passive/loop/element/turns_with_sign` states: “Number of effective turns (with sign) in a passive conductor loop element.” The name omits both the signed basis and the element locus; the enclosing source says loop cross-section elements are “described individually.”",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source specifies \"effective turns (with sign) in a passive conductor loop element\"; its enclosure states \"Each loop is comprised of a number of cross-section elements described individually.\" The name omits the signed, per-element basis and the stated convention: \"positive means current is counter-clockwise when seen from above.\"",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "electron_temperature_at_magnetic_axis",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=43",
+      "original_audited_source_path": "summary/local/magnetic_axis/t_e/value",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Electron temperature at the magnetic axis, inferred from ratios of soft x-rays emissivity at different energies",
+      "source_sentence_path": "camera_x_rays/t_e_magnetic_axis",
+      "label_reason": "Both sources denote electron temperature at the magnetic axis; the inference method does not change that quantity, and eV is appropriate.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The name, definition, and sources consistently describe the electron temperature evaluated at the magnetic axis, measured in electronvolts within the transport domain.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Both sources state \"Electron temperature (Te) at the magnetic axis\"; the stored name and definition describe that same local electron kinetic temperature, and the eV unit matches both source units.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Both sources state “Electron temperature (Te) at the magnetic axis,” matching the name and stored definition’s “Temperature of electrons at the magnetic axis.” The quantity is local electron temperature, appropriately expressed in eV.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "elongation_of_flux_surface",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-equilibrium-boundary-to-profiles.md:row=36",
+      "original_audited_source_path": "equilibrium/time_slice/profiles_1d/elongation",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Elongation (κ) of nested magnetic flux surfaces as a 1D radial profile in the MHD equilibrium, defined as the ratio of the vertical to horizontal semi-axis of each flux surface.",
+      "source_sentence_path": "equilibrium/time_slice/profiles_1d/elongation",
+      "label_reason": "The dimensionless vertical-to-radial extent ratio matches the source elongation of a flux surface.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, name, and definition describe the elongation (kappa) of a magnetic flux surface, defined as the ratio of its vertical to radial extent.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Both sources describe flux-surface “Elongation (κ)” as the “ratio of the vertical to horizontal semi-axes.” The stored extent formula gives that ratio for an elliptical cross-section and defines the same vertical-to-horizontal shape measure per surface. It is dimensionless (unit 1), and the equilibrium profile source supports the assigned domain.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is flux-surface elongation: the source’s “ratio of the vertical to horizontal semi-axis of each flux surface” matches the stored “ratio of its poloidal cross-section’s vertical extent to its radial extent.” Unit “1” and domain “equilibrium” fit this dimensionless shape ratio.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "faraday_angle",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit.md:row=21",
+      "original_audited_source_path": "equilibrium/time_slice/constraints/faraday_angle/reconstructed",
+      "independent_verdict": "sound",
+      "label_verdict": "overturned",
+      "source_sentence": "Faraday angle (variation of the Faraday angle induced by crossing the plasma)",
+      "source_sentence_path": "polarimeter/channel/faraday_angle",
+      "label_reason": "The name and definition identify plasma-induced polarisation rotation; measured and reconstructed values are representations of that same angle.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The sources, standard name, and stored definition all describe the Faraday rotation angle induced by passage of a probing beam through magnetized plasma, measured in radians.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Source 2: “Faraday rotation angle induced by passage of the probing beam through the magnetized plasma,” sensitive to “∫n_e·B∥ dl”; the stored definition gives the same accumulated signed rotation. The documentation treats measured and reconstructed values as realizations of one angle. Unit rad and the equilibrium-constraint domain match the sources.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The name and definition identify the “Faraday rotation angle induced by passage of the probing beam through the magnetized plasma.” The sources’ “Measured value” and “Value calculated from the reconstructed equilibrium” represent this same angle. The unit rad and equilibrium-constraint domain are consistent.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "flux_surface_averaged_inverse_of_square_of_magnetic_field_magnitude",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit.md:row=31",
+      "original_audited_source_path": "equilibrium/time_slice/profiles_1d/gm4",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Flux surface averaged 1/B^2",
+      "source_sentence_path": "equilibrium/time_slice/profiles_1d/gm4",
+      "label_reason": "The name preserves the order of reciprocal, square and flux-surface averaging, and the stored unit is inverse tesla squared.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, standard name, and stored definition all describe the flux-surface average of the inverse square of the magnetic field magnitude, with consistent units of T^-2 and assigned domain equilibrium.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Source: “Flux surface averaged inverse square of the total magnetic field, ⟨1/B²⟩ (gm4), as a radial profile.” The name and definition identify that same average of B⁻² for the total equilibrium field magnitude; source and stored unit are both “T^-2”, and the enclosing equilibrium structure supports the assigned domain.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source’s “Flux surface averaged inverse square of the total magnetic field, ⟨1/B²⟩” is the quantity identified by the name and defined as “Flux-surface average of the inverse square of total equilibrium magnetic-field magnitude.” T^-2 and the equilibrium domain are consistent.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "flux_surface_averaged_major_radius",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit.md:row=32",
+      "original_audited_source_path": "equilibrium/time_slice/profiles_1d/gm8",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Flux surface averaged R",
+      "source_sentence_path": "equilibrium/time_slice/profiles_1d/gm8",
+      "label_reason": "The metre-valued flux-surface mean of major radius matches the named operator and the source.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The standard name, definition, and source text all consistently describe the flux-surface-averaged major radius \\langle R \\rangle in meters as an equilibrium profile metric coefficient.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source states “Flux surface averaged major radius (gm8 = 〈R〉)” and “Represents the mean major radius over a flux surface”; the name and stored definition identify that same averaged radius, with the appropriate unit “m” and physics domain “equilibrium”.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source states “Flux surface averaged major radius (gm8 = 〈R〉),” matching the name and stored definition, “Major radius averaged over a complete closed magnetic flux surface.” All identify the same quantity. The unit m and equilibrium domain are consistent.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "forward_wave_phase_of_ion_cyclotron_heating_antenna",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-equilibrium-profiles-to-magnetics.md:row=21",
+      "original_audited_source_path": "ic_antennas/antenna/module/phase_forward",
+      "independent_verdict": "defective",
+      "label_verdict": "overturned",
+      "source_sentence": "Phase of the forward power with respect to the first module",
+      "source_sentence_path": "ic_antennas/antenna/module/phase_forward",
+      "label_reason": "The source specifies a selected module relative to the first module; an antenna forward-wave phase leaves that reference and module scope unstated.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source specifies the locus as an \"ICRH antenna module\" within enclosing structure \"ic_antennas/antenna/module\" (\"Set of antenna modules\"), but the standard name omits the module locus, naming only the overall \"ion_cyclotron_heating_antenna\".",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source states “Phase of the forward power wave for an ICRH antenna module, measured relative to the first module,” and the enclosing locus is “Set of antenna modules.” The name only says “forward_wave_phase_of_ion_cyclotron_heating_antenna,” omitting the module locus and the first-module relative-phase reference.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "The source specifies “for an ICRH antenna module, measured relative to the first module.” Documentation confirms “one selected module relative to the first module.” The name identifies antenna-level forward-wave phase without the module locus or first-module reference, leaving out source qualifiers and differing from the stored definition’s module-relative scope.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "height_of_poloidal_field_coil",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-magnetics-to-spectrometer-visible.md:row=12",
+      "original_audited_source_path": "pf_active/coil/element/geometry/rectangle/height",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Vertical full height of the rectangular cross-section of an active PF coil element.",
+      "source_sentence_path": "pf_active/coil/element/geometry/rectangle/height",
+      "label_reason": "The name says coil height but the source and definition specify the full vertical dimension of a rectangular conductor-element cross-section.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, name, and definition describe the vertical full height of the rectangular cross-section of a poloidal field coil or element in metres.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The sources state “Vertical full height of the rectangular cross-section”; the definition’s “full vertical extent of the rectangular conductor cross-section of an individual active coil element” describes that same coil-element height. The unit m fits, and magnetic_field_systems is the appropriate domain.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is the “Vertical full height” of a PF coil element’s rectangular conductor cross-section. The stored definition calls this the “nonnegative full vertical extent,” and the enclosing rectangle structure specifies “Rectangular description of the element.” The unit m and magnetic_field_systems domain fit.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "initial_polarization_ellipticity_of_polarimeter_beam",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-magnetics-to-spectrometer-visible.md:row=25",
+      "original_audited_source_path": "polarimeter/channel/polarization_initial",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Initial polarization vector before entering the plasma",
+      "source_sentence_path": "polarimeter/channel/polarization_initial",
+      "label_reason": "Ellipticity is a dimensionless semiaxis ratio, not a length in metres; the second source additionally denotes a full initial polarization vector, which is not that scalar ratio.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "unit_wrong"
+          ],
+          "rationale": "Polarization ellipticity is defined as the signed minor-to-major semiaxis ratio of the electric-field polarization ellipse, which is a dimensionless ratio. The stored unit 'm' (meters) is dimensionally wrong for an ellipticity.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "unit_wrong"
+          ],
+          "rationale": "The definition calls ellipticity “the signed minor-to-major semiaxis ratio,” a dimensionless quantity, yet the stored unit is “m.” The source’s “Initial ellipticity … before entering the plasma” otherwise agrees with the name and stored definition.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_contradicts_source",
+            "definition_contradicts_source",
+            "unit_wrong"
+          ],
+          "rationale": "Source 2 states “Initial polarization vector,” but the name specifies ellipticity and stored documentation explicitly says “It is not the full initial polarization vector.” Both agree with Source 1, but contradict Source 2. The defined “signed minor-to-major semiaxis ratio” is dimensionless, so stored unit “m” is wrong.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "launched_power_of_lower_hybrid_antenna",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=32",
+      "original_audited_source_path": "summary/heating_current_drive/lh/power/value",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Represents the net RF power absorbed by the plasma from the lower hybrid current drive (LHCD) system.",
+      "source_sentence_path": "summary/heating_current_drive/lh/power/value",
+      "label_reason": "The documentation defines power entering the vacuum vessel and explicitly leaves subsequent deposition unresolved, but this bound source states plasma-absorbed power.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, name, and definition consistently describe the net RF power launched into the vacuum vessel by a lower-hybrid antenna, module, or overall antenna system, with unit W in the auxiliary_heating domain.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is net lower-hybrid launched power: Source 4 says “Net RF power launched from a lower hybrid (LH) antenna into the vacuum vessel,” while Source 7 specifies “the forward power minus the reflected power.” Source 5 covers the system sum. The stored definitions agree; W and auxiliary_heating are appropriate.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_contradicts_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "Source 6 specifies “net RF power absorbed by the plasma.” The name specifies launched power, and the documentation defines “net power delivered across the launching aperture into the vessel.” Plasma-absorbed power and power entering the vessel are distinct quantities, so both the name and stored definition conflict with Source 6.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "loop_voltage_at_plasma_boundary",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=30",
+      "original_audited_source_path": "summary/global_quantities/v_loop/value",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "LCFS loop voltage (positive value drives positive ohmic current that flows anti-clockwise when viewed from above)",
+      "source_sentence_path": "plasma_profiles/global_quantities/v_loop",
+      "label_reason": "The boundary toroidal circulation, volts and positive-current convention match the LCFS loop-voltage source.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, name, and stored definition all describe the loop voltage at the plasma boundary (last closed flux surface), with unit V representing the toroidal electromotive force driving ohmic current.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The sources describe “Loop voltage ... at the last closed flux surface (LCFS), the inductive EMF driving ohmic current”; the name and definition describe that same boundary loop voltage, with the appropriate unit V.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source's “Loop voltage (Vloop) at the last closed flux surface (LCFS)” matches “loop_voltage_at_plasma_boundary” and the documented “closed toroidal loop at the plasma boundary”: the boundary toroidal electromotive force driving ohmic current, measured in V.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "lower_bound_photon_energy",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit.md:row=40",
+      "original_audited_source_path": "hard_x_rays/emissivity_profile_1d/lower_bound",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Lower energy detection threshold on each pixel of the detector (photons are counted only if their energy is above this value)",
+      "source_sentence_path": "camera_x_rays/energy_threshold_lower",
+      "label_reason": "The name specifies the photon-energy lower boundary and the documentation covers both per-pixel thresholds and emission-band bounds in eV.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The standard name, stored definition, and Data Dictionary sources all describe the lower bound or minimum threshold of photon energy for an energy band or detector channel/pixel.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is the lower photon-energy edge of an X-ray band: the sources call it the “Lower bound of the energy band” or the pixel threshold where “photons are counted only if their energy is above this value.” The documentation covers both “detection or emission band,” and eV is an energy unit.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is the lower photon-energy boundary of an X-ray energy window. Sources specify “Lower bound of the energy band” or “Lower energy detection threshold on each pixel”; the documentation covers “an X-ray detection or emission band,” distinguishing counting thresholds from emission-band boundaries.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "minimum_over_flux_surface_magnetic_field_magnitude",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-equilibrium-boundary-to-profiles.md:row=31",
+      "original_audited_source_path": "equilibrium/time_slice/profiles_1d/b_field_min",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Minimum(modulus(B)) on the flux surface (always positive, irrespective of the sign convention for the B-field direction)",
+      "source_sentence_path": "equilibrium/time_slice/profiles_1d/b_field_min",
+      "label_reason": "The minimum of field magnitude over one flux surface preserves the source operator, locus and sign independence.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, name, and definition describe the minimum of the magnetic field magnitude across a magnetic flux surface.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Source: “Minimum magnetic field modulus (|B|_min) on each flux surface as a 1D radial profile in the MHD equilibrium.” The name and definition identify the pointwise minimum of total |B| over a flux surface; the stored unit T and equilibrium domain also match.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source’s “Minimum magnetic field modulus (|B|_min) on each flux surface” matches the name and stored “Smallest total magnetic-field strength attained along a specified nested magnetic flux surface.” All describe the minimum of |B| over one flux surface. The unit T and equilibrium domain are appropriate.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "minimum_safety_factor",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-equilibrium-boundary-to-profiles.md:row=27",
+      "original_audited_source_path": "equilibrium/time_slice/global_quantities/q_min/value",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Minimum q value",
+      "source_sentence_path": "equilibrium/time_slice/global_quantities/q_min/value",
+      "label_reason": "The source and name specify minimum q, but the documentation minimizes absolute q and returns a signed value, a different operation when q is negative.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, stored name, and definitions all specify the minimum safety factor (q value) across the plasma equilibrium.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source leaf 'q_min/value' is documented as 'Minimum q value' with unit '1'; its parent separately describes 'Minimum q value and position.' The name and stored definition identify the extremal safety-factor value, not its location, and the dimensionless unit and equilibrium domain fit.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "The source specifies “Minimum q value,” matching minimum_safety_factor. The stored documentation instead selects the surface “where the magnitude of the safety factor is smallest.” The signed q at minimum |q| is not generally the minimum q, particularly when q is negative.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "minor_radius_of_plasma_boundary",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-equilibrium-boundary-to-profiles.md:row=1",
+      "original_audited_source_path": "equilibrium/time_slice/boundary/minor_radius",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Minor radius of the plasma boundary (defined as (Rmax-Rmin) / 2 of the boundary)",
+      "source_sentence_path": "equilibrium/time_slice/boundary/minor_radius",
+      "label_reason": "The name and definition give the same boundary horizontal half-width as the source, in metres.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Minor radius of the plasma boundary, defined as half the difference between the maximum and minimum major radii of the boundary contour.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source and stored definition agree on one quantity: “Minor radius (a) of the plasma boundary, defined as (R_max − R_min)/2 of the boundary contour,” matching “half the difference between the maximum and minimum major radii.” The plasma-boundary/LCFS locus, unit m, and equilibrium domain are consistent.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source’s “Minor radius (a) of the plasma boundary, defined as (R_max − R_min)/2 of the boundary contour” matches the name and stored definition’s “half the difference between the maximum and minimum major radii.” All describe the same boundary-wide geometric minor radius; unit “m” and domain “equilibrium” fit.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "normalized_poloidal_flux_coordinate",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=37",
+      "original_audited_source_path": "core_profiles/profiles_1d/grid/rho_pol_norm",
+      "independent_verdict": "defective",
+      "label_verdict": "overturned",
+      "source_sentence": "Normalised poloidal flux coordinate = sqrt((psi(rho)-psi(magnetic_axis) / (psi(LCFS)-psi(magnetic_axis)))",
+      "source_sentence_path": "core_profiles/profiles_1d/grid/rho_pol_norm",
+      "label_reason": "The name omits the square-root parameterization explicitly stated by most sources; a linear normalized flux and its square root share endpoints but have different values.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "normalized poloidal flux coordinate",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source"
+          ],
+          "rationale": "Stored documentation: “The coordinate is the square-root form, ρ_pol,norm = √ψ_N.” Source 18 instead identifies “Normalised poloidal flux coordinate (ψ_norm)” and says “the flux being normalized” from axis to separatrix; that is the linear normalized flux ψ_N, not its square root.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source"
+          ],
+          "rationale": "Source 18 identifies “ψ_norm,” with “the flux being normalized to run from 0 at the magnetic axis to 1 at the separatrix.” The stored definition instead mandates “the square root of the poloidal-flux fraction.” Linear normalized poloidal flux and its square-root coordinate are different quantities.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "poloidal_magnetic_flux_of_flux_loop",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-equilibrium-boundary-to-profiles.md:row=10",
+      "original_audited_source_path": "equilibrium/time_slice/constraints/flux_loop/measured",
+      "independent_verdict": "defective",
+      "label_verdict": "overturned",
+      "source_sentence": "Value calculated from the reconstructed equilibrium",
+      "source_sentence_path": "equilibrium/time_slice/constraints/flux_loop/reconstructed",
+      "label_reason": "The stored description restricts the quantity to a measured flux, whereas this source is a calculated reconstructed value; the name itself can cover both representations.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source"
+          ],
+          "rationale": "The definition states that the quantity is the \"measured, signed vertical-field integral\" and documentation specifies \"that loop's measured value\", which directly contradicts Source 1 (`equilibrium/time_slice/constraints/flux_loop/reconstructed`), defined as \"Value calculated from the reconstructed equilibrium\".",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source"
+          ],
+          "rationale": "The description calls this “the measured, signed vertical-field integral,” and the documentation says “that loop's measured value”; Source 1 instead states “Reconstructed value of flux loop” and “Value calculated from the reconstructed equilibrium.” The name itself is provenance-neutral, and Wb matches the stated flux.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "Source 1 says “Reconstructed value of flux loop” and “Value calculated from the reconstructed equilibrium.” The description instead specifies “the measured, signed vertical-field integral,” and documentation specifies “that loop's measured value.” This measured-only scope contradicts Source 1 and narrows the name’s unrestricted loop-specific poloidal flux.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "radial_coordinate_at_inboard_midplane",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-equilibrium-boundary-to-profiles.md:row=49",
+      "original_audited_source_path": "equilibrium/time_slice/profiles_1d/r_inboard",
+      "independent_verdict": "sound",
+      "label_verdict": "overturned",
+      "source_sentence": "Major radius (R) of the flux surface at the inboard (high-field side) midplane intersection, provided as a 1D radial profile.",
+      "source_sentence_path": "equilibrium/time_slice/profiles_1d/r_inboard",
+      "label_reason": "The name, definition and metre unit agree with the source location on the inboard midplane.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Major radius (radial coordinate) of a magnetic flux surface at its inboard midplane intersection.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source states \"Major radius (R) of the flux surface at the inboard (high-field side) midplane intersection\"; the name and stored definition identify that same locus-specific major-radius coordinate. The source unit \"m\" fits, and the enclosing equilibrium profile structure supports the assigned equilibrium domain.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source states “Major radius (R) of the flux surface at the inboard (high-field side) midplane intersection,” matching the name and stored definition’s “Major-radius coordinate of a magnetic flux surface at its inboard midplane intersection.” The unit m and equilibrium domain are appropriate.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "radial_coordinate_of_conductor_cross_section",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit.md:row=56",
+      "original_audited_source_path": "pf_active/coil/element/geometry/rectangle/r",
+      "independent_verdict": "defective",
+      "label_verdict": "overturned",
+      "source_sentence": "Geometric centre R",
+      "source_sentence_path": "pf_active/coil/element/geometry/rectangle/r",
+      "label_reason": "The source names a cross-section centre coordinate, while the name can equally denote an arbitrary point or outline coordinate and omits that stated centre qualifier.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "wrong_physics_domain"
+          ],
+          "rationale": "The assigned physics domain is equilibrium, but the sources describe the geometry of hardware components such as \"Array of active poloidal field (PF) coils including the central solenoid and shaping coils\" (pf_active/coil) and \"ic_antennas/antenna/module/strap\", which belong to the magnets or heating domains rather than plasma equilibrium.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source documentation states “Geometric centre R”, but the name only gives a “radial_coordinate_of_conductor_cross_section”; it omits the geometric-centre reference locus. The stored description supplies that locus and otherwise agrees with the source.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_definition_disagree",
+            "wrong_physics_domain"
+          ],
+          "rationale": "The name identifies a 'conductor_cross_section' generally, while documentation restricts it to 'cross-sections represented as rectangles' and 'the center position'. The sources concern 'Active PF coils', antenna straps and passive-loop geometry: conductor geometry, not an equilibrium quantity.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "spectral_bremsstrahlung_photon_radiance",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=7",
+      "original_audited_source_path": "bremsstrahlung_visible/channel/radiance_spectral",
+      "independent_verdict": "defective",
+      "label_verdict": "overturned",
+      "source_sentence": "Calibrated continuum intensity in the middle of the spectrum per unit wavelength",
+      "source_sentence_path": "charge_exchange/channel/spectrum/radiance_continuum",
+      "label_reason": "The source and stored definition select the spectrum-centre value, a wavelength-locus restriction absent from the unqualified spectral-radiance name.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Spectral bremsstrahlung photon radiance represents calibrated continuum spectral radiance per unit wavelength, with unit m^-3.s^-1.sr^-1 representing photons per area, second, solid angle, and wavelength.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is continuum bremsstrahlung spectral photon radiance per unit wavelength: source 2 calls it \"continuum spectral radiance measured at the centre\" \"per unit wavelength.\" The stored photon-rate definition, central-wavelength evaluation, and m^-3.s^-1.sr^-1 unit consistently describe that quantity.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "Source 2 specifies “measured at the centre of the charge exchange spectrum,” and the stored definition says “evaluated at the spectrum center.” The name “spectral_bremsstrahlung_photon_radiance” omits this spectral-location restriction and describes a broader scope than the stored definition.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "spectral_calibration_factor_at_line_of_sight",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-equilibrium-profiles-to-magnetics.md:row=41",
+      "original_audited_source_path": "interferometer/channel/wavelength/phase_to_n_e_line",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Conversion factor to be used to convert phase into line density for this wavelength",
+      "source_sentence_path": "interferometer/channel/wavelength/phase_to_n_e_line",
+      "label_reason": "A spectral calibration factor does not name the explicitly stated conversion from interferometric phase to line-integrated electron density, which distinguishes it from other calibration factors.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Conversion factor from interferometric phase to line-integrated electron density for an optical line of sight at a given probing wavelength.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source’s “Conversion factor from measured interferometric phase to line-integrated electron density (∫ne·dl) for a given wavelength channel” matches the stored wavelength-specific phase-to-electron-column-density coefficient along a line of sight; the unit and interferometric diagnostic domain also fit.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is the wavelength-specific phase-to-electron-column calibration factor: “Conversion factor from measured interferometric phase to line-integrated electron density” for “a given wavelength channel.” The enclosing channels are “lines-of-sight,” matching the name’s locus. The stored definition and m^-2.rad^-1 unit agree with this conversion.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "spectral_rate_of_spectrometer_channel",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-magnetics-to-spectrometer-visible.md:row=37",
+      "original_audited_source_path": "spectrometer_visible/channel/grating_spectrometer/intensity_spectrum",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Detected photon count rate from a filter spectrometer channel.",
+      "source_sentence_path": "spectrometer_visible/channel/filter_spectrometer/photon_count",
+      "label_reason": "The name omits the photoelectron counting basis of its intensity-spectrum sources, and the definition treats all bindings as per-pixel photoelectrons even though this source states detected photons.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The sources, name, and definition describe the detected photoelectron or photon rate (s^-1) per spectral channel or wavelength pixel of a spectrometer channel, with electronic gain compensation and relative calibration applied.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "The name’s “spectral_rate” omits the stated counting basis and pixel locus: “photoelectrons per unit time per wavelength pixel.” The definition also conflicts with Source 2: it specifies “photoelectrons” and applies “to each wavelength pixel,” whereas Source 2 states “Detected photon count rate” and “number of photons per unit time recorded by the detector.”",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source"
+          ],
+          "rationale": "The stored definition specifies “Detected photoelectron rate assigned to each wavelength pixel.” Source 2 instead specifies “Detected photon count rate” and “number of photons per unit time recorded by the detector.” Photon counts and photoelectron counts are distinct counting bases; the stored definition does not represent Source 2.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "surface_temperature",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit.md:row=6",
+      "original_audited_source_path": "camera_ir/channel/camera/frame/apparent_temperature",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Processed image in apparent temperature.",
+      "source_sentence_path": "camera_ir/channel/camera/frame/apparent_temperature",
+      "label_reason": "The source specifies apparent radiometric temperature; the unqualified name and thermodynamic-temperature definition erase the distinction from the material temperature.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "The source specifies 'apparent_temperature' ('apparent surface temperature from an infrared camera frame'), whereas the name omits the qualifier 'apparent' and the definition contradicts the source by defining it as 'thermodynamic temperature'.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "Source: “Processed 2D image of apparent surface temperature”. The name omits “apparent”; the definition instead specifies “thermodynamic temperature” and a “local scalar” at a surface point, contradicting the source’s apparent-temperature 2D image.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "The source specifies “apparent surface temperature” and “Processed image in apparent temperature.” The name omits “apparent,” while the stored definition instead asserts “thermodynamic temperature” representing the “surface material state,” which is not necessarily the apparent temperature inferred from infrared radiance.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "thermal_electron_pressure_at_post_sawtooth_crash",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=33",
+      "original_audited_source_path": "core_profiles/profiles_1d/electrons/pressure_thermal",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Electron thermal pressure (Pe,th) radial profile, arising from random thermal motion of the bulk electron population.",
+      "source_sentence_path": "core_profiles/profiles_1d/electrons/pressure_thermal",
+      "label_reason": "The name restricts every source to after a sawtooth crash, while generic core and edge profiles have no such timing; the definition further confines the quantity to the edge despite the post-crash core source.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "Source 3 states the quantity represents electron pressure in the 'post-crash core plasma state', but the stored definition states it is 'in the plasma edge and scrape-off layer'. This contradicts the source text and introduces a disagreement between the locus specified in the name and the locus in the definition.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "Source 3 places the named post-crash pressure \"in the post-crash core plasma state\"; the stored description instead puts it \"in the plasma edge and scrape-off layer\", contradicting the source and assigning the name a different spatial scope.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "Source 3 specifies the “post-crash core plasma state”; the stored description instead locates the pressure “in the plasma edge and scrape-off layer.” This contradicts the source and gives the named post-sawtooth-crash quantity an incompatible edge/SOL scope.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "toroidal_angle_of_antenna_strap",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-equilibrium-profiles-to-magnetics.md:row=25",
+      "original_audited_source_path": "ic_antennas/antenna/module/strap/outline/phi",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Strap outline",
+      "source_sentence_path": "ic_antennas/antenna/module/strap/outline",
+      "label_reason": "The source and documentation assign an angle to each outline point, while the name omits outline-point scope and can denote a strap reference position.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source specifies `ic_antennas/antenna/module/strap/outline/phi` as \"Toroidal angle (φ) coordinate of outline\" within the enclosing structure `strap/outline` (\"Strap outline\"). The standard name leaves out the locus or component qualifier `outline`, identifying the angle as belonging to the antenna strap rather than its outline.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The source path ends “strap/outline/phi” and states “Toroidal angle (φ) coordinate of outline,” with enclosing structure “Strap outline.” The name “toroidal_angle_of_antenna_strap” omits this outline-point locus, although the stored definition explicitly supplies it.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "The source specifies “Toroidal angle (φ) coordinate of outline” under “Strap outline”; the definition specifies “each antenna-strap outline point.” The name “toroidal_angle_of_antenna_strap” omits the outline-point locus and is broader in scope than the stored per-point definition.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "toroidal_angle_of_toroidal_magnetic_field_probe",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-equilibrium-profiles-to-magnetics.md:row=49",
+      "original_audited_source_path": "magnetics/b_field_phi_probe/toroidal_angle",
+      "independent_verdict": "defective",
+      "label_verdict": "overturned",
+      "source_sentence": "Angle of the projection of the sensor normal vector (n) in the horizontal plane with the increasing R direction (i.e. grad(R))",
+      "source_sentence_path": "magnetics/b_field_phi_probe/toroidal_angle",
+      "label_reason": "The source is a folded angle of the projected sensor normal, not the probe position; the name omits the orientation and projection that distinguish those quantities.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Toroidal angle of the projection of a toroidal field (B_φ) probe's normal vector onto the horizontal plane, measured counter-clockwise from the outward major radius direction.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Source and stored definition both describe “the projection of a toroidal field (B_φ) probe's normal vector onto the horizontal plane,” measured from outward R, with values “modulo pi” in “(-pi/2,pi/2]”. The name identifies the same probe-specific toroidal angle; rad and magnetic_field_diagnostics are appropriate.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source identifies the “Toroidal angle of the projection of a toroidal field (B_φ) probe's normal vector onto the horizontal plane,” with values “modulo pi” in “(-pi/2,pi/2].” The name and stored definition describe this same probe-orientation angle; radians and magnetic_field_diagnostics are appropriate.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "toroidal_vacuum_magnetic_field",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-equilibrium-profiles-to-magnetics.md:row=4",
+      "original_audited_source_path": "equilibrium/vacuum_toroidal_field/b0",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Toroidal component of the vacuum magnetic field, given on various grid subsets",
+      "source_sentence_path": "tf/field_map/b_field_tor",
+      "label_reason": "Most sources select the field at reference radius R0, which the name omits, while the definition restricts every binding to R0 despite this arbitrary-grid field-map source.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "Sources 1–19 and the definition specify the field evaluated \"at the reference major radius R0\". The name leaves out this locus (name_omits_source). Consequently, the name denotes a spatially distributed field while the definition describes only the single-point scalar at the reference radius (name_definition_disagree).",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "Sources 1–19 specify “at the reference major radius R0”, a locus absent from the name. Source 20 instead says “on GGD grid subsets” and “given on various grid subsets”, contradicting the stored definition’s “at the reference major radius” and documentation’s “component evaluated at the reference radius”.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "The definition specifies \"at the reference major radius\", but source 20 describes a \"full 3D vacuum field map\" and a toroidal component \"given on various grid subsets\", not solely R0. The unrestricted name \"toroidal_vacuum_magnetic_field\" also has broader spatial scope than the stored definition.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "total_external_heating_power",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=33",
+      "original_audited_source_path": "summary/heating_current_drive/power_additional/value",
+      "independent_verdict": "sound",
+      "label_verdict": "stands",
+      "source_sentence": "Total additional external power (NBI+EC+IC+LH, without ohmic) coupled to the plasma",
+      "source_sentence_path": "summary/heating_current_drive/power_additional",
+      "label_reason": "External auxiliary heating power, summed over the named systems and excluding Ohmic heating, is consistent between the source and stored definition.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Total additional external heating power coupled to the plasma, summing all auxiliary heating systems excluding Ohmic power.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Source: “Total additional external heating power coupled to the plasma, summing all auxiliary heating systems (NBI, EC, IC, and LH) excluding Ohmic power.” The name, stored definition, W unit, and auxiliary_heating domain all describe this same whole-plasma aggregate.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is “Total additional external heating power coupled to the plasma, summing all auxiliary heating systems (NBI, EC, IC, and LH) excluding Ohmic power.” The stored definition agrees; W and auxiliary_heating are appropriate.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "total_power_due_to_ohmic_dissipation",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=24",
+      "original_audited_source_path": "summary/global_quantities/power_ohm/value",
+      "independent_verdict": "defective",
+      "label_verdict": "overturned",
+      "source_sentence": "Ohmic power in the halo region",
+      "source_sentence_path": "disruption/global_quantities/power_ohm_halo",
+      "label_reason": "The definition explicitly selects whole-plasma total power rather than the halo contribution, contradicting this bound halo-only source; the name also omits the plasma locus.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_definition_disagree",
+            "definition_contradicts_source",
+            "name_contradicts_source"
+          ],
+          "rationale": "The name is general, but the stored definition restricts scope to \"during a disruption\" (name_definition_disagree), contradicting Source 1's \"primary intrinsic heating channel in tokamak operation\" (definition_contradicts_source). Additionally, \"total_power\" in the name contradicts Source 2, which specifies power dissipated strictly in the \"halo region\" (name_contradicts_source).",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "The name omits the source locus “in the plasma.” Source 2 instead states “Ohmic power dissipated in the halo region”, but the documentation integrates over “the full plasma volume” and says this is “rather than denoting only the halo-region contribution”, directly contradicting that source.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source",
+            "name_definition_disagree"
+          ],
+          "rationale": "Source 2 specifies 'Ohmic power dissipated in the halo region' from 'halo currents'; documentation instead specifies 'the full plasma volume', explicitly 'rather than denoting only the halo-region contribution'. The unqualified 'total_power_due_to_ohmic_dissipation' also has broader scope than the definition’s 'in the plasma during a disruption'.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "upper_photon_energy",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-equilibrium-profiles-to-magnetics.md:row=8",
+      "original_audited_source_path": "hard_x_rays/channel/energy_band/upper_bound",
+      "independent_verdict": "sound",
+      "label_verdict": "overturned",
+      "source_sentence": "Upper bound of the energy band",
+      "source_sentence_path": "hard_x_rays/channel/energy_band/upper_bound",
+      "label_reason": "The upper photon-energy cutoff in eV matches the detector and emission-band sources and the stored definition.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The standard name, definition, unit (eV), and domain describe the upper-bound photon energy of a detector channel or emissivity energy band, matching the Data Dictionary sources.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The sources share one quantity: \"Upper photon energy bound\" of a hard- or soft-X-ray energy band, in eV. The stored definition matches it as the \"Upper-bound photon energy\" giving the \"high-energy cutoff\" of an X-ray emission or detection band.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is the upper photon-energy boundary of an X-ray energy band. The sources state “Upper bound of the energy band”; the definition states “maximum energy included in an X-ray emission or detection band.” The unit eV and radiation-measurement domain fit this quantity.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "vertical_coordinate_of_ece_channel",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=48",
+      "original_audited_source_path": "ece/channel/position/z",
+      "independent_verdict": "sound",
+      "label_verdict": "overturned",
+      "source_sentence": "Position of the measurements",
+      "source_sentence_path": "ece/channel/position",
+      "label_reason": "The enclosing structure makes this the ECE measurement position, and its Z coordinate, name and metre unit agree.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source, name, and definition consistently specify the vertical (Z) coordinate of the measurement position for an electron cyclotron emission (ECE) diagnostic channel.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source 'Vertical (Z) coordinate of position' under 'Position of the measurements' and 'ece/channel' denotes an ECE channel’s measurement height; the definition likewise gives the 'Signed vertical coordinate ... measurement position', with matching unit m and ECE diagnostics domain.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The source’s “Vertical (Z) coordinate of position,” enclosed by “Position of the measurements” under ece/channel, is the named and defined vertical coordinate of an ECE channel’s measurement position. The unit m is appropriate.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "vertical_coordinate_of_measurement_position",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=18",
+      "original_audited_source_path": "camera_x_rays/aperture/centre/z",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Vertical (Z) coordinate of delta position suprathermal.",
+      "source_sentence_path": "ece/channel/delta_position_suprathermal/z",
+      "label_reason": "A delta-position coordinate is a displacement, whereas the name and definition identify an absolute measurement position; beamlet and aperture-centre sources additionally span non-measurement loci.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_contradicts_source",
+            "wrong_physics_domain"
+          ],
+          "rationale": "The name specifies 'measurement position', contradicting sources for actuator and hardware locations such as NBI beamlets (nbi/unit/beamlets_group/beamlets/positions/z) and polarizer centre (ece/polarizer/centre/z). Furthermore, the assigned physics domain 'equilibrium' does not fit these diagnostic and heating/actuator coordinates.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "wrong_physics_domain"
+          ],
+          "rationale": "The sources' \"Vertical (Z) coordinate of position\" and unit \"m\" match the name and definition. However, the positions occur predominantly in diagnostic or device structures such as \"reflectometer_fluctuation\", \"bolometer\", \"nbi\" and \"langmuir_probes\"; this generic measurement-position coordinate is not specifically an equilibrium quantity, so the assigned domain \"equilibrium\" is wrong.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_contradicts_source",
+            "name_omits_source",
+            "definition_contradicts_source",
+            "wrong_physics_domain"
+          ],
+          "rationale": "'delta position suprathermal' describes a displacement, not the named position coordinate; 'position average' supplies an omitted averaging qualifier. The definition instead specifies a 'position vector from the coordinate origin' and excludes 'aggregating coordinates over a population'. Sources including 'nbi/unit/beamlets_group/beamlets/positions/z' describe cross-device geometry, not an equilibrium-specific quantity.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    },
+    {
+      "id": "vertical_coordinate_of_strike_point",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=9",
+      "original_audited_source_path": "summary/boundary/strike_point_inner_z/value",
+      "independent_verdict": "sound",
+      "label_verdict": "overturned",
+      "source_sentence": "Vertical (Z) coordinate of the outer divertor strike point, where the outer separatrix intersects the divertor target.",
+      "source_sentence_path": "summary/boundary/strike_point_outer_z/value",
+      "label_reason": "The source, name and definition consistently identify a selected strike-point height; inner and outer identify instances of the same coordinate quantity.",
+      "readers": {
+        "A": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The standard name, definition, unit, and physics domain consistently describe the vertical coordinate (Z) of a divertor strike point, matching the Data Dictionary sources in both equilibrium constraints and summary boundary parameters.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The sources and stored definition share one quantity: the vertical Z coordinate, in metres, of an individual divertor strike point. Source 1’s measured strike-point array and sources 2–3’s outer/inner points fit the definition’s “one selected strike point, including separately identified inner and outer strike points”; no conflicting scope, unit, or domain is stated.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is the vertical (Z) coordinate of an individual divertor strike point. The source states “Array of strike points, for each of them the RZ position is given”; the definition states “Vertical coordinate of a selected divertor strike point.” Inner and outer entries identify particular strike points.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "vertical_outline_of_limiter_tile",
+      "planted_label": "sound",
+      "original_citation": "west-name-audit-spectrometer-visible-to-wall.md:row=49",
+      "original_audited_source_path": "wall/description_2d/limiter/unit/outline/z",
+      "independent_verdict": "defective",
+      "label_verdict": "undecidable",
+      "source_sentence": "Irregular outline of the limiting surface. Do NOT repeat the first point for closed contours",
+      "source_sentence_path": "wall/description_2d/limiter/unit/outline",
+      "label_reason": "The source names a broader object; the shown text does not establish whether this particular instance satisfies the narrower qualifier. Provisional defective reading is excluded from calibration.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "name_contradicts_source",
+            "definition_contradicts_source"
+          ],
+          "rationale": "The standard name and definition specify a limiter tile, but the source text establishes the component as a limiter unit (wall/description_2d/limiter/unit: 'Set of limiter units') representing the 'limiting surface', not a tile.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": true
+        },
+        "B": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "Source “Vertical (Z) coordinate of outline” with unit “m”, under “Irregular outline of the limiting surface” and “Set of limiter units”, matches the stored “Signed vertical (Z) coordinate of each point on a limiter-tile boundary contour”; structural_components fits this limiter geometry quantity.",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": false
+        },
+        "C": {
+          "verdict": "sound",
+          "classes": [],
+          "rationale": "The shared quantity is the vertical coordinate of the limiter outline: the source states “Vertical (Z) coordinate of outline” within an “Irregular outline of the limiting surface.” The stored definition likewise specifies the “Signed vertical (Z) coordinate of each point” on that contour. Metres and structural_components fit this geometric quantity.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": false
+        }
+      },
+      "at_least_two_flag": false
+    },
+    {
+      "id": "wave_phase_of_wave_beam",
+      "planted_label": "defective",
+      "original_citation": "west-name-audit-equilibrium-profiles-to-magnetics.md:row=40",
+      "original_audited_source_path": "interferometer/channel/wavelength/phase_corrected",
+      "independent_verdict": "defective",
+      "label_verdict": "stands",
+      "source_sentence": "Measured phase of the probing wave for each frequency and time slice (corresponding to the begin time of a sweep), relative to the phase at launch",
+      "source_sentence_path": "reflectometer_fluctuation/channel/phase",
+      "label_reason": "The name omits the launch reference explicitly stated by the reflectometer and refractometer sources, which distinguishes a phase difference from an arbitrary wave phase.",
+      "readers": {
+        "A": {
+          "verdict": "defective",
+          "classes": [
+            "definition_contradicts_source"
+          ],
+          "rationale": "The definition states that this quantity 'is the envelope phase, not the carrier oscillation phase.' This contradicts Source 1 ('Phase (φ) measured for a specific interferometer wavelength channel') and Source 2 ('Measured phase of the probing wave relative to its launch phase'), where the measured quantity is the carrier wave phase.",
+          "model": "openrouter/google/gemini-3.8-flash",
+          "shares_judged_class": false
+        },
+        "B": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "The name leaves out stated qualifiers: Source 1 requires “Phase … for a specific interferometer wavelength channel, corrected for fringe jumps”; Source 2 requires phase “relative to its launch phase”; Source 3 specifies the “envelope” phase “measured relative to the launch phase.”",
+          "model": "openrouter/moonshotai/kimi-k3.1-pro",
+          "shares_judged_class": true
+        },
+        "C": {
+          "verdict": "defective",
+          "classes": [
+            "name_omits_source"
+          ],
+          "rationale": "Sources specify phase “corrected from fringe jumps,” “relative to the phase at launch,” and “of the envelope of the probing signal.” The name “wave_phase_of_wave_beam” omits the fringe-jump correction, launch reference, and envelope qualifier.",
+          "model": "openrouter/openai/gpt-6-astra",
+          "shares_judged_class": true
+        }
+      },
+      "at_least_two_flag": true
+    }
+  ],
+  "reader_models": {
+    "A": "openrouter/google/gemini-3.8-flash",
+    "B": "openrouter/moonshotai/kimi-k3.1-pro",
+    "C": "openrouter/openai/gpt-6-astra"
+  },
+  "input_sha256": {
+    "blind-audit.json": "df48cbcda85bcf12f0a15d50b01d50ceedb454a72c55706dec6493d85f5f3666",
+    "frontier-third-reader.json": "f005493e817ca8bc6055a5b223ca63c3ec0c61580f325f9d80df08fe149cf750"
+  },
+  "label_summary": {
+    "stands": 26,
+    "undecidable": 2,
+    "overturned": 12,
+    "original_defective_now_sound": 5,
+    "original_sound_now_defective": 7
+  },
+  "scores": {
+    "labels_that_stand": {
+      "A": {
+        "recall": {
+          "count": 9,
+          "total": 15,
+          "rate": 0.6,
+          "ci_95": [
+            0.357464427565077,
+            0.8017577191740534
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 0,
+          "total": 11,
+          "rate": 0.0,
+          "ci_95": [
+            2.7755575615628914e-17,
+            0.2588400172488141
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "B": {
+        "recall": {
+          "count": 11,
+          "total": 15,
+          "rate": 0.7333333333333333,
+          "ci_95": [
+            0.4804911034231324,
+            0.8910272389681718
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 0,
+          "total": 11,
+          "rate": 0.0,
+          "ci_95": [
+            2.7755575615628914e-17,
+            0.2588400172488141
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "C": {
+        "recall": {
+          "count": 13,
+          "total": 15,
+          "rate": 0.8666666666666667,
+          "ci_95": [
+            0.6211750079348376,
+            0.9626395301086407
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 1,
+          "total": 11,
+          "rate": 0.09090909090909091,
+          "ci_95": [
+            0.01623175226282597,
+            0.3773646254862038
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "two_of_three": {
+        "recall": {
+          "count": 11,
+          "total": 15,
+          "rate": 0.7333333333333333,
+          "ci_95": [
+            0.4804911034231324,
+            0.8910272389681718
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 0,
+          "total": 11,
+          "rate": 0.0,
+          "ci_95": [
+            2.7755575615628914e-17,
+            0.2588400172488141
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      }
+    },
+    "all_decidable_checked_labels": {
+      "A": {
+        "recall": {
+          "count": 13,
+          "total": 22,
+          "rate": 0.5909090909090909,
+          "ci_95": [
+            0.38734477382893806,
+            0.7674444033117963
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 0,
+          "total": 16,
+          "rate": 0.0,
+          "ci_95": [
+            0.0,
+            0.19361341827271994
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "B": {
+        "recall": {
+          "count": 16,
+          "total": 22,
+          "rate": 0.7272727272727273,
+          "ci_95": [
+            0.5184787630099802,
+            0.8684941798418556
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 0,
+          "total": 16,
+          "rate": 0.0,
+          "ci_95": [
+            0.0,
+            0.19361341827271994
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "C": {
+        "recall": {
+          "count": 19,
+          "total": 22,
+          "rate": 0.8636363636363636,
+          "ci_95": [
+            0.6666458812053,
+            0.9525108273576373
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 1,
+          "total": 16,
+          "rate": 0.0625,
+          "ci_95": [
+            0.01111905730833121,
+            0.2832926836802987
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "two_of_three": {
+        "recall": {
+          "count": 16,
+          "total": 22,
+          "rate": 0.7272727272727273,
+          "ci_95": [
+            0.5184787630099802,
+            0.8684941798418556
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 0,
+          "total": 16,
+          "rate": 0.0,
+          "ci_95": [
+            0.0,
+            0.19361341827271994
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      }
+    },
+    "original_labels_reference_only": {
+      "A": {
+        "recall": {
+          "count": 9,
+          "total": 20,
+          "rate": 0.45,
+          "ci_95": [
+            0.25819502085709295,
+            0.6579179916924003
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 5,
+          "total": 20,
+          "rate": 0.25,
+          "ci_95": [
+            0.11186005278940309,
+            0.4687050099580636
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "B": {
+        "recall": {
+          "count": 11,
+          "total": 20,
+          "rate": 0.55,
+          "ci_95": [
+            0.3420820083075997,
+            0.7418049791429071
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 5,
+          "total": 20,
+          "rate": 0.25,
+          "ci_95": [
+            0.11186005278940309,
+            0.4687050099580636
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "C": {
+        "recall": {
+          "count": 13,
+          "total": 20,
+          "rate": 0.65,
+          "ci_95": [
+            0.43285051021946463,
+            0.8188104521320554
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 7,
+          "total": 20,
+          "rate": 0.35,
+          "ci_95": [
+            0.18118954786794464,
+            0.5671494897805354
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      },
+      "two_of_three": {
+        "recall": {
+          "count": 11,
+          "total": 20,
+          "rate": 0.55,
+          "ci_95": [
+            0.3420820083075997,
+            0.7418049791429071
+          ],
+          "within_ten_points": false
+        },
+        "false_alarm": {
+          "count": 5,
+          "total": 20,
+          "rate": 0.25,
+          "ci_95": [
+            0.11186005278940309,
+            0.4687050099580636
+          ],
+          "within_ten_points": false
+        },
+        "meets_point_thresholds": false,
+        "meets_precision": false,
+        "fit_to_decide": false
+      }
+    }
+  },
+  "method": {
+    "interval": "Two-sided 95% Wilson score interval, z=1.96",
+    "unit": "One name; any listed defect class counts as one flag",
+    "majority": "At least two of three observed flags; no independence assumption",
+    "primary_cohort": "Original labels that agree with the frozen source judgment",
+    "supplement": "All decidable judgments, including overturned labels relabelled",
+    "precision": "Each interval endpoint within 0.10 of the observed rate",
+    "fitness": "Recall >= 0.90, false alarm <= 0.10, and both precision checks",
+    "uncertainty": "Binomial intervals describe sampling uncertainty only; they do not include label disagreement, selective planting, text drift, or uncertainty about a single manual adjudication.",
+    "provenance": "Both planted classes were selected from earlier West audit rows labelled correct or INCORRECT, not from pipeline review scores. Selection checked live name and audited-source membership, not unchanged stored text or agreement across every current source.",
+    "historical_replay": "Current graph fields use the original prompt renderer. The prior audit retained no complete per-name prompts or text hashes, so this is conditional calibration against checked current text, not an exact historical replay or a new physicist sign-off."
+  },
+  "conclusion": "No individual reader or two-of-three rule meets both point thresholds on the labels that stand, and none meets interval precision. The checked set also remains too small to establish fitness. Do not use these results alone to authorize deciding group audits or a release bar. Enlarge an independently adjudicated set with versioned full source packets and measure again; any interim deciding rule requires the lead's recorded choice. Re-estimating catalog defect rates from this selected calibration set requires assumptions not tested here.",
+  "workflow": {
+    "blind_judgment_commit": "0b058c4394856e777436e3761a6cb66b7b814d81",
+    "compared_after_revision": "0b058c4394856e777436e3761a6cb66b7b814d81",
+    "compared_at": "2026-11-17T11:55:46.103558+00:00",
+    "order": [
+      "Read live plan and aggregate context",
+      "Read source-only packets and write forty judgments",
+      "Commit all forty judgments without reader data",
+      "Open planted labels and three readers and compare frozen judgments"
+    ]
+  }
 }
