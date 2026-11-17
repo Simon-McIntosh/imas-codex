@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T08:41:15.729Z",
+  "dispatched_at": "2026-11-17T08:41:05Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261117T084016026373-plan-review-of-sn-pipeline-hygiene/plan.html:92",
+      "id": "done_when-1",
+      "reason": "without a stage predicate on the retirement rule, the section's own negative control and its migration branch cannot both pass, and the worker must guess which clause governs.",
+      "text": "s11's first clause requires that the step returning a source \"retires that name in the same step, so that step leaves no live name without a source\", while its reconciliation clause requires the same population to be \"retired \u2026 if it is exhausted, or ha[ve] its source bound back if it is not\", and its planted control requires \"a planted accepted name's source left bound\". A worker cannot satisfy all three: retiring on every return retires the accepted name, whose source the control says must stay bound (the live graph today holds three sourceless `accepted` names), and rebinding the non-exhausted ones contradicts the universal rule; the global \"leaves no live name without a source\" is also unreachable for the ten names that already lacked a source before the incident and that this step never touches",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261117T084016026373-plan-review-of-sn-pipeline-hygiene/plan.html:92",
+      "id": "done_when-2",
+      "reason": "the only quantitative measure closing s11 passes on non-repair, so the section could be retired with every stranded name still live.",
+      "text": "s11's population target reads \"the count of live names without a source, by the repository's own enumeration, is back to 10 or each further one is listed\", which no outcome can fail, and the enumeration it names takes a signed `exhausted_exempt_ids` exemption (`imas_codex/standard_names/source_invariant.py:204`), so the target can also be met by excusing the seventeen exhausted names instead of retiring them",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3fb991aa612687074e1bd8fc21c97c91598baa7d",
+  "plan_fingerprint": "d6c9ae0380b11df4dcff7d15fd3dbad4dad938588096766da2309b365deb87bf",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 53,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T084016026373-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "e16df63751d2d8665aabff7e0124d09842219aa3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 none of the two sections cites a file or commit; the one command s12 quotes, `sn run --only review_name --edits --scope-run-id`, resolves: `--edits`, `--scope-run-id` and `--only` are options of the run command (`imas_codex/cli/sn.py:1742,1754,1776`) and `review_name` is a pipeline key (`imas_codex/cli/sn.py:530`).",
+    "done_when": "a finding \u2014 s11's done-when holds two mutually exclusive rules for the same event (retire every name whose source is returned, versus retire only the exhausted and rebind the rest), and its count target is excused by listing, so neither clause set can be met and falsified on its own.",
+    "evidence_paths": "pass \u2014 both sections commit evidence under `docs/evidence/fragments/sn-pipeline-hygiene/`, a durable repository path, and neither sends a log to a session scratchpad.",
+    "naming": "pass \u2014 no section identifier, stage name or ticket number reaches a symbol or comment in either section; the only quoted command tokens are the product's own CLI spellings.",
+    "reasoning": "pass \u2014 s11's measured premise reproduces (`imas-codex sn sourceless --json` reports 23 live names without a source, 17 of them in stage `exhausted`, 3 `accepted`, 3 `pending`), so the stated 10\u219223 rise and \"nearly all \u2026 exhausted\" are supported, and neither section prescribes a code path, step sequence or function; the defect is in s11's done-when, emitted below.",
+    "single_goal": "pass \u2014 s11 delivers one endpoint (a source return retires the name, with the already-stranded population reconciled) and s12 one endpoint (a scoped run stays inside its scope); each closes on one verdict.",
+    "wiring": "pass \u2014 the snapshot declares s11 and s12 `implementable` in the document's section-declaration map, both carry no relationship (`data-links=\"\"`, as does every section but s7), and no dependency between them is required: s12's scope containment and s11's retirement are separate endpoints on the same incident."
+  },
+  "section_digests": {
+    "_document": "645e0d26c10adf6b7710052b78d34f4d4b29176a3f92d1b92e56e8c5cc2f07c7",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "74688d482ee00f0f28ed1052be32bb9bb31527aa48192d5a4a5fc24b9676c610",
+    "s11": "4f5520afd4cf62bca49f3c2d558bd963b5ce565f6f97c7b29d146bc90e699450",
+    "s12": "24e6adec893056ff6b044b45423faecae383cc81dfbbf828677463fe1f9fafa9",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T08:46:21.424133+00:00",
+  "total": null
+}
