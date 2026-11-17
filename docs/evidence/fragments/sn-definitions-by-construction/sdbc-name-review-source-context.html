@@ -49,7 +49,10 @@
     qualifier only when that sentence neither negates nor contrasts it
     (<q>not</q>, <q>never</q>, <q>without</q>, <q>rather than</q>, <q>instead</q>,
     <q>other than</q>) and does not name another quantity by its physical base
-    instead. The check settles only when all of the name's qualifiers are stated
+    instead — where <q>quantity base</q> is the short list a quantity is measured
+    in (density, energy, flux, count, power, temperature, volume and the rest),
+    not the roster's carrier and geometry words, so <q>the plasma prefill
+    phase</q> is not read as a different quantity. The check settles only when all of the name's qualifiers are stated
     by leaf-or-structure <em>and</em> at least one is stated only by a structure;
     otherwise it returns nothing and the judge's own answer stands.
   </p>
@@ -97,10 +100,11 @@
     enclosing structures, and both check texts were re-judged with the enclosing
     statements present in its evidence and <strong>no code path at all</strong>.
     It fails on the names whose qualifiers the structures state: all eight renamed
-    names fail <code>source_fidelity_unsupported_qualifier</code> (0.64–0.89) and
-    three of them fail <code>over_qualified_modifier</code> as well (0.62–0.78).
-    On the planted name it answers 0.63 / 0.73, as it does with the settled code,
-    because no leaf and no structure states <q>total</q>. The code path is
+    names fail <code>source_fidelity_unsupported_qualifier</code> (0.70–0.86) and
+    five of them fail <code>over_qualified_modifier</code> as well (0.50–0.81).
+    On the planted name, whose qualifier no leaf and no structure states, the
+    judge answers 0.91 / 0.89, and the code path cannot fire on it at all. The
+    code path is
     therefore kept and narrowed rather than removed.
   </p>
   <table id="sdbc-name-review-source-context-judge-table">
@@ -110,14 +114,15 @@
       <tr><th>Arm</th><th>Answers at or above 0.5</th><th>Route moves against the withheld arm</th></tr>
     </thead>
     <tbody>
-      <tr><td>Enclosing statements withheld</td><td>152 of 398</td><td>baseline</td></tr>
-      <tr><td>Statements shown, no code path (judge alone)</td><td>167 of 398</td><td>12: 4 toward accept, 8 toward refine</td></tr>
-      <tr><td>Statements shown, narrowed code path</td><td>132 of 398</td><td>19: 18 toward accept, 1 toward refine</td></tr>
+      <tr><td>Enclosing statements withheld</td><td>139 of 398</td><td>baseline</td></tr>
+      <tr><td>Statements shown, no code path (judge alone)</td><td>165 of 398</td><td>25: 20 toward accept, 5 toward refine</td></tr>
+      <tr><td>Statements shown, narrowed code path</td><td>120 of 398</td><td>22: 20 toward accept, 2 toward refine</td></tr>
     </tbody>
   </table>
   <p id="sdbc-name-review-source-context-judge-conclusion">
-    The judge alone makes eight names worse for every four it improves; the
-    narrowed path improves eighteen and worsens one. The narrowed path is what
+    Every arm is measured on the same 199 names and the same withheld baseline.
+    The judge alone makes five names worse for every twenty it improves; the
+    narrowed path improves twenty and worsens two. The narrowed path is what
     keeps both readings honest: the judge still answers every name no structure
     settles, and its probability is recorded beside the settled answer on every
     name one does, so the discard is visible rather than silent.
@@ -126,10 +131,9 @@
   <h3 id="sdbc-name-review-source-context-eight">The eight live names</h3>
   <p id="sdbc-name-review-source-context-eight-note">
     Before is the newest stored name review from the day before this change; after
-    is the row written by this change. Both source-support checks read 0.0 in every
-    stored after-row. <code>accumulated_carbon_equivalent_electron_count_due_to_gas_injection</code>
-    still routes <code>refine</code>, and no check holds it: the score mapping does
-    (its dimension answers score 0.68).
+    is the row written by this change, measured again on the code as it landed.
+    Both source-support checks read 0.0 in every after-row, and all eight route
+    <code>accept</code>: nothing in the class fails a check the statements answer.
   </p>
   <table id="sdbc-name-review-source-context-eight-table">
     <thead>
@@ -145,13 +149,15 @@
 
   <h3 id="sdbc-name-review-source-context-planted">The planted qualifier still fails</h3>
   <p id="sdbc-name-review-source-context-planted-note">
-    <code>accumulated_total_carbon_equivalent_electron_count_due_to_gas_injection</code>
-    parses, and no leaf or structure states <q>total</q>. Enclosing support
-    returns none, so the judge keeps its answer: 0.58 on
-    <code>over_qualified_modifier</code> and 0.75 on
-    <code>source_fidelity_unsupported_qualifier</code>, both above the 0.5 cutoff,
-    route <code>refine</code>. The statement channel does not launder an unsupported
-    qualifier.
+    <code>accumulated_carbon_maximum_equivalent_electron_count_due_to_gas_injection</code>
+    parses, and no leaf and no enclosing structure states <q>maximum</q> — the
+    token was chosen by reading every leaf and every structure its source sits
+    under, and the first candidate, <q>total</q>, was rejected because the carbon
+    structure's description does state <q>total</q> and a planted name whose source
+    states it proves nothing. Enclosing support returns none, so the judge keeps
+    its answer: 0.93 on <code>over_qualified_modifier</code> and 0.91 on
+    <code>source_fidelity_unsupported_qualifier</code>, both far above the 0.5
+    cutoff. The statement channel does not launder an unsupported qualifier.
   </p>
 
   <h3 id="sdbc-name-review-source-context-population">How wide the class is</h3>
@@ -166,78 +172,102 @@
     <code>transport</code>.
   </p>
   <p id="sdbc-name-review-source-context-population-residual">
-The pass ran to completion over the class: 1179 of 1184 names re-reviewed and stored, at USD 0.2022. Of the 1184 members, 1184 have a stored name review; 867 store both checks at 0.0. Unmeasurable, with the error text: <code>incident_energy_flux_at_wall_due_to_radiation</code> (ValueError: DD resolution version must be one exact published version); <code>neutral_energy_flux_at_wall_due_to_recombination</code> (DDResolutionStale: graph value for ('wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values', '4.1.1', 'unit') does not match the resolution's effective value); <code>neutral_kinetic_energy_flux_at_wall_due_to_surface_emission</code> (ValueError: DD resolution version must be one exact published version); <code>parallel_ion_state_energy_convection_velocity</code> (ValueError: DD resolution version must be one exact published version); <code>total_power_due_to_ion_cyclotron_heating</code> (ValueError: DD resolution version must be one exact published version). 221 check answers across 145 members still sit at or above the 0.5 cutoff. 145 of those members are explained and 0 are not; an explained member carries, beside the qualifier its structures state, another qualifier that no leaf and no structure states, so the judge's failure is the right answer and the review must not settle it. <code>breakdown_initial_time</code> is one: <code>initial</code> is stated by no leaf and no statement, and its checks answer over_qualified_modifier 0.52. No member the resolver settles still stores an answer above cutoff, which is the clause this change owns.
+The pass ran to completion over the class: 1179 of 1184 names re-reviewed and stored, at USD 0.2204. Of the 1184 members, 1184 have a stored name review; 854 store both checks at 0.0. Unmeasurable, with the error text: <code>incident_energy_flux_at_wall_due_to_radiation</code> (ValueError: DD resolution version must be one exact published version); <code>neutral_energy_flux_at_wall_due_to_recombination</code> (DDResolutionStale: graph value for ('wall/description_ggd/ggd/energy_fluxes/recombination/neutral/incident/values', '4.1.1', 'unit') does not match the resolution's effective value); <code>neutral_kinetic_energy_flux_at_wall_due_to_surface_emission</code> (ValueError: DD resolution version must be one exact published version); <code>parallel_ion_state_energy_convection_velocity</code> (ValueError: DD resolution version must be one exact published version); <code>total_power_due_to_ion_cyclotron_heating</code> (ValueError: DD resolution version must be one exact published version). 398 check answers across 236 members still sit at or above the 0.5 cutoff. All 236 are explained and 0 are not; an explained member carries, beside the qualifier its structures state, another qualifier that no leaf and no structure states, so the judge's failure is the right answer and the review must not settle it. <code>breakdown_initial_time</code> is one: <code>initial</code> is stated by no leaf and no statement, and its checks answer over_qualified_modifier 0.68. No member the resolver settles still stores an answer above cutoff, which is the clause this change owns.
   </p>
 
   <h3 id="sdbc-name-review-source-context-sample">Accepted names before and after</h3>
   <p id="sdbc-name-review-source-context-sample-note">
-199 of the 200 accepted names the measure fixes were measurable the same
-    way; the two-hundredth, <code>x_second_measurement_direction_unit_vector_of_strain_gauge</code>,
-    was skipped at enrichment on the stale DD resolution that also left five
-    class members unmeasurable, and the measure is stated on the 199. Each was
-    judged twice, round-robin across 30 domains (seed 20261116): once with the
-    enclosing statements withheld and once with them present under the narrowed
-    rule. 19 moved. 18 moved <code>refine</code>→<code>accept</code> — 4 settled
-    by a statement that states the qualifier, and 14 on the judge's other answers
-    with both source-support checks unsettled — and one moved the other way.
+    199 of the 200 accepted names the measure fixes were measurable the same way;
+    the two-hundredth,
+    <code>x_second_measurement_direction_unit_vector_of_strain_gauge</code>,
+    was skipped at enrichment on the stale DD resolution that also leaves class
+    members unmeasurable, and the measure is stated on the 199.
+    Each was judged twice, round-robin across 30 domains (seed
+    20261116): once with the enclosing statements withheld and once with them
+    present under the narrowed rule. 22 moved. 20 moved
+    <code>refine</code>→<code>accept</code> — 7 settled by a statement that
+    states the qualifier, and 13 on the judge's other answers with both
+    source-support checks unsettled — and 2 moved the other way.
   </p>
   <p id="sdbc-name-review-source-context-sample-regression">
-The one move the change did not intend,
-    <code>flux_due_to_pumping</code>, went <code>accept</code>→<code>refine</code>
-    with both source-support checks at 0.14 and no statement involved: a
-    different check held the name back. The reverse case is recorded rather
-    than hidden too: <code>line_integrated_neutral_beam_radiance_at_spectral_line</code>
-    is the name the rule deliberately does not settle — its structures say
-    <q>Beam Emission Spectroscopy</q> and never <code>neutral_beam</code> — and its
-    checks read 0.45 and 0.55 unsettled in the after row. Its
-    <code>refine</code>→<code>accept</code> is score noise on other checks, the same
-    knife-edge reading documented for its earlier <code>accept</code>→<code>refine</code>.
+    The 2 move the change did not intend: <code>toroidal_coordinate_of_polarizer</code> (0.45 / 0.58 on the two source-support checks), <code>flux_at_divertor_target</code> (0.12 / 0.13 on the two source-support checks).
+    No statement settles either source-support check on them; another
+    answer on the same review holds the name back, which is the judge's
+    reading of the name rather than the statement channel.
+    <code>line_integrated_neutral_beam_radiance_at_spectral_line</code> is the
+    name the rule deliberately does not settle — its structures speak of beam
+    emission spectroscopy and never state <code>neutral</code> — and it stays
+    unsettled at 0.43 / 0.49.
   </p>
   <ul id="sdbc-name-review-source-context-sample-moves">
-    <li><code>accumulated_propane_count_due_to_gas_injection</code>: refine → accept — <q>Propane (C3H8)</q></li>
+    <li><code>accumulated_helium_3_prefill_count_due_to_gas_injection</code>: refine → accept — <q>Accumulated injected gas during the prefill in equivalent electrons Container grouping accumulated injected gas quantities during the plasma prefill phase, expressed in equivalent electrons, organized by gas species. Covers hydrogenic isotopes, noble gases, and impurity species.</q></li>
+    <li><code>co_passing_thermal_electron_power_density_due_to_collisions</code>: refine → accept — <q>Collisional exchange with electrons</q></li>
     <li><code>coolant_temperature_at_outlet</code>: refine → accept — dimension score only</li>
     <li><code>deuterated_methane_source_rate</code>: refine → accept — <q>Deuterated methane (CD4)</q></li>
     <li><code>electron_kinetic_energy_flux_at_wall_due_to_surface_emission</code>: refine → accept — dimension score only</li>
-    <li><code>energy_flux_maximum_at_first_wall</code>: refine → accept — dimension score only</li>
+    <li><code>electron_power_at_outer_divertor_target</code>: refine → accept — dimension score only</li>
+    <li><code>flux_at_wall_due_to_pumping</code>: refine → accept — dimension score only</li>
+    <li><code>gas_flow_of_valve</code>: refine → accept — <q>Set of valves connecting a gas bottle to pipes</q></li>
     <li><code>hydrogen_source_rate_due_to_gas_injection</code>: refine → accept — <q>Hydrogen</q></li>
-    <li><code>line_integrated_neutral_beam_radiance_at_spectral_line</code>: refine → accept — dimension score only</li>
-    <li><code>neutron_emissivity</code>: refine → accept — dimension score only</li>
-    <li><code>normal_wave_magnetic_field</code>: refine → accept — <q>Components of the wave magnetic field</q></li>
+    <li><code>incident_ion_energy_flux_at_wall_due_to_recombination</code>: refine → accept — <q>Incident fluxes for various wall components (grid subsets) Incident energy flux density from ion recombination onto the wall, resolved on various GGD grid subsets representing wall components. Part of the recombination energy balance, where net flux equals incident minus emitted.</q></li>
+    <li><code>normal_wave_magnetic_field</code>: refine → accept — <q>Magnitude of wave magnetic field normal to a flux surface, given on various grid subsets Normal component of the wave magnetic field (B_normal) perpendicular to a flux surface, provided on various GGD grid subsets as part of a full-wave solution. One of three field-aligned decomposition components alongside parallel and bi-normal.</q></li>
+    <li><code>normalized_gyrocenter_perturbed_current_density</code>: refine → accept — dimension score only</li>
     <li><code>orbit_integral</code>: refine → accept — dimension score only</li>
-    <li><code>parallel_current_due_to_non_inductive_current_drive</code>: refine → accept — dimension score only</li>
-    <li><code>photon_energy</code>: refine → accept — dimension score only</li>
     <li><code>poloidal_magnetic_flux_at_plasma_boundary</code>: refine → accept — dimension score only</li>
+    <li><code>spectral_efficiency_of_filter</code>: refine → accept — dimension score only</li>
     <li><code>toroidal_angle_of_toroidal_magnetic_field_probe</code>: refine → accept — dimension score only</li>
     <li><code>toroidal_coordinate_at_beam_tracing_point</code>: refine → accept — dimension score only</li>
     <li><code>toroidal_current_density</code>: refine → accept — dimension score only</li>
-    <li><code>toroidal_total_torque</code>: refine → accept — dimension score only</li>
+    <li><code>vertical_coordinate_of_poloidal_magnetic_field_probe</code>: refine → accept — dimension score only</li>
     <li><code>volume_averaged_effective_hydrogenic_mass</code>: refine → accept — dimension score only</li>
-    <li><code>flux_due_to_pumping</code>: accept → refine — dimension score only</li>
+    <li><code>flux_at_divertor_target</code>: accept → refine — dimension score only</li>
+    <li><code>toroidal_coordinate_of_polarizer</code>: accept → refine — dimension score only</li>
   </ul>
 
   <h3 id="sdbc-name-review-source-context-verification">Verification</h3>
   <p id="sdbc-name-review-source-context-tests">
-    Three tests in <code>tests/standard_names/test_name_review_source_context.py</code>
-    fix the record: a qualifier stated only by an enclosing structure is recorded
-    as supported with the stating structure on the check and zero as the answer; a
-    qualifier no structure states keeps the judge's answer; a leaf that states its
-    own qualifiers needs no statement. With the enclosing-structure statement
-    withheld from the review, the first test fails
-    (<code>negative_control.log</code>), which is the negative control the landing
-    requires.
+    Five tests in <code>tests/standard_names/test_name_review_source_context.py</code>
+    fix what the review records and where it refuses: a qualifier stated only by
+    an enclosing structure settles both checks and the judge's own probability is
+    recorded beside the settled one; a negated statement is left to the judge; a
+    statement whose qualifier modifies another quantity's base is left to the
+    judge; a qualifier no leaf and no structure states keeps the judge's answer;
+    and a leaf that states its own qualifiers needs no statement. Nine tests in
+    <code>tests/standard_names/test_enclosing_structure_read.py</code> hold the
+    graph read itself — both fields with documentation first, whitespace collapse,
+    an empty statement dropped, a repeated statement kept at the nearer path, the
+    limit, the owner's query asked once per path, and no query at all for a path
+    set that is empty — so a regression in the read fails a test rather than
+    surfacing only in a class pass. The remaining related suite
+    (<code>test_review_checks</code>, <code>test_worker_dependency_table</code>,
+    <code>test_jev_name_review</code>, <code>test_review_cascade</code>) passes
+    127 tests. With the enclosing statements withheld from the review the first
+    test fails (<code>negative_control.log</code>), which is the landing's
+    negative control.
   </p>
   <p id="sdbc-name-review-source-context-suite">
-Both arms were extracted with <code>git archive</code> into the job's own <code>$TMPDIR</code> and run there against the shared environment with <code>IMAS_CODEX_SN_ISNC</code> pointing at the catalog checkout, so the reviewing-guide address resolves. Head: 2 failed, 8769 passed, 12 skipped, exit 1. Base <code>4d632fba1</code>: 2 failed, 8766 passed, 12 skipped, exit 1. The two arms are one pytest run each over <code>tests/standard_names</code>.
+    Both arms were extracted with <code>git archive</code> into the job&rsquo;s own
+    <code>$TMPDIR</code> and run there against the shared environment
+    with <code>IMAS_CODEX_SN_ISNC</code> pointing at the catalog checkout, so the
+    reviewing-guide address resolves. Head <code>fb4a4c962</code>: 2 failed, 8780
+    passed, 12 skipped, exit 1. Base <code>4d632fba1</code>: 2 failed, 8766
+    passed, 12 skipped, exit 1. The two failures are the same two ids in both
+    arms (<code>test_refine_model_dispatch.py::test_refine_does_not_alias_compose</code>
+    and <code>::test_refine_env_override_independent_of_compose</code>: the
+    <code>sn-refine</code> seat has no recognised route for the test seats), and
+    the head arm passes 14 more tests, which are the tests added here. Each arm
+    is one pytest run over <code>tests/standard_names</code>.
   </p>
 
   <p id="sdbc-name-review-source-context-spend">
-    Decisions spend: USD 0.0011 for the eight, USD 0.00014 for the planted name,
-    USD 0.060 for the 398-sample judgements, and USD 0.0036 for the 36 class names
-    re-reviewed before the pass aborted.
+    Decisions spend for this repair: USD 0.0012 for the eight, USD 0.00015 for
+    the planted name, USD 0.0343 for the judge-only arms, USD 0.0637 for the two
+    sample arms, and USD 0.2204 for the class pass — USD 0.32 in all, against the
+    USD 5 ceiling.
   </p>
 
   <script>
-    const data = {"eight": [{"name": "accumulated_ammonia_deuterated_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.82, "source_fidelity_unsupported_qualifier": 0.91}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_ammonia_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.84, "source_fidelity_unsupported_qualifier": 0.94}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_argon_equivalent_electron_count_due_to_gas_injection", "route": "accept", "before": {"over_qualified_modifier": 0.81, "source_fidelity_unsupported_qualifier": 0.95}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_carbon_equivalent_electron_count_due_to_gas_injection", "route": "accept", "before": {"over_qualified_modifier": 0.85, "source_fidelity_unsupported_qualifier": 0.94}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_deuterated_methane_prefill_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.81, "source_fidelity_unsupported_qualifier": 0.95}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_deuterium_equivalent_electron_count_due_to_gas_injection", "route": "accept", "before": {"over_qualified_modifier": 0.8, "source_fidelity_unsupported_qualifier": 0.9}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_ethane_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.81, "source_fidelity_unsupported_qualifier": 0.94}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}, {"name": "accumulated_neon_equivalent_electron_count", "route": "accept", "before": {"over_qualified_modifier": 0.81, "source_fidelity_unsupported_qualifier": 0.94}, "after": {"over_qualified_modifier": 0.0, "source_fidelity_unsupported_qualifier": 0.0}}]};
+    const data = {"eight":[{"name":"accumulated_ammonia_deuterated_equivalent_electron_count","route":"accept","failed_checks":[],"before":{"over_qualified_modifier":0.82,"source_fidelity_unsupported_qualifier":0.91},"after":{"over_qualified_modifier":0.0,"source_fidelity_unsupported_qualifier":0.0}},{"name":"accumulated_ammonia_equivalent_electron_count","route":"accept","failed_checks":[],"before":{"over_qualified_modifier":0.84,"source_fidelity_unsupported_qualifier":0.94},"after":{"over_qualified_modifier":0.0,"source_fidelity_unsupported_qualifier":0.0}},{"name":"accumulated_argon_equivalent_electron_count_due_to_gas_injection","route":"accept","failed_checks":[],"before":{"over_qualified_modifier":0.81,"source_fidelity_unsupported_qualifier":0.95},"after":{"over_qualified_modifier":0.0,"source_fidelity_unsupported_qualifier":0.0}},{"name":"accumulated_carbon_equivalent_electron_count_due_to_gas_injection","route":"accept","failed_checks":[],"before":{"over_qualified_modifier":0.85,"source_fidelity_unsupported_qualifier":0.94},"after":{"over_qualified_modifier":0.0,"source_fidelity_unsupported_qualifier":0.0}},{"name":"accumulated_deuterated_methane_prefill_equivalent_electron_count","route":"accept","failed_checks":[],"before":{"over_qualified_modifier":0.81,"source_fidelity_unsupported_qualifier":0.95},"after":{"over_qualified_modifier":0.0,"source_fidelity_unsupported_qualifier":0.0}},{"name":"accumulated_deuterium_equivalent_electron_count_due_to_gas_injection","route":"accept","failed_checks":[],"before":{"over_qualified_modifier":0.8,"source_fidelity_unsupported_qualifier":0.9},"after":{"over_qualified_modifier":0.0,"source_fidelity_unsupported_qualifier":0.0}},{"name":"accumulated_ethane_equivalent_electron_count","route":"accept","failed_checks":[],"before":{"over_qualified_modifier":0.81,"source_fidelity_unsupported_qualifier":0.94},"after":{"over_qualified_modifier":0.0,"source_fidelity_unsupported_qualifier":0.0}},{"name":"accumulated_neon_equivalent_electron_count","route":"accept","failed_checks":[],"before":{"over_qualified_modifier":0.81,"source_fidelity_unsupported_qualifier":0.94},"after":{"over_qualified_modifier":0.0,"source_fidelity_unsupported_qualifier":0.0}}],"planted":{"name":"accumulated_carbon_maximum_equivalent_electron_count_due_to_gas_injection","support":null,"checks":{"over_qualified_modifier":0.9,"source_fidelity_unsupported_qualifier":0.9},"cost_usd":0.000146622}};
     const rows = document.getElementById("sdbc-name-review-source-context-eight-rows");
     for (const row of data.eight) {
       const tr = document.createElement("tr");
