@@ -161,7 +161,7 @@ does not require the metadata archive to be the signal's serving archive.
 
 `signal.time` and `signal.values` are NumPy arrays; `metadata["unit"]` gives the
 unit and `metadata["time_base"]` distinguishes `epoch_ns` (integer Unix epoch
-nanoseconds) from `relative_seconds` (floating seconds). Subtract an integer
+nanoseconds) from `pulse_seconds` (floating seconds relative to the pulse). Subtract an integer
 origin before converting epoch timestamps to float seconds. Keep `mode`,
 `decimated` (true/false/unknown), `sampling_verification`, query and cache evidence
 from the metadata. Raw mode is not proof of no decimation. Envelope/binned and
