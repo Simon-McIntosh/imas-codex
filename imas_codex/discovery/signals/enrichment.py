@@ -206,11 +206,21 @@ async def recovered_call(call, *, attempts, validate, counters, counter, **kwarg
             if isinstance(exc, LLMStructuredCallError):
                 if exc.telemetry_failure:
                     raise
-                cost += exc.cost or 0
-                tokens += exc.tokens
+            cost += getattr(exc, "cost", 0) or 0
+            tokens += getattr(exc, "tokens", 0) or 0
             if attempt == attempts:
                 raise
             counters[counter] += 1
+            kwargs = dict(kwargs)
+            kwargs["messages"] = [
+                *kwargs["messages"],
+                {
+                    "role": "user",
+                    "content": "The response failed validation:\n"
+                    + str(exc)
+                    + "\nReturn corrected JSON for the same supplied signals and context.",
+                },
+            ]
 
 
 def context_items(text: str) -> dict[str, str]:

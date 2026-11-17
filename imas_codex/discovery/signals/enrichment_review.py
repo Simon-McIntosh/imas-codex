@@ -10,6 +10,14 @@ from weakref import WeakKeyDictionary
 from imas_codex.discovery.signals.enrichment import DescriptionReview
 
 
+class ReviewCallError(ValueError):
+    """One request's share of a failed pooled call's consumed telemetry."""
+
+    def __init__(self, message, cost, tokens):
+        super().__init__(message)
+        self.cost, self.tokens = cost, tokens
+
+
 @dataclass
 class ReviewRequest:
     call: object
@@ -45,6 +53,7 @@ class ReviewBatcher:
             asyncio.create_task(self.deliver(requests))
 
     async def deliver(self, requests):
+        cost, tokens = 0.0, 0
         try:
             if len(requests) == 1:
                 request = requests[0]
@@ -107,17 +116,33 @@ class ReviewBatcher:
                     (
                         DescriptionReview(results=rows),
                         cost / len(requests),
-                        tokens / len(requests),
+                        tokens // len(requests) + (index < tokens % len(requests)),
                     )
-                    for rows in outputs
+                    for index, rows in enumerate(outputs)
                 ]
             for request, value in zip(requests, values, strict=True):
                 if not request.future.done():
                     request.future.set_result(value)
         except BaseException as exc:
-            for request in requests:
+            from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+
+            cost += getattr(exc, "cost", 0) or 0
+            tokens += getattr(exc, "tokens", 0) or 0
+            for index, request in enumerate(requests):
                 if not request.future.done():
-                    request.future.set_exception(exc)
+                    error = exc
+                    if (
+                        len(requests) > 1
+                        and isinstance(exc, ValueError)
+                        and not isinstance(exc, ProviderBudgetExhausted)
+                        and not getattr(exc, "telemetry_failure", False)
+                    ):
+                        error = ReviewCallError(
+                            str(exc),
+                            cost / len(requests),
+                            tokens // len(requests) + (index < tokens % len(requests)),
+                        )
+                    request.future.set_exception(error)
 
 
 _BATCHERS = WeakKeyDictionary()

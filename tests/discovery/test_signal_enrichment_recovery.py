@@ -208,3 +208,61 @@ async def test_review_tail_flushes_and_duplicate_coverage_refuses_all_waiters():
 def test_invalid_recovery_or_review_controls_are_refused(settings):
     with pytest.raises(ValueError):
         EnrichmentOptions.model_validate(settings)
+
+
+@pytest.mark.asyncio
+async def test_failed_pooled_call_preserves_consumed_tokens_once():
+    batcher = ReviewBatcher(2)
+    call = AsyncMock(return_value=(review(), 0.3, 11))
+    kwargs = {
+        "messages": [
+            {"role": "system", "content": "Review"},
+            {
+                "role": "user",
+                "content": json.dumps(
+                    {"context_items": {}, "drafts": {1: ["Temperature."]}}
+                ),
+            },
+        ]
+    }
+    errors = await asyncio.gather(
+        batcher.submit(call, kwargs),
+        batcher.submit(call, kwargs),
+        return_exceptions=True,
+    )
+    assert sum(error.tokens for error in errors) == 11
+    assert sum(error.cost for error in errors) == pytest.approx(0.3)
+
+
+@pytest.mark.asyncio
+async def test_budget_refusal_is_never_retried_or_replaced_with_fallback():
+    from imas_codex.discovery.base.llm import ProviderBudgetExhausted
+
+    call = AsyncMock(side_effect=ProviderBudgetExhausted("budget exhausted"))
+    with pytest.raises(ProviderBudgetExhausted):
+        await enrich(EnrichmentOptions(recovery_attempts=2, source_fallback=True), call)
+    assert call.await_count == 1
+
+
+@pytest.mark.asyncio
+async def test_full_cohort_delivery_requires_bounded_retry():
+    delivered = 0
+    for index in range(200):
+        value = draft()
+        if index in (39, 157):
+            value.results[0].signal_index = 3
+            replies = [(value, 0, 1), (draft(), 0, 1), (review(), 0, 1)]
+        else:
+            replies = [(value, 0, 1), (review(), 0, 1)]
+        try:
+            batch, _, _ = await enrich(
+                EnrichmentOptions(
+                    review=True, recovery_attempts=1, source_fallback=True
+                ),
+                AsyncMock(side_effect=replies),
+            )
+        except ValueError:
+            continue
+        delivered += bool(batch.results[0].description.strip())
+    print(f"Full cohort delivered: {delivered}/200")
+    assert delivered == 200
