@@ -61,6 +61,21 @@ def cypher_mutation_clause(cypher: str) -> str | None:
     return match.group(0).upper() if match else None
 
 
+#: The stale-stamp clear a focus run issues before seeding. Bounded by the
+#: run's own source ids, so a run given a focus set never clears a run id on a
+#: name or source outside it.
+FOCUS_STAMP_CLEAR_CYPHER = (
+    "UNWIND $source_ids AS source_id "
+    "MATCH (source:StandardNameSource {id: source_id}) "
+    "OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName) "
+    "WITH "
+    "[x IN collect(DISTINCT source) WHERE x IS NOT NULL] AS sources, "
+    "[x IN collect(DISTINCT name) WHERE x IS NOT NULL] AS names "
+    "FOREACH (sns IN sources | SET sns.run_id = NULL) "
+    "FOREACH (sn IN names | SET sn.run_id = NULL)"
+)
+
+
 class _SuppressedWriteResult:
     """The Result-shaped return for a statement the guard dropped.
 
@@ -2593,23 +2608,17 @@ def sn_run(
             )
             return
 
-        # 1. Clear stale run_ids from previous focused runs. Both node labels
-        #    are cleared in a single statement so the reset is atomic and the
-        #    scoping invariant (no residual run_id survives a fresh focus run)
-        #    holds even if a preceding read query interposes. A scoped run does
-        #    not own the rest of the catalogue, so it leaves other runs' stamps
-        #    alone: its own claim predicates read this run's id, not the
-        #    absence of others'.
-        if not (
-            skip_global_maintenance or maintenance_policy.bypass_global_maintenance
-        ):
+        # 1. Clear stale run_ids from previous focused runs of *these* paths.
+        #    Both legs are bounded by the focus set: a run scoped to these paths
+        #    does not own the rest of the catalogue, and its own claim predicates
+        #    read this run's id, not the absence of other runs' stamps. An
+        #    explicitly bypassed run leaves even these stamps alone.
+        if not skip_global_maintenance:
+            focus_source_ids = [f"dd:{path}" for path in flat_focus]
             with GraphClient() as gc:
                 gc.query(
-                    "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
-                    "SET sn.run_id = NULL "
-                    "WITH count(*) AS _cleared "
-                    "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
-                    "SET sns.run_id = NULL"
+                    FOCUS_STAMP_CLEAR_CYPHER,
+                    source_ids=focus_source_ids,
                 )
 
         # Gap-only default: a focused path that already carries a live

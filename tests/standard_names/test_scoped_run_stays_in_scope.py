@@ -249,10 +249,21 @@ def test_focused_scoped_run_leaves_other_runs_stamps_alone() -> None:
     assert result.exit_code == 0, result.output
     run_cmd.assert_called_once()
     assert run_cmd.call_args.kwargs["scope_run_id"] is not None
-    queries = [call.args[0] for call in graph.query.call_args_list if call.args]
-    # The global stamp clear was the one write such a run made outside its
-    # scope; the in-scope seeding must still have happened.
-    assert not any("WHERE sn.run_id IS NOT NULL" in query for query in queries)
+    queries = [str(call.args[0]) for call in graph.query.call_args_list if call.args]
+    # The stale-stamp clear stays inside the named paths: no whole-catalogue
+    # statement, and the statement that does run carries this run's sources.
+    assert not any(
+        "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL" in query
+        for query in queries
+    )
+    scoped_clears = [
+        call
+        for call in graph.query.call_args_list
+        if call.args
+        and "FOREACH (sn IN names | SET sn.run_id = NULL)" in str(call.args[0])
+    ]
+    assert scoped_clears, "no scope-bounded run_id clear was issued"
+    assert scoped_clears[0].kwargs["source_ids"] == [f"dd:{_FOCUS_PATH}"]
 
 
 @pytest.mark.parametrize(
@@ -512,3 +523,49 @@ def test_scoped_run_leaves_a_planted_out_of_scope_name_unchanged(
         reconcile_after = reconcile_standard_name_sources("dd")
         assert reconcile_after["stale_marked"] >= 1
         assert _digest(gc, control_id) != control_before
+
+
+@pytest.mark.graph
+@pytest.mark.timeout(120)
+def test_focus_stamp_clear_is_bounded_by_the_named_sources(
+    disposable_neo4j_empty: str,
+) -> None:
+    """The one write a focus run makes before seeding stays inside its paths."""
+    from imas_codex.cli.sn import FOCUS_STAMP_CLEAR_CYPHER
+    from imas_codex.graph.client import GraphClient
+
+    token = uuid.uuid4().hex[:8]
+    inside = f"dd:{_FOCUS_PATH}"
+    outside = f"dd:equilibrium/time_slice/profiles_1d/psi_outside_{token}"
+    with GraphClient() as gc:
+        for source_id in (inside, outside):
+            gc.query(
+                """
+                MERGE (sns:StandardNameSource {id: $source_id})
+                SET sns.source_type = 'dd', sns.source_id = $source_id,
+                    sns.status = 'extracted', sns.run_id = 'previous-run'
+                MERGE (sn:StandardName {id: $sn_id})
+                SET sn.run_id = 'previous-run', sn.name_stage = 'drafted'
+                MERGE (sns)-[:PRODUCED_NAME]->(sn)
+                """,
+                source_id=source_id,
+                sn_id=f"name_for_{source_id}",
+            )
+        gc.query(FOCUS_STAMP_CLEAR_CYPHER, source_ids=[inside])
+        rows = list(
+            gc.query(
+                """
+                MATCH (sns:StandardNameSource)
+                OPTIONAL MATCH (sns)-[:PRODUCED_NAME]->(sn:StandardName)
+                RETURN sns.id AS source_id, sns.run_id AS source_run,
+                       sn.run_id AS name_run
+                ORDER BY source_id
+                """
+            )
+        )
+
+    by_source = {row["source_id"]: row for row in rows}
+    assert by_source[inside]["source_run"] is None
+    assert by_source[inside]["name_run"] is None
+    assert by_source[outside]["source_run"] == "previous-run"
+    assert by_source[outside]["name_run"] == "previous-run"
