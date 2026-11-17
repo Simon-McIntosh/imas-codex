@@ -1,0 +1,117 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_review": {
+    "test_document_denial_stops_without_sign_in_retry": "reddens if _stale retry is re-enabled for document reads or the stop latch is removed.",
+    "test_document_form_is_exact": "eight parametrised malformed forms; reddens if the exact-form check in client.py:103 is relaxed.",
+    "test_document_private_config_fails_closed": "eight malformed configurations; reddens if any validation clause in client.py:465 is dropped.",
+    "test_failed_get_has_explicit_outcome_and_no_file": "reddens if _outcome mapping collapses; cannot fail on allow_redirects because the transport is mocked.",
+    "test_pdf_stored_only_after_signature_and_page_validation": "sha256 is recomputed independently over the supplied bytes and page count comes from pypdf, so both sides do not move together.",
+    "test_sign_in_and_error_bodies_store_nothing": "reddens if a non-PDF or HTML body is stored; tmp_path listing proves nothing written.",
+    "test_total_document_budget_applies_across_identities_and_session_budget": "reddens if either budget check in before_send is removed.",
+    "test_unlisted_document_identity_sends_zero_requests": "guarded by negative-identity.log: removing the identity check reddens all five parametrisations.",
+    "test_workbook_uses_existing_extraction_and_counts_all_sheets": "asserts the stored text equals a fresh extract_excel_full call plus a content substring, and that the extractor was called once with the body."
+  },
+  "call_site_count": 1,
+  "call_sites": [
+    "imas_codex/discovery/icp/records.py:20"
+  ],
+  "completed_at": "2026-11-17T23:11:40.204Z",
+  "dispatched_at": "2026-11-17T23:11:21Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/base/transfer.py",
+      "line": "522",
+      "severity": "non-blocking",
+      "text": "non-blocking: nothing asserts allow_redirects reaches transport; every test mocks HTTPAdapter.send so all 491 tests stay green if this line reverts to allow_redirects=True, leaving the redirect-or-sign-in outcome the receipt reports unguarded."
+    },
+    {
+      "file": "imas_codex/discovery/icp/documents.py",
+      "line": "168",
+      "severity": "non-blocking",
+      "text": "non-blocking: path.open(\"xb\") raises FileExistsError out of fetch for a uid and version already stored, so a repeated fetch raises instead of returning a DocumentReceipt as documents.py:16 states."
+    },
+    {
+      "file": "imas_codex/discovery/icp/documents.py",
+      "line": "177",
+      "severity": "non-blocking",
+      "text": "non-blocking: every 200 becomes 'fetched', so the section's 'a request for a version that does not exist returns an explicit outcome' is satisfied only by the after-the-fact classification in live-private-receipt.json missing_version, not by the code."
+    },
+    {
+      "file": "imas_codex/discovery/icp/__init__.py",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: ICPDocuments and DocumentReceipt are not exported while the sibling ICPRecords and its errors are, so callers must import the private submodule."
+    },
+    {
+      "file": "imas_codex/discovery/icp/documents.py",
+      "line": "83",
+      "severity": "non-blocking",
+      "text": "non-blocking: the size-probe-then-download ordering duplicates imas_codex/discovery/base/transfer.py:725 download_with_size_check instead of extending it."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "Read commit by commit: the single commit 1166291c adds the document form and identity guard at imas_codex/discovery/icp/client.py:103, the guarded fetch at imas_codex/discovery/icp/documents.py:56, the allow_redirects knob at imas_codex/discovery/base/transfer.py:491, and 494 lines of tests.",
+    "done_when": "The fetch, refusal, request-budget and negative-control clauses are met as recorded, but the tracked-tree zero-match clause is unmet at 1166291c: docs/state/imas-codex/runs/r-20261115T213954176293-idm-document-fetch.json:2 carries two identities, present at base and repaired afterwards at c07af83.",
+    "goal": "docs/plans/icp-api-access.html section 5 asks for named IDM documents fetched by identity and version into private storage with metadata and a digest; imas_codex/discovery/icp/documents.py:56 delivers that and live-private-receipt.json records 7/7 fetched with size and sha256, but no production module imports ICPDocuments.",
+    "manifest": "Read in full: baseline.log 379 passed and head.log 491 passed with EXIT=0 on both arms, negative-identity.log 7 failed / 105 passed, and the pre-existing privacy match reported under outside_scope.",
+    "write_paths": "All four diff paths (imas_codex/discovery/base/transfer.py, imas_codex/discovery/icp/client.py, imas_codex/discovery/icp/documents.py, tests/discovery/test_icp_documents.py) lie inside the declared write paths; nothing outside them changed."
+  },
+  "justifications": {
+    "durability": "negative-identity.log shows removing only the identity check reddens 7 ids that pass in head.log, but no assertion fails if imas_codex/discovery/base/transfer.py:522 reverts to allow_redirects=True.",
+    "evidence": "baseline_suite and after_suite both record completed arms at a80e825 and 1166291c with zero failures (baseline.log 379 passed, head.log 491 passed), and the head arm collects tests/discovery/test_icp_documents.py, with the tracked-tree clause reported unmet rather than claimed.",
+    "fit": "documents.py follows the idiom of imas_codex/discovery/icp/records.py except that imas_codex/discovery/icp/__init__.py:4 exports ICPClient and ICPRecords but not the new public classes.",
+    "goal_fidelity": "imas_codex/discovery/icp/documents.py:177 returns a receipt with size, sha256, page_count and sheets as section 5 asks, while the version-not-distinguished outcome exists only in live-private-receipt.json and not in the code.",
+    "reuse": "ICPDocuments reuses ICPClient, TransferClient and imas_codex/discovery/wiki/excel.py:241 extract_excel_full, but imas_codex/discovery/icp/documents.py:83 re-derives the probe-then-download ordering that imas_codex/discovery/base/transfer.py:725 download_with_size_check owns.",
+    "scope_discipline": "every path in the diff is inside the declared write paths, and the transfer.py edit is the minimum needed for a redirect outcome."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: docs/plans/icp-api-access.html section 5 asks for named IDM documents fetched by identity and version into private storage with metadata and a digest; imas_codex/discovery/icp/documents.py:56 delivers exactly that and the run's live-private-receipt.json records 7/7 fetched with size and sha256, but no production module imports ICPDocuments so the new capability has no runtime caller.\nVERDICT done_when: section 5's fetch and refusal clauses are met as recorded, but its \"search of the tracked tree finds none of the fetched content, identities or titles\" clause is unmet at this revision: git grep at 1166291c finds two identities in docs/state/imas-codex/runs/r-20261115T213954176293-idm-document-fetch.json:2, present at base a80e825 and repaired only afterwards at c07af83.\nVERDICT write_paths: the source node declared imas_codex/discovery/icp, imas_codex/discovery/base/transfer.py, tests/discovery, docs/evidence/fragments/icp-api-access/fetch-named-pilot-documents.html and docs/figures/icp-api-access/fetch-named-pilot-documents; all four diff paths are imas_codex/discovery/base/transfer.py, imas_codex/discovery/icp/client.py, imas_codex/discovery/icp/documents.py and tests/discovery/test_icp_documents.py, and every one lies inside them with nothing changed outside.\nVERDICT manifest: read in full; it records baseline.log 379 passed and head.log 491 passed with EXIT=0 on both arms, names negative-identity.log with 7 failed / 105 passed, and reports the pre-existing privacy match under outside_scope rather than claiming the zero-match clause.\nVERDICT diff: read commit by commit; the single commit 1166291c changes four files, adding the exact-form and identity guard at imas_codex/discovery/icp/client.py:103, the guarded fetch and receipt at imas_codex/discovery/icp/documents.py:56, the allow_redirects knob at imas_codex/discovery/base/transfer.py:491, and 494 lines of tests.\nCALL_SITES: imas_codex/discovery/icp/records.py:20\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: imas_codex/discovery/icp/documents.py:177 returns a receipt with size, sha256, page_count and sheets as section 5 asks, while the version-not-distinguished outcome exists only in live-private-receipt.json and not in the code.\nSCORE evidence: 16\nJUSTIFICATION evidence: baseline_suite and after_suite both record completed arms at a80e825 and 1166291c with zero failures (baseline.log 379 passed, head.log 491 passed) and the head arm collects tests/discovery/test_icp_documents.py at head.log, with the tracked-tree clause reported unmet rather than claimed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the diff (imas_codex/discovery/base/transfer.py, imas_codex/discovery/icp/client.py, imas_codex/discovery/icp/documents.py, tests/discovery/test_icp_documents.py) is inside the declared write paths, and the transfer.py edit is the minimum needed for a redirect outcome.\nSCORE durability: 15\nJUSTIFICATION durability: negative-identity.log shows removing only the identity check reddens 7 ids that pass in head.log, but no assertion in tests/discovery/test_icp_documents.py fails if imas_codex/discovery/base/transfer.py:522 reverts to allow_redirects=True, because the mocked transport never follows a redirect.\nSCORE fit: 16\nJUSTIFICATION fit: documents.py follows the idiom of imas_codex/discovery/icp/records.py (frozen dataclass receipts, module docstring, guarded session use) except that imas_codex/discovery/icp/__init__.py:4 exports ICPClient and ICPRecords but not the new public classes.\nSCORE reuse: 14\nJUSTIFICATION reuse: ICPDocuments reuses ICPClient's session, request log and pacer, TransferClient, and the owned imas_codex/discovery/wiki/excel.py:241 extract_excel_full, and the searches over imas_codex/discovery that opened imas_codex/discovery/wiki/pipeline.py:2036 and imas_codex/discovery/base/transfer.py:725 found no owner for a receipt into private storage, but imas_codex/discovery/icp/documents.py:83 re-derives the probe-then-download ordering that transfer.py:725 download_with_size_check already owns.\nFINDING imas_codex/discovery/base/transfer.py:522 non-blocking: nothing asserts the new allow_redirects value reaches transport, because every test mocks HTTPAdapter.send so a redirect is never followed and all 491 tests stay green if this line reverts to allow_redirects=True, leaving the explicit redirect-or-sign-in outcome the receipt reports unguarded.\nFINDING imas_codex/discovery/icp/documents.py:168 non-blocking: path.open(\"xb\") raises FileExistsError out of fetch for a uid and version already stored, so a repeated fetch raises instead of returning a DocumentReceipt, contrary to the class contract stated at documents.py:16 that failures come back as a receipt.\nFINDING imas_codex/discovery/icp/documents.py:177 non-blocking: every 200 response becomes \"fetched\", so the section's \"a request for a version that does not exist returns an explicit outcome\" is satisfied only by the after-the-fact classification in live-private-receipt.json missing_version, and a host that silently serves the current version is indistinguishable from one that served the requested version.\nFINDING imas_codex/discovery/icp/__init__.py:4 non-blocking: ICPDocuments and DocumentReceipt are not exported while the sibling ICPRecords and its errors are, so a caller must import the private submodule and the package surface now names only half of what the package provides.\nFINDING imas_codex/discovery/icp/documents.py:83 non-blocking: the size-probe-then-download ordering duplicates imas_codex/discovery/base/transfer.py:725 download_with_size_check instead of extending it with the allow_redirects and probe-status arguments this caller needs.\n",
+  "review_method": "Read the source node's brief, plan section 5, manifest, the single commit 1166291c against base a80e825, and the production call sites by git grep; verified the live receipt reconciles with the landing record (7 documents, 14,847,857 bytes, sheets 16/313/53, pages 81/35/9/55/32/12, 26 requests with 8 HEAD and 8 GET on the document host, maximum 4 per identity).",
+  "review_run_id": "r-20261117T231043417100-review-of-fetch-named-pilot-documents-1166291cb4ca",
+  "reviewed_base_sha": "a80e825715db1081a01a3513c9c2601e4542345a",
+  "reviewed_head_sha": "1166291cb4ca9446fdb139cf735e4eddfd6e65b3",
+  "reviewed_run_id": "r-20261117T223052589700-fetch-named-pilot-documents",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 16,
+    "reuse": 14,
+    "scope_discipline": 19
+  },
+  "source_commits": [
+    "1166291cb4ca9446fdb139cf735e4eddfd6e65b3"
+  ],
+  "status": "parsed",
+  "suite_evidence": {
+    "after": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223052589700-fetch-named-pilot-documents/head.log",
+      "revision": "1166291cb4ca9446fdb139cf735e4eddfd6e65b3",
+      "summary": "491 passed, 1 warning in 6.58s"
+    },
+    "baseline": {
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223052589700-fetch-named-pilot-documents/baseline.log",
+      "revision": "a80e825715db1081a01a3513c9c2601e4542345a",
+      "summary": "379 passed, 1 warning in 6.54s"
+    },
+    "negative_control": {
+      "exit_status": 1,
+      "failing_ids_pass_in_head": true,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T223052589700-fetch-named-pilot-documents/negative-identity.log",
+      "summary": "7 failed, 105 passed"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T23:28:09.478768+00:00",
+  "total": 96
+}
