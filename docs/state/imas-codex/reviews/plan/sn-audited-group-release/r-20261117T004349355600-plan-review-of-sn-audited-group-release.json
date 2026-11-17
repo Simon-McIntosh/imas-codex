@@ -43,6 +43,16 @@
       "note": "The roll-forward section now requires a recorded run showing a disposable group planted above the bar reported and not cut.",
       "reason": "",
       "when": "2026-11-17T01:00:43.443099+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "The first-group section now states that it closes on the cut and that the repair comparison is reported evidence that neither closes nor holds it.",
+      "reason": "",
+      "when": "2026-11-17T01:03:14.304191+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The roll-forward section now requires a recorded run showing a disposable group planted above the bar reported and not cut.",
       "reason": "",
       "when": "2026-11-17T01:00:43.443099+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "note": "The first-group section now states that it closes on the cut and that the repair comparison is reported evidence that neither closes nor holds it.",
+      "reason": "",
+      "when": "2026-11-17T01:03:14.304191+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T004349355600-plan-review-of-sn-audited-group-release.json",
