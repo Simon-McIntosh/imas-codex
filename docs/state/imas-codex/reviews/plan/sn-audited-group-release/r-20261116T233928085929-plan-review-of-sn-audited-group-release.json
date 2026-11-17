@@ -33,7 +33,30 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 5,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "00170b9803954167e1960dd570381368851388f7",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The forty planted names are read in addition to the sample and excluded from every count and rate reported for it; they are reported separately.",
+      "reason": "",
+      "when": "2026-11-17T00:15:23.280549+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "00170b9803954167e1960dd570381368851388f7",
+      "commit_basis": "edit",
+      "note": "The forty planted names are read in addition to the sample and excluded from every count and rate reported for it; they are reported separately.",
+      "reason": "",
+      "when": "2026-11-17T00:15:23.280549+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261116T233928085929-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261116T233928085929-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "a6a2767bc59fda503e59f7dd62d7635ca54c3241",
   "rubric": "content",
