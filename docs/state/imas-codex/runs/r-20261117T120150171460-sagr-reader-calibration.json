@@ -4985,6 +4985,25 @@
     "reason": "brief-names-no-plan",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sagr-reader-calibration uv run --no-sync --directory /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sagr-reader-calibration python /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sagr-reader-calibration/docs/evidence/fragments/sn-audited-group-release/reader-calibration.py --check",
+    "integrated_revision": "18dd243d7ebcf1e949a24d4ca27600f0b0db84bf",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261117T120150171460-sagr-reader-calibration/review-landing/gate-18dd243d7ebcf1e949a24d4ca27600f0b0db84bf.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'UV_PROJECT_ENVIRONMENT=./.venv PYTHONPATH=. uv run --no-sync --directory . python ./docs/evidence/fragments/sn-audited-group-release/reader-calibration.py --check'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sagr-reader-calibration",
+      "/home/ITER/mcintos/Code/imas-codex"
+    ]
+  },
   "lane": "codex",
   "lane_advisory": {
     "backend": "codex",
