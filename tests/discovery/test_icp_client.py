@@ -131,16 +131,17 @@ def test_fixed_method_entry_points_reject_method_override(
     (
         "https://unlisted.example.test/items",
         "https://unrelated.example.test/items",
-        "http://integration.example.test/items",
-        "https://integration.example.test.evil.test/items",
-        "https://integration.example.test:444/items",
-        "https://reader@integration.example.test/items",
+        "http://{host}/items",
+        "https://{host}.evil.test/items",
+        "https://{host}:444/items",
+        "https://reader@{host}/items",
         "https://login.microsoftonline.com.evil.test/items",
         "//unrelated.example.test/items",
     ),
 )
 @pytest.mark.parametrize("entry", ("client", "session", "prepared", "adapter"))
 def test_other_origin_refused(client, transport, url, entry):
+    url = url.format(host=ORIGIN.removeprefix("https://"))
     with pytest.raises((ICPRequestRefused, requests.exceptions.RequestException)):
         if entry == "client":
             client.get(url)
@@ -230,7 +231,7 @@ def test_stale_session_is_renewed_once(client, transport, monkeypatch, expired):
     def sign_in(*credentials):
         assert client.session.cookies.get("stale") is None
         client.session.cookies.set(
-            "renewed", "synthetic", domain="integration.example.test"
+            "renewed", "synthetic", domain=ORIGIN.removeprefix("https://")
         )
         return True
 
@@ -524,12 +525,13 @@ def test_api_post_refused_in_every_authentication_state(client, transport, state
 
 
 @pytest.mark.parametrize(
-    "target", (IDENTITY + "/login", GATEWAY + "/assertion", ORIGIN + "/gateway/sign-in")
+    "target", (IDENTITY + "/login", GATEWAY + "/assertion", "/gateway/sign-in")
 )
 @pytest.mark.parametrize("state", ("before", "signed-in", "inconsistent"))
 def test_sign_in_post_refused_outside_unsigned_exchange(
     client, transport, target, state
 ):
+    target = ORIGIN + target if target.startswith("/") else target
     client._authenticated = state != "before"
     client._policy.authenticating = state == "inconsistent"
     form = (
@@ -555,12 +557,14 @@ def test_unlisted_origin_post_refused_during_exchange(client, transport):
     ("target", "expected_origin", "expected_path"),
     (
         (GATEWAY + "/assertion", GATEWAY, "/assertion"),
-        (ORIGIN + "/gateway/sign-in", ORIGIN, "/gateway/sign-in"),
+        ("/gateway/sign-in", None, "/gateway/sign-in"),
     ),
 )
 def test_observed_gateway_form_allowed_only_during_sign_in(
     client, transport, target, expected_origin, expected_path
 ):
+    target = ORIGIN + target if target.startswith("/") else target
+    expected_origin = expected_origin or ORIGIN
     with client._sign_in_exchange():
         client.session.post(
             target, data={"SAMLResponse": "synthetic", "RelayState": "test"}
@@ -577,9 +581,7 @@ def test_observed_gateway_form_allowed_only_during_sign_in(
     assert len(transport) == 1
 
 
-@pytest.mark.parametrize(
-    "target", (GATEWAY + "/assertion", ORIGIN + "/gateway/sign-in")
-)
+@pytest.mark.parametrize("target", (GATEWAY + "/assertion", "/gateway/sign-in"))
 @pytest.mark.parametrize(
     "form",
     (
@@ -591,6 +593,7 @@ def test_observed_gateway_form_allowed_only_during_sign_in(
 def test_gateway_refuses_credentials_and_non_login_forms(
     client, transport, target, form
 ):
+    target = ORIGIN + target if target.startswith("/") else target
     with client._sign_in_exchange(), pytest.raises(ICPRequestRefused):
         client.session.post(target, data=form)
     assert transport == []
