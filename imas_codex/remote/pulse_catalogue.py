@@ -87,7 +87,7 @@ def main() -> None:
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--import-graph", action="store_true")
     parser.add_argument(
-        "--kind-rules", type=Path, help="Private JSON evidence rules for category kinds"
+        "--kind-rules", type=Path, help="Private YAML evidence rules for category kinds"
     )
     args = parser.parse_args()
     import yaml
@@ -109,7 +109,7 @@ def main() -> None:
     if args.kind_rules:
         rules = [
             PulseKindRule.model_validate(rule)
-            for rule in json.loads(args.kind_rules.read_text())
+            for rule in yaml.safe_load(args.kind_rules.read_text())
         ]
         categories = classify_categories(categories, pulses, rules)
     receipt = pulse_distribution(categories, pulses)
