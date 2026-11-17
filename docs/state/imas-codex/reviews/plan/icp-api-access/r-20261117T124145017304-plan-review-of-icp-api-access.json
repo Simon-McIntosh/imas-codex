@@ -1,0 +1,61 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T13:00:49.250Z",
+  "dispatched_at": "2026-11-17T13:00:00Z",
+  "findings": [
+    {
+      "anchor": "plan.html:61",
+      "id": "done_when-1",
+      "reason": "the branch selects between \"seven documents delivered\" and \"no documents, source back to the lead\", so an undefined predicate lets a worker close on the wrong one and the blocked plan inherits the result, not the deliveries.",
+      "text": "\u00a75 closes in one of two ways, but the two branches share one observation: the success branch permits \"each of the seven listed documents is fetched at its stated version, or reported with its outcome (not found, not permitted, a sign-in page, an error) where the host refuses it\", while the failure branch fires when \"the first named document cannot be fetched\", so a first document the host refuses (404, 403, or a sign-in page) satisfies both forms, and nothing fixes which of the seven is probed or in what order, letting the worker choose which branch \u2014 and therefore whether the document source stays with the section or goes back to the lead \u2014 on evidence the plan does not discriminate",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:61",
+      "id": "reasoning-1",
+      "reason": "",
+      "text": "\u2014 \u00a75 states \"That host is read under the same rules as the two records hosts\" and requires \"Tests show every write-refusal and host-refusal case of section 2 holds for the document host\", yet \u00a72's delivered rule (plan.html:46) says \"Requests go only to the ICP hosts listed in private configuration ... the integration instance ... and the production instance\" and its host-refusal test (plan.html:47) refuses \"any host other than the ICP hosts listed in private configuration and the listed sign-in hosts\"; the IDM document host is neither an ICP host nor a sign-in host, so \u00a72's rule refuses the host \u00a75 is built on, and a worker applying \u00a72's test literally must make the section's own first fetch. WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: the same shape of conflict was resolved for production by naming it in \u00a72; the document host needs the same allowance stated in \u00a72's delivered host set (with the named-identity restriction), or \u00a75's tests and the section's fetch contradict the guardrails they are meant to inherit.",
+      "type": "reasoning",
+      "would_change": null
+    },
+    {
+      "anchor": "plan.html:20",
+      "id": "wiring-1",
+      "reason": "",
+      "text": "\u2014 the plan declares `plan-blocks` = `iter-signal-context-and-enrichment`, whose \u00a74 (`docs/plans/iter-signal-context-and-enrichment.html:58`) now depends on `icp-api-access#s3`, `#s4` and `#s5` and delivers \"the rows of its signal list and data file, and references to its functional specification\", while \u00a75's failure branch (plan.html:61) closes the section as done with \"nothing further is requested from the host\", no document fetched, and the document source going back to the lead \u2014 so the dependency the relationship names can be satisfied while delivering none of the files the blocked section imports; the block is claimed against a section whose done-when permits delivering nothing. WOULD_CHANGE_THE_PLAN: yes \u2014 REASON: a blocks relationship that a no-fetch close satisfies will release that plan's \u00a74 to build pilot context with no signal list or specification, which is the empty delivery the earlier wiring finding named; either the relationship must record that only \u00a75's fetch branch unblocks it, or the blocked plan's done-when must fail on missing documents.",
+      "type": "wiring",
+      "would_change": null
+    }
+  ],
+  "plan_commit": "07d12e06ad00541bd3a2313465ba9af5a358bc01",
+  "plan_fingerprint": "b1d023dc2935527d66d6cbfe1a4bee0b99794d8cd9f2edec0556aa40b4733217",
+  "plan_slug": "icp-api-access",
+  "plan_version": 25,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T124145017304-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "0e6887190c8c0dea15612620b9711e3772109b96",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a75's `icp-api-access#s2`, `icp-api-access#s4` links and the new `document-host-read-only` decision resolve in the snapshot, with extensionless hrefs resolved as `<path>.html`.",
+    "done_when": "a finding \u2014 \u00a75's two closing branches overlap: one named document being refused is both a permitted outcome inside the success branch and the trigger of the failure branch, and \"the first named document\" names no ordered list.",
+    "evidence_paths": "pass \u2014 \u00a75's receipts and landing record are the same durable private receipt and landing record the plan's completed sections landed on, not a node-local temporary path.",
+    "naming": "pass \u2014 the added decision key and the section text name no code symbol, ticket number or stage label.",
+    "reasoning": "a finding \u2014 \u00a75 reads the IDM document host, while \u00a72's delivered host rule and host-refusal test at plan.html:46-47 allow requests only to \"the ICP hosts listed in private configuration and the listed sign-in hosts\", and \u00a71 treats IDM as a system distinct from ICP.",
+    "single_goal": "pass \u2014 \u00a75 carries the named-document fetch as its one deliverable, with both closing branches answering the same question.",
+    "wiring": "a finding \u2014 the plan declares it blocks `iter-signal-context-and-enrichment`, whose \u00a74 lists `icp-api-access#s5` as a dependency, while \u00a75 now permits a close that fetches no document at all."
+  },
+  "section_digests": {
+    "_document": "1faae709ade296dcbe95974b385b004073b5d95eadb304cf33a51e8b6760e967",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "a67c89d3d13fc2d150d8c305334b48a40a1479a2b166bd1daaa7eebac1a5fd56",
+    "s3": "dcfe744278ad8f7b812902b66cbd7c4e6eba42cd9cca8c338b00164b75dd4f55",
+    "s4": "4df24fd8de94abfdf9430b8cc0a70ab71824a0084529a3db2136c0401a52eed6",
+    "s5": "be55af742c2a79feff2a7eee7d0825b350c61722233554e4426b5e2fbcbbe4f3"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:11:24.418565+00:00",
+  "total": null
+}
