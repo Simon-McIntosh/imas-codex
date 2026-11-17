@@ -53,6 +53,16 @@
       "note": "The first-group section now states that it closes on the cut and that the repair comparison is reported evidence that neither closes nor holds it.",
       "reason": "",
       "when": "2026-11-17T01:03:14.304191+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "A sourceless member now has three routes: bound through the pipeline's own write path, withdrawn, or listed with the lead's ruling as an exception; the bar refuses only a sourceless member not so listed.",
+      "reason": "",
+      "when": "2026-11-17T01:05:33.387920+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "The roll-forward section now requires a recorded run showing a disposable group planted above the bar reported and not cut.",
       "reason": "",
       "when": "2026-11-17T01:00:43.443099+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "note": "A sourceless member now has three routes: bound through the pipeline's own write path, withdrawn, or listed with the lead's ruling as an exception; the bar refuses only a sourceless member not so listed.",
+      "reason": "",
+      "when": "2026-11-17T01:05:33.387920+00:00"
     },
     "single_goal-1": {
       "action": "acted",
