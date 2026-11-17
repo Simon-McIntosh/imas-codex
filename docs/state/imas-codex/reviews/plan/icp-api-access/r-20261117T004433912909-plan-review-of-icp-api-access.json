@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T00:45:55.372Z",
+  "dispatched_at": "2026-11-17T00:45:41Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/icp-api-access/r-20261117T004433912909-plan-review-of-icp-api-access/plan.html:52",
+      "id": "done_when-1",
+      "reason": "without a bound fixed before the run, \u00a73's pacing measure is unfalsifiable and the one property that keeps the read-only client from being rate-limited or blocked is unverified.",
+      "text": "\u00a73's done-when requires the measured request rate to stay \"at or below the stated bound\", but the only rate figure in the plan surfaces after the fact in a build comment (1.818 requests/s \"below 2\"); as written the same worker states the bound and measures against it, so the pacer guard can never show a refusal and a client with no pacing at all still passes by declaring a bound above its own measured rate",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/icp-api-access/r-20261117T004433912909-plan-review-of-icp-api-access/plan.html:54",
+      "id": "reasoning-1",
+      "reason": "the heading is what a dispatch brief takes as the node's goal, and as written it carries the wrong host and an unconditional fetch the section has not established.",
+      "text": "the \u00a74 heading \"A document file is fetched from IDM by identity and version\" names IDM as the file source and asserts a fetch, while the section body and the `document-source` decision (\"production-read-only\") read the file through production ICP under the same guardrails, and \u00a74's own evidence says no file has ever been fetched from either instance; a node composed from the heading would be pointed at the IDM host with a deliverable the section itself allows to close as \"no route exists\"",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "3c5fe0e04c51504e1522366f757f849c5757f698",
+  "plan_fingerprint": "03cb84f436372a3f0f117d053e5d3c28e7d24c9e016c3dcb341fa6c1eb21f64a",
+  "plan_slug": "icp-api-access",
+  "plan_version": 19,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T004433912909-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "9ff43c69efc4745ea96cacc8b1b16b93d42e4ca1",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 both evidence anchors (`docs/evidence/fragments/icp-api-access/icp-read-only-client.html#icp-read-only-client-evidence` and `...#icp-plant-structure-and-component-reads-evidence`) exist in their cited files, the section hrefs (`icp-api-access#s2`) resolve to real section ids, and the blocking plan's references to this plan resolve.",
+    "done_when": "a finding \u2014 \u00a73's done-when compares the measured request rate against \"the stated bound\", but the plan never states a bound, so the gate can be satisfied by any rate.",
+    "evidence_paths": "pass \u2014 every receipt the comments cite sits under `docs/evidence/fragments/icp-api-access/`, and fetched content is required to stay in the private cache outside the plan's and the repository's tree.",
+    "naming": "pass \u2014 no plan, stage, ticket or version identifiers are carried into the quantities or rules the sections impose.",
+    "reasoning": "a finding \u2014 \u00a74's heading states the file is fetched from IDM while the section's own body and the `document-source` decision read it from production ICP, so heading and body disagree about which host the section reads.",
+    "single_goal": "pass \u2014 each of \u00a72, \u00a73 and \u00a74 names one deliverable; \u00a74's two closure branches answer a single question (whether production exposes a document-file read) and each branch is separately checkable.",
+    "wiring": "pass \u2014 both declared section dependencies resolve (`s3` and `s4` on `icp-api-access#s2`, which exists), and `plan-blocks iter-signal-context-and-enrichment` is matched by that plan's `s4` declaring `icp-api-access#s3` and `icp-api-access#s4`."
+  },
+  "section_digests": {
+    "_document": "86c1a8aea5604dc507982d9398768fdde8bb0fe0ee57036fe372995309e31878",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "a67c89d3d13fc2d150d8c305334b48a40a1479a2b166bd1daaa7eebac1a5fd56",
+    "s3": "dcfe744278ad8f7b812902b66cbd7c4e6eba42cd9cca8c338b00164b75dd4f55",
+    "s4": "4df24fd8de94abfdf9430b8cc0a70ab71824a0084529a3db2136c0401a52eed6"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:23:25.771907+00:00",
+  "total": null
+}

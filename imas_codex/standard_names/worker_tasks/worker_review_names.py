@@ -15,8 +15,10 @@ wrapper — is reached through the batch processor's positional-only
 ``_worker_dependency`` resolver, so a patch on ``workers.<name>`` stays visible
 inside the moved code and the persisting wrapper a caller sees is the
 entrypoint's own object, which is what the panel audit recognises structurally.
-Only standard-library modules are imported directly; ``BudgetManager`` is
-imported for typing alone.
+Only standard-library modules are imported directly, with one exception: the
+ancestor read below is the extraction owner's query and statement rule, imported
+rather than restated so a review and a compose prompt read one lineage one way.
+``BudgetManager`` is imported for typing alone.
 """
 
 from __future__ import annotations
@@ -30,6 +32,10 @@ from typing import TYPE_CHECKING, Any
 from imas_codex.standard_names import vocabulary_definitions as vocabulary_source
 from imas_codex.standard_names.defaults import DEFAULT_ESCALATION_MODEL
 from imas_codex.standard_names.source_reads import source_paths_projection
+from imas_codex.standard_names.worker_tasks.worker_common import (
+    _ANCESTOR_CONTEXT_QUERY,
+    ancestor_statements,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -51,6 +57,44 @@ def _review_source_binding_sort_key(binding: dict[str, Any]) -> tuple[str, ...]:
             "dd_parent_documentation",
         )
     )
+
+
+# The enclosing statements a bound DD leaf is read against. A qualifier a
+# leaf's own text cannot carry — a counting basis, a weighting, a qualifier or
+# a unit convention — is often stated one or more structures above it, so the
+# review is shown those statements rather than the leaf label alone. The read
+# itself is the extraction owner's: one HAS_PARENT walk, one depth bound and one
+# statement rule serve both the review and the compose prompt.
+
+
+def enclosing_structure_statements(
+    paths: Any,
+) -> dict[str, list[dict[str, str]]]:
+    """Read the statements made by the structures each bound DD path sits under.
+
+    Returns, per bound path, the nearest-first list of its enclosing structures
+    that make a statement, each as ``{"path", "text"}``. The walk, the depth
+    bound, the documentation-else-description precedence, the whitespace
+    collapse and the dedupe of a repeated statement all come from
+    :func:`~...worker_common.ancestor_statements`, so a
+    review and a compose prompt cannot read one lineage two ways. A structure
+    that makes no statement is left out: an empty entry names nothing a name
+    could be judged against.
+    """
+    wanted = sorted({str(path) for path in paths if path})
+    if not wanted:
+        return {}
+    from imas_codex.graph.client import GraphClient
+
+    by_leaf: dict[str, list[dict[str, str]]] = {}
+    with GraphClient() as gc:
+        for path in wanted:
+            statements = ancestor_statements(
+                gc.query(_ANCESTOR_CONTEXT_QUERY, path=path), limit=None
+            )
+            if statements:
+                by_leaf[path] = statements
+    return by_leaf
 
 
 def _enrich_name_review_items(
@@ -184,6 +228,30 @@ def _enrich_name_review_items(
             if source_id and source_id not in group["ids"]:
                 group["ids"].append(source_id)
         item["dd_source_docs"] = list(source_doc_groups.values())
+        try:
+            enclosing = enclosing_structure_statements(
+                source_id
+                for group in source_doc_groups.values()
+                for source_id in group["ids"]
+            )
+        except Exception:
+            logger.debug(
+                "review_name: enclosing-structure statements unavailable for %s",
+                item.get("id"),
+                exc_info=True,
+            )
+        else:
+            for group in source_doc_groups.values():
+                statements: list[dict[str, str]] = []
+                seen_paths: set[str] = set()
+                for source_id in group["ids"]:
+                    for statement in enclosing.get(source_id, ()):
+                        if statement["path"] in seen_paths:
+                            continue
+                        seen_paths.add(statement["path"])
+                        statements.append(statement)
+                if statements:
+                    group["enclosing_structures"] = statements
 
         parent_groups: dict[tuple[Any, ...], dict[str, Any]] = {}
         for binding in context_bindings:

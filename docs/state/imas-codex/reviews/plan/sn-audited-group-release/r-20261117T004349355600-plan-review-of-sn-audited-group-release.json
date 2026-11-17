@@ -1,0 +1,122 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T00:45:13.221Z",
+  "dispatched_at": "2026-11-17T00:45:00Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-audited-group-release.html:45",
+      "id": "done_when-1",
+      "reason": "the node would need one added planted group carrying an unbeatable rate, plus the run that shows it reported and not cut, which is a section change.",
+      "text": "\u00a75 (\"Each further group follows in the ruled order\") has no planted control: its only failure-shaped measure is conditional on a real group failing the bar within a \"spend the lead rules for it\", so if every further group happens to pass, the \"reported with its measured rate and the classes that hold it, and is not cut\" arm never runs, and the section cannot show its refusal fires; \u00a73 and \u00a74 both plant the fault they need to see refused",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-audited-group-release.html:41",
+      "id": "single_goal-1",
+      "reason": "splitting the comparison from the cut, or naming which of the two closes \u00a74, changes the node plan a later node is dispatched against.",
+      "text": "\u00a74's done-when closes on two independent verdicts: \"the repair comparison reports, per arm, the members the second reading finds repaired, still defective and made worse ... and says which arm did better\", and \"the group then meets the bar of \u00a73 on the second reading and its release candidate is cut to the fork\"; either can pass while the other fails (the arm comparison can be decidable while the group misses the bar, and the group can reach the bar with no arm difference), and neither is named as the node's one goal",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-audited-group-release.html:37",
+      "id": "reasoning-1",
+      "reason": "\u00a74 needs a stated route (withdraw, backfill, or a lead ruling recorded as an exception the bar reads) for a sourceless member, otherwise the first group can never be cut and a node discovers it only after the full audit and both repairs are spent.",
+      "text": "\u00a73's bar refuses the cut \"when any member has no source\", but \u00a74's done-when supplies clearing routes only for defects the audit assigns to a repair, for duplicates and wrong domains, and for members it \"lists by name\"; a member that is sound on every class of \u00a71 and has no source is refused by the bar and has no route back to it, so \u00a74's assertion that \"the group then meets the bar of \u00a73\" is not reachable by anything the plan states; \u00a72's own census (3,205 of 3,266 names \"record the domains of their sources\", leaving 61 unrecorded) shows such members are present and were not excluded from the first group's membership",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "c69df97a9c6e9ae4574c96f915d93d088a98849c",
+  "plan_fingerprint": "b4746b65487004f58c66895f7ef7b11318b650c04028286e402a574ffac5c926",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 9,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The roll-forward section now requires a recorded run showing a disposable group planted above the bar reported and not cut.",
+      "reason": "",
+      "when": "2026-11-17T01:00:43.443099+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "finding": "single_goal-1",
+      "note": "The first-group section now states that it closes on the cut and that the repair comparison is reported evidence that neither closes nor holds it.",
+      "reason": "",
+      "when": "2026-11-17T01:03:14.304191+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "A sourceless member now has three routes: bound through the pipeline's own write path, withdrawn, or listed with the lead's ruling as an exception; the bar refuses only a sourceless member not so listed.",
+      "reason": "",
+      "when": "2026-11-17T01:05:33.387920+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "note": "The roll-forward section now requires a recorded run showing a disposable group planted above the bar reported and not cut.",
+      "reason": "",
+      "when": "2026-11-17T01:00:43.443099+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "note": "A sourceless member now has three routes: bound through the pipeline's own write path, withdrawn, or listed with the lead's ruling as an exception; the bar refuses only a sourceless member not so listed.",
+      "reason": "",
+      "when": "2026-11-17T01:05:33.387920+00:00"
+    },
+    "single_goal-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "410a53049f0ce385653b60d548a1c7fa722e9f1b",
+      "commit_basis": "edit",
+      "note": "The first-group section now states that it closes on the cut and that the repair comparison is reported evidence that neither closes nor holds it.",
+      "reason": "",
+      "when": "2026-11-17T01:03:14.304191+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T004349355600-plan-review-of-sn-audited-group-release.json",
+  "review_run_id": "r-20261117T004349355600-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "5a8f24a2e7babeaa15f9d6e06e377a7dac1b6ce4",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the five section ids s1\u2013s5 and `sn-definitions-by-construction#s11` all resolve in `docs/plans/`; the file anchor `docs/evidence/fragments/sn-audited-group-release/group-release-table.json` names a path this plan itself creates, and the directory it sits in exists (`docs/evidence/fragments/sn-audited-group-release/briefs/`).",
+    "done_when": "a finding \u2014 \u00a75 declares no planted negative control, so its non-cut arm fires only if some real group happens to fail the bar.",
+    "evidence_paths": "pass \u2014 every section's evidence, refusals and the group table land under `docs/evidence/fragments/sn-audited-group-release/`, a committed path, and no section puts evidence in a scratch or node-local directory.",
+    "naming": "pass \u2014 the sections name no symbol or code path and carry no plan labels, stage names or ticket numbers; the one file name \u00a75 fixes (`group-release-table.json`) states its content.",
+    "reasoning": "a finding \u2014 \u00a73's bar refuses a group containing any member with no source, while \u00a74 gives a clearing route only for members the audit reads as *defective*, so a sound but sourceless member blocks the cut with no stated endpoint; the plan's own \u00a72 figure (3,205 of 3,266 names record their sources' domains) says such names exist.",
+    "single_goal": "a finding \u2014 \u00a74 carries two separable deliverables: the two-arm repair comparison and the first release cut.",
+    "wiring": "pass \u2014 s1\u2192s2\u2192s3\u2192s4\u2192s5 in `plan-section-depends-on` matches the content, and \u00a74's extra dependency `sn-definitions-by-construction#s11 (\"The name review reads what the source's enclosing structures state\") resolves and matches the enclosing-structure context \u00a74's regeneration arm needs."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "aa90814bf7fe5b0dc6fc4403fa5241ca76667bad628c7228a5c12b5713272289",
+    "s3": "e8393e47f72f4a1c6f59095493b36c9814cfaf2e2c04fe322f9dedf659e80a0e",
+    "s4": "55a7a1a90c5d11ba3014a737a7ec9d1739d9a73983171b69f7d28601e0499ac8",
+    "s5": "f0ee018e09aed5387d06a0afa7fed73304ba3b121e2598ec77e830c5db06e9ae"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:59:29.088224+00:00",
+  "total": null
+}

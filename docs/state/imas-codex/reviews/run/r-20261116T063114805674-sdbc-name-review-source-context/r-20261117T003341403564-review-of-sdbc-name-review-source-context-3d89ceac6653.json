@@ -1,0 +1,94 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T00:34:51.621Z",
+  "dispatched_at": "2026-11-17T00:34:38Z",
+  "emission": [
+    "VERDICT goal: the source goal is to judge a qualifier against what the source's enclosing structures state; the delta keeps that reading and narrows it at imas_codex/standard_names/review/jev_review.py:766 (_structure_states_token refuses a negating or other-quantity sentence) while preserving the judge's own answer at imas_codex/standard_names/review/jev_review.py:1724.",
+    "VERDICT done_when: the command-asserted clause is the whole tests/standard_names directory; suite_head.log:1 records revision fb4a4c962 with 2 failed, 8780 passed and the same two tests/standard_names/test_refine_model_dispatch.py ids as suite_base.log:1 at 4d632fba1, so the delta adds no failure; the class, eight, planted and sample clauses are recorded in docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-review-source-context.html:175, but that paragraph's 854/398/236 contradicts the committed data file it is rendered from.",
+    "VERDICT write_paths: read the eleven paths in the source manifest's orientation_write_paths and the ten files the delta touches; every changed path is inside them, including imas_codex/standard_names/worker_tasks/__init__.py:56 which the previous review recorded as outside the fence.",
+    "VERDICT manifest: read; it reports status complete, twelve commits, baseline_suite at 4d632fba1 and after_suite at fb4a4c962 each 2 failed with identical ids, the negative control at 1 failed/4 passed ending EXIT=1, and the class pass at USD 0.2204 with 854 both-zero and 236 explained.",
+    "VERDICT diff: read the seven commits from fa84422c3 to 3d89ceac6: 366b0fbfd shares the ancestor read, 17abc05c7 and 4a8dfb7e3 add the two support guards, 4da8b03e4 reads both ancestor fields, 34144d3cb moves the query to worker_common, fb4a4c962 fixes the moved import, 3d89ceac6 rewrites the two evidence fragments; ten changed files, none outside the declared paths.",
+    "CALL_SITES: imas_codex/standard_names/worker_tasks/worker_review_names.py:232, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:858, imas_codex/standard_names/review/jev_review.py:1683, imas_codex/standard_names/review/checks.py:327",
+    "SCORE goal_fidelity: 18",
+    "JUSTIFICATION goal_fidelity: imas_codex/standard_names/review/jev_review.py:766 narrows the statement reading to one non-negating, non-other-quantity sentence per structure, which is the goal's judgement rather than a wider trigger.",
+    "SCORE evidence: 14",
+    "JUSTIFICATION evidence: suite_base.log:1 and suite_head.log:1 carry the two revisions, the command and matching failures, but docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-review-source-context.html:175 states a class residual the committed name-review-source-context.json does not hold.",
+    "SCORE scope_discipline: 20",
+    "JUSTIFICATION scope_discipline: every one of the ten changed paths is inside the source manifest's eleven declared paths, including imas_codex/standard_names/worker_tasks/__init__.py:56, whose earlier out-of-scope line this delta repairs.",
+    "SCORE durability: 18",
+    "JUSTIFICATION durability: tests/standard_names/test_name_review_source_context.py:108 and :121 redden if _contrasts or _token_followed_by_a_base is removed, and tests/standard_names/test_enclosing_structure_read.py:110 fails if the review read stops using the owner query.",
+    "SCORE fit: 16",
+    "JUSTIFICATION fit: the guards sit beside the states_token owner at imas_codex/standard_names/review/jev_review.py:666 and reuse _qualifier_stem and _physical_base_roster rather than introducing a second vocabulary.",
+    "SCORE reuse: 16",
+    "JUSTIFICATION reuse: imas_codex/standard_names/worker_tasks/worker_review_names.py:92 now calls worker_common.ancestor_statements over worker_common._ANCESTOR_CONTEXT_QUERY instead of its own HAS_PARENT Cypher, answering the previous review's reuse finding; only the negation word list at jev_review.py:684 restates words docs_gates.py:803 already holds.",
+    "FINDING docs/evidence/fragments/sn-definitions-by-construction/name-review-source-context.json:1 non-blocking: the committed data file's class_pass holds both_settled_at_zero 867 and above_cutoff_count 221 across 145 members, with per-name probabilities of an earlier reading (breakdown_initial_time over_qualified_modifier 0.52), while the page rendered from it states 854 both-zero and 398 answers across 236 members at sdbc-name-review-source-context.html:175; fill_fragment.py:111 renders residual_text from data['class_pass'], so re-running the generator would silently replace the measured 236 with 145. The class clause of the done_when therefore carries two different counts in the same landing, both claiming 0 unexplained.",
+    "FINDING docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-review-source-context.html:158 non-blocking: the planted-qualifier section states 0.93 on over_qualified_modifier and 0.91 on source_fidelity_unsupported_qualifier, while the same document at :106 states 0.91 / 0.89 for that name and the committed name-review-source-context.json records 0.9 / 0.9; three readings of one run are carried at once and only the run-directory artifact would settle which print is the one to quote.",
+    "FINDING imas_codex/standard_names/review/jev_review.py:684 non-blocking: _QUALIFIER_CONTRASTS restates a negation vocabulary the repository already holds at imas_codex/standard_names/docs_gates.py:803 (_NEUTRAL_NEGATION_RE), so the two lists can drift; the new set is sentence-scoped and adds contrast words, so it is a narrower adjacent list rather than a capability fork.",
+    "FINDING imas_codex/standard_names/worker_tasks/worker_review_names.py:88 non-blocking: enclosing_structure_statements now issues one graph round trip per bound path inside the loop, where the deleted _ENCLOSING_STRUCTURE_QUERY batched every path into one statement, so a review batch pays a query per source path instead of one per call."
+  ],
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/name-review-source-context.json",
+      "line": 1,
+      "severity": "non-blocking",
+      "summary": "The committed data file's class_pass holds both_settled_at_zero 867 and above_cutoff_count 221 across 145 members, with per-name probabilities from an earlier reading (breakdown_initial_time over_qualified_modifier 0.52), while the page rendered from it states 854 both-zero and 398 answers across 236 members at docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-review-source-context.html:175; fill_fragment.py:111 renders residual_text from data['class_pass'], so re-running the generator would silently replace the measured 236 with 145. The class clause of the done_when therefore carries two different counts in the same landing, both claiming 0 unexplained."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/sdbc-name-review-source-context.html",
+      "line": 158,
+      "severity": "non-blocking",
+      "summary": "The planted-qualifier section states 0.93 on over_qualified_modifier and 0.91 on source_fidelity_unsupported_qualifier, while the same document at :106 states 0.91 / 0.89 for that name and the committed name-review-source-context.json records 0.9 / 0.9; three readings of one planted run are carried at once, and only the run-directory artifact would settle which print is the one to quote."
+    },
+    {
+      "file": "imas_codex/standard_names/review/jev_review.py",
+      "line": 679,
+      "severity": "non-blocking",
+      "summary": "_QUALIFIER_CONTRASTS restates a negation vocabulary the repository already holds: imas_codex/standard_names/docs_gates.py:803 _NEUTRAL_NEGATION_RE carries most of the same words for the same purpose (deciding whether prose denies the term it names). The new set is sentence-scoped and extended with contrast words, so it is a narrower owner-adjacent list rather than a full capability fork, but the two lists can drift."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_review_names.py",
+      "line": 88,
+      "severity": "non-blocking",
+      "summary": "enclosing_structure_statements now issues one graph round trip per bound path inside the loop, where the deleted _ENCLOSING_STRUCTURE_QUERY batched every path into one statement. A review batch pays a query per source path instead of one per call."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Verified the landed code is reached from imas_codex/standard_names/worker_tasks/worker_review_names.py:232 (_enrich_name_review_items, which calls enclosing_structure_statements), imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:858 (_enrich_batch_items, which calls ancestor_statements), imas_codex/standard_names/review/jev_review.py:1683 (_item_record, which calls enclosing_structure_support), and imas_codex/standard_names/review/checks.py:327 (load_review_checks, which reads the two prompt texts from review_checks.yaml).",
+    "diff": "Read commit by commit from fa84422c3 to 3d89ceac6 (base is the previous review's head). 366b0fbfd moves the review read onto the ancestor query, 4da8b03e4 reads documentation and description both, 17abc05c7 adds the other-quantity guard, 4a8dfb7e3 restricts it to a quantity base, 34144d3cb moves query and rule to worker_common, fb4a4c962 fixes the moved import in worker_review_names, 3d89ceac6 rewrites the html and json evidence. No file outside the declared paths.",
+    "done_when": "The clauses are: a class census listed with stating structure; the eight renamed names below cutoff; a planted qualifier still above cutoff; a fixed two-hundred-name sample with each accept-to-not-accept listed; the whole tests/standard_names directory adding no failure; no stored name text changed; spend within USD 5. The command-asserted clause is recorded at suite_base.log/suite_head.log with revisions 4d632fba1 and fb4a4c962, 2 failures each and identical ids (added 0). The rest is recorded as measurement in the html and data file, but the class count disagrees between the two artifacts (finding at name-review-source-context.json:1).",
+    "goal": "The source goal is to judge a qualifier against what the source's enclosing structures state. The delta keeps the resolver and narrows it: jev_review.py:766 reads one sentence per structure and refuses a sentence that negates the qualifier or names another quantity's physical base, and jev_review.py:1724 records the judge's own probability beside the settled answer. The two source-support checks still settle from code rather than from the judge, which is the reading the previous review already accepted.",
+    "manifest": "Read the source manifest: status complete, twelve commits, baseline_suite and after_suite as armed JSON with completed true, 2 failures each and the same test_refine_model_dispatch.py ids, negative_control_log at 1 failed/4 passed, and the class/sample/planted verification lines. Its recorded suite receipts match the logs on disk.",
+    "write_paths": "Eleven paths declared; the delta touches ten files, all inside the declared list: review_checks.yaml, jev_review.py, worker_tasks/__init__.py, worker_common.py, worker_extraction_and_enrichment.py, worker_review_names.py, test_ancestor_grounding.py, test_enclosing_structure_read.py, test_name_review_source_context.py, and the two docs fragments."
+  },
+  "node": "sdbc-name-review-source-context",
+  "notes": "Read-only review. Read: the source prompt's rendered node spec (goal, done_when, eleven write paths), the source manifest, suite_base.log, suite_head.log, negative_control.log, the class/sample/planted sections of the html at head, the committed name-review-source-context.json, residual_after.json, fill_fragment.py, and the delta diff for imas_codex, tests and docs. Added failure count is 0 because both arms name the same two tests/standard_names/test_refine_model_dispatch.py ids and no others. One read outside the diff was taken for the reuse judgement: imas_codex/standard_names/docs_gates.py:802. No file in the reviewed tree was modified; the only writes are the two review records.",
+  "plan": "imas-codex:sn-definitions-by-construction#s11",
+  "project": "imas-codex",
+  "review_run_id": "r-20261117T003341403564-review-of-sdbc-name-review-source-context-3d89ceac6653",
+  "reviewed_base_sha": "fa84422c342666bfca0a5d0397f6ad0fa5035822",
+  "reviewed_commits": [
+    "366b0fbfd",
+    "17abc05c7",
+    "4da8b03e4",
+    "4a8dfb7e3",
+    "34144d3cb",
+    "fb4a4c962",
+    "3d89ceac6"
+  ],
+  "reviewed_head_sha": "3d89ceac66534177cc46f984f6d77ac2a3627185",
+  "reviewed_run_id": "r-20261116T063114805674-sdbc-name-review-source-context",
+  "rubric": "node",
+  "scores": {
+    "durability": 18,
+    "evidence": 14,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:45:00Z",
+  "total": 102
+}

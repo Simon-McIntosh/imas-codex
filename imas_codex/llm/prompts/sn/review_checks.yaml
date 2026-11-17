@@ -143,7 +143,12 @@ checks:
   question:
     kind: noul
     true_case: defect
-    text: Does the name add a modifier the source does not state, on a form that makes it a claim?
+    text: >-
+      Does the name add a modifier the source does not state, on a form that makes it a claim? Read the bound
+      source's own text and the statements made by the structures that enclose it — the enclosing_structures on
+      each dd_source_docs entry, nearest first. A qualifier an enclosing structure states supports the name, and a
+      qualifier neither the leaf nor its enclosing structures state is the claim this check names. A structure that
+      names the words while negating them, or while describing another quantity, does not support the name.
 - id: source_fidelity_unsupported_qualifier
   axis: name
   dimension: semantic
@@ -159,8 +164,13 @@ checks:
   question:
     kind: noul
     true_case: defect
-    text: Does the name assert a direction, mechanism, weighting or locus the authoritative DD doc does
-      not support?
+    text: >-
+      Does the name assert a direction, mechanism, weighting or locus the authoritative DD doc does not support?
+      Read the bound source's own text and the statements made by the structures that enclose it — the
+      enclosing_structures on each dd_source_docs entry, nearest first. A direction, mechanism, weighting or locus
+      an enclosing structure states is supported, and one that neither the leaf nor its enclosing structures state
+      is the assertion this check names. A structure that names the words while negating them, or while describing
+      another quantity, does not support it.
 - id: bound_to_wrong_object
   axis: name
   dimension: semantic

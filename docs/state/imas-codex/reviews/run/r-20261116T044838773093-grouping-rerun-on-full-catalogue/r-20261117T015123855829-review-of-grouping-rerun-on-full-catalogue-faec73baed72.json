@@ -1,0 +1,81 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs on disk: classification.json records baseline_suite null and after_suite null, so the run declares no suite arms; the arms it does record read grouping-measure.log EXIT=0, negative-control-green.log EXIT=0 and repair-revert-check.log EXIT=0 with no FAILED line, and the two red arms (product-gate.log EXIT=1, negative-control-red.log EXIT=1) are the declared negative controls, red by design, not added failures. Baseline-to-after set difference is therefore empty (0, no ids).",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/remote/catalogue_grouping.py:77 persist_archive_grouping called by the catalogue grouping driver",
+    "imas_codex/discovery/signals/archive_grouping_graph.py:189 RETIRE_UNUSED_GROUPS_QUERY applied inside persist_archive_grouping"
+  ],
+  "completed_at": "2026-11-17T01:55:04.369Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-grouping-rerun-on-full-catalogue-faec73baed72",
+      "recorded_at": "2026-11-17T02:24:00.124314+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T01:54:04Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "96",
+      "severity": "non-blocking",
+      "text": "non-blocking: the 'Any PlantComponent node with no signal reference' row puts 100 in the 'Before the re-run' cell, but the only measurement that produced 100 (unreferenced_all_components) was taken after the re-run's projection and the grouping-measurement.json that held it was overwritten by the repeat, so the fragment asserts a pre-run measurement no artifact records."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "100",
+      "severity": "non-blocking",
+      "text": "non-blocking: the growth from 100 to 723 is attributed to 'a concurrent plant-context import' though no artifact in the run directory records that cause - no timestamped re-measurement, no component-property breakdown, no naming of the import - so an inferred origin is stated as fact in an evidence document."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "117",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence claims the measurement gate 'exits non-zero unless ... metadata coverage equals the archive size', but measure_grouping.py:139 compares receipt.get('first',{}).get('metadata_completed') with .get('archive_variables'), so a receipt carrying neither key passes that duty as None == None."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read commit faec73bae against base 9a20d0e5 commit by commit; it rewrites the negative-control section into a three-arm table with a new product-only arm, adds the unfiltered PlantComponent row, states the measurement gate's duties and the twice-measured retirement, and commits nothing outside the fragment.",
+    "done_when": "plan \u00a710 (docs/plans/iter-signal-context-and-enrichment.html:89) asks for every section-5 measure beside the partial run's, zero unreferenced component and pattern nodes, a repeat that adds no groups and all_debug; the fragment carries each figure, the run occurred on all_debug, and the component zero is now measured at 0 grouping components with the 723 unfiltered PlantComponent nodes disclosed at line 100 rather than omitted.",
+    "goal": "the node goal is to re-run component and field-pattern grouping over the completed catalogue with the superseded groups and patterns retired; grouping-receipt.json records status complete at job 1321277 on all_debug with metadata_completed 995006 of archive_variables 995006 and archive_fraction 1.0, so the goal is met and commit faec73bae corrects the account of it.",
+    "manifest": "read; it records status complete, commits 0f4f00558 9a20d0e51 faec73bae, the measure command over measure_grouping.py, five test_logs including product-gate.log as negative_control_log at EXIT=1, and no baseline or after suite arms, which classification.json confirms with both null.",
+    "write_paths": "the declared paths are the fragment and docs/figures/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue; git diff 9a20d0e5 faec73baed touches only docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html, 13 insertions and 4 deletions."
+  },
+  "justifications": {
+    "durability": "the product-only arm and the duties gate live in the private run directory (product-gate.py, measure_grouping.py), so no committed test reddens if imas_codex/discovery/signals/archive_grouping_graph.py:189 regresses; the durable fix is reported under the node's outside_scope instead.",
+    "evidence": "each added claim is checkable against a named artifact - product-gate.log reads EXIT=1 with after_field_set_change=1, grouping-measure.log carries the identical duties dict and EXIT=0, grouping-measurement.json holds the repeat at 0 before and 0 deleted - except the 100 in the Before column and the plant-context attribution at lines 96 and 100, and the gate-limit claim at line 117.",
+    "fit": "the added table and paragraphs follow the sibling fragment idiom and the h4/table structure already used at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:93, and commit faec73bae uses a conventional docs(signals) subject with no plan identifier.",
+    "goal_fidelity": "grouping-receipt.json records the completed-catalogue run (995006 of 995006 metadata, archive_fraction 1.0) and the fragment at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:4 reports it, with faec73bae narrowing what the run claims rather than adding a new deliverable.",
+    "reuse": "the diff adds no function, class or module; a search of imas_codex/discovery/signals for retirement mechanisms found archive_grouping_graph.py:73 RETIRE_UNUSED_GROUPS_QUERY as the owner, which the fragment cites rather than forks.",
+    "scope_discipline": "git diff 9a20d0e519870c8150309c35afe46338e4860d5b faec73baed72fae9b731e9a70374c7dcb0fb41da lists the one declared fragment path and no other file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to re-run component and field-pattern grouping over the completed catalogue with the superseded groups and patterns retired; grouping-receipt.json records status complete at job 1321277 on all_debug with metadata_completed 995006 of archive_variables 995006 and archive_fraction 1.0, so the goal is met and commit faec73bae corrects the account of it.\nVERDICT done_when: plan \u00a710 (docs/plans/iter-signal-context-and-enrichment.html:89) asks for every section-5 measure beside the partial run's, zero unreferenced component and pattern nodes, a repeat that adds no groups and all_debug; the fragment carries each figure, the run occurred on all_debug, and the component zero is now measured at 0 grouping components with the 723 unfiltered PlantComponent nodes disclosed at line 100 rather than omitted.\nVERDICT write_paths: the declared paths are the fragment and docs/figures/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue; git diff 9a20d0e5 faec73baed touches only docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html, 13 insertions and 4 deletions.\nVERDICT manifest: read; it records status complete, commits 0f4f00558 9a20d0e51 faec73bae, the measure command over measure_grouping.py, five test_logs including product-gate.log as negative_control_log at EXIT=1, and no baseline or after suite arms, which classification.json confirms with both null.\nVERDICT diff: read commit faec73bae against base 9a20d0e5 commit by commit; it rewrites the negative-control section into a three-arm table with a new product-only arm, adds the unfiltered PlantComponent row, states the measurement gate's duties and the twice-measured retirement, and commits nothing outside the fragment.\nCALL_SITES: imas_codex/remote/catalogue_grouping.py:77 persist_archive_grouping, imas_codex/discovery/signals/archive_grouping_graph.py:189 RETIRE_UNUSED_GROUPS_QUERY applied inside persist_archive_grouping\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: grouping-receipt.json records the completed-catalogue run (995006 of 995006 metadata, archive_fraction 1.0) and the fragment at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:4 reports it, with faec73bae narrowing what the run claims rather than adding a new deliverable.\nSCORE evidence: 16\nJUSTIFICATION evidence: each added claim is checkable against a named artifact - product-gate.log reads EXIT=1 with after_field_set_change=1, grouping-measure.log carries the identical duties dict and EXIT=0, grouping-measurement.json holds the repeat at 0 before and 0 deleted - except the 100 in the Before column and the plant-context attribution at lines 96 and 100, and the gate-limit claim at line 117.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 9a20d0e519870c8150309c35afe46338e4860d5b faec73baed72fae9b731e9a70374c7dcb0fb41da lists the one declared fragment path and no other file.\nSCORE durability: 9\nJUSTIFICATION durability: the product-only arm and the duties gate live in the private run directory (product-gate.py, measure_grouping.py), so no committed test reddens if imas_codex/discovery/signals/archive_grouping_graph.py:189 regresses; the durable fix is reported under the node's outside_scope instead.\nSCORE fit: 17\nJUSTIFICATION fit: the added table and paragraphs follow the sibling fragment idiom and the h4/table structure already used at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:93, and commit faec73bae uses a conventional docs(signals) subject with no plan identifier.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module; a search of imas_codex/discovery/signals for retirement mechanisms found archive_grouping_graph.py:73 RETIRE_UNUSED_GROUPS_QUERY as the owner, which the fragment cites rather than forks.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:96 non-blocking: the 'Any PlantComponent node with no signal reference' row puts 100 in the 'Before the re-run' cell, but the only measurement that produced 100 (unreferenced_all_components) was taken after the re-run's projection and the grouping-measurement.json that held it was overwritten by the repeat, so the fragment asserts a pre-run measurement no artifact records.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:100 non-blocking: the growth from 100 to 723 is attributed to 'a concurrent plant-context import' though no artifact in the run directory records that cause - no timestamped re-measurement, no component-property breakdown, no naming of the import - so an inferred origin is stated as fact in an evidence document.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:117 non-blocking: the sentence claims the measurement gate 'exits non-zero unless ... metadata coverage equals the archive size', but measure_grouping.py:139 compares receipt.get('first',{}).get('metadata_completed') with .get('archive_variables'), so a receipt carrying neither key passes that duty as None == None.",
+  "review_node": "review-of-grouping-rerun-on-full-catalogue-faec73baed72",
+  "review_run_id": "r-20261117T015123855829-review-of-grouping-rerun-on-full-catalogue-faec73baed72",
+  "reviewed_base_sha": "9a20d0e519870c8150309c35afe46338e4860d5b",
+  "reviewed_head_sha": "faec73baed72fae9b731e9a70374c7dcb0fb41da",
+  "reviewed_run_id": "r-20261116T044838773093-grouping-rerun-on-full-catalogue",
+  "reviewer": {
+    "backend": "deepseek",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T015123855829-review-of-grouping-rerun-on-full-catalogue-faec73baed72"
+  },
+  "scores": {
+    "durability": 9,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T02:12:56.419928+00:00",
+  "total": 100
+}

@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "b2efb3a240bfab259ea94903b797b0103200d21c",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/remote/pulse_catalogue.py:104 main (live metadata import entry point)",
+    "imas_codex/remote/codac_uda.py:386 ArchiveSignalLoader.load (open-ended pulse bound guard)",
+    "imas_codex/discovery/signals/scanners/codac_uda.py:481 ArchiveReader (signal validation path)",
+    "imas_codex/remote/scripts/codac_uda.py:639 dispatch (remote operation router)"
+  ],
+  "completed_at": "2026-11-17T01:26:01.167Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-pulse-categories-and-pulses-in-graph-5a8246e821e5",
+      "recorded_at": "2026-11-17T01:56:23.442737+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T01:25:24Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/archive_pulses.py",
+      "line": "10",
+      "severity": "non-blocking",
+      "text": "non-blocking: ARCHIVE_QUERY duplicates the ArchiveEndpoint upsert that imas_codex/discovery/signals/scanners/codac_uda.py:31 already owns - same MERGE, SET and AT_FACILITY text with only the list UNWIND and the single-entity parameter differing - so two declarations must be kept in step; fold the import onto the existing writer."
+    },
+    {
+      "file": "imas_codex/config/codac_uda.py",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: create_archive_pulse still annotates end_ns as int although the schema change makes None legal and tests/graph/test_archive_pulses.py:34 passes end_ns=None, so the factory's signature states a contract its new caller violates."
+    },
+    {
+      "file": "imas_codex/remote/scripts/codac_uda.py",
+      "line": "288",
+      "severity": "non-blocking",
+      "text": "non-blocking: the \"pulse catalogue exceeds limit\" refusal has no assertion left after tests/remote/test_codac_uda_reads.py:224 was repurposed to the pre-fetch ValueError path, and the new empty-or-duplicate category identity refusal at imas_codex/remote/scripts/codac_uda.py:269 is likewise untested, so both refusals can regress silently."
+    }
+  ],
+  "head_log_revision": "5a8246e821e5a0d5014d79e4135286dcbf85bb78",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read commit by commit against b2efb3a24 -- 8db4796 adds optional Pulse end_ns and the description pass-through, the pulse_categories listing, archive_pulses.py and pulse_catalogue.py plus tests; d8f1b64 adds the error-status read to the native fixture; 5a8246e bounds pulse and category listings independently so a listing error is no longer reported as an empty list.",
+    "done_when": "the measure asks for archive-vs-graph category counts, the pulses-per-category distribution with the empty count, end-time totals, 20 preregistered pulses across at least 5 categories, a zero-node second import and passing graph-marked tests; /home/ITER/mcintos/.cache/imas-codex-codac-uda/pulse-catalogue/acceptance-receipt.json records graph_categories 743 = categories 743, the distribution 1..4359 with empty_categories 0, with_end 5934 + without_end 0 = pulses 5934, sample_pulses 20 over 14 categories, second_import_nodes_created 0, and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/final-head-gate.log:30 reads \"67 passed\".",
+    "goal": "the goal is every archive pulse category and each of its pulses with its start time, and its end time where one exists, in the graph under ITER; imas_codex/discovery/signals/archive_pulses.py:19-38 writes both node kinds with AT_FACILITY and IN_ARCHIVE, and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/import-measure.log records the live import of 743 categories and 5934 pulses under facility iter.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/manifest.md; it states final gate 67 passed, baseline 56 passed, negative control 2 failed, records the landing figures, the three commits 8db4796/d8f1b64/5a8246e, and both suite blocks with exit_status 0 and completed true.",
+    "write_paths": "the declared scope is imas_codex/schemas/, imas_codex/remote/, imas_codex/discovery/signals/, imas_codex/graph/, scripts/, tests/remote/, tests/discovery/, tests/graph/ and the node fragment/figure paths; git diff --stat b2efb3a24 5a8246e82 changes nine files, every one inside imas_codex/schemas/, imas_codex/remote/, imas_codex/discovery/signals/ or tests/remote/ and tests/graph/."
+  },
+  "justifications": {
+    "durability": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/negative-control-receipt.log records \"2 failed\" with test_open_ended_pulse_is_stored_without_invented_end and test_empty_category_is_present_linked_and_counted under the declared mutation, so those guards redden on regression, while the \"pulse catalogue exceeds limit\" branch at imas_codex/remote/scripts/codac_uda.py:288 lost its only assertion and the identity checks at scripts/codac_uda.py:269 are uncovered.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/final-head-gate.log:30 reads \"67 passed\" with EXIT=0, and import-measure.log ends EXIT=0 with the ACCEPTANCE line carrying every done_when figure from an independent graph readback and archive re-list, though those figures come from a run-dir measurement script rather than the declared gate command.",
+    "fit": "archive_pulses.py follows the Cypher-and-acknowledgement idiom of imas_codex/discovery/signals/scanners/codac_uda.py:31-38 and reuses catalogue_scan.write_receipt, but imas_codex/config/codac_uda.py:32 still annotates end_ns as int while None is now legal and imas_codex/remote/pulse_catalogue.py:13 imports the generated graph models at module scope.",
+    "goal_fidelity": "imas_codex/discovery/signals/archive_pulses.py:19-56 stores PulseCategory and Pulse with optional end_ns plus AT_FACILITY and IN_ARCHIVE, and the recorded live import has 743 categories and 5934 pulses under iter.",
+    "reuse": "imas_codex/discovery/signals/archive_pulses.py:10 re-declares the ArchiveEndpoint MERGE/SET/AT_FACILITY statement already owned by imas_codex/discovery/signals/scanners/codac_uda.py:31 instead of extending it.",
+    "scope_discipline": "all nine paths in git diff --stat b2efb3a24 5a8246e82 sit inside the declared fence, but tests/remote/test_codac_uda_reads.py:224 replaces the assertion of an existing refusal instead of adding alongside it."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is every archive pulse category and each of its pulses with its start time, and its end time where one exists, in the graph under ITER; imas_codex/discovery/signals/archive_pulses.py:19-38 writes both node kinds with AT_FACILITY and IN_ARCHIVE, and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/import-measure.log records the live import of 743 categories and 5934 pulses under facility iter.\nVERDICT done_when: the measure asks for archive-vs-graph category counts, the pulses-per-category distribution with the empty count, end-time totals, 20 preregistered pulses across at least 5 categories, a zero-node second import and passing graph-marked tests; /home/ITER/mcintos/.cache/imas-codex-codac-uda/pulse-catalogue/acceptance-receipt.json records graph_categories 743 = categories 743, the distribution 1..4359 with empty_categories 0, with_end 5934 + without_end 0 = pulses 5934, sample_pulses 20 over 14 categories, second_import_nodes_created 0, and /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/final-head-gate.log:30 reads \"67 passed\".\nVERDICT write_paths: the declared scope is imas_codex/schemas/, imas_codex/remote/, imas_codex/discovery/signals/, imas_codex/graph/, scripts/, tests/remote/, tests/discovery/, tests/graph/ and the node fragment/figure paths; git diff --stat b2efb3a24 5a8246e82 changes nine files, every one inside imas_codex/schemas/, imas_codex/remote/, imas_codex/discovery/signals/ or tests/remote/ and tests/graph/.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/manifest.md; it states final gate 67 passed, baseline 56 passed, negative control 2 failed, records the landing figures, the three commits 8db4796/d8f1b64/5a8246e, and both suite blocks with exit_status 0 and completed true.\nVERDICT diff: read commit by commit against b2efb3a24 -- 8db4796 adds optional Pulse end_ns and the description pass-through, the pulse_categories listing, archive_pulses.py and pulse_catalogue.py plus tests; d8f1b64 adds the error-status read to the native fixture; 5a8246e bounds pulse and category listings independently so a listing error is no longer reported as an empty list.\nCALL_SITES: imas_codex/remote/pulse_catalogue.py:104 main (live metadata import entry point), imas_codex/remote/codac_uda.py:386 ArchiveSignalLoader.load (open-ended pulse bound guard), imas_codex/discovery/signals/scanners/codac_uda.py:481 ArchiveReader (signal validation path), imas_codex/remote/scripts/codac_uda.py:639 dispatch (remote operation router)\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/archive_pulses.py:19-56 stores PulseCategory and Pulse with optional end_ns plus AT_FACILITY and IN_ARCHIVE, and the recorded live import has 743 categories and 5934 pulses under iter.\nSCORE evidence: 18\nJUSTIFICATION evidence: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/final-head-gate.log:30 reads \"67 passed\" with EXIT=0, and import-measure.log ends EXIT=0 with the ACCEPTANCE line carrying every done_when figure from an independent graph readback and archive re-list, though those figures come from a run-dir measurement script rather than the declared gate command.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: all nine paths in git diff --stat b2efb3a24 5a8246e82 sit inside the declared fence, but tests/remote/test_codac_uda_reads.py:224 replaces the assertion of an existing refusal instead of adding alongside it.\nSCORE durability: 16\nJUSTIFICATION durability: /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/negative-control-receipt.log records \"2 failed\" with test_open_ended_pulse_is_stored_without_invented_end and test_empty_category_is_present_linked_and_counted under the declared mutation, so those guards redden on regression, while the \"pulse catalogue exceeds limit\" branch at imas_codex/remote/scripts/codac_uda.py:288 lost its only assertion and the identity checks at scripts/codac_uda.py:269 are uncovered.\nSCORE fit: 17\nJUSTIFICATION fit: archive_pulses.py follows the Cypher-and-acknowledgement idiom of imas_codex/discovery/signals/scanners/codac_uda.py:31-38 and reuses catalogue_scan.write_receipt, but imas_codex/config/codac_uda.py:32 still annotates end_ns as int while None is now legal and imas_codex/remote/pulse_catalogue.py:13 imports the generated graph models at module scope.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/discovery/signals/archive_pulses.py:10 re-declares the ArchiveEndpoint MERGE/SET/AT_FACILITY statement already owned by imas_codex/discovery/signals/scanners/codac_uda.py:31 instead of extending it.\nFINDING imas_codex/discovery/signals/archive_pulses.py:10 non-blocking: ARCHIVE_QUERY duplicates the ArchiveEndpoint upsert that imas_codex/discovery/signals/scanners/codac_uda.py:31 already owns - same MERGE, SET and AT_FACILITY text with only the list UNWIND and the single-entity parameter differing - so two declarations must be kept in step; fold the import onto the existing writer.\nFINDING imas_codex/config/codac_uda.py:32 non-blocking: create_archive_pulse still annotates end_ns as int although the schema change makes None legal and tests/graph/test_archive_pulses.py:34 passes end_ns=None, so the factory's signature states a contract its new caller violates.\nFINDING imas_codex/remote/scripts/codac_uda.py:288 non-blocking: the \"pulse catalogue exceeds limit\" refusal has no assertion left after tests/remote/test_codac_uda_reads.py:224 was repurposed to the pre-fetch ValueError path, and the new empty-or-duplicate category identity refusal at imas_codex/remote/scripts/codac_uda.py:269 is likewise untested, so both refusals can regress silently.\n",
+  "review_run_id": "r-20261117T012003441138-review-of-pulse-categories-and-pulses-in-graph-5a8246e821e5",
+  "reviewed_base_sha": "b2efb3a240bfab259ea94903b797b0103200d21c",
+  "reviewed_head_sha": "5a8246e821e5a0d5014d79e4135286dcbf85bb78",
+  "reviewed_run_id": "r-20261117T001815749369-pulse-categories-and-pulses-in-graph",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T012003441138-review-of-pulse-categories-and-pulses-in-graph-5a8246e821e5"
+  },
+  "reviewer_run_id": "r-20261117T012003441138-review-of-pulse-categories-and-pulses-in-graph-5a8246e821e5",
+  "scores": {
+    "durability": 16,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 20,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:40:08.209131+00:00",
+  "total": 95
+}

@@ -1,0 +1,178 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "assertion_audit": [
+    {
+      "fails_if": "The forward stops waiting before 5 s, composes a different DBUS address, or terminates the process it started; restoring the 3-second loop makes clock[0] 3.0 and line 50 fail.",
+      "lines": [
+        39,
+        49,
+        50
+      ]
+    },
+    {
+      "fails_if": "An exited SSH process is not reported before the wait, or the stderr message is dropped: clock[0] must stay 0 and the log must carry exit 255 and its stderr.",
+      "lines": [
+        55,
+        61,
+        65
+      ]
+    },
+    {
+      "fails_if": "The wait is not bounded at 15 s or the timeout path does not terminate the forward: lines 77-78 assert the bound and the terminate call.",
+      "lines": [
+        69,
+        77,
+        78
+      ]
+    },
+    {
+      "fails_if": "An unavailable or failed keyring read returns None again instead of raising, or an empty readable store stops returning None; each case supplies an independent store state.",
+      "lines": [
+        79,
+        84,
+        86,
+        98,
+        100,
+        104
+      ]
+    },
+    {
+      "fails_if": "The client stops converting an unreadable store into ICPAuthenticationError before any request, or a runtime origin selector widens access to a host absent from readable_origins.",
+      "lines": [
+        120,
+        125,
+        181,
+        187
+      ]
+    },
+    {
+      "fails_if": "The allowlist validation accepts an empty, non-list, path-bearing, query-bearing, identity-provider or None entry, or the single-origin fallback stops being readable while still refusing an unlisted host.",
+      "lines": [
+        208,
+        232,
+        254
+      ]
+    },
+    {
+      "fails_if": "The gateway or redirect checks stop applying per host: the listed destination must traverse twice and record its origin, the unlisted one must refuse after one request.",
+      "lines": [
+        629,
+        636,
+        660,
+        666
+      ]
+    }
+  ],
+  "assertion_independence": "No tautological assertion found: every expected value is an independent fixture fact (clock arithmetic, store state, allowlist absence, redirect destination, transport call count) rather than a value the test handed the code under test; the one loose guard is the RuntimeError catch at tests/discovery/test_credential_forward.py:82, recorded as a non-blocking finding.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/discovery/icp/client.py:426",
+    "imas_codex/discovery/wiki/auth.py:414",
+    "imas_codex/cli/tunnel.py:1321"
+  ],
+  "completed_at": "2026-11-17T01:18:46.184Z",
+  "derivation": "added_failure_ids = after_suite.failure_ids minus baseline_suite.failure_ids = [] because the head arm completed with 0 failures; added_failure_count = 0.",
+  "dispatched_at": "2026-11-17T01:17:37Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/icp-api-access/idm-document-fetch.html",
+      "line": 16,
+      "severity": "non-blocking",
+      "text": "The landing record gives the listed set only as counts (1,187 candidate GET operations, including 22 document-named content readers) and then enumerates the 20 templates actually tried; the plan's second closing form requires the landing record to list each route in the set by path template with its outcome or the reason it cannot return a document's file, while the untried majority is accounted for only by the private production-document-route-candidates.json list and one class-level not_selected_reason in production-document-probe-selection.json, so a reader of the tracked record cannot check the judgement against the set it was made on."
+    },
+    {
+      "file": "host-reproduction.log",
+      "line": 1,
+      "severity": "non-blocking",
+      "text": "The baseline arm's header declares revision a6f87b9be1ddce509d3ed5c2e5c83b8581137bb8, but the three tests it selects (test_each_private_application_origin_is_readable, test_selector_cannot_authorise_an_unlisted_host, test_invalid_private_readable_allowlist_refused) are absent from that commit and arrive in 4c9c028, so the recorded revision is not the tree the arm measured and the manifest's baseline_suite revision field repeats the mislabel."
+    },
+    {
+      "file": "tests/discovery/test_credential_forward.py",
+      "line": 82,
+      "severity": "non-blocking",
+      "text": "The unavailable-store check catches RuntimeError rather than CredentialStoreUnavailable, so it still passes if the raised type is changed to an unrelated RuntimeError and the guard on the exception identity is looser than the behaviour the change introduced."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "Read all ten commits of 166904e8..ce7f5247 commit by commit: aeafd8f adds the 15-second forward wait and the strict credential read, 4c9c028 moves access to a private readable_origins allowlist, 73b510b re-points host-sensitive test values, ce7f5247 and the three evidence commits write the finding, and a6f87b9/463b85d merge main.",
+    "done_when": "The dispatch done_when states the file-fetch arm only, while the live plan's section 4 second arm is what was measured: production-routes-normalized.json gives 27 GET and 0 of every other method across 20 templates, final-head.log gives 378 passed, and tracked-tree-scan.json plus production-resumed-tracked-boundary.json give the tree search with a positive control.",
+    "goal": "Source dispatch-detail.json sets the goal to fetch one IDM document file by identity and version into private storage; no published GET returned a file, so the landed delivery is the plan section 4 second closing form recorded at docs/evidence/fragments/icp-api-access/idm-document-fetch.html:1-9 with zero files fetched.",
+    "manifest": "Read the reviewed manifest.md; it reports final-head 378 passed, the 86-failure write-check mutation and a 22-failure baseline, and final-head.log, final-mutation.log and host-reproduction.log carry those numbers and EXIT lines, with the inherited docs_gates.py reference attributed under outside_scope.",
+    "write_paths": "Read the declared paths in dispatch-detail.json; the exact commit range 166904e8..ce7f5247 changes five files, imas_codex/discovery/icp/client.py, imas_codex/discovery/wiki/auth.py, tests/discovery/test_credential_forward.py, tests/discovery/test_icp_client.py and docs/evidence/fragments/icp-api-access/idm-document-fetch.html, each inside one of them."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_credential_forward.py:69 asserts the 14.9..15.1 s bound and tests/discovery/test_icp_client.py:test_selector_cannot_authorise_an_unlisted_host asserts refusal of an unlisted origin, so restoring the 3-second loop or the single-origin policy reddens them, as the 22-failure reproduction in host-reproduction.log shows.",
+    "evidence": "production-routes-normalized.json records request_count 27 with method_counts {GET: 27} and 20 templates, final-head.log ends 378 passed with EXIT=0, and final-mutation.log ends 86 failed with EXIT=1, so the done_when's request-log language and both test arms are measured rather than claimed.",
+    "fit": "imas_codex/discovery/icp/client.py:374-400 keeps the module's existing configuration-parse idiom and imas_codex/discovery/wiki/auth.py:56 names the new exception for its state rather than for a plan or ticket.",
+    "goal_fidelity": "docs/plans/icp-api-access.html section 4 authorises closing on the no-file finding, and docs/evidence/fragments/icp-api-access/idm-document-fetch.html:5-9 delivers it with 13 readers at HTTP 204 against a passing plant control and zero files fetched.",
+    "reuse": "Searches for an existing host allowlist, credential-store exception and socket-wait helper found none outside the owners the diff edits; readable_origins extends _RequestPolicy in place and _forward_dbus_socket remains the single forwarder its cli/tunnel.py:1321 caller already imports.",
+    "scope_discipline": "The node's own commits change only imas_codex/discovery/icp/client.py, imas_codex/discovery/wiki/auth.py, tests/discovery/test_credential_forward.py, tests/discovery/test_icp_client.py and docs/evidence/fragments/icp-api-access/idm-document-fetch.html, all inside the declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: Source dispatch-detail.json sets the goal to fetch one IDM document file by identity and version into private storage; no published GET returned a file, and docs/plans/icp-api-access.html section 4 authorises the second closing form the delivery takes at docs/evidence/fragments/icp-api-access/idm-document-fetch.html:5-9, where 13 document readers returned HTTP 204 against a passing plant control and zero files were fetched.\nVERDICT done_when: The dispatched done_when states the file-fetch arm only, while the live plan section 4 second arm is what the gate measures: production-routes-normalized.json records request_count 27 and method_counts {GET: 27} over 20 templates, final-head.log ends 378 passed with EXIT=0, and production-resumed-tracked-boundary.json records the tree search with a positive control; the per-template enumeration the second arm also names is only partly present.\nVERDICT write_paths: Read the declared paths in dispatch-detail.json; the commit range 166904e8..ce7f5247 changes only imas_codex/discovery/icp/client.py, imas_codex/discovery/wiki/auth.py, tests/discovery/test_credential_forward.py, tests/discovery/test_icp_client.py and docs/evidence/fragments/icp-api-access/idm-document-fetch.html, each inside them.\nVERDICT manifest: Read the reviewed manifest.md; it reports final-head 378 passed, an 86-failure write-check mutation and a 22-failure baseline, and final-head.log, final-mutation.log and host-reproduction.log carry those numbers with their EXIT lines, the inherited docs_gates.py reference being attributed under outside_scope.\nVERDICT diff: Read all ten commits of 166904e8..ce7f5247 one by one; aeafd8f adds the bounded forward wait and strict credential read, 4c9c028 moves access to a private readable_origins allowlist, 73b510b re-points host-sensitive test values, ce7f5247 and three evidence commits write the finding, and a6f87b9/463b85d merge main.\nCALL_SITES: imas_codex/discovery/icp/client.py:426, imas_codex/discovery/wiki/auth.py:414, imas_codex/cli/tunnel.py:1321\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/plans/icp-api-access.html section 4 authorises closing on the no-file finding, and docs/evidence/fragments/icp-api-access/idm-document-fetch.html:5-9 delivers it with 13 readers at HTTP 204, a passing plant control and zero files fetched.\nSCORE evidence: 15\nJUSTIFICATION evidence: production-routes-normalized.json records request_count 27 with method_counts {GET: 27} and final-head.log ends 378 passed with EXIT=0, so the request-log measure and both test arms are recorded rather than claimed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: The node's own commits change only the five files of imas_codex/discovery/icp/client.py, imas_codex/discovery/wiki/auth.py, tests/discovery/test_credential_forward.py, tests/discovery/test_icp_client.py and docs/evidence/fragments/icp-api-access/idm-document-fetch.html, all inside the declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: tests/discovery/test_credential_forward.py:69 asserts the 14.9..15.1 s bound and tests/discovery/test_icp_client.py:test_selector_cannot_authorise_an_unlisted_host asserts refusal of an unlisted origin, so restoring the 3-second loop or the single-origin policy reddens them, as host-reproduction.log shows.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/discovery/icp/client.py:374-400 keeps the module's existing configuration-parse idiom and imas_codex/discovery/wiki/auth.py:56 names the new exception for its state rather than for a plan or ticket.\nSCORE reuse: 20\nJUSTIFICATION reuse: Searches for an existing host allowlist, credential-store exception and socket-wait helper found no other owner; readable_origins extends _RequestPolicy in place and _forward_dbus_socket remains the single forwarder its caller at imas_codex/cli/tunnel.py:1321 already imports.\nFINDING docs/evidence/fragments/icp-api-access/idm-document-fetch.html:16 non-blocking: The landing record gives the listed set only as counts (1,187 candidate GET operations, including 22 document-named content readers) and enumerates the 20 templates tried; the plan's second closing form requires the landing record to list each route in the set by path template with its outcome or the reason it cannot return a document's file, while the untried majority is accounted for only by the private production-document-route-candidates.json list and one class-level not_selected_reason, so the tracked record cannot be checked against the set the judgement was made on.\nFINDING host-reproduction.log:1 non-blocking: The baseline arm declares revision a6f87b9be1ddce509d3ed5c2e5c83b8581137bb8, but the three tests it selects are absent from that commit and arrive in 4c9c028, so the recorded revision is not the tree the arm measured and the manifest's baseline_suite repeats the mislabel.\nFINDING tests/discovery/test_credential_forward.py:82 non-blocking: The unavailable-store check catches RuntimeError rather than CredentialStoreUnavailable, so it still passes if the raised type becomes an unrelated RuntimeError and the guard on the exception identity is looser than the behaviour introduced.\nreviewed_base_sha: 166904e82f01f20acbc8bf6f5956e0c1e6e90d82\nreviewed_head_sha: ce7f5247284c5430b87ac97aba748621c521da87",
+  "review_run_id": "r-20261117T003353874760-review-of-idm-document-fetch-ce7f5247284c",
+  "reviewed_base_sha": "166904e82f01f20acbc8bf6f5956e0c1e6e90d82",
+  "reviewed_head_sha": "ce7f5247284c5430b87ac97aba748621c521da87",
+  "reviewed_run_id": "r-20261115T213954176293-idm-document-fetch",
+  "revision_note": "Reviewed at the node's own commits 166904e82f01f20acbc8bf6f5956e0c1e6e90d82..ce7f5247284c5430b87ac97aba748621c521da87; the range also contains the two main merges a6f87b9 and 463b85d, whose imported trees are not this node's authorship.",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "suite_evidence": {
+    "after_suite": {
+      "command": "uv run --no-sync pytest -p no:cacheprovider --basetemp /tmp/icp-head-7104v2na/pytest /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/idm-document-fetch/tests/discovery/test_icp_client.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/idm-document-fetch/tests/discovery/test_icp_records.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/idm-document-fetch/tests/discovery/test_request_pacer.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/idm-document-fetch/tests/discovery/test_credential_forward.py",
+      "completed": true,
+      "exit_status": 0,
+      "failure_count": 0,
+      "failure_ids": [],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T213954176293-idm-document-fetch/final-head.log",
+      "revision": "ce7f5247284c5430b87ac97aba748621c521da87"
+    },
+    "baseline_suite": {
+      "command": "uv run --no-sync pytest -p no:cacheprovider tests/discovery/test_icp_client.py -k 'each_private_application or selector_cannot or invalid_private_readable'",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 22,
+      "failure_ids": [
+        "tests/discovery/test_icp_client.py::test_each_private_application_origin_is_readable[https://integration.example.test]",
+        "tests/discovery/test_icp_client.py::test_each_private_application_origin_is_readable[https://production.example.test]",
+        "tests/discovery/test_icp_client.py::test_selector_cannot_authorise_an_unlisted_host[https://integration.example.test-environment]",
+        "tests/discovery/test_icp_client.py::test_selector_cannot_authorise_an_unlisted_host[https://integration.example.test-constructor]",
+        "tests/discovery/test_icp_client.py::test_selector_cannot_authorise_an_unlisted_host[https://production.example.test-environment]",
+        "tests/discovery/test_icp_client.py::test_selector_cannot_authorise_an_unlisted_host[https://production.example.test-constructor]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://integration.example.test-origins0]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://integration.example.test-https://integration.example.test]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://integration.example.test-origins2]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://integration.example.test-origins3]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://integration.example.test-origins4]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://integration.example.test-origins5]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://integration.example.test-origins6]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://integration.example.test-origins7]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://production.example.test-origins0]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://production.example.test-https://integration.example.test]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://production.example.test-origins2]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://production.example.test-origins3]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://production.example.test-origins4]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://production.example.test-origins5]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://production.example.test-origins6]",
+        "tests/discovery/test_icp_client.py::test_invalid_private_readable_allowlist_refused[https://production.example.test-origins7]"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261115T213954176293-idm-document-fetch/host-reproduction.log",
+      "revision": "a6f87b9be1ddce509d3ed5c2e5c83b8581137bb8"
+    }
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:38:56.845584+00:00",
+  "total": 108
+}

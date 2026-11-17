@@ -7,6 +7,10 @@ import re as _re
 from collections.abc import Callable, Sequence
 from typing import TYPE_CHECKING, Any
 
+from imas_codex.standard_names.worker_tasks.worker_common import (
+    ancestor_statements,
+)
+
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
@@ -495,7 +499,6 @@ async def _rerank_comparators_for_worker(
 
 
 _DD_CONTEXT_QUERY = "\nMATCH (n:IMASNode {id: $path})\nMATCH (current_dd_version:DDVersion {is_current: true})\nOPTIONAL MATCH (n)-[:HAS_IDENTIFIER_SCHEMA]->(ident:IdentifierSchema)\nOPTIONAL MATCH (n)-[:HAS_PARENT]->(parent:IMASNode)\nOPTIONAL MATCH (parent)-[:HAS_CHILD]->(sibling:IMASNode)\nWHERE sibling.id <> $path\n  AND NOT (sibling.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])\nWITH n, current_dd_version, ident, parent,\n     [(n)-[:HAS_UNIT]->(unit:Unit) | unit.id] AS unit_relations,\n     collect(DISTINCT {\n         path: sibling.id,\n         description: sibling.description,\n         data_type: sibling.data_type\n     })[0..8] AS sibling_fields\nRETURN n.coordinate1_same_as AS coordinate1,\n       n.coordinate2_same_as AS coordinate2,\n       n.coordinate3_same_as AS coordinate3,\n       n.timebasepath AS timebase,\n       n.cocos_transformation_type AS cocos_label,\n       n.cocos_transformation_expression AS cocos_expression,\n       n.lifecycle_status AS lifecycle_status,\n       n.data_type AS data_type,\n       n.description AS node_description,\n       n.documentation AS node_documentation,\n       ident.name AS identifier_schema_name,\n       ident.documentation AS identifier_schema_doc,\n       ident.options AS identifier_options,\n       current_dd_version.id AS dd_version,\n       n.unit AS raw_unit,\n       unit_relations,\n       CASE WHEN size(unit_relations) = 1\n            THEN head(unit_relations) ELSE null END AS unit_from_rel,\n       parent.id AS parent_path,\n       parent.description AS parent_description,\n       n.enrichment_source AS enrichment_source,\n       sibling_fields\n"
-_ANCESTOR_CONTEXT_QUERY = "\nMATCH path = (n:IMASNode {id: $path})-[:HAS_PARENT*1..8]->(a:IMASNode)\nWHERE coalesce(trim(a.description), '') <> ''\n   OR coalesce(trim(a.documentation), '') <> ''\nRETURN length(path) AS depth,\n       a.id AS path,\n       a.description AS description,\n       a.documentation AS documentation,\n       a.enrichment_source AS enrichment_source\nORDER BY depth ASC\n"
 _CROSS_IDS_QUERY = "\nMATCH (n:IMASNode {id: $path})-[:IN_CLUSTER]->(c:IMASSemanticCluster)\nWHERE c.scope IN ['global', 'domain']\nWITH c ORDER BY c.scope ASC LIMIT 3\nMATCH (member:IMASNode)-[:IN_CLUSTER]->(c)\nWHERE member.id <> $path\n  AND NOT (member.data_type IN ['STRUCTURE', 'STRUCT_ARRAY'])\nRETURN c.label AS cluster_label,\n       c.description AS cluster_description,\n       c.scope AS cluster_scope,\n       collect(DISTINCT member.id)[0..5] AS member_paths\n"
 _VERSION_HISTORY_QUERY = "\nMATCH (vc:IMASNodeChange)-[:FOR_IMAS_PATH]->(n:IMASNode {id: $path})\nWHERE vc.change_type IN [\n    'path_added', 'cocos_transformation_type', 'sign_convention',\n    'units', 'path_renamed', 'definition_clarification'\n]\nRETURN vc.id AS change_id, vc.change_type AS change_type\n"
 _ERROR_FIELDS_QUERY = "\nMATCH (d:IMASNode {id: $path})-[:HAS_ERROR]->(e:IMASNode)\nRETURN e.id AS error_path\n"
@@ -852,24 +855,12 @@ def _enrich_batch_items(_worker_dependency, /, items: list[dict]) -> None:
                     item["description"] = rich
                 item["documentation"] = node_doc or node_desc
             if not item.get("ancestor_context"):
-                anc_rows = list(
+                lineage = ancestor_statements(
                     gc.query(
                         _worker_dependency("_ANCESTOR_CONTEXT_QUERY"),
                         path=grounding_path,
                     )
                 )
-                lineage: list[dict[str, str]] = []
-                seen_text: set[str] = set()
-                for a in anc_rows:
-                    a_desc = (a.get("description") or "").strip()
-                    a_doc = (a.get("documentation") or "").strip()
-                    text = a_desc or a_doc
-                    if not text or text in seen_text:
-                        continue
-                    seen_text.add(text)
-                    lineage.append({"path": a.get("path") or "", "text": text})
-                    if len(lineage) >= 4:
-                        break
                 if lineage:
                     item["ancestor_context"] = lineage
             if item.get("unit") and path:

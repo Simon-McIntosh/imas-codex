@@ -1,8 +1,9 @@
 """Read ICP through a guarded session and the existing gateway sign-in exchange.
 
-Set IMAS_CODEX_ICP_ORIGIN to the authorised integration origin and
-IMAS_CODEX_ICP_DESCRIPTION_PATH to its description path at runtime. Neither
-setting has a production fallback. Select the facility with
+Select an application origin from the private readable_origins allowlist with
+IMAS_CODEX_ICP_ORIGIN or the constructor's origin argument. Neither selector
+grants access to an unlisted host. Set IMAS_CODEX_ICP_DESCRIPTION_PATH to its
+description path at runtime. Select the facility with
 IMAS_CODEX_ICP_FACILITY or the constructor's facility argument. Its ignored
 private configuration holds the icp credential service, identity origins,
 sign-in origins and exact gateway sign-in paths. API paths resolve from the
@@ -17,7 +18,7 @@ import os
 import threading
 import time
 from contextlib import contextmanager
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 from urllib.parse import parse_qsl, unquote, urljoin, urlsplit
 
@@ -25,7 +26,7 @@ import requests
 
 from imas_codex.discovery.base.facility import get_facility_infrastructure
 from imas_codex.discovery.base.request_pacer import RequestPacer
-from imas_codex.discovery.wiki.auth import CredentialManager
+from imas_codex.discovery.wiki.auth import CredentialManager, CredentialStoreUnavailable
 from imas_codex.discovery.wiki.confluence import ConfluenceClient
 
 _READ_METHODS = frozenset({"GET", "HEAD"})
@@ -80,13 +81,13 @@ def _description(response: requests.Response) -> dict[str, Any] | None:
 
 @dataclass(frozen=True)
 class RequestRecord:
-    """A private receipt; sign-in includes origin/path, never query or auth data."""
+    """A private receipt with origin, never query or authentication data."""
 
     method: str
     target: str
     status: int | None
     phase: str
-    origin: str | None = None
+    origin: str | None = field(default=None, repr=False)
     path: str | None = None
     started_at: float | None = None
 
@@ -94,14 +95,14 @@ class RequestRecord:
 class _RequestPolicy:
     def __init__(
         self,
-        origin: str,
+        readable_origins: frozenset[str],
         interval: float,
         identity_origins: frozenset[str],
         sign_in_origins: frozenset[str],
         gateway_paths: frozenset[str],
         description_path: str,
     ) -> None:
-        self.origin = origin
+        self.readable_origins = readable_origins
         self.pacer = RequestPacer(interval)
         self.identity_origins = identity_origins
         self.sign_in_origins = sign_in_origins
@@ -123,7 +124,7 @@ class _RequestPolicy:
         }:
             raise ICPRequestRefused("A different Host header is not allowed")
         method = request.method
-        if origin == self.origin:
+        if origin in self.readable_origins:
             if method not in _READ_METHODS:
                 path = unquote(urlsplit(request.url).path)
                 if (
@@ -136,7 +137,7 @@ class _RequestPolicy:
                         "ICP accepts only GET and HEAD outside sign-in paths"
                     )
                 self._check_sign_in(request, origin)
-            return "integration"
+            return "application"
         self._check_sign_in(request, origin)
         return (
             "identity-provider"
@@ -290,7 +291,7 @@ class _GuardedAdapter(requests.adapters.HTTPAdapter):
                     target,
                     response.status_code if response is not None else None,
                     "sign-in" if signing_in else "read",
-                    _origin(request.url) if signing_in else None,
+                    _origin(request.url),
                     urlsplit(request.url).path if signing_in else None,
                     started_at,
                 )
@@ -353,11 +354,10 @@ class _APILogin(ConfluenceClient):
 
 
 class ICPClient:
-    """Read a privately configured integration instance, renewing stale sessions.
+    """Read privately allowlisted application hosts, renewing stale sessions.
 
-    The runtime origin is the authority for the sole allowed application host.
-    Requests to other application origins, including a production origin, are
-    refused. Only the sign-in exchange may contact the identity provider.
+    Runtime selectors choose an origin without widening the private allowlist.
+    Only the sign-in exchange may contact the identity provider.
     The exposed session uses the same policy for convenience methods, prepared
     requests, redirects and direct adapter calls.
     """
@@ -366,6 +366,7 @@ class ICPClient:
         self,
         *,
         facility: str | None = None,
+        origin: str | None = None,
         timeout: float = 30,
         min_interval: float = 0.5,
     ) -> None:
@@ -373,19 +374,29 @@ class ICPClient:
         if not facility:
             raise ICPConfigurationError("Configure the ICP facility")
         config = get_facility_infrastructure(facility).get("icp", {})
-        configured = os.environ.get("IMAS_CODEX_ICP_ORIGIN", config.get("origin", ""))
+        configured = origin or os.environ.get(
+            "IMAS_CODEX_ICP_ORIGIN", config.get("origin", "")
+        )
         path = os.environ.get(
             "IMAS_CODEX_ICP_DESCRIPTION_PATH", config.get("description_path", "")
         )
         try:
+            allowed = config.get("readable_origins", [config.get("origin", "")])
+            if not isinstance(allowed, list) or not allowed:
+                raise ValueError
+            for value in [configured, *allowed]:
+                parts = urlsplit(value)
+                if parts.path not in ("", "/") or parts.query or parts.fragment:
+                    raise ValueError
+                _origin(value)
+            readable_origins = frozenset(_origin(value) for value in allowed)
             origin = _origin(configured)
-        except ICPRequestRefused:
+            if origin not in readable_origins:
+                raise ValueError
+        except (ICPRequestRefused, ValueError, TypeError, AttributeError):
             raise ICPConfigurationError(
-                "Configure the private integration origin"
+                "Select an HTTPS origin from the private readable origins"
             ) from None
-        parts = urlsplit(configured)
-        if parts.path not in ("", "/") or parts.query or parts.fragment:
-            raise ICPConfigurationError("The integration origin must have no path")
         if not path.startswith("/") or path.startswith("//"):
             raise ICPConfigurationError("Configure an absolute description path")
         self._origin = origin
@@ -412,7 +423,7 @@ class ICPClient:
         if (
             not identity_origins
             or not identity_origins <= sign_in_origins
-            or origin in identity_origins
+            or readable_origins & identity_origins
         ):
             raise ICPConfigurationError(
                 "Identity origins must belong to the sign-in allowlist"
@@ -423,13 +434,16 @@ class ICPClient:
             raise ICPConfigurationError("Gateway sign-in paths must be absolute paths")
         self.timeout = timeout
         self._creds = CredentialManager()
-        self._credentials = self._creds.get_stored_credentials(service)
+        try:
+            self._credentials = self._creds.get_stored_credentials(service)
+        except CredentialStoreUnavailable as exc:
+            raise ICPAuthenticationError(str(exc)) from exc
         if not self._credentials:
             raise ICPAuthenticationError("No stored credentials for the ICP sign-in")
         if "@" not in self._credentials[0]:
             raise ICPAuthenticationError("The stored username must be an email")
         self._policy = _RequestPolicy(
-            origin,
+            readable_origins,
             min_interval,
             identity_origins,
             sign_in_origins,
@@ -445,7 +459,7 @@ class ICPClient:
 
     @property
     def origin(self) -> str:
-        """The configured integration origin attached to record identities."""
+        """The selected application origin attached to record identities."""
         return self._origin
 
     @property

@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T02:14:05.800Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-17T02:12:06Z",
+  "finding_dispositions": {},
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/blind-audit.py",
+      "line": "719",
+      "severity": "non-blocking",
+      "text": "non-blocking: per_reader['read'] now counts sampled names only while the spend and tokens beside it (lines 721-727) still sum every call including the 40 plant calls, so the page's Readings column (blind-audit.py:1157) shows 340 against USD 1.7614 that paid for 380 calls and 339 against USD 10.4257 that paid for 379; a reader cannot reconcile the row, and the same mixed object is in blind-audit.json per_reader."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T220839161092-sagr-blind-audit/report.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the header that labels the run writing blind-audit.json and sagr-blind-audit.html names d4f2a7d2c '(worktree, uncommitted repair tree)', not the dccd83ff4 revision the two files landed at, so the receipt does not itself tie the committed artefacts to the committed script; the tie holds only on content, because the committed blind-audit.json carries plant_pairs and spend.unknown_cost_calls, keys the base script never writes."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/blind-audit.py",
+      "line": "1365",
+      "severity": "non-blocking",
+      "text": "non-blocking: --check is a real guard and its negative control reddens five assertions at dccd83ff4, but nothing runs it: the file sits under docs/evidence/fragments/, no test collects it, no CI workflow names it, so a later regression of summarize() would redden no automated run and only a person running the script by hand would see it."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "none \u2014 the landed change is a committed evidence script under docs/evidence/fragments/, imported by no runtime module; a grep of imas_codex/ for blind_audit or blind-audit returns nothing, and the script's only importers are its own two output files.",
+    "diff": "read the single commit dccd83ff4 against base d4f2a7d2c (git diff --name-only lists exactly blind-audit.py, blind-audit.json, sagr-blind-audit.html): the script builds complete from sampled_ids alone and adds through_plants, records a failed call's cost as null with spend.unknown_cost_calls, delegates kappa to imas_codex.discovery.base.evaluation.cohen_kappa and the pipeline-model set to imas_codex.settings accessors, adds a nine-assertion --check with its own controls, and drops the unused description_alias projection; the JSON and page are recomputed from the same readings with the plants moved to their own section.",
+    "done_when": "the plan's done_when asks for a >=300-name stratified sample, two non-pipeline readers, a fixed class list, per-class and any-class counts with intervals, per-group counts only, 20+20 plants excluded from every sample count and rate with row citations, thirty disagreements, spend <= USD 30, and no stored text change; the gate run reads 340 sampled names over all 23 groups of >=20 (blind-audit.json draw.groups) with 339 paired, 174 of 339 at least one reader (51.3 %, CI 46.0-56.6), zero plant names in defective_names, per_class or disagreements, 40 plant pairs reported separately, 30 disagreement rows on the page, USD 12.19, and the persist run records stored_text_changed: [], so the measure is asserted.",
+    "goal": "the source goal is to measure the live catalog's defect rate with a blind two-reader audit; sagr-blind-audit.html:11 now states that rate over the 339 sampled names with both readings (174, 51.3 %, 95 % CI 46.0-56.6) instead of over sample plus plants, and the readers are gemini-3.8-flash and kimi-k3.1-pro, neither named by any pipeline seat or review profile at the landed revision.",
+    "manifest": "read the reviewed manifest: status complete, commits 1e87f877f / d4f2a7d2c / dccd83ff4, tests naming the --report, --check, --run, --persist, ruff and graph commands, report.log and self-test.log as its logs and two negative-control logs; it carries no baseline_suite or after_suite keys, so added_failure_count is 0 from the absence of any suite arm rather than from a pair of readable gate logs, and its report.log admits it ran in an uncommitted tree labelled d4f2a7d2c.",
+    "write_paths": "the declared paths are the three docs/evidence/fragments/sn-audited-group-release files plus the unused docs/figures directory; git diff --name-only d4f2a7d2c dccd83ff4 lists exactly blind-audit.json, blind-audit.py and sagr-blind-audit.html and nothing else."
+  },
+  "justifications": {
+    "durability": "blind-audit.py:1258 _self_test asserts nine properties against literal expected values on a synthetic 2-sample/2-plant fixture and the recorded control at negative-control-sample-split.log reddens five of them (EXIT=1) on the reinstated population split, but no collected test or CI job runs --check, so the guard fires only under a hand-run.",
+    "evidence": "report.log:1 ends EXIT=0 and self-test.log:1 names dccd83ff4 with nine PASS lines, yet report.log's own revision line names d4f2a7d2c as an uncommitted tree, so the generating run is tied to the landed script by the JSON's new keys rather than by the receipt.",
+    "fit": "blind-audit.py:1365 adds --check in the same shape as docs/evidence/fragments/sn-name-definition-fresh-labels/sheet-draw.py:230, and the page keeps the fragment's id/heading idiom, though the spend table at blind-audit.py:1157 mixes a sample-only count with all-call spend.",
+    "goal_fidelity": "sagr-blind-audit.html:11 publishes 174 of the 339 sampled names (51.3 %) instead of the 191 of 379 that included the plants, and blind-audit.json defective_names loses exactly the 17 planted rows the base carried while gaining none.",
+    "reuse": "blind-audit.py:629 delegates the agreement statistic to imas_codex.discovery.base.evaluation.cohen_kappa and blind-audit.py:1243 derives the pipeline-model set from imas_codex.settings MODEL_SECTIONS and the sn-review accessors, so the two forks the previous review named are gone; no other definition the commit adds has an owner.",
+    "scope_discipline": "git diff --name-only d4f2a7d2c dccd83ff4 lists only docs/evidence/fragments/sn-audited-group-release/{blind-audit.py,blind-audit.json,sagr-blind-audit.html}, all inside the declared write paths, with no stored text, stage or score touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source goal is to measure the live catalog's defect rate with a blind two-reader audit; sagr-blind-audit.html:11 now states that rate over the 339 sampled names with both readings (174, 51.3 %, 95 % CI 46.0-56.6) instead of over sample plus plants, and the readers are gemini-3.8-flash and kimi-k3.1-pro, neither named by any pipeline seat or review profile at the landed revision.\nVERDICT done_when: the plan's done_when asks for a >=300-name stratified sample, two non-pipeline readers, a fixed class list, per-class and any-class counts with intervals, per-group counts only, 20+20 plants excluded from every sample count and rate with row citations, thirty disagreements, spend <= USD 30, and no stored text change; the gate run reads 340 sampled names over all 23 groups of >=20 (blind-audit.json draw.groups) with 339 paired, 174 of 339 at least one reader (51.3 %, CI 46.0-56.6), zero plant names in defective_names, per_class or disagreements, 40 plant pairs reported separately, 30 disagreement rows on the page, USD 12.19, and the persist run records stored_text_changed: [], so the measure is asserted.\nVERDICT write_paths: the declared paths are the three docs/evidence/fragments/sn-audited-group-release files plus the unused docs/figures directory; git diff --name-only d4f2a7d2c dccd83ff4 lists exactly blind-audit.json, blind-audit.py and sagr-blind-audit.html and nothing else.\nVERDICT manifest: read the reviewed manifest: status complete, commits 1e87f877f / d4f2a7d2c / dccd83ff4, tests naming the --report, --check, --run, --persist, ruff and graph commands, report.log and self-test.log as its logs and two negative-control logs; it carries no baseline_suite or after_suite keys, so added_failure_count is 0 from the absence of any suite arm rather than from a pair of readable gate logs, and its report.log admits it ran in an uncommitted tree labelled d4f2a7d2c.\nVERDICT diff: read the single commit dccd83ff4 against base d4f2a7d2c (git diff --name-only lists exactly blind-audit.py, blind-audit.json, sagr-blind-audit.html): the script builds complete from sampled_ids alone and adds through_plants, records a failed call's cost as null with spend.unknown_cost_calls, delegates kappa to imas_codex.discovery.base.evaluation.cohen_kappa and the pipeline-model set to imas_codex.settings accessors, adds a nine-assertion --check with its own controls, and drops the unused description_alias projection; the JSON and page are recomputed from the same readings with the plants moved to their own section.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: sagr-blind-audit.html:11 publishes 174 of the 339 sampled names (51.3 %) instead of the 191 of 379 that included the plants, and blind-audit.json defective_names loses exactly the 17 planted rows the base carried while gaining none.\nSCORE evidence: 15\nJUSTIFICATION evidence: report.log:1 ends EXIT=0 and self-test.log:1 names dccd83ff4 with nine PASS lines, yet report.log's own revision line names d4f2a7d2c as an uncommitted tree, so the generating run is tied to the landed script by the JSON's new keys rather than by the receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only d4f2a7d2c dccd83ff4 lists only docs/evidence/fragments/sn-audited-group-release/{blind-audit.py,blind-audit.json,sagr-blind-audit.html}, all inside the declared write paths, with no stored text, stage or score touched.\nSCORE durability: 13\nJUSTIFICATION durability: blind-audit.py:1258 _self_test asserts nine properties against literal expected values on a synthetic 2-sample/2-plant fixture and the recorded control at negative-control-sample-split.log reddens five of them (EXIT=1) on the reinstated population split, but no collected test or CI job runs --check, so the guard fires only under a hand-run.\nSCORE fit: 18\nJUSTIFICATION fit: blind-audit.py:1365 adds --check in the same shape as docs/evidence/fragments/sn-name-definition-fresh-labels/sheet-draw.py:230, and the page keeps the fragment's id/heading idiom, though the spend table at blind-audit.py:1157 mixes a sample-only count with all-call spend.\nSCORE reuse: 20\nJUSTIFICATION reuse: blind-audit.py:629 delegates the agreement statistic to imas_codex.discovery.base.evaluation.cohen_kappa and blind-audit.py:1243 derives the pipeline-model set from imas_codex.settings MODEL_SECTIONS and the sn-review accessors, so the two forks the previous review named are gone; no other definition the commit adds has an owner.\nFINDING docs/evidence/fragments/sn-audited-group-release/blind-audit.py:719 non-blocking: per_reader['read'] now counts sampled names only while the spend and tokens beside it (lines 721-727) still sum every call including the 40 plant calls, so the page's Readings column (blind-audit.py:1157) shows 340 against USD 1.7614 that paid for 380 calls and 339 against USD 10.4257 that paid for 379; a reader cannot reconcile the row, and the same mixed object is in blind-audit.json per_reader.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T220839161092-sagr-blind-audit/report.log:1 non-blocking: the header that labels the run writing blind-audit.json and sagr-blind-audit.html names d4f2a7d2c '(worktree, uncommitted repair tree)', not the dccd83ff4 revision the two files landed at, so the receipt does not itself tie the committed artefacts to the committed script; the tie holds only on content, because the committed blind-audit.json carries plant_pairs and spend.unknown_cost_calls, keys the base script never writes.\nFINDING docs/evidence/fragments/sn-audited-group-release/blind-audit.py:1365 non-blocking: --check is a real guard and its negative control reddens five assertions at dccd83ff4, but nothing runs it: the file sits under docs/evidence/fragments/, no test collects it, no CI workflow names it, so a later regression of summarize() would redden no automated run and only a person running the script by hand would see it.\n",
+  "review_run_id": "r-20261117T020939579708-review-of-sagr-blind-audit-dccd83ff4ada",
+  "reviewed_base_sha": "d4f2a7d2cc8bc082006fcccbbadd8f1a2ce87160",
+  "reviewed_head_sha": "dccd83ff4adaf0236d263019e11dbe7a823a4cf6",
+  "reviewed_run_id": "r-20261116T220839161092-sagr-blind-audit",
+  "reviewer": {
+    "backend": "omp-local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T020939579708-review-of-sagr-blind-audit-dccd83ff4ada"
+  },
+  "reviewer_run_id": "r-20261117T020939579708-review-of-sagr-blind-audit-dccd83ff4ada",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T02:29:13.957804+00:00",
+  "total": 105
+}
