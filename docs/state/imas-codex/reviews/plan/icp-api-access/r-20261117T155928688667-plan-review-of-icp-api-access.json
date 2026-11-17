@@ -25,7 +25,30 @@
   "plan_slug": "icp-api-access",
   "plan_version": 27,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b162d2192f92a529cd33d9df448825a4e6c764b2",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The next version records that the assistant read the signal list as a spreadsheet and the others as PDF files, and gives a closing path for a file fetched in another format: it is reported with its content type and counts as not fetched for the mandatory pair.",
+      "reason": "",
+      "when": "2026-11-17T16:18:13.063953+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b162d2192f92a529cd33d9df448825a4e6c764b2",
+      "commit_basis": "edit",
+      "note": "The next version records that the assistant read the signal list as a spreadsheet and the others as PDF files, and gives a closing path for a file fetched in another format: it is reported with its content type and counts as not fetched for the mandatory pair.",
+      "reason": "",
+      "when": "2026-11-17T16:18:13.063953+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261117T155928688667-plan-review-of-icp-api-access.json",
   "review_run_id": "r-20261117T155928688667-plan-review-of-icp-api-access",
   "reviewed_blob_sha": "0700c70c13f18f5a1e3a37db719964468fb17645",
   "rubric": "content",
