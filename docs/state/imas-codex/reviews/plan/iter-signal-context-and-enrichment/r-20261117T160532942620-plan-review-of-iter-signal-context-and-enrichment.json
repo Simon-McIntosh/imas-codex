@@ -35,9 +35,28 @@
       "note": "The next version declares section 6 deferred again until the pilot-context section it waits on has landed.",
       "reason": "",
       "when": "2026-11-17T16:23:27.613803+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b65b88de863efafdcc35c98698d6c1518af34704",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The next version states in section 6 that the locally served model with the grounded settings writes the descriptions, as the locked decision records.",
+      "reason": "",
+      "when": "2026-11-17T16:23:32.992875+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "b65b88de863efafdcc35c98698d6c1518af34704",
+      "commit_basis": "edit",
+      "note": "The next version states in section 6 that the locally served model with the grounded settings writes the descriptions, as the locked decision records.",
+      "reason": "",
+      "when": "2026-11-17T16:23:32.992875+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
