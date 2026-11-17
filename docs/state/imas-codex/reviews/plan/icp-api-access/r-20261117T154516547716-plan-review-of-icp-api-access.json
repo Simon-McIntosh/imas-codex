@@ -25,7 +25,30 @@
   "plan_slug": "icp-api-access",
   "plan_version": 26,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "2c64f7f2f3664eb78f0e4e1ef5045b2321b3569f",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The next version takes the failure form's control from the records host: a known-present plant-structure read through the same sign-in, which is independent of the documents and makes no further request to the document host.",
+      "reason": "",
+      "when": "2026-11-17T15:58:39.838947+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "2c64f7f2f3664eb78f0e4e1ef5045b2321b3569f",
+      "commit_basis": "edit",
+      "note": "The next version takes the failure form's control from the records host: a known-present plant-structure read through the same sign-in, which is independent of the documents and makes no further request to the document host.",
+      "reason": "",
+      "when": "2026-11-17T15:58:39.838947+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261117T154516547716-plan-review-of-icp-api-access.json",
   "review_run_id": "r-20261117T154516547716-plan-review-of-icp-api-access",
   "reviewed_blob_sha": "3f5202ed18b47a94ba47407e5db30dbfc2366b97",
   "rubric": "content",
