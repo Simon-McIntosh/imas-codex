@@ -1,0 +1,45 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:34:17.357Z",
+  "dispatched_at": "2026-11-17T16:33:45Z",
+  "findings": [
+    {
+      "anchor": "plan.html:20",
+      "id": "wiring-1",
+      "reason": "the blocked plan's \u00a74 imports rows from a store \u00a75 will not put a data file in, so its dependency is satisfied by a section that cannot feed it and the enrichment node will wait or land short.",
+      "text": "the plan declares `plan-blocks` = `iter-signal-context-and-enrichment`, whose \u00a74 (docs/plans/iter-signal-context-and-enrichment.html:58) depends on `icp-api-access#s5` and states (line 59) \"The signal list, the data file and the functional specification are read from the private store that plan's section 5 fills by fetching the named pilot documents\", delivering \"the rows of its signal list and data file\"; \u00a75's seven documents are \"the signal list ... and the other six documents as PDF files\", its Delivers reads only \"a spreadsheet's rows\", and its success form records sheet names and row counts for the signal list alone, so no version of \u00a75 fetches the data file: if the data file is among the six it arrives as a PDF and is not a data file, and if it is not among the seven it is never requested",
+      "type": "wiring",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "85d72d7f6861739d3572d4f78201f59ccea949b2",
+  "plan_fingerprint": "47e5698df6e7d571ebcb8910d30ea4dae2eace3534bef80f354eb0173a96c7b4",
+  "plan_slug": "icp-api-access",
+  "plan_version": 28,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T161959596710-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "d252ef4e373adcf055112e11846322cb654f338a",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a75's `icp-api-access#s2` and `icp-api-access#s4` links, its two declared dependencies, and the `document-host-read-only` decision dated 2026-11-17 all resolve in the snapshot.",
+    "done_when": "pass \u2014 \u00a75's two closing forms are now fixed by the signal-list-first probe, each fetched document's checks are tied to its observed format, and both declared negative controls (a sign-in/error body stored as nothing; the unlisted-identity test failing with the list check removed) can fail.",
+    "evidence_paths": "pass \u2014 the receipt and landing record are the durable private-store and landing record the plan's completed sections use, not a node-local temporary path.",
+    "naming": "pass \u2014 the changed \u00a75 text names no plan label, stage name, ticket number or version tag.",
+    "reasoning": "pass \u2014 \u00a75's cited evidence supports its premises (section 4's no-file finding, the 2026-11-17 decision, the assistant's observed formats), its documents are readable under the same sign-in it describes, and the format rule is stated as an endpoint, not an implementation.",
+    "single_goal": "pass \u2014 \u00a75 carries one deliverable, the named pilot documents fetched into private storage with their checks, and its two closing forms answer the same question.",
+    "wiring": "a finding \u2014 \u00a75's delivered document set cannot supply the data file that `iter-signal-context-and-enrichment` \u00a74 reads from the store \u00a75 fills, while this plan declares `plan-blocks` on that plan."
+  },
+  "section_digests": {
+    "_document": "1faae709ade296dcbe95974b385b004073b5d95eadb304cf33a51e8b6760e967",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "a1b848eb16f85209dbe3346593e0951ac9a6eeaff03616ab372f38f661e7ba96",
+    "s3": "dcfe744278ad8f7b812902b66cbd7c4e6eba42cd9cca8c338b00164b75dd4f55",
+    "s4": "4df24fd8de94abfdf9430b8cc0a70ab71824a0084529a3db2136c0401a52eed6",
+    "s5": "d40becd3b170dd322862ae58bb1b324946a9fd1c677cb199d951d5eee87a394d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:44:18.310677+00:00",
+  "total": null
+}
