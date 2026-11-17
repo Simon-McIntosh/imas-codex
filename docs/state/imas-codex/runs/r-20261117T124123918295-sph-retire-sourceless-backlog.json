@@ -2427,6 +2427,22 @@
     "reason": "brief-names-no-plan",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "env -u SLURM_JOB_ID -u SLURM_JOBID sbatch --partition=all_debug --time=00:45:00 --cpus-per-task=4 --mem=32G --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/after_suite_isolated.scheduler.log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/isolated_suite.sh 4345f519303afa9ede6aee6280f607be0bc1b415 /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/after_suite_isolated.log",
+    "integrated_revision": "eb6ad6b82763b02ad0ca1a9fd778752c101a8bb5",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/review-landing/gate-eb6ad6b82763b02ad0ca1a9fd778752c101a8bb5.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'env -u SLURM_JOB_ID -u SLURM_JOBID sbatch --partition=all_debug --time=00:45:00 --cpus-per-task=4 --mem=32G --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/after_suite_isolated.scheduler.log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/isolated_suite.sh 4345f519303afa9ede6aee6280f607be0bc1b415 /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/after_suite_isolated.log'",
+    "worktree_roots_rewritten": []
+  },
   "lane": "codex",
   "lane_advisory": {
     "backend": "codex",
