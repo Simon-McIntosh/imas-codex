@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="59">
+<meta name="plan-version" content="60">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -197,6 +197,9 @@
 </div>
 <div class="r-comment" data-section="s16" data-id="c-run-r-20261117T041824863610-review-of-pulse-categories-and-pulses-in-graph-14ea14976b21" data-who="reckon-build" data-when="2026-11-17T04:20:30.347Z">
     <div class="r-comment-body"><p>Review of run r-20261117T001815749369 over 56172736..14ea14976b scores goal_fidelity 18, evidence 12, scope_discipline 18, durability 15, fit 18, reuse 20 with 0 added failures and two non-blocking findings (live figures measured at 5a8246e never re-measured at the promoted head; the promoted gate selection is narrower than the 67-test arm the landing cites).</p></div>
+</div>
+<div class="r-comment" data-section="s16" data-id="c-run-r-20261117T001815749369-pulse-categories-and-pulses-in-graph" data-who="reckon-build" data-when="2026-11-17T04:17:16Z">
+    <div class="r-comment-body"><p>Imported metadata-only on rigel: archive categories 743 = graph categories 743; pulses 5934, with end 5934 + without end 0 = 5934; pulses-per-category distribution (pulse count:category count) {&quot;1&quot;:662,&quot;2&quot;:19,&quot;3&quot;:10,&quot;4&quot;:9,&quot;5&quot;:5,&quot;6&quot;:4,&quot;7&quot;:3,&quot;8&quot;:6,&quot;10&quot;:2,&quot;11&quot;:1,&quot;12&quot;:2,&quot;13&quot;:1,&quot;14&quot;:1,&quot;15&quot;:1,&quot;16&quot;:2,&quot;18&quot;:1,&quot;21&quot;:1,&quot;24&quot;:2,&quot;25&quot;:1,&quot;27&quot;:1,&quot;28&quot;:1,&quot;37&quot;:1,&quot;56&quot;:1,&quot;57&quot;:1,&quot;58&quot;:1,&quot;60&quot;:2,&quot;67&quot;:1,&quot;4359&quot;:1}, empty categories 0. All imported nodes reach ITER. Twenty preregistered pulses across fourteen categories have exact graph/archive start and end equality (20/20), independently relisted after import; second import created 0 nodes. Focused gate: 67 passed, including four graph-marked tests; mutation control: 2 declared tests failed on invented ends and omitted empty categories. Reuse repair: one scanner-owned archive endpoint writer now serves both import paths; 21 repair tests passed including eight graph-marked tests, and reversing the answering commit fails both delegation checks. Merged-head verification at 14ea14976b215eccba7ccd59a797e9f9c2e70db9 includes main f777968a92fae1136f7b926fd25b1c856db2b29a: generated models rebuilt; the 21 named tests pass, including eight graph tests. Original refusal was 21 setup errors from a replayed deleted basetemp parent; the committed gate now allocates its own scratch on every invocation. Merged pulse mutations produce 2 failed/19 passed, and the reuse inverse produces 2 failed.</p></div>
 </div>
 <div class="r-comment" data-section="s19" data-id="c-run-r-20261117T012026991117-review-of-feed-described-signals-searchable-bfec1a7f6b15" data-who="reckon-build" data-when="2026-11-17T01:50:48.751Z">
     <div class="r-comment-body"><p>Independent review of r-20261117T004037755034-feed-described-signals-searchable at bfec1a7f6b15bed01bc77216e5a4bc3770efd844 (base 4c295316312e3b6b1956a239ea13557f589e35d8) scores goal_fidelity 19, evidence 17, scope_discipline 18, durability 16, fit 18, reuse 19 (total 107), records 0 added failures against a baseline of 2, and carries three non-blocking findings; both declared review-record paths are written and pass crew check --review.</p></div>
