@@ -25,7 +25,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 53,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "07d12e06ad00541bd3a2313465ba9af5a358bc01",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The next version declares section 4 deferred until the document fetch it waits on has landed.",
+      "reason": "",
+      "when": "2026-11-17T15:42:31.247768+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "07d12e06ad00541bd3a2313465ba9af5a358bc01",
+      "commit_basis": "edit",
+      "note": "The next version declares section 4 deferred until the document fetch it waits on has landed.",
+      "reason": "",
+      "when": "2026-11-17T15:42:31.247768+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261117T124214016654-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261117T124214016654-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "e84cafe5fa342d8621b2fde9fd84d909d759d824",
   "rubric": "content",
