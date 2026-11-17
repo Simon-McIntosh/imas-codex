@@ -1,0 +1,82 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "",
+  "dispatched_at": "2026-11-17T13:23:27Z",
+  "findings": [
+    {
+      "file": "scripts/plot_signal_enrichment_recovery.py",
+      "id": "f2405117933",
+      "line": 27,
+      "severity": "non-blocking",
+      "summary": "Every non-selected row's direct value label is drawn in the reference grey chosen at line 27 and passed to the annotate call at line 46, which renders at rgb(146,146,146) on white: a 3.1:1 contrast, below the 4.5:1 WCAG AA threshold for 14 pt text. Measured on the rendered PNG, the sixteen grey numerals (196, 198, 200 for the five fully-delivering rows, 197, 190, 311.8, 250.1, 216.7, 125.7, 49.8, 145.8, 136.9, 81.9, 79.9) read clearly at native size, so this does not stop a reader, and the hue is the plot-style rule's own receding-population grey. The fault is that the rule sets 3:1 as the floor for a MARK, not for text; a darker grey for the label while the marker keeps #929292, or the label taking the axis-text colour, would clear AA without disturbing the intended emphasis on the blue selection. Present on both panels and on every variant row, so it is a property of the drawing code rather than of this figure alone."
+    },
+    {
+      "file": "scripts/plot_signal_enrichment_recovery.py",
+      "id": "fa84967ce3b",
+      "line": 52,
+      "severity": "non-blocking",
+      "summary": "The legend is figure-level and its fourth entry, 'Required delivery', shows a dotted line, but that line is drawn only on the left panel (axvline at line 52). A reader scanning the right panel for the wall-time requirement the legend appears to promise finds no rule there, and nothing in the legend or the caption says the dotted entry applies to delivery count alone; the caption's first clause ('The dotted line is the required 200-description delivery bar') does settle it for a reader who reaches the caption, but the panel on its own is ambiguous. Either restricting the legend entry's marker style to the left panel or one clause in the legend label ('Required delivery (left panel)', or naming the 200-description bar) removes the ambiguity. Cosmetic, so it does not hold the node."
+    }
+  ],
+  "item_verdicts": {
+    "caption": "pass: the caption names what the two marks mean ('the blue diamond marks the selected combination enabled for the seat; the square marks the previous settings') and states the three activation conditions and that the selected combination meets them, which is more than a restatement of the figure's title.",
+    "contrast": "pass on axis titles, row labels, tick labels, legend text and the blue marks, measured on rendered pixels: axis and legend glyph cores are rgb(82,81,78) at 7.9:1 on white, legend glyphs reach rgb(11,11,11) at 19.7:1, and the selected series' blue labels and diamond are rgb(40,120,165) at 4.9:1, all clearing WCAG AA. The grey direct value labels and grey markers are rgb(146,146,146) at 3.1:1, which is the plot-style rule's floor for a receding population but is below the 4.5:1 AA threshold for 14 pt text; recorded as a finding against the labels rather than the marks.",
+    "data_ink": "pass: the ink is data -- twenty marker glyphs (ten per panel), a dotted delivery rule at 200 in the left panel, a figure-level legend and one direct value label per marker. No gradient, texture, drop shadow or filled band appears anywhere on the canvas, and 96.3 per cent of pixels are pure white.",
+    "decoration": "pass: no gridlines, no shaded plot background, no top or right spine on either panel, and the right panel hides its unused left spine and ticks. White covers 96.3 per cent of the canvas. The only rule on the figure is the dotted one at 200, whose position is the requirement the fragment states.",
+    "label_collision": "pass: measured on the rendered PNG, ink stops 23 px from the top, 48 px from the bottom, 123 px from the left and 54 px from the right edge of a 1399x720 canvas, so no text is clipped. Every direct value label sits 9 points to the right of its own marker with clear space between, and the ten rows are separated vertically so no two labels approach each other; the dotted rule at 200 passes through the markers that sit at the bar, never through a label.",
+    "legibility": "pass: a 1399x720 two-panel dot plot whose axis titles 'Descriptions delivered [of 200]' and 'Wall time [min / 1000 signals]', its ten row labels, its tick values (190, 200 on the left; 0, 100, 200, 300 on the right) and its four-entry legend all read at native size. Each row carries its own printed value, so the figure is readable without referring to the table, and the selected combination is picked out at a glance by the blue diamond at 200 delivered and 53.6 min per thousand.",
+    "table_form": "pass: although the fragment also states these numbers in a table, the panels carry a comparison a table does not -- the left panel places every variant against the delivery bar at 200 so the three short arms are visible as distance rather than as two numbers to subtract, and the right panel spreads wall time over a 49.8 to 311.8 min per thousand range in which the selected combination's position among the fully-delivering arms is a visual judgement, not arithmetic."
+  },
+  "notes": "Read-only figure review at the reviewed head 92389c03086e. The only images opened were the PNG named in this review and crops of it; no SVG, no preview image and no other image was read, and no file was created, edited, redrawn, relabelled or moved. Checks that could have failed, run on the render rather than on the source. (1) Faithfulness of the picture to the numbers: each marker's plotted position was measured on the render and converted to data units from its own panel's calibration, then compared with the value printed beside it. Left panel: five rows printed 200 sit at x 728.5-728.8, the 190 row at x 459.2, giving 26.95 px per description; the 196, 197 and 198 rows then fall at 621.0, 647.9 and 674.8 against predictions of 620.9, 647.8 and 674.8. Right panel: the 79.9 and 311.8 rows give 1.063 px per minute with the origin at x 938.6, and the remaining eight rows fall within 0.4 px of prediction. So the plotted position and the printed value agree everywhere, and no arm is drawn at a position its label denies. (2) Absence of clipping: the outer margins were measured as 23, 48, 123 and 54 px on a 1399x720 canvas, and all four border bands are pure white. (3) Absence of decoration: 96.3 per cent of pixels are white and no gridline, band or background fill is present. Instrument fault recorded because it inverted a conclusion before it was caught: the first contrast helper applied the sRGB linearisation twice and reported axis text at 18.3:1 rather than 7.9:1 and grey text at 8.96:1 rather than 3.11:1, which would have passed the grey labels; the corrected helper returns 21.00:1 for pure black and 3.95:1 for mid-grey rgb(128,128,128) as controls, and the sampled glyph cores on the render (rgb(152,152,152) for the '311.8' label including antialiasing, rgb(114,113,111) for a y tick label) agree with the design colours it reports. The two non-blocking findings concern the drawing script, not the data, and neither stops a reader, so the figure passes the rubric and the record is parsed.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261117T132235319547-review-of-make-grounded-local-enrichment-complete-and-faster-92389c03086e-figure",
+  "reviewed_base_sha": "201cbdba1ee218f7dfa3731459b3adb73b1b7e44",
+  "reviewed_commits": [
+    "be7a2d338b7dfe3e90f7c3248a337985d6905d2b",
+    "54f82c084c406d2335bad6630d1e1f344c4dd61b",
+    "831170b8044598506fdc325a03c1650fc0e5a4ed",
+    "f886cb53b2ef64b0794a1d6ad220b6467dcf5ffe",
+    "1150a129eec354cf915a18acb94633b74fa43770",
+    "45536c219f4e119eebfdba16d3996ad964a7ef5d",
+    "faef3938abb1bccfd440b763f493a2bf59f78918",
+    "5eb227fd762d8307ee4258fcbf511d97a9bd0f87",
+    "610abf4d33872e9397cf424ad258f6264e202bed",
+    "b524ac6f44e23d7c62499357b40eaa06249d65fe",
+    "d4d5fc990e175691befeaaf9598e4565e9e45a8c",
+    "e7efc0162f9ed3010a3d4d91e6c82db09287e47b",
+    "6eeaec7bcb4578086671db4f483248bd348ec600",
+    "3134760f3b369a694b8e31529d43661ac579ceb0",
+    "5b96482f746baa23962a4ba3858b467b460116fd",
+    "aeafae09c280e2d141dfdb61ae9fdb59c6fe4e69",
+    "3c4bc0cef70d934e8bb504cb9c97432d1940dbca",
+    "9de6b85fd2703fa64674ece0821a4d73d21bbd79",
+    "92389c03086e31d07f88148d4be5f98e148f5771"
+  ],
+  "reviewed_figures": [
+    {
+      "drawing_script": "scripts/plot_signal_enrichment_recovery.py",
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T132235319547-review-of-make-grounded-local-enrichment-complete-and-faster-92389c03086e-figure/image-0.png",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/iter-signal-context-and-enrichment/make-grounded-local-enrichment-complete-and-faster/delivery-throughput.svg",
+      "state": "the figure the fragment embeds beside the variant table at the reviewed head",
+      "state_identified_by": "the shared legend reads 'Previous seat settings', 'Other variants', 'Selected; seat enabled' and 'Required delivery'; the ten row labels are the fragment's own variant names ('Before grounding (archive)', 'Correctness round (archive)', 'Correctness control (fresh)', 'Recovery (1 worker)', 'Conditional review', 'Review reasoning off', 'Recovery (3 workers)', 'Review batches of 3', 'Schema constraint', 'Recovery (8 workers)'), and the printed values 200/79.9, 196/311.8, 198/250.1, 200/216.7, 200/125.7, 200/49.8, 200/53.6, 197/145.8, 190/136.9, 200/81.9 agree with the receipt those rows name"
+    }
+  ],
+  "reviewed_head_sha": "92389c03086e31d07f88148d4be5f98e148f5771",
+  "reviewed_run_id": "r-20261117T083513338937-make-grounded-local-enrichment-complete-and-faster",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility [delivery-throughput.svg via image-0.png]: pass: 1399x720 two-panel dot plot; axis titles 'Descriptions delivered [of 200]' and 'Wall time [min / 1000 signals]', ten row labels, ticks 190/200 and 0/100/200/300 and a four-entry legend all read at native size; every row carries its printed value, and the blue diamond at 200 delivered and 53.6 min is picked out at a glance.",
+    "RUBRIC data_ink [delivery-throughput.svg via image-0.png]: pass: the ink is data -- twenty markers, one dotted rule, a figure-level legend and one direct label per marker; no gradient, texture or filled band, and 96.3 per cent of the canvas is pure white.",
+    "RUBRIC decoration [delivery-throughput.svg via image-0.png]: pass: no gridlines, no shaded background, no top or right spine, and the right panel drops its unused left spine and ticks; the only rule is the dotted delivery bar at 200, whose position is the stated 200-description requirement.",
+    "RUBRIC contrast [delivery-throughput.svg via image-0.png]: pass on all text except the grey direct labels: axis and legend glyph cores rgb(82,81,78) at 7.9:1, legend glyphs rgb(11,11,11) at 19.7:1, blue selected-series labels and diamond rgb(40,120,165) at 4.9:1. The grey value labels and grey markers are rgb(146,146,146), 3.1:1, recorded as a finding against the labels.",
+    "RUBRIC table_form [delivery-throughput.svg via image-0.png]: pass: the left panel places each variant against the delivery bar at 200 so a shortfall reads as distance, and the right panel spreads wall time across 49.8 to 311.8 min per thousand, neither of which a table carries; the printed values are direct labels, not a table drawn as a chart.",
+    "RUBRIC label_collision [delivery-throughput.svg via image-0.png]: pass: ink stops 23/48/123/54 px from the top/bottom/left/right canvas edges, so nothing is clipped; every value label sits 9 points clear of its marker and the vertical separation between rows keeps labels apart; the dotted rule at 200 crosses markers at the bar but no label.",
+    "RUBRIC caption [image-0.png]: pass: the caption explains what the diamond and square mark, states the three activation conditions and that the selected combination passes all three; it does not repeat the figure's title."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:31:51Z",
+  "total": null
+}

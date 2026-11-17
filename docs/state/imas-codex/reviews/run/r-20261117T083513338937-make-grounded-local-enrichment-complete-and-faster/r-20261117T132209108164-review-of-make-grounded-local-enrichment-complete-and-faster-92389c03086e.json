@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms: baseline_suite (baseline-suite.log, revision 201cbdba1, completed, exit_status 0, failure_count 0, failure_ids []) and after_suite (head-suite.log, revision 9de6b85fd, completed, exit_status 0, failure_count 0, failure_ids []), so the head arm adds no failure id to the baseline arm's empty set. Logs end with their runner summary lines and bare EXIT=0 lines.",
+  "call_sites": [
+    "imas_codex/discovery/signals/parallel.py:4293",
+    "imas_codex/discovery/signals/parallel.py:5000",
+    "imas_codex/discovery/signals/parallel.py:6287"
+  ],
+  "call_sites_note": "4293 reads the seat's options for the enrich worker, 5000 is the enrich_signal_batch call, and 6287-6292 caps the enrich worker count at the seat's max-workers; scripts/measure_signal_enrichment_recovery.py:219 is measurement scaffolding, not a production call site.",
+  "completed_at": "2026-11-17T13:25:08.661Z",
+  "dispatched_at": "2026-11-17T13:24:26Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/enrichment.py",
+      "line": 196,
+      "severity": "non-blocking",
+      "summary": "recovered_call repeats the validation-directed retry that imas_codex/discovery/base/llm.py:2525-2545 already implements, including the \"The response failed validation:\" follow-up and the one-replacement bound, so a fix to that owner's retry wording or telemetry will not reach this copy and the two may drift."
+    },
+    {
+      "file": "imas_codex/discovery/signals/enrichment.py",
+      "line": 484,
+      "severity": "non-blocking",
+      "summary": "when signal_source_items finds no source_description for a result whose reviewed description is empty the fallback raises ValueError out of enrich_signal_batch, so at batch-size above 1 (allowed to 200 by enrichment.py:19) one label-less signal discards every other signal's completed description in the same batch."
+    },
+    {
+      "file": "imas_codex/discovery/signals/enrichment.py",
+      "line": 223,
+      "severity": "non-blocking",
+      "summary": "the retry appends only the validation error to the messages, so a coverage retry asks the model to correct a reply it cannot see, unlike imas_codex/discovery/base/llm.py:2530-2540 which appends the rejected assistant turn; tests/discovery/test_signal_enrichment_recovery.py:299-302 asserts only that the feedback string is forwarded, so it holds either way."
+    }
+  ],
+  "node": "make-grounded-local-enrichment-complete-and-faster",
+  "project": "imas-codex",
+  "review_run_id": "r-20261117T132209108164-review-of-make-grounded-local-enrichment-complete-and-faster-92389c03086e",
+  "review_text": "VERDICT goal: the node goal at brief.md:5-8 is to deliver every description, run faster and switch the seat on if it holds; pyproject.toml:438-455 now sets grounding, description-sentences=1, review, review-thinking, recovery-attempts=1, source-fallback and max-workers=3, and the fragment records 200/200 delivered at 3213.13 s per 1000 against a 15032.47 control.\nVERDICT done_when: brief.md's \"## Done when\" asks for per-variant delivered, raw-parsed, per-path recovery, calls and wall-time figures plus a blind hand reading, a saved figure and tests; docs/evidence/fragments/iter-signal-context-and-enrichment/make-grounded-local-enrichment-complete-and-faster.html:10-21 carries the ten-arm table with every one of those columns, :42-43 the sealed forties and :34 the figure, while head-suite.log answers only the tests clause.\nVERDICT write_paths: the node declares imas_codex/discovery/signals/, imas_codex/discovery/base/, imas_codex/llm/, pyproject.toml, scripts/, tests/discovery/, the evidence fragment and the figure directory; git diff --name-only 201cbdba1..92389c030 lists 17 paths and every one sits inside them.\nVERDICT manifest: read; status complete with after_suite {\"completed\": true, \"exit_status\": 0, \"failure_count\": 0}, matched by head-suite.log's \"157 passed, 1 deselected\" and its EXIT=0 line, and negative_control_log names negative-retry.log, whose \"4 failed, 12 passed\" and EXIT=1 are the recorded negative control.\nVERDICT diff: read all 19 commits from 201cbdba1ee218f7dfa3731459b3adb73b1b7e44 to 92389c03086e31d07f88148d4be5f98e148f5771, 17 files and +2218/-22: recovery and the marked fallback land in enrichment.py, the review coalescer in enrichment_review.py, the fixture for caller doubles in tests/discovery/enrichment_fixtures.py, the activation in pyproject.toml, measurement and plotting scripts in scripts/, and the evidence fragment with its figure.\nCALL_SITES: imas_codex/discovery/signals/parallel.py:4293, imas_codex/discovery/signals/parallel.py:5000, imas_codex/discovery/signals/parallel.py:6287\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: pyproject.toml:438-455 enables the measured combination and the fragment's ten-arm table shows 200 delivered of 200 at 3213.13 s per 1000, so both clauses of brief.md:5-8 hold at the landed revision.\nSCORE evidence: 16\nJUSTIFICATION evidence: head-suite.log's own summary line reads \"157 passed, 1 deselected\" with EXIT=0 for the command recorded in the manifest's tests field, but that gate asserts only the done-when's tests clause while the 200/198 and hand-reading figures rest on private/verified-metrics.json and reading-concurrent/readings.jsonl, which no gate re-reads.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: every path in git diff --name-only 201cbdba1..92389c030 is inside the manifest's orientation_write_paths, and the edits to tests/discovery/test_signal_glossary.py and tests/discovery/test_signal_role_store.py only substitute the review-answering double at tests/discovery/enrichment_fixtures.py:9 for the call the enabled seat now makes.\nSCORE durability: 16\nJUSTIFICATION durability: tests/discovery/test_signal_enrichment_recovery.py:36-38 goes red if the fallback is removed (empty description, empty fallback_indices) and :248-268 goes red at delivered 198 if the retry loop is replaced, as negative-retry.log records, though the coalescing path added at imas_codex/discovery/signals/enrichment_review.py:28 is never reached by an enabled-seat test because review_batch_size stays 1.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/discovery/signals/enrichment.py:19-44 adds aliased pydantic fields and a model_validator in the same idiom as the surrounding options, and the in-function imports at :149 and :198 follow the existing local-import style at :264.\nSCORE reuse: 5\nJUSTIFICATION reuse: recovered_call at imas_codex/discovery/base/llm.py:2525 already owns a validation-directed replacement, and imas_codex/discovery/signals/enrichment.py:196 re-implements it with the same feedback wording rather than extending it, while the plotting addition does extend its owner at scripts/plot_signal_enrichment_recovery.py:15.\nFINDING imas_codex/discovery/signals/enrichment.py:196 non-blocking: recovered_call repeats the validation-directed retry that imas_codex/discovery/base/llm.py:2525-2545 already implements, including the \"The response failed validation:\" follow-up and the one-replacement bound, so a fix to that owner's retry wording or telemetry will not reach this copy and the two may drift.\nFINDING imas_codex/discovery/signals/enrichment.py:484 non-blocking: when signal_source_items finds no source_description for a result whose reviewed description is empty the fallback raises ValueError out of enrich_signal_batch, so at batch-size above 1 (allowed to 200 by enrichment.py:19) one label-less signal discards every other signal's completed description in the same batch.\nFINDING imas_codex/discovery/signals/enrichment.py:223 non-blocking: the retry appends only the validation error to the messages, so a coverage retry asks the model to correct a reply it cannot see, unlike imas_codex/discovery/base/llm.py:2536 which appends the rejected assistant turn; tests/discovery/test_signal_enrichment_recovery.py:299-302 asserts only that the feedback string is forwarded, so it holds either way.",
+  "reviewed_base_sha": "201cbdba1ee218f7dfa3731459b3adb73b1b7e44",
+  "reviewed_head_commits": [
+    "be7a2d338b7dfe3e90f7c3248a337985d6905d2b",
+    "54f82c084c406d2335bad6630d1e1f344c4dd61b",
+    "831170b8044598506fdc325a03c1650fc0e5a4ed",
+    "f886cb53b2ef64b0794a1d6ad220b6467dcf5ffe",
+    "1150a129eec354cf915a18acb94633b74fa43770",
+    "45536c219f4e119eebfdba16d3996ad964a7ef5d",
+    "faef3938abb1bccfd440b763f493a2bf59f78918",
+    "5eb227fd762d8307ee4258fcbf511d97a9bd0f87",
+    "610abf4d33872e9397cf424ad258f6264e202bed",
+    "b524ac6f44e23d7c62499357b40eaa06249d65fe",
+    "d4d5fc990e175691befeaaf9598e4565e9e45a8c",
+    "e7efc0162f9ed3010a3d4d91e6c82db09287e47b",
+    "6eeaec7bcb4578086671db4f483248bd348ec600",
+    "3134760f3b369a694b8e31529d43661ac579ceb0",
+    "5b96482f746baa23962a4ba3858b467b460116fd",
+    "aeafae09c280e2d141dfdb61ae9fdb59c6fe4e69",
+    "3c4bc0cef70d934e8bb504cb9c97432d1940dbca",
+    "9de6b85fd2703fa64674ece0821a4d73d21bbd79",
+    "92389c03086e31d07f88148d4be5f98e148f5771"
+  ],
+  "reviewed_head_sha": "92389c03086e31d07f88148d4be5f98e148f5771",
+  "reviewed_run_id": "r-20261117T083513338937-make-grounded-local-enrichment-complete-and-faster",
+  "scores": {
+    "durability": 16,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:45:26.281921+00:00",
+  "total": 91
+}
