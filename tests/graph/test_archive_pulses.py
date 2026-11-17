@@ -89,6 +89,7 @@ def test_empty_category_is_present_linked_and_counted(disposable_graph):
             "with_end": 0,
             "without_end": 1,
             "nodes_created": 4,
+            "nodes_changed": 3,
         }
         rows = graph.query(
             "MATCH (c:PulseCategory {id: $id})-[:AT_FACILITY]->(f:Facility) MATCH (c)-[:IN_ARCHIVE]->(a:ArchiveEndpoint) OPTIONAL MATCH (p:Pulse)-[:IN_PULSE_CATEGORY]->(c) RETURN count(p) AS pulses, f.id AS facility, a.id AS archive",
@@ -116,3 +117,21 @@ def test_wrong_membership_refused_before_graph_write(disposable_graph):
     with GraphClient() as graph:
         with pytest.raises(ValueError, match="listed categories"):
             import_pulses(graph, archive, categories, [pulse])
+
+
+def test_empty_description_is_removed_status_retained_and_repeat_changes_nothing(
+    disposable_graph,
+):
+    archive, categories, pulse = records()
+    with GraphClient() as graph:
+        seed_facility(graph, archive)
+        import_pulses(graph, archive, categories, [pulse])
+        empty = pulse.model_copy(update={"description": "", "status": "finished"})
+        receipt = import_pulses(graph, archive, categories, [empty])
+        assert receipt["nodes_changed"] == 1
+        assert graph.query(
+            "MATCH (p:Pulse {id:$id}) RETURN p.description AS description, p.status AS status",
+            id=pulse.id,
+        ) == [{"description": None, "status": "finished"}]
+        repeated = import_pulses(graph, archive, categories, [empty])
+        assert repeated["nodes_created"] == repeated["nodes_changed"] == 0

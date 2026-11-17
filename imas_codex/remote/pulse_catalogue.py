@@ -86,6 +86,9 @@ def main() -> None:
     parser.add_argument("--snapshot", type=Path, required=True)
     parser.add_argument("--receipt", type=Path, required=True)
     parser.add_argument("--import-graph", action="store_true")
+    parser.add_argument(
+        "--kind-rules", type=Path, help="Private JSON evidence rules for category kinds"
+    )
     args = parser.parse_args()
     import yaml
 
@@ -96,10 +99,19 @@ def main() -> None:
     state = collect_pulses(reader, args.snapshot)
     categories, pulses = snapshot_models(state)
     from imas_codex.discovery.signals.archive_pulses import (
+        PulseKindRule,
+        classify_categories,
         import_pulses,
         pulse_distribution,
+        pulse_metadata_counts,
     )
 
+    if args.kind_rules:
+        rules = [
+            PulseKindRule.model_validate(rule)
+            for rule in json.loads(args.kind_rules.read_text())
+        ]
+        categories = classify_categories(categories, pulses, rules)
     receipt = pulse_distribution(categories, pulses)
     if args.import_graph:
         from imas_codex.graph.client import GraphClient
@@ -113,6 +125,7 @@ def main() -> None:
         )
         with GraphClient() as graph:
             receipt = import_pulses(graph, archive, categories, pulses)
+    receipt.update(pulse_metadata_counts(categories, pulses))
     write_receipt(args.receipt, receipt)
     print(json.dumps(receipt))
 

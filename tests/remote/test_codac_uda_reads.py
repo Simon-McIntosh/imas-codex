@@ -55,6 +55,7 @@ class FakeClient:
                 timeFrom=10,
                 timeTo=20,
                 description="Demonstration pulse",
+                status="finished",
             )
         ]
 

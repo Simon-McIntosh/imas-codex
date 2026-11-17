@@ -96,6 +96,7 @@ def test_native_pulse_listing_keeps_missing_end_and_description(end):
             timeFrom=1731600000000000001,
             timeTo=end,
             description="Demonstration pulse",
+            status="finished",
         )
     ]
     result = native.dispatch(

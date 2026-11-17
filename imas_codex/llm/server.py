@@ -2500,6 +2500,7 @@ class AgentsServer:
                 facility: str,
                 designation: str | None = None,
                 category_id: str | None = None,
+                test_kind: str | None = None,
                 limit: int = 20,
                 offset: int = 0,
             ) -> str:
@@ -2508,19 +2509,21 @@ class AgentsServer:
                 Supply exactly one of designation or category_id. The designation
                 matches a literal, case-insensitive substring of category names
                 and descriptions. Pass a returned category id to list its pulses.
+                Filter either listing by an exact, case-insensitive test_kind.
                 No query language, archive endpoint or sample-data read is involved.
 
                 Args:
                     facility: Facility identifier, for example iter.
                     designation: Coil or system designation to find in test categories.
                     category_id: Exact category id from a preceding category search.
+                    test_kind: Supported test-kind label, such as fast discharge.
                     limit: Page size, 1 to 100 (default 20).
                     offset: Zero-based page offset (default 0).
 
                 Returns:
                     Bounded JSON: items, total, count and continuation with the next
                     tool call, or an explicit empty items list with total 0.
-                    Categories include pulse_count. Pulses include exact start_ns,
+                    Categories include kind, kind_source and pulse_count. Pulses include status and exact start_ns,
                     end_ns (null when absent), open_ended and descriptions. Times
                     are absolute Unix epoch nanoseconds; an absent end stays absent.
                 """
@@ -2533,6 +2536,7 @@ class AgentsServer:
                         facility,
                         designation=designation,
                         category_id=category_id,
+                        test_kind=test_kind,
                         limit=limit,
                         offset=offset,
                     )

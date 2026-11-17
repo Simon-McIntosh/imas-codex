@@ -28,12 +28,13 @@ def plant_graph(disposable_graph):
                 """
                 MATCH (f:Facility {id: $facility})
                 CREATE (c:PulseCategory {id: $facility + ':test:coil-alpha', facility_id: $facility,
-                    name: 'Coil Alpha commissioning', description: 'Coil Alpha cold test'})-[:AT_FACILITY]->(f)
+                    name: 'Coil Alpha commissioning', description: 'Coil Alpha cold test',
+                    kind: 'fast discharge', kind_source: 'category_name:invented-rule'})-[:AT_FACILITY]->(f)
                 CREATE (:PulseCategory {id: $facility + ':test:coil-alpha-empty', facility_id: $facility,
                     name: 'Coil Alpha empty campaign'})-[:AT_FACILITY]->(f)
                 CREATE (:Pulse {id: $facility + ':pulse:closed', facility_id: $facility,
                     name: 'Coil Alpha / closed', start_ns: 1700000000000000001, end_ns: 1700000002000000003,
-                    description: 'Invented completed pulse'})-[:IN_PULSE_CATEGORY]->(c)
+                    description: 'Invented completed pulse', status: 'finished'})-[:IN_PULSE_CATEGORY]->(c)
                 CREATE (:Pulse {id: $facility + ':pulse:open', facility_id: $facility,
                     name: 'Coil Alpha / open', start_ns: 1700000003000000007})-[:IN_PULSE_CATEGORY]->(c)
                 """,
@@ -100,6 +101,7 @@ def test_pulses_preserve_exact_times_open_ends_and_facility_boundary(plant_graph
     assert first["items"][0]["start_ns"] == 1700000000000000001
     assert first["items"][0]["end_ns"] == 1700000002000000003
     assert first["items"][0]["open_ended"] is False
+    assert first["items"][0]["status"] == "finished"
     second = json.loads(
         search_pulse_catalogue(plant_graph, **first["continuation"]["arguments"])
     )
@@ -117,6 +119,47 @@ def test_pulses_preserve_exact_times_open_ends_and_facility_boundary(plant_graph
         )["total"]
         == 0
     )
+
+
+@pytest.mark.asyncio
+async def test_running_server_filters_categories_and_pulses_by_supported_kind(
+    plant_graph,
+):
+    server = AgentsServer(dd_only=False, no_embed=True)
+    async with Client(server.mcp) as client:
+        for kind, expected in [("FAST DISCHARGE", 1), ("absent kind", 0)]:
+            response = await client.call_tool(
+                "search_pulses",
+                {
+                    "facility": "demo-alpha",
+                    "designation": "Coil Alpha",
+                    "test_kind": kind,
+                    "limit": 1,
+                },
+            )
+            result = json.loads(response.content[0].text)
+            assert result["total"] == expected
+            assert all(
+                c["kind"] == "fast discharge"
+                and c["kind_source"] == "category_name:invented-rule"
+                for c in result["items"]
+            )
+            if not expected:
+                assert result["items"] == [] and result["continuation"] is None
+        for kind, expected in [("fast discharge", 2), ("absent kind", 0)]:
+            response = await client.call_tool(
+                "search_pulses",
+                {
+                    "facility": "demo-alpha",
+                    "category_id": "demo-alpha:test:coil-alpha",
+                    "test_kind": kind,
+                    "limit": 1,
+                },
+            )
+            result = json.loads(response.content[0].text)
+            assert result["total"] == expected
+            if expected:
+                assert result["continuation"]["arguments"]["test_kind"] == kind
 
 
 @pytest.mark.parametrize(

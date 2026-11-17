@@ -1891,6 +1891,12 @@ classes:
         required: true
       description:
         description: Archive-declared category description
+      kind:
+        description: Plain test-kind label supported by a configured source rule
+      kind_source:
+        description: >-
+          Evidence for kind as category_name, pulse_description, or document,
+          followed by a colon and the private rule or document reference.
 
   Pulse:
     description: >-
@@ -1937,6 +1943,8 @@ classes:
           relationship_type: IN_PULSE_CATEGORY
       description:
         description: Archive-declared pulse description
+      status:
+        description: Exact archive-declared pulse status, absent when not supplied
 
   DataSource:
     description: >-
