@@ -1,0 +1,426 @@
+"""Record source-grounded proposals and verify their accepted graph identities.
+
+Only the public CLI mutates the graph. The source invariant's canonical reader
+supplies every command's before/after count. Full receipts remain in the run
+folder; the compact record is independently inspectable with --show.
+"""
+
+from __future__ import annotations
+
+import argparse
+import base64
+import importlib.util
+import json
+import os
+import subprocess
+import sys
+import zlib
+from collections import Counter
+from datetime import UTC, datetime
+from html import escape
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+DATA = HERE / "equilibrium-repair.json"
+PAGE = HERE / "equilibrium-repair.html"
+MAIN = Path("/home/ITER/mcintos/Code/imas-codex")
+RUN = Path(
+    "/home/ITER/mcintos/.config/reckon/crew/runs/"
+    "r-20261117T225452416830-sagr-equilibrium-agent-repair"
+)
+CEILING = 30.0
+EXPECTED_SOURCELESS = 10
+IDENTITY_FIELDS = (
+    "id",
+    "description",
+    "documentation",
+    "name_stage",
+    "docs_stage",
+    "edit_status",
+    "reviewer_score_name",
+    "reviewer_score_docs",
+    "successor",
+)
+
+
+def now():
+    return datetime.now(UTC).isoformat()
+
+
+def revision(tree=MAIN):
+    return subprocess.check_output(
+        ["git", "-C", str(tree), "rev-parse", "HEAD"], text=True
+    ).strip()
+
+
+def audit():
+    spec = importlib.util.spec_from_file_location(
+        "equilibrium_adjudication", HERE / "equilibrium-adjudication.py"
+    )
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def load(path=DATA):
+    raw = json.loads(Path(path).read_text())
+    payload = raw.pop("payload_zlib_base85", None)
+    return raw | (
+        json.loads(zlib.decompress(base64.b85decode(payload))) if payload else {}
+    )
+
+
+def save(record, path=DATA):
+    raw = {k: v for k, v in record.items() if k not in ("members", "commands")}
+    raw["payload_zlib_base85"] = base64.b85encode(
+        zlib.compress(
+            json.dumps(
+                {k: record[k] for k in ("members", "commands")}, ensure_ascii=False
+            ).encode(),
+            9,
+        )
+    ).decode()
+    content = json.dumps(raw, ensure_ascii=False, indent=2) + "\n"
+    assert len(content.encode()) <= 300_000, "Move oversized evidence to run directory"
+    Path(path).write_text(content)
+
+
+def client():
+    from imas_codex.graph.client import GraphClient
+
+    return GraphClient()
+
+
+def sourceless(gc):
+    from imas_codex.standard_names.source_invariant import (
+        find_sourceless_live_name_rows,
+    )
+
+    rows = find_sourceless_live_name_rows(gc, derived_parents_exempt=False)
+    control = list(
+        gc.query(
+            "MATCH (sn:StandardName) WHERE sn.id IN $ids "
+            "RETURN count(sn) AS candidates, count(sn.id) AS keyed",
+            ids=["electron_temperature", "elongation_of_plasma_boundary"],
+        )
+    )[0]
+    assert control["candidates"] == control["keyed"] == 2, control
+    return {"at": now(), "count": len(rows), "rows": rows, "known_present": control}
+
+
+def identities(gc, ids):
+    rows = list(
+        gc.query(
+            "MATCH (sn:StandardName) WHERE sn.id IN $ids "
+            "OPTIONAL MATCH (s:StandardNameSource)-[:PRODUCED_NAME]->(sn) "
+            "WHERE coalesce(s.status, '') <> 'stale' "
+            "WITH sn, collect(s.id) AS sources "
+            "OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit) "
+            "WITH sn, sources, collect(u.id) AS units "
+            "OPTIONAL MATCH (sn)-[:HAS_PHYSICS_DOMAIN]->(p:PhysicsDomain) "
+            "RETURN properties(sn) AS props, sources, units, collect(p.id) AS domains",
+            ids=sorted(set(ids)),
+        )
+    )
+    return {
+        row["props"]["id"]: {
+            **{k: row["props"].get(k) for k in IDENTITY_FIELDS},
+            "sources": sorted(row["sources"]),
+            "units": sorted(row["units"]),
+            "domains": sorted(row["domains"]),
+        }
+        for row in rows
+    }
+
+
+def initialize():
+    assert not DATA.exists(), "Record already exists; do not replace it"
+    module = audit()
+    original = module.load()
+    judgments = {r["id"]: r for r in original["judgments"] if r["verdict"] != "sound"}
+    causes = original["report"]["candidate_pipeline_defects"]
+    order = list(
+        dict.fromkeys(
+            [name for c in causes for name in c["members"] if name in judgments]
+            + [name for name, j in judgments.items() if j["verdict"] == "defective"]
+            + [name for name, j in judgments.items() if j["verdict"] == "undecidable"]
+        )
+    )
+    assert len(order) == 126
+    with client() as gc:
+        count = sourceless(gc)
+        initial = identities(gc, order)
+    assert count["count"] == EXPECTED_SOURCELESS, count
+    record = {
+        "created_at": now(),
+        "base_revision": revision(),
+        "ceiling_usd": CEILING,
+        "spent_usd": 0.0,
+        "baseline_sourceless": count,
+        "commands": [],
+        "causes": causes,
+        "class_list": original["class_list"],
+        "pilot": {},
+        "pending_excluded": [p["id"] for p in original["pending"]],
+        "members": [
+            {
+                "id": name,
+                "judgment": judgments[name],
+                "causes": [c["cause"] for c in causes if name in c["members"]],
+                "before": initial.get(name),
+                "after": initial.get(name),
+                "proposals": [],
+                "outcome": "pending",
+                "cost_usd": 0.0,
+                "lead_question": "",
+            }
+            for name in order
+        ],
+    }
+    save(record)
+    render(record)
+    print(json.dumps({"members": len(order), "sourceless": count["count"]}))
+
+
+def reviews(gc, ids, since):
+    return list(
+        gc.query(
+            "MATCH (sn:StandardName)-[:HAS_REVIEW]->(r:StandardNameReview) "
+            "WHERE sn.id IN $ids AND toString(r.reviewed_at) >= $since "
+            "RETURN sn.id AS name, r.id AS id, r.review_axis AS axis, "
+            "r.score AS score, r.comments AS comments, r.model AS model, "
+            "r.review_group_id AS review_group ORDER BY r.reviewed_at",
+            ids=ids,
+            since=since,
+        )
+    )
+
+
+def command(member, arguments):
+    record = load()
+    row = next(r for r in record["members"] if r["id"] == member)
+    assert record["spent_usd"] < CEILING, "Spend ceiling reached"
+    stamp = now()
+    receipt_path = RUN / f"command-{len(record['commands']):04d}.json"
+    argv = [
+        "uv",
+        "run",
+        "--no-sync",
+        "--directory",
+        str(MAIN),
+        "imas-codex",
+        "sn",
+        *arguments,
+    ]
+    with client() as gc:
+        before = sourceless(gc)
+    assert before["count"] == EXPECTED_SOURCELESS, before
+    receipt = {
+        "member": member,
+        "argv": argv,
+        "started_at": stamp,
+        "main_revision": revision(),
+        "sourceless_before": before,
+        "state": "started",
+    }
+    receipt_path.write_text(json.dumps(receipt, indent=2, default=str))
+    record["commands"].append(str(receipt_path))
+    save(record)
+    env = os.environ | {
+        "PYTHONPATH": str(MAIN),
+        "UV_PROJECT_ENVIRONMENT": str(MAIN / ".venv"),
+    }
+    result = subprocess.run(argv, cwd=MAIN, env=env, timeout=1200, check=False)
+    with client() as gc:
+        after = sourceless(gc)
+        ids = [row["id"]]
+        if "--rename" in arguments:
+            ids.append(arguments[arguments.index("--rename") + 1])
+        state = identities(gc, ids)
+        review_rows = reviews(gc, ids, stamp)
+        costs = list(
+            gc.query(
+                "MATCH (c:LLMCost) WHERE toString(c.llm_at) >= $since "
+                "AND any(name IN c.standard_name_ids WHERE name IN $ids) "
+                "RETURN c.id AS id, c.run_id AS run_id, c.llm_cost AS cost, "
+                "c.standard_name_ids AS names",
+                since=stamp,
+                ids=ids,
+            )
+        )
+    spent = sum(float(c["cost"] or 0.0) for c in costs)
+    receipt.update(
+        {
+            "state": "finished",
+            "finished_at": now(),
+            "exit_status": result.returncode,
+            "sourceless_after": after,
+            "identities": state,
+            "reviews": review_rows,
+            "cost_rows": costs,
+            "cost_usd": spent,
+        }
+    )
+    receipt_path.write_text(json.dumps(receipt, indent=2, default=str))
+    row["cost_usd"] += spent
+    record["spent_usd"] += spent
+    row["proposals"].append(
+        {
+            "receipt": str(receipt_path),
+            "arguments": arguments,
+            "exit_status": result.returncode,
+            "cost_usd": spent,
+            "reviews": review_rows,
+        }
+    )
+    row["after"] = state.get(ids[-1]) or state.get(row["id"])
+    save(record)
+    render(record)
+    assert after["count"] == EXPECTED_SOURCELESS, after
+    assert record["spent_usd"] <= CEILING, "Spend ceiling exceeded"
+    print(
+        json.dumps(
+            {
+                "receipt": str(receipt_path),
+                "exit_status": result.returncode,
+                "cost_usd": spent,
+                "total_usd": record["spent_usd"],
+                "sourceless": after["count"],
+            }
+        )
+    )
+    return result.returncode
+
+
+def counts(record):
+    by_class = {
+        c: dict(
+            Counter(
+                r["outcome"]
+                for r in record["members"]
+                if c in r["judgment"]["defect_classes"]
+            )
+        )
+        for c, _ in record["class_list"]
+    }
+    by_cause = {
+        c["cause"]: dict(
+            Counter(r["outcome"] for r in record["members"] if r["id"] in c["members"])
+        )
+        for c in record["causes"]
+    }
+    return {
+        "outcomes": dict(Counter(r["outcome"] for r in record["members"])),
+        "classes": by_class,
+        "causes": by_cause,
+    }
+
+
+def render(record):
+    e = lambda x: escape(str(x))
+    content = [
+        "<!doctype html><html lang='en'><meta charset='utf-8'>",
+        "<meta name='reckon-type' content='evidence'><title>Equilibrium repair record</title>",
+        "<link rel='stylesheet' href='/_shared/foundation.css'><main>",
+        "<h1>Equilibrium repair record</h1>",
+        f"<p>Recorded spend USD {record['spent_usd']:.6f} / USD {CEILING:.2f}. "
+        f"Initial live names without a source: {record['baseline_sourceless']['count']}. "
+        "Pipeline acceptance is recorded here; correctness awaits a fresh blind adjudication.</p>",
+        f"<pre>{e(json.dumps(counts(record), indent=2))}</pre>",
+        "<p>The two pending adjudications remain excluded. Full command receipts, source packets, "
+        "and guard measurements are preserved in the run directory recorded in the data file's receipts.</p>",
+        "<table><thead><tr><th>Before → after</th><th>Source and adjudication</th>"
+        "<th>Proposal and review</th><th>Outcome / cost / question for the lead</th></tr></thead><tbody>",
+    ]
+    for r in record["members"]:
+        after = r.get("after") or {}
+        proposals = "\n".join(json.dumps(p, ensure_ascii=False) for p in r["proposals"])
+        content.append(
+            f"<tr><td><code>{e(r['id'])}</code> → <code>{e(after.get('id'))}</code>"
+            f"<p>{e((r.get('before') or {}).get('description'))}</p><p>{e(after.get('description'))}</p>"
+            f"</td><td>{e(r['judgment']['evidence_path'])}<p>{e(r['judgment']['reason'])}</p>"
+            f"</td><td><pre>{e(proposals)}</pre></td><td>{e(r['outcome'])}; USD {r['cost_usd']:.6f}"
+            f"<p>{e(r['lead_question'])}</p></td></tr>"
+        )
+    content.append("</tbody></table></main></html>\n")
+    PAGE.write_text("\n".join(content))
+
+
+def check(path=DATA):
+    record = load(path)
+    module = audit()
+    expected = {j["id"] for j in module.load()["judgments"] if j["verdict"] != "sound"}
+    rows = record["members"]
+    assert {r["id"] for r in rows} == expected and len(rows) == 126, "Cohort mismatch"
+    assert record["spent_usd"] <= CEILING, "Spend ceiling"
+    assert abs(sum(r["cost_usd"] for r in rows) - record["spent_usd"]) < 1e-8
+    for r in rows:
+        assert r["outcome"] in ("accepted_repair", "lead", "refused"), (
+            r["id"],
+            r["outcome"],
+        )
+        if r["outcome"] != "accepted_repair":
+            assert r["lead_question"].strip(), (r["id"], "No precise lead question")
+    repaired = [r for r in rows if r["outcome"] == "accepted_repair"]
+    with client() as gc:
+        guard = sourceless(gc)
+        assert guard["count"] == EXPECTED_SOURCELESS, guard
+        live = identities(gc, [r["after"]["id"] for r in repaired])
+    for r in repaired:
+        target = live.get(r["after"]["id"])
+        assert target == r["after"], (
+            r["id"],
+            "Stored identity differs from repair record",
+        )
+        assert target["name_stage"] == "accepted", (r["id"], "Name not accepted")
+        assert target["sources"], (r["id"], "Missing producing source")
+        assert r["proposals"], (r["id"], "No signed proposal receipt")
+    for path in record["commands"]:
+        receipt = json.loads(Path(path).read_text())
+        assert receipt["state"] == "finished", (path, "Unfinished command")
+        for k in ("sourceless_before", "sourceless_after"):
+            assert receipt[k]["count"] == EXPECTED_SOURCELESS, (path, k)
+    print(
+        json.dumps(
+            {
+                "checked": len(rows),
+                "repaired": len(repaired),
+                **counts(record),
+                "sourceless": guard["count"],
+                "spent_usd": record["spent_usd"],
+                "ceiling_usd": CEILING,
+            }
+        )
+    )
+
+
+def main():
+    p = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    p.add_argument("--init", action="store_true")
+    p.add_argument("--check", action="store_true")
+    p.add_argument("--show", action="store_true")
+    p.add_argument("--render", action="store_true")
+    p.add_argument("--data", type=Path, default=DATA)
+    p.add_argument("--member")
+    p.add_argument("arguments", nargs=argparse.REMAINDER)
+    args = p.parse_args()
+    if args.init:
+        initialize()
+    elif args.check:
+        check(args.data)
+    elif args.show:
+        print(json.dumps(load(args.data), indent=2, ensure_ascii=False))
+    elif args.render:
+        render(load(args.data))
+    elif args.member:
+        arguments = (
+            args.arguments[1:] if args.arguments[:1] == ["--"] else args.arguments
+        )
+        return command(args.member, arguments)
+    else:
+        p.error("Choose --init, --check, --show, --render or --member")
+    return 0
+
+
+if __name__ == "__main__":
+    sys.exit(main())
