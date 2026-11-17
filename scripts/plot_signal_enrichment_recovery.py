@@ -66,7 +66,7 @@ def draw(report: dict, output: Path, preview: Path):
             marker="s",
             linestyle="none",
             color=REFERENCE,
-            label="Settings in use",
+            label=report.get("current_label", "Settings in use"),
         ),
         Line2D(
             [],
@@ -82,7 +82,7 @@ def draw(report: dict, output: Path, preview: Path):
             marker="D",
             linestyle="none",
             color=SUBJECT,
-            label="Selected proposal",
+            label=report.get("selected_label", "Selected proposal"),
         ),
         Line2D(
             [],
