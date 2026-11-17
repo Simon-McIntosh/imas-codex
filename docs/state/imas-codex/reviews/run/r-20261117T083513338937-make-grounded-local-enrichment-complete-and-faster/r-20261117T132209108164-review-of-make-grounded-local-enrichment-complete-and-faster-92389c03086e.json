@@ -16,6 +16,12 @@
       "recorded_at": "2026-11-17T13:53:53.681925+00:00",
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261117T083513338937-make-grounded-local-enrichment-complete-and-faster"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-17T13:53:53.681925+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261117T083513338937-make-grounded-local-enrichment-complete-and-faster"
     }
   },
   "findings": [
