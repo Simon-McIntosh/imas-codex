@@ -25,7 +25,30 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 26,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "4128eecb175b82368086ace24e245a014bcb14e1",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 3 now says that with no fit reader no reader produces a rate: the rate is the share the blind adjudication judges defective over every member, uncorrected, undecidable members reported as their own share, and the bar reads the rate with them counted defective.",
+      "reason": "",
+      "when": "2026-11-17T20:45:38.852322+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "4128eecb175b82368086ace24e245a014bcb14e1",
+      "commit_basis": "edit",
+      "note": "Section 3 now says that with no fit reader no reader produces a rate: the rate is the share the blind adjudication judges defective over every member, uncorrected, undecidable members reported as their own share, and the bar reads the rate with them counted defective.",
+      "reason": "",
+      "when": "2026-11-17T20:45:38.852322+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T165142991935-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261117T165142991935-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "d02ae6566fd214bac4294f3afd1d22c033a35314",
   "rubric": "content",
