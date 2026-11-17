@@ -54,14 +54,24 @@ def check_admission(root, arm, concurrency, lane_document):
     )
 
 
-def metrics(records, wall_seconds):
-    responses = [response for row in records for response in row["responses"]]
-    outputs = [
-        value
+def delivered_count(records):
+    """Count descriptions rather than result objects that can contain no text."""
+    return sum(
+        bool(value.get("description", "").strip())
         for row in records
         for value in row["outputs"]
-        if value.get("description", "").strip()
-    ]
+    )
+
+
+def progress_counts(records):
+    return {
+        "completed": len(records),
+        "delivered": delivered_count(records),
+    }
+
+
+def metrics(records, wall_seconds):
+    responses = [response for row in records for response in row["responses"]]
     recoveries = {
         key: sum(row.get("grounding_counts", {}).get(key, 0) for row in records)
         for key in (
@@ -109,7 +119,7 @@ def metrics(records, wall_seconds):
         )
     return {
         "signals": sum(len(row["ids"]) for row in records),
-        "delivered": len(outputs),
+        "delivered": delivered_count(records),
         "raw_parses": sum(
             row["responses"][0]["score"]["parse_success"]
             for row in records
@@ -260,8 +270,7 @@ async def run(root, arm, options, concurrency, lane_document):
                 json.dumps(
                     {
                         "arm": arm,
-                        "completed": len(completed),
-                        "delivered": sum(bool(row["outputs"]) for row in completed),
+                        **progress_counts(completed),
                     }
                 ),
                 flush=True,

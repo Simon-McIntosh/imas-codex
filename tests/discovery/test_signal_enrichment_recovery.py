@@ -433,3 +433,15 @@ def test_pooled_retry_accounting_distinguishes_requests_from_signals():
     assert result["recoveries"]["review_feedback_calls"] == 1
     assert result["recoveries"]["review_validation_reasks"] == 1
     assert result["input_tokens"] == result["output_tokens"] == 5
+
+
+def test_live_delivery_counter_agrees_with_nonempty_receipt_descriptions():
+    from scripts.measure_signal_enrichment_recovery import metrics, progress_counts
+
+    records = [
+        {"ids": ["empty"], "responses": [], "outputs": [{"description": "   "}]},
+        {"ids": ["valid"], "responses": [], "outputs": [{"description": "Pressure"}]},
+        {"ids": ["failed"], "responses": [], "outputs": []},
+    ]
+    assert metrics(records, 1)["delivered"] == 1
+    assert progress_counts(records) == {"completed": 3, "delivered": 1}
