@@ -9,6 +9,7 @@ records are written into a temporary directory.
 
 from __future__ import annotations
 
+import hashlib
 import json
 from contextlib import ExitStack
 from dataclasses import replace
@@ -31,6 +32,7 @@ from imas_codex.standard_names.export import (
     load_group_release_ruling,
     run_export,
 )
+from imas_codex.standard_names.families import family_identifier
 from tests.standard_names.conftest import clean_source_audit_graph
 
 PLAIN_DOCUMENTATION = "A quantity stated plainly, counted once for the plasma."
@@ -326,10 +328,23 @@ def test_family_with_a_member_in_another_group_refuses() -> None:
     assert issue["other_groups"] == {"magnetic_field_systems": ["field_systems_name"]}
 
 
+def _planted_family_id() -> str:
+    """The planted family's id, restated here rather than read back."""
+    members = [
+        "equilibrium/foo/radial",
+        "equilibrium/foo/toroidal",
+        "equilibrium/foo/vertical",
+    ]
+    digest = hashlib.sha1("|".join(members).encode("utf-8")).hexdigest()[:8]
+    return "|".join(["equilibrium/foo", "physical_vector", digest])
+
+
 def test_ruled_family_exception_or_a_joint_cut_clears_the_family() -> None:
-    family_id = _group_family_issues(_family_paths(_family_rows()), GROUP, _ruled())[0][
+    family_id = _planted_family_id()
+    reported = _group_family_issues(_family_paths(_family_rows()), GROUP, _ruled())[0][
         "family"
     ]
+    assert reported == family_id
 
     as_exception = _group_family_issues(
         _family_paths(_family_rows()),
@@ -578,6 +593,46 @@ def test_a_defective_verdict_must_name_its_class(tmp_path: Path) -> None:
     record, problem = load_group_audit_record(tmp_path, GROUP)
     assert record is None
     assert "without naming a defect class" in problem
+
+
+# ---------------------------------------------------------------------------
+# The ids a ruling names are the ids the measurement published
+# ---------------------------------------------------------------------------
+
+MEASUREMENT = (
+    Path(__file__).parents[2]
+    / "docs/evidence/fragments/sn-audited-group-release/domain-groups.json"
+)
+
+
+def test_the_committed_family_exceptions_are_the_measured_ids() -> None:
+    families = json.loads(MEASUREMENT.read_text(encoding="utf-8"))["families"]
+    spanning = families["spanning"]
+    assert len(spanning) == 225
+    for entry in spanning:
+        assert (
+            family_identifier(
+                entry["parent_path"], entry["family_type"], entry["members"]
+            )
+            == entry["id"]
+        )
+    assert _ruled().family_exceptions == {entry["id"] for entry in spanning}
+    assert set(families["touching_first_group"]["ids"]) <= {
+        entry["id"] for entry in spanning
+    }
+
+
+def test_the_audit_digest_is_the_claim_ledger_text_identity() -> None:
+    # The combined content hash a refine claim records for this description
+    # and documentation, through the ledger's own hashing service: one text,
+    # one identity, so an audit's digest is comparable with a claim's.
+    assert (
+        audited_text_digest(
+            "A quantity stated plainly.",
+            "A quantity stated plainly, counted once for the plasma.",
+        )
+        == "a475a64188a8c55d73814cde87bc0501cc6cba71d821695101c084758bc00c82"
+    )
 
 
 def test_group_never_measured_refuses(tmp_path: Path) -> None:
