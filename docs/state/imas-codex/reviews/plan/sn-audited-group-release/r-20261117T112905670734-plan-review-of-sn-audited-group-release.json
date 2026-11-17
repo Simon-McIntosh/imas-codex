@@ -89,6 +89,16 @@
       "note": "Section 2 now states the USD 300 is the ceiling on total repair spend, raised from USD 250, and that section 4's USD 40 is the first group's own ceiling inside it.",
       "reason": "",
       "when": "2026-11-17T16:49:35.159696+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5e4112b78b29bf5b8b59dd15e97c72a82376a6cb",
+      "commit_basis": "edit",
+      "finding": "reasoning-2",
+      "note": "The plan's effort is set to 36 hours, the sum of its six sections.",
+      "reason": "",
+      "when": "2026-11-17T16:50:17.134578+00:00"
     }
   ],
   "responses": {
@@ -118,6 +128,15 @@
       "note": "Section 6 now says its 1,042 is the 2026-11-17 reading of section 2's measurement, whose data file records the definition of live, and that the 1,079 opening section 2 is the 2026-11-16 reading.",
       "reason": "",
       "when": "2026-11-17T16:47:07.547125+00:00"
+    },
+    "reasoning-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "5e4112b78b29bf5b8b59dd15e97c72a82376a6cb",
+      "commit_basis": "edit",
+      "note": "The plan's effort is set to 36 hours, the sum of its six sections.",
+      "reason": "",
+      "when": "2026-11-17T16:50:17.134578+00:00"
     },
     "wiring-1": {
       "action": "acted",
