@@ -35,9 +35,28 @@
       "note": "The next version declares section 4 deferred until the document fetch it waits on has landed.",
       "reason": "",
       "when": "2026-11-17T15:42:31.247768+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "07d12e06ad00541bd3a2313465ba9af5a358bc01",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The next version states in section 4 that its documents come from the document-fetch section's private store, and that with no documents fetched the section stays deferred.",
+      "reason": "",
+      "when": "2026-11-17T15:42:38.103228+00:00"
     }
   ],
   "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "07d12e06ad00541bd3a2313465ba9af5a358bc01",
+      "commit_basis": "edit",
+      "note": "The next version states in section 4 that its documents come from the document-fetch section's private store, and that with no documents fetched the section stays deferred.",
+      "reason": "",
+      "when": "2026-11-17T15:42:38.103228+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
