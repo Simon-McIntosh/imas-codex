@@ -1,0 +1,66 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 6,
+  "call_sites": [
+    "imas_codex/cli/sn.py:sn_run",
+    "imas_codex/cli/sn.py:_run_sn_cmd",
+    "imas_codex/cli/sn.py:_bind_pending_edit_scope",
+    "imas_codex/cli/sn.py:_docs_drain_factory._drain",
+    "imas_codex/standard_names/edit.py:_run_scoped_pipeline",
+    "imas_codex/standard_names/pipeline.py:resolve_scope_maintenance"
+  ],
+  "completed_at": "2026-11-17T12:40:02.361Z",
+  "dispatched_at": "2026-11-17T12:39:47Z",
+  "findings": [
+    {
+      "file": "tests/standard_names/test_scoped_run_stays_in_scope.py",
+      "line": "320",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert bindings[0][\"run_id\"]` checks only truthiness while the comment above it claims the loop receives the same id the scope was bound to, so an entrance that minted one id for the binding and handed another to the loop would still pass this guard."
+    },
+    {
+      "file": "imas_codex/cli/sn.py",
+      "line": "1493",
+      "severity": "non-blocking",
+      "text": "non-blocking: production code reads the private constants graph_claim_scope._EXACT_SCOPE_TERMINAL_NAME_STAGES and _EXACT_SCOPE_TERMINAL_STATUSES across a module boundary, so the edits binding depends on an implementation detail the owning module is free to rename or restructure."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "Verified 6 production call sites: imas_codex/cli/sn.py:sn_run resolves the policy from the concrete flags at line 2418 and refuses at 2487; imas_codex/cli/sn.py:_run_sn_cmd forces the bypass, applies the refusal and binds the edits-only scope at 906-918; imas_codex/cli/sn.py:_bind_pending_edit_scope mints that scope at 1464; imas_codex/cli/sn.py:_docs_drain_factory._drain now inherits the forced bypass for campaign drains; imas_codex/standard_names/edit.py:_run_scoped_pipeline already passes skip_global_maintenance=True at imas_codex/standard_names/edit.py:4764; and imas_codex/standard_names/pipeline.py:resolve_scope_maintenance is the single owner every one of them reads.",
+    "diff": "Read all nine commits 3fb991aa6..14b30a1e1 commit by commit; git diff --name-only lists imas_codex/cli/sn.py (183 added, 13 removed), imas_codex/standard_names/pipeline.py (new, 105 lines), tests/standard_names/test_scoped_run_stays_in_scope.py (new, 728 lines) and docs/evidence/fragments/sn-pipeline-hygiene/sph-scoped-run-stays-in-scope.html, and the last commit 14b30a1e1 changes only that fragment.",
+    "done_when": "The quantitative clause is the whole-tests/standard_names head-versus-base run; logs/gate-head-standard_names.log ends \"8811 passed, 11 skipped, 544 deselected\" EXIT=0 at 0aa2cb857 and logs/gate-base-standard_names.log ends \"8789 passed, 12 skipped, 541 deselected\" EXIT=0 at 3fb991aa, which is 0 added failures, while the disposable-graph digest test and its red negative-control log cover the other clauses.",
+    "goal": "The goal is \"Make a run given a scope change nothing outside that scope\"; imas_codex/standard_names/pipeline.py:37 resolves one policy and imas_codex/cli/sn.py:918 applies it, the edits-only form that aborted at the loop guard is bound at imas_codex/cli/sn.py:906, and focus runs gained the bounded FOCUS_STAMP_CLEAR_CYPHER at imas_codex/cli/sn.py:70.",
+    "manifest": "Read; it names commits f96493682 through 14b30a1e1, both suite arms with revisions, logs and zero failures, the graph-tier log (3 passed, EXIT=0), both negative-control logs with their mutations, and added failures 0, and every figure it quotes reconciles with the log it cites.",
+    "write_paths": "The dispatch granted imas_codex/cli/sn.py, imas_codex/standard_names/pipeline.py, tests/standard_names/test_scoped_run_stays_in_scope.py, the sn-pipeline-hygiene fragment and the figure directory; all four paths the diff names are inside that grant and no plan file is edited."
+  },
+  "justifications": {
+    "durability": "The guards are genuine - tests/standard_names/test_scoped_run_stays_in_scope.py:505 digests the planted name before and after a real run_sn_pools, line 517 shows the control arm moves, line 312 stops the real loop only after its guard, and both mutations are recorded red at EXIT=1 - but tests/standard_names/test_scoped_run_stays_in_scope.py:320 checks only that some run id was bound, never that the loop received it.",
+    "evidence": "logs/gate-head-standard_names.log and logs/gate-base-standard_names.log record both arms with their summary lines and EXIT=0, and logs/negative-control-scoped-run.log records the digest assertion red under the declared mutation; the head arm ran at 0aa2cb857, one docs-only commit before the reviewed head, so the code measured is the landed code.",
+    "fit": "The change follows the surrounding idiom - a frozen dataclass and module docstring in imas_codex/standard_names/pipeline.py:31, refusal text in the style of the flag-era guard at imas_codex/cli/sn.py:2459 - and names nothing the repository forbids, though imas_codex/cli/sn.py:1493 imports private constants across a module boundary and tests/standard_names/test_scoped_run_stays_in_scope.py:319 describes more than its assertion checks.",
+    "goal_fidelity": "imas_codex/cli/sn.py:918 forces the bypass at the command for direct callers and imas_codex/cli/sn.py:900 does so at the orchestrator entrance, so run-id, focus, exact-name and edits scopes all stay inside themselves, and imas_codex/cli/sn.py:2703 replaces the last whole-catalogue write in the focus branch with a scope-bounded statement.",
+    "reuse": "A capability search over imas_codex/standard_names for an existing scope-maintenance policy found none (resolve_scope_maintenance and bypass_global_maintenance occur only in the new module), the graph-wide phase set was moved into the single owner GRAPH_WIDE_ONLY_PHASES at imas_codex/standard_names/pipeline.py:25 rather than restated, and the binding delegates to the existing scope_exact_standard_names at imas_codex/cli/sn.py:1500.",
+    "scope_discipline": "git diff --name-only 3fb991aa6..14b30a1e1 lists exactly the four granted paths, with no plan edit, no generated file and nothing the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The goal is \"Make a run given a scope change nothing outside that scope\"; imas_codex/standard_names/pipeline.py:37 resolves one policy and imas_codex/cli/sn.py:918 applies it, the edits-only form that aborted at the loop guard is bound at imas_codex/cli/sn.py:906, and focus runs gained the bounded FOCUS_STAMP_CLEAR_CYPHER at imas_codex/cli/sn.py:70.\nVERDICT done_when: The quantitative clause is the whole-tests/standard_names head-versus-base run; logs/gate-head-standard_names.log ends \"8811 passed, 11 skipped, 544 deselected\" EXIT=0 at 0aa2cb857 and logs/gate-base-standard_names.log ends \"8789 passed, 12 skipped, 541 deselected\" EXIT=0 at 3fb991aa, which is 0 added failures, while the disposable-graph digest test and its red negative-control log cover the other clauses.\nVERDICT write_paths: The dispatch granted imas_codex/cli/sn.py, imas_codex/standard_names/pipeline.py, tests/standard_names/test_scoped_run_stays_in_scope.py, the sn-pipeline-hygiene fragment and the figure directory; all four paths the diff names are inside that grant and no plan file is edited.\nVERDICT manifest: Read; it names commits f96493682 through 14b30a1e1, both suite arms with revisions, logs and zero failures, the graph-tier log (3 passed, EXIT=0), both negative-control logs with their mutations, and added failures 0, and every figure it quotes reconciles with the log it cites.\nVERDICT diff: Read all nine commits 3fb991aa6..14b30a1e1 commit by commit; git diff --name-only lists imas_codex/cli/sn.py (183 added, 13 removed), imas_codex/standard_names/pipeline.py (new, 105 lines), tests/standard_names/test_scoped_run_stays_in_scope.py (new, 728 lines) and docs/evidence/fragments/sn-pipeline-hygiene/sph-scoped-run-stays-in-scope.html, and the last commit 14b30a1e1 changes only that fragment.\nCALL_SITES: imas_codex/cli/sn.py:sn_run, imas_codex/cli/sn.py:_run_sn_cmd, imas_codex/cli/sn.py:_bind_pending_edit_scope, imas_codex/cli/sn.py:_docs_drain_factory._drain, imas_codex/standard_names/edit.py:_run_scoped_pipeline, imas_codex/standard_names/pipeline.py:resolve_scope_maintenance\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/cli/sn.py:918 forces the bypass at the command for direct callers and imas_codex/cli/sn.py:900 does so at the orchestrator entrance, so run-id, focus, exact-name and edits scopes all stay inside themselves, and imas_codex/cli/sn.py:2703 replaces the last whole-catalogue write in the focus branch with a scope-bounded statement.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/gate-head-standard_names.log and logs/gate-base-standard_names.log record both arms with their summary lines and EXIT=0, and logs/negative-control-scoped-run.log records the digest assertion red under the declared mutation; the head arm ran at 0aa2cb857, one docs-only commit before the reviewed head, so the code measured is the landed code.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --name-only 3fb991aa6..14b30a1e1 lists exactly the four granted paths, with no plan edit, no generated file and nothing the goal does not imply.\nSCORE durability: 17\nJUSTIFICATION durability: The guards are genuine - tests/standard_names/test_scoped_run_stays_in_scope.py:505 digests the planted name before and after a real run_sn_pools, line 517 shows the control arm moves, line 312 stops the real loop only after its guard, and both mutations are recorded red at EXIT=1 - but tests/standard_names/test_scoped_run_stays_in_scope.py:320 checks only that some run id was bound, never that the loop received it.\nSCORE fit: 17\nJUSTIFICATION fit: The change follows the surrounding idiom - a frozen dataclass and module docstring in imas_codex/standard_names/pipeline.py:31, refusal text in the style of the flag-era guard at imas_codex/cli/sn.py:2459 - and names nothing the repository forbids, though imas_codex/cli/sn.py:1493 imports private constants across a module boundary and tests/standard_names/test_scoped_run_stays_in_scope.py:319 describes more than its assertion checks.\nSCORE reuse: 18\nJUSTIFICATION reuse: A capability search over imas_codex/standard_names for an existing scope-maintenance policy found none (resolve_scope_maintenance and bypass_global_maintenance occur only in the new module), the graph-wide phase set was moved into the single owner GRAPH_WIDE_ONLY_PHASES at imas_codex/standard_names/pipeline.py:25 rather than restated, and the binding delegates to the existing scope_exact_standard_names at imas_codex/cli/sn.py:1500.\nFINDING tests/standard_names/test_scoped_run_stays_in_scope.py:320 non-blocking: `assert bindings[0][\"run_id\"]` checks only truthiness while the comment above it claims the loop receives the same id the scope was bound to, so an entrance that minted one id for the binding and handed another to the loop would still pass this guard.\nFINDING imas_codex/cli/sn.py:1493 non-blocking: production code reads the private constants graph_claim_scope._EXACT_SCOPE_TERMINAL_NAME_STAGES and _EXACT_SCOPE_TERMINAL_STATUSES across a module boundary, so the edits binding depends on an implementation detail the owning module is free to rename or restructure.",
+  "review_run_id": "r-20261117T123856371698-review-of-sph-scoped-run-stays-in-scope-14b30a1e1227",
+  "reviewed_base_sha": "3fb991aa612687074e1bd8fc21c97c91598baa7d",
+  "reviewed_head_sha": "14b30a1e12274818d577504a2a4cd66b5a74a839",
+  "reviewed_run_id": "r-20261117T084125357765-sph-scoped-run-stays-in-scope",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:00:22.626941+00:00",
+  "total": 107
+}
