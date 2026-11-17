@@ -760,6 +760,71 @@
       "exit_status": 0,
       "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/focused-after-aggregation.log"
     },
-    "suite_comparison": "pending archived base/head all_debug jobs"
+    "suite_comparison": {
+      "baseline_suite": {
+        "revision": "27ec3208c031d4782de71883b1b5eb3b8fe7191b",
+        "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/retirement-measure-1322893-w3qa/tree uv run --no-sync pytest /tmp/retirement-measure-1322893-w3qa/tree/tests/standard_names -p no:cacheprovider",
+        "exit_status": 0,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/baseline_suite.log",
+        "completed": true,
+        "failure_count": 0,
+        "failure_ids": [],
+        "summary": "8789 passed, 12 skipped, 541 deselected, 43 warnings in 849.29s (0:14:09)",
+        "measurement_module": "/tmp/retirement-measure-1322893-w3qa/tree/imas_codex/standard_names/graph_store/graph_audits.py",
+        "measurement_cwd": "/tmp/retirement-measure-1322893-w3qa/tree"
+      },
+      "after_suite": {
+        "revision": "0bdd635cdc466ce0a6337d14681c54f619141e7c",
+        "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/retirement-measure-1322925-jJv6/tree uv run --no-sync pytest /tmp/retirement-measure-1322925-jJv6/tree/tests/standard_names -p no:cacheprovider",
+        "exit_status": 0,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/after_suite.log",
+        "completed": true,
+        "failure_count": 0,
+        "failure_ids": [],
+        "summary": "8789 passed, 12 skipped, 553 deselected, 43 warnings in 878.05s (0:14:38)",
+        "measurement_module": "/tmp/retirement-measure-1322925-jJv6/tree/imas_codex/standard_names/graph_store/graph_audits.py",
+        "measurement_cwd": "/tmp/retirement-measure-1322925-jJv6/tree"
+      },
+      "comparison": {
+        "added_failures": [],
+        "fixed_failures": []
+      }
+    },
+    "negative_controls": {
+      "negative_control_retirement_removed": {
+        "revision": "0bdd635cdc466ce0a6337d14681c54f619141e7c",
+        "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/retirement-measure-1322925-jJv6/tree uv run --no-sync pytest /tmp/retirement-measure-1322925-jJv6/tree/tests/standard_names/test_recycled_source_retires_name.py -m graph -p no:cacheprovider",
+        "exit_status": 1,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/negative_control_retirement_removed.log",
+        "completed": true,
+        "failure_count": 3,
+        "failure_ids": [
+          "tests/standard_names/test_recycled_source_retires_name.py::test_exhausted_name_is_retired_when_its_source_is_recycled",
+          "tests/standard_names/test_recycled_source_retires_name.py::test_recycling_all_producers_retires_name_once",
+          "tests/standard_names/test_recycled_source_retires_name.py::test_stale_producer_does_not_keep_a_recycled_name_live"
+        ],
+        "summary": "3 failed, 9 passed, 1 warning in 29.46s",
+        "measurement_module": "/tmp/retirement-measure-1322925-jJv6/tree/imas_codex/standard_names/graph_store/graph_audits.py",
+        "measurement_cwd": "/tmp/retirement-measure-1322925-jJv6/tree"
+      },
+      "negative_control_live_source_taken": {
+        "revision": "0bdd635cdc466ce0a6337d14681c54f619141e7c",
+        "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/retirement-measure-1322925-jJv6/tree uv run --no-sync pytest /tmp/retirement-measure-1322925-jJv6/tree/tests/standard_names/test_recycled_source_retires_name.py::test_source_of_a_non_exhausted_live_name_is_not_taken\\[contested\\] -m graph -p no:cacheprovider",
+        "exit_status": 1,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/negative_control_live_source_taken.log",
+        "completed": true,
+        "failure_count": 1,
+        "failure_ids": [
+          "tests/standard_names/test_recycled_source_retires_name.py::test_source_of_a_non_exhausted_live_name_is_not_taken[contested]"
+        ],
+        "summary": "1 failed, 1 warning in 25.88s",
+        "measurement_module": "/tmp/retirement-measure-1322925-jJv6/tree/imas_codex/standard_names/graph_store/graph_audits.py",
+        "measurement_cwd": "/tmp/retirement-measure-1322925-jJv6/tree"
+      },
+      "mutations": {
+        "negative_control_retirement_removed": "the new test fails with the retirement removed from the pass; replace its exhausted retirement predicate with false",
+        "negative_control_live_source_taken": "remove the atomic-retirement eligibility exclusion, allowing the contested live target source to recycle"
+      }
+    }
   }
 }

@@ -210,3 +210,40 @@ controls are running as separate <code>all_debug</code> measurements; their
 results will be appended when complete. Logs and the landing record live at
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/manifest.md</code>.</p>
 </section>
+
+<section id="recycled-source-retirement-final-measure">
+<h2>Completed measurements</h2>
+<p>The archived base and implementation head were measured as independent
+<code>all_debug</code> jobs, with the shared project environment, fresh copies
+of the checkout's generated models and explicit scratch-tree import paths.
+The product revision measured at head is
+<code>0bdd635cdc466ce0a6337d14681c54f619141e7c</code>; subsequent commits add
+evidence only.</p>
+<table><thead><tr><th>Arm</th><th>Runner summary</th><th>Exit</th></tr></thead><tbody>
+<tr><td>Base whole directory</td><td><code>8789 passed, 12 skipped, 541 deselected, 43 warnings in 849.29s (0:14:09)</code></td><td>0</td></tr>
+<tr><td>Head whole directory</td><td><code>8789 passed, 12 skipped, 553 deselected, 43 warnings in 878.05s (0:14:38)</code></td><td>0</td></tr>
+<tr><td>Focused graph, source revival and recovery</td><td><code>57 passed, 1 warning in 35.46s</code></td><td>0</td></tr>
+<tr><td>Retirement disabled</td><td><code>3 failed, 9 passed, 1 warning in 29.46s</code></td><td>1</td></tr>
+<tr><td>Contested source protection disabled</td><td><code>1 failed, 1 warning in 25.88s</code></td><td>1</td></tr>
+</tbody></table>
+<p>The whole-directory failure-id difference is empty: <strong>zero added
+failures, zero fixed failures</strong>. The default directory run excludes
+graph-tier cases; the focused 57-case run executes the new planted cases and
+the existing source revival graph cases. Disabling retirement fails the
+exhausted-name, multi-producer and stale-producer assertions. Removing the
+live-source protection fails the contested-name source-status assertion.
+Both red logs contain failing test ids absent from the passing focused arm
+and finish with <code>EXIT=1</code>.</p>
+<p>The earlier pending comparison is complete. This landing delivers the pass,
+its tests and quantitative evidence. The live cohort remains unchanged: 13
+exhausted names still need the signed provenance-admission repair named above,
+so the ten-name live endpoint remains open. The original evidence and the
+current source/status tables are retained.</p>
+<ul>
+<li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/baseline_suite.log</code></li>
+<li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/after_suite.log</code></li>
+<li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/focused-after-aggregation.log</code></li>
+<li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/negative_control_retirement_removed.log</code></li>
+<li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/negative_control_live_source_taken.log</code></li>
+</ul>
+</section>
