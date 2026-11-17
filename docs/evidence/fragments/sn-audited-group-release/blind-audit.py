@@ -1698,6 +1698,7 @@ def summarize_third(
         ),
         "prior": {
             "both_readers": 0.248,
+            "both_readers_ci": [0.205, 0.296],
             "either_reader": 0.513,
             "either_reader_ci": [0.460, 0.566],
         },
@@ -2032,7 +2033,9 @@ def render_third_page(summary: dict[str, Any]) -> str:
         f"<td>{fmt(estimate['ci'][0])}–{fmt(estimate['ci'][1])}</td></tr>"
         f"<tr><td>both earlier readers</td>"
         f"<td>{estimate['sample_names']}</td>"
-        f"<td>{fmt(estimate['prior']['both_readers'])}</td><td>—</td></tr>"
+        f"<td>{fmt(estimate['prior']['both_readers'])}</td>"
+        f"<td>{fmt(estimate['prior']['both_readers_ci'][0])}–"
+        f"{fmt(estimate['prior']['both_readers_ci'][1])}</td></tr>"
         f"<tr><td>either earlier reader</td>"
         f"<td>{estimate['sample_names']}</td>"
         f"<td>{fmt(estimate['prior']['either_reader'])}</td>"
