@@ -1,0 +1,121 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/retirement-measure-1322925-jJv6/tree uv run --no-sync pytest /tmp/retirement-measure-1322925-jJv6/tree/tests/standard_names -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/after_suite.log",
+    "revision": "0bdd635cdc466ce0a6337d14681c54f619141e7c"
+  },
+  "assertion_audit": [
+    {
+      "file": "tests/standard_names/test_recycled_source_retires_name.py",
+      "lines": [
+        85,
+        86,
+        87,
+        88,
+        89
+      ],
+      "regression_and_failure": "Deleting the retirement FOREACH or the outer eligibility guard leaves the name at exhausted, the source at composed and names_retired at 0; all four reads are independent graph queries or the function's own return, and negative_control_retirement_removed.log records this exact removal reddening three cases."
+    },
+    {
+      "file": "tests/standard_names/test_recycled_source_retires_name.py",
+      "lines": "97-105",
+      "regression_and_failure": "A receipt with another operation or origin breaks equality with the literal pair, and reverting to a CREATE per recycled source makes the second pass report 1 and the count 2; focused-before-commit.log records that regression failing 1 failed / 55 passed."
+    },
+    {
+      "file": "tests/standard_names/test_recycled_source_retires_name.py",
+      "lines": "122-131",
+      "regression_and_failure": "Removing the new NOT EXISTS live-source filter lets the source return to extracted; negative_control_live_source_taken.log shows the contested case failing on precisely that assertion."
+    },
+    {
+      "file": "tests/standard_names/test_recycled_source_retires_name.py",
+      "lines": "145-148",
+      "regression_and_failure": "Refusing to release a superseded target's source, or retiring it again, reddens the extracted-status and names_retired assertions."
+    },
+    {
+      "file": "tests/standard_names/test_recycled_source_retires_name.py",
+      "lines": "179-182",
+      "regression_and_failure": "Retiring a name that still has a live producer source, or deleting the retained producer's edge, reddens the kept-source status or the name_stage assertion."
+    },
+    {
+      "file": "tests/standard_names/test_recycled_source_retires_name.py",
+      "lines": "197-205",
+      "regression_and_failure": "Reinstating the supplied patch's per-source retirement produces two receipts and fails the count == 1 assertion."
+    },
+    {
+      "file": "tests/standard_names/test_recycled_source_retires_name.py",
+      "lines": "225-228",
+      "regression_and_failure": "Counting a stale producer as live leaves name_stage at exhausted and names_retired at 0; the stale status read at :227 is independent of the code under test."
+    },
+    {
+      "file": "tests/standard_names/test_recycled_source_retires_name.py",
+      "lines": "250-254",
+      "regression_and_failure": "Retiring a derived or catalog exhausted name, or releasing its source, reddens the composed-status and not-sourceless assertions; the protection properties are set in the fixture and read back from the graph."
+    }
+  ],
+  "baseline_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/retirement-measure-1322893-w3qa/tree uv run --no-sync pytest /tmp/retirement-measure-1322893-w3qa/tree/tests/standard_names -p no:cacheprovider",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/baseline_suite.log",
+    "revision": "27ec3208c031d4782de71883b1b5eb3b8fe7191b"
+  },
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:1927 (_global_maintenance_call(reconcile_source_status_liveness, default={}))",
+    "imas_codex/standard_names/loop.py:1936-1940 (source-status reconcile log line)",
+    "imas_codex/standard_names/graph_store/__init__.py:86 (re-export)"
+  ],
+  "completed_at": "2026-11-17T12:17:12.183Z",
+  "dispatched_at": "2026-11-17T12:17:00Z",
+  "findings": [
+    "FINDING tests/standard_names/test_recycled_source_retires_name.py:109 non-blocking: the protected-stage parameter list passes 'refined', which is not a NameStage value (imas_codex/graph/models.py:1405 defines 'refining'), and the 'refining' case the recorded base reproduction exercised is absent from the committed file, so the live refine-claim stage is not among the cases guarding the new live-source filter.",
+    "FINDING imas_codex/standard_names/graph_store/graph_audits.py:1107 non-blocking: names_retired is computed and returned, but the only production caller (imas_codex/standard_names/loop.py:1936) logs only live_realigned and orphaned_reset, so a retirement stays invisible in the pool log beyond the generic 'returned to extracted' line."
+  ],
+  "justifications": {
+    "durability": "tests/standard_names/test_recycled_source_retires_name.py:87-105 fails on retirement removal as negative_control_retirement_removed.log shows, but the protection loop at :109 passes the non-NameStage value 'refined' and drops the 'refining' case the base reproduction exercised.",
+    "evidence": "baseline_suite.log:9 and after_suite.log:9 each end in a bare EXIT=0 with 8789 passed, and the head arm's revision 0bdd635c differs from the reviewed head only by the two evidence commits.",
+    "fit": "imas_codex/standard_names/graph_store/graph_audits.py:927-984 extends the function's existing collect/FOREACH/aggregate idiom and documents the new behaviour in the docstring at :805-816.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_audits.py:940-964 sets name_stage and status to superseded with one receipt in the releasing statement; the 13 pre-existing names remain, which the brief's boundary clause permits.",
+    "reuse": "The search over imas_codex/standard_names found no shared StandardNameChange helper (about twenty inline CREATE sites), so graph_audits.py:948-964 follows the established receipt idiom, while the separate retirement owner graph_supersession.py:3354 is a signed-manifest path this pass cannot call.",
+    "scope_discipline": "git diff --stat 27ec3208c dba86843d9 changes exactly the five declared write paths (graph_audits.py, two test files, two docs/evidence fragments), and live-cohort.log records graph_writes 0."
+  },
+  "limitations": [
+    "The two whole-directory arms deselect the graph marker (541 and 553 deselected), so the new test file is covered only by the focused 57-case arm and the two mutation arms.",
+    "The 13 pre-existing sourceless exhausted names were not retired; the live ten-name endpoint remains unmet and the signed-path repair in imas_codex/standard_names/graph_supersession.py is outside this landing's grants.",
+    "This review reran no test and modified no source; it reads the recorded logs and git."
+  ],
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the reviewed brief.md Why/What paragraphs; imas_codex/standard_names/graph_store/graph_audits.py:859-964 retires an exhausted live name in the same statement that recycles its last source and keeps non-exhausted, derived and catalog sources bound, as section 11 states.\nVERDICT done_when: read manifest.md and the cited logs; baseline_suite.log:9 and after_suite.log:9 report 8789 passed, 12 skipped with a bare EXIT=0 at 27ec3208c and 0bdd635c, and 0bdd635c..dba86843d9 is docs-only, so added failures are 0 by measurement rather than claim.\nVERDICT write_paths: read manifest.md orientation_write_paths and git diff --stat 27ec3208c dba86843d9; the five changed paths are exactly the five declared write paths.\nVERDICT manifest: read manifest.md and opened baseline_suite.log, after_suite.log, focused-after-aggregation.log (57 passed), negative_control_retirement_removed.log (3 failed, EXIT=1) and negative_control_live_source_taken.log (1 failed, EXIT=1); every stated count and sha reconciles with a log or with git.\nVERDICT diff: read 0bdd635c, 7c4f21896 and dba86843d commit by commit against 27ec3208c; the code change is the graph_audits.py:859-964 query extension plus the new test file, and the other two commits change docs/evidence fragments and recycled-source-names.json only.\nCALL_SITES: imas_codex/standard_names/loop.py:1927, imas_codex/standard_names/loop.py:1936, imas_codex/standard_names/graph_store/__init__.py:86\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_audits.py:940-964 performs the retirement and its receipt in the releasing statement, while the 13 pre-existing names stay listed; the brief's boundary clause allows that.\nSCORE evidence: 18\nJUSTIFICATION evidence: baseline_suite.log:9 and after_suite.log:9 each end in a bare EXIT=0 with 8789 passed, and the head arm's 0bdd635c differs from the reviewed head only by evidence commits.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 27ec3208c dba86843d9 changes 5 files, all five inside the declared write paths, and live-cohort.log records graph_writes 0.\nSCORE durability: 15\nJUSTIFICATION durability: tests/standard_names/test_recycled_source_retires_name.py:87-105 reddens on retirement removal as negative_control_retirement_removed.log shows, but the protection loop at :109 passes the non-NameStage value 'refined' and drops the 'refining' case the base reproduction exercised.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/standard_names/graph_store/graph_audits.py:927-984 extends the function's collect/FOREACH/aggregate idiom and documents the new guard at :805-816.\nSCORE reuse: 16\nJUSTIFICATION reuse: no shared StandardNameChange helper exists under imas_codex/standard_names (about twenty inline CREATE sites), so graph_audits.py:948-964 follows the established receipt idiom, while the retirement owner at graph_supersession.py:3354 is a signed-manifest path this pass cannot call.\nFINDING tests/standard_names/test_recycled_source_retires_name.py:109 non-blocking: 'refined' is not a NameStage value (imas_codex/graph/models.py:1405 defines 'refining'), so the live refine-claim stage is not covered.\nFINDING imas_codex/standard_names/graph_store/graph_audits.py:1107 non-blocking: names_retired is returned but the only production caller at imas_codex/standard_names/loop.py:1936 logs only live_realigned and orphaned_reset, leaving the retirement count unlogged.",
+  "review_method": "git diff/log/--stat 27ec3208c..dba86843d9 commit by commit, git show of the changed files at head, the reviewed run's manifest and cited logs, plus repository searches for the change-receipt creator and the retirement owner for the reuse judgement.",
+  "review_run_id": "r-20261117T121632051114-review-of-sph-retire-recycled-source-landing-dba86843d926",
+  "reviewed_base_sha": "27ec3208c031d4782de71883b1b5eb3b8fe7191b",
+  "reviewed_head_sha": "dba86843d9260fe728a7f1e16929dbb05c9d24c9",
+  "reviewed_run_id": "r-20261117T114117913470-sph-retire-recycled-source-landing",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "self_referential_assertions": [],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:36:27.152553+00:00",
+  "total": 104,
+  "verdicts": {
+    "diff": "Read all three commits against 27ec3208c: 0bdd635c extends imas_codex/standard_names/graph_store/graph_audits.py:859-964 and adds tests/standard_names/test_recycled_source_retires_name.py; 7c4f21896 and dba86843d add only docs/evidence fragments.",
+    "done_when": "Read manifest.md and the cited gate logs; baseline_suite.log:9 and after_suite.log:9 record 8789 passed / 12 skipped with EXIT=0 at 27ec3208c and 0bdd635c, and 0bdd635c..dba86843d9 touches only docs/evidence, so added failures are 0 by measurement rather than claim.",
+    "goal": "Read the reviewed brief.md Why/What paragraphs; the landed imas_codex/standard_names/graph_store/graph_audits.py:859-964 retires an exhausted live name in the same statement that returns its last source to extracted and leaves non-exhausted, derived and catalog targets bound, while the 13 pre-existing names are listed rather than written, which the brief's boundary clause permits.",
+    "manifest": "Read manifest.md including baseline_suite/after_suite, negative_control_log, tests and the rubric lines; every stated count reconciles with its named log (8789 passed, 57 passed, 3 failed/9 passed EXIT=1, 1 failed EXIT=1) and every sha exists in git.",
+    "write_paths": "Read manifest.md orientation_write_paths/changed_paths against git diff --stat 27ec3208c dba86843d9; five paths changed and all five are declared, with no plan, live-graph or out-of-scope write."
+  }
+}
