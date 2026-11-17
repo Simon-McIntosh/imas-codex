@@ -1,0 +1,111 @@
+<article id="grouping-rerun-on-full-catalogue-results">
+<h3>Grouping re-run on the completed archive catalogue</h3>
+<p>The private catalogue store holds metadata for every listed archive variable. Its completion receipt records <strong>995,006 of 995,006 variables completed</strong>, <code>complete: true</code>, <code>integrity: ok</code>, zero failed variables, and 965,741 metadata requests over 43,228 seconds; 917,948 variables returned metadata and 77,058 answered with the archive's single unavailable code, leaving no variable unrequested.</p>
+<p>The grouping of section 5 was re-run against that completed store on <code>all_debug</code>, job <code>1321277</code>, with the caller held in <code>sbatch --wait</code>; the receipt records 1,440.09 seconds for grouping, private replay and graph projection, and the run reports <code>archive_fraction: 1.0</code> and <code>metadata_completed_fraction: 1.0</code>. Because the grouping is derived from parsed names, the completed metadata leaves every group and pattern identity unchanged; what changes is that the snapshot now covers the whole archive rather than 64.4484% of it.</p>
+<h4>Coverage and the two pattern keys, beside the partial run</h4>
+<table><thead><tr><th>Measure</th><th>Partial run (§5)</th><th>Completed-catalogue run</th></tr></thead><tbody>
+<tr><td>Fraction of the archive the store held</td><td>100% listed / 64.4484% metadata</td><td>100% listed / 100% metadata</td></tr>
+<tr><td>Variables</td><td>995,006</td><td>995,006</td></tr>
+<tr><td>Grouped</td><td>949,351</td><td>949,351</td></tr>
+<tr><td>Ungrouped</td><td>45,655</td><td>45,655</td></tr>
+<tr><td>Parse outcome: component variable</td><td>457,619</td><td>457,619</td></tr>
+<tr><td>Parse outcome: function-level variable</td><td>491,732</td><td>491,732</td></tr>
+<tr><td>Parse outcome: nonconforming</td><td>45,655</td><td>45,655</td></tr>
+<tr><td>Component groups</td><td>27,253</td><td>27,253</td></tr>
+<tr><td>Control-node groups</td><td>1,777</td><td>1,777</td></tr>
+<tr><td>Exact category + field-set patterns</td><td>1,802</td><td>1,802</td></tr>
+<tr><td>Category-only patterns</td><td>413</td><td>413</td></tr>
+<tr><td>Variables only in the graph</td><td>0</td><td>0</td></tr>
+</tbody></table>
+<p>The repeat replay of the same private snapshot adds zero component groups, zero control groups and zero patterns; the graph repeat leaves all four active counts unchanged.</p>
+<h4>Distribution of group size and the sharing measures</h4>
+<p>The distribution is identical to the partial run's, as the table's two group columns show. Single-member groups are 3,338 component groups and 46 control-node groups; signals in them account for 0.340098% of all 995,006 variables. Component variables whose exact key pattern is shared by two or more components are 97.8886% of 457,619; under the category-only key the share is 99.7972%.</p>
+<table><thead><tr><th>Variables per group</th><th>Component groups (partial)</th><th>Component groups (complete)</th><th>Component variables</th><th>Control-node groups (partial)</th><th>Control-node groups (complete)</th><th>Function variables</th></tr></thead><tbody>
+<tr><td>1</td><td>3,338</td><td>3,338</td><td>3,338</td><td>46</td><td>46</td><td>46</td></tr>
+<tr><td>2–5</td><td>3,832</td><td>3,832</td><td>11,375</td><td>191</td><td>191</td><td>600</td></tr>
+<tr><td>6–10</td><td>5,435</td><td>5,435</td><td>43,589</td><td>83</td><td>83</td><td>649</td></tr>
+<tr><td>11–25</td><td>9,464</td><td>9,464</td><td>142,934</td><td>265</td><td>265</td><td>4,535</td></tr>
+<tr><td>26–50</td><td>3,973</td><td>3,973</td><td>143,187</td><td>215</td><td>215</td><td>8,008</td></tr>
+<tr><td>51–100</td><td>783</td><td>783</td><td>54,667</td><td>179</td><td>179</td><td>13,459</td></tr>
+<tr><td>101–250</td><td>422</td><td>422</td><td>56,948</td><td>299</td><td>299</td><td>47,717</td></tr>
+<tr><td>251–500</td><td>6</td><td>6</td><td>1,581</td><td>264</td><td>264</td><td>89,539</td></tr>
+<tr><td>501–1,000</td><td>0</td><td>0</td><td>0</td><td>145</td><td>145</td><td>94,651</td></tr>
+<tr><td>1,001–5,000</td><td>0</td><td>0</td><td>0</td><td>79</td><td>79</td><td>144,424</td></tr>
+<tr><td>5,001 and above</td><td>0</td><td>0</td><td>0</td><td>11</td><td>11</td><td>88,104</td></tr>
+</tbody></table>
+<h4>Descriptions enrichment would need</h4>
+<table><thead><tr><th>Description key</th><th>Component</th><th>Control node</th><th>Pattern</th><th>Total</th></tr></thead><tbody>
+<tr><td>Category + exact field set (partial and complete)</td><td>27,253</td><td>1,777</td><td>1,802</td><td>30,832</td></tr>
+<tr><td>Category only / union of fields (partial and complete)</td><td>27,253</td><td>1,777</td><td>413</td><td>29,443</td></tr>
+</tbody></table>
+<p>These counts cover the 949,351 grouped variables; the 45,655 nonconforming variables have no group-based enrichment projection. No enrichment calls were made and the re-run incurred no metered model spend.</p>
+<h4>Twenty largest exact category + field-set patterns</h4>
+<p>Ranked by variable count; names are invented display aliases and disclose no archive field or component name. Every row and count is identical to the partial run's table.</p>
+<table><thead><tr><th>Invented pattern name</th><th>Distinct fields</th><th>Components</th><th>Component variables</th></tr></thead><tbody>
+<tr><td>Exact pattern A</td><td>11</td><td>859</td><td>32,990</td></tr>
+<tr><td>Exact pattern B</td><td>19</td><td>469</td><td>11,578</td></tr>
+<tr><td>Exact pattern C</td><td>11</td><td>265</td><td>11,130</td></tr>
+<tr><td>Exact pattern D</td><td>1</td><td>897</td><td>9,324</td></tr>
+<tr><td>Exact pattern E</td><td>16</td><td>468</td><td>9,312</td></tr>
+<tr><td>Exact pattern F</td><td>10</td><td>656</td><td>7,216</td></tr>
+<tr><td>Exact pattern G</td><td>30</td><td>59</td><td>6,018</td></tr>
+<tr><td>Exact pattern H</td><td>10</td><td>527</td><td>5,797</td></tr>
+<tr><td>Exact pattern I</td><td>7</td><td>64</td><td>5,312</td></tr>
+<tr><td>Exact pattern J</td><td>11</td><td>150</td><td>5,239</td></tr>
+<tr><td>Exact pattern K</td><td>11</td><td>167</td><td>5,190</td></tr>
+<tr><td>Exact pattern L</td><td>10</td><td>439</td><td>4,829</td></tr>
+<tr><td>Exact pattern M</td><td>11</td><td>100</td><td>3,943</td></tr>
+<tr><td>Exact pattern N</td><td>28</td><td>34</td><td>3,928</td></tr>
+<tr><td>Exact pattern O</td><td>11</td><td>150</td><td>3,750</td></tr>
+<tr><td>Exact pattern P</td><td>32</td><td>36</td><td>3,730</td></tr>
+<tr><td>Exact pattern Q</td><td>33</td><td>18</td><td>3,672</td></tr>
+<tr><td>Exact pattern R</td><td>1</td><td>492</td><td>3,192</td></tr>
+<tr><td>Exact pattern S</td><td>1</td><td>318</td><td>3,113</td></tr>
+<tr><td>Exact pattern T</td><td>34</td><td>15</td><td>3,030</td></tr>
+</tbody></table>
+<h4>Twenty largest category-only patterns</h4>
+<p>Ranked by variable count; names are invented display aliases. Every row and count is identical to the partial run's table.</p>
+<table><thead><tr><th>Invented pattern name</th><th>Distinct fields</th><th>Components</th><th>Component variables</th></tr></thead><tbody>
+<tr><td>Category pattern A</td><td>67</td><td>2,432</td><td>52,748</td></tr>
+<tr><td>Category pattern B</td><td>109</td><td>1,854</td><td>44,761</td></tr>
+<tr><td>Category pattern C</td><td>101</td><td>914</td><td>31,134</td></tr>
+<tr><td>Category pattern D</td><td>38</td><td>1,206</td><td>22,786</td></tr>
+<tr><td>Category pattern E</td><td>147</td><td>205</td><td>15,124</td></tr>
+<tr><td>Category pattern F</td><td>111</td><td>900</td><td>14,406</td></tr>
+<tr><td>Category pattern G</td><td>59</td><td>544</td><td>14,038</td></tr>
+<tr><td>Category pattern H</td><td>107</td><td>799</td><td>13,366</td></tr>
+<tr><td>Category pattern I</td><td>22</td><td>1,124</td><td>12,517</td></tr>
+<tr><td>Category pattern J</td><td>13</td><td>798</td><td>10,486</td></tr>
+<tr><td>Category pattern K</td><td>43</td><td>847</td><td>10,296</td></tr>
+<tr><td>Category pattern L</td><td>17</td><td>555</td><td>9,439</td></tr>
+<tr><td>Category pattern M</td><td>42</td><td>594</td><td>9,220</td></tr>
+<tr><td>Category pattern N</td><td>48</td><td>778</td><td>9,142</td></tr>
+<tr><td>Category pattern O</td><td>52</td><td>847</td><td>8,316</td></tr>
+<tr><td>Category pattern P</td><td>30</td><td>451</td><td>8,245</td></tr>
+<tr><td>Category pattern Q</td><td>56</td><td>250</td><td>8,005</td></tr>
+<tr><td>Category pattern R</td><td>78</td><td>223</td><td>7,458</td></tr>
+<tr><td>Category pattern S</td><td>63</td><td>46</td><td>5,208</td></tr>
+<tr><td>Category pattern T</td><td>83</td><td>22</td><td>3,929</td></tr>
+</tbody></table>
+<h4>Graph state, retired groups and unreferenced nodes</h4>
+<p>The graph readback covers all 94,633 archive signals: 29,060 component variables, 58,669 function-level variables and 6,904 nonconforming variables. After projection and after the graph replay the active counts are identical: 2,234 component groups, 358 control-node groups, 189 exact patterns and 95 category-only patterns.</p>
+<p>The partial run left <strong>96 <code>ArchiveFieldPattern</code> nodes that no component referenced</strong> in the graph: the nodes of the superseded inferred-grammar key, whose links section 5's cleanup removed while the nodes stayed. Before this run the graph also held zero archive grouping components without a signal reference. The re-run's retirement removed all 96 pattern nodes and none of the 2,234 active component groups or 284 active pattern nodes; after it the counts of unreferenced nodes are <strong>0 pattern nodes and 0 archive grouping component nodes</strong>.</p>
+<table><thead><tr><th>Graph node population</th><th>Before the re-run</th><th>After the re-run and retirement</th></tr></thead><tbody>
+<tr><td><code>ArchiveFieldPattern</code> nodes with no component reference</td><td>96</td><td>0</td></tr>
+<tr><td>Archive grouping <code>PlantComponent</code> nodes with no signal reference</td><td>0</td><td>0</td></tr>
+<tr><td>Active component groups</td><td>2,234</td><td>2,234</td></tr>
+<tr><td>Active pattern nodes (exact + category-only)</td><td>284</td><td>284</td></tr>
+</tbody></table>
+<p>One hundred further <code>PlantComponent</code> nodes carry no signal reference and no archive grouping identity; they are the plant-breakdown nodes carrying names and descriptions, not grouping nodes, so they are left in place.</p>
+<h4>Negative control</h4>
+<p>A component whose field set changes between two runs leaves no unreferenced pattern node behind. On a disposable facility in the live graph, one component variable was grouped alone, then a second field of the same component was added; the first pattern became unreferenced (<strong>1</strong>) and the retirement deleted it, leaving <strong>0</strong>. The first run itself leaves 0, and the control's own facility and nodes are deleted afterwards.</p>
+<p>The statement that performs the retirement is not yet part of <code>persist_archive_grouping</code>: the module's own <code>RETIRE_UNUSED_GROUPS_QUERY</code> strips pattern links from unreferenced components but keeps the pattern node. The re-run therefore retired the nodes through the statement below, logged at <code>grouping-measure.log</code>, and the product gap is reported for a follow-on change rather than worked around silently.</p>
+<pre><code>MATCH (p:ArchiveFieldPattern {facility_id: $facility})
+WHERE NOT EXISTS {
+  MATCH (:PlantComponent)-[:HAS_ARCHIVE_FIELD_PATTERN|HAS_ARCHIVE_CATEGORY_PATTERN]-&gt;(p)
+}
+WITH collect(p) AS stale
+FOREACH (p IN stale | DETACH DELETE p)
+RETURN size(stale) AS deleted</code></pre>
+<p>Private receipts and logs are under <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T044838773093-grouping-rerun-on-full-catalogue</code>: <code>grouping-receipt.json</code>, <code>grouping-run.log</code>, <code>grouping-measurement.json</code>, <code>grouping-measure.log</code> and the private <code>grouping.sqlite</code>. The metadata completion receipt is <code>full-census/recovery-job-1317566-receipt.json</code> in the private catalogue directory. The coordinator owns integration and the separate merged-result gate.</p>
+</article>
