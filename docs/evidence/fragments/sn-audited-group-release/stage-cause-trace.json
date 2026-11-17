@@ -280,6 +280,12 @@
    "same_repair_as": "physical_scope_qualifier_lost",
    "same_repair_verdict": "covered",
    "same_repair_why": "The same lineage-and-leaf text repair reaches the composer; the qualifier then needs a registered token or a vocab_gap.",
+   "repair": {
+    "smallest": "Render the enclosing lineage in the file with the composer, so the stated normalization or weighting reaches it and is carried as a qualifier or reported as a vocab_gap.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -289,6 +295,13 @@
    "same_repair_as": "physical_scope_qualifier_lost",
    "same_repair_verdict": "partial",
    "same_repair_why": "The text repair puts the coordinate convention in front of the composer, but choosing the right convention token is a separate rule.",
+   "repair": {
+    "smallest": "Render the lineage, and require the composer to name the source's coordinate convention when the source states one rather than defaulting to the DD reference frame.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md",
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -298,6 +311,12 @@
    "same_repair_as": "physical_scope_qualifier_lost",
    "same_repair_verdict": "covered",
    "same_repair_why": "Vacuum is a source-contribution qualifier carried in the enclosing statement; the text repair makes it visible and the prompt already requires preservation.",
+   "repair": {
+    "smallest": "Render the lineage so the vacuum contribution restriction is visible, and keep it as the source qualifier the prompt already forbids dropping.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -307,6 +326,12 @@
    "same_repair_as": "physical_scope_qualifier_lost",
    "same_repair_verdict": "covered",
    "same_repair_why": "The pedestal top is a registered locus the enumerable vocabulary already offers; the name loses it because the enclosing text naming the pedestal is not rendered.",
+   "repair": {
+    "smallest": "Render the lineage so the pedestal locus is stated, and bind it to the registered pedestal_top locus rather than the generic pedestal token.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -316,6 +341,13 @@
    "same_repair_as": null,
    "same_repair_verdict": "not_covered",
    "same_repair_why": "A definition-stage rule: the definition must state the named transform or derivative rather than substitute a base quantity.",
+   "repair": {
+    "smallest": "Add a definition rule: when the name carries a transform or derivative, the definition must state that operation, not substitute the base quantity.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_docs_user.md",
+     "imas_codex/llm/prompts/sn/generate_docs_system.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -325,6 +357,13 @@
    "same_repair_as": "physical_scope_qualifier_lost",
    "same_repair_verdict": "partial",
    "same_repair_why": "The text repair exposes the averaging clause; expressing it needs the aggregation token or prefix the grammar provides, and a rule binding them.",
+   "repair": {
+    "smallest": "Render the lineage so the averaging clause reaches the composer, and require the aggregation token the source states rather than a pointwise definition.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md",
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -334,6 +373,12 @@
    "same_repair_as": "boundary_forced_to_lcfs",
    "same_repair_verdict": "partial",
    "same_repair_why": "Same stage and the same 'bind the source-stated selection' repair shape, but the selection is signed-minimum versus minimum-of-absolute, not the boundary kind.",
+   "repair": {
+    "smallest": "Require the extremum locus token to follow the source's selection: the minimum of the signed quantity, not of its absolute value.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -343,6 +388,13 @@
    "same_repair_as": "physical_scope_qualifier_lost",
    "same_repair_verdict": "partial",
    "same_repair_why": "The text repair exposes thermal-versus-total; the subject segment must carry it, which is a token-selection rule.",
+   "repair": {
+    "smallest": "Render the lineage and require the population basis (thermal or total) in the subject segment when the source states it.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_dd_names.md",
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -352,6 +404,12 @@
    "same_repair_as": null,
    "same_repair_verdict": "not_covered",
    "same_repair_why": "A definition-stage rule: the definition may not substitute a different geometric or coordinate scope for the source's.",
+   "repair": {
+    "smallest": "Add a definition rule: the definition may not substitute a geometric or coordinate scope the source does not state.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_docs_user.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -361,6 +419,12 @@
    "same_repair_as": "boundary_forced_to_lcfs",
    "same_repair_verdict": "covered",
    "same_repair_why": "The same repair: the source's stated branch or point-selection rule outranks the generic template.",
+   "repair": {
+    "smallest": "Require the source's stated branch or point-selection rule to outrank the generic geometric template when choosing the locus token.",
+    "files": [
+     "imas_codex/llm/prompts/sn/generate_name_system.md"
+    ]
+   },
    "traced": []
   },
   {
@@ -370,6 +434,13 @@
    "same_repair_as": null,
    "same_repair_verdict": "not_covered",
    "same_repair_why": "The domain stage resolves a domain from the sources' DD domains; a structural quantity reached only through an equilibrium consumer needs its own domain source.",
+   "repair": {
+    "smallest": "Resolve the domain from the structural quantity's own DD source where one exists, so a quantity reached only through an equilibrium consumer does not inherit that consumer's domain.",
+    "files": [
+     "imas_codex/standard_names/domain_decision.py",
+     "imas_codex/standard_names/domain_audit.py"
+    ]
+   },
    "traced": []
   }
  ]

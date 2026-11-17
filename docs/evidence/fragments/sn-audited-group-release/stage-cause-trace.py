@@ -268,6 +268,16 @@ def check_trace(trace: dict, record: dict) -> None:
                 f"{kind}: recorded stage {cause['stage']!r} but the stage table "
                 f"says {STAGE_OF_CAUSE[kind]!r}"
             )
+        repair = cause.get("repair") or {}
+        if not repair.get("smallest"):
+            raise Failure(f"{kind}: no smallest repair recorded")
+        if not repair.get("files"):
+            raise Failure(f"{kind}: the repair names no files")
+        for path in repair["files"]:
+            if not (REPO / path).exists():
+                raise Failure(
+                    f"{kind}: repair names a file that does not exist: {path}"
+                )
         if len(cause["traced"]) not in (0, 0) and len(cause["traced"]) < 3:
             raise Failure(f"{kind}: {len(cause['traced'])} traced members, need 3")
         for member in cause["traced"]:
@@ -454,7 +464,8 @@ def render(trace: dict, record: dict) -> str:
     )
     add(
         '<table><thead><tr><th>Cause</th><th class="num">Members</th><th>Stage</th>'
-        "<th>Same repair</th><th>Why</th></tr></thead><tbody>\n"
+        "<th>Smallest repair and files</th><th>Same repair</th><th>Why</th>"
+        "</tr></thead><tbody>\n"
     )
     for cause in shared[TRACED_CAUSES:]:
         same = (
@@ -466,7 +477,9 @@ def render(trace: dict, record: dict) -> str:
         add(
             f'<tr><td><code>{escape(cause["id"])}</code></td><td class="num">{cause["count"]}</td>'
             f"<td><code>{escape(cause['stage'])}</code></td>"
-            f"<td>{same}</td>"
+            f"<td>{escape(cause['repair']['smallest'])}<br>"
+            + ", ".join(f"<code>{escape(f)}</code>" for f in cause["repair"]["files"])
+            + f"</td><td>{same}</td>"
             f"<td>{escape(cause['same_repair_why'])}</td></tr>\n"
         )
     add("</tbody></table>\n")
