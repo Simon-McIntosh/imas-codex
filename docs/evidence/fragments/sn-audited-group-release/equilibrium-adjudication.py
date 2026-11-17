@@ -296,12 +296,14 @@ def collect():
     print(json.dumps(data["collection_receipt"]))
 
 
-def committed_snapshot(phase):
+def committed_snapshot(phase, required=True):
     for sha in git("rev-list", "--reverse", "HEAD", "--", RELATIVE_DATA).splitlines():
         record = decode_record(json.loads(git("show", f"{sha}:{RELATIVE_DATA}")))
         if record["phase"] == phase:
             return sha, record
-    raise AssertionError("Missing independent committed seal: " + phase)
+    if required:
+        raise AssertionError("Missing independent committed seal: " + phase)
+    return None
 
 
 def validate(data):
@@ -363,16 +365,22 @@ def check(path=DATA, include_report=True):
     for key, value in frozen_packets.items():
         if key not in ("phase", "judgments"):
             assert data[key] == value, "Packet seal changed: " + key
-    if data["judgments"]:
-        verdict_sha, frozen_verdicts = committed_snapshot("verdicts-frozen")
+    verdict_seal = committed_snapshot("verdicts-frozen", required=False)
+    if verdict_seal:
+        verdict_sha, frozen_verdicts = verdict_seal
         assert data["judgments"] == frozen_verdicts["judgments"], (
             "Verdict changed after blind commit"
+        )
+        assert data["phase"] == "verdicts-frozen", (
+            "Adjudication phase changed after seal"
         )
         assert data["judgment_digest"] == frozen_verdicts["judgment_digest"]
         assert git(
             "diff-tree", "--no-commit-id", "--name-only", "-r", verdict_sha
         ).splitlines() == [RELATIVE_DATA], "Verdict commit touched reader data"
         assert git("merge-base", packet_sha, verdict_sha) == packet_sha
+    else:
+        assert not data["judgments"], "Verdicts require an independent committed seal"
     if include_report and "report" in data:
         report = data["report"]
         assert report == summarize(data, report["comparison_inputs"])
@@ -869,7 +877,7 @@ def render_page(data):
             "<p>The seven classes and reconciled omission instruction come from the existing blind-audit helper. A source-stated component, locus, basis, coordinate, weight or normalization omitted from a name is a defect; stylistic preferences and unstated qualifiers are not. Missing source text yields undecidable unless a source-independent class can be established. Derived producer descriptions are retained as evidence, not invented DD text. Generic-versus-specific derived identities and ambiguous source conventions remain matters for the lead where the committed reason says so.</p>",
             "<p>Run <code>uv run --no-sync python docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py --check</code> in the repository environment. The check compares packets and verdicts to independent git commits, recomputes all results and the seeded draw, and reproduces this HTML exactly. Altering a verdict and recomputing its digest still fails against the committed seal. No paid calls were authorized or made: actual reader spend USD 0; authorized paid-call ceiling USD 0.</p>",
             "<h2>Every committed verdict</h2>",
-            "<table><thead><tr><th>Name and stored definition</th><th>Producer source paths</th><th>Verdict and classes</th><th>Quoted reason and binding</th></tr></thead><tbody>",
+            "<table><thead><tr><th>Name and stored definition</th><th>Quoted source binding</th><th>Verdict and classes</th><th>Quoted reason</th></tr></thead><tbody>",
         ]
     )
     for name in data["members"]:
@@ -880,9 +888,9 @@ def render_page(data):
             .split("Definition (stored description): ", 1)[1]
             .split("\n", 1)[0]
         )
-        sources = "<br>".join(e(s) for s in p["source_paths"]) or "none recorded"
+        sources = f"<code>{e(j['evidence_path'])}</code><p><small>{len(p['source_paths'])} frozen bindings</small></p>"
         result.append(
-            f'<tr id="member-{e(name)}"><td><code>{e(name)}</code><p>{e(definition)}</p></td><td>{sources}</td><td><strong>{j["verdict"]}</strong><p>{e(", ".join(j["defect_classes"]) or "none")}</p></td><td>{e(j["reason"])}<p><code>{e(j["evidence_path"])}</code></p></td></tr>'
+            f'<tr id="member-{e(name)}"><td><code>{e(name)}</code><p>{e(definition)}</p></td><td>{sources}</td><td><strong>{j["verdict"]}</strong><p>{e(", ".join(j["defect_classes"]) or "none")}</p></td><td>{e(j["reason"])}</td></tr>'
         )
     result.extend(["</tbody></table></details></body></html>"])
     return "\n".join(result) + "\n"
