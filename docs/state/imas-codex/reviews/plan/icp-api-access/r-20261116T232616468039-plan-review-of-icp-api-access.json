@@ -25,7 +25,30 @@
   "plan_slug": "icp-api-access",
   "plan_version": 16,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "56dde51e45b1b7bc71859084a8d47aeff49a44bd",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 4's done-when at version 18 has two closing forms: files fetched, or a recorded finding that no published GET returns a file, with a known-present control read.",
+      "reason": "",
+      "when": "2026-11-17T00:10:36.951281+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "56dde51e45b1b7bc71859084a8d47aeff49a44bd",
+      "commit_basis": "edit",
+      "note": "Section 4's done-when at version 18 has two closing forms: files fetched, or a recorded finding that no published GET returns a file, with a known-present control read.",
+      "reason": "",
+      "when": "2026-11-17T00:10:36.951281+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261116T232616468039-plan-review-of-icp-api-access.json",
   "review_run_id": "r-20261116T232616468039-plan-review-of-icp-api-access",
   "reviewed_blob_sha": "fbbd5f275ef39ec68ec6b826599976c22e048d19",
   "rubric": "content",
