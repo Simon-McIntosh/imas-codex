@@ -43,6 +43,16 @@
       "note": "The next version fixes the probe: the signal list is fetched first; the failure form applies only if that fetch fails; the success form requires the signal list and the functional specification fetched, with the others fetched or reported.",
       "reason": "",
       "when": "2026-11-17T15:42:14.230162+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "07d12e06ad00541bd3a2313465ba9af5a358bc01",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The next version rewords section 2's host rule and refusal test to the hosts listed in private configuration, naming the document host as the one added for section 5.",
+      "reason": "",
+      "when": "2026-11-17T15:42:19.820295+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The next version fixes the probe: the signal list is fetched first; the failure form applies only if that fetch fails; the success form requires the signal list and the functional specification fetched, with the others fetched or reported.",
       "reason": "",
       "when": "2026-11-17T15:42:14.230162+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "07d12e06ad00541bd3a2313465ba9af5a358bc01",
+      "commit_basis": "edit",
+      "note": "The next version rewords section 2's host rule and refusal test to the hosts listed in private configuration, naming the document host as the one added for section 5.",
+      "reason": "",
+      "when": "2026-11-17T15:42:19.820295+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261117T124145017304-plan-review-of-icp-api-access.json",
