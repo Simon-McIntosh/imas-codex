@@ -29,7 +29,6 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass
-from itertools import combinations
 from pathlib import Path
 
 import matplotlib
@@ -39,6 +38,8 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb
 from matplotlib.patches import FancyBboxPatch, Polygon
+
+from imas_codex.plotting.style import save_figure, use_style
 
 ROOT = Path(__file__).resolve().parents[1]
 FIGURES = ROOT / "docs/figures/ai-stack"
@@ -81,29 +82,22 @@ class Roles:
         return tint(getattr(self, kind))
 
 
-@dataclass
-class Placed:
-    """A text artist and, optionally, the box it must stay inside."""
-
-    text: plt.Text
-    inside: tuple[float, float, float, float] | None = None  # x0, y0, x1, y1 in data
-
-
 class Canvas:
     def __init__(self, roles: Roles):
-        plt.style.use("data-ink")
-        # Arial where it is installed; Nimbus Sans shares its metrics, so the layout
-        # check measures the same widths, and the SVG keeps its text as text in Arial.
-        plt.rcParams["font.family"] = "sans-serif"
-        plt.rcParams["font.sans-serif"] = ["Arial", "Nimbus Sans"]
-        plt.rcParams["svg.fonttype"] = "none"
-        plt.rcParams["svg.hashsalt"] = STEM  # stable ids, so a re-render diffs clean
+        # Arial where it is installed; Nimbus Sans shares its metrics, so the
+        # layout measures the same widths, and the SVG keeps its text as text.
+        use_style(
+            **{
+                "font.family": "sans-serif",
+                "font.sans-serif": ["Arial", "Nimbus Sans"],
+                "svg.fonttype": "none",
+            }
+        )
         self.roles = roles
         self.fig = plt.figure(figsize=(WIDTH, HEIGHT), dpi=100)
         self.ax = self.fig.add_axes((0, 0, 1, 1))
         self.ax.axis("off")
         self.ax.set(xlim=(0, WIDTH * U), ylim=(0, HEIGHT * U), autoscale_on=False)
-        self.placed: list[Placed] = []
 
     def box(self, x0, y0, x1, y1, *, edge, fill="white", lw=1.6, dashed=False, z=2):
         self.ax.add_patch(
@@ -120,13 +114,11 @@ class Canvas:
             )
         )
 
-    def text(self, x, y, s, *, size=BODY, inside=None, **kw):
+    def text(self, x, y, s, *, size=BODY, **kw):
         kw.setdefault("ha", "center")
         kw.setdefault("va", "center")
         kw.setdefault("color", INK)
-        t = self.ax.text(x, y, s, fontsize=size, zorder=10, **kw)
-        self.placed.append(Placed(t, inside))
-        return t
+        return self.ax.text(x, y, s, fontsize=size, zorder=10, **kw)
 
     def card(
         self, x0, y0, x1, y1, title, subtitle=None, *, kind, size=TITLE, weight="bold"
@@ -136,21 +128,19 @@ class Canvas:
             x0, y0, x1, y1, edge=getattr(self.roles, kind), fill=self.roles.fill(kind)
         )
         cx, cy = (x0 + x1) / 2, (y0 + y1) / 2
-        inside = (x0, y0, x1, y1)
         if subtitle is None:
-            self.text(cx, cy, title, size=size, inside=inside, weight=weight)
+            self.text(cx, cy, title, size=size, weight=weight)
             return
         lines = [subtitle] if isinstance(subtitle, str) else list(subtitle)
         title_h, sub_h, gap = size * 1.2 / PT, SMALL * 1.2 / PT, 0.4
         top = cy + (title_h + gap + sub_h * len(lines)) / 2
-        self.text(cx, top, title, size=size, inside=inside, weight=weight, va="top")
+        self.text(cx, top, title, size=size, weight=weight, va="top")
         for i, line in enumerate(lines):
             self.text(
                 cx,
                 top - title_h - gap - i * sub_h,
                 line,
                 size=SMALL,
-                inside=inside,
                 color=MUTED,
                 va="top",
             )
@@ -170,9 +160,7 @@ class Canvas:
 
     def chip(self, x0, y0, x1, y1, label, *, kind):
         self.box(x0, y0, x1, y1, edge=getattr(self.roles, kind), lw=1.2, z=4)
-        self.text(
-            (x0 + x1) / 2, (y0 + y1) / 2, label, size=SMALL, inside=(x0, y0, x1, y1)
-        )
+        self.text((x0 + x1) / 2, (y0 + y1) / 2, label, size=SMALL)
 
     def group(self, x0, y0, x1, y1, title=None):
         """A dashed neutral frame that gathers chips or cards under a heading."""
@@ -185,46 +173,7 @@ class Canvas:
                 size=BODY,
                 weight="bold",
                 ha="left",
-                inside=(x0, y0, x1, y1),
             )
-
-    def check_layout(self, *, refuse: bool = True) -> None:
-        """Refuse text that wraps, leaves the canvas, collides, or escapes its box."""
-        self.fig.canvas.draw()
-        renderer = self.fig.canvas.get_renderer()
-        to_data = self.ax.transData.inverted()
-        boxes = [(p, p.text.get_window_extent(renderer)) for p in self.placed]
-        faults = [
-            f"wraps: {p.text.get_text()!r}"
-            for p, _ in boxes
-            if "\n" in p.text.get_text()
-        ]
-        faults += [
-            f"off canvas: {p.text.get_text()!r}"
-            for p, b in boxes
-            if b.x0 < 0
-            or b.y0 < 0
-            or b.x1 > self.fig.bbox.x1
-            or b.y1 > self.fig.bbox.y1
-        ]
-        faults += [
-            f"overlap: {p1.text.get_text()!r} / {p2.text.get_text()!r}"
-            for (p1, b1), (p2, b2) in combinations(boxes, 2)
-            if b1.overlaps(b2)
-        ]
-        for p, b in boxes:
-            if p.inside is None:
-                continue
-            (x0, y0), (x1, y1) = to_data.transform([(b.x0, b.y0), (b.x1, b.y1)])
-            bx0, by0, bx1, by1 = p.inside
-            px, py = 0.6, 0.1  # clear margin to the box edge, in drawing units
-            if x0 < bx0 + px or x1 > bx1 - px or y0 < by0 + py or y1 > by1 - py:
-                faults.append(f"escapes its box: {p.text.get_text()!r}")
-        if faults:
-            message = "layout check refused the figure:\n  " + "\n  ".join(faults)
-            if refuse:
-                raise SystemExit(message)
-            print(message)
 
 
 # --------------------------------------------------------------------------- layout
@@ -362,7 +311,6 @@ def draw_foundation(c: Canvas) -> None:
             system,
             size=BODY,
             weight="bold",
-            inside=(x, y0, xe, y1),
         )
         # each source rises straight into the graph
         xm = (x + xe) / 2
@@ -413,7 +361,6 @@ def draw_graph(c: Canvas) -> None:
         weight="bold",
         ha="left",
         color=colour,
-        inside=(x0, y0, x1, y1),
     )
     c.text(
         x0 + 30.0,
@@ -422,7 +369,6 @@ def draw_graph(c: Canvas) -> None:
         size=SMALL,
         color=MUTED,
         ha="left",
-        inside=(x0, y0, x1, y1),
     )
     # a strip of the network, drawn as the ICP knowledge map draws its nodes and links
     lo, hi = y0 + 1.3, y1 - 1.3
@@ -512,7 +458,6 @@ def draw_interfaces(c: Canvas) -> None:
         "domain dashboards",
         size=SMALL,
         color=MUTED,
-        inside=(x0, y0, x1, y1),
     )
     for i, (label, kind) in enumerate(
         [("commissioning", "deterministic"), ("overnight digest", "frontier")]
@@ -647,21 +592,11 @@ def draw(draft: Path | None) -> Path:
     draw_users(c, names_x)
     draw_legend(c)
     if draft is not None:
-        c.check_layout(refuse=False)
-        c.fig.savefig(draft, dpi=100, facecolor="white")
+        save_figure(c.fig, draft, dpi=100)
         plt.close(c.fig)
         return draft
-    c.check_layout()
-    FIGURES.mkdir(parents=True, exist_ok=True)
     svg = FIGURES / f"{STEM}.svg"
-    c.fig.savefig(svg, format="svg", metadata={"Date": None}, facecolor="white")
-    text = svg.read_text()
-    # declared at slide width (31.1 cm), so it drops onto a slide under its title
-    text = text.replace(f'width="{WIDTH * 72:g}pt"', 'width="31.1cm"', 1)
-    text = text.replace(
-        f'height="{HEIGHT * 72:g}pt"', f'height="{31.1 * HEIGHT / WIDTH:.2f}cm"', 1
-    )
-    svg.write_text("\n".join(line.rstrip() for line in text.splitlines()) + "\n")
+    save_figure(c.fig, svg)
     plt.close(c.fig)
     print(svg.relative_to(ROOT))
     return svg
@@ -669,7 +604,7 @@ def draw(draft: Path | None) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    parser.add_argument("--draft", type=Path, help="write a PNG here, unchecked")
+    parser.add_argument("--draft", type=Path, help="write a checked PNG here")
     args = parser.parse_args()
     draw(args.draft)
 

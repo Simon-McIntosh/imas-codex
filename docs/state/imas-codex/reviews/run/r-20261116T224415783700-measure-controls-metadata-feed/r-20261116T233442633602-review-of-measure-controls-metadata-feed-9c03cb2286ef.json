@@ -1,0 +1,106 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest declares baseline_suite: null (manifest.md:21); the base arm was read from the run's focused-tests.log at revision e2d14012 (15 passed, no FAILED or ERROR ids) and compared with the after_suite log final-focused-tests.log at c42861b (17 passed, EXIT=0, failure_count 0, both pytest and both complete), so the diff of failing ids is empty",
+  "assertion_analysis": [
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:34-37",
+      "would_fail_if": "parse_entries stopped raising MeasurementError for an empty list, a wrong wrapper, a non-list root or a non-string unit; the recorded refusal-bypass mutation reddens exactly these ids."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:41-44",
+      "would_fail_if": "parse_entries stopped reading the installed client's `variable`/`units`/`data type` keys or stopped stripping surrounding whitespace."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:63",
+      "would_fail_if": "compare_catalogue opened the catalogue read-write or wrote to it, since the assertion compares the file bytes before and after the call."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:64-79",
+      "would_fail_if": "coverage used the feed total as a denominator, merged normalisations, or counted duplicate archive rows; every expected count is derived from the invented six-name archive rather than from the code's own output."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:82-83",
+      "would_fail_if": "the cohort were restricted to the first name field, which would miss the diagnostic-namespace member the fixture supplies."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:98-99",
+      "would_fail_if": "a missing known archive name were presented as zero coverage instead of raising the positive-control failure."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:118-119",
+      "would_fail_if": "colliding normalisation keys were hidden by summing matches instead of reporting feed_collision_keys and matched_archive_collision_keys."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:129-135",
+      "would_fail_if": "empty descriptions were dropped from the length bins, the empty string entered the ten-most-common filter, or quantiles used a different rank rule."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:141-147",
+      "would_fail_if": "measure parsed after opening the catalogue or accepted a non-JSON response, since the absent catalogue path is asserted not to exist afterwards."
+    },
+    {
+      "site": "tests/discovery/test_controls_metadata_measurement.py:150-165",
+      "would_fail_if": "main exited zero, wrote an output file, or printed coverage on stdout for a refused response."
+    },
+    {
+      "site": "scripts/measure_controls_metadata.py:249-254",
+      "would_fail_if": "nothing: no test exercises plot_coverage, so restoring the pre-c42861b major locator leaves the gate green while figure saving raises the clipped-tick ValueError again."
+    }
+  ],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-16T23:45:52.015Z",
+  "dispatched_at": "2026-11-16T23:45:33Z",
+  "findings": [
+    {
+      "file": "scripts/measure_controls_metadata.py",
+      "line": "249",
+      "severity": "non-blocking",
+      "text": "non-blocking: the tick clamp added so the shared save guard accepts the plot has no test; restoring `axis.xaxis.set_major_locator(MaxNLocator(6))` leaves all 17 gate tests green while the figure save raises ValueError: clipped figure text: 12 again, as measurement-rigel.log records."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T224415783700-measure-controls-metadata-feed/manifest.md",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "non-blocking: baseline_suite is null although focused-tests.log holds a base-revision log at e2d14012 (15 passed), so the run declares no base arm and its added-failure count is undeclared; I derived 0 by comparing that log with final-focused-tests.log (17 passed, EXIT=0, no failing ids in either)."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production caller; the only in-repository caller is the node's own test file, and the script runs as a CLI over private inputs.",
+    "diff": "read all three commits against base e2d14012; 3d4fb904 adds the measurement script and its 15-test suite, c42861b4 adds the fragment, the SVG and two CLI controls plus the tick clamp at scripts/measure_controls_metadata.py:249-254, and 9c03cb22 records the gate and mutation counts in the fragment.",
+    "done_when": "brief.md:76-88 requires every count, a plain searchability statement, a plotted coverage figure and offline refusal controls; the fragment carries the counts, statement and figure, but the gate recorded in final-focused-tests.log (17 passed, EXIT=0) asserts only the invented-input refusal and arithmetic tests, not the counts.",
+    "goal": "brief.md:4 asks whether the installed MINT controls feed gives real descriptions and units and how much of the archive it covers; docs/evidence/fragments/codac-uda-signals/measure-controls-metadata-feed.html:3-17 answers with 2,910/2,912 nonempty descriptions, 1,710/2,912 units, 1,832 distinct descriptions, 0.291255% archive coverage and 3.047045% cold-cohort coverage.",
+    "manifest": "manifest.md records three commits, four changed paths, the 17-test gate, the 11-failure mutation and the private receipts, but declares baseline_suite: null at manifest.md:21 although a base-revision log exists as focused-tests.log.",
+    "write_paths": "brief.md:92-98 grants scripts/, tests/discovery/, the evidence fragment and the figure directory; all four paths added between e2d14012 and 9c03cb228 lie inside those grants."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_controls_metadata_measurement.py:34-165 reddens on refusal, denominator, collision and distribution regressions as the 11 mutation failures show, but the tick clamp at scripts/measure_controls_metadata.py:249-254 has no test.",
+    "evidence": "final-focused-tests.log records 17 passed and EXIT=0 and final-negative-control.log reddens 11 of the same tests, but no committed test asserts the fragment's coverage counts and manifest.md:21 leaves baseline_suite null.",
+    "fit": "the script follows the scripts/ + `from scripts import ...` test idiom already used at tests/discovery/test_signal_enrichment_options.py:106 and routes its plot through imas_codex.plotting.save_figure at scripts/measure_controls_metadata.py:229.",
+    "goal_fidelity": "measure-controls-metadata-feed.html:3-17 and :106-169 give every requested count, the coverage table, the hand reading and the refresh limits, and recomputing directly from the stored response reproduces 2,912 entries, nonempty 2,910/1,710/2,912, top-ten 95 (3.2624%) and the 0/14/22/27/36/38/39/39 quantile vector exactly.",
+    "reuse": "I searched for an owner of the archive census read and found imas_codex/discovery/signals/archive_grouping.py:20 (a read-write grouped store that requires a sealed census) and imas_codex/remote/archive_catalogue.py:43 (opens read-write and creates tables), neither of which can open the read-only mode=ro file used at scripts/measure_controls_metadata.py:128, while plotting is extended through its owner rather than duplicated.",
+    "scope_discipline": "the diff from e2d14012 to 9c03cb228 changes exactly scripts/measure_controls_metadata.py, tests/discovery/test_controls_metadata_measurement.py, the evidence fragment and the figure, matching brief.md:92-98 with nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "reviewed_base_sha: e2d140122ee32347b3f126e79b505aafa9cc2637\nreviewed_head_sha: 9c03cb2286efecb69f45e3968d92c31fc09624bf\nVERDICT goal: brief.md:4 asks whether the installed MINT controls feed gives real descriptions and units and how much of the archive it covers; docs/evidence/fragments/codac-uda-signals/measure-controls-metadata-feed.html:3-17 answers with 2,910/2,912 nonempty descriptions, 1,710/2,912 units, 1,832 distinct descriptions, 0.291255% archive coverage and 3.047045% cold-cohort coverage.\nVERDICT done_when: brief.md:76-88 requires every count, a plain searchability statement, a plotted coverage figure and offline refusal controls; the fragment carries the counts, statement and figure, but the gate recorded in final-focused-tests.log (17 passed, EXIT=0) asserts only the invented-input refusal and arithmetic tests, not the reference counts.\nVERDICT write_paths: brief.md:92-98 grants scripts/, tests/discovery/, the evidence fragment and the figure directory; all four paths added between e2d14012 and 9c03cb228 lie inside those grants.\nVERDICT manifest: manifest.md records three commits, four changed paths, the 17-test gate, the 11-failure mutation and the private receipts, but declares baseline_suite: null at manifest.md:21 although a base-revision log exists as focused-tests.log.\nVERDICT diff: read all three commits against base e2d14012; 3d4fb904 adds the measurement script and its 15-test suite, c42861b4 adds the fragment, the SVG and two CLI controls plus the tick clamp at scripts/measure_controls_metadata.py:249-254, and 9c03cb22 records the gate and mutation counts in the fragment.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: measure-controls-metadata-feed.html:3-17 and :106-169 give every requested count, the coverage table, the hand reading and the refresh limits, and recomputing directly from the stored response reproduces 2,912 entries, nonempty 2,910/1,710/2,912, top-ten 95 (3.2624%) and the 0/14/22/27/36/38/39/39 quantile vector exactly.\nSCORE evidence: 15\nJUSTIFICATION evidence: final-focused-tests.log records 17 passed and EXIT=0 and final-negative-control.log reddens 11 of the same tests, but no committed test asserts the fragment's coverage counts and manifest.md:21 leaves baseline_suite null.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the diff from e2d14012 to 9c03cb228 changes exactly scripts/measure_controls_metadata.py, tests/discovery/test_controls_metadata_measurement.py, the evidence fragment and the figure, matching brief.md:92-98 with nothing else.\nSCORE durability: 16\nJUSTIFICATION durability: tests/discovery/test_controls_metadata_measurement.py:34-165 reddens on refusal, denominator, collision and distribution regressions as the 11 mutation failures show, but the tick clamp at scripts/measure_controls_metadata.py:249-254 has no test.\nSCORE fit: 18\nJUSTIFICATION fit: the script follows the scripts/ + `from scripts import ...` test idiom already used at tests/discovery/test_signal_enrichment_options.py:106 and routes its plot through imas_codex.plotting.save_figure at scripts/measure_controls_metadata.py:229.\nSCORE reuse: 16\nJUSTIFICATION reuse: I searched for an owner of the archive census read and found imas_codex/discovery/signals/archive_grouping.py:20 (a read-write grouped store that requires a sealed census) and imas_codex/remote/archive_catalogue.py:43 (opens read-write and creates tables), neither of which can open the read-only mode=ro file used at scripts/measure_controls_metadata.py:128, while plotting is extended through its owner rather than duplicated.\nFINDING scripts/measure_controls_metadata.py:249 non-blocking: the tick clamp added so the shared save guard accepts the plot has no test; restoring `axis.xaxis.set_major_locator(MaxNLocator(6))` leaves all 17 gate tests green while the figure save raises ValueError: clipped figure text: 12 again, as measurement-rigel.log records.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T224415783700-measure-controls-metadata-feed/manifest.md:21 non-blocking: baseline_suite is null although focused-tests.log holds a base-revision log at e2d14012 (15 passed), so the run declares no base arm and its added-failure count is undeclared; I derived 0 by comparing that log with final-focused-tests.log (17 passed, EXIT=0, no failing ids in either).\n",
+  "review_run_id": "r-20261116T233442633602-review-of-measure-controls-metadata-feed-9c03cb2286ef",
+  "reviewed_base_sha": "e2d140122ee32347b3f126e79b505aafa9cc2637",
+  "reviewed_head_sha": "9c03cb2286efecb69f45e3968d92c31fc09624bf",
+  "reviewed_run_id": "r-20261116T224415783700-measure-controls-metadata-feed",
+  "rubric": "code",
+  "scores": {
+    "durability": 16,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:09:35.676449+00:00",
+  "total": 104
+}

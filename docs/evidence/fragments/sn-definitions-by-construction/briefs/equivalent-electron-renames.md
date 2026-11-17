@@ -2,6 +2,14 @@
 
 The first rewrite listed 56 names as waiting on the grammar word `equivalent_electron`. The refine pass found the word is already a registered qualifier in the grammar the pipeline imports (`Qualifier.EQUIVALENT_ELECTRON`, tagged `v0.12.0rc1`), and renamed three of them through the signed path (`accumulated_ammonia_count`, `accumulated_argon_count`, `accumulated_neon_count`). This node renames the rest. It is resumable from a progress file.
 
+## State at restart (2026-11-17)
+An earlier run of this brief stopped at its probe: eight names are renamed and live, four of them reviewed and not accepted, forty-eight untouched, USD 0.54 spent. The cause was the name review judging the qualifier against the source leaf only; that is repaired on main (the name review reads the source's enclosing structures), and all eight renamed names now answer both source-support checks at 0.0.
+- Start from the live graph, not from the earlier list: re-read every one of the fifty-six.
+- The earlier run's progress file is `~/.cache/imas-codex-live-rewrite/equivalent-electron-progress.jsonl`; keep appending to it. Its report builder, check script, data file and page are kept at `~/.cache/imas-codex-live-rewrite/equivalent-electron-first-run/` (`equivalent-electron-renames.py`, `check_equivalent_electron_renames.py`, `.json`, `.html`); copy them into your tree and build on them rather than writing new ones.
+- First have the four renamed-but-not-accepted names reviewed again; if any is still refused for source support of `equivalent_electron`, stop and report at once: that is a failure of the review repair, not a name to list.
+- The section's measure now requires every renamed name, the eight and the forty-eight, to be accepted on name or listed with the check that holds it. Spend counts from the start of the earlier run: USD 8 in total.
+- Run scratch and progress files under `~/.cache/imas-codex-live-rewrite/` are yours to write; your declared write paths bound only what you commit. Manifest lists are comma-separated.
+
 ## Precondition (check first; stop and report if it fails)
 You are the only graph writer: no `sn run`, `sn edit` or signed apply of this account in `squeue` or the process table. Say what you checked. The grammar the pipeline imports parses a probe name carrying `equivalent_electron`; show the parse.
 

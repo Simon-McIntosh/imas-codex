@@ -1,0 +1,88 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs on disk: the run declares no baseline_suite or after_suite arm (classification.json records after_suite null), and its recorded arms read grouping-measure.log EXIT=0 and negative-control-green.log EXIT=0 with no FAILED line, so the baseline-to-after set difference is empty (0). negative-control-red.log is the declared negative-control arm, red by design at EXIT=1, not an added failure.",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/remote/catalogue_grouping.py:48-81 invokes ArchiveGrouping and calls persist_archive_grouping",
+    "imas_codex/discovery/signals/archive_grouping_graph.py:127 persist_archive_grouping calls RETIRE_UNUSED_GROUPS_QUERY at line 189"
+  ],
+  "completed_at": "2026-11-17T01:30:10.090Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-grouping-rerun-on-full-catalogue-9a20d0e51987",
+      "recorded_at": "2026-11-17T01:56:56.771277+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T01:28:24Z",
+  "findings": [
+    {
+      "file": "measure_grouping.py",
+      "line": "127",
+      "severity": "non-blocking",
+      "text": "non-blocking: the gate returns 0 unconditionally, so any figure it prints, including zero groups, is recorded as EXIT=0 and nothing reddens."
+    },
+    {
+      "file": "negative-control.py",
+      "line": "60",
+      "severity": "non-blocking",
+      "text": "non-blocking: the green arm deletes the orphan through DELETE_UNREFERENCED_PATTERNS imported from the measurement script, so it exercises that ad-hoc statement and not persist_archive_grouping, and it passes while the product still leaks the pattern."
+    },
+    {
+      "file": "measure_grouping.py",
+      "line": "42",
+      "severity": "non-blocking",
+      "text": "non-blocking: UNREFERENCED_GROUP_COMPONENTS filters on archive_field_pattern or archive_category_pattern, so the reported zero covers grouping components while the unfiltered PlantComponent nodes without a signal reference number 100 as disclosed at fragment line 99, narrower than the done_when's flat phrase."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "3",
+      "severity": "non-blocking",
+      "text": "non-blocking: commit 9a20d0e51's message says it drops the private archive code from this metadata paragraph, but its diff touches only the negative-control paragraph and this line is unchanged between the two commits."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read both commits against base 91b28dadb \u2014 0f4f00558 adds the 111-line fragment and 9a20d0e51 changes one negative-control paragraph, while 9a20d0e51's subject body also claims it drops private archive code from the metadata paragraph, a change its diff does not contain.",
+    "done_when": "the done_when asks for every section-5 measure beside the partial run's, zero unreferenced component and pattern nodes, a repeat that adds no groups, and all_debug; the fragment carries each, and I re-derived the group-size buckets, both largest-pattern tables, the descriptions table and the graph counts from grouping-receipt.json with every figure matching, while the component-node zero is measured over components carrying an archive pattern property (measure_grouping.py:42-48) and the 100 unfiltered PlantComponent nodes without a signal reference are disclosed at fragment line 99.",
+    "goal": "the node goal is to re-run component and field-pattern grouping over the completed private catalogue; grouping-receipt.json records status complete with archive_fraction 1.0 and metadata_completed 995006 at job 1321277 on all_debug, and grouping-run.log names revision 91b28dadb with EXIT=0, so the goal is met.",
+    "manifest": "read; it records status complete, the measure command over measure_grouping.py with EXIT=0, negative-control-red.log EXIT=1 and negative-control-green.log EXIT=0, the 96-to-0 retirement, and no baseline or after suite arms, which classification.json confirms with after_suite null.",
+    "write_paths": "the declared paths are the fragment and a figures directory; git diff 91b28dadb 9a20d0e51 touches only docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html, and the figures directory stays empty, so the diff is inside the fence."
+  },
+  "justifications": {
+    "durability": "negative-control.py:60-62 retires the orphan with its own DELETE statement, so the control passes with persist_archive_grouping unchanged and no committed test reddens if the product leaves the pattern behind.",
+    "evidence": "measure_grouping.py:127 returns 0 without asserting any figure and the run declares no suite arms, so the recorded EXIT=0 is a printed report whose figures I confirmed only by re-deriving them from grouping-receipt.json.",
+    "fit": "the fragment follows the sibling structure and element-id prefix of docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html, though 9a20d0e51's message describes a change its diff does not carry.",
+    "goal_fidelity": "grouping-receipt.json records the completed-catalogue re-run with metadata_completed 995006 of 995006 and archive_fraction 1.0, though the graph retirement ran through a statement in the run directory rather than the product path at imas_codex/discovery/signals/archive_grouping_graph.py:189.",
+    "reuse": "the landed change adds no definition, and a search of imas_codex/discovery/signals for retirement mechanisms found archive_grouping_graph.py:73 RETIRE_UNUSED_GROUPS_QUERY, which the node did not fork; the product gap is reported under outside_scope instead.",
+    "scope_discipline": "git diff 91b28dadb 9a20d0e51 contains only the declared fragment path docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is to re-run component and field-pattern grouping over the completed private catalogue; grouping-receipt.json records status complete with archive_fraction 1.0 and metadata_completed 995006 at job 1321277 on all_debug, and grouping-run.log names revision 91b28dadb with EXIT=0, so the goal is met.\nVERDICT done_when: the done_when asks for every section-5 measure beside the partial run's, zero unreferenced component and pattern nodes, a repeat that adds no groups, and all_debug; the fragment carries each, and I re-derived the group-size buckets, both largest-pattern tables, the descriptions table and the graph counts from grouping-receipt.json with every figure matching, while the component-node zero is measured over components carrying an archive pattern property (measure_grouping.py:42-48) and the 100 unfiltered PlantComponent nodes without a signal reference are disclosed at fragment line 99.\nVERDICT write_paths: the declared paths are the fragment and a figures directory; git diff 91b28dadb 9a20d0e51 touches only docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html, and the figures directory stays empty, so the diff is inside the fence.\nVERDICT manifest: read; it records status complete, the measure command over measure_grouping.py with EXIT=0, negative-control-red.log EXIT=1 and negative-control-green.log EXIT=0, the 96-to-0 retirement, and no baseline or after suite arms, which classification.json confirms with after_suite null.\nVERDICT diff: read both commits against base 91b28dadb \u2014 0f4f00558 adds the 111-line fragment and 9a20d0e51 changes one negative-control paragraph, while 9a20d0e51's subject body also claims it drops private archive code from the metadata paragraph, a change its diff does not contain.\nCALL_SITES: imas_codex/remote/catalogue_grouping.py:48-81 invokes ArchiveGrouping and calls persist_archive_grouping, imas_codex/discovery/signals/archive_grouping_graph.py:127 persist_archive_grouping calls RETIRE_UNUSED_GROUPS_QUERY at line 189\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: grouping-receipt.json records the completed-catalogue re-run with metadata_completed 995006 of 995006 and archive_fraction 1.0, though the graph retirement ran through a statement in the run directory rather than the product path at imas_codex/discovery/signals/archive_grouping_graph.py:189.\nSCORE evidence: 15\nJUSTIFICATION evidence: measure_grouping.py:127 returns 0 without asserting any figure and the run declares no suite arms, so the recorded EXIT=0 is a printed report whose figures I confirmed only by re-deriving them from grouping-receipt.json.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 91b28dadb 9a20d0e51 contains only the declared fragment path docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html.\nSCORE durability: 6\nJUSTIFICATION durability: negative-control.py:60-62 retires the orphan with its own DELETE statement, so the control passes with persist_archive_grouping unchanged and no committed test reddens if the product leaves the pattern behind.\nSCORE fit: 17\nJUSTIFICATION fit: the fragment follows the sibling structure and element-id prefix of docs/evidence/fragments/iter-signal-context-and-enrichment/signals-grouped-by-component-and-pattern.html, though 9a20d0e51's message describes a change its diff does not carry.\nSCORE reuse: 20\nJUSTIFICATION reuse: the landed change adds no definition, and a search of imas_codex/discovery/signals for retirement mechanisms found archive_grouping_graph.py:73 RETIRE_UNUSED_GROUPS_QUERY, which the node did not fork; the product gap is reported under outside_scope instead.\nFINDING measure_grouping.py:127 non-blocking: the gate returns 0 unconditionally, so any figure it prints, including zero groups, is recorded as EXIT=0 and nothing reddens.\nFINDING negative-control.py:60 non-blocking: the green arm deletes the orphan through DELETE_UNREFERENCED_PATTERNS imported from the measurement script, so it exercises that ad-hoc statement and not persist_archive_grouping, and it passes while the product still leaks the pattern.\nFINDING measure_grouping.py:42 non-blocking: UNREFERENCED_GROUP_COMPONENTS filters on archive_field_pattern or archive_category_pattern, so the reported zero covers grouping components while the unfiltered PlantComponent nodes without a signal reference number 100 as disclosed at fragment line 99, narrower than the done_when's flat phrase.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:3 non-blocking: commit 9a20d0e51's message says it drops the private archive code from this metadata paragraph, but its diff touches only the negative-control paragraph and this line is unchanged between the two commits.\n",
+  "review_node": "review-of-grouping-rerun-on-full-catalogue-9a20d0e51987",
+  "review_run_id": "r-20261117T012257298867-review-of-grouping-rerun-on-full-catalogue-9a20d0e51987",
+  "reviewed_base_sha": "91b28dadb47206f741fefe49698c78ff2e744d57",
+  "reviewed_head_sha": "9a20d0e519870c8150309c35afe46338e4860d5b",
+  "reviewed_run_id": "r-20261116T044838773093-grouping-rerun-on-full-catalogue",
+  "reviewer": {
+    "backend": "deepseek",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T012257298867-review-of-grouping-rerun-on-full-catalogue-9a20d0e51987"
+  },
+  "scores": {
+    "durability": 6,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:43:11.665706+00:00",
+  "total": 96
+}

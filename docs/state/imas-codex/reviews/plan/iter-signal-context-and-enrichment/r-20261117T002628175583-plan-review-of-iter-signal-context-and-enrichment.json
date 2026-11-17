@@ -1,0 +1,90 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T01:12:16.363Z",
+  "dispatched_at": "2026-11-17T01:11:47Z",
+  "findings": [
+    {
+      "anchor": "plan.html:58",
+      "id": "wiring-1",
+      "reason": "a worker reaching \u00a74 would have either to widen `icp-api-access` under a section that does not own it or to land component categories nameless.",
+      "text": "\u00a74 requires \"the function-category codes and their official meanings ... imported with it\", but the only sections of `icp-api-access` are s2 (API description and read-only enforcement), s3 (PDS node, children, component lists) and s4 (one document file); none returns typed function-category records, so \u00a74's dependency set names a read that does not exist",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:58",
+      "id": "reasoning-1",
+      "reason": "without a declared deferral the node must invent a source or fail \u00a74 for a reason \u00a74 never admitted.",
+      "text": "\u00a74 delivers \"the rows of its signal list and data file\" from `icp-api-access#s4`, whose own done-when closes either with a fetched file or with the finding that no published GET returns one; \u00a74 states no branch for the second outcome, so its whole context import can rest on a dependency that lands successfully with no rows",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:73",
+      "id": "reasoning-2",
+      "reason": "the search endpoint \u00a77 is measured by cannot return a signal that is not a graph node, so the section is unreachable as written and a worker would have to invent a bulk graph load that no section budgets.",
+      "text": "\u00a77 delivers \"the whole catalogue has passed group enrichment and the discovery pipeline's check and embedding stages\" and counts \"the number of signals in each pipeline state\", while \u00a75 explicitly places a variable \"in the graph or only in the private catalogue store\" and no section loads the remaining ~995,000 catalogue variables into the graph; `codac-uda-signals#s12` deferred that entry to this plan \"once their node shape is designed\", and no section here designs it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:83",
+      "id": "reasoning-3",
+      "reason": "the check as written would fail on correct work, or be silently reinterpreted into a different export whose bound nothing bounds.",
+      "text": "\u00a79's measure \"an archive built without the facility filter is shown to contain none of the ITER-derived labels' ITER rows\" is inverted: once \u00a74 and \u00a77 have written those rows into the graph, an archive built without the facility filter is exactly the one that contains them, so the stated measure cannot pass and no other export path is named",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:48",
+      "id": "done_when-1",
+      "reason": "\u00a72 is done and its config assertions stand on their own, so amending the control now changes no future dispatch.",
+      "text": "\u00a72's negative control is \"a seat naming a model its route does not serve fails its live request and is reported\", but the landed record shows 0 of 63 seats moved, so no seat names an unserved model and the control was never made to happen",
+      "type": "done_when",
+      "would_change": false
+    },
+    {
+      "anchor": "plan.html:58",
+      "id": "single_goal-1",
+      "reason": "the overlap duplicates work and reporting but sends no node down a wrong path, so it is a candidate for the author to record rather than to re-cut.",
+      "text": "\u00a74's gate requires a facility-scoped archive, with package visibility, digest and counts read back, before the section lands, which is the deliverable \u00a79 exists to own; \u00a74 therefore cannot be closed on one verdict and \u00a79's \"a second copy from the day it exists\" is already satisfied by \u00a74",
+      "type": "single_goal",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "7febb7f0b326676760597c420d3afbcb756c2997",
+  "plan_fingerprint": "fc60067daaf8fba35bf9222183d8f93eac8ca20ce3921883ea080aad909e3d7d",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 43,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T002628175583-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "279d80803347001ea461892869e4959835d1d38e",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `icp-api-access#s3`, `#s4`, `codac-uda-signals#s12` and the `#local-model-signal-enrichment-benchmark-results` fragment anchor all resolve, and the reviewed snapshot is byte-identical to `docs/plans/iter-signal-context-and-enrichment.html`.",
+    "done_when": "a finding \u2014 \u00a72's negative control was never exercised, since the landing record moved zero seats, so the gate cannot show its guard fires.",
+    "evidence_paths": "pass \u2014 every section reports to the landing record. A section citing none is not a finding, and the cited fragments under `docs/evidence/fragments/iter-signal-context-and-enrichment/` are durable.",
+    "naming": "pass \u2014 the sections name records and outcomes only, with no code symbol, ticket number or stage label.",
+    "reasoning": "a finding \u2014 \u00a71's stated root cause is supported by its own census and no section prescribes a code path, but \u00a77 is unreachable because nothing carries the remaining catalogue from the private store into the graph, and \u00a79's unfiltered-archive measure is inverted against \u00a74.",
+    "single_goal": "a finding \u2014 \u00a74 carries both the pilot context import and a facility-scoped archive checkpoint that \u00a79 owns as its own deliverable.",
+    "wiring": "a finding \u2014 \u00a74 declares only `icp-api-access#s3` and `#s4`, but neither delivers the function-category code records \u00a74 requires, and that plan has no other section."
+  },
+  "section_digests": {
+    "_document": "9a83dd09d9bc1c741eabcc38e3c2733bacf80251e1a09e3e2967b93a787514ff",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "0c790a3f0d65e4c65a76633b2c0e032bed39a211305c63913946cc77974eade8",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:45:26.702135+00:00",
+  "total": null
+}

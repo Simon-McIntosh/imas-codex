@@ -1,0 +1,95 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:29:44.626Z",
+  "dispatched_at": "2026-11-16T23:28:50Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:41",
+      "id": "done_when-1",
+      "reason": "a node obeying the done-when regenerates every defective member and withdraws the rest, then either reports the comparison as a one-arm record or invents an unreviewed route, and the section either needs a stated second repair route with what the comparison must show or the lead ruling must be dropped.",
+      "text": "s4's lead ruling says the group's defective members are repaired two ways, regeneration and agent-proposed repair, and that the two are compared by the audited result, but the same section's done-when lists only \"regenerated through the pipeline from its source with the enclosing-structure context, or is listed by name with the lead's ruling for leaving or withdrawing it\" \u2014 agent-proposed repair never appears, so the \"repair comparison\" the done-when also requires as committed evidence has one arm and cannot be produced.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:29",
+      "id": "reasoning-1",
+      "reason": "a per-class bar set from counts that mix prevalence with classification choice would either admit a class above its intended ceiling or force a repair aimed at the wrong defect, so s1 must either allow a second class per name (counted per class) or fix the order in which classes are chosen.",
+      "text": "each reader must assign every name to exactly one defect class, and the fixed list holds classes that co-occur on one name (a name that omits what the source states commonly also disagrees with its definition), with no priority rule, so two readers who see the same two defects can still land in different classes; the per-class counts, the one-reader/both-reader split and the reader agreement then measure class-choice disagreement rather than defect prevalence, and s3 (line 37) fixes its per-class bar on those rates.",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "a7934ffa6d8e1b054ecec9de31241e2889964a0e",
+  "plan_fingerprint": "db2f73f9caffc88b93dd654c79124c55a5b919345a6d2a39d48927960c6480c5",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5cb361c74f16ea5cc53b81aba4020aa4bcde9805",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The done-when now states both repairs (regeneration, or one agent proposal through the signed edit path), the seeded assignment within each defect class, the reporting of a cause shared by three or more members as a pipeline defect, and what the comparison reports per arm and class.",
+      "reason": "",
+      "when": "2026-11-16T23:39:22.151885+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5cb361c74f16ea5cc53b81aba4020aa4bcde9805",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "A reader now records every class that applies to a name, so a name with two defects counts once in each class and once as defective; agreement is reported on defective-or-not and on each class separately.",
+      "reason": "",
+      "when": "2026-11-16T23:39:24.919935+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5cb361c74f16ea5cc53b81aba4020aa4bcde9805",
+      "commit_basis": "edit",
+      "note": "The done-when now states both repairs (regeneration, or one agent proposal through the signed edit path), the seeded assignment within each defect class, the reporting of a cause shared by three or more members as a pipeline defect, and what the comparison reports per arm and class.",
+      "reason": "",
+      "when": "2026-11-16T23:39:22.151885+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5cb361c74f16ea5cc53b81aba4020aa4bcde9805",
+      "commit_basis": "edit",
+      "note": "A reader now records every class that applies to a name, so a name with two defects counts once in each class and once as defective; agreement is reported on defective-or-not and on each class separately.",
+      "reason": "",
+      "when": "2026-11-16T23:39:24.919935+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261116T231517842280-plan-review-of-sn-audited-group-release.json",
+  "review_run_id": "r-20261116T231517842280-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "52788aef5c182b30afe36a49e4cc38bb273b8e38",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 s11 of `sn-definitions-by-construction` exists as a section anchor, the five section ids exist in the snapshot, and the named evidence directory resolves; extensionless-doc conventions do not arise here.",
+    "done_when": "a finding \u2014 s4 (line 41) requires a two-route repair comparison as committed evidence while its own done-when admits only regeneration or withdrawal, so the comparison has one arm.",
+    "evidence_paths": "pass \u2014 s1, s2, s3, s4 and s5 each commit their page, data file and run records under `docs/evidence/fragments/sn-audited-group-release/`, which exists in the repository, and s5 names `group-release-table.json` with a page beside it; no path is a scratchpad or node-local temporary.",
+    "naming": "pass \u2014 no plan label, stage number, ticket or version tag reaches a symbol or filename, and no section names a code path, function or step sequence to follow.",
+    "reasoning": "a finding \u2014 s1 (line 29) forces exactly one defect class per name with no priority order, so the per-class counts it delivers measure the reader's class choice as much as the class's prevalence, yet s3 (line 37) fixes the per-class bar on those counts.",
+    "single_goal": "pass \u2014 each of s1\u2013s5 names one deliverable (a blind audit with its negative control, a per-group measurement with a ruled order, a bar and a refusing cut, the first group's audited cut, and the repeated route for the remaining groups); s4's repair step serves its single endpoint, the group's release candidate.",
+    "wiring": "pass \u2014 the snapshot's `plan-section-depends-on` gives s2\u2192s1, s3\u2192s1, s4\u2192s2,s3,`sn-definitions-by-construction#s11`, s5\u2192s4; every target resolves (`docs/plans/sn-definitions-by-construction.html` carries `id=\"s11\"`), and no dependency the sections' headings or done-whens state is absent."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "1165ec53d6edca4e49745464b9499e2410fd592812e4a2b0059f0b3e13604f22",
+    "s2": "64e5908c42b7c37fecd6c49edbecc9b64b4e448bc4ac1e9d4db7457e0ae27e81",
+    "s3": "5bf1856d8a3ca2ec61b972901c47af6a328eeb66c301c9fb3a5e691d0f22020a",
+    "s4": "5cef877f5602beae9d8c85b0f59cc6cd21425d2fc036e458665550c272015d8a",
+    "s5": "f0ee018e09aed5387d06a0afa7fed73304ba3b121e2598ec77e830c5db06e9ae"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:38:29.180217+00:00",
+  "total": null
+}

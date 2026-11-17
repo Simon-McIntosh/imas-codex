@@ -1,0 +1,73 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:08:02.334Z",
+  "dispatched_at": "2026-11-16T23:07:19Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261116T214601561527-plan-review-of-iter-signal-context-and-enrichment/plan.html:61",
+      "id": "done_when-1",
+      "reason": "this bar is the only quality threshold the plan has and the lead is asked to confirm it with the model answer, so leaving it passable at 36 partly-right in 40 retires the gate at the moment the model choice is made, not after.",
+      "text": "section 6's quality bar fails only on \"at most four of the forty are wrong\", so a run whose other thirty-six descriptions are all scored partly right passes, and because the plan defines neither the boundary between partly right and wrong nor a ceiling on partly right, the classifier's discretion decides the verdict with no failing observation",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b4c776eae213687dc7dd3cf583eafae6196fc7c5",
+  "plan_fingerprint": "4386b612a328d0e07cb25a23e390780071c592877e9bbd08eac8e79e922a5fd0",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 38,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 6's bar at version 41 requires at most four wrong and at least twenty-eight right of forty, and defines wrong, partly right and right.",
+      "reason": "",
+      "when": "2026-11-16T23:32:57.590903+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "0a39bf15b1ae449050e2f8417a866c0e9b831920",
+      "commit_basis": "edit",
+      "note": "Section 6's bar at version 41 requires at most four wrong and at least twenty-eight right of forty, and defines wrong, partly right and right.",
+      "reason": "",
+      "when": "2026-11-16T23:32:57.590903+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261116T214601561527-plan-review-of-iter-signal-context-and-enrichment.json",
+  "review_run_id": "r-20261116T214601561527-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "15ed5d6901253262ca26d54f3cdb4264956eb04d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited fragment exists in the tracked tree (git ls-files resolves it), the node identifier `ground-local-signal-descriptions-in-context` in the new comment resolves to the live run r-20261116T212212585198-ground-local-signal-descriptions-in-context whose brief states the same cohort, frozen context, local-model-only rule and bar the comment describes, and no href in the reviewed units is extensionless.",
+    "done_when": "a finding \u2014 section 6 at plan.html:61 bounds only the `wrong` count (\"at most four of the forty are wrong\") while also requiring a `partly right` count that no condition bounds and no definition separates from `wrong`, so the section's only quality gate can be met by scoring a description as partly right rather than wrong.",
+    "evidence_paths": "pass \u2014 the open decision names the tracked fragment docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html, and that fragment's receipt material resolves under /home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261115T213437019440-refine-local-model-signal-enrichment (private/cohort.json, comparison/hand-review.jsonl, comparison/hand-seal.json, head-suite.log, negative-final.log all present), matching the plan's statement that the receipts moved to the run archive on promotion.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number reaches code, and the changed prose states mechanism (model choice, evidence instrument, forwarding-excluded cohort) rather than tracker entries.",
+    "reasoning": "pass \u2014 each figure in the changed decision context matches the cited fragment (197 of 200 parsing, hand 27/0/13 preference and 26/0 wrong of 40, judge 111/32 wrong and 75/71/54 preference of 200, 17-of-40 agreement), the root cause stated (\"delivery reliability settled, factual quality not\") is the one that evidence supports, and no reviewed section names a code path, step sequence or function.",
+    "single_goal": "pass \u2014 each section names one deliverable; section 6's hand reading is the gate on its own delivery rather than a second deliverable, and the new comment at plan.html:142 records state about a dispatched refinement round without adding a section.",
+    "wiring": "pass \u2014 the changed `local-lane-accepted` rationale at plan.html:118 no longer claims a settled description model and defers to `local-model-confirmed-on-quality`; `plan-section-declarations` marks s6 and s7 `deferred` behind the open decision and every depends-on (s4 on icp-api-access#s3/#s4, s6 on s4/s5, s7 on s6, s8 on s7, s9 on s4/s6/s7/s10) resolves to a section that exists."
+  },
+  "section_digests": {
+    "_document": "6ed74ade3650e05bb3646a4b4c587a1fb1ea13f57733084f39871a677e4c83bf",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "c5e0fdbc73872136bee918c31d6a991ed8c2cd51f26591a5afb67eb1a6cc94dc",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:27:55.733523+00:00",
+  "total": null
+}

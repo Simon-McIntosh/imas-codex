@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import logging
 import re as _re
+from collections.abc import Iterable, Mapping
 from functools import cache as _cache, lru_cache
 from typing import Any
 
@@ -1532,3 +1533,46 @@ def _stamp_dedup_decision(
             g["dedup_decision"] = VocabGapDedupDecision.distinct_confirmed.value
         else:
             g.setdefault("dedup_decision", VocabGapDedupDecision.unchecked.value)
+
+
+_ANCESTOR_CONTEXT_QUERY = "\nMATCH path = (n:IMASNode {id: $path})-[:HAS_PARENT*1..8]->(a:IMASNode)\nWHERE coalesce(trim(a.description), '') <> ''\n   OR coalesce(trim(a.documentation), '') <> ''\nRETURN length(path) AS depth,\n       a.id AS path,\n       a.description AS description,\n       a.documentation AS documentation,\n       a.enrichment_source AS enrichment_source\nORDER BY depth ASC\n"
+
+
+# The number of ancestor statements a compose prompt carries: the nearest ones
+# state the placement, and the rest only lengthen the prompt.
+_ANCESTOR_STATEMENT_LIMIT = 4
+
+
+def ancestor_statements(
+    rows: Iterable[Mapping[str, Any]],
+    *,
+    limit: int | None = _ANCESTOR_STATEMENT_LIMIT,
+) -> list[dict[str, str]]:
+    """Read the statements ancestor rows make, nearest first.
+
+    The one place the ancestor read's rule lives: an ancestor's documentation
+    and its description, documentation first, whitespace collapsed, and a
+    statement a nearer ancestor already made dropped. Both fields are read
+    because a DD structure states a qualifier in one of them and a field label
+    in the other; preferring either alone hides half of what it says. The order
+    is the query's, which returns nearest first.
+
+    Args:
+        rows: The ``_ANCESTOR_CONTEXT_QUERY`` rows for one path.
+        limit: Cap on the statements returned; ``None`` keeps them all.
+    """
+    statements: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for row in rows or ():
+        parts = [
+            " ".join(str(row.get(field) or "").split())
+            for field in ("documentation", "description")
+        ]
+        text = " ".join(part for part in parts if part)
+        if not text or text in seen:
+            continue
+        seen.add(text)
+        statements.append({"path": str(row.get("path") or ""), "text": text})
+        if limit is not None and len(statements) >= limit:
+            break
+    return statements

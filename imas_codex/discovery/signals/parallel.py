@@ -1543,6 +1543,7 @@ def write_signal_descriptions(
     followers_of: str | None = None,
     followers_status: str | None = None,
     extra_params: dict[str, Any] | None = None,
+    precomputed_embeddings: dict[str, list[float] | None] | None = None,
 ) -> int:
     """The single writer for FacilitySignal descriptions.
 
@@ -1581,6 +1582,9 @@ def write_signal_descriptions(
         extra_params: Additional named parameters bound into the statement, for
             a caller whose statement contract carries the group's shared
             enrichment values by name.
+        precomputed_embeddings: Vectors already obtained for these exact items,
+            keyed by signal identity. Every item must have a receipt. Enables a
+            caller to validate a batch before admitting new graph signals.
 
     Returns:
         Number of nodes written.
@@ -1598,7 +1602,13 @@ def write_signal_descriptions(
         props.pop("embedding", None)
         payload.append(props)
 
-    embed_descriptions_batch(payload, text_field="embed_text")
+    if precomputed_embeddings is None:
+        embed_descriptions_batch(payload, text_field="embed_text")
+    else:
+        if any(item["id"] not in precomputed_embeddings for item in payload):
+            raise ValueError("precomputed embeddings must cover every description")
+        for item in payload:
+            item["embedding"] = precomputed_embeddings[item["id"]]
 
     # A missing vector means the embedding service did not answer for that
     # text, not that the signal has no text. Writing it would null a stored
@@ -1688,10 +1698,17 @@ def _write_description_arms(
     and the row stays marked for re-embedding.
     """
     written = 0
+    provenance = """
+            SET s.description_source = CASE WHEN s.description = item.description
+                    THEN s.description_source ELSE null END,
+                s.description_source_updated_at = CASE WHEN s.description = item.description
+                    THEN s.description_source_updated_at ELSE null END
+    """
     if embedded:
         statement = f"""
             UNWIND $items AS item
             {match}{where}
+            {provenance}
             SET s.description = item.description,
                 s.embedding = item.embedding,
                 s.embedded_at = datetime(),
@@ -1703,8 +1720,10 @@ def _write_description_arms(
         statement = f"""
             UNWIND $items AS item
             {match}{where}
+            {provenance}
             SET s.description = item.description,
-                s.embedded_text_hash = item.embedded_text_hash{extra_clause}
+                s.embedded_text_hash = item.embedded_text_hash,
+                s.embedding = null, s.embedded_at = null{extra_clause}
             RETURN count(s) AS updated
         """
         written += _run_description_write(gc, statement, params_for(empty_text))
@@ -1712,6 +1731,7 @@ def _write_description_arms(
         statement = f"""
             UNWIND $items AS item
             {match}{where}
+            {provenance}
             SET s.description = item.description{extra_clause}
             RETURN count(s) AS updated
         """
@@ -3126,7 +3146,8 @@ WHERE da.id = CASE WHEN s.data_archive IS NOT NULL
                    ELSE props.data_access END
 SET s.facility_id = props.facility_id, s.accessor = props.accessor,
     s.name = props.name, s.discovery_source = props.discovery_source,
-    s.source_description = props.source_description, s.unit = props.unit,
+    s.source_description = props.source_description,
+    s.unit = CASE WHEN s.description_source IS NULL THEN props.unit ELSE s.unit END,
     s.metadata_state = props.metadata_state, s.metadata_error_code = props.metadata_error_code,
     s.metadata_error = props.metadata_error, s.metadata_errors = props.metadata_errors,
     s.archive_labels = props.archive_labels, s.archive_format = props.archive_format,
@@ -3136,7 +3157,8 @@ SET s.facility_id = props.facility_id, s.accessor = props.accessor,
     s.archive_upper_alarm_limit = props.archive_upper_alarm_limit,
     s.archive_lower_warning_limit = props.archive_lower_warning_limit,
     s.archive_upper_warning_limit = props.archive_upper_warning_limit,
-    s.archive_metadata = props.archive_metadata, s.data_type = props.data_type,
+    s.archive_metadata = props.archive_metadata,
+    s.data_type = CASE WHEN s.description_source IS NULL THEN props.data_type ELSE s.data_type END,
     s.structure_fields = props.structure_fields,
     s.first_sample_ns = props.first_sample_ns, s.last_sample_ns = props.last_sample_ns,
     s.listed_archives = props.listed_archives,

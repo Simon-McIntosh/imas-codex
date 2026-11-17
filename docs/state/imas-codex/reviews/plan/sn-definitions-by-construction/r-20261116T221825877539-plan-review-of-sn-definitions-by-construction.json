@@ -1,0 +1,101 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T22:20:15.187Z",
+  "dispatched_at": "2026-11-16T22:20:03Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261116T221825877539-plan-review-of-sn-definitions-by-construction/plan.html:223",
+      "id": "wiring-1",
+      "reason": "without either an s10 dependency on s11 and s6 or removal of the live re-render from \u00a710's done-when, the dispatch order is unsatisfiable and the node that runs first must be redone.",
+      "text": "the new \u00a710 ruling says \"The live re-render of the 316 members is a separate node and runs after the name-review repair and the remaining equivalent-electron renames, because those renames change six of the family names\", but `plan-section-depends-on` gives s10 only s2, so \u00a710 is dispatchable now and its own done-when (line 153) still requires that live re-render; and \u00a76 declares depends-on s10 while its family clause requires the families already \"at one wording as \u00a710 delivers it\" \u2014 so whichever of \u00a76 and \u00a710 runs first fails, and a \u00a710 dispatched today re-renders 316 members before six of their names change",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-definitions-by-construction/r-20261116T221825877539-plan-review-of-sn-definitions-by-construction/plan.html:10",
+      "id": "wiring-2",
+      "reason": "a descoped section is not dispatched, so no node's path changes, but the declarations advertise an endpoint the plan no longer delivers.",
+      "text": "`plan-summary` still reads \"then recut the catalog\" and the open followup f-sdbc-001 (line 176) still says \"\u00a77 waits for \u00a76 and for the domain repair\", although \u00a77 is now declared `descoped` and its done-when (line 124) is the only place in the plan a recut appears",
+      "type": "wiring",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "d969ec667affb3746677461e9c563d706fb31d05",
+  "plan_fingerprint": "94bd4be2caa5e0addbfc6246cfdb4f5330205f39d2b26cbd727ffa60304ad98a",
+  "plan_slug": "sn-definitions-by-construction",
+  "plan_version": 72,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9cdee54b4013754998939d492acc8311cec68e1",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "The renames are now their own section waiting on the review-context repair; the family section waits on that repair and on the renames; the wording section waits on the family section. The order is review context, renames, family re-render, wording census.",
+      "reason": "",
+      "when": "2026-11-16T22:49:57.208493+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "a9cdee54b4013754998939d492acc8311cec68e1",
+      "commit_basis": "edit",
+      "finding": "wiring-2",
+      "note": "The summary no longer mentions a recut and the open followup is resolved with the descope and the remaining order.",
+      "reason": "",
+      "when": "2026-11-16T22:50:06.437306+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9cdee54b4013754998939d492acc8311cec68e1",
+      "commit_basis": "edit",
+      "note": "The renames are now their own section waiting on the review-context repair; the family section waits on that repair and on the renames; the wording section waits on the family section. The order is review context, renames, family re-render, wording census.",
+      "reason": "",
+      "when": "2026-11-16T22:49:57.208493+00:00"
+    },
+    "wiring-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "a9cdee54b4013754998939d492acc8311cec68e1",
+      "commit_basis": "edit",
+      "note": "The summary no longer mentions a recut and the open followup is resolved with the descope and the remaining order.",
+      "reason": "",
+      "when": "2026-11-16T22:50:06.437306+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-definitions-by-construction/r-20261116T221825877539-plan-review-of-sn-definitions-by-construction.json",
+  "review_run_id": "r-20261116T221825877539-plan-review-of-sn-definitions-by-construction",
+  "reviewed_blob_sha": "af9ee6673082ebada9389b8499f38524798b64ae",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/plans/sn-audited-group-release.html` \u00a73 exists and does carry \"a member's shared wording is not the rendering of its stored sentence\"; the added commit anchors `612678690` and `fa84422c3426` both resolve in the repository.",
+    "done_when": "pass \u2014 every implementable section's measure names a planted control that must fail (\u00a710 a family planted with a divergent member and a deletion-sensitive guard; \u00a711 a name whose qualifier appears nowhere in the tree; \u00a76 a planted divergent family, a no-form name, a variant name and a qualifier missing from an identifier).",
+    "evidence_paths": "pass \u2014 census and label evidence sits under `docs/evidence/fragments/`, and the runs the new comments cite (`r-20261115T171429412588-sdbc-family-sentences`, `r-20261116T212041055513-\u2026`, `r-20261116T112923940369-\u2026`) resolve under `~/.config/reckon/crew/archive/runs/`.",
+    "naming": "pass \u2014 the new \u00a710 and \u00a711 comment text carries no plan label, ticket number or stage name into a symbol, and the descope reason states its mechanism.",
+    "reasoning": "pass \u2014 the \u00a711 body's cause matches the stored reviews the plan cites (both source-support checks above cutoff on all eight, evidence being the leaf's own \"Carbon.\"/\"Value\" while the counting basis sits on `summary/gas_injection_accumulated`), and the changed text prescribes no code path or function.",
+    "single_goal": "pass \u2014 \u00a710's deliverable is one wording per species family and \u00a711's is the review reading enclosing structures; the placement question the new \u00a710 ruling raises is a wiring defect, not a second deliverable.",
+    "wiring": "a finding \u2014 the s10 ruling recorded at `sn-definitions-by-construction.html:223` moves the live re-render after the \u00a711 repair and the remaining equivalent-electron renames, while `plan-section-depends-on` still has `s6` depend on `s10` and no dependency on `s10`."
+  },
+  "section_digests": {
+    "_document": "8165842c175095c51d25653a8d42067601c4dda18dca2400febf8c693b7faa53",
+    "s1": "9adbcbc148d1c43c1c6c08859f48ed5e98950e523c8148ecb0cb80857fdec8f7",
+    "s10": "bd41368433029d1e02366c5695dd18270e49f777137bfb763fb6510c890d807d",
+    "s11": "469da7cec1a94cba0366b89883ccbdb8ef92a07016c4482eb907048e2bd9b1d3",
+    "s2": "f8453331438ca2b94cc1d4c5968e8649aab7b936c8e32d6403f3e0320feb67c7",
+    "s3": "e7694a6e595ff66ba52afcef8b2834d1537611dc87ef79213c7cfc23804a2f67",
+    "s4": "4dc4334fea0840530cdd38b8cfddcca3584bf0feba4ae6118abddc72878b5ede",
+    "s5": "9cf2cc1638ff39388352a6f44ec4be5e28060a1cc301aec11f13d75542087675",
+    "s6": "be3bba7a6c0c34e2eaabff635af4f43905aee0b0b0b94e3ea4b097ce2777d04a",
+    "s7": "cf98e341e597a01da94c2c945252159d4bfc1226bdd9d1c36870f59e215d9de0",
+    "s8": "b02c542c76c379dfa407d9efb9b6fad2ffab27a4330ab3ed3bda358538e2506c",
+    "s9": "82089682f07bb6616b98aa46a1ef8f5d644d1fbb9c1fe64c263b3a4ea4a8cd06"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T22:47:51.254827+00:00",
+  "total": null
+}

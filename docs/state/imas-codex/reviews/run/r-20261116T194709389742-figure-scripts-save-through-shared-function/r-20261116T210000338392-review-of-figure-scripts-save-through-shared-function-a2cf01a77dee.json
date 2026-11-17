@@ -1,0 +1,83 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 11,
+  "call_sites": [
+    "imas_codex/plotting/signals.py:237",
+    "scripts/figures_ai_stack.py:595",
+    "scripts/figures_icp_knowledge_map.py:737",
+    "scripts/figures_knowledge_graph_scale.py:674",
+    "scripts/figures_mapping_flow.py:255",
+    "scripts/figures_discovery_to_mapping.py:312",
+    "scripts/figures_jt60sa_mapping_study.py:136",
+    "scripts/plot_jet_epoch_evolution.py:868",
+    "scripts/plot_jet_poloidal.py:382",
+    "scripts/plot_jet_composite_geometry.py:530",
+    "scripts/plot_jet_limiter_epochs.py:234"
+  ],
+  "completed_at": "2026-11-16T21:02:07.217Z",
+  "dispatched_at": "2026-11-16T21:01:25Z",
+  "findings": [
+    {
+      "file": "tests/plotting/test_figure_scripts.py",
+      "line": "59",
+      "severity": "non-blocking",
+      "text": "non-blocking: the animated assertion compares receipt[\"pixel_size\"], which save_figure computes from the same figure the test sized from style.CANVAS, against style.CANVAS and never reads the written GIF, so a GIF exported at another pixel size leaves the test green."
+    },
+    {
+      "file": "tests/plotting/test_figure_scripts.py",
+      "line": "80",
+      "severity": "non-blocking",
+      "text": "non-blocking: the declared-size assertion reads receipt[\"declared_cm\"], filled by the same _declared_size call that writes the SVG header, so skipping the header substitution at imas_codex/plotting/style.py:137-143 leaves it green, and the file-parsing guard at tests/plotting/test_signals.py:167-183 already owns that property in a stronger form."
+    },
+    {
+      "file": "imas_codex/plotting/style.py",
+      "line": "116",
+      "severity": "non-blocking",
+      "text": "non-blocking: the direct-label-over-data refusal now skips every visible line with an empty or underscore-prefixed label, so a label over an unlabelled data trace is no longer refused - a narrowing of an existing refusal landed inside a migration the plan says must not bypass the check."
+    },
+    {
+      "file": "scripts/figures_mapping_flow.py",
+      "line": "139",
+      "severity": "non-blocking",
+      "text": "non-blocking: the transparent title-strip rectangle is constructed a second time here, duplicating scripts/figures_knowledge_graph_scale.py:577-585 in a file that already imports FONT, SLATE, SYSTEMS, TITLE_SPACE and human from that module, so the strip reservation has two owners."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 11 production call site(s)",
+    "diff": "read commit by commit from 4c66fcbc to a2cf01a77; e23349142 carries all code (style.py gains use_style, _declared_size and _text_boxes and save_figure's dpi/animation/fps/clear_of plus a receipt, ten scripts migrate, and each script-local check_layout, halo and slide-size literal is deleted), while 37311dcae and a2cf01a77 carry the landing record and the raster comparison.",
+    "done_when": "the brief's evidence fence asks for a recorded search, passing tests/plotting tests including a label-beyond-canvas refusal, each file's drawn/declared ratio within 1e-3, and a landing record listing the sizes before and after; the gate at a2cf01a77 (gate-plotting-tests.log) asserts only the test bullet - 30 passed, EXIT=0, with test_a_script_given_a_label_beyond_the_canvas_writes_no_file among them - while the search, the 3.57e-4 worst declared-versus-coordinate error and the 3 x 1400x720 GIF sizes live in measure-declared-ratios.log and the landing record, and I re-derived both from the head files (docs/figures/jt60sa-mapping-study/agreement.svg declares 31.1cm x 14.22cm against viewBox 1008x460.8).",
+    "goal": "the node's goal is that every figure script under scripts/ saves through the shared function with no check or export function of its own; at head grep finds 0 savefig( calls under scripts/ and all eleven matplotlib-using scripts import imas_codex.plotting.style.save_figure (scripts/plot_signal_enrichment_refinement.py:73 already did at base), and the one remaining helper, scripts/figures_discovery_to_mapping.py:311-313, calls the shared function twice and builds its receipt from the return value.",
+    "manifest": "read; it records three commits (e23349142, 37311dcae, a2cf01a77), the gate's 30 passed at a2cf01a77, the negative-control log whose header disables the clipped-text branch and whose run reports DID NOT RAISE with EXIT=1, and both suite arms as unreadable - baseline-suite.log and after-suite.log each abort at collection with EXIT=4, so neither carries a failed test id.",
+    "write_paths": "the 21 declared paths at prompt.txt:85-107 cover all 28 paths in the diff, checked path by path and none outside, including docs/evidence/fragments/figure-scripts-use-the-shared-save-function/figure-scripts-save-through-shared-function.html and the five docs/figures directories."
+  },
+  "justifications": {
+    "durability": "only tests/plotting/test_figure_scripts.py:29 reddens on a reinstated defect (the negative control proves it), while no test fails if a script returns to savefig and the two receipt-reading assertions at tests/plotting/test_figure_scripts.py:59 and :80 hold whatever the written file contains.",
+    "evidence": "the gate genuinely runs the label-beyond-canvas test at tests/plotting/test_figure_scripts.py:29 and is logged with its revision at gate-plotting-tests.log, but the ratio and declared-size measures the fence also asks for are recorded outside the gate in measure-declared-ratios.log rather than asserted by it.",
+    "fit": "imas_codex/plotting/style.py:23-160 follows the module's existing shape - private helpers, one public entry point, ValueError refusals - and introduces no name the repository's naming rules forbid.",
+    "goal_fidelity": "every matplotlib-using script under scripts/ reaches imas_codex/plotting/style.py:83 save_figure (scripts/figures_ai_stack.py:599, scripts/figures_icp_knowledge_map.py:1158), and no script defines a text check or a slide-size constant.",
+    "reuse": "use_style at imas_codex/plotting/style.py:23 extends the one owner of the packaged style and the three script-local check_layout copies are deleted rather than forked, but scripts/figures_mapping_flow.py:139 duplicates the title-strip rectangle at scripts/figures_knowledge_graph_scale.py:577 instead of extending it.",
+    "scope_discipline": "all 28 paths of the diff fall inside prompt.txt:85-107, and the only behavioural extra, scripts/figures_mapping_flow.py:252-256 writing only the draft PNG under --draft, is the pattern scripts/figures_ai_stack.py:593-596 already had at base."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that every figure script under scripts/ saves through the shared function with no check or export function of its own; at head grep finds 0 savefig( calls under scripts/ and all eleven matplotlib-using scripts import imas_codex.plotting.style.save_figure (scripts/plot_signal_enrichment_refinement.py:73 already did at base), and the one remaining helper, scripts/figures_discovery_to_mapping.py:311-313, calls the shared function twice and builds its receipt from the return value.\nVERDICT done_when: the brief's evidence fence asks for a recorded search, passing tests/plotting tests including a label-beyond-canvas refusal, each file's drawn/declared ratio within 1e-3, and a landing record listing the sizes before and after; the gate at a2cf01a77 (gate-plotting-tests.log) asserts only the test bullet - 30 passed, EXIT=0, with test_a_script_given_a_label_beyond_the_canvas_writes_no_file among them - while the search, the 3.57e-4 worst declared-versus-coordinate error and the 3 x 1400x720 GIF sizes live in measure-declared-ratios.log and the landing record, and I re-derived both from the head files (docs/figures/jt60sa-mapping-study/agreement.svg declares 31.1cm x 14.22cm against viewBox 1008x460.8).\nVERDICT write_paths: the 21 declared paths at prompt.txt:85-107 cover all 28 paths in the diff, checked path by path and none outside, including docs/evidence/fragments/figure-scripts-use-the-shared-save-function/figure-scripts-save-through-shared-function.html and the five docs/figures directories.\nVERDICT manifest: read; it records three commits (e23349142, 37311dcae, a2cf01a77), the gate's 30 passed at a2cf01a77, the negative-control log whose header disables the clipped-text branch and whose run reports DID NOT RAISE with EXIT=1, and both suite arms as unreadable - baseline-suite.log and after-suite.log each abort at collection with EXIT=4, so neither carries a failed test id.\nVERDICT diff: read commit by commit from 4c66fcbc to a2cf01a77; e23349142 carries all code (style.py gains use_style, _declared_size and _text_boxes and save_figure's dpi/animation/fps/clear_of plus a receipt, ten scripts migrate, and each script-local check_layout, halo and slide-size literal is deleted), while 37311dcae and a2cf01a77 carry the landing record and the raster comparison.\nCALL_SITES: imas_codex/plotting/signals.py:237, scripts/figures_ai_stack.py:595, scripts/figures_icp_knowledge_map.py:737, scripts/figures_knowledge_graph_scale.py:674, scripts/figures_mapping_flow.py:255, scripts/figures_discovery_to_mapping.py:312, scripts/figures_jt60sa_mapping_study.py:136, scripts/plot_jet_epoch_evolution.py:868, scripts/plot_jet_poloidal.py:382, scripts/plot_jet_composite_geometry.py:530, scripts/plot_jet_limiter_epochs.py:234\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: every matplotlib-using script under scripts/ reaches imas_codex/plotting/style.py:83 save_figure (scripts/figures_ai_stack.py:599, scripts/figures_icp_knowledge_map.py:1158), and no script defines a text check or a slide-size constant.\nSCORE evidence: 15\nJUSTIFICATION evidence: the gate genuinely runs the label-beyond-canvas test at tests/plotting/test_figure_scripts.py:29 and is logged with its revision at gate-plotting-tests.log, but the ratio and declared-size measures the fence also asks for are recorded outside the gate in measure-declared-ratios.log rather than asserted by it.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: all 28 paths of the diff fall inside prompt.txt:85-107, and the only behavioural extra, scripts/figures_mapping_flow.py:252-256 writing only the draft PNG under --draft, is the pattern scripts/figures_ai_stack.py:593-596 already had at base.\nSCORE durability: 12\nJUSTIFICATION durability: only tests/plotting/test_figure_scripts.py:29 reddens on a reinstated defect (the negative control proves it), while no test fails if a script returns to savefig and the two receipt-reading assertions at tests/plotting/test_figure_scripts.py:59 and :80 hold whatever the written file contains.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/plotting/style.py:23-160 follows the module's existing shape - private helpers, one public entry point, ValueError refusals - and introduces no name the repository's naming rules forbid.\nSCORE reuse: 16\nJUSTIFICATION reuse: use_style at imas_codex/plotting/style.py:23 extends the one owner of the packaged style and the three script-local check_layout copies are deleted rather than forked, but scripts/figures_mapping_flow.py:139 duplicates the title-strip rectangle at scripts/figures_knowledge_graph_scale.py:577 instead of extending it.\nFINDING tests/plotting/test_figure_scripts.py:59 non-blocking: the animated assertion compares receipt[\"pixel_size\"], which save_figure computes from the same figure the test sized from style.CANVAS, against style.CANVAS and never reads the written GIF, so a GIF exported at another pixel size leaves the test green.\nFINDING tests/plotting/test_figure_scripts.py:80 non-blocking: the declared-size assertion reads receipt[\"declared_cm\"], filled by the same _declared_size call that writes the SVG header, so skipping the header substitution at imas_codex/plotting/style.py:137-143 leaves it green, and the file-parsing guard at tests/plotting/test_signals.py:167-183 already owns that property in a stronger form.\nFINDING imas_codex/plotting/style.py:116 non-blocking: the direct-label-over-data refusal now skips every visible line with an empty or underscore-prefixed label, so a label over an unlabelled data trace is no longer refused - a narrowing of an existing refusal landed inside a migration the plan says must not bypass the check.\nFINDING scripts/figures_mapping_flow.py:139 non-blocking: the transparent title-strip rectangle is constructed a second time here, duplicating scripts/figures_knowledge_graph_scale.py:577-585 in a file that already imports FONT, SLATE, SYSTEMS, TITLE_SPACE and human from that module, so the strip reservation has two owners.\n",
+  "review_run_id": "r-20261116T210000338392-review-of-figure-scripts-save-through-shared-function-a2cf01a77dee",
+  "reviewed_base_sha": "4c66fcbcdf7c7b8a7eb8210d9f677c2cae2ff07f",
+  "reviewed_head_sha": "a2cf01a77deefcc1ab54aefb91b912276978ab30",
+  "reviewed_run_id": "r-20261116T194709389742-figure-scripts-save-through-shared-function",
+  "scores": {
+    "durability": 12,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T21:26:31.236061+00:00",
+  "total": 97
+}

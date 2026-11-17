@@ -13,8 +13,10 @@ from __future__ import annotations
 
 import pytest
 
-from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
+from imas_codex.standard_names.worker_tasks.worker_common import (
     _ANCESTOR_CONTEXT_QUERY,
+)
+from imas_codex.standard_names.worker_tasks.worker_extraction_and_enrichment import (
     _enrich_batch_items,
 )
 from imas_codex.standard_names.worker_tasks.worker_generate_docs import (

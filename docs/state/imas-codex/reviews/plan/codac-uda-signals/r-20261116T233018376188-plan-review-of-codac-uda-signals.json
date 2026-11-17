@@ -1,0 +1,162 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:31:58.453Z",
+  "dispatched_at": "2026-11-16T23:31:45Z",
+  "findings": [
+    {
+      "anchor": "plan.html:124",
+      "id": "done_when-1",
+      "reason": "without a constructed open pulse the whole open-ended guard can pass vacuously, so the section must add one fixture-driven observation alongside the live count.",
+      "text": "the negative control's second clause (\"a pulse the archive returns without an end time is stored as open-ended, never with an invented end\") is conditional on data the section says was never measured (\"listing the pulses of a category has not yet been measured\"), so a run that finds zero open pulses satisfies the control without the absent-end branch ever executing, and the section names no test that constructs a pulse with no end; the declared schema change to optional `end_ns` (imas_codex/schemas/facility.yaml:1929-1933, now `required: true`) therefore has no measurement of its own",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:124",
+      "id": "done_when-2",
+      "reason": "the plan simultaneously claims one shape change and requires a stored count the shape cannot hold, so the worker cannot tell whether the schema or the control is wrong.",
+      "text": "the first control requires \"a category the archive lists with no pulses is stored with a count of zero\", but PulseCategory carries no count attribute (imas_codex/schemas/facility.yaml:1865-1892: id, facility_id, archive, name, description only), and s16 declares exactly one change to the section 3 shapes, an end time that may be absent, so a worker taking the control literally must make an undeclared second schema change while one reading it loosely records zero memberships",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:132",
+      "id": "done_when-3",
+      "reason": "the two sections changed in this version state incompatible pulse expectations, and the endpoint must say the end is reported where the archive gives one.",
+      "text": "s18's done-when requires the pulse leg to return \"the pulses of one of them with start and end times\", which s16 now says cannot always be true (a pulse's end may be absent), so the check as written can only pass by selecting a category whose pulses are all closed or by presenting an invented end \u2014 the exact behaviour s16's negative control forbids \u2014 and nothing measures the open-ended case through the server",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:124",
+      "id": "reasoning-1",
+      "reason": "the change rests on an unmeasured premise, so the plan should present the open-ended pulse as something the run establishes and report its count as the evidence, rather than assert it beforehand.",
+      "text": "the section justifies the schema change with \"a pulse still running has none\", stated as a fact about the archive, while the same paragraph records that listing a category's pulses has not been measured and section 1's measured table holds only the 743 category names and the string identity type",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "7f666fe948b132b4dcb42478526d44de902e0913",
+  "plan_fingerprint": "c77204bfc30994d91a73ca31722ff5291e27f4c5b6bb9197938ce7c7e4b491a3",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 52,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 16 at version 54 requires a test with a constructed pulse that has no end time, independent of what the live archive returns.",
+      "reason": "",
+      "when": "2026-11-16T23:48:11.600511+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 16 at version 54 no longer requires a stored count: an empty category is in the graph with no pulse linked and is counted in the landing record.",
+      "reason": "",
+      "when": "2026-11-16T23:48:36.815216+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "finding": "done_when-3",
+      "note": "Section 18 at version 54 returns each pulse's end time where the archive gives one and returns an open-ended pulse as open-ended.",
+      "reason": "",
+      "when": "2026-11-16T23:49:08.992408+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 16 at version 54 says whether the archive returns pulses without an end is unmeasured, and that the run establishes it and reports the count.",
+      "reason": "",
+      "when": "2026-11-16T23:49:31.133158+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "note": "Section 16 at version 54 requires a test with a constructed pulse that has no end time, independent of what the live archive returns.",
+      "reason": "",
+      "when": "2026-11-16T23:48:11.600511+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "note": "Section 16 at version 54 no longer requires a stored count: an empty category is in the graph with no pulse linked and is counted in the landing record.",
+      "reason": "",
+      "when": "2026-11-16T23:48:36.815216+00:00"
+    },
+    "done_when-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "note": "Section 18 at version 54 returns each pulse's end time where the archive gives one and returns an open-ended pulse as open-ended.",
+      "reason": "",
+      "when": "2026-11-16T23:49:08.992408+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "12cc9945acf7cbd8cb7c85e6adf66dbe3010f650",
+      "commit_basis": "edit",
+      "note": "Section 16 at version 54 says whether the archive returns pulses without an end is unmeasured, and that the run establishes it and reports the count.",
+      "reason": "",
+      "when": "2026-11-16T23:49:31.133158+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261116T233018376188-plan-review-of-codac-uda-signals.json",
+  "review_run_id": "r-20261116T233018376188-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "1b8717bb9ed0e0317ed8891fc967407d13a30369",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 neither changed section cites a file, section or commit, and the declarations they do carry resolve: section 3 delivers the archive, pulse and pulse category shapes s16 names, and section 8 delivers the parsed name fields s18 waits on.",
+    "done_when": "a finding \u2014 s16's open-ended-pulse control can only fire if the archive happens to return a pulse with no end, and its empty-category control names a stored count that no shape carries (plan.html:124).",
+    "evidence_paths": "pass \u2014 both changed sections record into the run's landing record, the same durable location the plan's other sections use.",
+    "naming": "pass \u2014 neither changed section introduces a symbol, and no plan label or version tag reaches code.",
+    "reasoning": "a finding \u2014 s16 states as a fact about the archive (\"because a pulse still running has none\") a property its own paragraph says has not been measured.",
+    "single_goal": "pass \u2014 s16's schema change is the shape the import it already delivers writes through, and s18's added listing keys are measures of the one search tool set it delivers.",
+    "wiring": "pass \u2014 the three units changed in this version are consistent with their declarations: `plan-section-depends-on` now carries `\"s18\":[\"codac-uda-signals#s16\",\"codac-uda-signals#s8\"]`, and each section's own `data-links` matches it (plan.html:131), so the plant-system/function/component keys \u00a718's done-when exercises have a declared predecessor; the \u00a78 keys the listings rest on (component_category, control_path, field_code) exist on the facility signal shape in imas_codex/schemas/facility.yaml:3092-3109."
+  },
+  "section_digests": {
+    "_document": "1cc908167bd9920aa39296f9494d63906a36d5dd8b82644b7babbd738209a859",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "633ac9deabcdb3fa15399f21a718931c0ebe55ae9f404afe6dc61d57f6eb00c2",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "e0676bd7b59749ec3243ea8a92952dd11874ab0211871387be174146c00a6e2d",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:47:29.314099+00:00",
+  "total": null
+}

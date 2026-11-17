@@ -1,0 +1,135 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-16T23:08:02.397Z",
+  "dispatched_at": "2026-11-16T23:07:22Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261116T222315137534-plan-review-of-codac-uda-signals/plan.html:124",
+      "id": "done_when-1",
+      "reason": "the control is unsatisfiable against the shape the section must use, so the measure would either be met by rewriting a landed schema outside the section's scope or be reported as a blocking contradiction at build time.",
+      "text": "s16 requires \"a pulse the archive returns without an end time is stored as open-ended, never with an invented end\", but the delivered Pulse class carries `end_ns` with `required: true` (imas_codex/schemas/facility.yaml:1929-1933), and s16 binds itself to \"the archive, pulse and pulse category shapes section 3 added\" whose declaration is that section is done, so a worker must either invent an end (refused by the control) or change the landed schema, which the section does not declare; the same required end makes the done-when's \"number of pulses carrying both a start and an end time\" a tautology equal to the total, a measure that cannot fail",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261116T222315137534-plan-review-of-codac-uda-signals/plan.html:131",
+      "id": "wiring-1",
+      "reason": "a node queued from this plan would see no prerequisite for the component and control-node content s18's listing and walk must read, and the wiring record would not name the section whose landed parse supplies it.",
+      "text": "s18 lists \"from a plant system, function, component category or field to the signals that carry it\" and \"from a signal to its component, its system and the other signals of the same component\" and its done-when reads back \"signals of the pilot set\" by plant system and component category and its siblings, yet its data-links and its plan-section-depends-on entry name s16 alone, and s16's own waits (s3, s5) reach neither s8 (the landed plant-system/component parse) nor any other node that supplies the component grouping",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261116T222315137534-plan-review-of-codac-uda-signals/plan.html:132",
+      "id": "done_when-2",
+      "reason": "the section's own acceptance cannot distinguish a complete delivery from one missing the function- and field-keyed walks, so either the Delivers narrows or one measure per leg is added.",
+      "text": "s18's Delivers names four lookup keys (plant system, function, component category, field) and its done-when exercises only \"a listing by plant system and component category\", so a delivery with the function- and field-keyed walks absent closes on the same green record; likewise its Delivers' \"from a coil or system designation\" is checked, so the gap is specifically the function and field legs",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "9a9cdf7858e51037f7172508633138bb9ab24be9",
+  "plan_fingerprint": "d8bc6b473b6e60edc64cfc989f7bbc2e197b0cfbc06d9b1d5ffa2a23b967d9d1",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 50,
+  "project": "imas-codex",
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7f666fe948b132b4dcb42478526d44de902e0913",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 16 at version 51 declares the one schema change it makes, a pulse end time that may be absent, and counts pulses with and without an end, summing to the total.",
+      "reason": "",
+      "when": "2026-11-16T23:27:26.502192+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7f666fe948b132b4dcb42478526d44de902e0913",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 18 at version 52 also waits on section 8, the landed name parse that supplies plant system, function, component and field.",
+      "reason": "",
+      "when": "2026-11-16T23:27:31.268736+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "7f666fe948b132b4dcb42478526d44de902e0913",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 18's done-when at version 51 adds a listing by function and a listing by field beside the listing by plant system and component category.",
+      "reason": "",
+      "when": "2026-11-16T23:27:34.615519+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7f666fe948b132b4dcb42478526d44de902e0913",
+      "commit_basis": "edit",
+      "note": "Section 16 at version 51 declares the one schema change it makes, a pulse end time that may be absent, and counts pulses with and without an end, summing to the total.",
+      "reason": "",
+      "when": "2026-11-16T23:27:26.502192+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "7f666fe948b132b4dcb42478526d44de902e0913",
+      "commit_basis": "edit",
+      "note": "Section 18's done-when at version 51 adds a listing by function and a listing by field beside the listing by plant system and component category.",
+      "reason": "",
+      "when": "2026-11-16T23:27:34.615519+00:00"
+    },
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "7f666fe948b132b4dcb42478526d44de902e0913",
+      "commit_basis": "edit",
+      "note": "Section 18 at version 52 also waits on section 8, the landed name parse that supplies plant system, function, component and field.",
+      "reason": "",
+      "when": "2026-11-16T23:27:31.268736+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/.config/reckon/crew/reviews/imas-codex/plan-codac-uda-signals.v50.json",
+  "review_run_id": "r-20261116T222315137534-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "5d2b7c510d7f3d43a11c18b46c220ca02e4dab63",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 s16/s17/s18's data-links agree with plan-section-depends-on, the cited section 3 resolves and is declared done, and the follow-up's named plan figure-scripts-use-the-shared-save-function exists on disk.",
+    "done_when": "a finding \u2014 s16's negative control stores an end-less pulse as \"open-ended\" though the Pulse shape section 3 delivered makes the end required, and s18's done-when exercises only two of the four walk keys its Delivers names.",
+    "evidence_paths": "pass \u2014 s16 to s18 name the landing record and, for s16, tests under the graph marker; no scratchpad or node-local temporary path appears.",
+    "naming": "pass \u2014 s16 to s18 name no symbol, file, ticket or version tag; they state records and figures only.",
+    "reasoning": "pass \u2014 s16 states the category count as measured and the per-category pulse listing as not yet measured, and s18's three walks are obtainable from content sections 3, 8 and 16 deliver; s16's unreachable negative control is scored under done_when rather than repeated here.",
+    "single_goal": "pass \u2014 s16 delivers the pulse graph, s17 delivers one skill, s18 delivers the typed server tools; each closes on one verdict.",
+    "wiring": "a finding \u2014 s16 and s17 declare their waits correctly, but s18's content and done-when rest on the component/control-node parse that s8 landed, and no depends-on entry or data-links reaches s8 (s18 depends only on s16)."
+  },
+  "section_digests": {
+    "_document": "b9551d395bd5ad00ebab8b49dfd9df9544da2f565fc0ab4ea022bf3ddda0d30e",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "73e8c85ab485cf119ca5cf84f679a4c7b8b4fbedc69fe20b58048975814e943e",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "eaf950e24f163ea8576107645075c2e387372be053cdf571b8dd1d406dc7e7d5",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-16T23:16:26.254694+00:00",
+  "total": null
+}

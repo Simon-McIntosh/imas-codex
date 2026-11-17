@@ -13,6 +13,8 @@ import re
 from collections.abc import Iterable
 from typing import Any
 
+from imas_codex.graph.signal_descriptions import description_is_name
+
 
 def _get_value(result: Any, key: str, default: Any = None) -> Any:
     """Read a field from a dict-like or attribute-based result object."""
@@ -204,9 +206,32 @@ def format_signals_report(
             )
             if roles:
                 meta.append(f"Role: {', '.join(roles)}")
+            matched = sorted(
+                {field for sig in members for field in sig.get("match_fields", [])}
+            )
+            if matched:
+                meta.append(f"Matched: {', '.join(matched)}")
             parts.append("  " + " | ".join(meta))
             if len(members) == 1 and members[0].get("description"):
-                parts.append(f"  {members[0]['description']}")
+                member = members[0]
+                if not description_is_name(
+                    member["description"],
+                    member.get("name") or "",
+                    member.get("accessor") or "",
+                ):
+                    parts.append(f"  {member['description']}")
+            sources = sorted(
+                {
+                    (
+                        sig["description_source"],
+                        sig.get("description_source_updated_at") or "unknown",
+                    )
+                    for sig in members
+                    if sig.get("description_source")
+                }
+            )
+            for source, updated in sources:
+                parts.append(f"  Metadata source: {source}; source updated: {updated}")
             parts.append(
                 "  Members: " + ", ".join(str(sig.get("id", "?")) for sig in members)
             )
