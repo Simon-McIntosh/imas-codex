@@ -1,0 +1,84 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms on disk: after_suite names unit-head.log at revision 0599ef0, which records '54 passed, 1 warning in 5.43s' with EXIT=0 and no FAILED id; the reviewed manifest's baseline_suite field (manifest.md:20) is empty and the run directory carries no base-arm log, so the base set is unreadable and the set difference over the readable after arm alone is empty (0). The after arm is complete and green, so no added failure is claimed either way.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T05:49:18.552Z",
+  "dispatched_at": "2026-11-17T05:48:05Z",
+  "findings": [
+    {
+      "file": "tests/remote/test_archive_signal_loader.py",
+      "line": "355",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert pulse[\"end_ns\"] is None` reads back the dict the test built at line 337 and no code under test mutates it, so it holds whatever the loader does and guards nothing; the real guard is the refusal asserted at line 351."
+    },
+    {
+      "file": ".claude/skills/archive-signals/SKILL.md",
+      "line": "128",
+      "severity": "non-blocking",
+      "text": "non-blocking: the load snippet imports only numpy and ArchiveReader/ArchiveSignalLoader at line 121, then uses os, Path, json and GraphClient, which exist only in the earlier discovery snippet, so an agent copying the load block alone hits NameError at line 128 before any read."
+    },
+    {
+      "file": "imas_codex/remote/archive_access.py",
+      "line": "109",
+      "severity": "non-blocking",
+      "text": "non-blocking: find_signals opens a second FacilitySignal lookup beside imas_codex/graph/domain_queries.py:27, which owns the find-signals capability and is the one bound into the REPL namespace at imas_codex/llm/server.py:1575; the exact name/accessor predicate could have been a mode of the owner, and two functions of the same name now carry different semantics."
+    },
+    {
+      "file": "imas_codex/remote/archive_access.py",
+      "line": "14",
+      "severity": "non-blocking",
+      "text": "non-blocking: the coalesce(c.description, '') branch searches a property no writer sets \u2014 imas_codex/remote/pulse_catalogue.py:58 constructs PulseCategory with id, facility_id, archive and name only \u2014 so that half of the documented match surface cannot fire and every returned category description is null, while SKILL.md:109 tells the agent to select categories from their names/descriptions."
+    },
+    {
+      "file": "manifest.md",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reviewed run records no baseline_suite arm, so an added-failure derivation rests on the after arm alone; the after arm is complete and green at 0599ef0 with zero failures, but the revision pair the record contract names is half absent."
+    }
+  ],
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "call_sites": "searched the repository for importers of imas_codex.remote.archive_access outside tests and found none; the only call_sites found name imas_codex.graph.domain_queries.find_signals, which is a different function, so this change has no production call site.",
+    "diff": "read 47b051916, de63c0acd, 0599ef007 and 4c9bd332e against base e0798a406; 604 insertions over five files \u2014 a new 125-line accessor module, a new test file, 109 appended lines in an existing test file, a 193-line skill and an 83-line evidence fragment \u2014 and imas_codex/remote/codac_uda.py is untouched.",
+    "done_when": "the done_when asks for a fresh-worker live run, the commands and counts recorded, tests over the documented accessor calls and two refusals; docs/evidence/fragments/codac-uda-signals/signal-accessor-skill.html records the sbatch commands and the 7 categories / 34 pulses / 27,47,15 samples, and tests/remote/test_archive_access.py:42,84,93 plus tests/remote/test_archive_signal_loader.py:281 assert the refusals and the explicit empty result.",
+    "goal": "the goal is a project skill taking an agent from a test article to arrays in hand with units and sampling and no plotting; .claude/skills/archive-signals/SKILL.md:1-193 is that pattern, imas_codex/remote/archive_access.py:58-125 supplies the three paged lookups it names, and sample reads stay in the existing imas_codex/remote/codac_uda.py reader.",
+    "manifest": "read the reviewed run's manifest.md at the run directory; it reports status complete, four commits ending 4c9bd332e, unit-head.log with 54 passed EXIT=0 and negative-control.log with 6 failed EXIT=1, all of which I confirmed in both log files on disk, but its baseline_suite field is empty at manifest.md:20.",
+    "write_paths": "the declared paths are .claude/skills/, imas_codex/remote/, imas_codex/discovery/signals/, tests/remote/, tests/discovery/, the fragment path and a figures directory; the diff touches five paths and every one is inside a declared fence, the discovery paths and the figures directory being unused."
+  },
+  "justifications": {
+    "durability": "the declared mutation in negative-control.log at 0599ef0 reddens six independent assertions \u2014 the three empty-category cases at tests/remote/test_archive_access.py:42 and the three missing/oversized window cases at tests/remote/test_archive_signal_loader.py:281 \u2014 while unit-head.log records the same six passing at the same revision, so the guards fire on the regression they name; the one exception is the vacuum at tests/remote/test_archive_signal_loader.py:355, which no mutation can redden.",
+    "evidence": "unit-head.log names revision 0599ef0, tree and command on its header lines and ends 54 passed EXIT=0 over the whole test_archive_access.py and test_archive_signal_loader.py, and negative-control.log ends 6 failed EXIT=1 with the six ids named; the after arm is recorded in the manifest but the baseline_suite field at manifest.md:20 is empty, so the added-failure pair rests on one arm.",
+    "fit": "the accessor module follows the plain-module shape of imas_codex/discovery/signals/archive_pulses.py:12-32 with module-level Cypher constants and parameter binding, and the skill sits beside the existing .claude/skills/sn-edit/SKILL.md layout, though the load snippet at .claude/skills/archive-signals/SKILL.md:128 depends on imports made in an earlier snippet.",
+    "goal_fidelity": ".claude/skills/archive-signals/SKILL.md:52-91 walks category search to pulse listing and :120-167 loads bounded windows with unit and time base, all values invented (DEMO), and no plotting appears anywhere in the file.",
+    "reuse": "searches for 'SKIP $offset', 'next_offset' and a page helper across imas_codex/ found no owner for the paged metadata envelope, so imas_codex/remote/archive_access.py:26 is a first implementation; the one overlap is find_signals at :109 against the owner at imas_codex/graph/domain_queries.py:27, which has no name/accessor predicate, so the addition is a new predicate rather than a re-implementation and is recorded as a finding.",
+    "scope_discipline": "all five paths in the diff \u2014 the skill, the fragment, imas_codex/remote/archive_access.py and the two test files \u2014 fall inside the fences declared at the reviewed manifest's orientation_write_paths, and the diff carries no generated model, figure or plan edit."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is a project skill taking an agent from a test article to arrays in hand with units and sampling and no plotting; .claude/skills/archive-signals/SKILL.md:1-193 is that pattern, imas_codex/remote/archive_access.py:58-125 supplies the three paged lookups it names, and sample reads stay in the existing imas_codex/remote/codac_uda.py reader.\nVERDICT done_when: the done_when asks for a fresh-worker live run, the commands and counts recorded, tests over the documented accessor calls and two refusals; docs/evidence/fragments/codac-uda-signals/signal-accessor-skill.html records the sbatch commands and the 7 categories / 34 pulses / 27,47,15 samples, and tests/remote/test_archive_access.py:42,84,93 plus tests/remote/test_archive_signal_loader.py:281 assert the refusals and the explicit empty result.\nVERDICT write_paths: the declared paths are .claude/skills/, imas_codex/remote/, imas_codex/discovery/signals/, tests/remote/, tests/discovery/, the fragment path and a figures directory; the diff touches five paths and every one is inside a declared fence, the discovery paths and the figures directory being unused.\nVERDICT manifest: read the reviewed run's manifest.md at the run directory; it reports status complete, four commits ending 4c9bd332e, unit-head.log with 54 passed EXIT=0 and negative-control.log with 6 failed EXIT=1, all of which I confirmed in both log files on disk, but its baseline_suite field is empty at manifest.md:20.\nVERDICT diff: read 47b051916, de63c0acd, 0599ef007 and 4c9bd332e against base e0798a406; 604 insertions over five files \u2014 a new 125-line accessor module, a new test file, 109 appended lines in an existing test file, a 193-line skill and an 83-line evidence fragment \u2014 and imas_codex/remote/codac_uda.py is untouched.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: .claude/skills/archive-signals/SKILL.md:52-91 walks category search to pulse listing and :120-167 loads bounded windows with unit and time base, all values invented (DEMO), and no plotting appears anywhere in the file.\nSCORE evidence: 16\nJUSTIFICATION evidence: unit-head.log names revision 0599ef0, tree and command on its header lines and ends 54 passed EXIT=0 over the whole test_archive_access.py and test_archive_signal_loader.py, and negative-control.log ends 6 failed EXIT=1 with the six ids named; the after arm is recorded in the manifest but the baseline_suite field at manifest.md:20 is empty, so the added-failure pair rests on one arm.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all five paths in the diff \u2014 the skill, the fragment, imas_codex/remote/archive_access.py and the two test files \u2014 fall inside the fences declared at the reviewed manifest's orientation_write_paths, and the diff carries no generated model, figure or plan edit.\nSCORE durability: 18\nJUSTIFICATION durability: the declared mutation in negative-control.log at 0599ef0 reddens six independent assertions \u2014 the three empty-category cases at tests/remote/test_archive_access.py:42 and the three missing/oversized window cases at tests/remote/test_archive_signal_loader.py:281 \u2014 while unit-head.log records the same six passing at the same revision, so the guards fire on the regression they name; the one exception is the vacuum at tests/remote/test_archive_signal_loader.py:355, which no mutation can redden.\nSCORE fit: 17\nJUSTIFICATION fit: the accessor module follows the plain-module shape of imas_codex/discovery/signals/archive_pulses.py:12-32 with module-level Cypher constants and parameter binding, and the skill sits beside the existing .claude/skills/sn-edit/SKILL.md layout, though the load snippet at .claude/skills/archive-signals/SKILL.md:128 depends on imports made in an earlier snippet.\nSCORE reuse: 12\nJUSTIFICATION reuse: searches for 'SKIP $offset', 'next_offset' and a page helper across imas_codex/ found no owner for the paged metadata envelope, so imas_codex/remote/archive_access.py:26 is a first implementation; the one overlap is find_signals at :109 against the owner at imas_codex/graph/domain_queries.py:27, which has no name/accessor predicate, so the addition is a new predicate rather than a re-implementation and is recorded as a finding.\nFINDING tests/remote/test_archive_signal_loader.py:355 non-blocking: `assert pulse[\"end_ns\"] is None` reads back the dict the test built at line 337 and no code under test mutates it, so it holds whatever the loader does and guards nothing; the real guard is the refusal asserted at line 351.\nFINDING .claude/skills/archive-signals/SKILL.md:128 non-blocking: the load snippet imports only numpy and ArchiveReader/ArchiveSignalLoader at line 121, then uses os, Path, json and GraphClient, which exist only in the earlier discovery snippet, so an agent copying the load block alone hits NameError at line 128 before any read.\nFINDING imas_codex/remote/archive_access.py:109 non-blocking: find_signals opens a second FacilitySignal lookup beside imas_codex/graph/domain_queries.py:27, which owns the find-signals capability and is the one bound into the REPL namespace at imas_codex/llm/server.py:1575; the exact name/accessor predicate could have been a mode of the owner, and two functions of the same name now carry different semantics.\nFINDING imas_codex/remote/archive_access.py:14 non-blocking: the coalesce(c.description, '') branch searches a property no writer sets \u2014 imas_codex/remote/pulse_catalogue.py:58 constructs PulseCategory with id, facility_id, archive and name only \u2014 so that half of the documented match surface cannot fire and every returned category description is null, while SKILL.md:109 tells the agent to select categories from their names/descriptions.\nFINDING manifest.md:20 non-blocking: the reviewed run records no baseline_suite arm, so an added-failure derivation rests on the after arm alone; the after arm is complete and green at 0599ef0 with zero failures, but the revision pair the record contract names is half absent.",
+  "review_node": "review-of-signal-accessor-skill-4c9bd332e01e",
+  "review_run_id": "r-20261117T054506525289-review-of-signal-accessor-skill-4c9bd332e01e",
+  "reviewed_base_sha": "e0798a4062a2ef75d221bf661c1c1db1f8f76edc",
+  "reviewed_head_sha": "4c9bd332e01e8b51f4a12cfcf184ea52e4ab9e81",
+  "reviewed_run_id": "r-20261117T050133242863-signal-accessor-skill",
+  "reviewer": {
+    "backend": "native",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T054506525289-review-of-signal-accessor-skill-4c9bd332e01e"
+  },
+  "scores": {
+    "durability": 18,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 12,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T05:56:54.472840+00:00",
+  "total": 102
+}
