@@ -1,0 +1,18 @@
+<section id="grouped-coil-current-evidence">
+  <h3>Coil-current candidates grouped by test kind</h3>
+  <figure>
+    <img src="/imas-codex/figures/codac-uda-signals/example-request/coil-current-profiles.svg" alt="Two panels compare DC-link current candidates over pulse windows, with fast-discharge categories grouped together.">
+    <figcaption>DC-link current candidates A and B over 34 pulse windows, arranged into four groups from seven categories. The two groups with returned samples are drawn; zero-current discharge checks (9 windows) and unclassified category A (10 windows) returned no samples and are omitted. These empty results do not establish zero current. The discharge labels are inferred from category-name tokens, consistent with the documented test activities; no document confirms the naming convention. Names that do not establish a test kind remain separate, unclassified groups. Current is in kA; time is measured from each window's own start. The upper time axis is linear. The lower time axis is linear to 0.01 ks and logarithmic beyond, so both short and long windows can be read. Pulse symbols identify windows within each panel, with numbering local to that group. Blue solid and purple dashed segments show the returned envelope bin means of A and B. All returned bins have equal minimum, mean and maximum, so separate envelope extents would add no information. The 80 bins with matching timestamps and identical envelope values are drawn once in blue; differing measurements remain separate. Lines join returned bins only within adjacent successful, nonempty read tiles; missing and timed-out tiles break the traces. Grey marks below zero locate the 3 timed-out reads in the populated panels; 11 further timeouts occurred in the omitted unclassified group. These are archived-sample summaries, not verified raw cadence or time-weighted current. Windows may overlap and are not independent tests. The DC link shares the coil's series path while the supply is connected; during fast discharge these measurements may not follow coil current, and the available documents do not bind either exact measurement to that role.</figcaption>
+  </figure>
+  <table>
+    <thead><tr><th>Group</th><th>Categories</th><th>Pulse windows</th><th>With samples</th><th>Without samples</th></tr></thead>
+    <tbody>
+      <tr><td>Unclassified category B</td><td>1</td><td>7</td><td>7</td><td>0</td></tr>
+      <tr><td>Fast-discharge tests</td><td>3</td><td>8</td><td>8</td><td>0</td></tr>
+      <tr><td>Zero-current discharge checks</td><td>2</td><td>9</td><td>0</td><td>9</td></tr>
+      <tr><td>Unclassified category A</td><td>1</td><td>10</td><td>0</td><td>10</td></tr>
+    </tbody>
+  </table>
+  <p>Checked export: 14 × 7.2 in canvas, declaring 31.1 × 16 cm; two populated panels; one figure-level legend. Both exports passed the repository save function's clipping, text-overlap and direct-label checks. The SVG was rasterised to 1400 × 720 pixels and both public and private renders were inspected: labels fit, pulse symbols and measurement styles remain visible, and empty panels are absent.</p>
+  <p>Privacy check: the entire SVG byte stream, including metadata and identifiers, was searched for 96 distinct private identifiers from the selection and category/pulse bindings, including measurement tags and component sequences: 0 hits. The same search against the private figure detected 2 identifiers, satisfying the detection control. The evidence fragment also contains zero matches. No archive read, graph write or product-source change was made. Publication of measured profiles remains for the lead's decision.</p>
+</section>
