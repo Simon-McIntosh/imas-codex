@@ -35,6 +35,16 @@
       "note": "The next version records that the assistant read the signal list as a spreadsheet and the others as PDF files, and gives a closing path for a file fetched in another format: it is reported with its content type and counts as not fetched for the mandatory pair.",
       "reason": "",
       "when": "2026-11-17T16:18:13.063953+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "b162d2192f92a529cd33d9df448825a4e6c764b2",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The next version asks for size and digest only for documents fetched, and for status and content type for those the host refuses.",
+      "reason": "",
+      "when": "2026-11-17T16:18:18.290489+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The next version records that the assistant read the signal list as a spreadsheet and the others as PDF files, and gives a closing path for a file fetched in another format: it is reported with its content type and counts as not fetched for the mandatory pair.",
       "reason": "",
       "when": "2026-11-17T16:18:13.063953+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "b162d2192f92a529cd33d9df448825a4e6c764b2",
+      "commit_basis": "edit",
+      "note": "The next version asks for size and digest only for documents fetched, and for status and content type for those the host refuses.",
+      "reason": "",
+      "when": "2026-11-17T16:18:18.290489+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261117T155928688667-plan-review-of-icp-api-access.json",
