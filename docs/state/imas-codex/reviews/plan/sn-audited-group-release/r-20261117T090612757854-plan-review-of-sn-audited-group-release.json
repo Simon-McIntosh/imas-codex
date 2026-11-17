@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T09:06:58.223Z",
+  "dispatched_at": "2026-11-17T09:06:46Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:37",
+      "id": "done_when-1",
+      "reason": "without a stated recall and false-alarm bound, the node composing \u00a74's audit cannot tell whether it may start, and the bar's own provenance is unverifiable.",
+      "text": "\u00a73 fixes the bar from \"the reader or readers that re-reading shows fit to decide\" but names no threshold on that measurement, while the ruling that opens the section calls the \u00a71 readers \"too weak\" on the same kind of evidence; \"fit to decide\" is therefore satisfied by any reader the lead names, so \u00a74's \"readers ruled fit to decide in \u00a73\" (docs/plans/sn-audited-group-release.html:41) inherits a selection that cannot be shown right or wrong",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:41",
+      "id": "done_when-2",
+      "reason": "without that route the \u00a74 node has no declared terminal state other than an overrun or a forced cut, and the bar becomes a threshold nothing is permitted to fail.",
+      "text": "\u00a74's only declared outcome is that the first group meets the bar and is cut, so a first group that cannot reach the bar declares nothing the node can land, whereas \u00a75 names the reported-and-not-cut route for exactly that case; the USD 40 spend ceiling appears only in the release notes, which a group that is not cut never produces",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "62d54dc328f9c9498f05a7ac8d67c2fbb604db59",
+  "plan_fingerprint": "9f9a600bccdcc601e74cb63089d06d23abc7237f847facc594da7b283a1eb94d",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 15,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T090612757854-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "453c22aad3c5b7778a6bb69de10532db5ca46e70",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited plan section, the evidence page and the fixed seven-class list resolve (the class keys appear in blind-audit.json), and \u00a72's census figures reconcile with the audit frame: 3,193 in the 23 audited groups plus 50 in the sub-20 groups plus 23 with no domain = 3,266.",
+    "done_when": "two findings \u2014 \u00a73 fixes the deciding readers by a fitness claim with no measurable threshold, and \u00a74 declares only the cut outcome for the first group.",
+    "evidence_paths": "pass \u2014 \u00a71-\u00a75 commit their pages and data under docs/evidence/fragments/sn-audited-group-release/, which exists and is populated (blind-audit.json, sagr-blind-audit.html); no scratchpad or node-local path is named anywhere in the plan.",
+    "naming": "pass \u2014 no plan labels, stage names, ticket numbers or version tags reach a symbol, file or comment, and the domain terms the plan uses (shared wording, signed edit path, physics-domain group) resolve in the repository.",
+    "reasoning": "pass \u2014 the stated root cause matches the cited evidence (174 of 339 sampled names defective by either reader, 84 by both, kappa 0.4435 and the per-class counts all verified in blind-audit.json, and the seven-class list carries wrong_physics_domain and duplicate_of_live_name, so \u00a72's and \u00a74's inputs exist), every endpoint is obtainable from the live graph and the committed audit, and no section names a code path, step sequence, formula to implement or function to call.",
+    "single_goal": "pass \u2014 each section names one deliverable, and \u00a74's repair comparison is explicitly declared evidence that neither closes nor holds the section.",
+    "wiring": "pass \u2014 every declared depends-on resolves (s2\u2192s1; s3\u2192s1,s2; s5\u2192s4) and s4's cross-plan dependency sn-definitions-by-construction#s11 resolves at docs/plans/sn-definitions-by-construction.html:155 with status done, matching \u00a74's use of the enclosing-structure reading."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "aa90814bf7fe5b0dc6fc4403fa5241ca76667bad628c7228a5c12b5713272289",
+    "s3": "a3b2c8f2a4f28cb91ff55dc17fb3c2ccbbc457ea202014c5422e465c227665c8",
+    "s4": "87bc53d65ca3b964321a7281242d11c92f9f3aacdf03535d32dc9501829b6b4e",
+    "s5": "a2f0b01700b8c8cb79bcd7145c31c0af85e63c939ec7ef4ebb63bdf44d51035d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T09:23:01.552646+00:00",
+  "total": null
+}
