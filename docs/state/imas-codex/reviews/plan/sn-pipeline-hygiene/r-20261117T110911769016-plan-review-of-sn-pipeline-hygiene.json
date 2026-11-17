@@ -1,0 +1,60 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T11:11:48.659Z",
+  "dispatched_at": "2026-11-17T11:10:08Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261117T110911769016-plan-review-of-sn-pipeline-hygiene/plan.html:92",
+      "id": "done_when-1",
+      "reason": "the rule and its control must be scoped to a live, non-exhausted name (or to the dead-end stages the ruling covers), otherwise the worker either breaks a passing test or writes a control that cannot fire.",
+      "text": "\u00a711 makes the rule \"returns a held source to the pool only when the name holding it is exhausted\" and orders \"a test [that] fails when the pass is allowed to take the source of a name that is not exhausted\", but the pass it names is `reconcile_source_status_liveness`, whose terminal set is `superseded`, `exhausted` and `contested` (`imas_codex/standard_names/graph_store/graph_foundation.py:108-114`), which deliberately resets a `composed` source whose only target is a `superseded` name back to `extracted` (`graph_audits.py:841-922`; that behaviour is asserted today by `tests/standard_names/test_source_revival.py:251` (plants `name_stage = 'superseded'`) and `:423` (`assert state[\"status\"] == \"extracted\"`), so the stated negative control fires on correct behaviour and a literal implementation would strand every superseded name's source out of the generation pool",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-pipeline-hygiene/r-20261117T110911769016-plan-review-of-sn-pipeline-hygiene/plan.html:92",
+      "id": "reasoning-1",
+      "reason": "the section is dispatched on that one log line, and committing the excerpt or quoting its exact message is what pins the pass the retirement rule is to be applied to.",
+      "text": "\u00a711 opens on the pass whose \"log reads 24 returned to 'extracted'\" and identifies it as \"the one that reconciles each source's status with whether a live name still holds it\", but that pass logs `\"%d returned to extracted\"` with no quotes, and the only quoted occurrences are `\"%d source(s) returned to 'extracted' so compose rewrites the missing prose\"` (`graph_audits.py:2345`, the descriptionless pass \u00a711 itself calls a different path that keeps its behaviour) and `\"%d of %d source(s) returned to 'extracted' \u2026\"` (`loop.py:1872,1891`); no file under `docs/evidence/fragments/sn-pipeline-hygiene/` carries the line, so a worker cannot tell which of four maintenance passes emitted the count and the attribution rests entirely on paraphrase",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "d186a7965a076250525d6bc1611095365624296c",
+  "plan_fingerprint": "b491d83b3979f411966e40fb82a0aa2b5a9671239cd8fa75e57aa6fda36e1e29",
+  "plan_slug": "sn-pipeline-hygiene",
+  "plan_version": 56,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T110911769016-plan-review-of-sn-pipeline-hygiene",
+  "reviewed_blob_sha": "2d69a8475adac7492825e9aae33b4ae4ff65df2d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the only paths the two units name (`tests/standard_names`, `docs/evidence/fragments/sn-pipeline-hygiene/`) exist at head; there is no href in either unit to resolve.",
+    "done_when": "a finding \u2014 plan.html:92 requires the named reconcile pass to return a held source \"only when the name holding it is exhausted\" and a test that fails when the pass takes the source of \"a name that is not exhausted\", which is a state the pass must keep handling for `superseded` names.",
+    "evidence_paths": "pass \u2014 both units commit their evidence under `docs/evidence/fragments/sn-pipeline-hygiene/`, a directory that exists in the repository, not a scratch or node-local path.",
+    "naming": "pass \u2014 neither unit names a symbol, file, stage label or plan tag in a way a later reader would need this plan to decode; the pass is described by what it does.",
+    "reasoning": "a finding \u2014 \u00a711's root cause is carried by a quoted log line that no emitter in the tree reproduces verbatim and that no committed artifact contains, so the pass that wrote it is identified only by paraphrase.",
+    "single_goal": "pass \u2014 \u00a711's one deliverable is the invariant on the recycling pass plus the clean-up of the names that pass already emptied; \u00a712's one deliverable is containment of a scoped run.",
+    "wiring": "pass \u2014 \u00a711 and \u00a712 declare no dependency the snapshot contradicts; \u00a712's \"the pass above\" refers to the \u00a711 pass, the two are separately implementable, and no data-links relationship in the composed snapshot points at a wrong node."
+  },
+  "section_digests": {
+    "_document": "645e0d26c10adf6b7710052b78d34f4d4b29176a3f92d1b92e56e8c5cc2f07c7",
+    "s1": "6c7ce003b6eaddfc625831d909473de570f043c2ff5449f741bcb6f21e026024",
+    "s10": "74688d482ee00f0f28ed1052be32bb9bb31527aa48192d5a4a5fc24b9676c610",
+    "s11": "31aabfa82ba690ef1e2e66949d44f75069d4d806a79db41501227dd94bc2a64b",
+    "s12": "1ff22a20672ed136c4ed617c41e5313f6ab56bb1e4e59eb195d56f5192a06306",
+    "s2": "e9d021306c93e843cfa1ad6c6c66f401b766ba90335edf46b9827be8671de3e5",
+    "s3": "a205991a491d3ca44d31ed4fd17f44659f56c383526f7ed4ee27ad22f9520561",
+    "s4": "e19655648e3f9a005df4834ac35f5fb2bc214b6707a17a98b1218f40d3cd2c7d",
+    "s5": "22355c76f1a73f28bb10c96b7844c864ff49c695fe02732dc5952823ab5cfd70",
+    "s6": "8159bf6d6723b63ae9ea529cb516e69681047379b40e53f1271a4f47c9b0194f",
+    "s7": "a32106acdcff60e7fdf2ad612ff1962f13bfa360ce0b1a5c122f5be40f3b7845",
+    "s8": "1b61eb49b7e3985650f5e8b81e1658ef1d47c219e7f293bc18878de8199fdfdb",
+    "s9": "9670782eb7a3f85867e8bd04c827e01638e499e80e222de614f4dd9af22271ba"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T11:24:12.119977+00:00",
+  "total": null
+}
