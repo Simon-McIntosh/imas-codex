@@ -1,0 +1,218 @@
+{
+  "generated_at": "2026-11-17",
+  "command": "imas-codex sn sourceless --json",
+  "count": 23,
+  "baseline_count": 10,
+  "baseline_source": "docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json",
+  "new_since_baseline": [
+    "diamagnetic_momentum_coefficient",
+    "gradient_of_electron_pressure",
+    "implicit_ion_particle_source_rate",
+    "implicit_ion_state_particle_source_rate",
+    "incident_energy_flux_at_wall",
+    "maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate",
+    "molecular_fraction",
+    "momentum_coefficient_due_to_diamagnetic_drift",
+    "neutral_species_fraction",
+    "nuclear_source_rate_due_to_beam_beam_fusion",
+    "plasma_velocity_due_to_diamagnetic_drift",
+    "poloidal_straight_field_line_angle",
+    "total_power_of_plant_system"
+  ],
+  "names": [
+    {
+      "id": "beta",
+      "origin": "derived",
+      "name_stage": "accepted",
+      "derived_parent": true,
+      "live_children": 4,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+      "origin": "pipeline",
+      "name_stage": "accepted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "deposited_power_at_divertor_target",
+      "origin": "pipeline",
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 1,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "diamagnetic_momentum_coefficient",
+      "origin": "pipeline",
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "electron_temperature_at_plasma_boundary",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "gradient_of_electron_pressure",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "implicit_ion_particle_source_rate",
+      "origin": "pipeline",
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "implicit_ion_state_particle_source_rate",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "incident_energy_flux_at_wall",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "line_averaged_neon_density",
+      "origin": null,
+      "name_stage": "pending",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "molecular_fraction",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "momentum_coefficient_due_to_diamagnetic_drift",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "neutral_species_fraction",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "nuclear_source_rate_due_to_beam_beam_fusion",
+      "origin": "pipeline",
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "plasma_velocity_due_to_diamagnetic_drift",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "poloidal_straight_field_line_angle",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "poloidal_total_momentum_convection_velocity",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "radius_of_soft_xray_detector",
+      "origin": null,
+      "name_stage": "pending",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "ratio_of_diamagnetic_vorticity_to_major_radius",
+      "origin": null,
+      "name_stage": "pending",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "total_power_of_plant_system",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": false
+    },
+    {
+      "id": "voltage_of_diagnostic_antenna",
+      "origin": null,
+      "name_stage": "exhausted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": true
+    },
+    {
+      "id": "volume_averaged_electron_number_density_over_scrape_off_layer",
+      "origin": "pipeline",
+      "name_stage": "accepted",
+      "derived_parent": false,
+      "live_children": 0,
+      "baseline_2026_11_15": true
+    }
+  ],
+  "former_source_of_new_names": {
+    "result": "unrecoverable_from_the_graph",
+    "mechanism": "the recycling step deletes the PRODUCED_NAME edge, clears produced_sn_id/composed_at on the source and removes the source id from the name's source_paths cache, and records no StandardNameChange row for the pass; a query over StandardNameChange for the 13 names returns no 2026-11-17 event and over StandardNameSource returns no mirror or edge",
+    "present_status_of_former_source": "unknown; the source nodes are not identifiable from the name after the step"
+  },
+  "stage_counts": {
+    "accepted": 3,
+    "exhausted": 17,
+    "pending": 3
+  }
+}
