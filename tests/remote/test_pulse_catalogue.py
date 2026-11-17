@@ -117,6 +117,29 @@ def test_native_listing_error_is_not_reported_as_empty(operation):
         native.dispatch(client, {"operation": operation, "pattern": "DEMO:ACTIVE"})
 
 
+def test_native_pulse_catalogue_overflow_is_refused():
+    client = Mock()
+    client.getErrorCode.return_value = 0
+    client.getPulses2.return_value = [object(), object()]
+    with pytest.raises(native.ReadError, match="pulse catalogue exceeds limit"):
+        native.dispatch(
+            client, {"operation": "pulses", "pattern": "DEMO:ACTIVE", "limit": 1}
+        )
+    client.getPulseCategories.assert_not_called()
+    client.fetchData.assert_not_called()
+
+
+@pytest.mark.parametrize("categories", [[""], ["DEMO:ACTIVE", "DEMO:ACTIVE"]])
+def test_native_category_identity_refusal(categories):
+    client = Mock()
+    client.getErrorCode.return_value = 0
+    client.getPulseCategories.return_value = categories
+    with pytest.raises(native.ReadError, match="empty or duplicate identities"):
+        native.dispatch(client, {"operation": "pulse_categories"})
+    client.getPulses2.assert_not_called()
+    client.fetchData.assert_not_called()
+
+
 def test_open_pulse_requires_explicit_window_before_data_read():
     reader = Mock(archive="demo:codac_uda:slow")
     graph = Mock()

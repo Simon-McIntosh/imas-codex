@@ -5,15 +5,9 @@ from __future__ import annotations
 from collections import Counter
 from collections.abc import Sequence
 
+from imas_codex.discovery.signals.scanners import codac_uda as catalogue
 from imas_codex.graph.models import ArchiveEndpoint, Pulse, PulseCategory
 
-ARCHIVE_QUERY = """
-MATCH (f:Facility {id: $facility})
-MERGE (a:ArchiveEndpoint {id: $archive.id})
-SET a += $archive
-MERGE (a)-[:AT_FACILITY]->(f)
-RETURN count(a) AS written
-"""
 CATEGORY_QUERY = """
 MATCH (f:Facility {id: $facility})
 MATCH (a:ArchiveEndpoint {id: $archive, facility_id: $facility, excluded: false})
@@ -94,7 +88,7 @@ def import_pulses(
             raise ValueError("pulse memberships must reference listed categories")
         if pulse.end_ns is not None and pulse.end_ns < pulse.start_ns:
             raise ValueError("pulse end precedes its start")
-    created = 0
+    created = catalogue.persist_archive_endpoints(graph, archive.facility_id, [archive])
 
     def write(tx, statement, expected, **parameters):
         result = tx.run(statement, **parameters)
@@ -107,13 +101,6 @@ def import_pulses(
         return summary.counters.nodes_created
 
     with graph.session() as session:
-        created += session.execute_write(
-            write,
-            ARCHIVE_QUERY,
-            1,
-            facility=archive.facility_id,
-            archive=archive.model_dump(mode="json"),
-        )
         for statement, items in [(CATEGORY_QUERY, categories), (PULSE_QUERY, pulses)]:
             for offset in range(0, len(items), batch_size):
                 batch = items[offset : offset + batch_size]

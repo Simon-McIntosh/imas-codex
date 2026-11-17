@@ -95,19 +95,40 @@ def _save(path: Path, state: dict) -> None:
     temporary.replace(path)
 
 
-def _persist_archives(facility: str, archives: list[ArchiveEndpoint]) -> None:
-    from imas_codex.discovery.signals.parallel import persist_data_access
+def persist_archive_endpoints(
+    graph: GraphClient, facility: str, archives: list[ArchiveEndpoint]
+) -> int:
+    """Upsert archive endpoints and return acknowledged created-node counters.
 
-    with GraphClient() as graph:
-        rows = graph.query(
+    Signal and pulse catalogues share this writer without requiring a pulse
+    import to create signal access methods or data source bindings.
+    """
+    if not archives:
+        return 0
+
+    def write(tx):
+        result = tx.run(
             ARCHIVE_QUERY,
             facility=facility,
             archives=[item.model_dump(mode="json") for item in archives],
         )
-        if not rows or rows[0]["written"] != len(archives):
+        row = result.single()
+        summary = result.consume()
+        if row is None or row["written"] != len(archives):
             raise RuntimeError(
                 "archive write was not acknowledged; facility must exist"
             )
+        return summary.counters.nodes_created
+
+    with graph.session() as session:
+        return session.execute_write(write)
+
+
+def _persist_archives(facility: str, archives: list[ArchiveEndpoint]) -> None:
+    from imas_codex.discovery.signals.parallel import persist_data_access
+
+    with GraphClient() as graph:
+        persist_archive_endpoints(graph, facility, archives)
     bindings = []
     for archive in archives:
         if archive.excluded:
