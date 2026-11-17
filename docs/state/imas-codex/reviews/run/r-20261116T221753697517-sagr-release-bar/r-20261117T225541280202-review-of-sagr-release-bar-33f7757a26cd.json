@@ -8,6 +8,13 @@
     "imas_codex/standard_names/catalog_release.py:2505"
   ],
   "completed_at": "2026-11-17T22:56:29.808Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-sagr-release-bar-33f7757a26cd",
+      "recorded_at": "2026-11-17T23:43:19.953262+00:00"
+    }
+  },
   "dispatched_at": "2026-11-17T22:56:10Z",
   "findings": [
     {
