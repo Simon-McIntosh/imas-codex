@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T15:46:10.223Z",
+  "dispatched_at": "2026-11-17T15:45:54Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/icp-api-access/r-20261117T154516547716-plan-review-of-icp-api-access/plan.html:61",
+      "id": "done_when-1",
+      "reason": "without a named known-present read the failure form is unclosable, which is exactly the case that sends the section's first result back to the lead, so the plan must either name the resource (or drop the arm) or the worker stalls at the first refusal.",
+      "text": "\u00a75's failure form requires \"a known-present read through the same session succeeds, to show the session works; nothing further is requested from the host\", yet the section itself establishes that no read on this host is known present (\"this client has never requested one\" any of the seven listed documents) and that only listed identities may be requested at all; if the signal list or the functional specification fails, the control therefore has either no permitted target or is itself the further request the same clause forbids. \u00a74 closed the analogous arm with a plant-structure read that exists independently of the document, and \u00a75 has no such independent resource, so a worker whose first fetch fails can neither produce the closure the section demands nor record the not-done verdict the same clause requires",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/icp-api-access/r-20261117T154516547716-plan-review-of-icp-api-access/plan.html:61",
+      "id": "done_when-2",
+      "reason": "the section must name which listed documents the PDF and spreadsheet forms apply to, or add them to the mandated pair, otherwise its closing verdict is reachable without the deliverable its own Delivers and its downstream consumer require.",
+      "text": "\u00a75's success form makes only the signal list and the functional specification mandatory and lets each of the other five be merely \"reported with its outcome\", yet the same form requires \"each PDF is shown to be a PDF by its file signature and page count, and the spreadsheet's sheet names and row counts are recorded\", while the Delivers promises \"reads a spreadsheet's rows through the project's existing spreadsheet extraction\"; nothing ties the PDF or the spreadsheet to the two mandated documents, so the section can close as done having fetched neither a PDF nor the spreadsheet. The blocked plan's \u00a74 reads \"the rows of its signal list and data file\" from the store this section fills, so a done verdict reached without them propagates as a false satisfied dependency",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "2c64f7f2f3664eb78f0e4e1ef5045b2321b3569f",
+  "plan_fingerprint": "f1cb1ce248406339d737206ddc26a1172e90d0974eaba5a4a3efcd853f2e2a0c",
+  "plan_slug": "icp-api-access",
+  "plan_version": 26,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T154516547716-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "3f5202ed18b47a94ba47407e5db30dbfc2366b97",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `icp-api-access#s2` and `icp-api-access#s4` resolve to sections that exist, \u00a75's prose references \"section 2\" and \"section 4\" resolve, and the decision anchor for s5 resolves.",
+    "done_when": "two findings \u2014 \u00a75's failure form requires a successful known-present read from the document host while forbidding any further request to it, and its success form requires PDF and spreadsheet evidence for documents it lets be merely \"reported with its outcome\".",
+    "evidence_paths": "pass \u2014 \u00a75 places the receipt in private storage outside the repository and the counts in the landing record, and the evidence fragments its sibling sections cite (`docs/evidence/fragments/icp-api-access/icp-read-only-client.html`, `idm-document-fetch.html`, `icp-plant-structure-and-component-reads.html`) all exist.",
+    "naming": "pass \u2014 \u00a75 introduces no symbol, file or comment; its dates and section references live in plan prose only.",
+    "reasoning": "pass \u2014 the root cause matches its evidence (\u00a74's landing comment records 27 GET requests, no other method, and no file from any published route), the 2026-11-17 lead decision the section relies on now exists, the section states plainly that the host serving these files is not yet established and makes that its first result, and it prescribes no code path or function.",
+    "single_goal": "pass \u2014 \u00a75 names one deliverable, the seven named pilot documents fetched into the private store with their metadata and digests; the spreadsheet extraction is the read of one of those documents.",
+    "wiring": "pass \u2014 \u00a75's declared depends-on (`icp-api-access#s2`, `icp-api-access#s4`) both resolve to done sections, the authorising `document-host-read-only` decision carries `data-sections=\"s5\"` and is dated 2026-11-17, and the blocked plan's \u00a74 (`docs/plans/iter-signal-context-and-enrichment.html:58`) now declares `icp-api-access#s5` and is `deferred`."
+  },
+  "section_digests": {
+    "_document": "1faae709ade296dcbe95974b385b004073b5d95eadb304cf33a51e8b6760e967",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "a1b848eb16f85209dbe3346593e0951ac9a6eeaff03616ab372f38f661e7ba96",
+    "s3": "dcfe744278ad8f7b812902b66cbd7c4e6eba42cd9cca8c338b00164b75dd4f55",
+    "s4": "4df24fd8de94abfdf9430b8cc0a70ab71824a0084529a3db2136c0401a52eed6",
+    "s5": "1afbdc60aa8f2354d40f0e609f920c168dbfab62573fa27875efff6d19465eab"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T15:51:06.343450+00:00",
+  "total": null
+}
