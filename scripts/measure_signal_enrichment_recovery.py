@@ -35,6 +35,25 @@ from scripts.refine_signal_enrichment import (
 CALL_RECORD = ContextVar("enrichment_call_record")
 
 
+def check_admission(root, arm, concurrency, lane_document):
+    """Bind the trial's concurrency to a fresh published generation ceiling."""
+    from datetime import UTC, datetime
+
+    lane = json.loads(lane_document.read_text())
+    observed = datetime.fromisoformat(lane["observed_at"].replace("Z", "+00:00"))
+    if not 0 <= (datetime.now(UTC) - observed).total_seconds() <= 120:
+        raise ValueError("local concurrency publication is stale")
+    gate = lane["router_generation_gate"]
+    if gate["paused"] or concurrency > gate["effective_width"]:
+        raise ValueError(
+            "requested concurrency exceeds the published local limit or the gate is paused"
+        )
+    bench.save(
+        root / f"admission-{arm}.json",
+        {"requested_concurrency": concurrency, "lane": lane},
+    )
+
+
 def metrics(records, wall_seconds):
     responses = [response for row in records for response in row["responses"]]
     outputs = [
@@ -86,7 +105,8 @@ def metrics(records, wall_seconds):
     }
 
 
-async def run(root, arm, options, concurrency):
+async def run(root, arm, options, concurrency, lane_document):
+    check_admission(root, arm, concurrency, lane_document)
     model = get_model("discovery-describe")
     if not model.startswith("local/"):
         raise ValueError("the experiment requires the local description seat")
@@ -272,9 +292,16 @@ def main():
     parser.add_argument("--arm", required=True)
     parser.add_argument("--options", type=Path, required=True)
     parser.add_argument("--concurrency", type=int, choices=range(1, 9), default=1)
+    parser.add_argument(
+        "--lane-document",
+        type=Path,
+        default=Path.home() / "public/imas-ambix/lane.json",
+    )
     args = parser.parse_args()
     options = EnrichmentOptions.model_validate(json.loads(args.options.read_text()))
-    asyncio.run(run(args.store, args.arm, options, args.concurrency))
+    asyncio.run(
+        run(args.store, args.arm, options, args.concurrency, args.lane_document)
+    )
 
 
 if __name__ == "__main__":

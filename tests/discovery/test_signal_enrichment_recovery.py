@@ -333,3 +333,43 @@ async def test_pooled_review_cannot_admit_unissued_or_foreign_citation(citation)
     for batch, _, _ in results:
         assert batch.results[0].description == "Cooling temperature"
         assert batch.fallback_indices == [1]
+
+
+@pytest.mark.parametrize(
+    "width,paused,age", [(1, False, 0), (3, True, 0), (3, False, 121)]
+)
+def test_measurement_refuses_unpublished_concurrency(tmp_path, width, paused, age):
+    from datetime import UTC, datetime, timedelta
+
+    from scripts.measure_signal_enrichment_recovery import check_admission
+
+    publication = tmp_path / "lane.json"
+    publication.write_text(
+        json.dumps(
+            {
+                "observed_at": (datetime.now(UTC) - timedelta(seconds=age)).isoformat(),
+                "router_generation_gate": {"effective_width": width, "paused": paused},
+            }
+        )
+    )
+    with pytest.raises(ValueError, match="stale|published"):
+        check_admission(tmp_path, "trial", 3, publication)
+    assert not (tmp_path / "admission-trial.json").exists()
+
+
+def test_measurement_keeps_the_publication_that_admitted_it(tmp_path):
+    from datetime import UTC, datetime
+
+    from scripts.measure_signal_enrichment_recovery import check_admission
+
+    publication = tmp_path / "lane.json"
+    value = {
+        "observed_at": datetime.now(UTC).isoformat(),
+        "router_generation_gate": {"effective_width": 3, "paused": False},
+    }
+    publication.write_text(json.dumps(value))
+    check_admission(tmp_path, "trial", 3, publication)
+    assert json.loads((tmp_path / "admission-trial.json").read_text()) == {
+        "requested_concurrency": 3,
+        "lane": value,
+    }
