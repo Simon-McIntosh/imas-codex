@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import re
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
@@ -136,6 +137,24 @@ class VectorFamily:
     parent_name: str | None = None  # Deterministic ISN parent name (if derivable)
     unit_uniform: bool = True  # Whether all members share a single unit
     units: set[str] = field(default_factory=set)
+
+
+def family_identifier(
+    parent_path: str,
+    family_type: str,
+    members: Sequence[str],
+) -> str:
+    """The published id of a Data Dictionary family.
+
+    ``<parent path>|<family type>|<first eight hex of the sha1 over the member
+    paths joined by "|">>``. Section 2's measurement publishes families under
+    this id and a release ruling lists its exceptions by it, so the framing is
+    a stored identity: a change to the separator, the ordering or the hash
+    silently unmatches every id a ruling already carries. Callers pass the
+    sorted member paths they measured.
+    """
+    digest = hashlib.sha1("|".join(members).encode("utf-8")).hexdigest()[:8]
+    return "|".join([parent_path, family_type, digest])
 
 
 @dataclass

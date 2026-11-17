@@ -2101,7 +2101,10 @@ def _group_family_issues(
     cut together. The family id is the one the group measurement records, so a
     ruling's exception list can name it directly.
     """
-    from imas_codex.standard_names.families import detect_families
+    from imas_codex.standard_names.families import (
+        detect_families,
+        family_identifier,
+    )
 
     path_names: dict[str, set[str]] = {}
     path_unit: dict[str, str] = {}
@@ -2132,8 +2135,9 @@ def _group_family_issues(
         if group not in by_group or len(by_group) < 2:
             continue
         others = sorted(set(by_group) - {group})
-        digest = hashlib.sha1("|".join(member_paths).encode("utf-8")).hexdigest()[:8]
-        family_id = "|".join([family.parent_path, family.family_type, digest])
+        family_id = family_identifier(
+            family.parent_path, family.family_type, member_paths
+        )
         cleared = ruling is not None and (
             family_id in ruling.family_exceptions
             or all(ruling.cut_with(group, other) for other in others)
