@@ -340,49 +340,97 @@ def recorded_calls():
     )
 
 
-async def read_corrected(*, pilot_only):
-    """Use the audit's call owner with the frozen exact source-only user text."""
-    from imas_codex.discovery.base import llm
+def spending_rates(audit):
     from imas_codex.settings import get_openrouter_pricing
 
-    data = frozen_record()
-    audit = audit_module()
-    readers = (*audit.READERS, audit.third_reader())
-    rates_by_model = {}
-    for reader in readers:
+    rates = {}
+    for reader in (*audit.READERS, audit.third_reader()):
         price = get_openrouter_pricing(reader["model"])
         if not price:
-            price = next(
+            candidate = next(
                 p
                 for p in audit.model_selection()["candidates"]
                 if p["model"] == reader["model"]
             )
             price = {
-                "prompt": price["prompt_usd_per_mtok"],
-                "completion": price["completion_usd_per_mtok"],
+                "prompt": candidate["prompt_usd_per_mtok"],
+                "completion": candidate["completion_usd_per_mtok"],
             }
-        rates_by_model[reader["model"]] = {
+        rates[reader["model"]] = {
             "prompt": max(float(price["prompt"]), float(price.get("cache_write") or 0)),
             "completion": float(price["completion"]),
             "request": 0.0,
             "image": 0.0,
         }
-    # Tighten provider-enforced rate ceilings to the audit's recorded text
-    # prices. The generic policy includes a dollar per-request allowance,
-    # which is not a charge any of these token-priced endpoints requires.
-    llm.get_openrouter_max_price = lambda model: rates_by_model[model]
+    # The unfiltered reader is reserved at the shared text policy's upper
+    # token rates, above its listed price. No per-request charge is invented.
+    rates[audit.READERS[0]["model"]].update(prompt=20.0, completion=100.0)
+    return rates
+
+
+def call_bound(packet, system, rates, output_ceiling):
+    input_bound = len((system + packet["reader_visible_text"]).encode()) + 4096
+    return (input_bound * rates["prompt"] + output_ceiling * rates["completion"]) / 1e6
+
+
+def budget_account(records, packets, system, rates):
+    priced = sum(r["cost"] for r in records if r.get("cost") is not None)
+    unknown = [r for r in records if r.get("cost") is None]
+    charges = [
+        r.get(
+            "worst_case_usd",
+            call_bound(
+                packets[r["name"]],
+                system,
+                rates[r["model"]],
+                r.get("output_token_ceiling", 4000),
+            ),
+        )
+        for r in unknown
+    ]
+    return {
+        "priced_usd": priced,
+        "unpriced_calls": len(unknown),
+        "unpriced_reserved_usd": sum(charges),
+        "charged_usd": priced + sum(charges),
+        "ceiling_usd": CEILING,
+    }
+
+
+async def read_corrected(*, pilot_only):
+    """Use frozen packets and the audit call owner; reserve one call at a time."""
+    from imas_codex.discovery.base import llm
+
+    data = frozen_record()
+    audit = audit_module()
+    readers = (*audit.READERS, audit.third_reader())
+    rates = spending_rates(audit)
+    original_build = llm._build_kwargs
+
+    def build_kwargs(*args, **kwargs):
+        built = original_build(*args, **kwargs)
+        model = args[0] if args else kwargs["model"]
+        if model == audit.READERS[0]["model"]:
+            built.get("extra_body", {}).pop("provider", None)
+        return built
+
+    llm._build_kwargs = build_kwargs
+    # Keep the two readers whose price filters admitted calls on their known
+    # bounds. The first reader's filter is removed by the narrow wrapper above.
+    llm.get_openrouter_max_price = lambda model: rates[model]
     original_call = llm.acall_llm_structured
+    ceilings = {"A": 4000, "B": 8000, "C": 4000}
 
     async def bounded_call(**kwargs):
-        kwargs["output_token_ceiling"] = audit.MAX_TOKENS * 2
+        seat = next(r["seat"] for r in readers if r["model"] == kwargs["model"])
+        kwargs["max_tokens"] = ceilings[seat]
+        kwargs["output_token_ceiling"] = ceilings[seat]
+        kwargs["max_retries"] = 1
         return await original_call(**kwargs)
 
     llm.acall_llm_structured = bounded_call
     audit.assert_readers_not_pipeline(readers)
     packets = {p["id"]: p for p in source_packets(data)}
-    # Preserve the original rendered packet byte for byte; only the system
-    # omission instruction differs. The call still owns schema, retries,
-    # token cap, prompt blindness, receipt fields and service attribution.
     audit.render_user_prompt = lambda row: row["reader_visible_text"]
     order = reading_order(data)
     system = audit.system_prompt()
@@ -393,17 +441,17 @@ async def read_corrected(*, pilot_only):
             "readers": readers,
             "blind_commit": BLIND_COMMIT,
             "order": order,
-            "provider_rate_ceilings": rates_by_model,
-            "output_token_ceiling": audit.MAX_TOKENS * 2,
+            "spend_reservation_rates": rates,
+            "output_token_ceilings": ceilings,
+            "provider_filter_removed": ["A"],
+            "max_attempts_per_call": 1,
         },
     )
     records = recorded_calls()
-    assert not any(r.get("error") or r.get("cost") is None for r in records), (
-        "An unpriced or failed call requires adjudication before retry"
+    done = {(r["seat"], r["name"]) for r in records if not r.get("error")}
+    assert len(done) == sum(not r.get("error") for r in records), (
+        "Duplicate successful call"
     )
-    spent = sum(r["cost"] for r in records)
-    done = {(r["seat"], r["name"]) for r in records}
-    assert len(done) == len(records), "Duplicate billed call"
     if not pilot_only:
         pilot = load(RUN / "pilot.json")
         assert pilot["complete"] and pilot["projected_usd"] <= CEILING, (
@@ -412,74 +460,80 @@ async def read_corrected(*, pilot_only):
         assert pilot["names"] == order[:6]
     names = order[:6] if pilot_only else order
     for index, name in enumerate(names):
-        todo = [r for r in readers if (r["seat"], name) not in done]
-        reserves = []
-        for reader in todo:
-            rates = rates_by_model[reader["model"]]
-            # UTF-8 bytes bound text tokens conservatively, with schema and
-            # message overhead. Two attempts use at most 4000 + 8000 output
-            # tokens, as bounded by the shared call's immutable ceiling.
-            input_bound = (
-                len((system + packets[name]["reader_visible_text"]).encode()) + 4096
+        for reader in readers:
+            if (reader["seat"], name) in done:
+                continue
+            account = budget_account(records, packets, system, rates)
+            worst = call_bound(
+                packets[name], system, rates[reader["model"]], ceilings[reader["seat"]]
             )
-            reserves.append(
-                (
-                    2 * input_bound * rates["prompt"]
-                    + 3 * audit.MAX_TOKENS * rates["completion"]
-                )
-                / 1e6
+            save(
+                RUN / "spend-status.json",
+                account
+                | {
+                    "next_name": name,
+                    "next_reader": reader["seat"],
+                    "next_call_bound_usd": worst,
+                },
             )
-        assert spent + sum(reserves) <= CEILING, (
-            f"Cannot reserve bounded calls within USD {CEILING}; spent {spent}"
-        )
-        spend = {"total": spent}
-        replies = await asyncio.gather(
-            *(
-                audit.judge_one(reader, packets[name], spend, ceiling=CEILING)
-                for reader in todo
+            assert account["charged_usd"] + worst <= CEILING, (
+                f"Next call cannot fit: charged {account['charged_usd']:.6f} + bound {worst:.6f} > {CEILING}"
             )
-        )
-        for reply in replies:
-            reply["instruction_digest"] = digest(system)
-            reply["packet_digest"] = digest(packets[name])
-            reply["recorded_at"] = datetime.now(UTC).isoformat()
+            reply = await audit.judge_one(
+                reader,
+                packets[name],
+                {"total": account["charged_usd"]},
+                ceiling=CEILING,
+            )
+            reply.update(
+                instruction_digest=digest(system),
+                packet_digest=digest(packets[name]),
+                recorded_at=datetime.now(UTC).isoformat(),
+                output_token_ceiling=ceilings[reader["seat"]],
+                worst_case_usd=worst,
+            )
             with (RUN / "corrected-readings.jsonl").open("a") as handle:
                 handle.write(json.dumps(reply, ensure_ascii=False) + "\n")
-        records.extend(replies)
-        assert not any(r.get("error") or r.get("cost") is None for r in replies), (
-            "Failed or unpriced call; stopped without retrying the experiment"
-        )
-        spent = sum(r["cost"] for r in records)
-        assert spent <= CEILING
+            records.append(reply)
+            account = budget_account(records, packets, system, rates)
+            save(RUN / "spend-status.json", account)
+            assert account["charged_usd"] <= CEILING
+            if reply.get("error"):
+                raise RuntimeError(
+                    "Reader call failed; null-cost receipt reserved at worst case: "
+                    + reply["error"]
+                )
+            done.add((reader["seat"], name))
+        account = budget_account(records, packets, system, rates)
         print(
-            f"{index + 1}/{len(names)} names complete; recorded spend USD {spent:.6f} / {CEILING:.2f}",
+            f"{index + 1}/{len(names)} names complete; priced USD {account['priced_usd']:.6f}; charged USD {account['charged_usd']:.6f} / {CEILING:.2f}",
             flush=True,
         )
     if pilot_only:
-        pilot_records = [r for r in records if r["name"] in names]
-        assert len(pilot_records) == 18
-        paid = sum(r["cost"] for r in pilot_records)
-        projection = paid / 6 * len(order)
+        good = [r for r in records if not r.get("error") and r["name"] in names]
+        assert len(good) == 18
+        paid = sum(r["cost"] for r in good)
+        account = budget_account(records, packets, system, rates)
+        projection = paid / 6 * len(order) + account["unpriced_reserved_usd"]
         receipt = {
             "names": names,
-            "calls": len(pilot_records),
+            "calls": len(good),
             "complete": True,
             "spend_usd": paid,
             "projected_usd": projection,
             "ceiling_usd": CEILING,
             "all_names": len(order),
-            "method": "Recorded cost of six names through all three readers, multiplied by cohort size / 6",
+            "method": "Successful six-name priced spend multiplied by cohort size / 6, plus worst-case charge for every null-cost failed call",
+            "account": account,
             "per_reader_usd": {
-                r["seat"]: sum(
-                    x["cost"] for x in pilot_records if x["seat"] == r["seat"]
-                )
+                r["seat"]: sum(x["cost"] for x in good if x["seat"] == r["seat"])
                 for r in readers
             },
         }
         save(RUN / "pilot.json", receipt)
         print("PILOT " + json.dumps(receipt), flush=True)
         assert projection <= CEILING, (
-            "Pilot projection exceeds USD 10; no full run authorized by the protocol"
+            "Pilot projection exceeds ceiling; stopped before full read"
         )
 
 
