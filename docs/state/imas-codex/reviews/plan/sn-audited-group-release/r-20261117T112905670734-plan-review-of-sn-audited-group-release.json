@@ -1,0 +1,78 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T11:41:31.788Z",
+  "dispatched_at": "2026-11-17T11:40:59Z",
+  "findings": [
+    {
+      "anchor": "plan.html:49",
+      "id": "reasoning-1",
+      "reason": "a worker placing \"every one of its live names\" must reconcile against one count, and 37 missing names or a wrong 47 % sends the division at the wrong population.",
+      "text": "\u00a76 states `transport` holds 1,042 live names on the 2026-11-17 reading with 47 % carrying a domain among their sources', while \u00a72:33 in the same plan states 1,079 and 530 of 1,079 (49 %), and a bounded live read on 2026-11-17 reproduces \u00a72 exactly (3,267 live names, 1,079 with domain `transport`, 530 agreeing out of 1,079, 1,058 carrying any source domain); \u00a76 never says which population its 1,042 excludes, so the count a worker must place every live name against is ambiguous and the refused-split justification (197 names into a 17-name group) rests on a reading nothing records",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:49",
+      "id": "done_when-1",
+      "reason": "without a planted name the section's sole verification cannot fail in the way it is meant to catch.",
+      "text": "\u00a76's only measured check is \"the count of names per part read back from the live graph equals the ruled proposal's\", which compares the writer's own read against its own proposal with no planted name whose part is known and no reconciliation to the live transport count, so a placement or count query that silently matches nothing reads as exactly equal and correct; \u00a72, \u00a73, \u00a74 and \u00a76 of this plan each plant a control for their own guard, and \u00a76 plants none",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:33",
+      "id": "wiring-1",
+      "reason": "the ruled release route for `transport`'s parts needs a node that waits on \u00a76, otherwise \u00a75 can close with the parts never audited or cut.",
+      "text": "\u00a72's ruling states \"Its parts are released after the other groups\", but \u00a75 depends only on \u00a74 and covers \"each group in the order ruled in \u00a72\", while the parts and their names come from \u00a76 (which depends only on \u00a72); no edge or done-when makes any node audit, bar and cut the transport parts after \u00a76 has created them, so the plan's stated release of a third of the catalog is unowned",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:33",
+      "id": "done_when-2",
+      "reason": "a node repairing the first group cannot tell whether it is capped at USD 40 or USD 300, and the ruled raise is unreadable without a base.",
+      "text": "\u00a72's ruling records \"The repair ceiling is raised by USD 50 to USD 300\" with no base figure anywhere in the plan, while \u00a74's done-when still holds the first group to \"the spend ceiling\" and its release notes to \"a ceiling of USD 40\"; nothing states whether the raised ceiling replaces the per-group ceiling, bounds total repair spend, or leaves \u00a74's USD 40 intact",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:16",
+      "id": "reasoning-2",
+      "reason": "the effort total is what a coordinator sizes and orders dispatches against, and it now disagrees with the sections that make it.",
+      "text": "`plan-effort-hours` still declares 30.0 while the declared sections now sum to 36.0 (6 + 4 + 6 + 8 + 6 + 6 after \u00a76 was added), so the plan's own total understates the work by the new section's effort",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "9d4c7f66e57db043df4efce2429a1ed18f831d99",
+  "plan_fingerprint": "f3a3b6080f6ad38456ff01441e6c61d7acf0949c6f852582c8463c427b070cfa",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 18,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T112905670734-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "6b7abe77da64e87a1bc8d04f367ef42e3f3892cf",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `sn-definitions-by-construction.html#s11`, `docs/evidence/fragments/sn-audited-group-release/` and the snapshot's one evidence href all resolve; extensionless hrefs resolve as `<path>.html`.",
+    "done_when": "a finding \u2014 \u00a76's done-when has no planted control and no reconciliation to the live transport count, so a placement read back with the same query that produced the proposal reads correct while counting nothing.",
+    "evidence_paths": "pass \u2014 both changed units commit their evidence under `docs/evidence/fragments/sn-audited-group-release/` in the repository, not a scratch path.",
+    "naming": "pass \u2014 \u00a76's parts are named for the quantities they hold; no plan label, stage name or version tag reaches a stored name or a symbol.",
+    "reasoning": "a finding \u2014 \u00a76's opening reading (1,042 live transport names, 47 % with a domain among their sources') contradicts \u00a72's 1,079 / 530 for the same group and is not reproduced by today's live read.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable (the transport division proposed, ruled, written and counted back), and \u00a72's added ruling adds no second deliverable to it.",
+    "wiring": "a finding \u2014 \u00a72's ruling sends `transport`'s parts after the other groups, but no relationship or done-when makes any node audit, bar or cut those parts after \u00a76 creates them."
+  },
+  "section_digests": {
+    "_document": "3a1f5b884da22b0f9f7513f167fc23ed231b5462b07c24908c13cb258da75fe9",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "e7a10e0bddf86639a41fadfae20ca60b7ac34623e7e53cfc71d00c0db8c52b0e",
+    "s3": "03b59dc453e3a1deb0da401df747cd3637a918ac62ab529a42f7aa0edb3eb9e3",
+    "s4": "71dcafa9a66f779d950fcc8843ee5d7e06e2a99f13c72f9839aaadbaa2a18c3c",
+    "s5": "a2f0b01700b8c8cb79bcd7145c31c0af85e63c939ec7ef4ebb63bdf44d51035d",
+    "s6": "c0e52df4d06961b9594292ac9c2437c024eedfaad28595e00b5a4f9390327dd0"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T11:55:09.855619+00:00",
+  "total": null
+}
