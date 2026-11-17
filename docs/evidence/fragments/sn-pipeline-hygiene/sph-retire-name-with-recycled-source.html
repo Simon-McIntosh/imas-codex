@@ -1,6 +1,15 @@
 <section id="sph-retire-name-with-recycled-source">
 <h2>Retiring a name in the step that returns its source to the pool — blocked on write scope</h2>
 
+<p>The whole directory runs clean of new failures on both arms:
+<code>tests/standard_names</code> at head gives <code>22 failed, 8767 passed, 12
+skipped, 541 deselected</code> and the same tree plus the patch gives <code>22
+failed, 8767 passed, 12 skipped, 545 deselected</code> — the four extra
+deselections are the new graph-tier cases, and the failure id sets are
+identical, empty on both sides of the difference. The 22 are environment
+failures (<code>ReviewingGuideLinkError: no catalog checkout is resolved</code>)
+present at head.</p>
+
 <p><strong>Outcome: blocked on write scope.</strong> The step is identified, both
 halves of its defect are reproduced on a disposable graph, and a patch that
 fixes it is implemented and measured in a scratch tree — but the step lives in
