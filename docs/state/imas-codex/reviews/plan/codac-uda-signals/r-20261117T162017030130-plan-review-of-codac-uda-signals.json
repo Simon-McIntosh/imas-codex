@@ -17,7 +17,24 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 67,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The section's endpoint is unchanged. The node's dispatch contract carries the stronger control: an invented category whose name holds a kind-like word with nothing supporting it must stay unlabelled, and the test must fail when the support check is removed.",
+      "when": "2026-11-17T22:29:36.610796+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The section's endpoint is unchanged. The node's dispatch contract carries the stronger control: an invented category whose name holds a kind-like word with nothing supporting it must stay unlabelled, and the test must fail when the support check is removed.",
+      "when": "2026-11-17T22:29:36.610796+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261117T162017030130-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261117T162017030130-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "78e90730916120ccc74388b6e13693a65c5ec61a",
   "rubric": "content",
