@@ -427,7 +427,7 @@ def collect_comparison():
         )
     finally:
         gc.close()
-    save(rows, RUN / "historical-graph-rows.json")
+    save({"rows": rows}, RUN / "historical-graph-rows.json")
     assert rows, "Historical audit query missed known-present comparison names"
     ignored_seats = []
     for row in rows:
