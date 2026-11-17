@@ -13,9 +13,12 @@ import hashlib
 import importlib.util
 import json
 import os
+import random
 import subprocess
 import zlib
+from collections import Counter, defaultdict
 from datetime import UTC, datetime
+from html import escape
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent
@@ -353,7 +356,7 @@ def seal_verdicts():
     print(f"SEALED: {len(judgments)} blind verdicts; commit only {RELATIVE_DATA}")
 
 
-def check(path=DATA):
+def check(path=DATA, include_report=True):
     data = load(path)
     validate(data)
     packet_sha, frozen_packets = committed_snapshot("packets-frozen")
@@ -370,6 +373,17 @@ def check(path=DATA):
             "diff-tree", "--no-commit-id", "--name-only", "-r", verdict_sha
         ).splitlines() == [RELATIVE_DATA], "Verdict commit touched reader data"
         assert git("merge-base", packet_sha, verdict_sha) == packet_sha
+    if include_report and "report" in data:
+        report = data["report"]
+        assert report == summarize(data, report["comparison_inputs"])
+        assert PAGE.read_text() == render_page(data), "Rendered evidence changed"
+        assert len(report["lead_review"]["members"]) == 20
+        assert PAGE.read_text().count('class="review-card"') == 20
+        assert PAGE.read_text().count("<textarea ") == 20
+        assert "<details open" not in PAGE.read_text()
+        print(
+            "PASS: exact census, intervals, causes, historical comparisons and seeded 20-member review page reproduced; lead verdict fields empty"
+        )
     print(
         f"PASS: {len(data['members'])} immutable source packets; {len(data['judgments'])} blind verdicts; independent git seals verified"
     )
@@ -413,12 +427,16 @@ def collect_comparison():
         )
     finally:
         gc.close()
+    save(rows, RUN / "historical-graph-rows.json")
     assert rows, "Historical audit query missed known-present comparison names"
+    ignored_seats = []
     for row in rows:
         assert row["name"] == row["back_reference"]
         payload = json.loads(row["comments"])
-        seat = payload["reader_seat"]
-        assert seat in ("A", "B")
+        seat = payload.get("reader_seat", "")
+        if seat not in ("A", "B"):
+            ignored_seats.append(seat)
+            continue
         classes = sorted(payload["defect_classes"])
         assert set(classes) <= set(audit.CLASS_KEYS)
         target = earlier.setdefault(row["name"], {})
@@ -435,7 +453,7 @@ def collect_comparison():
     calibration = sibling("reader-calibration")
     corrected_path = calibration.RUN / "corrected-readings.jsonl"
     corrected = {}
-    for row in calibration.recorded_calls():
+    for row in calibration.recorded_calls() if corrected_path.exists() else []:
         if row.get("error") or row["name"] not in members:
             continue
         target = corrected.setdefault(row["name"], {})
@@ -447,13 +465,19 @@ def collect_comparison():
         "graph_audit_group": audit.PRIOR_GROUP,
         "bounded_member_ids": sorted(members),
         "graph_rows": len(rows),
+        "ignored_non_pair_seats": ignored_seats,
         "known_present_cross_source_matches": controls,
         "third_reader_source": str(third_path),
         "third_reader_sha256": hashlib.sha256(third_path.read_bytes()).hexdigest(),
         "corrected_reader_source": str(corrected_path),
+        "corrected_reader_status": "available"
+        if corrected_path.exists()
+        else "receipt path absent; optional corrected-instruction overlap unavailable",
         "corrected_reader_sha256": hashlib.sha256(
             corrected_path.read_bytes()
-        ).hexdigest(),
+        ).hexdigest()
+        if corrected_path.exists()
+        else None,
         "earlier": earlier,
         "corrected": corrected,
         "graph_writes": 0,
@@ -466,12 +490,443 @@ def collect_comparison():
     )
 
 
+def share(count, total):
+    return {
+        "count": count,
+        "total": total,
+        "share": count / total if total else None,
+        "wilson_95": list(sibling("blind-audit").wilson(count, total)),
+    }
+
+
+def review_draw(judgments):
+    """Largest-remainder allocation, seeded draws within all verdict strata."""
+    strata = defaultdict(list)
+    for row in judgments:
+        strata[row["verdict"]].append(row["id"])
+    size = 20
+    n = len(judgments)
+    allocation = {key: size * len(names) // n for key, names in strata.items()}
+    remainders = sorted(strata, key=lambda k: (-(size * len(strata[k]) % n), k))
+    for key in remainders[: size - sum(allocation.values())]:
+        allocation[key] += 1
+    assert allocation["sound"] > 0 and allocation["defective"] > 0
+    rng = random.Random(SEED)
+    selected = []
+    for key in sorted(strata):
+        selected.extend(rng.sample(sorted(strata[key]), allocation[key]))
+    rng.shuffle(selected)
+    return {
+        "seed": SEED,
+        "algorithm": "Largest-remainder proportional allocation across all three verdict strata; sorted strata and names; Python Random.sample within strata then Random.shuffle",
+        "allocation": dict(sorted(allocation.items())),
+        "members": selected,
+        "lead_verdicts": dict.fromkeys(selected, ""),
+    }
+
+
+def compare_readers(judgments, readings):
+    out = {}
+    for seat in ("A", "B", "C"):
+        observed = [j for j in judgments if seat in readings.get(j["id"], {})]
+        paired = [j for j in observed if j["verdict"] != "undecidable"]
+        rows = []
+        for j in observed:
+            classes = readings[j["id"]][seat]
+            rows.append(
+                {
+                    "id": j["id"],
+                    "adjudication": j["verdict"],
+                    "reader_classes": classes,
+                    "binary_agreement": None
+                    if j["verdict"] == "undecidable"
+                    else bool(classes) == (j["verdict"] == "defective"),
+                    "exact_class_agreement": None
+                    if j["verdict"] == "undecidable"
+                    else set(classes) == set(j["defect_classes"]),
+                }
+            )
+        agreement = sum(r["binary_agreement"] is True for r in rows)
+        exact = sum(r["exact_class_agreement"] is True for r in rows)
+        defective = [j for j in paired if j["verdict"] == "defective"]
+        sound = [j for j in paired if j["verdict"] == "sound"]
+        out[seat] = {
+            "observed": len(observed),
+            "undecidable_reference": len(observed) - len(paired),
+            "binary_agreement": share(agreement, len(paired)),
+            "exact_class_agreement": share(exact, len(paired)),
+            "detected_defective": share(
+                sum(bool(readings[j["id"]][seat]) for j in defective), len(defective)
+            ),
+            "flagged_sound": share(
+                sum(bool(readings[j["id"]][seat]) for j in sound), len(sound)
+            ),
+            "rows": rows,
+        }
+    return out
+
+
+CAUSES = {
+    "physical_scope_qualifier_lost": "The naming stage drops a source-stated component, geometric reference or physical locus.",
+    "source_bindings_conflate_distinct_definitions": "Producer bindings pool quantities whose loci, operations or physical meanings cannot share the stored definition.",
+    "boundary_forced_to_lcfs": "Definition templates replace the source's selectable boundary with the last closed flux surface.",
+    "normalization_or_weighting_qualifier_lost": "Naming drops an explicit normalization or weighting that distinguishes the source quantity.",
+    "coordinate_reference_qualifier_lost": "Naming or definition construction drops or substitutes the source's coordinate convention or reference axis.",
+    "vacuum_source_qualifier_lost": "Naming drops a vacuum-field contribution restriction and can admit plasma-response or total-field interpretations.",
+    "pressure_pedestal_qualifier_lost": "The pressure-pedestal locus collapses to an unspecified pedestal in the name.",
+    "transformation_equation_replaced_by_base_quantity": "Definition construction substitutes a base quantity or an inconsistent equation for the named transform or derivative.",
+    "averaging_qualifier_lost": "A source's average or aggregation disappears from the name or is explicitly excluded by a pointwise definition.",
+    "absolute_extremum_substituted_for_signed_extremum": "A signed safety-factor minimum is replaced with the minimum of its absolute value.",
+    "population_basis_qualifier_lost": "The source's thermal or total population basis disappears from the name or is mixed across bindings.",
+    "physical_scope_qualifier_replaced": "Definition construction substitutes a different geometric or coordinate scope for the source's scope.",
+    "locus_template_overrides_source": "A generic geometric template overrides the source's stated branch or point-selection rule.",
+    "consumer_context_used_as_quantity_domain": "Domain assignment follows an equilibrium consumer instead of the iron-core or structural quantity itself.",
+}
+
+
+def summarize(data, comparison):
+    judgments = data["judgments"]
+    n = len(judgments)
+    counts = Counter(j["verdict"] for j in judgments)
+    classes = Counter(c for j in judgments for c in j["defect_classes"])
+    candidates = defaultdict(list)
+    for row in judgments:
+        for cause in row["candidate_cause"].split("|"):
+            if cause:
+                candidates[cause].append(row["id"])
+        if "wrong_physics_domain" in row["defect_classes"]:
+            candidates["consumer_context_used_as_quantity_domain"].append(row["id"])
+    special_classes = {"duplicate_of_live_name", "wrong_physics_domain"}
+    return {
+        "population": n,
+        "verdicts": {
+            v: share(counts[v], n) for v in ("sound", "defective", "undecidable")
+        },
+        "classes": {c: share(classes[c], n) for c, _ in data["class_list"]},
+        "candidate_pipeline_defects": [
+            {
+                "cause": cause,
+                "mechanism": CAUSES[cause],
+                "count": len(names),
+                "members": sorted(names),
+            }
+            for cause, names in sorted(
+                candidates.items(), key=lambda r: (-len(r[1]), r[0])
+            )
+            if len(names) >= 3
+        ],
+        "duplicate_or_wrong_domain_only": [
+            j["id"]
+            for j in judgments
+            if j["defect_classes"] and set(j["defect_classes"]) <= special_classes
+        ],
+        "undecidable": [j["id"] for j in judgments if j["verdict"] == "undecidable"],
+        "defect_share_if_all_undecidable_sound": counts["defective"] / n,
+        "defect_share_if_all_undecidable_defective": (
+            counts["defective"] + counts["undecidable"]
+        )
+        / n,
+        "lead_review": review_draw(judgments),
+        "comparison_inputs": comparison,
+        "historical_reader_agreement": compare_readers(
+            judgments, comparison["earlier"]
+        ),
+        "corrected_reader_agreement": compare_readers(
+            judgments, comparison["corrected"]
+        ),
+        "packet_commit": committed_snapshot("packets-frozen")[0],
+        "verdict_commit": committed_snapshot("verdicts-frozen")[0],
+    }
+
+
+def percentage(value):
+    return "not estimable" if value is None else f"{100 * value:.1f}%"
+
+
+def interval(value):
+    if not value["total"]:
+        return "not estimable"
+    low, high = value["wilson_95"]
+    return f"{percentage(low)}–{percentage(high)}"
+
+
+def table(headers, rows):
+    return (
+        "<table><thead><tr>"
+        + "".join(f"<th>{h}</th>" for h in headers)
+        + "</tr></thead><tbody>"
+        + "".join(
+            "<tr>" + "".join(f"<td>{c}</td>" for c in row) + "</tr>" for row in rows
+        )
+        + "</tbody></table>"
+    )
+
+
+def render_page(data):
+    report = data["report"]
+    visible = {p["id"]: p for p in packets(data)}
+    judgments = {j["id"]: j for j in data["judgments"]}
+    e = escape
+    result = [
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">',
+        '<meta name="viewport" content="width=device-width,initial-scale=1">',
+        "<title>Equilibrium source adjudication and lead review</title>",
+        "<style>body{font:16px/1.5 system-ui,sans-serif;max-width:1400px;margin:2rem auto;padding:0 1.5rem;color:#222}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{padding:.55rem;text-align:left;vertical-align:top;border-bottom:1px solid #ccc;overflow-wrap:anywhere}th{font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.45 ui-monospace,monospace}summary{cursor:pointer;font-weight:600}details{margin:1rem 0}textarea{min-height:8rem;width:95%;font:inherit}code{overflow-wrap:anywhere}.review-card{margin:3rem 0;padding-top:1rem;border-top:1px solid #777}a{color:#245c91}small{font-size:.85em}@media print{body{max-width:none}.review-card{break-before:page}}</style></head><body>",
+        "<h1>Equilibrium: judge the source packet first</h1>",
+        "<p>Twenty members were drawn by a recorded seed from the complete frozen equilibrium cohort. Read each packet, enter your own verdict in the blank column, then open the disclosure to compare. Every packet below is complete and contains no earlier reader verdict, score or adjudication. Fields are blank in this file; entered text is not automatically saved.</p>",
+        f"<p>Packet seal <code>{report['packet_commit']}</code>; blind verdict seal <code>{report['verdict_commit']}</code>. The verdict seal predates all individual reader exposure. No model calls, paid reader calls or graph writes were made for this adjudication.</p>",
+    ]
+    for i, name in enumerate(report["lead_review"]["members"], 1):
+        j = judgments[name]
+        p = visible[name]
+        result.extend(
+            [
+                f'<article class="review-card" id="review-{i}"><h2>{i}. {e(name)}</h2>',
+                f"<p><small>Packet SHA-256: {digest(p)}</small></p><pre>{e(p['reader_visible_text'])}</pre>",
+                table(
+                    [
+                        "Lead verdict and reason",
+                        "Committed adjudication — reveal after judging",
+                    ],
+                    [
+                        [
+                            f'<textarea aria-label="Lead verdict for {e(name)}"></textarea>',
+                            '<details class="adjudication"><summary>Reveal committed adjudication</summary>'
+                            f"<p><strong>{j['verdict']}</strong>: {e(', '.join(j['defect_classes']) or 'no defect class')}</p>"
+                            f"<p>{e(j['reason'])}</p><p>Evidence binding: <code>{e(j['evidence_path'])}</code></p></details>",
+                        ]
+                    ],
+                ),
+                "</article>",
+            ]
+        )
+    result.extend(
+        [
+            '<details id="audit-results"><summary>Open census, methods, comparisons and all 210 committed verdicts after reviewing</summary>',
+            "<h2>Full-cohort census</h2>",
+            "<p>Every live equilibrium member at collection is included: 210 names, 699 distinct producer sources, including 661 Data Dictionary paths and 38 derived sources. All 72 spanning families touching equilibrium contribute structural context. Raw producer text and the ancestry of every DD source are retained; 655 DD chains contain enclosing text. One name has no producer source. Text is whitespace-normalized without clipping. The compact JSON stores lossless compressed packet and verdict payloads; this script decodes them. The freeze is a point-in-time snapshot, not a claim about later graph changes.</p>",
+            table(
+                ["Verdict", "Count / 210", "Share", "95% Wilson interval"],
+                [
+                    [
+                        v,
+                        f"{r['count']} / {r['total']}",
+                        percentage(r["share"]),
+                        interval(r),
+                    ]
+                    for v, r in report["verdicts"].items()
+                ],
+            ),
+            "<p>This is a census of the frozen cohort: its counts and shares are exact conditional on these adjudications. Wilson intervals are supplied as binomial descriptive intervals for the requested proportions; they do not quantify adjudicator error or sampling uncertainty for this fixed census. Undecidable is not counted as sound. Classes overlap and each class uses all 210 members as denominator.</p>",
+            table(
+                [
+                    "Defect class",
+                    "Meaning",
+                    "Count / 210",
+                    "Share",
+                    "95% Wilson interval",
+                ],
+                [
+                    [
+                        e(c),
+                        e(label),
+                        f"{report['classes'][c]['count']} / 210",
+                        percentage(report["classes"][c]["share"]),
+                        interval(report["classes"][c]),
+                    ]
+                    for c, label in data["class_list"]
+                ],
+            ),
+            f"<p>If every undecidable case were sound, the defective share would be {percentage(report['defect_share_if_all_undecidable_sound'])}; if every undecidable case were defective, it would be {percentage(report['defect_share_if_all_undecidable_defective'])}. These are bounds on unresolved labels, not confidence limits.</p>",
+            "<h2>Candidate pipeline defects shared by at least three members</h2>",
+            "<p>These are mechanism candidates inferred from repeated source-to-name or source-to-definition mismatches. They are not causal traces through production prompts and do not authorize member-by-member patching. Groups can overlap; each member links to its committed wording, reason and source binding.</p>",
+            table(
+                ["Candidate mechanism", "Members", "Committed members"],
+                [
+                    [
+                        e(row["mechanism"]),
+                        str(row["count"]),
+                        "<br>".join(
+                            f'<a href="#member-{e(name)}">{e(name)}</a>'
+                            for name in row["members"]
+                        ),
+                    ]
+                    for row in report["candidate_pipeline_defects"]
+                ],
+            ),
+            "<h2>Duplicate or wrong-domain classes only</h2>",
+            "<p>These members have no other defect class. An accepted alternative below is a semantic identity to consider, not a graph edit or a new spelling approved for release.</p>",
+            table(
+                [
+                    "Stored name",
+                    "Only classes",
+                    "Source binding",
+                    "Reason and intended distinction",
+                ],
+                [
+                    [
+                        e(name),
+                        e(", ".join(judgments[name]["defect_classes"])),
+                        e(judgments[name]["evidence_path"]),
+                        e(judgments[name]["reason"]),
+                    ]
+                    for name in report["duplicate_or_wrong_domain_only"]
+                ],
+            ),
+            "<h2>Undecidable from the supplied text</h2>",
+            "<p>Some derived producers have no independent text, some sources conflict on the coordinate convention, and some definitions assert a precise external shape formula that the packet only cites. No external paper, additional graph scope or earlier reader label was used to fill those gaps. The source owner must supply the missing definition, convention or cited formula before these cases can be decided.</p>",
+            table(
+                ["Name", "Evidence binding", "Why it could not be decided"],
+                [
+                    [
+                        e(name),
+                        e(judgments[name]["evidence_path"]),
+                        e(judgments[name]["reason"]),
+                    ]
+                    for name in report["undecidable"]
+                ],
+            ),
+            "<h2>Earlier readers: comparison only</h2>",
+            "<p>Historical A/B audit rows were read from the graph after the verdict commit, bounded to the 210 frozen identities; C comes from the retained third-reader evidence. Corrected-instruction calibration readings are shown separately. No reader output contributed to an adjudication. Agreement is computed only on observed, decidable overlaps; an absent reading is never treated as sound and undecidable references are excluded from binary and exact-class agreement. The observed subsets are selected historical cohorts, not random validation samples. Source text and instruction versions may differ, so agreement does not isolate model ability or the effect of the instruction change.</p>",
+        ]
+    )
+    for label, key in (
+        ("Historical audit instructions", "historical_reader_agreement"),
+        ("Corrected-instruction calibration subset", "corrected_reader_agreement"),
+    ):
+        if (
+            key == "corrected_reader_agreement"
+            and not report["comparison_inputs"]["corrected"]
+        ):
+            result.append(
+                "<h3>Corrected-instruction calibration overlap unavailable</h3><p>The earlier calibration document names a per-call receipt file that is absent in this execution environment. Its aggregate scores do not recover individual class lists, so no corrected-instruction agreement is inferred. The required historical A/B/C comparisons above remain available.</p>"
+            )
+            continue
+        result.extend(
+            [
+                f"<h3>{label}</h3>",
+                table(
+                    [
+                        "Reader",
+                        "Observed",
+                        "Undecidable reference",
+                        "Binary agreement",
+                        "95% interval",
+                        "Exact class-set agreement",
+                        "Detected defective",
+                        "Flagged sound",
+                    ],
+                    [
+                        [
+                            seat,
+                            str(row["observed"]),
+                            str(row["undecidable_reference"]),
+                            f"{row['binary_agreement']['count']}/{row['binary_agreement']['total']} ({percentage(row['binary_agreement']['share'])})",
+                            interval(row["binary_agreement"]),
+                            f"{row['exact_class_agreement']['count']}/{row['exact_class_agreement']['total']}",
+                            f"{row['detected_defective']['count']}/{row['detected_defective']['total']}",
+                            f"{row['flagged_sound']['count']}/{row['flagged_sound']['total']}",
+                        ]
+                        for seat, row in report[key].items()
+                    ],
+                ),
+                "<details><summary>Per-member reader comparisons</summary>",
+                table(
+                    [
+                        "Reader",
+                        "Name",
+                        "Committed verdict",
+                        "Reader classes",
+                        "Binary agreement",
+                        "Exact classes",
+                    ],
+                    [
+                        [
+                            seat,
+                            e(r["id"]),
+                            r["adjudication"],
+                            e(", ".join(r["reader_classes"]) or "none"),
+                            "excluded: undecidable"
+                            if r["binary_agreement"] is None
+                            else str(r["binary_agreement"]),
+                            "excluded: undecidable"
+                            if r["exact_class_agreement"] is None
+                            else str(r["exact_class_agreement"]),
+                        ]
+                        for seat, row in report[key].items()
+                        for r in row["rows"]
+                    ],
+                ),
+                "</details>",
+            ]
+        )
+    comparison = report["comparison_inputs"]
+    result.extend(
+        [
+            "<h2>Reproducibility and review draw</h2>",
+            f"<p>Seed <code>{SEED}</code>. {e(report['lead_review']['algorithm'])}. Allocation: {e(json.dumps(report['lead_review']['allocation'], sort_keys=True))}. All twenty lead verdicts remain blank. The lead must complete this independent check before the group proceeds; this document grants no release authority.</p>",
+            f"<p>Comparison opened at {e(comparison['opened_after_verdict_commit_at'])} after verdict commit <code>{comparison['verdict_commit_before_exposure']}</code>. The bounded graph query returned {comparison['graph_rows']} rows; {comparison['known_present_cross_source_matches']} known-present A/B class sets match the independent retained third-reader file. Non-pair audit seats are excluded using the existing helper’s rule.</p>",
+            "<p>The seven classes and reconciled omission instruction come from the existing blind-audit helper. A source-stated component, locus, basis, coordinate, weight or normalization omitted from a name is a defect; stylistic preferences and unstated qualifiers are not. Missing source text yields undecidable unless a source-independent class can be established. Derived producer descriptions are retained as evidence, not invented DD text. Generic-versus-specific derived identities and ambiguous source conventions remain matters for the lead where the committed reason says so.</p>",
+            "<p>Run <code>uv run --no-sync python docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py --check</code> in the repository environment. The check compares packets and verdicts to independent git commits, recomputes all results and the seeded draw, and reproduces this HTML exactly. Altering a verdict and recomputing its digest still fails against the committed seal. No paid calls were authorized or made: actual reader spend USD 0; authorized paid-call ceiling USD 0.</p>",
+            "<h2>Every committed verdict</h2>",
+            "<table><thead><tr><th>Name and stored definition</th><th>Producer source paths</th><th>Verdict and classes</th><th>Quoted reason and binding</th></tr></thead><tbody>",
+        ]
+    )
+    for name in data["members"]:
+        p = visible[name]
+        j = judgments[name]
+        definition = (
+            p["reader_visible_text"]
+            .split("Definition (stored description): ", 1)[1]
+            .split("\n", 1)[0]
+        )
+        sources = "<br>".join(e(s) for s in p["source_paths"]) or "none recorded"
+        result.append(
+            f'<tr id="member-{e(name)}"><td><code>{e(name)}</code><p>{e(definition)}</p></td><td>{sources}</td><td><strong>{j["verdict"]}</strong><p>{e(", ".join(j["defect_classes"]) or "none")}</p></td><td>{e(j["reason"])}<p><code>{e(j["evidence_path"])}</code></p></td></tr>'
+        )
+    result.extend(["</tbody></table></details></body></html>"])
+    return "\n".join(result) + "\n"
+
+
+def report():
+    check(include_report=False)
+    data = load()
+    comparison = load(RUN / "comparison-inputs.json")
+    assert (
+        comparison["verdict_commit_before_exposure"]
+        == committed_snapshot("verdicts-frozen")[0]
+    )
+    assert comparison["bounded_member_ids"] == data["members"]
+    data["report"] = summarize(data, comparison)
+    save(data)
+    PAGE.write_text(render_page(data))
+    print(
+        json.dumps(
+            {
+                "verdicts": {
+                    v: r["count"] for v, r in data["report"]["verdicts"].items()
+                },
+                "candidate_pipeline_defects": len(
+                    data["report"]["candidate_pipeline_defects"]
+                ),
+                "duplicate_or_wrong_domain_only": len(
+                    data["report"]["duplicate_or_wrong_domain_only"]
+                ),
+                "lead_review_allocation": data["report"]["lead_review"]["allocation"],
+                "data_bytes": DATA.stat().st_size,
+                "html_bytes": PAGE.stat().st_size,
+            }
+        )
+    )
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--collect", action="store_true")
     parser.add_argument("--check", action="store_true")
     parser.add_argument("--seal-verdicts", action="store_true")
     parser.add_argument("--collect-comparison", action="store_true")
+    parser.add_argument("--report", action="store_true")
     parser.add_argument("--data", type=Path, default=DATA)
     args = parser.parse_args()
     if args.collect:
@@ -482,6 +937,8 @@ def main():
         seal_verdicts()
     elif args.collect_comparison:
         collect_comparison()
+    elif args.report:
+        report()
 
 
 if __name__ == "__main__":
