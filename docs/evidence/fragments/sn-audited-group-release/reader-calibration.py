@@ -880,6 +880,21 @@ def derived_report(data):
             s,
         ),
     )
+    uncertainty_name = "toroidal_flux_coordinate_gradient_magnitude"
+    sensitivity_judgments = {n: dict(j) for n, j in judgments.items()}
+    sensitivity_judgments[uncertainty_name] = dict(
+        judgments[uncertainty_name], verdict="undecidable", defect_classes=[]
+    )
+    sensitivity = {
+        "excluded_name": uncertainty_name,
+        "reason": "The packet never states the units or normalization of the toroidal-flux coordinate. A length-valued coordinate has a dimensionless spatial gradient, so unit 1 cannot be rejected from this packet alone.",
+        "timing": "Post-comparison source-ambiguity sensitivity; the pre-comparison committed judgments are unchanged.",
+        "label_counts": {"defective": 43, "sound": 40},
+        "corrected": scores(names, sensitivity_judgments, corrected),
+        "catalog_estimate_same_reader": catalog_estimate(
+            data, sensitivity_judgments, earlier, corrected, chosen
+        ),
+    }
     spent = sum(r["cost"] for r in records)
     account = budget_account(
         attempts,
@@ -910,6 +925,7 @@ def derived_report(data):
         "earlier_paired": before_paired,
         "corrected_paired": after_paired,
         "per_class": class_scores(names, judgments, earlier, corrected),
+        "source_ambiguity_sensitivity": sensitivity,
         "chosen_reader": chosen,
         "chosen_reader_fit": after[chosen]["fit_to_decide"],
         "selection_rule": "Among fit individual readers if any, otherwise among all three: highest balanced accuracy, then higher recall, then seat id; majority rule reported separately.",
@@ -1025,6 +1041,16 @@ def render_page(data):
         "<h2>Corrected instructions: entire checked set</h2>",
         "<p>Recall is the share of hand-defective names with any reader flag; a matching defect class is not required for this headline measure. False alarm is the share of hand-sound names flagged. Two-of-three is scored directly, without an independence assumption. The point thresholds are recall ≥90% and false alarm ≤10%. Precision requires each endpoint of each two-sided 95% Wilson interval to be within ten percentage points of its point estimate.</p>",
         score_table(result["corrected"], fitness=True),
+        "<h2>Source-ambiguity sensitivity</h2>",
+        "<p>The frozen label for <code>"
+        + escape(result["source_ambiguity_sensitivity"]["excluded_name"])
+        + "</code> calls unit 1 wrong. "
+        + escape(result["source_ambiguity_sensitivity"]["reason"])
+        + " This concern was recorded after the first comparison. The frozen judgments remain unchanged, and the following sensitivity excludes that one case from the calibration denominators, leaving 43 defective and 40 sound labels. Its already-observed reader flag still contributes to the projected flag share of the 339-name sample.</p>",
+        score_table(result["source_ambiguity_sensitivity"]["corrected"], fitness=True),
+        "<p>Using the same selected reader, A, with this exclusion gives a corrected sample estimate of "
+        + f"{100 * result['source_ambiguity_sensitivity']['catalog_estimate_same_reader']['corrected_rate']:.1f}% (conditional 95% {100 * result['source_ambiguity_sensitivity']['catalog_estimate_same_reader']['ci_95'][0]:.1f}–{100 * result['source_ambiguity_sensitivity']['catalog_estimate_same_reader']['ci_95'][1]:.1f}%)."
+        + " This is a post-comparison sensitivity, not a replacement blind label set. No fitness decision is strengthened by treating the ambiguous case as defective.</p>",
         "<h2>Earlier instructions and corrected instructions on the same names</h2>",
         "<p>" + escape(result["paired_note"]) + "</p>",
         "<h3>Earlier instructions</h3>",
