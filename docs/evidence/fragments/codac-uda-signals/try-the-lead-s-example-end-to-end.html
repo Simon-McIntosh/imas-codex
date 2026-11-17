@@ -1,5 +1,31 @@
+<section id="example-request-resumed-evidence">
+  <h2>Resumed trial: both DC-link candidates, all returned windows</h2>
+  <p>The coordinator supplied private document-assistant findings that identify
+    the common series path through the DC link, current leads and coil as the
+    coil-current path while the supply is connected. One converter's current
+    does not represent that combined current. No document binds an exact archive
+    variable, and a DC-link reading may not follow coil current during fast
+    discharge. Both returned DC-link candidates have the same physical
+    description and unit <code>KA</code>, so both are retained as aliases
+    <q>DC-link A</q> and <q>DC-link B</q>, without declaring either authoritative.
+    Native <code>KA</code> is normalized to kA with factor one.</p>
+  <p>All 34 returned pulse windows are selected, grouped under seven category
+    aliases. They are not asserted to be 34 distinct cold-test runs. A
+    <code>rigel</code> pilot returned one envelope bin for A and no bin for B.
+    The 17 windows of at most ten minutes were then read in full using at most
+    60-second envelope tiles: 124 reads, 1,459 bins, 16 nonempty window–channel
+    pairs out of 34, in 123.423 s. Empty reads remain empty. Per-call receipts
+    and original/normalized arrays are durable in the private
+    <code>example-request/resumed/</code> directory.</p>
+  <p>Long-window work follows as sparse envelope tiles, up to 48 disjoint
+    intervals of 60 seconds distributed across each remaining window. The
+    accessor bounds stay unchanged. Gaps are unobserved, not interpolated, and
+    requested-time coverage is recorded per window. This is a sampled overview,
+    not an envelope of the full long interval. The initial blocked attempt below
+    remains the record of what discovery alone established.</p>
+</section>
 <section id="example-request-end-to-end-evidence">
-  <h2>Coil-current request: test discovery succeeds; signal identity blocks the plot</h2>
+  <h2>Initial attempt: test discovery succeeds; signal identity blocks the plot</h2>
   <p>Trial on 2026-11-17 at revision <code>757626386351100cb0a1e4549a561d1579ae06e2</code>.
     The request was to plot a named coil's cold-test current, stack the profiles
     for all its tests, and express current in kA. All identities below are
