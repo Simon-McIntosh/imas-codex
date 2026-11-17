@@ -133,6 +133,19 @@ def identities(gc, ids):
     }
 
 
+def source_bindings(gc, source_ids):
+    rows = list(
+        gc.query(
+            "UNWIND $ids AS sid MATCH (s:StandardNameSource {id: sid}) "
+            "OPTIONAL MATCH (s)-[:PRODUCED_NAME]->(sn:StandardName) "
+            "WHERE NOT coalesce(sn.name_stage, '') IN ['superseded', 'exhausted'] "
+            "RETURN sid AS source, collect(sn.id) AS names",
+            ids=source_ids,
+        )
+    )
+    return {r["source"]: sorted(r["names"]) for r in rows}
+
+
 def initialize():
     assert not DATA.exists(), "Record already exists; do not replace it"
     module = audit()
@@ -236,6 +249,8 @@ def command(member, arguments):
         ids = [row["id"]]
         if "--rename" in arguments:
             ids.append(arguments[arguments.index("--rename") + 1])
+        bindings = source_bindings(gc, (row.get("before") or {}).get("sources", []))
+        ids = sorted(set(ids) | {n for names in bindings.values() for n in names})
         state = identities(gc, ids)
         review_rows = reviews(gc, ids, stamp)
         costs = list(
@@ -256,6 +271,7 @@ def command(member, arguments):
             "exit_status": result.returncode,
             "sourceless_after": after,
             "identities": state,
+            "source_bindings": bindings,
             "reviews": review_rows,
             "cost_rows": costs,
             "cost_usd": spent,
@@ -273,7 +289,16 @@ def command(member, arguments):
             "reviews": review_rows,
         }
     )
-    row["after"] = state.get(ids[-1]) or state.get(row["id"])
+    current = state.get((row.get("after") or {}).get("id")) or state.get(row["id"])
+    if "--rename" in arguments and "--dry-run" not in arguments:
+        candidate = state.get(arguments[arguments.index("--rename") + 1])
+        if current and current["name_stage"] == "superseded" and candidate:
+            current = candidate
+    row["after"] = current
+    row["source_bindings"] = bindings
+    row["related_identities"] = {
+        n: state[n] for names in bindings.values() for n in names if n in state
+    }
     save(record)
     render(record)
     assert after["count"] == EXPECTED_SOURCELESS, after
@@ -317,15 +342,20 @@ def counts(record):
 
 
 def render(record):
-    e = lambda x: escape(str(x))
+    def e(x):
+        return escape(str(x))
+
     content = [
         "<!doctype html><html lang='en'><meta charset='utf-8'>",
         "<meta name='reckon-type' content='evidence'><title>Equilibrium repair record</title>",
         "<link rel='stylesheet' href='/_shared/foundation.css'><main>",
         "<h1>Equilibrium repair record</h1>",
+        f"<p><strong>{e(record.get('state', 'in progress'))}</strong>: "
+        f"{e(record.get('checkpoint', 'Repair work is incomplete.'))}</p>",
         f"<p>Recorded spend USD {record['spent_usd']:.6f} / USD {CEILING:.2f}. "
         f"Initial live names without a source: {record['baseline_sourceless']['count']}. "
         "Pipeline acceptance is recorded here; correctness awaits a fresh blind adjudication.</p>",
+        f"<p>{e(record.get('pilot', {}).get('result', 'Pilot not completed.'))}</p>",
         f"<pre>{e(json.dumps(counts(record), indent=2))}</pre>",
         "<p>The two pending adjudications remain excluded. Full command receipts, source packets, "
         "and guard measurements are preserved in the run directory recorded in the data file's receipts.</p>",
@@ -346,7 +376,7 @@ def render(record):
     PAGE.write_text("\n".join(content))
 
 
-def check(path=DATA):
+def check(path=DATA, *, checkpoint=False):
     record = load(path)
     module = audit()
     expected = {j["id"] for j in module.load()["judgments"] if j["verdict"] != "sound"}
@@ -354,18 +384,25 @@ def check(path=DATA):
     assert {r["id"] for r in rows} == expected and len(rows) == 126, "Cohort mismatch"
     assert record["spent_usd"] <= CEILING, "Spend ceiling"
     assert abs(sum(r["cost_usd"] for r in rows) - record["spent_usd"]) < 1e-8
-    for r in rows:
-        assert r["outcome"] in ("accepted_repair", "lead", "refused"), (
-            r["id"],
-            r["outcome"],
-        )
-        if r["outcome"] != "accepted_repair":
-            assert r["lead_question"].strip(), (r["id"], "No precise lead question")
     repaired = [r for r in rows if r["outcome"] == "accepted_repair"]
     with client() as gc:
         guard = sourceless(gc)
         assert guard["count"] == EXPECTED_SOURCELESS, guard
-        live = identities(gc, [r["after"]["id"] for r in repaired])
+        live = identities(
+            gc,
+            [r["after"]["id"] for r in repaired]
+            + [n for r in repaired for n in r.get("related_identities", {})],
+        )
+        bindings = source_bindings(
+            gc,
+            sorted(
+                {
+                    p
+                    for r in repaired
+                    for p in (r.get("before") or {}).get("sources", [])
+                }
+            ),
+        )
     for r in repaired:
         target = live.get(r["after"]["id"])
         assert target == r["after"], (
@@ -375,15 +412,29 @@ def check(path=DATA):
         assert target["name_stage"] == "accepted", (r["id"], "Name not accepted")
         assert target["sources"], (r["id"], "Missing producing source")
         assert r["proposals"], (r["id"], "No signed proposal receipt")
+        assert target["docs_stage"] == "accepted", (r["id"], "Docs not accepted")
+        for source, names in r.get("source_bindings", {}).items():
+            assert names and bindings.get(source) == names, (source, "Binding differs")
+        for name, identity in r.get("related_identities", {}).items():
+            assert live.get(name) == identity, (name, "Related identity differs")
+            assert identity["name_stage"] == "accepted" and identity["sources"], name
     for path in record["commands"]:
         receipt = json.loads(Path(path).read_text())
         assert receipt["state"] == "finished", (path, "Unfinished command")
         for k in ("sourceless_before", "sourceless_after"):
             assert receipt[k]["count"] == EXPECTED_SOURCELESS, (path, k)
+    for r in rows:
+        assert r["outcome"] in ("accepted_repair", "lead", "refused", "pending"), (
+            r["id"],
+            r["outcome"],
+        )
+        if r["outcome"] in ("lead", "refused"):
+            assert r["lead_question"].strip(), (r["id"], "No precise lead question")
     print(
         json.dumps(
             {
                 "checked": len(rows),
+                "complete": not any(r["outcome"] == "pending" for r in rows),
                 "repaired": len(repaired),
                 **counts(record),
                 "sourceless": guard["count"],
@@ -392,12 +443,20 @@ def check(path=DATA):
             }
         )
     )
+    if not checkpoint:
+        pending = [r["id"] for r in rows if r["outcome"] == "pending"]
+        assert not pending, f"Incomplete repair cohort: {len(pending)} pending members"
 
 
 def main():
     p = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     p.add_argument("--init", action="store_true")
     p.add_argument("--check", action="store_true")
+    p.add_argument(
+        "--checkpoint",
+        action="store_true",
+        help="Verify recorded completed work while reporting pending members",
+    )
     p.add_argument("--show", action="store_true")
     p.add_argument("--render", action="store_true")
     p.add_argument("--data", type=Path, default=DATA)
@@ -407,7 +466,7 @@ def main():
     if args.init:
         initialize()
     elif args.check:
-        check(args.data)
+        check(args.data, checkpoint=args.checkpoint)
     elif args.show:
         print(json.dumps(load(args.data), indent=2, ensure_ascii=False))
     elif args.render:
