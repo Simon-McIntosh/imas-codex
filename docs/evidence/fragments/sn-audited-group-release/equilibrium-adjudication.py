@@ -489,8 +489,17 @@ def validate(data):
         audit.assert_blind(packet["reader_visible_text"], packet)
     judgments = data["judgments"]
     if judgments:
-        assert {j["id"] for j in judgments} == set(data["members"])
-        assert len(judgments) == len(visible)
+        pending = data.get("pending", [])
+        if pending:
+            assert [p["id"] for p in pending] == list(PENDING_MEMBERS), (
+                "Pending exceptions changed"
+            )
+            assert all(p["status"] == "pending_fresh_adjudication" for p in pending)
+        expected = set(data["members"]) - {p["id"] for p in pending}
+        assert {j["id"] for j in judgments} == expected, (
+            "Eligible member lacks a verdict"
+        )
+        assert len(judgments) == len(expected)
         assert digest(judgments) == data["judgment_digest"]
         by_id = {p["id"]: p for p in visible}
         for judgment in judgments:
@@ -504,6 +513,99 @@ def validate(data):
             assert judgment["evidence_quote"] in judgment["reason"], judgment["id"]
             assert judgment["evidence_path"] in text, judgment["id"]
     return visible
+
+
+def exclude_pending():
+    data = load()
+    assert "pending" not in data
+    _, sealed = committed_snapshot("verdicts-frozen")
+    assert data["judgments"] == sealed["judgments"]
+    handoff = load(PENDING_PACKETS)
+    missing = data["source_completeness"]["missing_fields"]
+    assert {m["member"] for m in missing} == set(PENDING_MEMBERS)
+    data["pending"] = [
+        {
+            "id": packet["id"],
+            "status": "pending_fresh_adjudication",
+            "omitted_fields": [m for m in missing if m["member"] == packet["id"]],
+            "corrected_packet_digest": packet["packet_digest"],
+        }
+        for packet in handoff["packets"]
+    ]
+    data["judgments"] = [
+        j for j in sealed["judgments"] if j["id"] not in PENDING_MEMBERS
+    ]
+    data["judgment_digest"] = digest(data["judgments"])
+    data.pop("report", None)
+    validate(data)
+    check_coverage(data)
+    save(data)
+    print(
+        "EXCLUSIONS: 208 original verdicts unchanged; exactly two pending fresh adjudication; six omitted fields retained; no new verdicts"
+    )
+
+
+def check_coverage(data):
+    assert [p["id"] for p in data.get("pending", [])] == list(PENDING_MEMBERS), (
+        "Exactly the two authorized pending members are required"
+    )
+    coverage_sha, sealed = committed_field("coverage")
+    assert data["coverage"] == sealed["coverage"], (
+        "Committed ancestor requirements changed"
+    )
+    assert data["coverage_receipt"] == sealed["coverage_receipt"]
+    assert digest(data["coverage"]) == data["coverage_receipt"]["coverage_digest"]
+    assert data["source_completeness"] == sealed["source_completeness"]
+    source_ids = {
+        s[3:] for p in packets(data) for s in p["source_paths"] if s.startswith("dd:")
+    }
+    assert set(data["coverage"]["source_fields"]) == source_ids
+    missing = coverage_missing(data, data["coverage"])
+    expected_missing = [
+        {key: item[key] for key in ("member", "source", "ancestor", "field", "text")}
+        for item in sealed["source_completeness"]["missing_fields"]
+    ]
+    assert sorted(missing, key=digest) == sorted(expected_missing, key=digest), (
+        "A member outside the pending exceptions lacks a full packet"
+    )
+    assert len(missing) == 6 and {m["member"] for m in missing} == set(PENDING_MEMBERS)
+    payload = load(PENDING_PACKETS)
+    pending_path = str(PENDING_PACKETS.relative_to(ROOT.parents[3]))
+    assert payload == json.loads(git("show", f"{coverage_sha}:{pending_path}")), (
+        "Corrected neutral packets changed after commit"
+    )
+    assert set(payload) == {"packets"}
+    assert [p["id"] for p in payload["packets"]] == list(PENDING_MEMBERS)
+    assert digest(payload) == data["coverage_receipt"]["pending_packets_digest"]
+    assert not any(
+        word in json.dumps(payload).lower()
+        for word in ("verdict", "reader", "defect_classes", "candidate_cause")
+    )
+    for pending, packet in zip(data["pending"], payload["packets"], strict=True):
+        assert set(pending) == {
+            "id",
+            "status",
+            "omitted_fields",
+            "corrected_packet_digest",
+        }
+        assert pending["status"] == "pending_fresh_adjudication"
+        assert pending["omitted_fields"] == [
+            m
+            for m in sealed["source_completeness"]["missing_fields"]
+            if m["member"] == pending["id"]
+        ]
+        assert pending["corrected_packet_digest"] == packet["packet_digest"]
+        assert packet["packet_digest"] == digest(
+            {k: v for k, v in packet.items() if k != "packet_digest"}
+        )
+        sibling("blind-audit").assert_blind(packet["packet_text"], packet)
+        for source in packet["source_paths"]:
+            for index in data["coverage"]["source_fields"][source[3:]]:
+                assert (
+                    data["coverage"]["ancestor_fields"][index]["text"]
+                    in packet["packet_text"]
+                ), "Corrected packet lacks ancestor text"
+    assert len(data["judgments"]) == 208
 
 
 def seal_verdicts():
@@ -536,13 +638,13 @@ def check(path=DATA, include_report=True):
     verdict_seal = committed_snapshot("verdicts-frozen", required=False)
     if verdict_seal:
         verdict_sha, frozen_verdicts = verdict_seal
-        assert data["judgments"] == frozen_verdicts["judgments"], (
-            "Verdict changed after blind commit"
-        )
+        pending = {p["id"] for p in data.get("pending", [])}
+        expected = [j for j in frozen_verdicts["judgments"] if j["id"] not in pending]
+        assert data["judgments"] == expected, "Verdict changed after blind commit"
         assert data["phase"] == "verdicts-frozen", (
             "Adjudication phase changed after seal"
         )
-        assert data["judgment_digest"] == frozen_verdicts["judgment_digest"]
+        assert data["judgment_digest"] == digest(expected)
         assert git(
             "diff-tree", "--no-commit-id", "--name-only", "-r", verdict_sha
         ).splitlines() == [RELATIVE_DATA], "Verdict commit touched reader data"
@@ -550,20 +652,19 @@ def check(path=DATA, include_report=True):
     else:
         assert not data["judgments"], "Verdicts require an independent committed seal"
     if include_report and data["judgments"]:
-        assert data.get("source_completeness", {}).get("complete") is True, (
-            "Full source-packet completeness not established: inherited ancestor cap omitted source text; blind recovery requires an unexposed adjudicator"
-        )
+        check_coverage(data)
         assert "report" in data, "Completed adjudication requires its report"
     if include_report and "report" in data:
         report = data["report"]
         assert report == summarize(data, report["comparison_inputs"])
         assert PAGE.read_text() == render_page(data), "Rendered evidence changed"
         assert len(report["lead_review"]["members"]) == 20
+        assert not set(report["lead_review"]["members"]) & set(PENDING_MEMBERS)
         assert PAGE.read_text().count('class="review-card"') == 20
         assert PAGE.read_text().count("<textarea ") == 20
         assert "<details open" not in PAGE.read_text()
         print(
-            "PASS: exact census, intervals, causes, historical comparisons and seeded 20-member review page reproduced; lead verdict fields empty"
+            "PASS: 208 complete packets and unchanged sealed verdicts; exactly two pending with six omitted fields; all result counts exclude pending members; seeded 20-member page reproduced; lead verdict fields empty"
         )
     print(
         f"PASS: {len(data['members'])} immutable source packets; {len(data['judgments'])} blind verdicts; independent git seals verified"
@@ -767,6 +868,11 @@ CAUSES = {
 
 def summarize(data, comparison):
     judgments = data["judgments"]
+    eligible = {j["id"] for j in judgments}
+    assert comparison["eligible_members"] == sorted(eligible)
+    assert all(set(comparison[key]) <= eligible for key in ("earlier", "corrected")), (
+        "Pending member present in reader comparison"
+    )
     n = len(judgments)
     counts = Counter(j["verdict"] for j in judgments)
     classes = Counter(c for j in judgments for c in j["defect_classes"])
@@ -780,7 +886,8 @@ def summarize(data, comparison):
     special_classes = {"duplicate_of_live_name", "wrong_physics_domain"}
     return {
         "population": n,
-        "source_completeness": data.get("source_completeness"),
+        "pending": data["pending"],
+        "coverage_commit": committed_field("coverage")[0],
         "verdicts": {
             v: share(counts[v], n) for v in ("sound", "defective", "undecidable")
         },
@@ -855,8 +962,8 @@ def render_page(data):
         "<title>Equilibrium source adjudication and lead review</title>",
         "<style>body{font:16px/1.5 system-ui,sans-serif;max-width:1400px;margin:2rem auto;padding:0 1.5rem;color:#222}table{border-collapse:collapse;width:100%;margin:1rem 0}th,td{padding:.55rem;text-align:left;vertical-align:top;border-bottom:1px solid #ccc;overflow-wrap:anywhere}th{font-weight:600}pre{white-space:pre-wrap;overflow-wrap:anywhere;font:14px/1.45 ui-monospace,monospace}summary{cursor:pointer;font-weight:600}details{margin:1rem 0}textarea{min-height:8rem;width:95%;font:inherit}code{overflow-wrap:anywhere}.review-card{margin:3rem 0;padding-top:1rem;border-top:1px solid #777}a{color:#245c91}small{font-size:.85em}@media print{body{max-width:none}.review-card{break-before:page}}</style></head><body>",
         "<h1>Equilibrium: judge the source packet first</h1>",
-        "<p><strong>INCOMPLETE EVIDENCE — do not use this census to proceed with the group.</strong> A final completeness probe found six enclosing-text omissions in two frozen packets: <code>radial_coordinate_of_conductor_cross_section</code> and <code>vertical_outline</code>. The inherited context helper kept only four ancestor statements per source. Earlier reader comparisons had already been opened when this was discovered, so these verdicts cannot be upgraded to full-packet blind adjudications in this session. The original packets and verdicts are preserved. An unexposed adjudicator must complete a new full-packet blind pass. The twenty selected review packets are unaffected by these observed omissions, but their review does not close the cohort defect.</p>",
-        "<p>Twenty members were drawn by a recorded seed from the complete frozen equilibrium cohort. Read each packet, enter your own verdict in the blank column, then open the disclosure to compare. Every packet below is complete and contains no earlier reader verdict, score or adjudication. Fields are blank in this file; entered text is not automatically saved.</p>",
+        '<p><strong>208 adjudicated members; two pending fresh adjudication.</strong> The original verdicts for the 208 complete packets are preserved exactly. <code>radial_coordinate_of_conductor_cross_section</code> and <code>vertical_outline</code> are pending because their original packets omitted six enclosing-text fields. Both are excluded from every verdict and class count, rate, interval, shared-cause count, reader comparison and review draw on this page. They were not re-judged after reader exposure. Complete corrected packets are available in <a href="equilibrium-pending-packets.json">the neutral packet handoff</a>, which contains no verdict or reader information. The pending-member table below identifies every omitted field.</p>',
+        "<p>Twenty members were drawn by a recorded seed from only the 208 complete, adjudicated packets. Read each packet, enter your own verdict in the blank column, then open the disclosure to compare. Every packet below is complete and contains no earlier reader verdict, score or adjudication. Fields are blank in this file; entered text is not automatically saved.</p>",
         f"<p>Packet seal <code>{report['packet_commit']}</code>; blind verdict seal <code>{report['verdict_commit']}</code>. The verdict seal predates all individual reader exposure. No model calls, paid reader calls or graph writes were made for this adjudication.</p>",
     ]
     for i, name in enumerate(report["lead_review"]["members"], 1):
@@ -885,11 +992,37 @@ def render_page(data):
         )
     result.extend(
         [
-            '<details id="audit-results"><summary>Open census, methods, comparisons and all 210 committed verdicts after reviewing</summary>',
-            "<h2>Full-cohort census</h2>",
-            "<p>Every live equilibrium member at collection is included: 210 names, 699 distinct producer sources, including 660 Data Dictionary paths and 39 derived sources. All 72 spanning families touching equilibrium contribute structural context. Raw producer text is retained; 655 DD chains contain enclosing text, subject to the four-statement cap disclosed above. There are 661 DD producer/name memberships, distinct from the 660 unique DD paths. One name has no producer source. Text is whitespace-normalized without clipping after context selection. The compact JSON stores lossless compressed packet and verdict payloads; this script decodes them. The freeze is a point-in-time snapshot, not a claim about later graph changes.</p>",
+            '<details id="audit-results"><summary>Open results, pending members, methods and all 208 retained verdicts after reviewing</summary>',
+            "<h2>Adjudicated cohort</h2>",
+            "<p>The frozen membership frame has 210 names: 208 complete packets retain their original blind verdicts; exactly two are pending and excluded from all results. Full ancestor-field coverage is independently committed, and the gate verifies every source chain against it. The two corrected packets include all enclosing statements without the inherited four-statement cap. Raw producer text and structural family context are retained. Text is whitespace-normalized without clipping after context selection. The compact JSON stores lossless compressed packets, verdicts and coverage requirements; this script decodes them. The freeze is a point-in-time snapshot, not a claim about later graph changes.</p>",
+            "<h3>Pending fresh adjudication — excluded from all results</h3>",
             table(
-                ["Verdict", "Count / 210", "Share", "95% Wilson interval"],
+                [
+                    "Pending member",
+                    "Source binding",
+                    "Omitted ancestor",
+                    "Field",
+                    "Omitted source words",
+                ],
+                [
+                    [
+                        e(p["id"]),
+                        e(field["source"]),
+                        e(field["ancestor"]),
+                        e(field["field"]),
+                        e(field["text"]),
+                    ]
+                    for p in data["pending"]
+                    for field in p["omitted_fields"]
+                ],
+            ),
+            table(
+                [
+                    "Verdict",
+                    f"Count / {report['population']}",
+                    "Share",
+                    "95% Wilson interval",
+                ],
                 [
                     [
                         v,
@@ -900,12 +1033,12 @@ def render_page(data):
                     for v, r in report["verdicts"].items()
                 ],
             ),
-            "<p>This is a census of the frozen cohort: its counts and shares are exact conditional on these adjudications. Wilson intervals are supplied as binomial descriptive intervals for the requested proportions; they do not quantify adjudicator error or sampling uncertainty for this fixed census. Undecidable is not counted as sound. Classes overlap and each class uses all 210 members as denominator.</p>",
+            "<p>Counts and shares refer only to the 208 retained adjudications. Pending members contribute to no numerator or denominator. Wilson intervals are supplied as binomial descriptive intervals for the requested proportions; they do not quantify adjudicator error or sampling uncertainty for this fixed evaluated cohort. Undecidable is not counted as sound. Classes overlap and each class uses the same 208 evaluated members as denominator.</p>",
             table(
                 [
                     "Defect class",
                     "Meaning",
-                    "Count / 210",
+                    f"Count / {report['population']}",
                     "Share",
                     "95% Wilson interval",
                 ],
@@ -913,7 +1046,7 @@ def render_page(data):
                     [
                         e(c),
                         e(label),
-                        f"{report['classes'][c]['count']} / 210",
+                        f"{report['classes'][c]['count']} / {report['population']}",
                         percentage(report["classes"][c]["share"]),
                         interval(report["classes"][c]),
                     ]
@@ -970,7 +1103,7 @@ def render_page(data):
                 ],
             ),
             "<h2>Earlier readers: comparison only</h2>",
-            "<p>Historical A/B audit rows were read from the graph after the verdict commit, bounded to the 210 frozen identities; C comes from the retained third-reader evidence. Corrected-instruction calibration readings are shown separately. No reader output contributed to an adjudication. Agreement is computed only on observed, decidable overlaps; an absent reading is never treated as sound and undecidable references are excluded from binary and exact-class agreement. The observed subsets are selected historical cohorts, not random validation samples. Source text and instruction versions may differ, so agreement does not isolate model ability or the effect of the instruction change.</p>",
+            "<p>Historical A/B audit rows were read from the graph after the verdict commit; C comes from the retained third-reader evidence. All comparison inputs shown here are restricted to the 208 retained members; pending members are excluded even when a historical reading exists. Corrected-instruction calibration readings are shown separately. No reader output contributed to an adjudication. Agreement is computed only on observed, decidable overlaps; an absent reading is never treated as sound and undecidable references are excluded from binary and exact-class agreement. The observed subsets are selected historical cohorts, not random validation samples. Source text and instruction versions may differ, so agreement does not isolate model ability or the effect of the instruction change.</p>",
         ]
     )
     for label, key in (
@@ -1048,14 +1181,14 @@ def render_page(data):
         [
             "<h2>Reproducibility and review draw</h2>",
             f"<p>Seed <code>{SEED}</code>. {e(report['lead_review']['algorithm'])}. Allocation: {e(json.dumps(report['lead_review']['allocation'], sort_keys=True))}. All twenty lead verdicts remain blank. The lead must complete this independent check before the group proceeds; this document grants no release authority.</p>",
-            f"<p>Comparison opened at {e(comparison['opened_after_verdict_commit_at'])} after verdict commit <code>{comparison['verdict_commit_before_exposure']}</code>. The bounded graph query returned {comparison['graph_rows']} rows; {comparison['known_present_cross_source_matches']} known-present A/B class sets match the independent retained third-reader file. Non-pair audit seats are excluded using the existing helper’s rule.</p>",
+            f"<p>Comparison opened at {e(comparison['opened_after_verdict_commit_at'])} after verdict commit <code>{comparison['verdict_commit_before_exposure']}</code>. The original bounded-read receipt and its known-present controls remain in the run record. The comparison tables and their stored inputs are restricted to eligible members. Non-pair audit seats are excluded using the existing helper’s rule. Complete coverage and the neutral pending packets are independently sealed at <code>{report['coverage_commit']}</code>.</p>",
             "<p>The seven classes and reconciled omission instruction come from the existing blind-audit helper. A source-stated component, locus, basis, coordinate, weight or normalization omitted from a name is a defect; stylistic preferences and unstated qualifiers are not. Missing source text yields undecidable unless a source-independent class can be established. Derived producer descriptions are retained as evidence, not invented DD text. Generic-versus-specific derived identities and ambiguous source conventions remain matters for the lead where the committed reason says so.</p>",
-            "<p>Run <code>uv run --no-sync python docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py --check</code> in the repository environment. The final gate deliberately fails on the incomplete source packets. The earlier integrity-only gate reproduced counts, intervals, the seeded draw and this page, but did not measure ancestor completeness. Altering a verdict and recomputing its digest, or erasing every verdict, is independently refused against the committed seal. No paid calls were authorized or made: actual reader spend USD 0; authorized paid-call ceiling USD 0.</p>",
-            "<h2>Every committed verdict</h2>",
+            "<p>Run <code>uv run --no-sync python docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py --check</code> in the repository environment. The gate requires exactly the two named pending exceptions, complete source context and an unchanged committed verdict for every other member, exclusion of pending members from all results, complete neutral handoff packets, and a twenty-member draw only from the retained cohort. Altering a retained verdict and recomputing its digest, erasing a verdict, or omitting any other packet context is refused. No paid calls were authorized or made: actual reader spend USD 0; authorized paid-call ceiling USD 0.</p>",
+            "<h2>Every retained committed verdict</h2>",
             "<table><thead><tr><th>Name and stored definition</th><th>Quoted source binding</th><th>Verdict and classes</th><th>Quoted reason</th></tr></thead><tbody>",
         ]
     )
-    for name in data["members"]:
+    for name in judgments:
         p = visible[name]
         j = judgments[name]
         definition = (
@@ -1080,6 +1213,33 @@ def report():
         == committed_snapshot("verdicts-frozen")[0]
     )
     assert comparison["bounded_member_ids"] == data["members"]
+    eligible = {j["id"] for j in data["judgments"]}
+    comparison = {
+        key: value
+        for key, value in comparison.items()
+        if key
+        not in (
+            "bounded_member_ids",
+            "graph_rows",
+            "ignored_non_pair_seats",
+            "known_present_cross_source_matches",
+            "earlier",
+            "corrected",
+        )
+    } | {
+        "eligible_members": sorted(eligible),
+        "source_snapshot": str(RUN / "comparison-inputs.json"),
+        "earlier": {
+            name: rows
+            for name, rows in load(RUN / "comparison-inputs.json")["earlier"].items()
+            if name in eligible
+        },
+        "corrected": {
+            name: rows
+            for name, rows in load(RUN / "comparison-inputs.json")["corrected"].items()
+            if name in eligible
+        },
+    }
     data["report"] = summarize(data, comparison)
     save(data)
     PAGE.write_text(render_page(data))
@@ -1111,6 +1271,7 @@ def main():
     parser.add_argument("--collect-comparison", action="store_true")
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--collect-pending-packets", action="store_true")
+    parser.add_argument("--exclude-pending", action="store_true")
     parser.add_argument("--data", type=Path, default=DATA)
     args = parser.parse_args()
     if args.collect:
@@ -1125,6 +1286,8 @@ def main():
         report()
     elif args.collect_pending_packets:
         collect_pending_packets()
+    elif args.exclude_pending:
+        exclude_pending()
 
 
 if __name__ == "__main__":
