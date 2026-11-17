@@ -46,7 +46,14 @@ class FakeClient:
 
     def getPulses2(self, pattern):
         assert pattern == "DEMO:*/*"
-        return [SimpleNamespace(pulseID="DEMO:TRIAL/1", timeFrom=10, timeTo=20)]
+        return [
+            SimpleNamespace(
+                pulseID="DEMO:TRIAL/1",
+                timeFrom=10,
+                timeTo=20,
+                description="Demonstration pulse",
+            )
+        ]
 
     def getPulseCategories(self):
         return ["DEMO:TRIAL"]
@@ -201,10 +208,17 @@ def test_empty_and_permission_refusal_are_distinct():
 def test_pulse_listing_adds_explicit_pulse_segment():
     result = reader.pulses(FakeClient(), {"pattern": "DEMO:*"})
     assert result == {
-        "pulses": [{"id": "DEMO:TRIAL/1", "start_ns": 10, "end_ns": 20}],
+        "pulses": [
+            {
+                "id": "DEMO:TRIAL/1",
+                "start_ns": 10,
+                "end_ns": 20,
+                "description": "Demonstration pulse",
+            }
+        ],
         "categories": ["DEMO:TRIAL"],
     }
-    with pytest.raises(reader.ReadError, match="pulse catalogue exceeds limit"):
+    with pytest.raises(ValueError, match="pulse limit must be positive"):
         reader.pulses(FakeClient(), {"pattern": "DEMO:*/*", "limit": 0})
 
 

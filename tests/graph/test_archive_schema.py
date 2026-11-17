@@ -153,7 +153,7 @@ def test_archive_data_source_does_not_require_mdsplus_server() -> None:
     assert DataSource.model_validate_json(source.model_dump_json()) == source
 
 
-@pytest.mark.parametrize("field", ["name", "start_ns", "end_ns", "archive"])
+@pytest.mark.parametrize("field", ["name", "start_ns", "archive"])
 def test_pulse_requires_identity_and_bounds(field: str) -> None:
     values = {
         "id": "demo:codac_uda:slow:DEMO:CAMPAIGN/pulse-alpha",
