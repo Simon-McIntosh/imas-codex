@@ -6284,6 +6284,12 @@ async def run_parallel_data_discovery(
         }
 
     # --- Enrich workers ---
+    from imas_codex.discovery.signals.enrichment import get_enrichment_options
+    from imas_codex.settings import get_model
+
+    worker_limit = get_enrichment_options(get_model("discovery-describe")).max_workers
+    if worker_limit is not None:
+        num_enrich_workers = min(num_enrich_workers, worker_limit)
     workers.append(
         WorkerSpec(
             "enrich",

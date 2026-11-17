@@ -16,6 +16,7 @@ class EnrichmentOptions(BaseModel):
     model_config = ConfigDict(populate_by_name=True, extra="forbid")
 
     batch_size: int = Field(default=20, alias="batch-size", ge=1, le=200)
+    max_workers: int | None = Field(default=None, alias="max-workers", ge=1, le=64)
     schema_constraint: bool = Field(default=False, alias="schema-constraint")
     json_mode: bool = Field(default=False, alias="json-mode")
     thinking: bool | None = None
