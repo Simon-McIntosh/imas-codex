@@ -471,6 +471,36 @@ def test_session_budget_includes_records_and_sign_in_reads(document_client):
     assert len(sent) == 40
 
 
+def test_records_only_session_can_read_records_beyond_document_budget(document_client):
+    _, sent, _ = document_client
+    with ICPClient(facility="synthetic", min_interval=0, records_only=True) as client:
+        client._authenticated = True
+        for _ in range(45):
+            client.get("/items")
+        assert len(sent) == 45
+        assert client._policy.document_requests == {}
+
+
+@pytest.mark.parametrize("entry", ["client", "session", "prepared", "adapter"])
+def test_records_only_session_refuses_documents_before_transport(
+    document_client, entry
+):
+    _, sent, _ = document_client
+    with ICPClient(facility="synthetic", min_interval=0, records_only=True) as client:
+        client._authenticated = True
+        request = requests.Request("GET", DOCUMENT_URL).prepare()
+        with pytest.raises(ICPRequestRefused, match="records-only"):
+            if entry == "client":
+                client.get(DOCUMENT_URL)
+            elif entry == "session":
+                client.session.get(DOCUMENT_URL)
+            elif entry == "prepared":
+                client.session.send(request)
+            else:
+                client.session.get_adapter(DOCUMENT_URL).send(request)
+        assert sent == []
+
+
 @pytest.mark.asyncio
 async def test_probe_network_failure_stops_without_a_get(
     document_client, monkeypatch, tmp_path
