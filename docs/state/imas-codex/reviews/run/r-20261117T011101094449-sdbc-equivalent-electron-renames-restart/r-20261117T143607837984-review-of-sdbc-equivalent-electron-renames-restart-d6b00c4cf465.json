@@ -1,0 +1,90 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T14:37:00.508Z",
+  "dispatched_at": "2026-11-17T14:36:43Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_equivalent_electron_renames.py",
+      "line": "46",
+      "severity": "non-blocking",
+      "text": "non-blocking: the default expected_count is read from document['population']['count'], so the row-count assertion compares the record against its own claim and never against the 56 declared names in live-rewrite-bulk.json; a record edited consistently to 50 rows and 50 in population.count passes, and the red arm bypasses this path with an explicit --expected-count."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_equivalent_electron_renames.py",
+      "line": "158",
+      "severity": "non-blocking",
+      "text": "non-blocking: a left row's left_reason is only required for outcomes collision and declined_source, so the one left row here, outcome review_not_accepted, could lose its reason and the gate would still exit 0 although the done_when requires it listed by name with the evidence for leaving it."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/check_equivalent_electron_renames.py",
+      "line": "136",
+      "severity": "non-blocking",
+      "text": "non-blocking: the renamed-row branch asserts sources, the qualifier token and name_stage but never asserts that edit_scope_id or cost.run_id is present, so the done_when's 'paid history kept' half is recorded in equivalent-electron-renames.json and guarded by nothing."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/equivalent-electron-renames.py",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: SPEND_CEILING is 12.0 while the --spend-ceiling default at :959 is 8.0, so the batch path enforces 12 and the render path enforces 8, and the landed record and HTML tell a reader the ceiling was USD 8.00 after the section raised it to 12."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/equivalent-electron-renames.py",
+      "line": "818",
+      "severity": "non-blocking",
+      "text": "non-blocking: inside 'elif result.returncode not in (0, 3)' the test 'result.returncode == 3' can never be true, so the review_not_accepted arm is unreachable dead code that reads as if return code 3 is mapped here."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-definitions-by-construction/equivalent-electron-renames.py",
+      "line": "223",
+      "severity": "non-blocking",
+      "text": "non-blocking: the outcome label is built as f'renamed_{outcome}' from the progress ledger's settled outcome, so four rows carrying after.name_stage 'accepted' are labelled renamed_review_not_accepted (equivalent-electron-renames.json:123, :255, :322 and one more), and a reader filtering on outcome reads an accepted rename as an unaccepted one."
+    },
+    {
+      "file": "manifest.md",
+      "line": "51",
+      "severity": "non-blocking",
+      "text": "non-blocking: the manifest's cost sentence names 0.090277 and 0.072843 as the only outliers, while the record it ships attributes 1.268263, 1.115819, 0.773151 and 0.516159 to single names, so a reader cannot reconcile the manifest's spend account with the record it landed."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from base c0eda18f6cf3d35d399a992fdb0c5467e69ca987; 715043bdf adds both scripts, caa87e233/c21d62f85/435b22285 add the record, its generation stamp and each left row's reason, befff55b3 adds the scoped stage-then-review route with the sourceless guard, and d6b00c4cf rewrites only generated_at_utc.",
+    "done_when": "the done_when measures all 56 names renamed-and-accepted or listed-with-reason, sourceless not above 10, and a read-only check that fails on mismatch with one red arm; check_equivalent_electron_renames.py:99-157 asserts identity presence, description/unit/stage equality, score equality, source carry-over and the equivalent_electron token, and the run's logs record 'checked 56 rows, 56 live identities, 10 live names without a source' EXIT=0 and 'FAIL population: evidence has 56 rows, expected 57' EXIT=1.",
+    "goal": "the node's goal is to rename the names stated in equivalent electrons so their identifiers carry the qualifier; docs/evidence/fragments/sn-definitions-by-construction/equivalent-electron-renames.json records 55 of 56 rows with a live identity carrying equivalent_electron at name_stage accepted and one row, source_rate_due_to_gas_injection, left with its four refused candidate scores.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T011101094449-sdbc-equivalent-electron-renames-restart/manifest.md; it reports 55 renamed plus 1 left, sourceless 10, spend USD 5.547970 and names logs/check-green.log, logs/check-altered-count.log and logs/render.log, all three present in the run directory and ending EXIT=0, EXIT=1, EXIT=0.",
+    "write_paths": "the manifest declares six paths; the diff touches four files, all under docs/evidence/fragments/sn-definitions-by-construction/, so nothing in the diff leaves the declared scope, and the two declared sdbc-equivalent-electron-renames-restart paths are untouched."
+  },
+  "justifications": {
+    "durability": "check_equivalent_electron_renames.py:99-157 reddens if a rename is reverted, a source binding detaches or a name drops out of accepted, but :46 takes the expected population from the record it checks, :158 never asserts the left row's reason, and nothing wires the script to an automated suite.",
+    "evidence": "logs/check-green.log ends EXIT=0 over 56 rows and logs/check-altered-count.log ends EXIT=1 on --expected-count 57, so the gate asserts the done_when's population and acceptance measures with a red arm, though the manifest's tests line is prose rather than the command and only the log headers carry it.",
+    "fit": "equivalent-electron-renames.py:32 sets SPEND_CEILING = 12.0 while :959 defaults --spend-ceiling to 8.0, so the same bound has two values and the landed record reports the 8.00 one.",
+    "goal_fidelity": "equivalent-electron-renames.json rows carry live_identity ids such as accumulated_ammonia_equivalent_electron_count with after.name_stage 'accepted', 55 of 56, and the one exception is documented in left_reason.",
+    "reuse": "both scripts reuse imas_codex/standard_names/source_reads.py:64 read_source_paths_by_name and :90 count_live_names_without_source, but the identity-read Cypher is restated at check_equivalent_electron_renames.py:16-27 and equivalent-electron-renames.py:62-70 because imas_codex/standard_names/search.py:505 fetch_standard_names projects neither stages nor reviewer scores and drops absent ids.",
+    "scope_discipline": "git diff --stat c0eda18f6..d6b00c4cf lists four files, each inside the declared write paths, and the tree at d6b00c4cf is clean."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to rename the names stated in equivalent electrons so their identifiers carry the qualifier; docs/evidence/fragments/sn-definitions-by-construction/equivalent-electron-renames.json records 55 of 56 rows with a live identity carrying equivalent_electron at name_stage accepted and one row, source_rate_due_to_gas_injection, left with its four refused candidate scores.\nVERDICT done_when: the done_when measures all 56 names renamed-and-accepted or listed-with-reason, sourceless not above 10, and a read-only check that fails on mismatch with one red arm; check_equivalent_electron_renames.py:99-157 asserts identity presence, description/unit/stage equality, score equality, source carry-over and the equivalent_electron token, and the run's logs record 'checked 56 rows, 56 live identities, 10 live names without a source' EXIT=0 and 'FAIL population: evidence has 56 rows, expected 57' EXIT=1.\nVERDICT write_paths: the manifest declares six paths; the diff touches four files, all under docs/evidence/fragments/sn-definitions-by-construction/, so nothing in the diff leaves the declared scope, and the two declared sdbc-equivalent-electron-renames-restart paths are untouched.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T011101094449-sdbc-equivalent-electron-renames-restart/manifest.md; it reports 55 renamed plus 1 left, sourceless 10, spend USD 5.547970 and names logs/check-green.log, logs/check-altered-count.log and logs/render.log, all three present in the run directory and ending EXIT=0, EXIT=1, EXIT=0.\nVERDICT diff: read commit by commit from base c0eda18f6cf3d35d399a992fdb0c5467e69ca987; 715043bdf adds both scripts, caa87e233/c21d62f85/435b22285 add the record, its generation stamp and each left row's reason, befff55b3 adds the scoped stage-then-review route with the sourceless guard, and d6b00c4cf rewrites only generated_at_utc.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: equivalent-electron-renames.json rows carry live_identity ids such as accumulated_ammonia_equivalent_electron_count with after.name_stage 'accepted', 55 of 56, and the one exception is documented in left_reason.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/check-green.log ends EXIT=0 over 56 rows and logs/check-altered-count.log ends EXIT=1 on --expected-count 57, so the gate asserts the done_when's population and acceptance measures with a red arm, though the manifest's tests line is prose rather than the command and only the log headers carry it.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat c0eda18f6..d6b00c4cf lists four files, each inside the declared write paths, and the tree at d6b00c4cf is clean.\nSCORE durability: 13\nJUSTIFICATION durability: check_equivalent_electron_renames.py:99-157 reddens if a rename is reverted, a source binding detaches or a name drops out of accepted, but :46 takes the expected population from the record it checks, :158 never asserts the left row's reason, and nothing wires the script to an automated suite.\nSCORE fit: 15\nJUSTIFICATION fit: equivalent-electron-renames.py:32 sets SPEND_CEILING = 12.0 while :959 defaults --spend-ceiling to 8.0, so the same bound has two values and the landed record reports the 8.00 one.\nSCORE reuse: 16\nJUSTIFICATION reuse: both scripts reuse imas_codex/standard_names/source_reads.py:64 read_source_paths_by_name and :90 count_live_names_without_source, but the identity-read Cypher is restated at check_equivalent_electron_renames.py:16-27 and equivalent-electron-renames.py:62-70 because imas_codex/standard_names/search.py:505 fetch_standard_names projects neither stages nor reviewer scores and drops absent ids.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_equivalent_electron_renames.py:46 non-blocking: the default expected_count is read from document['population']['count'], so the row-count assertion compares the record against its own claim and never against the 56 declared names in live-rewrite-bulk.json; a record edited consistently to 50 rows and 50 in population.count passes, and the red arm bypasses this path with an explicit --expected-count.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_equivalent_electron_renames.py:158 non-blocking: a left row's left_reason is only required for outcomes collision and declined_source, so the one left row here, outcome review_not_accepted, could lose its reason and the gate would still exit 0 although the done_when requires it listed by name with the evidence for leaving it.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/check_equivalent_electron_renames.py:136 non-blocking: the renamed-row branch asserts sources, the qualifier token and name_stage but never asserts that edit_scope_id or cost.run_id is present, so the done_when's 'paid history kept' half is recorded in equivalent-electron-renames.json and guarded by nothing.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/equivalent-electron-renames.py:32 non-blocking: SPEND_CEILING is 12.0 while the --spend-ceiling default at :959 is 8.0, so the batch path enforces 12 and the render path enforces 8, and the landed record and HTML tell a reader the ceiling was USD 8.00 after the section raised it to 12.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/equivalent-electron-renames.py:818 non-blocking: inside 'elif result.returncode not in (0, 3)' the test 'result.returncode == 3' can never be true, so the review_not_accepted arm is unreachable dead code that reads as if return code 3 is mapped here.\nFINDING docs/evidence/fragments/sn-definitions-by-construction/equivalent-electron-renames.py:223 non-blocking: the outcome label is built as f'renamed_{outcome}' from the progress ledger's settled outcome, so four rows carrying after.name_stage 'accepted' are labelled renamed_review_not_accepted (equivalent-electron-renames.json:123, :255, :322 and one more), and a reader filtering on outcome reads an accepted rename as an unaccepted one.\nFINDING manifest.md:51 non-blocking: the manifest's cost sentence names 0.090277 and 0.072843 as the only outliers, while the record it ships attributes 1.268263, 1.115819, 0.773151 and 0.516159 to single names, so a reader cannot reconcile the manifest's spend account with the record it landed.\n",
+  "review_run_id": "r-20261117T143607837984-review-of-sdbc-equivalent-electron-renames-restart-d6b00c4cf465",
+  "reviewed_base_sha": "c0eda18f6cf3d35d399a992fdb0c5467e69ca987",
+  "reviewed_head_sha": "d6b00c4cf465fbb3f49ceb2e615be8ef170864be",
+  "reviewed_run_id": "r-20261117T011101094449-sdbc-equivalent-electron-renames-restart",
+  "reviewer_run_id": "r-20261117T143607837984-review-of-sdbc-equivalent-electron-renames-restart-d6b00c4cf465",
+  "scores": {
+    "durability": 13,
+    "evidence": 17,
+    "fit": 15,
+    "goal_fidelity": 18,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T14:43:39.911006+00:00",
+  "total": 98
+}
