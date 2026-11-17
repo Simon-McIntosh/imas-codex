@@ -41,7 +41,24 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 57,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "Section 11 is landed: all 13 stranded names were exhausted and were retired through the signed path, and the read-back is exactly the original ten, so the listed-with-reason branch was never taken and the two clauses did not conflict in the event.",
+      "when": "2026-11-17T16:50:29.920266+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Section 11 is landed: all 13 stranded names were exhausted and were retired through the signed path, and the read-back is exactly the original ten, so the listed-with-reason branch was never taken and the two clauses did not conflict in the event.",
+      "when": "2026-11-17T16:50:29.920266+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261117T114408716975-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261117T114408716975-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "800fd3583a60a196285ae4debfb4fa3cae9f2c10",
   "rubric": "content",
