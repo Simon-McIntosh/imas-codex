@@ -25,7 +25,24 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 28,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "finding": "naming-1",
+      "reason": "the bar is already fixed in words in the preceding sentence, so removing or restating the identifier leaves the cut's behaviour and its done-when exactly as they are; an implementer takes the quantity, not the spelling, from the plan.FINDING done_when docs/plans/sn-audited-group-release.html:37 \u2014 a bare claim",
+      "when": "2026-11-17T22:10:30.320704+00:00"
+    }
+  ],
+  "responses": {
+    "naming-1": {
+      "action": "noted",
+      "by": "plan-review-reflex",
+      "reason": "the bar is already fixed in words in the preceding sentence, so removing or restating the identifier leaves the cut's behaviour and its done-when exactly as they are; an implementer takes the quantity, not the spelling, from the plan.FINDING done_when docs/plans/sn-audited-group-release.html:37 \u2014 a bare claim",
+      "when": "2026-11-17T22:10:30.320704+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T220019426200-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261117T220019426200-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "767525a609b2bceb7e23c27eeb00b635db9b6012",
   "rubric": "content",
