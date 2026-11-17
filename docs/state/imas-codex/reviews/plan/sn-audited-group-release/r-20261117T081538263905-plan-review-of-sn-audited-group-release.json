@@ -41,7 +41,30 @@
   "plan_slug": "sn-audited-group-release",
   "plan_version": 14,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "62d54dc328f9c9498f05a7ac8d67c2fbb604db59",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The bar is now fixed from the readings of the reader or readers the third-reader re-reading shows fit to decide, and those readers, not the first two, audit every group.",
+      "reason": "",
+      "when": "2026-11-17T09:02:09.676695+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "62d54dc328f9c9498f05a7ac8d67c2fbb604db59",
+      "commit_basis": "edit",
+      "note": "The bar is now fixed from the readings of the reader or readers the third-reader re-reading shows fit to decide, and those readers, not the first two, audit every group.",
+      "reason": "",
+      "when": "2026-11-17T09:02:09.676695+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-audited-group-release/r-20261117T081538263905-plan-review-of-sn-audited-group-release.json",
   "review_run_id": "r-20261117T081538263905-plan-review-of-sn-audited-group-release",
   "reviewed_blob_sha": "9feeac251aa7df1722e3b81bd83ad48157fc1ffd",
   "rubric": "content",
