@@ -15,7 +15,7 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="30.0">
 <meta name="plan-after" content="sn-definitions-by-construction">
-<meta name="plan-version" content="12">
+<meta name="plan-version" content="13">
 <meta name="plan-modified" content="2026-11-17">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-audited-group-release#s1&quot;],&quot;s3&quot;:[&quot;sn-audited-group-release#s1&quot;,&quot;sn-audited-group-release#s2&quot;],&quot;s4&quot;:[&quot;sn-audited-group-release#s2&quot;,&quot;sn-audited-group-release#s3&quot;,&quot;sn-definitions-by-construction#s11&quot;],&quot;s5&quot;:[&quot;sn-audited-group-release#s4&quot;]}">
@@ -49,7 +49,10 @@
     <div class="r-comment-body"><p>independent review of run r-20261116T220839161092-sagr-blind-audit at d4f2a7d2cc8bc082006fcccbbadd8f1a2ce87160 scores goal_fidelity 11, evidence 8, scope_discipline 19, durability 4, fit 16, reuse 5 (total 63) and blocks on two defects: the sample statistics at blind-audit.py:692-695 are computed over sampled names plus the 40 planted names, so the published 191 of 379 and the per-class counts violate the done_when's exclusion (sample-only reading 174 of 339, 51.3 %), and the negative-control log's header names revision 1e87f877f, which carries no assert_readers_not_pipeline.</p></div>
 </div>
 <div class="r-comment" data-section="s1" data-id="c-run-r-20261117T020939579708-review-of-sagr-blind-audit-dccd83ff4ada" data-who="reckon-build" data-when="2026-11-17T02:14:05.800Z">
-    <div class="r-comment-body"><p>review-of-sagr-blind-audit landed: the increment d4f2a7d2c..dccd83ff4 scores goal_fidelity 19, evidence 15, scope_discipline 20, durability 13, fit 18, reuse 20 (total 105), reviews the sample/plant split repair that moves the published catalog rate to 174 of 339 sampled names (51.3 %, CI 46.0-56.6) and removes every planted name from the sample aggregates, and records three non-blocking findings: the spend table&#x27;s sample-only Readings column beside all-call USD and tokens, report.log&#x27;s header naming d4f2a7d2c rather than dccd83ff4, and --check having no automated runner.</p></div>
+    <div class="r-comment-body"><p>review-of-sagr-blind-audit landed: the increment d4f2a7d2c..dccd83ff4 scores goal_fidelity 19, evidence 15, scope_discipline 20, durability 13, fit 18, reuse 20 (total 105), reviews the sample/plant split repair that moves the published catalog rate to 174 of 339 sampled names (51.3 %, CI 46.0-56.6) and removes every planted name from the sample aggregates, and records three non-blocking findings: the spend table's sample-only Readings column beside all-call USD and tokens, report.log's header naming d4f2a7d2c rather than dccd83ff4, and --check having no automated runner.</p></div>
+</div>
+<div class="r-comment" data-section="s1" data-id="c-run-r-20261116T220839161092-sagr-blind-audit" data-who="reckon-build" data-when="2026-11-16T23:59:06Z">
+    <div class="r-comment-body"><p>docs/evidence/fragments/sn-audited-group-release/sagr-blind-audit.html measures the live catalog blind: 339 of 340 sampled names (from the 23 groups of at least 20 names) were read by gemini-3.8-flash and kimi-k3.1-pro, and at least one reader read 51.3 % (95 % CI 46.0-56.6) as defective, both readers 24.8 %, with agreement 73.5 % (kappa 0.44); on 40 separately reported plants recall was 45 % / 55 % and 25 % of names ruled sound were flagged by each reader; spend USD 12.19 of the USD 30 ceiling.</p></div>
 </div>
 </section>
 </main>
