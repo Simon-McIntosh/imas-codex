@@ -24,6 +24,11 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "equilibrium-adjudication.json"
 PAGE = ROOT / "equilibrium-adjudication.html"
+PENDING_PACKETS = ROOT / "equilibrium-pending-packets.json"
+PENDING_MEMBERS = (
+    "radial_coordinate_of_conductor_cross_section",
+    "vertical_outline",
+)
 RUN = Path(
     os.environ.get(
         "EQUILIBRIUM_ADJUDICATION_RUN",
@@ -57,7 +62,7 @@ def load(path=DATA):
 
 def decode_record(value):
     value = dict(value)
-    for key in ("judgments", "report"):
+    for key in ("judgments", "report", "coverage"):
         payload = value.pop(key + "_payload_zlib_base85", None)
         if payload is not None:
             value[key] = json.loads(zlib.decompress(base64.b85decode(payload)))
@@ -66,7 +71,7 @@ def decode_record(value):
 
 def save(value, path=DATA):
     value = dict(value)
-    for key in ("judgments", "report"):
+    for key in ("judgments", "report", "coverage"):
         if value.get(key):
             value[key + "_payload_zlib_base85"] = base64.b85encode(
                 zlib.compress(
@@ -304,6 +309,169 @@ def committed_snapshot(phase, required=True):
     if required:
         raise AssertionError("Missing independent committed seal: " + phase)
     return None
+
+
+def committed_field(key):
+    for sha in git("rev-list", "--reverse", "HEAD", "--", RELATIVE_DATA).splitlines():
+        record = decode_record(json.loads(git("show", f"{sha}:{RELATIVE_DATA}")))
+        if key in record:
+            return sha, record
+    raise AssertionError("Missing independently committed field: " + key)
+
+
+def collect_pending_packets():
+    """Supplement the frozen builder output with every enclosing statement."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.worker_tasks.worker_common import (
+        _ANCESTOR_CONTEXT_QUERY,
+        ancestor_statements,
+    )
+
+    data = load()
+    assert "coverage" not in data and not PENDING_PACKETS.exists()
+    visible = packets(data)
+    sources = sorted(
+        {s[3:] for p in visible for s in p["source_paths"] if s.startswith("dd:")}
+    )
+    depth = max(s.count("/") for s in sources)
+    query = (
+        _ANCESTOR_CONTEXT_QUERY.replace(
+            "MATCH path =", "UNWIND $paths AS source_path\nMATCH path ="
+        )
+        .replace("id: $path", "id: source_path")
+        .replace("*1..8", f"*1..{depth}")
+        .replace(
+            "RETURN length(path)", "RETURN source_path AS source_path, length(path)"
+        )
+        .replace("ORDER BY depth ASC", "ORDER BY source_path, depth ASC")
+    )
+    gc = GraphClient()
+    try:
+        rows = list(gc.query(query, paths=sources))
+    finally:
+        gc.close()
+    save({"rows": rows}, RUN / "pending-ancestor-rows.json")
+    assert any(r["path"] == "equilibrium/time_slice/boundary" for r in rows), (
+        "Known-present context control missing"
+    )
+    by_source = defaultdict(list)
+    for row in rows:
+        by_source[row["source_path"]].append(row)
+    fields = []
+    indices = {}
+    source_fields = {}
+    for source in sources:
+        required = []
+        for row in by_source[source]:
+            for field in ("documentation", "description"):
+                text = " ".join((row.get(field) or "").split())
+                if not text:
+                    continue
+                item = {"ancestor": row["path"], "field": field, "text": text}
+                identity = digest(item)
+                if identity not in indices:
+                    indices[identity] = len(fields)
+                    fields.append(item)
+                required.append(indices[identity])
+        source_fields[source] = required
+    coverage = {"ancestor_fields": fields, "source_fields": source_fields}
+    missing = coverage_missing(data, coverage)
+    original_missing = [
+        {key: item[key] for key in ("member", "source", "ancestor", "field", "text")}
+        for item in data["source_completeness"]["missing_fields"]
+    ]
+    assert sorted(missing, key=digest) == sorted(original_missing, key=digest), (
+        "Ancestor text changed beyond recorded omissions"
+    )
+    assert {m["member"] for m in missing} == set(PENDING_MEMBERS)
+    corrected = []
+    for packet in visible:
+        if packet["id"] not in PENDING_MEMBERS:
+            continue
+        ancestors = []
+        seen = set()
+        for source in packet["source_paths"]:
+            if not source.startswith("dd:"):
+                continue
+            for row in ancestor_statements(by_source[source[3:]], limit=None):
+                if row["path"] not in seen:
+                    ancestors.append(row)
+                    seen.add(row["path"])
+        text = packet["reader_visible_text"]
+        start = text.index("\nEnclosing structures of every source")
+        endings = [
+            text.find(marker, start)
+            for marker in (
+                "\nOther live standard names",
+                "\nReturn every fixed defect class",
+            )
+        ]
+        end = min(i for i in endings if i >= 0)
+        text = (
+            text[:start]
+            + "\nEnclosing structures of every source, nearest first per chain:\n"
+            + "\n".join(f"  {a['path']}: {a['text']}" for a in ancestors)
+            + text[end:]
+        )
+        text = text.replace(
+            "Return every fixed defect class that applies, or an empty list, with the wording that decides it.\n",
+            "",
+        )
+        text = text.replace(
+            "Structural family context (no earlier audit verdicts):",
+            "Structural family context:",
+        )
+        item = {
+            "id": packet["id"],
+            "source_paths": packet["source_paths"],
+            "packet_text": text,
+            "dd_versions": [
+                v
+                for v in packet_data(data)["dd_versions"]
+                if v["path"] in packet["source_paths"]
+            ],
+        }
+        for source in packet["source_paths"]:
+            for index in source_fields[source.removeprefix("dd:")]:
+                assert fields[index]["text"] in text
+        item["packet_digest"] = digest(item)
+        corrected.append(item)
+    payload = {"packets": corrected}
+    assert len(corrected) == 2
+    assert not any(
+        word in json.dumps(payload).lower()
+        for word in ("verdict", "reader", "defect_classes", "candidate_cause")
+    )
+    save(payload, PENDING_PACKETS)
+    data["coverage"] = coverage
+    data["coverage_receipt"] = {
+        "collected_at": datetime.now(UTC).isoformat(),
+        "source_count": len(sources),
+        "ancestor_rows": len(rows),
+        "positive_control": "equilibrium/time_slice/boundary",
+        "coverage_digest": digest(coverage),
+        "pending_packets_digest": digest(payload),
+    }
+    save(data)
+    print(
+        f"COVERAGE: {len(sources)} source chains; {len(rows)} ancestor rows; {len(missing)} known omitted fields; two complete neutral packets; zero graph writes"
+    )
+
+
+def coverage_missing(data, coverage):
+    missing = []
+    for packet in packets(data):
+        for source in packet["source_paths"]:
+            if not source.startswith("dd:"):
+                continue
+            assert source[3:] in coverage["source_fields"], (
+                "Source lacks completeness coverage"
+            )
+            for index in coverage["source_fields"][source[3:]]:
+                field = coverage["ancestor_fields"][index]
+                if field["text"] not in packet["reader_visible_text"]:
+                    missing.append({"member": packet["id"], "source": source, **field})
+    return missing
 
 
 def validate(data):
@@ -942,6 +1110,7 @@ def main():
     parser.add_argument("--seal-verdicts", action="store_true")
     parser.add_argument("--collect-comparison", action="store_true")
     parser.add_argument("--report", action="store_true")
+    parser.add_argument("--collect-pending-packets", action="store_true")
     parser.add_argument("--data", type=Path, default=DATA)
     args = parser.parse_args()
     if args.collect:
@@ -954,6 +1123,8 @@ def main():
         collect_comparison()
     elif args.report:
         report()
+    elif args.collect_pending_packets:
+        collect_pending_packets()
 
 
 if __name__ == "__main__":
