@@ -1,0 +1,69 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "classification.json in the reviewed run records baseline_suite null and after_suite null, so the run declares no suite arms and the baseline-to-after set difference is empty; the logs it records are measurement and control arms (merged-head-gate.log EXIT=0, merged-head-live.log EXIT=0, metadata-duty-red.log EXIT=1 red by design as the declared duty mutation).",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/archive_grouping_graph.py:127 persist_archive_grouping",
+    "imas_codex/discovery/signals/archive_grouping_graph.py:73 RETIRE_UNUSED_GROUPS_QUERY"
+  ],
+  "completed_at": "2026-11-17T04:46:03.009Z",
+  "dispatched_at": "2026-11-17T04:45:40Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "124",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence says verify_evidence.py 'asserts every figure above', but that script loads only grouping-receipt.json, grouping-measurement.json and component-census.json (verify_evidence.py:47-50) and checks 36 values, so component-population.json's 723 unlinked components and two 90-second readings, the 96-node retirement, the three negative-control arms and the two 20-row pattern tables above the quoted line are unasserted and the promoted gate cannot redden on them."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "125",
+      "severity": "non-blocking",
+      "text": "non-blocking: the private-artifact list omits merged-head-gate.log and merged-head-live.log, the two logs the new sentence's checks=36 failed=0 and duties figures come from, so the cited result cannot be opened by name from the document."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read both gained commits against base 84f70b6ad; 10c852d6a is a merge whose contribution over main (7fb460d91) is the diff's 125-line fragment alone, and 9028b605 adds one paragraph at the fragment's line 124 plus its commit body, inside the declared scope.",
+    "done_when": "plan section 10 (docs/plans/iter-signal-context-and-enrichment.html:89) asks the landing record to state every section-5 measure beside the partial run's; the run's manifest tests line names verify_evidence.py and merged-head-gate.log records checks=36 failed=0 EXIT=0 over those measures, though the fragment's claim that the gate asserts every figure above overstates it.",
+    "goal": "the node goal (prompt.txt in the reviewed run) is to re-run component and field-pattern grouping over the completed private catalogue, and the gained commit 9028b605 documents at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 the credential-free gate that now proves it rather than changing the grouping.",
+    "manifest": "read manifest.md; it records status complete, the fragment as the only changed path, tests line uv run --no-sync python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T044838773093-grouping-rerun-on-full-catalogue/verify_evidence.py, and test_logs merged-head-gate.log merged-head-live.log metadata-duty-red.log.",
+    "write_paths": "the run's manifest.md:3 declares docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html and docs/figures/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue; git diff --stat 84f70b6ad 9028b605 touches only the first, one insertion."
+  },
+  "justifications": {
+    "durability": "the commit adds no assertion and no committed test, and verify_evidence.py is untracked in the repository (git ls-files counts 0), so the private gate at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 reddens nothing in the tree if the sentence or its constants regress.",
+    "evidence": "merged-head-gate.log carries its revision, command and a bare EXIT=0 with checks=36 failed=0, but the fragment's assertion that the gate asserts every figure above is false of verify_evidence.py:47-50, which loads only three artifacts.",
+    "fit": "the added paragraph at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 keeps the fragment's prose-with-code-name idiom used at lines 121-123, and the commit subject docs(signals): gate the grouping evidence without graph credentials follows the repository's conventional-commit form.",
+    "goal_fidelity": "the gained paragraph at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 records the gate that proves the section-10 re-run's figures and the merged-tree result, so it advances the goal by making its evidence replayable rather than by altering any measure.",
+    "reuse": "the diff adds no function, class or module and names the existing verifier and the product writers, so no capability is forked; the search over imas_codex/discovery/signals found archive_grouping_graph.py already owns the retirement statement the fragment quotes.",
+    "scope_discipline": "git diff --stat 84f70b6ad 9028b605 names only docs/evidence/fragments/.../grouping-rerun-on-full-catalogue.html, and the merge's own contribution over main is that same file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal (prompt.txt in the reviewed run) is to re-run component and field-pattern grouping over the completed private catalogue, and the gained commit 9028b605 documents at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 the credential-free gate that now proves it rather than changing the grouping.\nVERDICT done_when: plan section 10 (docs/plans/iter-signal-context-and-enrichment.html:89) asks the landing record to state every section-5 measure beside the partial run's; the run's manifest tests line names verify_evidence.py and merged-head-gate.log records checks=36 failed=0 EXIT=0 over those measures, though the fragment's claim that the gate asserts every figure above overstates it.\nVERDICT write_paths: the run's manifest.md:3 declares docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html and docs/figures/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue; git diff --stat 84f70b6ad 9028b605 touches only the first, one insertion.\nVERDICT manifest: read manifest.md; it records status complete, the fragment as the only changed path, tests line uv run --no-sync python /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T044838773093-grouping-rerun-on-full-catalogue/verify_evidence.py, and test_logs merged-head-gate.log merged-head-live.log metadata-duty-red.log.\nVERDICT diff: read both gained commits against base 84f70b6ad; 10c852d6a is a merge whose contribution over main (7fb460d91) is the diff's 125-line fragment alone, and 9028b605 adds one paragraph at the fragment's line 124 plus its commit body, inside the declared scope.\nCALL_SITES: imas_codex/discovery/signals/archive_grouping_graph.py:127 persist_archive_grouping, imas_codex/discovery/signals/archive_grouping_graph.py:73 RETIRE_UNUSED_GROUPS_QUERY\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the gained paragraph at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 records the gate that proves the section-10 re-run's figures and the merged-tree result, so it advances the goal by making its evidence replayable rather than by altering any measure.\nSCORE evidence: 15\nJUSTIFICATION evidence: merged-head-gate.log carries its revision, command and a bare EXIT=0 with checks=36 failed=0, but the fragment's assertion that the gate asserts every figure above is false of verify_evidence.py:47-50, which loads only three artifacts.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 84f70b6ad 9028b605 names only docs/evidence/fragments/.../grouping-rerun-on-full-catalogue.html, and the merge's own contribution over main is that same file.\nSCORE durability: 8\nJUSTIFICATION durability: the commit adds no assertion and no committed test, and verify_evidence.py is untracked in the repository (git ls-files counts 0), so the private gate at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 reddens nothing in the tree if the sentence or its constants regress.\nSCORE fit: 18\nJUSTIFICATION fit: the added paragraph at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 keeps the fragment's prose-with-code-name idiom used at lines 121-123, and the commit subject docs(signals): gate the grouping evidence without graph credentials follows the repository's conventional-commit form.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module and names the existing verifier and the product writers, so no capability is forked; the search over imas_codex/discovery/signals found archive_grouping_graph.py already owns the retirement statement the fragment quotes.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:124 non-blocking: the sentence says verify_evidence.py 'asserts every figure above', but that script loads only grouping-receipt.json, grouping-measurement.json and component-census.json (verify_evidence.py:47-50) and checks 36 values, so component-population.json's 723 unlinked components and two 90-second readings, the 96-node retirement, the three negative-control arms and the two 20-row pattern tables above the quoted line are unasserted and the promoted gate cannot redden on them.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:125 non-blocking: the private-artifact list omits merged-head-gate.log and merged-head-live.log, the two logs the new sentence's checks=36 failed=0 and duties figures come from, so the cited result cannot be opened by name from the document.\n",
+  "review_node": "review-of-grouping-rerun-on-full-catalogue-9028b605936a",
+  "review_run_id": "r-20261117T044501446319-review-of-grouping-rerun-on-full-catalogue-9028b605936a",
+  "reviewed_base_sha": "84f70b6ad54ee7bb32eaba4f6660355c8d8c494c",
+  "reviewed_head_sha": "9028b605936a0de08aa4da458116f741ccb3c7ca",
+  "reviewed_run_id": "r-20261116T044838773093-grouping-rerun-on-full-catalogue",
+  "reviewer": {
+    "backend": "deepseek",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T044501446319-review-of-grouping-rerun-on-full-catalogue-9028b605936a"
+  },
+  "scores": {
+    "durability": 8,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T04:53:37.597198+00:00",
+  "total": 99
+}
