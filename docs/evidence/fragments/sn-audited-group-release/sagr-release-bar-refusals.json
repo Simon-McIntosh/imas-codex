@@ -1,0 +1,215 @@
+{
+  "recorded_at_host": "98dci4-clu-3051",
+  "gate": "group_release_bar",
+  "test_bar": {
+    "max_defect_rate": 0.2,
+    "class_maxima": {
+      "name_contradicts_source": 0.1
+    },
+    "note": "stated test values; the lead's ruling replaces them"
+  },
+  "module": "imas_codex/standard_names/export.py",
+  "tests": "tests/standard_names/test_release_group_bar.py",
+  "rows": [
+    {
+      "fault": "none (the group is cut)",
+      "gate": "group_release_bar",
+      "passed": true,
+      "causes": [],
+      "details": []
+    },
+    {
+      "fault": "member not accepted on name",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_member_not_accepted"
+      ],
+      "details": [
+        {
+          "type": "group_member_not_accepted",
+          "name": "plasma_current",
+          "cause": "name_not_accepted",
+          "detail": "member is live in the group at name_stage='reviewed'"
+        }
+      ]
+    },
+    {
+      "fault": "member not accepted on documentation",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_member_not_accepted"
+      ],
+      "details": [
+        {
+          "type": "group_member_not_accepted",
+          "name": "plasma_current",
+          "cause": "documentation_not_accepted",
+          "detail": "member is live in the group but the cut excludes it for documentation_not_accepted"
+        }
+      ]
+    },
+    {
+      "fault": "sourceless member, no ruled exception",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_member_sourceless"
+      ],
+      "details": [
+        {
+          "type": "group_member_sourceless",
+          "name": "plasma_current",
+          "detail": "member has no producing source and the ruling records no exception for it"
+        }
+      ]
+    },
+    {
+      "fault": "shared wording not its stored sentence",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "member_shared_wording_altered"
+      ],
+      "details": [
+        {
+          "type": "member_shared_wording_altered",
+          "name": "argon_density",
+          "shared_part": "species_family:<X>_density",
+          "detail": "the definition omits the stored wording: Number density of argon ions. The density counts ions summed over all charge states; neutral atoms are excluded."
+        },
+        {
+          "type": "member_shared_wording_altered",
+          "name": "argon_density",
+          "shared_part": "population:species",
+          "detail": "the definition omits the stored wording: The density counts ions summed over all charge states; neutral atoms are excluded."
+        }
+      ]
+    },
+    {
+      "fault": "family with a member in another group",
+      "gate": "cross_field_consistency",
+      "passed": false,
+      "causes": [
+        "family_spans_groups"
+      ],
+      "details": [
+        {
+          "type": "family_spans_groups",
+          "family": "equilibrium/foo|physical_vector|2b2d4add",
+          "parent_path": "equilibrium/foo",
+          "family_type": "physical_vector",
+          "members_in_group": [
+            "equilibrium_name"
+          ],
+          "other_groups": {
+            "magnetic_field_systems": [
+              "field_systems_name"
+            ]
+          },
+          "detail": "a family of the group has members in another group and the ruling neither lists the family as an exception nor names the groups as cut together"
+        }
+      ]
+    },
+    {
+      "fault": "defect rate above the bar",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_defect_rate_above_bar"
+      ],
+      "details": [
+        {
+          "type": "group_defect_rate_above_bar",
+          "rate": 0.666667,
+          "bar": 0.2,
+          "defective": 2,
+          "members": 3
+        }
+      ]
+    },
+    {
+      "fault": "class rate above its maximum",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_defect_class_rate_above_bar"
+      ],
+      "details": [
+        {
+          "type": "group_defect_class_rate_above_bar",
+          "defect_class": "name_contradicts_source",
+          "rate": 0.333333,
+          "maximum": 0.1,
+          "defective": 1,
+          "members": 3
+        }
+      ]
+    },
+    {
+      "fault": "never measured",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_audit_never_measured"
+      ],
+      "details": [
+        {
+          "type": "group_audit_never_measured",
+          "detail": "no audit record for group 'equilibrium' at /tmp/reckon-crew-scratch/r-20261116T221753697517-sagr-release-bar/tmp6w0kh6sq/absent/equilibrium.json"
+        }
+      ]
+    },
+    {
+      "fault": "not measured over every member",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_audit_incomplete"
+      ],
+      "details": [
+        {
+          "type": "group_audit_incomplete",
+          "missing_members": [
+            "ion_temperature"
+          ],
+          "not_a_member": [],
+          "unknown_classes": [],
+          "detail": "the audit does not measure every member of the group in the fixed class list"
+        }
+      ]
+    },
+    {
+      "fault": "measured before a member's text changed",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "group_audit_stale"
+      ],
+      "details": [
+        {
+          "type": "group_audit_stale",
+          "names": [
+            "plasma_current"
+          ],
+          "detail": "the recorded audit read text that is not the stored text the cut would ship"
+        }
+      ]
+    },
+    {
+      "fault": "no bar ruled",
+      "gate": "group_release_bar",
+      "passed": false,
+      "causes": [
+        "release_bar_not_ruled"
+      ],
+      "details": [
+        {
+          "type": "release_bar_not_ruled",
+          "detail": "no release bar ruling is configured"
+        }
+      ]
+    }
+  ]
+}
