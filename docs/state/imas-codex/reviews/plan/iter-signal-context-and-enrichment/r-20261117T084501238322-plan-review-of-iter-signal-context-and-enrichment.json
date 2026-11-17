@@ -1,0 +1,66 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T08:47:55.092Z",
+  "dispatched_at": "2026-11-17T08:47:20Z",
+  "findings": [
+    {
+      "anchor": "plan.html:57",
+      "id": "wiring-1",
+      "reason": "the section's whole deliverable rests on a source its dependency map no longer reaches, so the node either halts on a missing input or imports from an unrecorded manual copy.",
+      "text": "\u00a74 requires \"the rows of its signal list and data file\", yet its only declared sources are `icp-api-access#s3` and `#s4`, and `icp-api-access` closed s4 under its second form (\"no published GET returned a document's file\"); the new comment at plan.html:145 replaces that route with a one-off fetch through the document assistant that \"the pipeline cannot repeat by itself\" and that records no owner, path or digest, so a node dispatched on \u00a74 has no reachable input for the rows it must import",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:67",
+      "id": "reasoning-1",
+      "reason": "with no recorded private location for the specification the hand reading has no reference to compare against and the quality bar it gates cannot be taken.",
+      "text": "\u00a76's done-when reads forty member descriptions by hand \"against the functional specification\", but \u00a76 depends only on s4 and s5 and the specification's content arrives through the same unrecorded one-off fetch, whose files the comment at plan.html:145 places outside the repository with no recorded location",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:125",
+      "id": "reasoning-2",
+      "reason": "the option's label and the round it points to now target different defects, so the lead's answer cannot be read back into the deliverable the option states \u2014 a label change, not a new section, fixes it.",
+      "text": "the middle option reads \"One more refinement round aimed at correctness\", while the rewritten context at plan.html:122 records the correctness round as complete (2 wrong, 1 partly right and 37 right on the original forty) and the round now under way as aimed at \"the empty responses and at speed\"; an answer choosing the middle option therefore commissions a round with a different aim from the one the option names",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "261ffd237090d83922f6c3453062c74d02934787",
+  "plan_fingerprint": "aa1eb287e55fcac4343464c86cce3717619acd051c9a5c0a8e4410d94734c178",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 52,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T084501238322-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "8682a2d29f062dcb34079ddc100316a5cc6ba952",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 both cited fragments resolve, and `icp-api-access.html` with sections s3 and s4 named in \u00a74's `data-links` exists and declares those sections.",
+    "done_when": "pass \u2014 s10's new `done` declaration is backed by its landing comment (plan.html:164), whose declared control is shown red then green (EXIT=1 with retirement off, EXIT=0 with it on), and \u00a76 now states both thresholds of the bar the lead set.",
+    "evidence_paths": "pass \u2014 the rewritten decision cites `docs/evidence/fragments/iter-signal-context-and-enrichment/refine-local-model-signal-enrichment.html` and `ground-local-signal-descriptions-in-context.html`, both present on disk under the repository's durable evidence tree.",
+    "naming": "pass \u2014 the changed units introduce no symbol or filename, and the comment names a node, not a plan label carried into code.",
+    "reasoning": "a finding \u2014 the rewritten decision and the document-route comment leave \u00a76's quality measure without its reference and leave the middle option aimed at a round the context contradicts.",
+    "single_goal": "pass \u2014 none of the changed units changes a node's goal; \u00a74's carried archive gate is unchanged from the earlier review (single_goal-1) and is not re-raised.",
+    "wiring": "a finding \u2014 \u00a74 (plan.html:57) still declares only `icp-api-access#s3` and `icp-api-access#s4` as its sources, but that plan closed s4 under its no-file form, and the new comment at plan.html:145 supplies the pilot's documents as a one-off manual fetch no dependency covers."
+  },
+  "section_digests": {
+    "_document": "ada5a8c7df669e1e6d4ad93c8e0eb66128712c0c1eedacd24d9525dfb73f7f2b",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "91398bfd8fc70b5797b0fd0d0e3078225f32231a3b69e49eda948f79ef82f29e",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "718dd3f96dd21031506b561ce54982d7fee0ac8c2d5e6f5f626f32df4d13f5fc",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T08:56:05.520477+00:00",
+  "total": null
+}
