@@ -55,6 +55,13 @@
       "finding": "done_when-2",
       "reason": "Section 10 is landed and closed against the six reviews it named; the non-blocking findings recorded since, including those from sections 9, 10, 11 and 12, are carried to one follow-up node rather than by reopening a landed section.",
       "when": "2026-11-17T16:50:33.719746+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "Section 11 is landed. The work did split across nodes as the finding predicts: the pass rule and its controls landed first and the signed retirement of the 13 names landed as its own reviewed node, each with its own gate.",
+      "when": "2026-11-17T16:50:37.814344+00:00"
     }
   ],
   "responses": {
@@ -69,6 +76,12 @@
       "by": "",
       "reason": "Section 10 is landed and closed against the six reviews it named; the non-blocking findings recorded since, including those from sections 9, 10, 11 and 12, are carried to one follow-up node rather than by reopening a landed section.",
       "when": "2026-11-17T16:50:33.719746+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "Section 11 is landed. The work did split across nodes as the finding predicts: the pass rule and its controls landed first and the signed retirement of the 13 names landed as its own reviewed node, each with its own gate.",
+      "when": "2026-11-17T16:50:37.814344+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261117T114408716975-plan-review-of-sn-pipeline-hygiene.json",
