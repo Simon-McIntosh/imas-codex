@@ -35,6 +35,16 @@
       "note": "The step now acts only on an exhausted name, retiring it, and never takes the source of a name that is not exhausted; a test covers each half, and the planted accepted name's source staying bound follows from the second.",
       "reason": "",
       "when": "2026-11-17T08:58:30.090706+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cf79a06651c87edcfb5447fa3b41a02380a51ad8",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The closing count is exactly the ten names that had no source before 2026-11-17, named, with no name added to the exemption list to reach it; a name outside those ten fails the section.",
+      "reason": "",
+      "when": "2026-11-17T08:59:14.435623+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The step now acts only on an exhausted name, retiring it, and never takes the source of a name that is not exhausted; a test covers each half, and the planted accepted name's source staying bound follows from the second.",
       "reason": "",
       "when": "2026-11-17T08:58:30.090706+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "cf79a06651c87edcfb5447fa3b41a02380a51ad8",
+      "commit_basis": "edit",
+      "note": "The closing count is exactly the ten names that had no source before 2026-11-17, named, with no name added to the exemption list to reach it; a name outside those ten fails the section.",
+      "reason": "",
+      "when": "2026-11-17T08:59:14.435623+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261117T084016026373-plan-review-of-sn-pipeline-hygiene.json",
