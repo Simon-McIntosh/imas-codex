@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:58:02.728Z",
+  "dispatched_at": "2026-11-17T16:57:30Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261117T165142991935-plan-review-of-sn-audited-group-release/plan.html:37",
+      "id": "reasoning-1",
+      "reason": "a node closing \u00a73 cannot tell which number is the figure the bar reads, so it either invents a correction from an instrument that was ruled out or reports a rate the section's text does not sanction.",
+      "text": "\u00a73's done-when's no-fit branch requires that \"every group rate that reader produces is corrected for its measured recall and false-alarm rate, the corrected rate and its interval being the figure the bar reads\", but the same section's ruling (plan.html:37) is that no model reader is fit and \"no reader is in the loop\", so no reader produces a group rate and no recall/false-alarm pair exists to correct with; the ruled route (docs/evidence/fragments/sn-audited-group-release/reader-calibration.json records chosen_reader_fit false and the page states the measurement does not choose an interim deciding rule) therefore leaves undefined whether the bar reads the raw adjudicated rate or a corrected one, and \u00a74/\u00a75 inherit the undefined figure",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261117T165142991935-plan-review-of-sn-audited-group-release/plan.html:41",
+      "id": "done_when-1",
+      "reason": "the group's post-repair rate, the two-arm repair comparison and every later group's second reading are all computed from this instrument, so naming the wrong instrument produces a rate the bar then judges.",
+      "text": "\u00a74's done-when reads each member again after repair \"by the same readers under the same instructions\", but \u00a71 (plan.html:29) defines those readers as the two model readers while \u00a73 (plan.html:37) rules that no model reader is fit and that the audit is adjudication with no reader in the loop, so the second reading's instrument is either the ruled-out readers or unstated; a second reading by the unfit readers (best measured 72.7 % recall, 15 % false alarm, reader-calibration.html) against an adjudicated first reading makes the before/after comparison measure the change of instrument rather than the repair, and \u00a75's \"read again after repair as in \u00a74\" carries the same ambiguity to every later group",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "5e4112b78b29bf5b8b59dd15e97c72a82376a6cb",
+  "plan_fingerprint": "90aa057b7e9af92fbfe383ad12453bdeed18e4df84ade1b02d15b6c7b1cce8e2",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 26,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T165142991935-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "d02ae6566fd214bac4294f3afd1d22c033a35314",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 all six section ids and the cited `sn-definitions-by-construction#s11` anchor resolve; the one href (plan.html:62) carries .html and its target file exists.",
+    "done_when": "a finding \u2014 \u00a74's done-when fixes the second reading's instrument as \"the same readers\", which \u00a73 has already ruled unfit and removed from the loop, so the after-repair measure is not the instrument the before-repair measure used.",
+    "evidence_paths": "pass \u2014 every evidence path named in s1\u2013s6 is a committed path under docs/evidence/fragments/sn-audited-group-release/ (present on disk: sagr-blind-audit.html, domain-groups.json, frontier-third-reader.json, planted-label-check.json, reader-calibration.json, plus the named group-release-table.json to be created there), and the blind-audit href at plan.html:62 resolves to docs/evidence/fragments/sn-audited-group-release/sagr-blind-audit.html.",
+    "naming": "pass \u2014 the plan names no code symbol, file or function for a later node to carry a plan label into; the only new names it fixes are evidence data files and data-dictionary group names \"named for the quantities it holds\".",
+    "reasoning": "a finding \u2014 \u00a73's done-when makes \"the corrected rate and its interval\" the figure the bar reads, while \u00a73's own ruling puts adjudication in place of readers, so under the ruled route no correction exists and the bar's reading figure is undefined.",
+    "single_goal": "pass \u2014 \u00a73's reader-fitness branch, bar and cut refusals are one deliverable (the bar and its enforcement, declared as such in its opening sentence), \u00a74's repair comparison is explicitly declared \"reported evidence ... does not by itself close or hold the section\", and \u00a76's proposal, ruling and move are one vocabulary change.",
+    "wiring": "pass \u2014 every depends-on in the snapshot's `plan-section-depends-on` resolves to a section that exists (`s1`\u2013`s6` here, `sn-definitions-by-construction#s11` at docs/plans/sn-definitions-by-construction.html:155), the transitive edges carry what each section needs (s4\u2192s3\u2192s1 for \u00a71's class list, s5\u2192s4 for \u00a72's order), and `plan-after` sn-definitions-by-construction exists."
+  },
+  "section_digests": {
+    "_document": "3a1f5b884da22b0f9f7513f167fc23ed231b5462b07c24908c13cb258da75fe9",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "3073ba4c58fc1374d8568d8e8798f5c1fac407860517b8ac0c4e0ca15a6a4a2b",
+    "s3": "1cd4f3bbb31c4bf9faa467d9805f60516f50ab65d190467a3c5001b43dbd6cc8",
+    "s4": "9e18221f3db12f11eaa4e1bef9e8f7510d0f32d3451ab85f2e657d064094c433",
+    "s5": "61674c50c2e89474d21672aad5679437c4d08736b700aabf9ebf00fc989477fb",
+    "s6": "90a0463c758d22b32611805f931c843f2382e2bc89a2e1ef318231acd72f2fca"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T17:12:24.156100+00:00",
+  "total": null
+}
