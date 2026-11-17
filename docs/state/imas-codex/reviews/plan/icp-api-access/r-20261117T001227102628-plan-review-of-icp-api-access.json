@@ -35,6 +35,16 @@
       "note": "Section 4 at version 19 requires the negative result to be judged against the listed set of document-like GET routes in production's description, each with an outcome or an exclusion reason.",
       "reason": "",
       "when": "2026-11-17T00:43:44.267078+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3c5fe0e04c51504e1522366f757f849c5757f698",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 3's done-when at version 19 asks for observed permission denials and says the API may omit invisible records silently.",
+      "reason": "",
+      "when": "2026-11-17T00:44:08.816346+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "Section 4 at version 19 requires the negative result to be judged against the listed set of document-like GET routes in production's description, each with an outcome or an exclusion reason.",
       "reason": "",
       "when": "2026-11-17T00:43:44.267078+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3c5fe0e04c51504e1522366f757f849c5757f698",
+      "commit_basis": "edit",
+      "note": "Section 3's done-when at version 19 asks for observed permission denials and says the API may omit invisible records silently.",
+      "reason": "",
+      "when": "2026-11-17T00:44:08.816346+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261117T001227102628-plan-review-of-icp-api-access.json",
