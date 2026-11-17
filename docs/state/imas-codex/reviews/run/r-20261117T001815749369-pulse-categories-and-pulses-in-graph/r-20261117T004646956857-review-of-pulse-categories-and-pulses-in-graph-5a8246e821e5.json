@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "b2efb3a240bfab259ea94903b797b0103200d21c",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/remote/pulse_catalogue.py:main calls import_pulses at :115",
+    "imas_codex/discovery/signals/scanners/codac_uda.py:_persist_archives delegates at :131",
+    "imas_codex/remote/codac_uda.py:ArchiveSignalLoader.load guards open-ended pulses at :386",
+    "imas_codex/remote/scripts/codac_uda.py:dispatch routes the pulses and pulse_categories operations"
+  ],
+  "completed_at": "",
+  "dispatched_at": "2026-11-17T00:19:34Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/archive_pulses.py",
+      "id": "f85b2d62f81",
+      "line": "91",
+      "severity": "non-blocking",
+      "text": "non-blocking: the endpoint write at :91 postdates the live acceptance run, which import-measure.log:1 records at revision 5a8246e, so the landed head's live figures (743=743, 5934, 20/20, second import 0) were never re-measured against the code that now ships; the head arm only covers a disposable graph. Re-run import-measure.py at 56172736 before quoting the figures beside it."
+    },
+    {
+      "file": "imas_codex/config/codac_uda.py",
+      "id": "f3f34f70a35",
+      "line": "32",
+      "severity": "non-blocking",
+      "text": "non-blocking: create_archive_pulse still annotates end_ns as int although the schema change at imas_codex/schemas/facility.yaml:1929 makes None legal and tests/graph/test_archive_pulses.py passes end_ns=None, so the factory signature contradicts its new caller; the worker recorded this under outside_scope because imas_codex/config/ is outside its grant."
+    }
+  ],
+  "head_log_revision": "56172736ad79098997557a96c79a8a83e6b6cc80",
+  "item_aggregate": 5,
+  "item_verdicts": {
+    "diff": "read all four commits against b2efb3a: 8db4796 makes Pulse end_ns optional and adds the category listing, the resumable snapshot and the graph importer; d8f1b64 adds the error-status read to the native fixture; 5a8246e bounds pulse and category listings independently; 56172736 moves the endpoint upsert onto scanners/codac_uda.py:98 and adds the delegation tests.",
+    "done_when": "the measure asks for archive-vs-graph category equality, the pulses-per-category distribution with the empty count, end-time totals summing to the total, 20 preregistered pulses across at least 5 categories with equal bounds, a zero-node second import and passing graph-marked tests; acceptance-summary.json records categories 743 = graph_categories 743, the distribution 1..4359 with empty_categories 0, with_end 5934 + without_end 0 = 5934, sample_matches 20 over 14 categories, second_import_nodes_created 0, and reuse-head.log:30 records \"21 passed\" with EXIT=0 over 8 graph-marked tests.",
+    "goal": "the goal is every archive pulse category and each of its pulses with its start time and its end time where one exists, in the graph under the ITER facility; imas_codex/discovery/signals/archive_pulses.py:11-34 writes both node kinds with facility and archive links, and import-measure.log records 743 categories and 5934 pulses under facility iter with count(p.start_ns) equal to the total and every node reaching the facility.",
+    "manifest": "read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/manifest.md; it names commits 8db4796/d8f1b64/5a8246e/56172736, the landing figures, baseline_suite and after_suite both with exit_status 0, completed true and failure_count 0, the reuse negative control, and outside_scope for the config annotation.",
+    "write_paths": "the declared scope is imas_codex/schemas/, imas_codex/remote/, imas_codex/discovery/signals/, imas_codex/graph/, scripts/, tests/remote/, tests/discovery/, tests/graph/ plus the node fragment and figure paths; the four commits change eleven files and every one lies inside those directories."
+  },
+  "justifications": {
+    "durability": "reuse-control.log:35-37 records the two delegation checks failing when the answering commit is reversed, and negative-control.log:90-92 records test_open_ended_pulse_is_stored_without_invented_end and test_empty_category_is_present_linked_and_counted failing under an invented end and skipped empty categories, while the with_end/without_end sums are produced by pulse_distribution itself and are cross-checked only by import-measure.py's graph count.",
+    "evidence": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T001815749369-pulse-categories-and-pulses-in-graph/import-measure.log:1 names revision 5a8246e, so the done_when's live figures predate the 56172736 repair that changed the endpoint write path; the head arm at reuse-head.log:30 is a 21-test arm (8 graph-marked) rather than a re-measurement, and import-measure.py asserts the graph readback against an independent archive re-list with positive controls.",
+    "fit": "imas_codex/discovery/signals/archive_pulses.py:93-114 follows the validated-bounded-batch, acknowledged-counter idiom of imas_codex/discovery/signals/archive_grouping_graph.py:175-195 and reuses catalogue_scan.write_receipt; added names are descriptive and no plan or ticket identifier appears.",
+    "goal_fidelity": "imas_codex/discovery/signals/archive_pulses.py:11-34 writes PulseCategory and Pulse with AT_FACILITY, IN_ARCHIVE and IN_PULSE_CATEGORY, and import-measure.log records 743 categories and 5934 pulses under facility iter with every node reaching it and end_ns optional.",
+    "reuse": "imas_codex/discovery/signals/archive_pulses.py:91 now delegates the ArchiveEndpoint upsert to the existing owner at imas_codex/discovery/signals/scanners/codac_uda.py:98, and write_receipt is reused from imas_codex/remote/catalogue_scan.py:35; the pulse listing snapshot at imas_codex/remote/pulse_catalogue.py:18 has no owning store (ArchiveCatalogue is a variable-census SQLite store) and the search over imas_codex/remote and imas_codex/discovery found none.",
+    "scope_discipline": "every path in git diff --stat b2efb3a24 56172736 is inside the declared write paths; the config annotation defect is small but declared under outside_scope rather than fixed."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is every archive pulse category and each of its pulses with its start time and its end time where one exists in the graph under the ITER facility, and imas_codex/discovery/signals/archive_pulses.py:11-34 writes both node kinds with AT_FACILITY and IN_ARCHIVE links while import-measure.log records 743 categories and 5934 pulses under facility iter with every node reaching it.\nVERDICT done_when: the measure asks for archive-vs-graph category equality, the pulses-per-category distribution with the empty count, end-time totals summing to the total, 20 preregistered pulses across at least 5 categories with equal bounds, a zero-node second import and passing graph-marked tests, and acceptance-summary.json records 743=743, the 1..4359 distribution with empty_categories 0, with_end 5934 + without_end 0 = 5934, sample_matches 20 over 14 categories and second_import_nodes_created 0 while reuse-head.log:30 records 21 passed with EXIT=0.\nVERDICT write_paths: the declared scope is imas_codex/schemas/, imas_codex/remote/, imas_codex/discovery/signals/, imas_codex/graph/, scripts/, tests/remote/, tests/discovery/, tests/graph/ plus the fragment and figure paths, and the eleven files in git diff --stat b2efb3a24 56172736 all lie inside them.\nVERDICT manifest: read manifest.md, which names commits 8db4796/d8f1b64/5a8246e/56172736, the landing figures, baseline_suite and after_suite with exit_status 0, completed true and failure_count 0, negative_control_log reuse-control.log, and outside_scope for the config annotation.\nVERDICT diff: read the four commits against b2efb3a, 8db4796 adding optional end_ns plus the category listing, resumable snapshot and importer, d8f1b64 adding the fixture error status, 5a8246e bounding the two listings independently, and 56172736 routing the endpoint upsert through scanners/codac_uda.py:98 with delegation tests.\nCALL_SITES: imas_codex/remote/pulse_catalogue.py:main, imas_codex/discovery/signals/scanners/codac_uda.py:_persist_archives, imas_codex/remote/codac_uda.py:ArchiveSignalLoader.load, imas_codex/remote/scripts/codac_uda.py:dispatch\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/archive_pulses.py:11-34 writes PulseCategory and Pulse with optional end_ns, start_ns, AT_FACILITY and IN_ARCHIVE, and import-measure.log records the live 743 categories and 5934 pulses under facility iter with all nodes reachable.\nSCORE evidence: 13\nJUSTIFICATION evidence: import-measure.log:1 names revision 5a8246e, so the done_when figures predate the 56172736 repair that changed the endpoint write path, and the head arm at reuse-head.log:30 is a 21-test run rather than a re-measurement.\nSCORE scope_discipline: 18\nJUSTIFICATION scope_discipline: all eleven changed paths in git diff --stat b2efb3a24 56172736 are inside the declared write paths, with the one out-of-grant annotation declared under outside_scope rather than edited.\nSCORE durability: 18\nJUSTIFICATION durability: reuse-control.log:35-37 and negative-control.log:90-92 record the delegation checks and the two graph guards failing when the answering commit is reversed and when an end is invented or empty categories are skipped.\nSCORE fit: 18\nJUSTIFICATION fit: imas_codex/discovery/signals/archive_pulses.py:93-114 follows the validated bounded-batch and acknowledged-counter idiom of imas_codex/discovery/signals/archive_grouping_graph.py:175-195 and reuses catalogue_scan.write_receipt.\nSCORE reuse: 18\nJUSTIFICATION reuse: imas_codex/discovery/signals/archive_pulses.py:91 delegates the endpoint upsert to the existing owner at imas_codex/discovery/signals/scanners/codac_uda.py:98, and the pulse snapshot at imas_codex/remote/pulse_catalogue.py:18 has no owning store after searching imas_codex/remote and imas_codex/discovery.\nFINDING imas_codex/discovery/signals/archive_pulses.py:91 non-blocking: the endpoint write postdates the live acceptance run recorded at revision 5a8246e in import-measure.log:1, so the landed head's live figures were never re-measured against the shipped code and the head arm covers only a disposable graph.\nFINDING imas_codex/config/codac_uda.py:32 non-blocking: create_archive_pulse still annotates end_ns as int although imas_codex/schemas/facility.yaml:1929 makes None legal and the new graph test passes end_ns=None, leaving the factory signature contradicting its caller.",
+  "review_run_id": "r-20261117T004646956857-review-of-pulse-categories-and-pulses-in-graph-5a8246e821e5",
+  "reviewed_base_sha": "b2efb3a240bfab259ea94903b797b0103200d21c",
+  "reviewed_head_sha": "56172736ad79098997557a96c79a8a83e6b6cc80",
+  "reviewed_run_id": "r-20261117T001815749369-pulse-categories-and-pulses-in-graph",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T004646956857-review-of-pulse-categories-and-pulses-in-graph-5a8246e821e5"
+  },
+  "reviewer_run_id": "r-20261117T004646956857-review-of-pulse-categories-and-pulses-in-graph-5a8246e821e5",
+  "scores": {
+    "durability": 18,
+    "evidence": 13,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T01:59:18.933306+00:00",
+  "total": 104
+}
