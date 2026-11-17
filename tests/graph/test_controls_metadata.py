@@ -177,6 +177,25 @@ def test_description_provenance_survives_reembedding_but_not_a_rewrite(
             "RETURN s.description_source AS source, s.description_source_updated_at AS updated"
         ) == [{"source": None, "updated": None}]
         write_signal_descriptions(
+            [
+                {
+                    "id": "demo:temperature",
+                    "description": "Demonstration cooling temperature",
+                }
+            ],
+            gc=graph,
+            precomputed_embeddings={"demo:temperature": None},
+        )
+        assert graph.query(
+            "MATCH (s:FacilitySignal {id:'demo:temperature'}) "
+            "RETURN s.description AS description, s.embedding IS NOT NULL AS retained_vector"
+        ) == [
+            {
+                "description": "Demonstration cooling temperature",
+                "retained_vector": True,
+            }
+        ]
+        write_signal_descriptions(
             [{"id": "demo:temperature", "description": "TEMPERATURE"}],
             gc=graph,
             embed_text=lambda item: "",
