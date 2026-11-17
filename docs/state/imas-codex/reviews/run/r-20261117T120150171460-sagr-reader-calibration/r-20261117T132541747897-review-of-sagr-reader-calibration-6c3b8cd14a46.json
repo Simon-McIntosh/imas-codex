@@ -1,0 +1,65 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "3386823c9c1425d89908ffa6d86ada5efef21bec",
+  "call_sites": [
+    "docs/evidence/fragments/sn-audited-group-release/blind-audit.py:515 judge_one builds its system prompt through system_prompt()",
+    "docs/evidence/fragments/sn-audited-group-release/blind-audit.py:2171 report page stamps system_prompt()",
+    "docs/evidence/fragments/sn-audited-group-release/blind-audit.py:2525 prompt record written beside the readings",
+    "docs/evidence/fragments/sn-audited-group-release/reader-calibration.py:294 check_blind asserts the corrected rule is the one in system_prompt()"
+  ],
+  "completed_at": "2026-11-17T13:26:46.179Z",
+  "dispatched_at": "2026-11-17T13:26:33Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/reader-calibration.py",
+      "line": "32",
+      "severity": "non-blocking",
+      "summary": "gate and page depend on an uncommitted run directory at a hardcoded absolute path",
+      "text": "RUN defaults to /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T120150171460-sagr-reader-calibration and derived_report loads corrected-readings.jsonl, earlier-readings.json, pilot.json and corrected-pilot.json from it, so --check cannot be re-run by a reader of the repository: the committed record is self-contained but its verifier is not."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/reader-calibration.py",
+      "line": "427",
+      "severity": "non-blocking",
+      "summary": "three llm attributes rebound globally and never restored",
+      "text": "llm._build_kwargs, llm.get_openrouter_max_price and llm.acall_llm_structured are replaced at :427-441 for the rest of the process, so any later caller in the same interpreter inherits the calibration's reservation rates and token ceilings; the one-shot script masks this, but the rebound attributes are production attributes and the script never returns them."
+    }
+  ],
+  "head_log_revision": "6c3b8cd14a467dc8e1b43ae3f6f4dd021f78a316",
+  "item_verdicts": {
+    "diff": "pass \u2014 read commit by commit; two lines change the omission rule at blind-audit.py:431-432, and the rest is new calibration script, data and page; 1461 insertions, 2 deletions.",
+    "done_when": "pass \u2014 the done_when's seven clauses are each asserted by the gate: check_blind at reader-calibration.py:294 for the 40/40 counts, :310 for the reconciled prompt, scores at :617 for the four rules with Wilson intervals, :743 for the corrected estimate, spend at :905 and :1031, and frozen_record at :331 for the altered judgment; head-check.log records all PASS lines at EXIT=0.",
+    "goal": "pass \u2014 dispatch-detail.json rendered_state states the goal as measuring the three audit readers on an enlarged hand-checked set under reconciled omission instructions; reader-calibration.py:743-843 and reader-calibration.html deliver it.",
+    "manifest": "pass \u2014 read; status complete, thirteen commits, the head-gate command with five log paths, charged USD 7.056898 of USD 10, and the altered-judgment refusal with the frozen-field message.",
+    "write_paths": "pass \u2014 the manifest declares blind-audit.py and reader-calibration.py/.json/.html, and git diff 3386823c9c..6c3b8cd14a touches only those four."
+  },
+  "justifications": {
+    "durability": "reader-calibration.py:1206-1229 asserts independent gold values (A 1/1 and 0/1, B false alarm 1, two-of-three 1/0, C unread) and the historical standing-label rates 9/15, 11/15, 13/15, so a regression in scores() or flag() reddens; the negative control shows the frozen-field guard actually refusing.",
+    "evidence": "head-check.log records the --check gate at 6c3b8cd14a with three PASS lines and EXIT=0, and negative-control.log records EXIT=1 on an altered frozen judgment; the gate log is a receipt, not a claim.",
+    "fit": "reader-calibration.py:595-620 follows the sibling evidence-fragment idiom with plain dict returns, and it introduces no plan or ticket identifier in code; binding production llm attributes at :427-441 is process-scoped but outside that idiom.",
+    "goal_fidelity": "reader-calibration.py:743 inverts the measured recall and false-alarm rate into a corrected estimate for the 339 sampled names, and reader-calibration.html carries the before/after instruction text, the four-rule tables, and the spend beside the USD 10 ceiling.",
+    "reuse": "reader-calibration.py:381-400 and :743 extend the fragment's existing owners by calling audit_module().wilson, audit.judge_one, audit.CLASS_KEYS and audit.system_prompt rather than re-implementing them; the search found no other rate or bootstrap owner that fits, and the worst-case reservation has no owner in blind-audit.py:598.",
+    "scope_discipline": "git diff --stat 3386823c9c..6c3b8cd14a lists exactly blind-audit.py, reader-calibration.py, reader-calibration.json and reader-calibration.html, the four declared write paths."
+  },
+  "notes": "Independent recount from the run's own corrected-readings.jsonl reproduces the record exactly: 254 receipts (252 priced, 2 null-cost failures), cohort 44 defective/40 sound, A 32/44 and 6/40, B 26/44 and 15/40, C 38/44 and 20/40, two-of-three 33/44 and 14/40, and p=(q-f)/(r-f)=0.47225 at 34.1-62.8 percent. The corrected prompt strings were checked against the live module: audit.system_prompt() contains the AFTER text and not the BEFORE text. added_failure_count is derived from the reviewed run's own gate logs because the run was unarmed: after arm head-check.log ends EXIT=0 with no failing ids and no FAILED lines, and the run recorded no baseline arm, so no failure exists that the base does not; the same EXIT= capture reads 1 in negative-control.log, which is the instrument's positive control.",
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal recorded in dispatch-detail.json is to measure the three audit readers on an enlarged hand-checked set under reconciled omission instructions, and reader-calibration.py:743 plus reader-calibration.html carry that measurement and its corrected catalog estimate.\nVERDICT done_when: the done_when requires 40/40 labels, the reconciled instruction shown before and after, all four rules with counts and 95% intervals under both instructions, a named reader with its corrected estimate, spend beside the USD 10 ceiling, and --check passing and failing on an altered judgment; head-check.log records three PASS lines at EXIT=0 and negative-control.log records EXIT=1 on the altered judgment.\nVERDICT write_paths: the manifest declares blind-audit.py, reader-calibration.py, reader-calibration.json and reader-calibration.html, and git diff --stat 3386823c9c..6c3b8cd14a lists exactly those four files.\nVERDICT manifest: read; it records status complete, thirteen commits, the head-gate command and five log paths, charged USD 7.056898 of USD 10, and the altered-judgment refusal with its frozen-field message.\nVERDICT diff: read commit by commit from 3386823c9c to 6c3b8cd14a; two lines reconcile the omission rule at blind-audit.py:431-432 and the remainder is the new 1249-line calibration script, its 295 KB data record and 209-line page, all inside the declared scope.\nCALL_SITES: docs/evidence/fragments/sn-audited-group-release/blind-audit.py:515, docs/evidence/fragments/sn-audited-group-release/blind-audit.py:2171, docs/evidence/fragments/sn-audited-group-release/blind-audit.py:2525, docs/evidence/fragments/sn-audited-group-release/reader-calibration.py:294\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: reader-calibration.py:743 inverts the measured recall and false-alarm rate into a corrected estimate for the 339 sampled names, and reader-calibration.html carries the before/after instruction text and the spend beside the USD 10 ceiling.\nSCORE evidence: 17\nJUSTIFICATION evidence: head-check.log records the --check gate at 6c3b8cd14a with three PASS lines and EXIT=0, and negative-control.log records EXIT=1 on an altered frozen judgment.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 3386823c9c..6c3b8cd14a lists exactly the four declared write paths and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: reader-calibration.py:1211-1226 asserts independent gold values and the historical 9/15, 11/15, 13/15 rates, so a regression in scores() or flag() reddens, and the frozen-field guard is shown refusing in negative-control.log.\nSCORE fit: 17\nJUSTIFICATION fit: reader-calibration.py:595-620 follows the sibling evidence-fragment style, while binding llm attributes at :427-441 is process-scoped but outside that idiom.\nSCORE reuse: 18\nJUSTIFICATION reuse: reader-calibration.py:381-400 and :743 call audit_module().wilson, audit.judge_one and audit.system_prompt rather than re-implementing them, and the search found no owner for the worst-case reservation that blind-audit.py:598 lacks.\nFINDING docs/evidence/fragments/sn-audited-group-release/reader-calibration.py:32 non-blocking: RUN defaults to a hardcoded absolute run directory, so --check cannot be re-run from the committed tree and the record's verification depends on uncommitted files outside the repository.\nFINDING docs/evidence/fragments/sn-audited-group-release/reader-calibration.py:427 non-blocking: llm._build_kwargs, llm.get_openrouter_max_price and llm.acall_llm_structured are rebound and never restored, so any later caller in the process inherits the calibration's reservation rates and ceilings.",
+  "review_run_id": "r-20261117T132541747897-review-of-sagr-reader-calibration-6c3b8cd14a46",
+  "reviewed_base_sha": "3386823c9c1425d89908ffa6d86ada5efef21bec",
+  "reviewed_head_sha": "6c3b8cd14a467dc8e1b43ae3f6f4dd021f78a316",
+  "reviewed_run_id": "r-20261117T120150171460-sagr-reader-calibration",
+  "reviewer_run_id": "r-20261117T132541747897-review-of-sagr-reader-calibration-6c3b8cd14a46",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:52:00+00:00",
+  "total": 109
+}
