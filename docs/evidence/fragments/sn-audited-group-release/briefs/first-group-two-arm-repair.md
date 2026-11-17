@@ -19,7 +19,7 @@ For every member both readers call defective, state the cause in one line and pu
 Members only one reader calls defective are listed separately and are not repaired here.
 
 ## Step two: assign arms without choosing
-Split the singular members into two arms by a seeded shuffle within each defect class (record the seed), so each class is spread across both arms. An odd member goes to arm A.
+A member whose only defect classes are ones regeneration cannot repair (a duplicate of another live name, a wrong physics domain) is not in the comparison: settle it by an agent proposal or the lead's ruling and report it beside the comparison. The member is the unit of assignment. Split the remaining singular members into two arms by a seeded shuffle among the members sharing the same set of defect classes (record the seed), so each combination is spread across both arms. An odd member goes to arm A. In the per-class table a member with two classes is counted in each of its classes, within its one arm.
 
 ## Arm A: regeneration
 Each member is reset and regenerated from its source through the pipeline's own stages, with the enclosing-structure context, and reviewed by the pipeline. No steer beyond what the pipeline itself supplies.

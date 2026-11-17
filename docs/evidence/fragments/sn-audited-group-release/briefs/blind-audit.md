@@ -11,6 +11,7 @@ The section states the endpoint. This brief is the reuse map from the plan's des
 
 ## Method points the section leaves to you
 - Fix the defect classes in a committed file before any reading and do not change them after.
+- A reader records every class that applies to a name, not one. The forty planted names are read in addition to the sample of at least 300 and are excluded from every count and rate reported for the sample; report them separately.
 - The readers see no stage, score or earlier verdict. Check this by printing one full reader prompt into the evidence.
 - No stored name, description or documentation changes; audit records are review records and do not decide anything.
 
