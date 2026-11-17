@@ -12,10 +12,12 @@ from unittest.mock import patch
 import pytest
 
 from imas_codex.discovery.signals import parallel
+from imas_codex.discovery.signals.enrichment import EnrichmentOptions
 from imas_codex.discovery.signals.models import (
     SignalEnrichmentBatch,
     SignalEnrichmentResult,
 )
+from tests.discovery.enrichment_fixtures import with_description_review
 
 FACILITY = "jt-60sa"
 
@@ -96,7 +98,10 @@ async def test_interleaved_batch_keeps_each_description_on_its_signal():
             "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", side_effect=llm),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=with_description_review(llm),
+        ),
     ):
         await parallel.enrich_worker(state)
 
@@ -106,7 +111,8 @@ async def test_interleaved_batch_keeps_each_description_on_its_signal():
 
 
 @pytest.mark.asyncio
-async def test_repeated_prompt_number_writes_one_row():
+@pytest.mark.parametrize("recovery", [False, True])
+async def test_repeated_prompt_number_cannot_write_onto_two_signals(recovery):
     """A model that repeats an index cannot write one result onto two rows."""
     signals = [_signal(category, name) for category, name in BATCH[:2]]
     state = parallel.DataDiscoveryState(facility=FACILITY, scanner_types=["edas"])
@@ -134,6 +140,10 @@ async def test_repeated_prompt_number_writes_one_row():
         enriched_rows.extend(entries)
 
     with (
+        patch(
+            "imas_codex.discovery.signals.enrichment.get_enrichment_options",
+            return_value=EnrichmentOptions(recovery_attempts=int(recovery)),
+        ),
         patch.object(parallel, "claim_signals_for_enrichment", side_effect=claim),
         patch.object(parallel, "prepare_signal_sources", return_value=(0, 0, 0)),
         patch.object(parallel, "propagate_units_from_signal_nodes", return_value=0),
@@ -149,12 +159,17 @@ async def test_repeated_prompt_number_writes_one_row():
             "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", side_effect=llm),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=with_description_review(llm),
+        ),
     ):
         await parallel.enrich_worker(state)
 
-    assert [row["description"] for row in enriched_rows] == ["first answer"]
-    release.assert_called_once()
+    assert [row["description"] for row in enriched_rows] == (
+        [] if recovery else ["first answer"]
+    )
+    assert release.call_count == (len(signals) if recovery else 1)
 
 
 @pytest.mark.asyncio
@@ -196,7 +211,10 @@ async def test_reset_signal_without_a_name_is_enriched():
             "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", side_effect=llm),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=with_description_review(llm),
+        ),
     ):
         await parallel.enrich_worker(state)
 

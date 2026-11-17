@@ -15,6 +15,7 @@ from imas_codex.discovery.signals.models import (
 from imas_codex.discovery.signals.scanners.base import ScanResult
 from imas_codex.discovery.signals.scanners.edas import EDASScanner
 from imas_codex.graph import GraphClient
+from tests.discovery.enrichment_fixtures import with_description_review
 
 CATALOGUE_TEXT = "Lower FPPCC Current (LKAT2)"
 SIGNAL_ID = "jt-60sa:general/mmsys_curlfpplkat"
@@ -113,7 +114,10 @@ async def test_reset_signal_prompt_uses_catalogue_text():
             "imas_codex.discovery.signals.scanners.wiki.fetch_semantic_wiki_context",
             return_value=[],
         ),
-        patch("imas_codex.discovery.base.llm.acall_llm_structured", side_effect=llm),
+        patch(
+            "imas_codex.discovery.base.llm.acall_llm_structured",
+            side_effect=with_description_review(llm),
+        ),
     ):
         await parallel.enrich_worker(state)
 

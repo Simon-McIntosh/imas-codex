@@ -26,11 +26,16 @@ from tests.discovery.test_signal_enrichment_benchmark import answer
         ({"thinking": False}, {"reasoning_effort": None}),
         ({"max-tokens": 32768}, {"max_tokens": 32768}),
         ({"batch-size": 3}, {}),
+        ({"max-workers": 3}, {}),
         ({"fitted-prompt": True}, {}),
         ({"grounding": True}, {}),
         ({"claim-evidence": True}, {}),
         ({"review": True}, {}),
         ({"review-thinking": True}, {}),
+        ({"recovery-attempts": 1}, {}),
+        ({"source-fallback": True}, {}),
+        ({"review": True, "review-if-unsupported": True}, {}),
+        ({"review": True, "review-batch-size": 4}, {}),
         ({"temperature": 0}, {}),
         ({"description-sentences": 1}, {}),
     ],
@@ -51,7 +56,14 @@ def test_each_seat_option_is_explicit_and_other_models_keep_defaults(
 
 
 @pytest.mark.parametrize(
-    "settings", [{"batch-size": 0}, {"max-tokens": 0}, {"unknown": True}]
+    "settings",
+    [
+        {"batch-size": 0},
+        {"max-tokens": 0},
+        {"max-workers": 0},
+        {"max-workers": 65},
+        {"unknown": True},
+    ],
 )
 def test_invalid_seat_options_are_refused(settings):
     with pytest.raises(ValueError):
@@ -515,3 +527,56 @@ def test_abort_retry_delivery_is_not_counted_as_validation_reask():
     assert result["raw_parse_rate"] == 0
     assert result["delivered_after_reask"] == 0
     assert result["delivered_after_retry"] == 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(
+    ("model", "requested", "expected"),
+    [
+        ("local/test", 8, 3),
+        ("local/test", 2, 2),
+        ("openrouter/test", 8, 8),
+        ("local/other", 8, 8),
+    ],
+)
+async def test_worker_fanout_obeys_only_its_local_seat_limit(
+    monkeypatch, model, requested, expected
+):
+    from imas_codex.discovery.signals import parallel
+
+    observed = []
+
+    async def preflight(function, *args):
+        assert function.__name__ == "_preflight"
+        return {}, None, [], {}, {}, {}
+
+    class WorkersInspected(Exception):
+        pass
+
+    async def inspect_workers(state, workers, **kwargs):
+        observed.extend(worker.count for worker in workers if worker.name == "enrich")
+        raise WorkersInspected
+
+    monkeypatch.setattr(parallel.asyncio, "to_thread", preflight)
+    monkeypatch.setattr(parallel, "run_discovery_engine", inspect_workers)
+    monkeypatch.setattr("imas_codex.settings.get_model", lambda seat: model)
+    monkeypatch.setattr(
+        "imas_codex.settings._get_section",
+        lambda seat: {"model": "local/test", "signal-enrichment": {"max-workers": 3}},
+    )
+    with pytest.raises(WorkersInspected):
+        await parallel.run_parallel_data_discovery(
+            "jt-60sa", enrich_only=True, num_enrich_workers=requested
+        )
+    assert observed == [expected]
+
+
+def test_description_seat_enables_qualified_grounded_recovery():
+    from imas_codex.settings import get_model
+
+    options = get_enrichment_options(get_model("discovery-describe"))
+    assert options.grounding and options.review and options.review_thinking
+    assert options.recovery_attempts == 1 and options.source_fallback
+    assert options.description_sentences == 1 and options.max_workers == 3
+    assert options.review_batch_size == 1 and not options.review_if_unsupported
+    assert not options.schema_constraint and not options.json_mode
