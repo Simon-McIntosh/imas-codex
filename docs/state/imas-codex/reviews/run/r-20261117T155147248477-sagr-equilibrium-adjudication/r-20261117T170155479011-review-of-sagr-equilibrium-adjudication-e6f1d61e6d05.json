@@ -1,0 +1,60 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "unmeasured from suite arms: the reviewed manifest's baseline_suite and after_suite are both empty, so no suite pair exists to diff; its only recorded gates are the script's own --check at e6f1d61e (resume-head.log, EXIT=0) and the mutated-verdict control at the same revision (resume-altered-verdict.log, EXIT=1), which report no failing test ids at either arm, so no added failing test exists to name.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T17:14:37.970Z",
+  "dispatched_at": "2026-11-17T17:14:10Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py",
+      "line": "486",
+      "severity": "non-blocking",
+      "text": "non-blocking: the assertion that model_calls and graph_writes are zero compares against counters the same script writes at lines 279-281, so it can only fail if an author edits the constant and cannot detect a model call or graph write at head, leaving the blindness claim resting on the run's own statement."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/equilibrium-pending-packets.json",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the file was written outside the node's three declared write paths even though the resume instruction ordered it, so a reader comparing the diff to the declared scope finds an out-of-scope deliverable the path list never named."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit from 5276688300 to e6f1d61e; twelve commits add four files inside docs/evidence/fragments/sn-audited-group-release and touch nothing else, and the verdict commit d92993f103 lists only equilibrium-adjudication.json, as the diff-tree assertion at equilibrium-adjudication.py:648-651 requires.",
+    "done_when": "the measure is the script's --check plus per-verdict and per-class counts with 95 % intervals, causes shared by three or more members, the duplicate-or-wrong-domain-only list and a seeded twenty-member page with hidden verdicts; check() at equilibrium-adjudication.py:631-673 asserts the seals, the pending exclusion, the coverage, the 20-card closed-disclosure page and exact page reproduction, --check at e6f1d61e reran EXIT=0 here, and resume-altered-verdict.log shows the control failing EXIT=1 on \"Verdict changed after blind commit\".",
+    "goal": "the reviewed goal is that every equilibrium name is adjudicated blind from its full source packet; docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.json holds 208 sealed verdicts each bound to a quoted source phrase, and equilibrium-adjudication.html renders them beside the 20-card lead review, with the two members whose frozen packets omitted ancestor text marked pending under the exclusion resume-1-advice.txt authorises.",
+    "manifest": "the reviewed manifest.md records status complete, the literal --check command, resume-head.log at EXIT=0, resume-altered-verdict.log at EXIT=1, six further mutation logs, and leaves baseline_suite and after_suite empty because the node's gate is the script's self-check rather than a pytest suite.",
+    "write_paths": "the manifest declares the three equilibrium-adjudication files under docs/evidence/fragments/sn-audited-group-release; the diff adds those three plus equilibrium-pending-packets.json, which the resumed instruction ordered written beside the data but the declared path list was never extended to name."
+  },
+  "justifications": {
+    "durability": "reinstating a changed verdict reddens equilibrium-adjudication.py:643 with \"Verdict changed after blind commit\", as resume-altered-verdict.log records at EXIT=1.",
+    "evidence": "equilibrium-adjudication.py:659-660 pins the committed report and page against fresh summaries and renders, but the reviewed manifest's baseline_suite and after_suite are empty so no suite-delta measure exists and interval arithmetic is protected only by the committed report's round trip.",
+    "fit": "equilibrium-adjudication.py:24-41 follows the sibling fragment idiom of reader-calibration.py:26-36, and its snake_case helpers and docstrings raise no name the repository naming rules forbid.",
+    "goal_fidelity": "equilibrium-adjudication.html renders 208 retained verdicts and a 20-member page whose verdicts sit in closed details, and the two pending members are excluded from every count in equilibrium-adjudication.py:889-912.",
+    "reuse": "equilibrium-adjudication.py:92 and :784 delegate packet building to reader-calibration.source_packets and intervals to blind-audit.wilson rather than re-implementing them, while :59-88 re-decode the record format the siblings' generic load/save cannot read.",
+    "scope_discipline": "every path in the diff is inside docs/evidence/fragments/sn-audited-group-release, but equilibrium-pending-packets.json was written outside the three declared write paths."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed goal is that every equilibrium name is adjudicated blind from its full source packet; docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.json holds 208 sealed verdicts each bound to a quoted source phrase, and equilibrium-adjudication.html renders them beside the 20-card lead review, with the two members whose frozen packets omitted ancestor text marked pending under the exclusion resume-1-advice.txt authorises.\nVERDICT done_when: the measure is the script's --check plus per-verdict and per-class counts with 95 % intervals, causes shared by three or more members, the duplicate-or-wrong-domain-only list and a seeded twenty-member page with hidden verdicts; check() at equilibrium-adjudication.py:631-673 asserts the seals, the pending exclusion, the coverage, the 20-card closed-disclosure page and exact page reproduction, --check at e6f1d61e reran EXIT=0 here, and resume-altered-verdict.log shows the control failing EXIT=1 on \"Verdict changed after blind commit\".\nVERDICT write_paths: the manifest declares the three equilibrium-adjudication files under docs/evidence/fragments/sn-audited-group-release; the diff adds those three plus equilibrium-pending-packets.json, which the resumed instruction ordered written beside the data but the declared path list was never extended to name.\nVERDICT manifest: the reviewed manifest.md records status complete, the literal --check command, resume-head.log at EXIT=0, resume-altered-verdict.log at EXIT=1, six further mutation logs, and leaves baseline_suite and after_suite empty because the node's gate is the script's self-check rather than a pytest suite.\nVERDICT diff: read commit by commit from 5276688300 to e6f1d61e; twelve commits add four files inside docs/evidence/fragments/sn-audited-group-release and touch nothing else, and the verdict commit d92993f103 lists only equilibrium-adjudication.json, as the diff-tree assertion at equilibrium-adjudication.py:648-651 requires.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: equilibrium-adjudication.html renders 208 retained verdicts and a 20-member page whose verdicts sit in closed details, and the two pending members are excluded from every count in equilibrium-adjudication.py:889-912.\nSCORE evidence: 17\nJUSTIFICATION evidence: equilibrium-adjudication.py:659-660 pins the committed report and page against fresh summaries and renders, but the reviewed manifest's baseline_suite and after_suite are empty so no suite-delta measure exists and interval arithmetic is protected only by the committed report's round trip.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: every path in the diff is inside docs/evidence/fragments/sn-audited-group-release, but equilibrium-pending-packets.json was written outside the three declared write paths.\nSCORE durability: 18\nJUSTIFICATION durability: reinstating a changed verdict reddens equilibrium-adjudication.py:643 with \"Verdict changed after blind commit\", as resume-altered-verdict.log records at EXIT=1.\nSCORE fit: 16\nJUSTIFICATION fit: equilibrium-adjudication.py:24-41 follows the sibling fragment idiom of reader-calibration.py:26-36, and its snake_case helpers and docstrings raise no name the repository naming rules forbid.\nSCORE reuse: 17\nJUSTIFICATION reuse: equilibrium-adjudication.py:92 and :784 delegate packet building to reader-calibration.source_packets and intervals to blind-audit.wilson rather than re-implementing them, while :59-88 re-decode the record format the siblings' generic load/save cannot read.\nFINDING docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py:486 non-blocking: the assertion that model_calls and graph_writes are zero compares against counters the same script writes at lines 279-281, so it can only fail if an author edits the constant and cannot detect a model call or graph write at head, leaving the blindness claim resting on the run's own statement.\nFINDING docs/evidence/fragments/sn-audited-group-release/equilibrium-pending-packets.json:1 non-blocking: the file was written outside the node's three declared write paths even though the resume instruction ordered it, so a reader comparing the diff to the declared scope finds an out-of-scope deliverable the path list never named.\n",
+  "review_run_id": "r-20261117T170155479011-review-of-sagr-equilibrium-adjudication-e6f1d61e6d05",
+  "reviewed_base_sha": "52766883007dfae58b25699d72e1c6e28538d57a",
+  "reviewed_head_sha": "e6f1d61e6d057e44bf7cdaff8ffb790bbdf73f43",
+  "reviewed_run_id": "r-20261117T155147248477-sagr-equilibrium-adjudication",
+  "scores": {
+    "durability": 18,
+    "evidence": 17,
+    "fit": 16,
+    "goal_fidelity": 18,
+    "reuse": 17,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T17:25:35.985761+00:00",
+  "total": 101
+}
