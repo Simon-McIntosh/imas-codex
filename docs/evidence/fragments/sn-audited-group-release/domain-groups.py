@@ -639,15 +639,69 @@ def proposed_order(table: list[dict[str, Any]], transport_live: int) -> dict[str
     else:
         reasons["transport"] = f"last of the ranked groups: {transport_live} live names"
     for entry in below:
+        noun = "name" if entry["live"] == 1 else "names"
         reasons[entry["group"]] = (
-            f"below the {SAMPLE_FLOOR}-name floor: {entry['live']} live names, "
+            f"below the {SAMPLE_FLOOR}-name floor: {entry['live']} live {noun}, "
             f"{entry['settled']} settled; must be read in full before a bar applies"
         )
     return {
         "proposed": order,
         "reasons": reasons,
         "ranked_count": len(ranked),
+        "reasons_source": "the measured order put to the lead before the ruling",
         "below_floor": [entry["group"] for entry in below],
+    }
+
+
+#: The rulings recorded on the plan at commit 7b7bf5fbb (2026-11-17), section 2
+#: for the order, the transport choice and the families, section 6 for what
+#: ``transport`` is divided along instead.
+FIRST_GROUP = "equilibrium"
+TRANSPORT_PARTS_LABEL = "transport's parts (section 6)"
+FAMILY_RULING = "exception for the first cut"
+RULING = {
+    "date": "2026-11-17",
+    "source": "plan sn-audited-group-release section 2 and section 6, commit 7b7bf5fbb",
+    "order_statement": (
+        "equilibrium is released first and the remaining groups follow the "
+        "measured order"
+    ),
+    "transport": (
+        "transport does not stand as one group and is not split by its sources' "
+        "domains; it is divided along the data dictionary's own structures, which "
+        "returns a vocabulary the domain list does not hold today and is carried by "
+        "section 6; its parts are released after the parts of the other groups"
+    ),
+    "families": (
+        "no family clearing moves a stored domain until section 6 has measured "
+        "reading a name's group from its sources' data structures over the whole "
+        "catalog; until then every family that spans groups is an exception for the "
+        "first cut, and the families that touch equilibrium are listed by name"
+    ),
+    "repair_ceiling_usd": 300,
+}
+
+
+def ruled_order(order: dict[str, Any]) -> dict[str, Any]:
+    """Section 2's ruled position of every group, against the measured order.
+
+    The first group is ruled, not measured: ``equilibrium`` is released first and
+    every other group follows the order measured here. ``transport`` leaves this
+    list as a group — section 2 divides it along data structures under section 6
+    and releases its parts last — so the ruled sequence ends with one entry that
+    is not a group.
+    """
+    rest = [
+        group for group in order["proposed"] if group not in (FIRST_GROUP, "transport")
+    ]
+    return {
+        "first": FIRST_GROUP,
+        "rest": rest,
+        "last": TRANSPORT_PARTS_LABEL,
+        "sequence": [FIRST_GROUP, *rest, TRANSPORT_PARTS_LABEL],
+        "measured_place": {
+            group: position for position, group in enumerate(order["proposed"], start=1)
+        },
     }
 
 
@@ -711,7 +765,14 @@ def render_page(payload: dict[str, Any]) -> str:
         f"{len(families)} DD families have live names in more than one group, and "
         f"<code>transport</code> holds {transport['live']} names at "
         f"{_pct(transport['settled'] / transport['live'] if transport['live'] else None)} "
-        "settled."
+        "settled. "
+        "Ruled 2026-11-17: <code>equilibrium</code> is released first and the "
+        "remaining groups follow the measured order; <code>transport</code> does not "
+        "stand and is not split by its sources' domains but divided along the data "
+        "dictionary's own structures under section 6, its parts last; and every "
+        f"family that spans groups is recorded as an {FAMILY_RULING}, with the proposal "
+        "kept beside "
+        "it, until section 6 measures reading a name's group from its sources."
     )
     parts.append(
         f'<h1 id="{node}-title">The physics-domain groups measured before release</h1>\n'
@@ -929,21 +990,24 @@ def render_page(payload: dict[str, Any]) -> str:
     exception = counts.get("exception", 0)
     parts.append(
         f'<p id="{node}-families">{payload["families"]["detected"]} DD families are '
-        f"detected by <code>detect_families</code> over the "
+        "detected by <code>detect_families</code> over the "
         f"{payload['families']['source_paths']} DD paths that produced the live "
         f"names; <strong>{len(families)} of them have live names in more than one "
         "group</strong>, and a family whose live names all sit in one group spans "
-        "nothing and is not listed. Each is listed with its members' groups and one "
-        f"proposed clearing: {bring} are brought into one group (one group holds at "
-        "least two thirds of the family's named members), "
-        f"{cut} are cut with the groups they span (no two-thirds majority, and the "
-        "two largest groups are within three places of each other in the proposed "
-        f"order), and {exception} are proposed as exceptions that may span groups. "
-        "The lead rules each; the ruled list is what the release bar reads.</p>\n"
+        "nothing and is not listed. Each is listed with its members' groups, the "
+        "clearing proposed here, and the state the lead ruled. "
+        "<strong>Ruled 2026-11-17: every one of these families is recorded as an "
+        f"{FAMILY_RULING}</strong> — no clearing moves a stored domain until section "
+        "6 has measured reading a name's group from its sources' data structures "
+        "over the whole catalog — so the proposal below is kept beside the ruling "
+        "and is not in the release bar for the first cut. The proposals, by "
+        f"construction: {bring} bring the members into one group, {cut} cut with the "
+        f"groups they span, and {exception} are exceptions as well as ruled ones.</p>\n"
     )
     family_head = (
         "<tr><th>Family (DD parent, type, members)</th><th>Members' groups</th>"
-        "<th>Named members</th><th>Proposed clearing</th></tr>"
+        "<th>Named members</th><th>Ruled state</th><th>Proposed clearing (not in "
+        "the bar)</th></tr>"
     )
     body = []
     for family in families:
@@ -963,6 +1027,7 @@ def render_page(payload: dict[str, Any]) -> str:
             f"<td><code>{_esc(family['parent_path'])}</code><br>"
             f"{_esc(family['family_type'])}: {suffix_text}</td>"
             f"<td>{groups_cell}</td><td>{family['named_members']}</td>"
+            f"<td>{_esc(family['ruled'])}</td>"
             f"<td>{verdict}</td>"
             "</tr>"
         )
@@ -970,6 +1035,47 @@ def render_page(payload: dict[str, Any]) -> str:
         f'<table id="{node}-families-table"><thead>{family_head}</thead><tbody>'
         + "\n".join(body)
         + "</tbody></table>\n"
+    )
+    touching = [family for family in families if FIRST_GROUP in family["group_counts"]]
+    parts.append(
+        f'<h2 id="{node}-equilibrium-families-head">The families that touch '
+        f"{_esc(FIRST_GROUP)}</h2>\n"
+    )
+    parts.append(
+        f'<p id="{node}-equilibrium-families">Section 2\'s ruling lists these by name '
+        f"because <code>{_esc(FIRST_GROUP)}</code> is released first: "
+        f"<strong>{len(touching)} of the {len(families)} spanning families have a "
+        f"member in <code>{_esc(FIRST_GROUP)}</code></strong>, so each is an "
+        "exception the first cut carries and each is a place where the first cut's "
+        "own group is entangled with a group released later. The right-hand column "
+        "names the groups the rest of the family sits in.</p>\n"
+    )
+    touching_head = (
+        "<tr><th>Family (DD parent, type, members in equilibrium)</th>"
+        f"<th>Members in {_esc(FIRST_GROUP)}</th><th>Its other groups</th></tr>"
+    )
+    body = []
+    for family in touching:
+        suffix_text = _esc(", ".join(family["suffixes"]))
+        members = ", ".join(
+            f"<code>{_esc(name)}</code>"
+            for name in family["member_groups"].get(FIRST_GROUP) or []
+        )
+        others = ", ".join(
+            f"{_esc(group)} {count}"
+            for group, count in family["group_counts"].items()
+            if group != FIRST_GROUP
+        )
+        body.append(
+            "<tr>"
+            f"<td><code>{_esc(family['parent_path'])}</code><br>"
+            f"{_esc(family['family_type'])}: {suffix_text}</td>"
+            f"<td>{members}</td><td>{others}</td>"
+            "</tr>"
+        )
+    parts.append(
+        f'<table id="{node}-equilibrium-families-table"><thead>{touching_head}'
+        "</thead><tbody>" + "\n".join(body) + "</tbody></table>\n"
     )
 
     # -- transport
@@ -1016,17 +1122,18 @@ def render_page(payload: dict[str, Any]) -> str:
             "outside what a split among them can do.</p>\n"
         )
     parts.append(
-        f'<p id="{node}-transport-choice">The choice put to the lead: '
-        "<strong>A</strong>: <code>transport</code> stands as one release unit, "
-        "last in the order, its membership read as an operator class (the split table "
-        "below shows what the mechanical alternative would do). <strong>B</strong>: "
-        "<code>transport</code> is split by the mechanical rule, which moves "
-        f"{transport['split_total']} names and refutes itself by handing "
-        f"{fast} of them to a 17-name group. <strong>C</strong>: "
-        "<code>transport</code> is split by the DD structure its members are "
-        "measured from, which is a new domain vocabulary and so is not a split "
-        "among the existing groups. The lead's ruling replaces this list.</p>\n"
+        f'<p id="{node}-transport-choice"><strong>Ruled 2026-11-17: '
+        "<code>transport</code> does not stand as one group, and it is not split by "
+        "the domains of its sources.</strong> Section 2 refuses that split for the "
+        "reason measured here — it would send "
+        f"{fast} names to a 17-name group and {core} to one of 45 — and divides the "
+        "group along the data dictionary's own structures instead, which returns "
+        "group names the domain vocabulary does not hold today and is carried by the "
+        "plan's section 6. Its parts are released after the other groups. No stored "
+        "domain moves until section 6's parts are ruled. The table below stays as "
+        "the measurement behind the refusal, not as a proposal.</p>\n"
     )
+
     transport_head = "<tr><th>Destination</th><th>Names</th><th>Rule</th></tr>"
     body = [
         f"<tr><td>stays in <code>transport</code></td><td>{transport['stays']}</td>"
@@ -1050,25 +1157,45 @@ def render_page(payload: dict[str, Any]) -> str:
 
     # -- order
     order = payload["order"]
-    parts.append(f'<h2 id="{node}-order-head">Proposed release order</h2>\n')
+    ruled = payload["ruling"]["sequence"]
+    parts.append(f'<h2 id="{node}-order-head">The ruled release order</h2>\n')
     parts.append(
-        f'<p id="{node}-order">The order follows M1 within the ranked groups, with '
-        "two constraints taken from the evidence above: a group below the "
-        f"{SAMPLE_FLOOR}-name floor is placed after the ranked ones because the bar "
-        "of section 3 is fixed from audited rates and such a group must be read in "
-        "full before any bar can apply, and <code>transport</code> is placed last "
-        "among the ranked groups because it is the largest and the least settled. "
-        "The lead rules the order; the split option above is the one variation that "
-        "would change it, because the receiving groups would grow and their own "
-        "settled shares with them. The ruling list the release bar reads is the "
-        "order below with each family's clearing from the table above.</p>\n"
+        f'<p id="{node}-order"><strong>Ruled 2026-11-17: <code>{_esc(ruled["first"])}'
+        "</code> is released first and the remaining groups follow the measured "
+        "order.</strong> The measured order is M1 within the ranked groups, with a "
+        f"group below the {SAMPLE_FLOOR}-name floor after them because the bar of "
+        "section 3 is fixed from audited rates and such a group must be read in full "
+        "before any bar can apply. The ruling moves "
+        f"<code>{_esc(ruled['first'])}</code> from measured place "
+        f"{ruled['measured_place'][ruled['first']]} to the first release, leaves every "
+        "other group where the measurement puts it, and takes <code>transport</code> "
+        "out of the group list: section 2 divides it along the data dictionary's own "
+        f"structures under section 6, so its parts are released last as "
+        f"{_esc(ruled['last'])}. Neither the first group nor the last line is a "
+        "measured position; each is the ruling.</p>\n"
     )
-    order_head = "<tr><th>Release position</th><th>Group</th><th>Why here</th></tr>"
+    order_head = (
+        "<tr><th>Release position</th><th>Group</th><th>Measured place</th>"
+        "<th>Why here</th></tr>"
+    )
     body = []
-    for position, group in enumerate(order["proposed"], start=1):
+    for position, group in enumerate(ruled["sequence"], start=1):
+        if group == ruled["first"]:
+            why = "ruled first on 2026-11-17"
+            measured = ruled["measured_place"][group]
+        elif group == ruled["last"]:
+            why = (
+                "not a group after section 2's ruling: transport is divided along "
+                "data dictionary structures under section 6 and its parts are "
+                "released after the groups"
+            )
+            measured = "—"
+        else:
+            why = order["reasons"].get(group, "")
+            measured = ruled["measured_place"].get(group, "—")
         body.append(
-            f"<tr><td>{position}</td><td>{_esc(group)}</td>"
-            f"<td>{order['reasons'].get(group, '')}</td></tr>"
+            f"<tr><td>{position}</td><td>{_esc(group)}</td><td>{measured}</td>"
+            f"<td>{why}</td></tr>"
         )
     parts.append(
         f'<table id="{node}-order-table"><thead>{order_head}</thead><tbody>'
@@ -1177,6 +1304,17 @@ def build(gc: Any) -> dict[str, Any]:
     }
     for family in families["spanning"]:
         family["clearing"] = clearing_proposal(family, order_position)
+        family["ruled"] = FAMILY_RULING
+    touching = [
+        family
+        for family in families["spanning"]
+        if FIRST_GROUP in family["group_counts"]
+    ]
+    families["touching_first_group"] = {
+        "group": FIRST_GROUP,
+        "count": len(touching),
+        "ids": [family["id"] for family in touching],
+    }
     audit = wrong_domain_counts(AUDIT_JSON, states)
     census_rows = sorted(rows.values(), key=lambda row: (-row["live"], row["group"]))
     partition = {
@@ -1203,6 +1341,7 @@ def build(gc: Any) -> dict[str, Any]:
         "families": families,
         "transport": transport,
         "order": order,
+        "ruling": {**RULING, "sequence": ruled_order(order)},
         "mismatches": mismatches,
         "instrument": {
             "census_plant": plant,
