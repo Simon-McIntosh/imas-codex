@@ -826,5 +826,500 @@
         "negative_control_live_source_taken": "remove the atomic-retirement eligibility exclusion, allowing the contested live target source to recycle"
       }
     }
-  }
+  },
+  "signed_backlog_retirement": {
+    "implementation_commit": "4345f519303afa9ede6aee6280f607be0bc1b415",
+    "reproduction": {
+      "requested": 13,
+      "admitted": 0,
+      "refused": 13,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/live_before.log"
+    },
+    "disposable": {
+      "outcome": "applied",
+      "changed": 13,
+      "ledger_rows": 13,
+      "dry_run_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/disposable_preview.json",
+      "receipt_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/disposable_apply.json",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/disposable.log"
+    },
+    "live_dry_run": {
+      "counts": {
+        "requested": 13,
+        "admitted": 13,
+        "refused": 0
+      },
+      "manifest_sha256": "827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8",
+      "receipt_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/live_preview.json",
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/live_preview.log"
+    },
+    "live_apply": {
+      "outcome": "applied",
+      "changed": 13,
+      "superseded": 13,
+      "ledger_rows": 13,
+      "manifest_sha256": "827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8",
+      "change_ids": [
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:a625d9fec3331cc76046",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:ee3fe9cf79136f1dfd2e",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:ba53cf7a5595c3016892",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:d7c005ba159b81ae6242",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:4a46080810ab60747c91",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:1f11f953d8454c5ea4a9",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:1e645a49803b1210dd17",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:d2e3fbdacc37b5e7583a",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:a49e6fb7368d94e2b5f0",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:58c946104afd019e8594",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:1dce78d5bfbe12c7fa82",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:3ab8216e4844a24a3938",
+        "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:fd3cfeeb7a486c26d0b3"
+      ]
+    },
+    "cohort": [
+      {
+        "id": "diamagnetic_momentum_coefficient",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Dimensionless coefficient for the diamagnetic component of the momentum flux limiter.",
+        "reviewer_score_name": 0.8447875057200793,
+        "former_source_evidence": {
+          "released_sources": [],
+          "migration_receipt_ids": [
+            "sn-change:source-migration:53d3a8437e7b8e4e1b692e09f6ae9bbb4d80a110382ef9082e02b10b2469cc49"
+          ]
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:a625d9fec3331cc76046",
+        "retired": true
+      },
+      {
+        "id": "gradient_of_electron_pressure",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Algebraically signed slope of electron pressure with respect to normalized poloidal magnetic flux, evaluated where its absolute steepness is greatest in the H-mode pedestal.",
+        "reviewer_score_name": 0.4625,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value",
+              "source_id": "summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:ee3fe9cf79136f1dfd2e",
+        "retired": true
+      },
+      {
+        "id": "implicit_ion_particle_source_rate",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Implicit part of the ion particle source rate multiplied by ion density in transport solves.",
+        "reviewer_score_name": 0.7655585814303492,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:core_sources/source/profiles_1d/ion/particles_decomposed/implicit_part",
+              "source_id": "core_sources/source/profiles_1d/ion/particles_decomposed/implicit_part",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:ba53cf7a5595c3016892",
+        "retired": true
+      },
+      {
+        "id": "implicit_ion_state_particle_source_rate",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Implicit (stiff) part of the decomposed particle source term for an ion charge state, coefficient multiplying local ion density.",
+        "reviewer_score_name": 0.698717447509219,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:core_sources/source/profiles_1d/ion/state/particles_decomposed/implicit_part",
+              "source_id": "core_sources/source/profiles_1d/ion/state/particles_decomposed/implicit_part",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:d7c005ba159b81ae6242",
+        "retired": true
+      },
+      {
+        "id": "incident_energy_flux_at_wall",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Incident energy flux onto the wall surface, covering kinetic and recombination contributions from all species.",
+        "reviewer_score_name": 0.7990942430662499,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:wall/description_ggd/ggd/power_density/values",
+              "source_id": "wall/description_ggd/ggd/power_density/values",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:4a46080810ab60747c91",
+        "retired": true
+      },
+      {
+        "id": "maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Maximum gradient of electron pressure with respect to normalized poloidal flux in the pedestal.",
+        "reviewer_score_name": 0.8446045958557662,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm_max/value",
+              "source_id": "summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm_max/value",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:1f11f953d8454c5ea4a9",
+        "retired": true
+      },
+      {
+        "id": "molecular_fraction",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Relative molecular fraction of a gas species within the injected gas mixture.",
+        "reviewer_score_name": 0.6868908340429285,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:pulse_schedule/nbi/unit/species/fraction",
+              "source_id": "pulse_schedule/nbi/unit/species/fraction",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:1e645a49803b1210dd17",
+        "retired": true
+      },
+      {
+        "id": "momentum_coefficient_due_to_diamagnetic_drift",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Diamagnetic drift contribution to the momentum flux limiter coefficient.",
+        "reviewer_score_name": 0.5625,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:edge_transport/model/ggd/momentum/flux_limiter/diamagnetic",
+              "source_id": "edge_transport/model/ggd/momentum/flux_limiter/diamagnetic",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:d2e3fbdacc37b5e7583a",
+        "retired": true
+      },
+      {
+        "id": "neutral_species_fraction",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Relative molecular fraction of each neutral gas species in the mixture injected by the NBI unit.",
+        "reviewer_score_name": 0.83125,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:pulse_schedule/density_control/valve/species/fraction",
+              "source_id": "pulse_schedule/density_control/valve/species/fraction",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:a49e6fb7368d94e2b5f0",
+        "retired": true
+      },
+      {
+        "id": "nuclear_source_rate_due_to_beam_beam_fusion",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Global production rate of fusion products generated by beam\u2013beam fusion between nonthermal fuel ions.",
+        "reviewer_score_name": 0.5973810155139305,
+        "former_source_evidence": {
+          "released_sources": [],
+          "migration_receipt_ids": [
+            "sn-change:source-migration:e9e11c8327031da40522adf87bd1f32865c2f56b1f145820ce117fb651d248ec"
+          ]
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:58c946104afd019e8594",
+        "retired": true
+      },
+      {
+        "id": "plasma_velocity_due_to_diamagnetic_drift",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "The plasma velocity due to diamagnetic drift is a signed scalar component of the bulk-plasma diamagnetic drift velocity, obtained by projecting the mass-weighted pressure-gradient-driven species drifts onto a specified positive component direction.",
+        "reviewer_score_name": 0.75,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:edge_transport/model/ggd/momentum/v/diamagnetic",
+              "source_id": "edge_transport/model/ggd/momentum/v/diamagnetic",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:1dce78d5bfbe12c7fa82",
+        "retired": true
+      },
+      {
+        "id": "poloidal_straight_field_line_angle",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Straight field line poloidal angle coordinate on the 2D wave propagation grid",
+        "reviewer_score_name": 0.7011555938252245,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:waves/coherent_wave/profiles_2d/grid/theta_straight",
+              "source_id": "waves/coherent_wave/profiles_2d/grid/theta_straight",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:3ab8216e4844a24a3938",
+        "retired": true
+      },
+      {
+        "id": "total_power_of_plant_system",
+        "stage_before": "exhausted",
+        "stage_after": "superseded",
+        "description": "Total real electrical power consumed by all included plant systems, obtained by summing their individual electrical loads at the corresponding system boundaries.",
+        "reviewer_score_name": 0.7309508261295233,
+        "former_source_evidence": {
+          "released_sources": [
+            {
+              "id": "dd:balance_of_plant/power_plant/power_electric_generated",
+              "source_id": "balance_of_plant/power_plant/power_electric_generated",
+              "status": "extracted",
+              "attempt_count": 0,
+              "claimed_at": null,
+              "claim_token": null,
+              "producer_count": 0,
+              "mirror": null,
+              "holders": []
+            }
+          ],
+          "migration_receipt_ids": []
+        },
+        "change_id": "sn-change:exhausted-orphan:827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8:fd3cfeeb7a486c26d0b3",
+        "retired": true
+      }
+    ],
+    "skipped": [],
+    "readback": {
+      "count": 10,
+      "rows": [
+        {
+          "id": "beta",
+          "origin": "derived",
+          "name_stage": "accepted",
+          "derived_parent": true,
+          "live_children": 4
+        },
+        {
+          "id": "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+          "origin": "pipeline",
+          "name_stage": "accepted",
+          "derived_parent": false,
+          "live_children": 0
+        },
+        {
+          "id": "deposited_power_at_divertor_target",
+          "origin": "pipeline",
+          "name_stage": "exhausted",
+          "derived_parent": false,
+          "live_children": 1
+        },
+        {
+          "id": "electron_temperature_at_plasma_boundary",
+          "origin": null,
+          "name_stage": "exhausted",
+          "derived_parent": false,
+          "live_children": 0
+        },
+        {
+          "id": "line_averaged_neon_density",
+          "origin": null,
+          "name_stage": "pending",
+          "derived_parent": false,
+          "live_children": 0
+        },
+        {
+          "id": "poloidal_total_momentum_convection_velocity",
+          "origin": null,
+          "name_stage": "exhausted",
+          "derived_parent": false,
+          "live_children": 0
+        },
+        {
+          "id": "radius_of_soft_xray_detector",
+          "origin": null,
+          "name_stage": "pending",
+          "derived_parent": false,
+          "live_children": 0
+        },
+        {
+          "id": "ratio_of_diamagnetic_vorticity_to_major_radius",
+          "origin": null,
+          "name_stage": "pending",
+          "derived_parent": false,
+          "live_children": 0
+        },
+        {
+          "id": "voltage_of_diagnostic_antenna",
+          "origin": null,
+          "name_stage": "exhausted",
+          "derived_parent": false,
+          "live_children": 0
+        },
+        {
+          "id": "volume_averaged_electron_number_density_over_scrape_off_layer",
+          "origin": "pipeline",
+          "name_stage": "accepted",
+          "derived_parent": false,
+          "live_children": 0
+        }
+      ],
+      "matches_original_ten": true,
+      "exemptions_added": [],
+      "enumerator": "find_sourceless_live_name_rows(gc, derived_parents_exempt=False)",
+      "source_nodes_and_producer_edges_unchanged": true,
+      "other_source_holders_unchanged": true,
+      "original_ten_properties_unchanged": true,
+      "non_lifecycle_properties_preserved": true,
+      "receipt_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/live_readback.json",
+      "endpoint_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/live_endpoint.json"
+    },
+    "negative_controls": {
+      "admission_removed": {
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/negative_control.log",
+        "failed": 5,
+        "passed": 16,
+        "exit_status": 1
+      },
+      "non_exhausted_admitted": {
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/negative_exhaustion.log",
+        "failed": 10,
+        "passed": 11,
+        "exit_status": 1
+      }
+    },
+    "suite_comparison": {
+      "partition": "all_debug",
+      "baseline": {
+        "revision": "d12142b478667cd114095d1e1a1309ef551204e9",
+        "command": "uv run --no-sync pytest -p no:cacheprovider --basetemp=/tmp/retirement-suite-1323183-kfz6_r_5/pytest /tmp/retirement-suite-1323183-kfz6_r_5/tests/standard_names",
+        "exit_status": 0,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/baseline_suite_isolated.log",
+        "completed": true,
+        "failure_count": 0,
+        "failure_ids": [],
+        "summary": "8789 passed, 12 skipped, 553 deselected, 43 warnings in 881.15s (0:14:41)"
+      },
+      "head": {
+        "revision": "4345f519303afa9ede6aee6280f607be0bc1b415",
+        "command": "uv run --no-sync pytest -p no:cacheprovider --basetemp=/tmp/retirement-suite-1323184-6qld3htz/pytest /tmp/retirement-suite-1323184-6qld3htz/tests/standard_names",
+        "exit_status": 0,
+        "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/after_suite_isolated.log",
+        "completed": true,
+        "failure_count": 0,
+        "failure_ids": [],
+        "summary": "8789 passed, 12 skipped, 575 deselected, 43 warnings in 781.99s (0:13:01)"
+      },
+      "added_failure_count": 0,
+      "added_failure_ids": [],
+      "measurement": "Independent archived revisions, shared environment without sync, checkout-specific generated model copies, printed module and cwd, separate per-job pytest basetemp, direct log capture."
+    }
+  },
+  "current_count": 10,
+  "current_names": [
+    "beta",
+    "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+    "deposited_power_at_divertor_target",
+    "electron_temperature_at_plasma_boundary",
+    "line_averaged_neon_density",
+    "poloidal_total_momentum_convection_velocity",
+    "radius_of_soft_xray_detector",
+    "ratio_of_diamagnetic_vorticity_to_major_radius",
+    "voltage_of_diagnostic_antenna",
+    "volume_averaged_electron_number_density_over_scrape_off_layer"
+  ],
+  "initial_census_note": "The top-level count and names preserve the initial loss census; current_count/current_names and signed_backlog_retirement.readback carry the completed retirement readback."
 }

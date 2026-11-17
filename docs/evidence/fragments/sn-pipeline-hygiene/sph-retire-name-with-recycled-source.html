@@ -247,3 +247,52 @@ current source/status tables are retained.</p>
 <li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/negative_control_live_source_taken.log</code></li>
 </ul>
 </section>
+
+<section id="signed-backlog-retirement">
+<h2>Signed retirement of the stranded cohort</h2>
+<p>On 2026-11-17 the fresh preview at <code>d12142b478667cd114095d1e1a1309ef551204e9</code> reproduced the refusal: requested 13, admitted 0, refused 13. The new admission tests at that implementation base reported <code>5 failed, 15 passed</code>; the exhausted cases returned <code>refused</code> where <code>would_apply</code> was required. The implementation at <code>4345f519303afa9ede6aee6280f607be0bc1b415</code> keeps the source-loss classification intact and lets the signed retirement path read the exhausted identity’s own former-source evidence.</p>
+<p>A recorded source qualifies when it is extracted, has zero attempts, no claim, no produced-name mirror and no producer edge. When no source id survives, a completed source-migration change into this exact identity proves a prior binding. Related names’ source records confer no authority. The signed manifest carries this evidence and reads it again after locking the names; existing stage, derived-origin, missing-name and producing-source refusals remain in force.</p>
+<p>The production cohort was cloned to an empty disposable graph first. Its recorded dry run admitted 13/13; application retired 13/13, wrote 13 ledger rows and left none of the cohort live without a source (<code>EXIT=0</code>). The separately recorded live dry run then admitted 13, refused 0, with digest <code>827e5a27860bf829827d90056324082cfa3acbc99bb2fbfa21a972167b3ea7a8</code>. The sole live writer applied that exact digest, retiring 13 and reading back 13 matching change rows (<code>EXIT=0</code>). Every cohort member was still exhausted immediately before apply; no accepted or other non-exhausted name was skipped or changed.</p>
+<table><thead><tr><th>Name</th><th>Former-source authority read by the signed path</th><th>Result</th></tr></thead><tbody>
+<tr><td><code>diamagnetic_momentum_coefficient</code></td><td>No surviving source id. Own completed transfer receipt: <code>sn-change:source-migration:53d3a8437e7b8e4e1b692e09f6ae9bbb4d80a110382ef9082e02b10b2469cc49</code></td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>gradient_of_electron_pressure</code></td><td><code>dd:summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>implicit_ion_particle_source_rate</code></td><td><code>dd:core_sources/source/profiles_1d/ion/particles_decomposed/implicit_part</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>implicit_ion_state_particle_source_rate</code></td><td><code>dd:core_sources/source/profiles_1d/ion/state/particles_decomposed/implicit_part</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>incident_energy_flux_at_wall</code></td><td><code>dd:wall/description_ggd/ggd/power_density/values</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate</code></td><td><code>dd:summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm_max/value</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>molecular_fraction</code></td><td><code>dd:pulse_schedule/nbi/unit/species/fraction</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>momentum_coefficient_due_to_diamagnetic_drift</code></td><td><code>dd:edge_transport/model/ggd/momentum/flux_limiter/diamagnetic</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>neutral_species_fraction</code></td><td><code>dd:pulse_schedule/density_control/valve/species/fraction</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>nuclear_source_rate_due_to_beam_beam_fusion</code></td><td>No surviving source id. Own completed transfer receipt: <code>sn-change:source-migration:e9e11c8327031da40522adf87bd1f32865c2f56b1f145820ce117fb651d248ec</code></td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>plasma_velocity_due_to_diamagnetic_drift</code></td><td><code>dd:edge_transport/model/ggd/momentum/v/diamagnetic</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>poloidal_straight_field_line_angle</code></td><td><code>dd:waves/coherent_wave/profiles_2d/grid/theta_straight</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+<tr><td><code>total_power_of_plant_system</code></td><td><code>dd:balance_of_plant/power_plant/power_electric_generated</code> (extracted, unclaimed, no producer)</td><td>exhausted → superseded; one signed change row</td></tr>
+</tbody></table>
+<p>For <code>diamagnetic_momentum_coefficient</code>, the path reads the change recording transfer from <code>diamagnetic_momentum_flux_limiter_coefficient</code>. For <code>nuclear_source_rate_due_to_beam_beam_fusion</code>, it reads the transfer from <code>volume_integrated_rate_due_to_beam_beam_fusion</code>. Neither record supplies a surviving source id; both identities retire on their own completed transfer receipt, without inventing a binding or copying a related name’s source. The source and aliases producing other names under <code>momentum_coefficient_due_to_diamagnetic_drift</code> were read back unchanged.</p>
+<p>The repository’s <code>find_sourceless_live_name_rows(gc, derived_parents_exempt=False)</code> now enumerates exactly the original ten, including the structural parent <code>beta</code>. No exemption was added. A bound-name positive control is absent from that population while its producing sources are present. The ten names’ properties, every sampled source node and producer edge, all other source holders, the retired names’ stored text, and their recorded model-spend fields are unchanged:</p>
+<ul>
+<li><code>beta</code></li>
+<li><code>coolant_absorbed_energy_accumulated_of_plasma_facing_component</code></li>
+<li><code>deposited_power_at_divertor_target</code></li>
+<li><code>electron_temperature_at_plasma_boundary</code></li>
+<li><code>line_averaged_neon_density</code></li>
+<li><code>poloidal_total_momentum_convection_velocity</code></li>
+<li><code>radius_of_soft_xray_detector</code></li>
+<li><code>ratio_of_diamagnetic_vorticity_to_major_radius</code></li>
+<li><code>voltage_of_diagnostic_antenna</code></li>
+<li><code>volume_averaged_electron_number_density_over_scrape_off_layer</code></li>
+</ul>
+<p>The protected-stage test now uses <code>refining</code>, and a live refine claim is explicitly preserved. The production maintenance caller now logs the count of exhausted names retired. The admission-removal mutation reports <code>5 failed, 16 passed, EXIT=1</code>; the non-exhausted-admission mutation reports <code>10 failed, 11 passed, EXIT=1</code>. Their failing ids pass at implementation head. Both mutations and every graph run used <code>all_debug</code>.</p>
+<p>Durable receipts, full manifests and logs: <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog</code>. The data file’s <code>signed_backlog_retirement</code> record carries each name, its authority, review score, description, change id, signed digest and the complete ten-name read-back. Historical readings above and the original data fields remain as recorded.</p>
+</section>
+
+<section id="signed-retirement-suite-comparison">
+<h2>Archived whole-directory comparison</h2>
+<p>Independent <code>all_debug</code> jobs measured <code>tests/standard_names</code> at the stated base and implementation head. Each archive used copied generated models, the shared environment without sync, an explicit source import path printed in its log, a private pytest basetemp and direct log capture. The completed results add zero failure ids:</p>
+<table><thead><tr><th>Revision</th><th>Result</th><th>Exit</th></tr></thead><tbody>
+<tr><td><code>d12142b478667cd114095d1e1a1309ef551204e9</code></td><td>8789 passed, 12 skipped, 553 deselected, 43 warnings in 881.15s (0:14:41)</td><td>0</td></tr>
+<tr><td><code>4345f519303afa9ede6aee6280f607be0bc1b415</code></td><td>8789 passed, 12 skipped, 575 deselected, 43 warnings in 781.99s (0:13:01)</td><td>0</td></tr>
+</tbody></table>
+<p>The new graph cases and recovery checks were measured separately; both declared mutation controls fail on ids that pass at implementation head. No product code changed after these measurements were submitted. The original captures are retained in the run directory; private temporary directories and direct capture were used for the final comparable measurements.</p>
+<ul><li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/baseline_suite_isolated.log</code></li><li><code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T124123918295-sph-retire-sourceless-backlog/after_suite_isolated.log</code></li></ul>
+</section>

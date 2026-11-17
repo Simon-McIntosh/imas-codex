@@ -1926,14 +1926,16 @@ async def run_sn_pools(
         source_status = await _global_maintenance_call(
             reconcile_source_status_liveness, default={}
         )
-        if source_status.get("live_realigned", 0) or source_status.get(
-            "orphaned_reset", 0
+        if any(
+            source_status.get(key, 0)
+            for key in ("live_realigned", "orphaned_reset", "names_retired")
         ):
             logger.info(
                 "run_sn_pools: source-status reconcile — %d aligned to a live "
-                "target, %d returned to extracted",
+                "target, %d returned to extracted, %d exhausted name(s) retired",
                 source_status.get("live_realigned", 0),
                 source_status.get("orphaned_reset", 0),
+                source_status.get("names_retired", 0),
             )
 
         retired_hints = await _global_maintenance_call(

@@ -106,7 +106,7 @@ def test_exhausted_name_is_retired_when_its_source_is_recycled(_gc):
 
 
 @pytest.mark.parametrize(
-    "stage", ["contested", "accepted", "drafted", "pending", "refined"]
+    "stage", ["contested", "accepted", "drafted", "pending", "refining"]
 )
 def test_source_of_a_non_exhausted_live_name_is_not_taken(_gc, stage):
     from imas_codex.standard_names.graph_store.graph_audits import (
@@ -129,6 +129,37 @@ def test_source_of_a_non_exhausted_live_name_is_not_taken(_gc, stage):
         s=source,
     )
     assert edges[0]["n"] == 1
+
+
+def test_source_of_a_claimed_refining_name_is_not_taken(_gc):
+    from imas_codex.standard_names.graph_store.graph_audits import (
+        reconcile_source_status_liveness,
+    )
+
+    name = _PREFIX + "claimed_refining"
+    source = name + "_source"
+    _plant(_gc, name, "refining", source)
+    _gc.query(
+        "MATCH (n:StandardName {id:$id}) "
+        "SET n.claimed_at=datetime(), n.claim_token='refine-owner'",
+        id=name,
+    )
+    before = _gc.query(
+        "MATCH (n:StandardName {id:$id}) RETURN properties(n) AS properties", id=name
+    )
+    assert reconcile_source_status_liveness(gc=_gc)["names_retired"] == 0
+    assert (
+        _gc.query(
+            "MATCH (n:StandardName {id:$id}) RETURN properties(n) AS properties",
+            id=name,
+        )
+        == before
+    )
+    assert _gc.query(
+        "MATCH (s:StandardNameSource {id:$id})-[:PRODUCED_NAME]->(n) "
+        "RETURN s.status AS status, n.id AS name",
+        id=source,
+    ) == [{"status": "composed", "name": name}]
 
 
 def test_superseded_history_still_releases_its_source(_gc):
