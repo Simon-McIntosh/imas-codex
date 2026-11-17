@@ -2,6 +2,13 @@
   "added_failure_count": 0,
   "added_failure_ids": [],
   "completed_at": "2026-11-17T00:39:36.617Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-survey-plant-signal-meaning-sources-7361354d6274",
+      "recorded_at": "2026-11-17T01:13:51.056750+00:00"
+    }
+  },
   "dispatched_at": "2026-11-17T00:36:16Z",
   "emission": [
     "VERDICT goal: read the reviewed brief's Goal section and the landed fragment; docs/evidence/fragments/codac-uda-signals/survey-plant-signal-meaning-sources.html:1-18 states what the installed MINT suite contributes and what the operator-display definitions could contribute, matching the node goal.",
