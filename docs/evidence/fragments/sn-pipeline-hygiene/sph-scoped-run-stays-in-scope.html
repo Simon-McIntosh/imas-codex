@@ -24,6 +24,33 @@ be bounded by a scope refuses with a reason. The decision is applied at both
 seams a scoped run crosses: the CLI's own graph-wide startup writes (the
 global <code>run_id</code> clear) and the orchestrator entrance
 (<code>_run_sn_cmd</code>), which drops the passes for every caller.</p>
+<p id="sph-scoped-run-stays-in-scope-plan-reading">Read against the plan
+section: a scoped run stays in scope by default with no extra option, and an
+option combination that cannot be confined is refused at start with the
+reason. No flag is needed to obtain the scoped behaviour, and the refusals
+name the offending combination.</p>
+
+<h2 id="sph-scoped-run-stays-in-scope-edits">An edits-only run names its scope by run id&nbsp;</h2>
+<p id="sph-scoped-run-stays-in-scope-edits-binding">The edits predicate is a
+scope, but the loop accepts a maintenance bypass only for a run id, so
+<code>sn run --only review_name --edits</code> reached the loop with the bypass
+set and no run id and aborted on <code>skip_global_maintenance requires
+scope_run_id or drain_scope_id</code>. The orchestrator entrance now binds the
+pending successors before it resolves the policy:
+<code>PENDING_EDIT_SCOPE_QUERY</code> reads the <code>edit_status='open'</code>
+names that are not terminal, <code>_bind_pending_edit_scope()</code> stamps
+exactly that set with a fresh run id through the same preflight an exact-name
+run uses, and the run starts scoped with its claims selecting precisely the
+edit's names. A stale <code>edit_status</code> on a superseded or exhausted
+name is not work and is excluded rather than refusing the whole run; with
+nothing pending the command is a no-op.</p>
+<p id="sph-scoped-run-stays-in-scope-edits-recorded">Measured on the live
+graph: <code>imas-codex sn run --edits --only review_name --dry-run</code>
+prints <code>Scoped run: graph-wide maintenance is bypassed; only this scope's
+names are touched.</code> and exits 0. The guard test drives the real entrance
+into the real <code>run_sn_pools</code> — the loop is stopped only after its
+guard — and at reviewed head <code>6862a3d1a</code> the same test fails with
+that guard's <code>ValueError</code>.</p>
 
 <h2 id="sph-scoped-run-stays-in-scope-reproduction">The defect, recorded before the fix&nbsp;</h2>
 <p id="sph-scoped-run-stays-in-scope-repro-method">A throwaway driver invokes the
@@ -65,6 +92,17 @@ in-scope and an out-of-scope source, runs the statement, and reads both stamps
 back: the named pair is <code>null</code>, the other pair still reads
 <code>previous-run</code>.</p>
 
+<p id="sph-scoped-run-stays-in-scope-one-owner">The set of graph-wide
+<code>--only</code> phases has one owner,
+<code>GRAPH_WIDE_ONLY_PHASES</code> in
+<code>imas_codex/standard_names/pipeline.py</code>. Both readings use it: the
+<code>--skip-global-maintenance</code> compatibility check in the command and
+the entrance policy call, so a phase added to one cannot quietly stay outside
+the other's refusal. The entrance applies that refusal to direct callers too:
+<code>::test_orchestrator_entrance_refuses_a_graph_wide_phase_under_a_scope</code>
+passes a scope and <code>--only reconcile</code> straight to
+<code>_run_sn_cmd</code> and requires the same reason the command gives.</p>
+
 <h2 id="sph-scoped-run-stays-in-scope-disposable">A recorded run on a disposable graph&nbsp;</h2>
 <p id="sph-scoped-run-stays-in-scope-disposable-method">Two names are planted
 outside the scope, each with a <code>StandardNameSource</code> that has no
@@ -91,18 +129,29 @@ digest itself: <code>assert '19483419a9ee…' == '55196ee038af…'</code>, again
 unmodified test. The log is
 <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T084125357765-sph-scoped-run-stays-in-scope/logs/negative-control-scoped-run.log</code>
 and ends <code>EXIT=1</code>.</p>
+<p id="sph-scoped-run-stays-in-scope-negative-scope">A second declared control
+removes the entrance's pending-edit binding and runs
+<code>::test_edits_only_run_binds_its_scope_and_passes_the_loop_guard</code>:
+the test fails with the reported defect,
+<code>ValueError: skip_global_maintenance requires scope_run_id or
+drain_scope_id</code>, and ends <code>EXIT=1</code>
+(<code>logs/negative-control-edits-scope-bind.log</code>).</p>
 
 <h2 id="sph-scoped-run-stays-in-scope-review">Reviewing one edit's names&nbsp;</h2>
 <p id="sph-scoped-run-stays-in-scope-review-steps">The documented way is the
 command's own scope, in three steps:</p>
-<pre id="sph-scoped-run-stays-in-scope-review-commands"><code># 1. the names this edit would put in front of the reviewer, zero writes
-imas-codex sn run --only review_name --edits --scope-run-id &lt;edit-run-id&gt; --dry-run
+<pre id="sph-scoped-run-stays-in-scope-review-commands"><code># 1. the pending edit successors, as a scoped plan, zero writes
+imas-codex sn run --only review_name --edits --dry-run
 
-# 2. review exactly those names
-imas-codex sn run --only review_name --edits --scope-run-id &lt;edit-run-id&gt;
+# 2. review exactly those names; the entrance binds their run scope
+imas-codex sn run --only review_name --edits
 
-# 3. read the outcome back for the same run id
+# 3. read the outcome back
 imas-codex sn status</code></pre>
+<p id="sph-scoped-run-stays-in-scope-review-run-id">Adding
+<code>--scope-run-id &lt;edit-run-id&gt;</code> narrows the same run to one
+edit's stamped successors; it is optional, not a prerequisite for the scoped
+behaviour.</p>
 <p id="sph-scoped-run-stays-in-scope-review-recorded">Step 2 is recorded by
 <code>tests/standard_names/test_scoped_run_stays_in_scope.py::test_edits_scoped_review_forwards_the_bypass_without_the_flag</code>,
 which drives the command and observes the orchestrator receiving the edit's own
@@ -115,20 +164,20 @@ which calls <code>_run_sn_cmd</code> with a scope and no flag and observes
 <h2 id="sph-scoped-run-stays-in-scope-gate">The suite at head and base&nbsp;</h2>
 <p id="sph-scoped-run-stays-in-scope-gate-result">The whole
 <code>tests/standard_names</code> directory ran on the compute node
-<code>98dci4-clu-3026</code> (SLURM job 1319168), once from this worktree and
-once from a scratch extraction of base <code>3fb991aa</code>:</p>
+<code>98dci4-clu-3051</code>, once from this worktree and once from a scratch
+extraction of base <code>3fb991aa</code>:</p>
 <table>
 <thead><tr><th>arm</th><th>revision</th><th>result</th><th>failures</th></tr></thead>
 <tbody>
-<tr><td>head</td><td><code>7d64fd7d2</code></td><td>8808 passed, 11 skipped, 543 deselected (824.52 s)</td><td>0</td></tr>
-<tr><td>base</td><td><code>3fb991aa6</code></td><td>8789 passed, 12 skipped, 541 deselected (796.93 s)</td><td>0</td></tr>
+<tr><td>head</td><td><code>0aa2cb857</code></td><td>8811 passed, 11 skipped, 544 deselected (936.31 s)</td><td>0</td></tr>
+<tr><td>base</td><td><code>3fb991aa6</code></td><td>8789 passed, 12 skipped, 541 deselected (924.01 s)</td><td>0</td></tr>
 </tbody>
 </table>
 <p>Added failures: <strong>0</strong>. Logs:
 <code>logs/gate-head-standard_names.log</code> and
 <code>logs/gate-base-standard_names.log</code> under the run directory, each
 ending <code>EXIT=0</code>. The two graph-marked tests ran separately
-(<code>logs/graph-scoped-run-tests.log</code>, 2 passed, <code>EXIT=0</code>)
+(<code>logs/graph-scoped-run-tests.log</code>, 3 passed, <code>EXIT=0</code>)
 because the default markers exclude <code>graph</code>; no live graph was
 written.</p>
 </main></body>
