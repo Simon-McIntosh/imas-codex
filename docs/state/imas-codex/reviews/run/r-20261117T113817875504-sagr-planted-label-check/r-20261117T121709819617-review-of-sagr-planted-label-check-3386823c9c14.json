@@ -1,0 +1,52 @@
+{
+  "absent": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T12:18:07.841Z",
+  "dispatched_at": "2026-11-17T12:17:51Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/planted-label-check.py",
+      "line": "588",
+      "severity": "non-blocking",
+      "text": "render_page emits its framing counts as literal prose (\"15 standing defective labels and 11 standing sound labels\" at :588, \"22 defective and 16 sound\" at :603, \"7/20 ... to 1/11\" at :595, \"25.9%\" at :611) rather than deriving them from label_summary and scores, so the page-equality assertion at :760 compares the page against a render_page that carries the same literals and cannot go red when a data change leaves the prose stale; the numbers happen to be correct at this revision (verified against the committed JSON: 15/11 standing, 22/16 decidable, Wilson upper bound 25.9% for 0/11)."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no runtime module imports docs/evidence/fragments/sn-audited-group-release/planted-label-check.py and no repository search finds a reference to the new .json or .html outside the fragment itself and the pre-existing briefs/planted-label-check.md.",
+    "diff": "read commit by commit from a325c5b1f: 0b058c439 adds planted-label-check.py and a source-only JSON holding 40 packets and 40 judgments with no label or reader field, and its diff-tree touches only those two paths; 3386823c9 adds the comparison, the page and the --check, and every path in both commits is inside the declared scope.",
+    "done_when": "the done_when asks for committed judgments written before the comparison, one stands/overturned/undecidable ruling per label with its source sentence, the three readers and the two-of-three rule re-scored with counts and 95 % intervals, and a --check that passes and fails on an altered verdict; check.log ends EXIT=0 and negative-control.log ends EXIT=1 at planted-label-check.py:754.",
+    "goal": "the node's goal is to check the 40 planted audit labels by hand against their sources and re-score the three readers on the labels that stand; docs/evidence/fragments/sn-audited-group-release/planted-label-check.json carries 40 independent verdicts, 26 stands / 12 overturned / 2 undecidable with a non-empty source_sentence on all 40 rows, and Wilson recall and false_alarm re-scores for seats A, B, C and the two-of-three rule under scores.labels_that_stand.",
+    "manifest": "read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T113817875504-sagr-planted-label-check/manifest.md:23 the after_suite arm records completed true, exit_status 0 and failure_ids []; I re-ran the same --check at 3386823 and reproduced its PASS lines and EXIT=0, and the counts it prints (26/12/2; recall 9/15, 11/15, 13/15, 11/15) match the committed JSON.",
+    "write_paths": "the declared paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T113817875504-sagr-planted-label-check/prompt.txt:169 are the .py, .json and .html under docs/evidence/fragments/sn-audited-group-release/, and `git diff --stat a325c5b1f..3386823c9` names exactly those three."
+  },
+  "justifications": {
+    "durability": "reinstating the regression the control names \u2014 comparison[0].label_verdict changed from stands to overturned \u2014 reddens planted-label-check.py:754 with `Recomputed report differs: comparison` and EXIT=1, and :760 separately refuses a page that no longer matches render_page(data).",
+    "evidence": "docs/evidence/fragments/sn-audited-group-release/planted-label-check.py:739-763 asserts each element the done_when names and the recorded arms show it passing at EXIT=0 and refusing the altered label at EXIT=1.",
+    "fit": "the script follows the sibling evidence-script idiom of docs/evidence/fragments/sn-audited-group-release/blind-audit.py \u2014 a module docstring, one function per stage, assert-based gates and snake_case names \u2014 and introduces no plan-derived identifier.",
+    "goal_fidelity": "docs/evidence/fragments/sn-audited-group-release/planted-label-check.html reports every plant beside its planted label, independent judgment, source sentence and three reader verdicts, and the intervals land at a 25.9 % upper bound on 0/11, which is the deliverable the goal states.",
+    "reuse": "the statistics and the source-packet mechanics are imported from their owner (audit_module().wilson at planted-label-check.py:396, render_user_prompt, assert_blind and attach_duplicate_candidates from blind-audit.py:388-500) rather than restated, and a capability search found no owner inside the fragment tree for the JSON digest helper.",
+    "scope_discipline": "the two commits change only the three files prompt.txt:169 declares, and the blind commit's own diff-tree is refused by :297 unless it touches exactly the script and the data."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to check the 40 planted audit labels by hand against their sources and re-score the three readers on the labels that stand; docs/evidence/fragments/sn-audited-group-release/planted-label-check.json carries 40 independent verdicts, 26 stands / 12 overturned / 2 undecidable with a non-empty source_sentence on all 40 rows, and Wilson recall and false_alarm re-scores for seats A, B, C and the two-of-three rule under scores.labels_that_stand.\nVERDICT done_when: the done_when asks for committed judgments written before the quote-unseen comparison, one stands/overturned/undecidable ruling per label with its source sentence, the three readers and the two-of-three rule re-scored with counts and 95 % intervals, and a --check that passes and fails on an altered verdict; check.log ends EXIT=0 and negative-control.log ends EXIT=1 at planted-label-check.py:754.\nVERDICT write_paths: the declared paths at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T113817875504-sagr-planted-label-check/prompt.txt:169 are the .py, .json and .html under docs/evidence/fragments/sn-audited-group-release/, and git diff --stat a325c5b1f..3386823c9 names exactly those three.\nVERDICT manifest: read at /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T113817875504-sagr-planted-label-check/manifest.md:22 the after_suite arm records completed true, exit_status 0 and failure_ids []; I re-ran the same --check at 3386823 and reproduced its PASS lines and EXIT=0, and the counts it prints (26/12/2; recall 9/15, 11/15, 13/15, 11/15) match the committed JSON.\nVERDICT diff: read commit by commit from a325c5b1f: 0b058c439 adds planted-label-check.py and a source-only JSON holding 40 packets and 40 judgments with no label or reader field, and its diff-tree touches only those two paths; 3386823c9 adds the comparison, the page and the --check, and every path in both commits is inside the declared scope.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-audited-group-release/planted-label-check.html reports every plant beside its planted label, independent judgment, source sentence and three reader verdicts, which is the deliverable the goal states.\nSCORE evidence: 18\nJUSTIFICATION evidence: docs/evidence/fragments/sn-audited-group-release/planted-label-check.py:739-763 asserts each element the done_when names and the recorded arms show it passing at EXIT=0 and refusing the altered label at EXIT=1.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: the two commits change only the three files prompt.txt:169 declares.\nSCORE durability: 18\nJUSTIFICATION durability: reinstating the regression the control names reddens planted-label-check.py:754 with `Recomputed report differs: comparison` and EXIT=1, and :760 separately refuses a page that no longer matches render_page(data).\nSCORE fit: 20\nJUSTIFICATION fit: the script follows the sibling idiom of docs/evidence/fragments/sn-audited-group-release/blind-audit.py \u2014 module docstring, one function per stage, assert-based gates \u2014 and introduces no plan-derived identifier.\nSCORE reuse: 18\nJUSTIFICATION reuse: audit_module().wilson at planted-label-check.py:396 and the render_user_prompt, assert_blind and attach_duplicate_candidates helpers at blind-audit.py:388-500 are imported from their owner rather than restated.\nFINDING docs/evidence/fragments/sn-audited-group-release/planted-label-check.py:588 non-blocking: render_page emits its framing counts as literal prose (\"15 standing defective labels and 11 standing sound labels\" at :588, \"22 defective and 16 sound\" at :603, \"7/20 ... to 1/11\" at :595, \"25.9%\" at :611) rather than deriving them from label_summary and scores, so the page-equality assertion at :760 compares the page against a render_page carrying the same literals and cannot go red when a data change leaves the prose stale.",
+  "review_run_id": "r-20261117T121709819617-review-of-sagr-planted-label-check-3386823c9c14",
+  "reviewed_base_sha": "a325c5b1f0dbb7f76b9da7c95e1c901d57d900d2",
+  "reviewed_head_sha": "3386823c9c1425d89908ffa6d86ada5efef21bec",
+  "reviewed_run_id": "r-20261117T113817875504-sagr-planted-label-check",
+  "rubric": "",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 20,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:42:00Z",
+  "total": 112
+}
