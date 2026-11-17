@@ -1,0 +1,83 @@
+<section id="signal-accessor-skill-evidence">
+  <h3>Shell access from a test description to signal arrays</h3>
+  <p>The project skill <code>.claude/skills/archive-signals/SKILL.md</code>
+    documents paged category, pulse and exact-name lookups through
+    <code>imas_codex.remote.archive_access</code>, followed by bounded reads
+    through the existing <code>ArchiveSignalLoader</code> or
+    <code>ArchiveReader</code>. It adds no archive client or plotting path.
+    A named native selector absent from the imported graph can be read exactly
+    as requested: the pulse archive supplies a role, private configuration
+    validates that role and its exclusions, and the shared reader supplies the
+    arrays, unit and sampling evidence.</p>
+  <table>
+    <thead><tr><th>Measure</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Fresh worker input</td><td>The skill and one private one-line
+        request, with operational write constraints; no implementation briefing
+        or prior measurement receipts.</td></tr>
+      <tr><td>Discovery</td><td>7 matching categories and 34 distinct pulses;
+        category counts 10, 7, 6, 4, 1, 1 and 5. All pages completed.</td></tr>
+      <tr><td>Exact variable resolution</td><td>0 graph identities for the named
+        native selector; the documented direct reader retained that exact
+        selector without substitution.</td></tr>
+      <tr><td>Loaded arrays</td><td>27, 47 and 15 samples across 3 distinct
+        pulses, 89 samples total; each window spans 10 seconds at the pulse
+        midpoint. Every array reports unit A and time base
+        <code>epoch_ns</code>; timestamps are <code>uint64</code>, values
+        <code>float64</code>.</td></tr>
+      <tr><td>Sampling</td><td><code>raw</code>,
+        <code>explicit_raw_request</code>, <code>archived_samples</code>;
+        decimation remains unknown. No interpolation or resampling.</td></tr>
+      <tr><td>Saved-array verification</td><td>All 3 NPZ files reopened with
+        matching counts and shapes, monotonic timestamps inside the requested
+        bounds, exact selector preservation and archive-provided units.</td></tr>
+      <tr><td>Focused gate</td><td>54 passed, 1 warning in 5.43 s; exit 0.</td></tr>
+      <tr><td>Declared mutation</td><td>6 failed, 2 warnings in 1.69 s; exit 1.
+        Inventing missing bounds, disabling the window ceiling and replacing a
+        zero category count by one each breaks the corresponding tests.</td></tr>
+      <tr><td>Live query syntax</td><td>All 6 distinct metadata query shapes
+        and the archive-role lookup pass EXPLAIN. A populated category control
+        succeeds beside an explicit empty result for an invented designation.</td></tr>
+    </tbody>
+  </table>
+  <h4 id="signal-accessor-skill-negative-result">Preserved negative result</h4>
+  <p>The first independent request resolved one category, 16 pulses and one
+    graph signal, but all 18 raw windows over six distinct pulses returned zero
+    samples and no usable unit. That is retained as a failed data measurement,
+    not an archive-wide absence. A separate two-second window around a
+    previously observed sample returned 3 samples with unit A through the same
+    reader. Its exact native selector had no graph identity, which exposed the
+    missing native-selector instructions. Those instructions were added before
+    the second fresh worker evaluated the skill.</p>
+  <p>The successful worker's first two-second pulse-start window was also
+    empty and failed explicitly. It followed the skill's bounded-window
+    guidance to choose ten-second midpoint windows, which returned all three
+    populated arrays. It needed no additional archive API, endpoint discovery,
+    dependency or connection setup. Beyond the skill it checked environment and
+    placement, read the repository's graph guardrails and verified saved arrays.</p>
+  <p>The unchanged reader already refused missing bounds with
+    <code>resolved absolute or relative pulse bounds are required</code> and
+    excessive bounds with
+    <code>requested window and lookback exceed configured bound</code>.
+    Both controls made zero native fetches. Tests were added around these
+    existing guards; the reader's source blob is identical to the base.</p>
+  <h4 id="signal-accessor-skill-commands">Live execution commands</h4>
+  <p>All live discovery and sample reads in the successful forward evaluation
+    ran on separate <code>rigel</code> jobs. The middle command is the retained
+    empty-window failure; the last is the populated-array pass.</p>
+  <pre><code>env -u SLURM_JOB_ID -u SLURM_JOBID sbatch --partition=rigel --time=00:10:00 --cpus-per-task=1 --mem=4G --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050133242863-signal-accessor-skill/native-forward-evaluation/discover.log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050133242863-signal-accessor-skill/native-forward-evaluation/discover.sh
+env -u SLURM_JOB_ID -u SLURM_JOBID sbatch --partition=rigel --time=00:15:00 --cpus-per-task=1 --mem=4G --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050133242863-signal-accessor-skill/native-forward-evaluation/load.log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050133242863-signal-accessor-skill/native-forward-evaluation/load.sh
+env -u SLURM_JOB_ID -u SLURM_JOBID sbatch --partition=rigel --time=00:15:00 --cpus-per-task=1 --mem=4G --output=/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050133242863-signal-accessor-skill/native-forward-evaluation/retry.log /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T050133242863-signal-accessor-skill/native-forward-evaluation/retry.sh</code></pre>
+  <p>The private run directory retains both forward reports, exact command
+    records, scripts, full logs, request selections, sampling receipts, response
+    caches and arrays. The successful report is
+    <code>native-forward-evaluation/result.md</code>; the initial negative
+    report is <code>forward-evaluation/result.md</code>. Head and mutation logs
+    are <code>unit-head.log</code> and <code>negative-control.log</code>.
+    <code>array-verification.json</code> independently reconciles the saved
+    arrays with their receipts, and <code>source-provenance.json</code> records
+    the imported source paths and unchanged reader blob. Actual archive
+    identities and source descriptions stay in these private receipts.</p>
+  <p>Coordinator review, promotion and verification at the merged head remain
+    separate from this worker's bounded measure.</p>
+</section>
