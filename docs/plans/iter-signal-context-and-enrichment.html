@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="49">
+<meta name="plan-version" content="50">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -156,6 +156,9 @@
 </div>
 <div class="r-comment" data-section="s10" data-id="c-run-r-20261117T044501446319-review-of-grouping-rerun-on-full-catalogue-9028b605936a" data-who="reckon-build" data-when="2026-11-17T04:46:03.009Z">
     <div class="r-comment-body"><p>Independent review of r-20261116T044838773093-grouping-rerun-on-full-catalogue over the two commits it gained since the prior review (base 84f70b6ad54ee7bb32eaba4f6660355c8d8c494c, head 9028b605936a0de08aa4da458116f741ccb3c7ca: merge 10c852d6a whose contribution over main is the fragment alone, plus the one-paragraph credential-free-gate addition at the fragment's line 124): scores goal_fidelity 18, evidence 15, scope_discipline 20, durability 8, fit 18, reuse 20 (total 99), added_failure_count 0, two non-blocking findings (the gate-coverage claim at fragment line 124 overstates what verify_evidence.py asserts, and the artifact list at line 125 omits the two merged-head logs); status parsed, stored at both declared review-records paths and verified by crew check --review.</p></div>
+</div>
+<div class="r-comment" data-section="s10" data-id="c-run-r-20261116T044838773093-grouping-rerun-on-full-catalogue" data-who="reckon-build" data-when="2026-11-17T00:14:51Z">
+    <div class="r-comment-body"><p>Re-ran the section-5 grouping against the completed private catalogue (metadata 995,006 of 995,006 variables, integrity ok) on all_debug job 1321277: 100% of the archive listed and 100% of its metadata present versus the partial run&#x27;s 64.4484%; 995,006 variables, 949,351 grouped and 45,655 ungrouped (457,619 component, 491,732 function-level, 45,655 nonconforming); 27,253 component groups, 1,777 control-node groups, 1,802 exact and 413 category-only patterns, every count identical to the partial run&#x27;s; group-size distribution identical, single-member groups 3,338 component and 46 control-node (0.340098% of variables); 97.8886% of component variables in a shared exact pattern and 99.7972% under the category key; descriptions enrichment would need 30,832 under the exact key (27,253 component + 1,777 control-node + 1,802 pattern) or 29,443 under the category key; retired the 96 ArchiveFieldPattern nodes no component referenced, leaving 0 unreferenced component or pattern nodes and 284 referenced pattern nodes; the repeat adds zero groups; the changed-field-set control leaves 1 unreferenced pattern with retirement off (EXIT=1) and 0 with it on (EXIT=0).</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261115T140107906869-review-of-model-seats-name-latest-versions-5e95c4c21cc3" data-who="reckon-build" data-when="2026-11-15T14:04:30.419Z">
     <div class="r-comment-body"><p>Reviewed r-20261115T104944405793-model-seats-name-latest-versions at head 5e95c4c21cc315318d4a9f142436a90a0edfa6a8 against base d588fa703e76e54d4e39af1b742c31764b21dee7: goal_fidelity 16, evidence 15, scope_discipline 15, durability 13, fit 15, reuse 17, 6 non-blocking findings, added_failure_count 0, status parsed; the record is stored under the reviewed run's review-records/ as r-20261115T104944405793-model-seats-name-latest-versions.json and its head-keyed copy.</p></div>
