@@ -29,7 +29,14 @@ PRIOR_PROGRESS = SCRATCH / "held-names-progress.jsonl"
 PROGRESS = SCRATCH / "equivalent-electron-progress.jsonl"
 JSON_OUTPUT = HERE / "equivalent-electron-renames.json"
 HTML_OUTPUT = HERE / "equivalent-electron-renames.html"
-SPEND_CEILING = 8.0
+SPEND_CEILING = 12.0
+#: The live population without a producing source the catalogue is allowed to
+#: carry while this pass runs. A pipeline command that moves it has written
+#: outside its scope, and the pass stops instead of adding to it.
+SOURCE_BASELINE = 10
+#: A review rotation can overshoot its cap, so a per-edit ceiling well inside
+#: what the section has left keeps one slow rename from eating the rest.
+EDIT_COST_LIMIT = 0.25
 PROBE_AVERAGE_CEILING = 0.20
 
 READ_COST = """
@@ -146,7 +153,9 @@ def read_rescore_ledger(path: Path | None) -> dict[str, list[str]]:
     ledger = json.loads(path.read_text())
     if not isinstance(ledger, dict):
         raise ValueError(f"{path}: expected a name -> scope-id list map")
-    return {str(name): [str(scope) for scope in scopes] for name, scopes in ledger.items()}
+    return {
+        str(name): [str(scope) for scope in scopes] for name, scopes in ledger.items()
+    }
 
 
 def progress_by_name(
@@ -386,9 +395,7 @@ def dictionary_context(
                 raise ValueError(f"{derived_receipt}: no parent recorded")
             children = [
                 row["id"]
-                for row in (
-                    graph.query(READ_DERIVED_CHILDREN, parent=parent) or []
-                )
+                for row in (graph.query(READ_DERIVED_CHILDREN, parent=parent) or [])
             ]
             child_rows = graph.query(READ_BATCH_IDENTITIES, ids=children) or []
             child_by_id = {row["requested_id"]: row for row in child_rows}
@@ -503,6 +510,90 @@ def assert_writer_free(
             raise RuntimeError(f"graph writer process is active: {line.strip()}")
 
 
+class CommandResult:
+    """The exit status the outcome mapping reads from the last step that ran."""
+
+    def __init__(self, returncode: int) -> None:
+        self.returncode = returncode
+
+
+def live_sourceless_count() -> int:
+    with GraphClient() as graph:
+        return int(count_live_names_without_source(graph)["count"])
+
+
+def rename_and_review_name(
+    old_id: str, target: str, reason: str, cost_limit: float
+) -> CommandResult:
+    """Stage the rename, then review only the name axis over its own run.
+
+    ``sn edit`` reviews both axes inline, which spends a docs rotation on a
+    rename whose only judgement here is about the name. Staging the rename and
+    then running the name-axis review over its scoped run keeps the same signed
+    path and the same review gate, and stops after the axis this pass must
+    settle. Both commands are scoped, so neither writes whole-graph maintenance;
+    the population without a source is read around each of them so a write
+    outside that scope stops the pass instead of being attributed to the rename.
+    """
+    before = live_sourceless_count()
+    if before != SOURCE_BASELINE:
+        raise RuntimeError(
+            f"population without a source is {before}, not {SOURCE_BASELINE}"
+        )
+    staged = subprocess.run(
+        [
+            "imas-codex",
+            "sn",
+            "edit",
+            old_id,
+            "--rename",
+            target,
+            "--reason",
+            reason,
+            "--scope",
+            "self",
+            "--stage-only",
+        ],
+        check=False,
+    )
+    if staged.returncode != 0:
+        return CommandResult(staged.returncode)
+    after_stage = live_sourceless_count()
+    if after_stage != before:
+        raise RuntimeError(
+            f"staging {old_id} moved the population without a source "
+            f"from {before} to {after_stage}"
+        )
+
+    with GraphClient() as graph:
+        scope = (live_rows(graph, [target]).get(target) or {}).get("run_id")
+    if not scope:
+        raise ValueError(f"{target}: the staged rename records no run scope")
+
+    reviewed = subprocess.run(
+        [
+            "imas-codex",
+            "sn",
+            "run",
+            "--only",
+            "review_name",
+            "--edits",
+            "--scope-run-id",
+            scope,
+            "--cost-limit",
+            f"{cost_limit:.6f}",
+        ],
+        check=False,
+    )
+    after_review = live_sourceless_count()
+    if after_review != before:
+        raise RuntimeError(
+            f"reviewing {target} moved the population without a source "
+            f"from {before} to {after_review}"
+        )
+    return CommandResult(reviewed.returncode)
+
+
 def event_snapshot(
     name: str,
     row: dict[str, Any],
@@ -539,7 +630,9 @@ def run_batch(args: argparse.Namespace) -> int:
         ]
         unknown = sorted(set(wanted) - {row["name"] for row in candidates})
         if unknown:
-            raise ValueError("names outside the pending population: " + ", ".join(unknown))
+            raise ValueError(
+                "names outside the pending population: " + ", ".join(unknown)
+            )
         order = {name: index for index, name in enumerate(wanted)}
         candidates = sorted(
             (row for row in candidates if row["name"] in order),
@@ -679,22 +772,8 @@ def run_batch(args: argparse.Namespace) -> int:
             remaining = SPEND_CEILING - total_spend
             if remaining < 0.01:
                 raise RuntimeError(f"spend ceiling reached: USD {total_spend:.6f}")
-            cost_limit = min(1.0, remaining)
-            command = [
-                "imas-codex",
-                "sn",
-                "edit",
-                old_id,
-                "--rename",
-                target,
-                "--reason",
-                reason,
-                "--scope",
-                "self",
-                "--cost-limit",
-                f"{cost_limit:.6f}",
-            ]
-            result = subprocess.run(command, check=False)
+            cost_limit = min(EDIT_COST_LIMIT, remaining)
+            result = rename_and_review_name(old_id, target, reason, cost_limit)
 
             with GraphClient() as graph:
                 states_after = live_rows(graph, [old_id, target])
@@ -735,9 +814,9 @@ def run_batch(args: argparse.Namespace) -> int:
             if result.returncode == 2:
                 outcome = "refused_drift"
             elif result.returncode not in (0, 3):
-                outcome = "review_error"
-            elif result.returncode == 3:
-                outcome = "review_not_accepted"
+                outcome = (
+                    "review_not_accepted" if result.returncode == 3 else "review_error"
+                )
 
             cost = (
                 read_cost_receipt(scope_id, live_id)
@@ -792,8 +871,11 @@ def run_batch(args: argparse.Namespace) -> int:
                 return 2
             if outcome == "source_binding_mismatch":
                 return 2
-            if sourceless > 10:
-                print(f"stop: live names without a source rose to {sourceless}")
+            if sourceless != SOURCE_BASELINE:
+                print(
+                    "stop: live names without a source moved from "
+                    f"{SOURCE_BASELINE} to {sourceless}"
+                )
                 return 2
             if total_spend > SPEND_CEILING:
                 print(f"stop: spend reached USD {total_spend:.6f}")

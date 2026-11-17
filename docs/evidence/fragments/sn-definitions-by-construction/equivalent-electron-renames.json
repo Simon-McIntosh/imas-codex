@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-17T08:18:33.981858+00:00",
+  "generated_at_utc": "2026-11-17T14:30:21.786891+00:00",
   "names": [
     {
       "after": {
@@ -1836,10 +1836,10 @@
     {
       "after": {
         "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.917206798522601,
         "source_bindings": [
           "dd:summary/gas_injection_rates/beryllium/value"
         ],
@@ -1847,21 +1847,32 @@
       },
       "basis": "",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "92ebde03-4ddc-4669-9c60-01f9c360ae32",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T133754Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "beryllium_source_rate_due_to_gas_injection"
+        "id": "beryllium_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
+        "id": "beryllium_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.917206798522601
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/beryllium/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
         "id": "beryllium_source_rate_due_to_gas_injection",
@@ -1874,13 +1885,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous equivalent-electron source rate of beryllium atoms introduced by gas injection, with four equivalent electrons assigned to each atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.917206798522601,
         "source_bindings": [
           "dd:summary/gas_injection_rates/beryllium/value"
         ],
@@ -1890,10 +1901,10 @@
     {
       "after": {
         "description": "Cumulative equivalent-electron inventory introduced as carbon gas during plasma prefill, with six count units assigned to each injected carbon atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.89375,
-        "score_name": 0.8875,
+        "score_docs": null,
+        "score_name": 0.9128628973418769,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/carbon/value"
         ],
@@ -1901,21 +1912,32 @@
       },
       "basis": "Cumulative equivalent-electron inventory introduced as carbon gas ... with six count units assigned to each injected car",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "7fb4bd78-612e-4b9c-964a-a665d34d947d",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T133958Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "carbon_prefill_count_due_to_gas_injection"
+        "id": "carbon_prefill_equivalent_electron_count_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Cumulative equivalent-electron inventory introduced as carbon gas during plasma prefill, with six count units assigned to each injected carbon atom.",
+        "id": "carbon_prefill_equivalent_electron_count_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9128628973418769
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/carbon/value"
+        ],
+        "unit": "1"
+      },
       "old_identity": {
         "description": "Cumulative equivalent-electron inventory introduced as carbon gas during plasma prefill, with six count units assigned to each injected carbon atom.",
         "id": "carbon_prefill_count_due_to_gas_injection",
@@ -1928,13 +1950,13 @@
         ],
         "unit": "1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Cumulative equivalent-electron inventory introduced as carbon gas during plasma prefill, with six count units assigned to each injected carbon atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.89375,
-        "score_name": 0.8875,
+        "score_docs": null,
+        "score_name": 0.9128628973418769,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/carbon/value"
         ],
@@ -1944,10 +1966,10 @@
     {
       "after": {
         "description": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each injected carbon atom contributing six equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 0.875,
+        "score_docs": null,
+        "score_name": 0.9145001781034219,
         "source_bindings": [
           "dd:summary/gas_injection_rates/carbon/value"
         ],
@@ -1955,21 +1977,32 @@
       },
       "basis": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each ",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "7e34f832-073c-4a2b-92e8-31ea75884c59",
+        "spend_usd": 0.000145
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T134106Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "carbon_source_rate_due_to_gas_injection"
+        "id": "carbon_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each injected carbon atom contributing six equivalent-electron counts.",
+        "id": "carbon_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9145001781034219
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/carbon/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each injected carbon atom contributing six equivalent-electron counts.",
         "id": "carbon_source_rate_due_to_gas_injection",
@@ -1982,13 +2015,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous equivalent-electron carbon source rate delivered to the plasma vessel by gas injection systems, with each injected carbon atom contributing six equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 0.875,
+        "score_docs": null,
+        "score_name": 0.9145001781034219,
         "source_bindings": [
           "dd:summary/gas_injection_rates/carbon/value"
         ],
@@ -1998,10 +2031,10 @@
     {
       "after": {
         "description": "Instantaneous injection rate of deuterated methane (CD4), counted as equivalent electrons rather than molecules.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.91875,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9350387417754661,
         "source_bindings": [
           "dd:summary/gas_injection_rates/methane_deuterated/value"
         ],
@@ -2009,21 +2042,32 @@
       },
       "basis": "",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "20a0e76f-7033-4d1f-a8f0-bde052290fc4",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T134212Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "deuterated_methane_source_rate"
+        "id": "deuterated_methane_equivalent_electron_source_rate"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous injection rate of deuterated methane (CD4), counted as equivalent electrons rather than molecules.",
+        "id": "deuterated_methane_equivalent_electron_source_rate",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9350387417754661
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/methane_deuterated/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous injection rate of deuterated methane (CD4), counted as equivalent electrons rather than molecules.",
         "id": "deuterated_methane_source_rate",
@@ -2036,13 +2080,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous injection rate of deuterated methane (CD4), counted as equivalent electrons rather than molecules.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.91875,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9350387417754661,
         "source_bindings": [
           "dd:summary/gas_injection_rates/methane_deuterated/value"
         ],
@@ -2052,10 +2096,10 @@
     {
       "after": {
         "description": "Rate at which particles represented as equivalent electrons are removed from the plasma region by wall pumping, giving global electron-equivalent exhaust throughput.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 1.0,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9027789663723608,
         "source_bindings": [
           "dd:wall/global_quantities/electrons/pumping_speed"
         ],
@@ -2063,21 +2107,32 @@
       },
       "basis": "",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "581ebd12-ac54-4041-becc-a2afeef89de9",
+        "spend_usd": 0.000145
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T134318Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "electron_particle_flux_at_wall_due_to_pumping"
+        "id": "particle_equivalent_electron_flux_at_wall_due_to_pumping"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Rate at which particles represented as equivalent electrons are removed from the plasma region by wall pumping, giving global electron-equivalent exhaust throughput.",
+        "id": "particle_equivalent_electron_flux_at_wall_due_to_pumping",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9027789663723608
+        },
+        "source_bindings": [
+          "dd:wall/global_quantities/electrons/pumping_speed"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Rate at which particles represented as equivalent electrons are removed from the plasma region by wall pumping, giving global electron-equivalent exhaust throughput.",
         "id": "electron_particle_flux_at_wall_due_to_pumping",
@@ -2090,13 +2145,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Rate at which particles represented as equivalent electrons are removed from the plasma region by wall pumping, giving global electron-equivalent exhaust throughput.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 1.0,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9027789663723608,
         "source_bindings": [
           "dd:wall/global_quantities/electrons/pumping_speed"
         ],
@@ -2106,10 +2161,10 @@
     {
       "after": {
         "description": "Ethane prefill count is the total amount of neutral ethane (C2H6) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9750000000000001,
-        "score_name": 0.975,
+        "score_docs": null,
+        "score_name": 0.9399575474989279,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/ethane/value"
         ],
@@ -2117,21 +2172,32 @@
       },
       "basis": "the total amount of neutral ethane introduced before plasma breakdown, expressed as an equivalent-electron count with 18",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "51d5f6af-9233-4622-9c94-ec298a508ce0",
+        "spend_usd": 0.000147
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T134424Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "ethane_prefill_count"
+        "id": "ethane_prefill_equivalent_electron_count"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Ethane prefill count is the total amount of neutral ethane (C2H6) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per molecule.",
+        "id": "ethane_prefill_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9399575474989279
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ethane/value"
+        ],
+        "unit": "1"
+      },
       "old_identity": {
         "description": "Ethane prefill count is the total amount of neutral ethane (C2H6) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per molecule.",
         "id": "ethane_prefill_count",
@@ -2144,13 +2210,13 @@
         ],
         "unit": "1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Ethane prefill count is the total amount of neutral ethane (C2H6) introduced before plasma breakdown, expressed as an equivalent-electron count with 18 equivalent electrons per molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9750000000000001,
-        "score_name": 0.975,
+        "score_docs": null,
+        "score_name": 0.9399575474989279,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/ethane/value"
         ],
@@ -2160,10 +2226,10 @@
     {
       "after": {
         "description": "Instantaneous ethane-gas injection rate into the plasma vessel, expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.925,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9299803178403435,
         "source_bindings": [
           "dd:summary/gas_injection_rates/ethane/value"
         ],
@@ -2171,21 +2237,32 @@
       },
       "basis": "expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "c08edff6-be21-4994-b71f-c728d41a0160",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T134530Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "ethane_source_rate"
+        "id": "ethane_equivalent_electron_source_rate"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous ethane-gas injection rate into the plasma vessel, expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule.",
+        "id": "ethane_equivalent_electron_source_rate",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9299803178403435
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ethane/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous ethane-gas injection rate into the plasma vessel, expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule.",
         "id": "ethane_source_rate",
@@ -2198,13 +2275,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous ethane-gas injection rate into the plasma vessel, expressed as equivalent electrons per second, with 18 equivalent electrons assigned to each neutral C2H6 molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.925,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9299803178403435,
         "source_bindings": [
           "dd:summary/gas_injection_rates/ethane/value"
         ],
@@ -2214,10 +2291,10 @@
     {
       "after": {
         "description": "Ethylene prefill count is the total amount of neutral ethylene (C2H4) introduced before plasma breakdown, expressed as an equivalent-electron count with 16 equivalent electrons per molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9625,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9385775066593812,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/ethylene/value"
         ],
@@ -2225,21 +2302,32 @@
       },
       "basis": "expressed as an equivalent-electron count. Each neutral ethylene molecule contributes sixteen equivalent electrons",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "b43d0dc1-ece4-4b52-ac83-d981d0ac4c1f",
+        "spend_usd": 0.000147
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T134637Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "ethylene_prefill_count"
+        "id": "ethylene_prefill_equivalent_electron_count"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Ethylene prefill count is the total amount of neutral ethylene (C2H4) introduced before plasma breakdown, expressed as an equivalent-electron count with 16 equivalent electrons per molecule.",
+        "id": "ethylene_prefill_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9385775066593812
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/ethylene/value"
+        ],
+        "unit": "1"
+      },
       "old_identity": {
         "description": "Ethylene prefill count is the total amount of neutral ethylene (C2H4) introduced before plasma breakdown, expressed as an equivalent-electron count with 16 equivalent electrons per molecule.",
         "id": "ethylene_prefill_count",
@@ -2252,13 +2340,13 @@
         ],
         "unit": "1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Ethylene prefill count is the total amount of neutral ethylene (C2H4) introduced before plasma breakdown, expressed as an equivalent-electron count with 16 equivalent electrons per molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9625,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9385775066593812,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/ethylene/value"
         ],
@@ -2268,10 +2356,10 @@
     {
       "after": {
         "description": "Instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel, expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9280350042008845,
         "source_bindings": [
           "dd:summary/gas_injection_rates/ethylene/value"
         ],
@@ -2279,21 +2367,32 @@
       },
       "basis": "each molecule is assigned 16 equivalent electrons",
       "cost": {
-        "calls": 0,
+        "calls": 3,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "04271d38-5d8b-4dab-8ba1-75f6f5421503",
+        "spend_usd": 0.090277
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T134744Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "ethylene_source_rate"
+        "id": "ethylene_equivalent_electron_source_rate"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel, expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons.",
+        "id": "ethylene_equivalent_electron_source_rate",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9280350042008845
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/ethylene/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel, expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons.",
         "id": "ethylene_source_rate",
@@ -2306,13 +2405,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous injection rate of ethylene (C2H4) gas into the plasma vessel, expressed as equivalent electrons per second with each molecule counted as 16 equivalent electrons.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9280350042008845,
         "source_bindings": [
           "dd:summary/gas_injection_rates/ethylene/value"
         ],
@@ -2322,10 +2421,10 @@
     {
       "after": {
         "description": "Instantaneous equivalent-electron helium-3 source rate delivered to the plasma vessel by gas injection systems, where each injected helium-3 atom contributes two equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 1.0,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.8956175261268257,
         "source_bindings": [
           "dd:summary/gas_injection_rates/helium_3/value"
         ],
@@ -2333,21 +2432,32 @@
       },
       "basis": "expressed as an equivalent-electron count rate. Each helium-3 atom contributes two equivalent-electron counts",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "22b18e8a-1531-4806-926f-ad07196eae5d",
+        "spend_usd": 0.000148
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T135030Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "helium_3_source_rate_due_to_gas_injection"
+        "id": "helium_3_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous equivalent-electron helium-3 source rate delivered to the plasma vessel by gas injection systems, where each injected helium-3 atom contributes two equivalent-electron counts.",
+        "id": "helium_3_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.8956175261268257
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/helium_3/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous equivalent-electron helium-3 source rate delivered to the plasma vessel by gas injection systems, where each injected helium-3 atom contributes two equivalent-electron counts.",
         "id": "helium_3_source_rate_due_to_gas_injection",
@@ -2360,13 +2470,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous equivalent-electron helium-3 source rate delivered to the plasma vessel by gas injection systems, where each injected helium-3 atom contributes two equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 1.0,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.8956175261268257,
         "source_bindings": [
           "dd:summary/gas_injection_rates/helium_3/value"
         ],
@@ -2376,10 +2486,10 @@
     {
       "after": {
         "description": "Instantaneous equivalent-electron source rate of helium-4 delivered to the plasma vessel by gas injection, with each helium-4 atom contributing two equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.94375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9122631242567958,
         "source_bindings": [
           "dd:summary/gas_injection_rates/helium_4/value"
         ],
@@ -2387,21 +2497,32 @@
       },
       "basis": "Each helium-4 atom contributes two counts because helium has atomic number 2",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "fe7ab4c3-440a-4a23-9a25-f5d3fb4f6554",
+        "spend_usd": 0.000148
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T135138Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "helium_4_source_rate_due_to_gas_injection"
+        "id": "helium_4_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous equivalent-electron source rate of helium-4 delivered to the plasma vessel by gas injection, with each helium-4 atom contributing two equivalent-electron counts.",
+        "id": "helium_4_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9122631242567958
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/helium_4/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous equivalent-electron source rate of helium-4 delivered to the plasma vessel by gas injection, with each helium-4 atom contributing two equivalent-electron counts.",
         "id": "helium_4_source_rate_due_to_gas_injection",
@@ -2414,13 +2535,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous equivalent-electron source rate of helium-4 delivered to the plasma vessel by gas injection, with each helium-4 atom contributing two equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.94375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9122631242567958,
         "source_bindings": [
           "dd:summary/gas_injection_rates/helium_4/value"
         ],
@@ -2430,10 +2551,10 @@
     {
       "after": {
         "description": "Krypton prefill count is the total amount of neutral krypton introduced before plasma breakdown, expressed as an equivalent-electron count with 36 count units per atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.923407880527803,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/krypton/value"
         ],
@@ -2441,21 +2562,32 @@
       },
       "basis": "expressed as an equivalent-electron count ... 36 count units per atom",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "3753153e-cf40-4192-986f-c0810cd9f48b",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T135244Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "krypton_prefill_count"
+        "id": "krypton_prefill_equivalent_electron_count"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Krypton prefill count is the total amount of neutral krypton introduced before plasma breakdown, expressed as an equivalent-electron count with 36 count units per atom.",
+        "id": "krypton_prefill_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.923407880527803
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/krypton/value"
+        ],
+        "unit": "1"
+      },
       "old_identity": {
         "description": "Krypton prefill count is the total amount of neutral krypton introduced before plasma breakdown, expressed as an equivalent-electron count with 36 count units per atom.",
         "id": "krypton_prefill_count",
@@ -2468,13 +2600,13 @@
         ],
         "unit": "1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Krypton prefill count is the total amount of neutral krypton introduced before plasma breakdown, expressed as an equivalent-electron count with 36 count units per atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.923407880527803,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/krypton/value"
         ],
@@ -2484,10 +2616,10 @@
     {
       "after": {
         "description": "Instantaneous equivalent-electron krypton source rate delivered to the plasma vessel by gas injection systems, where each injected krypton atom with Z = 36 contributes 36 equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 1.0,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.924376282561006,
         "source_bindings": [
           "dd:summary/gas_injection_rates/krypton/value"
         ],
@@ -2495,21 +2627,32 @@
       },
       "basis": "expressed as an equivalent-electron count rate",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "3523f709-5715-4f30-9bbc-41da76b3fd93",
+        "spend_usd": 0.000147
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T135354Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "krypton_source_rate_due_to_gas_injection"
+        "id": "krypton_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous equivalent-electron krypton source rate delivered to the plasma vessel by gas injection systems, where each injected krypton atom with Z = 36 contributes 36 equivalent-electron counts.",
+        "id": "krypton_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.924376282561006
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/krypton/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous equivalent-electron krypton source rate delivered to the plasma vessel by gas injection systems, where each injected krypton atom with Z = 36 contributes 36 equivalent-electron counts.",
         "id": "krypton_source_rate_due_to_gas_injection",
@@ -2522,13 +2665,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous equivalent-electron krypton source rate delivered to the plasma vessel by gas injection systems, where each injected krypton atom with Z = 36 contributes 36 equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 1.0,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.924376282561006,
         "source_bindings": [
           "dd:summary/gas_injection_rates/krypton/value"
         ],
@@ -2538,10 +2681,10 @@
     {
       "after": {
         "description": "Instantaneous equivalent-electron lithium source rate delivered to the plasma vessel by gas injection systems, with each injected lithium atom contributing three equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.95625,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9143108447849241,
         "source_bindings": [
           "dd:summary/gas_injection_rates/lithium/value"
         ],
@@ -2549,21 +2692,32 @@
       },
       "basis": "each injected lithium atom contributing three equivalent-electron counts",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "26fa7f6f-0e15-4645-8588-4e513a5d9548",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T135501Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "lithium_source_rate_due_to_gas_injection"
+        "id": "lithium_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous equivalent-electron lithium source rate delivered to the plasma vessel by gas injection systems, with each injected lithium atom contributing three equivalent-electron counts.",
+        "id": "lithium_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9143108447849241
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/lithium/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous equivalent-electron lithium source rate delivered to the plasma vessel by gas injection systems, with each injected lithium atom contributing three equivalent-electron counts.",
         "id": "lithium_source_rate_due_to_gas_injection",
@@ -2576,13 +2730,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous equivalent-electron lithium source rate delivered to the plasma vessel by gas injection systems, with each injected lithium atom contributing three equivalent-electron counts.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.95625,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9143108447849241,
         "source_bindings": [
           "dd:summary/gas_injection_rates/lithium/value"
         ],
@@ -2592,10 +2746,10 @@
     {
       "after": {
         "description": "Instantaneous injection rate of carbon-13-labeled methane into the plasma vessel, expressed as an equivalent-electron rate with 10 equivalent electrons assigned to each neutral molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.94375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9407756615758694,
         "source_bindings": [
           "dd:summary/gas_injection_rates/methane_carbon_13/value"
         ],
@@ -2603,21 +2757,32 @@
       },
       "basis": "Each neutral carbon-13-labeled methane molecule contributes 10 equivalent electrons",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "3b708c9d-5cf2-4d03-be99-b74bfe2b89d4",
+        "spend_usd": 0.000148
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T135610Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "methane_carbon_13_source_rate"
+        "id": "methane_carbon_13_equivalent_electron_source_rate"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous injection rate of carbon-13-labeled methane into the plasma vessel, expressed as an equivalent-electron rate with 10 equivalent electrons assigned to each neutral molecule.",
+        "id": "methane_carbon_13_equivalent_electron_source_rate",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9407756615758694
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/methane_carbon_13/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous injection rate of carbon-13-labeled methane into the plasma vessel, expressed as an equivalent-electron rate with 10 equivalent electrons assigned to each neutral molecule.",
         "id": "methane_carbon_13_source_rate",
@@ -2630,13 +2795,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous injection rate of carbon-13-labeled methane into the plasma vessel, expressed as an equivalent-electron rate with 10 equivalent electrons assigned to each neutral molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.94375,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9407756615758694,
         "source_bindings": [
           "dd:summary/gas_injection_rates/methane_carbon_13/value"
         ],
@@ -2646,10 +2811,10 @@
     {
       "after": {
         "description": "Neon prefill count is the total amount of neutral neon (Ne) introduced before plasma breakdown, expressed as an equivalent-electron count with 10 equivalent electrons per atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9875,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9315085523206149,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/neon/value"
         ],
@@ -2657,21 +2822,32 @@
       },
       "basis": "expressed as an equivalent-electron count. Each neutral neon atom contributes 10 equivalent electrons",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "7df00c18-971c-4d12-9172-cfede6922f66",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T135802Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "neon_prefill_count"
+        "id": "neon_prefill_equivalent_electron_count"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Neon prefill count is the total amount of neutral neon (Ne) introduced before plasma breakdown, expressed as an equivalent-electron count with 10 equivalent electrons per atom.",
+        "id": "neon_prefill_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9315085523206149
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/neon/value"
+        ],
+        "unit": "1"
+      },
       "old_identity": {
         "description": "Neon prefill count is the total amount of neutral neon (Ne) introduced before plasma breakdown, expressed as an equivalent-electron count with 10 equivalent electrons per atom.",
         "id": "neon_prefill_count",
@@ -2684,13 +2860,13 @@
         ],
         "unit": "1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Neon prefill count is the total amount of neutral neon (Ne) introduced before plasma breakdown, expressed as an equivalent-electron count with 10 equivalent electrons per atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9875,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9315085523206149,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/neon/value"
         ],
@@ -2700,10 +2876,10 @@
     {
       "after": {
         "description": "Instantaneous injection rate of neon gas into the plasma vessel, expressed as an equivalent-electron count rate with ten counts assigned to each injected neon atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.95625,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9012428882523711,
         "source_bindings": [
           "dd:summary/gas_injection_rates/neon/value"
         ],
@@ -2711,21 +2887,32 @@
       },
       "basis": "the time rate of increase of the equivalent-electron count associated with injected neon. The equivalent-electron conven",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "bf984c32-0853-43fa-8a03-7582dc7e9c5e",
+        "spend_usd": 0.000145
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T135913Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "neon_source_rate"
+        "id": "neon_equivalent_electron_source_rate"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous injection rate of neon gas into the plasma vessel, expressed as an equivalent-electron count rate with ten counts assigned to each injected neon atom.",
+        "id": "neon_equivalent_electron_source_rate",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9012428882523711
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/neon/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous injection rate of neon gas into the plasma vessel, expressed as an equivalent-electron count rate with ten counts assigned to each injected neon atom.",
         "id": "neon_source_rate",
@@ -2738,13 +2925,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous injection rate of neon gas into the plasma vessel, expressed as an equivalent-electron count rate with ten counts assigned to each injected neon atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.95625,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9012428882523711,
         "source_bindings": [
           "dd:summary/gas_injection_rates/neon/value"
         ],
@@ -2754,10 +2941,10 @@
     {
       "after": {
         "description": "Nitrogen prefill count is the total amount of neutral nitrogen (N or N\u2082) introduced before plasma breakdown, expressed as an equivalent-electron count with 7 per atom or 14 per N\u2082 molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9437500000000001,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9174115010782609,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/nitrogen/value"
         ],
@@ -2765,21 +2952,32 @@
       },
       "basis": "the total amount of neutral nitrogen (N or N2) introduced before plasma breakdown, expressed as an equivalent-electron c",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "a100826a-580f-4caf-8f01-7085bef2d670",
+        "spend_usd": 0.000147
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T140026Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "nitrogen_prefill_count"
+        "id": "nitrogen_prefill_equivalent_electron_count"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Nitrogen prefill count is the total amount of neutral nitrogen (N or N\u2082) introduced before plasma breakdown, expressed as an equivalent-electron count with 7 per atom or 14 per N\u2082 molecule.",
+        "id": "nitrogen_prefill_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9174115010782609
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/nitrogen/value"
+        ],
+        "unit": "1"
+      },
       "old_identity": {
         "description": "Nitrogen prefill count is the total amount of neutral nitrogen (N or N\u2082) introduced before plasma breakdown, expressed as an equivalent-electron count with 7 per atom or 14 per N\u2082 molecule.",
         "id": "nitrogen_prefill_count",
@@ -2792,13 +2990,13 @@
         ],
         "unit": "1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Nitrogen prefill count is the total amount of neutral nitrogen (N or N\u2082) introduced before plasma breakdown, expressed as an equivalent-electron count with 7 per atom or 14 per N\u2082 molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9437500000000001,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9174115010782609,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/nitrogen/value"
         ],
@@ -2808,10 +3006,10 @@
     {
       "after": {
         "description": "Instantaneous rate of neutral molecular nitrogen admitted to the plasma vessel, expressed as equivalent-electron particles with fourteen counts assigned to each molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.925,
-        "score_name": 0.9125,
+        "score_docs": null,
+        "score_name": 0.912945333224904,
         "source_bindings": [
           "dd:summary/gas_injection_rates/nitrogen/value"
         ],
@@ -2819,21 +3017,32 @@
       },
       "basis": "the equivalent-electron source rate carried by neutral molecular nitrogen ... fourteen counts assigned to each molecule",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "f1174054-e468-446d-b5cd-d4b0613dc9b4",
+        "spend_usd": 0.000145
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T140135Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "nitrogen_source_rate"
+        "id": "nitrogen_equivalent_electron_source_rate"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous rate of neutral molecular nitrogen admitted to the plasma vessel, expressed as equivalent-electron particles with fourteen counts assigned to each molecule.",
+        "id": "nitrogen_equivalent_electron_source_rate",
+        "review_scores": {
+          "docs": null,
+          "name": 0.912945333224904
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/nitrogen/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous rate of neutral molecular nitrogen admitted to the plasma vessel, expressed as equivalent-electron particles with fourteen counts assigned to each molecule.",
         "id": "nitrogen_source_rate",
@@ -2846,13 +3055,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous rate of neutral molecular nitrogen admitted to the plasma vessel, expressed as equivalent-electron particles with fourteen counts assigned to each molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.925,
-        "score_name": 0.9125,
+        "score_docs": null,
+        "score_name": 0.912945333224904,
         "source_bindings": [
           "dd:summary/gas_injection_rates/nitrogen/value"
         ],
@@ -2862,10 +3071,10 @@
     {
       "after": {
         "description": "Instantaneous oxygen injection rate from gas fueling, expressed on an equivalent-electron basis with eight equivalent electrons assigned to each oxygen atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9624999999999999,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9152262311584392,
         "source_bindings": [
           "dd:summary/gas_injection_rates/oxygen/value"
         ],
@@ -2873,21 +3082,32 @@
       },
       "basis": "",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "38cf8a58-6021-4b1a-a566-e2b5f438ca3f",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T140243Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "oxygen_source_rate_due_to_gas_injection"
+        "id": "oxygen_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous oxygen injection rate from gas fueling, expressed on an equivalent-electron basis with eight equivalent electrons assigned to each oxygen atom.",
+        "id": "oxygen_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9152262311584392
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/oxygen/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous oxygen injection rate from gas fueling, expressed on an equivalent-electron basis with eight equivalent electrons assigned to each oxygen atom.",
         "id": "oxygen_source_rate_due_to_gas_injection",
@@ -2900,13 +3120,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous oxygen injection rate from gas fueling, expressed on an equivalent-electron basis with eight equivalent electrons assigned to each oxygen atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9624999999999999,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9152262311584392,
         "source_bindings": [
           "dd:summary/gas_injection_rates/oxygen/value"
         ],
@@ -2916,10 +3136,10 @@
     {
       "after": {
         "description": "Propane prefill count is the total amount of C3H8 introduced before plasma breakdown, expressed as an equivalent-electron count with 26 count units per neutral propane molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.925,
-        "score_name": 0.975,
+        "score_docs": null,
+        "score_name": 0.9375203339357419,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/propane/value"
         ],
@@ -2927,21 +3147,32 @@
       },
       "basis": "expressed as an equivalent-electron count. Each propane molecule contributes 26 equivalent electrons",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "6c14aa65-c13d-47bd-958e-f260e3e8d544",
+        "spend_usd": 0.000147
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T140351Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "propane_prefill_count"
+        "id": "propane_prefill_equivalent_electron_count"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Propane prefill count is the total amount of C3H8 introduced before plasma breakdown, expressed as an equivalent-electron count with 26 count units per neutral propane molecule.",
+        "id": "propane_prefill_equivalent_electron_count",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9375203339357419
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_prefill/propane/value"
+        ],
+        "unit": "1"
+      },
       "old_identity": {
         "description": "Propane prefill count is the total amount of C3H8 introduced before plasma breakdown, expressed as an equivalent-electron count with 26 count units per neutral propane molecule.",
         "id": "propane_prefill_count",
@@ -2954,13 +3185,13 @@
         ],
         "unit": "1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Propane prefill count is the total amount of C3H8 introduced before plasma breakdown, expressed as an equivalent-electron count with 26 count units per neutral propane molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.925,
-        "score_name": 0.975,
+        "score_docs": null,
+        "score_name": 0.9375203339357419,
         "source_bindings": [
           "dd:summary/gas_injection_prefill/propane/value"
         ],
@@ -2970,10 +3201,10 @@
     {
       "after": {
         "description": "Instantaneous propane (C3H8) injection rate into the plasma vessel, converted from molecules to equivalent electrons using 26 electrons per neutral molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9275626111884983,
         "source_bindings": [
           "dd:summary/gas_injection_rates/propane/value"
         ],
@@ -2981,21 +3212,32 @@
       },
       "basis": "converted from molecules to equivalent electrons using 26 electrons per neutral molecule",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "602581c1-2483-4105-a1a5-884abeba1b85",
+        "spend_usd": 0.000145
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T140458Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "propane_source_rate"
+        "id": "propane_equivalent_electron_source_rate"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous propane (C3H8) injection rate into the plasma vessel, converted from molecules to equivalent electrons using 26 electrons per neutral molecule.",
+        "id": "propane_equivalent_electron_source_rate",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9275626111884983
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/propane/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous propane (C3H8) injection rate into the plasma vessel, converted from molecules to equivalent electrons using 26 electrons per neutral molecule.",
         "id": "propane_source_rate",
@@ -3008,13 +3250,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous propane (C3H8) injection rate into the plasma vessel, converted from molecules to equivalent electrons using 26 electrons per neutral molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9275626111884983,
         "source_bindings": [
           "dd:summary/gas_injection_rates/propane/value"
         ],
@@ -3024,10 +3266,10 @@
     {
       "after": {
         "description": "Instantaneous injection rate of silane (SiH4) gas into the plasma vessel, expressed as an electron-equivalent particle rate with 18 equivalent electrons for each SiH4 molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.94375,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9402121378942646,
         "source_bindings": [
           "dd:summary/gas_injection_rates/silane/value"
         ],
@@ -3035,21 +3277,32 @@
       },
       "basis": "expressed on an electron-equivalent particle-counting basis ... 18 equivalent electrons for each SiH4 molecule",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "79f9a581-ddf5-4d06-9c2f-13844a1334d7",
+        "spend_usd": 0.000146
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T140605Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "silane_source_rate"
+        "id": "silane_equivalent_electron_source_rate"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous injection rate of silane (SiH4) gas into the plasma vessel, expressed as an electron-equivalent particle rate with 18 equivalent electrons for each SiH4 molecule.",
+        "id": "silane_equivalent_electron_source_rate",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9402121378942646
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/silane/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous injection rate of silane (SiH4) gas into the plasma vessel, expressed as an electron-equivalent particle rate with 18 equivalent electrons for each SiH4 molecule.",
         "id": "silane_source_rate",
@@ -3062,13 +3315,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous injection rate of silane (SiH4) gas into the plasma vessel, expressed as an electron-equivalent particle rate with 18 equivalent electrons for each SiH4 molecule.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.94375,
-        "score_name": 0.9875,
+        "score_docs": null,
+        "score_name": 0.9402121378942646,
         "source_bindings": [
           "dd:summary/gas_injection_rates/silane/value"
         ],
@@ -3079,7 +3332,7 @@
       "after": {
         "description": "Instantaneous equivalent-electron source rate delivered to the plasma vessel by gas injection systems, where each injected atom contributes Z equivalent electrons per second according to its atomic number.",
         "docs_stage": "accepted",
-        "name_stage": "accepted",
+        "name_stage": "reviewed",
         "score_docs": 0.925,
         "score_name": null,
         "source_bindings": [
@@ -3099,7 +3352,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "left_reason": "Four candidates were tried and none cleared the name review: the equivalent-electron form scored 0.482 and 0.725, the gas-subject form 0.681, and the particle-subject form 0.603, each refused on a missing required subject segment for base 'source_rate'. The name aggregates per-species gas-injection children and states no subject of its own. The accepted identity was restored in name, and the rescore path refuses it on deterministic revalidation, so the identity stays at 'reviewed' and the group has no accepted equivalent-electron form.",
       "live_identity": {
         "id": "source_rate_due_to_gas_injection"
       },
@@ -3116,11 +3369,11 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "review_not_accepted",
       "settled_after": {
         "description": "Instantaneous equivalent-electron source rate delivered to the plasma vessel by gas injection systems, where each injected atom contributes Z equivalent electrons per second according to its atomic number.",
         "docs_stage": "accepted",
-        "name_stage": "accepted",
+        "name_stage": "reviewed",
         "score_docs": 0.925,
         "score_name": null,
         "source_bindings": [
@@ -3132,10 +3385,10 @@
     {
       "after": {
         "description": "Instantaneous total rate at which neutral gas is introduced into the lower vacuum-vessel region by gas injection valves, summed over lower-region valves and expressed using the equivalent-electron convention across injected species.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9125000000000001,
-        "score_name": 0.925,
+        "score_docs": null,
+        "score_name": 0.9178733582149692,
         "source_bindings": [
           "dd:summary/gas_injection_rates/bottom/value"
         ],
@@ -3143,21 +3396,32 @@
       },
       "basis": "the lower-region aggregate equivalent-electron source rate due to gas injection",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "be35dc47-7e79-4efb-adb6-5f8c1211e855",
+        "spend_usd": 0.000151
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T141424Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection"
+        "id": "total_lower_gas_equivalent_electron_source_rate_of_vacuum_vessel_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous total rate at which neutral gas is introduced into the lower vacuum-vessel region by gas injection valves, summed over lower-region valves and expressed using the equivalent-electron convention across injected species.",
+        "id": "total_lower_gas_equivalent_electron_source_rate_of_vacuum_vessel_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9178733582149692
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/bottom/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous total rate at which neutral gas is introduced into the lower vacuum-vessel region by gas injection valves, summed over lower-region valves and expressed using the equivalent-electron convention across injected species.",
         "id": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection",
@@ -3170,13 +3434,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous total rate at which neutral gas is introduced into the lower vacuum-vessel region by gas injection valves, summed over lower-region valves and expressed using the equivalent-electron convention across injected species.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9125000000000001,
-        "score_name": 0.925,
+        "score_docs": null,
+        "score_name": 0.9178733582149692,
         "source_bindings": [
           "dd:summary/gas_injection_rates/bottom/value"
         ],
@@ -3186,10 +3450,10 @@
     {
       "after": {
         "description": "Instantaneous equivalent-electron source rate of neutral gas introduced into the vessel by gas injection, summed over all injected species.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.93125,
-        "score_name": 0.95625,
+        "score_docs": null,
+        "score_name": 0.8922965660548298,
         "source_bindings": [
           "dd:summary/gas_injection_rates/total/value"
         ],
@@ -3197,21 +3461,32 @@
       },
       "basis": "",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "e605c590-7db8-4a2a-be46-15d39f414257",
+        "spend_usd": 0.000147
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T141546Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "total_neutral_source_rate_due_to_gas_injection"
+        "id": "total_neutral_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous equivalent-electron source rate of neutral gas introduced into the vessel by gas injection, summed over all injected species.",
+        "id": "total_neutral_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.8922965660548298
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/total/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous equivalent-electron source rate of neutral gas introduced into the vessel by gas injection, summed over all injected species.",
         "id": "total_neutral_source_rate_due_to_gas_injection",
@@ -3224,13 +3499,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous equivalent-electron source rate of neutral gas introduced into the vessel by gas injection, summed over all injected species.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.93125,
-        "score_name": 0.95625,
+        "score_docs": null,
+        "score_name": 0.8922965660548298,
         "source_bindings": [
           "dd:summary/gas_injection_rates/total/value"
         ],
@@ -3240,10 +3515,10 @@
     {
       "after": {
         "description": "Total equivalent-electron rate of neutral and ion particles re-emitted from all divertor surfaces into the plasma by recycling.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 0.975,
+        "score_docs": null,
+        "score_name": 0.9496019828760329,
         "source_bindings": [
           "dd:divertors/divertor/particle_flux_recycled_total"
         ],
@@ -3251,21 +3526,32 @@
       },
       "basis": "",
       "cost": {
-        "calls": 0,
+        "calls": 1,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "c7ae2bc3-45d3-4527-9676-6c28ca7a4d4a",
+        "spend_usd": 0.000145
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T141706Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "total_particle_source_rate_of_divertor_due_to_recycling"
+        "id": "total_particle_equivalent_electron_source_rate_of_divertor_due_to_recycling"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Total equivalent-electron rate of neutral and ion particles re-emitted from all divertor surfaces into the plasma by recycling.",
+        "id": "total_particle_equivalent_electron_source_rate_of_divertor_due_to_recycling",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9496019828760329
+        },
+        "source_bindings": [
+          "dd:divertors/divertor/particle_flux_recycled_total"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Total equivalent-electron rate of neutral and ion particles re-emitted from all divertor surfaces into the plasma by recycling.",
         "id": "total_particle_source_rate_of_divertor_due_to_recycling",
@@ -3278,13 +3564,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Total equivalent-electron rate of neutral and ion particles re-emitted from all divertor surfaces into the plasma by recycling.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.9375,
-        "score_name": 0.975,
+        "score_docs": null,
+        "score_name": 0.9496019828760329,
         "source_bindings": [
           "dd:divertors/divertor/particle_flux_recycled_total"
         ],
@@ -3294,10 +3580,10 @@
     {
       "after": {
         "description": "Instantaneous equivalent-electron source rate for xenon atoms supplied by gas injection, assigning 54 equivalent electrons to each xenon atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.93125,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9147699253989997,
         "source_bindings": [
           "dd:summary/gas_injection_rates/xenon/value"
         ],
@@ -3305,21 +3591,32 @@
       },
       "basis": "",
       "cost": {
-        "calls": 0,
+        "calls": 3,
         "rescore": {
           "calls": 0,
           "run_ids": [],
           "spend_usd": 0
         },
-        "run_id": null,
-        "spend_usd": 0.0
+        "run_id": "191ae39f-3923-4633-8410-454e737c95c4",
+        "spend_usd": 0.072843
       },
-      "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+      "edit_scope_id": "sn-edit-20261117T141818Z",
+      "left_reason": null,
       "live_identity": {
-        "id": "xenon_source_rate_due_to_gas_injection"
+        "id": "xenon_equivalent_electron_source_rate_due_to_gas_injection"
       },
-      "new_identity": null,
+      "new_identity": {
+        "description": "Instantaneous equivalent-electron source rate for xenon atoms supplied by gas injection, assigning 54 equivalent electrons to each xenon atom.",
+        "id": "xenon_equivalent_electron_source_rate_due_to_gas_injection",
+        "review_scores": {
+          "docs": null,
+          "name": 0.9147699253989997
+        },
+        "source_bindings": [
+          "dd:summary/gas_injection_rates/xenon/value"
+        ],
+        "unit": "s^-1"
+      },
       "old_identity": {
         "description": "Instantaneous equivalent-electron source rate for xenon atoms supplied by gas injection, assigning 54 equivalent electrons to each xenon atom.",
         "id": "xenon_source_rate_due_to_gas_injection",
@@ -3332,13 +3629,13 @@
         ],
         "unit": "s^-1"
       },
-      "outcome": "not_attempted_probe_stop",
+      "outcome": "renamed",
       "settled_after": {
         "description": "Instantaneous equivalent-electron source rate for xenon atoms supplied by gas injection, assigning 54 equivalent electrons to each xenon atom.",
-        "docs_stage": "accepted",
+        "docs_stage": "pending",
         "name_stage": "accepted",
-        "score_docs": 0.93125,
-        "score_name": 1.0,
+        "score_docs": null,
+        "score_name": 0.9147699253989997,
         "source_bindings": [
           "dd:summary/gas_injection_rates/xenon/value"
         ],
@@ -3352,17 +3649,17 @@
   },
   "sourceless": {
     "allowance": 10,
-    "count": 23
+    "count": 10
   },
   "spend_ceiling_usd": 8.0,
   "spend_source": "LLMCost joined once through each scoped SNRun",
-  "spend_total_usd": 5.381189,
-  "status": "blocked",
-  "stop_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
+  "spend_total_usd": 5.54797,
+  "status": "complete",
+  "stop_reason": null,
   "summary": {
-    "left": 28,
+    "left": 1,
     "population": 56,
-    "renamed": 28,
-    "spend_usd": 5.381189
+    "renamed": 55,
+    "spend_usd": 5.54797
   }
 }
