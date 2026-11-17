@@ -128,3 +128,85 @@ superseding and deleting this cohort is a decision the plan does not settle.
 With the patch applied the step retires future cases; this cohort needs one
 signed action by the lead, listed by name in the JSON.</p>
 </section>
+<section id="recycled-source-retirement-implementation">
+<h2>The recycling pass is implemented; the existing cohort needs signed provenance admission</h2>
+<p>This update supersedes the earlier blocked implementation account above. Commit
+<code>0bdd635cdc466ce0a6337d14681c54f619141e7c</code> changes the owning pass,
+<code>graph_store/graph_audits.py</code>. The lead's ruling is supersession,
+never deletion; recorded model spend is retained. No live graph write was made
+by this landing.</p>
+<p>The pass keeps sources bound to every non-exhausted live name, and also to
+exhausted derived names and catalog content that it cannot retire. Superseded
+history still releases its source. Eligible exhausted names become superseded
+in the same statement that returns their last live producer to extracted,
+with claims cleared and a <code>retire_recycled_source_name</code> change row.
+Targets are collected once after all source releases: the supplied patch wrote
+two receipts when two producers recycled together, which the added multi-source
+case exposed and this implementation repairs. A stale producer is historical,
+so it does not prevent retirement.</p>
+<p>The fresh reproduction at base <code>27ec3208c031d4782de71883b1b5eb3b8fe7191b</code>
+reported <code>assert 'exhausted' == 'superseded'</code> for the exhausted
+name and <code>assert 'extracted' == 'composed'</code> for the contested
+name's source. Six other base failures were missing <code>names_retired</code>
+result-key assertions; derived and catalog protection cases also exposed source
+loss. The reproduction log reports <code>10 failed, 1 warning in 31.48s</code>,
+<code>EXIT=1</code>. After repair the focused gate over the new cases,
+<code>test_source_revival.py</code> and
+<code>test_pipeline_recovery_mechanics.py</code> reports
+<code>57 passed, 1 warning in 35.46s</code>, <code>EXIT=0</code>, on
+<code>all_debug</code>. That includes repeated-pass idempotency, two producers
+recycling together, a producer retained by another live name, stale producer
+history, accepted and contested names, and open-hint recovery behavior.</p>
+<h3>The original maintenance log</h3>
+<p>The lines below are copied from <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T011101094449-sdbc-equivalent-electron-renames-restart/omp-home/.local/share/imas-codex/logs/sn_sn-compose.log</code>,
+lines 9, 10 and 45. Log times are Europe/Paris (UTC+01:00). The pass returned
+24 <em>sources</em>, removed 28 producer edges and temporarily reported 24
+sourceless names; the later recorded population is 23.</p>
+<pre>2026-11-17 08:59:20 INFO     imas_codex.standard_names.graph_store.graph_audits: reconcile_source_status_liveness: realigned 0 source(s) with a live target; returned 24 source(s) without one to extracted (28 stale edge(s), 23 projection(s), and 25 source-path entry(s) dropped); cleaned 0 projection-only ghost source(s) (0 projection(s), 0 source-path entry(s))
+2026-11-17 08:59:20 INFO     imas_codex.standard_names.loop: run_sn_pools: source-status reconcile — 0 aligned to a live target, 24 returned to extracted
+2026-11-17 09:01:23 WARNING  imas_codex.standard_names.loop: run_sn_pools: source-loss probe found 24 live name(s) without a source; first few: coolant_absorbed_energy_accumulated_of_plasma_facing_component, deposited_power_at_divertor_target, diamagnetic_momentum_coefficient, electron_temperature_at_plasma_boundary, gradient_of_electron_pressure</pre>
+<h3>The thirteen names and their recorded former-source candidates</h3>
+<p>A fresh read on <code>all_debug</code> covers 13 of 13 identities and
+13 of 13 name-stage properties. All are exhausted, none accepted, and all have
+zero live producers. The repository's own enumeration over the named original
+23 still returns 23; a known bound name is absent and a known sourceless name is
+present in that same instrument. This is a cohort-scoped reading, not a claim
+that no other name has since become sourceless.</p>
+<table><thead><tr><th>Name</th><th>Stage</th><th>Recorded former source candidates and current status</th><th>Action</th></tr></thead><tbody>
+<tr><td><code>diamagnetic_momentum_coefficient</code></td><td>exhausted</td><td>No former source candidate survives in the supplied record</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>gradient_of_electron_pressure</code></td><td>exhausted</td><td><code>dd:summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>implicit_ion_particle_source_rate</code></td><td>exhausted</td><td><code>dd:core_sources/source/profiles_1d/ion/particles_decomposed/implicit_part</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>implicit_ion_state_particle_source_rate</code></td><td>exhausted</td><td><code>dd:core_sources/source/profiles_1d/ion/state/particles_decomposed/implicit_part</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>incident_energy_flux_at_wall</code></td><td>exhausted</td><td><code>dd:wall/description_ggd/ggd/power_density/values</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate</code></td><td>exhausted</td><td><code>dd:summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm_max/value</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>molecular_fraction</code></td><td>exhausted</td><td><code>dd:pulse_schedule/nbi/unit/species/fraction</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>momentum_coefficient_due_to_diamagnetic_drift</code></td><td>exhausted</td><td><code>dd:edge_transport/model/ggd/ion/state/momentum/flux_limiter/diamagnetic</code> (attached)<br><code>dd:edge_transport/model/ggd/momentum/flux_limiter/diamagnetic</code> (extracted)<br><code>dd:edge_transport/model/ggd/neutral/state/momentum/flux_limiter/diamagnetic</code> (composed)<br><code>dd:plasma_transport/model/ggd/ion/state/momentum/flux_limiter/diamagnetic</code> (composed)<br><code>dd:plasma_transport/model/ggd/neutral/state/momentum/flux_limiter/diamagnetic</code> (attached)<br><code>dd:plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/diamagnetic</code> (attached)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>neutral_species_fraction</code></td><td>exhausted</td><td><code>dd:pulse_schedule/density_control/valve/species/fraction</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>nuclear_source_rate_due_to_beam_beam_fusion</code></td><td>exhausted</td><td>No former source candidate survives in the supplied record</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>plasma_velocity_due_to_diamagnetic_drift</code></td><td>exhausted</td><td><code>dd:edge_transport/model/ggd/momentum/v/diamagnetic</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>poloidal_straight_field_line_angle</code></td><td>exhausted</td><td><code>dd:waves/coherent_wave/profiles_2d/grid/theta_straight</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+<tr><td><code>total_power_of_plant_system</code></td><td>exhausted</td><td><code>dd:balance_of_plant/power_plant/power_electric_generated</code> (extracted)</td><td>Not changed: signed admission blocked</td></tr>
+</tbody></table>
+<p>The two empty candidate sets are unknown provenance, not invented bindings.
+For <code>momentum_coefficient_due_to_diamagnetic_drift</code>, candidates
+include aliases that currently produce other names; those holders and sources
+were not changed. Full current mirrors, target identities and statuses are in
+<code>recycled-source-names.json</code>.</p>
+<p>The existing signed preview refused all thirteen (requested 13, admitted 0,
+refused 13; manifest digest
+<code>a0a12e70ba14fb36feaeb707357f7128f0cff0df49857bca2971a301be4a8374</code>).
+Its eligibility rule admits only <code>orphan_awaiting_retirement</code>, while
+these names classify as <code>dropped_edge</code> because recycling erased the
+producer provenance. The required file is
+<code>imas_codex/standard_names/graph_store/graph_supersession.py</code>:
+<code>classify_sourceless_standard_names</code> and the signed exhausted-orphan
+admission path. That file is outside this landing's grants, so the live action
+stops there. The next action is a scoped signed-path repair that reads former
+source authority without admitting accepted names, followed by supersession of
+the verified exhausted cohort. The ten-name endpoint is not yet met, and no
+exemption list was changed.</p>
+<p>The archived whole-directory base/head comparison and the two mutation
+controls are running as separate <code>all_debug</code> measurements; their
+results will be appended when complete. Logs and the landing record live at
+<code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/manifest.md</code>.</p>
+</section>

@@ -374,5 +374,392 @@
     "accepted": 3,
     "exhausted": 17,
     "pending": 3
+  },
+  "landing_followup": {
+    "revision": "0bdd635cdc466ce0a6337d14681c54f619141e7c",
+    "original_maintenance_log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T011101094449-sdbc-equivalent-electron-renames-restart/omp-home/.local/share/imas-codex/logs/sn_sn-compose.log",
+    "original_maintenance_log_excerpt": [
+      {
+        "line": 9,
+        "text": "2026-11-17 08:59:20 INFO     imas_codex.standard_names.graph_store.graph_audits: reconcile_source_status_liveness: realigned 0 source(s) with a live target; returned 24 source(s) without one to extracted (28 stale edge(s), 23 projection(s), and 25 source-path entry(s) dropped); cleaned 0 projection-only ghost source(s) (0 projection(s), 0 source-path entry(s))"
+      },
+      {
+        "line": 10,
+        "text": "2026-11-17 08:59:20 INFO     imas_codex.standard_names.loop: run_sn_pools: source-status reconcile \u2014 0 aligned to a live target, 24 returned to extracted"
+      },
+      {
+        "line": 45,
+        "text": "2026-11-17 09:01:23 WARNING  imas_codex.standard_names.loop: run_sn_pools: source-loss probe found 24 live name(s) without a source; first few: coolant_absorbed_energy_accumulated_of_plasma_facing_component, deposited_power_at_divertor_target, diamagnetic_momentum_coefficient, electron_temperature_at_plasma_boundary, gradient_of_electron_pressure"
+      }
+    ],
+    "timestamp_convention": "maintenance log local Europe/Paris, UTC+01:00; 08:59:20 is 07:59:20Z",
+    "live_read_receipt": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/live_cohort.json",
+    "enumeration_scope": [
+      "beta",
+      "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+      "deposited_power_at_divertor_target",
+      "diamagnetic_momentum_coefficient",
+      "electron_temperature_at_plasma_boundary",
+      "gradient_of_electron_pressure",
+      "implicit_ion_particle_source_rate",
+      "implicit_ion_state_particle_source_rate",
+      "incident_energy_flux_at_wall",
+      "line_averaged_neon_density",
+      "maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate",
+      "molecular_fraction",
+      "momentum_coefficient_due_to_diamagnetic_drift",
+      "neutral_species_fraction",
+      "nuclear_source_rate_due_to_beam_beam_fusion",
+      "plasma_velocity_due_to_diamagnetic_drift",
+      "poloidal_straight_field_line_angle",
+      "poloidal_total_momentum_convection_velocity",
+      "radius_of_soft_xray_detector",
+      "ratio_of_diamagnetic_vorticity_to_major_radius",
+      "total_power_of_plant_system",
+      "voltage_of_diagnostic_antenna",
+      "volume_averaged_electron_number_density_over_scrape_off_layer"
+    ],
+    "sourceless_in_named_cohort": 23,
+    "baseline_names": [
+      "beta",
+      "coolant_absorbed_energy_accumulated_of_plasma_facing_component",
+      "deposited_power_at_divertor_target",
+      "electron_temperature_at_plasma_boundary",
+      "line_averaged_neon_density",
+      "poloidal_total_momentum_convection_velocity",
+      "radius_of_soft_xray_detector",
+      "ratio_of_diamagnetic_vorticity_to_major_radius",
+      "voltage_of_diagnostic_antenna",
+      "volume_averaged_electron_number_density_over_scrape_off_layer"
+    ],
+    "recycled_cohort": [
+      {
+        "id": "diamagnetic_momentum_coefficient",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": "pipeline",
+        "source_paths": [],
+        "source_path": null,
+        "live_producers": 0,
+        "former_source_candidates": [],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "gradient_of_electron_pressure",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "implicit_ion_particle_source_rate",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": "pipeline",
+        "source_paths": [],
+        "source_path": "core_sources/source/profiles_1d/ion/particles_decomposed/implicit_part",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:core_sources/source/profiles_1d/ion/particles_decomposed/implicit_part",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "implicit_ion_state_particle_source_rate",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "core_sources/source/profiles_1d/ion/state/particles_decomposed/implicit_part",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:core_sources/source/profiles_1d/ion/state/particles_decomposed/implicit_part",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "incident_energy_flux_at_wall",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "wall/description_ggd/ggd/power_density/values",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:wall/description_ggd/ggd/power_density/values",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "maximum_of_derivative_of_pedestal_electron_pressure_with_respect_to_normalized_poloidal_flux_coordinate",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm_max/value",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm_max/value",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "molecular_fraction",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "pulse_schedule/nbi/unit/species/fraction",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:pulse_schedule/nbi/unit/species/fraction",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "momentum_coefficient_due_to_diamagnetic_drift",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "edge_transport/model/ggd/momentum/flux_limiter/diamagnetic",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:edge_transport/model/ggd/ion/state/momentum/flux_limiter/diamagnetic",
+            "status": "attached",
+            "attempt_count": 1,
+            "mirror": "ion_state_diamagnetic_momentum_flux_limiter_coefficient",
+            "targets": [
+              "ion_state_diamagnetic_momentum_flux_limiter_coefficient"
+            ]
+          },
+          {
+            "id": "dd:edge_transport/model/ggd/momentum/flux_limiter/diamagnetic",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          },
+          {
+            "id": "dd:edge_transport/model/ggd/neutral/state/momentum/flux_limiter/diamagnetic",
+            "status": "composed",
+            "attempt_count": 2,
+            "mirror": "neutral_state_diamagnetic_momentum_flux_limiter_coefficient",
+            "targets": [
+              "neutral_state_diamagnetic_momentum_flux_limiter_coefficient"
+            ]
+          },
+          {
+            "id": "dd:plasma_transport/model/ggd/ion/state/momentum/flux_limiter/diamagnetic",
+            "status": "composed",
+            "attempt_count": 3,
+            "mirror": "ion_state_diamagnetic_momentum_flux_limiter_coefficient",
+            "targets": [
+              "ion_state_diamagnetic_momentum_flux_limiter_coefficient"
+            ]
+          },
+          {
+            "id": "dd:plasma_transport/model/ggd/neutral/state/momentum/flux_limiter/diamagnetic",
+            "status": "attached",
+            "attempt_count": 2,
+            "mirror": "neutral_state_diamagnetic_momentum_flux_limiter_coefficient",
+            "targets": [
+              "neutral_state_diamagnetic_momentum_flux_limiter_coefficient"
+            ]
+          },
+          {
+            "id": "dd:plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/diamagnetic",
+            "status": "attached",
+            "attempt_count": 2,
+            "mirror": "neutral_state_diamagnetic_momentum_flux_limiter_coefficient",
+            "targets": [
+              "neutral_state_diamagnetic_momentum_flux_limiter_coefficient"
+            ]
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "neutral_species_fraction",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "pulse_schedule/density_control/valve/species/fraction",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:pulse_schedule/density_control/valve/species/fraction",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "nuclear_source_rate_due_to_beam_beam_fusion",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": "pipeline",
+        "source_paths": [],
+        "source_path": null,
+        "live_producers": 0,
+        "former_source_candidates": [],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "plasma_velocity_due_to_diamagnetic_drift",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "edge_transport/model/ggd/momentum/v/diamagnetic",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:edge_transport/model/ggd/momentum/v/diamagnetic",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "poloidal_straight_field_line_angle",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "waves/coherent_wave/profiles_2d/grid/theta_straight",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:waves/coherent_wave/profiles_2d/grid/theta_straight",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      },
+      {
+        "id": "total_power_of_plant_system",
+        "name_stage": "exhausted",
+        "status": "draft",
+        "origin": null,
+        "source_paths": [],
+        "source_path": "balance_of_plant/power_plant/power_electric_generated",
+        "live_producers": 0,
+        "former_source_candidates": [
+          {
+            "id": "dd:balance_of_plant/power_plant/power_electric_generated",
+            "status": "extracted",
+            "attempt_count": 0,
+            "mirror": null,
+            "targets": []
+          }
+        ],
+        "retired": false,
+        "reason": "signed classifier refuses dropped_edge; provenance admission lives outside granted graph_audits.py"
+      }
+    ],
+    "accepted_recycled_names": [],
+    "graph_writes": 0,
+    "identity_stage_coverage": {
+      "candidates": 13,
+      "with_id": 13,
+      "with_stage": 13
+    },
+    "enumeration_controls": {
+      "control_bound_name": "ion_state_diamagnetic_momentum_flux_limiter_coefficient",
+      "control_bound_name_enumerated": false,
+      "control_sourceless_name": "diamagnetic_momentum_coefficient",
+      "control_sourceless_name_enumerated": true
+    },
+    "signed_path_blocker": {
+      "file": "imas_codex/standard_names/graph_store/graph_supersession.py",
+      "functions": [
+        "classify_sourceless_standard_names",
+        "_exhausted_orphan_supersession_authority",
+        "supersede_exhausted_standard_name_orphans"
+      ],
+      "prior_preview": {
+        "command": "supersede_exhausted_standard_name_orphans(<13 ids>, apply=False)",
+        "outcome": "refused",
+        "counts": {
+          "requested": 13,
+          "admitted": 0,
+          "refused": 13
+        },
+        "manifest_sha256": "a0a12e70ba14fb36feaeb707357f7128f0cff0df49857bca2971a301be4a8374"
+      },
+      "required_change": "Read recorded former-source authority while retaining signed cohort, exhausted-stage, non-derived, no-live-producer and no-accepted-name guards; two names have no recovered source candidate."
+    },
+    "focused_gate": {
+      "summary": "57 passed, 1 warning in 35.46s",
+      "exit_status": 0,
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T114117913470-sph-retire-recycled-source-landing/focused-after-aggregation.log"
+    },
+    "suite_comparison": "pending archived base/head all_debug jobs"
   }
 }
