@@ -485,16 +485,21 @@ class HTTPBackend(TransferBackend):
     """
 
     def __init__(
-        self, session: requests.Session | None = None, verify_ssl: bool = True
+        self,
+        session: requests.Session | None = None,
+        verify_ssl: bool = True,
+        allow_redirects: bool = True,
     ):
         """Initialize HTTP backend.
 
         Args:
             session: Requests session (for auth cookies, etc.)
             verify_ssl: Whether to verify SSL certificates
+            allow_redirects: Follow redirects, or return their outcome to the caller
         """
         self.session = session
         self.verify_ssl = verify_ssl
+        self.allow_redirects = allow_redirects
 
     def _get_session(self):
         """Get or create requests session."""
@@ -514,7 +519,7 @@ class HTTPBackend(TransferBackend):
                 url,
                 timeout=timeout,
                 verify=self.verify_ssl,
-                allow_redirects=True,
+                allow_redirects=self.allow_redirects,
                 headers={"Accept": "*/*"},
             )
             if response.status_code == 200:
@@ -537,7 +542,7 @@ class HTTPBackend(TransferBackend):
                 url,
                 timeout=timeout,
                 verify=self.verify_ssl,
-                allow_redirects=True,
+                allow_redirects=self.allow_redirects,
                 headers={"Accept": "*/*"},
             )
 
@@ -607,6 +612,7 @@ class TransferClient:
     session: Any = None  # requests.Session
     mode: str = "http"  # "http" for URLs, "file" for SSH file paths
     verify_ssl: bool = False
+    allow_redirects: bool = True
     _backend: TransferBackend | None = field(default=None, init=False, repr=False)
 
     def __post_init__(self):
@@ -617,7 +623,9 @@ class TransferClient:
             self._backend = SSHCurlBackend(self.ssh_host, verify_ssl=self.verify_ssl)
         else:
             self._backend = HTTPBackend(
-                session=self.session, verify_ssl=self.verify_ssl
+                session=self.session,
+                verify_ssl=self.verify_ssl,
+                allow_redirects=self.allow_redirects,
             )
 
     async def __aenter__(self):

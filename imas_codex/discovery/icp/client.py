@@ -15,12 +15,13 @@ they are not flattened into a cross-host persistent cookie dictionary.
 from __future__ import annotations
 
 import os
+import re
 import threading
 import time
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 from typing import Any
-from urllib.parse import parse_qsl, unquote, urljoin, urlsplit
+from urllib.parse import parse_qsl, unquote, urlencode, urljoin, urlsplit
 
 import requests
 
@@ -90,6 +91,34 @@ class RequestRecord:
     origin: str | None = field(default=None, repr=False)
     path: str | None = None
     started_at: float | None = None
+    content_type: str | None = None
+
+
+@dataclass(frozen=True)
+class _DocumentAccess:
+    origin: str
+    path: str
+    identities: frozenset[str] = field(repr=False)
+
+    def check(self, request: requests.PreparedRequest) -> str:
+        parts = urlsplit(request.url)
+        try:
+            pairs = parse_qsl(parts.query, keep_blank_values=True, strict_parsing=True)
+        except ValueError:
+            raise ICPRequestRefused("The document query is invalid") from None
+        query = dict(pairs)
+        if (
+            parts.path != self.path
+            or parts.fragment
+            or len(pairs) != len(query)
+            or query.keys() != {"uid", "version", "action"}
+            or query["action"] != "get_document"
+            or not re.fullmatch(r"v[0-9]+(?:\.[0-9]+)*", query["version"])
+        ):
+            raise ICPRequestRefused("Only the configured document GET form is allowed")
+        if query["uid"] not in self.identities:
+            raise ICPRequestRefused("The document identity is not privately listed")
+        return query["uid"]
 
 
 class _RequestPolicy:
@@ -101,6 +130,7 @@ class _RequestPolicy:
         sign_in_origins: frozenset[str],
         gateway_paths: frozenset[str],
         description_path: str,
+        documents: _DocumentAccess | None = None,
     ) -> None:
         self.readable_origins = readable_origins
         self.pacer = RequestPacer(interval)
@@ -108,6 +138,9 @@ class _RequestPolicy:
         self.sign_in_origins = sign_in_origins
         self.gateway_paths = gateway_paths
         self.description_path = description_path
+        self.documents = documents
+        self.document_requests: dict[str, int] = {}
+        self.document_stopped = False
         self.authenticating = False
         self.signed_in = False
         self.records: list[RequestRecord] = []
@@ -137,6 +170,8 @@ class _RequestPolicy:
                         "ICP accepts only GET and HEAD outside sign-in paths"
                     )
                 self._check_sign_in(request, origin)
+            elif self.documents and origin == self.documents.origin:
+                self.documents.check(request)
             return "application"
         self._check_sign_in(request, origin)
         return (
@@ -256,7 +291,25 @@ class _RequestPolicy:
         if not {"ctx", "flowToken"} <= keys <= allowed:
             raise ICPRequestRefused("Only identity-provider login forms are allowed")
 
-    def before_send(self) -> None:
+    def before_send(self, request: requests.PreparedRequest) -> None:
+        if self.documents and len(self.records) >= 40:
+            raise ICPRequestRefused("The document session request budget was exhausted")
+        if (
+            self.documents
+            and _origin(request.url) == self.documents.origin
+            and request.method in _READ_METHODS
+        ):
+            uid = self.documents.check(request)
+            if self.document_stopped:
+                raise ICPRequestRefused(
+                    "Document reads stopped after a refused response"
+                )
+            if (
+                self.document_requests.get(uid, 0) >= 5
+                or sum(self.document_requests.values()) >= 40
+            ):
+                raise ICPRequestRefused("The document request budget was exhausted")
+            self.document_requests[uid] = self.document_requests.get(uid, 0) + 1
         if self.authenticating:
             self.sign_in_requests += 1
             if self.sign_in_requests > self.max_sign_in_requests:
@@ -277,7 +330,7 @@ class _GuardedAdapter(requests.adapters.HTTPAdapter):
         target = self._policy.check(request)
         if "verify" in kwargs and not kwargs["verify"]:
             raise ICPRequestRefused("TLS verification is required")
-        self._policy.before_send()
+        self._policy.before_send(request)
         self._policy.throttle()
         started_at = time.monotonic()
         signing_in = self._policy.authenticating
@@ -285,6 +338,13 @@ class _GuardedAdapter(requests.adapters.HTTPAdapter):
         try:
             response = super().send(request, **kwargs)
         finally:
+            if (
+                self._policy.documents
+                and _origin(request.url) == self._policy.documents.origin
+                and response is not None
+                and (response.status_code in {401, 403} or response.status_code >= 500)
+            ):
+                self._policy.document_stopped = True
             self._policy.records.append(
                 RequestRecord(
                     request.method or "",
@@ -294,6 +354,9 @@ class _GuardedAdapter(requests.adapters.HTTPAdapter):
                     _origin(request.url),
                     urlsplit(request.url).path if signing_in else None,
                     started_at,
+                    response.headers.get("Content-Type")
+                    if response is not None
+                    else None,
                 )
             )
         return response
@@ -399,6 +462,39 @@ class ICPClient:
             ) from None
         if not path.startswith("/") or path.startswith("//"):
             raise ICPConfigurationError("Configure an absolute description path")
+        documents = None
+        if any(key.startswith("document_") for key in config):
+            try:
+                document_origin = _origin(config["document_origin"])
+                parts = urlsplit(config["document_origin"])
+                document_path = config["document_path"]
+                identities = config["document_identities"]
+                if (
+                    parts.path not in ("", "/")
+                    or parts.query
+                    or parts.fragment
+                    or document_origin not in readable_origins
+                    or document_origin == origin
+                    or not isinstance(document_path, str)
+                    or not document_path.startswith("/")
+                    or document_path.startswith("//")
+                    or urlsplit(document_path).path != document_path
+                    or not isinstance(identities, list)
+                    or not identities
+                    or any(
+                        not isinstance(uid, str)
+                        or not re.fullmatch(r"[A-Za-z0-9_-]{1,64}", uid)
+                        for uid in identities
+                    )
+                ):
+                    raise ValueError
+                documents = _DocumentAccess(
+                    document_origin, document_path, frozenset(identities)
+                )
+            except (KeyError, ValueError, TypeError, AttributeError):
+                raise ICPConfigurationError(
+                    "Configure a separate listed document origin, path and identities"
+                ) from None
         self._origin = origin
         self._description_url = urljoin(origin + "/", path)
         if _origin(self._description_url) != origin:
@@ -449,6 +545,7 @@ class ICPClient:
             sign_in_origins,
             gateway_paths,
             urlsplit(self._description_url).path,
+            documents,
         )
         self._session = _GuardedSession(self._policy)
         self._login = _APILogin(
@@ -520,14 +617,18 @@ class ICPClient:
         """Read an origin-rooted API endpoint, retrying once after session expiry."""
         url = urljoin(self._origin + "/", endpoint)
         prepared = requests.Request(
-            method, url, headers=kwargs.get("headers")
+            method, url, headers=kwargs.get("headers"), params=kwargs.get("params")
         ).prepare()
         self._policy.check(prepared)
         self.authenticate()
         kwargs.setdefault("timeout", self.timeout)
         kwargs.setdefault("allow_redirects", False)
         response = self.session.request(method, url, **kwargs)
-        if self._stale(response):
+        is_document = (
+            self._policy.documents is not None
+            and _origin(url) == self._policy.documents.origin
+        )
+        if not is_document and self._stale(response):
             self.authenticate(force=True)
             response = self.session.request(method, url, **kwargs)
             if self._stale(response):
@@ -535,6 +636,16 @@ class ICPClient:
                 raise ICPAuthenticationError("The renewed session was refused")
         response.raise_for_status()
         return response
+
+    def document_url(self, uid: str, version: str) -> str:
+        """Build and validate a privately listed document GET before sign-in."""
+        access = self._policy.documents
+        if access is None:
+            raise ICPConfigurationError("Configure private document access")
+        query = urlencode({"uid": uid, "version": version, "action": "get_document"})
+        url = access.origin + access.path + "?" + query
+        self._policy.check(requests.Request("GET", url).prepare())
+        return url
 
     @staticmethod
     def _stale(response: requests.Response) -> bool:
