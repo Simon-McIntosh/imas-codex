@@ -79,6 +79,16 @@
       "note": "Section 5 now waits on section 6 and states that transport's parts are released last and only once section 6 has created them.",
       "reason": "",
       "when": "2026-11-17T16:48:49.979021+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5e4112b78b29bf5b8b59dd15e97c72a82376a6cb",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 2 now states the USD 300 is the ceiling on total repair spend, raised from USD 250, and that section 4's USD 40 is the first group's own ceiling inside it.",
+      "reason": "",
+      "when": "2026-11-17T16:49:35.159696+00:00"
     }
   ],
   "responses": {
@@ -90,6 +100,15 @@
       "note": "Section 6 now requires the parts to sum to the live transport count read in the same run and a disposable-graph run with one planted name moved to its ruled part and one outside transport left in place.",
       "reason": "",
       "when": "2026-11-17T16:48:02.112780+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "5e4112b78b29bf5b8b59dd15e97c72a82376a6cb",
+      "commit_basis": "edit",
+      "note": "Section 2 now states the USD 300 is the ceiling on total repair spend, raised from USD 250, and that section 4's USD 40 is the first group's own ceiling inside it.",
+      "reason": "",
+      "when": "2026-11-17T16:49:35.159696+00:00"
     },
     "reasoning-1": {
       "action": "acted",
