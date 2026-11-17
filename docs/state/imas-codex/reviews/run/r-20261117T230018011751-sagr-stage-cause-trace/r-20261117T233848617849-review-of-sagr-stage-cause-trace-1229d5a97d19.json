@@ -7,6 +7,14 @@
   "call_sites": [],
   "completed_at": "2026-11-17T23:39:26.032Z",
   "dispatched_at": "2026-11-17T23:39:13Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-17T23:57:57.266439+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261117T230018011751-sagr-stage-cause-trace"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-audited-group-release/stage-cause-trace.py",
