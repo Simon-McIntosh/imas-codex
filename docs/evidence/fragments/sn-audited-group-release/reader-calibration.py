@@ -1190,6 +1190,19 @@ def check(path):
         and values["two_of_three"]["false_alarm"]["count"] == 0
     )
     assert flag({"bad": {"A": []}}, "bad", "C") is None
+    historical = scores(
+        data["standing_ids"],
+        {j["id"]: j for j in data["judgments"]},
+        earlier_readings(data),
+    )
+    for seat, recalled, alarmed in (("A", 9, 0), ("B", 11, 0), ("C", 13, 1)):
+        assert historical[seat]["recall"]["count"] == recalled
+        assert historical[seat]["recall"]["total"] == 15
+        assert historical[seat]["false_alarm"]["count"] == alarmed
+        assert historical[seat]["false_alarm"]["total"] == 11
+    print(
+        "PASS: earlier standing-label readings reproduce A 9/15 and 0/11; B 11/15 and 0/11; C 13/15 and 1/11"
+    )
     print(
         "PASS: frozen judgments, 252 corrected readings, paired comparisons, class recall, spend, corrected estimate and HTML verified",
         flush=True,
