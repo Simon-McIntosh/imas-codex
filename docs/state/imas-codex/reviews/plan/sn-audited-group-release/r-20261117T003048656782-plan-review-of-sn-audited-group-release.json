@@ -61,6 +61,16 @@
       "note": "The census reconciles to the count of live names read in the same run, with names carrying no physics domain as a row of their own.",
       "reason": "",
       "when": "2026-11-17T00:41:44.707111+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c69df97a9c6e9ae4574c96f915d93d088a98849c",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "A recorded run now shows the sorting step reporting a cause planted on three members of a disposable group as a pipeline defect and leaving them out of both repairs. The write-path guard is the pipeline's own: an agent has read access only.",
+      "reason": "",
+      "when": "2026-11-17T00:42:05.240367+00:00"
     }
   ],
   "responses": {
@@ -72,6 +82,15 @@
       "note": "The census reconciles to the count of live names read in the same run, with names carrying no physics domain as a row of their own.",
       "reason": "",
       "when": "2026-11-17T00:41:44.707111+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "c69df97a9c6e9ae4574c96f915d93d088a98849c",
+      "commit_basis": "edit",
+      "note": "A recorded run now shows the sorting step reporting a cause planted on three members of a disposable group as a pipeline defect and leaving them out of both repairs. The write-path guard is the pipeline's own: an agent has read access only.",
+      "reason": "",
+      "when": "2026-11-17T00:42:05.240367+00:00"
     },
     "wiring-1": {
       "action": "acted",
