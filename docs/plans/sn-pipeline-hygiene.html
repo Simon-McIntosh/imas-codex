@@ -23,7 +23,7 @@
   <title>Standard-Name Pipeline Hygiene: Red Tests, Loose Boundaries, Release Plumbing | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="57">
+<meta name="plan-version" content="58">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -153,6 +153,12 @@
 <div class="r-comment" data-section="s10" data-id="c-s10-refine-dispatch-tests-repaired" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-16T06:55:00Z">
     <div class="r-comment-body"><p>The two failures in <code>test_refine_model_dispatch.py</code> named above are repaired and on main. The tests were at fault: they set placeholder model identifiers the model-seat route check rightly refuses. Both assertions are kept with identifiers that have a recognised route, and the route check is unchanged. The whole standard-names directory run from an archive at the reviewed head shows 8,768 passed and no failure. The three non-blocking findings from this section's own review remain open and unowned.</p></div>
 </div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261117T102905708416-review-of-sph-scoped-run-stays-in-scope-6862a3d1adb5" data-who="reckon-build" data-when="2026-11-17T10:30:21.881Z">
+    <div class="r-comment-body"><p>independent review of r-20261117T084125357765-sph-scoped-run-stays-in-scope at head 6862a3d1a against base 3fb991aa6 — scores goal_fidelity 13, evidence 14, scope_discipline 20, durability 13, fit 17, reuse 15 (total 92), added_failure_count 0 against both gate arms, one blocking finding (an edits-only scope sets the bypass while scope_run_id stays None, so `sn run --only review --edits` aborts at loop.py:1568) and two non-blocking findings, status parsed.</p></div>
+</div>
+<div class="r-comment" data-section="s12" data-id="c-run-r-20261117T084125357765-sph-scoped-run-stays-in-scope" data-who="reckon-build" data-when="2026-11-17T08:48:03Z">
+    <div class="r-comment-body"><p>A run given a scope now resolves one policy in `imas_codex/standard_names/pipeline.py`, and the orchestrator entrance binds the edits predicate to a real run id, so `sn run --only review_name --edits` starts scoped with no extra option (base aborted with `skip_global_maintenance requires scope_run_id or drain_scope_id`; head prints &quot;Scoped run: graph-wide maintenance is bypassed&quot; and exits 0), a scoped run leaves a planted out-of-scope name&#x27;s properties-and-relationships digest unchanged while the direct control arm changes the identical twin, an option combination that cannot be confined is refused at start with the reason (command and direct caller both), both declared negative controls fail on the defect they target, and the whole `tests/standard_names` suite adds 0 failures at head 0aa2cb857 against base 3fb991aa6 (8811 vs 8789 passed).</p></div>
+</div>
 <div class="r-comment" data-section="s2" data-id="c-close-s2" data-who="reckon-build" data-when="2026-11-12T00:45:00Z">
     <div class="r-comment-body"><p>§2 closed (<code>sph-corrects-schema</code>, commits <code>9f4b800b3</code> and <code>09f49e776</code>, review 110). <code>StandardNameSourceRetry.corrects</code> is declared with relationship type <code>CORRECTS</code>; the generated relationships carry the pair; a new endpoint assertion in <code>tests/graph/test_schema_compliance.py</code> passes on the live graph's 20 <code>CORRECTS</code> edges (one declared label pair, none mislabelled) and fails on a <code>StandardNameSource</code>→<code>StandardName</code> edge planted in a disposable graph. Outside scope: the correction records also carry an undeclared <code>correction_of</code> property. <a href="/imas-codex/evidence/fragments/sn-pipeline-hygiene/sph-corrects-schema.html">evidence</a></p></div>
 </div>
@@ -215,9 +221,6 @@
 </div>
 <div class="r-comment" data-section="s9" data-id="c-s9-closed-calibration-module-reached" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-15T22:50:00Z">
     <div class="r-comment-body"><p>Closed. The twelve definitions of the calibration module that nothing reached are deleted (375 lines to 100) and a guard test fails on a planted callerless function. The whole standard-names directory run from an archive at the reviewed head shows two failures, both in <code>test_refine_model_dispatch.py</code> and both present at the base revision: the model-seat route check introduced on main the same afternoon rejects the placeholder model identifiers those tests set. They are not from this change and are carried to the open-findings section. The independent review left four non-blocking findings, which the open-findings section also covers.</p></div>
-</div>
-<div class="r-comment" data-section="s12" data-id="c-run-r-20261117T102905708416-review-of-sph-scoped-run-stays-in-scope-6862a3d1adb5" data-who="reckon-build" data-when="2026-11-17T10:30:21.881Z">
-    <div class="r-comment-body"><p>independent review of r-20261117T084125357765-sph-scoped-run-stays-in-scope at head 6862a3d1a against base 3fb991aa6 — scores goal_fidelity 13, evidence 14, scope_discipline 20, durability 13, fit 17, reuse 15 (total 92), added_failure_count 0 against both gate arms, one blocking finding (an edits-only scope sets the bypass while scope_run_id stays None, so `sn run --only review --edits` aborts at loop.py:1568) and two non-blocking findings, status parsed.</p></div>
 </div>
 </section>
 </main>
