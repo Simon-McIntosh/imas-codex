@@ -18,14 +18,21 @@ pipeline already has rather than building a second harness beside them:
 * the statistics are the two-seat form of
   :mod:`imas_codex.standard_names.review.panel_audit`'s agreement report.
 
-The two readers are seats of the paid panel. No ``[tool.imas-codex.*]`` seat
-composes, refines, generates docs or reviews with either model, and the two are
-different families:
+The two readers are seats of the paid panel. No production seat and no
+selectable review profile composes, refines, generates docs or reviews with
+either model, and the two are different families:
 
-* ``openrouter/google/gemini-4-carbon`` — Google. The repository names it only
-  in a commented-out proposer line, so no pipeline stage calls it.
-* ``openrouter/moonshotai/kimi-k3.1-pro`` — Moonshot. No seat names it; it
-  appears only in historical benchmark candidate lists.
+* ``openrouter/google/gemini-3.8-flash`` — Google. It is a priced endpoint; no
+  ``[tool.imas-codex.<seat>].model`` and no ``sn-review`` seat or profile names
+  it.
+* ``openrouter/moonshotai/kimi-k3.1-pro`` — Moonshot. Same test: no production
+  seat and no review profile names either model.
+
+Both appear in the offline ``sn-benchmark`` candidate slate, which evaluates
+models outside the pipeline rather than composing or reviewing with them.
+:func:`assert_readers_not_pipeline` derives the production set from
+``pyproject.toml`` (seat ``model`` values and every ``sn-review`` ``models``
+list, profiles included) and refuses a reader that appears in it.
 
 Neither reader is told a name's stage, score, review history, or that any name
 is planted. A prompt carries only the audited fields: the name, its stored
@@ -124,7 +131,7 @@ DEFECT_CLASSES: tuple[tuple[str, str], ...] = (
 CLASS_KEYS = tuple(key for key, _ in DEFECT_CLASSES)
 
 READERS: tuple[dict[str, str], ...] = (
-    {"seat": "A", "model": "openrouter/google/gemini-4-carbon", "family": "google"},
+    {"seat": "A", "model": "openrouter/google/gemini-3.8-flash", "family": "google"},
     {"seat": "B", "model": "openrouter/moonshotai/kimi-k3.1-pro", "family": "moonshot"},
 )
 
@@ -251,7 +258,14 @@ def load_plants(
             and row["name"] not in in_sample
         ]
         pool.sort(key=lambda row: rank("plant", row["name"]))
-        chosen[verdict] = pool[:PLANTS_PER_SIDE]
+        seen: set[str] = set()
+        unique = []
+        for row in pool:
+            if row["name"] in seen:
+                continue
+            seen.add(row["name"])
+            unique.append(row)
+        chosen[verdict] = unique[:PLANTS_PER_SIDE]
     plants: list[dict[str, Any]] = []
     for verdict, known in (("incorrect", "defective"), ("correct", "sound")):
         for row in chosen[verdict]:
@@ -268,24 +282,24 @@ def load_plants(
             )
     return plants, {
         "defective_pool": len(
-            [
-                row
+            {
+                row["name"]
                 for row in verdicts
                 if row["verdict"] == "incorrect"
                 and row["name"] in live
                 and row["path"] in live[row["name"]]
                 and row["name"] not in in_sample
-            ]
+            }
         ),
         "sound_pool": len(
-            [
-                row
+            {
+                row["name"]
                 for row in verdicts
                 if row["verdict"] == "correct"
                 and row["name"] in live
                 and row["path"] in live[row["name"]]
                 and row["name"] not in in_sample
-            ]
+            }
         ),
         "plants": len(plants),
         "label_source": (
@@ -305,7 +319,7 @@ def load_dd_context(gc: Any, names: list[dict[str, Any]]) -> None:
     all_paths: set[str] = set()
     primaries: dict[str, str] = {}
     for row in names:
-        dd = split_source_paths(row.get("source_paths") or [])["dd"]
+        dd = split_source_paths(row.get("source_paths") or []).get("dd", [])
         row["dd_paths"] = dd
         all_paths.update(dd)
         if dd:
@@ -379,7 +393,7 @@ def names_by_dd_source(live_rows: list[dict[str, Any]]) -> dict[str, list[str]]:
 
     out: dict[str, list[str]] = defaultdict(list)
     for row in live_rows:
-        for path in split_source_paths(row.get("source_paths") or [])["dd"]:
+        for path in split_source_paths(row.get("source_paths") or []).get("dd", []):
             out[path].append(row["id"])
     return out
 
@@ -649,6 +663,15 @@ def round4(value: float | None) -> float | None:
     return None if value is None else round(value, 4)
 
 
+def _share(count: int, n: int) -> dict[str, Any]:
+    low, high = wilson(count, n)
+    return {
+        "names": count,
+        "rate": round(count / n, 4) if n else None,
+        "ci": [round(low, 4), round(high, 4)],
+    }
+
+
 # --------------------------------------------------------------------------- #
 # Summary
 # --------------------------------------------------------------------------- #
@@ -670,7 +693,6 @@ def summarize(
     complete = [
         name
         for name in requested
-        if ("A", name) or ("B", name)
         if ("A", name) in readings and ("B", name) in readings
     ]
     n = len(complete)
@@ -710,6 +732,10 @@ def summarize(
             "one_reader": c_a + c_b,
             "any": total,
             "agreement": round((c_both + c_n) / n, 4) if n else None,
+            "agreement_ci": [
+                round(wilson(c_both + c_n, n)[0], 4),
+                round(wilson(c_both + c_n, n)[1], 4),
+            ],
             "kappa": round4(kappa(c_both, c_a, c_b, c_n)),
             "rate_any": round(total / n, 4) if n else None,
             "ci_any": [round(c_low, 4), round(c_high, 4)],
@@ -803,6 +829,17 @@ def summarize(
         "readers": [dict(r) for r in READERS],
         "draw": draw,
         "names_read": n,
+        "requested": len(requested),
+        "missing_pairs": [
+            {
+                "name": name,
+                "missing": [
+                    seat for seat in ("A", "B") if (seat, name) not in readings
+                ],
+            }
+            for name in requested
+            if name not in complete
+        ],
         "sampled": len(sampled),
         "planted": len(plants),
         "per_reader": per_reader,
@@ -814,10 +851,29 @@ def summarize(
             "at_least_one": at_least_one,
             "at_least_one_rate": round(at_least_one / n, 4) if n else None,
             "at_least_one_ci": [round(low, 4), round(high, 4)],
+            "rows": {
+                "both": _share(both, n),
+                "exactly_one": _share(only_a + only_b, n),
+                "neither": _share(neither, n),
+            },
             "observed_agreement": round((both + neither) / n, 4) if n else None,
+            "observed_agreement_ci": [
+                round(wilson(both + neither, n)[0], 4),
+                round(wilson(both + neither, n)[1], 4),
+            ],
             "kappa": round4(kappa(both, only_a, only_b, neither)),
         },
         "per_class": per_class,
+        "defective_names": [
+            {
+                "name": name,
+                "A": readings[("A", name)].get("defect_classes", []),
+                "B": readings[("B", name)].get("defect_classes", []),
+            }
+            for name in complete
+            if readings[("A", name)].get("defect_classes")
+            or readings[("B", name)].get("defect_classes")
+        ],
         "groups": groups,
         "planted_detail": planted,
         "disagreements": disagreements,
@@ -888,7 +944,7 @@ def render_page(summary: dict[str, Any]) -> str:
         f"{summary['draw']['frame']} names in the {len(summary['draw']['groups'])} "
         f"physics-domain groups of at least {MIN_GROUP} names, plus "
         f"{summary['planted']} planted names, were read by "
-        f"{esc(per['A']['model'])} and {esc(per['B']['model'])}. Each reader "
+        f"{esc(READERS[0]['model'])} and {esc(READERS[1]['model'])}. Each reader "
         f"returned every fixed class that applies, or none. "
         f"<strong>{defective['at_least_one']} of {summary['names_read']} names "
         f"({fmt(defective['at_least_one_rate'])}, 95\u2009% CI "
@@ -902,6 +958,17 @@ def render_page(summary: dict[str, Any]) -> str:
         f"<strong>USD {summary['spend']['total']:.2f}</strong> of the USD "
         f"{SPEND_CEILING:.0f} ceiling.</p>"
     )
+    if summary["missing_pairs"]:
+        missing = "; ".join(
+            f"<code>{esc(row['name'])}</code> (no reader {'/'.join(row['missing'])})"
+            for row in summary["missing_pairs"]
+        )
+        rows.append(
+            f'<p id="sagr-blind-audit-missing">{summary["names_read"]} of '
+            f"{summary['requested']} requested names carry both readings; "
+            f"{missing} returned no content at the token cap after two attempts "
+            "and is excluded from every paired statistic.</p>"
+        )
 
     rows.append(
         '<h2 id="sagr-blind-audit-defective">Defective in any class</h2>'
@@ -915,13 +982,17 @@ def render_page(summary: dict[str, Any]) -> str:
             f"<td>{fmt(item['rate'])}</td>"
             f"<td>{fmt(item['ci'][0])}–{fmt(item['ci'][1])}</td></tr>"
         )
-    rows.append(
-        f"<tr><td>both readers</td><td>{defective['both']}</td><td>—</td><td>—</td></tr>"
-        f"<tr><td>exactly one reader</td><td>{defective['only_A'] + defective['only_B']}</td>"
-        f"<td>—</td><td>—</td></tr>"
-        f"<tr><td>neither reader</td><td>{defective['neither']}</td><td>—</td><td>—</td></tr>"
-        "</tbody></table>"
-    )
+    for label, key in (
+        ("both readers", "both"),
+        ("exactly one reader", "exactly_one"),
+        ("neither reader", "neither"),
+    ):
+        rows.append(
+            f"<tr><td>{label}</td><td>{defective['rows'][key]['names']}</td>"
+            f"<td>{fmt(defective['rows'][key]['rate'])}</td>"
+            f"<td>{fmt(defective['rows'][key]['ci'][0])}–{fmt(defective['rows'][key]['ci'][1])}</td></tr>"
+        )
+    rows.append("</tbody></table>")
     rows.append(
         '<p id="sagr-blind-audit-any-note">Defective in any class means the '
         "reader returned at least one class. A name with two defects is counted "
@@ -932,7 +1003,7 @@ def render_page(summary: dict[str, Any]) -> str:
         '<h2 id="sagr-blind-audit-classes">Per class</h2>'
         '<table id="sagr-blind-audit-classes-table"><thead><tr><th>Class'
         "</th><th>Both</th><th>Only A</th><th>Only B</th><th>Any</th><th>Share "
-        "of names</th><th>95&#8201;% CI</th><th>Agreement</th><th>&kappa;</th>"
+        "of names</th><th>95&#8201;% CI</th><th>Agreement (95&#8201;% CI)</th><th>&kappa;</th>"
         "</tr></thead><tbody>"
     )
     for key in CLASS_KEYS:
@@ -942,7 +1013,7 @@ def render_page(summary: dict[str, Any]) -> str:
             f"<td>{item['only_A']}</td><td>{item['only_B']}</td>"
             f"<td>{item['any']}</td><td>{fmt(item['rate_any'])}</td>"
             f"<td>{fmt(item['ci_any'][0])}–{fmt(item['ci_any'][1])}</td>"
-            f"<td>{fmt(item['agreement'])}</td><td>{item['kappa']}</td></tr>"
+            f"<td>{fmt(item['agreement'])} ({fmt(item['agreement_ci'][0])}–{fmt(item['agreement_ci'][1])})</td><td>{item['kappa']}</td></tr>"
         )
     rows.append("</table>")
 
@@ -1093,7 +1164,9 @@ def build_items() -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, 
         sampled_ids = {row["id"] for row in sampled}
         live_by_source = names_by_dd_source(live)
         live_sources = {
-            row["id"]: set(split_source_paths(row.get("source_paths") or [])["dd"])
+            row["id"]: set(
+                split_source_paths(row.get("source_paths") or []).get("dd", [])
+            )
             for row in live
         }
         plants, plant_meta = load_plants(live_sources, sampled_ids)
@@ -1117,6 +1190,39 @@ def build_items() -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, 
     return items, draw, plants
 
 
+def pipeline_models() -> set[str]:
+    """Every model the pipeline seats compose, refine, document or review with."""
+    import tomllib
+
+    data = tomllib.loads((FRAGMENTS.parents[3] / "pyproject.toml").read_text())
+    found: set[str] = set()
+
+    def walk(node: Any) -> None:
+        if isinstance(node, dict):
+            for key, value in node.items():
+                if key == "model" and isinstance(value, str):
+                    found.add(value)
+                elif key == "models" and isinstance(value, list):
+                    found.update(str(item) for item in value)
+                walk(value)
+        elif isinstance(node, list):
+            for item in node:
+                walk(item)
+
+    walk(data.get("tool", {}).get("imas-codex", {}))
+    return found
+
+
+def assert_readers_not_pipeline(reviewers: tuple[dict[str, str], ...]) -> None:
+    """Refuse a reader the pipeline composes or reviews with."""
+    used = pipeline_models()
+    for reviewer in reviewers:
+        if reviewer["model"] in used:
+            raise AssertionError(
+                f"reader {reviewer['seat']} uses a pipeline model: {reviewer['model']}"
+            )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
@@ -1126,6 +1232,7 @@ def main() -> int:
     parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
 
+    assert_readers_not_pipeline(READERS)
     items, draw, plants = build_items()
     if args.limit:
         items = items[: args.limit]
@@ -1170,9 +1277,45 @@ def main() -> int:
     return 2
 
 
+def stored_snapshot(ids: list[str]) -> dict[str, str]:
+    """A digest of every stored field an audit must leave unchanged."""
+    gc = graph_client()
+    try:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName) WHERE sn.id IN $ids
+            RETURN sn.id AS id,
+                   coalesce(sn.description,'') AS description,
+                   coalesce(sn.documentation,'') AS documentation,
+                   coalesce(sn.unit,'') AS unit,
+                   coalesce(sn.physics_domain,'') AS physics_domain,
+                   coalesce(sn.name_stage,'') AS name_stage,
+                   coalesce(sn.status,'') AS status
+            """,
+            ids=ids,
+        )
+    finally:
+        gc.close()
+    return {
+        str(row["id"]): hashlib.sha256(
+            json.dumps(
+                [
+                    row.get("description"),
+                    row.get("documentation"),
+                    row.get("unit"),
+                    row.get("physics_domain"),
+                    row.get("name_stage"),
+                    row.get("status"),
+                ]
+            ).encode()
+        ).hexdigest()
+        for row in rows
+    }
+
+
 def persist(readings: list[dict[str, Any]]) -> int:
     """Write each reading as a non-deciding review record."""
-    from imas_codex.standard_names import graph_store
+    from imas_codex.standard_names.graph_store import graph_catalog
     from imas_codex.standard_names.review.pipeline import _build_review_record
 
     records = []
@@ -1215,6 +1358,8 @@ def persist(readings: list[dict[str, Any]]) -> int:
         if not record:
             continue
         record.update(
+            id=f"{reading['name']}:blind-audit:{reading['seat']}",
+            standard_name_id=reading["name"],
             review_axis="name",
             cycle_index=-1,
             review_group_id=group,
@@ -1224,9 +1369,29 @@ def persist(readings: list[dict[str, Any]]) -> int:
             llm_tokens_cached_write=0,
         )
         records.append(record)
-    written = graph_store.write_reviews(records, skip_cost=True, services=graph_store)
-    print(f"persisted {written} audit records")
-    return 0
+    ids = sorted({reading["name"] for reading in readings if not reading.get("error")})
+    before = stored_snapshot(ids)
+    written = graph_catalog.write_reviews(records, skip_cost=True)
+    after = stored_snapshot(ids)
+    changed = sorted(
+        name for name, digest in before.items() if after.get(name) != digest
+    )
+    verification = {
+        "records_written": int(written),
+        "names_snapshotted": len(ids),
+        "stored_text_changed": changed,
+        "method": (
+            "sha256 of description, documentation, unit, physics_domain, "
+            "name_stage and status for every audited name, before and after "
+            "the audit-record write"
+        ),
+    }
+    STATE.mkdir(parents=True, exist_ok=True)
+    (STATE / "persist-verification.json").write_text(
+        json.dumps(verification, indent=1) + "\n"
+    )
+    print(json.dumps(verification, indent=1))
+    return 1 if changed else 0
 
 
 if __name__ == "__main__":
