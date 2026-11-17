@@ -85,7 +85,12 @@ def test_document_mapping_requires_explicit_match_and_reference():
     labelled = classify_categories([category()], [], [rule("document")])
     assert labelled[0].kind_source == "document:invented-source"
     with pytest.raises(ValueError):
-        PulseKindRule(kind="test", source="document", pattern="test", reference=" ")
+        PulseKindRule(
+            kind="invented kind",
+            source="document",
+            pattern="invented evidence",
+            reference=" ",
+        )
     with pytest.raises(ValueError):
         rule(pattern="[")
 
