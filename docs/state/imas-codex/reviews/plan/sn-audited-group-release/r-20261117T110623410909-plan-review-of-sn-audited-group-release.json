@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T11:09:12.361Z",
+  "dispatched_at": "2026-11-17T11:07:43Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:41",
+      "id": "done_when-1",
+      "reason": "without a plant, the node satisfies its done-when by cutting a passing real group and never exercises the route s4 now says it may close on.",
+      "text": "s4 now permits the first group to be \"reported and not cut\" when it misses the bar within the spend ceiling, but the section's only planted control is the sorting step's pipeline-defect run; nothing plants a group whose audited rate is above the bar and shows it reported with its rate after repair, its causes and its spend rather than cut, so the branch this change added is an assertion that cannot fail (\u00a75 received exactly this control after the earlier review)",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:37",
+      "id": "reasoning-1",
+      "reason": "the threshold must be set from achievable reader performance with a stated correction, or the fallback must say how the deciding reader's measured error is carried into the bar and the group rate, otherwise \u00a74 audits a 200-name group at 65 % recall/35 % false alarm while its evidence claims a fitness gate fired.",
+      "text": "s3 defines \"fit to decide\" as finding at least 90 % of the known-defective and flagging at most 10 % of the known-sound on the planted names, while the re-read the plan cites records 13 of 20 (65.0 %) known-defective found and 7 of 20 (35.0 %) known-sound flagged for the frontier reader, and 9 of 20 / 11 of 20 recall with 5 of 20 false alarms for the \u00a71 readers (docs/evidence/fragments/sn-audited-group-release/frontier-third-reader.json, \"planted\"), so no measured reader meets it; at 20 + 20 plants a 90 %/10 % rule also carries an interval far wider than the twenty points \u00a71 refuses to state a group rate from, so the threshold cannot discriminate; the fallback then lets the lead choose an unfit reader and requires only that its measured recall and false-alarm rate \"be stated beside every rate it produces\", never that the error be removed from the bar or from the \u00a74 group rates \u2014 so the bar is fixed and every group is audited by a reader the section's own criterion rejects, which is precisely the basis the 2026-11-17 ruling calls too weak",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "d186a7965a076250525d6bc1611095365624296c",
+  "plan_fingerprint": "9b9544c89f2f5ec076fd29e9b7e8fe5c925362eccada6a20ac8c5cd7f47aac3e",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 16,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T110623410909-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "d2b4467150027a5bc569d9c283fce073e7a29c43",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a71, \u00a72, \u00a73, \u00a75 and docs/evidence/fragments/sn-audited-group-release/ resolve in the snapshot (the directory holds sagr-blind-audit.html and sagr-frontier-third-reader.html), \u00a72's figures quoted in s4 match \u00a72, and sn-definitions-by-construction#s11 resolves to the enclosing-structure section s4's regeneration context depends on.",
+    "done_when": "a finding \u2014 s4's newly added report-and-not-cut route has no planted group; the section's only recorded refusal is the sorting step's pipeline-defect plant.",
+    "evidence_paths": "pass \u2014 both changed units commit their refusal runs, audit record, repair comparison and evidence page under docs/evidence/fragments/sn-audited-group-release/, which exists and is committed in the repository.",
+    "naming": "pass \u2014 the s3/s4 change introduces no plan labels, stage names, ticket numbers or changelog prose into symbols or code-facing text.",
+    "reasoning": "a finding \u2014 s3's reader-fitness threshold is unmeetable by the readings the plan itself cites, so the primary path has no instance and the fallback reinstates the readers the section exists to escape.",
+    "single_goal": "pass \u2014 s4 closes once on the first group's disposition (cut, or reported-and-ruled), and the repair comparison is declared evidence that neither closes nor holds it, which is the earlier review's declined item left unchanged.",
+    "wiring": "pass \u2014 the declarations resolve s3\u2192{s1,s2}, s4\u2192{s2,s3,sn-definitions-by-construction#s11}, s5\u2192{s4}, and each artefact a section consumes (the \u00a72 order and family-ruling list, the \u00a73 readers and bar, the enclosing-structure review) is produced by the node the declaration names."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "aa90814bf7fe5b0dc6fc4403fa5241ca76667bad628c7228a5c12b5713272289",
+    "s3": "7db59c6650c64d63f367db9d53bd4d95321e8259b324c941973b1ae2451750a1",
+    "s4": "1d06cbf1feb3764bc6d658b4ee8377d5a05943d379c412faebd353baac54e718",
+    "s5": "a2f0b01700b8c8cb79bcd7145c31c0af85e63c939ec7ef4ebb63bdf44d51035d"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T11:23:32.735239+00:00",
+  "total": null
+}
