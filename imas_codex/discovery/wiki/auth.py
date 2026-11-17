@@ -52,6 +52,11 @@ logger = logging.getLogger(__name__)
 # Service name prefix for all imas-codex credentials
 SERVICE_PREFIX = "imas-codex"
 
+
+class CredentialStoreUnavailable(RuntimeError):
+    """The credential store could not be read; its contents are unknown."""
+
+
 # Session TTL in seconds (default: 72 hours)
 DEFAULT_SESSION_TTL = 72 * 60 * 60
 
@@ -216,13 +221,8 @@ def _forward_dbus_socket(login_node: str) -> bool:
             stderr=subprocess.PIPE,
         )
 
-        # Wait briefly for the socket to appear
-        for _ in range(10):
-            if Path(local_socket).exists():
-                break
-            time.sleep(0.3)
-        else:
-            # Check if SSH failed
+        deadline = time.monotonic() + 15
+        while True:
             if proc.poll() is not None:
                 stderr = proc.stderr.read().decode() if proc.stderr else ""
                 logger.warning(
@@ -231,9 +231,14 @@ def _forward_dbus_socket(login_node: str) -> bool:
                     stderr.strip(),
                 )
                 return False
-            logger.warning("D-Bus forward socket did not appear in time")
-            proc.terminate()
-            return False
+            if Path(local_socket).exists():
+                break
+            remaining = deadline - time.monotonic()
+            if remaining <= 0:
+                logger.warning("D-Bus forward socket did not appear within 15 seconds")
+                proc.terminate()
+                return False
+            time.sleep(min(0.3, remaining))
 
         _dbus_forward_socket = local_socket
         _dbus_forward_pid = proc.pid
@@ -503,7 +508,7 @@ class CredentialManager:
 
         return creds_json
 
-    def _keyring_op(self, func, *args, **kwargs):
+    def _keyring_op(self, func, *args, raise_on_error: bool = False, **kwargs):
         """Run a keyring operation with timeout.
 
         Prevents blocking when GNOME Keyring prompts for unlock password.
@@ -511,6 +516,7 @@ class CredentialManager:
         Args:
             func: Function to call (e.g., keyring.get_password)
             *args: Positional arguments for func
+            raise_on_error: Report an unreadable store instead of an empty result.
             **kwargs: Keyword arguments for func
 
         Returns:
@@ -531,9 +537,17 @@ class CredentialManager:
             # Disable keyring for this session to avoid repeated timeouts
             self._keyring_available = False
             CredentialManager._keyring_timed_out = True
+            if raise_on_error:
+                raise CredentialStoreUnavailable(
+                    "System keyring read timed out"
+                ) from None
             return None
         except Exception as e:
             logger.debug("Keyring operation failed: %s", e)
+            if raise_on_error:
+                raise CredentialStoreUnavailable(
+                    "System keyring could not be read"
+                ) from None
             return None
         finally:
             executor.shutdown(wait=False, cancel_futures=True)
@@ -613,11 +627,14 @@ class CredentialManager:
     def get_stored_credentials(self, site: str) -> tuple[str, str] | None:
         """Read credentials from the system keyring without prompts or env fallback."""
         if not self._keyring_available:
-            return None
+            raise CredentialStoreUnavailable(
+                "System keyring is unavailable; credential storage could not be read"
+            )
         import keyring
 
         value = self._keyring_op(
-            lambda: keyring.get_password(self._service_name(site), "credentials")
+            lambda: keyring.get_password(self._service_name(site), "credentials"),
+            raise_on_error=True,
         )
         if not value:
             return None

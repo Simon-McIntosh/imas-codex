@@ -1,0 +1,141 @@
+<article id="idm-document-fetch-evidence">
+  <h2>Controlled production reads find records but no IDM document-serving route</h2>
+  <p>The retained advertised API does not provide an IDM document-serving route.
+  A known-present plant-by-code control returned HTTP 200 and its preselected
+  native identity, while all <strong>13 selected alternate-application
+  document-reference readers returned HTTP 204</strong> for the first named
+  document. No document reader returned HTTP 200, so the authorized conditional
+  sequence did not proceed to versions, file bytes or the second document.
+  <strong>Zero document files were fetched.</strong></p>
+
+  <h3>Offline route inventory and controlled continuation</h3>
+  <p>Before any further request, the retained cross-application description was
+  searched by path and tag for <code>document</code>, <code>idm</code>,
+  <code>version</code>, <code>file</code>, <code>attachment</code> and
+  <code>download</code>. It yielded <strong>1,187 candidate GET operations</strong>,
+  including 22 document-named content readers and 36 IDM-named GETs. The latter
+  belong to an F4E transfer application. Creation-style GETs and transfer
+  operations were excluded from live reads. No document version-list GET was
+  found; the same search found an unrelated published component-attribute
+  all-versions GET as a positive control.</p>
+  <p>Response schemas distinguish document containers and references from IDM
+  documents themselves. Thirteen document-named readers contain explicit IDM
+  document/version or engineering-document-version references and were selected
+  before live probing. Their published templates, schema fields, exclusions and
+  response codes are recorded privately. No operation directly names the
+  <code>IdmGenericDocument</code> response schema; the same reference scanner
+  found five operations naming the known plant response schema.</p>
+  <table>
+    <thead><tr><th>Check</th><th>Observed result</th><th>Interpretation</th></tr></thead>
+    <tbody>
+      <tr><td>Known-present plant by code</td><td>One published GET, HTTP 200, expected preselected native identity returned</td><td>The records application and authenticated session work on production.</td></tr>
+      <tr><td>Alternate-application document readers</td><td>13 published GETs; all HTTP 204 with no content</td><td>None of the selected document-reference containers serves the first named IDM identity.</td></tr>
+      <tr><td>Authentication/permission/server stop boundary</td><td>No production HTTP 401, 403 or 5xx observed</td><td>The run did not renew around a forbidden response or reinterpret one as empty content.</td></tr>
+      <tr><td>Version, file and second-document continuation</td><td>Not entered: no document reader returned HTTP 200</td><td>No document metadata, version, revision mapping or file property was obtained.</td></tr>
+    </tbody>
+  </table>
+  <p>The continuation made <strong>18 production GETs of the 25 allowed</strong>:
+  fourteen published data API reads and four GETs in the authorized sign-in and
+  verification exchange. All eighteen count against the ceiling. The seven
+  unused requests were unnecessary because no reader enabled the version/file
+  continuation. There were zero production requests using any other method.
+  The client used the shared pacer with a one-second minimum interval. Every
+  request has a private method, path-template/path, phase and status receipt;
+  gateway navigation is explicitly distinguished from published data routes.
+  The session is closed.</p>
+  <p>Including the prior attempt, the application host received exactly
+  <strong>27 GET, 0 HEAD, 0 POST, 0 PUT, 0 PATCH and 0 DELETE requests</strong>.
+  The prior attempt made nine GETs, including the first candidate's empty exact
+  UID lookup and generic records-reader HTTP 204. That observation was initially
+  left unclassified. The controlled continuation tests the alternative-application
+  hypothesis; the known-present control passes but no selected application
+  returns the document. A setup probe refused its own unpublished pre-exchange
+  verification GET before transport, producing zero requests; it was corrected
+  to enter the already authorized sign-in exchange explicitly.</p>
+
+  <h3>Every production route tried</h3>
+  <p>These are the complete production route templates across both attempts.
+  Literal document identities and query values remain private. Gateway paths
+  are sign-in navigation, not data API reads. The counts in this table sum to
+  27 GET requests; every other production method has count zero.</p>
+  <table>
+    <thead><tr><th>Method and path template</th><th>Outcome and count</th><th>What was returned</th></tr></thead>
+    <tbody>
+      <tr><td><code>GET /docs/main-webapi/v1/swagger.json</code></td><td>HTTP 200 (3 requests), HTTP 302 (1 request)</td><td>API description verification/read; no document file.</td></tr>
+      <tr><td><code>GET /</code></td><td>HTTP 200 (2 requests), HTTP 302 (2 requests)</td><td>Gateway navigation and authenticated landing; no document file.</td></tr>
+      <tr><td><code>GET /my.policy</code></td><td>HTTP 302 (2 requests)</td><td>Gateway sign-in redirect; no document file.</td></tr>
+      <tr><td><code>GET /api/main/search/uid</code></td><td>HTTP 200 (1 request)</td><td>Exact first-document UID search: empty array; no permission inference.</td></tr>
+      <tr><td><code>GET /api/main/landing/openapi</code></td><td>HTTP 200 (1 request)</td><td>Cross-application description returned JSON.</td></tr>
+      <tr><td><code>GET /api/machine-component/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>Generic records reader: no content for the first document.</td></tr>
+      <tr><td><code>GET /api/machine-component/pbs/type/search</code></td><td>HTTP 200 (1 request)</td><td>Known-present plant control: expected preselected native identity returned.</td></tr>
+      <tr><td><code>GET /api/rqm/docref/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/construction/cdp/contractor-document/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/construction/dossier/documentlink/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/hop/documentlink/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/hop/dossier/documentlink/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/icp4-lite-apps/document-standard/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/cad-document-package/cad-document-cabling-eng-package/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/cad-document-package/cad-document-eng-package/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/cad-document-package/cad-document-one-dimension-eng-package/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/cad-document-package/cad-document-piping-and-instrumentation-eng-package/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/cad-document-package/cad-document-process-flow-diagram-eng-package/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/cad-document-package/cad-document-single-line-eng-package/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+      <tr><td><code>GET /api/cad-document-package/cad-document-three-dimension-eng-package/content/{uid}</code></td><td>HTTP 204 (1 request)</td><td>First-document UID read: no content; version/file continuation not entered.</td></tr>
+    </tbody>
+  </table>
+
+  <h3>Delivered host and credential guards</h3>
+  <p>The shared records client and request pacer were merged before extending
+  access. Readable application hosts now come from ignored private facility
+  configuration. Constructor and environment origin selectors cannot widen the
+  allowlist. The same method, sign-in, redirect, session and adapter checks
+  apply to every allowed host; production details remain private.</p>
+  <p>The merged baseline passed <strong>196 tests</strong>. Before the host
+  repair, new checks reproduced 22 failures. The committed focused gate passed
+  <strong>378 tests</strong>, including the refusal suite on two synthetic
+  application hosts, records, pacing and credential forwarding. Deliberately
+  permitting application writes in the test process caused
+  <strong>86 refusal tests to fail</strong>, including API POSTs before, during
+  and after sign-in on the synthetic production host. No corresponding failing
+  IDs occur in the unmutated head arm. The final focused gate and mutation are
+  rerun after merging the current main branch. Host-sensitive URLs, gateway
+  forms and cookie domains now resolve from each active synthetic host.</p>
+  <p>The credential repair remains included: a socket appearing after five
+  seconds reproduced a three-second timeout, returning <code>False</code> and
+  logging <code>D-Bus forward socket did not appear in time</code>. The forward
+  now waits at most fifteen seconds and reports early SSH exit stderr.
+  Unavailable keyring access raises a distinct error instead of appearing to
+  mean no credentials are stored. Its mutation produced four failed checks
+  against the passing head.</p>
+
+  <h3>Accepted finding and document-source handoff</h3>
+  <p><strong>Complete under the accepted finding form:</strong> no published GET
+  used in this bounded investigation returned the document's file; the known-present
+  control succeeded and every selected document-reference reader returned 204.
+  No other method or data host was used to obtain a file. The document-source
+  question returns to the lead through the coordinator and is not a blocker on
+  this delivery. No further live requests were made for finalization.</p>
+  <p>No file was fetched, so file signatures, page counts, versions, stored paths,
+  sizes, digests and spreadsheet sheet/row counts are not applicable to this
+  closing form. No usable file route was reached for a document ACL or
+  missing-version control; neither is claimed. Empty references and HTTP 204
+  are never represented as explicit permission denial. Legacy source pointers
+  and their provenance limitations remain only in private notes.</p>
+  <p>The tracked-tree search includes the private application origin, both
+  preselected document identities and native identities/reference text returned
+  by the plant control. Known client source is the positive search control.
+  No fetched file content exists. Private configuration remains appended without
+  reserialization; credentials, cookies and tokens were neither printed nor
+  retained by these probes.</p>
+  <p>Private continuation receipts are
+  <code>production-document-route-candidates.json</code>,
+  <code>production-document-probe-selection.json</code>,
+  <code>production-resume-presend-refusal.json</code>,
+  <code>production-resumed-session.json</code>,
+  <code>production-resumed-outcome.json</code>,
+  <code>production-resumed-boundary.json</code> and
+  <code>legacy-document-route-pointers.json</code>, alongside the earlier guard,
+  credential and production receipts. Inventory counts describe the retained
+  filtered description; the earlier auth-key redaction removed some path keys,
+  so these are not claimed as complete unredacted API totals.</p>
+</article>
