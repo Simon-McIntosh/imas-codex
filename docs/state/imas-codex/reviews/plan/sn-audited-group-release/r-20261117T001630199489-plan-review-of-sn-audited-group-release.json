@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T00:17:48.721Z",
+  "dispatched_at": "2026-11-17T00:17:36Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-audited-group-release.html:37",
+      "id": "reasoning-1",
+      "reason": "the section that orders the releases permits a split that the release bar makes permanently uncuttable.",
+      "text": "s3's done-when refuses every group \"when a family of the group has a member in another group\", but s2's done-when merely lists the families whose members sit in more than one group and explicitly puts \"any proposed split or merge of a group\" to the lead as an allowed choice, and neither s2 nor s3 nor s5 states how a cross-group family is cleared (a joint cut of both groups, a member move, or a lead-ruled exception); families share a stem across physics domains by construction, so a group whose family straddles two of them is refused by its own bar and no node's verdict can close it",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-audited-group-release.html:33",
+      "id": "done_when-1",
+      "reason": "without a control name of known answer the census cannot fail, and the release order and group rates derived from it carry that undetected error into every later section.",
+      "text": "s2's done-when requires per-group live counts, the count whose domain is among its sources' domains, and the audit's wrong-domain count, with no planted member whose answer is known, so a source-domain join or domain read that silently matches nothing produces a uniform census (every count zero or every count \"agrees\") that reads as success and then fixes the ranking that s4 and s5 are ordered by",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "00170b9803954167e1960dd570381368851388f7",
+  "plan_fingerprint": "8a6384e39055cc07783b9057f517e501d1e2b8374225729d043e15d1574fbfd2",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T001630199489-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "543fa08b40a5b4941d5fcd2de5f34abc176d75a9",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 every `\u00a7n` reference resolves within the snapshot (s1-s5 at lines 29, 33, 37, 41, 45), the cited evidence directory exists, and `sn-definitions-by-construction#s11` resolves at line 155 of that plan; the snapshot is byte-identical to reviewed blob 543fa08b.",
+    "done_when": "a finding \u2014 s2 states counts and a source-domain agreement figure but declares no negative control, so a join that returns nothing reads as a settled census.",
+    "evidence_paths": "pass \u2014 every section commits its evidence under `docs/evidence/fragments/sn-audited-group-release/`, a durable in-repository path that exists and already holds this plan's section briefs.",
+    "naming": "pass \u2014 no module, function, ticket number or version tag is named in the five sections; the pipeline is referred to by role (\"the pipeline's own write paths\", \"the signed edit path\") and the only identifiers are section numbers.",
+    "reasoning": "a finding \u2014 s3 refuses a cut \"when a family of the group has a member in another group\" while s2 reports cross-group families as expected and permits a group split, and no section states how that boundary is ever cleared.",
+    "single_goal": "pass \u2014 each section names one deliverable: a blind audit with its planted control, a membership census and ruled order, a bar with its recorded refusal runs, the first group brought to the bar and cut, and the remaining groups following the same route.",
+    "wiring": "pass \u2014 s2 depends on s1, s3 on s1, s4 on s2 and s3, s5 on s4, and s4's cross-plan dependency `sn-definitions-by-construction#s11` resolves; no declared edge points at the wrong node."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "64e5908c42b7c37fecd6c49edbecc9b64b4e448bc4ac1e9d4db7457e0ae27e81",
+    "s3": "5bf1856d8a3ca2ec61b972901c47af6a328eeb66c301c9fb3a5e691d0f22020a",
+    "s4": "5b9524c06f6145d23a080ade4a98727e693a362f476b8d9d266c8da5118ad216",
+    "s5": "f0ee018e09aed5387d06a0afa7fed73304ba3b121e2598ec77e830c5db06e9ae"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:29:18.982218+00:00",
+  "total": null
+}
