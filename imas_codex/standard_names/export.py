@@ -1935,7 +1935,11 @@ def _group_audit_issues(
     total = len(members)
     if ruling is not None and total:
         allowed = set(ruling.defect_exceptions)
-        undecided = [name for name in sorted(members) if name in record.undecided]
+        undecided = [
+            name
+            for name in sorted(members)
+            if name in record.undecided and name not in allowed
+        ]
         defective = [
             name
             for name in members
@@ -1951,9 +1955,7 @@ def _group_audit_issues(
                     "rate": round(rate, 6),
                     "bar": ruling.max_defect_rate,
                     "defective": len(defective),
-                    "undecided": len(
-                        [name for name in undecided if name not in allowed]
-                    ),
+                    "undecided": len(undecided),
                     "members": total,
                     "names": defective[:20],
                     "detail": (
