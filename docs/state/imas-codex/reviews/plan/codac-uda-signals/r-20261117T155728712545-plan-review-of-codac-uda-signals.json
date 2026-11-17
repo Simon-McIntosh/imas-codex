@@ -33,7 +33,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 66,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1ddbfed7767cdf87cdabb6d375fb3acdcc9111e2",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The next version corrects the premise: pulse descriptions are already imported, so the section measures how many pulses carry one, and its schema changes are a pulse status and a category kind with its source.",
+      "reason": "",
+      "when": "2026-11-17T16:18:24.805171+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "1ddbfed7767cdf87cdabb6d375fb3acdcc9111e2",
+      "commit_basis": "edit",
+      "note": "The next version corrects the premise: pulse descriptions are already imported, so the section measures how many pulses carry one, and its schema changes are a pulse status and a category kind with its source.",
+      "reason": "",
+      "when": "2026-11-17T16:18:24.805171+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261117T155728712545-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261117T155728712545-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "7b5d51bde2b61c89a77474e6c1c7914b4a3b01cb",
   "rubric": "content",
