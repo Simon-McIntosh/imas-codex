@@ -353,3 +353,20 @@ def test_open_pulse_requires_explicit_window_and_keeps_its_missing_end(reader, r
     )
     assert len(signal.time) == 3
     assert pulse["end_ns"] is None
+
+
+def test_exact_native_name_can_load_without_an_imported_graph_identity(reader, result):
+    native = {**result, "name": "DEMO-NATIVE:CURRENT", "unit": "A"}
+    reader._request = Mock(return_value=native)
+    signal = reader.read(
+        "DEMO-NATIVE:CURRENT",
+        start=0,
+        end=3,
+        mode="raw",
+        max_samples=100,
+        max_bytes=10000,
+    )
+    assert reader._request.call_args.kwargs["name"] == "DEMO-NATIVE:CURRENT"
+    np.testing.assert_array_equal(signal.values, np.array([2, 4, 8]))
+    assert signal.metadata["unit"] == "A"
+    assert signal.metadata["time_base"] == "epoch_ns"

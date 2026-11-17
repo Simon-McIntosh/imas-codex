@@ -97,16 +97,20 @@ continuation is `None`. Category matching is a literal, case-insensitive
 substring in the name or description, not a wildcard or semantic search. If a
 long prose request matches nothing, try its explicit article designation.
 No match returns `{"items": [], "total": 0, "next_offset": null}`; report it
-and do not fall back to listing everything. Signal matching is exact. Require
-one signal match before loading, or ask which identity the request intended.
-Category and pulse IDs are strings; preserve them exactly.
+and do not fall back to listing everything. Signal matching is exact. More than
+one signal match needs disambiguation. A named native variable can be absent
+from the imported graph catalogue while the archive serves it: if there is no
+graph match, retain the exact requested selector and use the direct reader path
+below. Never select a similar graph name instead. Category and pulse IDs are
+strings; preserve them exactly.
 
 ## Load bounded arrays
 
 Select the intended categories from their names/descriptions, and three distinct
 pulses from their listings. Retain the total number found separately from the
 three selected. Store the selected pulse objects as `selected_pulses` and the
-one signal object as `selected_signal` in the private script. Use absolute
+one signal object as `selected_signal` in the private script, or `None` when
+the exact requested native variable has no graph match. Use absolute
 integer epoch nanoseconds from the pulse windows. Choose an explicit interval
 inside each pulse; two seconds at the start is an example, not a claim that the
 variable has samples there. If needed, choose another bounded subwindow within
@@ -138,8 +142,21 @@ with GraphClient() as graph:
         start = pulse["start_ns"]
         # An open pulse needs an explicitly chosen end; do not invent its end_ns.
         end = min(start + 2_000_000_000, pulse["end_ns"]) if pulse["end_ns"] is not None else start + 2_000_000_000
-        signal = loader.load(selected_signal["id"], start=start, end=end,
-                             mode="raw", max_samples=100_000, max_bytes=8_000_000)
+        parameters = dict(start=start, end=end, mode="raw",
+                          max_samples=100_000, max_bytes=8_000_000)
+        if selected_signal is not None:
+            signal = loader.load(selected_signal["id"], **parameters)
+        else:
+            # Resolve the category's archive role; endpoints stay in private config.
+            roles = graph.query(
+                "MATCH (a:ArchiveEndpoint {id: $archive, facility_id: $facility}) "
+                "RETURN a.role AS role, a.excluded AS excluded",
+                archive=pulse["archive"], facility="iter",
+            )
+            if len(roles) != 1 or roles[0]["excluded"] is not False:
+                raise RuntimeError("pulse archive is unavailable or excluded")
+            reader = reader_factory("iter", roles[0]["role"])
+            signal = reader.read(request["variable"], **parameters)
         if len(signal.time) == 0:
             raise RuntimeError("selected pulse window returned no samples")
         arrays.append(signal)  # NumPy signal.time and signal.values in this process.
@@ -167,6 +184,9 @@ origin before converting epoch timestamps to float seconds. Keep `mode`,
 from the metadata. Raw mode is not proof of no decimation. Envelope/binned and
 archived-on-change results must retain their sampling interpretation when
 combined. Do not interpolate event values as though they were continuous samples.
+An empty unit is unknown, not dimensionless. For several named variables, repeat
+the exact lookup and bounded load for each; retain each array's own time base
+and sampling evidence rather than automatically resampling them.
 
 Return the commands run, category and pulse counts, selected-window sample
 counts, unit, time base, sampling evidence and private artifact paths. State
