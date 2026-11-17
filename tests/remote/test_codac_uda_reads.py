@@ -26,6 +26,9 @@ class FakeClient:
         assert pattern == "DEMO-*"
         return ["DEMO-PLANT:TEMP"]
 
+    def getErrorCode(self):
+        return 1 if self.error else 0
+
     def getMetaTypeJSONCollapsed(self, name):
         assert name == "DEMO-PLANT:TEMP"
         return json.dumps(
