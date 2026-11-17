@@ -28,6 +28,10 @@ from imas_codex.standard_names.defaults import (
     REVIEW_DOCS_BACKLOG_CAP,
     REVIEW_NAME_BACKLOG_CAP,
 )
+from imas_codex.standard_names.pipeline import (
+    GRAPH_WIDE_ONLY_PHASES,
+    resolve_scope_maintenance,
+)
 from imas_codex.standard_names.turn import TURN_PHASES
 
 logger = logging.getLogger(__name__)
@@ -58,6 +62,21 @@ def cypher_mutation_clause(cypher: str) -> str | None:
     executable = CYPHER_LITERAL_OR_COMMENT.sub(" ", cypher)
     match = _CYPHER_MUTATION_CLAUSE.search(executable)
     return match.group(0).upper() if match else None
+
+
+#: The stale-stamp clear a focus run issues before seeding. Bounded by the
+#: run's own source ids, so a run given a focus set never clears a run id on a
+#: name or source outside it.
+FOCUS_STAMP_CLEAR_CYPHER = (
+    "UNWIND $source_ids AS source_id "
+    "MATCH (source:StandardNameSource {id: source_id}) "
+    "OPTIONAL MATCH (source)-[:PRODUCED_NAME]->(name:StandardName) "
+    "WITH "
+    "[x IN collect(DISTINCT source) WHERE x IS NOT NULL] AS sources, "
+    "[x IN collect(DISTINCT name) WHERE x IS NOT NULL] AS names "
+    "FOREACH (sns IN sources | SET sns.run_id = NULL) "
+    "FOREACH (sn IN names | SET sn.run_id = NULL)"
+)
 
 
 class _SuppressedWriteResult:
@@ -875,6 +894,30 @@ def _run_sn_cmd(
         summary_table,
     )
 
+    # A run that carries a scope changes nothing outside it. The scope reaches
+    # this boundary as a run id (focus, exact-name and edit launches all stamp
+    # one) or as the edits predicate, so the graph-wide maintenance passes are
+    # dropped here whichever caller assembled the run and whether or not it
+    # repeated the explicit flag.  An edits-only run names its scope by
+    # predicate and the loop accepts a bypass only for a run id, so bind its
+    # pending successors here: every caller then hands the loop a scope it can
+    # honour, and no pending successor means there is nothing to run.
+    if edits_only and scope_run_id is None:
+        scope_run_id = _bind_pending_edit_scope(dry_run=dry_run)
+        if scope_run_id is None:
+            logger.info("sn run: --edits found no pending edit successors")
+            return None
+
+    maintenance_policy = resolve_scope_maintenance(
+        scope_run_id=scope_run_id,
+        edits_only=edits_only,
+        only_phase=only,
+    )
+    if maintenance_policy.refusal is not None:
+        raise ValueError(maintenance_policy.refusal)
+    if maintenance_policy.bypass_global_maintenance:
+        skip_global_maintenance = True
+
     run_id = str(_uuid.uuid4())
     use_rich = not quiet and not dry_run and use_rich_output()
     can_generate_names = _run_can_generate_names(
@@ -1403,6 +1446,73 @@ def _reject_unscoped_accepted_reset(
         )
 
 
+#: StandardName edit successors awaiting review.  This set *is* the scope of an
+#: edits-only run: no DD path, exact name or run id was supplied, so the run's
+#: claim predicates select exactly these rows (``edit_status='open'``) once the
+#: run id below is stamped on them.  Terminal successors are excluded: a stale
+#: ``edit_status`` left on a superseded or exhausted name is not work, and
+#: including it would refuse the whole run at the exact-name preflight.
+PENDING_EDIT_SCOPE_QUERY = (
+    "MATCH (sn:StandardName) "
+    "WHERE coalesce(sn.edit_status, '') = 'open' "
+    "  AND NOT coalesce(sn.name_stage, '') IN $terminal_name_stages "
+    "  AND NOT coalesce(sn.status, '') IN $terminal_statuses "
+    "RETURN sn.id AS id ORDER BY sn.id"
+)
+
+
+def _bind_pending_edit_scope(*, dry_run: bool = False) -> str | None:
+    """Give an edits-only run a run id over its pending successors.
+
+    ``sn run --edits`` is a scoped run whose scope is the edits predicate, and
+    the loop accepts a maintenance bypass only for a run that names its scope
+    by run id.  This reads the pending successors, binds exactly them to a
+    fresh run id with the same preflight an exact-name run uses (so a run's
+    provenance and stale-stamp handling apply), and returns that id.  Returns
+    ``None`` when no edit successor is pending, which is a no-op rather than an
+    empty scoped run.
+    """
+    import uuid as _uuid
+
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.graph_store import (
+        graph_claim_scope,
+        graph_foundation,
+    )
+    from imas_codex.standard_names.graph_store.graph_claim_scope import (
+        ExactNameScopeConflict,
+        scope_exact_standard_names,
+    )
+
+    with GraphClient() as gc:
+        name_ids = [
+            str(row["id"])
+            for row in gc.query(
+                PENDING_EDIT_SCOPE_QUERY,
+                terminal_name_stages=sorted(
+                    graph_claim_scope._EXACT_SCOPE_TERMINAL_NAME_STAGES
+                ),
+                terminal_statuses=sorted(
+                    graph_claim_scope._EXACT_SCOPE_TERMINAL_STATUSES
+                ),
+            )
+        ]
+    if not name_ids:
+        return None
+
+    scope_run_id = str(_uuid.uuid4())
+    try:
+        scope_exact_standard_names(
+            name_ids,
+            scope_run_id,
+            dry_run=dry_run,
+            services=graph_foundation.services_for_call(),
+        )
+    except ExactNameScopeConflict as exc:
+        raise click.UsageError(str(exc)) from exc
+    return scope_run_id
+
+
 @sn.command("run")
 @click.option(
     "--source",
@@ -1767,7 +1877,9 @@ def _reject_unscoped_accepted_reset(
         "For a run bounded by --focus/--batch, --name, or --scope-run-id, "
         "bypass all "
         "global startup, background, and post-drain maintenance writes while "
-        "running the normal scoped worker pools. Invalid without an explicit "
+        "running the normal scoped worker pools. A scoped run bypasses that "
+        "maintenance whether or not this flag is given, so the flag is only "
+        "needed to state the intent explicitly. Invalid without an explicit "
         "scope and with reset/reseed/revalidate or maintenance-only modes. With "
         "--dry-run, validate and preview the scope without graph mutation."
     ),
@@ -2299,6 +2411,20 @@ def sn_run(
     # Coerce override_edits tuple to list for downstream
     _override_edits = list(override_edits) if override_edits else None
 
+    # A scope is a promise about that scope's names: the graph-wide
+    # maintenance passes are resolved here, once, from the concrete scope the
+    # flags produced. Actions that cannot be bounded by a scope refuse with a
+    # reason instead of quietly widening it.
+    maintenance_policy = resolve_scope_maintenance(
+        scope_run_id=scope_run_id,
+        focus_paths=tuple(flat_focus),
+        exact_names=tuple(exact_names),
+        edits_only=edits_only,
+        only_phase=only_phase,
+        reset_to=reset_to,
+        revalidate=revalidate,
+    )
+
     # ── Validate --flush constraints ──────────────────────────────────
     if flush and flat_focus:
         raise click.UsageError("--flush and --focus are mutually exclusive")
@@ -2333,7 +2459,7 @@ def sn_run(
             raise click.UsageError(
                 "--skip-global-maintenance cannot be combined with --revalidate"
             )
-        if only_phase in {"reconcile", "attach", "validate", "link"}:
+        if only_phase in GRAPH_WIDE_ONLY_PHASES:
             raise click.UsageError(
                 f"--skip-global-maintenance cannot be combined with --only {only_phase}"
             )
@@ -2353,6 +2479,27 @@ def sn_run(
                 "no graph writes performed"
             )
             return
+
+    # The bypass is a property of a scoped run, not an opt-in. The pool
+    # orchestrator applies the same policy at its own boundary, so the scope's
+    # promise holds whether the run arrives through this command or a direct
+    # caller. A scoped run whose action cannot be bounded refuses here.
+    if maintenance_policy.refusal is not None:
+        raise click.UsageError(maintenance_policy.refusal)
+    if maintenance_policy.bypass_global_maintenance:
+        logger.info(
+            "sn run: scope supplied — graph-wide maintenance is bypassed "
+            "(scope_run_id=%s, focus=%d, exact=%d, edits=%s)",
+            scope_run_id,
+            len(flat_focus),
+            len(exact_names),
+            edits_only,
+        )
+        if not quiet:
+            console.print(
+                "[dim]Scoped run: graph-wide maintenance is bypassed; "
+                "only this scope's names are touched.[/dim]"
+            )
 
     # ── Guard the unscoped graph-wide accepted-wipe footgun ───────────
     # Fires before either reset branch so it covers --reset-only and the
@@ -2451,6 +2598,7 @@ def sn_run(
     if exact_names:
         import uuid as _uuid
 
+        from imas_codex.standard_names.graph_store import graph_foundation
         from imas_codex.standard_names.graph_store.graph_claim_scope import (
             ExactNameScopeConflict,
             scope_exact_standard_names,
@@ -2459,7 +2607,10 @@ def sn_run(
         exact_scope_run_id = str(_uuid.uuid4())
         try:
             scoped = scope_exact_standard_names(
-                list(exact_names), exact_scope_run_id, dry_run=dry_run
+                list(exact_names),
+                exact_scope_run_id,
+                dry_run=dry_run,
+                services=graph_foundation.services_for_call(),
             )
         except ExactNameScopeConflict as exc:
             raise click.UsageError(str(exc)) from exc
@@ -2543,18 +2694,17 @@ def sn_run(
             )
             return
 
-        # 1. Clear stale run_ids from previous focused runs. Both node labels
-        #    are cleared in a single statement so the reset is atomic and the
-        #    scoping invariant (no residual run_id survives a fresh focus run)
-        #    holds even if a preceding read query interposes.
+        # 1. Clear stale run_ids from previous focused runs of *these* paths.
+        #    Both legs are bounded by the focus set: a run scoped to these paths
+        #    does not own the rest of the catalogue, and its own claim predicates
+        #    read this run's id, not the absence of other runs' stamps. An
+        #    explicitly bypassed run leaves even these stamps alone.
         if not skip_global_maintenance:
+            focus_source_ids = [f"dd:{path}" for path in flat_focus]
             with GraphClient() as gc:
                 gc.query(
-                    "MATCH (sn:StandardName) WHERE sn.run_id IS NOT NULL "
-                    "SET sn.run_id = NULL "
-                    "WITH count(*) AS _cleared "
-                    "MATCH (sns:StandardNameSource) WHERE sns.run_id IS NOT NULL "
-                    "SET sns.run_id = NULL"
+                    FOCUS_STAMP_CLEAR_CYPHER,
+                    source_ids=focus_source_ids,
                 )
 
         # Gap-only default: a focused path that already carries a live
@@ -2630,12 +2780,19 @@ def sn_run(
         #    re-staging in-flight items churns the hard tail (each pass re-shoots
         #    exhausted names). --reseed opts into the blunt re-stage-to-pending;
         #    targeted resets use --reset-to (handled above, before scope routing).
+        from imas_codex.standard_names.graph_store import graph_foundation
         from imas_codex.standard_names.graph_store.graph_claim_scope import (
             scope_focus_names,
         )
 
         with GraphClient() as gc:
-            scope_focus_names(sns_ids, scope_run_id, reset=reseed, gc=gc)
+            scope_focus_names(
+                sns_ids,
+                scope_run_id,
+                reset=reseed,
+                gc=gc,
+                services=graph_foundation.services_for_call(),
+            )
 
         # 5. Route through the pool orchestrator with scope_run_id.
         _run_sn_cmd(
