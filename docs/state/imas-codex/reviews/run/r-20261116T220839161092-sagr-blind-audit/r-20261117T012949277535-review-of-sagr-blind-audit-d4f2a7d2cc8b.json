@@ -7,6 +7,13 @@
   "call_sites": [],
   "completed_at": "2026-11-17T01:34:12.018Z",
   "dispatched_at": "2026-11-17T01:32:02Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sagr-blind-audit-d4f2a7d2cc8b",
+      "recorded_at": "2026-11-17T02:02:37.814851+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-audited-group-release/blind-audit.py",
