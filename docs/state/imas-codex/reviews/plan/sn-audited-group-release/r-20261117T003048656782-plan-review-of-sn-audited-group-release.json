@@ -51,9 +51,28 @@
       "note": "Section 3 now waits on section 2 as well as section 1.",
       "reason": "",
       "when": "2026-11-17T00:41:23.256343+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "c69df97a9c6e9ae4574c96f915d93d088a98849c",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The census reconciles to the count of live names read in the same run, with names carrying no physics domain as a row of their own.",
+      "reason": "",
+      "when": "2026-11-17T00:41:44.707111+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "c69df97a9c6e9ae4574c96f915d93d088a98849c",
+      "commit_basis": "edit",
+      "note": "The census reconciles to the count of live names read in the same run, with names carrying no physics domain as a row of their own.",
+      "reason": "",
+      "when": "2026-11-17T00:41:44.707111+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
