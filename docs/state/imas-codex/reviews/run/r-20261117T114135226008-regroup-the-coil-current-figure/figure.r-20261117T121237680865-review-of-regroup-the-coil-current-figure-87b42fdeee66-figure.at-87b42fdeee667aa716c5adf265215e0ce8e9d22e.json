@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-17T12:33:24.141Z",
+  "dispatched_at": "2026-11-17T12:13:16Z",
+  "findings": [
+    {
+      "file": "docs/figures/codac-uda-signals/example-request/coil-current-profiles.svg",
+      "id": "f95437d429a",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "F1: the upper panel's linear axis runs to 30 ks so as to carry a single window that starts at 27 ks, and the other seven windows with samples are compressed into the leftmost quarter of the panel. Measured on the PNG, 89 per cent of the trace pixels lie in the first 400 px of a 1240 px plot width, and the ramps between 2 and 7 ks cross one another so their individual shapes cannot be separated. The traces and their numbers remain visible and the caption states that windows may overlap, so nothing is hidden; but a reader can read the presence and endpoint of each ramp far better than its slope, which is most of what the panel exists to show."
+    },
+    {
+      "file": "docs/figures/codac-uda-signals/example-request/coil-current-profiles.svg",
+      "id": "f95437d429a",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "F2: in the lower panel the pulse numbers sit in a single vertical column near 0.9 s, roughly 150 px to the left of where their traces begin at 2 s, so each number is tied to its trace by row alignment alone rather than by sitting beside the trace start. The six traces are separated by 5 kA steps so the pairing is unambiguous and the labels occupy otherwise empty space, but a reader must follow a row across the gap to pair a number with its decay, and the column reads as a second axis rather than as part of the traces."
+    },
+    {
+      "file": "docs/figures/codac-uda-signals/example-request/coil-current-profiles.svg",
+      "id": "f95437d429a",
+      "line": null,
+      "severity": "non-blocking",
+      "summary": "F3: the three timed-out reads are shown as grey ticks about 4 px wide by 10 px tall at rgb(146,146,146) sitting on the zero line. At the 1399 px canvas they are legible, but at the roughly 900 px width the page renders the figure at they shrink to under 3 by 7 px and approach the limit of what a reader resolves without close inspection. All three fall in the upper panel while the caption's phrase the populated panels leads a reader to look in both; the caption does state the count of three, so the information is recoverable from the text rather than lost."
+    }
+  ],
+  "negative_control": "none: a read-only figure review runs no suite",
+  "notes": "Read-only figure review. Only the single PNG named in this review (image-0.png) was opened; no SVG and no other image was read, and no file was edited, created, moved, redrawn, relabelled or reformatted. Six rubric items are answered for the one figure, each a pass, and three non-blocking findings are recorded, so the record is parsed and the node is not held. Pulse numbers, the three grey timeout ticks, the twelve isolated dots and the caption's account of them were checked against the rendered pixels: grey tick clusters were found at x 181-184, 418-421 and 813-817 in the upper panel, which is the three the caption states. The caption does not merely repeat the title - it states the groups, the pulse counts, the omitted groups, the inferred labels and the caveats - so it is not recorded as a finding. No suite was run, a figure review runs none, hence added_failure_count 0 with an empty id list.",
+  "project": "imas-codex",
+  "review_run_id": "r-20261117T121237680865-review-of-regroup-the-coil-current-figure-87b42fdeee66-figure",
+  "reviewed_base_sha": "859fb408bf7f3fa6439fdb79246d8378a6ff9a2e",
+  "reviewed_figures": [
+    {
+      "image": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T121237680865-review-of-regroup-the-coil-current-figure-87b42fdeee66-figure/image-0.png",
+      "note": "one attachment carrying two stacked panels and one figure-level legend above them",
+      "panels": "upper panel titled Current ramps and ramp-downs, linear axis in kiloseconds from 0 to 30; lower panel titled Fast-discharge tests, explicitly logarithmic axis in seconds",
+      "pixels": "1399x720",
+      "rendered_from": "docs/figures/codac-uda-signals/example-request/coil-current-profiles.svg"
+    }
+  ],
+  "reviewed_head_sha": "87b42fdeee667aa716c5adf265215e0ce8e9d22e",
+  "reviewed_run_id": "r-20261117T114135226008-regroup-the-coil-current-figure",
+  "rubric": "figure",
+  "rubric_lines": [
+    "RUBRIC legibility [coil-current-profiles.svg via image-0.png]: pass. Both panels are readable at a glance: the upper carries seven numbered ramps plus one isolated ramp-down near 27 ks on a linear kilosecond axis, the lower carries six stacked decays numbered 1 to 6 and two longer traces numbered 7 and 8 on an explicitly logarithmic second axis; axis labels are 16 pt and ticks, legend and pulse numbers 14 pt. The crowded left cluster of the upper panel is recorded as F1, not as a legibility failure, because every trace and every number can still be read.",
+    "RUBRIC data_ink [coil-current-profiles.svg via image-0.png]: pass. The ink is the data: a blue solid trace and a purple dashed trace for the two DC-link candidates, twelve small dots for isolated returned bins, fifteen pulse numbers and three short grey timeout ticks below the zero line. There is no fill, marker cloud, gradient or texture anywhere in either panel.",
+    "RUBRIC decoration [coil-current-profiles.svg via image-0.png]: pass. All four canvas borders are pure white (every border pixel reads 255,255,255), the top and right spines are absent on both panels, there are no gridlines and there is no background shading; nothing decorative competes with the traces.",
+    "RUBRIC contrast [coil-current-profiles.svg via image-0.png]: pass for text, measured on the rendered pixels: axis and panel-title text rgb(11,11,11) at 19.6:1 on white and tick labels rgb(82,81,78) at 7.8:1, both well clear of WCAG AA. The data marks also clear 3:1, with the blue trace rgb(36,102,164) at 6.0:1 and the purple trace rgb(112,70,166) at 6.5:1. The faintest element is the grey timeout tick at rgb(146,146,146), 3.1:1, recorded as F3.",
+    "RUBRIC table_form [coil-current-profiles.svg via image-0.png]: pass. Both panels plot current in kA against time from each window's own start, so ramp shape, decay shape and the timing of each window are carried by position on two continuous axes. That relationship is not restated by the group table the evidence fragment prints beside the figure, and no part of the image is a table drawn as a picture.",
+    "RUBRIC label_collision [coil-current-profiles.svg via image-0.png]: pass. Measured on the PNG: every border is pure white, ink spans x 53 to 1365 and y 21 to 707 of a 1399 by 720 canvas, leaving at least 13 px clear on every side, and no pulse number touches another label or a plotted trace. The two placement observations recorded as F1 and F2 concern crowding and association, not overlap."
+  ],
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:25:00Z",
+  "total": null
+}
