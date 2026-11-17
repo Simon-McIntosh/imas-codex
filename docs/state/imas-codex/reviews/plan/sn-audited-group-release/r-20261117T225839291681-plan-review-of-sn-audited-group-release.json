@@ -1,0 +1,55 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T22:59:48.570Z",
+  "dispatched_at": "2026-11-17T22:59:29Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-audited-group-release.html:53",
+      "id": "wiring-1",
+      "reason": "without the \u00a74 edge (or an explicit statement that only the tracing runs in parallel and the comparison waits on \u00a74) the section's central measure has no input, and \u00a75's groups can also be cut through stages repaired after them.",
+      "text": "\u00a77 declares `depends-on` only `sn-audited-group-release#s2`, yet its done-when requires \"the share whose regenerated name and definition agree in substance with the agent-repaired member of \u00a74\", and its ruling says the stages are \"repaired in parallel with the agent repair of \u00a74\"; no edge or recorded artefact ties \u00a77 to \u00a74's repaired text, so a node dispatched on the declared edges can reach its gate with no \u00a74 text to compare against and no statement of what happens if \u00a74 has not landed.",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/sn-augmented-group-release.html:53",
+      "id": "done_when-1",
+      "reason": "",
+      "text": "\u2014 placeholder",
+      "type": "done_when",
+      "would_change": null
+    }
+  ],
+  "plan_commit": "bf4d11062ee1da036861478e70ff7926bb9bfed8",
+  "plan_fingerprint": "bf9f719151c875c1ec2171677bb0250ed241d02d0f68fba8ff5dec2c24103bd7",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 33,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T225839291681-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "9ac9cd761e6ccab061baf2b3ba72fcb557467ed8",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a74's references to \u00a71, \u00a73 and \u00a77 and \u00a77's reference to \u00a74 all resolve to headings at plan.html:27,35,51,39; the plan-after target `sn-definitions-by-construction.html` exists.",
+    "done_when": "a finding \u2014 \u00a77's reconciliation clause reports a per-cause agreement share with no acceptance condition, and \u00a74's shared-cause handoff has no planted control after this revision dropped the sorting-step run that was its control (plan.html:41, plan.html:53).",
+    "evidence_paths": "pass \u2014 both changed sections commit their records under `docs/evidence/fragments/sn-audited-group-release/`, which exists on disk and holds the adjudication, calibration and label-check evidence files.",
+    "naming": "pass \u2014 the new \u00a77 text introduces no plan slug, version tag or tracker identifier into a symbol or file name; stage names it uses (\"naming stage\", \"definition templates\") come from the adjudication's recorded mechanisms, not from code.",
+    "reasoning": "pass \u2014 the cited figures reconcile with the committed adjudication (208 judged, 93 defective, 33 undecidable, 14 causes summing to 89 instances, largest 18/13/11 and the four next 6+6+6+5=23), both endpoints are obtainable records, and neither changed section prescribes a code path or function.",
+    "single_goal": "pass \u2014 \u00a74 closes on the cut or the lead's recorded ruling and states the repair record is reported evidence that neither closes nor holds it; \u00a77 closes on the traced-and-repaired stages.",
+    "wiring": "a finding \u2014 the new \u00a77 is declared to depend only on \u00a72, while its done-when compares its regenerated names against \"the agent-repaired member of \u00a74\" and its ruling calls the work parallel to \u00a74, so the edge its measure needs is absent (plan.html:16 declarations, plan.html:53)."
+  },
+  "section_digests": {
+    "_document": "96580dc671b5ee69e2cc041dbca93e9dcedec56c16f19c715ba2119d05dc09d4",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "3073ba4c58fc1374d8568d8e8798f5c1fac407860517b8ac0c4e0ca15a6a4a2b",
+    "s3": "a302e5d7f08618c4b0b55889eb4a8df491abf4aed370ac9e8014d8e48c4cd5a9",
+    "s4": "ed36c2d71b87a143c7d2563ef4cd2958daa7348a97f998f185d5ccea206de41b",
+    "s5": "61674c50c2e89474d21672aad5679437c4d08736b700aabf9ebf00fc989477fb",
+    "s6": "90a0463c758d22b32611805f931c843f2382e2bc89a2e1ef318231acd72f2fca",
+    "s7": "888d78da56e3ce80611b8d4c092e145eff1f5dd1ad94dad520a0fe8641873298"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T23:03:45.655495+00:00",
+  "total": null
+}
