@@ -25,7 +25,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 56,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "a965030084b7a63d058fff7602a4408ae908175d",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 11's rule and its control are now scoped to live names: the pass takes the source of a live name only when that name is exhausted, and a superseded name's source returns to the pool as it does today.",
+      "reason": "",
+      "when": "2026-11-17T11:35:39.194182+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9",
+      "commit": "a965030084b7a63d058fff7602a4408ae908175d",
+      "commit_basis": "edit",
+      "note": "Section 11's rule and its control are now scoped to live names: the pass takes the source of a live name only when that name is exhausted, and a superseded name's source returns to the pool as it does today.",
+      "reason": "",
+      "when": "2026-11-17T11:35:39.194182+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261117T110911769016-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261117T110911769016-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "2d69a8475adac7492825e9aae33b4ae4ff65df2d",
   "rubric": "content",
