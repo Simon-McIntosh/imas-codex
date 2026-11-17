@@ -13,6 +13,14 @@
   ],
   "completed_at": "2026-11-17T13:32:34.597Z",
   "dispatched_at": "2026-11-17T13:31:12Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-17T14:06:08.563039+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261117T124123918295-sph-retire-sourceless-backlog"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/standard_names/loop.py",
