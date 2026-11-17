@@ -21605,6 +21605,25 @@
     "reason": "brief-names-no-plan",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster uv run --no-sync pytest -p no:cacheprovider /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster/tests/discovery/test_signal_enrichment_recovery.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster/tests/discovery/test_signal_enrichment_grounding.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster/tests/discovery/test_signal_enrichment_options.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster/tests/discovery/test_signal_enrichment_benchmark.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster/tests/discovery/test_enrich_result_matching.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster/tests/discovery/test_signal_glossary.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster/tests/discovery/test_catalogue_text_kept.py /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster/tests/discovery/test_signal_role_store.py",
+    "integrated_revision": "df1c2f1c6d6b393b019decf74a6ef575b9f2caf3",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261117T083513338937-make-grounded-local-enrichment-complete-and-faster/review-landing/gate-df1c2f1c6d6b393b019decf74a6ef575b9f2caf3.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'UV_PROJECT_ENVIRONMENT=./.venv PYTHONPATH=. uv run --no-sync pytest -p no:cacheprovider ./tests/discovery/test_signal_enrichment_recovery.py ./tests/discovery/test_signal_enrichment_grounding.py ./tests/discovery/test_signal_enrichment_options.py ./tests/discovery/test_signal_enrichment_benchmark.py ./tests/discovery/test_enrich_result_matching.py ./tests/discovery/test_signal_glossary.py ./tests/discovery/test_catalogue_text_kept.py ./tests/discovery/test_signal_role_store.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/make-grounded-local-enrichment-complete-and-faster",
+      "/home/ITER/mcintos/Code/imas-codex"
+    ]
+  },
   "lane": "codex",
   "lane_advisory": {
     "backend": "codex",
