@@ -17,12 +17,15 @@
     pairs out of 34, in 123.423 s. Empty reads remain empty. Per-call receipts
     and original/normalized arrays are durable in the private
     <code>example-request/resumed/</code> directory.</p>
-  <p>Long-window work follows as sparse envelope tiles, up to 48 disjoint
-    intervals of 60 seconds distributed across each remaining window. The
-    accessor bounds stay unchanged. Gaps are unobserved, not interpolated, and
-    requested-time coverage is recorded per window. This is a sampled overview,
-    not an envelope of the full long interval. The initial blocked attempt below
-    remains the record of what discovery alone established.</p>
+  <p>The initial sparse long-window exploration was stopped with its completed
+    receipts preserved. Sustained timings support complete requested-time
+    coverage within the budget using four independent readers on
+    <code>rigel</code>. That run declares 15,032 unique reads serving 15,214
+    window–tile references; each envelope request remains at most 60 seconds,
+    1,000 returned bins and 8,000,000 bytes. Each returned result is committed
+    to a private SQLite receipt-and-array store before its reader takes another
+    task. All 34 windows will be exported separately for each candidate. The
+    initial blocked attempt below remains the record of discovery alone.</p>
 </section>
 <section id="example-request-end-to-end-evidence">
   <h2>Initial attempt: test discovery succeeds; signal identity blocks the plot</h2>
