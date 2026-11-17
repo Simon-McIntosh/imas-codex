@@ -46,10 +46,27 @@ def git(*args):
 
 
 def load(path=DATA):
-    return json.loads(Path(path).read_text())
+    return decode_record(json.loads(Path(path).read_text()))
+
+
+def decode_record(value):
+    value = dict(value)
+    for key in ("judgments", "report"):
+        payload = value.pop(key + "_payload_zlib_base85", None)
+        if payload is not None:
+            value[key] = json.loads(zlib.decompress(base64.b85decode(payload)))
+    return value
 
 
 def save(value, path=DATA):
+    value = dict(value)
+    for key in ("judgments", "report"):
+        if value.get(key):
+            value[key + "_payload_zlib_base85"] = base64.b85encode(
+                zlib.compress(
+                    json.dumps(value.pop(key), ensure_ascii=False).encode(), level=9
+                )
+            ).decode()
     text = json.dumps(value, ensure_ascii=False, separators=(",", ":")) + "\n"
     assert path != DATA or len(text.encode()) <= 300_000, (
         "Repository data file exceeds ceiling"
@@ -275,7 +292,7 @@ def collect():
 
 def committed_snapshot(phase):
     for sha in git("rev-list", "--reverse", "HEAD", "--", RELATIVE_DATA).splitlines():
-        record = json.loads(git("show", f"{sha}:{RELATIVE_DATA}"))
+        record = decode_record(json.loads(git("show", f"{sha}:{RELATIVE_DATA}")))
         if record["phase"] == phase:
             return sha, record
     raise AssertionError("Missing independent committed seal: " + phase)
@@ -313,6 +330,26 @@ def validate(data):
     return visible
 
 
+def seal_verdicts():
+    data = load()
+    assert data["phase"] == "packets-frozen" and not data["judgments"]
+    check()
+    judgments = [
+        json.loads(line)
+        for line in (RUN / "blind-judgments.jsonl").read_text().splitlines()
+    ]
+    data.update(
+        phase="verdicts-frozen",
+        judgments=judgments,
+        judgment_digest=digest(judgments),
+        verdict_completed_at=datetime.now(UTC).isoformat(),
+        adjudication_method="Direct packet-by-packet adjudication; no reader or model calls; earlier individual readings unopened until verdict commit",
+    )
+    validate(data)
+    save(data)
+    print(f"SEALED: {len(judgments)} blind verdicts; commit only {RELATIVE_DATA}")
+
+
 def check(path=DATA):
     data = load(path)
     validate(data)
@@ -339,12 +376,15 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--collect", action="store_true")
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--seal-verdicts", action="store_true")
     parser.add_argument("--data", type=Path, default=DATA)
     args = parser.parse_args()
     if args.collect:
         collect()
     elif args.check:
         check(args.data)
+    elif args.seal_verdicts:
+        seal_verdicts()
 
 
 if __name__ == "__main__":
