@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="63">
+<meta name="plan-version" content="64">
 <meta name="plan-modified" content="2026-11-17">
 </head>
 <body>
@@ -206,6 +206,9 @@
 </div>
 <div class="r-comment" data-section="s18" data-id="c-run-r-20261117T053855364568-review-of-typed-test-and-signal-search-tools-6dbb758c0a9c" data-who="reckon-build" data-when="2026-11-17T05:43:01.608Z">
     <div class="r-comment-body"><p>Independent review of r-20261117T050020300191-typed-test-and-signal-search-tools at head 6dbb758c0a9c632e95bab92f688e3fb2da8b08b3 over base e0798a4062a2ef75d221bf661c1c1db1f8f76edc: scores goal_fidelity 19, evidence 18, scope_discipline 19, durability 17, fit 17, reuse 18; added_failure_count 0 with an empty added_failure_ids derived from the reviewed run's baseline_suite (2 failed, exit 1, e0798a40) and after_suite (0 failed, 165 passed/8 skipped, exit 0, 6dbb758c0); two non-blocking findings (imas_codex/cli/AGENTS.md:60 documents a search_signals call the landed parameter order now rejects; tests/llm/test_plant_search_tools.py:76 asserts a value against the literal the test itself supplied); both declared record paths written and both pass crew check --review.</p></div>
+</div>
+<div class="r-comment" data-section="s18" data-id="c-run-r-20261117T050020300191-typed-test-and-signal-search-tools" data-who="reckon-build" data-when="2026-11-17T05:29:22Z">
+    <div class="r-comment-body"><p>Typed search_signals now pages parsed plant codes and fetch_content walks a signal&#x27;s candidate component/control-system hierarchy and siblings; one search_pulses tool finds test categories and exact nanosecond pulse windows. Live HTTP at 6dbb758c0a9c: categories 1, pulses 1 (start/end verified 1/1; open-ended 0 in live page, absent ends preserved by isolated graph test); plant-system+category 620, function 264 and field 63 signals, each page count 1 with a working continuation; one signal reaches 1 candidate component, 1 system and 53 sibling signals (page count 1 with continuation). Tool counts full 38→39, read-only 31→32, DD-only 15→15; search_pulses could extend search_signals but test categories and pulse identities/windows are distinct from signal catalogue rows, so it is the one added tool; existing signal search and content retrieval were extended. Largest live MCP response 2382 bytes, page cap 256000 bytes under the 16000000-byte transport guard; unmatched designation count 0 and DD-only plant tools 0. Focused gate 165 passed/8 skipped, 0 failures; the two declared mutations produce 2 failing test ids absent from head. Exact private requests/results: /home/ITER/mcintos/.cache/imas-codex-codac-uda/typed-tool-server/attempt-1321675/receipt.json.</p></div>
 </div>
 <div class="r-comment" data-section="s19" data-id="c-run-r-20261117T012026991117-review-of-feed-described-signals-searchable-bfec1a7f6b15" data-who="reckon-build" data-when="2026-11-17T01:50:48.751Z">
     <div class="r-comment-body"><p>Independent review of r-20261117T004037755034-feed-described-signals-searchable at bfec1a7f6b15bed01bc77216e5a4bc3770efd844 (base 4c295316312e3b6b1956a239ea13557f589e35d8) scores goal_fidelity 19, evidence 17, scope_discipline 18, durability 16, fit 18, reuse 19 (total 107), records 0 added failures against a baseline of 2, and carries three non-blocking findings; both declared review-record paths are written and pass crew check --review.</p></div>
