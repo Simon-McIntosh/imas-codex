@@ -53,6 +53,16 @@
       "note": "A member whose only defect classes are ones regeneration cannot repair (a duplicate, a wrong domain) is outside the comparison and is settled by an agent proposal or the lead's ruling, reported beside it.",
       "reason": "",
       "when": "2026-11-17T00:15:48.039005+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "00170b9803954167e1960dd570381368851388f7",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The member is the unit of assignment, split among members sharing its set of defect classes; per-class cells count a member in each of its classes within its one arm.",
+      "reason": "",
+      "when": "2026-11-17T00:16:09.767112+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "A member whose only defect classes are ones regeneration cannot repair (a duplicate, a wrong domain) is outside the comparison and is settled by an agent proposal or the lead's ruling, reported beside it.",
       "reason": "",
       "when": "2026-11-17T00:15:48.039005+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "00170b9803954167e1960dd570381368851388f7",
+      "commit_basis": "edit",
+      "note": "The member is the unit of assignment, split among members sharing its set of defect classes; per-class cells count a member in each of its classes within its one arm.",
+      "reason": "",
+      "when": "2026-11-17T00:16:09.767112+00:00"
     },
     "reasoning-1": {
       "action": "acted",
