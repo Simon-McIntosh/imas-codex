@@ -1,0 +1,53 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:00:23.548Z",
+  "dispatched_at": "2026-11-17T16:00:00Z",
+  "findings": [
+    {
+      "anchor": "plan.html:61",
+      "id": "done_when-1",
+      "reason": "as written the node can reach a fetched document and be unable to close the section on either form, so the done-when needs a stated outcome for a document whose format is not the one its check assumes.",
+      "text": "\u00a75's success arm requires \"its [the signal list's] sheet names and row counts ... through the existing spreadsheet extraction\" and the functional specification \"shown to be the document by its file signature and page count\", but the plan nowhere establishes that the signal list is a spreadsheet or the specification a PDF: the decision context at plan.html:94 records only that the assistant \"gave a GET download form for each\". A falsely fetched file in another format \u2014 the case the same text elsewhere guards against with \"reported with its outcome\" \u2014 has no closing path: the fetch succeeded, so the failure form does not apply, and the mandatory extraction or page count cannot be produced",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:61",
+      "id": "done_when-2",
+      "reason": "the arm as written cannot be satisfied for a refused document, so the receipt's fields must be tied to the fetched case only.",
+      "text": "the receipt clause \"with size, digest and content type in a private receipt\" attaches to both alternatives of \"each of the other five listed documents is fetched at its stated version or reported with its outcome (not found, not permitted, a sign-in page, an error)\", so a document reported as not found or not permitted carries a demand for a digest of a body that was never returned",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b162d2192f92a529cd33d9df448825a4e6c764b2",
+  "plan_fingerprint": "e383198e2895e8f561788d24769a7220997d8ce46ef86e19fe995b4826f44f7d",
+  "plan_slug": "icp-api-access",
+  "plan_version": 27,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T155928688667-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "0700c70c13f18f5a1e3a37db719964468fb17645",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a75's links to `#s2` and `#s4` resolve, the `document-host-read-only` decision it rests on exists at plan.html:92 with `data-sections=\"s5\"` and a 2026-11-17 date, and the \u00a74 comment at plan.html:108 records the no-file finding \u00a75 cites.",
+    "done_when": "a finding \u2014 \u00a75 at plan.html:61 makes the signal list's spreadsheet extraction and the functional specification's page count mandatory in the success arm, yet no plan text establishes either document's format and neither branch reports a fetched document in an unexpected one.",
+    "evidence_paths": "pass \u2014 \u00a75's records go to a private receipt, private cache storage outside the repository and the landing record, the same durable private paths \u00a74 used.",
+    "naming": "pass \u2014 \u00a75 names rules and outcomes (GET/HEAD-only, refused before any request, identities listed in private configuration); no symbol, plan label or ticket number reaches a name.",
+    "reasoning": "pass \u2014 \u00a75's stated basis (the records API serves no document file, so the source moves to the document host under a recorded lead decision) matches the cited \u00a74 evidence, and its measures \u2014 refusal tests, unlisted-identity refusal, request log, failure-form control \u2014 are obtainable and can fail; the format assumption is scored under done_when rather than repeated here.",
+    "single_goal": "pass \u2014 \u00a75 delivers one result: the seven named pilot documents fetched and read once from the document host, closing on that fetch outcome.",
+    "wiring": "pass \u2014 \u00a75 declares depends-on `icp-api-access#s2` and `#s4`, both `done`; `plan-blocks` names `iter-signal-context-and-enrichment`, whose \u00a74 is now `deferred` and names `icp-api-access#s5` among its links, so the block wait matches the section's open state."
+  },
+  "section_digests": {
+    "_document": "1faae709ade296dcbe95974b385b004073b5d95eadb304cf33a51e8b6760e967",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "a1b848eb16f85209dbe3346593e0951ac9a6eeaff03616ab372f38f661e7ba96",
+    "s3": "dcfe744278ad8f7b812902b66cbd7c4e6eba42cd9cca8c338b00164b75dd4f55",
+    "s4": "4df24fd8de94abfdf9430b8cc0a70ab71824a0084529a3db2136c0401a52eed6",
+    "s5": "bc83dfea454fc8608b149529e3f1babbc075e4d7cc105a4adad64d8ec5ec2e4c"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:10:15.090420+00:00",
+  "total": null
+}
