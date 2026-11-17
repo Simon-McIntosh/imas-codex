@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T16:12:54.137Z",
+  "dispatched_at": "2026-11-17T16:12:29Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:68",
+      "id": "wiring-1",
+      "reason": "\u00a76 cannot produce any of its landed figures without the imported rows s4 owns, so the declaration sends a node at work whose inputs do not exist.",
+      "text": "\u00a76 declares `data-status=\"implementable\"` and the document declares s6 implementable, but its declared dependency s4 (line 58) is `deferred` until the one-off document fetch fills the private store, and s4 is where \u00a76's components, their linked context and the functional specification it reads forty descriptions against all come from; a dispatcher reading declarations alone would start \u00a76 with no linked context to describe from and no reference to measure against",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/iter-signal-context-and-enrichment.html:69",
+      "id": "reasoning-1",
+      "reason": "an implementable section that states no model is chosen leaves the worker either stalled on a closed decision or free to pick a seat, and one line naming the recorded choice removes both.",
+      "text": "\u00a76's Delivers still reads \"the one the lead names when answering the open decision on description quality; until that decision is answered no model is chosen for this section\", while the decision `local-model-confirmed-on-quality` is answered `local-confirmed` by the lead at 2026-11-17T15:53:44 (line 120) and its rationale names the locally served model with the grounded settings on the primary branch; the section is simultaneously marked implementable, so a worker reads a precondition that no longer gates and must infer the model from elsewhere in the plan",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b65b88de863efafdcc35c98698d6c1518af34704",
+  "plan_fingerprint": "d35aab4c417815d527b76d6d53acba61e240a06c4129d8f7d97c47a0669a3a93",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 56,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T160532942620-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "63094baf4afc285d73a3f4c1ad0d6124bfcd0541",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the decision's cited fragments and the new comment's fragment resolve; `icp-api-access#s3`/`#s4`/`#s5` all exist in docs/plans/icp-api-access.html.",
+    "done_when": "pass \u2014 each section's done-when names counts, a hand reading with a bar of at most two wrong and at least thirty-two right of forty, definitions of wrong/partly-right/right, and a negative control that can fire.",
+    "evidence_paths": "pass \u2014 the cited records sit under `docs/evidence/fragments/iter-signal-context-and-enrichment/`, and every fragment named in the changed units is present there.",
+    "naming": "pass \u2014 no plan labels, stage names or ticket numbers appear in the changed units; figures carry no tracker vocabulary.",
+    "reasoning": "a finding \u2014 \u00a76 still calls the description-model decision open and says no model is chosen, while the same version answers that decision `local-confirmed` and its rationale names the locally served model with the grounded settings.",
+    "single_goal": "pass \u2014 \u00a76 carries one deliverable, the pilot system's group enrichment and its measurement.",
+    "wiring": "a finding \u2014 \u00a76 is declared `implementable` at plan.html:19/68 while its only declared dependency \u00a74 is `deferred`, and \u00a74 is the source of both the component context and the functional specification \u00a76 measures against."
+  },
+  "section_digests": {
+    "_document": "ef6b59ee2a51cb80dc0dd9867527d9cdb661a5ff865be1a1f16f31a5ff549a37",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "39c2b9664cf1f28647096418d67e7e0b3a8616268e418f1a41c519a2703014f9",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "718dd3f96dd21031506b561ce54982d7fee0ac8c2d5e6f5f626f32df4d13f5fc",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T16:23:03.652948+00:00",
+  "total": null
+}
