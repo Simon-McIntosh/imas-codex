@@ -300,3 +300,36 @@ async def test_pooled_review_retains_failed_validation_feedback():
         "The response failed validation:"
         in call.call_args.kwargs["messages"][-1]["content"]
     )
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("citation", ["context-1", "request-9-context-1"])
+async def test_pooled_review_cannot_admit_unissued_or_foreign_citation(citation):
+    async def call(**kwargs):
+        if kwargs["response_model"] is not DescriptionReview:
+            return draft(), 0, 1
+        return (
+            DescriptionReview(
+                results=[
+                    {
+                        "signal_index": index,
+                        "statements": [
+                            {
+                                "draft_index": 1,
+                                "text": "Unsupported circuit detail.",
+                                "context_items": [citation],
+                            }
+                        ],
+                    }
+                    for index in (1, 2)
+                ]
+            ),
+            0,
+            2,
+        )
+
+    options = EnrichmentOptions(review=True, review_batch_size=2, source_fallback=True)
+    results = await asyncio.gather(enrich(options, call), enrich(options, call))
+    for batch, _, _ in results:
+        assert batch.results[0].description == "Cooling temperature"
+        assert batch.fallback_indices == [1]

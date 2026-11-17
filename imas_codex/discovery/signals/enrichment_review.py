@@ -116,10 +116,11 @@ class ReviewBatcher:
                         references = [
                             item.strip("[]") for item in statement.context_items
                         ]
-                        statement.context_items = [
-                            item[len(prefix) :] if item.startswith(prefix) else item
-                            for item in references
-                        ]
+                        statement.context_items = (
+                            [item[len(prefix) :] for item in references]
+                            if all(item.startswith(prefix) for item in references)
+                            else []
+                        )
                     outputs[request_index].append(row)
                 values = [
                     (
