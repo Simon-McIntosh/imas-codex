@@ -25,7 +25,30 @@
   "plan_slug": "icp-api-access",
   "plan_version": 18,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3c5fe0e04c51504e1522366f757f849c5757f698",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 4 at version 19 requires the negative result to be judged against the listed set of document-like GET routes in production's description, each with an outcome or an exclusion reason.",
+      "reason": "",
+      "when": "2026-11-17T00:43:44.267078+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3c5fe0e04c51504e1522366f757f849c5757f698",
+      "commit_basis": "edit",
+      "note": "Section 4 at version 19 requires the negative result to be judged against the listed set of document-like GET routes in production's description, each with an outcome or an exclusion reason.",
+      "reason": "",
+      "when": "2026-11-17T00:43:44.267078+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/icp-api-access/r-20261117T001227102628-plan-review-of-icp-api-access.json",
   "review_run_id": "r-20261117T001227102628-plan-review-of-icp-api-access",
   "reviewed_blob_sha": "bed5d31e20f7a1fc9d70cbc4b9f788740fafc874",
   "rubric": "content",
