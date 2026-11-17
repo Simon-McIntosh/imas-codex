@@ -10,6 +10,14 @@
   "call_sites_note": "4293 reads the seat's options for the enrich worker, 5000 is the enrich_signal_batch call, and 6287-6292 caps the enrich worker count at the seat's max-workers; scripts/measure_signal_enrichment_recovery.py:219 is measurement scaffolding, not a production call site.",
   "completed_at": "2026-11-17T13:25:08.661Z",
   "dispatched_at": "2026-11-17T13:24:26Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-17T13:53:53.681925+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261117T083513338937-make-grounded-local-enrichment-complete-and-faster"
+    }
+  },
   "findings": [
     {
       "file": "imas_codex/discovery/signals/enrichment.py",
