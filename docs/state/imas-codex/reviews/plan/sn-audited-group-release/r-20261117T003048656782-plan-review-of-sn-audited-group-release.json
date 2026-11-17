@@ -71,6 +71,13 @@
       "note": "A recorded run now shows the sorting step reporting a cause planted on three members of a disposable group as a pipeline defect and leaving them out of both repairs. The write-path guard is the pipeline's own: an agent has read access only.",
       "reason": "",
       "when": "2026-11-17T00:42:05.240367+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "single_goal-1",
+      "reason": "The section's one verdict is the first group cut at the bar. The two-arm comparison is how the lead ruled the group's defective members are repaired, and its table is evidence of that repair, allowed to be inconclusive; it does not carry a verdict of its own, so the section closes on the cut.",
+      "when": "2026-11-17T00:42:36.791477+00:00"
     }
   ],
   "responses": {
@@ -91,6 +98,12 @@
       "note": "A recorded run now shows the sorting step reporting a cause planted on three members of a disposable group as a pipeline defect and leaving them out of both repairs. The write-path guard is the pipeline's own: an agent has read access only.",
       "reason": "",
       "when": "2026-11-17T00:42:05.240367+00:00"
+    },
+    "single_goal-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The section's one verdict is the first group cut at the bar. The two-arm comparison is how the lead ruled the group's defective members are repaired, and its table is evidence of that repair, allowed to be inconclusive; it does not carry a verdict of its own, so the section closes on the cut.",
+      "when": "2026-11-17T00:42:36.791477+00:00"
     },
     "wiring-1": {
       "action": "acted",
