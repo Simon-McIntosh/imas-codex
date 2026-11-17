@@ -141,8 +141,8 @@ async def test_edas_prompt_scopes_category_and_term_context_to_signals():
 def test_the_boundary_matcher_holds_a_term_to_whole_words():
     assert parallel.glossary_term_reaches("EFC", "PSSCfst/refvcEFC1")
     assert not parallel.glossary_term_reaches("EFC", "PSSCfst/refcurEF1")
-    # The matcher it replaces accepted a case-folded substring, which EFC is
-    # inside refcurEF1 ("refcuref1"); keep that difference visible.
+    # A case-folded substring accepts EFC inside refcurEF1 ("refcuref1");
+    # boundary matching must refuse that false positive.
     assert "efc" in "PSSCfst/refcurEF1".casefold()
 
 
