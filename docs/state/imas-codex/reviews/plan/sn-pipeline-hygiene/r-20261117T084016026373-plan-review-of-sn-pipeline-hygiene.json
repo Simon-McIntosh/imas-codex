@@ -25,7 +25,30 @@
   "plan_slug": "sn-pipeline-hygiene",
   "plan_version": 53,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "cf79a06651c87edcfb5447fa3b41a02380a51ad8",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The step now acts only on an exhausted name, retiring it, and never takes the source of a name that is not exhausted; a test covers each half, and the planted accepted name's source staying bound follows from the second.",
+      "reason": "",
+      "when": "2026-11-17T08:58:30.090706+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "cf79a06651c87edcfb5447fa3b41a02380a51ad8",
+      "commit_basis": "edit",
+      "note": "The step now acts only on an exhausted name, retiring it, and never takes the source of a name that is not exhausted; a test covers each half, and the planted accepted name's source staying bound follows from the second.",
+      "reason": "",
+      "when": "2026-11-17T08:58:30.090706+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-pipeline-hygiene/r-20261117T084016026373-plan-review-of-sn-pipeline-hygiene.json",
   "review_run_id": "r-20261117T084016026373-plan-review-of-sn-pipeline-hygiene",
   "reviewed_blob_sha": "e16df63751d2d8665aabff7e0124d09842219aa3",
   "rubric": "content",
