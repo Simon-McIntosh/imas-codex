@@ -1,7 +1,7 @@
 {
   "added_failure_count": 0,
   "added_failure_ids": [],
-  "completed_at": "",
+  "completed_at": "2026-11-17T04:29:35.436Z",
   "dispatched_at": "2026-11-17T04:23:44Z",
   "figures": {
     "docs/figures/iter-signal-context-and-enrichment/ground-local-signal-descriptions-in-context/grounding-correctness.svg": {
@@ -41,6 +41,6 @@
   "rubric": "figure",
   "status": "parsed",
   "times_source": "run-record",
-  "timestamp": "2026-11-17T04:29:36.059869+00:00",
+  "timestamp": "2026-11-17T04:34:42.410828+00:00",
   "total": null
 }
