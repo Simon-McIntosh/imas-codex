@@ -43,6 +43,27 @@ def metrics(records, wall_seconds):
         for value in row["outputs"]
         if value.get("description", "").strip()
     ]
+    recoveries = {
+        key: sum(row.get("grounding_counts", {}).get(key, 0) for row in records)
+        for key in (
+            "draft_retries",
+            "review_retries",
+            "fallback_descriptions",
+            "review_skips",
+        )
+    }
+    for stage, schema in (
+        ("draft", "SignalEnrichmentBatch"),
+        ("review", "DescriptionReview"),
+    ):
+        directed = sum(
+            bool(row.get("validation_reask"))
+            for row in responses
+            if row.get("response_schema") == schema
+        )
+        recoveries[stage + "_validation_reasks"] = max(
+            0, directed - recoveries[stage + "_retries"]
+        )
     return {
         "signals": sum(len(row["ids"]) for row in records),
         "delivered": len(outputs),
@@ -60,15 +81,7 @@ def metrics(records, wall_seconds):
         "reasoning_tokens": sum(
             row.get("reasoning_tokens", 0) or 0 for row in responses
         ),
-        "recoveries": {
-            key: sum(row.get("grounding_counts", {}).get(key, 0) for row in records)
-            for key in (
-                "draft_retries",
-                "review_retries",
-                "fallback_descriptions",
-                "review_skips",
-            )
-        },
+        "recoveries": recoveries,
         "errors": [row["error"] for row in records if row.get("error")],
     }
 

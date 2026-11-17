@@ -186,7 +186,7 @@ async def test_review_tail_flushes_and_duplicate_coverage_refuses_all_waiters():
             },
         ]
     }
-    await asyncio.wait_for(batcher.submit(call, kwargs), 1)
+    await asyncio.wait_for(batcher.submit(call, kwargs), 3)
     outputs = await asyncio.gather(
         batcher.submit(call, kwargs),
         batcher.submit(call, kwargs),

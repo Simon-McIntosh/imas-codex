@@ -42,7 +42,7 @@ class ReviewBatcher:
                 self.timer.cancel()
             self.flush()
         elif self.timer is None:
-            self.timer = loop.call_later(0.1, self.flush)
+            self.timer = loop.call_later(2.0, self.flush)
         return await future
 
     def flush(self):
