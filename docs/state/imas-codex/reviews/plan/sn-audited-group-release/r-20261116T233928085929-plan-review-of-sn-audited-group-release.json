@@ -43,9 +43,28 @@
       "note": "The forty planted names are read in addition to the sample and excluded from every count and rate reported for it; they are reported separately.",
       "reason": "",
       "when": "2026-11-17T00:15:23.280549+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "00170b9803954167e1960dd570381368851388f7",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "A member whose only defect classes are ones regeneration cannot repair (a duplicate, a wrong domain) is outside the comparison and is settled by an agent proposal or the lead's ruling, reported beside it.",
+      "reason": "",
+      "when": "2026-11-17T00:15:48.039005+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "00170b9803954167e1960dd570381368851388f7",
+      "commit_basis": "edit",
+      "note": "A member whose only defect classes are ones regeneration cannot repair (a duplicate, a wrong domain) is outside the comparison and is settled by an agent proposal or the lead's ruling, reported beside it.",
+      "reason": "",
+      "when": "2026-11-17T00:15:48.039005+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
