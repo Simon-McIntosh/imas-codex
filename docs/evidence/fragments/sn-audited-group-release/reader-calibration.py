@@ -429,7 +429,7 @@ async def read_corrected(*, pilot_only, through=0):
     # bounds. The first reader's filter is removed by the narrow wrapper above.
     llm.get_openrouter_max_price = lambda model: rates[model]
     original_call = llm.acall_llm_structured
-    ceilings = {"A": 4000, "B": 8000, "C": 4000}
+    ceilings = {"A": 4000, "B": 16000, "C": 4000}
 
     async def bounded_call(**kwargs):
         seat = next(r["seat"] for r in readers if r["model"] == kwargs["model"])
@@ -1011,9 +1011,9 @@ def render_page(data):
         + ("fit" if result["chosen_reader_fit"] else "best measured individual")
         + " reader by balanced accuracy, with recall used to break ties. This measurement does not itself authorize a group release or choose an interim deciding rule where none is fit.</p>",
         "<h2>Spend and the six-name pilot</h2>",
-        f"<p>Recorded priced spend: <strong>USD {account['priced_usd']:.6f}</strong>; the one null-cost failed call is charged <strong>USD {account['unpriced_reserved_usd']:.6f}</strong> at its worst-case bound. Budget-accounted total: <strong>USD {account['charged_usd']:.6f} / USD {CEILING:.2f}</strong>. There are {len(records)} successful readings and {result['spend']['attempts'] - len(records)} retained failed attempt(s). No null receipt is counted as free.</p>",
+        f"<p>Recorded priced spend: <strong>USD {account['priced_usd']:.6f}</strong>; the {account['unpriced_calls']} null-cost failed calls are charged <strong>USD {account['unpriced_reserved_usd']:.6f}</strong> at its worst-case bound. Budget-accounted total: <strong>USD {account['charged_usd']:.6f} / USD {CEILING:.2f}</strong>. There are {len(records)} successful readings and {result['spend']['attempts'] - len(records)} retained failed attempt(s). No null receipt is counted as free.</p>",
         f"<p>The seeded six-name pilot completed all 18 successful readings for USD {pilot['spend_usd']:.6f}. Scaling that cost to 84 names and adding the failed-call reserve projected <strong>USD {pilot['projected_usd']:.6f} / USD {CEILING:.2f}</strong>; the full read began afterward. Two readings paid before resumption were retained. The initial local reservation refusal made no calls; the next attempt returned reader A’s price-filter refusal while B and C returned paid readings. After adjudication, A’s provider max-price filter was removed and every next call was checked against the running charged total plus its worst-case token cost, including the reserved bounds of any other calls in flight.</p>",
-        "<p>Calls use the original audit’s <code>judge_one</code> and shared structured-call owner. On resumption, output ceilings are A 4000, B 8000 and C 4000 tokens with one provider attempt per call. The inherited B receipt includes its earlier length retry. Reader A is reserved at conservative text rates of USD 20 / 100 per million input/output tokens; the other readers use the recorded bounded text prices. These budget controls and any text drift limit causal attribution solely to the omission sentence.</p>",
+        "<p>Calls use the original audit’s <code>judge_one</code> and shared structured-call owner. On resumption, output ceilings are A 4000 and C 4000 tokens; B used 8000 initially and 16000 after an empty length-limited response. Each resumed call has one provider attempt. The inherited B receipt includes its earlier length retry. Reader A is reserved at conservative text rates of USD 20 / 100 per million input/output tokens; the other readers use the recorded bounded text prices. These budget controls and any text drift limit causal attribution solely to the omission sentence.</p>",
         "<h2>The omission instruction: before and after</h2>",
         "<p>The unchanged class definition says that a qualifier stated by the source and absent from the name is a defect. The later rule contradicted it:</p>",
         "<table><thead><tr><th>Earlier instruction, retained with earlier readings</th><th>Corrected instruction</th></tr></thead><tbody><tr><td>"
