@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T22:01:40.568Z",
+  "dispatched_at": "2026-11-17T22:01:14Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:37",
+      "id": "done_when-1",
+      "reason": "the node that builds the cut must either subtract ruled exceptions (the ruling sentence, contradicting \"uncorrected, over every member\") or not (the refusal clause, which then makes \u00a74's exception route for sourceless members dead), and with equilibrium at 210 members carrying any single unrepairable defect the whole first-group cut lands on the wrong side of that choice.",
+      "text": "the section rules that a group is cut when every member is judged sound \"or is a named exception the lead has ruled\" and that an undecidable member counts as defective \"until it is ruled\", but the done-when in the same section defines the rate as \"the share of members the blind adjudication of \u00a74 judges defective, taken over every member and uncorrected, with the members it cannot decide reported as their own share\", and refuses the cut when that rate \"is above the ruled bar\", now 0; nothing subtracts a ruled exception from the rate, so any group holding one defective or undecidable member \u2014 including the sourceless member \u00a74 clears by \"listing with the lead's ruling as an exception the bar reads\" \u2014 is refused by the measured clause while the ruling clause admits it, and the node cannot tell which of the two decides",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-audited-group-release.html:37",
+      "id": "naming-1",
+      "reason": "the bar is already fixed in words in the preceding sentence, so removing or restating the identifier leaves the cut's behaviour and its done-when exactly as they are; an implementer takes the quantity, not the spelling, from the plan.FINDING done_when docs/plans/sn-audited-group-release.html:37 \u2014 a bare claim",
+      "text": "\"As the cut reads it: max_defect_rate 0, for the group and for every defect class\" asserts a code identifier that no file in the repository defines (grep -rn \"max_defect\\|max-defect\" over the checkout returns only this plan line), and the plan's own rule is that a section names no function or interface such a name would be read as",
+      "type": "naming",
+      "would_change": false
+    }
+  ],
+  "plan_commit": "2c37a8a47ad59c61f9cd5d73fa1a4f8270ba24e7",
+  "plan_fingerprint": "7c3a275241aaba92d4ff4ba6889b8fe5a73b9b8748475055a428655045c789d3",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 28,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T220019426200-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "767525a609b2bceb7e23c27eeb00b635db9b6012",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a72 resolves to section id s2, tests/standard_names exists in the repository root, docs/plans/sn-definitions-by-construction.html carries id=\"s11\", and the evidence directory named above exists.",
+    "done_when": "a finding \u2014 s3:37 now names two independent cut conditions, \"every member is judged sound ... or is a named exception the lead has ruled\" and \"the group's audited defect rate is above the ruled bar\", where the ruled bar is 0 and the rate the same done-when defines counts every defective member, so a ruled exception cannot satisfy the measure that decides the cut.",
+    "evidence_paths": "pass \u2014 the refusal runs and evidence page go to docs/evidence/fragments/sn-audited-group-release/, which exists and already holds committed pages (sagr-blind-audit.html, sagr-frontier-third-reader.html, planted-label-check.html), so a later reader can open them.",
+    "naming": "a finding \u2014 \"As the cut reads it: max_defect_rate 0\" puts a new identifier into the plan text that exists nowhere in the repository (grep for max_defect/max-defect returns only this plan line), so it states a field the cut does not read.",
+    "reasoning": "a finding \u2014 the zero-defect ruling the changed paragraph adds makes the section's own exception route unreachable by its own measurement, so a group cleared only through ruled exceptions still shows a non-zero rate and is refused by the same done-when.",
+    "single_goal": "pass \u2014 s3 has one deliverable, the bar a group's cut is held to and the set of refusals that enforce it; the reader-fitness and rate-definition clauses are definitions of that one measure, not separate deliverables.",
+    "wiring": "pass \u2014 s3's depends-on names s1 and s2 (both present and both consumed by its done-when), s4's dependency on sn-definitions-by-construction#s11 resolves (id=\"s11\" exists), and s5\u2192s4/s6 with s6\u2192s2 covers transport's parts."
+  },
+  "section_digests": {
+    "_document": "3a1f5b884da22b0f9f7513f167fc23ed231b5462b07c24908c13cb258da75fe9",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "3073ba4c58fc1374d8568d8e8798f5c1fac407860517b8ac0c4e0ca15a6a4a2b",
+    "s3": "b1d8066ddb5c2ccc9e95d7ca2ade38227b9277078af437f9fd748e218f8a8e8c",
+    "s4": "4640fdf2831f8ca044d9ed3f60314f8e79cc23053b199cb1f7491f7df26aeb50",
+    "s5": "61674c50c2e89474d21672aad5679437c4d08736b700aabf9ebf00fc989477fb",
+    "s6": "90a0463c758d22b32611805f931c843f2382e2bc89a2e1ef318231acd72f2fca"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T22:07:14.094003+00:00",
+  "total": null
+}
