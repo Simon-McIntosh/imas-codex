@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own records: classification.json carries baseline_suite null and after_suite null, so the run declares no suite arms and the baseline-to-after set difference is empty; the logs it records are measurement and control arms (grouping-measure.log EXIT=0, component-census.log EXIT=0, metadata-duty.log EXIT=0, component-population.log EXIT=0, negative-control-green.log EXIT=0) with the red arms product-gate.log EXIT=1, negative-control-red.log EXIT=1 and metadata-duty-red.log EXIT=1 red by design as the declared controls.",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/discovery/signals/archive_grouping_graph.py:164 persist_archive_grouping calls name_parse_items whose PARSE_QUERY at imas_codex/discovery/signals/variable_name_graph.py:42 MERGEs the CANDIDATE_PLANT_COMPONENT link the fragment's 623 row counts",
+    "imas_codex/discovery/signals/archive_grouping_graph.py:189 RETIRE_UNUSED_GROUPS_QUERY applied inside persist_archive_grouping"
+  ],
+  "completed_at": "2026-11-17T02:56:00.293Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-grouping-rerun-on-full-catalogue-84f70b6ad54e",
+      "recorded_at": "2026-11-17T03:02:01.671276+00:00"
+    }
+  },
+  "dispatched_at": "2026-11-17T02:55:10Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "105",
+      "severity": "non-blocking",
+      "text": "non-blocking: \"so the population is stable while a peer import runs\" gives the population a concurrent-import cause that no artefact in the run directory records - component-population.json holds two readings 90.06 s apart and no import trace - and the run manifest's evidence_inputs at manifest.md:27 itself calls the earlier concurrent-import attribution wrong."
+    },
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html",
+      "line": "122",
+      "severity": "non-blocking",
+      "text": "non-blocking: the sentence says metadata-duty-check.py \"refuses an empty receipt\" but quotes refusals={\"empty_receipt\": false, ...}, where the key is named for refusal while the value is metadata_duty's acceptance bit (False means refused); the quoted line therefore reads as the opposite of the claim until a reader opens metadata-duty-check.py, whose failed list treats True as failure."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T044838773093-grouping-rerun-on-full-catalogue/manifest.md",
+      "line": "27",
+      "severity": "non-blocking",
+      "text": "non-blocking: the run's evidence_inputs still states \"two readings 91 seconds apart\" while the fragment now says 90 seconds and component-population.json measures 02:14:29.961017 to 02:16:00.023328, 90.06 s, so the manifest that answers this review contradicts the artefact it cites."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 2 production call site(s)",
+    "diff": "read the single commit 3320eb0ea..84f70b6ad: it rewrites the component census paragraph and the 100-node row, drops the unrecorded pre-run comparison for a measured 90-second interval, replaces the re-typed metadata duty with the imported one plus a mutation arm, and adds component-census.log/json and metadata-duty-red.log to the private-log list, all in the fragment.",
+    "done_when": "the gate this commit adds is component-census.py, whose component-census.log ends accounted=2957 total=2957 EXIT=0, plus the metadata duty pair metadata-duty.log EXIT=0 and metadata-duty-red.log EXIT=1; neither asserts a section-5 measure, which the run's landing record already carries.",
+    "goal": "plan section 10's done_when (docs/plans/iter-signal-context-and-enrichment.html:89) asks the landing record to state every section-5 measure beside the partial run's with no unreferenced component or pattern node; commit 84f70b6ad is a fragment-only correction that moves the component-relation table onto a recorded census, so it repairs the evidence for that goal rather than adding a measure.",
+    "manifest": "read manifest.md: status complete with commits 0f4f00558 9a20d0e51 faec73bae 3320eb0ea 84f70b6ad, tests line names measure_grouping.py, five test logs including grouping-measure.log and component-census.log, negative_control_log product-gate.log, and classification.json records baseline_suite null and after_suite null.",
+    "write_paths": "the run's manifest.md:3 declares docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html and docs/figures/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue; git diff --stat 3320eb0ea 84f70b6ad touches only the first, 5 insertions and 5 deletions."
+  },
+  "justifications": {
+    "durability": "the checks that could catch a regression live in the private run directory, component-census.py and metadata-duty-check.py, so no committed test reddens if measure_grouping.py's metadata_duty or the census query changes; the mutation arm metadata-duty-red.log does falsify the duty check by replacing measure_grouping.metadata_duty with a permissive lambda and reading EXIT=1.",
+    "evidence": "every changed claim is checkable against a named artefact and the census log prints accounted=2957 total=2957 EXIT=0, but the peer-import clause at line 105 and the inverted refusals quote at line 122 leave two claims unreconcilable from the cited evidence alone.",
+    "fit": "the rewritten paragraphs at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:99-105 and 122-124 follow the h4/table/prose idiom already used at lines 90-97, and the commit subject is a conventional docs(signals) line.",
+    "goal_fidelity": "the census table at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:99-104 now rests on component-census.json, whose measured_at 2026-11-17T02:37:54.506618+00:00 and counts 2234+623+100=2957 match the fragment's figures.",
+    "reuse": "the diff adds no function, class or module to the repository and names the existing writers rather than forking them, PARSE_QUERY at imas_codex/discovery/signals/variable_name_graph.py:42 and RETIRE_UNUSED_GROUPS_QUERY at imas_codex/discovery/signals/archive_grouping_graph.py:73.",
+    "scope_discipline": "git diff --stat 3320eb0eadfee13bf7db9bbd535a123917f43ee2 84f70b6ad54ee7bb32eaba4f6660355c8d8c494c names only the declared fragment path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: plan section 10's done_when (docs/plans/iter-signal-context-and-enrichment.html:89) asks the landing record to state every section-5 measure beside the partial run's with no unreferenced component or pattern node; commit 84f70b6ad is a fragment-only correction that moves the component-relation table onto a recorded census, so it repairs the evidence for that goal rather than adding a measure.\nVERDICT done_when: the gate this commit adds is component-census.py, whose component-census.log ends accounted=2957 total=2957 EXIT=0, plus the metadata duty pair metadata-duty.log EXIT=0 and metadata-duty-red.log EXIT=1; neither asserts a section-5 measure, which the run's landing record already carries.\nVERDICT write_paths: the run's manifest.md:3 declares docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html and docs/figures/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue; git diff --stat 3320eb0ea 84f70b6ad touches only the first, 5 insertions and 5 deletions.\nVERDICT manifest: read manifest.md: it is status complete with commits 0f4f00558 9a20d0e51 faec73bae 3320eb0ea 84f70b6ad, its tests line names measure_grouping.py, it lists grouping-measure.log, component-census.log, metadata-duty-red.log, repair-revert-check-round3.log and metadata-duty.log, and classification.json records baseline_suite null and after_suite null.\nVERDICT diff: read the single commit 3320eb0ea..84f70b6ad: it rewrites the component census paragraph and the 100-node row, drops the unrecorded pre-run comparison for a measured 90-second interval, replaces the re-typed metadata duty with the imported one plus a mutation arm, and adds component-census.log/json and metadata-duty-red.log to the private-log list, all in docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html.\nCALL_SITES: imas_codex/discovery/signals/archive_grouping_graph.py:164 persist_archive_grouping calls name_parse_items whose PARSE_QUERY at imas_codex/discovery/signals/variable_name_graph.py:42 MERGEs the CANDIDATE_PLANT_COMPONENT link the fragment's 623 row counts, imas_codex/discovery/signals/archive_grouping_graph.py:189 RETIRE_UNUSED_GROUPS_QUERY\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the census table at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:99-104 now rests on component-census.json, whose measured_at 2026-11-17T02:37:54.506618+00:00 and counts 2234+623+100=2957 match the fragment's figures.\nSCORE evidence: 16\nJUSTIFICATION evidence: every changed claim is checkable against a named artefact and the census log prints accounted=2957 total=2957 EXIT=0, but the peer-import clause at line 105 and the inverted refusals quote at line 122 leave two claims unreconcilable from the cited evidence alone.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat 3320eb0eadfee13bf7db9bbd535a123917f43ee2 84f70b6ad54ee7bb32eaba4f6660355c8d8c494c names only the declared fragment path.\nSCORE durability: 8\nJUSTIFICATION durability: the checks that could catch a regression live in the private run directory, component-census.py and metadata-duty-check.py, so no committed test reddens if measure_grouping.py's metadata_duty or the census query changes; the mutation arm metadata-duty-red.log does falsify the duty check by replacing measure_grouping.metadata_duty with a permissive lambda and reading EXIT=1.\nSCORE fit: 18\nJUSTIFICATION fit: the rewritten paragraphs at docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:99-105 and 122-124 follow the h4/table/prose idiom already used at lines 90-97, and the commit subject is a conventional docs(signals) line.\nSCORE reuse: 20\nJUSTIFICATION reuse: the diff adds no function, class or module to the repository and names the existing writers rather than forking them, PARSE_QUERY at imas_codex/discovery/signals/variable_name_graph.py:42 and RETIRE_UNUSED_GROUPS_QUERY at imas_codex/discovery/signals/archive_grouping_graph.py:73.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:105 non-blocking: \"so the population is stable while a peer import runs\" gives the population a concurrent-import cause that no artefact in the run directory records - component-population.json holds two readings 90.06 s apart and no import trace - and the run manifest's evidence_inputs at manifest.md:27 itself calls the earlier concurrent-import attribution wrong.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/grouping-rerun-on-full-catalogue.html:122 non-blocking: the sentence says metadata-duty-check.py \"refuses an empty receipt\" but quotes refusals={\"empty_receipt\": false, ...}, where the key is named for refusal while the value is metadata_duty's acceptance bit (False means refused); the quoted line therefore reads as the opposite of the claim until a reader opens metadata-duty-check.py, whose failed list treats True as failure.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T044838773093-grouping-rerun-on-full-catalogue/manifest.md:27 non-blocking: the run's evidence_inputs still states \"two readings 91 seconds apart\" while the fragment now says 90 seconds and component-population.json measures 02:14:29.961017 to 02:16:00.023328, 90.06 s, so the manifest that answers this review contradicts the artefact it cites.",
+  "review_node": "review-of-grouping-rerun-on-full-catalogue-84f70b6ad54e",
+  "review_run_id": "r-20261117T025027717047-review-of-grouping-rerun-on-full-catalogue-84f70b6ad54e",
+  "reviewed_base_sha": "3320eb0eadfee13bf7db9bbd535a123917f43ee2",
+  "reviewed_head_sha": "84f70b6ad54ee7bb32eaba4f6660355c8d8c494c",
+  "reviewed_run_id": "r-20261116T044838773093-grouping-rerun-on-full-catalogue",
+  "reviewer": {
+    "backend": "deepseek",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T025027717047-review-of-grouping-rerun-on-full-catalogue-84f70b6ad54e"
+  },
+  "scores": {
+    "durability": 8,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T03:05:16.348125+00:00",
+  "total": 100
+}
