@@ -53,6 +53,16 @@
       "note": "The next version takes the empty-description control from a constructed pulse in a test, independent of whether the live archive holds one.",
       "reason": "",
       "when": "2026-11-17T16:18:30.877277+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "1ddbfed7767cdf87cdabb6d375fb3acdcc9111e2",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The next version requires the twenty pulses to be written to a private file before the run, with that file's digest in the landing record.",
+      "reason": "",
+      "when": "2026-11-17T16:18:35.852451+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "The next version takes the empty-description control from a constructed pulse in a test, independent of whether the live archive holds one.",
       "reason": "",
       "when": "2026-11-17T16:18:30.877277+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "1ddbfed7767cdf87cdabb6d375fb3acdcc9111e2",
+      "commit_basis": "edit",
+      "note": "The next version requires the twenty pulses to be written to a private file before the run, with that file's digest in the landing record.",
+      "reason": "",
+      "when": "2026-11-17T16:18:35.852451+00:00"
     },
     "reasoning-1": {
       "action": "acted",
