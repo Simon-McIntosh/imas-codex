@@ -1,0 +1,61 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "d12142b478667cd114095d1e1a1309ef551204e9",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/loop.py:1927 run_sn_pools -> reconcile_source_status_liveness",
+    "imas_codex/standard_names/ledger.py:58 find_provenance_orphans -> classify_sourceless_standard_names",
+    "imas_codex/standard_names/export.py:3067 -> classify_sourceless_standard_names",
+    "imas_codex/standard_names/graph_store/__init__.py:572 facade exposing supersede_exhausted_standard_name_orphans"
+  ],
+  "completed_at": "2026-11-17T13:32:34.597Z",
+  "dispatched_at": "2026-11-17T13:31:12Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/loop.py",
+      "line": "1929",
+      "severity": "non-blocking",
+      "text": "non-blocking: the folded change that logs the retired-name count in run_sn_pools is guarded by no assertion, so an edit that dropped names_retired from the tuple at :1931 or from the format arguments at :1938 would leave both archived arms green and the logging requirement silently unmet."
+    }
+  ],
+  "head_log_revision": "4345f519303afa9ede6aee6280f607be0bc1b415",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified four production call sites: run_sn_pools consuming the reconcile result, find_provenance_orphans and the export builder consuming the classifier, and the services facade exposing the signed supersession.",
+    "diff": "read commit by commit: 4345f5193 changes graph_supersession.py admission and loop.py logging plus two test files, 8ae592262 and a449ce31e change only the evidence JSON and HTML page.",
+    "done_when": "the done_when measures tests/standard_names at head against base with zero added failures; the manifest's baseline_suite and after_suite both declare completed=true with revision, command and log_path, and those logs read 8789 passed, 12 skipped, 0 failed and EXIT=0 at d12142b478667cd114095d1e1a1309ef551204e9 and 4345f519303afa9ede6aee6280f607be0bc1b415.",
+    "goal": "the node's goal is to admit an exhausted name whose source edge was removed by the recycling pass into the signed retirement path, retire the 13 stranded names through it, and leave exactly the original ten sourceless; imas_codex/standard_names/graph_store/graph_supersession.py:3251-3273 builds the former-source evidence, :3455-3456 unions it into the eligible ids, and live_apply.json records 13 applied with a ten-name readback in live_readback.json.",
+    "manifest": "read; it states status complete, the three commits, the isolated all_debug gate command with both arms' logs, both mutation controls at EXIT=1, retry_failures carrying the base-and-head-identical test_source_audit_gate failure, and outside_scope naming that same failure.",
+    "write_paths": "the fence is the six paths in the manifest's orientation_write_paths, and every path in git diff d12142b47 a449ce31e is one of those six with no seventh path present."
+  },
+  "justifications": {
+    "durability": "negative_control.log reddens 5 ids and negative_exhaustion.log reddens 10 ids on mutants that remove exactly the admission and stage guards asserted at tests/standard_names/test_exhausted_orphan_retirement.py:65-66 and :119-121, none of which echoes a value the test handed in, while the retired-name count added at imas_codex/standard_names/loop.py:1929 has no assertion.",
+    "evidence": "baseline_suite_isolated.log and after_suite_isolated.log each end in EXIT=0 with 8789 passed, 12 skipped at d12142b47 and at 4345f5193, so the recorded added_failure_count 0 is read from the gate logs, though both arms deselect the 22 new graph cases that reproduction.log and focused_head.log carry instead.",
+    "fit": "the addition keeps the file's foundation-runtime indirection and row-dict idiom at imas_codex/standard_names/graph_store/graph_supersession.py:3174-3205, and imas_codex/standard_names/loop.py:1929-1939 extends the neighbouring multi-count log call without a plan-derived name.",
+    "goal_fidelity": "imas_codex/standard_names/graph_store/graph_supersession.py:3251-3273 admits only an exhausted, non-derived identity carrying its own released-source or migration-receipt evidence, :3455-3456 unions those ids into the eligible set, and live_apply.json records changed 13 while live_readback.json enumerates exactly the original ten.",
+    "reuse": "the admission extends the classifier that already owns the population at imas_codex/standard_names/graph_store/graph_supersession.py:3245-3303 and the readback reuses find_sourceless_live_name_rows at imas_codex/standard_names/source_invariant.py:204 with no exemption added; a search for an owner of a released or claimable source predicate found only source_claim_predicate at imas_codex/standard_names/graph_store/graph_foundation.py:201, whose frozen-stage binding test is strictly weaker than the zero-producer, zero-attempt condition added here.",
+    "scope_discipline": "git diff --stat d12142b47..a449ce31e lists graph_supersession.py, loop.py, the two test files and the two evidence files, all six inside the declared orientation_write_paths and nothing else."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to admit an exhausted name whose source edge was removed by the recycling pass into the signed retirement path, retire the 13 stranded names through it, and leave exactly the original ten sourceless; imas_codex/standard_names/graph_store/graph_supersession.py:3251-3273 builds the former-source evidence, :3455-3456 unions it into the eligible ids, and live_apply.json records 13 applied with a ten-name readback in live_readback.json.\nVERDICT done_when: the done_when measures tests/standard_names at head against base with zero added failures; the manifest's baseline_suite and after_suite both declare completed=true with revision, command and log_path, and those logs read 8789 passed, 12 skipped, 0 failed and EXIT=0 at d12142b478667cd114095d1e1a1309ef551204e9 and 4345f519303afa9ede6aee6280f607be0bc1b415.\nVERDICT write_paths: the fence is the six paths in the manifest's orientation_write_paths, and every path in git diff d12142b47 a449ce31e is one of those six with no seventh path present.\nVERDICT manifest: read; it states status complete, the three commits, the isolated all_debug gate command with both arms' logs, both mutation controls at EXIT=1, retry_failures carrying the base-and-head-identical test_source_audit_gate failure, and outside_scope naming that same failure.\nVERDICT diff: read commit by commit: 4345f5193 changes graph_supersession.py admission and loop.py logging plus two test files, 8ae592262 and a449ce31e change only the evidence JSON and HTML page.\nCALL_SITES: imas_codex/standard_names/loop.py:1927 run_sn_pools -> reconcile_source_status_liveness, imas_codex/standard_names/ledger.py:58 find_provenance_orphans -> classify_sourceless_standard_names, imas_codex/standard_names/export.py:3067 -> classify_sourceless_standard_names, imas_codex/standard_names/graph_store/__init__.py:572 facade exposing supersede_exhausted_standard_name_orphans\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/graph_store/graph_supersession.py:3251-3273 admits only an exhausted, non-derived identity carrying its own released-source or migration-receipt evidence, :3455-3456 unions those ids into the eligible set, and live_apply.json records changed 13 while live_readback.json enumerates exactly the original ten.\nSCORE evidence: 18\nJUSTIFICATION evidence: baseline_suite_isolated.log and after_suite_isolated.log each end in EXIT=0 with 8789 passed, 12 skipped at d12142b47 and at 4345f5193, so the recorded added_failure_count 0 is read from the gate logs, though both arms deselect the 22 new graph cases that reproduction.log and focused_head.log carry instead.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff --stat d12142b47..a449ce31e lists graph_supersession.py, loop.py, the two test files and the two evidence files, all six inside the declared orientation_write_paths and nothing else.\nSCORE durability: 18\nJUSTIFICATION durability: negative_control.log reddens 5 ids and negative_exhaustion.log reddens 10 ids on mutants that remove exactly the admission and stage guards asserted at tests/standard_names/test_exhausted_orphan_retirement.py:65-66 and :119-121, none of which echoes a value the test handed in, while the retired-name count added at imas_codex/standard_names/loop.py:1929 has no assertion.\nSCORE fit: 19\nJUSTIFICATION fit: the addition keeps the file's foundation-runtime indirection and row-dict idiom at imas_codex/standard_names/graph_store/graph_supersession.py:3174-3205, and imas_codex/standard_names/loop.py:1929-1939 extends the neighbouring multi-count log call without a plan-derived name.\nSCORE reuse: 19\nJUSTIFICATION reuse: the admission extends the classifier that already owns the population at imas_codex/standard_names/graph_store/graph_supersession.py:3245-3303 and the readback reuses find_sourceless_live_name_rows at imas_codex/standard_names/source_invariant.py:204 with no exemption added; a search for an owner of a released or claimable source predicate found only source_claim_predicate at imas_codex/standard_names/graph_store/graph_foundation.py:201, whose frozen-stage binding test is strictly weaker than the zero-producer, zero-attempt condition added here.\nFINDING imas_codex/standard_names/loop.py:1929 non-blocking: the folded change that logs the retired-name count in run_sn_pools is guarded by no assertion, so an edit that dropped names_retired from the tuple at :1931 or from the format arguments at :1938 would leave both archived arms green and the logging requirement silently unmet.",
+  "review_run_id": "r-20261117T132855377275-review-of-sph-retire-sourceless-backlog-a449ce31e292",
+  "reviewed_base_sha": "d12142b478667cd114095d1e1a1309ef551204e9",
+  "reviewed_head_sha": "a449ce31e292113fd5a9bde1afb43f8b23bed7bc",
+  "reviewed_run_id": "r-20261117T124123918295-sph-retire-sourceless-backlog",
+  "reviewer_run_id": "r-20261117T132855377275-review-of-sph-retire-sourceless-backlog-a449ce31e292",
+  "scores": {
+    "durability": 18,
+    "evidence": 18,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 19,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T13:53:21.365095+00:00",
+  "total": 114
+}
