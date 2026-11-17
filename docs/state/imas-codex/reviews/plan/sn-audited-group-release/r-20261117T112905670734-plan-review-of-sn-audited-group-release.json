@@ -59,9 +59,28 @@
       "note": "Section 6 now says its 1,042 is the 2026-11-17 reading of section 2's measurement, whose data file records the definition of live, and that the 1,079 opening section 2 is the 2026-11-16 reading.",
       "reason": "",
       "when": "2026-11-17T16:47:07.547125+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "5e4112b78b29bf5b8b59dd15e97c72a82376a6cb",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 6 now requires the parts to sum to the live transport count read in the same run and a disposable-graph run with one planted name moved to its ruled part and one outside transport left in place.",
+      "reason": "",
+      "when": "2026-11-17T16:48:02.112780+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "5e4112b78b29bf5b8b59dd15e97c72a82376a6cb",
+      "commit_basis": "edit",
+      "note": "Section 6 now requires the parts to sum to the live transport count read in the same run and a disposable-graph run with one planted name moved to its ruled part and one outside transport left in place.",
+      "reason": "",
+      "when": "2026-11-17T16:48:02.112780+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
