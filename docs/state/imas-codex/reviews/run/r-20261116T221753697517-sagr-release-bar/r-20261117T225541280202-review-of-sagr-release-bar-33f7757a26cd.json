@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms: base-suite.log at 9dc386945214 is 22 failed / 8788 passed / EXIT=1 and after-suite.log at eb1a78ba63ef is 22 failed / 8811 passed / EXIT=1; the sorted FAILED id sets are identical (comm -13 and comm -23 both empty), so no failure id is added at head and the 23 extra passes are the new module. Both arms declare completed with a summary line, and the after arm is at eb1a78ba63ef, one docs-only commit below the delivered head.",
+  "call_site_count": 2,
+  "call_sites": [
+    "imas_codex/cli/sn.py:_run_export_cli",
+    "imas_codex/standard_names/catalog_release.py:2505"
+  ],
+  "completed_at": "2026-11-17T22:56:29.808Z",
+  "dispatched_at": "2026-11-17T22:56:10Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/export.py",
+      "line": "1599",
+      "severity": "non-blocking",
+      "text": "non-blocking: audited_text_digest re-implements the repository's combined stored-text content hash, which imas_codex/standard_names/graph_store/graph_claim_release.py:560 already computes as content_hashes.combined_sha256 via services._authority_payload_hash (defined at graph_store/graph_review_persistence.py:79); the new function uses a different framing ([description, documentation] as a JSON list), so a member's audit digest is a second, incomparable identity of the same text and no existing content-identity consumer can cross-check it."
+    },
+    {
+      "file": "tests/standard_names/test_release_group_bar.py",
+      "line": "330",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_ruled_family_exception_or_a_joint_cut_clears_the_family takes family_id from _group_family_issues itself and feeds it back as family_exceptions, so the two sides move together and the assertion holds whatever the id construction does; the regression it should catch - a change to the parent_path/family_type/sha1 framing at export.py:2136 that leaves the 225 committed ids in imas_codex/standard_names/release_bar.json unmatched - passes here, and no test ties the committed exception list to the computed id."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "Implemented in imas_codex/standard_names/export.py:run_export, reached from imas_codex/cli/sn.py:4712 (_run_export_cli) and imas_codex/standard_names/catalog_release.py:2505, with the new settings accessors read only from export.py.",
+    "diff": "Read commit by commit from 9dc386945214 to 33f7757a26cf: nine commits, the code landing in b39ff5933 (gate plus causes) and 15b0dbac0 (the ruled bar and undecided counting), 32d21962b narrowing the undecided report, docs and evidence in the rest, plus settings.py accessors and a five-line CLI cause printer.",
+    "done_when": "The done_when names a recorded refusal per planted fault plus a clean cut, the family cause inside the cross-field gate, and 'the whole tests/standard_names directory adds no failure at head against base'; tests/standard_names/test_release_group_bar.py covers ten planted faults, a clean cut, a ruled defect exception and an unruled bar, docs/evidence/fragments/sn-audited-group-release/sagr-release-bar-refusals.json records 13 rows, and the two suite arms are recorded in the manifest as baseline_suite and after_suite with log paths.",
+    "goal": "The node goal is that a group release cut refuses a group that does not meet the ruled bar; imas_codex/standard_names/export.py:2000 _run_group_bar_gate appends GATE_GROUP_BAR to report.gate_results whenever run_export is handed a domain (export.py:4066-4078), and the live gate-only leg in equilibrium-gate-report.json refuses equilibrium with group_member_not_accepted 63, member_shared_wording_altered 57 and group_audit_never_measured 1.",
+    "manifest": "The reviewed manifest.md reads status complete, names nine commits ending at 33f7757a26cf, records tests/standard_names/ as the gate with both arms' logs (base-suite.log 22 failed / 8788 passed EXIT=1, after-suite.log 22 failed / 8811 passed EXIT=1) and a negative control at EXIT=1; it also records the live gate report artifact and the ruling as evidence_inputs.",
+    "write_paths": "The reviewer's declared set is imas_codex/standard_names/{export,source_invariant,families}.py, tests/standard_names/test_release_group_bar.py and the two evidence paths; the diff also carries imas_codex/settings.py, imas_codex/cli/sn.py, imas_codex/standard_names/AGENTS.md and imas_codex/standard_names/release_bar.json plus the refusals json, all named in the worker's own orientation_write_paths, while source_invariant.py and families.py are declared and untouched."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_release_group_bar.py:246 fails when the gate's sourceless refusal is removed (negative-control-sourceless.log, 1 failed, EXIT=1), but the family-exception guard at line 330 feeds back an id the code under test itself produced, so it cannot redden when the id format drifts from the 225 committed ids.",
+    "evidence": "The done_when's suite measure is recorded as two arms whose logs carry revision, tree, module, cwd, command and a bare EXIT line, and their failure sets are identical by id (comm empty in both directions, 22 vs 22, 8788 vs 8811 passed), which I re-derived from the logs rather than taking from the manifest.",
+    "fit": "The addition uses GateResult, issue dicts with type/group/detail as the existing gates do (imas_codex/standard_names/export.py:1851-2040), and introduces no plan or ticket identifier in any name.",
+    "goal_fidelity": "imas_codex/standard_names/export.py:2000 refuses the group-scoped cut through all_gates_passed, and the parent gate was expanded in place at export.py:1179-1186 rather than beside it, so a cut that cannot meet the bar writes no catalog.",
+    "reuse": "The family, sourceless and wording checks wrap imas_codex/standard_names/families.py:215, imas_codex/standard_names/source_invariant.py:204 and imas_codex/standard_names/docs_gates.py:1238, but imas_codex/standard_names/export.py:1599 audited_text_digest re-implements the combined description+documentation content hash that imas_codex/standard_names/graph_store/graph_claim_release.py:560 already takes through services._authority_payload_hash instead of extending it.",
+    "scope_discipline": "Five changed paths (imas_codex/settings.py, imas_codex/cli/sn.py, imas_codex/standard_names/AGENTS.md, release_bar.json, sagr-release-bar-refusals.json) sit outside the six declared paths, though all are inside the worker's own orientation_write_paths and implied by the brief's configuration and ruling clauses."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed goal is that a group release cut refuse a group below the ruled bar; imas_codex/standard_names/export.py:2000 refuses through GATE_GROUP_BAR when a domain is set, and equilibrium-gate-report.json shows the live group refused. VERDICT done_when: the done_when names per-fault refusal runs, the family cause and a whole-directory suite comparison; tests/standard_names/test_release_group_bar.py plants ten faults plus a clean cut, and the manifest records both suite arms at 22 identical failure ids. VERDICT write_paths: the reviewer-declared six paths are not the whole diff; imas_codex/settings.py, imas_codex/cli/sn.py, imas_codex/standard_names/AGENTS.md, release_bar.json and the refusals json are changed outside them but inside the worker's own orientation_write_paths. VERDICT manifest: read; it records status complete, nine commits, both arm logs with exit status, and the negative control at EXIT=1. VERDICT diff: read commit by commit from 9dc386945214 to 33f7757a26cf; code lands in b39ff5933, 15b0dbac0 and 32d21962b, the rest is evidence and documentation. CALL_SITES: imas_codex/cli/sn.py:_run_export_cli, imas_codex/standard_names/catalog_release.py:2505 SCORE goal_fidelity: 18 JUSTIFICATION goal_fidelity: imas_codex/standard_names/export.py:2000 refuses through all_gates_passed, so a group under the bar writes no catalog. SCORE evidence: 18 JUSTIFICATION evidence: baseline_suite and after_suite in the reviewed manifest name revisions, logs with EXIT lines, and identical failing id sets that I re-derived by comm over the logs. SCORE scope_discipline: 15 JUSTIFICATION scope_discipline: five changed paths lie outside the six paths the review dispatch declares, including production code in imas_codex/cli/sn.py and imas_codex/settings.py. SCORE durability: 15 JUSTIFICATION durability: tests/standard_names/test_release_group_bar.py:246 reddens on the reverted sourceless refusal, but the family guard at line 330 feeds back the id under test. SCORE fit: 18 JUSTIFICATION fit: imas_codex/standard_names/export.py:1951-2040 follows the existing GateResult and issue-dict idiom and names nothing after a plan. SCORE reuse: 5 JUSTIFICATION reuse: imas_codex/standard_names/export.py:1599 duplicates the combined text hash owned at imas_codex/standard_names/graph_store/graph_claim_release.py:560 instead of extending it. FINDING imas_codex/standard_names/export.py:1599 non-blocking: audited_text_digest re-implements the combined description+documentation hash already owned by graph_claim_release.py:560 with a different framing, creating a second incomparable content identity. FINDING tests/standard_names/test_release_group_bar.py:330 non-blocking: the family-exception assertion takes family_id from the code under test and feeds it back, so it cannot catch an id-format drift that would leave the 225 committed exceptions unmatched.",
+  "review_run_id": "r-20261117T225541280202-review-of-sagr-release-bar-33f7757a26cd",
+  "reviewed_base_sha": "9dc3869452143619d5a483af615e043a86850d15",
+  "reviewed_head_sha": "33f7757a26cdfc4398814aaf63551c7748ea8c46",
+  "reviewed_run_id": "r-20261116T221753697517-sagr-release-bar",
+  "rubric": "text",
+  "scores": {
+    "durability": 15,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 18,
+    "reuse": 5,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T23:07:53.249020+00:00",
+  "total": 89
+}
