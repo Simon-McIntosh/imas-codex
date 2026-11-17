@@ -6,6 +6,13 @@
   "call_site_count": 0,
   "call_sites": [],
   "completed_at": "2026-11-17T01:34:12.018Z",
+  "dimension_dispositions": {
+    "evidence": {
+      "kind": "folded",
+      "node": "repair-of-sagr-blind-audit-d4f2a7d2cc8b",
+      "recorded_at": "2026-11-17T02:03:08.383336+00:00"
+    }
+  },
   "dispatched_at": "2026-11-17T01:32:02Z",
   "finding_dispositions": {
     "0": {
