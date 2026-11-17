@@ -11,6 +11,13 @@
     "imas_codex/remote/catalogue_grouping.py:77 persist_archive_grouping call that ran the projection and its repeat"
   ],
   "completed_at": "2026-11-17T02:23:53.814Z",
+  "dimension_dispositions": {
+    "durability": {
+      "kind": "folded",
+      "node": "repair-of-grouping-rerun-on-full-catalogue-3320eb0eadfe",
+      "recorded_at": "2026-11-17T02:43:34.653236+00:00"
+    }
+  },
   "dispatched_at": "2026-11-17T02:22:58Z",
   "findings": [
     {
