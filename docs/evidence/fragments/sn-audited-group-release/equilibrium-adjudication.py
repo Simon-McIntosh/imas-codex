@@ -42,7 +42,9 @@ def sibling(name):
 
 
 def git(*args):
-    return subprocess.check_output(["git", "-C", str(ROOT), *args], text=True).strip()
+    return subprocess.check_output(
+        ["git", "-C", str(ROOT.parents[3]), *args], text=True
+    ).strip()
 
 
 def load(path=DATA):
