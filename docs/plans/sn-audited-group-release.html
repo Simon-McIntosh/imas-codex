@@ -15,7 +15,7 @@
 <meta name="plan-roi" content="high">
 <meta name="plan-effort-hours" content="30.0">
 <meta name="plan-after" content="sn-definitions-by-construction">
-<meta name="plan-version" content="20">
+<meta name="plan-version" content="21">
 <meta name="plan-modified" content="2026-11-17">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;implementable&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[&quot;sn-audited-group-release#s1&quot;],&quot;s3&quot;:[&quot;sn-audited-group-release#s1&quot;,&quot;sn-audited-group-release#s2&quot;],&quot;s4&quot;:[&quot;sn-audited-group-release#s2&quot;,&quot;sn-audited-group-release#s3&quot;,&quot;sn-definitions-by-construction#s11&quot;],&quot;s5&quot;:[&quot;sn-audited-group-release#s4&quot;],&quot;s6&quot;:[&quot;sn-audited-group-release#s2&quot;]}">
@@ -60,6 +60,9 @@
 </div>
 <div class="r-comment" data-section="s1" data-id="c-close-s1" data-who="07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9" data-when="2026-11-17T03:45:00Z">
     <div class="r-comment-body"><p>§1 landed at the reviewed head <code>dccd83ff4</code>. Two readers outside the pipeline (gemini-3.8-flash and kimi-k3.1-pro) read 339 sampled live names blind, with 40 planted names read beside them and kept out of the sample's counts. Over the sample, at least one reader reads 174 names (51.3 %) as defective and both read 84 (24.8 %); one reader flags 32.7 % and the other 43.4 %. By class, counting a name in every class that applies, the largest is a name that omits what its source states: 114 names by either reader (33.6 %), 42 by both. Definition contradicts source and name and definition disagree are each 42 by either reader (12.4 %); name contradicts source is 31 (9.1 %). The readers themselves are weak: on the planted names they caught 45 % and 55 % of the known-defective ones and each flagged 25 % of the names ruled sound, so neither rate is the catalog's true defect rate and a bar fixed from them would carry that error. Spend USD 12.19 of USD 30; no stored text changed. The landing's review left three points open, none blocking: the readings column and the spend column count different sets of calls; the evidence header names an uncommitted tree; and the script's own check is run by nothing automatic. <a href="/imas-codex/evidence/fragments/sn-audited-group-release/sagr-blind-audit.html">evidence</a></p></div>
+</div>
+<div class="r-comment" data-section="s2" data-id="c-run-r-20261117T115137105385-review-of-sagr-domain-groups-c90b7997bfba" data-who="reckon-build" data-when="2026-11-17T12:02:46.423Z">
+    <div class="r-comment-body"><p>Independent review of run r-20261116T220848721359-sagr-domain-groups at head c90b7997bfba9c17f5819a35a1c5486c880c89a4 against base 5f882bc76c8cd51cb61cdc0ac17bd251232a10e6: scores goal_fidelity 16, evidence 12, scope_discipline 19, durability 12, fit 15, reuse 5; one blocking finding (domain-groups.py:381 counts a family name once per DD path, so 35 of 225 families carry an inflated member count and the equilibrium table repeats radial_magnetic_field twice) and four non-blocking findings.</p></div>
 </div>
 </section>
 </main>

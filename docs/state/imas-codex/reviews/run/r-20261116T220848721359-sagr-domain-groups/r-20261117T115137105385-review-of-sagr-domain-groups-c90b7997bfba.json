@@ -1,0 +1,78 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed node ran an evidence gate (domain-groups.py --check), not a test suite, and its manifest carries no baseline_suite or after_suite from which a failure delta could be taken; domain-groups-gate.log records five PASS lines and EXIT=0, so no failure was added",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-17T12:02:46.423Z",
+  "dispatched_at": "2026-11-17T12:02:16Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/domain-groups.py",
+      "line": "381",
+      "severity": "blocking",
+      "text": "blocking: `by_group[name_group[name]].append(name)` appends once per family path, so a name produced from two paths of the same family is counted twice in one group. 35 of the 225 families are affected: the data lists `radial_magnetic_field` twice under equilibrium for `edge_profiles/ggd/b_field`, the page renders that family at sagr-domain-groups.html:329 with the name repeated and \"equilibrium 5\" where four distinct names exist, and `named_members` and `clearing.moves` are inflated from the same counts; the families touching equilibrium are a named done_when deliverable, so the repeated entry and the overstated counts are a wrong figure in the ruled evidence."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/domain-groups.py",
+      "line": "197",
+      "severity": "non-blocking",
+      "text": "non-blocking: spearman and its _average_ranks helper duplicate imas_codex/standard_names/benchmark_roles.py:175 spearman_rho, an importable owner with its own test (tests/standard_names/test_benchmark_spearman.py) whose tie handling is identical; the sibling blind-audit.py:236 already imports from that module, so the local copy is an unforced capability fork."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/domain-groups.py",
+      "line": "262",
+      "severity": "non-blocking",
+      "text": "non-blocking: wilson duplicates the interval blind-audit.py:672 owns in the same plan's section-1 fragment; the two now define the audit's 95 percent interval independently, and a later correction to one will not reach the other."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/domain-groups.py",
+      "line": "1377",
+      "severity": "non-blocking",
+      "text": "non-blocking: OUT_JSON and OUT_HTML are written before the checks at line 1383 are evaluated, so a run whose instrument fails still overwrites the committed evidence page and data, and the only trace of the failure is the exit code a caller must not ignore."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/domain-groups.py",
+      "line": "1245",
+      "severity": "non-blocking",
+      "text": "non-blocking: `_revision()` reads git HEAD at run time, so the committed page can never name the commit that carries it; the evidence page at sagr-domain-groups.html:439 names 61e0027cf while the file itself lands in c90b7997b, and every future re-run will need the same extra stamp commit."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read commit by commit (3bf2a13dd the measurement, 61e0027cf the ruling as data, c90b7997b the environment stamp); all three touch only the three fragment files, and the only content change in c90b7997b is environment.generated_at and environment.revision in the json plus the matching paragraph at sagr-domain-groups.html:439.",
+    "done_when": "every done_when element is present (30 census rows summing to 3,142 at sagr-domain-groups.html:17-47, the plant paragraph at line 436, 225 family rows, 72 equilibrium-touching rows, the ruled order at line 406), but the gate at domain-groups.py:1383 asserts only the census sum and the two planted-name deltas; the 15-of-15 wrong-domain join and every family count are computed and printed but never asserted.",
+    "goal": "the goal asks for a measurement of how well each physics-domain group's membership is defined plus a proposed release order; domain-groups.py:1287 build() produces every section and sagr-domain-groups.html:15-406 renders the census, the ranking, the wrong-domain join, the 225-family table, the transport split and the 29-position ruled order.",
+    "manifest": "the reviewed run's manifest.md declares status complete, three commit hashes (3bf2a13dd, 61e0027cf, c90b7997b), the three changed paths, the exact gate command and two logs, and its rubric lines answer all six dimensions; it carries no baseline_suite or after_suite block, so its gate result is read from domain-groups-gate.log (five PASS lines, EXIT=0) rather than from a suite arm.",
+    "write_paths": "dispatch-detail.json node.write_paths names the three fragment paths and docs/figures/sn-audited-group-release/sagr-domain-groups, and git diff --name-status 5f882bc76..c90b7997b adds exactly domain-groups.json, domain-groups.py and sagr-domain-groups.html, all inside that scope."
+  },
+  "justifications": {
+    "durability": "the checks at domain-groups.py:1383 redden on a broken census join (domain-groups-mutation.log records the mutated arm as passed False) but the family double count at domain-groups.py:381 passes every one of them, so the defect the change carries is outside what the gate protects.",
+    "evidence": "the gate at domain-groups.py:1383 asserts the done_when's census sum and plant arms and its result is recorded in domain-groups-gate.log with EXIT=0, but no assertion covers the wrong-domain join, the family counts or the ruled sequence.",
+    "fit": "the page follows the sibling fragment's conventions (meta node-id, sagr- prefixed ids, prose plus tables) and ruff check and ruff format pass on domain-groups.py, but c90b7997b exists only because `_revision()` at domain-groups.py:1245 stamps HEAD at run time, so the artefact can never name its own commit.",
+    "goal_fidelity": "sagr-domain-groups.html:406 records the ruled order and domain-groups.py:662 RULING carries the lead's words as data, which is what the goal and the plan's section 2 ruling ask for.",
+    "reuse": "domain-groups.py:182-205 re-implements Spearman with average ranks that imas_codex/standard_names/benchmark_roles.py:175 spearman_rho already owns and blind-audit.py:236 already imports, and domain-groups.py:262 re-implements the wilson interval blind-audit.py:672 owns.",
+    "scope_discipline": "git diff --name-status 5f882bc76..c90b7997b shows only the three declared fragment files, with no product source, test, plan or stored-domain change."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal asks for a measurement of how well each physics-domain group's membership is defined plus a proposed release order; domain-groups.py:1287 build() produces every section and sagr-domain-groups.html:15-406 renders the census, the ranking, the wrong-domain join, the 225-family table, the transport split and the 29-position ruled order.\nVERDICT done_when: every done_when element is present (30 census rows summing to 3,142 at sagr-domain-groups.html:17-47, the plant paragraph at line 436, 225 family rows, 72 equilibrium-touching rows, the ruled order at line 406), but the gate at domain-groups.py:1383 asserts only the census sum and the two planted-name deltas; the 15-of-15 wrong-domain join and every family count are computed and printed but never asserted.\nVERDICT write_paths: dispatch-detail.json node.write_paths names the three fragment paths and docs/figures/sn-audited-group-release/sagr-domain-groups, and git diff --name-status 5f882bc76..c90b7997b adds exactly domain-groups.json, domain-groups.py and sagr-domain-groups.html, all inside that scope.\nVERDICT manifest: the reviewed run's manifest.md declares status complete, three commit hashes (3bf2a13dd, 61e0027cf, c90b7997b), the three changed paths, the exact gate command and two logs, and its rubric lines answer all six dimensions; it carries no baseline_suite or after_suite block, so its gate result is read from domain-groups-gate.log (five PASS lines, EXIT=0) rather than from a suite arm.\nVERDICT diff: read commit by commit (3bf2a13dd the measurement, 61e0027cf the ruling as data, c90b7997b the environment stamp); all three touch only the three fragment files, and the only content change in c90b7997b is environment.generated_at and environment.revision in the json plus the matching paragraph at sagr-domain-groups.html:439.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: sagr-domain-groups.html:406 records the ruled order and domain-groups.py:662 RULING carries the lead's words as data, which is what the goal and the plan's section 2 ruling ask for.\nSCORE evidence: 12\nJUSTIFICATION evidence: the gate at domain-groups.py:1383 asserts the done_when's census sum and plant arms and its result is recorded in domain-groups-gate.log with EXIT=0, but no assertion covers the wrong-domain join, the family counts or the ruled sequence.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --name-status 5f882bc76..c90b7997b shows only the three declared fragment files, with no product source, test, plan or stored-domain change.\nSCORE durability: 12\nJUSTIFICATION durability: the checks at domain-groups.py:1383 redden on a broken census join (domain-groups-mutation.log records the mutated arm as passed False) but the family double count at domain-groups.py:381 passes every one of them, so the defect the change carries is outside what the gate protects.\nSCORE fit: 15\nJUSTIFICATION fit: the page follows the sibling fragment's conventions (meta node-id, sagr- prefixed ids, prose plus tables) and ruff check and ruff format pass on domain-groups.py, but c90b7997b exists only because `_revision()` at domain-groups.py:1245 stamps HEAD at run time, so the artefact can never name its own commit.\nSCORE reuse: 5\nJUSTIFICATION reuse: domain-groups.py:182-205 re-implements Spearman with average ranks that imas_codex/standard_names/benchmark_roles.py:175 spearman_rho already owns and blind-audit.py:236 already imports, and domain-groups.py:262 re-implements the wilson interval blind-audit.py:672 owns.\nFINDING docs/evidence/fragments/sn-audited-group-release/domain-groups.py:381 blocking: `by_group[name_group[name]].append(name)` appends once per family path, so a name produced from two paths of the same family is counted twice in one group. 35 of the 225 families are affected: the data lists `radial_magnetic_field` twice under equilibrium for `edge_profiles/ggd/b_field`, the page renders that family at sagr-domain-groups.html:329 with the name repeated and \"equilibrium 5\" where four distinct names exist, and `named_members` and `clearing.moves` are inflated from the same counts; the families touching equilibrium are a named done_when deliverable, so the repeated entry and the overstated counts are a wrong figure in the ruled evidence.\nFINDING docs/evidence/fragments/sn-audited-group-release/domain-groups.py:197 non-blocking: spearman and its _average_ranks helper duplicate imas_codex/standard_names/benchmark_roles.py:175 spearman_rho, an importable owner with its own test (tests/standard_names/test_benchmark_spearman.py) whose tie handling is identical; the sibling blind-audit.py:236 already imports from that module, so the local copy is an unforced capability fork.\nFINDING docs/evidence/fragments/sn-audited-group-release/domain-groups.py:262 non-blocking: wilson duplicates the interval blind-audit.py:672 owns in the same plan's section-1 fragment; the two now define the audit's 95 percent interval independently, and a later correction to one will not reach the other.\nFINDING docs/evidence/fragments/sn-audited-group-release/domain-groups.py:1377 non-blocking: OUT_JSON and OUT_HTML are written before the checks at line 1383 are evaluated, so a run whose instrument fails still overwrites the committed evidence page and data, and the only trace of the failure is the exit code a caller must not ignore.\nFINDING docs/evidence/fragments/sn-audited-group-release/domain-groups.py:1245 non-blocking: `_revision()` reads git HEAD at run time, so the committed page can never name the commit that carries it; the evidence page at sagr-domain-groups.html:439 names 61e0027cf while the file itself lands in c90b7997b, and every future re-run will need the same extra stamp commit.",
+  "review_run_id": "r-20261117T115137105385-review-of-sagr-domain-groups-c90b7997bfba",
+  "reviewed_base_sha": "5f882bc76c8cd51cb61cdc0ac17bd251232a10e6",
+  "reviewed_head_sha": "c90b7997bfba9c17f5819a35a1c5486c880c89a4",
+  "reviewed_run_id": "r-20261116T220848721359-sagr-domain-groups",
+  "scores": {
+    "durability": 12,
+    "evidence": 12,
+    "fit": 15,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T12:18:18.709594+00:00",
+  "total": 79
+}
