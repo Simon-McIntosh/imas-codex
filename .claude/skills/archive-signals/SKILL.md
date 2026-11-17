@@ -1,0 +1,173 @@
+---
+name: archive-signals
+description: Find an ITER test or campaign's pulse categories and load named CODAC archive variables into NumPy arrays over bounded pulse windows from a shell. Use for array access; this skill does not plot.
+---
+
+# Load archive signals over test pulses
+
+Use the imported graph catalogue to find categories, pulses and exact signal
+identities. Use the existing `ArchiveSignalLoader` to load arrays. The graph
+lookups below are metadata only; only `loader.load` reads sample data.
+
+Keep real test descriptions, categories, pulse names, variable selectors and
+endpoint details in private request files and receipts, never tracked code or
+reports. Examples below are invented. Get real values from the user's request,
+private configuration and graph results. Do not substitute a similar variable
+when an exact named variable is absent or ambiguous.
+
+## Shell and environment
+
+Run from the project checkout using its root environment, e.g. `uv run --no-sync
+python /absolute/path/to/private_script.py`. In a worktree, point
+`UV_PROJECT_ENVIRONMENT` at the main checkout's `.venv` and `PYTHONPATH` at your
+worktree; reuse its `.env` symlink. No dependency install is needed. Put scripts,
+receipts and arrays in the private output directory authorized for the session.
+Set `ARCHIVE_REQUEST` to the private request JSON path and `ARCHIVE_OUTPUT` to
+that output directory. Set `ARCHIVE_CONFIG` to a standalone private YAML when
+needed; on this workstation it is normally
+`~/.cache/imas-codex-codac-uda/catalogue-private-config.yaml`. Do not print its
+contents. Keep any private script outside tracked paths.
+
+Run live graph and archive work on a compute partition (`rigel` or `all_debug`).
+From an existing allocation, a separate job is submitted with `env -u
+SLURM_JOB_ID -u SLURM_JOBID sbatch --partition=rigel`; use a GPFS output log and
+`export TMPDIR=/tmp` inside it. Do not create nested `srun` steps. A small bounded
+read may run in an allocation already assigned for this work. Keep the whole
+command's log and exit status; log no secrets to chat.
+
+The reader resolves the data system's setup and interpreter itself through the
+facility-aware executor. Its configured setup loads the archive client module
+in the same shell as the native reader. Do not import the native archive client
+or open another connection path. Endpoints come from private configuration;
+never contact the excluded operator archive.
+
+## Find categories, pulses and the named variable
+
+Prepare a private JSON request with `test_article` (a designation or distinctive
+substring of the test description) and `variable` (exact archive selector or
+graph signal name). Example content: `{"test_article":"DEMO magnet",
+"variable":"DEMO-PLANT:TEMP"}`. Pass private filenames through environment
+variables so scripts and shell history need no real identities.
+
+```python
+import json
+import os
+from pathlib import Path
+
+from imas_codex.graph.client import GraphClient
+from imas_codex.remote.archive_access import (
+    find_categories, find_signals, list_pulses,
+)
+
+request = json.loads(Path(os.environ["ARCHIVE_REQUEST"]).read_text())
+output = Path(os.environ["ARCHIVE_OUTPUT"])
+output.mkdir(parents=True, exist_ok=True)
+
+with GraphClient() as graph:
+    # Positive control: an empty search is credible only in a populated catalogue.
+    control = graph.query(
+        "MATCH (c:PulseCategory {facility_id: $facility}) "
+        "RETURN count(c) AS total, count(c.name) AS named", facility="iter"
+    )[0]
+    if not control["total"] or control["named"] != control["total"]:
+        raise RuntimeError("category catalogue unavailable or missing names")
+    categories = find_categories(graph, request["test_article"])
+    signals = find_signals(graph, request["variable"])
+    listings = {}
+    offset = 0
+    while True:
+        page = find_categories(graph, request["test_article"], offset=offset)
+        for category in page["items"]:
+            listing = list_pulses(graph, category["id"])
+            listings[category["id"]] = listing
+        if page["next_offset"] is None:
+            break
+        offset = page["next_offset"]
+
+receipt = {"categories": categories, "signals": signals, "pulses": listings}
+(output / "discovery.json").write_text(json.dumps(receipt, indent=2))
+print(json.dumps({"categories": categories["total"], "signals": signals["total"],
+                  "pulses_per_category": {k: v["total"] for k, v in listings.items()}}))
+```
+
+Inspect the private receipt before fetching. These helpers return `items`,
+`total` and `next_offset`; pages hold at most 100 rows. For further pulse pages,
+call `list_pulses(graph, category_id, offset=listing["next_offset"])` until the
+continuation is `None`. Category matching is a literal, case-insensitive
+substring in the name or description, not a wildcard or semantic search. If a
+long prose request matches nothing, try its explicit article designation.
+No match returns `{"items": [], "total": 0, "next_offset": null}`; report it
+and do not fall back to listing everything. Signal matching is exact. Require
+one signal match before loading, or ask which identity the request intended.
+Category and pulse IDs are strings; preserve them exactly.
+
+## Load bounded arrays
+
+Select the intended categories from their names/descriptions, and three distinct
+pulses from their listings. Retain the total number found separately from the
+three selected. Store the selected pulse objects as `selected_pulses` and the
+one signal object as `selected_signal` in the private script. Use absolute
+integer epoch nanoseconds from the pulse windows. Choose an explicit interval
+inside each pulse; two seconds at the start is an example, not a claim that the
+variable has samples there. If needed, choose another bounded subwindow within
+the same pulse, and record the selection. Never turn an empty read into a
+successful measurement.
+
+```python
+import numpy as np
+from imas_codex.remote.codac_uda import ArchiveReader, ArchiveSignalLoader
+
+# The normal factory reads merged public/private ITER facility configuration.
+# If the session instead supplies a private standalone YAML config, resolve it
+# explicitly; keep cache files in the authorized private output directory.
+import yaml
+config_path = os.environ.get("ARCHIVE_CONFIG")
+private_config = yaml.safe_load(Path(config_path).expanduser().read_text()) if config_path else None
+if private_config is not None and "data_systems" not in private_config:
+    private_config = {"data_systems": {"codac_uda": private_config}}
+
+def reader_factory(facility, role):
+    return ArchiveReader(facility, role, config=private_config,
+                         cache_dir=output / "cache")
+
+summaries = []
+arrays = []
+with GraphClient() as graph:
+    loader = ArchiveSignalLoader(graph, reader_factory=reader_factory)
+    for index, pulse in enumerate(selected_pulses):
+        start = pulse["start_ns"]
+        # An open pulse needs an explicitly chosen end; do not invent its end_ns.
+        end = min(start + 2_000_000_000, pulse["end_ns"]) if pulse["end_ns"] is not None else start + 2_000_000_000
+        signal = loader.load(selected_signal["id"], start=start, end=end,
+                             mode="raw", max_samples=100_000, max_bytes=8_000_000)
+        if len(signal.time) == 0:
+            raise RuntimeError("selected pulse window returned no samples")
+        arrays.append(signal)  # NumPy signal.time and signal.values in this process.
+        np.savez(output / f"pulse-{index}.npz", time=signal.time, values=signal.values)
+        summaries.append({"pulse_id": pulse["id"], "start": start, "end": end,
+                          "samples": len(signal.time), **signal.metadata})
+(output / "samples.json").write_text(json.dumps(summaries, indent=2))
+```
+
+Use the configured sample/byte limits if they are smaller than the example;
+`ArchiveReadError.category` and its message explain refusals. The configured
+`max_window_ns` also bounds the interval. With neither explicit bounds nor a
+closed `pulse_id` window, the loader refuses the load. A window beyond its bound
+is refused before fetching. A full closed pulse can instead be loaded with
+`loader.load(signal_id, pulse_id=pulse_id, ...)`, subject to the same limits;
+an open pulse needs explicit bounds. `pulse_id` must belong to the signal's
+archive. An explicit absolute interval uses the pulse listing as metadata and
+does not require the metadata archive to be the signal's serving archive.
+
+`signal.time` and `signal.values` are NumPy arrays; `metadata["unit"]` gives the
+unit and `metadata["time_base"]` distinguishes `epoch_ns` (integer Unix epoch
+nanoseconds) from `relative_seconds` (floating seconds). Subtract an integer
+origin before converting epoch timestamps to float seconds. Keep `mode`,
+`decimated` (true/false/unknown), `sampling_verification`, query and cache evidence
+from the metadata. Raw mode is not proof of no decimation. Envelope/binned and
+archived-on-change results must retain their sampling interpretation when
+combined. Do not interpolate event values as though they were continuous samples.
+
+Return the commands run, category and pulse counts, selected-window sample
+counts, unit, time base, sampling evidence and private artifact paths. State
+empty windows, refusals and any extra discovery needed beyond these instructions.

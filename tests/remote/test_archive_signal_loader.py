@@ -264,3 +264,92 @@ def test_relative_pulse_defaults_use_seconds(reader, result):
     assert reader._request.call_args.kwargs["start"] == 0.0
     assert reader._request.call_args.kwargs["end"] == 2.0
     assert reader._request.call_args.kwargs["pulse"] == "DEMO:TRIAL/1"
+
+
+@pytest.mark.parametrize(
+    ("bounds", "category", "reason"),
+    [
+        ({}, "invalid_request", "bounds are required"),
+        ({"start": 0}, "invalid_request", "bounds are required"),
+        (
+            {"start": 0, "end": 60000000001},
+            "limit",
+            "exceed configured bound",
+        ),
+    ],
+)
+def test_shell_load_refuses_missing_or_excessive_window(
+    reader, bounds, category, reason
+):
+    graph = Mock()
+    graph.query.return_value = [binding()]
+    reader._request = Mock(side_effect=AssertionError("fetch must not run"))
+    loader = service.ArchiveSignalLoader(graph, reader_factory=lambda *args: reader)
+    with pytest.raises(service.ArchiveReadError, match=reason) as error:
+        loader.load("demo:plant/temperature", **bounds)
+    assert error.value.category == category
+    reader._request.assert_not_called()
+
+
+def test_shell_load_returns_arrays_unit_and_time_base_over_three_pulses(reader, result):
+    graph = Mock()
+    graph.query.return_value = [binding()]
+    reader._request = Mock(
+        side_effect=lambda operation, **request: {
+            **result,
+            "time": [request["start"] + index for index in range(3)],
+        }
+    )
+    loader = service.ArchiveSignalLoader(graph, reader_factory=lambda *args: reader)
+    signals = [
+        loader.load(
+            "demo:plant/temperature",
+            start=start,
+            end=start + 3,
+            mode="raw",
+            max_samples=100,
+            max_bytes=10000,
+        )
+        for start in [0, 10, 20]
+    ]
+    assert reader._request.call_count == 3
+    assert [call.kwargs["start"] for call in reader._request.call_args_list] == [
+        0,
+        10,
+        20,
+    ]
+    for start, signal in zip([0, 10, 20], signals, strict=True):
+        np.testing.assert_array_equal(
+            signal.time, np.array([start, start + 1, start + 2])
+        )
+        np.testing.assert_array_equal(signal.values, np.array([2, 4, 8]))
+        assert signal.metadata["unit"] == "K"
+        assert signal.metadata["time_base"] == "epoch_ns"
+        assert signal.metadata["sampling_verification"] == "cadence_checked"
+        assert signal.metadata["decimated"] is False
+
+
+def test_open_pulse_requires_explicit_window_and_keeps_its_missing_end(reader, result):
+    reader._request = Mock(return_value=result)
+    pulse = {
+        "archive": reader.archive,
+        "start_ns": 0,
+        "end_ns": None,
+        "name": "DEMO:TRIAL/open",
+    }
+    graph = Mock()
+    graph.query.side_effect = [[binding()], [pulse], [binding()], [pulse]]
+    loader = service.ArchiveSignalLoader(graph, reader_factory=lambda *args: reader)
+    with pytest.raises(service.ArchiveReadError, match="explicit bounded window"):
+        loader.load(
+            "demo:plant/temperature", pulse_id="demo:codac_uda:slow:DEMO:TRIAL/open"
+        )
+    reader._request.assert_not_called()
+    signal = loader.load(
+        "demo:plant/temperature",
+        pulse_id="demo:codac_uda:slow:DEMO:TRIAL/open",
+        start=0,
+        end=3,
+    )
+    assert len(signal.time) == 3
+    assert pulse["end_ns"] is None
