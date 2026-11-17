@@ -58,7 +58,7 @@ own run, joined by name and the window the serial edit held it.</p>
 </tbody>
 </table>
 
-<p>Total USD 0.2197, average <strong>USD 0.0732 a member</strong>. At that rate
+<p>Total USD 0.2196, average <strong>USD 0.0732 a member</strong>. At that rate
 the 308 members project to <strong>USD 22.55</strong>, under the USD 30 ceiling
 but over the USD 0.05 per-member bar the probe is gated on. The stop is the bar,
 not the ceiling. The per-member cost is dominated by one <code>generate_docs</code>
@@ -94,6 +94,32 @@ learns that exemption, or the family sentence is not the documentation's
 opening and the ruling means the description, which already carries it. The
 three probe members are left with the description rendering and the sentence
 appended, listed as exceptions until that is ruled.</p>
+
+<h3 id="sdbc-family-rerender-arms">The gate arms</h3>
+
+<p>The <code>tests/standard_names</code> directory was run twice: once at the
+head revision <code>fb3c915f1</code> in this worktree, and once from
+a <code>git archive</code> of the base revision
+<code>52766883007</code> under the job's own scratch. Both arms collected the
+same failures: <strong>22</strong> at head (8790 passed) and <strong>22</strong>
+at base (8788 passed), with identical test ids and nothing added or repaired by
+this node. Every one fails with
+<code>ReviewingGuideLinkError: no catalog checkout is resolved, so the reviewing
+guide has no reviewable address</code>, in the release-notes and review-release
+modules — an environment without a catalog checkout, not a species-family
+reading. They are reported as outside this node's scope rather than triaged.</p>
+
+<p>The negative control re-keys one gas key back to its pre-rename spelling and
+runs the one test the re-key added:
+<code>test_the_gas_families_are_keyed_on_their_renamed_spelling</code>. It fails
+(<code>EXIT=1</code>), and it is not among the head arm's failures, so the guard
+is load-bearing. The source was restored from a copy and the worktree diff is
+empty.</p>
+
+<p>Spend sits with the family that was worked: USD 0.2196 across the three
+members of
+<code>accumulated_&lt;X&gt;_prefill_equivalent_electron_count_due_to_gas_injection</code>,
+and USD 0.0000 for each of the other 22 families.</p>
 
 <h3 id="sdbc-family-rerender-state">What is left</h3>
 

@@ -2355,5 +2355,216 @@
   ],
   "positive_control": "summary/gas_injection_rates/argon/value is returned for argon_equivalent_electron_source_rate_due_to_gas_injection",
   "suspects_including_neutrals_or_one_charge_state": 0
+ },
+ "spend_by_family": {
+  "<X>_density": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "<X>_density_at_divertor_target": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "<X>_density_at_internal_transport_barrier": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "<X>_density_at_limiter": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "<X>_density_at_magnetic_axis": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "<X>_density_at_pedestal_top": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "<X>_density_at_plasma_boundary": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "<X>_equivalent_electron_source_rate_due_to_gas_injection": {
+   "members_in_family": 9,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "<X>_prefill_equivalent_electron_count": {
+   "members_in_family": 4,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "accumulated_<X>_equivalent_electron_count": {
+   "members_in_family": 2,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "accumulated_<X>_equivalent_electron_count_due_to_gas_injection": {
+   "members_in_family": 8,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "accumulated_<X>_prefill_equivalent_electron_count": {
+   "members_in_family": 1,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection": {
+   "members_in_family": 3,
+   "members_worked": 3,
+   "rate_usd_per_member": 0.073213,
+   "spend_usd": 0.21964
+  },
+  "flux_surface_averaged_<X>_density_at_plasma_boundary": {
+   "members_in_family": 17,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "flux_surface_averaged_toroidal_<X>_velocity_at_plasma_boundary": {
+   "members_in_family": 17,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "line_averaged_<X>_density": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "ratio_of_<X>_density_to_electron_density": {
+   "members_in_family": 3,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "ratio_of_volume_averaged_<X>_density_to_volume_averaged_electron_density": {
+   "members_in_family": 14,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "toroidal_<X>_velocity_at_internal_transport_barrier": {
+   "members_in_family": 17,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "toroidal_<X>_velocity_at_magnetic_axis": {
+   "members_in_family": 17,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "toroidal_<X>_velocity_at_pedestal_top": {
+   "members_in_family": 17,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "toroidal_<X>_velocity_at_plasma_boundary": {
+   "members_in_family": 17,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  },
+  "volume_averaged_<X>_density": {
+   "members_in_family": 18,
+   "members_worked": 0,
+   "rate_usd_per_member": null,
+   "spend_usd": 0.0
+  }
+ },
+ "suite": {
+  "added_failures": [],
+  "attribution": "all 22 fail with ReviewingGuideLinkError: no catalog checkout is resolved, so the reviewing guide has no reviewable address; identical ids at base, so none is this node's",
+  "base": {
+   "command": "cd <archive> && UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=<archive> uv run --no-sync pytest -p no:cacheprovider tests/standard_names",
+   "completed": true,
+   "exit_status": 1,
+   "failure_count": 22,
+   "failure_ids": [
+    "tests/standard_names/test_exclusion_report_is_reachable.py::test_publish_commits_report_and_body_links_its_derived_address",
+    "tests/standard_names/test_exclusion_report_is_reachable.py::test_report_missing_from_checkout_refuses_the_request",
+    "tests/standard_names/test_review_body_authored.py::test_synthesized_body_still_gets_exclusion_ledger_paragraph",
+    "tests/standard_names/test_review_release.py::test_build_pr_notes_falls_back_on_llm_failure",
+    "tests/standard_names/test_review_release.py::test_enumerating_model_body_is_rejected_before_publish",
+    "tests/standard_names/test_review_release.py::test_frozen_artifact_is_schema_valid_with_the_label",
+    "tests/standard_names/test_review_release.py::test_missing_model_title_is_rejected_before_publish",
+    "tests/standard_names/test_review_release.py::test_model_cannot_invent_dd_caveats_for_empty_fact_set",
+    "tests/standard_names/test_review_release.py::test_real_run_writes_exactly_one_artifact_and_advances_candidate_once",
+    "tests/standard_names/test_review_release.py::test_release_notes_prompt_omits_problem_evidence",
+    "tests/standard_names/test_review_release.py::test_review_assembly_reproduces_and_closes_sparse_baseline_failure",
+    "tests/standard_names/test_review_release.py::test_review_branch_transport_ignores_upstream_remote",
+    "tests/standard_names/test_review_release.py::test_review_export_restores_approved_entry_bytes[-",
+    "tests/standard_names/test_review_release.py::test_review_export_restores_approved_entry_bytes[-",
+    "tests/standard_names/test_review_release.py::test_review_release_full_flow",
+    "tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_at_closed_pr_head",
+    "tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_contained_in_main",
+    "tests/standard_names/test_review_release.py::test_review_release_scopes_dd_caveats_to_batch_names",
+    "tests/standard_names/test_review_release.py::test_static_notes_omit_problem_narration",
+    "tests/standard_names/test_review_release.py::test_unavailable_dd_gap_read_is_visible_but_not_release_blocking",
+    "tests/standard_names/test_review_release_preview_link.py::test_release_names_missing_preview_link_invariant",
+    "tests/standard_names/test_review_release_preview_link.py::test_release_writes_and_reads_back_exact_pr_preview_address"
+   ],
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T225104371014-sdbc-family-rerender/suite-standard-names-base.log",
+   "revision": "52766883007dfae58b25699d72e1c6e28538d57a",
+   "totals": "22 failed, 8788 passed, 12 skipped, 578 deselected in 1045.93s"
+  },
+  "fixed_failures": [],
+  "head": {
+   "command": "cd /home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-family-rerender && UV_NO_SYNC=1 UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/sdbc-family-rerender uv run --no-sync pytest -p no:cacheprovider tests/standard_names",
+   "completed": true,
+   "exit_status": 1,
+   "failure_count": 22,
+   "failure_ids": [
+    "tests/standard_names/test_exclusion_report_is_reachable.py::test_publish_commits_report_and_body_links_its_derived_address",
+    "tests/standard_names/test_exclusion_report_is_reachable.py::test_report_missing_from_checkout_refuses_the_request",
+    "tests/standard_names/test_review_body_authored.py::test_synthesized_body_still_gets_exclusion_ledger_paragraph",
+    "tests/standard_names/test_review_release.py::test_build_pr_notes_falls_back_on_llm_failure",
+    "tests/standard_names/test_review_release.py::test_enumerating_model_body_is_rejected_before_publish",
+    "tests/standard_names/test_review_release.py::test_frozen_artifact_is_schema_valid_with_the_label",
+    "tests/standard_names/test_review_release.py::test_missing_model_title_is_rejected_before_publish",
+    "tests/standard_names/test_review_release.py::test_model_cannot_invent_dd_caveats_for_empty_fact_set",
+    "tests/standard_names/test_review_release.py::test_real_run_writes_exactly_one_artifact_and_advances_candidate_once",
+    "tests/standard_names/test_review_release.py::test_release_notes_prompt_omits_problem_evidence",
+    "tests/standard_names/test_review_release.py::test_review_assembly_reproduces_and_closes_sparse_baseline_failure",
+    "tests/standard_names/test_review_release.py::test_review_branch_transport_ignores_upstream_remote",
+    "tests/standard_names/test_review_release.py::test_review_export_restores_approved_entry_bytes[-",
+    "tests/standard_names/test_review_release.py::test_review_export_restores_approved_entry_bytes[-",
+    "tests/standard_names/test_review_release.py::test_review_release_full_flow",
+    "tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_at_closed_pr_head",
+    "tests/standard_names/test_review_release.py::test_review_release_reclaims_branch_contained_in_main",
+    "tests/standard_names/test_review_release.py::test_review_release_scopes_dd_caveats_to_batch_names",
+    "tests/standard_names/test_review_release.py::test_static_notes_omit_problem_narration",
+    "tests/standard_names/test_review_release.py::test_unavailable_dd_gap_read_is_visible_but_not_release_blocking",
+    "tests/standard_names/test_review_release_preview_link.py::test_release_names_missing_preview_link_invariant",
+    "tests/standard_names/test_review_release_preview_link.py::test_release_writes_and_reads_back_exact_pr_preview_address"
+   ],
+   "log": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261116T225104371014-sdbc-family-rerender/suite-standard-names.log",
+   "revision": "fb3c915f1dea367c45ac35df6a6d9dfc56030709",
+   "totals": "22 failed, 8790 passed, 11 skipped, 578 deselected in 1011.07s"
+  }
  }
 }
