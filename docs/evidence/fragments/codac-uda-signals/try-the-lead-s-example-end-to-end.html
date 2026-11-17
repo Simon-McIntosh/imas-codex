@@ -1,0 +1,273 @@
+<section id="example-request-completed-evidence">
+  <h2>Completed prototype: both DC-link candidates over all 34 returned windows</h2>
+  <p>The trial now has one private seven-panel figure in kA, saved through
+    <code>imas_codex.plotting.save_figure</code>, rendered and inspected. All 34
+    returned pulse windows were attempted for both candidates. Fifteen windows
+    returned samples for both channels; the other 19 have no samples to plot.
+    The original request is therefore <strong>answered in part</strong>, with
+    the missing data and conditional physical interpretation explicit. This
+    completes the prototype attempt, not a verification of every coil-current
+    trace during every operating mode.</p>
+  <p>The supplied private engineering findings identify DC-link current with
+    the common series current while the supply is connected. They do not name
+    either exact archive variable. The two candidates share the same physical
+    description and native unit <code>KA</code>; neither can be preferred from
+    that metadata, so both are shown as <q>DC-link A</q> and <q>DC-link B</q>.
+    Their metadata instrumentation labels appear only in the private figure.
+    Conversion to kA has factor one. During fast discharge the reading may not
+    follow the coil. A single converter-unit current was not substituted.</p>
+  <p>Every window is included under its category alias. Category kinds are not
+    established, and overlapping windows are not asserted to be independent
+    cold-test runs. Each trace subtracts its own integer pulse-start epoch before
+    conversion to elapsed s or ks. The figure shows returned envelope means and
+    extrema without interpolating across missing samples.</p>
+  <table>
+    <thead><tr><th>Category alias</th><th>Windows attempted</th><th>Windows with samples</th><th>Window–channel bins</th><th>Timed-out tiles</th></tr></thead>
+    <tbody>
+      <tr><td>category 1</td><td>10</td><td>0</td><td>0</td><td>11</td></tr>
+      <tr><td>category 2</td><td>7</td><td>7</td><td>5,637</td><td>3</td></tr>
+      <tr><td>category 3</td><td>6</td><td>6</td><td>1,437</td><td>0</td></tr>
+      <tr><td>category 4</td><td>4</td><td>0</td><td>0</td><td>0</td></tr>
+      <tr><td>category 5</td><td>1</td><td>1</td><td>6</td><td>0</td></tr>
+      <tr><td>category 6</td><td>1</td><td>1</td><td>16</td><td>0</td></tr>
+      <tr><td>category 7</td><td>5</td><td>0</td><td>0</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p>The complete interval plan has 15,214 window–tile
+    references, served by 15,032 unique accessor requests after
+    sharing identical overlaps. Each request is an envelope read bounded to
+    60 seconds, 1,000 bins and 8,000,000 bytes. Four independent readers ran on
+    <code>rigel</code>. Fourteen requests raised <code>ArchiveReadError</code>
+    with category <code>timeout</code> after the 60-second timeout; none was
+    retried by the harness or relabelled as an empty successful result.
+    The first batch job elapsed 438 s before stopping on its first timeout;
+    continuation elapsed 3,862 s, including 3854.462 s for its
+    read/export body. Per-request arguments, shapes, elapsed times, failures,
+    cache evidence and sampling metadata are stored in SQLite.</p>
+  <p>There are 5,988 unique returned envelope bins and
+    7,096 bins across the window exports because overlapping
+    windows reuse data. Nonempty reads have integer <code>epoch_ns</code>
+    timestamps of shape <code>[n]</code> and values of shape <code>[n,3]</code>.
+    Metadata reports <code>mode=envelope</code>, <code>decimated=true</code> and
+    <code>sampling_verification=server_envelope</code>. These are returned
+    archived-sample envelopes, not proof of raw cadence or time-weighted means.
+    Empty results and timed-out intervals are not zero-current observations.</p>
+  <p>The private <code>resumed/complete/</code> directory holds the SVG, its
+    1400 × 1800 PNG preview, <code>figure-caption.txt</code>,
+    <code>plot-receipt.json</code>, <code>visual-inspection.json</code>,
+    <code>samples.sqlite</code>, 68 per-window/channel NPZ exports and
+    <code>plan.json</code>. Export and preview took 1.514 s;
+    the SVG is 1,946,572 bytes and declares 31.1 × 39.99 cm.
+    The preview is the same checked canvas saved as PNG because the SVG rasterizer
+    was unavailable on the compute node. Visual inspection found seven readable
+    panels, a single identified legend and no clipped or overlapping labels.</p>
+  <p>The empty-designation control remains an explicit count of zero with no
+    figure for that request. A raw instrument check returned one sample in a
+    known-positive window and zero in an envelope-empty tile. A deliberate
+    off-canvas text control was refused with <code>clipped figure text: outside
+    canvas</code> and wrote no file. The final manifest names the full receipt
+    audit and its outcome.</p>
+  <h3>Remaining findings, ranked by their effect on the request</h3>
+  <ol>
+    <li><strong>Data availability and missing intervals.</strong> Nineteen requested
+      windows have no returned samples for either selected candidate, and 14
+      intervals timed out. Establish historical selector availability/retention
+      and diagnose setup, connection and fetch timing before rerunning the failed
+      bounded cohort. No code can infer the missing current from these replies.</li>
+    <li><strong>Exact measurement binding.</strong> Obtain the power-supply
+      signal-list binding for these selectors and the sensor's position relative
+      to fast-discharge switching. This is the smallest evidence that would
+      establish which candidate follows the coil in each operating mode.</li>
+    <li><strong>Server readiness.</strong> Two immediate nonempty calls in fresh
+      servers returned <code>'imas_codex.search'</code>; one warmup log reported
+      a partially initialized <code>SearchConfig</code> import. Later calls or a
+      five-second delay succeeded. A startup import race is an inference, not a
+      proved cause. Gate readiness on successful search initialization and test
+      an immediate populated lookup; an empty lookup alone missed the defect.</li>
+    <li><strong>Meaning and grouped context.</strong> Generic coil-current
+      queries led with other circuit quantities; the useful DC-link group was
+      at rank 15 after query refinement. Add the documented circuit relationship
+      and operating-mode condition to search context, and expose bounded member
+      descriptions or a clear drill-down for grouped results.</li>
+    <li><strong>Full-profile ergonomics and cost.</strong> The skill's short
+      three-pulse recipe needed private tiling, concurrency, resumability and
+      per-request failure handling to cover this request. Document a bounded
+      whole-window iterator/batch pattern. Measure per-call setup overhead before
+      changing the native reader lifecycle or any archive limit.</li>
+    <li><strong>Agent entry point.</strong> No project MCP tools were exposed in
+      this session. Connect the server in the agent environment or document the
+      private-client bootstrap; the trial needed supplemental CLI instructions.</li>
+  </ol>
+</section>
+<section id="example-request-resumed-evidence">
+  <h2>Resumed checkpoint: source interpretation and short-window controls</h2>
+  <p>The coordinator supplied private document-assistant findings that identify
+    the common series path through the DC link, current leads and coil as the
+    coil-current path while the supply is connected. One converter's current
+    does not represent that combined current. No document binds an exact archive
+    variable, and a DC-link reading may not follow coil current during fast
+    discharge. Both returned DC-link candidates have the same physical
+    description and unit <code>KA</code>, so both are retained as aliases
+    <q>DC-link A</q> and <q>DC-link B</q>, without declaring either authoritative.
+    Native <code>KA</code> is normalized to kA with factor one.</p>
+  <p>All 34 returned pulse windows are selected, grouped under seven category
+    aliases. They are not asserted to be 34 distinct cold-test runs. A
+    <code>rigel</code> pilot returned one envelope bin for A and no bin for B.
+    The 17 windows of at most ten minutes were then read in full using at most
+    60-second envelope tiles: 124 reads, 1,459 bins, 16 nonempty window–channel
+    pairs out of 34, in 123.423 s. Empty reads remain empty. Per-call receipts
+    and original/normalized arrays are durable in the private
+    <code>example-request/resumed/</code> directory.</p>
+  <p>The initial sparse long-window exploration was stopped with its completed
+    receipts preserved. Sustained timings support complete requested-time
+    coverage within the budget using four independent readers on
+    <code>rigel</code>. That run declares 15,032 unique reads serving 15,214
+    window–tile references; each envelope request remains at most 60 seconds,
+    1,000 returned bins and 8,000,000 bytes. Each returned result is committed
+    to a private SQLite receipt-and-array store before its reader takes another
+    task. All 34 windows were subsequently exported separately for each candidate. The
+    initial blocked attempt below remains the record of discovery alone.</p>
+</section>
+<section id="example-request-end-to-end-evidence">
+  <h2>Initial attempt: test discovery succeeds; signal identity blocks the plot</h2>
+  <p>Trial on 2026-11-17 at revision <code>757626386351100cb0a1e4549a561d1579ae06e2</code>.
+    The request was to plot a named coil's cold-test current, stack the profiles
+    for all its tests, and express current in kA. All identities below are
+    invented aliases. At that checkpoint the request was answered <strong>in part</strong>: seven
+    matching categories and 34 distinct, closed pulses were found; zero pulses
+    were loaded or plotted. No candidate was established as the coil-current
+    measurement, so selecting a nearby circuit current would substitute a
+    different physical quantity. The figure and arrays did not exist at that checkpoint. This initial
+    attempt was blocked; the completed resumed prototype is recorded above.</p>
+
+  <h3>Method and private record</h3>
+  <p>The project <code>archive-signals</code> skill was the starting point.
+    Discovery used a running read-only MCP server over stdio, its advertised
+    schemas, <code>search_pulses</code>, <code>search_signals</code> and
+    <code>fetch_content</code>. No caller supplied Cypher. No product implementation
+    source was read or changed. Supplemental reads were the live plan and the
+    repository's graph, CLI and documentation instructions. Runtime signatures
+    and docstrings identified <code>imas_codex.plotting.save_figure</code>, but
+    plotting was never reached. No previous request receipt was used to seed a
+    signal selector. Every live operation ran in a separate <code>rigel</code>
+    batch job, reusing the main checkout's environment without syncing it.</p>
+  <p>Private home: <code>~/.cache/imas-codex-codac-uda/example-request/</code>.
+    It holds 20 tool-call receipts, advertised tool schemas, ranked search
+    responses, category/pulse windows, server logs, job scripts and
+    <code>verification.json</code>. Real names, descriptions and selectors remain
+    there. The run directory holds the manifest and verification log. No archive
+    sample read occurred; no archive endpoint, including the excluded operator
+    archive, was contacted by this trial. There was no metered generation call;
+    embedding-service monetary usage was not reported by these tools.</p>
+
+  <h3>Observed calls and results</h3>
+  <table>
+    <thead><tr><th>Operation</th><th>Request and observed shape</th><th>Elapsed</th></tr></thead>
+    <tbody>
+      <tr><td>Interface</td><td>Initialize and list tools: 32 read-only tools,
+        including the three used here. Session startup did not wait for search
+        warmup to finish.</td><td>4.362 s</td></tr>
+      <tr><td>First test search</td><td>Coil designation, page limit 100:
+        <code>isError=true</code>, <code>Error calling tool 'search_pulses':
+        'imas_codex.search'</code>. Server stderr also reports a partially
+        initialized <code>SearchConfig</code> import during warmup.</td><td>1.169 s</td></tr>
+      <tr><td>Negative control</td><td>Invented nonexistent designation:
+        <code>items=[]</code>, <code>total=0</code>, <code>count=0</code>,
+        <code>continuation=null</code>, no error, no figure. A subsequent
+        positive search found seven categories, so the empty result is not
+        evidence of an empty catalogue.</td><td>0.095 s</td></tr>
+      <tr><td>Meaning search</td><td>Query <q>coil current</q>, k=10: ten
+        matches grouped into three report rows. Leading group: a battery-current
+        candidate. Converter-current candidates occur at rank 7.</td><td>0.827 s</td></tr>
+      <tr><td>Meaning search</td><td>Query <q>magnet cold test coil current</q>,
+        k=10: ten matches in four rows, led by unrelated electrical-current
+        candidates; a temperature group occurs at rank 5.</td><td>0.273 s</td></tr>
+      <tr><td>More specific meaning search</td><td>Query <q>TF coil DC current
+        measurement</q>, k=20: twenty matches in five rows. Eight converter-current
+        candidates form the leading group; two DC-link candidates form a group
+        at rank 15. None of the inspected descriptions identifies coil current.</td><td>1.560 s</td></tr>
+      <tr><td>Test-search retry</td><td>Same designation and limit in a fresh
+        session after meaning search: seven categories, all in one page.
+        No metadata-helper fallback was used.</td><td>0.176 s</td></tr>
+      <tr><td>Pulse listings</td><td>Seven category-id calls, limit 100:
+        counts 10, 7, 6, 4, 1, 1, 5. Total and distinct count both 34;
+        34 integer-nanosecond closed windows, zero open windows, no continuation.
+        Category descriptions are null for all seven.</td><td>0.031, 0.029,
+        0.030, 0.029, 0.029, 0.028, 0.031 s</td></tr>
+      <tr><td>Candidate inspection</td><td>Three exact returned signal ids,
+        each with sibling limit 100. One converter/charging-circuit current and
+        two DC-link currents were inspected. Their units are A, KA and KA;
+        naming-derived component context does not verify a coil measurement.</td><td>0.646,
+        1.919, 0.647 s</td></tr>
+      <tr><td>Plant/field listing</td><td>Using a field discriminator as the
+        field filter returned zero. Inspection showed the actual field code was
+        different. Correcting the caller's filter returned 17 rows, including
+        the known candidate. The zero is a caller error, not missing data.</td><td>0.406 s;
+        corrected 0.349 s</td></tr>
+      <tr><td>Broader current-component listing</td><td>Cold-test plant prefix
+        plus returned current-component category, limit 100: immediate first call
+        failed with <code>'imas_codex.search'</code>. A fresh session with a
+        five-second startup delay returned all 13 rows, with no continuation.
+        The rows describe converter/protection/DC-link currents or repeat the
+        variable's name; no coil-current identity was established.</td><td>1.151 s;
+        delayed call 0.410 s, excluding the 5 s delay</td></tr>
+      <tr><td>Load, scale, save and inspect</td><td>Not attempted after the
+        identity blocker. Arrays 0, figure 0, plotted pulses 0/34. No claim of
+        sampling verification, kA conversion or layout-guard success.</td><td>Not run</td></tr>
+    </tbody>
+  </table>
+  <p>The 20 tool calls took 9.836 s in aggregate, excluding server startup,
+    scheduler waits and manual assessment; 18 succeeded and two returned tool
+    errors. The largest serialized MCP result was 9,153 bytes. The first private
+    discovery driver then failed by trying to parse the error response as JSON;
+    all four preceding call receipts survived. Later drivers handled tool errors
+    explicitly. This wrapper error is separate from the server import error.</p>
+
+  <h3>Ranked findings and smallest closing changes</h3>
+  <ol>
+    <li><strong>Measurement identity, blocking.</strong> Supply or catalogue one
+      exact coil-current selector with source-backed description and its
+      relationship to the test circuit. A converter or DC-link current is not
+      accepted as coil current without that relationship. The name-only candidate
+      remains unidentified. No existing selector was guessed or substituted.</li>
+    <li><strong>Test selection, unresolved.</strong> The seven categories contain
+      34 pulse windows, not 34 independently verified cold-test runs. Every
+      category description is null, and windows can overlap. Add a documented
+      mapping from category/pulse kind to cold-test run, or an explicit selection
+      instruction. A minimal implementation must retain all returned windows
+      until this distinction is resolved.</li>
+    <li><strong>Server readiness, observed twice.</strong> Immediate first
+      nonempty metadata calls can return the quoted import error. One pulse
+      retry after another search succeeded; a plant listing succeeded after a
+      five-second delay. These observations suggest a startup import race but
+      do not prove its cause. Make readiness wait for successful search
+      initialization, or serialize that initialization; validate with immediate
+      positive calls, not only an empty search.</li>
+    <li><strong>Grouped search context.</strong> Multi-member report rows omit
+      the individual descriptions needed to choose a physical measurement.
+      Fetching three identities recovered their descriptions. Include bounded
+      member descriptions or an explicit drill-down next action in grouped
+      search results; improve ranking only after the intended signal is known.</li>
+    <li><strong>Whole-test loading, not exercised.</strong> Configured limits are
+      60 s, 100,000 samples and 8,388,608 bytes per read. Twenty-five of the 34
+      pulse windows exceed 60 s; the longest is 205,200 s. The skill demonstrates
+      three short pulse windows. Document a bounded full-profile chunk/envelope
+      recipe with timestamp origin, cache and sampling interpretation retained.
+      This is a planning constraint, not a measured loader failure.</li>
+    <li><strong>Entry point.</strong> This session exposed no project MCP tools.
+      A private stdio client and extra CLI instructions were needed to launch
+      the server. Connect the intended server in the agent environment, or give
+      the skill a documented client bootstrap. No source-code reading was needed.</li>
+  </ol>
+
+  <h3>Verification and next action</h3>
+  <p>A separate bounded <code>rigel</code> verification job reopened all receipts
+    and asserted their counts, distinct pulse identities, integer closed
+    windows, pagination completion, the known-present row in the corrected
+    listing, two tool errors, explicit empty negative control, and absence of
+    arrays or figures. Its log ends <code>EXIT=0</code>. This verifies the
+    recorded partial result; it does not certify the unperformed load or plot.
+    The coordinator's next action is to obtain the exact coil-current identity
+    and define which returned pulse kinds constitute tests, then resume the
+    bounded array/figure attempt. No product repair or plan closure was made.</p>
+</section>
