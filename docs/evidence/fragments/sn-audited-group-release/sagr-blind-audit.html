@@ -11,24 +11,24 @@
 <body>
 <main>
 <h1 id="sagr-blind-audit-title">The live catalog read blind by two independent readers</h1>
-<p id="sagr-blind-audit-summary">340 live names drawn by seed 20261117 from the 3193 names in the 23 physics-domain groups of at least 20 names, plus 40 planted names, were read by openrouter/google/gemini-3.8-flash and openrouter/moonshotai/kimi-k3.1-pro. Each reader returned every fixed class that applies, or none. <strong>191 of 379 names (50.4 %, 95 % CI 45.4 %–55.4 %) were read defective by at least one reader</strong>; reader A read 125 defective (33.0 %) and reader B read 163 (43.0 %). The two agree on defective-or-not for 75.2 % of names (Cohen's κ 0.4792). Spend was <strong>USD 12.19</strong> of the USD 30 ceiling.</p>
-<p id="sagr-blind-audit-missing">379 of 380 requested names carry both readings; <code>per_toroidal_mode_fast_electron_absorbed_wave_power</code> (no reader B) returned no content at the token cap after two attempts and is excluded from every paired statistic.</p>
+<p id="sagr-blind-audit-summary">340 live names drawn by seed 20261117 from the 3193 names in the 23 physics-domain groups of at least 20 names, plus 40 planted names, were read by openrouter/google/gemini-3.8-flash and openrouter/moonshotai/kimi-k3.1-pro. Each reader returned every fixed class that applies, or none. <strong>174 of the 339 sampled names with both readings (51.3 %, 95 % CI 46.0 %–56.6 %) were read defective by at least one reader</strong>; reader A read 111 defective (32.7 %) and reader B read 147 (43.4 %). The two agree on defective-or-not for 73.5 % of names (Cohen's κ 0.4435). Spend was <strong>USD 12.19</strong> of the USD 30 ceiling. The planted names are reported in their own section and enter no sample share above.</p>
+<p id="sagr-blind-audit-missing">339 of 340 sampled names carry both readings; <code>per_toroidal_mode_fast_electron_absorbed_wave_power</code> (no reader B) returned no content at the token cap after two attempts and is excluded from every paired statistic.</p>
 <h2 id="sagr-blind-audit-defective">Defective in any class</h2><table id="sagr-blind-audit-defective-table"><thead><tr><th>Reading</th><th>Names</th><th>Share</th><th>95&#8201;% CI</th></tr></thead><tbody>
-<tr><td>reader A: defective</td><td>125</td><td>33.0 %</td><td>28.4 %–37.9 %</td></tr>
-<tr><td>reader B: defective</td><td>163</td><td>43.0 %</td><td>38.1 %–48.0 %</td></tr>
-<tr><td>both readers</td><td>97</td><td>25.6 %</td><td>21.5 %–30.2 %</td></tr>
-<tr><td>exactly one reader</td><td>94</td><td>24.8 %</td><td>20.7 %–29.4 %</td></tr>
-<tr><td>neither reader</td><td>188</td><td>49.6 %</td><td>44.6 %–54.6 %</td></tr>
+<tr><td>reader A: defective</td><td>111</td><td>32.7 %</td><td>28.0 %–37.9 %</td></tr>
+<tr><td>reader B: defective</td><td>147</td><td>43.4 %</td><td>38.2 %–48.7 %</td></tr>
+<tr><td>both readers</td><td>84</td><td>24.8 %</td><td>20.5 %–29.6 %</td></tr>
+<tr><td>exactly one reader</td><td>90</td><td>26.6 %</td><td>22.1 %–31.5 %</td></tr>
+<tr><td>neither reader</td><td>165</td><td>48.7 %</td><td>43.4 %–54.0 %</td></tr>
 </tbody></table>
 <p id="sagr-blind-audit-any-note">Defective in any class means the reader returned at least one class. A name with two defects is counted once here and once in each class it carries.</p>
 <h2 id="sagr-blind-audit-classes">Per class</h2><table id="sagr-blind-audit-classes-table"><thead><tr><th>Class</th><th>Both</th><th>Only A</th><th>Only B</th><th>Any</th><th>Share of names</th><th>95&#8201;% CI</th><th>Agreement (95&#8201;% CI)</th><th>&kappa;</th></tr></thead><tbody>
-<tr><td><code>name_contradicts_source</code></td><td>11</td><td>16</td><td>8</td><td>35</td><td>9.2 %</td><td>6.7 %–12.6 %</td><td>93.7 % (90.8 %–95.7 %)</td><td>0.4456</td></tr>
-<tr><td><code>name_omits_source</code></td><td>48</td><td>6</td><td>70</td><td>124</td><td>32.7 %</td><td>28.2 %–37.6 %</td><td>80.0 % (75.6 %–83.7 %)</td><td>0.4508</td></tr>
-<tr><td><code>definition_contradicts_source</code></td><td>24</td><td>6</td><td>22</td><td>52</td><td>13.7 %</td><td>10.6 %–17.5 %</td><td>92.6 % (89.5 %–94.8 %)</td><td>0.5925</td></tr>
-<tr><td><code>name_definition_disagree</code></td><td>13</td><td>28</td><td>5</td><td>46</td><td>12.1 %</td><td>9.2 %–15.8 %</td><td>91.3 % (88.0 %–93.7 %)</td><td>0.4011</td></tr>
-<tr><td><code>unit_wrong</code></td><td>11</td><td>3</td><td>1</td><td>15</td><td>4.0 %</td><td>2.4 %–6.4 %</td><td>98.9 % (97.3 %–99.6 %)</td><td>0.8407</td></tr>
-<tr><td><code>wrong_physics_domain</code></td><td>5</td><td>7</td><td>5</td><td>17</td><td>4.5 %</td><td>2.8 %–7.1 %</td><td>96.8 % (94.5 %–98.2 %)</td><td>0.4384</td></tr>
-<tr><td><code>duplicate_of_live_name</code></td><td>12</td><td>0</td><td>6</td><td>18</td><td>4.8 %</td><td>3.0 %–7.4 %</td><td>98.4 % (96.6 %–99.3 %)</td><td>0.7921</td></tr>
+<tr><td><code>name_contradicts_source</code></td><td>11</td><td>13</td><td>7</td><td>31</td><td>9.1 %</td><td>6.5 %–12.7 %</td><td>94.1 % (91.1 %–96.2 %)</td><td>0.493</td></tr>
+<tr><td><code>name_omits_source</code></td><td>42</td><td>6</td><td>66</td><td>114</td><td>33.6 %</td><td>28.8 %–38.8 %</td><td>78.8 % (74.1 %–82.8 %)</td><td>0.4259</td></tr>
+<tr><td><code>definition_contradicts_source</code></td><td>20</td><td>4</td><td>18</td><td>42</td><td>12.4 %</td><td>9.3 %–16.3 %</td><td>93.5 % (90.4 %–95.7 %)</td><td>0.6114</td></tr>
+<tr><td><code>name_definition_disagree</code></td><td>12</td><td>25</td><td>5</td><td>42</td><td>12.4 %</td><td>9.3 %–16.3 %</td><td>91.1 % (87.6 %–93.7 %)</td><td>0.4034</td></tr>
+<tr><td><code>unit_wrong</code></td><td>10</td><td>3</td><td>1</td><td>14</td><td>4.1 %</td><td>2.5 %–6.8 %</td><td>98.8 % (97.0 %–99.5 %)</td><td>0.8273</td></tr>
+<tr><td><code>wrong_physics_domain</code></td><td>4</td><td>6</td><td>5</td><td>15</td><td>4.4 %</td><td>2.7 %–7.2 %</td><td>96.8 % (94.3 %–98.2 %)</td><td>0.4044</td></tr>
+<tr><td><code>duplicate_of_live_name</code></td><td>12</td><td>0</td><td>6</td><td>18</td><td>5.3 %</td><td>3.4 %–8.2 %</td><td>98.2 % (96.2 %–99.2 %)</td><td>0.7911</td></tr>
 </table>
 <h2 id="sagr-blind-audit-class-definitions">The fixed class list</h2><table id="sagr-blind-audit-class-definitions-table"><thead><tr><th>Key</th><th>Definition</th></tr></thead><tbody>
 <tr><td><code>name_contradicts_source</code></td><td>The name states a quantity, locus, component or relation that the Data Dictionary source text contradicts.</td></tr>
@@ -64,7 +64,7 @@
 <tr><td>turbulence</td><td>71</td><td>14</td><td>2</td><td>5</td><td>2</td></tr>
 <tr><td>waves</td><td>23</td><td>14</td><td>7</td><td>10</td><td>7</td></tr>
 </tbody></table>
-<h2 id="sagr-blind-audit-planted">Planted names</h2><p id="sagr-blind-audit-planted-note">20 names a physicist's committed west audit rules INCORRECT and 20 it rules correct were planted unmarked among the sample. Each citation is the audit row the label comes from. Recall on the defective plants: A 45.0 %, B 55.0 %. False-alarm rate on the sound plants: A 25.0 %, B 25.0 %.</p><table id="sagr-blind-audit-planted-table"><thead><tr><th>Name</th><th>Known</th><th>Citation</th><th>A</th><th>B</th></tr></thead><tbody>
+<h2 id="sagr-blind-audit-planted">Planted names</h2><p id="sagr-blind-audit-planted-note">20 names a physicist's committed west audit rules INCORRECT and 20 it rules correct were planted unmarked among the sample. Each citation is the audit row the label comes from. Recall on the defective plants: A 45.0 %, B 55.0 %. False-alarm rate on the sound plants: A 25.0 %, B 25.0 %. These rows are excluded from every sample share above; 40 of 40 planted names carry both readings.</p><table id="sagr-blind-audit-planted-table"><thead><tr><th>Name</th><th>Known</th><th>Citation</th><th>A</th><th>B</th></tr></thead><tbody>
 <tr><td><code>vertical_coordinate_of_measurement_position</code></td><td>defective</td><td><code>west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=18</code></td><td>defective: name_contradicts_source, wrong_physics_domain</td><td>defective: wrong_physics_domain</td></tr>
 <tr><td><code>thermal_electron_pressure_at_post_sawtooth_crash</code></td><td>defective</td><td><code>west-name-audit-bremsstrahlung-to-equilibrium-boundary.md:row=33</code></td><td>defective: definition_contradicts_source, name_definition_disagree</td><td>defective: definition_contradicts_source, name_definition_disagree</td></tr>
 <tr><td><code>toroidal_angle_of_antenna_strap</code></td><td>defective</td><td><code>west-name-audit-equilibrium-profiles-to-magnetics.md:row=25</code></td><td>defective: name_omits_source</td><td>defective: name_omits_source</td></tr>
@@ -106,7 +106,7 @@
 <tr><td><code>vertical_outline_of_limiter_tile</code></td><td>sound</td><td><code>west-name-audit-spectrometer-visible-to-wall.md:row=49</code></td><td>defective: name_contradicts_source, definition_contradicts_source</td><td>no defect</td></tr>
 <tr><td><code>difference_of_vacuum_poloidal_current_function_and_initial_vacuum_poloidal_current_function</code></td><td>sound</td><td><code>west-name-audit-spectrometer-visible-to-wall.md:row=48</code></td><td>no defect</td><td>no defect</td></tr>
 </tbody></table>
-<h2 id="sagr-blind-audit-disagreements">Names the readers disagree on</h2><p id="sagr-blind-audit-disagreements-note">94 names carry a verdict the other reader does not. Both readings are listed for the lead; the first thirty are shown.</p><table id="sagr-blind-audit-disagreements-table"><thead><tr><th>Name</th><th>Reader A</th><th>Reader B</th></tr></thead><tbody>
+<h2 id="sagr-blind-audit-disagreements">Names the readers disagree on</h2><p id="sagr-blind-audit-disagreements-note">90 names carry a verdict the other reader does not. Both readings are listed for the lead; the first thirty are shown.</p><table id="sagr-blind-audit-disagreements-table"><thead><tr><th>Name</th><th>Reader A</th><th>Reader B</th></tr></thead><tbody>
 <tr><td><code>electron_decay_time_at_magnetic_axis_due_to_disruption</code></td><td>name_contradicts_source, name_definition_disagree. The source specifies the &#x27;decay of electron temperature (Te)&#x27; and &#x27;Exponential decay time constant&#x27;, but the name states &#x27;electron_decay_time&#x27; without temperature and without specifying exponential decay (distinguishing it from linear), creating a contradiction and disagreement with the source and stored definition.</td><td>no defect. The source’s “Exponential decay time constant (τ) characterizing the decay of electron temperature (Te) at the magnetic axis during a disruption” matches the stored “Exponential e-folding time of the electron temperature at the magnetic axis during a disruption”; seconds fit this time constant.</td></tr>
 <tr><td><code>ion_charge_state_power_at_inside_flux_surface</code></td><td>name_definition_disagree. The name specifies generic &#x27;power&#x27;, while the definition restricts the quantity specifically to &#x27;Cumulative wave power absorbed by a specified ion charge state&#x27;, representing different scopes and quantities.</td><td>no defect. Name and definition both denote &quot;Cumulative wave power absorbed by a specified ion charge state, integrated over the plasma volume enclosed by a selected magnetic flux surface.&quot; W fits power, auxiliary_heating fits wave-energy absorption, and no other live names are supplied for duplicate comparison.</td></tr>
 <tr><td><code>poloidal_neutral_state_momentum_source</code></td><td>no defect. The source, name, and definition share the poloidal component of the momentum source for a specific neutral state, represented on GGD grid elements with the Data Dictionary&#x27;s documented area-normalized unit kg.m^-1.s^-2.</td><td>name_omits_source, definition_contradicts_source. The source specifies “a neutral species charge state” and “different charge states of the species,” plus “momentum source density.” The name omits the charge-state and density qualifiers, while the stored definition instead says “one specified internal state,” changing the state basis.</td></tr>
@@ -171,6 +171,6 @@ Enclosing structures of the first source, nearest first:
 Other live standard names produced by the same source(s): tritium_prefill_count
 Return every fixed defect class that applies, or an empty list, with the wording that decides it.</pre>
 <h2 id="sagr-blind-audit-spend">Spend and calls</h2><table id="sagr-blind-audit-spend-table"><thead><tr><th>Seat</th><th>Model</th><th>Readings</th><th>USD</th><th>Tokens</th></tr></thead><tbody>
-<tr><td>A</td><td><code>openrouter/google/gemini-3.8-flash</code></td><td>380</td><td>1.7614</td><td>851524</td></tr>
-<tr><td>B</td><td><code>openrouter/moonshotai/kimi-k3.1-pro</code></td><td>379</td><td>10.4257</td><td>1588336</td></tr>
+<tr><td>A</td><td><code>openrouter/google/gemini-3.8-flash</code></td><td>340</td><td>1.7614</td><td>851524</td></tr>
+<tr><td>B</td><td><code>openrouter/moonshotai/kimi-k3.1-pro</code></td><td>339</td><td>10.4257</td><td>1588336</td></tr>
 </tbody></table><p>Total USD 12.1871. Unanswered calls: 0.</p></main></body></html>

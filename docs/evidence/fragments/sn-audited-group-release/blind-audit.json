@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-11-17T01:12:47.608792+00:00",
+ "generated_at": "2026-11-17T01:52:27.235097+00:00",
  "class_list_fixed": [
   {
    "key": "name_contradicts_source",
@@ -88,8 +88,8 @@
    "label_source": "docs/evidence/sn-west-catalog-release/west-name-audit*.md, read row by row by judgment_goldens._west_verdicts"
   }
  },
- "names_read": 379,
- "requested": 380,
+ "names_read": 339,
+ "requested": 340,
  "missing_pairs": [
   {
    "name": "per_toroidal_mode_fast_electron_absorbed_wave_power",
@@ -98,183 +98,185 @@
    ]
   }
  ],
+ "plant_pairs": 40,
+ "plant_missing_pairs": [],
  "sampled": 340,
  "planted": 40,
  "per_reader": {
   "A": {
-   "read": 380,
-   "defective": 125,
-   "rate": 0.3298,
+   "read": 340,
+   "defective": 111,
+   "rate": 0.3274,
    "ci": [
-    0.2844,
-    0.3786
+    0.2797,
+    0.3791
    ],
    "spend": 1.7614,
    "tokens": 851524
   },
   "B": {
-   "read": 379,
-   "defective": 163,
-   "rate": 0.4301,
+   "read": 339,
+   "defective": 147,
+   "rate": 0.4336,
    "ci": [
-    0.3812,
-    0.4804
+    0.3819,
+    0.4868
    ],
    "spend": 10.4257,
    "tokens": 1588336
   }
  },
  "defective_any": {
-  "both": 97,
-  "only_A": 28,
-  "only_B": 66,
-  "neither": 188,
-  "at_least_one": 191,
-  "at_least_one_rate": 0.504,
+  "both": 84,
+  "only_A": 27,
+  "only_B": 63,
+  "neither": 165,
+  "at_least_one": 174,
+  "at_least_one_rate": 0.5133,
   "at_least_one_ci": [
-   0.4538,
-   0.554
+   0.4602,
+   0.566
   ],
   "rows": {
    "both": {
-    "names": 97,
-    "rate": 0.2559,
+    "names": 84,
+    "rate": 0.2478,
     "ci": [
-     0.2146,
-     0.3022
+     0.2048,
+     0.2964
     ]
    },
    "exactly_one": {
-    "names": 94,
-    "rate": 0.248,
+    "names": 90,
+    "rate": 0.2655,
     "ci": [
-     0.2072,
-     0.2939
+     0.2213,
+     0.3149
     ]
    },
    "neither": {
-    "names": 188,
-    "rate": 0.496,
+    "names": 165,
+    "rate": 0.4867,
     "ci": [
-     0.446,
-     0.5462
+     0.434,
+     0.5398
     ]
    }
   },
-  "observed_agreement": 0.752,
+  "observed_agreement": 0.7345,
   "observed_agreement_ci": [
-   0.7061,
-   0.7928
+   0.6851,
+   0.7787
   ],
-  "kappa": 0.4792
+  "kappa": 0.4435
  },
  "per_class": {
   "name_contradicts_source": {
    "both": 11,
-   "only_A": 16,
-   "only_B": 8,
-   "one_reader": 24,
-   "any": 35,
-   "agreement": 0.9367,
+   "only_A": 13,
+   "only_B": 7,
+   "one_reader": 20,
+   "any": 31,
+   "agreement": 0.941,
    "agreement_ci": [
-    0.9075,
-    0.9571
+    0.9106,
+    0.9615
    ],
-   "kappa": 0.4456,
-   "rate_any": 0.0923,
+   "kappa": 0.493,
+   "rate_any": 0.0914,
    "ci_any": [
-    0.0672,
-    0.1257
+    0.0652,
+    0.1269
    ]
   },
   "name_omits_source": {
-   "both": 48,
+   "both": 42,
    "only_A": 6,
-   "only_B": 70,
-   "one_reader": 76,
-   "any": 124,
-   "agreement": 0.7995,
+   "only_B": 66,
+   "one_reader": 72,
+   "any": 114,
+   "agreement": 0.7876,
    "agreement_ci": [
-    0.7562,
-    0.8367
+    0.741,
+    0.8278
    ],
-   "kappa": 0.4508,
-   "rate_any": 0.3272,
+   "kappa": 0.4259,
+   "rate_any": 0.3363,
    "ci_any": [
-    0.2819,
-    0.3759
+    0.2881,
+    0.3882
    ]
   },
   "definition_contradicts_source": {
-   "both": 24,
-   "only_A": 6,
-   "only_B": 22,
-   "one_reader": 28,
-   "any": 52,
-   "agreement": 0.9261,
+   "both": 20,
+   "only_A": 4,
+   "only_B": 18,
+   "one_reader": 22,
+   "any": 42,
+   "agreement": 0.9351,
    "agreement_ci": [
-    0.8953,
-    0.9484
+    0.9037,
+    0.9568
    ],
-   "kappa": 0.5925,
-   "rate_any": 0.1372,
+   "kappa": 0.6114,
+   "rate_any": 0.1239,
    "ci_any": [
-    0.1062,
-    0.1755
+    0.093,
+    0.1632
    ]
   },
   "name_definition_disagree": {
-   "both": 13,
-   "only_A": 28,
+   "both": 12,
+   "only_A": 25,
    "only_B": 5,
-   "one_reader": 33,
-   "any": 46,
-   "agreement": 0.9129,
+   "one_reader": 30,
+   "any": 42,
+   "agreement": 0.9115,
    "agreement_ci": [
-    0.8802,
+    0.8765,
     0.9373
    ],
-   "kappa": 0.4011,
-   "rate_any": 0.1214,
+   "kappa": 0.4034,
+   "rate_any": 0.1239,
    "ci_any": [
-    0.0922,
-    0.1581
+    0.093,
+    0.1632
    ]
   },
   "unit_wrong": {
-   "both": 11,
+   "both": 10,
    "only_A": 3,
    "only_B": 1,
    "one_reader": 4,
-   "any": 15,
-   "agreement": 0.9894,
+   "any": 14,
+   "agreement": 0.9882,
    "agreement_ci": [
-    0.9732,
-    0.9959
+    0.9701,
+    0.9954
    ],
-   "kappa": 0.8407,
-   "rate_any": 0.0396,
+   "kappa": 0.8273,
+   "rate_any": 0.0413,
    "ci_any": [
-    0.0241,
-    0.0643
+    0.0248,
+    0.0681
    ]
   },
   "wrong_physics_domain": {
-   "both": 5,
-   "only_A": 7,
+   "both": 4,
+   "only_A": 6,
    "only_B": 5,
-   "one_reader": 12,
-   "any": 17,
-   "agreement": 0.9683,
+   "one_reader": 11,
+   "any": 15,
+   "agreement": 0.9676,
    "agreement_ci": [
-    0.9455,
+    0.9428,
     0.9818
    ],
-   "kappa": 0.4384,
-   "rate_any": 0.0449,
+   "kappa": 0.4044,
+   "rate_any": 0.0442,
    "ci_any": [
-    0.0282,
-    0.0707
+    0.027,
+    0.0717
    ]
   },
   "duplicate_of_live_name": {
@@ -283,16 +285,16 @@
    "only_B": 6,
    "one_reader": 6,
    "any": 18,
-   "agreement": 0.9842,
+   "agreement": 0.9823,
    "agreement_ci": [
-    0.9659,
-    0.9927
+    0.9619,
+    0.9919
    ],
-   "kappa": 0.7921,
-   "rate_any": 0.0475,
+   "kappa": 0.7911,
+   "rate_any": 0.0531,
    "ci_any": [
-    0.0302,
-    0.0738
+    0.0338,
+    0.0824
    ]
   }
  },
@@ -1811,165 +1813,6 @@
     "name_omits_source",
     "name_definition_disagree"
    ]
-  },
-  {
-   "name": "vertical_coordinate_of_measurement_position",
-   "A": [
-    "name_contradicts_source",
-    "wrong_physics_domain"
-   ],
-   "B": [
-    "wrong_physics_domain"
-   ]
-  },
-  {
-   "name": "thermal_electron_pressure_at_post_sawtooth_crash",
-   "A": [
-    "definition_contradicts_source",
-    "name_definition_disagree"
-   ],
-   "B": [
-    "definition_contradicts_source",
-    "name_definition_disagree"
-   ]
-  },
-  {
-   "name": "toroidal_angle_of_antenna_strap",
-   "A": [
-    "name_omits_source"
-   ],
-   "B": [
-    "name_omits_source"
-   ]
-  },
-  {
-   "name": "wave_phase_of_wave_beam",
-   "A": [
-    "definition_contradicts_source"
-   ],
-   "B": [
-    "name_omits_source"
-   ]
-  },
-  {
-   "name": "spectral_rate_of_spectrometer_channel",
-   "A": [],
-   "B": [
-    "name_omits_source",
-    "definition_contradicts_source"
-   ]
-  },
-  {
-   "name": "surface_temperature",
-   "A": [
-    "name_omits_source",
-    "definition_contradicts_source"
-   ],
-   "B": [
-    "name_omits_source",
-    "definition_contradicts_source"
-   ]
-  },
-  {
-   "name": "area_of_diagnostic_aperture",
-   "A": [],
-   "B": [
-    "name_contradicts_source",
-    "definition_contradicts_source"
-   ]
-  },
-  {
-   "name": "toroidal_vacuum_magnetic_field",
-   "A": [
-    "name_omits_source",
-    "name_definition_disagree"
-   ],
-   "B": [
-    "name_omits_source",
-    "definition_contradicts_source"
-   ]
-  },
-  {
-   "name": "initial_polarization_ellipticity_of_polarimeter_beam",
-   "A": [
-    "unit_wrong"
-   ],
-   "B": [
-    "unit_wrong"
-   ]
-  },
-  {
-   "name": "effective_turn_count_of_passive_loop",
-   "A": [
-    "name_omits_source"
-   ],
-   "B": [
-    "name_omits_source"
-   ]
-  },
-  {
-   "name": "accumulated_total_gas_count",
-   "A": [
-    "name_omits_source",
-    "name_definition_disagree"
-   ],
-   "B": [
-    "name_omits_source"
-   ]
-  },
-  {
-   "name": "radial_coordinate_of_conductor_cross_section",
-   "A": [
-    "wrong_physics_domain"
-   ],
-   "B": [
-    "name_omits_source"
-   ]
-  },
-  {
-   "name": "poloidal_magnetic_flux_of_flux_loop",
-   "A": [
-    "definition_contradicts_source"
-   ],
-   "B": [
-    "definition_contradicts_source"
-   ]
-  },
-  {
-   "name": "total_power_due_to_ohmic_dissipation",
-   "A": [
-    "name_definition_disagree",
-    "definition_contradicts_source",
-    "name_contradicts_source"
-   ],
-   "B": [
-    "name_omits_source",
-    "definition_contradicts_source"
-   ]
-  },
-  {
-   "name": "normalized_poloidal_flux_coordinate",
-   "A": [],
-   "B": [
-    "definition_contradicts_source"
-   ]
-  },
-  {
-   "name": "forward_wave_phase_of_ion_cyclotron_heating_antenna",
-   "A": [
-    "name_omits_source"
-   ],
-   "B": [
-    "name_omits_source"
-   ]
-  },
-  {
-   "name": "vertical_outline_of_limiter_tile",
-   "A": [
-    "name_contradicts_source",
-    "definition_contradicts_source"
-   ],
-   "B": []
   }
  ],
  "groups": {
@@ -4177,61 +4020,6 @@
     ],
     "rationale": "The description states \u201cRadiance of a spectral-line component,\u201d but the stored unit \u201cm^-2.s^-1.sr^-1\u201d has no energy dimension. Radiance is power per area per solid angle, requiring W.m^-2.sr^-1 for integrated line radiance; the stored unit instead describes an unqualified particle or photon radiance."
    }
-  },
-  {
-   "name": "spectral_rate_of_spectrometer_channel",
-   "A": {
-    "classes": [],
-    "rationale": "The sources, name, and definition describe the detected photoelectron or photon rate (s^-1) per spectral channel or wavelength pixel of a spectrometer channel, with electronic gain compensation and relative calibration applied."
-   },
-   "B": {
-    "classes": [
-     "name_omits_source",
-     "definition_contradicts_source"
-    ],
-    "rationale": "The name\u2019s \u201cspectral_rate\u201d omits the stated counting basis and pixel locus: \u201cphotoelectrons per unit time per wavelength pixel.\u201d The definition also conflicts with Source 2: it specifies \u201cphotoelectrons\u201d and applies \u201cto each wavelength pixel,\u201d whereas Source 2 states \u201cDetected photon count rate\u201d and \u201cnumber of photons per unit time recorded by the detector.\u201d"
-   }
-  },
-  {
-   "name": "area_of_diagnostic_aperture",
-   "A": {
-    "classes": [],
-    "rationale": "Surface area of a diagnostic aperture opening."
-   },
-   "B": {
-    "classes": [
-     "name_contradicts_source",
-     "definition_contradicts_source"
-    ],
-    "rationale": "The stored scope is \u201cthe diagnostic aperture opening\u201d and \u201cdistinct from \u2026 surface_area_of_detector.\u201d The sources instead include \u201cSurface specification of detector,\u201d \u201cSurface specification of antenna emission,\u201d and reflector documentation \u201cSurface of the object.\u201d Thus the aperture-only name and definition contradict source loci beyond apertures."
-   }
-  },
-  {
-   "name": "normalized_poloidal_flux_coordinate",
-   "A": {
-    "classes": [],
-    "rationale": "normalized poloidal flux coordinate"
-   },
-   "B": {
-    "classes": [
-     "definition_contradicts_source"
-    ],
-    "rationale": "Stored documentation: \u201cThe coordinate is the square-root form, \u03c1_pol,norm = \u221a\u03c8_N.\u201d Source 18 instead identifies \u201cNormalised poloidal flux coordinate (\u03c8_norm)\u201d and says \u201cthe flux being normalized\u201d from axis to separatrix; that is the linear normalized flux \u03c8_N, not its square root."
-   }
-  },
-  {
-   "name": "vertical_outline_of_limiter_tile",
-   "A": {
-    "classes": [
-     "name_contradicts_source",
-     "definition_contradicts_source"
-    ],
-    "rationale": "The standard name and definition specify a limiter tile, but the source text establishes the component as a limiter unit (wall/description_2d/limiter/unit: 'Set of limiter units') representing the 'limiting surface', not a tile."
-   },
-   "B": {
-    "classes": [],
-    "rationale": "Source \u201cVertical (Z) coordinate of outline\u201d with unit \u201cm\u201d, under \u201cIrregular outline of the limiting surface\u201d and \u201cSet of limiter units\u201d, matches the stored \u201cSigned vertical (Z) coordinate of each point on a limiter-tile boundary contour\u201d; structural_components fits this limiter geometry quantity."
-   }
   }
  ],
  "errors": [],
@@ -4242,6 +4030,7 @@
    "A": 1.7614,
    "B": 10.4257
   },
+  "unknown_cost_calls": 0,
   "ceiling": 30.0
  },
  "prompts": {

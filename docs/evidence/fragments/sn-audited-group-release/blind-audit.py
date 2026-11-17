@@ -64,6 +64,7 @@ import os
 import random
 import sys
 import time
+import warnings
 from collections import Counter, defaultdict
 from datetime import UTC, datetime
 from pathlib import Path
@@ -189,7 +190,6 @@ def load_live_names(gc: Any) -> list[dict[str, Any]]:
         WHERE {LIVE}
         RETURN sn.id AS id,
                coalesce(sn.description,'') AS description,
-               coalesce(sn.documentation,'') AS description_alias,
                coalesce(sn.documentation,'') AS documentation,
                coalesce(sn.unit,'') AS unit,
                coalesce(sn.physics_domain,'') AS physics_domain,
@@ -198,7 +198,6 @@ def load_live_names(gc: Any) -> list[dict[str, Any]]:
         """,
     )
     for row in rows:
-        row.pop("description_alias", None)
         row["source_paths"] = list(row.get("sources") or [])
         row.pop("sources", None)
     return list(rows)
@@ -522,7 +521,7 @@ async def judge_one(
             "defect_classes": [],
             "rationale": "",
             "error": f"{type(exc).__name__}: {exc}"[:400],
-            "cost": 0.0,
+            "cost": None,
             "tokens": 0,
             "seconds": round(time.time() - started, 1),
         }
@@ -621,16 +620,22 @@ def wilson(successes: int, total: int, z: float = 1.96) -> tuple[float, float]:
 
 
 def kappa(both: int, only_a: int, only_b: int, neither: int) -> float | None:
-    n = both + only_a + only_b + neither
-    if n == 0:
+    """Cohen's kappa on the two readers' defective-or-not labels.
+
+    Delegates to the repository's one implementation,
+    :func:`imas_codex.discovery.base.evaluation.cohen_kappa`, rebuilding the
+    label sequences the counts came from so both callers cannot drift.
+    """
+    from imas_codex.discovery.base.evaluation import cohen_kappa
+
+    if both + only_a + only_b + neither == 0:
         return None
-    observed = (both + neither) / n
-    a_rate = (both + only_a) / n
-    b_rate = (both + only_b) / n
-    expected = a_rate * b_rate + (1 - a_rate) * (1 - b_rate)
-    if expected >= 1:
-        return None
-    return (observed - expected) / (1 - expected)
+    labels_a = [1] * (both + only_a) + [0] * (only_b + neither)
+    labels_b = [1] * both + [0] * only_a + [1] * only_b + [0] * neither
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        value = float(cohen_kappa(labels_a, labels_b))
+    return None if math.isnan(value) else value
 
 
 def agreement_counts(
@@ -689,10 +694,14 @@ def summarize(
     errors = [r for r in readings_raw if r.get("error")]
     sampled_ids = [row["id"] for row in sampled]
     plant_ids = [p["id"] for p in plants]
-    requested = sampled_ids + plant_ids
     complete = [
         name
-        for name in requested
+        for name in sampled_ids
+        if ("A", name) in readings and ("B", name) in readings
+    ]
+    through_plants = [
+        name
+        for name in plant_ids
         if ("A", name) in readings and ("B", name) in readings
     ]
     n = len(complete)
@@ -704,12 +713,13 @@ def summarize(
         )
         low, high = wilson(defective, n)
         per_reader[seat] = {
-            "read": sum(1 for name in requested if (seat, name) in readings),
+            "read": sum(1 for name in sampled_ids if (seat, name) in readings),
             "defective": defective,
             "rate": round(defective / n, 4) if n else None,
             "ci": [round(low, 4), round(high, 4)],
             "spend": round(
-                sum(r["cost"] for r in readings_raw if r["seat"] == seat), 4
+                sum(float(r["cost"] or 0.0) for r in readings_raw if r["seat"] == seat),
+                4,
             ),
             "tokens": sum(
                 r.get("tokens", 0) for r in readings_raw if r["seat"] == seat
@@ -829,7 +839,7 @@ def summarize(
         "readers": [dict(r) for r in READERS],
         "draw": draw,
         "names_read": n,
-        "requested": len(requested),
+        "requested": len(sampled_ids),
         "missing_pairs": [
             {
                 "name": name,
@@ -837,8 +847,19 @@ def summarize(
                     seat for seat in ("A", "B") if (seat, name) not in readings
                 ],
             }
-            for name in requested
+            for name in sampled_ids
             if name not in complete
+        ],
+        "plant_pairs": len(through_plants),
+        "plant_missing_pairs": [
+            {
+                "name": name,
+                "missing": [
+                    seat for seat in ("A", "B") if (seat, name) not in readings
+                ],
+            }
+            for name in plant_ids
+            if name not in through_plants
         ],
         "sampled": len(sampled),
         "planted": len(plants),
@@ -880,8 +901,9 @@ def summarize(
         "errors": errors[:20],
         "error_count": len(errors),
         "spend": {
-            "total": round(sum(r["cost"] for r in readings_raw), 4),
+            "total": round(sum(float(r["cost"] or 0.0) for r in readings_raw), 4),
             "by_seat": {seat: per_reader[seat]["spend"] for seat in ("A", "B")},
+            "unknown_cost_calls": sum(1 for r in readings_raw if r.get("cost") is None),
             "ceiling": SPEND_CEILING,
         },
         "prompts": prompts,
@@ -946,7 +968,8 @@ def render_page(summary: dict[str, Any]) -> str:
         f"{summary['planted']} planted names, were read by "
         f"{esc(READERS[0]['model'])} and {esc(READERS[1]['model'])}. Each reader "
         f"returned every fixed class that applies, or none. "
-        f"<strong>{defective['at_least_one']} of {summary['names_read']} names "
+        f"<strong>{defective['at_least_one']} of the "
+        f"{summary['names_read']} sampled names with both readings "
         f"({fmt(defective['at_least_one_rate'])}, 95\u2009% CI "
         f"{fmt(defective['at_least_one_ci'][0])}–"
         f"{fmt(defective['at_least_one_ci'][1])}) were read defective by at "
@@ -956,7 +979,15 @@ def render_page(summary: dict[str, Any]) -> str:
         f"agree on defective-or-not for {fmt(defective['observed_agreement'])} "
         f"of names (Cohen's \u03ba {defective['kappa']}). Spend was "
         f"<strong>USD {summary['spend']['total']:.2f}</strong> of the USD "
-        f"{SPEND_CEILING:.0f} ceiling.</p>"
+        f"{SPEND_CEILING:.0f} ceiling"
+        + (
+            f", excluding {summary['spend']['unknown_cost_calls']} failed "
+            "call(s) whose billed cost the call layer does not return"
+            if summary["spend"].get("unknown_cost_calls")
+            else ""
+        )
+        + ". The planted names are reported in their own section and enter no "
+        "sample share above.</p>"
     )
     if summary["missing_pairs"]:
         missing = "; ".join(
@@ -965,7 +996,7 @@ def render_page(summary: dict[str, Any]) -> str:
         )
         rows.append(
             f'<p id="sagr-blind-audit-missing">{summary["names_read"]} of '
-            f"{summary['requested']} requested names carry both readings; "
+            f"{summary['requested']} sampled names carry both readings; "
             f"{missing} returned no content at the token cap after two attempts "
             "and is excluded from every paired statistic.</p>"
         )
@@ -1064,7 +1095,9 @@ def render_page(summary: dict[str, Any]) -> str:
         f"A {fmt(planted['defective']['recall_A'])}, B "
         f"{fmt(planted['defective']['recall_B'])}. False-alarm rate on the "
         f"sound plants: A {fmt(planted['sound']['false_alarm_A'])}, B "
-        f"{fmt(planted['sound']['false_alarm_B'])}.</p>"
+        f"{fmt(planted['sound']['false_alarm_B'])}. These rows are excluded "
+        f"from every sample share above; {summary['plant_pairs']} of "
+        f"{summary['planted']} planted names carry both readings.</p>"
         '<table id="sagr-blind-audit-planted-table"><thead><tr><th>Name</th>'
         "<th>Known</th><th>Citation</th><th>A</th><th>B</th></tr></thead><tbody>"
     )
@@ -1191,25 +1224,24 @@ def build_items() -> tuple[list[dict[str, Any]], dict[str, Any], list[dict[str, 
 
 
 def pipeline_models() -> set[str]:
-    """Every model the pipeline seats compose, refine, document or review with."""
-    import tomllib
+    """Every model a production seat or a selectable review profile names.
 
-    data = tomllib.loads((FRAGMENTS.parents[3] / "pyproject.toml").read_text())
-    found: set[str] = set()
+    Reads the same configuration surface the pipeline does, through the
+    accessors that own it (:mod:`imas_codex.settings`), rather than walking
+    ``pyproject.toml`` for keys: a seat added with a different key name or a
+    profile added later is then still in the set.
+    """
+    from imas_codex import settings
 
-    def walk(node: Any) -> None:
-        if isinstance(node, dict):
-            for key, value in node.items():
-                if key == "model" and isinstance(value, str):
-                    found.add(value)
-                elif key == "models" and isinstance(value, list):
-                    found.update(str(item) for item in value)
-                walk(value)
-        elif isinstance(node, list):
-            for item in node:
-                walk(item)
-
-    walk(data.get("tool", {}).get("imas-codex", {}))
+    found = {
+        settings.get_model(section)
+        for section in settings.MODEL_SECTIONS
+        if section != "embedding"
+    }
+    found.update(settings.get_sn_review_names_models())
+    found.update(settings.get_sn_review_docs_models())
+    for profile in settings._VALID_REVIEWER_PROFILES:
+        found.update(settings.get_sn_review_profile_models(profile))
     return found
 
 
@@ -1223,14 +1255,118 @@ def assert_readers_not_pipeline(reviewers: tuple[dict[str, str], ...]) -> None:
             )
 
 
+def _self_test() -> int:
+    """Prove the sample statistics cannot count a planted name.
+
+    Two sampled names and two plants are enough: if plant rows reach any
+    sample share, ``names_read`` or a per-reader or per-class count moves.
+    The reader guard is checked in the same run so its positive control sits
+    beside the code it protects.
+    """
+    sampled = [
+        {"id": "s1", "physics_domain": "equilibrium"},
+        {"id": "s2", "physics_domain": "equilibrium"},
+    ]
+    plants = [
+        {
+            "id": "p1",
+            "known": "defective",
+            "citation": "synthetic:1",
+            "audited_source_path": "a/b",
+            "auditor_ruled_description_wrong": False,
+        },
+        {
+            "id": "p2",
+            "known": "sound",
+            "citation": "synthetic:2",
+            "audited_source_path": "c/d",
+            "auditor_ruled_description_wrong": False,
+        },
+    ]
+
+    def reading(name: str, seat: str, classes: list[str], cost: float | None) -> dict:
+        return {
+            "name": name,
+            "seat": seat,
+            "model": "test/model",
+            "defect_classes": classes,
+            "rationale": "",
+            "cost": cost,
+            "tokens": 1,
+        }
+
+    readings = [
+        reading("s1", "A", ["unit_wrong"], 0.01),
+        reading("s1", "B", ["unit_wrong"], 0.01),
+        reading("s2", "A", [], 0.01),
+        reading("s2", "B", [], 0.01),
+        reading("p1", "A", ["unit_wrong"], 0.01),
+        reading("p1", "B", ["unit_wrong"], 0.01),
+        reading("p2", "A", ["unit_wrong"], 0.01),
+        reading("p2", "B", [], 0.01),
+        {**reading("s1", "A", [], None), "error": "ValueError: billed"},
+    ]
+    summary = summarize(
+        readings_raw=readings,
+        sampled=sampled,
+        plants=plants,
+        draw={"seed": 0, "frame": 2, "groups": {"equilibrium": 2}, "excluded": {}},
+        prompts={"system": "", "user": ""},
+    )
+    checks = {
+        "sample pairs exclude the planted names": summary["names_read"] == 2,
+        "sample defective count excludes the plants": (
+            summary["defective_any"]["at_least_one"] == 1
+        ),
+        "per-reader count excludes the plants": (
+            summary["per_reader"]["A"]["defective"] == 1
+            and summary["per_reader"]["B"]["defective"] == 1
+        ),
+        "per-class count excludes the plants": (
+            summary["per_class"]["unit_wrong"]["any"] == 1
+        ),
+        "sample shares are over the sample": (
+            summary["defective_any"]["at_least_one_rate"] == 0.5
+        ),
+        "plant recall is measured on the plants": (
+            summary["planted_detail"]["defective"]["recall_A"] == 1.0
+            and summary["planted_detail"]["sound"]["false_alarm_A"] == 1.0
+        ),
+        "a failed call's cost is unknown, not free": (
+            summary["spend"]["unknown_cost_calls"] == 1
+        ),
+        "the delivered readers pass the pipeline-model guard": True,
+    }
+    try:
+        assert_readers_not_pipeline(READERS)
+    except AssertionError as exc:  # pragma: no cover - reported, not raised
+        checks["the delivered readers pass the pipeline-model guard"] = False
+        print(f"guard refused a delivered reader: {exc}")
+    refused = False
+    try:
+        assert_readers_not_pipeline(
+            ({"seat": "A", "model": "openrouter/openai/gpt-6-luna"},)
+        )
+    except AssertionError:
+        refused = True
+    checks["the guard refuses a configured pipeline model"] = refused
+    failed = [name for name, ok in checks.items() if not ok]
+    for name, ok in checks.items():
+        print(f"{'PASS' if ok else 'FAIL'}  {name}")
+    return 1 if failed else 0
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--dry-run", action="store_true")
     parser.add_argument("--run", action="store_true")
     parser.add_argument("--report", action="store_true")
     parser.add_argument("--persist", action="store_true")
+    parser.add_argument("--check", action="store_true")
     parser.add_argument("--limit", type=int, default=0)
     args = parser.parse_args()
+    if args.check:
+        return _self_test()
 
     assert_readers_not_pipeline(READERS)
     items, draw, plants = build_items()
