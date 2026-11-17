@@ -1,0 +1,69 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T00:32:03.374Z",
+  "dispatched_at": "2026-11-17T00:31:51Z",
+  "findings": [
+    {
+      "anchor": "plan.html:21",
+      "id": "wiring-1",
+      "reason": "a \u00a73 node dispatched against a \u00a71-only table has no artifact for the multi-group family condition and must either block or re-derive a lead ruling it does not own.",
+      "text": "\u00a73's done-when refuses a cut \"when a family of the group has a member in another group and the ruling recorded in \u00a72 does not list that family as an exception or name the two groups as cut together\", so \u00a73 consumes \u00a72's recorded family-ruling list, yet the dependency declaration gives s3 only `sn-audited-group-release#s1`; \u00a72 states in its own done-when that its ruling is \"the list the release bar reads\"",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:33",
+      "id": "done_when-1",
+      "reason": "the worker cannot tell which total the census must reconcile to, so the sum check either fails on exactly the 23 names the section reports or is silently reinterpreted, and either way the reconciliation the section exists to prove is not fixed.",
+      "text": "\u00a72's own census reads 3,266 live names carrying a physics domain and 23 carrying none, while the done-when asserts \"the per-group counts sum to the live total\"; the 29 groups partition only the 3,266, so the invariant is false against the live total the section's figures imply (3,289) and true only against the domain-carrying subset",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:41",
+      "id": "done_when-2",
+      "reason": "with no planted three-member shared cause whose member-by-member repair must be refused, the node cannot show its routing fires, so its correct behaviour and its complete absence are the same evidence.",
+      "text": "\u00a74 requires that \"a cause shared by three or more defective members is reported as a pipeline defect and is not repaired member by member\" and that \"none is edited in place outside the pipeline's own write paths\", but unlike \u00a72 (\"a recorded run shows the census counting \u2026\") and \u00a73 (\"a recorded run shows each refusal on a group planted with that one fault\") the section declares no planted case and no recorded run for either guard; a run that reports zero shared causes and repairs every member individually satisfies the done-when as written",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:39",
+      "id": "single_goal-1",
+      "reason": "one verdict cannot close both, so a coordinator accepting this node's result cannot state which of the two it is accepting, and a split is the only way to close either on its own evidence.",
+      "text": "\u00a74 delivers two independently closable endpoints in one node: the first group brought to the \u00a73 bar and cut as a release candidate, and the two-arm regeneration/agent-proposal comparison, whose outcome the section explicitly permits to be inconclusive (\"where the counts are too small to say\"); the cut can close while the comparison reports nothing usable, and the comparison can be conclusive while the cut fails at the bar",
+      "type": "single_goal",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "dc94a37f47efbbbd3ab756a7ad45e2a69348baeb",
+  "plan_fingerprint": "975aa482bcd83e81ad47d2ce2d9d20b893ea933c11d8e37698989d98e99f6ef2",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 7,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T003048656782-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "b899c3fe63404600a422f093f66c8648a863e8d3",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a71\u2013\u00a74 cross-references land on sections that exist; `sn-definitions-by-construction#s11` resolves to \"The name review reads what the source's enclosing structures state\", which is what \u00a74's enclosing-structure regeneration arm needs; `tests/standard_names` and `docs/plans/sn-definitions-by-construction.html` both exist in the repository.",
+    "done_when": "a finding \u2014 \u00a72's \"per-group counts sum to the live total\" cannot close against the section's own census figures, and \u00a74 declares no planted control for its shared-cause and write-path guards.",
+    "evidence_paths": "pass \u2014 \u00a71\u2013\u00a75 commit their pages and data under `docs/evidence/fragments/sn-audited-group-release/` (\u00a75 names `group-release-table.json`); no scratchpad, session or node-local path is named.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag reaches a code symbol or comment; the evidence directory carries the plan slug, which is the existing convention across `docs/evidence/fragments/` and so is not a tracker dependency.",
+    "reasoning": "pass \u2014 the stated causes match the cited evidence (\u00a71's three figures show the review score and the earlier label set diverging from correctness; \u00a72 states that domain disagreement is not itself error and argues only that membership is unsettled), the endpoints are obtainable from the described system (live-graph census and source domains in \u00a72, the release refusal behaviour in \u00a73 whose planted-fault runs show it can fail, the repaired and unrepaired readings in \u00a74); every measure can fail (\u00a71's planted defective and sound names, \u00a72's two planted census rows, \u00a73's per-fault refusals); no section prescribes a code path, function, formula or step sequence \u2014 \u00a74's two repair arms and its seeded allocation are the comparison's design, which the section must fix for its reported counts to be checkable, not a method a worker is told to implement.",
+    "single_goal": "a finding \u2014 \u00a74 bundles the first group's release cut with the two-arm repair comparison.",
+    "wiring": "a finding \u2014 `plan-section-depends-on` declares `s3:[sn-audited-group-release#s1]` while \u00a73's done-when reads the family ruling that \u00a72 records."
+  },
+  "section_digests": {
+    "_document": "486edfd56d85e5a94e11a05f9cc27cae7efb69da2247316a64200e55d26c724f",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "b33be4e52c15fc2c304988f519d8af6e1ce4e9295b820dfb5523ac442ce1577e",
+    "s3": "e8393e47f72f4a1c6f59095493b36c9814cfaf2e2c04fe322f9dedf659e80a0e",
+    "s4": "5b9524c06f6145d23a080ade4a98727e693a362f476b8d9d266c8da5118ad216",
+    "s5": "f0ee018e09aed5387d06a0afa7fed73304ba3b121e2598ec77e830c5db06e9ae"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:39:59.751541+00:00",
+  "total": null
+}
