@@ -2,9 +2,9 @@
 
 Candidates are drawn in seeded round-robin order across the joint earlier
 reader flag strata. The adjudicator sees only source packets. All standing
-labels from the source-only check are retained. New judgments fill forty
-labels of each kind in draw order; surplus judgments remain visible but are
-not charged to the reader experiment. No graph writes are made.
+labels from the source-only check are retained. New judgments are added in draw order
+until at least forty labels of each kind stand; every decidable judgment
+from that prefix is retained in the reader experiment. No graph writes are made.
 """
 
 from __future__ import annotations
@@ -274,10 +274,10 @@ def check_blind(data):
     )
     by_name = {j["id"]: j for j in data["judgments"]}
     assert len(by_name) == len(data["judgments"])
-    assert len(data["cohort"]) == len(set(data["cohort"])) == 80
+    assert len(data["cohort"]) == len(set(data["cohort"])) == len(packets)
     assert set(data["cohort"]) == set(packets)
     counts = Counter(by_name[n]["verdict"] for n in data["cohort"])
-    assert counts == {"defective": TARGET, "sound": TARGET}
+    assert counts["defective"] >= TARGET and counts["sound"] >= TARGET
     assert set(data["standing_ids"]) <= set(data["cohort"])
     assert not set(data["blindness"]["exposure_exclusions"]) & set(by_name)
     first = load(ROOT / "planted-label-check.json")
@@ -293,5 +293,5 @@ def check_blind(data):
         assert set(judgment["defect_classes"]) <= set(audit.CLASS_KEYS)
     assert AFTER in audit.system_prompt() and BEFORE not in audit.system_prompt()
     print(
-        "PASS: 80 source-only labels (40 defective, 40 sound), all 26 standing labels retained; quoted sources and lossless packets verified"
+        "PASS: source-only cohort has at least 40 defective and 40 sound; all 26 standing labels retained; quoted sources and lossless packets verified"
     )
