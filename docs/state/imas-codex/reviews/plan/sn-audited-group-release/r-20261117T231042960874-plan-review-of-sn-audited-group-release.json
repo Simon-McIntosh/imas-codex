@@ -1,0 +1,47 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T23:11:36.758Z",
+  "dispatched_at": "2026-11-17T23:11:18Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/sn-audited-group-release/r-20261117T231042960874-plan-review-of-sn-audited-group-release/plan.html:41",
+      "id": "done_when-1",
+      "reason": "the author must state a draw the measured group can satisfy (all unchanged members, or as many as the pool holds) before a node can complete the second-reading control without an unanswered decision.",
+      "text": "s4's second reading puts the changed members beside \"an equal number of unchanged members drawn by a recorded seed\", but the section's own opening states the adjudication found 93 of 208 members defective and 33 undecidable, which the cited evidence page confirms (93 defective, 33 undecidable, 82 sound of 208), so at least 93 defective members change text while only 82 unchanged members exist to draw from; the equality cannot be met, and a worker must ask whether the measure is broken or silently draw fewer decoys than the done-when requires",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "248aaec54000e8e1a13e7e07231cc88dde1c7b4e",
+  "plan_fingerprint": "f90ec9992d145110c09ab808a504f5125ae34d46fdfc50750dd316fae50e83da",
+  "plan_slug": "sn-audited-group-release",
+  "plan_version": 35,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T231042960874-plan-review-of-sn-audited-group-release",
+  "reviewed_blob_sha": "de807ddd5d2b515420cc45a7de2379f1992803c0",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \u00a71, \u00a73, \u00a77 resolve as plan sections; docs/evidence/fragments/sn-audited-group-release/ resolves; sn-definitions-by-construction#s11 resolves (plan.html:155 of that file, status done); the counts cited in s4 reproduce in the cited evidence page.",
+    "done_when": "a finding \u2014 s4 (plan.html:41) requires the second blind reading to be taken beside \"an equal number of unchanged members\", but the section's own measured composition leaves 82 unchanged members against 126 defective-or-undecidable ones, so the declared draw is unsatisfiable.",
+    "evidence_paths": "pass \u2014 the audit record, repair record and evidence page are committed under docs/evidence/fragments/sn-audited-group-release/, which exists and already holds the audit, adjudication and calibration artefacts.",
+    "naming": "pass \u2014 the changed sentence is prose; s4 names no symbol, file or stage with a plan label, and the only identifier in the plan's bar was settled by an earlier review.",
+    "reasoning": "pass \u2014 the section's root cause matches its evidence: plan.html:864 of the adjudication page records 82 sound / 93 defective / 33 undecidable of 208 retained members and the shared-cause table records 14 mechanisms of three or more members, so \"93 of 208 members defective, 33 undecidable and 14 causes\" holds; removing \"with the repaired group as the set the pipeline must then reproduce\" is consistent with \u00a77's now-blind, reload-based adjudication rather than arguing past it; and \u2014 with the exception recorded under done_when \u2014 the rate, the bar comparison and the planted above-bar group are all obtainable and able to fail.",
+    "single_goal": "pass \u2014 the section carries one endpoint, equilibrium's first release candidate cut, or the same group reported and not cut on the lead's ruling.",
+    "wiring": "pass \u2014 s4 declares depends-on s2, s3 and sn-definitions-by-construction#s11, all of which resolve, and the change removes the clause that made s4's repaired text an input to s7. Done-when's hand-off of shared causes to \u00a77 needs no edge because \u00a77 (plan.html:53) adjudicates regenerated members blind from reloaded packets and states it \"needs nothing from \u00a74\"."
+  },
+  "section_digests": {
+    "_document": "96580dc671b5ee69e2cc041dbca93e9dcedec56c16f19c715ba2119d05dc09d4",
+    "s1": "f0aa244fbb34760385f051b8660b9c1e0b722c2779a0d4b8c973a08fcae4a9e5",
+    "s2": "3073ba4c58fc1374d8568d8e8798f5c1fac407860517b8ac0c4e0ca15a6a4a2b",
+    "s3": "a302e5d7f08618c4b0b55889eb4a8df491abf4aed370ac9e8014d8e48c4cd5a9",
+    "s4": "fdba058275ca5854c62eaf7462ca8188f7e2db9ab67e7107a17ea5a1b7ecdc5f",
+    "s5": "61674c50c2e89474d21672aad5679437c4d08736b700aabf9ebf00fc989477fb",
+    "s6": "90a0463c758d22b32611805f931c843f2382e2bc89a2e1ef318231acd72f2fca",
+    "s7": "c00231603538a13a9d760a0a7f3e06c28b97eb1c5682e0dc7a2708499b5571a9"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T23:22:26.623445+00:00",
+  "total": null
+}
