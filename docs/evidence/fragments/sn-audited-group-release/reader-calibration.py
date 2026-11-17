@@ -342,11 +342,42 @@ def recorded_calls():
 
 async def read_corrected(*, pilot_only):
     """Use the audit's call owner with the frozen exact source-only user text."""
-    from imas_codex.discovery.base.llm import get_openrouter_max_price
+    from imas_codex.discovery.base import llm
+    from imas_codex.settings import get_openrouter_pricing
 
     data = frozen_record()
     audit = audit_module()
     readers = (*audit.READERS, audit.third_reader())
+    rates_by_model = {}
+    for reader in readers:
+        price = get_openrouter_pricing(reader["model"])
+        if not price:
+            price = next(
+                p
+                for p in audit.model_selection()["candidates"]
+                if p["model"] == reader["model"]
+            )
+            price = {
+                "prompt": price["prompt_usd_per_mtok"],
+                "completion": price["completion_usd_per_mtok"],
+            }
+        rates_by_model[reader["model"]] = {
+            "prompt": max(float(price["prompt"]), float(price.get("cache_write") or 0)),
+            "completion": float(price["completion"]),
+            "request": 0.0,
+            "image": 0.0,
+        }
+    # Tighten provider-enforced rate ceilings to the audit's recorded text
+    # prices. The generic policy includes a dollar per-request allowance,
+    # which is not a charge any of these token-priced endpoints requires.
+    llm.get_openrouter_max_price = lambda model: rates_by_model[model]
+    original_call = llm.acall_llm_structured
+
+    async def bounded_call(**kwargs):
+        kwargs["output_token_ceiling"] = audit.MAX_TOKENS * 2
+        return await original_call(**kwargs)
+
+    llm.acall_llm_structured = bounded_call
     audit.assert_readers_not_pipeline(readers)
     packets = {p["id"]: p for p in source_packets(data)}
     # Preserve the original rendered packet byte for byte; only the system
@@ -362,6 +393,8 @@ async def read_corrected(*, pilot_only):
             "readers": readers,
             "blind_commit": BLIND_COMMIT,
             "order": order,
+            "provider_rate_ceilings": rates_by_model,
+            "output_token_ceiling": audit.MAX_TOKENS * 2,
         },
     )
     records = recorded_calls()
@@ -382,19 +415,19 @@ async def read_corrected(*, pilot_only):
         todo = [r for r in readers if (r["seat"], name) not in done]
         reserves = []
         for reader in todo:
-            rates = get_openrouter_max_price(reader["model"])
+            rates = rates_by_model[reader["model"]]
             # UTF-8 bytes bound text tokens conservatively, with schema and
-            # message overhead. Three attempts are the audit call's retry cap.
+            # message overhead. Two attempts use at most 4000 + 8000 output
+            # tokens, as bounded by the shared call's immutable ceiling.
             input_bound = (
                 len((system + packets[name]["reader_visible_text"]).encode()) + 4096
             )
             reserves.append(
-                3
-                * (
-                    input_bound * rates["prompt"] / 1e6
-                    + audit.MAX_TOKENS * rates["completion"] / 1e6
-                    + rates["request"]
+                (
+                    2 * input_bound * rates["prompt"]
+                    + 3 * audit.MAX_TOKENS * rates["completion"]
                 )
+                / 1e6
             )
         assert spent + sum(reserves) <= CEILING, (
             f"Cannot reserve bounded calls within USD {CEILING}; spent {spent}"
