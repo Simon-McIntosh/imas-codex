@@ -1395,13 +1395,15 @@ def get_sn_staging_dir() -> Path:
 
 
 def get_sn_group_release_bar() -> Path | None:
-    """Path to the recorded group-release bar ruling, or None when unruled.
+    """Override path for the group-release bar ruling, or None for the default.
 
     Resolution order: ``IMAS_CODEX_SN_GROUP_RELEASE_BAR`` env var →
-    ``[tool.imas-codex.sn].group-release-bar`` config → ``None``. There is no
-    default document: a bar nobody ruled is a refusal, not a guessed threshold,
-    so an unset path leaves the group cut refusing with
-    ``release_bar_not_ruled``.
+    ``[tool.imas-codex.sn].group-release-bar`` config → ``None``. ``None`` is
+    not an unruled bar: the cut then reads the ruling committed beside the
+    package (``imas_codex/standard_names/release_bar.json``), so a checkout
+    reads the same bar on every host. These keys exist for a ruling being
+    tried before it lands; a document found at the resulting path that carries
+    no numeric ``max_defect_rate`` still refuses with ``release_bar_not_ruled``.
     """
     env = os.environ.get("IMAS_CODEX_SN_GROUP_RELEASE_BAR")
     if env:
