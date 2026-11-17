@@ -1,5 +1,5 @@
 {
-  "generated_at_utc": "2026-11-17T08:13:43.316955+00:00",
+  "generated_at_utc": "2026-11-17T08:18:33.981858+00:00",
   "names": [
     {
       "after": {
@@ -1857,7 +1857,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "beryllium_source_rate_due_to_gas_injection"
       },
@@ -1911,7 +1911,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "carbon_prefill_count_due_to_gas_injection"
       },
@@ -1965,7 +1965,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "carbon_source_rate_due_to_gas_injection"
       },
@@ -2019,7 +2019,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "deuterated_methane_source_rate"
       },
@@ -2073,7 +2073,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "electron_particle_flux_at_wall_due_to_pumping"
       },
@@ -2127,7 +2127,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "ethane_prefill_count"
       },
@@ -2181,7 +2181,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "ethane_source_rate"
       },
@@ -2235,7 +2235,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "ethylene_prefill_count"
       },
@@ -2289,7 +2289,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "ethylene_source_rate"
       },
@@ -2343,7 +2343,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "helium_3_source_rate_due_to_gas_injection"
       },
@@ -2397,7 +2397,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "helium_4_source_rate_due_to_gas_injection"
       },
@@ -2451,7 +2451,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "krypton_prefill_count"
       },
@@ -2505,7 +2505,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "krypton_source_rate_due_to_gas_injection"
       },
@@ -2559,7 +2559,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "lithium_source_rate_due_to_gas_injection"
       },
@@ -2613,7 +2613,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "methane_carbon_13_source_rate"
       },
@@ -2667,7 +2667,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "neon_prefill_count"
       },
@@ -2721,7 +2721,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "neon_source_rate"
       },
@@ -2775,7 +2775,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "nitrogen_prefill_count"
       },
@@ -2829,7 +2829,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "nitrogen_source_rate"
       },
@@ -2883,7 +2883,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "oxygen_source_rate_due_to_gas_injection"
       },
@@ -2937,7 +2937,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "propane_prefill_count"
       },
@@ -2991,7 +2991,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "propane_source_rate"
       },
@@ -3045,7 +3045,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "silane_source_rate"
       },
@@ -3099,7 +3099,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "source_rate_due_to_gas_injection"
       },
@@ -3153,7 +3153,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "total_lower_gas_source_rate_of_vacuum_vessel_due_to_gas_injection"
       },
@@ -3207,7 +3207,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "total_neutral_source_rate_due_to_gas_injection"
       },
@@ -3261,7 +3261,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "total_particle_source_rate_of_divertor_due_to_recycling"
       },
@@ -3315,7 +3315,7 @@
         "spend_usd": 0.0
       },
       "edit_scope_id": null,
-      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+      "left_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
       "live_identity": {
         "id": "xenon_source_rate_due_to_gas_injection"
       },
@@ -3358,7 +3358,7 @@
   "spend_source": "LLMCost joined once through each scoped SNRun",
   "spend_total_usd": 5.381189,
   "status": "blocked",
-  "stop_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch's stop condition.",
+  "stop_reason": "Global maintenance inside a review rotation detached producing sources at 2026-11-17T07:59Z and the live population without a source rose from 10 to 23; that route is reverted and the pass stopped under its dispatch stop condition.",
   "summary": {
     "left": 28,
     "population": 56,
