@@ -120,6 +120,31 @@ def test_a_rendered_member_carries_its_family_sentence() -> None:
         assert sentence in rendered, name
 
 
+def test_the_gas_families_are_keyed_on_their_renamed_spelling() -> None:
+    """A settled rename changes the spelling a family is keyed on.
+
+    The equivalent-electron renames renamed the six gas families' members, so a
+    key left on the old spelling matches no live name and those families would
+    render no sentence at all.
+    """
+
+    renamed = (
+        "<X>_prefill_equivalent_electron_count",
+        "<X>_equivalent_electron_source_rate_due_to_gas_injection",
+        "accumulated_<X>_equivalent_electron_count",
+        "accumulated_<X>_equivalent_electron_count_due_to_gas_injection",
+        "accumulated_<X>_prefill_equivalent_electron_count",
+        "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection",
+    )
+    for key in renamed:
+        assert key in SPECIES_FAMILY_SENTENCES, key
+        name = key.replace("<X>", "argon")
+        assert species_family(name) == (key, "argon"), name
+        assert species_family_sentence(name) == SPECIES_FAMILY_SENTENCES[key].replace(
+            "<X>", "argon"
+        )
+
+
 def test_the_members_of_a_family_carry_one_description() -> None:
     """Every member's description is the family's one wording, species apart.
 

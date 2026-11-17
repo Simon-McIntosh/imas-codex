@@ -892,27 +892,27 @@ SPECIES_FAMILY_SENTENCES: dict[str, str] = {
         "Number density of <X> ions at the plasma boundary. "
         + SPECIES_POPULATION_SENTENCE
     ),
-    "<X>_prefill_count": (
+    "<X>_prefill_equivalent_electron_count": (
         "Equivalent-electron count of the neutral <X> atoms introduced as "
         "prefill before plasma breakdown."
     ),
-    "<X>_source_rate_due_to_gas_injection": (
+    "<X>_equivalent_electron_source_rate_due_to_gas_injection": (
         "Equivalent-electron source rate of the neutral <X> atoms injected "
         "to the vessel by gas injection."
     ),
-    "accumulated_<X>_count": (
+    "accumulated_<X>_equivalent_electron_count": (
         "Cumulative equivalent-electron count of the neutral <X> atoms "
         "delivered to the vessel after plasma breakdown."
     ),
-    "accumulated_<X>_count_due_to_gas_injection": (
+    "accumulated_<X>_equivalent_electron_count_due_to_gas_injection": (
         "Cumulative equivalent-electron count of the neutral <X> atoms "
         "delivered by gas injection after plasma breakdown."
     ),
-    "accumulated_<X>_prefill_count": (
+    "accumulated_<X>_prefill_equivalent_electron_count": (
         "Cumulative equivalent-electron count of the neutral <X> atoms "
         "delivered as prefill before plasma breakdown."
     ),
-    "accumulated_<X>_prefill_count_due_to_gas_injection": (
+    "accumulated_<X>_prefill_equivalent_electron_count_due_to_gas_injection": (
         "Cumulative equivalent-electron count of the neutral <X> atoms "
         "delivered by gas injection as prefill before plasma breakdown."
     ),
