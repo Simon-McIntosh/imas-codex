@@ -71,7 +71,7 @@ def metrics(records, wall_seconds):
             "review_skips",
         )
     }
-    replacement_calls = {"draft": 0, "review": 0}
+    feedback_calls = {"draft": 0, "review": 0}
     for row in records:
         for request in row.get("messages", []):
             if not request or request[-1].get("role") != "user":
@@ -92,7 +92,7 @@ def metrics(records, wall_seconds):
                 and "context_items" in payload
                 else "draft"
             )
-            replacement_calls[stage] += 1
+            feedback_calls[stage] += 1
     for stage, schema in (
         ("draft", "SignalEnrichmentBatch"),
         ("review", "DescriptionReview"),
@@ -103,9 +103,9 @@ def metrics(records, wall_seconds):
             if row.get("response_schema") == schema
         )
         # A pooled replacement can serve several signal retries in one call.
-        recoveries[stage + "_replacement_calls"] = replacement_calls[stage]
+        recoveries[stage + "_feedback_calls"] = feedback_calls[stage]
         recoveries[stage + "_validation_reasks"] = max(
-            0, directed - replacement_calls[stage]
+            0, directed - feedback_calls[stage]
         )
     return {
         "signals": sum(len(row["ids"]) for row in records),

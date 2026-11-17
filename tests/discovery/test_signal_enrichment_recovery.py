@@ -430,5 +430,6 @@ def test_pooled_retry_accounting_distinguishes_requests_from_signals():
     ]
     result = metrics(rows, 1)
     assert result["recoveries"]["review_retries"] == 2
+    assert result["recoveries"]["review_feedback_calls"] == 1
     assert result["recoveries"]["review_validation_reasks"] == 1
     assert result["input_tokens"] == result["output_tokens"] == 5
