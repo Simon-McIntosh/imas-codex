@@ -441,6 +441,10 @@ source_description: Field-line angle
     [
         ("Ref. of ion temperature gradient.", ["Ref. of ion temperature gradient."]),
         (
+            "Reference of Control Method No. for Gas Inj. Gr.7.",
+            ["Reference of Control Method No. for Gas Inj. Gr.7."],
+        ),
+        (
             "Control Algorithm No. (CS1-PS). Unrelated detail.",
             ["Control Algorithm No. (CS1-PS).", "Unrelated detail."],
         ),
@@ -469,3 +473,18 @@ async def test_one_sentence_limit_preserves_the_reference_quantity():
     )
     assert batch.results[0].description == "Ref. of ion temperature gradient."
     assert batch.length_drops == 1
+
+
+@pytest.mark.asyncio
+async def test_one_sentence_limit_keeps_the_gas_injection_group():
+    value = draft()
+    value.results[
+        0
+    ].description = (
+        "Reference of Control Method No. for Gas Inj. Gr.7, a binary payload."
+    )
+    (batch, _, _), _ = await run(
+        EnrichmentOptions(description_sentences=1), [(value, 0, 1)]
+    )
+    assert batch.results[0].description == value.results[0].description
+    assert batch.length_drops == 0

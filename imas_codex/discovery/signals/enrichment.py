@@ -168,7 +168,7 @@ def description_statements(text: str) -> list[str]:
         if not part:
             continue
         if statements and re.search(
-            r"\b(?:ref|no|e\.g|i\.e|etc|vs|fig|eq)\.$", statements[-1], re.I
+            r"\b(?:ref|no|e\.g|i\.e|etc|vs|fig|eq|inj|gr)\.$", statements[-1], re.I
         ):
             statements[-1] += " " + part
         else:
