@@ -43,6 +43,12 @@ imports:
 # ======================================================================
 
 enums:
+  PlantContextMatch:
+    description: Strength of a signal's join to privately curated source rows
+    permissible_values:
+      exact: {description: The source explicitly names the unchanged archive selector}
+      derived: {description: "Joined through the full control path, category and component number"}
+      absent: {description: No source row supports a link}
   ArchiveGroupingState:
     description: Structural group kind for a component variable, function variable or invalid selector
     permissible_values:
@@ -1711,6 +1717,123 @@ classes:
       description:
         description: What data this server hosts
 
+  PlantContextProvenance:
+    mixin: true
+    description: Facility ownership and stable private import cohort for plant context
+    attributes:
+      facility_id:
+        required: true
+        range: Facility
+        annotations: {relationship_type: AT_FACILITY}
+      context_scope:
+        required: true
+        description: Facility-qualified stable import cohort, independent of execution attempts
+
+  PlantStructure:
+    description: Official plant breakdown record read through the guarded records client
+    class_uri: facility:PlantStructure
+    mixins: [PlantContextProvenance]
+    attributes:
+      id: {identifier: true, required: true, description: Facility-qualified source identity}
+      source_uid: {required: true, description: Native source record identity}
+      code: {required: true, description: Official plant breakdown code}
+      description: {required: true, description: Official plant record title}
+      source_origin: {required: true, description: Private configured records origin}
+      source_endpoint: {required: true, description: Read endpoint establishing this record}
+      parent_structure:
+        range: PlantStructure
+        description: Parent established by the source record, not inferred from spelling
+        annotations: {relationship_type: PARENT_PLANT_STRUCTURE}
+
+  PlantFunctionCategory:
+    description: Official function-category code and meaning from the records client
+    class_uri: facility:PlantFunctionCategory
+    mixins: [PlantContextProvenance]
+    attributes:
+      id: {identifier: true, required: true, description: Facility-qualified source identity}
+      source_uid: {required: true, description: Native function-category record identity}
+      code: {required: true, description: Official function-category code}
+      description: {required: true, description: Official meaning of the category}
+      component_type: {description: Source component-type classification}
+      source_origin: {required: true, description: Private configured records origin}
+      source_endpoint: {required: true, description: Read endpoint establishing this record}
+
+  PlantContextDocument:
+    description: Versioned private source document and extracted text for a plant system
+    class_uri: facility:PlantContextDocument
+    mixins: [PlantContextProvenance]
+    attributes:
+      id: {identifier: true, required: true, description: Facility-qualified document identity and version}
+      source_uid: {required: true, description: Native document identity}
+      version: {required: true, description: Version reported by the document service}
+      description: {required: true, description: Private source document title}
+      role: {required: true, description: "Signal list, functional specification or supporting reference"}
+      sha256: {required: true, description: Digest of the complete cached document bytes}
+      text: {description: Text extracted with the project's existing document extraction}
+      system_code: {required: true, description: Full control-system prefix delimiting the curated context}
+      plant_structure:
+        range: PlantStructure
+        required: true
+        description: Official plant system this document provides context for
+        annotations: {relationship_type: CONTEXT_FOR_PLANT}
+
+  PlantSignalRow:
+    description: A nonempty spreadsheet data row with source coordinates and untouched text
+    class_uri: facility:PlantSignalRow
+    mixins: [PlantContextProvenance]
+    attributes:
+      id: {identifier: true, required: true, description: Document version plus sheet and row coordinate}
+      source_document:
+        range: PlantContextDocument
+        required: true
+        description: Versioned spreadsheet containing this row
+        annotations: {relationship_type: FROM_PLANT_DOCUMENT}
+      sheet: {required: true, description: Native worksheet name}
+      row_number: {required: true, range: integer, description: One-based workbook row number}
+      description: {required: true, description: Row formatted by the shared spreadsheet extractor}
+      cells_json: {required: true, description: Original nonempty cell values by column index as JSON}
+      control_path: {description: Source control path; never inferred from the selected pilot}
+      component_category: {description: Source component category code}
+      component_sequence: {description: "Source component sequence, before join normalization"}
+      field_code: {description: "Source field code, if present"}
+      source_selectors:
+        multivalued: true
+        description: Unchanged explicit selectors found in the source cells
+      plant_structure:
+        range: PlantStructure
+        description: Source plant reference verified against an official record
+        annotations: {relationship_type: ROW_PLANT_STRUCTURE}
+      function_category:
+        range: PlantFunctionCategory
+        description: Official meaning of the row's category code
+        annotations: {relationship_type: ROW_FUNCTION_CATEGORY}
+
+  SignalContextLink:
+    description: Auditable exact or component-derived association to one source row
+    class_uri: facility:SignalContextLink
+    mixins: [PlantContextProvenance]
+    attributes:
+      id: {identifier: true, required: true, description: Stable fingerprint of signal and source-row identities}
+      signal:
+        range: FacilitySignal
+        required: true
+        description: Existing catalogued archive signal; never created by the context importer
+        annotations: {relationship_type: CONTEXT_SIGNAL}
+      source_row:
+        range: PlantSignalRow
+        required: true
+        description: Specific source row supporting this association
+        annotations: {relationship_type: CONTEXT_SOURCE_ROW}
+      component:
+        range: PlantComponent
+        description: Existing parsed component supporting a derived join
+        annotations: {relationship_type: CONTEXT_COMPONENT}
+      match_kind:
+        range: PlantContextMatch
+        required: true
+        description: Exact selector occurrence or full component join
+      description: {required: true, description: Join mechanism and its limits}
+
   PlantComponent:
     description: >-
       Component identified by a control path plus category and sequence code.
@@ -1744,6 +1867,15 @@ classes:
         description: Component sequence digits, preserving leading zeroes
       parse_provenance:
         description: Parser rule provenance; does not assert engineering identity
+
+      function_category:
+        range: PlantFunctionCategory
+        description: Official category meaning established by imported source context
+        annotations: {relationship_type: COMPONENT_FUNCTION_CATEGORY}
+      plant_structure:
+        range: PlantStructure
+        description: Official plant mapping established by imported source rows
+        annotations: {relationship_type: COMPONENT_PLANT_STRUCTURE}
 
       archive_member_count:
         range: integer
@@ -2872,6 +3004,16 @@ classes:
       - DiscoveryProvenance
       - LLMOperation
     attributes:
+      plant_context_state:
+        range: PlantContextMatch
+        description: Strongest supported row join, or absent after a context import
+      plant_context_scope:
+        description: Private context cohort that last assessed this signal
+      plant_context_links:
+        range: SignalContextLink
+        multivalued: true
+        description: Evidence associations to versioned source rows
+        annotations: {relationship_type: HAS_PLANT_CONTEXT}
       id:
         identifier: true
         description: >-
