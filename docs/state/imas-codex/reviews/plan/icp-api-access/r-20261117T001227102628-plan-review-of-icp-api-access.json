@@ -1,0 +1,52 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-17T00:24:39.194Z",
+  "dispatched_at": "2026-11-17T00:24:04Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/icp-api-access.html:57",
+      "id": "done_when-1",
+      "reason": "making the judged set explicit (read production's description, enumerate the document and attachment GET routes, and decide both branches against that listed set) is what turns \u00a74's closure into a checkable measure instead of a search the node chooses the depth of.",
+      "text": "\u00a74 closes in one of two branches on whether a \"published GET operation on production\" returns a document's file, but the section never delivers the production description or names the candidate read routes, so branch 2 (\"no published GET operation returns a document's file\") is a universal negative supported only by \"each route tried with its outcome\"; against an API whose integration description already carries 815 operations and 471 GETs, a handful of ad-hoc tries can close the section as \"no route exists\" without the document-like GET routes ever being enumerated, which is exactly the answer the lead's next decision hangs on",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/icp-api-access.html:52",
+      "id": "reasoning-1",
+      "reason": "the quantity the section must deliver becomes the obtained one (observed permission denials) rather than a withheld count the instance never exposes, so a re-measurement cannot pass by reporting an unfalsifiable zero.",
+      "text": "\u00a73's done-when asks the run to report \"the number of records the account was not permitted to see\", but the cited receipt records \"0 observed HTTP 403 responses\" and states the API may silently omit nodes invisible to the account, so the demanded count is reported as 0 whether nothing is withheld or everything invisible was, and a zero there reads as complete visibility",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "56dde51e45b1b7bc71859084a8d47aeff49a44bd",
+  "plan_fingerprint": "8e6b0d24539e9ed8144f05bebe5b33b4976f4414ffd85fb22ea8aa9e04b2a1a1",
+  "plan_slug": "icp-api-access",
+  "plan_version": 18,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261117T001227102628-plan-review-of-icp-api-access",
+  "reviewed_blob_sha": "bed5d31e20f7a1fc9d70cbc4b9f788740fafc874",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/icp-api-access/icp-read-only-client.html#icp-read-only-client-evidence` and `docs/evidence/fragments/icp-api-access/icp-plant-structure-and-component-reads.html#icp-plant-structure-and-component-reads-evidence` both carry those ids, and the snapshot is byte-identical to `docs/plans/icp-api-access.html` at the review's plan_commit.",
+    "done_when": "a finding \u2014 \u00a74's done-when cannot decide its own branch because the set of \"published GET operations on production\" it judges against is never enumerated or delivered by the section (plan.html:57).",
+    "evidence_paths": "pass \u2014 both cited receipts live under `docs/evidence/fragments/icp-api-access/`, and the only material the plan requires elsewhere is fetched content, which \u00a71 and \u00a73 forbid inside the repository and place under the private cache.",
+    "naming": "pass \u2014 the plan body names no symbol, file or stage label, and the identifiers appearing in the cited receipts (`ICPClient`, `ICPRecords`, `RequestPacer`) are mechanism names, not tracker labels.",
+    "reasoning": "a finding \u2014 \u00a73's done-when asks for \"the number of records the account was not permitted to see\", a figure its own cited receipt states the instance never reveals (plan.html:52).",
+    "single_goal": "pass \u2014 each section names one capability (sign-in and description read under a read-only chokepoint; structure and component records; document file by identity and version), and \u00a74's two closure branches are one deliverable with a declared negative outcome rather than two goals.",
+    "wiring": "pass \u2014 s3 and s4 declare `icp-api-access#s2` in `data-links` and in `plan-section-depends-on`, `plan-blocks=\"iter-signal-context-and-enrichment\"` names a plan that exists, and the enrichment plan's s4 reciprocally depends on `icp-api-access#s3`/`#s4`, so neither direction is orphaned."
+  },
+  "section_digests": {
+    "_document": "86c1a8aea5604dc507982d9398768fdde8bb0fe0ee57036fe372995309e31878",
+    "s1": "781f1d067a92f6cdb5ed1061d6e781fec64562e8f6d9d158344f64bee1156b4c",
+    "s2": "a67c89d3d13fc2d150d8c305334b48a40a1479a2b166bd1daaa7eebac1a5fd56",
+    "s3": "66e329fb1086b96e19afdeacc4d5c59fb4e2b0161056d483336f969c8e6ea1ee",
+    "s4": "517f5b9b8d4c7593edf4b389f3a10ae9de3c675b3ec95310862fcf4cfae54b25"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-17T00:42:59.154175+00:00",
+  "total": null
+}
