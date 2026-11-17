@@ -72,6 +72,7 @@ def load(path=DATA):
 
 def save(record, path=DATA):
     raw = {k: v for k, v in record.items() if k not in ("members", "commands")}
+    raw["counts"] = counts(record)
     raw["payload_zlib_base85"] = base64.b85encode(
         zlib.compress(
             json.dumps(
@@ -316,20 +317,21 @@ def command(member, arguments):
 
 
 def counts(record):
+    def tally(rows):
+        outcomes = Counter(r["outcome"] for r in rows)
+        return {
+            "repaired": outcomes["accepted_repair"],
+            "refused": outcomes["refused"],
+            "left_for_lead": outcomes["lead"],
+            "pending": outcomes["pending"],
+        }
+
     by_class = {
-        c: dict(
-            Counter(
-                r["outcome"]
-                for r in record["members"]
-                if c in r["judgment"]["defect_classes"]
-            )
-        )
+        c: tally(r for r in record["members"] if c in r["judgment"]["defect_classes"])
         for c, _ in record["class_list"]
     }
     by_cause = {
-        c["cause"]: dict(
-            Counter(r["outcome"] for r in record["members"] if r["id"] in c["members"])
-        )
+        c["cause"]: tally(r for r in record["members"] if r["id"] in c["members"])
         for c in record["causes"]
     }
     return {
@@ -448,6 +450,9 @@ def check(path=DATA, *, checkpoint=False):
         )
         if r["outcome"] in ("lead", "refused"):
             assert r["lead_question"].strip(), (r["id"], "No precise lead question")
+            assert r.get("intended_proposal"), (r["id"], "No proposed correction")
+            assert r.get("source_words"), (r["id"], "No deciding source words")
+            assert r.get("parked_gate"), (r["id"], "No reason proposal cannot proceed")
     print(
         json.dumps(
             {
