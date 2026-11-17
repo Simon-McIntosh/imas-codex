@@ -51,9 +51,28 @@
       "note": "The bar is now fixed from the readings of the reader or readers the third-reader re-reading shows fit to decide, and those readers, not the first two, audit every group.",
       "reason": "",
       "when": "2026-11-17T09:02:09.676695+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "62d54dc328f9c9498f05a7ac8d67c2fbb604db59",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "A group's rate after repair is taken over every member: the second reading of each member that changed and the first reading of each that did not.",
+      "reason": "",
+      "when": "2026-11-17T09:03:13.191779+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "62d54dc328f9c9498f05a7ac8d67c2fbb604db59",
+      "commit_basis": "edit",
+      "note": "A group's rate after repair is taken over every member: the second reading of each member that changed and the first reading of each that did not.",
+      "reason": "",
+      "when": "2026-11-17T09:03:13.191779+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
