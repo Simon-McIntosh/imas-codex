@@ -1,26 +1,33 @@
 <section id="sph-retire-name-with-recycled-source">
 <h2>Retiring a name in the step that returns its source to the pool — blocked on write scope</h2>
 
-<p><strong>Outcome: blocked.</strong> The step is identified and both halves of its
-defect are reproduced on a disposable graph, but the step lives in
+<p><strong>Outcome: blocked on write scope.</strong> The step is identified, both
+halves of its defect are reproduced on a disposable graph, and a patch that
+fixes it is implemented and measured in a scratch tree — but the step lives in
 <code>imas_codex/standard_names/graph_store/graph_audits.py</code>, which is not
 among this node's declared write paths (the declaration names
-<code>imas_codex/standard_names/graph_ops.py</code>, the graph store's façade).
-The step is <code>reconcile_source_status_liveness</code> — the pass
+<code>imas_codex/standard_names/graph_ops.py</code>, the graph store's façade,
+and <code>graph_ops.py</code> holds no step). The scratch patch and its logs are
+in the run directory; nothing of the product change is committed.</p>
+
+<h3 id="sph-retire-name-with-recycled-source-step">The step</h3>
+
+<p><code>reconcile_source_status_liveness</code> — the pass
 <code>run_sn_pools</code> logs as <q>source-status reconcile — N aligned to a live
-target, M returned to extracted</q> and the one <code>sn sourceless</code>'s
-population follows: its orphan branch treats <code>superseded</code>,
-<code>exhausted</code> and <code>contested</code> targets as terminal, deletes
-each bound source's <code>PRODUCED_NAME</code> edge, clears the source's
-<code>produced_sn_id</code>/<code>composed_at</code>/attempt budget and drops the
-source id from the name's <code>source_paths</code> cache — while leaving the
-name itself in the graph, live, with no producer.</p>
+target, M returned to extracted</q>. Its orphan branch treats
+<code>superseded</code>, <code>exhausted</code> and <code>contested</code>
+targets as terminal, deletes each bound source's <code>PRODUCED_NAME</code>
+edge, clears the source's <code>produced_sn_id</code>/<code>composed_at</code>/
+attempt budget and drops the source id from the name's
+<code>source_paths</code> cache — while leaving the name itself in the graph,
+live, with no producer. No <code>StandardNameChange</code> row is written, which
+is why the 24 sources the 2026-11-17 maintenance pass returned cannot be
+attributed back to their names from the graph.</p>
 
 <h3 id="sph-retire-name-with-recycled-source-reproduction">The defect reproduces in both directions</h3>
 
-<p>Two planted cases on a disposable Neo4j, run at revision
-<code>81026a662b6c</code> (log: <code>negative_control_head_reproduction.log</code>,
-<code>EXIT=1</code>):</p>
+<p>Two planted cases on a disposable Neo4j at revision <code>81026a662b6c</code>
+(log <code>negative_control_head_reproduction.log</code>, <code>EXIT=1</code>):</p>
 
 <table>
 <tr><th>plant</th><th>the step's result at head</th><th>required by the ruling</th></tr>
@@ -30,52 +37,81 @@ name itself in the graph, live, with no producer.</p>
 <td><code>orphaned_reset=1</code>; source <code>extracted</code>; edge deleted;
 name still present at <code>exhausted</code>; the enumeration now lists it with no
 producer (<code>SOURCELESS ['probe_recycled_exhausted']</code>)</td>
-<td>the exhausted name is retired in the same step, so the step leaves no live
-name without a source</td>
+<td>the exhausted name is retired in the same step, so the population does not
+grow</td>
 </tr>
 <tr>
 <td><code>StandardName{name_stage:'contested'}</code> + a bound composed
 source</td>
-<td>source <code>extracted</code> — the source of a name that is not exhausted
-was taken</td>
-<td>the source stays bound; only an exhausted name's source is recycled</td>
+<td>source <code>extracted</code> — the source of a live, non-exhausted name was
+taken</td>
+<td>the source stays bound; only an exhausted dead end's source is recycled</td>
 </tr>
 </table>
 
-<p>The step writes no <code>StandardNameChange</code> row, so the recycling is not
-recorded against the name it empties. That is why the 24 sources the 2026-11-17
-maintenance pass returned cannot be attributed back to their names from the
-graph.</p>
+<h3 id="sph-retire-name-with-recycled-source-change">The patch, measured in a scratch tree</h3>
+
+<p>Patch <code>graph_audits-retire-recycled-source.patch</code> (in the run
+directory) changes the orphan branch in three ways: a source whose targets
+include a <code>contested</code> name is no longer taken at all; the query
+returns the ids of the names it emptied; and each emptied target that is
+<code>exhausted</code>, non-derived and carries no catalog approval is retired in
+the same pass — <code>name_stage='superseded'</code>,
+<code>status='superseded'</code>, claims cleared — through
+<code>provenance_lifecycle.record_standard_name_change</code> with
+<code>operation='retire_recycled_source_name'</code>. Superseded history still
+releases its source as before. The patch also adds
+<code>names_retired</code> to the pass's result and log line, which required the
+two expectations in
+<code>tests/standard_names/test_pipeline_recovery_mechanics.py</code> to carry
+the new key (<code>tests-result-key-update.patch</code>).</p>
+
+<table>
+<tr><th>arm</th><th>command</th><th>result</th></tr>
+<tr><td>patch, three planted cases</td>
+<td><code>pytest tests/standard_names/test_recycled_source_retires_name.py -m graph</code>
+in the scratch tree</td><td>3 passed</td></tr>
+<tr><td>negative control: retirement disabled in the same tree</td>
+<td>same command</td>
+<td><code>1 failed, 2 passed</code>, failing id
+<code>test_exhausted_name_is_retired_when_its_source_is_recycled</code>
+(<code>EXIT=1</code>)</td></tr>
+</table>
 
 <h3 id="sph-retire-name-with-recycled-source-population">The population the step has already left without a source</h3>
 
-<p><code>imas-codex sn sourceless --json</code> at 2026-11-17 reads
-<strong>23</strong> live names with no producer, against the 10 recorded in
+<p><code>imas-codex sn sourceless --json</code> on 2026-11-17 reads
+<strong>23</strong> live names with no producer against the 10 recorded in
 <code>docs/evidence/fragments/sn-catalog-consistency/scc-live-names-without-a-source.json</code>.
-The 13 names that appeared since (all <code>exhausted</code>, none accepted, none
-a derived parent) are listed with their stage and origin in
-<code>recycled-source-names.json</code>. Their former sources are not
-recoverable from the graph: the step deleted the edge, cleared the source's
-mirror and erased the source id from the name's <code>source_paths</code>, and a
-query over <code>StandardNameChange</code> for those 13 names returns no
-2026-11-17 event. The JSON records that as the reason rather than naming a source
-it cannot name.</p>
+The 13 that appeared since are all <code>exhausted</code>, none accepted, none a
+derived parent; each is listed in <code>recycled-source-names.json</code> with
+its stage, origin, the candidate former source ids the source audit can still
+recover, and each candidate's present status.</p>
 
-<h3 id="sph-retire-name-with-recycled-source-change">The change the step needs</h3>
+<p>Two facts about that backlog decide how it can be closed:</p>
 
-<p>In the orphan branch of <code>reconcile_source_status_liveness</code>, partition
-the terminal targets of each orphan source: when every target is an
-<code>exhausted</code> non-derived name, retire those names and release the
-source in the same transaction (recording one change row per retired name);
-when any target is a live non-exhausted name (<code>contested</code>, or a name
-still carrying an open hint), leave the source bound and the edge intact. The
-retirement mechanism is a decision the plan does not settle — deleting the node
-through <code>provenance_lifecycle.retire_unrecoverable_provenance_orphans</code>,
-or flipping <code>name_stage='superseded'</code> with a ledger row — and both
-also live outside the declared write paths.</p>
+<ul>
+<li>The repo's own source audit classifies all 13 as population
+<code>dropped_edge</code>, not <code>orphan_awaiting_retirement</code>, because
+the step erased the provenance the classification reads. A read-only preview of
+<code>supersede_exhausted_standard_name_orphans</code> over the 13 refuses every
+one of them (<code>requested 13, admitted 0, refused 13</code>, manifest
+<code>a0a12e70…</code>): the signed retirement path cannot retire the population
+this step creates. That is a second reason the retirement has to happen in the
+step itself.</li>
+<li>Eleven of the 13 still have candidate former source ids whose nodes are now
+<code>extracted</code> with <code>attempt_count 0</code> and no produced
+mirror; one name carries six candidate paths, four of which still produce other
+live names and are aliases rather than former producers; two names carry no
+candidate at all. The retired-source status is recorded per name in the JSON
+rather than summarised here.</li>
+</ul>
 
-<p>The 13 backlog names are not retired here. Retiring them is a live-graph write
-of its own, made under a single-writer window and through the same write path the
-fix installs; doing it ahead of the fix would retire 13 names with no code able
-to do it again.</p>
+<p>The 13 are not retired here. Retiring them is a live-graph write; the signed
+path refuses them, the deletion path
+(<code>provenance_lifecycle.retire_unrecoverable_provenance_orphans</code>) would
+remove 13 names with no code able to reuse the rule, and the choice between
+superseding and deleting this cohort is a decision the plan does not settle.
+With the patch applied the step retires future cases; this cohort needs one
+signed action by the lead, listed by name in the JSON.</p>
 </section>

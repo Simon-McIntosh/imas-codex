@@ -50,7 +50,9 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": []
     },
     {
       "id": "electron_temperature_at_plasma_boundary",
@@ -66,7 +68,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:summary/pedestal_fits/linear/pressure_electron/d_dpsi_norm_max/value",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "implicit_ion_particle_source_rate",
@@ -74,7 +86,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:core_sources/source/profiles_1d/ion/particles_decomposed/implicit_part",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "implicit_ion_state_particle_source_rate",
@@ -82,7 +104,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:core_sources/source/profiles_1d/ion/state/particles_decomposed/implicit_part",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "incident_energy_flux_at_wall",
@@ -90,7 +122,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:wall/description_ggd/ggd/power_density/values",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "line_averaged_neon_density",
@@ -106,7 +148,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:summary/pedestal_fits/mtanh/pressure_electron/d_dpsi_norm_max/value",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "molecular_fraction",
@@ -114,7 +166,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:pulse_schedule/nbi/unit/species/fraction",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "momentum_coefficient_due_to_diamagnetic_drift",
@@ -122,7 +184,52 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:edge_transport/model/ggd/ion/state/momentum/flux_limiter/diamagnetic",
+          "status": "attached",
+          "attempts": 1,
+          "mirror": "ion_state_diamagnetic_momentum_flux_limiter_coefficient",
+          "last_error": null
+        },
+        {
+          "id": "dd:edge_transport/model/ggd/momentum/flux_limiter/diamagnetic",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        },
+        {
+          "id": "dd:edge_transport/model/ggd/neutral/state/momentum/flux_limiter/diamagnetic",
+          "status": "composed",
+          "attempts": 2,
+          "mirror": "neutral_state_diamagnetic_momentum_flux_limiter_coefficient",
+          "last_error": null
+        },
+        {
+          "id": "dd:plasma_transport/model/ggd/ion/state/momentum/flux_limiter/diamagnetic",
+          "status": "composed",
+          "attempts": 3,
+          "mirror": "ion_state_diamagnetic_momentum_flux_limiter_coefficient",
+          "last_error": null
+        },
+        {
+          "id": "dd:plasma_transport/model/ggd/neutral/state/momentum/flux_limiter/diamagnetic",
+          "status": "attached",
+          "attempts": 2,
+          "mirror": "neutral_state_diamagnetic_momentum_flux_limiter_coefficient",
+          "last_error": null
+        },
+        {
+          "id": "dd:plasma_transport/model/profiles_1d/neutral/state/momentum/flux_limiter/diamagnetic",
+          "status": "attached",
+          "attempts": 2,
+          "mirror": "neutral_state_diamagnetic_momentum_flux_limiter_coefficient",
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "neutral_species_fraction",
@@ -130,7 +237,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:pulse_schedule/density_control/valve/species/fraction",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "nuclear_source_rate_due_to_beam_beam_fusion",
@@ -138,7 +255,9 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": []
     },
     {
       "id": "plasma_velocity_due_to_diamagnetic_drift",
@@ -146,7 +265,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:edge_transport/model/ggd/momentum/v/diamagnetic",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "poloidal_straight_field_line_angle",
@@ -154,7 +283,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:waves/coherent_wave/profiles_2d/grid/theta_straight",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "poloidal_total_momentum_convection_velocity",
@@ -186,7 +325,17 @@
       "name_stage": "exhausted",
       "derived_parent": false,
       "live_children": 0,
-      "baseline_2026_11_15": false
+      "baseline_2026_11_15": false,
+      "population": "dropped_edge",
+      "former_source_candidates": [
+        {
+          "id": "dd:balance_of_plant/power_plant/power_electric_generated",
+          "status": "extracted",
+          "attempts": 0,
+          "mirror": null,
+          "last_error": null
+        }
+      ]
     },
     {
       "id": "voltage_of_diagnostic_antenna",
@@ -206,9 +355,20 @@
     }
   ],
   "former_source_of_new_names": {
-    "result": "unrecoverable_from_the_graph",
-    "mechanism": "the recycling step deletes the PRODUCED_NAME edge, clears produced_sn_id/composed_at on the source and removes the source id from the name's source_paths cache, and records no StandardNameChange row for the pass; a query over StandardNameChange for the 13 names returns no 2026-11-17 event and over StandardNameSource returns no mirror or edge",
-    "present_status_of_former_source": "unknown; the source nodes are not identifiable from the name after the step"
+    "result": "recoverable_only_as_candidate_paths",
+    "mechanism": "the recycling step deletes the PRODUCED_NAME edge, clears produced_sn_id/composed_at on the source and drops the source id from the name's source_paths cache, and writes no StandardNameChange row; what remains is the source audit's own token set (recorded paths, projections, detachment receipts), which recovers candidate source ids for 11 of the 13 names",
+    "classification_after_the_step": "the repo's own source audit classifies all 13 as population 'dropped_edge', not 'orphan_awaiting_retirement', because the step erased the very provenance that classification reads; the signed exhausted-orphan retirement path therefore refuses all 13",
+    "signed_retirement_preview": {
+      "command": "supersede_exhausted_standard_name_orphans(<13 ids>, apply=False)",
+      "outcome": "refused",
+      "counts": {
+        "requested": 13,
+        "admitted": 0,
+        "refused": 13
+      },
+      "manifest_sha256": "a0a12e70ba14fb36feaeb707357f7128f0cff0df49857bca2971a301be4a8374"
+    },
+    "former_sources_present_status": "11 of the 13 have candidate ids that are now status 'extracted' with attempt_count 0 and no produced mirror; one name (momentum_coefficient_due_to_diamagnetic_drift) carries six candidate paths, four of which still produce other live names and are aliases rather than former producers; two names (diamagnetic_momentum_coefficient, nuclear_source_rate_due_to_beam_beam_fusion) carry no candidate at all"
   },
   "stage_counts": {
     "accepted": 3,
