@@ -1318,8 +1318,6 @@ def render_figure(document: dict[str, Any]) -> None:
         axes.set_title(
             "Share right on the held-out half, with a 95 % interval", loc="left"
         )
-        axes.grid(axis="x", color="#eeeeee", linewidth=0.8)
-        axes.set_axisbelow(True)
         for side in ("top", "right"):
             axes.spines[side].set_visible(False)
         figure.tight_layout()
@@ -1327,7 +1325,7 @@ def render_figure(document: dict[str, Any]) -> None:
         figure.savefig(
             FIGURE, format="svg", bbox_inches="tight", metadata={"Date": None}
         )
-        figure.clear()
+        plt.close(figure)
 
 
 # --------------------------------------------------------------------------- #

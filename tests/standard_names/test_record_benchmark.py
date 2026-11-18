@@ -8,6 +8,9 @@ checks that refuse a benchmark in which the controls did not move.
 
 from __future__ import annotations
 
+import importlib.util
+from pathlib import Path
+
 import pytest
 
 from imas_codex.standard_names.advisory_benchmark import summarize_costs
@@ -340,3 +343,59 @@ def test_cost_summary_validates_both_sides_of_the_spend() -> None:
     summary = summarize_costs(20.0, 3.0, 25.0)
     assert summary.total_cost == pytest.approx(23.0)
     assert summary.within_authorized_ceiling is True
+
+
+RUNNER = (
+    Path(__file__).resolve().parents[2]
+    / "docs/evidence/fragments/sn-case-file-generation/benchmark.py"
+)
+
+
+@pytest.fixture(scope="module")
+def figure_runner():
+    spec = importlib.util.spec_from_file_location("scfg_benchmark_runner", RUNNER)
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_figure_text_is_paths_and_no_figure_leaks(
+    figure_runner, tmp_path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """No <text> element may reach the SVG, and no figure may stay managed.
+
+    The published figure lost its labels under a renderer that could not
+    resolve the declared font, so the text must be glyph paths. A figure that
+    is cleared rather than closed stays registered in pyplot and accumulates
+    in a long-lived process.
+    """
+    import matplotlib.pyplot as plt
+
+    plt.close("all")
+    document = {
+        "final": {
+            "arms": [
+                {"arm": "incumbent", "share_right": 0.678, "interval": [0.574, 0.767]},
+                {
+                    "arm": "one-pass/frontier",
+                    "share_right": 0.322,
+                    "interval": [0.233, 0.426],
+                },
+            ]
+        }
+    }
+    target = tmp_path / "heldout-arm-right.svg"
+    monkeypatch.setattr(figure_runner, "FIGURE", target)
+
+    figure_runner.render_figure(document)
+
+    svg = target.read_text(encoding="utf-8")
+    assert "<text" not in svg
+    assert "font-family" not in svg
+    assert "<path" in svg
+    assert "#eeeeee" not in svg
+    assert plt.get_fignums() == []
+
+    figure_runner.render_figure(document)
+    assert plt.get_fignums() == []
