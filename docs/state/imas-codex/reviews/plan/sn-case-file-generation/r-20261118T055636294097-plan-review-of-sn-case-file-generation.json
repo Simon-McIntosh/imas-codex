@@ -49,7 +49,30 @@
   "plan_slug": "sn-case-file-generation",
   "plan_version": 4,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 2 now produces case files for the equilibrium members and the 84 hand-checked names, the populations the reference set is drawn from, so it needs nothing from section 1.",
+      "reason": "",
+      "when": "2026-11-18T06:46:48.254606+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+      "commit_basis": "edit",
+      "note": "Section 2 now produces case files for the equilibrium members and the 84 hand-checked names, the populations the reference set is drawn from, so it needs nothing from section 1.",
+      "reason": "",
+      "when": "2026-11-18T06:46:48.254606+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-case-file-generation/r-20261118T055636294097-plan-review-of-sn-case-file-generation.json",
   "review_run_id": "r-20261118T055636294097-plan-review-of-sn-case-file-generation",
   "reviewed_blob_sha": "ed3019db63e743c19eccdd880c7be193f7343b7b",
   "rubric": "content",
