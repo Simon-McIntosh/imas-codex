@@ -38,7 +38,7 @@ from datetime import UTC, datetime
 from html import escape
 from pathlib import Path
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 ROOT = Path(__file__).resolve().parent
 REPO = ROOT.parents[3]
@@ -78,6 +78,15 @@ Two consequences decide every judgment:
 """
 
 VERDICTS = ("sound", "naming_defect", "definition_defect", "undecidable")
+ALIASES = {
+    "verdict": ("judgement", "judgment", "decision"),
+    "right_names": ("names", "right_name", "proposed_names"),
+    "definition_points": ("points", "must_state"),
+    "evidence_quote": ("quote", "evidence"),
+    "evidence_path": ("path", "source_path"),
+    "reason": ("rationale", "reasoning", "why"),
+    "rule_clause": ("clause", "rule"),
+}
 DEFECTIVE = ("naming_defect", "definition_defect")
 CLAUSES = ("name-identifies", "definition-specifies", "both-agree", "not-decidable")
 
@@ -102,13 +111,25 @@ Decide exactly one verdict:
   contradicts a point the source states — a normalisation, a weight, an average,
   a convention, a coordinate basis, a method or a unit. State the points it must
   carry.
-- `undecidable`: the packet does not carry the text needed to decide, for
-  example no source text at all, or source text that does not describe the
-  quantity. Do not guess.
+- `undecidable`: the packet carries no text that describes this quantity at
+  all. Do not guess, and do not return this when a stored definition is present.
 
-Quote the deciding wording verbatim from the packet in `evidence_quote`, and name
-where it sits in `evidence_path`. Never quote a sentence the packet does not
-contain; a quote that cannot be found in the packet is rejected.
+A packet whose Data Dictionary section says `(none recorded)` still carries the
+stored name, description, documentation and unit: judge the name against the
+stored definition as the record's only statement of the quantity, and quote that
+definition in `evidence_quote` with `evidence_path: stored description`.
+
+Every decided verdict must fill all four fields:
+- `right_names` is never empty: the incumbent name when it is right, the
+  corrected spelling otherwise (one name, or a set when more than one is right).
+- `definition_points` is never empty: what the definition must state. For a
+  sound member list the points it already states.
+- `evidence_quote` is copied verbatim from the packet, long enough to identify
+  one sentence of it, and `evidence_path` says where that sentence sits.
+- `reason` is one or two sentences joining the quote to the verdict.
+
+Never quote a sentence the packet does not contain; a quote that cannot be found
+in the packet is rejected and the answer is asked again.
 """
 
 
@@ -143,20 +164,81 @@ class Judgment(BaseModel):
         description="The deciding wording, quoted verbatim from the packet."
     )
     evidence_path: str = Field(
+        default="",
         description=(
             "Where the quote sits: a Data Dictionary path, an enclosing "
             "structure path, or `stored description`."
-        )
+        ),
     )
     reason: str = Field(
-        description="One or two sentences joining the quote to the verdict."
+        default="",
+        description="One or two sentences joining the quote to the verdict.",
     )
     rule_clause: str = Field(
+        default="",
         description=(
             "Which half of the rule decides the verdict: `name-identifies`, "
             "`definition-specifies`, `both-agree` or `not-decidable`."
-        )
-    )# --------------------------------------------------------------------------- #
+        ),
+    )
+
+    @model_validator(mode="before")
+    @classmethod
+    def fold_alternate_names(cls, data):
+        """Accept the alternate key names a free-form model drifts into."""
+        if not isinstance(data, dict):
+            return data
+        data = dict(data)
+        for target, aliases in ALIASES.items():
+            if data.get(target) in (None, "", []):
+                for alias in aliases:
+                    if data.get(alias) not in (None, "", []):
+                        data[target] = data[alias]
+                        break
+        for key in ("right_names", "definition_points"):
+            if isinstance(data.get(key), str):
+                data[key] = [data[key]]
+        return data
+
+
+class Specification(BaseModel):
+    """The right answer's name or names and definition points."""
+
+    right_names: list[str] = Field(
+        default_factory=list,
+        description=(
+            "The name or set of names that identify this quantity. Never empty."
+        ),
+    )
+    definition_points: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Every point the definition must state, one short sentence each. "
+            "Never empty."
+        ),
+    )
+
+
+SPECIFICATION_PROMPT = """\
+You write the specification half of a standard-name judgment already made. The
+verdict is given; do not change it.
+
+Return two things and nothing else:
+- `right_names`: the name, or the set of names, that identify this quantity. For
+  a sound or definition_defect verdict that is the incumbent name; for a
+  naming_defect verdict it is the corrected spelling, using standard grammar
+  words for the physical object, the locus and the relation.
+- `definition_points`: every point the definition must state. Start with what
+  the quantity is, then each normalisation, weighting, average or integration,
+  coordinate frame, convention, method and unit the source states. One short
+  sentence per point, three to eight points.
+
+Neither list may be empty. A point restates what the source states; do not add
+requirements the packet does not support.
+"""
+
+
+# --------------------------------------------------------------------------- #
 # Small helpers
 # --------------------------------------------------------------------------- #
 
@@ -429,6 +511,8 @@ def normalise(member: dict, raw: dict) -> dict:
     else:
         names = [incumbent]
     if verdict != "undecidable":
+        if not reason:
+            raise ValueError("no reason given")
         if not points:
             raise ValueError("no definition points")
         if len(quote) < 8:
@@ -463,16 +547,49 @@ async def judge_once(member: dict) -> dict:
         max_tokens=MAX_TOKENS,
         timeout=TIMEOUT_S,
         max_retries=1,
+        reasoning_effort="medium",
+        local_schema_constraint=True,
+    )
+    return result.parsed.model_dump()
+
+
+
+async def fill_once(member: dict, decided: dict) -> dict:
+    """Ask for the name and the definition points a judgment left empty."""
+    from imas_codex.discovery.base.llm import acall_llm_structured
+
+    user = (
+        member["text"]
+        + "\n\nVerdict already decided: "
+        + str(decided.get("verdict"))
+        + "\nDeciding reason: "
+        + str(decided.get("reason") or "")
+    )
+    result = await acall_llm_structured(
+        model=MODEL,
+        messages=[
+            {"role": "system", "content": SPECIFICATION_PROMPT},
+            {"role": "user", "content": user},
+        ],
+        response_model=Specification,
+        service=SERVICE,
+        max_tokens=MAX_TOKENS,
+        timeout=TIMEOUT_S,
+        max_retries=1,
+        reasoning_effort="medium",
+        local_schema_constraint=True,
     )
     return result.parsed.model_dump()
 
 
 async def judge_one(member: dict, semaphore, lock) -> dict:
     """Retry a blind judgment while it cannot stand, then record it once."""
+    RUN.mkdir(parents=True, exist_ok=True)
     assert_blind(member)
     started = time.time()
     problem = ""
     record = None
+    raw = None
     for _attempt in range(1, MAX_ATTEMPTS + 1):
         async with semaphore:
             try:
@@ -481,6 +598,24 @@ async def judge_one(member: dict, semaphore, lock) -> dict:
                 break
             except ValueError as exc:
                 problem = str(exc)
+                if raw is not None and raw.get("verdict") in (
+                    "sound",
+                    "naming_defect",
+                    "definition_defect",
+                ) and ("right name" in problem or "definition points" in problem):
+                    try:
+                        extra = await fill_once(member, raw)
+                        merged = dict(raw)
+                        merged["right_names"] = (
+                            raw.get("right_names") or extra.get("right_names")
+                        )
+                        merged["definition_points"] = (
+                            raw.get("definition_points") or extra.get("definition_points")
+                        )
+                        record = normalise(member, merged)
+                        break
+                    except Exception as fill_error:
+                        problem = f"{problem}; fill: {fill_error}"[:400]
             except Exception as exc:
                 problem = f"{type(exc).__name__}: {exc}"[:400]
     if record is None:
