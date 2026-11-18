@@ -14,9 +14,9 @@
 <meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-after" content="sn-audited-group-release">
-<meta name="plan-version" content="11">
+<meta name="plan-version" content="12">
 <meta name="plan-modified" content="2026-11-18">
-<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;implementable&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
+<meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;sn-case-file-generation#s1&quot;,&quot;sn-case-file-generation#s2&quot;],&quot;s4&quot;:[&quot;sn-case-file-generation#s3&quot;],&quot;s5&quot;:[&quot;sn-case-file-generation#s4&quot;],&quot;s6&quot;:[&quot;sn-case-file-generation#s3&quot;,&quot;sn-case-file-generation#s4&quot;,&quot;sn-case-file-generation#s5&quot;,&quot;sn-audited-group-release#s3&quot;]}">
 <meta name="plan-effort-hours" content="53.0">
 </head>
@@ -25,7 +25,7 @@
 
 
 <h2 id="s1">A reference set says what a right answer is</h2>
-<section data-reckon="section" data-id="s1" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="implementable" data-links=""></section>
+<section data-reckon="section" data-id="s1" data-effort-hours="5.0" data-capability-version="1.0" data-capability-class="general" data-capability-reasoning="deep" data-capability-verification="strict" data-capability-risk="low" data-status="done" data-links=""></section>
 <p>The blind adjudication of equilibrium judged 208 names from their full source packets: 82 sound, 93 defective, 33 it could not decide. The agent repair that followed got 17 names accepted and listed 109 with the reason each could not be repaired. Both were judged before the lead ruled, on 2026-11-18, that a name identifies and its definition specifies: a name carries what separates the quantity from its neighbours, and normalisations, weightings, conventions and methods belong to the definition. A benchmark needs an answer key read under that rule, and nothing in the catalog is one yet.</p><p><strong>Done when:</strong> a reference set is committed holding, for each member, its source packet, the right name or the set of names that would be right, the points its definition must state, its unit and its group, and the verdict's reason quoting the source; it is built from the 82 members judged sound, the 17 accepted repairs and the 84 names hand-checked for the reader calibration (44 judged defective, 40 sound), every one re-read under the identity rule by an adjudicator that sees the earlier verdict only after committing its own, with the members whose verdict changes listed beside the rule that changed it; the 52 equilibrium members earlier classed as omitting what their source states are each re-classed as a naming defect, a definition defect or sound, with counts; members that cannot be decided are kept out of the set and counted; at least 100 members are in the set, and at least 20 of them are defective under the rule so a generator that copies the incumbent scores below one that repairs it; a check fails when a reference member's packet digest no longer matches the stored one. No stored text or graph property changes. The evidence is committed under <code>docs/evidence/fragments/sn-case-file-generation/</code>.</p>
 
 <h2 id="s2">Every name has a case file built by code</h2>
@@ -53,7 +53,7 @@
     <div class="r-comment-body"><p>Reviewed scfg-reference-set (base e2ea2a6217fc5c91071fdac0a28764636f66696d, head 5b3bc322e54417539711cd6c2f316101258a33e4) on all six checklist items and six dimensions; scores goal_fidelity 18, evidence 15, scope_discipline 17, durability 13, fit 15, reuse 16; six findings, one blocking (duplicate element ids shared by reference-set.html and scfg-reference-set.html, refused by reckon/crew/check 18 times) and five non-blocking.</p></div>
 </div>
 <div class="r-comment" data-section="s2" data-id="c-run-r-20261118T064806928346-scfg-case-file" data-who="reckon-build" data-when="2026-11-18T06:56:09.169Z">
-    <div class="r-comment-body"><p>Committed on the worktree&#x27;s detached head 688408ac12dcef1b12397c99aa46598b51a56d84 in five commits over base 6e12ff2bcf548d3c16736d65dacb9b3a12ae0ce8; the working tree is clean and the head is left for the coordinator to merge, because a worker here does not move the shared main branch.</p></div>
+    <div class="r-comment-body"><p>Committed on the worktree's detached head 688408ac12dcef1b12397c99aa46598b51a56d84 in five commits over base 6e12ff2bcf548d3c16736d65dacb9b3a12ae0ce8; the working tree is clean and the head is left for the coordinator to merge, because a worker here does not move the shared main branch.</p></div>
 </div>
 </section>
 </main>
