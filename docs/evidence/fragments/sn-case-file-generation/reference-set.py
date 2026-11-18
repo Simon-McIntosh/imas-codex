@@ -327,15 +327,54 @@ def source_records() -> dict:
     }
 
 
-HEADERS = (
-    ("name", "Standard name: "),
-    ("description", "Definition (stored description): "),
-    ("documentation", "Documentation (stored): "),
-    ("unit", "Stored unit: "),
-    ("physics_domain", "Assigned physics domain: "),
-)
+HEADER_KEYS = ("name", "description", "documentation", "unit", "physics_domain")
+HEADER_PROBE = {
+    "id": "@@name@@",
+    "description": "@@description@@",
+    "documentation": "@@documentation@@",
+    "unit": "@@unit@@",
+    "physics_domain": "@@physics_domain@@",
+}
 BODY_MARK = "Data Dictionary source text:"
 INSTRUCTION = "Return every fixed defect class that applies"
+AUDIT = None
+
+
+def audit():
+    """The packet builder that owns the header layout, loaded once."""
+    global AUDIT
+    if AUDIT is None:
+        AUDIT = load_module("blind-audit")
+    return AUDIT
+
+
+def header_layout() -> list[str]:
+    """The header's five lines, asked of the builder that owns their layout."""
+    return audit().render_user_prompt(HEADER_PROBE).split("\n")[:5]
+
+
+def header_prefixes() -> list[tuple[str, str]]:
+    """Each header key with the literal text that precedes its value."""
+    layout = header_layout()
+    return [
+        (key, layout[index].split("@@" + key + "@@")[0])
+        for index, key in enumerate(HEADER_KEYS)
+    ]
+
+
+def header_lines(record: dict) -> list[str]:
+    """The five header lines with this record's own stored text in them."""
+    values = {
+        "name": record.get("name", ""),
+        "description": record.get("description", ""),
+        "documentation": record.get("documentation") or "(none recorded)",
+        "unit": record.get("unit") or "(none recorded)",
+        "physics_domain": record.get("physics_domain") or "(none recorded)",
+    }
+    return [
+        line.replace("@@" + key + "@@", values[key])
+        for line, key in zip(header_layout(), HEADER_KEYS, strict=True)
+    ]
 
 
 def split_packet(text: str) -> tuple[dict, str]:
@@ -343,11 +382,12 @@ def split_packet(text: str) -> tuple[dict, str]:
     record: dict[str, str] = {}
     lines = text.split("\n")
     body_start = len(lines)
+    prefixes = header_prefixes()
     for index, line in enumerate(lines):
         if line.startswith(BODY_MARK):
             body_start = index
             break
-        for key, prefix in HEADERS:
+        for key, prefix in prefixes:
             if line.startswith(prefix):
                 record[key] = line[len(prefix) :].strip()
                 break
@@ -359,16 +399,7 @@ def split_packet(text: str) -> tuple[dict, str]:
 
 def render_packet(record: dict, body: str) -> str:
     """The exact text a blind reader sees, and the text the digest covers."""
-    lines = [
-        f"Standard name: {record.get('name', '')}",
-        f"Definition (stored description): {record.get('description', '')}",
-        "Documentation (stored): " + (record.get("documentation") or "(none recorded)"),
-        f"Stored unit: {record.get('unit') or '(none recorded)'}",
-        f"Assigned physics domain: {record.get('physics_domain') or '(none recorded)'}",
-        "",
-        body,
-    ]
-    return "\n".join(lines).strip("\n") + "\n"
+    return "\n".join(header_lines(record) + ["", body]).strip("\n") + "\n"
 
 
 NAME_WORD = re.compile(r"^[a-z][a-z0-9_]{2,119}$")
@@ -799,6 +830,8 @@ def reclassify(comparison: dict) -> dict:
             for row in rows
         ],
     }
+
+
 def encode_payload(payload) -> str:
     raw = json.dumps(payload, ensure_ascii=False, separators=(",", ":")).encode()
     return base64.b85encode(zlib.compress(raw, level=9)).decode()
@@ -928,6 +961,8 @@ def build(sealed: dict, members: list[dict]) -> dict:
     data["members"] = sorted(rows, key=lambda row: (row["verdict"], row["id"]))
     data["packets"] = packets
     return data
+
+
 def save(data: dict, path=DATA) -> None:
     """Write the record.
 
@@ -1022,6 +1057,8 @@ def check(path=DATA) -> int:
         f"{defective} defective, {data['population']['undecidable']} undecidable"
     )
     return 0
+
+
 def table(headers: list[str], rows: list[list[str]], ident: str) -> str:
     head = "".join(f"<th>{escape(str(h))}</th>" for h in headers)
     body = "".join(
@@ -1242,21 +1279,45 @@ def document(title: str, body: str) -> str:
 
 
 def write_pages(data: dict) -> None:
-    prefix = "scfg-reference-set"
-    head = page(data, "The reference set of right answers", prefix)
-    body = head + "\n" + more(data, prefix) + "\n" + excluded(data, prefix)
-    body += "\n" + check_receipt(data, prefix) + "\n" + members_table(data, prefix)
-    PAGE.write_text(document("The reference set of right answers", body))
-    summary = (
-        head
-        + "\n"
-        + more(data, prefix)
-        + "\n"
-        + excluded(data, prefix)
-        + "\n"
-        + check_receipt(data, prefix)
-    )
+    node = "scfg-reference-set"
+    full = page(data, "The reference set of right answers", node) + "\n"
+    full += more(data, node) + "\n" + excluded(data, node) + "\n"
+    full += check_receipt(data, node) + "\n" + members_table(data, node)
+    PAGE.write_text(document("The reference set of right answers", full))
+    answers = "scfg-reference-set-answers"
+    summary = page(data, "The reference set of right answers", answers) + "\n"
+    summary += more(data, answers) + "\n" + excluded(data, answers) + "\n"
+    summary += check_receipt(data, answers)
     FRAGMENT.write_text(document("The reference set of right answers", summary))
+
+
+ID_PATTERN = re.compile(r"""id=['"]([^'"]+)['"]""")
+NODE_ID = "scfg-reference-set"
+
+
+def page_ids(html: str) -> list[str]:
+    return ID_PATTERN.findall(html)
+
+
+def page_problems() -> list[str]:
+    """Both pages begin with the node id and never reuse one another's ids."""
+    page = page_ids(PAGE.read_text())
+    node = page_ids(FRAGMENT.read_text())
+    problems = [
+        path_name + " id " + ident + " does not begin with the node id"
+        for path_name, ids in (("reference-set.html", page), ("scfg-reference-set.html", node))
+        for ident in ids
+        if not ident.startswith(NODE_ID)
+    ]
+    shared = sorted(set(page) & set(node))
+    if shared:
+        problems.append(
+            str(len(shared)) + " element ids appear on both pages: " + ", ".join(shared[:3])
+        )
+    repeated = sorted(ident for ident in set(page) if page.count(ident) > 1)
+    if repeated:
+        problems.append(str(len(repeated)) + " ids repeat within reference-set.html")
+    return problems
 
 
 def self_test() -> int:
@@ -1279,6 +1340,11 @@ def self_test() -> int:
     assert any("no definition points" in p for p in problems), problems
     refusals += 1
     print("self-test: a member without definition points is refused")
+    problems = page_problems()
+    assert not problems, problems
+    print("self-test: the two pages carry no shared element id")
+    print("self-test: " + str(len(page_ids(PAGE.read_text()))) + " ids on the page, "
+          + str(len(page_ids(FRAGMENT.read_text()))) + " on the node page")
     print("self-test ok, " + str(refusals) + " refusals")
     return 0
 
