@@ -273,8 +273,8 @@ grammar cannot express it.
 >   ✅ `plasma_current`   ❌ `measured_plasma_current`   ❌ `plasma_current_constraint`
 >   ✅ `poloidal_magnetic_field`   ❌ `poloidal_magnetic_field_at_constraint_position`
 {% endif %}
-- **Enriched source description (PRIMARY GROUNDING):** {{ item.description }}
-{% if item.ancestor_context %}- **DD path lineage** (ancestor nodes — the quantity's meaning and its evaluation locus live here; use them to resolve the correct locus, e.g. `pedestal_top` vs the bare path segment `pedestal`):
+- **Enriched source description (PRIMARY GROUNDING):** {{ item.description }}{% if item.ancestor_context %}
+- **DD path lineage** (ancestor nodes — the quantity's meaning and its evaluation locus live here; use them to resolve the correct locus, e.g. `pedestal_top` vs the bare path segment `pedestal`):
 {% for anc in item.ancestor_context %}  - `{{ anc.path }}`: {{ anc.text }}
 {% endfor %}{% endif %}
 - **Unit:** {{ item.unit or 'dimensionless' }} *(authoritative — do NOT output)*
