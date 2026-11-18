@@ -14,7 +14,6 @@ import json
 import logging
 import math
 import os
-import random
 import time
 from collections import Counter
 from collections.abc import Mapping, Sequence
@@ -2330,6 +2329,40 @@ RECORD_BENCHMARK_SCHEMA = "imas-codex.standard-name-record-benchmark/1"
 RECORD_STRUCTURES = ("one-pass", "staged")
 RECORD_VERDICTS = ("right", "wrong", "blocked")
 RECORD_SPLITS = ("development", "held_out")
+# What a blocked row may report, as buckets the report can be read and compared
+# on. A generator's own wording is mapped into these: anything outside them is
+# "other", so a typo never becomes its own row in a published table.
+RECORD_BLOCKER_BUCKETS = (
+    "collision",
+    "insufficient-source-text",
+    "grammar-gap",
+    "registry-conflict",
+    "no-incumbent",
+    "generation-failure",
+    "judge-failure",
+    "other",
+)
+_BLOCKER_ALIASES = {
+    "bound_source": "insufficient-source-text",
+    "missing_bound_source": "insufficient-source-text",
+    "wrong_bound_source": "insufficient-source-text",
+    "missing-source-text": "insufficient-source-text",
+    "insufficient_source_text": "insufficient-source-text",
+    "source_scope_conflict": "registry-conflict",
+    "missing_coordinate_convention": "grammar-gap",
+    "grammar": "grammar-gap",
+}
+
+
+def blocker_bucket(blocker: str) -> str:
+    """Map a generator's blocker wording onto the published vocabulary."""
+    text = blocker.strip()
+    for prefix in ("generation-failure:", "judge-failure:"):
+        if text.startswith(prefix):
+            return prefix.rstrip(":")
+    if text in RECORD_BLOCKER_BUCKETS:
+        return text
+    return _BLOCKER_ALIASES.get(text, "other")
 
 
 class BenchmarkControlDidNotSeparate(RuntimeError):
@@ -2538,7 +2571,9 @@ def summarize_record_arm(
         interval=wilson_interval(right, total),
         blocked_by_type=dict(
             sorted(
-                Counter(row.blocker or "unspecified" for row in blocked_rows).items()
+                Counter(
+                    blocker_bucket(row.blocker or "unspecified") for row in blocked_rows
+                ).items()
             )
         ),
         changed_right_incumbent=changed_right,
@@ -2598,17 +2633,30 @@ def compare_record_arms(
     """
     shared, rights_a, rights_b = _paired_rights(rows, arm_a, arm_b, members)
     count = len(shared)
-    differences: list[float] = []
-    generator = random.Random(seed)
-    for _ in range(max(1, draws)):
-        index_sample = [generator.randrange(count) for _ in range(count)]
-        share_a = sum(rights_a[index] for index in index_sample) / count
-        share_b = sum(rights_b[index] for index in index_sample) / count
-        differences.append(share_b - share_a)
-    differences.sort()
-    low = differences[int(0.025 * (len(differences) - 1))]
-    high = differences[int(0.975 * (len(differences) - 1))]
+    # The paired interval belongs to the repository's evaluation module: it
+    # resamples units, keeps copy groups together and returns the percentile
+    # bounds. A custom statistic makes it the mean-difference interval here,
+    # with the arm passed as ``scores`` and the other as ``scores_b``.
+    from imas_codex.discovery.base.evaluation import bootstrap_interval
+
+    def mean_share(_labels: Any, values: Any) -> float:
+        return sum(values) / len(values)
+
+    draw = bootstrap_interval(
+        [0.0] * count,
+        rights_a,
+        scores_b=rights_b,
+        statistic=mean_share,
+        n_resamples=max(2, draws),
+        seed=seed,
+    )
+    if draw["lower"] is None or draw["upper"] is None:
+        raise ValueError("the paired interval is undefined")
     difference = (sum(rights_b) - sum(rights_a)) / count
+    # ``bootstrap_interval`` returns mean(a) - mean(b); the caller's sign is
+    # b - a, so the bounds are negated and swapped.
+    low = -float(draw["upper"])
+    high = -float(draw["lower"])
     return {
         "arms": [arm_a, arm_b],
         "members": count,

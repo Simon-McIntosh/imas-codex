@@ -87,7 +87,7 @@ def test_arm_report_counts_blockers_drift_and_spend() -> None:
         "one-pass/local",
         ["right", "wrong", "blocked", "right"],
         blockers=[None, None, "grammar-gap", None],
-        changed=[True, True, False, False],
+        changed=[True, True, False, True],
         incumbent_right=[True, True, True, False],
     )
 
@@ -105,6 +105,73 @@ def test_arm_report_counts_blockers_drift_and_spend() -> None:
     assert report.cost_usd == pytest.approx(0.04)
     assert report.seconds_per_name == pytest.approx(2.0)
     assert report.tokens_read_per_name == pytest.approx(100.0)
+
+
+def test_blockers_are_published_as_buckets_not_free_text() -> None:
+    rows = rows_for(
+        "one-pass/local",
+        ["blocked", "blocked", "blocked", "blocked"],
+        blockers=[
+            "e",
+            "missing_bound_source",
+            "generation-failure:LLMStructuredCallError",
+            "judge-failure:TimeoutError",
+        ],
+    )
+
+    report = summarize_record_arm(rows, ONE_PASS_LOCAL)
+
+    assert report.blocked_by_type == {
+        "generation-failure": 1,
+        "insufficient-source-text": 1,
+        "judge-failure": 1,
+        "other": 1,
+    }
+
+
+def test_paired_comparison_uses_the_shared_bootstrap(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    calls: dict[str, object] = {}
+
+    def fake_bootstrap(
+        labels: object,
+        scores: object,
+        *,
+        scores_b: object,
+        statistic: object,
+        n_resamples: int,
+        seed: int,
+    ) -> dict[str, object]:
+        calls.update(
+            labels=labels,
+            scores=scores,
+            scores_b=scores_b,
+            statistic=statistic,
+            n_resamples=n_resamples,
+            seed=seed,
+        )
+        return {"lower": -0.2, "upper": 0.1, "n_resamples": n_resamples}
+
+    monkeypatch.setattr(
+        "imas_codex.discovery.base.evaluation.bootstrap_interval", fake_bootstrap
+    )
+    one_pass = rows_for("one-pass/local", ["right", "wrong", "right"])
+    staged = rows_for("staged/local", ["right", "right", "wrong"])
+
+    comparison = compare_record_arms(
+        one_pass + staged, "one-pass/local", "staged/local", seed=7, draws=50
+    )
+
+    assert calls["scores"] == [1, 0, 1]
+    assert calls["scores_b"] == [1, 1, 0]
+    assert calls["n_resamples"] == 50
+    assert calls["seed"] == 7
+    statistic = calls["statistic"]
+    assert callable(statistic)
+    assert statistic([0.0], [1.0, 0.0, 1.0]) == pytest.approx(2 / 3)
+    # The owner's interval is mean(a) - mean(b); the caller reports b - a.
+    assert comparison["interval"] == pytest.approx([-0.1, 0.2])
 
 
 def test_arm_report_refuses_a_member_scored_twice() -> None:
