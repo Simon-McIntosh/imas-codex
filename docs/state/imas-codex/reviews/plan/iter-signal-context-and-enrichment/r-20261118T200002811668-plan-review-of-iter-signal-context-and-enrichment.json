@@ -25,7 +25,24 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 65,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The node's dispatch contract carries the reconciliation: members described plus members awaiting context plus members failed must equal the 1,766 pilot signals of the context landing, with the 190 linked signals all accounted for. The section's endpoint is unchanged.",
+      "when": "2026-11-18T20:35:44.000962+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The node's dispatch contract carries the reconciliation: members described plus members awaiting context plus members failed must equal the 1,766 pilot signals of the context landing, with the 190 linked signals all accounted for. The section's endpoint is unchanged.",
+      "when": "2026-11-18T20:35:44.000962+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261118T200002811668-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261118T200002811668-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "a2aab5706942a8486039dae229c3704bdbd05273",
   "rubric": "content",
