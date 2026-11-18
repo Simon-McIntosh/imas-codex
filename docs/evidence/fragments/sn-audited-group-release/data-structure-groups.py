@@ -1822,7 +1822,7 @@ def main(argv: list[str] | None = None) -> int:
         taken = snapshot["environment"]["generated_at"]
         print(f"drift from the snapshot taken {taken}: {counts_line(live)}")
         if not all(ok for _, ok in checks):
-            print("the committed evidence disagrees with itself; nothing written")
+            print("the gate refused; nothing written")
             return 1
         base = snapshot["environment"]["measured_base"]
         print(f"checked at snapshot {base}; nothing written")
