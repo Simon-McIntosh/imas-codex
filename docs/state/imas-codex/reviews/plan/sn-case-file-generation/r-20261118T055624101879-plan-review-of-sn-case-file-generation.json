@@ -69,6 +69,16 @@
       "note": "Section 2 now makes the case file one record carrying content, digest and completeness verdict, read by the reference set, the benchmark and generation with none collecting the text again.",
       "reason": "",
       "when": "2026-11-18T06:22:05.893965+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "88485226d218e7bf2e580ff349550b28e4b08d93",
+      "commit_basis": "edit",
+      "finding": "thin_wrapper-1",
+      "note": "The reuse map names the existing benchmark report, comparison table and held-out handling as the owners section 3's node extends; the section's endpoint is unchanged because it states what is reported, not the harness.",
+      "reason": "",
+      "when": "2026-11-18T06:22:12.581853+00:00"
     }
   ],
   "responses": {
@@ -89,6 +99,15 @@
       "note": "The census is committed as the reuse map at docs/evidence/fragments/sn-case-file-generation/briefs/reuse-map.md and every node brief cites it; the plan states endpoints and names no module, so the extension lives in the briefs.",
       "reason": "",
       "when": "2026-11-18T06:22:01.881079+00:00"
+    },
+    "thin_wrapper-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "88485226d218e7bf2e580ff349550b28e4b08d93",
+      "commit_basis": "edit",
+      "note": "The reuse map names the existing benchmark report, comparison table and held-out handling as the owners section 3's node extends; the section's endpoint is unchanged because it states what is reported, not the harness.",
+      "reason": "",
+      "when": "2026-11-18T06:22:12.581853+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-case-file-generation/r-20261118T055624101879-plan-review-of-sn-case-file-generation.json",
