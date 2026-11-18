@@ -1,0 +1,82 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "e66c592bc8a2de5b21ba878c25cf51d13d44078a",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:301",
+    "imas_codex/standard_names/attachment_audit.py:889",
+    "imas_codex/standard_names/attachment_audit.py:2816"
+  ],
+  "completed_at": "2026-11-18T09:52:46.994Z",
+  "dispatched_at": "2026-11-18T09:52:29Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T045053972083-sagr-stage-repairs/logs/suite_head.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the head gate log names two revisions and two commands in its own header - line 1 records c57bb6727 with PYTHONPATH=/home/ITER/mcintos/Code/.reckon while line 3 records 4d3ab5cc and line 6 adds 'uncommitted repairs present' - so the arm cannot be replayed against one revision or one path, although its 17-test delta and the 8/4/5 dot counts show it did measure the landed test set."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T045053972083-sagr-stage-repairs/manifest.md",
+      "line": "16",
+      "severity": "non-blocking",
+      "text": "non-blocking: the after_suite command is stored as PYTHONPATH==/home/... with a doubled equals sign, so the recorded command as written does not put the reviewed worktree on sys.path and disagrees with the log's own '# command:' line; a gate receipt built from this field would re-run a different command than the one measured."
+    },
+    {
+      "file": "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py",
+      "line": "1292",
+      "severity": "non-blocking",
+      "text": "non-blocking: the _stated_operations docstring's worked example says 'ratio of loop voltage to plasma angle' while the ratio pattern and the fixtures are about plasma current, so a reader following the docstring into the tests finds text that matches nothing."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T045053972083-sagr-stage-repairs/logs/base_arm_new_tests.log",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the base arm of the new tests ran in a scratch tree under the bare path /tmp/reckon-crew-scratch/r-20261118T045053972083-sagr-stage-repairs/sagr-stage-repairs/base rather than under $TMPDIR, so the tree it measured does not survive with the run and cannot be inspected later."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "verified 3 production call site(s)",
+    "diff": "read commit by commit against e66c592bc8a2de5b21ba878c25cf51d13d44078a - d2b86beb adds four prompt lines, 132 guard lines and 387 test lines, 4d3ab5cc adds the 873-line evidence script, 60fd0e488 and c57bb6727 add the rendered evidence page and data plus 14 test lines, and a3b13f594 changes one comment line.",
+    "done_when": "the done_when asks for a per-cause base-red/head-green test pair with a sound fixture still passing, a recorded disposable-graph regeneration with blind adjudication beside the share before, the remaining eleven causes, a zero added-failure suite delta, a stated spend and no live write; each is evidenced - logs/base_arm_new_tests.log reads 15 failed 1 passed, logs/suite_base.log and logs/suite_head.log carry 22 failed each with identical ids and 8789/8806 passing, and docs/evidence/fragments/sn-audited-group-release/stage-repairs.json records sound 0 to 12/6/7 of 18/13/11 members, eleven remaining causes, USD 0.0276 against a USD 10 ceiling and zero live writes.",
+    "goal": "the node's goal is to repair the three stages the trace names so a source-stated qualifier reaches the name, a name is not bound to sources whose quantities differ, and a definition keeps the boundary its source states; the diff does all three, the first at imas_codex/llm/prompts/sn/generate_name_dd_names.md:277, the second at imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1451, and the third at imas_codex/llm/prompts/sn/generate_name_system.md:104 as a system-prompt rule that files a geometry vocab_gap instead of binding plasma_boundary.",
+    "manifest": "read; it states status complete with five commits, baseline and after suites at 22 failures each, added_failure_count 0, negative-control exits [1, 1, 1], and the landing numbers this review reconciled against stage-repairs.json.",
+    "write_paths": "the node was fenced to the two prompt files, worker_extraction_and_enrichment.py, attachment_audit.py, the three new test files, four evidence artefacts and a figures directory; the delivered diff touches every declared path except the figures directory, plus docs/evidence/fragments/sn-audited-group-release/sagr-stage-repairs.html which the dispatch to this review also declares."
+  },
+  "justifications": {
+    "durability": "logs/negative-control.log reverts each repair in place and reads 3 failed, 4 failed and 4 failed at EXIT=1, while tests/standard_names/test_attachment_guard_reads_source_text.py:79 asserts the refusal rather than a value the test passed in.",
+    "evidence": "both suite logs carry the same 22 failure ids and a base of 8789 passed against a head of 8806 passed, but logs/suite_head.log:1 and :3 name different revisions for the same arm.",
+    "fit": "the new constants and helper follow worker_extraction_and_enrichment.py:1269-1288, and the only blemish is the docstring example at :1292 citing the wrong quantity.",
+    "goal_fidelity": "the three repairs land where the goal names them, at imas_codex/llm/prompts/sn/generate_name_dd_names.md:277, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1451 and imas_codex/llm/prompts/sn/generate_name_system.md:104.",
+    "reuse": "the text rule extends the owner at imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1265 with optional keywords rather than forking a second guard, and a search of imas_codex/standard_names found no existing stated-operation detector.",
+    "scope_discipline": "every path in the delivered diff is inside the declared write paths, and no plan, registry or live-graph file is touched."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to repair the three stages the trace names so a source-stated qualifier reaches the name, a name is not bound to sources whose quantities differ, and a definition keeps the boundary its source states; the diff does all three, the first at imas_codex/llm/prompts/sn/generate_name_dd_names.md:277, the second at imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1451, and the third at imas_codex/llm/prompts/sn/generate_name_system.md:104 as a system-prompt rule that files a geometry vocab_gap instead of binding plasma_boundary.\nVERDICT done_when: the done_when asks for a per-cause base-red/head-green test pair with a sound fixture still passing, a recorded disposable-graph regeneration with blind adjudication beside the share before, the remaining eleven causes, a zero added-failure suite delta, a stated spend and no live write; each is evidenced - logs/base_arm_new_tests.log reads 15 failed 1 passed, logs/suite_base.log and logs/suite_head.log carry 22 failed each with identical ids and 8789/8806 passing, and docs/evidence/fragments/sn-audited-group-release/stage-repairs.json records sound 0 to 12/6/7 of 18/13/11 members, eleven remaining causes, USD 0.0276 against a USD 10 ceiling and zero live writes.\nVERDICT write_paths: the node was fenced to the two prompt files, worker_extraction_and_enrichment.py, attachment_audit.py, the three new test files, four evidence artefacts and a figures directory; the delivered diff touches every declared path except the figures directory, plus docs/evidence/fragments/sn-audited-group-release/sagr-stage-repairs.html which the dispatch to this review also declares.\nVERDICT manifest: read; it states status complete with five commits, baseline and after suites at 22 failures each, added_failure_count 0, negative-control exits [1, 1, 1], and the landing numbers this review reconciled against stage-repairs.json.\nVERDICT diff: read commit by commit against e66c592bc8a2de5b21ba878c25cf51d13d44078a - d2b86beb adds four prompt lines, 132 guard lines and 387 test lines, 4d3ab5cc adds the 873-line evidence script, 60fd0e488 and c57bb6727 add the rendered evidence page and data plus 14 test lines, and a3b13f594 changes one comment line.\nCALL_SITES: imas_codex/standard_names/worker_tasks/worker_compose_and_validate.py:301, imas_codex/standard_names/attachment_audit.py:889, imas_codex/standard_names/attachment_audit.py:2816\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: the three repairs land where the goal names them, at imas_codex/llm/prompts/sn/generate_name_dd_names.md:277, imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1451 and imas_codex/llm/prompts/sn/generate_name_system.md:104.\nSCORE evidence: 15\nJUSTIFICATION evidence: both suite logs carry the same 22 failure ids and a base of 8789 passed against a head of 8806 passed, but logs/suite_head.log:1 and :3 name different revisions for the same arm.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in the delivered diff is inside the declared write paths, and no plan, registry or live-graph file is touched.\nSCORE durability: 18\nJUSTIFICATION durability: logs/negative-control.log reverts each repair in place and reads 3 failed, 4 failed and 4 failed at EXIT=1, while tests/standard_names/test_attachment_guard_reads_source_text.py:79 asserts the refusal rather than a value the test passed in.\nSCORE fit: 17\nJUSTIFICATION fit: the new constants and helper follow worker_extraction_and_enrichment.py:1269-1288, and the only blemish is the docstring example at :1292 citing the wrong quantity.\nSCORE reuse: 18\nJUSTIFICATION reuse: the text rule extends the owner at imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1265 with optional keywords rather than forking a second guard, and a search of imas_codex/standard_names found no existing stated-operation detector.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T045053972083-sagr-stage-repairs/logs/suite_head.log:1 non-blocking: the head gate log names two revisions and two commands in its own header - line 1 records c57bb6727 with PYTHONPATH=/home/ITER/mcintos/Code/.reckon while line 3 records 4d3ab5cc and line 6 adds 'uncommitted repairs present' - so the arm cannot be replayed against one revision or one path, although its 17-test delta and the 8/4/5 dot counts show it did measure the landed test set.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T045053972083-sagr-stage-repairs/manifest.md:16 non-blocking: the after_suite command is stored as PYTHONPATH==/home/... with a doubled equals sign, so the recorded command as written does not put the reviewed worktree on sys.path and disagrees with the log's own '# command:' line; a gate receipt built from this field would re-run a different command than the one measured.\nFINDING imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py:1292 non-blocking: the _stated_operations docstring's worked example says 'ratio of loop voltage to plasma angle' while the ratio pattern and the fixtures are about plasma current, so a reader following the docstring into the tests finds text that matches nothing.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T045053972083-sagr-stage-repairs/logs/base_arm_new_tests.log:1 non-blocking: the base arm of the new tests ran in a scratch tree under the bare path /tmp/reckon-crew-scratch/r-20261118T045053972083-sagr-stage-repairs/sagr-stage-repairs/base rather than under $TMPDIR, so the tree it measured does not survive with the run and cannot be inspected later.",
+  "review_run_id": "r-20261118T094904778418-review-of-sagr-stage-repairs-a3b13f594fd0",
+  "reviewed_base_sha": "e66c592bc8a2de5b21ba878c25cf51d13d44078a",
+  "reviewed_head_sha": "a3b13f594fd0f331800dab680a4eefdfd71e98f3",
+  "reviewed_run_id": "r-20261118T045053972083-sagr-stage-repairs",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T094904778418-review-of-sagr-stage-repairs-a3b13f594fd0"
+  },
+  "reviewer_run_id": "r-20261118T094904778418-review-of-sagr-stage-repairs-a3b13f594fd0",
+  "scores": {
+    "durability": 18,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 18,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T10:16:00.551411+00:00",
+  "total": 105
+}
