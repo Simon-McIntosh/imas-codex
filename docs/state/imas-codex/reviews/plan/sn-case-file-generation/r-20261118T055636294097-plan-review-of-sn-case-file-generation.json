@@ -89,6 +89,16 @@
       "note": "Section 4 names its population: every member of the reference set's held-out half and every planted name.",
       "reason": "",
       "when": "2026-11-18T06:47:10.770659+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 1 names the third source: the 84 names hand-checked for the reader calibration, 44 defective and 40 sound, so the floor of 100 is reachable.",
+      "reason": "",
+      "when": "2026-11-18T06:47:18.273082+00:00"
     }
   ],
   "responses": {
@@ -118,6 +128,15 @@
       "note": "Section 4 names its population: every member of the reference set's held-out half and every planted name.",
       "reason": "",
       "when": "2026-11-18T06:47:10.770659+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+      "commit_basis": "edit",
+      "note": "Section 1 names the third source: the 84 names hand-checked for the reader calibration, 44 defective and 40 sound, so the floor of 100 is reachable.",
+      "reason": "",
+      "when": "2026-11-18T06:47:18.273082+00:00"
     },
     "wiring-1": {
       "action": "acted",
