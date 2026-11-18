@@ -56,7 +56,7 @@ RUN = Path(
     )
 )
 CONCURRENCY = int(os.environ.get("REFERENCE_SET_CONCURRENCY", "8"))
-MAX_TOKENS = 6000
+MAX_TOKENS = 16000
 TIMEOUT_S = 900
 MAX_ATTEMPTS = 3
 MODEL = "local/deepseek-v4.1-flash"
@@ -656,11 +656,19 @@ async def run_judging(members: list[dict]) -> None:
     RUN.mkdir(parents=True, exist_ok=True)
     done = {}
     path = RUN / JSONL
+    kept = []
     if path.exists():
         for line in path.read_text().splitlines():
-            if line.strip():
-                row = json.loads(line)
-                done[row["id"]] = row
+            if not line.strip():
+                continue
+            row = json.loads(line)
+            if row["verdict"] == "unjudged":
+                continue
+            kept.append(row)
+            done[row["id"]] = row
+        path.write_text(
+            "".join(json.dumps(row, ensure_ascii=False) + "\n" for row in kept)
+        )
     pending = [member for member in members if member["id"] not in done]
     print(f"{len(done)} judged, {len(pending)} pending", flush=True)
     semaphore = asyncio.Semaphore(CONCURRENCY)
@@ -763,7 +771,10 @@ def compare(sealed: dict, members: list[dict]) -> dict:
 def reclassify(comparison: dict) -> dict:
     """Re-class the members earlier called as omitting what their source says."""
     rows = [
-        row for row in comparison["rows"] if "name_omits_source" in row["earlier_classes"]
+        row
+        for row in comparison["rows"]
+        if "name_omits_source" in row["earlier_classes"]
+        and "omits-source-reclass" in row["cohorts"]
     ]
     counts = Counter(row["verdict"] for row in rows)
     by_outcome = {}
@@ -838,8 +849,11 @@ def build(sealed: dict, members: list[dict]) -> dict:
     unjudged = []
     packets = {}
     for member in members:
-        verdict = verdicts[member["id"]]
         packets[member["id"]] = member["text"]
+        verdict = verdicts.get(member["id"])
+        if verdict is None:
+            unjudged.append({"id": member["id"], "reason": "no verdict recorded"})
+            continue
         if verdict["verdict"] in DEFECTIVE:
             if in_set(member):
                 rows.append(member_entry(member, verdict))
