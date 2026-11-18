@@ -370,7 +370,7 @@ The fixed classes of the audit this measurement compares against, unchanged:
 
 
 def class_rules() -> str:
-    """§1's fixed class list, read from the audit that declared it."""
+    """The audit's fixed class list, read from the script that declared it."""
     audit = _load_module("sn_blind_audit", AUDIT_SCRIPT)
     return "\n".join(f"- `{key}`: {text}" for key, text in audit.DEFECT_CLASSES)
 
