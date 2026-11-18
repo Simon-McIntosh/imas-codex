@@ -25,7 +25,24 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 61,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The delivered import already reports it against the source: 343 nonempty rows imported (9, 312 and 22) from sheets of 16, 313 and 53 rows, the difference being header and empty rows, hand-checked on twenty links. The section's endpoint is unchanged and the delivery's review checks the count.",
+      "when": "2026-11-18T05:37:05.524390+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The delivered import already reports it against the source: 343 nonempty rows imported (9, 312 and 22) from sheets of 16, 313 and 53 rows, the difference being header and empty rows, hand-checked on twenty links. The section's endpoint is unchanged and the delivery's review checks the count.",
+      "when": "2026-11-18T05:37:05.524390+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261118T045145771690-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261118T045145771690-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "8814404ef3dc609d2ed1286194d7b20a0b24cced",
   "rubric": "content",
