@@ -1,0 +1,99 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed run records no baseline_suite/after_suite pair: its manifest names one pytest log (gate.log) and no base arm. That log runs to its summary line at revision c752333ed with 24 passed and EXIT=0, so the head arm's failure set is empty and no added failure can exist; the base arm is unmeasured rather than measured zero. The reviewed head 530dab405 changes only the fragment renderer, the regenerated report labels and the SVG, and no suite log was recorded at 530dab405.",
+  "after_suite": {
+    "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/scfg-benchmark uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_record_benchmark.py tests/standard_names/test_advisory_benchmark.py",
+    "completed": true,
+    "exit_status": 0,
+    "failure_count": 0,
+    "failure_ids": [],
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T064807925154-scfg-benchmark/gate.log",
+    "revision": "c752333edbef286e952c71fbf453bd0d11799f18"
+  },
+  "after_suite_note": "the reviewed manifest names this log as test_logs, not as an after_suite block, and its header revision c752333ed is one commit before the reviewed head 530dab405",
+  "baseline_suite": null,
+  "call_site_count": 2,
+  "call_sites": [
+    "docs/evidence/fragments/sn-case-file-generation/benchmark.py:1459 write_report -> render_figure",
+    "docs/evidence/fragments/sn-case-file-generation/benchmark.py:1516 main (--stage report|all) -> write_report"
+  ],
+  "completed_at": "2026-11-18T23:06:35.448Z",
+  "dispatched_at": "2026-11-18T23:06:21Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "1268",
+      "severity": "non-blocking",
+      "text": "non-blocking: the property this delta was landed for \u2014 an SVG carrying no <text element so no renderer needs a font \u2014 has no committed test; the only check is the run-time negative-control-figure.log, so an edit that sets svg.fonttype back to 'none' or restores the hand-written SVG leaves tests/standard_names green while the label-less figure returns."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "1330",
+      "severity": "non-blocking",
+      "text": "non-blocking: figure.clear() empties the figure but leaves it registered in pyplot because plt.subplots created it, so every call to render_figure accumulates one more managed figure in a long-lived process; plt.close(figure) releases it instead."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "1321",
+      "severity": "non-blocking",
+      "text": "non-blocking: axes.grid(axis='x', color='#eeeeee', linewidth=0.8) keeps six faint full-height vertical gridlines, non-data ink the house plot style leaves out; carried from the figure review of this same head and not repaired by 530dab405."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "VERDICT diff: read commit by commit over 0f38d7d5b..530dab405; the delta is the single commit 530dab405, which replaces the hand-written SVG writer at docs/evidence/fragments/sn-case-file-generation/benchmark.py:1268 with a matplotlib renderer under rc_context svg.fonttype=path, rewrites benchmark.html and benchmark.json only in the revision and built_at labels, and lands an SVG carrying 0 <text elements and 310 DejaVuSans glyph-path references where c752333ed carried 19 <text elements and 0 glyph references.",
+    "done_when": "VERDICT done_when: the done_when asks for one record per arm and member, a blind adjudicator, per-arm share right with a 95 % interval, blocked by type, changed-right-incumbent, cost, time and tokens, two development rounds, one held-out pass and two controls; the reviewed run's gate.log at revision c752333ed runs 24 tests over tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py with 24 passed and EXIT=0, but no suite arm was recorded at the reviewed head 530dab405, so this delta's own change is covered only by the figure check in negative-control-figure.log.",
+    "goal": "VERDICT goal: the source node's goal is to benchmark one-pass against staged generation across the available models on the reference set and put the choice to the lead; the delta's four paths are the final report and its held-out figure, and docs/evidence/fragments/sn-case-file-generation/benchmark.py:1268 render_figure now draws that figure through matplotlib with svg.fonttype=path while benchmark.json .final carries the same per-arm figures as before.",
+    "manifest": "VERDICT manifest: read; it reports status complete, commits dd04a65fd through 530dab405, tests over tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py with test_logs gate.log, and the checkpoint line 'gate green at c752333ed'; it carries no baseline_suite or after_suite block, so its suite evidence is a single arm at the commit before the reviewed head.",
+    "write_paths": "VERDICT write_paths: the reviewed node declared nine paths including benchmark.py, benchmark.html, benchmark.json and docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg; git diff c752333ed..530dab405 touches exactly those four files and nothing else (1659 insertions, 105 deletions)."
+  },
+  "justifications": {
+    "durability": "no test file in the reviewed run imports or exercises docs/evidence/fragments/sn-case-file-generation/benchmark.py, so nothing in tests/standard_names reddens if render_figure at :1268 returns to a text-element SVG or to svg.fonttype 'none'; the only guard is the run-time check in negative-control-figure.log.",
+    "evidence": "the reviewed run's gate.log is the only suite arm recorded and its header names revision c752333ed, one commit before the reviewed head 530dab405, while the head's own evidence is negative-control-figure.log (text_elements 19 EXIT=1 on the pre-fix figure, 0 EXIT=0 on the repaired one) read and independently reproduced here, not a suite run.",
+    "fit": "the renderer follows the established evidence-fragment idiom (matplotlib rc_context plus a direct figure save with metadata Date None, as at docs/evidence/fragments/sn-catalog-grouping/scg-jev-tree-benchmark-run.py:383) and introduces no new module-level name beyond the existing render_figure.",
+    "goal_fidelity": "docs/evidence/fragments/sn-case-file-generation/benchmark.py:1268-1330 draws the same six arms, intervals and value labels the goal's evidence needs, and the landed SVG at docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg carries the labels as glyph outlines so no renderer can drop them.",
+    "reuse": "the repository's checked figure exporter is imas_codex/plotting/style.py:103 save_figure, which declares a slide width and runs text-clipping checks and so does not fit a documentation figure; 33 sibling fragments under docs/evidence save through figure.savefig directly (git grep -l 'savefig(' at 530dab405 lists 34 files including this one), and matplotlib 3.11.2 already defaults svg.fonttype to 'path', so the rc override extends the fragment idiom rather than forking the owner.",
+    "scope_discipline": "git diff c752333ed..530dab405 names only the four declared paths, and the report rewrites are the two regenerated labels rather than new figures or prose."
+  },
+  "negative_checks": {
+    "figure_property": "independently measured from the committed artifacts: c752333ed:heldout-arm-right.svg carries 19 '<text' elements and 0 DejaVuSans glyph references; 530dab405:heldout-arm-right.svg carries 0 '<text' elements and 310 DejaVuSans glyph references; ImageMagick rasterization of both at 96 dpi shows dark pixels in the title band and the left label column for the head figure."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node's goal is to benchmark one-pass against staged generation across the available models on the reference set and put the choice to the lead; the delta's four paths are the final report and its held-out figure, and docs/evidence/fragments/sn-case-file-generation/benchmark.py:1268 render_figure now draws that figure through matplotlib with svg.fonttype=path while benchmark.json .final carries the same per-arm figures as before.\nVERDICT done_when: the done_when asks for one record per arm and member, a blind adjudicator, per-arm share right with a 95 % interval, blocked by type, changed-right-incumbent, cost, time and tokens, two development rounds, one held-out pass and two controls; the reviewed run's gate.log at revision c752333ed runs 24 tests over tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py with 24 passed and EXIT=0, but no suite arm was recorded at the reviewed head 530dab405, so this delta's own change is covered only by the figure check in negative-control-figure.log.\nVERDICT write_paths: the reviewed node declared nine paths including benchmark.py, benchmark.html, benchmark.json and docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg; git diff c752333ed..530dab405 touches exactly those four files and nothing else (1659 insertions, 105 deletions).\nVERDICT manifest: read; it reports status complete, commits dd04a65fd through 530dab405, tests over tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py with test_logs gate.log, and the checkpoint line 'gate green at c752333ed'; it carries no baseline_suite or after_suite block, so its suite evidence is a single arm at the commit before the reviewed head.\nVERDICT diff: read commit by commit over 0f38d7d5b..530dab405; the delta is the single commit 530dab405, which replaces the hand-written SVG writer at docs/evidence/fragments/sn-case-file-generation/benchmark.py:1268 with a matplotlib renderer under rc_context svg.fonttype=path, rewrites benchmark.html and benchmark.json only in the revision and built_at labels, and lands an SVG carrying 0 <text elements and 310 DejaVuSans glyph-path references where c752333ed carried 19 <text elements and 0 glyph references.\nCALL_SITES: docs/evidence/fragments/sn-case-file-generation/benchmark.py:1459 write_report -> render_figure, docs/evidence/fragments/sn-case-file-generation/benchmark.py:1516 main (--stage report|all) -> write_report\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-case-file-generation/benchmark.py:1268-1330 draws the same six arms, intervals and value labels the goal's evidence needs, and the landed SVG at docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg carries the labels as glyph outlines so no renderer can drop them.\nSCORE evidence: 14\nJUSTIFICATION evidence: the reviewed run's gate.log is the only suite arm recorded and its header names revision c752333ed, one commit before the reviewed head 530dab405, while the head's own evidence is negative-control-figure.log (text_elements 19 EXIT=1 on the pre-fix figure, 0 EXIT=0 on the repaired one) read and independently reproduced here, not a suite run.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff c752333ed..530dab405 names only the four declared paths, and the report rewrites are the two regenerated labels rather than new figures or prose.\nSCORE durability: 4\nJUSTIFICATION durability: no test file in the reviewed run imports or exercises docs/evidence/fragments/sn-case-file-generation/benchmark.py, so nothing in tests/standard_names reddens if render_figure at :1268 returns to a text-element SVG or to svg.fonttype 'none'; the only guard is the run-time check in negative-control-figure.log.\nSCORE fit: 18\nJUSTIFICATION fit: the renderer follows the established evidence-fragment idiom (matplotlib rc_context plus a direct figure save with metadata Date None, as at docs/evidence/fragments/sn-catalog-grouping/scg-jev-tree-benchmark-run.py:383) and introduces no new module-level name beyond the existing render_figure.\nSCORE reuse: 16\nJUSTIFICATION reuse: the repository's checked figure exporter is imas_codex/plotting/style.py:103 save_figure, which declares a slide width and runs text-clipping checks and so does not fit a documentation figure; 33 sibling fragments under docs/evidence save through figure.savefig directly (git grep -l 'savefig(' at 530dab405 lists 34 files including this one), and matplotlib 3.11.2 already defaults svg.fonttype to 'path', so the rc override extends the fragment idiom rather than forking the owner.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:1268 non-blocking: the property this delta was landed for \u2014 an SVG carrying no <text element so no renderer needs a font \u2014 has no committed test; the only check is the run-time negative-control-figure.log, so an edit that sets svg.fonttype back to 'none' or restores the hand-written SVG leaves tests/standard_names green while the label-less figure returns.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:1330 non-blocking: figure.clear() empties the figure but leaves it registered in pyplot because plt.subplots created it, so every call to render_figure accumulates one more managed figure in a long-lived process; plt.subplots' figure should be released with plt.close(figure).\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:1321 non-blocking: axes.grid(axis='x', color='#eeeeee', linewidth=0.8) keeps six faint full-height vertical gridlines, non-data ink the house plot style leaves out; carried from the figure review of this same head and not repaired by 530dab405.",
+  "review_run_id": "r-20261118T225016373773-review-of-scfg-benchmark-530dab4050e3",
+  "review_scope": "only the commits gained after the prior review at c752333ed: commit 530dab405, touching docs/evidence/fragments/sn-case-file-generation/benchmark.py, benchmark.html, benchmark.json and docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg",
+  "reviewed_base_sha": "c752333edbef286e952c71fbf453bd0d11799f18",
+  "reviewed_head_sha": "530dab4050e393d99cfbeee4a95185613476710d",
+  "reviewed_node": {
+    "goal": "Benchmark one-pass against staged generation across the available models on the reference set and put the choice to the lead",
+    "id": "scfg-benchmark",
+    "write_paths": [
+      "imas_codex/standard_names/benchmark.py",
+      "imas_codex/standard_names/advisory_benchmark.py",
+      "tests/standard_names/test_record_benchmark.py",
+      "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "docs/evidence/fragments/sn-case-file-generation/benchmark.json",
+      "docs/evidence/fragments/sn-case-file-generation/benchmark.html",
+      "docs/evidence/fragments/sn-case-file-generation/scfg-benchmark.html",
+      "docs/figures/sn-case-file-generation/scfg-benchmark",
+      "docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg"
+    ]
+  },
+  "reviewed_run_id": "r-20261118T064807925154-scfg-benchmark",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T225016373773-review-of-scfg-benchmark-530dab4050e3"
+  },
+  "scores": {
+    "durability": 4,
+    "evidence": 14,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 16,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T23:19:48.388735+00:00",
+  "total": 90
+}
