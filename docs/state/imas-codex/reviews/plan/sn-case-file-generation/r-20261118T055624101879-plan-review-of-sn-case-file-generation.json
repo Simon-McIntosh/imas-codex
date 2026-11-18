@@ -1,0 +1,76 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:08:32.355Z",
+  "dispatched_at": "2026-11-18T06:08:10Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:33",
+      "id": "reuse_search-1",
+      "reason": "the plan's 53 h price five builders that already exist in some form, and an author who sees this census can fold \u00a71, \u00a72 and \u00a73 into extension work, which changes their acceptance criteria and their hours.",
+      "text": "\u00a72's case file re-proposes machinery that already assembles its whole content: enclosing-structure text up to the root is `imas_codex/standard_names/worker_tasks/worker_review_names.py:70` (`enclosing_structure_statements`, nearest-first per bound path) and `imas_codex/standard_names/review/jev_review.py:212` (`enclosing_statements`); the family/sibling/neighbour block with what separates each member is `imas_codex/standard_names/review/jev_review.py:252` (`build_name_state`) with `:307` (`neighbourhood_block`) and `:320` (`dd_enclosing_structures`), plus `imas_codex/standard_names/context.py:677` (`fetch_review_neighbours`), `context.py:862` (`fetch_sibling_family`), `context.py:1026` (`locus_context_for`); the grammar segments, vocabulary and ruled conventions are `context.py:65` (`build_compose_context`, whose docstring lists grammar, per-segment vocabulary, conventions and enum lists) and `context.py:32` (`conventions_context_for`); the frozen packet with digest, per-packet versions and reseal assertions is `docs/evidence/fragments/sn-audited-group-release/equilibrium-adjudication.py:100` (`packets`), `:92` (`packet_data`), `:273` (`packet_digest`), asserted at `:482`\u2013`:484`. \u00a71's reference set is prefigured by `imas_codex/standard_names/judgment_goldens.py:298` (`build_name_acceptable`) with `:87` (`assign_group_splits`, an existing development/held-out split) and by the blind-verdict store in the same evidence script; \u00a73's arms and blind scoring are `imas_codex/standard_names/benchmark.py:414` (`compare_to_reference`) and `:35` (`BenchmarkConfig`), `imas_codex/standard_names/advisory_benchmark.py:81` (`FrozenBenchmarkReport`) with `:298` (`_validate_run_arguments`), `:333` (`_validate_rendered_message_hashes`) and `:419` (`_summarize_costs`), the stratified draw is `benchmark_roles.py:283` (`_stratified_sample`), member-by-member comparison is `benchmark_roles.py:1240` (`discrimination_metrics`), and the run entry is `imas_codex/cli/sn.py:3874`; blind joint name-and-definition judgement is `imas_codex/standard_names/review/name_definition_seat.py:1` (module docstring, one judge, one class list) with blind cycles at `worker_tasks/worker_review_names.py:651`. \u00a74's typed blocker and its queue are `imas_codex/standard_names/review/holds.py:27` (`finding_key`), `:37` (`hold_id(name_id, axis, kind, finding)`), `:52` (`raise_hold`), `:218` (`open_holds`), driven from `review/pipeline.py:2079` and `review/cascade.py:390`; the grammar-gap type is `imas_codex/standard_names/segments.py:552` (`classify_gap`) with `:632` (`is_actionable_gap`). \u00a75's grammar version selection and graph sync are `imas_codex/standard_names/grammar_query.py:44` (`select_grammar_version`) and `imas_codex/standard_names/grammar_sync.py:258` (`sync_isn_grammar_to_graph`), so a new release is a version bump plus a sync, not new machinery. \u00a76's one-writer regeneration is `imas_codex/standard_names/campaign.py:962` (`CampaignRunner`) over `graph_store/graph_claim_scope.py`",
+      "type": "reuse_search",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:33",
+      "id": "deep_module-1",
+      "reason": "\u00a72's done-when currently demands two separate deliverables (the file and a separate check run) that a single record replaces, and \u00a73's \"from its case file\" becomes one named artifact with one producer.",
+      "text": "the per-name artifact is decomposed across sections instead of sitting behind one record: \u00a72 produces \"a case file ... each with a digest\", then a separate run against \"the file's own completeness check\", then a token-size distribution, then \u00a74's blocker entry, \u00a73's per-arm row and \u00a71's packet-digest check \u2014 six shapes for one per-name artifact, each re-reading the same graph neighbourhood; the deep alternative is one case-file record carrying content, digest and completeness verdict together, with \u00a72's completeness run a field of the record and \u00a73's arm consuming the record rather than re-collecting it",
+      "type": "deep_module",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:37",
+      "id": "thin_wrapper-1",
+      "reason": "if the frozen report can carry the new columns the section is a report-shape extension, not a new harness, and its done-when should state that.",
+      "text": "\u00a73 proposes a per-arm report (share right with interval, blocked by type, cost, time, tokens) and \u00a72 a case-file completeness check, and neither section says why the existing report and validation cannot be extended instead: `imas_codex/standard_names/advisory_benchmark.py:81` (`FrozenBenchmarkReport`) already stores frozen per-row verdicts with message-hash validation, cost summaries and argument validation, `imas_codex/standard_names/benchmark.py:227` (`BenchmarkReport`) already carries per-model right/wrong rows with `:1869` (`render_comparison_table`), and `imas_codex/standard_names/docs_holdout_eval.py` already keeps held-out material apart from development material",
+      "type": "thin_wrapper",
+      "would_change": true
+    },
+    {
+      "anchor": "imas_codex/standard_names/review/holds.py:52",
+      "id": "duplicate_owner-1",
+      "reason": "a forked queue splits holds across two stores and a forked case-file builder drifts from the reader's state, so the sections must state that the existing owner is extended, and \u00a74's blocker types become the hold kinds already typed there.",
+      "text": "a census of shared owners the design would fork: (1) the blocker queue duplicates the graph hold mechanism owned by `imas_codex/standard_names/review/holds.py` \u2014 `finding_key` (`:27`), `hold_id(name_id, axis, kind, finding)` (`:37`), `sync_holds` (`:99`), `clear_holds_not_raised` (`:128`) and `open_holds` (`:218`) already persist one typed hold per name, so \u00a74's four blocker types are new hold kinds and \u00a74's \"gathered into one page\" is a query over open holds; (2) the case-file builder duplicates the reader-state owner `imas_codex/standard_names/review/jev_review.py:252` (`build_name_state`, already emitting the neighbourhood block, sibling family, physical-base roster and COCOS label) and the context owner `imas_codex/standard_names/context.py:65` (`build_compose_context`, cached grammar, vocabulary, conventions); (3) \u00a76's one-writer regeneration duplicates the campaign owner `imas_codex/standard_names/campaign.py:962` (`CampaignRunner`) with `measure_batch` (`:603`) and the audit-and-revalidate defaults, whose claim scoping lives in `imas_codex/standard_names/graph_store/graph_claim_scope.py`; (4) the grammar-gap type duplicates `imas_codex/standard_names/segments.py:552` (`classify_gap`) and `:632` (`is_actionable_gap`), which already separate a missing term from a gap the definition must state",
+      "type": "duplicate_owner",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:41",
+      "id": "interface_budget-1",
+      "reason": "the four additions are exactly the refusal-family surface a zero budget forbids without a retirement statement, so the plan must name the retired kinds or the reason none can be.",
+      "text": "with public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0 this week, \u00a74 adds four new refusal types (\"a grammar gap\", \"a registry conflict\", \"insufficient source text\", \"a collision\") as first-class pipeline outcomes with their own gathering page and resumption rule, \u00a71 (`:29`) adds a check that fails on packet-digest mismatch, and \u00a72 (`:33`) adds one that fails on case-file incompleteness, and none of the three names what it retires or merges or states why nothing can \u2014 while \u00a73 (`:37`) adds no CLI or view surface because `imas_codex/cli/sn.py:3874` already runs a benchmark; the cheapest honest accounting is that \u00a74's four types are the existing hold kinds under new names, the old names retired",
+      "type": "interface_budget",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0d592dd1f086fc9a303b6801c6f89bd36ab2d5e3",
+  "plan_fingerprint": "0fa1ea743c6e8d8b0243bec967e88932abc16fdaadd815d4ae493a0af978c865",
+  "plan_slug": "sn-case-file-generation",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261118T055624101879-plan-review-of-sn-case-file-generation",
+  "reviewed_blob_sha": "ed3019db63e743c19eccdd880c7be193f7343b7b",
+  "rubric": "design",
+  "rubric_items": {
+    "deep_module": "a finding \u2014 the per-name artifact is spread over five surfaces (packet, digest, token-size distribution, completeness check, blocker queue entry) placed in different sections, so no single record hides the graph traversal, the ancestry walk and the joins that produce it.",
+    "duplicate_owner": "a finding \u2014 a second case-file builder, a second blocker queue and a second arm runner duplicate the owners `context.py`/`holds.py`/`benchmark.py`/`campaign.py`.",
+    "interface_budget": "a finding \u2014 public_definitions 0, cli_options 0, mcp_views 0, refusal_families 0; \u00a71, \u00a72 and \u00a74 add refusal/typed-blocker surface without naming what it retires or why nothing can be, while \u00a73 adds none because a benchmark CLI entry already exists.",
+    "reuse_search": "a finding \u2014 the case file (\u00a72), the frozen packet and its digest (\u00a71), the arm runner and its frozen report (\u00a73), the typed blocker and its queue (\u00a74) and the grammar-gap classification (\u00a74/\u00a75) all already exist in the package (`review/jev_review.py`, `context.py`, `review/holds.py`, `benchmark.py` + `advisory_benchmark.py`, `segments.py`) and none is named as the thing being extended.",
+    "thin_wrapper": "a finding \u2014 \u00a73's per-arm report and \u00a72's case-file check are thin layers over `advisory_benchmark.FrozenBenchmarkReport` and the packet builders, with no statement of why those cannot be extended."
+  },
+  "section_digests": {
+    "_document": "7a9d8625ce5742894fc04de85ea7e8ad1129d8491a34648d226a5eb1b2957165",
+    "s1": "6df20d0bb95b521f5417abd6fe08061d941501ea4fbbc7bcf38781cae92e8a90",
+    "s2": "3f632887b68c6f2dcd10a2e438763d7e2e3130fae9d890988619efaa1955a0e2",
+    "s3": "4ec6b37767ed3280b899d988e5db3dc29648dbe2c0a55722420a47bcdaa5572d",
+    "s4": "06721cf1f3ed3ffd052621ea5ad786f915bbf9d5b93ba0c231248a7e08672ace",
+    "s5": "789e947f7768c2d6c1335d6fd988efd7128806c4adffdee8dc863931d65fb18f",
+    "s6": "7120ba2490657cf45883e76ac032846fa208f2167b45e384982a90026d4915f4"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:19:51.598879+00:00",
+  "total": null
+}
