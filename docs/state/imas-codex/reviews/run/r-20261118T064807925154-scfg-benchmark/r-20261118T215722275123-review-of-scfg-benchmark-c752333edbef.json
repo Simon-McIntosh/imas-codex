@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "the reviewed manifest records baseline_suite: null and after_suite: null, so there is no base arm to difference; the head gate log at c752333ed (the reviewed run's own gate.log) reports 24 passed with EXIT=0 and no FAILED or ERROR id over tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py, so no failing test is added on the head side.",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/standard_names/advisory_benchmark.py:228 run_frozen_advisory_benchmark -> validate_cost",
+    "imas_codex/standard_names/advisory_benchmark.py:238 run_frozen_advisory_benchmark -> summarize_costs",
+    "imas_codex/standard_names/advisory_benchmark.py:319 _validate_run_arguments -> validate_cost",
+    "docs/evidence/fragments/sn-case-file-generation/benchmark.py:731,845,855,870,875,959,1339 -> summarize_record_arm, evaluate_controls, compare_record_arms, assert_controls_separate, summarize_costs, assign_development_split"
+  ],
+  "completed_at": "2026-11-18T22:00:27.527Z",
+  "dispatched_at": "2026-11-18T21:59:32Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "855",
+      "severity": "non-blocking",
+      "text": "non-blocking: the else branch calls bench.evaluate_controls without withheld_arm, so the withheld control arm stays among the repairing arms and appears in .final.controls.incumbent.comparisons in benchmark.json, judging a control against a control; a run in which the withheld arm beat the incumbent would report the incumbent control as separated on a non-repairing arm."
+    },
+    {
+      "file": "imas_codex/standard_names/benchmark.py",
+      "line": "2398",
+      "severity": "non-blocking",
+      "text": "non-blocking: assign_development_split re-implements the ranked-digest alternation owned by imas_codex/standard_names/judgment_goldens.py:87 (assign_group_splits) with its own sha256 ranking and index-parity loop instead of extending that owner, so two splitters in one package rank and alternate independently."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "738",
+      "severity": "non-blocking",
+      "text": "non-blocking: dependent_members holds the withheld control's member selection in a runner no test imports, so the withheld arm appears in .final.controls.incumbent.comparisons and its own filter (repaired at b6eefda01) is guarded only by the one-off mutation in negative-control-dependent.log; both would regress with the gate still green."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "1035",
+      "severity": "non-blocking",
+      "text": "non-blocking: the report still publishes ruling: awaiting the lead's ruling in benchmark.json and benchmark.html, so the done_when clause that the ruling be recorded is unmet; the lead's ruling is external to this node and its disposition belongs to the coordinator."
+    }
+  ],
+  "head_log_revision": "c752333edbef286e952c71fbf453bd0d11799f18",
+  "item_verdicts": {
+    "call_sites": "VERDICT call_sites: the record-benchmark symbols have no runtime caller inside imas_codex outside tests, so the package-side sites checked are the renamed cost helpers at imas_codex/standard_names/advisory_benchmark.py:228, :238 and :319, and the only runtime consumer of the new statistics is docs/evidence/fragments/sn-case-file-generation/benchmark.py:731-875.",
+    "diff": "VERDICT diff: read all six commits against the base; dd04a65fd adds the statistics and the arm, row and report types, fc42585d2 adds the 1430-line runner's core, 4c8c3687e adds the generated report and figure, fc98b4f6d replaces the inline bootstrap with discovery.base.evaluation.bootstrap_interval and buckets the blocker vocabulary, b6eefda01 restricts the withheld control to members the full arm answered correctly, and c752333ed regenerates benchmark.json, benchmark.html and scfg-benchmark.html.",
+    "done_when": "VERDICT done_when: the done_when asks for one record per arm per member, a blind adjudicator, per-arm share/interval/blocked-by-type/changed-right-incumbent/cost/time/tokens, two development rounds, one held-out pass and two controls; the reviewed run's records.jsonl and verdicts.jsonl each hold 1234 rows (89 development x 4 arms x 2 rounds, 87 held-out x 6 arms) so every arm covered every member, and benchmark.json .final plus .rounds carry the per-arm figures and both prompt changes, with the second round stating the failure classes it answered.",
+    "goal": "VERDICT goal: the goal is to benchmark one-pass against staged generation across the available models on the reference set and put the choice to the lead; docs/evidence/fragments/sn-case-file-generation/benchmark.json .decision carries four measured options with share right, 95 % interval, cost, time and tokens beside each and names a recommendation, but .decision.ruling still reads awaiting the lead's ruling.",
+    "manifest": "VERDICT manifest: read; it reports status complete, commits dd04a65fd/fc42585d2/4c8c3687e/fc98b4f6d/b6eefda01/c752333ed, the pytest gate over tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py with gate.log at c752333ed reading 24 passed, and negative_control_log negative-control-reuse.log.",
+    "write_paths": "VERDICT write_paths: the reviewed node's declared set is imas_codex/standard_names/benchmark.py, imas_codex/standard_names/advisory_benchmark.py, tests/standard_names/test_record_benchmark.py, docs/evidence/fragments/sn-case-file-generation/benchmark.py, benchmark.json, benchmark.html, the widened scfg-benchmark.html and docs/figures/sn-case-file-generation/scfg-benchmark, and git diff 0f38d7d5b..c752333ed touches exactly those eight paths and no other file."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_record_benchmark.py:85 reddens when the incumbent_right filter at imas_codex/standard_names/benchmark.py:2565 is dropped (negative-control-drift.log: assert 3 == 2), :132 reddens if the inline bootstrap returns (negative-control-reuse.log: KeyError scores), and :110 reddens if blocker strings stop being bucketed, while the runner's dependent_members filter at docs/evidence/fragments/sn-case-file-generation/benchmark.py:738 has no permanent test.",
+    "evidence": "gate.log records the reviewed revision with 24 passed and EXIT=0 over the two suites, and each negative-control log records EXIT=1 under its stated mutation, but no gate assertion rereads benchmark.json, so the published .final figures are reconciled by reading rather than by a threshold.",
+    "fit": "the addition sits under the section header at imas_codex/standard_names/benchmark.py:2323-2326 and follows the module's dataclass, constants and to_dict conventions, with no plan, sprint or ticket identifier in any name or comment.",
+    "goal_fidelity": "imas_codex/standard_names/benchmark.py:2538-2770 feeds docs/evidence/fragments/sn-case-file-generation/benchmark.json .final, which carries every arm, member, round and control figure the goal names, with the lead's ruling left open at docs/evidence/fragments/sn-case-file-generation/benchmark.py:1035.",
+    "reuse": "imas_codex/standard_names/benchmark.py:2629 now calls imas_codex/discovery/base/evaluation.py:144 bootstrap_interval with scores_b and a mean statistic instead of keeping its own resampler, but :2398 still re-implements the ranked-digest alternation of imas_codex/standard_names/judgment_goldens.py:87 for the split.",
+    "scope_discipline": "every path in git diff 0f38d7d5b..c752333ed is inside the reviewed node's declared write set, and the only product edit outside the new record-benchmark block is the public renaming of summarize_costs and validate_cost at imas_codex/standard_names/advisory_benchmark.py:419."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to benchmark one-pass against staged generation across the available models on the reference set and put the choice to the lead; docs/evidence/fragments/sn-case-file-generation/benchmark.json .decision carries four measured options with share right, 95 % interval, cost, time and tokens beside each and names a recommendation, but .decision.ruling still reads awaiting the lead's ruling.\nVERDICT done_when: the done_when asks for one record per arm per member, a blind adjudicator, per-arm share/interval/blocked-by-type/changed-right-incumbent/cost/time/tokens, two development rounds, one held-out pass and two controls; the reviewed run's records.jsonl and verdicts.jsonl each hold 1234 rows (89 development x 4 arms x 2 rounds, 87 held-out x 6 arms) so every arm covered every member, and benchmark.json .final plus .rounds carry the per-arm figures and both prompt changes, with the second round stating the failure classes it answered.\nVERDICT write_paths: the reviewed node's declared set is imas_codex/standard_names/benchmark.py, imas_codex/standard_names/advisory_benchmark.py, tests/standard_names/test_record_benchmark.py, docs/evidence/fragments/sn-case-file-generation/benchmark.py, benchmark.json, benchmark.html, the widened scfg-benchmark.html and docs/figures/sn-case-file-generation/scfg-benchmark, and git diff 0f38d7d5b..c752333ed touches exactly those eight paths and no other file.\nVERDICT manifest: read; it reports status complete, commits dd04a65fd/fc42585d2/4c8c3687e/fc98b4f6d/b6eefda01/c752333ed, the pytest gate over tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py with gate.log at c752333ed reading 24 passed, and negative_control_log negative-control-reuse.log.\nVERDICT diff: read all six commits against the base; dd04a65fd adds the statistics and the arm, row and report types, fc42585d2 adds the 1430-line runner's core, 4c8c3687e adds the generated report and figure, fc98b4f6d replaces the inline bootstrap with discovery.base.evaluation.bootstrap_interval and buckets the blocker vocabulary, b6eefda01 restricts the withheld control to members the full arm answered correctly, and c752333ed regenerates benchmark.json, benchmark.html and scfg-benchmark.html.\nCALL_SITES: imas_codex/standard_names/advisory_benchmark.py:228 run_frozen_advisory_benchmark -> validate_cost, imas_codex/standard_names/advisory_benchmark.py:238 run_frozen_advisory_benchmark -> summarize_costs, imas_codex/standard_names/advisory_benchmark.py:319 _validate_run_arguments -> validate_cost, docs/evidence/fragments/sn-case-file-generation/benchmark.py:731,845,855,870,875,959,1339 -> summarize_record_arm, evaluate_controls, compare_record_arms, assert_controls_separate, summarize_costs, assign_development_split\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/benchmark.py:2538-2770 feeds docs/evidence/fragments/sn-case-file-generation/benchmark.json .final, which carries every arm, member, round and control figure the goal names, with the lead's ruling left open at docs/evidence/fragments/sn-case-file-generation/benchmark.py:1035.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate.log records the reviewed revision with 24 passed and EXIT=0 over the two suites, and each negative-control log records EXIT=1 under its stated mutation, but no gate assertion rereads benchmark.json, so the published .final figures are reconciled by reading rather than by a threshold.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 0f38d7d5b..c752333ed is inside the reviewed node's declared write set, and the only product edit outside the new record-benchmark block is the public renaming of summarize_costs and validate_cost at imas_codex/standard_names/advisory_benchmark.py:419.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_record_benchmark.py:85 reddens when the incumbent_right filter at imas_codex/standard_names/benchmark.py:2565 is dropped (negative-control-drift.log: assert 3 == 2), :132 reddens if the inline bootstrap returns (negative-control-reuse.log: KeyError scores), and :110 reddens if blocker strings stop being bucketed, while the runner's dependent_members filter at docs/evidence/fragments/sn-case-file-generation/benchmark.py:738 has no permanent test.\nSCORE fit: 18\nJUSTIFICATION fit: the addition sits under the section header at imas_codex/standard_names/benchmark.py:2323-2326 and follows the module's dataclass, constants and to_dict conventions, with no plan, sprint or ticket identifier in any name or comment.\nSCORE reuse: 15\nJUSTIFICATION reuse: imas_codex/standard_names/benchmark.py:2629 now calls imas_codex/discovery/base/evaluation.py:144 bootstrap_interval with scores_b and a mean statistic instead of keeping its own resampler, but :2398 still re-implements the ranked-digest alternation of imas_codex/standard_names/judgment_goldens.py:87 for the split.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:855 non-blocking: the else branch calls bench.evaluate_controls without withheld_arm, so the withheld control arm stays among the repairing arms and appears in .final.controls.incumbent.comparisons in benchmark.json, judging a control against a control; a run in which the withheld arm beat the incumbent would report the incumbent control as separated on a non-repairing arm.\nFINDING imas_codex/standard_names/benchmark.py:2398 non-blocking: assign_development_split re-implements the ranked-digest alternation owned by imas_codex/standard_names/judgment_goldens.py:87 (assign_group_splits) with its own sha256 ranking and index-parity loop instead of extending that owner, so two splitters in one package rank and alternate independently.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:738 non-blocking: dependent_members holds the withheld control's member selection in a runner no test imports, so the withheld arm appears in .final.controls.incumbent.comparisons and its own filter (repaired at b6eefda01) is guarded only by the one-off mutation in negative-control-dependent.log; both would regress with the gate still green.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:1035 non-blocking: the report still publishes ruling: awaiting the lead's ruling in benchmark.json and benchmark.html, so the done_when clause that the ruling be recorded is unmet; the lead's ruling is external to this node and its disposition belongs to the coordinator.",
+  "review_run_id": "r-20261118T215722275123-review-of-scfg-benchmark-c752333edbef",
+  "reviewed_base_sha": "0f38d7d5b6dd07706ec496230bcde3369dc27693",
+  "reviewed_head_sha": "c752333edbef286e952c71fbf453bd0d11799f18",
+  "reviewed_run_id": "r-20261118T064807925154-scfg-benchmark",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T215722275123-review-of-scfg-benchmark-c752333edbef"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 16,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 15,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T22:33:45.991837+00:00",
+  "total": 102
+}
