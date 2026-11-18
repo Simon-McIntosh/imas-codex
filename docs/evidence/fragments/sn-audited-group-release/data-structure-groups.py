@@ -911,16 +911,21 @@ def disposable_controls() -> dict[str, Any]:
 # ---------------------------------------------------------------------------
 
 
+def repeated_names(payload: dict[str, Any]) -> list[str]:
+    """Names a part placements claims twice, which no part may hold."""
+    placement = collections.Counter(
+        name for part in payload["transport"]["parts"] for name in part["names"]
+    )
+    return sorted(name for name, count in placement.items() if count > 1)
+
+
 def instrument_checks(payload: dict[str, Any]) -> list[tuple[str, bool]]:
     """Every way this run could be wrong, one arm each so every arm can fail."""
     catalog = payload["catalog"]
     transport = payload["transport"]
     families = payload["families"]
     sample = payload["sample"]
-    placement = collections.Counter(
-        name for part in transport["parts"] for name in part["names"]
-    )
-    repeated = sorted(name for name, count in placement.items() if count > 1)
+    repeated = repeated_names(payload)
     checks = [
         (
             "settled, moved and spanning sum to the live names read",
@@ -965,10 +970,6 @@ def instrument_checks(payload: dict[str, Any]) -> list[tuple[str, bool]]:
         (
             "every statement this run hands the graph is a read",
             payload["read_only"]["passed"],
-        ),
-        (
-            "the landed fragment publishes this run's partition",
-            landing_agrees(payload),
         ),
     ]
     for control in payload["controls"]["disposable"]["arms"]:
@@ -1351,19 +1352,6 @@ def render_page(payload: dict[str, Any]) -> str:
 # The landing fragment
 # ---------------------------------------------------------------------------
 
-#: What a name placed in each part holds, one line per part.
-PART_HOLDS = {
-    "transport_coefficients": (
-        "diffusivities, conductivities, convection velocities and damping rates"
-    ),
-    "profile_quantities": "profile quantities and their general-grid forms",
-    "distribution_quantities": ("distribution functions and their orbit-class moments"),
-    "summary_quantities": (
-        "local, volume-, line- and flux-surface-averaged or integrated forms"
-    ),
-    "source_quantities": "particle, energy, momentum and current source terms",
-}
-
 
 def render_landing(payload: dict[str, Any]) -> str:
     """The landing fragment, every figure taken from this run's measurement."""
@@ -1453,7 +1441,7 @@ def render_landing(payload: dict[str, Any]) -> str:
             + "</code></td><td>"
             + str(part["count"])
             + "</td><td>"
-            + PART_HOLDS[part["part"]]
+            + _esc(part["definition"])
             + "</td></tr>"
         )
     out += [
@@ -1488,62 +1476,148 @@ def render_landing(payload: dict[str, Any]) -> str:
     return "".join(out)
 
 
-#: The figures the landing fragment publishes, read back out of its text.
-LANDING_FIGURES = (
-    ("live", r"(\d+) live names were read in one pass"),
-    ("settled", r"<strong>(\d+) names settle in their stored group</strong>"),
-    ("settled_with_structure", r"\((\d+) from their structures"),
-    ("settled_without_structure", r"(\d+) with no data structure to read"),
-    ("moved", r"<strong>(\d+) move</strong>"),
-    ("spanning", r"<strong>(\d+) span</strong>"),
-    ("transport_live", r"<code>transport</code> is (\d+) live names"),
-    ("placed", r"with (\d+) placed and"),
-    ("listed_total", r"placed and (\d+) listed with a reason"),
-    ("families", r"The (\d+) DD families are recounted"),
-    ("today_spanning", r"set: (\d+) span stored domains"),
-    ("rule_spanning", r"and (\d+) would span under the rule"),
-)
+def summary_text(text: str) -> str | None:
+    """The summary paragraph's text with its tags removed, or ``None``."""
+    match = re.search(r'<p id="[^"]*-summary">([\s\S]*?)</p>', text)
+    if match is None:
+        return None
+    return html.unescape(re.sub(r"<[^>]+>", " ", match.group(1)))
 
 
-def published_figures(text: str) -> dict[str, int] | None:
-    """The partition the landing fragment states, or ``None`` if it states none."""
-    figures: dict[str, int] = {}
-    for key, pattern in LANDING_FIGURES:
-        match = re.search(pattern, text)
-        if match is None:
+def numbers(text: str) -> list[int]:
+    """Every number the text states, in the order it states them."""
+    return [int(digits) for digits in re.findall(r"\d+", text)]
+
+
+def catalog_partition(payload: dict[str, Any]) -> list[int]:
+    """The five partition rows the data file holds, in printed order."""
+    catalog = payload["catalog"]
+    return [
+        catalog["settled_with_structure"],
+        catalog["settled_without_structure"],
+        catalog["moved"],
+        catalog["spanning"],
+        catalog["live"],
+    ]
+
+
+def table_rows(text: str, suffix: str) -> list[list[str]] | None:
+    """The body rows of the first table whose id ends in ``suffix``."""
+    pattern = r'<table id="[^"]*' + suffix + r'">[\s\S]*?</table>'
+    match = re.search(pattern, text)
+    if match is None:
+        return None
+    rows = []
+    for row in re.findall(r"<tr>(.*?)</tr>", match.group(0), re.S):
+        cells = re.findall(r"<td>(.*?)</td>", row, re.S)
+        rows.append([html.unescape(re.sub(r"<[^>]+>", "", c)).strip() for c in cells])
+    return rows
+
+
+def partition_counts(text: str) -> list[int] | None:
+    """The five partition rows a file prints, in the order it prints them."""
+    rows = None
+    for suffix in ("-partition-table", "-catalog-table"):
+        rows = table_rows(text, suffix)
+        if rows is not None:
+            break
+    if rows is None:
+        return None
+    counts = []
+    for row in rows[1:]:
+        if len(row) < 2 or not row[1].isdigit():
             return None
-        figures[key] = int(match.group(1))
-    return figures
+        counts.append(int(row[1]))
+    return counts
 
 
-def landing_partition(payload: dict[str, Any]) -> dict[str, int]:
-    """The same figures taken from the measurement, in the fragment's names."""
+def part_counts(text: str) -> dict[str, int] | None:
+    """Every part a file prints, with the count printed beside it."""
+    rows = table_rows(text, "-parts-table")
+    if rows is None:
+        return None
+    counts = {}
+    for row in rows[1:]:
+        if len(row) < 2 or not row[1].isdigit():
+            return None
+        counts[row[0]] = int(row[1])
+    return counts
+
+
+def evidence_checks(
+    payload: dict[str, Any], page_text: str, fragment_text: str
+) -> list[tuple[str, bool]]:
+    """Every figure the published files state, against the file they publish."""
     catalog = payload["catalog"]
     transport = payload["transport"]
-    families = payload["families"]
-    return {
-        "live": catalog["live"],
-        "settled": catalog["settled"],
-        "settled_with_structure": catalog["settled_with_structure"],
-        "settled_without_structure": catalog["settled_without_structure"],
-        "moved": catalog["moved"],
-        "spanning": catalog["spanning"],
-        "transport_live": transport["live"],
-        "placed": transport["placed"],
-        "listed_total": transport["listed_total"],
-        "families": families["families"],
-        "today_spanning": families["today_spanning"],
-        "rule_spanning": families["rule_spanning"],
-    }
+    want_partition = catalog_partition(payload)
+    want_parts = expected_parts(payload)
+    fragment_want = [
+        catalog["live"],
+        catalog["settled"],
+        catalog["settled_with_structure"],
+        catalog["settled_without_structure"],
+        catalog["moved"],
+        catalog["spanning"],
+        transport["live"],
+        len(transport["parts"]),
+        transport["placed"],
+        transport["listed_total"],
+        payload["families"]["families"],
+        payload["families"]["today_spanning"],
+        2,  # ``section 2 records``’s number, in the same sentence
+        payload["families"]["rule_spanning"],
+        payload["families"]["part_spanning_count"],
+    ]
+    page_want = [
+        catalog["live"],
+        catalog["settled"],
+        catalog["settled_with_structure"],
+        catalog["settled_without_structure"],
+        catalog["moved"],
+        catalog["spanning"],
+        transport["live"],
+        transport["placed"],
+        len(transport["parts"]),
+        transport["listed_total"],
+    ]
+    return [
+        (
+            "the landing fragment states the data file's summary figures",
+            _summary_numbers(fragment_text) == fragment_want,
+        ),
+        (
+            "the landing fragment states the data file's partition table",
+            partition_counts(fragment_text) == want_partition,
+        ),
+        (
+            "the landing fragment states the data file's per-part counts",
+            part_counts(fragment_text) == want_parts,
+        ),
+        (
+            "the page states the data file's summary figures",
+            _summary_numbers(page_text) == page_want,
+        ),
+        (
+            "the page states the data file's partition table",
+            partition_counts(page_text) == want_partition,
+        ),
+        (
+            "the page states the data file's per-part counts",
+            part_counts(page_text) == want_parts,
+        ),
+    ]
 
 
-def landing_agrees(payload: dict[str, Any]) -> bool:
-    """True when the landed fragment states this run's partition and no other."""
-    try:
-        text = OUT_LANDING.read_text(encoding="utf-8")
-    except OSError:
-        return False
-    return published_figures(text) == landing_partition(payload)
+def _summary_numbers(text: str) -> list[int] | None:
+    """The numbers the summary paragraph states, or ``None`` if it has none."""
+    summary = summary_text(text)
+    return None if summary is None else numbers(summary)
+
+
+def expected_parts(payload: dict[str, Any]) -> dict[str, int]:
+    """Every part the data file holds, with its count."""
+    return {part["part"]: part["count"] for part in payload["transport"]["parts"]}
 
 
 # ---------------------------------------------------------------------------
@@ -1692,6 +1766,21 @@ def build(gc: Any) -> dict[str, Any]:
     return payload
 
 
+def counts_line(payload: dict[str, Any]) -> str:
+    """The one-line partition and transport summary both modes print."""
+    catalog = payload["catalog"]
+    transport = payload["transport"]
+    return (
+        f"live={catalog['live']} settled={catalog['settled']} "
+        f"(with_structure={catalog['settled_with_structure']} "
+        f"without_structure={catalog['settled_without_structure']}) "
+        f"moved={catalog['moved']} spanning={catalog['spanning']} "
+        f"sum={catalog['settled'] + catalog['moved'] + catalog['spanning']} "
+        f"transport_live={transport['live']} placed={transport['placed']} "
+        f"listed={transport['listed_total']} parts={len(transport['parts'])}"
+    )
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -1709,48 +1798,55 @@ def main(argv: list[str] | None = None) -> int:
     from imas_codex.graph.client import GraphClient
 
     with GraphClient() as gc:
-        payload = build(gc)
+        live = build(gc)
     if args.plant_double_count:
-        planted = payload["transport"]["parts"][0]["names"][0]
-        payload["transport"]["parts"][1]["names"].append(planted)
+        planted = live["transport"]["parts"][0]["names"][0]
+        live["transport"]["parts"][1]["names"].append(planted)
 
-    if not args.check:
-        # The landing fragment is regenerated from this run's payload before the
-        # gate reads it, so a write can never publish one measurement and land
-        # another. In ``--check`` mode nothing is written and the arm compares
-        # the committed fragment against this run.
-        OUT_LANDING.write_text(render_landing(payload) + "\n", encoding="utf-8")
-    checks = instrument_checks(payload)
+    if args.check:
+        snapshot = json.loads(OUT_JSON.read_text(encoding="utf-8"))
+        checks = evidence_checks(
+            snapshot,
+            OUT_HTML.read_text(encoding="utf-8"),
+            OUT_LANDING.read_text(encoding="utf-8"),
+        )
+        for control in live["controls"]["disposable"]["arms"]:
+            checks.append((control["description"], control["passed"]))
+        if args.plant_double_count:
+            checks.append(
+                ("no transport name is placed in two parts", not repeated_names(live))
+            )
+        for description, ok in checks:
+            print(f"{'PASS' if ok else 'FAIL'} {description}")
+        print(counts_line(snapshot))
+        taken = snapshot["environment"]["generated_at"]
+        print(f"drift from the snapshot taken {taken}: {counts_line(live)}")
+        if not all(ok for _, ok in checks):
+            print("the committed evidence disagrees with itself; nothing written")
+            return 1
+        base = snapshot["environment"]["measured_base"]
+        print(f"checked at snapshot {base}; nothing written")
+        return 0
+
+    fragment_text = render_landing(live) + "\n"
+    page_text = render_page(live) + "\n"
+    checks = instrument_checks(live) + evidence_checks(live, page_text, fragment_text)
     for description, ok in checks:
         print(f"{'PASS' if ok else 'FAIL'} {description}")
-    catalog = payload["catalog"]
-    transport = payload["transport"]
-    print(
-        f"live={catalog['live']} settled={catalog['settled']} "
-        f"(with_structure={catalog['settled_with_structure']} "
-        f"without_structure={catalog['settled_without_structure']}) "
-        f"moved={catalog['moved']} spanning={catalog['spanning']} "
-        f"sum={catalog['settled'] + catalog['moved'] + catalog['spanning']} "
-        f"transport_live={transport['live']} placed={transport['placed']} "
-        f"listed={transport['listed_total']} parts={len(transport['parts'])} "
-        f"families_today_spanning={payload['families']['today_spanning']} "
-        f"families_rule_spanning={payload['families']['rule_spanning']}"
-    )
+    print(counts_line(live))
     if not all(ok for _, ok in checks):
         print(
-            f"not written: {OUT_JSON.name} and {OUT_HTML.name} keep the last run "
-            "that passed"
+            "not written: "
+            f"{OUT_JSON.name}, {OUT_HTML.name} and {OUT_LANDING.name} "
+            "keep the last run that passed"
         )
         return 1
-    if args.check:
-        base = payload["environment"]["measured_base"]
-        print(f"checked at {base}; nothing written")
-        return 0
     OUT_JSON.write_text(
-        json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n",
+        json.dumps(live, separators=(",", ":"), sort_keys=True) + "\n",
         encoding="utf-8",
     )
-    OUT_HTML.write_text(render_page(payload) + "\n", encoding="utf-8")
+    OUT_HTML.write_text(page_text, encoding="utf-8")
+    OUT_LANDING.write_text(fragment_text, encoding="utf-8")
     print(f"wrote {OUT_JSON.name}, {OUT_HTML.name} and {OUT_LANDING.name}")
     return 0
 
