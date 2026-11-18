@@ -1,0 +1,82 @@
+{
+  "absent": null,
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own suite arms: manifest.md carries no baseline_suite and no after_suite key, and its tests: line names only the script gate uv run --no-sync python docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py --check, so no pair of gate logs exists to difference and the added-failure set is empty by construction, stated as an absence rather than counted. Verifying the merged result belongs to a separately dispatched test node",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-18T05:22:50.273Z",
+  "dispatched_at": "2026-11-18T05:22:37Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_check_runs_not_every_arm",
+      "line": "1789",
+      "severity": "non-blocking",
+      "text": "non-blocking: --check's help still states 'read, run every arm and the planted controls', but the check branch at :1808-1819 runs only evidence_checks plus the four disposable arms (and the plant arm when asked), so the eleven measurement arms the page publishes in its checks table are neither executed nor read in the committed-evidence mode."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_page_checks_table_unread",
+      "line": "1313",
+      "severity": "non-blocking",
+      "text": "non-blocking: _page_checks renders every stored arm's 'pass'/'FAIL' into the committed page's checks table, but evidence_checks at :1547-1605 reads only the summary, partition and per-part tables, so a published 'FAIL ... FAIL' \u2014 the page's own statement that an arm regressed \u2014 would publish and pass --check; only the write path (:1833) refuses to write such a page in the first place."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_part_definition_unchecked",
+      "line": "1444",
+      "severity": "non-blocking",
+      "text": "non-blocking: 10664254e replaced the hand-kept PART_HOLDS with _esc(part[\"definition\"]) here and at :1208; _page_checks aside, the Holds column is out of the same commit's account, and part_counts (:1534-1546) keeps only the name and count cells, so a mis-rendered definition, such as one part's text printed under another's name, changes the landing fragment and passes both the write path and --check."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_summary_pins_section_number",
+      "line": "1568",
+      "severity": "non-blocking",
+      "text": "non-blocking: the expected summary numbers at :1556-1572 are a positional list that carries the literal 2 for the phrase 'section 2 records', so a plan renumbering, or any prose edit that adds or drops a number in either summary paragraph, fails the arm for a reason that is not a figure disagreeing; the failure is loud rather than wrong, which is why it does not hold the node."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_check_still_needs_graph",
+      "line": "1800",
+      "severity": "non-blocking",
+      "text": "non-blocking: --check opens GraphClient and runs the full catalog read at :1800-1801 only to print the drift line and to compute the in-process disposable arms, so an unavailable graph makes the committed-evidence gate exit non-zero on a traceback rather than on its own 'the gate refused' receipt; the mode's own docstring and commit message say it verifies the committed evidence without the live graph."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 39dcbaf88756: 10664254e rewrites --check to compare the committed JSON against the committed page and fragment, adds repeated_names, summary_text, numbers, catalog_partition, table_rows, partition_counts, part_counts, evidence_checks, _summary_numbers, expected_parts and counts_line, deletes PART_HOLDS, LANDING_FIGURES, published_figures, landing_partition and landing_agrees, and moves the write after the checks; 81077970c changes one refusal message. The regenerated fragment differs only in the Holds column, which now names each quantity's structure.",
+    "done_when": "The done_when asks for the rule's counts over every live name, the families beside today's 225, a hand-read sample, and each transport part's count, structures and families; the gate at data-structure-groups.py:1808-1819 asserts only that the committed page and landing fragment state the committed data file's figures, and it reads neither the stored measurement arms nor the page's own checks table (data-structure-groups.py:1313) where those measurements are reported.",
+    "goal": "The node's goal is to measure the data-structure rule over every live name and propose transport's five parts; the gained commits turn data-structure-groups.py:1808-1819 into a committed-evidence check and render each part's definition from the payload at data-structure-groups.py:1444 instead of the hand-kept PART_HOLDS, so sagr-data-structure-groups.html:1 now states which structures each part's names come from.",
+    "manifest": "manifest.md at head records status complete, the gate command and its test_logs, gate.log and negative-control.log and landing-control.log and write-refusal.log, and the recorded checkpoint; its evidence_inputs still carries the pre-fix 885/815/311 pair, but no baseline_suite or after_suite arm is recorded, so the added-failure set has no measured pair to derive from.",
+    "write_paths": "The five declared paths are the four fragment files plus docs/figures/sn-audited-group-release/sagr-data-structure-groups; git diff 39dcbaf88756..81077970cf1f changes exactly data-structure-groups.py and sagr-data-structure-groups.html, both declared, and writes no figure."
+  },
+  "justifications": {
+    "durability": "The per-part arm is shown firing by landing-control.log:4-6, but the page's checks table at data-structure-groups.py:1313 and the Holds cell at :1444 have no arm, so the recorded gate passes whatever those two say.",
+    "evidence": "gate.log:1-14 names revision 81077970cf1f, the six evidence PASS lines, and EXIT=0, and landing-control.log:4-6 records the per-part arm refusing an altered 360-to-361 count with EXIT=1, but the gate never reads the committed data file's eleven stored arms nor the page's published checks table.",
+    "fit": "The additions reuse the module's own _esc/_row/_table helpers at data-structure-groups.py:985-1010 and follow the surrounding docstring idiom, though the literal 2 at :1568 pins a plan section number inside a list of measured figures.",
+    "goal_fidelity": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1444 renders each part's payload definition into the landing fragment and :1808 makes the gate read the committed files against each other, but :1789 still advertises every arm while the check branch runs only the evidence and disposable arms.",
+    "reuse": "No shared owner exists for committed-evidence figure agreement: the search found only imas_codex/standard_names/judgment_goldens.py:188-206, a private reader of one expert HTML table, and the sibling standalone fragment script docs/evidence/fragments/sn-review-through-jev/srtj-jev-name-evidence-measure-run.py, so the additions extend neither and fork neither.",
+    "scope_discipline": "git diff 39dcbaf88756..81077970cf1f changes only the two declared fragment paths, although the landing fragment's Holds column changes visible text that neither commit body mentions."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: read the node goal at s6.txt:5 against docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1444 and :1808-1819; the gained commits make the gate read the committed files against each other and render each part's definition from the payload, and both stated intents landed; VERDICT done_when: read the done_when at s6.txt:5 and gate.log:3-12 at head; the gate asserts the committed page and fragment state the committed data file's figures but reads neither the stored measurement arms nor the page's checks table at data-structure-groups.py:1313; VERDICT write_paths: read the five declared paths against git diff 39dcbaf88756..81077970cf1f; exactly data-structure-groups.py and sagr-data-structure-groups.html changed and both are declared; VERDICT manifest: read manifest.md at head; it records status complete, the gate command and four logs, and no baseline_suite or after_suite arm.",
+  "review_run_id": "r-20261118T051221462311-review-of-sagr-data-structure-groups-81077970cf1f",
+  "reviewed_base_sha": "39dcbaf88756f605a70eed6745b74309eb65d3c3",
+  "reviewed_head_sha": "81077970cf1f10ca980118fff456643e6c69909e",
+  "reviewed_range_note": "This record reviews the two commits the run gained after its earlier review at 39dcbaf88756: 10664254e and 81077970c, whose union is exactly docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py and docs/evidence/fragments/sn-audited-group-release/sagr-data-structure-groups.html. The node's own base is 1bc9b0f260c81266af0e2ab499ef253f1f5cf7fe, covered by the record stored at review-records/r-20261117T230027635139-sagr-data-structure-groups.at-39dcbaf88756f605a70eed6745b74309eb65d3c3.json.",
+  "reviewed_run_id": "r-20261117T230027635139-sagr-data-structure-groups",
+  "rubric": "text",
+  "scores": {
+    "durability": 14,
+    "evidence": 15,
+    "fit": 18,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 18
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:40:00Z",
+  "total": 102
+}
