@@ -1,0 +1,550 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="docs-project" content="imas-codex">
+<meta name="plan-slug" content="sn-audited-group-release">
+<meta name="reckon-type" content="evidence-fragment">
+<meta name="node-id" content="sagr-stage-repairs">
+<title>Three repaired stages regenerate their causes' members</title>
+</head>
+<body>
+<main>
+<h1 id="sagr-stage-repairs-title">Three repaired stages regenerate their causes' members</h1>
+<p id="sagr-stage-repairs-summary">
+The three largest shared defect causes hold <strong>42 members</strong> of the equilibrium adjudication. Each was regenerated here through the repaired stage from its own recorded source packet, and the regenerated record was read back from a disposable graph and adjudicated blind by a fresh reader (<code>openrouter/openai/gpt-6-luna</code>), under the fixed classes of the audit this measurement compares against. Judged sound: <strong>0 of 42 before</strong>, <strong>25 of 42 after</strong>.
+</p>
+<h2 id="sagr-stage-repairs-per-cause">Per cause</h2>
+<table id="sagr-stage-repairs-cause-table"><thead><tr><th>Cause</th><th>Members</th><th>Sound before</th><th>Sound after</th><th>Named after</th><th>Not named after</th></tr></thead><tbody>
+<tr><td><code>physical_scope_qualifier_lost</code></td><td>18</td><td>0</td><td>12</td><td>14</td><td>4</td></tr>
+<tr><td><code>source_bindings_conflate_distinct_definitions</code></td><td>13</td><td>0</td><td>6</td><td>12</td><td>1</td></tr>
+<tr><td><code>boundary_forced_to_lcfs</code></td><td>11</td><td>0</td><td>7</td><td>10</td><td>1</td></tr>
+</tbody></table>
+<h2 id="sagr-stage-repairs-physical_scope_qualifier_lost">physical_scope_qualifier_lost</h2>
+<p id="sagr-stage-repairs-physical_scope_qualifier_lost-stage">Stage <code>imas_codex/llm/prompts/sn/generate_name_dd_names.md</code>, repair marker <code>{{ item.ancestor_context }}</code>.</p>
+<table id="sagr-stage-repairs-physical_scope_qualifier_lost-table"><thead><tr><th>Member</th><th>Before</th><th>Regenerated record</th><th>After</th><th>Adjudicator's reason</th></tr></thead><tbody>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-current_of_passive_structure"><td><code>current_of_passive_structure</code></td><td>defective</td><td><code>toroidal_passive_structure_current_due_to_passive_structure</code><br>Toroidal current flowing in the passive conductor structures, as used in equilibrium reconstruction.</td><td class="ok">sound</td><td>The source identifies “pf passive current” in “a set of axisymmetric passive conductors” used as an equilibrium constraint, consistent with the record’s passive-structure current used in equilibrium reconstruction.</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-gap_at_outboard_midplane"><td><code>gap_at_outboard_midplane</code></td><td>defective</td><td><em>vocab_gap</em><br><code>geometry:outer_separatrix</code></td><td class="ok">sound</td><td>The source specifies a “Distance between the inner and outer separatrices,” which is not named by the reported term “geometry/outer_separatrix,” supporting the stage’s vocab_gap decline.</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-inner_radius_of_plasma_filament"><td><code>inner_radius_of_plasma_filament</code></td><td>defective</td><td><code>inner_radius_of_annulus_center</code><br>Inner radius of an annular cross-section element representing a plasma current-carrying filament.</td><td class="bad">definition_contradicts_source</td><td>The source describes a “discrete plasma current-carrying filament,” but the definition only says “a plasma current-carrying filament.”<details><summary>source text</summary><pre>path: pf_plasma/element/geometry/annulus/radius_inner
+Inner radius of an annular cross-section element representing a discrete plasma current-carrying filament in the pf_plasma IDS. Defines the inner boundary of the annulus in axisymmetric plasma current distribution modelling. Inner radius
+
+enclosing structures:
+pf_plasma/element/geometry/annulus: The element is an annulus of centre R, Z, with inner radius radius_inner and outer radius radius_outer
+pf_plasma/element/geometry: Cross-sectional shape of the element</pre></details></td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-major_length_of_plasma_filament"><td><code>major_length_of_plasma_filament</code></td><td>defective</td><td><em>no_candidate</em><br><code>no gap reported</code></td><td class="bad">name_omits_source</td><td>The sources specify “Length of the parallelogram side inclined at angle alpha,” so reporting “nothing” leaves this supported quantity unnamed.<details><summary>source text</summary><pre>path: pf_plasma/element/geometry/oblique/length_alpha
+Length of the parallelogram side inclined at angle alpha with respect to the major radius axis, describing the oblique cross-sectional geometry of a discrete plasma current filament element. Length of the parallelogram side inclined with angle alpha with respect to the major radius axis
+
+enclosing structures:
+pf_plasma/element/geometry/oblique: Parallelogram description of the element
+pf_plasma/element/geometry: Cross-sectional shape of the element</pre></details></td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-maximum_magnetic_field"><td><code>maximum_magnetic_field</code></td><td>defective</td><td><code>maximum_over_flux_surface_magnetic_field_magnitude</code><br>Maximum of the magnetic field magnitude on a toroidal magnetic flux surface.</td><td class="ok">sound</td><td>The definition specifies the omitted qualifier, stating “on a toroidal magnetic flux surface,” and matches the source’s maximum of the magnetic field magnitude.</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-maximum_magnetic_field_magnitude"><td><code>maximum_magnetic_field_magnitude</code></td><td>defective</td><td><code>maximum_over_flux_surface_magnetic_field_magnitude</code><br>Maximum magnetic field magnitude on each closed flux surface.</td><td class="ok">sound</td><td>The source describes “Maximum(modulus(B)) on the flux surface” and a “1D radial profile,” matching the record’s “Maximum magnetic field magnitude on each closed flux surface.”</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-minor_length_of_plasma_filament"><td><code>minor_length_of_plasma_filament</code></td><td>defective</td><td><em>vocab_gap</em><br><code>geometric_base:inclined_side_length</code></td><td class="ok">sound</td><td>The decline is supported by the source’s specific qualifier: “Length of the parallelogram side inclined at angle beta with respect to the height axis,” which is not captured by the reported generic “inclined_side_length.”</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-normal_non_axisymmetric_magnetic_field"><td><code>normal_non_axisymmetric_magnetic_field</code></td><td>defective</td><td><code>normal_non_axisymmetric_vacuum_magnetic_field_of_control_surface</code><br>Normal component of the non-axisymmetric vacuum magnetic field evaluated on a control surface.</td><td class="ok">sound</td><td>The source describes the “Normal component of the non-axisymmetric (3D) vacuum magnetic field” on a control surface, matching the record’s name and definition.</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-outer_radius_of_plasma_filament"><td><code>outer_radius_of_plasma_filament</code></td><td>defective</td><td><code>outer_radius</code><br>Outer radius of the annular cross-sectional geometry of a poloidal field plasma element</td><td class="ok">sound</td><td>The source describes “Outer radius” for the annulus, and the record identifies it as “Outer radius of the annular cross-sectional geometry of a poloidal field plasma element.”</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-polarization_angle_at_constraint_position"><td><code>polarization_angle_at_constraint_position</code></td><td>defective</td><td><code>polarization_angle</code><br>Motional Stark effect polarization angle measured for equilibrium reconstruction constraints.</td><td class="ok">sound</td><td>The definition’s qualifier “measured” matches the measured source, “Measured value,” and distinguishes it from the reconstructed source, “Value calculated from the reconstructed equilibrium.”</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-radial_coordinate_of_plasma_filament"><td><code>radial_coordinate_of_plasma_filament</code></td><td>defective</td><td><em>grammar_rejected</em><br><code>geometry:oblique</code></td><td class="bad">name_omits_source</td><td>The decline is not supported by the clear source description “Major radius (R) coordinate of oblique,” which identifies a nameable quantity.<details><summary>source text</summary><pre>path: pf_plasma/element/geometry/oblique/r
+Major radius (R) coordinate of oblique. Major radius of the reference point (from which the alpha and beta angles are defined, marked by a + on the diagram)
+
+enclosing structures:
+pf_plasma/element/geometry/oblique: Parallelogram description of the element
+pf_plasma/element/geometry: Cross-sectional shape of the element</pre></details></td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-radial_coordinate_of_strike_point"><td><code>radial_coordinate_of_strike_point</code></td><td>defective</td><td><code>radial_coordinate_of_strike_point</code><br>Radial (cylindrical R) coordinate of a divertor strike point position.</td><td class="bad">name_omits_source</td><td>The sources distinguish the “inner strike point” and “outer strike point,” but the name says only “strike_point” and the definition does not specify which one.<details><summary>source text</summary><pre>path: equilibrium/time_slice/constraints/strike_point/position_measured/r
+Major radius (R) coordinate of position measured. Major radius
+
+path: summary/boundary/strike_point_inner_r/value
+Value
+
+path: summary/boundary/strike_point_outer_r/value
+Value
+
+enclosing structures:
+equilibrium/time_slice/constraints/strike_point/position_measured: Measured or estimated position
+equilibrium/time_slice/constraints/strike_point: Array of strike points, for each of them the RZ position is given
+equilibrium/time_slice/constraints: In case of equilibrium reconstruction under constraints, measurements used to constrain the equilibrium, reconstructed values and accuracy of the fit. The names of the child nodes correspond to the following definition: the solver aims at minimizing a cost function defined as : J=1/2*sum_i [ weight_i^2 (reconstructed_i - measured_i)^2 / sigma_i^2 ]. in which sigma_i is the standard deviation of the measurement error (to be found in the IDS of the measurement)
+summary/boundary/strike_point_inner_r: R position of the inner strike point Major radius (R) position of the inner divertor strike point, where the inner separatrix leg intersects the divertor target. A key geometric boundary parameter for plasma shape characterization.
+summary/boundary/strike_point_outer_r: R position of the outer strike point Major radius (R) position of the outer divertor strike point, where the outer separatrix leg intersects the divertor target plate. A key geometric parameter for divertor heat load characterization and plasma boundary analysis.</pre></details></td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-radial_coordinate_of_x_point"><td><code>radial_coordinate_of_x_point</code></td><td>defective</td><td><code>radial_coordinate_of_x_point</code><br>Major radius (R) coordinate of the X-point position.</td><td class="bad">name_omits_source, definition_contradicts_source</td><td>The sources specify “Measured or estimated position” and “main X-point,” while the name and definition say only “X-point,” omitting those qualifiers.<details><summary>source text</summary><pre>path: equilibrium/time_slice/constraints/x_point/position_measured/r
+Major radius (R) coordinate of position measured. Major radius
+
+path: summary/boundary/x_point_main/r
+Major radius (R) coordinate of x point main. Major radius
+
+enclosing structures:
+equilibrium/time_slice/constraints/x_point/position_measured: Measured or estimated position
+equilibrium/time_slice/constraints/x_point: Array of X-points, for each of them the RZ position is given
+equilibrium/time_slice/constraints: In case of equilibrium reconstruction under constraints, measurements used to constrain the equilibrium, reconstructed values and accuracy of the fit. The names of the child nodes correspond to the following definition: the solver aims at minimizing a cost function defined as : J=1/2*sum_i [ weight_i^2 (reconstructed_i - measured_i)^2 / sigma_i^2 ]. in which sigma_i is the standard deviation of the measurement error (to be found in the IDS of the measurement)
+summary/boundary/x_point_main: RZ position of the main X-point</pre></details></td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-radial_outline_of_flux_surface"><td><code>radial_outline_of_flux_surface</code></td><td>defective</td><td><code>radial_coordinate_of_flux_surface</code><br>Radial (cylindrical R) coordinate of a level-set contour of the poloidal magnetic flux.</td><td class="bad">definition_contradicts_source</td><td>The source specifies a “Single poloidal flux contour including critical point (x-point only),” but the definition gives a generic “level-set contour” without the x-point-only qualifier.<details><summary>source text</summary><pre>path: equilibrium/time_slice/contour_tree/node/levelset/r
+Major radius (R) coordinate of levelset. Major radius
+
+enclosing structures:
+equilibrium/time_slice/contour_tree/node/levelset: Single poloidal flux contour including critical point (x-point only)
+equilibrium/time_slice/contour_tree/node: Set of nodes. A contour tree node is defined by its critical type and position within the poloidal plane. A critical type of 1 references an x-point whilst a critical type of 0 or 2 references an o-point. Both X-points and O-points are rarely coincident with nodes defining the poloidal upon which the poloidal flux map is defined. The order in which the critical points are stored in the nodes array of structure is only important for the primary plasma O-point and X-points. If present, the primary plasma O-point should be placed as the first element of the nodes array of structure. If present, the primary plasma X-point should be the second element in the nodes structure
+equilibrium/time_slice/contour_tree: Description of the topological connectivity of the poloidal flux map critical points as an undirected graph. Critical points are ether local extremum (o-points) or saddle points (x-points) of the poloidal flux map. X-points have zero gradients in orthogonal directions but are not local extremum of the poloidal flux map whilst O-points are.</pre></details></td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-reference_major_radius"><td><code>reference_major_radius</code></td><td>defective</td><td><code>major_vacuum_reference_radius</code><br>Reference major radius at which the vacuum toroidal magnetic field is defined.</td><td class="ok">sound</td><td>The definition says “Reference major radius at which the vacuum toroidal magnetic field is defined,” matching the name “major_vacuum_reference_radius” and the sources’ reference-radius descriptions.</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-rotational_transform"><td><code>rotational_transform</code></td><td>defective</td><td><code>rotational_transform</code><br>Rotational transform (inverse safety factor) at normalized effective minor radius 2/3.</td><td class="ok">sound</td><td>The enclosing structure specifies “Parameters at r_eff_norm = 2/3,” and the definition identifies the quantity as “at normalized effective minor radius 2/3.”</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-toroidal_vacuum_magnetic_field"><td><code>toroidal_vacuum_magnetic_field</code></td><td>defective</td><td><code>toroidal_vacuum_magnetic_field</code><br>Vacuum toroidal magnetic field B0 at the reference major radius R0</td><td class="ok">sound</td><td>The definition faithfully specifies the source quantity: “Vacuum toroidal magnetic field B0 at the reference major radius R0.”</td></tr>
+<tr id="sagr-stage-repairs-physical_scope_qualifier_lost-vertical_coordinate_of_strike_point"><td><code>vertical_coordinate_of_strike_point</code></td><td>defective</td><td><code>vertical_coordinate_of_strike_point</code><br>Vertical (Z) coordinate of the divertor strike point position.</td><td class="ok">sound</td><td>The source descriptions identify strike-point Z positions, including “Vertical (Z) coordinate of the inner divertor strike point” and “Vertical (Z) coordinate of the outer strike point,” matching the record’s “Vertical (Z) coordinate of the divertor strike point position.”</td></tr>
+</tbody></table>
+<h2 id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions">source_bindings_conflate_distinct_definitions</h2>
+<p id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-stage">Stage <code>imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py</code>, repair marker <code>stated operation mismatch</code>.</p>
+<table id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-table"><thead><tr><th>Member</th><th>Before</th><th>Regenerated record</th><th>After</th><th>Adjudicator's reason</th></tr></thead><tbody>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-plasma_resistance"><td><code>plasma_resistance</code></td><td>defective<br>rejected <code>summary/global_quantities/resistance/value</code>: stated operation mismatch: path &#x27;summary/global_quantities/resistance/value&#x27; states &#x27;ratio of loop voltage to plasma current, characterizing resistive&#x27; but SN &#x27;plasma_resistance&#x27; and its other sources state no ratio</td><td><code>plasma_resistance</code><br>Effective electrical resistance of the plasma column, defined as the volume integral of E·J divided by the plasma current squared.</td><td class="ok">sound</td><td>The record’s “volume integral of E·J divided by the plasma current squared” matches the equilibrium source’s definition, and both sources identify plasma electrical resistance in ohms.</td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-poloidal_angle_of_flux_surface"><td><code>poloidal_angle_of_flux_surface</code></td><td>defective</td><td><code>poloidal_angle</code><br>Poloidal angle coordinate on the 2D equilibrium grid in the poloidal plane.</td><td class="bad">name_omits_source</td><td>The definition limits the quantity to “the 2D equilibrium grid,” but the sources also describe a coil’s “sensitive axis orientation” and gyrokinetic angles in a “flux-tube domain,” which the record does not identify.<details><summary>source text</summary><pre>path: equilibrium/time_slice/ggd/theta/values
+Array of values for theta. One scalar value is provided per element in the grid subset.
+
+path: equilibrium/time_slice/profiles_2d/theta
+Poloidal angle (θ) coordinate at each point of the 2D equilibrium grid in the poloidal plane. Provides the geometric poloidal angle for mapping equilibrium quantities on the structured grid. Values of the poloidal angle on the grid
+
+path: gyrokinetics_local/linear/wavevector/eigenmode/angle_pol
+Poloidal angle grid for a linear gyrokinetic eigenmode in the flux-tube domain, defined relative to the geometric center of the flux surface cross-section. The angle increases clockwise with theta=0 at the low-field side midplane. Poloidal angle grid. The angle is defined with respect to (R0,Z0) with R0=(Rmax-Rmin)/2 and Z0=(Zmax-Zmin)/2. It is increasing clockwise. So (r,theta,phi) is right-handed. theta=0 for Z=Z0 and R&gt;R0 (LFS)
+
+path: gyrokinetics_local/non_linear/angle_pol
+Poloidal angle grid used in the non-linear gyrokinetic flux-tube simulation, with zero at the low-field side midplane and increasing clockwise. Forms the parallel (along-field-line) coordinate for the flux-tube domain. Poloidal angle grid. The angle is defined with respect to (R0,Z0) with R0=(Rmax-Rmin)/2 and Z0=(Zmax-Zmin)/2. It is increasing clockwise. So (r,theta,phi) is right-handed. theta=0 for Z=Z0 and R&gt;R0 (LFS)
+
+path: magnetics/b_field_pol_probe/poloidal_angle
+Poloidal angle of the sensitive axis orientation of a poloidal field (Bp) probe coil, defining its alignment relative to the poloidal direction. Used together with the toroidal angle to fully specify the coil orientation in 3D space. Poloidal angle of the coil orientation
+
+path: waves/coherent_wave/profiles_2d/grid/theta_geometric
+Geometric poloidal angle (θ) at each point of the 2D poloidal cross-section grid used for coherent wave propagation profiles. Defined as the standard geometric angle measured from the magnetic axis. Geometrical poloidal angle
+
+enclosing structures:
+equilibrium/time_slice/ggd/theta: Values of the poloidal angle, given on various grid subsets
+equilibrium/time_slice/ggd: Set of equilibrium representations using the generic grid description
+equilibrium/time_slice/profiles_2d: Equilibrium 2D profiles in the poloidal plane. Multiple 2D representations of the equilibrium can be stored here.
+gyrokinetics_local/linear/wavevector/eigenmode: Set of eigenmode for this wavector
+gyrokinetics_local/linear/wavevector: Set of wavevectors
+waves/coherent_wave/profiles_2d/grid: 2D grid in a poloidal cross-section
+waves/coherent_wave/profiles_2d: 2D profiles in poloidal cross-section, for various time slices</pre></details></td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-poloidal_magnetic_flux_at_constraint_position"><td><code>poloidal_magnetic_flux_at_constraint_position</code></td><td>defective</td><td><code>poloidal_magnetic_flux</code><br>Poloidal magnetic flux labeling the radial grid for effective diffusivities.</td><td class="bad">definition_contradicts_source</td><td>The definition says “labeling the radial grid for effective diffusivities,” but the sources also identify ψ on the convection grid, at equilibrium constraint positions, and on plasma-source profiles.<details><summary>source text</summary><pre>path: core_transport/model/profiles_1d/grid_d/psi
+Poloidal magnetic flux (ψ) on the radial grid used for effective diffusivities and parallel conductivity in core transport profiles. Serves as a flux-surface label coordinate for the diffusivity grid (grid_d). Poloidal magnetic flux
+
+path: core_transport/model/profiles_1d/grid_v/psi
+Poloidal magnetic flux (ψ) on the effective convection grid (grid_v) for core transport coefficient profiles. Defines the flux-coordinate labeling of the radial grid used for convective transport terms. Poloidal magnetic flux
+
+path: equilibrium/time_slice/constraints/j_parallel/position/psi
+Poloidal magnetic flux (ψ) at the position of a flux-surface-averaged parallel current density (j∥) constraint point in equilibrium reconstruction. Specifies the flux surface label for the j∥ measurement location. Poloidal magnetic flux
+
+path: equilibrium/time_slice/constraints/j_phi/position/psi
+Poloidal magnetic flux (ψ) at the position of a j_phi constraint measurement used in equilibrium reconstruction. Specifies the flux-surface location of the toroidal current density constraint point. Poloidal magnetic flux
+
+path: equilibrium/time_slice/constraints/n_e/position/psi
+Poloidal magnetic flux (ψ) at the position of an electron density (ne) measurement used as a constraint in equilibrium reconstruction. Specifies the flux-surface location of the ne measurement in terms of ψ. Poloidal magnetic flux
+
+path: equilibrium/time_slice/constraints/pressure/position/psi
+Poloidal magnetic flux (ψ) at the position of a pressure measurement point used as a constraint in equilibrium reconstruction. Specifies the flux-surface location of the measurement in the equilibrium coordinate system. Poloidal magnetic flux
+
+path: equilibrium/time_slice/constraints/pressure_rotational/position/psi
+Poloidal magnetic flux (ψ) at the position of a rotational pressure constraint measurement used in equilibrium reconstruction. Specifies the flux-surface label of the rotational pressure constraint point. Poloidal magnetic flux
+
+path: equilibrium/time_slice/constraints/q/position/psi
+Poloidal magnetic flux (ψ, psi) at the measurement position of a safety factor (q) constraint used in equilibrium reconstruction. Specifies the flux surface location associated with a given q estimate within the constraints structure. Poloidal magnetic flux
+
+path: plasma_sources/source/profiles_1d/grid/psi
+Poloidal magnetic flux (ψ, psi) used as a radial grid coordinate for 1D plasma source profiles in the plasma_sources IDS. Defines the flux-surface label along which particle, energy, and momentum source terms are tabulated. Poloidal magnetic flux
+
+enclosing structures:
+core_transport/model/profiles_1d/grid_d: Grid for effective diffusivities and parallel conductivity
+core_transport/model/profiles_1d: Transport coefficient profiles for various time slices. Fluxes and convection are positive (resp. negative) when outwards i.e. towards the LCFS (resp. inwards i.e. towards the magnetic axes).
+core_transport/model/profiles_1d/grid_v: Grid for effective convections
+equilibrium/time_slice/constraints/j_parallel/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/j_parallel: Set of flux-surface averaged parallel current density approximations at various positions (= average(j.B) / B0, where B0 = /vacuum_toroidal_field/b0) Flux-surface averaged parallel current density (j∥), defined as ⟨j·B⟩/B0, used as a constraint in MHD equilibrium reconstruction. Stored as an array of measurement and reconstructed value pairs at specified positions.
+equilibrium/time_slice/constraints: In case of equilibrium reconstruction under constraints, measurements used to constrain the equilibrium, reconstructed values and accuracy of the fit. The names of the child nodes correspond to the following definition: the solver aims at minimizing a cost function defined as : J=1/2*sum_i [ weight_i^2 (reconstructed_i - measured_i)^2 / sigma_i^2 ]. in which sigma_i is the standard deviation of the measurement error (to be found in the IDS of the measurement)
+equilibrium/time_slice/constraints/j_phi/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/j_phi: Set of flux-surface averaged toroidal current density approximations at various positions (= average(j_tor/R) / average(1/R)) Flux-surface averaged toroidal current density (j_phi) constraint in equilibrium reconstruction, defined as ⟨j_tor/R⟩/⟨1/R⟩. Each entry records the measured, reconstructed, and residual values at specified positions for chi-squared minimization.
+equilibrium/time_slice/constraints/n_e/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/n_e: Set of local density measurements Set of local electron density (ne) measurements used as constraints in MHD equilibrium reconstruction. Each entry records measured, reconstructed, and residual values contributing to the cost-function minimization.
+equilibrium/time_slice/constraints/pressure/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/pressure: Set of total pressure estimates Set of total plasma pressure estimates used as constraints in equilibrium reconstruction. Each element contains measured, reconstructed, weight, and chi-squared values for a pressure measurement point.
+equilibrium/time_slice/constraints/pressure_rotational/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/pressure_rotational: Set of rotational pressure estimates. The rotational pressure is defined as R0^2*rho*omega^2 / 2, where omega is the toroidal rotation frequency, rho=ne(R0,psi)*m, and m is the plasma equivalent mass. Rotational pressure constraint (P_rot = R0²·ρ·ω²/2) used in MHD equilibrium reconstruction, where ω is the toroidal rotation frequency and ρ is the mass density. Stores measured, reconstructed, and chi-squared fit residual values.
+equilibrium/time_slice/constraints/q/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/q: Set of safety factor estimates at various positions
+plasma_sources/source/profiles_1d/grid: Radial grid. Note that some of the radial coordinates listed above are undefined outside the last closed flux surface, thus they must be filled with EMPTY_FLOAT values in such locations
+plasma_sources/source/profiles_1d: Source profiles for various time slices. Source terms are positive (resp. negative) when there is a gain (resp. a loss) to the considered channel.</pre></details></td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-poloidal_magnetic_flux_of_flux_loop"><td><code>poloidal_magnetic_flux_of_flux_loop</code></td><td>defective</td><td><code>poloidal_magnetic_flux_of_flux_loop</code><br>Poloidal magnetic flux measured by a flux loop sensor.</td><td class="ok">sound</td><td>The definition specifies “Poloidal magnetic flux measured by a flux loop sensor,” consistent with the source documentation “Measured flux” and the enclosing description’s “measured ... poloidal flux (ψ) values.”</td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-radial_coordinate_of_coordinate_system"><td><code>radial_coordinate_of_coordinate_system</code></td><td>defective</td><td><code>radial_coordinate_of_coordinate_system</code><br>Major radius (R) coordinate on the flux-surface coordinate-system grid.</td><td class="bad">name_omits_source, definition_contradicts_source</td><td>The record names a “coordinate_system” and specifies a “flux-surface coordinate-system grid,” but the fourth source is an “emission_grid” described as the “Major radius (R) coordinate of emission grid.”<details><summary>source text</summary><pre>path: equilibrium/time_slice/coordinate_system/r
+Major radius (R) coordinate of coordinate system. Values of the major radius on the grid
+
+path: mhd_linear/time_slice/toroidal_mode/plasma/coordinate_system/r
+Major radius (R) coordinate of coordinate system. Values of the major radius on the grid
+
+path: mhd_linear/time_slice/toroidal_mode/vacuum/coordinate_system/r
+Major radius (R) coordinate of coordinate system. Values of the major radius on the grid
+
+path: neutron_diagnostic/detector/field_of_view/emission_grid/r
+Major radius (R) coordinate of emission grid. Major radius
+
+enclosing structures:
+equilibrium/time_slice/coordinate_system: Flux surface coordinate system on a square grid of flux and poloidal angle
+mhd_linear/time_slice/toroidal_mode/plasma/coordinate_system: Flux surface coordinate system on a square grid of flux and poloidal angle
+mhd_linear/time_slice/toroidal_mode/plasma: MHD modes in the confined plasma
+mhd_linear/time_slice/toroidal_mode: Vector of toroidal modes
+mhd_linear/time_slice/toroidal_mode/vacuum/coordinate_system: Flux surface coordinate system on a square grid of flux and poloidal angle
+mhd_linear/time_slice/toroidal_mode/vacuum: MHD modes in the vacuum
+neutron_diagnostic/detector/field_of_view/emission_grid: Grid defining the neutron emission cells in the plasma
+neutron_diagnostic/detector/field_of_view: Field of view associated to this detector. The field of view is described by a voxelized plasma volume. Each voxel, with indexes i_R, i_Z, and i_phi, has an associated solid angle scalar and a detector direction vector.</pre></details></td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-radial_coordinate_of_geometric_axis"><td><code>radial_coordinate_of_geometric_axis</code></td><td>defective</td><td><code>radial_coordinate_of_geometric_axis</code><br>Radial (cylindrical R) coordinate of the geometric axis, the center of the plasma boundary cross-section.</td><td class="bad">definition_contradicts_source</td><td>The definition says “center of the plasma boundary cross-section,” but the profiles source describes the geometric axis “of the magnetic surfaces.”<details><summary>source text</summary><pre>path: equilibrium/time_slice/boundary/geometric_axis/r
+Major radius
+
+path: equilibrium/time_slice/profiles_1d/geometric_axis/r
+Major radius (R) coordinate of geometric axis. Major radius
+
+path: summary/boundary/geometric_axis_r/value
+Major radius (R) position of the plasma geometric axis, defined as (Rmax + Rmin)/2 of the plasma boundary. A key geometric descriptor of the plasma cross-section shape. Value
+
+enclosing structures:
+equilibrium/time_slice/boundary/geometric_axis: RZ position of the geometric axis (defined as (Rmin+Rmax) / 2 and (Zmin+Zmax) / 2 of the boundary)
+equilibrium/time_slice/boundary: Description of the plasma boundary used by fixed-boundary codes and typically chosen at psi_norm = 99.x% of the separatrix
+equilibrium/time_slice/profiles_1d/geometric_axis: RZ position of the geometric axis of the magnetic surfaces (defined as (Rmin+Rmax) / 2 and (Zmin+Zmax) / 2 of the surface)
+equilibrium/time_slice/profiles_1d: Equilibrium profiles (1D radial grid) as a function of the poloidal flux
+summary/boundary/geometric_axis_r: R position of the geometric axis (defined as (Rmax+Rmin) / 2 of the boundary) Major radius (R) position of the plasma geometric axis, defined as (Rmax + Rmin)/2 of the plasma boundary. A key geometric descriptor of the plasma cross-section shape.</pre></details></td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-radial_coordinate_of_magnetic_axis"><td><code>radial_coordinate_of_magnetic_axis</code></td><td>defective</td><td><code>radial_coordinate_of_magnetic_axis</code><br>Radial (cylindrical R) coordinate of the magnetic axis.</td><td class="ok">sound</td><td>The sources describe the magnetic-axis coordinate as “Major radius (R) coordinate,” and the record specifies “cylindrical R” coordinate of the magnetic axis.</td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-radial_coordinate_of_measurement_position"><td><code>radial_coordinate_of_measurement_position</code></td><td>defective</td><td><code>radial_coordinate_of_gauge</code><br>Radial (cylindrical R) coordinate of the barometry gauge position.</td><td class="ok">sound</td><td>The source says “Major radius (R) coordinate of position,” and the record specifies “Radial (cylindrical R) coordinate of the barometry gauge position.”</td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-toroidal_angle"><td><code>toroidal_angle</code></td><td>defective</td><td><code>toroidal_angle</code><br>Toroidal angle coordinate of the non-axisymmetric magnetic field map grid.</td><td class="bad">definition_contradicts_source</td><td>The definition says “of the non-axisymmetric magnetic field map grid,” but the sources also place this coordinate at a gas-injection point, beamlet positions, and a pellet-path position.<details><summary>source text</summary><pre>path: b_field_non_axisymmetric/time_slice/field_map/grid/phi
+Toroidal angle (φ) coordinate of grid. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: gas_injection/pipe/second_point/phi
+Toroidal angle (φ) coordinate of second point. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: nbi/unit/beamlets_group/beamlets/positions/phi
+Toroidal angle (φ) coordinate of positions. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: pellets/time_slice/pellet/path_profiles/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+enclosing structures:
+b_field_non_axisymmetric/time_slice/field_map/grid: 3D grid
+b_field_non_axisymmetric/time_slice/field_map: Description of the error field map
+gas_injection/pipe/second_point: Second point indicating (combined with the exit_position) the direction of the gas injection towards the plasma
+nbi/unit/beamlets_group/beamlets/positions: Position of each beamlet
+nbi/unit/beamlets_group/beamlets: Detailed information on beamlets
+nbi/unit/beamlets_group: Group of beamlets with common vertical and horizontal focal point. If there are no common focal points, then select small groups of beamlets such that a focal point description of the beamlets group provides a fair description
+pellets/time_slice/pellet/path_profiles/position: Position along the pellet path
+pellets/time_slice/pellet/path_profiles: 1-D profiles of plasma and pellet along the pellet path
+pellets/time_slice/pellet: Set of pellets ablated in the plasma at a given time</pre></details></td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-toroidal_angle_of_measurement_position"><td><code>toroidal_angle_of_measurement_position</code></td><td>defective</td><td><code>toroidal_angle_of_gauge</code><br>Toroidal angle of the position of the gauge.</td><td class="bad">name_contradicts_source</td><td>The name and definition restrict the quantity to “gauge,” but the sources include positions of many other objects, including a “centre” and “positions” for spectrometer components.<details><summary>source text</summary><pre>path: barometry/gauge/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: ece/channel/position/phi
+Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: equilibrium/time_slice/constraints/j_parallel/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: equilibrium/time_slice/constraints/j_phi/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: equilibrium/time_slice/constraints/n_e/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: equilibrium/time_slice/constraints/pressure/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: equilibrium/time_slice/constraints/pressure_rotational/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: equilibrium/time_slice/constraints/q/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: ic_antennas/antenna/module/current/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: ic_antennas/antenna/module/pressure/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: ic_antennas/antenna/module/voltage/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: langmuir_probes/embedded/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: langmuir_probes/reciprocating/plunge/collector/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle
+
+path: magnetics/b_field_phi_probe/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: magnetics/b_field_pol_probe/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: magnetics/flux_loop/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: magnetics/rogowski_coil/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: reflectometer_fluctuation/channel/doppler/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: reflectometer_fluctuation/channel/fluctuations_level/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: reflectometer_profile/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: spectrometer_visible/channel/light_collection_efficiencies/positions/phi
+Toroidal angle (φ) coordinate of positions. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: spectrometer_x_ray_crystal/channel/reflector/centre/phi
+Toroidal angle (φ) coordinate of centre. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: spi/injector/optical_pellet_diagnostic/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+path: summary/heating_current_drive/nbi/position/phi/value
+Toroidal angle (φ) coordinate of position. Value
+
+path: thomson_scattering/channel/position/phi
+Toroidal angle (φ) coordinate of position. Toroidal angle (oriented counter-clockwise when viewing from above)
+
+enclosing structures:
+barometry/gauge/position: Position of the measurements
+ece/channel/position: Position of the measurements
+equilibrium/time_slice/constraints/j_parallel/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/j_parallel: Set of flux-surface averaged parallel current density approximations at various positions (= average(j.B) / B0, where B0 = /vacuum_toroidal_field/b0) Flux-surface averaged parallel current density (j∥), defined as ⟨j·B⟩/B0, used as a constraint in MHD equilibrium reconstruction. Stored as an array of measurement and reconstructed value pairs at specified positions.
+equilibrium/time_slice/constraints: In case of equilibrium reconstruction under constraints, measurements used to constrain the equilibrium, reconstructed values and accuracy of the fit. The names of the child nodes correspond to the following definition: the solver aims at minimizing a cost function defined as : J=1/2*sum_i [ weight_i^2 (reconstructed_i - measured_i)^2 / sigma_i^2 ]. in which sigma_i is the standard deviation of the measurement error (to be found in the IDS of the measurement)
+equilibrium/time_slice/constraints/j_phi/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/j_phi: Set of flux-surface averaged toroidal current density approximations at various positions (= average(j_tor/R) / average(1/R)) Flux-surface averaged toroidal current density (j_phi) constraint in equilibrium reconstruction, defined as ⟨j_tor/R⟩/⟨1/R⟩. Each entry records the measured, reconstructed, and residual values at specified positions for chi-squared minimization.
+equilibrium/time_slice/constraints/n_e/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/n_e: Set of local density measurements Set of local electron density (ne) measurements used as constraints in MHD equilibrium reconstruction. Each entry records measured, reconstructed, and residual values contributing to the cost-function minimization.
+equilibrium/time_slice/constraints/pressure/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/pressure: Set of total pressure estimates Set of total plasma pressure estimates used as constraints in equilibrium reconstruction. Each element contains measured, reconstructed, weight, and chi-squared values for a pressure measurement point.
+equilibrium/time_slice/constraints/pressure_rotational/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/pressure_rotational: Set of rotational pressure estimates. The rotational pressure is defined as R0^2*rho*omega^2 / 2, where omega is the toroidal rotation frequency, rho=ne(R0,psi)*m, and m is the plasma equivalent mass. Rotational pressure constraint (P_rot = R0²·ρ·ω²/2) used in MHD equilibrium reconstruction, where ω is the toroidal rotation frequency and ρ is the mass density. Stores measured, reconstructed, and chi-squared fit residual values.
+equilibrium/time_slice/constraints/q/position: Position at which this measurement is given
+equilibrium/time_slice/constraints/q: Set of safety factor estimates at various positions
+ic_antennas/antenna/module/current/position: Position of the measurement
+ic_antennas/antenna/module/current: Set of current measurements Array of current measurement structures for an ICRH antenna module, each fed by a single transmission line. Records current amplitude and phase at various positions along the module, characterizing the antenna&#x27;s electromagnetic state during operation.
+ic_antennas/antenna/module: Set of antenna modules (each module is fed by a single transmission line)
+ic_antennas/antenna/module/pressure/position: Position of the measurement
+ic_antennas/antenna/module/pressure: Set of pressure measurements Set of pressure measurement structures on an ion cyclotron (IC) antenna module. Groups individual sensor records for monitoring mechanical or gas pressure conditions on ICRH antenna hardware components.
+ic_antennas/antenna/module/voltage/position: Position of the measurement
+ic_antennas/antenna/module/voltage: Set of voltage measurements Set of voltage measurement structures for an IC antenna module. Each entry records the voltage on a single transmission line feed, supporting power and reflection analysis of the ICRH system.
+langmuir_probes/embedded/position: Position of the measurements
+langmuir_probes/reciprocating/plunge/collector/position: Position of the collector
+langmuir_probes/reciprocating/plunge/collector: Set of probe collectors including measurements specific to each collector Array of individual probe collector elements on a reciprocating Langmuir probe, each recording measurements specific to that collector during a single plunge. Contains electron temperature, saturation current, floating potential, heat flux, and statistical moment data per collector.
+langmuir_probes/reciprocating/plunge: Set of plunges of this probe during the pulse, each plunge being recorded as a time slice from the Access Layer point of view. The time child node corresponds to the time of maximum penetration of the probe during a given plunge. The dynamics of physicas quantities within the plunge are described via the time_within_plunge vector.
+magnetics/b_field_phi_probe/position: R, Z, Phi position of the coil centre
+magnetics/b_field_pol_probe/position: R, Z, Phi position of the coil centre
+magnetics/flux_loop/position: List of (R,Z,phi) points defining the position of the loop (see data structure documentation FLUXLOOPposition.pdf)
+magnetics/rogowski_coil/position: List of (R,Z,phi) points defining the position of the coil guiding center
+reflectometer_fluctuation/channel/doppler/position: Measurement position
+reflectometer_fluctuation/channel/doppler: Processed data for Doppler reflectometers
+reflectometer_fluctuation/channel/fluctuations_level/position: Array of positions at which the fluctuation level is computed
+reflectometer_fluctuation/channel/fluctuations_level: Reconstruction of the amplitude of the fluctuations
+spectrometer_visible/channel/light_collection_efficiencies/positions: List of positions for which the light collection efficiencies are provided
+spectrometer_visible/channel/light_collection_efficiencies: Light collection efficiencies (fraction of the local emission detected by the optical system) for a list of points defining regions of interest. To be used for non-pinhole optics.
+spectrometer_x_ray_crystal/channel/reflector/centre: Coordinates of the origin of the local coordinate system (X1,X2,X3) describing the object. This origin is located within the object area and should be the middle point of the object surface. If geometry_type=2, it&#x27;s the centre of the circular object. If geometry_type=3, it&#x27;s the centre of the rectangular object.
+spectrometer_x_ray_crystal/channel/reflector: Set of reflectors (optional) reflecting the light coming from the plasma towards the crystal. If empty, means that the plasma light directly arrives on the crystal.
+spi/injector/optical_pellet_diagnostic/position: Position of the measurement
+spi/injector/optical_pellet_diagnostic: Information related to the embedded optical pellet diagnostic
+summary/heating_current_drive/nbi/position/phi: Toroidal angle Toroidal angle (φ) coordinate of position.
+summary/heating_current_drive/nbi/position: R, Z, Phi position of the NBI unit centre
+summary/heating_current_drive/nbi: Set of NBI units
+thomson_scattering/channel/position: Position of the measurements (intersection between laser beam and line of sight)</pre></details></td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-toroidal_magnetic_field"><td><code>toroidal_magnetic_field</code></td><td>defective<br>rejected <code>magnetics/b_field_phi_probe/field</code>: stated operation mismatch: path &#x27;magnetics/b_field_phi_probe/field&#x27; states &#x27;averaged over sensor volume defined by area and length, where n = cos(pol&#x27; but SN &#x27;toroidal_magnetic_field&#x27; and its other sources state no average</td><td><code>toroidal_magnetic_field</code><br>Toroidal component of the magnetic field vector on the grid subset.</td><td class="bad">name_contradicts_source, definition_contradicts_source, name_omits_source</td><td>The probe source specifies a field “in direction of sensor normal axis” and the calibration sources specify non-linear-response values, while the record calls these a “Toroidal component ... on the grid subset”; the TF source also identifies a “vacuum magnetic field,” which the definition does not specify.<details><summary>source text</summary><pre>path: edge_profiles/ggd/b_field/phi
+Toroidal angle (φ) coordinate of b field. Toroidal component, one scalar value is provided per element in the grid subset.
+
+path: equilibrium/time_slice/ggd/b_field_phi/values
+Array of values for b field phi. One scalar value is provided per element in the grid subset.
+
+path: magnetics/b_field_phi_probe/field
+Magnetic field component in direction of sensor normal axis (n) averaged over sensor volume defined by area and length, where n = cos(poloidal_angle)*cos(toroidal_angle)*grad(R) - sin(poloidal_angle)*grad(Z) + cos(poloidal_angle)*sin(toroidal_angle)*grad(Phi)/norm(grad(Phi))
+
+path: magnetics/b_field_phi_probe/non_linear_response/b_field_linear
+Array of magnetic field values defining the linear-response reference points for characterising the non-linear response of a toroidal field (Hall) probe. Paired with b_field_non_linear to form the probe calibration lookup table. Array of magnetic field values (corresponding to the assumption of a linear relation between magnetic field and probe coil current), for each of which the probe non-linear response is given in ../b_field_non_linear
+
+path: magnetics/b_field_phi_probe/non_linear_response/b_field_non_linear
+Magnetic field (B) values at the non-linear response calibration points of a toroidal field probe, used alongside the linear-response reference to characterise the full non-linear input-output relationship. Relevant for Hall probes where the response deviates from linearity at higher fields. Magnetic field value taking into account the non-linear response of the probe
+
+path: mhd/ggd/b_field_phi/values
+Array of values for b field phi. One scalar value is provided per element in the grid subset.
+
+path: plasma_profiles/ggd/b_field/phi
+Toroidal angle (φ) coordinate of b field. Toroidal component, one scalar value is provided per element in the grid subset.
+
+path: tf/field_map/b_field_tor/values
+Array of values for b field tor. One scalar value is provided per element in the grid subset.
+
+path: wall/description_ggd/ggd/b_field/phi
+Toroidal angle (φ) coordinate of b field. Toroidal component, one scalar value is provided per element in the grid subset.
+
+enclosing structures:
+edge_profiles/ggd/b_field: Magnetic field, given on various grid subsets
+equilibrium/time_slice/ggd/b_field_phi: Toroidal component of the magnetic field, given on various grid subsets
+equilibrium/time_slice/ggd: Set of equilibrium representations using the generic grid description
+magnetics/b_field_phi_probe/non_linear_response: Non-linear response of the probe (typically in case of a Hall probe)
+mhd/ggd/b_field_phi: Toroidal component of the magnetic field, given on various grid subsets
+plasma_profiles/ggd/b_field: Magnetic field, given on various grid subsets
+tf/field_map/b_field_tor: Toroidal component of the vacuum magnetic field, given on various grid subsets Toroidal component of the vacuum magnetic field (B_tor, B_φ) on GGD grid subsets, representing the primary confining field generated by the TF coil system. Part of the full 3D vacuum field map alongside radial and vertical components.
+wall/description_ggd/ggd/b_field: Magnetic field, given on various grid subsets
+wall/description_ggd/ggd: Wall physics quantities represented using the general grid description, for various time slices.</pre></details></td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-toroidal_vacuum_magnetic_field"><td><code>toroidal_vacuum_magnetic_field</code></td><td>defective</td><td><em>grammar_rejected</em><br><code>geometry:major_radius</code></td><td class="ok">sound</td><td>The decline is supported because the sources define B0 as “at the reference major radius R0,” matching the reported geometry/major_radius rejection.</td></tr>
+<tr id="sagr-stage-repairs-source_bindings_conflate_distinct_definitions-vertical_coordinate_of_measurement_position"><td><code>vertical_coordinate_of_measurement_position</code></td><td>defective</td><td><code>vertical_coordinate_of_gauge</code><br>Vertical (Z) coordinate of the barometry gauge position</td><td class="ok">sound</td><td>The source describes the value as “Vertical (Z) coordinate of position” at `barometry/gauge/position/z`, and the record specifies “Vertical (Z) coordinate of the barometry gauge position.”</td></tr>
+</tbody></table>
+<h2 id="sagr-stage-repairs-boundary_forced_to_lcfs">boundary_forced_to_lcfs</h2>
+<p id="sagr-stage-repairs-boundary_forced_to_lcfs-stage">Stage <code>imas_codex/llm/prompts/sn/generate_name_system.md</code>, repair marker <code>effective_plasma_boundary</code>.</p>
+<table id="sagr-stage-repairs-boundary_forced_to_lcfs-table"><thead><tr><th>Member</th><th>Before</th><th>Regenerated record</th><th>After</th><th>Adjudicator's reason</th></tr></thead><tbody>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-elongation_of_plasma_boundary"><td><code>elongation_of_plasma_boundary</code></td><td>defective</td><td><code>elongation_of_plasma_boundary</code><br>Elongation κ of the plasma boundary, the ratio of vertical half-height to minor radius.</td><td class="ok">sound</td><td>The record’s definition specifies the source’s qualifying measure, “ratio of the plasma&#x27;s vertical half-height to its minor radius,” while its name identifies “Elongation of the plasma boundary.”</td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-gap_at_closest_wall_point"><td><code>gap_at_closest_wall_point</code></td><td>defective</td><td><code>distance_at_closest_wall_point</code><br>Distance from the reconstructed plasma boundary to the closest first-wall point (plasma-wall gap).</td><td class="bad">name_omits_source</td><td>The name `distance_at_closest_wall_point` does not identify the second source’s `gap_limiter_wall` quantity, which is defined as the distance between the separatrix and the nearest limiter or wall element.<details><summary>source text</summary><pre>path: equilibrium/time_slice/boundary/closest_wall_point/distance
+Distance from the nearest first-wall point to the reconstructed plasma boundary. Quantifies the plasma-wall gap at the closest wall location, a key geometric parameter for limiter and confinement margin assessment. Distance to the plasma boundary
+
+path: summary/boundary/gap_limiter_wall/value
+Distance between the plasma separatrix and the nearest limiter or wall element (gap). A key boundary geometry parameter characterizing the proximity of the last closed flux surface to plasma-facing components. Value
+
+enclosing structures:
+equilibrium/time_slice/boundary/closest_wall_point: Position and distance to the plasma boundary of the point of the first wall which is the closest to plasma boundary
+equilibrium/time_slice/boundary: Description of the plasma boundary used by fixed-boundary codes and typically chosen at psi_norm = 99.x% of the separatrix
+summary/boundary/gap_limiter_wall: Distance between the separatrix and the nearest limiter or wall element Distance between the plasma boundary (separatrix or last closed flux surface) and the nearest limiter or wall element (gap). A key boundary geometry parameter characterizing plasma proximity to plasma-facing components.</pre></details></td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-lower_inner_squareness_of_plasma_boundary"><td><code>lower_inner_squareness_of_plasma_boundary</code></td><td>defective</td><td><code>lower_inner_squareness_of_plasma_boundary</code><br>Squareness of the lower inner quadrant of the plasma boundary cross-section.</td><td class="bad">undecided</td><td>the adjudicator&#x27;s responses were rejected: LLM structured call failed after 5 provider response(s): 1 validation error for _Verdict
+defect_classes
+  Value error, unknown defect class(es) [&#x27;definition_omits_qualifier&#x27;]; the fixed classes are exactly: name_contradicts_source, name_omits_source, defini<details><summary>source text</summary><pre>path: equilibrium/time_slice/boundary/squareness_lower_inner
+Lower inner squareness (ζ_LI) of the plasma boundary shape parameter, defined following the T. Luce convention. Quantifies the deviation of the lower inner quadrant of the plasma cross-section from an elliptical shape. Lower inner squareness of the plasma boundary (definition from T. Luce, Plasma Phys. Control. Fusion 55 (2013) 095009)
+
+enclosing structures:
+equilibrium/time_slice/boundary: Description of the plasma boundary used by fixed-boundary codes and typically chosen at psi_norm = 99.x% of the separatrix</pre></details></td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-lower_triangularity_of_plasma_boundary"><td><code>lower_triangularity_of_plasma_boundary</code></td><td>defective</td><td><code>lower_triangularity_of_plasma_boundary</code><br>Lower triangularity of the plasma boundary, quantifying the asymmetric shaping of its lower half.</td><td class="ok">sound</td><td>The record names “Lower triangularity of the plasma boundary” and its definition captures the source qualifier “asymmetric shaping of its lower half.”</td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-minor_radius_of_plasma_boundary"><td><code>minor_radius_of_plasma_boundary</code></td><td>defective</td><td><code>minor_radius_of_plasma_boundary</code><br>Minor radius of the plasma boundary, half the difference between its maximum and minimum major radii.</td><td class="ok">sound</td><td>The record faithfully states the shared quantity: the sources describe the “Minor radius (a) of the plasma boundary” as the difference between its maximum and minimum major radii divided by two.</td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-normalized_toroidal_flux_coordinate"><td><code>normalized_toroidal_flux_coordinate</code></td><td>defective</td><td><code>normalized_toroidal_flux_coordinate</code><br>Normalized toroidal flux coordinate rho_tor_norm used as the radial grid.</td><td class="ok">sound</td><td>The sources describe “Normalised toroidal flux coordinate” on radial grids or profile positions, consistent with the name and the definition’s “used as the radial grid.”</td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-normalized_toroidal_flux_coordinate_at_constraint_position"><td><code>normalized_toroidal_flux_coordinate_at_constraint_position</code></td><td>defective</td><td><em>vocab_gap</em><br><code>physical_base:normalized_tor_norm_not_registered</code></td><td class="ok">sound</td><td>The sources identify the quantity as a “Normalised toroidal flux coordinate,” and the stage reported “physical_base/normalized_tor_norm_not_registered,” so declining to name it is consistent with the stated vocabulary gap.</td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-poloidal_magnetic_flux_at_plasma_boundary"><td><code>poloidal_magnetic_flux_at_plasma_boundary</code></td><td>defective</td><td><code>poloidal_magnetic_flux_at_plasma_boundary</code><br>Poloidal magnetic flux evaluated at the plasma boundary (last closed flux surface).</td><td class="bad">definition_contradicts_source</td><td>The definition restricts the quantity to the “last closed flux surface,” but the source says the boundary is “typically set at a near-separatrix flux surface (psi_norm ≈ 99%).”<details><summary>source text</summary><pre>path: core_profiles/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (last closed flux surface, LCFS), used as the outer normalization reference for the radial ψ grid in core plasma 1D profiles. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: core_sources/source/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used as a normalization reference defining the outer extent of the radial grid for core source profiles. Provides the boundary condition for the psi coordinate array. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: core_transport/model/profiles_1d/grid_d/psi_boundary
+Value of the poloidal magnetic flux (ψ) at the plasma boundary on the effective diffusivity radial grid (grid_d). Provides a normalization reference for the ψ array when the grid does not span from the magnetic axis to the boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: core_transport/model/profiles_1d/grid_flux/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used as a normalization reference for the poloidal flux coordinate array on the flux grid when the radial grid does not span to the full boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: core_transport/model/profiles_1d/grid_v/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (last closed flux surface, LCFS), stored on the convection grid (grid_v). Used to normalise the psi array when the radial grid does not span from axis to boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: disruption/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used as the outer normalization reference for the radial psi grid in disruption 1D radial profiles. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: distribution_sources/source/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (last closed flux surface, LCFS). Used as the outer normalization reference for the radial psi grid in 1D distribution source profiles when the grid does not span from axis to boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: distributions/distribution/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (last closed flux surface), stored as a normalization reference for the 1D radial grid of distribution function profiles. Used when the grid does not span from the magnetic axis to the boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: ece/psi_normalization/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used as the upper normalization reference for the flux coordinate in ECE channel mapping. Together with psi_magnetic_axis, defines the normalized poloidal flux coordinate ρ_pol. Value of the poloidal magnetic flux at the plasma boundary
+
+path: edge_profiles/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (last closed flux surface, LCFS), used as a normalization reference for the psi radial grid in edge profiles. Particularly useful when the grid does not extend from axis to boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: equilibrium/time_slice/boundary/psi
+Poloidal magnetic flux (ψ) at the plasma boundary surface used by fixed-boundary equilibrium codes. Typically set at a near-separatrix flux surface (psi_norm ≈ 99%) as the boundary condition for the equilibrium solution. Value of the poloidal flux at which the boundary is taken
+
+path: equilibrium/time_slice/global_quantities/psi_boundary
+Poloidal magnetic flux (ψ) at the selected plasma boundary (last closed flux surface or separatrix). A key scalar boundary condition for equilibrium reconstruction, defining the flux surface topology and normalisation of the ψ coordinate. Poloidal flux at the selected plasma boundary 
+
+path: plasma_profiles/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used as a normalization reference for the radial psi grid in plasma_profiles 1D profiles when the grid does not span from the magnetic axis to the last closed flux surface. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: plasma_sources/source/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (last closed flux surface, LCFS). Used to normalize the psi array when the radial grid does not extend from the magnetic axis to the plasma boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: plasma_transport/model/profiles_1d/grid_d/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary, used as a normalization reference for the diffusivity radial grid (grid_d) in the plasma_transport IDS. Essential when the grid does not extend to the last closed flux surface. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: plasma_transport/model/profiles_1d/grid_flux/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used as a normalization reference for the poloidal flux coordinate on the flux-surface grid for transport coefficient profiles. Useful when the radial grid does not extend from magnetic axis to boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: plasma_transport/model/profiles_1d/grid_v/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS) for the effective convection grid (grid_v). Used as a normalization reference for the ψ array when the radial grid does not span from axis to boundary. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: reflectometer_fluctuation/psi_normalization/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used to normalize the poloidal flux coordinate in the fluctuation reflectometer IDS. Provides the upper bound of the ψ normalization range for mapping measurement positions to flux-surface coordinates. Value of the poloidal magnetic flux at the plasma boundary
+
+path: reflectometer_profile/psi_normalization/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used to normalize the poloidal flux coordinate in the reflectometer profile IDS. Provides the upper bound of the ψ normalization range for mapping measurement positions to flux coordinates. Value of the poloidal magnetic flux at the plasma boundary
+
+path: runaway_electrons/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (last closed flux surface, LCFS) on the runaway electron radial grid. Used as a normalization reference for the poloidal flux coordinate array. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: sawteeth/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used as a normalization reference for the radial psi grid in sawtooth post-crash profiles. Defines the boundary value of ψ for flux coordinate normalization. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: summary/local/separatrix/position/psi
+Poloidal magnetic flux (ψ, psi) evaluated at the separatrix radial position. Serves as a flux-surface label identifying the separatrix location within the magnetic geometry in the summary IDS. Poloidal magnetic flux
+
+path: summary/local/separatrix_average/position/psi
+Poloidal magnetic flux (ψ) at the radial position used for flux-surface-averaged quantities at the separatrix. Provides the flux surface label corresponding to the separatrix-average location in the summary IDS. Poloidal magnetic flux
+
+path: transport_solver_numerics/solver_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (LCFS), used as a normalization reference for the 1D transport solver radial grid. Defines the outer boundary condition for flux-coordinate-based transport calculations. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+path: waves/coherent_wave/profiles_1d/grid/psi_boundary
+Poloidal magnetic flux (ψ) at the plasma boundary (last closed flux surface, LCFS). Provides the normalization reference for the radial psi grid of the 1D wave deposition profile data. Value of the poloidal magnetic flux at the plasma boundary (useful to normalize the psi array values when the radial grid doesn&#x27;t go from the magnetic axis to the plasma boundary)
+
+enclosing structures:
+core_profiles/profiles_1d/grid: Radial grid
+core_sources/source/profiles_1d/grid: Radial grid
+core_sources/source/profiles_1d: Source profiles for various time slices. Source terms are positive (resp. negative) when there is a gain (resp. a loss) to the considered channel.
+core_transport/model/profiles_1d/grid_d: Grid for effective diffusivities and parallel conductivity
+core_transport/model/profiles_1d: Transport coefficient profiles for various time slices. Fluxes and convection are positive (resp. negative) when outwards i.e. towards the LCFS (resp. inwards i.e. towards the magnetic axes).
+core_transport/model/profiles_1d/grid_flux: Grid for fluxes
+core_transport/model/profiles_1d/grid_v: Grid for effective convections
+disruption/profiles_1d/grid: Radial grid
+distribution_sources/source/profiles_1d/grid: Radial grid
+distribution_sources/source/profiles_1d: Source radial profiles (flux surface averaged quantities) for various time slices
+distributions/distribution/profiles_1d/grid: Radial grid
+distributions/distribution/profiles_1d: Radial profiles (flux surface averaged quantities) for various time slices
+edge_profiles/profiles_1d/grid: Radial grid
+equilibrium/time_slice/boundary: Description of the plasma boundary used by fixed-boundary codes and typically chosen at psi_norm = 99.x% of the separatrix
+equilibrium/time_slice/global_quantities: 0D parameters of the equilibrium
+plasma_profiles/profiles_1d/grid: Radial grid. Note that some of the radial coordinates listed above are undefined outside the last closed flux surface, thus they must be filled with EMPTY_FLOAT values in such locations
+plasma_sources/source/profiles_1d/grid: Radial grid. Note that some of the radial coordinates listed above are undefined outside the last closed flux surface, thus they must be filled with EMPTY_FLOAT values in such locations
+plasma_sources/source/profiles_1d: Source profiles for various time slices. Source terms are positive (resp. negative) when there is a gain (resp. a loss) to the considered channel.
+plasma_transport/model/profiles_1d/grid_d: Grid for effective diffusivities and parallel conductivity. Note that some of the radial coordinates listed above are undefined outside the last closed flux surface, thus they must be filled with EMPTY_FLOAT values in such locations
+plasma_transport/model/profiles_1d: Transport coefficient profiles for various time slices. The transport of particles, energy and momentum is described by diffusion coefficients, D, and convection velocities, v. In 1D (radial) equations, these are defined by the total fluxes of particles, energy and momentum, across a flux surface given by : V&#x27; [-D Y&#x27; &lt;|grad(rho_tor_norm)|^2&gt; + v Y &lt;|grad(rho_tor_norm)|&gt;], where Y represents the particles, energy and momentum density, respectively, while V is the volume inside a flux surface, the primes denote derivatives with respect to rho_tor_norm and &lt; X &gt; is the flux surface average of a quantity X. This formulation remains valid when changing simultaneously rho_tor_norm into rho_tor in the gradient terms and in the derivatives denoted by the prime. The average flux stored in the IDS as sibling of D and v is the total flux described above divided by the flux surface area V&#x27; &lt;|grad(rho_tor_norm)|&gt;. Note that the energy flux includes the energy transported by the particle flux, in this form: Q = V&#x27; [- n D (T)&#x27; &lt;|grad(rho_tor_norm)|^2&gt; + v (nT) &lt;|grad(rho_tor_norm)|&gt;] + flux_multiplier * T * particle_flux. Fluxes and convection are positive (resp. negative) when outwards i.e. towards the LCFS (resp. inwards i.e. towards the magnetic axes).
+plasma_transport/model/profiles_1d/grid_flux: Grid for fluxes. Note that some of the radial coordinates listed above are undefined outside the last closed flux surface, thus they must be filled with EMPTY_FLOAT values in such locations
+plasma_transport/model/profiles_1d/grid_v: Grid for effective convections. Note that some of the radial coordinates listed above are undefined outside the last closed flux surface, thus they must be filled with EMPTY_FLOAT values in such locations
+runaway_electrons/profiles_1d/grid: Radial grid
+sawteeth/profiles_1d/grid: Radial grid
+summary/local/separatrix/position: Radial position at which physics quantities are evaluated
+summary/local/separatrix: Parameters at separatrix
+summary/local/separatrix_average/position: Radial position at which physics quantities are evaluated
+summary/local/separatrix_average: Flux surface averaged parameters at separatrix (flux-surface average over the entire core-SOL boundary separatrix)
+transport_solver_numerics/solver_1d/grid: Radial grid
+waves/coherent_wave/profiles_1d/grid: Radial grid
+waves/coherent_wave/profiles_1d: Source radial profiles (flux surface averaged quantities) for various time slices</pre></details></td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-toroidal_flux_coordinate_at_plasma_boundary"><td><code>toroidal_flux_coordinate_at_plasma_boundary</code></td><td>defective</td><td><code>toroidal_flux_coordinate_of_plasma_boundary</code><br>Toroidal flux coordinate evaluated at the plasma boundary flux surface.</td><td class="ok">sound</td><td>The sources describe the boundary quantity as “Toroidal flux coordinate at the selected plasma boundary,” which the record faithfully names and defines as evaluated at the plasma boundary flux surface.</td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-upper_inner_squareness_of_plasma_boundary"><td><code>upper_inner_squareness_of_plasma_boundary</code></td><td>defective</td><td><code>upper_squareness_of_plasma_boundary</code><br>Upper inner squareness of the plasma boundary cross-section shape</td><td class="ok">sound</td><td>The definition specifies “Upper inner squareness,” preserving the source’s inner-quadrant qualifier omitted from the name.</td></tr>
+<tr id="sagr-stage-repairs-boundary_forced_to_lcfs-upper_triangularity_of_plasma_boundary"><td><code>upper_triangularity_of_plasma_boundary</code></td><td>defective</td><td><code>upper_triangularity_of_plasma_boundary</code><br>Upper triangularity of the plasma boundary, measuring asymmetry of the upper half of the plasma cross-section.</td><td class="bad">name_omits_source</td><td>The source specifies triangularity “relative to the geometric axis,” but the record’s definition only says “measuring asymmetry of the upper half” and omits that qualifier.<details><summary>source text</summary><pre>path: equilibrium/time_slice/boundary/triangularity_upper
+Upper triangularity (δ_u) of the plasma boundary, measuring the asymmetry of the upper half of the plasma cross-section relative to the geometric axis. A key shape parameter for MHD stability and confinement. Upper triangularity of the plasma boundary
+
+path: summary/boundary/triangularity_upper/value
+Upper triangularity of the plasma boundary. Value
+
+enclosing structures:
+equilibrium/time_slice/boundary: Description of the plasma boundary used by fixed-boundary codes and typically chosen at psi_norm = 99.x% of the separatrix
+summary/boundary/triangularity_upper: Upper triangularity of the plasma boundary</pre></details></td></tr>
+</tbody></table>
+<h2 id="sagr-stage-repairs-remaining">The remaining eleven causes</h2>
+<table id="sagr-stage-repairs-remaining-table"><thead><tr><th>Cause</th><th>Members</th><th>Stage</th><th>Same repair</th><th>Smallest repair</th></tr></thead><tbody>
+<tr><td><code>normalization_or_weighting_qualifier_lost</code></td><td>6</td><td><code>compose_name</code></td><td>physical_scope_qualifier_lost</td><td>Render the enclosing lineage in the file with the composer, so the stated normalization or weighting reaches it and is carried as a qualifier or reported as a vocab_gap.</td></tr>
+<tr><td><code>coordinate_reference_qualifier_lost</code></td><td>6</td><td><code>compose_name</code></td><td>physical_scope_qualifier_lost</td><td>Render the lineage, and require the composer to name the source&#x27;s coordinate convention when the source states one rather than defaulting to the DD reference frame.</td></tr>
+<tr><td><code>vacuum_source_qualifier_lost</code></td><td>6</td><td><code>compose_name</code></td><td>physical_scope_qualifier_lost</td><td>Render the lineage so the vacuum contribution restriction is visible, and keep it as the source qualifier the prompt already forbids dropping.</td></tr>
+<tr><td><code>pressure_pedestal_qualifier_lost</code></td><td>5</td><td><code>compose_name</code></td><td>physical_scope_qualifier_lost</td><td>Render the lineage so the pedestal locus is stated, and bind it to the registered pedestal_top locus rather than the generic pedestal token.</td></tr>
+<tr><td><code>transformation_equation_replaced_by_base_quantity</code></td><td>4</td><td><code>definition_construction</code></td><td>no</td><td>Add a definition rule: when the name carries a transform or derivative, the definition must state that operation, not substitute the base quantity.</td></tr>
+<tr><td><code>averaging_qualifier_lost</code></td><td>4</td><td><code>compose_name</code></td><td>physical_scope_qualifier_lost</td><td>Render the lineage so the averaging clause reaches the composer, and require the aggregation token the source states rather than a pointwise definition.</td></tr>
+<tr><td><code>absolute_extremum_substituted_for_signed_extremum</code></td><td>4</td><td><code>locus_binding</code></td><td>boundary_forced_to_lcfs</td><td>Require the extremum locus token to follow the source&#x27;s selection: the minimum of the signed quantity, not of its absolute value.</td></tr>
+<tr><td><code>population_basis_qualifier_lost</code></td><td>3</td><td><code>compose_name</code></td><td>physical_scope_qualifier_lost</td><td>Render the lineage and require the population basis (thermal or total) in the subject segment when the source states it.</td></tr>
+<tr><td><code>physical_scope_qualifier_replaced</code></td><td>3</td><td><code>definition_construction</code></td><td>no</td><td>Add a definition rule: the definition may not substitute a geometric or coordinate scope the source does not state.</td></tr>
+<tr><td><code>locus_template_overrides_source</code></td><td>3</td><td><code>locus_binding</code></td><td>boundary_forced_to_lcfs</td><td>Require the source&#x27;s stated branch or point-selection rule to outrank the generic geometric template when choosing the locus token.</td></tr>
+<tr><td><code>consumer_context_used_as_quantity_domain</code></td><td>3</td><td><code>domain_assignment</code></td><td>no</td><td>Resolve the domain from the structural quantity&#x27;s own DD source where one exists, so a quantity reached only through an equilibrium consumer does not inherit that consumer&#x27;s domain.</td></tr>
+</tbody></table>
+<h2 id="sagr-stage-repairs-measure">Measure</h2>
+<p id="sagr-stage-repairs-graph">Regenerated members written to a disposable Neo4j: <strong>36</strong>, read back: <strong>35</strong>. Live-graph writes: <strong>0</strong>.</p>
+<p id="sagr-stage-repairs-spend">Composer <code>local/deepseek-v4.1-flash</code>, adjudicator <code>openrouter/openai/gpt-6-luna</code>. Calls: 42 compose, 41 judge. Recorded spend <strong>USD 0.03</strong> of the USD 10 ceiling.</p>
+</main>
+</body>
+</html>

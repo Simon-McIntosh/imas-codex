@@ -32,9 +32,12 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import hashlib
 import importlib.util
 import json
 import re
+import sys
+from collections import Counter
 from html import escape
 from pathlib import Path
 from typing import Any, Literal
@@ -45,6 +48,8 @@ RECORD = ROOT / "equilibrium-adjudication.json"
 TRACE = ROOT / "stage-cause-trace.json"
 TRACE_SCRIPT = ROOT / "stage-cause-trace.py"
 DATA = ROOT / "stage-repairs.json"
+MODELS = ROOT / "stage-repairs-models.json"
+ADJUDICATIONS = ROOT / "stage-repairs-adjudications.json"
 FRAGMENT = ROOT / "sagr-stage-repairs.html"
 PAGE = ROOT / "stage-repairs.html"
 CONFTEST = REPO / "tests/standard_names/conftest.py"
@@ -59,11 +64,14 @@ TOP_CAUSES = (
 CEILING_USD = 10.0
 COMPOSE_CONCURRENCY = 4
 
+#: A rejected response that survives this many attempts is recorded as a stage outcome.
+COMPOSE_ATTEMPTS = 3
+
 #: The repair each cause is measured against, as the marker its stage carries.
 REPAIR_MARKERS = {
     "physical_scope_qualifier_lost": (
         "imas_codex/llm/prompts/sn/generate_name_dd_names.md",
-        "{{ item.ancestor_context }}",
+        "item.ancestor_context",
     ),
     "source_bindings_conflate_distinct_definitions": (
         "imas_codex/standard_names/worker_tasks/worker_extraction_and_enrichment.py",
@@ -87,12 +95,18 @@ ANCESTOR_LINE = re.compile(r"^  (?P<path>[a-z0-9_]+(?:/[a-z0-9_]+)*): (?P<text>.
 # --------------------------------------------------------------------------
 
 
-def trace_module():
-    spec = importlib.util.spec_from_file_location("stage_cause_trace", TRACE_SCRIPT)
+def _load_module(name: str, path: Path):
+    """Import a file as a module, registered so dataclass resolution finds it."""
+    spec = importlib.util.spec_from_file_location(name, path)
     module = importlib.util.module_from_spec(spec)
     assert module is not None and spec.loader is not None
+    sys.modules[name] = module
     spec.loader.exec_module(module)
     return module
+
+
+def trace_module():
+    return _load_module("stage_cause_trace", TRACE_SCRIPT)
 
 
 def load_record() -> dict[str, Any]:
@@ -162,6 +176,23 @@ def source_text(record_source: dict[str, Any]) -> str:
     return " ".join(part for part in parts if part)
 
 
+def sources_block(packet: dict[str, Any]) -> str:
+    """The member's full source text, as the adjudicator is shown it."""
+    parts = [
+        f"path: {source_path(source)}\n{source_text(source)}"
+        for source in packet["sources"]
+    ]
+    if packet["ancestors"]:
+        parts.append(
+            "enclosing structures:\n"
+            + "\n".join(
+                f"{ancestor['path']}: {ancestor['text']}"
+                for ancestor in packet["ancestors"]
+            )
+        )
+    return "\n\n".join(parts)
+
+
 def source_path(record_source: dict[str, Any]) -> str:
     return str(record_source["id"]).split(":", 1)[1]
 
@@ -209,7 +240,10 @@ async def compose_member(
     calls: dict[str, float],
 ) -> dict[str, Any]:
     """Run the naming stage for one member's sources."""
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.discovery.base.llm import (
+        LLMStructuredCallError,
+        acall_llm_structured,
+    )
     from imas_codex.llm.prompt_loader import render_prompt
     from imas_codex.standard_names.models import StandardNameComposeBatch
 
@@ -232,16 +266,39 @@ async def compose_member(
             "ids_name": item["path"].split("/")[0],
         },
     )
-    async with semaphore:
-        result = await acall_llm_structured(
-            model=model,
-            messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
-            ],
-            response_model=StandardNameComposeBatch,
-            service="standard-names",
-        )
+    # A provider response that fails the response model is a stage outcome the
+    # production task retries; offer the refusal back so the retry can converge,
+    # and record the outcome when it does not.
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": user_prompt},
+    ]
+    result = None
+    last_error = ""
+    for _attempt in range(COMPOSE_ATTEMPTS):
+        try:
+            async with semaphore:
+                result = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=StandardNameComposeBatch,
+                    service="standard-names",
+                )
+            break
+        except LLMStructuredCallError as error:
+            last_error = str(error)[:300]
+            calls["compose_rejected"] = calls.get("compose_rejected", 0) + 1
+            messages = messages[:2] + [
+                {
+                    "role": "user",
+                    "content": (
+                        "Your previous response was rejected by the response "
+                        f"schema: {last_error}\nReturn a corrected response."
+                    ),
+                }
+            ]
+    if result is None:
+        return {"outcome": "stage_error", "error": last_error, "gaps": []}
     calls["compose"] = calls.get("compose", 0) + 1
     calls["compose_cost_usd"] = calls.get("compose_cost_usd", 0.0) + float(
         getattr(result, "cost", 0.0)
@@ -257,10 +314,32 @@ async def compose_member(
     try:
         name = candidate.compose_name()
     except Exception as error:  # a grammar rejection is a stage outcome, not a crash
+        # The pre-validation gate in worker_compose_batches adopts the parser's
+        # own spelling when the refusal is a segment-order complaint, so the same
+        # recovery runs here; only an unrecoverable refusal is recorded.
+        refused = getattr(error, "name", None)
+        if refused and not candidate.operators:
+            from imas_codex.standard_names.grammar_adapter import (
+                adopt_canonical_segment_order,
+            )
+
+            try:
+                adopted = adopt_canonical_segment_order(refused)
+            except Exception:
+                adopted = None
+            if adopted is not None:
+                return {
+                    "outcome": "named",
+                    "name": adopted.name,
+                    "definition": candidate.description,
+                    "unit": packet["unit"],
+                    "gaps": gaps,
+                    "adopted_canonical_order": True,
+                }
         return {
             "outcome": "grammar_rejected",
             "error": str(error)[:200],
-            "gaps".replace("gaps", "gaps"): gaps,
+            "gaps": gaps,
         }
     return {
         "outcome": "named",
@@ -271,6 +350,8 @@ async def compose_member(
     }
 
 
+AUDIT_SCRIPT = ROOT / "blind-audit.py"
+
 JUDGE_RULES = """You are an independent physics auditor of fusion data-dictionary
 standard names. Decide whether ONE record names its sources faithfully, or
 whether the stage that produced it was right to decline to name the quantity.
@@ -278,25 +359,27 @@ You are given the Data Dictionary source text of every source the record must
 identify, then the record itself. Never assume a record is right because it
 parses, and never ask for a different record: judge this one.
 
-The fixed classes (a record may carry several):
+A name identifies and its definition specifies: a qualifier the name omits is
+owed by the definition, and its absence there is the defect. A record that does
+not name the quantity carries no defect class when the stage declined for a
+reason the sources support.
 
-- `name_contradicts_source`: the name states a quantity, locus, component or
-  relation that the source text contradicts.
-- `name_omits_source`: the source text states a qualifier of the quantity — a
-  counting basis, a species basis, a weighting or average, a normalisation, a
-  coordinate convention, a component or a locus — and the name leaves it out
-  although that qualifier separates this quantity from another.
-- `definition_contradicts_source`: the definition (description) contradicts the
-  source text.
-- `name_definition_disagree: the name and the definition describe different
-  quantities or different scopes.
+The fixed classes of the audit this measurement compares against, unchanged:
 
-A name identifies and its definition specifies: a normalisation, weighting,
-convention or method the name omits is owed by the definition, and its absence
-there is the defect. When the stage declined to name the quantity and reports a
-missing vocabulary token, judge whether declining was the faithful outcome for
-these sources.
 """
+
+
+def class_rules() -> str:
+    """§1's fixed class list, read from the audit that declared it."""
+    audit = _load_module("sn_blind_audit", AUDIT_SCRIPT)
+    return "\n".join(f"- `{key}`: {text}" for key, text in audit.DEFECT_CLASSES)
+
+
+JUDGE_VERSION = 2
+
+
+def class_fingerprint() -> str:
+    return hashlib.sha256(f"v{JUDGE_VERSION}:{class_rules()}".encode()).hexdigest()[:16]
 
 
 class Verdict:
@@ -304,14 +387,42 @@ class Verdict:
 
     @staticmethod
     def build():
-        from pydantic import BaseModel, Field
+        from pydantic import BaseModel, Field, field_validator, model_validator
+
+        keys = tuple(_load_module("sn_blind_audit", AUDIT_SCRIPT).CLASS_KEYS)
 
         class _Verdict(BaseModel):
             verdict: Literal["sound", "defective"] = Field(
                 description="sound when the record is faithful, defective otherwise"
             )
-            defect_classes: list[str] = Field(default_factory=list)
+            defect_classes: list[str] = Field(
+                description=(
+                    "Every fixed class that applies, by its exact key; empty "
+                    "exactly when the verdict is sound."
+                )
+            )
             reason: str = Field(description="one sentence quoting the deciding text")
+
+            @field_validator("defect_classes")
+            @classmethod
+            def _known_classes(cls, value: list[str]) -> list[str]:
+                unknown = [item for item in value if item not in keys]
+                if unknown:
+                    raise ValueError(
+                        f"unknown defect class(es) {unknown}; the fixed classes "
+                        f"are exactly: {', '.join(keys)}"
+                    )
+                return value
+
+            @model_validator(mode="after")
+            def _classes_agree_with_verdict(self):
+                if self.verdict == "sound" and self.defect_classes:
+                    raise ValueError("a sound record carries no defect class")
+                if self.verdict == "defective" and not self.defect_classes:
+                    raise ValueError(
+                        "a defective record must name at least one fixed class"
+                    )
+                return self
 
         return _Verdict
 
@@ -323,7 +434,10 @@ async def adjudicate(
     semaphore: asyncio.Semaphore,
     calls: dict[str, float],
 ) -> dict[str, Any]:
-    from imas_codex.discovery.base.llm import acall_llm_structured
+    from imas_codex.discovery.base.llm import (
+        LLMStructuredCallError,
+        acall_llm_structured,
+    )
 
     sources = "\n\n".join(
         f"path: {source_path(source)}\nunit: {source.get('dd_unit')}\n"
@@ -339,16 +453,39 @@ async def adjudicate(
         f"Enclosing structures (nearest first, deduplicated):\n{ancestors}\n\n"
         f"Record to judge:\n{record_text}\n"
     )
-    async with semaphore:
-        result = await acall_llm_structured(
-            model=model,
-            messages=[
-                {"role": "system", "content": JUDGE_RULES},
-                {"role": "user", "content": user_prompt},
-            ],
-            response_model=Verdict.build(),
-            service="standard-names",
-        )
+    messages = [
+        {"role": "system", "content": JUDGE_RULES},
+        {"role": "user", "content": user_prompt},
+    ]
+    result = None
+    last_error = ""
+    for _attempt in range(COMPOSE_ATTEMPTS):
+        try:
+            async with semaphore:
+                result = await acall_llm_structured(
+                    model=model,
+                    messages=messages,
+                    response_model=Verdict.build(),
+                    service="standard-names",
+                )
+            break
+        except LLMStructuredCallError as error:
+            last_error = str(error)[:300]
+            messages = messages[:2] + [
+                {
+                    "role": "user",
+                    "content": (
+                        "Your previous response was rejected by the response "
+                        f"schema: {last_error}\nReturn a corrected response."
+                    ),
+                }
+            ]
+    if result is None:
+        return {
+            "verdict": "undecided",
+            "defect_classes": [],
+            "reason": f"the adjudicator's responses were rejected: {last_error}",
+        }
     calls["adjudicate"] = calls.get("adjudicate", 0) + 1
     calls["adjudicate_cost_usd"] = calls.get("adjudicate_cost_usd", 0.0) + float(
         getattr(result, "cost", 0.0)
@@ -373,10 +510,7 @@ async def adjudicate(
 
 
 def start_disposable_graph():
-    spec = importlib.util.spec_from_file_location("sn_conftest", CONFTEST)
-    module = importlib.util.module_from_spec(spec)
-    assert module is not None and spec.loader is not None
-    spec.loader.exec_module(module)
+    module = _load_module("sn_conftest", CONFTEST)
     directory, process, _log, port = module._start_empty_neo4j()
     return module, directory, process, port
 
@@ -426,6 +560,138 @@ def stop_disposable_graph(module, directory, process) -> None:
 # --------------------------------------------------------------------------
 
 
+#: Bumped when the code that composes and adjudicates changes, so a recorded
+#: model phase cannot outlive the code that produced it.
+COMPOSE_VERSION = 1
+
+
+def _inputs_fingerprint() -> str:
+    """What the compose phase depends on: the record and the repaired stages."""
+    digest = hashlib.sha256(f"v{COMPOSE_VERSION}".encode())
+    for path in (RECORD, CONFTEST):
+        digest.update(path.read_bytes())
+    for cause in TOP_CAUSES:
+        digest.update((REPO / REPAIR_MARKERS[cause][0]).read_bytes())
+    return digest.hexdigest()
+
+
+def _load_models(fingerprint: str) -> dict[str, Any] | None:
+    """A recorded model phase for these inputs, so a later failure costs nothing."""
+    if not MODELS.exists():
+        return None
+    cached = json.loads(MODELS.read_text())
+    return cached if cached.get("fingerprint") == fingerprint else None
+
+
+def _store_models(
+    fingerprint: str, results: dict[str, Any], calls: dict[str, Any]
+) -> None:
+    MODELS.write_text(
+        json.dumps(
+            {"fingerprint": fingerprint, "members": results, "calls": calls}, indent=1
+        )
+        + "\n"
+    )
+
+
+def _load_adjudications(key: str) -> dict[str, dict[str, Any]]:
+    """Recorded verdicts taken under this class list and this compose phase."""
+    if not ADJUDICATIONS.exists():
+        return {}
+    return json.loads(ADJUDICATIONS.read_text()).get(key, {})
+
+
+def _store_adjudications(key: str, verdicts: dict[str, Any]) -> None:
+    data = json.loads(ADJUDICATIONS.read_text()) if ADJUDICATIONS.exists() else {}
+    data[key] = verdicts
+    ADJUDICATIONS.write_text(json.dumps(data, indent=1) + "\n")
+
+
+async def _compose_phase(
+    context: dict[str, Any], system_prompt: str, compose_model: str
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Regenerate every member of the three causes through the repaired stage."""
+    record = load_record()
+    members = cause_members(record)
+    before = member_before(record)
+    pool = record["packet"]["text_pool"]
+    packets = {packet["id"]: packet for packet in record["packet"]["packets"]}
+    semaphore = asyncio.Semaphore(COMPOSE_CONCURRENCY)
+    calls: dict[str, Any] = {}
+    results: dict[str, list[dict[str, Any]]] = {}
+    for cause in TOP_CAUSES:
+        results[cause] = []
+        for member_id in members[cause]:
+            packet = parse_packet(pool, packets[member_id])
+            listed = packet["sources"]
+            rejected: list[dict[str, str]] = []
+            if cause == "source_bindings_conflate_distinct_definitions":
+                sources, rejected = admitted_sources(packet["name"], listed)
+                if not sources:
+                    sources = listed[:1]
+            else:
+                sources = listed
+            regenerated = await compose_member(
+                context, system_prompt, packet, sources, compose_model, semaphore, calls
+            )
+            results[cause].append(
+                {
+                    "id": member_id,
+                    "before": before[member_id],
+                    "sources": [source_path(source) for source in listed],
+                    "rejected_bindings": rejected,
+                    "regenerated": regenerated,
+                    "source_text": sources_block(packet),
+                    "_packet": packet,
+                }
+            )
+    return results, calls
+
+
+def record_text(regenerated: dict[str, Any]) -> str:
+    """The record as the adjudicator reads it, or the stage's refusal."""
+    if regenerated["outcome"] == "named":
+        return (
+            f"Standard name: {regenerated['name']}\n"
+            f"Definition: {regenerated['definition']}\n"
+            f"Unit: {regenerated['unit']}\n"
+        )
+    gaps = "; ".join(f"{gap['segment']}/{gap['token']}" for gap in regenerated["gaps"])
+    return (
+        f"The stage did not name these sources ({regenerated['outcome']}); it "
+        f"reported: {gaps or regenerated.get('error') or 'nothing'}\n"
+    )
+
+
+async def _judge_phase(
+    results: dict[str, Any], judge_model: str, calls: dict[str, Any]
+) -> None:
+    """Put every regenerated record to the fresh adjudicator, blind."""
+    key = class_fingerprint()
+    cached = _load_adjudications(key)
+    semaphore = asyncio.Semaphore(COMPOSE_CONCURRENCY)
+    record = load_record()
+    pool = record["packet"]["text_pool"]
+    packets = {packet["id"]: packet for packet in record["packet"]["packets"]}
+    pending = []
+    for rows in results.values():
+        for row in rows:
+            if "_packet" not in row:
+                row["_packet"] = parse_packet(pool, packets[row["id"]])
+            row["record_text"] = record_text(row["regenerated"])
+            if row["id"] in cached:
+                row["after"] = cached[row["id"]]
+            else:
+                pending.append(row)
+    print(f"{len(cached)} adjudications reused, {len(pending)} to take", flush=True)
+    for row in pending:
+        row["after"] = await adjudicate(
+            row["_packet"], row["record_text"], judge_model, semaphore, calls
+        )
+    cached.update({row["id"]: row["after"] for row in pending})
+    _store_adjudications(f"{key}:{_inputs_fingerprint()[:16]}", cached)
+
+
 async def measure() -> dict[str, Any]:
     from imas_codex.settings import get_model
     from imas_codex.standard_names.context import build_compose_context
@@ -438,68 +704,22 @@ async def measure() -> dict[str, Any]:
     system_prompt = render_prompt("sn/generate_name_system", context)
 
     record = load_record()
-    members = cause_members(record)
-    before = member_before(record)
-    pool = record["packet"]["text_pool"]
-    packets = {packet["id"]: packet for packet in record["packet"]["packets"]}
 
-    compose_semaphore = asyncio.Semaphore(COMPOSE_CONCURRENCY)
-    judge_semaphore = asyncio.Semaphore(COMPOSE_CONCURRENCY)
+    fingerprint = _inputs_fingerprint()
+    cached = _load_models(fingerprint)
     calls: dict[str, Any] = {}
+    if cached is not None:
+        print(f"reusing the compose phase for {fingerprint[:16]}", flush=True)
+        results = cached["members"]
+        calls.update(cached["calls"])
+    else:
+        results, calls = await _compose_phase(context, system_prompt, compose_model)
+        _store_models(fingerprint, results, calls)
 
-    results: dict[str, list[dict[str, Any]]] = {}
-    for cause in TOP_CAUSES:
-        results[cause] = []
-        for member_id in members[cause]:
-            packet = parse_packet(pool, packets[member_id])
-            listed = packet["sources"]
-            rejected: list[dict[str, str]] = []
-            if cause == "source_bindings_conflate_distinct_definitions":
-                sources, rejected = admitted_sources(packet["name"], listed) or (
-                    listed,
-                    [],
-                )
-                if not sources:
-                    sources = listed[:1]
-            else:
-                sources = listed
-            regenerated = await compose_member(
-                context,
-                system_prompt,
-                packet,
-                sources,
-                compose_model,
-                compose_semaphore,
-                calls,
-            )
-            if regenerated["outcome"] == "named":
-                record_text = (
-                    f"Standard name: {regenerated['name']}\n"
-                    f"Definition: {regenerated['definition']}\n"
-                    f"Unit: {regenerated['unit']}\n"
-                )
-            else:
-                gaps = "; ".join(
-                    f"{gap['segment']}/{gap['token']}" for gap in regenerated["gaps"]
-                )
-                record_text = (
-                    "The stage declined to name these sources and reported a "
-                    f"missing vocabulary token: {gaps or 'none reported'}\n"
-                )
-            after = await adjudicate(
-                packet, record_text, judge_model, judge_semaphore, calls
-            )
-            results[cause].append(
-                {
-                    "id": member_id,
-                    "before": before[member_id],
-                    "sources": [source_path(source) for source in listed],
-                    "rejected_bindings": rejected,
-                    "regenerated": regenerated,
-                    "after": after,
-                    "record_text": record_text,
-                }
-            )
+    await _judge_phase(results, judge_model, calls)
+    for rows in results.values():
+        for row in rows:
+            row.pop("_packet", None)
 
     named_rows = []
     for cause, members_rows in results.items():
@@ -542,14 +762,24 @@ async def measure() -> dict[str, Any]:
             row for row in members_rows if row["regenerated"]["outcome"] == "named"
         ]
         sound = [row for row in members_rows if row["after"]["verdict"] == "sound"]
+        outcomes = Counter(row["regenerated"]["outcome"] for row in members_rows)
+        verdicts = Counter(row["after"]["verdict"] for row in members_rows)
         summary[cause] = {
             "members": len(members_rows),
+            "sound_between_classes": sum(
+                1
+                for row in members_rows
+                if row["after"]["verdict"] == "sound"
+                and row["before"]["verdict"] == "sound"
+            ),
             "sound_before": sum(
                 1 for row in members_rows if row["before"]["verdict"] == "sound"
             ),
             "sound_after": len(sound),
+            "undecided_after": verdicts.get("undecided", 0),
             "named_after": len(named),
-            "gap_after": len(members_rows) - len(named),
+            "not_named_after": len(members_rows) - len(named),
+            "outcomes": dict(sorted(outcomes.items())),
             "sound_share_after": round(len(sound) / len(members_rows), 3),
         }
 
@@ -615,8 +845,19 @@ def _verdict_cell(row: dict[str, Any]) -> str:
     after = row["after"]
     if after["verdict"] == "sound":
         return '<td class="ok">sound</td>'
-    classes = ", ".join(escape(item) for item in after["defect_classes"]) or "defective"
-    return f'<td class="bad">{classes}</td>'
+    if after["verdict"] == "undecided":
+        return '<td class="bad">undecided</td>'
+    return f'<td class="bad">{", ".join(escape(item) for item in after["defect_classes"])}</td>'
+
+
+def _detail(row: dict[str, Any]) -> str:
+    """A member still judged defective carries its text, so the reader can judge it."""
+    if row["after"]["verdict"] == "sound":
+        return ""
+    return (
+        "<details><summary>source text</summary><pre>"
+        f"{escape(row['source_text'])}</pre></details>"
+    )
 
 
 def _record_cell(row: dict[str, Any]) -> str:
@@ -660,20 +901,21 @@ def _body_parts(data: dict[str, Any]) -> list[str]:
         "here through the repaired stage from its own recorded source packet, and "
         "the regenerated record was read back from a disposable graph and "
         "adjudicated blind by a fresh reader "
-        f"(<code>{escape(data['spend']['adjudicator_model'])}</code>). "
+        f"(<code>{escape(data['spend']['adjudicator_model'])}</code>), under the "
+        "fixed classes of the audit this measurement compares against. "
         f"Judged sound: <strong>{sound_before} of {total_members} before</strong>, "
         f"<strong>{sound_after} of {total_members} after</strong>.",
         "</p>",
         '<h2 id="sagr-stage-repairs-per-cause">Per cause</h2>',
         '<table id="sagr-stage-repairs-cause-table"><thead><tr>'
         "<th>Cause</th><th>Members</th><th>Sound before</th><th>Sound after</th>"
-        "<th>Named after</th><th>Vocab gap after</th></tr></thead><tbody>",
+        "<th>Named after</th><th>Not named after</th></tr></thead><tbody>",
     ]
     for cause, item in summary.items():
         parts.append(
             f"<tr><td><code>{escape(cause)}</code></td><td>{item['members']}</td>"
             f"<td>{item['sound_before']}</td><td>{item['sound_after']}</td>"
-            f"<td>{item['named_after']}</td><td>{item['gap_after']}</td></tr>"
+            f"<td>{item['named_after']}</td><td>{item['not_named_after']}</td></tr>"
         )
     parts.append("</tbody></table>")
 
@@ -705,7 +947,7 @@ def _body_parts(data: dict[str, Any]) -> list[str]:
                 f"<td>{before}</td>"
                 f"{_record_cell(row)}"
                 f"{_verdict_cell(row)}"
-                f"<td>{escape(row['after']['reason'])}</td></tr>"
+                f"<td>{escape(row['after']['reason'])}{_detail(row)}</td></tr>"
             )
         parts.append("</tbody></table>")
 
@@ -788,21 +1030,34 @@ def render_page(data: dict[str, Any]) -> str:
 # --------------------------------------------------------------------------
 
 
+def _augment(data: dict[str, Any]) -> None:
+    """Fill a member's source text from the record for data measured before the
+    source-text column existed. It reads the record only: no model is called."""
+    record = load_record()
+    pool = record["packet"]["text_pool"]
+    packets = {packet["id"]: packet for packet in record["packet"]["packets"]}
+    for rows in data["members"].values():
+        for row in rows:
+            if row.get("source_text"):
+                continue
+            row["source_text"] = sources_block(parse_packet(pool, packets[row["id"]]))
+
+
 def _render_all(data: dict[str, Any]) -> None:
+    _augment(data)
+    DATA.write_text(json.dumps(data, indent=1) + "\n")
     FRAGMENT.write_text(render_fragment(data))
     PAGE.write_text(render_page(data))
 
 
 def run() -> None:
     data = asyncio.run(measure())
-    DATA.write_text(json.dumps(data, indent=1) + "\n")
-    FRAGMENT.write_text(render_fragment(data))
-    PAGE.write_text(render_page(data))
+    _render_all(data)
     summary = data["summary"]
     for cause, item in summary.items():
         print(
             f"{cause}: {item['sound_after']}/{item['members']} sound after "
-            f"({item['sound_before']} before), {item['gap_after']} gaps"
+            f"({item['sound_before']} before), {item['not_named_after']} not named"
         )
     print(f"spend USD {data['spend']['total_usd']:.2f}")
     print(f"graph {data['disposable_graph']['nodes_read_back']} nodes read back")
@@ -840,6 +1095,8 @@ def check() -> int:
     for row in (row for rows in data["members"].values() for row in rows):
         if row["id"] not in PAGE.read_text():
             failures.append(f"member {row['id']} absent from the page")
+        if not row.get("source_text"):
+            failures.append(f"member {row['id']} carries no source text")
     for failure in failures:
         print(f"FAIL {failure}")
     if not failures:

@@ -51,6 +51,20 @@ def test_a_selectable_boundary_must_not_bind_the_boundary_token() -> None:
     assert "never bind such a source to `plasma_boundary`" in rule
 
 
+def test_the_gap_names_a_class_the_grammar_reports() -> None:
+    """A gap filed under a class the grammar does not have is dropped unseen.
+
+    ``StandardNameVocabGap`` validates the class against the installed grammar
+    and ``_normalise_gap_segments`` drops an unknown one before it can be reconciled,
+    so the gap class must be legal or the refusal disappears.
+    """
+    from imas_codex.standard_names.segments import reportable_segments
+
+    rule = _boundary_rule(_system_prompt())
+    assert 'segment: "geometry"' in rule
+    assert "geometry" in reportable_segments()
+
+
 def test_the_stated_last_closed_surface_keeps_the_boundary_token() -> None:
     """The reservation is one-sided: a source that names the LCFS keeps it."""
     rule = _boundary_rule(_system_prompt())
