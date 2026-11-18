@@ -10624,6 +10624,25 @@
     "reason": "corrective-run:resume",
     "verdict": "exempt"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/scfg-benchmark uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_record_benchmark.py tests/standard_names/test_advisory_benchmark.py",
+    "integrated_revision": "e8dbe4716122436cf3fa85a491835ac14ca3f193",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T064807925154-scfg-benchmark/review-landing/gate-e8dbe4716122436cf3fa85a491835ac14ca3f193.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'UV_PROJECT_ENVIRONMENT=./.venv PYTHONPATH=. uv run --no-sync pytest -p no:cacheprovider tests/standard_names/test_record_benchmark.py tests/standard_names/test_advisory_benchmark.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/scfg-benchmark",
+      "/home/ITER/mcintos/Code/imas-codex"
+    ]
+  },
   "lane": null,
   "lane_advisory": {
     "backend": "omp-local",
