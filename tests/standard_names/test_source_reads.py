@@ -462,6 +462,7 @@ COPIED_LIST_SITES: dict[tuple[str, str], str] = {
     ): "record",
     ("standard_names/benchmark_roles.py", "build_advisory_paired_corpus"): "runtime",
     ("standard_names/benchmark_roles.py", "load_discrimination_corpus"): "runtime",
+    ("standard_names/case_file.py", "_neighbours_block"): "runtime",
     ("standard_names/consolidation.py", "_merge_duplicates"): "runtime",
     ("standard_names/context.py", "fetch_review_neighbours"): "runtime",
     ("standard_names/dd_gaps.py", "_evidence_snapshot"): "other_label",

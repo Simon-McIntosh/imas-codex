@@ -57,12 +57,13 @@ def test_fetch_review_neighbours_no_graph_returns_empty_lists():
                 "source_paths": ["core_profiles/profiles_1d/0/electrons/temperature"],
             }
         )
-    assert out == {
-        "vector_neighbours": [],
-        "same_base_neighbours": [],
-        "same_path_neighbours": [],
-        "sibling_family": None,
-    }
+    assert out["vector_neighbours"] == []
+    assert out["same_base_neighbours"] == []
+    assert out["same_path_neighbours"] == []
+    assert out["sibling_family"] is None
+    # An empty list alone cannot say whether the catalog has no neighbour or the
+    # lookup never ran: every channel reports that it was attempted and failed.
+    assert set(out["channel_status"].values()) == {"unavailable"}
 
 
 class _FakeGC:
@@ -294,3 +295,51 @@ def test_doc_opening_word_boundary_truncation():
     assert len(out) <= 53
     assert _doc_opening("short text") == "short text"
     assert _doc_opening(None) == ""
+
+
+class _LocusGC:
+    """Answer the locus-neighbour statement and record what it was sent."""
+
+    def __init__(self, rows):  # noqa: N805 - kept tiny on purpose
+        self.rows = rows
+        self.calls = []
+
+    def query(self, statement, **params):
+        self.calls.append((statement, params))
+        return list(self.rows)
+
+
+def test_locus_neighbours_rank_by_shared_path_depth_and_normalise_prefix():
+    from imas_codex.standard_names.context import fetch_locus_neighbours
+
+    rows = [
+        {"id": "volume_of_flux_surface", "shared_depth": 3},
+        {"id": "elongation_of_plasma_boundary", "shared_depth": 2},
+    ]
+    gc = _LocusGC(rows)
+
+    out = fetch_locus_neighbours(
+        ["dd:equilibrium/time_slice/profiles_1d/elongation"],
+        sn_id="elongation_of_flux_surface",
+        gc=gc,
+        k=4,
+        min_shared=2,
+    )
+
+    assert out == rows
+    statement, params = gc.calls[0]
+    assert "SN_LOCUS_NEIGHBOURS" in statement
+    assert "replace(" in statement
+    assert (
+        set(params) == {"paths", "sn_id", "k", "min_shared"}
+        and params["sn_id"] == "elongation_of_flux_surface"
+        and params["k"] == 4
+    )
+    assert params["min_shared"] == 2
+    assert params["paths"] == ["dd:equilibrium/time_slice/profiles_1d/elongation"]
+
+
+def test_locus_neighbours_returns_nothing_without_a_source_path():
+    from imas_codex.standard_names.context import fetch_locus_neighbours
+
+    assert fetch_locus_neighbours([]) == []
