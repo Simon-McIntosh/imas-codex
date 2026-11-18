@@ -1,0 +1,73 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failure_note": "The reviewed run declared baseline_suite and after_suite empty: it armed no pytest suite, so the delta over both arms is 0 with no failure ids. Its gate is the script's --check, whose head log live-repair-check.log ends EXIT=0 and whose altered-row negative control altered-identity.log ends EXIT=1.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-18T04:48:55.365Z",
+  "dispatched_at": "2026-11-18T04:48:34Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.json",
+      "line": "329",
+      "severity": "non-blocking",
+      "text": "non-blocking: all 126 members are accounted for but only 17 carry an accepted repaired identity; 76 defective and 33 undecidable members remain lead entries, so the release bar of zero known defects is not reached by this node and rests on the filled lead questions."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py",
+      "line": "502",
+      "severity": "non-blocking",
+      "text": "non-blocking: check() never asserts a member row carries its before identity or a review score on every accepted axis, so a regression dropping either passes the gate; the shipped record shows radial_outline_of_flux_surface with docs_stage accepted and reviewer_score_docs null."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py",
+      "line": "56",
+      "severity": "non-blocking",
+      "text": "non-blocking: audit() loads and returns the equilibrium-adjudication module, so a reader cannot tell from the name that it drives no audit."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read the 12 commit stats against bf4d110 and the landed script and record in full; the first commit c5630daa5 lands the driver and its record, the later commits only strengthen check() and the per-member data, and every commit touches exactly the three declared files (+2972 lines).",
+    "done_when": "the done_when measures --check against the live graph plus a per-member record; the source manifest's live-repair-check.log reports checked 126, complete true, repaired 17, sourceless 10 and spent_usd 2.420026 with EXIT=0, and I re-ran that same command at 7182664cf and saw EXIT=0.",
+    "goal": "the node's goal is to repair every defective or undecidable equilibrium name by one proposal through the signed edit path; docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.json:329 records 126 members accounted for but only 17 accepted repairs and 109 entries held for the lead, so the signed-edit-path repair reaches 17 of the 126.",
+    "manifest": "read; it states status complete, 12 commits, the three changed paths, the live-check command, test_logs live-repair-check.log (EXIT=0) and altered-identity.log (EXIT=1), and leaves baseline_suite and after_suite empty because the run armed no pytest suite.",
+    "write_paths": "the source node's fence was docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py, docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.json and docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.html; git diff --stat bf4d110..7182664cf lists exactly those three paths."
+  },
+  "justifications": {
+    "durability": "altered-identity.log reddens on a one-field record alteration because docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:503 compares live-graph identities against the record, but no test file exists and the before-identity and review-score clauses are not guarded.",
+    "evidence": "live-repair-check.log reports checked 126, complete true, sourceless 10 and EXIT=0 and I reproduced that EXIT=0 at head, but docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:502 never asserts a member's before identity or a non-null review score, so two done_when clauses rest on inspection alone.",
+    "fit": "the file follows the evidence-fragment idiom with a module docstring, docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:56 names the adjudication-module loader audit(), so that name states nothing it does.",
+    "goal_fidelity": "docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.json:329 shows 17 accepted repairs and 109 lead entries, so 109 of the 126 defective-or-undecidable members never reached the signed edit path, although the brief and done_when permit the lead listing.",
+    "reuse": "docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:95 calls imas_codex/standard_names/source_invariant.py:204 find_sourceless_live_name_rows, whose docstring calls a single enumeration the rule, and every mutation goes through the existing imas-codex sn CLI; the identity read is new and no owner for it exists under imas_codex/standard_names.",
+    "scope_discipline": "every one of the 12 commits touches only the three declared equilibrium-repair files and the diff adds nothing to any other path."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is to repair every defective or undecidable equilibrium name by one proposal through the signed edit path; docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.json:329 records 126 members accounted for but only 17 accepted repairs and 109 entries held for the lead, so the signed-edit-path repair reaches 17 of the 126.\nVERDICT done_when: the done_when measures --check against the live graph plus a per-member record; the source manifest's live-repair-check.log reports checked 126, complete true, repaired 17, sourceless 10 and spent_usd 2.420026 with EXIT=0, and I re-ran that same command at 7182664cf and saw EXIT=0.\nVERDICT write_paths: the source node's fence was docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py, docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.json and docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.html; git diff --stat bf4d110..7182664cf lists exactly those three paths.\nVERDICT manifest: read; it states status complete, 12 commits, the three changed paths, the live-check command, test_logs live-repair-check.log (EXIT=0) and altered-identity.log (EXIT=1), and leaves baseline_suite and after_suite empty because the run armed no pytest suite.\nVERDICT diff: read the 12 commit stats against bf4d110 (base bf4d11062, head 7182664cf) and the landed script and record in full; the first commit c5630daa5 lands the driver and its record, the later commits only strengthen check() and the per-member data, and every commit touches exactly the three declared files (+2972 lines).\nCALL_SITES: none\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.json:329 shows 17 accepted repairs and 109 lead entries, so 109 of the 126 defective-or-undecidable members never reached the signed edit path, although the brief and done_when permit the lead listing.\nSCORE evidence: 18\nJUSTIFICATION evidence: live-repair-check.log reports checked 126, complete true, sourceless 10 and EXIT=0 and I reproduced that EXIT=0 at head, but docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:502 never asserts a member's before identity or a non-null review score, so two done_when clauses rest on inspection alone.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every one of the 12 commits touches only the three declared equilibrium-repair files and the diff adds nothing to any other path.\nSCORE durability: 17\nJUSTIFICATION durability: altered-identity.log reddens on a one-field record alteration because docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:503 compares live-graph identities against the record, but no test file exists and the before-identity and review-score clauses are not guarded.\nSCORE fit: 16\nJUSTIFICATION fit: the file follows the evidence-fragment idiom with a module docstring, docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:56 names the adjudication-module loader audit(), so that name states nothing it does.\nSCORE reuse: 18\nJUSTIFICATION reuse: docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:95 calls imas_codex/standard_names/source_invariant.py:204 find_sourceless_live_name_rows, whose docstring calls a single enumeration the rule, and every mutation goes through the existing imas-codex sn CLI; the identity read is new and no owner for it exists under imas_codex/standard_names.\nFINDING docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.json:329 non-blocking: all 126 members are accounted for but only 17 carry an accepted repaired identity; 76 defective and 33 undecidable members remain lead entries, so the release bar of zero known defects is not reached by this node and rests on the filled lead questions.\nFINDING docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:502 non-blocking: check() never asserts a member row carries its before identity or a review score on every accepted axis, so a regression dropping either passes the gate; the shipped record shows radial_outline_of_flux_surface with docs_stage accepted and reviewer_score_docs null.\nFINDING docs/evidence/fragments/sn-audited-group-release/equilibrium-repair.py:56 non-blocking: audit() loads and returns the equilibrium-adjudication module, so a reader cannot tell from the name that it drives no audit.\n",
+  "review_run_id": "r-20261118T044731672878-review-of-sagr-equilibrium-agent-repair-7182664cf97c",
+  "reviewed_base_sha": "bf4d11062ee1da036861478e70ff7926bb9bfed8",
+  "reviewed_head_sha": "7182664cf97ce934612a2474ae96e6edc6c46cac",
+  "reviewed_run_id": "r-20261117T225452416830-sagr-equilibrium-agent-repair",
+  "reviewer": {
+    "backend": "local",
+    "effort": "high",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T044731672878-review-of-sagr-equilibrium-agent-repair-7182664cf97c"
+  },
+  "reviewer_run_id": "r-20261118T044731672878-review-of-sagr-equilibrium-agent-repair-7182664cf97c",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 16,
+    "goal_fidelity": 15,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:11:54.080991+00:00",
+  "total": 104
+}
