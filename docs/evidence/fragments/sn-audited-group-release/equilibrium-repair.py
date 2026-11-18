@@ -349,12 +349,18 @@ def render(record):
         "<!doctype html><html lang='en'><meta charset='utf-8'>",
         "<meta name='reckon-type' content='evidence'><title>Equilibrium repair record</title>",
         "<link rel='stylesheet' href='/_shared/foundation.css'><main>",
+        "<style>table{table-layout:fixed;width:100%}td,th{vertical-align:top;"
+        "overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere}"
+        "code{overflow-wrap:anywhere}</style>",
         "<h1>Equilibrium repair record</h1>",
         f"<p><strong>{e(record.get('state', 'in progress'))}</strong>: "
         f"{e(record.get('checkpoint', 'Repair work is incomplete.'))}</p>",
         f"<p>Recorded spend USD {record['spent_usd']:.6f} / USD {CEILING:.2f}. "
         f"Initial live names without a source: {record['baseline_sourceless']['count']}. "
         "Pipeline acceptance is recorded here; correctness awaits a fresh blind adjudication.</p>",
+        "<p>Scores describe the stored identity. A held member with no submitted command "
+        "has no fresh review claimed. Refused counts mean two scored name-review refusals; "
+        "deterministic vetoes and source questions are included among members left for the lead.</p>",
         f"<p>{e(record.get('pilot', {}).get('result', 'Pilot not completed.'))}</p>",
         f"<pre>{e(json.dumps(counts(record), indent=2))}</pre>",
         "<p>The two pending adjudications remain excluded. Full command receipts, source packets, "
@@ -368,9 +374,12 @@ def render(record):
         for proposal in r["proposals"]:
             args = proposal["arguments"]
             text = " ".join(args[:2])
-            for flag in ("--rename", "--docs", "--hint", "--reason"):
-                if flag in args:
-                    text += "\n" + flag + ": " + args[args.index(flag) + 1]
+            if "--dry-run" in args:
+                text += " (dry run; full proposal in the command receipt)"
+            else:
+                for flag in ("--rename", "--docs", "--hint", "--reason"):
+                    if flag in args:
+                        text += "\n" + flag + ": " + args[args.index(flag) + 1]
             scores = [
                 (v["axis"], v["score"])
                 for v in proposal["reviews"]
@@ -388,6 +397,9 @@ def render(record):
         content.append(
             f"<tr><td><code>{e(r['id'])}</code> → <code>{e(after.get('id'))}</code>"
             f"<p>{e((r.get('before') or {}).get('description'))}</p><p>{e(after.get('description'))}</p>"
+            f"<p>Units: {e(after.get('units'))}; domains: {e(after.get('domains'))}. "
+            f"Name score: {e(after.get('reviewer_score_name'))}; "
+            f"documentation score: {e(after.get('reviewer_score_docs'))}.</p>"
             f"</td><td>{e(r['judgment']['evidence_path'])}<p>{e(r['judgment']['reason'])}</p>"
             f"</td><td><pre>{e(proposals)}</pre></td><td>{e(r['outcome'])}; USD {r['cost_usd']:.6f}"
             f"<p>{e(r['lead_question'])}</p></td></tr>"
@@ -397,12 +409,16 @@ def render(record):
 
 
 def check(path=DATA, *, checkpoint=False):
+    print(json.dumps({"module": __file__, "cwd": str(Path.cwd().resolve())}))
     record = load(path)
     module = audit()
     expected = {j["id"] for j in module.load()["judgments"] if j["verdict"] != "sound"}
     rows = record["members"]
     assert {r["id"] for r in rows} == expected and len(rows) == 126, "Cohort mismatch"
-    assert record["spent_usd"] <= CEILING, "Spend ceiling"
+    assert record["ceiling_usd"] == CEILING and record["spent_usd"] <= CEILING, (
+        "Spend ceiling"
+    )
+    assert record["counts"] == counts(record), "Outcome totals differ from member rows"
     assert abs(sum(r["cost_usd"] for r in rows) - record["spent_usd"]) < 1e-8
     repaired = [r for r in rows if r["outcome"] == "accepted_repair"]
     with client() as gc:
@@ -437,12 +453,29 @@ def check(path=DATA, *, checkpoint=False):
             assert names and bindings.get(source) == names, (source, "Binding differs")
         for name, identity in r.get("related_identities", {}).items():
             assert live.get(name) == identity, (name, "Related identity differs")
-            assert identity["name_stage"] == "accepted" and identity["sources"], name
+            assert (
+                identity["name_stage"] == identity["docs_stage"] == "accepted"
+                and identity["sources"]
+            ), name
+    cost_ids = set()
+    receipt_spend = 0.0
+    positive_cost_rows = zero_cost_rows = 0
     for path in record["commands"]:
         receipt = json.loads(Path(path).read_text())
         assert receipt["state"] == "finished", (path, "Unfinished command")
         for k in ("sourceless_before", "sourceless_after"):
             assert receipt[k]["count"] == EXPECTED_SOURCELESS, (path, k)
+        for cost in receipt["cost_rows"]:
+            assert cost["cost"] is not None, (path, "Unknown cost is not zero")
+            assert cost["id"] not in cost_ids, (path, "Duplicate cost receipt")
+            cost_ids.add(cost["id"])
+            positive_cost_rows += cost["cost"] > 0
+            zero_cost_rows += cost["cost"] == 0
+        observed = sum(float(c["cost"]) for c in receipt["cost_rows"])
+        assert abs(observed - receipt["cost_usd"]) < 1e-8, (path, "Cost differs")
+        receipt_spend += observed
+    assert abs(receipt_spend - record["spent_usd"]) < 1e-8, "Unreconciled spend"
+    assert positive_cost_rows, "Cost reader must see known paid reviews"
     for r in rows:
         assert r["outcome"] in ("accepted_repair", "lead", "refused", "pending"), (
             r["id"],
@@ -463,12 +496,24 @@ def check(path=DATA, *, checkpoint=False):
                 "sourceless": guard["count"],
                 "spent_usd": record["spent_usd"],
                 "ceiling_usd": CEILING,
+                "cost_receipts": len(cost_ids),
+                "positive_cost_rows": positive_cost_rows,
+                "zero_cost_rows": zero_cost_rows,
             }
         )
     )
     if not checkpoint:
         pending = [r["id"] for r in rows if r["outcome"] == "pending"]
         assert not pending, f"Incomplete repair cohort: {len(pending)} pending members"
+        pilot = record["pilot"]
+        assert pilot["completed"] and pilot["accepted"] == len(pilot["members"]) == 6
+        assert len(set(pilot["members"])) == 6
+        assert all(
+            r["outcome"] == "accepted_repair"
+            for r in rows
+            if r["id"] in pilot["members"]
+        ), "Pilot member is no longer an accepted repair"
+        assert pilot["projected_all_126_usd"] <= CEILING, "Pilot exceeds ceiling"
 
 
 def main():
