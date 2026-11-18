@@ -32,6 +32,13 @@
       "finding": "done_when-1",
       "reason": "The node's dispatch contract carries the reconciliation: members described plus members awaiting context plus members failed must equal the 1,766 pilot signals of the context landing, with the 190 linked signals all accounted for. The section's endpoint is unchanged.",
       "when": "2026-11-18T20:35:44.000962+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "reasoning-1",
+      "reason": "The functional specification is on disk in the private document store the fetch section filled on 2026-11-18, and the node's brief names that path. Private paths are kept out of plan text by rule.",
+      "when": "2026-11-18T20:35:47.436656+00:00"
     }
   ],
   "responses": {
@@ -40,6 +47,12 @@
       "by": "",
       "reason": "The node's dispatch contract carries the reconciliation: members described plus members awaiting context plus members failed must equal the 1,766 pilot signals of the context landing, with the 190 linked signals all accounted for. The section's endpoint is unchanged.",
       "when": "2026-11-18T20:35:44.000962+00:00"
+    },
+    "reasoning-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The functional specification is on disk in the private document store the fetch section filled on 2026-11-18, and the node's brief names that path. Private paths are kept out of plan text by rule.",
+      "when": "2026-11-18T20:35:47.436656+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261118T200002811668-plan-review-of-iter-signal-context-and-enrichment.json",
