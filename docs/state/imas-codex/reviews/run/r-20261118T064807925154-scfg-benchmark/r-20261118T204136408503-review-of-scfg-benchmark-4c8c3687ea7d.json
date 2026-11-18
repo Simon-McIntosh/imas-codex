@@ -1,0 +1,98 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 5,
+  "call_sites": [
+    "imas_codex/standard_names/advisory_benchmark.py:228 run_frozen_advisory_benchmark -> validate_cost",
+    "imas_codex/standard_names/advisory_benchmark.py:238 run_frozen_advisory_benchmark -> summarize_costs",
+    "imas_codex/standard_names/advisory_benchmark.py:319 _validate_run_arguments -> validate_cost",
+    "docs/evidence/fragments/sn-case-file-generation/benchmark.py:730 build_document -> bench.summarize_record_arm",
+    "docs/evidence/fragments/sn-case-file-generation/benchmark.py:827 build_document -> bench.evaluate_controls"
+  ],
+  "completed_at": "2026-11-18T20:53:51.878Z",
+  "dispatched_at": "2026-11-18T20:53:09Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/benchmark.py",
+      "line": "2583",
+      "severity": "non-blocking",
+      "text": "non-blocking: compare_record_arms re-implements the paired percentile bootstrap inline (random.Random at :2602, sorted draws and the 0.025/0.975 index at :2608) instead of using imas_codex/discovery/base/evaluation.py:144 bootstrap_interval, whose scores_b plus statistic path already returns the paired mean-difference interval; a second implementation of a capability the repository owns will drift from the owner."
+    },
+    {
+      "file": "tests/standard_names/test_record_benchmark.py",
+      "line": "102",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fixture sets changed_incumbent True on exactly the two rows that are also incumbent_right, so `assert report.changed_right_incumbent == 2` also holds if benchmark.py:2524 drops its right_incumbent_total filter and counts every changed row; the drift figure the report publishes is therefore not guarded by a failing condition."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "62",
+      "severity": "non-blocking",
+      "text": "non-blocking: KIMI_COMMAND carries the literal `<B300-server>` placeholder and is published verbatim as .not_run[0].command, so the done_when's \"the command that will run it\" is a template no shell can run, and the subscription entry points at a --stage measure invocation that does not select an arm the report would add."
+    },
+    {
+      "file": "imas_codex/standard_names/benchmark.py",
+      "line": "2450",
+      "severity": "non-blocking",
+      "text": "non-blocking: RecordBenchmarkRow accepts any non-empty blocker string and summarize_record_arm counts it verbatim, so the published .final.arms blocked_by_type for one-pass/local contains a one-letter key \"e\" beside three unrelated vocabularies (missing_bound_source, bound_source, generation-failure:...); the done_when's share-blocked-by-type table is bucketed on an unvalidated free-text vocabulary."
+    },
+    {
+      "file": "imas_codex/standard_names/benchmark.py",
+      "line": "2714",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert_controls_separate has no production caller - neither the evidence runner nor any imas_codex module calls it, the runner records \"measuring\": false instead - so the only refusal the module offers for a non-separating control is exercised by its own test and by nothing that runs."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "988",
+      "severity": "non-blocking",
+      "text": "non-blocking: the report publishes \"ruling\": \"awaiting the lead's ruling\" and the node ended complete, so the done_when clause \"the ruling is recorded here\" is unmet; the choice is presented with its figures, but no ruling exists in the record for a later node to read."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "737",
+      "severity": "non-blocking",
+      "text": "non-blocking: dependent_members selects members whose evidence quote sits only in the enclosing text (3 held-out members) but does not require the full arm to have got them right, so .final.controls.withheld compares 0/3 full against 0/3 withheld: the withheld control could not separate by construction and its failure says nothing about whether withholding the text matters."
+    }
+  ],
+  "head_log_revision": "4c8c3687ea7d1de22ea0cd751784cde74ea66d09",
+  "item_verdicts": {
+    "call_sites": "three production call sites were verified in imas_codex/standard_names/advisory_benchmark.py (:228, :238, :319) for the renamed public cost helpers; the record-benchmark symbols have no package runtime caller outside the evidence runner.",
+    "diff": "read all three commits against 0f38d7d5b: dd04a65fd adds wilson_interval, assign_development_split, the arm, row and report types, summarize_record_arm, _paired_rights, compare_record_arms, evaluate_controls and assert_controls_separate plus 275 test lines; fc42585d2 adds the 1430-line evidence runner; 4c8c3687e adds the generated JSON, HTML, fragment and figure.",
+    "done_when": "every arm wrote a record for every reference member from its case file (records.jsonl 1234 rows = 89 development x 4 arms x 2 rounds plus 87 held-out x 6 arms), a blind judge scored each, per-arm share/interval/blocked-by-type/drift/cost/time/tokens are in .final.arms, two prompt rounds are in .rounds, and the gate log at 4c8c3687e is EXIT=0; the ruling clause and a runnable not-run command are not fully met.",
+    "goal": "the goal is to benchmark one-pass against staged generation across the models and put the choice to the lead; benchmark.json .decision gives four measured options (one-pass/frontier 32.2 %, staged/frontier 27.6 %, one-pass/local 17.2 %, staged/local 8.0 %) with cost, time and tokens beside each, and .not_run names kimi and the subscription lane.",
+    "manifest": "read; status complete, commits dd04a65fd/fc42585d2/4c8c3687e, the gate command and gate.log, negative-control.log EXIT=1 with the mutation stated, and the held-out figures with both controls failing to separate.",
+    "write_paths": "the diff touches docs/evidence/fragments/sn-case-file-generation/{benchmark.py,benchmark.json,benchmark.html,scfg-benchmark.html}, docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg, imas_codex/standard_names/{benchmark.py,advisory_benchmark.py} and tests/standard_names/test_record_benchmark.py, all inside the declared eight paths."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_record_benchmark.py:196-209 reddens under the declared evaluate_controls mutation (negative-control.log EXIT=1), but :102 asserts a drift count of 2 on a fixture where summing every changed row also yields 2, so the incumbent_right filter at benchmark.py:2524 is unguarded.",
+    "evidence": "gate.log at 4c8c3687e reads \"22 passed\" and EXIT=0 for tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py, and negative-control.log reads 1 failed EXIT=1, but nothing in the gate rereads benchmark.json, whose share_right and interval fields I had to reconcile against benchmark.py by hand.",
+    "fit": "the addition sits under a section header at benchmark.py:2323-2325 and uses the module's dataclass and section conventions, with no plan or ticket identifier in any name or comment.",
+    "goal_fidelity": "benchmark.json (.reference, .final.arms, .decision) carries 176 reference members, all six arms over 87 held-out members and a recommended one-pass/frontier at 32.2 %, but .decision.ruling reads \"awaiting the lead's ruling\", so the done_when's recorded ruling is absent.",
+    "reuse": "compare_record_arms at benchmark.py:2583 re-implements the paired percentile bootstrap that imas_codex/discovery/base/evaluation.py:144 (bootstrap_interval, scores_b plus a custom statistic) already owns, so a repository capability is duplicated rather than extended.",
+    "scope_discipline": "the eight paths in git diff 0f38d7d5b..4c8c3687e are exactly the node's declared write paths, and the only product edit outside the new record-benchmark block is the public renaming of summarize_costs/validate_cost in advisory_benchmark.py:419."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to benchmark one-pass against staged generation across the available models and put the choice to the lead, and imas_codex/standard_names/benchmark.py:2323-2719 plus docs/evidence/fragments/sn-case-file-generation/benchmark.json .decision deliver four measured options with cost, time and tokens beside each and two lanes reported not run, though .decision.ruling stands at \"awaiting the lead's ruling\".\nVERDICT done_when: the done_when asks for a record per arm per member, a blind adjudicator, per-arm share with a 95 % interval, blocked-by-type, changed-right-incumbent, cost/time/tokens, two rounds on a development half, one held-out measurement, a member-by-member comparison, two separating controls and a ruling; benchmark.json carries all of them but the ruling, and the gate the worker ran (tests/standard_names/test_record_benchmark.py and tests/standard_names/test_advisory_benchmark.py, 22 passed EXIT=0 at 4c8c3687e) asserts the statistics behind those figures rather than rereading the committed evidence JSON.\nVERDICT write_paths: the declared eight paths are the product owners, the test and the evidence and figure files, and git diff 0f38d7d5b..4c8c3687e touches exactly those eight and nothing else.\nVERDICT manifest: read; it reports status complete, commits dd04a65fd/fc42585d2/4c8c3687e, the two-file pytest gate with its log, negative-control.log EXIT=1 naming the evaluate_controls mutation, and the held-out figures with both controls failing to separate.\nVERDICT diff: read all three commits against base 0f38d7d5b - dd04a65fd adds the record-benchmark statistics and its tests, fc42585d2 adds the 1430-line evidence runner, and 4c8c3687e adds the generated JSON, two HTML pages and the held-out figure.\nCALL_SITES: imas_codex/standard_names/advisory_benchmark.py:228 run_frozen_advisory_benchmark -> validate_cost, imas_codex/standard_names/advisory_benchmark.py:238 run_frozen_advisory_benchmark -> summarize_costs, imas_codex/standard_names/advisory_benchmark.py:319 _validate_run_arguments -> validate_cost, docs/evidence/fragments/sn-case-file-generation/benchmark.py:730 build_document -> bench.summarize_record_arm, docs/evidence/fragments/sn-case-file-generation/benchmark.py:827 build_document -> bench.evaluate_controls\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: benchmark.json .decision lists four options with share, interval, blocked-by-type, drift, cost, time and tokens beside each, but .decision.ruling reads \"awaiting the lead's ruling\" and so the done_when's recorded ruling is missing.\nSCORE evidence: 16\nJUSTIFICATION evidence: gate.log at 4c8c3687e reads \"22 passed\" and EXIT=0 and negative-control.log reads EXIT=1 with test_withheld_control_at_full_arm_score_is_refused failing, yet no gate rereads benchmark.json, whose shares and Wilson bounds I reconciled against benchmark.py by hand rather than from the recorded run.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every path in git diff 0f38d7d5b..4c8c3687e is one of the eight declared paths, and the only product edit beyond the new record-benchmark block is the public renaming in imas_codex/standard_names/advisory_benchmark.py:419-443 that the goal's spend statement needs.\nSCORE durability: 14\nJUSTIFICATION durability: tests/standard_names/test_record_benchmark.py:196-209 reddens under the declared evaluate_controls mutation (negative-control.log EXIT=1), but :102 asserts a drift count of 2 on a fixture where summing every changed row also yields 2, so the incumbent_right filter at benchmark.py:2524 has no failing condition.\nSCORE fit: 17\nJUSTIFICATION fit: the block under imas_codex/standard_names/benchmark.py:2323-2325 follows the module's dataclass, frozen-row and section-header idiom and introduces no plan or ticket identifier.\nSCORE reuse: 5\nJUSTIFICATION reuse: imas_codex/standard_names/benchmark.py:2583 re-implements the paired percentile bootstrap owned by imas_codex/discovery/base/evaluation.py:144 bootstrap_interval, whose scores_b and statistic arguments already return that interval, so the capability is duplicated rather than extended.\nFINDING imas_codex/standard_names/benchmark.py:2583 non-blocking: compare_record_arms re-implements the paired percentile bootstrap inline instead of using imas_codex/discovery/base/evaluation.py:144 bootstrap_interval, whose scores_b and statistic path already returns the paired mean-difference interval, so the repository carries two bootstrap implementations.\nFINDING tests/standard_names/test_record_benchmark.py:102 non-blocking: the fixture marks exactly the two incumbent-right rows as changed, so the assertion still holds if benchmark.py:2524 drops its right_incumbent_total filter and counts every changed row, leaving the published drift figure unguarded.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:62 non-blocking: KIMI_COMMAND contains the literal placeholder `<B300-server>` and is published as .not_run[0].command, so the done_when's command that will run the aim is a template no shell can run.\nFINDING imas_codex/standard_names/benchmark.py:2450 non-blocking: a blocked row's type is any non-empty string and summarize_record_arm counts it verbatim, so .final.arms publishes a one-letter blocked type \"e\" beside three inconsistent vocabularies and the share-by-blocked-type table is bucketed on unvalidated free text.\nFINDING imas_codex/standard_names/benchmark.py:2714 non-blocking: assert_controls_separate has no production caller - the evidence runner records \"measuring\": false instead - so the module's only refusal for a non-separating control is reachable from its own test alone.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:988 non-blocking: the node shipped \"ruling\": \"awaiting the lead's ruling\" and ended complete, so the done_when's \"the ruling is recorded here\" is not satisfied by the landed record.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:737 non-blocking: dependent_members does not require the full arm to have got those members right, so the withheld control compares 0/3 full against 0/3 withheld and could not separate by construction, which makes its reported failure uninformative about the withheld text.\n",
+  "review_run_id": "r-20261118T204136408503-review-of-scfg-benchmark-4c8c3687ea7d",
+  "reviewed_base_sha": "0f38d7d5b6dd07706ec496230bcde3369dc27693",
+  "reviewed_head_sha": "4c8c3687ea7d1de22ea0cd751784cde74ea66d09",
+  "reviewed_run_id": "r-20261118T064807925154-scfg-benchmark",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261118T204136408503-review-of-scfg-benchmark-4c8c3687ea7d"
+  },
+  "reviewer_run_id": "r-20261118T204136408503-review-of-scfg-benchmark-4c8c3687ea7d",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T21:23:47.674583+00:00",
+  "total": 88
+}
