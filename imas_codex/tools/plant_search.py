@@ -173,6 +173,7 @@ def search_pulse_catalogue(
     *,
     designation: str | None = None,
     category_id: str | None = None,
+    test_kind: str | None = None,
     limit: int = 20,
     offset: int = 0,
 ) -> str:
@@ -182,14 +183,19 @@ def search_pulse_catalogue(
     if (designation is None) == (category_id is None):
         raise ValueError("supply exactly one of designation or category_id")
     arguments: dict[str, Any] = {"facility": facility, "limit": limit}
+    if test_kind is not None:
+        test_kind = _text(test_kind, "test_kind").lower()
+        arguments["test_kind"] = test_kind
+    kind_predicate = " AND toLower(c.kind) = $test_kind" if test_kind else ""
     if category_id is None:
         designation = _text(designation, "designation")
         arguments["designation"] = designation
         page = _read_page(
             graph,
             "MATCH (c:PulseCategory {facility_id: $facility})",
-            "(toLower(c.name) CONTAINS $designation OR toLower(coalesce(c.description, '')) CONTAINS $designation)",
-            """c { .id, .name, .archive,
+            "(toLower(c.name) CONTAINS $designation OR toLower(coalesce(c.description, '')) CONTAINS $designation)"
+            + kind_predicate,
+            """c { .id, .name, .archive, .kind, .kind_source,
                 description: substring(c.description, 0, $description_chars),
                 description_truncated: coalesce(size(c.description), 0) > $description_chars,
                 pulse_count: COUNT { MATCH (p:Pulse)-[:IN_PULSE_CATEGORY]->(c) WHERE p.facility_id = $facility } }""",
@@ -199,17 +205,24 @@ def search_pulse_catalogue(
                 "designation": designation.lower(),
                 "limit": limit,
                 "offset": offset,
+                "test_kind": test_kind,
             },
         )
-        context = {"kind": "pulse_categories", "designation": designation}
+        context = {
+            "kind": "pulse_categories",
+            "designation": designation,
+            "test_kind": test_kind,
+        }
     else:
         category_id = _text(category_id, "category_id")
         arguments["category_id"] = category_id
         page = _read_page(
             graph,
             "MATCH (p:Pulse {facility_id: $facility})",
-            "EXISTS { MATCH (p)-[:IN_PULSE_CATEGORY]->(:PulseCategory {id: $category_id, facility_id: $facility}) }",
-            """p { .id, .name, .archive, .start_ns, .end_ns,
+            "EXISTS { MATCH (p)-[:IN_PULSE_CATEGORY]->(c:PulseCategory {id: $category_id, facility_id: $facility}) WHERE true"
+            + kind_predicate
+            + " }",
+            """p { .id, .name, .archive, .start_ns, .end_ns, .status,
                 open_ended: p.end_ns IS NULL,
                 description: substring(p.description, 0, $description_chars),
                 description_truncated: coalesce(size(p.description), 0) > $description_chars }""",
@@ -219,11 +232,13 @@ def search_pulse_catalogue(
                 "category_id": category_id,
                 "limit": limit,
                 "offset": offset,
+                "test_kind": test_kind,
             },
         )
         context = {
             "kind": "pulses",
             "category_id": category_id,
+            "test_kind": test_kind,
             "time_base": "unix_epoch_nanoseconds",
         }
     return _page_json(

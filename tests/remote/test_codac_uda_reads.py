@@ -55,6 +55,7 @@ class FakeClient:
                 timeFrom=10,
                 timeTo=20,
                 description="Demonstration pulse",
+                status="finished",
             )
         ]
 
@@ -217,6 +218,7 @@ def test_pulse_listing_adds_explicit_pulse_segment():
                 "start_ns": 10,
                 "end_ns": 20,
                 "description": "Demonstration pulse",
+                "status": "finished",
             }
         ],
         "categories": ["DEMO:TRIAL"],

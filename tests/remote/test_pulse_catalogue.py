@@ -96,6 +96,7 @@ def test_native_pulse_listing_keeps_missing_end_and_description(end):
             timeFrom=1731600000000000001,
             timeTo=end,
             description="Demonstration pulse",
+            status="finished",
         )
     ]
     result = native.dispatch(
@@ -167,3 +168,44 @@ def test_open_pulse_requires_explicit_window_before_data_read():
             "demo:signal", pulse_id="demo:pulse"
         )
     reader.read.assert_not_called()
+
+
+def test_catalogue_command_reads_private_yaml_kind_rules(tmp_path, monkeypatch):
+    import json
+
+    from imas_codex.remote import pulse_catalogue
+
+    config = tmp_path / "config.yaml"
+    config.write_text("data_systems: {}\n")
+    rules = tmp_path / "rules.yaml"
+    rules.write_text(
+        "- kind: commissioning\n"
+        "  source: category_name\n"
+        "  pattern: ACTIVE$\n"
+        "  reference: invented-rule\n"
+    )
+    receipt = tmp_path / "receipt.json"
+    monkeypatch.setattr(
+        pulse_catalogue, "ArchiveReader", lambda *a, **kw: fake_reader()
+    )
+    monkeypatch.setattr(
+        "sys.argv",
+        [
+            "pulse-catalogue",
+            "--config",
+            str(config),
+            "--role",
+            "slow",
+            "--snapshot",
+            str(tmp_path / "snapshot.json"),
+            "--receipt",
+            str(receipt),
+            "--kind-rules",
+            str(rules),
+        ],
+    )
+    pulse_catalogue.main()
+    result = json.loads(receipt.read_text())
+    assert result["kinds"] == {"commissioning": 1}
+    assert result["categories_with_kind_by_source"] == {"category_name": 1}
+    assert result["categories_without_kind"] == 1

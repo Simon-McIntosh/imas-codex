@@ -30,7 +30,9 @@ ARCHIVE_QUERY = """
 MATCH (f:Facility {id: $facility})
 UNWIND $archives AS props
 MERGE (a:ArchiveEndpoint {id: props.id})
-SET a += props
+FOREACH (_ IN CASE WHEN any(key IN keys(props) WHERE
+    coalesce(a[key] <> props[key], a[key] IS NOT NULL OR props[key] IS NOT NULL))
+    THEN [1] ELSE [] END | SET a += props)
 MERGE (a)-[:AT_FACILITY]->(f)
 RETURN count(a) AS written
 """

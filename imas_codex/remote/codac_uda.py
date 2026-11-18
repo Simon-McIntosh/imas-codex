@@ -309,6 +309,7 @@ class ArchiveReader:
                 start_ns=item["start_ns"],
                 end_ns=item.get("end_ns"),
                 description=item.get("description"),
+                status=item.get("status"),
                 categories=[
                     f"{self.archive}:{category}"
                     for category in result["categories"]

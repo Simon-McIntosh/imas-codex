@@ -292,9 +292,8 @@ def pulses(client, request: dict) -> dict:
                 "id": str(item.pulseID),
                 "start_ns": int(item.timeFrom),
                 "end_ns": None if item.timeTo in (None, "") else int(item.timeTo),
-                "description": str(item.description)
-                if item.description is not None
-                else None,
+                "description": str(item.description) if item.description else None,
+                "status": str(item.status) if item.status is not None else None,
             }
             for item in found
         ],

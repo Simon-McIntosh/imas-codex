@@ -29,9 +29,10 @@ def create_archive_pulse(
     archive: str,
     name: str,
     start_ns: int,
-    end_ns: int,
+    end_ns: int | None,
     categories: list[str] | None = None,
     description: str | None = None,
+    status: str | None = None,
     id: str | None = None,
 ) -> Pulse:
     """Construct a pulse using its complete archive-reported identity.
@@ -51,7 +52,8 @@ def create_archive_pulse(
         start_ns=start_ns,
         end_ns=end_ns,
         categories=categories,
-        description=description,
+        description=description or None,
+        status=status or None,
     )
     if "/" not in pulse.name or any(not segment for segment in pulse.name.split("/")):
         raise ValueError("pulse name must include its archive category and pulse path")

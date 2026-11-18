@@ -55,6 +55,7 @@ async def test_mcp_schema_exposes_typed_plant_filters_without_query_requirement(
             schema = tools[name].inputSchema
             assert not {"cypher", "endpoint", "host"} & schema["properties"].keys()
             assert tools[name].outputSchema is None
+        assert "test_kind" in tools["search_pulses"].inputSchema["properties"]
 
 
 @pytest.mark.asyncio
