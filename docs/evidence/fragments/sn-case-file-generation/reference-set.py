@@ -816,7 +816,6 @@ def member_entry(member: dict, verdict: dict) -> dict:
         "earlier": {
             "verdict": member["earlier"]["verdict"],
             "defect_classes": member["earlier"]["defect_classes"],
-            "reason": member["earlier"]["reason"],
         },
         "packet_digest": member["packet_digest"],
     }
