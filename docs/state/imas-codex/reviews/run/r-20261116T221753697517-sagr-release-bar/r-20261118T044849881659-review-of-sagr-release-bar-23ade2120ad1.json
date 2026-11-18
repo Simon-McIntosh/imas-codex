@@ -1,0 +1,61 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arms, both read here rather than taken on report: base-suite.log at 9dc386945214 is '22 failed, 8788 passed ... EXIT=1' and after-suite.log at 290a09207d0f is '22 failed, 8813 passed ... EXIT=1'; the sorted FAILED id sets are identical (comm -13 and comm -23 both empty), so no failure id is added at head and the 25 extra passes are the new module. Each log carries 22 FAILED lines, matching its own summary line, and both arms declare completed. The after arm is at 290a09207d0f, one docs-only commit below the reviewed head 23ade2120ad1.",
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/sn.py:4712",
+    "imas_codex/cli/sn.py:4848",
+    "imas_codex/standard_names/catalog_release.py:2505"
+  ],
+  "completed_at": "2026-11-18T04:50:04.656Z",
+  "dispatched_at": "2026-11-18T04:49:50Z",
+  "findings": [
+    {
+      "file": "imas_codex/standard_names/export.py",
+      "line": "1179",
+      "severity": "non-blocking",
+      "text": "non-blocking: the family half of the bar reaches the cut only through _run_gate_b(domain=..., family_paths=...), and no test drives that path - the module tests _group_family_issues in isolation (tests/standard_names/test_release_group_bar.py:322) and patches _fetch_group_family_paths to [] at :810 - so deleting family_paths= at export.py:4069 or the extend at :1182 leaves all 25 tests green while the family cause silently leaves the cross-field gate."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/sagr-release-bar.html",
+      "line": "69",
+      "severity": "non-blocking",
+      "text": "non-blocking: the suite table's head arm names revision 290a09207, and the reviewed head is 23ade2120, so \"no failure at head\" is measured one docs-only commit below the revision being promoted; the intervening delta is the fragment itself, so the measure stands but the page does not say it."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read commit by commit from 9dc386945214 to 23ade2120ad1; the code lands in b39ff5933 (gate, ten causes, fetchers) and 15b0dbac0 (ruled bar, undecided counted), 8507f6e08 and 07a9a66b5 take the two identities from their owners, 6367dfa60 replaces the same-variable id assertion, and the head commit is a three-line evidence edit.",
+    "done_when": "the done_when asks for a recorded refusal per planted fault, a clean cut, the family cause inside the cross-field gate, and \"the whole tests/standard_names directory adds no failure at head against base\"; the gate run was that whole directory, both arms are recorded as legible JSON with log paths, the evidence page records thirteen planted-fault cuts, and the live gate-only run records the same gate on the real group.",
+    "goal": "the node goal is a group release cut that refuses, naming the cause, on the eight conditions of plan section 3; imas_codex/standard_names/export.py:2015 (_run_group_bar_gate) carries six of them and export.py:1179 carries the family cause inside the cross-field gate, and the extra release_bar_not_ruled at export.py:2061 is the bar's own precondition rather than a second rule.",
+    "manifest": "read at the run directory; it records status complete, fourteen commits from b39ff5933 to 23ade2120, base arm 22 failed and 8788 passed against base-suite.log, head arm 22 failed and 8813 passed against after-suite.log, the gate command, three negative-control logs and the live report path; both suite objects are legible and completed.",
+    "write_paths": "the declared paths are export.py, source_invariant.py, families.py, tests/standard_names/test_release_group_bar.py, the evidence fragment and a figures path; the diff touches export.py, families.py and the test file inside them and five further files outside them (imas_codex/settings.py:1397, imas_codex/cli/sn.py:4757, imas_codex/standard_names/AGENTS.md, release_bar.json, the refusals json), with source_invariant.py and the figures path untouched."
+  },
+  "justifications": {
+    "durability": "each plant-and-refuse test compares the gate's own issue type to a literal cause (tests/standard_names/test_release_group_bar.py:195 and following), the two assertions the preceding review named as same-variable are repaired - :331 restates the sha1 framing inline and :608 recomputes all 225 committed ids from domain-groups.json - but no test drives family_paths through _run_gate_b at export.py:1179.",
+    "evidence": "the manifest's baseline_suite and after_suite name the whole-directory command and completed arms whose FAILED id sets I recomputed from base-suite.log and after-suite.log (22 in each, comm -13 and comm -23 both empty, matching each summary line), and equilibrium-gate-report.json reproduces the page's live counts 63, 57, 1 and 0 per cause.",
+    "fit": "the gate follows export.py's GateResult and issue-dict idiom, the accessors sit beside get_sn_staging_dir at settings.py:1394, and the only out-of-idiom line is the private cross-module import of _authority_payload_hash at export.py:1620.",
+    "goal_fidelity": "every refusal the plan lists is implemented once and named - export.py:1773 acceptance, :1811 sourceless, :1834 shared wording, :1866 rate and class maxima, :2106 family - and a group planted with no fault is cut at tests/standard_names/test_release_group_bar.py:172.",
+    "reuse": "eligibility, the source census, family detection, shared wording and both stored identities delegate to their existing owners (export.py:1773, families.py:142, docs_gates.shared_part_findings, graph_claim_release.py:560); only the bar and audit-record readers at export.py:1502 and :1651 are new, and searching standard_names, settings.py and catalog_release.py found no owner for a ruled release bar or an audit record.",
+    "scope_discipline": "five of the nine changed files (imas_codex/settings.py:1397, imas_codex/cli/sn.py:4757, standard_names/AGENTS.md, release_bar.json, the refusals json) sit outside the six declared write paths, each implied by the goal and none widening the refusal set."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is a group release cut that refuses, naming the cause, on the eight conditions of plan section 3; imas_codex/standard_names/export.py:2015 (_run_group_bar_gate) carries six of them and export.py:1179 carries the family cause inside the cross-field gate, and the extra release_bar_not_ruled at export.py:2061 is the bar's own precondition rather than a second rule.\nVERDICT done_when: the done_when asks for a recorded refusal per planted fault, a clean cut, the family cause inside the cross-field gate, and \"the whole tests/standard_names directory adds no failure at head against base\"; the gate run was that whole directory, both arms are recorded as legible JSON with log paths, the evidence page records thirteen planted-fault cuts, and the live gate-only run records the same gate on the real group.\nVERDICT write_paths: the declared paths are export.py, source_invariant.py, families.py, tests/standard_names/test_release_group_bar.py, the evidence fragment and a figures path; the diff touches export.py, families.py and the test file inside them and five further files outside them (imas_codex/settings.py:1397, imas_codex/cli/sn.py:4757, imas_codex/standard_names/AGENTS.md, release_bar.json, the refusals json), with source_invariant.py and the figures path untouched.\nVERDICT manifest: read at the run directory; it records status complete, fourteen commits from b39ff5933 to 23ade2120, base arm 22 failed and 8788 passed against base-suite.log, head arm 22 failed and 8813 passed against after-suite.log, the gate command, three negative-control logs and the live report path; both suite objects are legible and completed.\nVERDICT diff: read commit by commit from 9dc386945214 to 23ade2120ad1; the code lands in b39ff5933 (gate, ten causes, fetchers) and 15b0dbac0 (ruled bar, undecided counted), 8507f6e08 and 07a9a66b5 take the two identities from their owners, 6367dfa60 replaces the same-variable id assertion, and the head commit is a three-line evidence edit.\nCALL_SITES: imas_codex/cli/sn.py:4712 (_run_export_cli -> run_export), imas_codex/cli/sn.py:4848 (_run_preview path -> unscoped run_export), imas_codex/standard_names/catalog_release.py:2505 (_default_exporter -> run_export)\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: every refusal the plan lists is implemented once and named - export.py:1773 acceptance, :1811 sourceless, :1834 shared wording, :1866 rate and class maxima, :2106 family - and a group planted with no fault is cut at tests/standard_names/test_release_group_bar.py:172.\nSCORE evidence: 18\nJUSTIFICATION evidence: the manifest's baseline_suite and after_suite name the whole-directory command and completed arms whose FAILED id sets I recomputed from base-suite.log and after-suite.log (22 in each, comm -13 and comm -23 both empty, matching each summary line), and equilibrium-gate-report.json reproduces the page's live counts 63, 57, 1 and 0 per cause.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: five of the nine changed files (imas_codex/settings.py:1397, imas_codex/cli/sn.py:4757, standard_names/AGENTS.md, release_bar.json, the refusals json) sit outside the six declared write paths, each implied by the goal and none widening the refusal set.\nSCORE durability: 17\nJUSTIFICATION durability: each plant-and-refuse test compares the gate's own issue type to a literal cause (tests/standard_names/test_release_group_bar.py:195 and following), the two assertions the preceding review named as same-variable are repaired - :331 restates the sha1 framing inline and :608 recomputes all 225 committed ids from domain-groups.json - but no test drives family_paths through _run_gate_b at export.py:1179.\nSCORE fit: 18\nJUSTIFICATION fit: the gate follows export.py's GateResult and issue-dict idiom, the accessors sit beside get_sn_staging_dir at settings.py:1394, and the only out-of-idiom line is the private cross-module import of _authority_payload_hash at export.py:1620.\nSCORE reuse: 19\nJUSTIFICATION reuse: eligibility, the source census, family detection, shared wording and both stored identities delegate to their existing owners (export.py:1773, families.py:142, docs_gates.shared_part_findings, graph_claim_release.py:560); only the bar and audit-record readers at export.py:1502 and :1651 are new, and searching standard_names, settings.py and catalog_release.py found no owner for a ruled release bar or an audit record.\nFINDING imas_codex/standard_names/export.py:1179 non-blocking: the family half of the bar reaches the cut only through _run_gate_b(domain=..., family_paths=...), and no test drives that path - the module tests _group_family_issues in isolation (tests/standard_names/test_release_group_bar.py:322) and patches _fetch_group_family_paths to [] at :810 - so deleting family_paths= at export.py:4069 or the extend at :1182 leaves all 25 tests green while the family cause silently leaves the cross-field gate.\nFINDING docs/evidence/fragments/sn-audited-group-release/sagr-release-bar.html:69 non-blocking: the suite table's head arm names revision 290a09207, and the reviewed head is 23ade2120, so \"no failure at head\" is measured one docs-only commit below the revision being promoted; the intervening delta is the fragment itself, so the measure stands but the page does not say it.\n",
+  "review_run_id": "r-20261118T044849881659-review-of-sagr-release-bar-23ade2120ad1",
+  "reviewed_base_sha": "9dc3869452143619d5a483af615e043a86850d15",
+  "reviewed_head_sha": "23ade2120ad1cb01920c9e591e0dfd993dd102bc",
+  "reviewed_run_id": "r-20261116T221753697517-sagr-release-bar",
+  "rubric": "text",
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:16:55.413047+00:00",
+  "total": 110
+}
