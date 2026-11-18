@@ -89,6 +89,16 @@
       "note": "Section 4 now states a blocker is a kind of the per-name hold the catalog already keeps, in that one store; the reuse map names the reader-state, context and campaign owners the case file and section 6 extend.",
       "reason": "",
       "when": "2026-11-18T06:22:20.258685+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "88485226d218e7bf2e580ff349550b28e4b08d93",
+      "commit_basis": "edit",
+      "finding": "interface_budget-1",
+      "note": "Section 4 now requires any existing hold kind a blocker replaces to be retired and named in the evidence, so the four blocker types extend the existing hold family and add no second store.",
+      "reason": "",
+      "when": "2026-11-18T06:22:31.538433+00:00"
     }
   ],
   "responses": {
@@ -109,6 +119,15 @@
       "note": "Section 4 now states a blocker is a kind of the per-name hold the catalog already keeps, in that one store; the reuse map names the reader-state, context and campaign owners the case file and section 6 extend.",
       "reason": "",
       "when": "2026-11-18T06:22:20.258685+00:00"
+    },
+    "interface_budget-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "88485226d218e7bf2e580ff349550b28e4b08d93",
+      "commit_basis": "edit",
+      "note": "Section 4 now requires any existing hold kind a blocker replaces to be retired and named in the evidence, so the four blocker types extend the existing hold family and add no second store.",
+      "reason": "",
+      "when": "2026-11-18T06:22:31.538433+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
