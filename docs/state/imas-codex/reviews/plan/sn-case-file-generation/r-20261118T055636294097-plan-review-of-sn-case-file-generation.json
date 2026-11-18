@@ -1,0 +1,78 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:27:47.479Z",
+  "dispatched_at": "2026-11-18T06:27:29Z",
+  "findings": [
+    {
+      "anchor": "plan.html:20",
+      "id": "wiring-1",
+      "reason": "without the edge a coordinator may dispatch \u00a72 in parallel with \u00a71 and the node blocks on an artifact its manifest says it does not need.",
+      "text": "the depends-on map gives s2 an empty list, yet s2's done-when at plan.html:33 requires \"every member of the reference set\" to have a case file, and that set is \u00a71's deliverable, so a dispatch of s2 can run before \u00a71 and still be declared satisfied on a clause it cannot meet",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:45",
+      "id": "done_when-1",
+      "reason": "the uniform empty result is the exact condition the plan treats as success, so the node cannot distinguish a fired guard from a broken one.",
+      "text": "\u00a75's done-when makes the grammar proposal's correctness rest on \"each proposed term is checked against every live name and every existing term ... and none is found or each is listed\", with no planted collision or second-spelling case the check must report, so a check that examines nothing reports the same result as a clean result",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:37",
+      "id": "done_when-2",
+      "reason": "without an arm whose score must fall below a named bar (the incumbent-copy arm \u00a71's 20 defective members are built to defeat), a broken case file, a wrong model and a weak model produce the same evidence.",
+      "text": "\u00a73's done-when can be satisfied with every arm scoring low or returning blocked for every member: shares, intervals, cost and tokens are reported whichever way the arms behave, and no control arm or population must fail, so the benchmark measures nothing about whether the pipeline reads a case file at all",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:41",
+      "id": "done_when-3",
+      "reason": "the node must fix a written scope or it can close the section on the equilibrium cohort while the plan's later sections and the grammar proposal assume a wider run.",
+      "text": "\u00a74's done-when opens \"for each name the pipeline returns exactly one of two things\" without naming the population, while \u00a75 samples ~200 and \u00a76 regenerates all 208 equilibrium members, so the section's own terminal condition has no defined extent and a run over any subset satisfies it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:29",
+      "id": "reasoning-1",
+      "reason": "the node cannot both honour the named populations and reach its gate, so it either pads the set from an unbounded population or stops to ask which members the 100th name is.",
+      "text": "\u00a71 requires \"at least 100 members\" in the reference set but states the set is built from the 82 sound, the 17 accepted repairs and unspecified \"hand-checked audit labels\": 82 + 17 = 99, and the section keeps the 33 undecided out, so the floor is unmet by 1 before the unstated labels. The 17 is confirmed by equilibrium-repair.html (\"All 126 members accounted for: 17 repaired and accepted; 109 individually listed\").",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0d592dd1f086fc9a303b6801c6f89bd36ab2d5e3",
+  "plan_fingerprint": "0fa1ea743c6e8d8b0243bec967e88932abc16fdaadd815d4ae493a0af978c865",
+  "plan_slug": "sn-case-file-generation",
+  "plan_version": 4,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261118T055636294097-plan-review-of-sn-case-file-generation",
+  "reviewed_blob_sha": "ed3019db63e743c19eccdd880c7be193f7343b7b",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/evidence/fragments/sn-case-file-generation/ resolves in the repository, the \u00a73/\u00a74/\u00a75 cross-references resolve to headings that exist, and sn-audited-group-release#s3 resolves to that plan's \"A group is cut only when it meets a bar fixed from the audit\".",
+    "done_when": "findings \u2014 \u00a75's collision check at plan.html:45 has no planted positive, and \u00a73 at plan.html:37 has no control that must fail.",
+    "evidence_paths": "pass \u2014 docs/evidence/fragments/sn-case-file-generation/ exists and is named by \u00a71, \u00a75 and \u00a76; \u00a72\u2013\u00a74 rely on the same committed fragment directory without restating it.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag is passed into a name; plasma_boundary and the li(3) convention are domain terms, not tracker identifiers.",
+    "reasoning": "a finding \u2014 \u00a71's floor of 100 reference members is not reachable from the three populations the section names.",
+    "single_goal": "pass \u2014 each section names one deliverable; \u00a75's measurement, proposal and single release are one goal under one lead ruling, and \u00a74's two outcomes are one pipeline.",
+    "wiring": "a finding \u2014 the depends-on map at plan.html:20 declares s2 with no dependency, but s2's done-when at plan.html:33 consumes \u00a71's reference set."
+  },
+  "section_digests": {
+    "_document": "7a9d8625ce5742894fc04de85ea7e8ad1129d8491a34648d226a5eb1b2957165",
+    "s1": "6df20d0bb95b521f5417abd6fe08061d941501ea4fbbc7bcf38781cae92e8a90",
+    "s2": "3f632887b68c6f2dcd10a2e438763d7e2e3130fae9d890988619efaa1955a0e2",
+    "s3": "4ec6b37767ed3280b899d988e5db3dc29648dbe2c0a55722420a47bcdaa5572d",
+    "s4": "06721cf1f3ed3ffd052621ea5ad786f915bbf9d5b93ba0c231248a7e08672ace",
+    "s5": "789e947f7768c2d6c1335d6fd988efd7128806c4adffdee8dc863931d65fb18f",
+    "s6": "7120ba2490657cf45883e76ac032846fa208f2167b45e384982a90026d4915f4"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:45:24.715502+00:00",
+  "total": null
+}
