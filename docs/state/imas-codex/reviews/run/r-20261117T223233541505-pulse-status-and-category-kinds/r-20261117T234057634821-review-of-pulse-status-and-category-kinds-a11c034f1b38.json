@@ -1,0 +1,88 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "base_log_revision": "a80e825715db1081a01a3513c9c2601e4542345a",
+  "call_site_count": 4,
+  "call_sites": [
+    "imas_codex/remote/codac_uda.py:301 ArchiveReader.pulses -> create_archive_pulse",
+    "imas_codex/remote/pulse_catalogue.py:116 main --import-graph -> import_pulses, classify_categories, pulse_metadata_counts",
+    "imas_codex/llm/server.py:2528 search_pulses tool -> search_pulse_catalogue",
+    "imas_codex/config/codac_uda.py:26 create_archive_pulse -> imas_codex/remote/codac_uda.py:305"
+  ],
+  "completed_at": "2026-11-17T23:41:50.054Z",
+  "dispatched_at": "2026-11-17T23:41:32Z",
+  "findings": [
+    {
+      "file": "imas_codex/remote/pulse_catalogue.py",
+      "line": "109",
+      "severity": "non-blocking",
+      "text": "non-blocking: with --import-graph and no --kind-rules the categories reach import_pulses with kind None, so the changed predicate at imas_codex/discovery/signals/archive_pulses.py:20 sees c.kind IS NOT NULL and SET c += props removes every stored kind; no tracked document names the flag, so a routine resumable import silently erases the labels this node delivered."
+    },
+    {
+      "file": "imas_codex/remote/codac_uda.py",
+      "line": "312",
+      "severity": "non-blocking",
+      "text": "non-blocking: the status passthrough the goal requires landed in a file outside the declared write paths, as did imas_codex/remote/pulse_catalogue.py:109 and the three test files under tests/graph and tests/remote, so five of the fifteen changed files sit outside the fence the coordinator declared."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/pulse-status-and-category-kinds.html",
+      "line": "1",
+      "severity": "non-blocking",
+      "text": "non-blocking: the declared evidence fragment is absent from the diff, so the section's quantitative landing record exists only in private run files under the crew run directory and the plan page has no tracked evidence for this section."
+    },
+    {
+      "file": "tests/graph/test_plant_search.py",
+      "line": "162",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert result[\"continuation\"][\"arguments\"][\"test_kind\"] == kind compares the echo of the argument the test passed in rather than an independent value, so it cannot redden on a regression that keeps the key while the filter stops applying; the independent guard on the same branch is the total assertion at :160."
+    },
+    {
+      "file": "imas_codex/discovery/signals/archive_pulses.py",
+      "line": "20",
+      "severity": "non-blocking",
+      "text": "non-blocking: the changed predicate repeats an idiom the repository already carries inline at imas_codex/discovery/signals/controls_metadata.py:105 and again at imas_codex/discovery/signals/scanners/codac_uda.py:33, and the three copies now differ in null handling; no shared helper was extracted for the same capability."
+    }
+  ],
+  "head_log_revision": "a11c034f1b38a518c8a327ddb8b206fe7b2142e9",
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "call_sites": "checked the production call sites that reach the changed functions: imas_codex/remote/codac_uda.py:301, imas_codex/remote/pulse_catalogue.py:116, imas_codex/llm/server.py:2528 and imas_codex/config/codac_uda.py:26.",
+    "diff": "read all four commits against a80e825: the native listing gains status, the factory and import normalize empty text, the import skips unchanged property writes, PulseKindRule/classify_categories/pulse_metadata_counts are added, search_pulses gains test_kind, two schema attributes are added, and nine tests cover the paths.",
+    "done_when": "the done_when asks for graph pulse/description/status counts, 20 preregistered pulses equal to the archive under a recorded digest, kind counts split by source, a running-server kind search with an explicit empty result, a zero-change second import, a rigel run with no data read and graph statements under -m graph; live.log (EXIT=0) records 5957 pulses, 5957 with description, 5957 with status, 20 matched, 92 categorised by source (80 name rules, 12 pulse descriptions), 652 unlabelled, second import 0 created / 0 changed, and server-private.json records an absent kind returning empty items with total 0.",
+    "goal": "the node's goal is that every pulse carries the archive's description and status and every category a plain kind with its source, searchable by kind through the pulse search; imas_codex/remote/scripts/codac_uda.py:296 returns status, imas_codex/discovery/signals/archive_pulses.py:70 classifies categories from explicit rules, and imas_codex/tools/plant_search.py:189 filters both listings by test_kind.",
+    "manifest": "read; it reports status complete, four commits to a11c034f1, baseline_suite and after_suite as completed with zero failures, the negative control red with three ids, and manifest-check.json records crew check --manifest as ok true with no findings.",
+    "write_paths": "the fence names eleven paths; ten of the fifteen changed files lie inside them and imas_codex/remote/codac_uda.py, imas_codex/remote/pulse_catalogue.py, tests/graph/test_archive_pulses.py, tests/remote/test_pulse_catalogue.py and tests/remote/test_codac_uda_reads.py do not."
+  },
+  "justifications": {
+    "durability": "negative-control.log records EXIT=1 with three failed tests after the kind-evidence predicate and both normalization sites are reverted, and tests/graph/test_archive_pulses.py:135 fails on a stored empty description; the exception is tests/graph/test_plant_search.py:162, which only echoes an argument back.",
+    "evidence": "the recorded live.log (EXIT=0) carries the counts the done_when names and live-receipt-private.json records matched_sample 20 against selection sha256 ca2537be..., second_import nodes_created 0/nodes_changed 0, while server-private.json records 2 matching categories, 1 pulse and an explicit empty items list with total 0 for an absent kind.",
+    "fit": "the additions follow the module's existing shape (Cypher constants at imas_codex/discovery/signals/archive_pulses.py:15, pydantic model with a validator at :46) and add no plan, sprint or ticket identifier, with the one wart being the 'WHERE true' concatenation at imas_codex/tools/plant_search.py:222.",
+    "goal_fidelity": "each pulse now carries the archive's status through imas_codex/remote/codac_uda.py:312 into the schema attribute at imas_codex/schemas/facility.yaml:1946, imas_codex/discovery/signals/archive_pulses.py:70 gives every category a kind and kind_source from explicit evidence rules, and imas_codex/tools/plant_search.py:189 filters both listings by test_kind.",
+    "reuse": "the search tool and the pulse factory are extended rather than forked at imas_codex/tools/plant_search.py:170 and imas_codex/config/codac_uda.py:26, but the changed-predicate at imas_codex/discovery/signals/archive_pulses.py:20 repeats the idiom already carried inline at imas_codex/discovery/signals/controls_metadata.py:105.",
+    "scope_discipline": "five of the fifteen changed files sit outside the declared fence, including imas_codex/remote/codac_uda.py:312 and imas_codex/remote/pulse_catalogue.py:109, all of them necessary for the goal but none of them declared."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node's goal is that every pulse carries the archive's description and status and every category a plain kind with its source, searchable by kind through the pulse search; imas_codex/remote/scripts/codac_uda.py:296 returns status, imas_codex/discovery/signals/archive_pulses.py:70 classifies categories from explicit rules, and imas_codex/tools/plant_search.py:189 filters both listings by test_kind.\nVERDICT done_when: the done_when asks for graph pulse/description/status counts, 20 preregistered pulses equal to the archive under a recorded digest, kind counts split by source, a running-server kind search with an explicit empty result, a zero-change second import, a rigel run with no data read and graph statements under -m graph; live.log (EXIT=0) records 5957 pulses, 5957 with description, 5957 with status, 20 matched, 92 categorised by source (80 name rules, 12 pulse descriptions), 652 unlabelled, second import 0 created / 0 changed, and server-private.json records an absent kind returning empty items with total 0.\nVERDICT write_paths: the fence names eleven paths; ten of the fifteen changed files lie inside them and imas_codex/remote/codac_uda.py, imas_codex/remote/pulse_catalogue.py, tests/graph/test_archive_pulses.py, tests/remote/test_pulse_catalogue.py and tests/remote/test_codac_uda_reads.py do not.\nVERDICT manifest: read; it reports status complete, four commits to a11c034f1, baseline_suite and after_suite as completed with zero failures, the negative control red with three ids, and manifest-check.json records crew check --manifest as ok true with no findings.\nVERDICT diff: read all four commits against a80e825: the native listing gains status, the factory and import normalize empty text, the import skips unchanged property writes, PulseKindRule/classify_categories/pulse_metadata_counts are added, search_pulses gains test_kind, two schema attributes are added, and nine tests cover the paths.\nCALL_SITES: imas_codex/remote/codac_uda.py:301 ArchiveReader.pulses -> create_archive_pulse, imas_codex/remote/pulse_catalogue.py:116 main --import-graph -> import_pulses, classify_categories, pulse_metadata_counts, imas_codex/llm/server.py:2528 search_pulses tool -> search_pulse_catalogue, imas_codex/config/codac_uda.py:26 create_archive_pulse -> imas_codex/remote/codac_uda.py:305\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: each pulse now carries the archive's status through imas_codex/remote/codac_uda.py:312 into the schema attribute at imas_codex/schemas/facility.yaml:1946, imas_codex/discovery/signals/archive_pulses.py:70 gives every category a kind and kind_source from explicit evidence rules, and imas_codex/tools/plant_search.py:189 filters both listings by test_kind.\nSCORE evidence: 19\nJUSTIFICATION evidence: the recorded live.log (EXIT=0) carries the counts the done_when names and live-receipt-private.json records matched_sample 20 against selection sha256 ca2537be..., second_import nodes_created 0/nodes_changed 0, while server-private.json records 2 matching categories, 1 pulse and an explicit empty items list with total 0 for an absent kind.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: five of the fifteen changed files sit outside the declared fence, including imas_codex/remote/codac_uda.py:312 and imas_codex/remote/pulse_catalogue.py:109, all of them necessary for the goal but none of them declared.\nSCORE durability: 17\nJUSTIFICATION durability: negative-control.log records EXIT=1 with three failed tests after the kind-evidence predicate and both normalization sites are reverted, and tests/graph/test_archive_pulses.py:135 fails on a stored empty description; the exception is tests/graph/test_plant_search.py:162, which only echoes an argument back.\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the module's existing shape (Cypher constants at imas_codex/discovery/signals/archive_pulses.py:15, pydantic model with a validator at :46) and add no plan, sprint or ticket identifier, with the one wart being the 'WHERE true' concatenation at imas_codex/tools/plant_search.py:222.\nSCORE reuse: 14\nJUSTIFICATION reuse: the search tool and the pulse factory are extended rather than forked at imas_codex/tools/plant_search.py:170 and imas_codex/config/codac_uda.py:26, but the changed-predicate at imas_codex/discovery/signals/archive_pulses.py:20 repeats the idiom already carried inline at imas_codex/discovery/signals/controls_metadata.py:105.\nFINDING imas_codex/remote/pulse_catalogue.py:109 non-blocking: with --import-graph and no --kind-rules the categories reach import_pulses with kind None, so the changed predicate at imas_codex/discovery/signals/archive_pulses.py:20 sees c.kind IS NOT NULL and SET c += props removes every stored kind; no tracked document names the flag, so a routine resumable import silently erases the labels this node delivered.\nFINDING imas_codex/remote/codac_uda.py:312 non-blocking: the status passthrough the goal requires landed in a file outside the declared write paths, as did imas_codex/remote/pulse_catalogue.py:109 and the three test files under tests/graph and tests/remote, so five of the fifteen changed files sit outside the fence the coordinator declared.\nFINDING docs/evidence/fragments/codac-uda-signals/pulse-status-and-category-kinds.html:1 non-blocking: the declared evidence fragment is absent from the diff, so the section's quantitative landing record exists only in private run files under the crew run directory and the plan page has no tracked evidence for this section.\nFINDING tests/graph/test_plant_search.py:162 non-blocking: assert result[\"continuation\"][\"arguments\"][\"test_kind\"] == kind compares the echo of the argument the test passed in rather than an independent value, so it cannot redden on a regression that keeps the key while the filter stops applying; the independent guard on the same branch is the total assertion at :160.\nFINDING imas_codex/discovery/signals/archive_pulses.py:20 non-blocking: the changed predicate repeats an idiom the repository already carries inline at imas_codex/discovery/signals/controls_metadata.py:105 and again at imas_codex/discovery/signals/scanners/codac_uda.py:33, and the three copies now differ in null handling; no shared helper was extracted for the same capability.\n",
+  "review_run_id": "r-20261117T234057634821-review-of-pulse-status-and-category-kinds-a11c034f1b38",
+  "reviewed_base_sha": "a80e825715db1081a01a3513c9c2601e4542345a",
+  "reviewed_head_sha": "a11c034f1b38a518c8a327ddb8b206fe7b2142e9",
+  "reviewed_run_id": "r-20261117T223233541505-pulse-status-and-category-kinds",
+  "reviewer": {
+    "backend": "local",
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261117T234057634821-review-of-pulse-status-and-category-kinds-a11c034f1b38"
+  },
+  "reviewer_run_id": "r-20261117T234057634821-review-of-pulse-status-and-category-kinds-a11c034f1b38",
+  "scores": {
+    "durability": 17,
+    "evidence": 19,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 14,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T00:04:21.893712+00:00",
+  "total": 99
+}
