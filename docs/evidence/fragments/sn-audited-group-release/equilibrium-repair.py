@@ -418,6 +418,12 @@ def render(record):
             proposals += "\nRefusing gate: " + r["parked_gate"]
         if r.get("source_words"):
             proposals += "\nSource words: " + r["source_words"]
+        if r.get("parked_state"):
+            proposals += "\nParked live state: " + r["parked_state"]
+        if r.get("refused_documentation_attempts"):
+            proposals += "\nDocumentation refusal attempts: " + json.dumps(
+                r["refused_documentation_attempts"], ensure_ascii=False
+            )
         detail = ""
         if r["outcome"] == "accepted_repair":
             detail = (
