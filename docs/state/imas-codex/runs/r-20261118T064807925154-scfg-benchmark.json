@@ -11807,6 +11807,84 @@
   "plan_link": null,
   "promoted_by": "review-acceptance",
   "promoted_revision": "530dab4050e393d99cfbeee4a95185613476710d",
+  "release": {
+    "arms_kept": [],
+    "arms_logs_copied": [],
+    "arms_removed_paths": [],
+    "arms_withheld": "",
+    "process_signalled": false,
+    "process_withheld": "no terminal manifest was delivered",
+    "scratch_bytes": 453332,
+    "scratch_host": "98dci4-clu-3026.iter.org",
+    "scratch_path": "/tmp/reckon-crew-scratch/r-20261118T064807925154-scfg-benchmark",
+    "scratch_removed": true,
+    "scratch_removed_paths": [
+      {
+        "bytes": 453332,
+        "path": "/tmp/reckon-crew-scratch/r-20261118T064807925154-scfg-benchmark"
+      }
+    ],
+    "scratch_withheld": "",
+    "worktree_audit": {
+      "counts": {
+        "dirty": 0,
+        "disposable": 0,
+        "integrated": 0,
+        "live-referenced": 0,
+        "retained-for-resume": 1,
+        "unintegrated": 0
+      },
+      "worktrees": [
+        {
+          "artifact_classification": "dirty",
+          "available": true,
+          "claimed_by_live_runs": [],
+          "classification": "retained-for-resume",
+          "commits_unmeasured_reason": "release_residue is false: this caller did not ask for the commits beyond the integration head to be measured",
+          "dirty": [
+            " M docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+            " M tests/standard_names/test_record_benchmark.py"
+          ],
+          "head": "530dab4050e393d99cfbeee4a95185613476710d",
+          "integrated_into": "HEAD",
+          "non_equivalent_commits": null,
+          "patch_equivalent_commits": null,
+          "path": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/scfg-benchmark",
+          "reclaimable": false,
+          "retention": {
+            "classification": "retained-for-resume",
+            "retained_at": "2026-11-18T18:31:05Z",
+            "session_id": "01a1efed-417b-7000-b481-4c6cc32378a5",
+            "session_source": "pointer",
+            "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/scfg-benchmark"
+          },
+          "shadow_patch": "",
+          "shadow_run_id": "",
+          "status_digest": "sha256:8cf09fd3ea9d2a442f4ff3dee3eced6a3af7473a32152f7779202b2d338a97c6",
+          "status_entries": [
+            {
+              "code": " M",
+              "path": "docs/evidence/fragments/sn-case-file-generation/benchmark.py"
+            },
+            {
+              "code": " M",
+              "path": "tests/standard_names/test_record_benchmark.py"
+            }
+          ],
+          "withheld": "this worktree is the working directory of recoverable session 01a1efed-417b-7000-b481-4c6cc32378a5"
+        }
+      ]
+    },
+    "worktree_released": false,
+    "worktree_retention": {
+      "classification": "retained-for-resume",
+      "retained_at": "2026-11-18T18:31:05Z",
+      "session_id": "01a1efed-417b-7000-b481-4c6cc32378a5",
+      "session_source": "pointer",
+      "worktree": "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/07a8cbfa-1dc5-41ed-bf84-0d88174bdbe9/scfg-benchmark"
+    },
+    "worktree_withheld": "retained as the working directory of recoverable session 01a1efed-417b-7000-b481-4c6cc32378a5"
+  },
   "resume_waiver": null,
   "review": {
     "absent": [],
