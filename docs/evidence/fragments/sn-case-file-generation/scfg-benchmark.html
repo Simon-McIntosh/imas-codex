@@ -1,0 +1,24 @@
+<section data-reckon="evidence">
+<h3 id="scfg-benchmark-record-benchmark">A blind record benchmark</h3>
+<p>Every arm wrote one record per reference member from its code-built case file. The blind adjudicator saw neither the arm nor the incumbent. The final figures are the held-out half (87 members), taken once.</p>
+<div id="scfg-benchmark-final"><table><tr><th>arm</th><th>structure</th><th>model</th><th>right</th><th>95 % interval</th><th>blocked</th><th>changed a right incumbent</th><th>cost/name</th><th>s/name</th><th>tokens read/name</th></tr>
+<tr><td>incumbent</td><td>copy</td><td>none</td><td>59/87 (67.8 %)</td><td>[57.4 %, 76.7 %]</td><td>0 {}</td><td>0/64</td><td>0.0000</td><td>0.0</td><td>0</td></tr>
+<tr><td>one-pass/frontier</td><td>one-pass</td><td>openrouter/openai/gpt-6.1-sol</td><td>28/87 (32.2 %)</td><td>[23.3 %, 42.6 %]</td><td>9 {&#x27;collision&#x27;: 5, &#x27;insufficient-source-text&#x27;: 3, &#x27;registry-conflict&#x27;: 1}</td><td>64/64</td><td>0.0174</td><td>52.7</td><td>5559</td></tr>
+<tr><td>withheld/one-pass/frontier</td><td>one-pass</td><td>openrouter/openai/gpt-6.1-sol</td><td>27/87 (31.0 %)</td><td>[22.3 %, 41.4 %]</td><td>15 {&#x27;collision&#x27;: 3, &#x27;insufficient-source-text&#x27;: 12}</td><td>63/64</td><td>0.0147</td><td>54.0</td><td>5416</td></tr>
+<tr><td>staged/frontier</td><td>staged</td><td>openrouter/openai/gpt-6.1-sol</td><td>24/87 (27.6 %)</td><td>[19.3 %, 37.8 %]</td><td>7 {&#x27;grammar-gap&#x27;: 1, &#x27;insufficient-source-text&#x27;: 5, &#x27;registry-conflict&#x27;: 1}</td><td>64/64</td><td>0.0327</td><td>82.9</td><td>10796</td></tr>
+<tr><td>one-pass/local</td><td>one-pass</td><td>local/deepseek-v4.1-flash</td><td>15/87 (17.2 %)</td><td>[10.7 %, 26.5 %]</td><td>13 {&#x27;generation-failure&#x27;: 9, &#x27;insufficient-source-text&#x27;: 3, &#x27;other&#x27;: 1}</td><td>54/64</td><td>0.0000</td><td>104.8</td><td>6405</td></tr>
+<tr><td>staged/local</td><td>staged</td><td>local/deepseek-v4.1-flash</td><td>7/87 (8.0 %)</td><td>[4.0 %, 15.7 %]</td><td>18 {&#x27;generation-failure&#x27;: 17, &#x27;insufficient-source-text&#x27;: 1}</td><td>53/64</td><td>0.0000</td><td>202.8</td><td>11667</td></tr>
+</table></div>
+<h4 id="scfg-benchmark-controls">Controls</h4>
+<p>Incumbent-unchanged separated: false; withheld-text unmeasurable: no held-out member has its right answer only in the enclosing text and is right for one-pass/frontier. Measuring: false.</p>
+<p id="scfg-benchmark-admission">the controls did not separate: the incumbent-unchanged arm scored 67.8 % against 32.2 % for the best repairing arm; the withheld-text control is unmeasurable because no held-out member has its right answer only in the enclosing text and is right for one-pass/frontier.</p>
+<h4 id="scfg-benchmark-choice">The choice</h4>
+<table><tr><th>option</th><th>structure</th><th>model</th><th>right</th><th>95 % interval</th><th>complete</th><th>cost/name</th></tr>
+<tr><td>one-pass/frontier</td><td>one-pass</td><td>openrouter/openai/gpt-6.1-sol</td><td>32.2 %</td><td>[23.3 %, 42.6 %]</td><td>true</td><td>0.0174</td></tr>
+<tr><td>staged/frontier</td><td>staged</td><td>openrouter/openai/gpt-6.1-sol</td><td>27.6 %</td><td>[19.3 %, 37.8 %]</td><td>true</td><td>0.0327</td></tr>
+<tr><td>one-pass/local</td><td>one-pass</td><td>local/deepseek-v4.1-flash</td><td>17.2 %</td><td>[10.7 %, 26.5 %]</td><td>true</td><td>0.0000</td></tr>
+<tr><td>staged/local</td><td>staged</td><td>local/deepseek-v4.1-flash</td><td>8.0 %</td><td>[4.0 %, 15.7 %]</td><td>true</td><td>0.0000</td></tr>
+</table>
+<p>Recommended by the measured figures, pending the lead's ruling: <strong>one-pass/frontier</strong> at 32.2 % right on the held-out half. Ruling: awaiting the lead&#x27;s ruling.</p>
+<p>Spend USD 18.54 against the USD 25 ceiling.</p>
+</section>

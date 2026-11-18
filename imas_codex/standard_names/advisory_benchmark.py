@@ -225,7 +225,7 @@ async def run_frozen_advisory_benchmark(
         panel_task,
     )
 
-    candidate_cost = _validate_cost(candidate_cost, "candidate")
+    candidate_cost = validate_cost(candidate_cost, "candidate")
     _validate_rendered_message_hashes(candidate_message_hashes, len(frozen_rows))
     candidate_by_name = _index_candidate_judgments(candidate_judgments, row_names)
     result_rows = _assemble_result_rows(
@@ -235,7 +235,7 @@ async def run_frozen_advisory_benchmark(
         panel,
     )
     ordered_result_hash = _ordered_rows_hash([asdict(row) for row in result_rows])
-    costs = _summarize_costs(
+    costs = summarize_costs(
         candidate_cost,
         panel.total_cost,
         authorized_cost_ceiling,
@@ -316,7 +316,7 @@ def _validate_run_arguments(
         raise TypeError("seed must be an integer")
     if not isinstance(candidate_model, str) or not candidate_model.strip():
         raise ValueError("candidate_model must be a non-empty string")
-    _validate_cost(authorized_cost_ceiling, "authorized ceiling")
+    validate_cost(authorized_cost_ceiling, "authorized ceiling")
     if not source_provenance:
         raise ValueError("source_provenance must identify the supplied population")
     _canonical_json(source_provenance)
@@ -416,12 +416,18 @@ def _assemble_result_rows(
     return tuple(assembled)
 
 
-def _summarize_costs(
+def summarize_costs(
     candidate_cost: float,
     judging_cost: float,
     authorized_ceiling: float,
 ) -> ArtifactCostSummary:
-    judging_cost = _validate_cost(judging_cost, "judging")
+    """Record a run's spend beside the ceiling it was authorized under.
+
+    Both sides of the spend are validated, so a negative or non-finite figure
+    cannot be published as a cost that fits under the ceiling.
+    """
+    candidate_cost = validate_cost(candidate_cost, "candidate")
+    judging_cost = validate_cost(judging_cost, "judging")
     total_cost = candidate_cost + judging_cost
     remaining = authorized_ceiling - total_cost
     return ArtifactCostSummary(
@@ -434,7 +440,7 @@ def _summarize_costs(
     )
 
 
-def _validate_cost(value: float, label: str) -> float:
+def validate_cost(value: float, label: str) -> float:
     if (
         isinstance(value, bool)
         or not isinstance(value, int | float)
