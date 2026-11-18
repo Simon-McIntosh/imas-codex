@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T05:23:11.852Z",
+  "dispatched_at": "2026-11-18T05:22:56Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261118T045145771690-plan-review-of-iter-signal-context-and-enrichment/plan.html:60",
+      "id": "done_when-1",
+      "reason": "the plan knows the independent reference (the private store's 16/313/53 sheet rows) and must state imported-equals-source as a tolerance, or a partial context import passes as complete.",
+      "text": "the done-when requires \"the number of source rows imported per source\" but never compares that number with the rows the stored documents hold, and \"a second import adds none\" holds for any stable count, so an import that landed 300 of the spreadsheet's 382 rows would satisfy every stated check.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261118T045145771690-plan-review-of-iter-signal-context-and-enrichment/plan.html:59-60",
+      "id": "done_when-2",
+      "reason": "the done-when has no measurable quantity for two of its three imported deliverables, so its single verdict does not cover them.",
+      "text": "\u00a74 delivers three kinds of imported record \u2014 signal-list rows, functional-specification references from six PDFs, and function-category records \u2014 yet the done-when counts only \"source rows\", a quantity undefined for a PDF, and no figure or negative control covers the specification references or the category records, so the section could land with neither present.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "746d5c083eb5bc8a654f16f59a565d23187e77f0",
+  "plan_fingerprint": "12663a43566158e91ec52a12fc3d4a76d7ee88e3aaf8da930d14a1df2dab72ff",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 61,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261118T045145771690-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "8814404ef3dc609d2ed1286194d7b20a0b24cced",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited plan sections `icp-api-access#s3/#s4/#s5` and the seven-document fetch receipt at docs/plans/icp-api-access.html:112 resolve; the extensionless scheme fragment cited elsewhere is the house convention.",
+    "done_when": "a finding \u2014 \u00a74's done-when asks the landing record to report imported rows per source but compares that number against nothing, so a partial import passes (plan.html:60).",
+    "evidence_paths": "pass \u2014 \u00a74 names a landing record and the source digests in a private receipt (plan.html:59-60), both durable artifacts rather than session scratch.",
+    "naming": "pass \u2014 \u00a74 introduces no code-level names, ticket numbers or stage labels; the record classes it names (exact, derived, absent) are described mechanisms.",
+    "reasoning": "pass \u2014 the stated source of the signal list and specification is the store filled on 2026-11-18 (docs/plans/icp-api-access.html:112 records 7/7 files, one spreadsheet of three sheets and six PDFs), and \u00a74's remaining endpoint measures (link classes, idempotence, tree search) are obtainable and can fail; \u00a74 prescribes no code path, step sequence or function.",
+    "single_goal": "pass \u2014 \u00a74 now carries one deliverable (the pilot system's context import); the facility-scoped archive that duplicated \u00a79 has been removed from its gate at plan.html:60, leaving \u00a79 sole owner of that deliverable.",
+    "wiring": "pass \u2014 \u00a74's declared links `icp-api-access#s3`, `#s4` and `#s5` all resolve and are `done` in docs/plans/icp-api-access.html:50,55,60, so `data-status=\"implementable\"` at plan.html:58 is consistent with its dependencies; the function-category meanings \u00a74 requires are supplied by s3's typed reads (imas_codex/discovery/icp/records.py:82-93)."
+  },
+  "section_digests": {
+    "_document": "ef6b59ee2a51cb80dc0dd9867527d9cdb661a5ff865be1a1f16f31a5ff549a37",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "9e51f8ba217e7d0bed83b1b1befdddbaeba215a0d94df9a98fe95e3d3b93eb42",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T05:35:20.822289+00:00",
+  "total": null
+}
