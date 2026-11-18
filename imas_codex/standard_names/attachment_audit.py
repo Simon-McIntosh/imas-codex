@@ -272,7 +272,8 @@ _PAIRING_GUARD_QUERY = """
 MATCH (sn:StandardName {id: $sn_id})
 OPTIONAL MATCH (bound:StandardNameSource)-[:PRODUCED_NAME]->(sn)
 OPTIONAL MATCH (bound)-[:FROM_DD_PATH]->(bound_dd:IMASNode)
-WITH sn, collect(DISTINCT bound_dd.id) AS existing_dd_paths
+WITH sn, collect(DISTINCT bound_dd.id) AS existing_dd_paths,
+        collect(DISTINCT bound_dd.description) + collect(DISTINCT bound_dd.documentation) AS existing_dd_texts
 UNWIND $source_ids AS source_id
 OPTIONAL MATCH (source:StandardNameSource {id: source_id})
 OPTIONAL MATCH (source)-[:FROM_DD_PATH]->(dd:IMASNode)
@@ -285,8 +286,10 @@ RETURN source_id,
        coalesce(nu.id, sn.unit) AS sn_unit,
        EXISTS { (source)-[:PRODUCED_NAME]->(sn) } AS already_bound,
        existing_dd_paths,
+       existing_dd_texts,
        sn.name_stage AS name_stage,
-       dd.documentation AS dd_documentation
+       dd.documentation AS dd_documentation,
+       dd.description AS dd_description
 """
 
 #: Detach one attachment: the provenance edge, the DD-side projection, and the
@@ -795,7 +798,9 @@ def _attachment_consistency(
     existing_sources: tuple[str, ...] = (),
     dd_unit: str | None = None,
     sn_unit: str | None = None,
+    dd_description: str | None = None,
     dd_documentation: str | None = None,
+    existing_texts: tuple[str, ...] = (),
 ) -> tuple[bool, str]:
     """Ask the compose guard about a pairing, judging the registered spelling.
 
@@ -827,6 +832,9 @@ def _attachment_consistency(
         existing_sources=existing_sources,
         dd_unit=dd_unit,
         sn_unit=sn_unit,
+        dd_text=" ".join(text for text in (dd_description, dd_documentation) if text)
+        or None,
+        existing_texts=existing_texts,
     )
     if not ok and reason.startswith("locus/source device mismatch"):
         confirmed = _locus_documentation_confirms_device(
@@ -867,7 +875,18 @@ def guard_source_pairings(
     existing_paths = sorted(
         {path for row in rows for path in (row.get("existing_dd_paths") or []) if path}
     )
+    existing_texts = tuple(
+        text
+        for row in rows
+        for text in (row.get("existing_dd_texts") or [])
+        + [
+            row.get("dd_description"),
+            row.get("dd_documentation"),
+        ]
+        if row.get("already_bound") and text
+    )
     accepted: list[str] = []
+    accepted_texts: list[str] = list(existing_texts)
     rejected: list[AttachmentVerdict] = []
     for source_id in requested:
         row = by_id.get(source_id)
@@ -892,11 +911,18 @@ def guard_source_pairings(
             existing_sources=tuple(existing_paths),
             dd_unit=row.get("dd_unit"),
             sn_unit=row.get("sn_unit"),
+            dd_description=row.get("dd_description"),
             dd_documentation=row.get("dd_documentation"),
+            existing_texts=tuple(accepted_texts),
         )
         if ok:
             accepted.append(source_id)
             existing_paths.append(dd_path)
+            accepted_texts.extend(
+                text
+                for text in (row.get("dd_description"), row.get("dd_documentation"))
+                if text
+            )
         else:
             rejected.append(
                 AttachmentVerdict(
