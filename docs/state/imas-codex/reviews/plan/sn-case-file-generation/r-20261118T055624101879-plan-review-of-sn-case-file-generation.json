@@ -79,6 +79,16 @@
       "note": "The reuse map names the existing benchmark report, comparison table and held-out handling as the owners section 3's node extends; the section's endpoint is unchanged because it states what is reported, not the harness.",
       "reason": "",
       "when": "2026-11-18T06:22:12.581853+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "88485226d218e7bf2e580ff349550b28e4b08d93",
+      "commit_basis": "edit",
+      "finding": "duplicate_owner-1",
+      "note": "Section 4 now states a blocker is a kind of the per-name hold the catalog already keeps, in that one store; the reuse map names the reader-state, context and campaign owners the case file and section 6 extend.",
+      "reason": "",
+      "when": "2026-11-18T06:22:20.258685+00:00"
     }
   ],
   "responses": {
@@ -90,6 +100,15 @@
       "note": "Section 2 now makes the case file one record carrying content, digest and completeness verdict, read by the reference set, the benchmark and generation with none collecting the text again.",
       "reason": "",
       "when": "2026-11-18T06:22:05.893965+00:00"
+    },
+    "duplicate_owner-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "88485226d218e7bf2e580ff349550b28e4b08d93",
+      "commit_basis": "edit",
+      "note": "Section 4 now states a blocker is a kind of the per-name hold the catalog already keeps, in that one store; the reuse map names the reader-state, context and campaign owners the case file and section 6 extend.",
+      "reason": "",
+      "when": "2026-11-18T06:22:20.258685+00:00"
     },
     "reuse_search-1": {
       "action": "acted",
