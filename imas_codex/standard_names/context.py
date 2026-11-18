@@ -698,7 +698,13 @@ def fetch_review_neighbours(
 
     All result lists exclude the candidate itself by ``id``. On any failure
     (no graph client, missing index, etc.) the corresponding list is empty
-    and the function logs at DEBUG level — never raises.
+    and the function logs at DEBUG level — never raises. An empty list alone
+    cannot distinguish "nothing in the catalog" from "the lookup did not run",
+    so ``channel_status`` reports one state per channel: ``ok`` (the lookup
+    answered, even if empty), ``unavailable`` (it was attempted and failed),
+    or ``skipped`` (its input field was absent). A caller that must not read a
+    failed lookup as an empty result — the case file's completeness verdict —
+    reads that key rather than the list.
 
     Each entry dict contains:
         ``id, name, description, kind, unit, score`` (score only for vector).
@@ -726,6 +732,12 @@ def fetch_review_neighbours(
         "same_base_neighbours": [],
         "same_path_neighbours": [],
         "sibling_family": None,
+        "channel_status": {
+            "vector": "skipped",
+            "same_base": "skipped",
+            "same_path": "skipped",
+            "sibling_family": "skipped",
+        },
     }
 
     own_gc = False
@@ -739,6 +751,9 @@ def fetch_review_neighbours(
             own_gc = True
         except Exception:
             logger.debug("fetch_review_neighbours: GraphClient unavailable")
+            for channel in ("vector", "same_base", "same_path", "sibling_family"):
+                if out["channel_status"][channel] == "skipped":
+                    out["channel_status"][channel] = "unavailable"
             return out
 
     try:
@@ -755,7 +770,9 @@ def fetch_review_neighbours(
                 out["vector_neighbours"] = [r for r in rows if r.get("id") != sn_id][
                     :n_vector
                 ]
+                out["channel_status"]["vector"] = "ok"
             except Exception:
+                out["channel_status"]["vector"] = "unavailable"
                 logger.debug("fetch_review_neighbours: vector lookup failed")
 
         # --- Same physical_base ---------------------------------------------
@@ -785,7 +802,9 @@ def fetch_review_neighbours(
                     or []
                 )
                 out["same_base_neighbours"] = [dict(r) for r in rows]
+                out["channel_status"]["same_base"] = "ok"
             except Exception:
+                out["channel_status"]["same_base"] = "unavailable"
                 logger.debug("fetch_review_neighbours: same-base lookup failed")
 
         # --- Same DD IDS prefix ---------------------------------------------
@@ -816,14 +835,18 @@ def fetch_review_neighbours(
                     or []
                 )
                 out["same_path_neighbours"] = [dict(r) for r in rows]
+                out["channel_status"]["same_path"] = "ok"
             except Exception:
+                out["channel_status"]["same_path"] = "unavailable"
                 logger.debug("fetch_review_neighbours: same-path lookup failed")
 
         # --- HAS_PARENT sibling family (parallel-structure comparator) -------
         if sn_id:
             try:
                 out["sibling_family"] = fetch_sibling_family(sn_id, gc=gc)
+                out["channel_status"]["sibling_family"] = "ok"
             except Exception:
+                out["channel_status"]["sibling_family"] = "unavailable"
                 logger.debug("fetch_review_neighbours: sibling-family lookup failed")
 
         return out
@@ -1021,6 +1044,104 @@ def fetch_sibling_family(
         "anchor": anchor,
         "siblings": siblings,
     }
+
+
+_LOCUS_NEIGHBOUR_QUERY = """
+// SN_LOCUS_NEIGHBOURS
+UNWIND $paths AS own_path
+WITH replace(own_path, 'dd:', '') AS own
+MATCH (sn:StandardName)
+WHERE sn.id <> $sn_id
+  AND coalesce(sn.validation_status, '') <> 'quarantined'
+  AND coalesce(sn.source_paths, []) <> []
+UNWIND sn.source_paths AS other_path
+WITH sn, own, replace(other_path, 'dd:', '') AS other
+WITH sn, other,
+     [i IN range(0, size(split(own, '/')) - 1)
+      WHERE i < size(split(other, '/'))
+        AND split(own, '/')[i] = split(other, '/')[i]] AS same
+WITH sn, other, size(same) AS shared
+WITH sn, max(shared) AS deepest,
+     collect(DISTINCT {path: other, depth: shared}) AS pairs
+WHERE deepest >= $min_shared
+WITH sn, deepest, [p IN pairs WHERE p.depth = deepest | p.path] AS shared_paths
+OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)
+RETURN sn.id AS id,
+       sn.id AS name,
+       sn.description AS description,
+       sn.kind AS kind,
+       coalesce(u.id, sn.unit) AS unit,
+       deepest AS shared_depth,
+       shared_paths
+ORDER BY shared_depth DESC, sn.id ASC
+LIMIT $k
+"""
+
+
+def fetch_locus_neighbours(
+    source_paths: Sequence[str],
+    *,
+    sn_id: str = "",
+    gc: Any = None,
+    k: int = 5,
+    min_shared: int = 2,
+) -> list[dict[str, Any]]:
+    """Return the catalog's nearest standard names by DD locus.
+
+    The neighbour is a live standard name whose own ``source_paths`` share the
+    longest leading path prefix with one of *source_paths*, so a name sourced
+    from ``equilibrium/time_slice/profiles_1d/elongation`` is nearest to the
+    other profile quantities of that structure, ahead of everything that merely
+    lives in the ``equilibrium`` IDS. This is the locus ordering the case file's
+    same-locus block needs; :func:`fetch_review_neighbours` answers the same
+    path prefix alphabetically, and employed as a case file's locus channel it
+    would do that. ``same_path_neighbours`` deliberately keeps its defined
+    order, which the reviewer prompt consumes.
+
+    A path has ``n`` segments; two paths share the count of leading segments
+    equal at the same index, so a shared ``equilibrium/time_slice`` scores 2.
+    Only neighbours scoring at least ``min_shared`` (an IDS plus one structure,
+    default) are returned, ordered by that depth descending and then by id, so a
+    run repeats. An entry carries ``id, name, description, kind, unit,
+    shared_depth, shared_paths`` — the paths that make it a locus neighbour.
+
+    Raises nothing on a graph failure: the caller that must not read an empty
+    answer as "no neighbour" passes its own client and catches, exactly as
+    :func:`fetch_review_neighbours` records ``channel_status``.
+    """
+    wanted = [p for p in source_paths if p]
+    if not wanted:
+        return []
+
+    own_gc = False
+    if gc is not None:
+        rows = gc.query(
+            _LOCUS_NEIGHBOUR_QUERY,
+            paths=wanted,
+            sn_id=sn_id,
+            k=k,
+            min_shared=min_shared,
+        )
+    else:
+        from imas_codex.graph.client import GraphClient
+
+        client = GraphClient()
+        own_gc = True
+        try:
+            rows = client.query(
+                _LOCUS_NEIGHBOUR_QUERY,
+                paths=wanted,
+                sn_id=sn_id,
+                k=k,
+                min_shared=min_shared,
+            )
+        finally:
+            if own_gc:
+                try:
+                    client.close()
+                except Exception:
+                    logger.debug("fetch_locus_neighbours: close failed", exc_info=True)
+    return [dict(row) for row in rows or []]
 
 
 def locus_context_for(sn_id: str) -> dict[str, Any] | None:
