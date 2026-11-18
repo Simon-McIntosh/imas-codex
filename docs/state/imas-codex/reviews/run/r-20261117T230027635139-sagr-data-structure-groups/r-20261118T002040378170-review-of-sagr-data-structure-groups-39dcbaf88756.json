@@ -1,0 +1,80 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own record: manifest.md carries baseline_suite and after_suite as null and its tests: line names only the script gate uv run --no-sync python docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py --check, so no baseline or after suite arm exists to difference and the added-failure set is empty by construction; verification of the merged result belongs to a separately dispatched test node.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-18T00:21:13.166Z",
+  "dispatched_at": "2026-11-18T00:21:01Z",
+  "findings": [
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T230027635139-sagr-data-structure-groups/manifest.md",
+      "id": "mf_evidence_inputs_stale",
+      "line": "23",
+      "severity": "non-blocking",
+      "text": "non-blocking: evidence_inputs still states settled 885 (815+70) and spanning 311 against the head gate's 884/814/312 and the landed fragment's own figures, the same stale pair the fix removed from the fragment and the landing line, and this field is what the orchestrator reads for plan writeback, so it would carry figures the node's own gate refutes."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_landing_written_before_gate",
+      "line": "1722",
+      "severity": "non-blocking",
+      "text": "non-blocking: OUT_LANDING is written before instrument_checks runs at :1723, so a write run whose arm fails still replaces the landing fragment with that failed run's partition while the data file and page keep the last passing one, and the failure message at :1741 names only the data file and page as unwritten."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_checks_before_landing_write",
+      "line": "1688",
+      "severity": "non-blocking",
+      "text": "non-blocking: payload[\"checks\"] is computed inside build() before the landing fragment is regenerated at :1722, so in a write run that changes figures the stored checks and the page's checks table (:1309-1317) record the landed-fragment arm as false while the run prints PASS; the head artifacts agree only because a second writer pass re-ran build with the fragment already regenerated."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_arm_reads_summary_only",
+      "line": "1492",
+      "severity": "non-blocking",
+      "text": "non-blocking: LANDING_FIGURES reads only the twelve summary figures, so a landing fragment whose partition table or per-part counts disagree with the payload still passes the arm, although a hand-restored whole fragment is caught."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py",
+      "id": "dsg_part_holds_duplicate",
+      "line": "1355",
+      "severity": "non-blocking",
+      "text": "non-blocking: PART_HOLDS restates what each part holds while PARTS at :98-131 already defines the same parts, giving the module two descriptions that can drift apart without any arm noticing."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "2097bc3e6..39dcbaf8: e487a23fd replaces the hand-written landing fragment with the payload-rendered one and adds the fragment arm; 39dcbaf88 rewrites only the generation stamp; four declared paths.",
+    "done_when": "gate.log records PASS on all sixteen arms and EXIT=0 at 39dcbaf88 with settled=884 (814+70), moved=1946, spanning=312 summing to live=3142; landing-control.log records the reinstated stale fragment failing the new arm with EXIT=1.",
+    "goal": "The node's goal is to measure the data-structure rule over the whole catalog and propose transport's parts; the gained commits e487a23fd and 39dcbaf88 replace the hand-maintained landing fragment with render_landing at data-structure-groups.py:1368 and add the arm at :1540, so sagr-data-structure-groups.html:1 publishes the committed JSON's 884/814/70/1946/312 partition.",
+    "manifest": "manifest.md records the six commits, four changed paths, gate and control logs, but its evidence_inputs at :23 still states 885 (815+70) settled and 311 spanning against the head gate's 884/814/312.",
+    "write_paths": "The five declared paths are the four fragment files plus docs/figures/sn-audited-group-release/sagr-data-structure-groups; the diff touches exactly the four fragment files and writes no figure."
+  },
+  "justifications": {
+    "durability": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1540-1547 fails when the fragment's published figures differ from the payload, which landing-control.log:15 shows by reinstating the stale fragment, but the arm reads only the twelve summary figures so the partition table and per-part counts rendered at :1422-1462 are unguarded.",
+    "evidence": "gate.log:3-18 records PASS on every arm and EXIT=0 at :21 at the reviewed head with the counts summing to 3142, and landing-control.log:15-22 records the arm refusing the reinstated 885/815/311 fragment with EXIT=1, though neither baseline_suite nor after_suite is recorded so the added-failure set is an empty derivation rather than a measured suite difference.",
+    "fit": "data-structure-groups.py:1368-1547 follows the module's own string-built HTML idiom and its _esc/_table helpers, and the new names carry no plan, sprint or ticket identifier.",
+    "goal_fidelity": "docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1722 writes the landing fragment from render_landing(payload) and the committed sagr-data-structure-groups.html:1 states exactly the figures the committed JSON holds (884/814/70/1946/312, 1042 transport, 950 placed, 92 listed).",
+    "reuse": "no owner for a landing-fragment renderer exists \u2014 the search over imas_codex/ for the evidence-fragment meta tags returned nothing and the sibling docs/evidence/fragments/sn-audited-group-release/domain-groups.py:61-62 writes a single page of its own \u2014 so the addition is the first of its kind, though PART_HOLDS at :1355 restates the part descriptions already held in PARTS at :98-131.",
+    "scope_discipline": "git diff 1bc9b0f2..39dcbaf8 touches only data-structure-groups.py, .json, .html and sagr-data-structure-groups.html, all four declared, and adds no other file."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node's goal is to measure the data-structure rule over the whole catalog and propose transport's parts; the gained commits e487a23fd and 39dcbaf88 replace the hand-maintained landing fragment with render_landing at docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1368 and add the arm at :1540 that reads the committed fragment's figures back against the run's own payload, so sagr-data-structure-groups.html:1 now publishes 884 settled (814 from structures, 70 without), 1946 moved and 312 spanning, which is the partition the committed data-structure-groups.json holds.\nVERDICT done_when: The dispatch measure is the whole-catalog partition, the families beside 225, the hand-read sample, the five parts with every transport name placed or listed, the vocabulary check, the planted disposable-graph controls and the no-write guard; gate.log records PASS on all sixteen arms and EXIT=0 at 39dcbaf88 with settled=884 (814+70), moved=1946, spanning=312 summing to live=3142, and landing-control.log records the reinstated stale fragment failing the new arm at :15 with EXIT=1.\nVERDICT write_paths: The five declared paths are the four fragment files under docs/evidence/fragments/sn-audited-group-release/ plus docs/figures/sn-audited-group-release/sagr-data-structure-groups; git diff 1bc9b0f2..39dcbaf8 touches exactly the four fragment files and writes no figure, so nothing lies outside the grant.\nVERDICT manifest: Read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T230027635139-sagr-data-structure-groups/manifest.md; it records the six commits, four changed paths, the --check command, gate.log, negative-control.log, landing-control.log and write.log, but its evidence_inputs line at :23 still states settled 885 (815+70) and spanning 311 against the head gate's 884/814/312.\nVERDICT diff: Read 2097bc3e6..39dcbaf8 commit by commit: e487a23fd replaces the 63-line hand-written fragment with the payload-rendered one and adds render_landing/published_figures/landing_partition/landing_agrees plus the fragment arm, and 39dcbaf88 rewrites only the generation stamp in the data file and page; four paths, all declared.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1722 writes the landing fragment from render_landing(payload) and the committed sagr-data-structure-groups.html:1 states exactly the figures the committed JSON holds (884/814/70/1946/312, 1042 transport, 950 placed, 92 listed).\nSCORE evidence: 17\nJUSTIFICATION evidence: gate.log:3-18 records PASS on every arm and EXIT=0 at :21 at the reviewed head with the counts summing to 3142, and landing-control.log:15-22 records the arm refusing the reinstated 885/815/311 fragment with EXIT=1, though neither baseline_suite nor after_suite is recorded so the added-failure set is an empty derivation rather than a measured suite difference.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git diff 1bc9b0f2..39dcbaf8 touches only data-structure-groups.py, .json, .html and sagr-data-structure-groups.html, all four declared, and adds no other file.\nSCORE durability: 17\nJUSTIFICATION durability: docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1540-1547 fails when the fragment's published figures differ from the payload, which landing-control.log:15 shows by reinstating the stale fragment, but the arm reads only the twelve summary figures so the partition table and per-part counts rendered at :1422-1462 are unguarded.\nSCORE fit: 18\nJUSTIFICATION fit: data-structure-groups.py:1368-1547 follows the module's own string-built HTML idiom and its _esc/_table helpers, and the new names carry no plan, sprint or ticket identifier.\nSCORE reuse: 18\nJUSTIFICATION reuse: no owner for a landing-fragment renderer exists \u2014 the search over imas_codex/ for the evidence-fragment meta tags returned nothing and the sibling docs/evidence/fragments/sn-audited-group-release/domain-groups.py:61-62 writes a single page of its own \u2014 so the addition is the first of its kind, though PART_HOLDS at :1355 restates the part descriptions already held in PARTS at :98-131.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T230027635139-sagr-data-structure-groups/manifest.md:23 non-blocking: evidence_inputs still states settled 885 (815+70) and spanning 311 against the head gate's 884/814/312 and the landed fragment's own figures, the same stale pair the fix removed from the fragment and the landing line, and this field is what the orchestrator reads for plan writeback, so it would carry figures the node's own gate refutes.\nFINDING docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1722 non-blocking: OUT_LANDING is written before instrument_checks runs at :1723, so a write run whose arm fails still replaces the landing fragment with that failed run's partition while the data file and page keep the last passing one, and the failure message at :1741 names only the data file and page as unwritten.\nFINDING docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1688 non-blocking: payload[\"checks\"] is computed inside build() before the landing fragment is regenerated at :1722, so in a write run that changes figures the stored checks and the page's checks table (rendered from payload[\"checks\"] at :1309-1317) record the landed-fragment arm as false while the same run prints PASS; the head artifacts agree only because a second writer pass re-ran build with the fragment already regenerated.\nFINDING docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1492 non-blocking: LANDING_FIGURES reads only the twelve summary figures, so a landing fragment whose partition table or per-part counts disagree with the payload still passes the arm, although a hand-restored whole fragment is caught.\nFINDING docs/evidence/fragments/sn-audited-group-release/data-structure-groups.py:1355 non-blocking: PART_HOLDS restates what each part holds while PARTS at :98-131 already defines the same parts, giving the module two descriptions that can drift apart without any arm noticing.\n",
+  "review_run_id": "r-20261118T002040378170-review-of-sagr-data-structure-groups-39dcbaf88756",
+  "reviewed_base_sha": "1bc9b0f260c81266af0e2ab499ef253f1f5cf7fe",
+  "reviewed_head_sha": "39dcbaf88756f605a70eed6745b74309eb65d3c3",
+  "reviewed_run_id": "r-20261117T230027635139-sagr-data-structure-groups",
+  "rubric": "text",
+  "scores": {
+    "durability": 17,
+    "evidence": 17,
+    "fit": 18,
+    "goal_fidelity": 19,
+    "reuse": 18,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T00:35:29.203405+00:00",
+  "total": 109
+}
