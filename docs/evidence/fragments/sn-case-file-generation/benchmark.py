@@ -632,7 +632,16 @@ async def score_split(
         member = members_by_id[member_id]
         if member_id not in case_bucket:
             return
-        verdict = await judge_one(member, record["draft"], semaphores)
+        try:
+            verdict = await judge_one(member, record["draft"], semaphores)
+        except Exception as exc:  # a failed judge must not read as a right
+            verdict = {
+                "verdict": "blocked",
+                "failure_class": f"judge-failure:{type(exc).__name__}",
+                "reason": f"the blind adjudicator did not answer: {exc}"[:300],
+                "cost": 0.0,
+                "seconds": 0.0,
+            }
         append_jsonl(
             VERDICT_LOG,
             {
@@ -810,14 +819,45 @@ def build_document(
     final_reports = report_arms(held_out_rows, arms, len(held_out))
 
     dependent = dependent_members(held_out, bucket)
+    final_objects = [
+        bench.summarize_record_arm(held_out_rows, arm)
+        for name, arm in arms.items()
+        if any(row.arm == name for row in held_out_rows)
+    ]
     controls = bench.evaluate_controls(
-        final_reports,
+        final_objects,
         held_out_rows,
         incumbent_arm="incumbent",
         withheld_arm=withheld_name,
         withheld_compared_to=best_arm,
         dependent_members=dependent,
         seed=SPLIT_SEED,
+    )
+    whole_split = bench.compare_record_arms(
+        held_out_rows, best_arm, withheld_name, seed=SPLIT_SEED
+    )
+    controls["withheld"]["whole_split"] = whole_split
+    best_repair_share = max(
+        (
+            report["share_right"]
+            for report in final_reports
+            if report["arm"] in {name for name, _, _ in ARM_SPECS}
+        ),
+        default=0.0,
+    )
+    admission = (
+        "the controls separated"
+        if controls["measuring"]
+        else (
+            "the controls did not separate: "
+            f"the incumbent-unchanged arm scored {percent(controls['incumbent'].get('share_right', 0.0))} "
+            f"against {percent(best_repair_share)} for the best repairing arm; "
+            f"the withheld-text arm scored {whole_split['right_b']}/{whole_split['members']} "
+            f"against {whole_split['right_a']}/{whole_split['members']} "
+            f"({percent(whole_split['right_a'] / whole_split['members'])}), "
+            f"losing {whole_split['only_a_right']} members and gaining {whole_split['only_b_right']}. "
+            "No arm difference is called a win on this run."
+        )
     )
     repair_names = [
         report["arm"]
@@ -946,6 +986,7 @@ def build_document(
             "options": options,
             "recommended": recommended,
             "ruling": "awaiting the lead's ruling",
+            "admission": admission,
         },
         "not_run": [
             {
@@ -1151,7 +1192,7 @@ def render_fragment(document: dict[str, Any]) -> str:
         '<h3 id="scfg-benchmark-record-benchmark">A blind record benchmark</h3>',
         "<p>Every arm wrote one record per reference member from its code-built "
         "case file. The blind adjudicator saw neither the arm nor the incumbent. "
-        f"The final figures are the held-out half ({escape(document['reference']['held_out'])} members), "
+        f"The final figures are the held-out half ({document['reference']['held_out']} members), "
         "taken once.</p>",
         '<div id="scfg-benchmark-final">' + _arm_table(final["arms"]) + "</div>",
         '<h4 id="scfg-benchmark-controls">Controls</h4>',
@@ -1160,6 +1201,7 @@ def render_fragment(document: dict[str, Any]) -> str:
         f"{str(controls['withheld']['separated']).lower()} on "
         f"{controls['withheld'].get('dependent_members', 0)} members whose right "
         f"answer rests on the enclosing text. Measuring: {str(final['measuring']).lower()}.</p>",
+        f'<p id="scfg-benchmark-admission">{escape(document["decision"]["admission"])}</p>',
         '<h4 id="scfg-benchmark-choice">The choice</h4>',
         _decision_table(document["decision"]),
         f"<p>Spend USD {spend['total_usd']:.2f} against the USD "

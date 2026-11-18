@@ -1,0 +1,53 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1100" height="372" font-family="system-ui, sans-serif" font-size="13">
+<rect width="100%" height="100%" fill="white"/>
+<text x="20" y="28" font-size="15" font-weight="600">Share right on the held-out half, with a 95 % interval</text>
+<line x1="260" y1="45" x2="260" y2="357" stroke="#333"/>
+<text x="20" y="76" font-size="12">incumbent</text>
+<rect x="260" y="60" width="488.3" height="22" fill="#e07a5f"/>
+<line x1="673.5" y1="56" x2="812.2" y2="56" stroke="#222"/>
+<line x1="673.5" y1="52" x2="673.5" y2="68" stroke="#222"/>
+<line x1="812.2" y1="52" x2="812.2" y2="68" stroke="#222"/>
+<text x="988" y="76" font-size="12">67.8 % [57.4 %, 76.7 %]</text>
+<text x="20" y="128" font-size="12">one-pass/frontier</text>
+<rect x="260" y="112" width="231.7" height="22" fill="#4b7bec"/>
+<line x1="427.8" y1="108" x2="566.5" y2="108" stroke="#222"/>
+<line x1="427.8" y1="104" x2="427.8" y2="120" stroke="#222"/>
+<line x1="566.5" y1="104" x2="566.5" y2="120" stroke="#222"/>
+<text x="988" y="128" font-size="12">32.2 % [23.3 %, 42.6 %]</text>
+<text x="20" y="180" font-size="12">withheld/one-pass/frontier</text>
+<rect x="260" y="164" width="223.4" height="22" fill="#e07a5f"/>
+<line x1="420.5" y1="160" x2="558.0" y2="160" stroke="#222"/>
+<line x1="420.5" y1="156" x2="420.5" y2="172" stroke="#222"/>
+<line x1="558.0" y1="156" x2="558.0" y2="172" stroke="#222"/>
+<text x="988" y="180" font-size="12">31.0 % [22.3 %, 41.4 %]</text>
+<text x="20" y="232" font-size="12">staged/frontier</text>
+<rect x="260" y="216" width="198.6" height="22" fill="#4b7bec"/>
+<line x1="398.9" y1="212" x2="532.0" y2="212" stroke="#222"/>
+<line x1="398.9" y1="208" x2="398.9" y2="224" stroke="#222"/>
+<line x1="532.0" y1="208" x2="532.0" y2="224" stroke="#222"/>
+<text x="988" y="232" font-size="12">27.6 % [19.3 %, 37.8 %]</text>
+<text x="20" y="284" font-size="12">one-pass/local</text>
+<rect x="260" y="268" width="124.1" height="22" fill="#4b7bec"/>
+<line x1="337.3" y1="264" x2="450.9" y2="264" stroke="#222"/>
+<line x1="337.3" y1="260" x2="337.3" y2="276" stroke="#222"/>
+<line x1="450.9" y1="260" x2="450.9" y2="276" stroke="#222"/>
+<text x="988" y="284" font-size="12">17.2 % [10.7 %, 26.5 %]</text>
+<text x="20" y="336" font-size="12">staged/local</text>
+<rect x="260" y="320" width="57.9" height="22" fill="#4b7bec"/>
+<line x1="288.5" y1="316" x2="373.0" y2="316" stroke="#222"/>
+<line x1="288.5" y1="312" x2="288.5" y2="328" stroke="#222"/>
+<line x1="373.0" y1="312" x2="373.0" y2="328" stroke="#222"/>
+<text x="988" y="336" font-size="12">8.0 % [4.0 %, 15.7 %]</text>
+<line x1="260.0" y1="45" x2="260.0" y2="357" stroke="#eee"/>
+<text x="250.0" y="370" font-size="11">0 %</text>
+<line x1="404.0" y1="45" x2="404.0" y2="357" stroke="#eee"/>
+<text x="394.0" y="370" font-size="11">20 %</text>
+<line x1="548.0" y1="45" x2="548.0" y2="357" stroke="#eee"/>
+<text x="538.0" y="370" font-size="11">40 %</text>
+<line x1="692.0" y1="45" x2="692.0" y2="357" stroke="#eee"/>
+<text x="682.0" y="370" font-size="11">60 %</text>
+<line x1="836.0" y1="45" x2="836.0" y2="357" stroke="#eee"/>
+<text x="826.0" y="370" font-size="11">80 %</text>
+<line x1="980.0" y1="45" x2="980.0" y2="357" stroke="#eee"/>
+<text x="970.0" y="370" font-size="11">100 %</text>
+</svg>
