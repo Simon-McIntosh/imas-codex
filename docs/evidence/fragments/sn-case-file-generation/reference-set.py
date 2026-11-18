@@ -1070,9 +1070,12 @@ def summary_text(data: dict) -> str:
         f"<strong>{len(members)} members are in the set</strong>, of which "
         f"<strong>{defective} are defective under the rule ({share}, 95&#8201;% CI "
         f"{percent(low)}&#8211;{percent(high)})</strong>. "
-        f"{population['undecidable']} could not be decided and "
-        f"{population['unjudged']} returned no usable answer; all were kept out "
-        f"and counted. {changes['changed']} verdicts changed from the earlier read. "
+        f"{population['undecidable']} could not "
+        f"be decided and {population['unjudged']} returned no usable answer; both are "
+        f"a distinct class, kept out of the set and counted. The rest of the "
+        f"{population['read']} read belong to the re-class pass only and their "
+        f"verdicts are reported there. {changes['changed']} verdicts changed from the "
+        f"earlier read. "
         f"The {reclass['population']} members earlier classed as omitting what "
         f"their source states re-class as {naming} naming defects, "
         f"{defining} definition defects, {sound} sound and {undecided} undecidable."
@@ -1164,32 +1167,66 @@ def more(data: dict, prefix: str) -> str:
     return "\n".join(parts)
 
 
-def tail(data: dict, prefix: str) -> str:
-    excluded = data["undecidable"]
+def excluded(data: dict, prefix: str) -> str:
+    excluded_rows = data["undecidable"]
     unjudged = data["unjudged"]
     parts = []
     parts.append("<h2 id='" + prefix + "-excluded'>Kept out and counted</h2>")
     parts.append(
-        "<p id='" + prefix + "-excluded-note'>" + str(len(excluded))
+        "<p id='" + prefix + "-excluded-note'>"
+        + str(len(excluded_rows))
         + " members could not be decided from their packet and "
-        + str(len(unjudged)) + " returned no usable answer. Neither enters the set.</p>"
+        + str(len(unjudged))
+        + " returned no usable answer. Neither enters the set; every member "
+        + "read is either in the set or listed here.</p>"
     )
     rows = []
-    for row in excluded:
-        rows.append(["<code>" + escape(row["id"]) + "</code>", "undecidable", escape(row["reason"])])
+    for row in excluded_rows:
+        rows.append(
+            ["<code>" + escape(row["id"]) + "</code>", "undecidable", escape(row["reason"])]
+        )
     for row in unjudged:
-        rows.append(["<code>" + escape(row["id"]) + "</code>", "unjudged", escape(row["reason"])])
+        rows.append(
+            ["<code>" + escape(row["id"]) + "</code>", "unjudged", escape(row["reason"])]
+        )
     parts.append(table(["Member", "State", "Why"], rows, prefix + "-excluded-table"))
-    parts.append("<h2 id='" + prefix + "-members'>The set, member by member</h2>")
+    return "\n".join(parts)
+
+
+def members_table(data: dict, prefix: str) -> str:
+    parts = ["<h2 id='" + prefix + "-members'>The set, member by member</h2>"]
     parts.append(
         table(
-            ["Member", "Verdict", "Right name(s)", "Definition must state", "Unit",
-             "Group", "Reason", "Source quote"],
+            [
+                "Member",
+                "Verdict",
+                "Right name(s)",
+                "Definition must state",
+                "Unit",
+                "Group",
+                "Reason",
+                "Source quote",
+            ],
             member_rows(data["members"]),
             prefix + "-members-table",
         )
     )
     return "\n".join(parts)
+
+
+def check_receipt(data: dict, prefix: str) -> str:
+    digest = data["blind"]["verdicts_digest"]
+    count = data["population"]["in_set"]
+    return (
+        "<h2 id='" + prefix + "-check'>The check that guards the packets</h2>"
+        "<p id='" + prefix + "-check-note'>Each of the "
+        + str(count)
+        + " members carries a digest over its packet. The committed check "
+        + "recomputes every digest and refuses the file when one no longer "
+        + "matches: moving one stored packet makes it exit non-zero and name "
+        + "the member. The blind answers are sealed before the earlier verdicts "
+        + "are read; sealed digest <code>" + escape(digest) + "</code>.</p>"
+    )
 
 
 def document(title: str, body: str) -> str:
@@ -1206,12 +1243,22 @@ def document(title: str, body: str) -> str:
 
 def write_pages(data: dict) -> None:
     prefix = "scfg-reference-set"
-    body = page(data, "The reference set of right answers", prefix)
-    body += "\n" + more(data, prefix)
-    body += "\n" + tail(data, prefix)
-    text = document("The reference set of right answers", body)
-    PAGE.write_text(text)
-    FRAGMENT.write_text(text)
+    head = page(data, "The reference set of right answers", prefix)
+    body = head + "\n" + more(data, prefix) + "\n" + excluded(data, prefix)
+    body += "\n" + check_receipt(data, prefix) + "\n" + members_table(data, prefix)
+    PAGE.write_text(document("The reference set of right answers", body))
+    summary = (
+        head
+        + "\n"
+        + more(data, prefix)
+        + "\n"
+        + excluded(data, prefix)
+        + "\n"
+        + check_receipt(data, prefix)
+    )
+    FRAGMENT.write_text(document("The reference set of right answers", summary))
+
+
 def self_test() -> int:
     """Prove the digest check refuses a packet that moved, and blindness fires."""
     data = load()
