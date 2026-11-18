@@ -31,6 +31,7 @@ import importlib.util
 import json
 import math
 import os
+import re
 import time
 import zlib
 from collections import Counter, defaultdict
@@ -370,6 +371,14 @@ def render_packet(record: dict, body: str) -> str:
     return "\n".join(lines).strip("\n") + "\n"
 
 
+NAME_WORD = re.compile(r"^[a-z][a-z0-9_]{2,119}$")
+
+
+def valid_name(name: str) -> bool:
+    """A standard name is lower-case words joined by underscores, nothing else."""
+    return bool(NAME_WORD.match(name)) and "placeholder" not in name
+
+
 def packet_digest(member: dict) -> str:
     return digest({"id": member["id"], "text": member["text"]})
 
@@ -494,8 +503,8 @@ def normalise(member: dict, raw: dict) -> dict:
         clause = fallback[verdict]
     quote = str(raw.get("evidence_quote") or "").strip()
     reason = str(raw.get("reason") or "").strip()
-    names = [str(name).strip() for name in (raw.get("right_names") or [])]
-    names = [name for name in names if name]
+    names = [str(name).strip().lower() for name in (raw.get("right_names") or [])]
+    names = list(dict.fromkeys(name for name in names if valid_name(name)))
     points = [str(point).strip() for point in (raw.get("definition_points") or [])]
     points = [point for point in points if point]
     incumbent = member["record"]["name"]
