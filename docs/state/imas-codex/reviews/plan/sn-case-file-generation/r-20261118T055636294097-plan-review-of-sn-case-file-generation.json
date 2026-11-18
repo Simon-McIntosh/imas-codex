@@ -79,6 +79,16 @@
       "note": "Section 3 gains two control arms that must separate, an incumbent-copy arm and the best arm with enclosing-structure text withheld, and a benchmark where neither separates is reported as measuring nothing.",
       "reason": "",
       "when": "2026-11-18T06:47:00.867698+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+      "commit_basis": "edit",
+      "finding": "done_when-3",
+      "note": "Section 4 names its population: every member of the reference set's held-out half and every planted name.",
+      "reason": "",
+      "when": "2026-11-18T06:47:10.770659+00:00"
     }
   ],
   "responses": {
@@ -99,6 +109,15 @@
       "note": "Section 3 gains two control arms that must separate, an incumbent-copy arm and the best arm with enclosing-structure text withheld, and a benchmark where neither separates is reported as measuring nothing.",
       "reason": "",
       "when": "2026-11-18T06:47:00.867698+00:00"
+    },
+    "done_when-3": {
+      "action": "acted",
+      "by": "",
+      "commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+      "commit_basis": "edit",
+      "note": "Section 4 names its population: every member of the reference set's held-out half and every planted name.",
+      "reason": "",
+      "when": "2026-11-18T06:47:10.770659+00:00"
     },
     "wiring-1": {
       "action": "acted",
