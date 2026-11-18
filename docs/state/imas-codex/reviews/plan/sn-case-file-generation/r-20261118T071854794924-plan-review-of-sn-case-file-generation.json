@@ -1,0 +1,62 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T07:33:41.463Z",
+  "dispatched_at": "2026-11-18T07:33:28Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:49",
+      "id": "wiring-1",
+      "reason": "a coordinator reading this plan alone can dispatch \u00a76 beside sn-audited-group-release#s4 (still implementable) and get two blind audits of 208 members and two release candidates for one group.",
+      "text": "\u00a76 regenerates equilibrium, adjudicates it and cuts its release candidate to the fork, which is the whole deliverable of sn-audited-group-release#s4 (\"every member of the first group is audited, not sampled... and the group's release candidate is cut\"), yet \u00a76 declares only sn-audited-group-release#s3 and neither depends on #s4 nor states that it supersedes it",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:41",
+      "id": "single_goal-1",
+      "reason": "the hold-kind retirement is a data migration with its own failure mode and needs its own section or a control that a held name losing its hold is refused; as written it is closed by a gate that never looks at it.",
+      "text": "\u00a74's done-when carries two deliverables, generation-or-blocker per name and the consolidation of blockers into the existing hold store with \"any existing hold kind it replaces retired\", and only \"named in the evidence\" stands behind the retirement, so a migration that silently drops the holds it replaces closes on the same verdict as the generation behaviour",
+      "type": "single_goal",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:33",
+      "id": "evidence_paths-1",
+      "reason": "a node given no path writes these where it runs, so the benchmark's per-arm figures and the two suite logs become unopenable and the reuse of the case files in \u00a73 and \u00a74 loses its provenance.",
+      "text": "\u00a72, \u00a73 and \u00a74 require recorded runs, a token-size distribution, per-arm tables and head-against-base suite logs on a compute partition, and name no path, while \u00a71, \u00a75 and \u00a76 all name docs/evidence/fragments/sn-case-file-generation/",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f25830340d985a2c0ae4ba0e384b3b8d321413d1",
+  "plan_fingerprint": "16b6ee49d5b0f53f0fb7c4d2ed8e3560bf7a4442c79c2ddfaef1701dda467716",
+  "plan_slug": "sn-case-file-generation",
+  "plan_version": 8,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261118T071854794924-plan-review-of-sn-case-file-generation",
+  "reviewed_blob_sha": "237636816389a678c6068104777591a0d5aea375",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 docs/evidence/fragments/sn-case-file-generation/ exists, sn-audited-group-release#s3 exists and holds the zero-known-defects ruling, plan-after sn-audited-group-release exists, and every figure the plan cites matches its evidence (see below).",
+    "done_when": "pass \u2014 every section names a control that can fail: \u00a71 a tampered packet digest, \u00a72 enclosing text withheld producing a refusing verdict, \u00a73 two control arms that must separate, \u00a74 a case is a planted case, \u00a75 a planted colliding and a planted respelled term, \u00a76 a disposable group with a planted defect the cut must refuse.",
+    "evidence_paths": "a finding \u2014 \u00a72 (line 33), \u00a73 (line 37) and \u00a74 (line 41) name no durable evidence path, while \u00a71, \u00a75 and \u00a76 name docs/evidence/fragments/sn-audited-group-release's sibling for this plan.",
+    "naming": "pass \u2014 no plan label, stage name, ticket number or version tag appears in any symbol, file or comment the sections name.",
+    "reasoning": "pass \u2014 the \u00a72 root cause matches stage-cause-trace.json (compose_name holds item['ancestor_context'] but the prompt never renders it; 36 of 89 cause instances are its text-repair, plus attach_guard 13 and locus_binding 11 from the same missing text), every cited figure resolves, and no section names a code path, step sequence, formula or function.",
+    "single_goal": "a finding \u2014 \u00a74 (line 41) carries the retirement and migration of an existing per-name hold kind alongside generation-or-blocker, with only one unmeasured clause standing behind the migration.",
+    "wiring": "a finding \u2014 \u00a76 (line 49) declares depends-on sn-audited-group-release#s3 only, while its release-candidate cut to the fork duplicates that plan's still-implementable \u00a74 (\"The first group is brought to the bar and cut as a release candidate\"), so the duplication is undeclared."
+  },
+  "section_digests": {
+    "_document": "7a9d8625ce5742894fc04de85ea7e8ad1129d8491a34648d226a5eb1b2957165",
+    "s1": "66daa3f78292910aa399a3a7874182b6ced822cba15f461f52d7f321bfb0d49c",
+    "s2": "678940dfe8bd6d437c712fed9aac830d188a43a3a48ac6eca1c34afa21ad5cfa",
+    "s3": "7da2eb37916f38bde6478e3e6258bf73b046248fbc5a7d256ce3251c430a2d4a",
+    "s4": "d0c203a2f760ab938d4544c7f4956717f1a6a1b14ab758143abf49bbdf0beb45",
+    "s5": "6695eb1820bfd26db82bf71b88bd092e7e57b2cd09a20902ceb273188d79512f",
+    "s6": "5914118099288f7cdc28bdb5a4837999feae2391e6decaa78a12188d67aa1b7e"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T07:50:20.908371+00:00",
+  "total": null
+}
