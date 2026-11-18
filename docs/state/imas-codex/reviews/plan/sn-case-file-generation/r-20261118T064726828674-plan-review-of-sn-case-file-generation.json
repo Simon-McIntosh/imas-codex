@@ -1,0 +1,54 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:55:57.173Z",
+  "dispatched_at": "2026-11-18T06:55:33Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:20",
+      "id": "wiring-1",
+      "reason": "without the edge s6 has no guaranteed input and can be dispatched concurrently with the benchmark it depends on.",
+      "text": "s6 declares no depends-on for `sn-case-file-generation#s3`, yet its done-when requires every equilibrium member to be regenerated \"with the structure and model ruled in \u00a73\"; a consumer reading only the relationship graph may dispatch s6 before that ruling exists",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/sn-case-file-generation.html:49",
+      "id": "done_when-1",
+      "reason": "a measure that holds however the pipeline behaves cannot close \"the route is shown to work on a whole group\", and the plan is the only place the bar's refusal is made to fail on purpose.",
+      "text": "s6's closing measure accepts either \"passes the cut's refusals ... is cut to the fork\" or \"is reported with what holds it and not cut\", so any outcome satisfies it; and no planted member or poisoned record is named that the cut must refuse, so the section's guard is never shown to fire",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+  "plan_fingerprint": "07f364a8db8fd60e1db37323eee68d2c3bec1d11cf8896975b8d5d4e28148285",
+  "plan_slug": "sn-case-file-generation",
+  "plan_version": 6,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261118T064726828674-plan-review-of-sn-case-file-generation",
+  "reviewed_blob_sha": "e6cdc1113b46e3ad826ff55c95142edd5439d56c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `docs/evidence/fragments/sn-case-file-generation/` exists, `sn-audited-group-release#s3` resolves in `docs/plans/sn-audited-group-release.html`, and the cited figures all check out against committed evidence: 208 judgments with 82 sound / 93 defective / 33 undecidable, 17 accepted repairs and 109 listed of 126, 84 hand-checked with 44 defective / 40 sound, `name_omits_source` = 52, and `baseline_sourceless.count` = 10.",
+    "done_when": "a finding \u2014 s6's terminal measure is a disjunction whose failing arm (\"or it is reported with what holds it and not cut\") also closes the node, and it names no planted control; s1 (packet-digest check, \u226520 defective members), s2 (withheld enclosing-structure text, no-family member), s3 (copy-incumbent and withheld-text arms), s4 (planted blocker of each type, kept and succeeded incumbents, resumed name) and s5 (planted colliding and respelled terms) each name a measurable control.",
+    "evidence_paths": "pass \u2014 s1, s5 and s6 commit evidence under `docs/evidence/fragments/sn-case-file-generation/` and s2/s4 route their suite runs through a compute-partition job; no scratch or node-local path is named.",
+    "naming": "pass \u2014 no plan label, stage name or ticket identifier is carried into a named artifact: the sections name outcomes and existing catalog concepts only.",
+    "reasoning": "pass \u2014 the root-cause claim in \u00a72 is consistent with the repair's own categories (vocabulary_gap 33 + vocabulary_projection 1 + insufficient_source 33 of 109 blockers) and is made falsifiable by \u00a73's withheld-text control arm; each section states obtainable records and a measure that can fail (per-arm share right with a 95 % interval, blocker counts by type, before/after verdicts per class, spend ceilings of USD 25 and USD 30); no section names a code path, symbol or step sequence.",
+    "single_goal": "pass \u2014 each of s1\u2013s6 states one deliverable (reference set; case file; structure-and-model ruling; generated-or-queued names; one grammar release; equilibrium regenerated), with the remaining clauses gates or parts of that deliverable.",
+    "wiring": "a finding \u2014 `plan-section-depends-on` gives s6 `[s4, s5, sn-audited-group-release#s3]` while s6's own done-when consumes the structure and model ruled in \u00a73."
+  },
+  "section_digests": {
+    "_document": "7a9d8625ce5742894fc04de85ea7e8ad1129d8491a34648d226a5eb1b2957165",
+    "s1": "66daa3f78292910aa399a3a7874182b6ced822cba15f461f52d7f321bfb0d49c",
+    "s2": "678940dfe8bd6d437c712fed9aac830d188a43a3a48ac6eca1c34afa21ad5cfa",
+    "s3": "7da2eb37916f38bde6478e3e6258bf73b046248fbc5a7d256ce3251c430a2d4a",
+    "s4": "d0c203a2f760ab938d4544c7f4956717f1a6a1b14ab758143abf49bbdf0beb45",
+    "s5": "6695eb1820bfd26db82bf71b88bd092e7e57b2cd09a20902ceb273188d79512f",
+    "s6": "7120ba2490657cf45883e76ac032846fa208f2167b45e384982a90026d4915f4"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T07:14:22.416231+00:00",
+  "total": null
+}
