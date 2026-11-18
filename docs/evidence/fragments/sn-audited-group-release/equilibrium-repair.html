@@ -4,15 +4,15 @@
 <style>table{table-layout:fixed;width:100%}td,th{vertical-align:top;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere}code{overflow-wrap:anywhere}</style>
 <h1>Equilibrium repair record</h1>
 <p><strong>in progress</strong>: Six accepted pilot members; USD 0.826609 total, USD 0.137768 per member; conservative 126-member projection USD 17.444540 including USD 0.085751 already-spent overhead, beside USD 30 ceiling.</p>
-<p>Recorded spend USD 2.009277 / USD 30.00. Initial live names without a source: 10. Pipeline acceptance is recorded here; correctness awaits a fresh blind adjudication.</p>
+<p>Recorded spend USD 2.146228 / USD 30.00. Initial live names without a source: 10. Pipeline acceptance is recorded here; correctness awaits a fresh blind adjudication.</p>
 <p>Scores describe the stored identity. A held member with no submitted command has no fresh review claimed. Refused counts mean two scored name-review refusals; deterministic vetoes and source questions are included among members left for the lead.</p>
 <p>Six accepted pilot members; USD 0.826609 total, USD 0.137768 per member; conservative 126-member projection USD 17.444540 including USD 0.085751 already-spent overhead, beside USD 30 ceiling.</p>
-<p>Member outcomes: {&#x27;lead&#x27;: 108, &#x27;accepted_repair&#x27;: 12, &#x27;pending&#x27;: 6}. Class and cause counts may overlap.</p>
+<p>Member outcomes: {&#x27;lead&#x27;: 108, &#x27;accepted_repair&#x27;: 13, &#x27;pending&#x27;: 5}. Class and cause counts may overlap.</p>
 <table><thead><tr><th>Defect class</th><th>Repaired</th><th>Refused</th><th>For the lead</th><th>Pending</th></tr></thead><tbody>
 <tr><td>name_contradicts_source</td><td>1</td><td>0</td><td>12</td><td>0</td></tr>
-<tr><td>name_omits_source</td><td>9</td><td>0</td><td>41</td><td>2</td></tr>
-<tr><td>definition_contradicts_source</td><td>4</td><td>0</td><td>44</td><td>4</td></tr>
-<tr><td>name_definition_disagree</td><td>2</td><td>0</td><td>8</td><td>4</td></tr>
+<tr><td>name_omits_source</td><td>10</td><td>0</td><td>41</td><td>1</td></tr>
+<tr><td>definition_contradicts_source</td><td>5</td><td>0</td><td>44</td><td>3</td></tr>
+<tr><td>name_definition_disagree</td><td>3</td><td>0</td><td>8</td><td>3</td></tr>
 <tr><td>unit_wrong</td><td>0</td><td>0</td><td>4</td><td>0</td></tr>
 <tr><td>wrong_physics_domain</td><td>0</td><td>0</td><td>2</td><td>1</td></tr>
 <tr><td>duplicate_of_live_name</td><td>0</td><td>0</td><td>2</td><td>0</td></tr>
@@ -27,11 +27,11 @@
 <tr><td>pressure_pedestal_qualifier_lost</td><td>0</td><td>0</td><td>5</td><td>0</td></tr>
 <tr><td>absolute_extremum_substituted_for_signed_extremum</td><td>1</td><td>0</td><td>3</td><td>0</td></tr>
 <tr><td>averaging_qualifier_lost</td><td>1</td><td>0</td><td>3</td><td>0</td></tr>
-<tr><td>transformation_equation_replaced_by_base_quantity</td><td>1</td><td>0</td><td>0</td><td>3</td></tr>
+<tr><td>transformation_equation_replaced_by_base_quantity</td><td>2</td><td>0</td><td>0</td><td>2</td></tr>
 <tr><td>consumer_context_used_as_quantity_domain</td><td>0</td><td>0</td><td>2</td><td>1</td></tr>
 <tr><td>locus_template_overrides_source</td><td>0</td><td>0</td><td>3</td><td>0</td></tr>
 <tr><td>physical_scope_qualifier_replaced</td><td>0</td><td>0</td><td>2</td><td>1</td></tr>
-<tr><td>population_basis_qualifier_lost</td><td>0</td><td>0</td><td>2</td><td>1</td></tr>
+<tr><td>population_basis_qualifier_lost</td><td>1</td><td>0</td><td>2</td><td>0</td></tr>
 </tbody></table>
 <p>The two pending adjudications remain excluded. Full command receipts, source packets, and guard measurements are preserved in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225452416830-sagr-equilibrium-agent-repair</code>. Receipt basenames below resolve in that directory; --show decodes the full JSON record.</p>
 <table><thead><tr><th>Before → after</th><th>Source and adjudication</th><th>Proposal and review</th><th>Outcome / cost / question for the lead</th></tr></thead><tbody>
@@ -1145,8 +1145,121 @@ review scores: []; exit: 0; USD 0.025920
 Proposal reason: The derivative source explicitly says Derivative of the elongation with respect to r_minor_norm. The fuller gyrokinetics_local/flux_surface/r_minor_norm raw text defines r_minor_norm = 1/2*(max(R)-min(R))/L_ref. Use that normalization, the signed slope, and the correctly named elongation relationship. Keep the underlying kappa equation separate from the derivative quantity.
 Proposed correction: The derivative source explicitly says Derivative of the elongation with respect to r_minor_norm. The fuller gyrokinetics_local/flux_surface/r_minor_norm raw text defines r_minor_norm = 1/2*(max(R)-min(R))/L_ref. Use that normalization, the signed slope, and the correctly named elongation relationship. Keep the underlying kappa equation separate from the derivative quantity.
 Source words: Derivative of the elongation with respect to r_minor_norm</pre></td><td>accepted_repair; USD 0.109621<p></p></td></tr>
-<tr><td><code>normalized_toroidal_beta</code> → <code>normalized_toroidal_beta</code><p>Normalized toroidal beta is the whole-plasma toroidal pressure-to-reference-magnetic-pressure ratio scaled by plasma minor radius and reference toroidal field relative to plasma current, with a defining factor of 100.</p><p>Normalized toroidal beta is the whole-plasma toroidal pressure-to-reference-magnetic-pressure ratio scaled by plasma minor radius and reference toroidal field relative to plasma current, with a defining factor of 100.</p><p>Units: [&#x27;1&#x27;]; domains: [&#x27;core_plasma_physics&#x27;, &#x27;equilibrium&#x27;, &#x27;magnetohydrodynamics&#x27;]. Name score: 1.0; documentation score: 0.8947821542107305.</p></td><td>core_profiles/global_quantities/beta_tor_norm<p>The source requires “100 * beta_tor * a[m] * B0 [T] / ip [MA]”, but the displayed defining equation is unnormalized beta and the name also omits the thermal-only basis of one bound source.</p></td><td><pre>
-Source words: 100 * beta_tor * a[m] * B0 [T] / ip [MA]</pre></td><td>pending; USD 0.000000<p></p></td></tr>
+<tr><td><code>normalized_toroidal_beta</code> → <code>normalized_toroidal_beta</code><p>Normalized toroidal beta is the whole-plasma toroidal pressure-to-reference-magnetic-pressure ratio scaled by plasma minor radius and reference toroidal field relative to plasma current, with a defining factor of 100.</p><p>Normalized toroidal beta is the whole-plasma toroidal pressure beta rescaled by minor radius and signed reference toroidal field relative to plasma current.</p><p>Units: [&#x27;1&#x27;]; domains: [&#x27;core_plasma_physics&#x27;, &#x27;equilibrium&#x27;, &#x27;magnetohydrodynamics&#x27;]. Name score: 1.0; documentation score: 0.9023625594308923.</p><details><summary>Stored documentation and source bindings</summary><pre>Normalized toroidal beta is the conventional current-and-geometry rescaling of the whole-plasma toroidal pressure beta. Its defining normalization is $\beta_{\mathrm{N}}=100\,\beta_{\mathrm{tor}}\,a[\mathrm{m}]\,B_0[\mathrm{T}]/I_p[\mathrm{MA}]$. Here $\beta_{\mathrm{N}}$ is normalized toroidal beta, $\beta_{\mathrm{tor}}$ is the dimensionless [toroidal beta](name:toroidal_beta), $a$ is plasma minor radius, $B_0$ is the signed reference vacuum toroidal magnetic field and $I_p$ is the signed net toroidal plasma current. The bracketed units specify the numerical values used in this conventional normalization.
+
+The underlying toroidal pressure ratio, before that rescaling, obeys $$\beta = \frac{2\mu_0 \langle p\rangle}{B^2}$$ with $\beta=\beta_{\mathrm{tor}}$, $B=B_0$, $\mu_0$ vacuum permeability and $\langle p\rangle$ the whole-plasma volume average of the pressure used to form the toroidal beta. This pressure-ratio equation defines the operand $\beta_{\mathrm{tor}}$; it is not the defining equation of $\beta_{\mathrm{N}}$.
+
+The pressure input includes the thermal and nonthermal contributions represented by the total-pressure input. A pressure estimate obtained from equilibrium reconstruction changes that pressure input rather than the normalization. Restricting the pressure input to thermal pressure defines the separately named [normalized toroidal thermal beta](name:normalized_toroidal_thermal_beta).
+
+The normalization requires positive minor radius and nonzero reference field and plasma current. It preserves the signed ratio $B_0/I_p$ without silently replacing either by its magnitude. For nonnegative underlying toroidal beta, the sign of the normalized value follows that ratio. The normalized quantity differs from unnormalized toroidal beta by the explicit factor of 100 and the stated size, field and current factors.
+
+{
+  &quot;dd:core_profiles/global_quantities/beta_tor_norm&quot;: [
+    &quot;normalized_toroidal_beta&quot;
+  ],
+  &quot;dd:equilibrium/time_slice/global_quantities/beta_normal&quot;: [
+    &quot;normalized_toroidal_beta&quot;
+  ],
+  &quot;dd:equilibrium/time_slice/global_quantities/beta_tor_norm&quot;: [
+    &quot;normalized_toroidal_beta&quot;
+  ],
+  &quot;dd:plasma_profiles/global_quantities/beta_tor_norm&quot;: [
+    &quot;normalized_toroidal_beta&quot;
+  ],
+  &quot;dd:summary/global_quantities/beta_tor_norm/value&quot;: [
+    &quot;normalized_toroidal_beta&quot;
+  ],
+  &quot;dd:summary/global_quantities/beta_tor_norm_mhd/value&quot;: [
+    &quot;normalized_toroidal_beta&quot;
+  ],
+  &quot;dd:summary/global_quantities/beta_tor_thermal_norm/value&quot;: [
+    &quot;normalized_toroidal_thermal_beta&quot;
+  ],
+  &quot;derived:beta&quot;: [
+    &quot;normalized_toroidal_beta&quot;
+  ]
+}</pre></details><p>Related accepted identity: <code>normalized_toroidal_thermal_beta</code>. Toroidal beta from thermal pressure only, normalized as 100*beta_tor*a[m]*B0[T]/Ip[MA] Name/docs scores: 0.9309579756970308 / 0.9442270283042602. Sources: [&#x27;dd:summary/global_quantities/beta_tor_thermal_norm/value&#x27;].</p></td><td>core_profiles/global_quantities/beta_tor_norm<p>The source requires “100 * beta_tor * a[m] * B0 [T] / ip [MA]”, but the displayed defining equation is unnormalized beta and the name also omits the thermal-only basis of one bound source.</p></td><td><pre>detach summary/global_quantities/beta_tor_thermal_norm/value (dry run)
+Receipt: command-0156.json
+review scores: []; exit: 0; USD 0.000000
+
+detach summary/global_quantities/beta_tor_thermal_norm/value
+Receipt: command-0157.json
+review scores: []; exit: 0; USD 0.000000
+
+source-hint summary/global_quantities/beta_tor_thermal_norm/value (dry run)
+Receipt: command-0158.json
+review scores: []; exit: 0; USD 0.000000
+
+source-hint summary/global_quantities/beta_tor_thermal_norm/value
+Receipt: command-0159.json
+review scores: []; exit: 0; USD 0.000000
+
+run --only
+Receipt: command-0160.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0161.json
+review scores: []; exit: 0; USD 0.000146
+
+edit normalized_toroidal_thermal_beta (dry run)
+Receipt: command-0162.json
+review scores: []; exit: 0; USD 0.000000
+
+edit normalized_toroidal_thermal_beta
+Receipt: command-0163.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0164.json
+review scores: []; exit: 0; USD 0.025087
+
+edit normalized_toroidal_beta (dry run)
+Receipt: command-0165.json
+review scores: []; exit: 0; USD 0.000000
+
+edit normalized_toroidal_beta
+Receipt: command-0166.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0167.json
+review scores: []; exit: 0; USD 0.057928
+
+edit normalized_toroidal_beta (dry run)
+Receipt: command-0168.json
+review scores: []; exit: 0; USD 0.000000
+
+edit normalized_toroidal_beta
+Receipt: command-0169.json
+review scores: []; exit: 0; USD 0.000000
+
+edit normalized_toroidal_beta (dry run)
+Receipt: command-0170.json
+review scores: []; exit: 0; USD 0.000000
+
+edit normalized_toroidal_beta
+Receipt: command-0171.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0172.json
+review scores: []; exit: 0; USD 0.026386
+
+edit normalized_toroidal_beta (dry run)
+Receipt: command-0173.json
+review scores: []; exit: 0; USD 0.000000
+
+edit normalized_toroidal_beta
+Receipt: command-0174.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0175.json
+review scores: []; exit: 0; USD 0.027404
+Proposal reason: The raw normalized-beta sources explicitly define 100 * beta_tor * a[m] * B0[T] / ip[MA]. Reading the accepted generated text at score 0.865 reproduced the recorded defect: its defining normalization display remained only 2 mu0 &lt;p&gt;/B^2 and never stated beta_N. State the complete source rescaling first, retain the canonical pressure ratio only as the underlying operand, and preserve the separate thermal-source binding.
+Proposed correction: The raw normalized-beta sources explicitly define 100 * beta_tor * a[m] * B0[T] / ip[MA]. Reading the accepted generated text at score 0.865 reproduced the recorded defect: its defining normalization display remained only 2 mu0 &lt;p&gt;/B^2 and never stated beta_N. State the complete source rescaling first, retain the canonical pressure ratio only as the underlying operand, and preserve the separate thermal-source binding.
+Source words: 100 * beta_tor * a[m] * B0 [T] / ip [MA]</pre></td><td>accepted_repair; USD 0.136951<p></p></td></tr>
 <tr><td><code>poloidal_angle_of_plasma_boundary_gap</code> → <code>poloidal_angle_of_plasma_boundary_gap</code><p>Poloidal angle of a plasma-boundary gap is the clockwise orientation of its directed gap vector from the outward major-radius direction in a poloidal cross-section.</p><p>Poloidal angle of a plasma-boundary gap is the clockwise orientation of its directed gap vector from the outward major-radius direction in a poloidal cross-section.</p><p>Units: [&#x27;rad&#x27;]; domains: [&#x27;equilibrium&#x27;, &#x27;plasma_control&#x27;]. Name score: 0.9375; documentation score: 0.9086741511167374.</p></td><td>equilibrium/time_slice/boundary/gap/angle<p>The source requires the direction of a “gap vector (pointing away from reference point)”, but the displayed equation uses magnetic-axis-to-position coordinates and therefore disagrees with the source and named gap angle.</p></td><td><pre>
 Source words: gap vector (pointing away from reference point)</pre></td><td>pending; USD 0.000000<p></p></td></tr>
 <tr><td><code>poloidal_beta</code> → <code>poloidal_beta</code><p>Poloidal beta compares volume-averaged total perpendicular plasma pressure with an effective poloidal magnetic-pressure scale set by net plasma current and plasma geometry.</p><p>Poloidal beta compares volume-averaged total perpendicular plasma pressure with an effective poloidal magnetic-pressure scale set by net plasma current and plasma geometry.</p><p>Units: [&#x27;1&#x27;]; domains: [&#x27;core_plasma_physics&#x27;, &#x27;equilibrium&#x27;]. Name score: 0.9875; documentation score: 0.8957977857849806.</p></td><td>core_profiles/global_quantities/beta_pol<p>The source requires “betap = 4 int(p dV) / [R_0 * mu_0 * Ip^2]”, but the stored reference-field square puts volume over major radius rather than the reverse and cannot reproduce that poloidal-beta normalization.</p></td><td><pre>
