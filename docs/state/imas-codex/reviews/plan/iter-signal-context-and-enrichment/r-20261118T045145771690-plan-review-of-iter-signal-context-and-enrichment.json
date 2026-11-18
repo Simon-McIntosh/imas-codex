@@ -32,6 +32,13 @@
       "finding": "done_when-1",
       "reason": "The delivered import already reports it against the source: 343 nonempty rows imported (9, 312 and 22) from sheets of 16, 313 and 53 rows, the difference being header and empty rows, hand-checked on twenty links. The section's endpoint is unchanged and the delivery's review checks the count.",
       "when": "2026-11-18T05:37:05.524390+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "The delivered landing record counts each kind: 18 plant records, all 16 required function-category meanings and seven document references, each reaching the facility node. The delivery's review checks them; the section's endpoint is unchanged.",
+      "when": "2026-11-18T05:37:08.355163+00:00"
     }
   ],
   "responses": {
@@ -40,6 +47,12 @@
       "by": "",
       "reason": "The delivered import already reports it against the source: 343 nonempty rows imported (9, 312 and 22) from sheets of 16, 313 and 53 rows, the difference being header and empty rows, hand-checked on twenty links. The section's endpoint is unchanged and the delivery's review checks the count.",
       "when": "2026-11-18T05:37:05.524390+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The delivered landing record counts each kind: 18 plant records, all 16 required function-category meanings and seven document references, each reaching the facility node. The delivery's review checks them; the section's endpoint is unchanged.",
+      "when": "2026-11-18T05:37:08.355163+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261118T045145771690-plan-review-of-iter-signal-context-and-enrichment.json",
