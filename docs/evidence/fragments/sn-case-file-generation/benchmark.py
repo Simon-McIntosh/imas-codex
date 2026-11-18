@@ -1266,60 +1266,68 @@ def render_fragment(document: dict[str, Any]) -> str:
 
 
 def render_figure(document: dict[str, Any]) -> None:
-    from html import escape
+    """Draw the held-out arms with text stored as paths.
+
+    Hand-written SVG text depends on the renderer's fonts; a rasterizer without the declared family can drop every label while it keeps the bars and whiskers. Matplotlib's SVG backend with ``svg.fonttype = "path"`` stores glyph outlines, so the title, arm names, values and ticks need no font lookup.
+    """
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
 
     reports = document["final"]["arms"]
-    width, height = 1100, 60 + 52 * max(1, len(reports))
-    left, plot_width = 260, 720
-    lines = [
-        f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" '
-        'font-family="system-ui, sans-serif" font-size="13">',
-        '<rect width="100%" height="100%" fill="white"/>',
-        '<text x="20" y="28" font-size="15" font-weight="600">'
-        "Share right on the held-out half, with a 95 % interval</text>",
-        f'<line x1="{left}" y1="45" x2="{left}" y2="{height - 15}" stroke="#333"/>',
+    names = [report["arm"] for report in reports]
+    shares = [report["share_right"] * 100 for report in reports]
+    lowers = [report["interval"][0] * 100 for report in reports]
+    uppers = [report["interval"][1] * 100 for report in reports]
+    colors = [
+        "#e07a5f" if ("withheld" in name or "incumbent" in name) else "#4b7bec"
+        for name in names
     ]
-    for index, report in enumerate(reports):
-        y = 60 + index * 52
-        low, high = report["interval"]
-        bar_width = report["share_right"] * plot_width
-        color = (
-            "#4b7bec"
-            if "withheld" not in report["arm"] and "incumbent" not in report["arm"]
-            else "#e07a5f"
+    positions = list(range(len(reports)))
+    with matplotlib.rc_context(
+        {
+            "svg.fonttype": "path",
+            "font.family": "DejaVu Sans",
+            "font.size": 10,
+        }
+    ):
+        figure, axes = plt.subplots(figsize=(11, 0.62 * len(reports) + 1.3), dpi=100)
+        figure.patch.set_facecolor("white")
+        axes.set_facecolor("white")
+        axes.barh(positions, shares, height=0.5, color=colors)
+        for position, low, high in zip(positions, lowers, uppers, strict=True):
+            axes.plot([low, high], [position, position], color="#222")
+            axes.plot([low, low], [position - 0.12, position + 0.12], color="#222")
+            axes.plot([high, high], [position - 0.12, position + 0.12], color="#222")
+        for position, report, high in zip(positions, reports, uppers, strict=True):
+            axes.text(
+                high + 1.5,
+                position,
+                f"{percent(report['share_right'])} "
+                f"[{percent(report['interval'][0])}, "
+                f"{percent(report['interval'][1])}]",
+                va="center",
+                fontsize=9,
+            )
+        axes.set_yticks(positions, names)
+        axes.invert_yaxis()
+        axes.set_xlim(0, 118)
+        axes.set_xticks([0, 20, 40, 60, 80, 100])
+        axes.set_xlabel("share right (%)")
+        axes.set_title(
+            "Share right on the held-out half, with a 95 % interval", loc="left"
         )
-        lines.append(
-            f'<text x="20" y="{y + 16}" font-size="12">{escape(report["arm"])}</text>'
+        axes.grid(axis="x", color="#eeeeee", linewidth=0.8)
+        axes.set_axisbelow(True)
+        for side in ("top", "right"):
+            axes.spines[side].set_visible(False)
+        figure.tight_layout()
+        FIGURE.parent.mkdir(parents=True, exist_ok=True)
+        figure.savefig(
+            FIGURE, format="svg", bbox_inches="tight", metadata={"Date": None}
         )
-        lines.append(
-            f'<rect x="{left}" y="{y}" width="{bar_width:.1f}" height="22" fill="{color}"/>'
-        )
-        lines.append(
-            f'<line x1="{left + low * plot_width:.1f}" y1="{y - 4}" '
-            f'x2="{left + high * plot_width:.1f}" y2="{y - 4}" stroke="#222"/>'
-        )
-        lines.append(
-            f'<line x1="{left + low * plot_width:.1f}" y1="{y - 8}" '
-            f'x2="{left + low * plot_width:.1f}" y2="{y + 8}" stroke="#222"/>'
-        )
-        lines.append(
-            f'<line x1="{left + high * plot_width:.1f}" y1="{y - 8}" x2="{left + high * plot_width:.1f}" y2="{y + 8}" stroke="#222"/>'
-        )
-        lines.append(
-            f'<text x="{left + plot_width + 8}" y="{y + 16}" font-size="12">'
-            f"{percent(report['share_right'])} [{percent(low)}, {percent(high)}]</text>"
-        )
-    for tick in range(0, 101, 20):
-        x = left + plot_width * tick / 100
-        lines.append(
-            f'<line x1="{x:.1f}" y1="45" x2="{x:.1f}" y2="{height - 15}" stroke="#eee"/>'
-        )
-        lines.append(
-            f'<text x="{x - 10:.1f}" y="{height - 2}" font-size="11">{tick} %</text>'
-        )
-    lines.append("</svg>")
-    FIGURE.parent.mkdir(parents=True, exist_ok=True)
-    FIGURE.write_text("\n".join(lines), encoding="utf-8")
+        figure.clear()
 
 
 # --------------------------------------------------------------------------- #
