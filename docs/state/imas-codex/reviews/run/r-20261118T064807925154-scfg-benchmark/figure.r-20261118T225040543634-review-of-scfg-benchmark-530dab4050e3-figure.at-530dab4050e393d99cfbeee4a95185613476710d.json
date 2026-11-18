@@ -1,0 +1,54 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments_judged": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T225040543634-review-of-scfg-benchmark-530dab4050e3-figure/image-0.png"
+  ],
+  "completed_at": "2026-11-18T23:00:09.102Z",
+  "dispatched_at": "2026-11-18T22:51:06Z",
+  "figures": {
+    "docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg": {
+      "contrast": "pass \u2014 the #222 title, arm labels, value labels, tick labels and whiskers sit on white and clear contrast comfortably; the #4b7bec and #e07a5f bar fills also read cleanly against white.",
+      "data_ink": "pass \u2014 the plot area carries only the six bars and their 95 % interval whiskers on white. There are no gradients, patterned fills or drop shadows; the faint gridlines are noted under decoration but are too pale to carry visual weight.",
+      "decoration": "defect \u2014 six faint full-height vertical gridlines (#eeeeee, visible at the 20/40/60/80/100 % ticks) are non-data ink the house plot style removes. They do not distract from the bars, so this does not block reading, but they are decoration.",
+      "label_collision": "pass \u2014 no label is clipped or overlaps another label or the data. Each value label is placed clear to the right of its whisker's upper bound (e.g. the incumbent label starts past x=76.7 %), and the widest label sits inside the x limit of 118 %.",
+      "legibility": "pass \u2014 the rendered PNG (1399x633) now carries every label: the title, the six arm names on the y axis, the six share/interval value labels, and the 0-100 % x ticks. Unlike the earlier cut, text renders and the figure is readable at a glance; the six arms and their values are unambiguous.",
+      "table_form": "pass \u2014 a six-row comparison of share-right with a 95 % interval is appropriately a bar chart with error bars rather than a table; the same numbers also appear as a table in the evidence fragment, which this chart summarises."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": 1321,
+      "severity": "non-blocking",
+      "summary": "the plot area draws six faint full-height vertical gridlines (#eeeeee, from axes.grid(axis='x') at :1321), visible at the 20/40/60/80/100 % ticks in the rendered PNG. The house plot style leaves gridlines out; they add no data and are the only decoration in the plot, though they do not impede reading."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": 1284,
+      "severity": "non-blocking",
+      "summary": "two bar colours split the arms \u2014 salmon #e07a5f for 'incumbent' and 'withheld/one-pass/frontier', blue #4b7bec for the other four \u2014 but nothing identifies the mapping: there is no legend, no direct label and no caption naming what the colours mean, and the evidence fragment says nothing about colour. Each bar is still readable from its y label, so the data are not lost, but the colour encodes a distinction the figure never states."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": 46,
+      "severity": "non-blocking",
+      "summary": "the figure is written to docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg but embedded nowhere: `git grep heldout-arm-right` at the reviewed head finds only this output-path line, and scfg-benchmark.html contains no <img>/<figure> element. A reader of the evidence page therefore never sees the artifact this node renders."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261118T225040543634-review-of-scfg-benchmark-530dab4050e3-figure",
+  "reviewed_base_sha": "0f38d7d5b6dd07706ec496230bcde3369dc27693",
+  "reviewed_head_sha": "530dab4050e393d99cfbeee4a95185613476710d",
+  "reviewed_run_id": "r-20261118T064807925154-scfg-benchmark",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewed_at": "2026-11-18T22:57:24.223175+00:00",
+    "reviewer_run_id": "r-20261118T225040543634-review-of-scfg-benchmark-530dab4050e3-figure"
+  },
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T23:00:20.520981+00:00",
+  "total": null
+}
