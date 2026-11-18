@@ -1,7 +1,7 @@
 {
   "schema": "imas-codex.standard-name-record-benchmark/1",
-  "built_at": "2026-11-18T21:47:22.004572+00:00",
-  "revision": "4c8c3687ea7d1de22ea0cd751784cde74ea66d09",
+  "built_at": "2026-11-18T21:54:03.165737+00:00",
+  "revision": "b6eefda013f33ae4cfc4f0b11224a277da71bac7",
   "reference": {
     "path": "docs/evidence/fragments/sn-case-file-generation/reference-set.json",
     "members": 176,
