@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="69">
+<meta name="plan-version" content="70">
 <meta name="plan-modified" content="2026-11-18">
 </head>
 <body>
@@ -234,6 +234,9 @@
 </div>
 <div class="r-comment" data-section="s20" data-id="c-run-r-20261117T234057634821-review-of-pulse-status-and-category-kinds-a11c034f1b38" data-who="reckon-build" data-when="2026-11-17T23:41:50.054Z">
     <div class="r-comment-body"><p>review of section 20 (pulse status and category kinds) at head a11c034f1 from base a80e825: goal_fidelity 19, evidence 19, scope_discipline 13, durability 17, fit 17, reuse 14, total 99, added failures 0 (base 2311 passed and head 2320 passed, both EXIT=0), five non-blocking findings (kind labels cleared by an import run without --kind-rules, five changed files outside the declared fence, no tracked evidence fragment, a continuation assertion that echoes its own input, and a third copy of the changed-predicate idiom).</p></div>
+</div>
+<div class="r-comment" data-section="s20" data-id="c-run-r-20261117T223233541505-pulse-status-and-category-kinds" data-who="reckon-build" data-when="2026-11-17T23:16:23Z">
+    <div class="r-comment-body"><p>Imported pulse metadata on rigel with zero data reads: graph pulses 5957, descriptions 5957, statuses 5957; 20/20 preregistered pulses exactly match independently relisted archive description/status (selection SHA-256 ca2537be035ca594d8e26693133d668cbcfebb0772cae6c602d4baca3727b17c). Of 744 categories, 92 have supported kinds: name rules 80, pulse descriptions 12, documents 0; 652 remain unlabelled. Kinds: cooldown 8, leak test 2, power on 76, regeneration 4, vacuum isolation 1, warmup 1. Running-server search by one kind/designation returned 2 matching categories and its category pulse listing returned 1 pulse; absent kind returned explicit empty items and total 0. Second import created 0 and changed 0 nodes; all 6701 imported nodes reach ITER. Final declared gate 2320 passed against 2311 passing baseline tests (0 added failures); explicit graph gate 14 passed; YAML command gate 12 passed; final fixture gate 6 passed. Declared mutations caused 3 failed/4 passed. Privacy scan of 15 changed tracked files against 744 categories, 5957 pulse identities and 781 descriptions found 0 matches with a positive control. No tool added.</p></div>
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261115T024952708941-review-of-archive-pulse-schema-179e16f1bee2" data-who="reckon-build" data-when="2026-11-15T03:56:30.143Z">
     <div class="r-comment-body"><p>Reviewed run r-20261115T021249205435-archive-pulse-schema at 1c2476daf9f7c83e4eaa0d56c60fb0d132c05136..179e16f1bee2299fd628a85eeba20f2ff03c1a78; scores goal_fidelity 19, evidence 18, scope_discipline 19, durability 18, fit 19, reuse 14; added_failure_count 0 with an empty added_failure_ids; three non-blocking findings recorded on the Pulse identity collision, a forked host-key exclusion helper, and the private-overlay merge shape; the parsed record is stored at both declared paths and passes the review contract with findings []</p></div>
