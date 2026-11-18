@@ -14,7 +14,7 @@
 <meta name="plan-status" content="active">
 <meta name="plan-roi" content="high">
 <meta name="plan-after" content="sn-audited-group-release">
-<meta name="plan-version" content="17">
+<meta name="plan-version" content="18">
 <meta name="plan-modified" content="2026-11-19">
 <meta name="plan-section-declarations" content="{&quot;s1&quot;:&quot;done&quot;,&quot;s2&quot;:&quot;done&quot;,&quot;s3&quot;:&quot;implementable&quot;,&quot;s4&quot;:&quot;implementable&quot;,&quot;s5&quot;:&quot;implementable&quot;,&quot;s6&quot;:&quot;implementable&quot;}">
 <meta name="plan-section-depends-on" content="{&quot;s2&quot;:[],&quot;s3&quot;:[&quot;sn-case-file-generation#s1&quot;,&quot;sn-case-file-generation#s2&quot;],&quot;s4&quot;:[&quot;sn-case-file-generation#s3&quot;],&quot;s5&quot;:[&quot;sn-case-file-generation#s4&quot;],&quot;s6&quot;:[&quot;sn-case-file-generation#s3&quot;,&quot;sn-case-file-generation#s4&quot;,&quot;sn-case-file-generation#s5&quot;,&quot;sn-audited-group-release#s3&quot;]}">
@@ -69,6 +69,9 @@
 </div>
 <div class="r-comment" data-section="s3" data-id="c-run-r-20261118T225016373773-review-of-scfg-benchmark-530dab4050e3" data-who="reckon-build" data-when="2026-11-18T23:06:35.448Z">
     <div class="r-comment-body"><p>review of r-20261118T064807925154-scfg-benchmark at base c752333edbef286e952c71fbf453bd0d11799f18 / head 530dab4050e393d99cfbeee4a95185613476710d stored parsed: scores goal_fidelity 19, evidence 14, scope_discipline 19, durability 4, fit 18, reuse 16; one non-blocking finding set carried at docs/evidence/fragments/sn-case-file-generation/benchmark.py:1268, :1330 and :1321; no blocking finding</p></div>
+</div>
+<div class="r-comment" data-section="s3" data-id="c-run-r-20261118T064807925154-scfg-benchmark" data-who="reckon-build" data-when="2026-11-18T18:31:05Z">
+    <div class="r-comment-body"><p>Added a blind record-generation benchmark over the 176-member reference set (89 development, 87 held out) with four structure-by-model arms, two prompt rounds and two controls; final held-out share right: one-pass/frontier 28/87 = 32.2 % (95 % CI 23.3-42.6), staged/frontier 24/87 = 27.6 %, one-pass/local 15/87 = 17.2 %, staged/local 7/87 = 8.0 %, incumbent-unchanged 59/87 = 67.8 %; the incumbent control did not separate and the withheld control is unmeasurable once restricted to members the full arm answered correctly, so the run reports measuring=false and calls no arm difference a win; spend USD 18.54 against the USD 25 ceiling.</p></div>
 </div>
 </section>
 </main>
