@@ -1,0 +1,58 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_sites": [],
+  "completed_at": "2026-11-18T11:03:03.787Z",
+  "dispatched_at": "2026-11-18T11:02:35Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/scfg-case-file.html",
+      "line": 5,
+      "severity": "non-blocking",
+      "text": "docs/evidence/fragments/sn-case-file-generation/scfg-case-file.html:5 emits `name=\"plan-slug\" content=\"sn-case-file-generation\"` with no `<meta` opener or closing `>` (the same line is in case-file.html:5), so the slug is inert text in <head> and any tooling reading the plan-slug meta finds none; the generator emits the bare string at docs/evidence/fragments/sn-case-file-generation/case-file.py:667,671, which is why both fragments carry it."
+    },
+    {
+      "file": "tests/standard_names/test_review_neighbours.py",
+      "line": 329,
+      "severity": "non-blocking",
+      "text": "tests/standard_names/test_review_neighbours.py:329 asserts `out == rows` against the rows the fake graph was handed, and :332 asserts the literal `replace(` appears in the statement, so the test named test_locus_neighbours_rank_by_shared_path_depth_and_normalise_prefix cannot redden if the ORDER BY or the prefix normalisation in SN_LOCUS_NEIGHBOURS is removed; the ranking the new locus channel exists for is unguarded."
+    },
+    {
+      "file": "imas_codex/standard_names/case_file.py",
+      "line": 247,
+      "severity": "non-blocking",
+      "text": "imas_codex/standard_names/case_file.py:247 gates the empty-enclosing branch on `len(chain) > 1`, so a source whose single enclosing ancestor reaches the root but states no text gets no missing entry and a complete verdict, contradicting the rule stated in its own docstring at :205 that a source whose enclosing structures carry no text is missing; the evidence population has no row with chain >= 1 and zero statements (all 61 zero-statement rows have chain_depth 0), so the hole is latent rather than measured."
+    },
+    {
+      "file": "tests/standard_names/test_case_file.py",
+      "line": 181,
+      "severity": "non-blocking",
+      "text": "tests/standard_names/test_case_file.py:181 asserts `record.tokens > 1` and :199 asserts `record.provenance[\"graph_writes\"] == 0`, which is the literal the implementation writes at case_file.py:1163; neither can fail for any regression they claim to guard, so the zero-write claim rests on the assembly read-only tests rather than on these lines."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261118T103229905361-review-of-scfg-case-file-688408ac12dc",
+  "review_text": "VERDICT goal: read the goal and imas_codex/standard_names/case_file.py:1128 (_assemble) - one record carries target, incumbent, adjudicator_reason, sources with units/coordinates and their enclosing chains, family, neighbours by subject and locus with a separation per member, grammar segments/vocabulary/registry/conventions, plus digest, tokens and its own completeness verdict, so every channel the goal names is present.\nVERDICT done_when: read it against tests/standard_names/test_case_file.py and docs/evidence/fragments/sn-case-file-generation/case-file.json - 284 rows each with digest and verdict (225 complete, 59 missing bound_source, tokens min 2201 p50 5075 max 34097) are recorded, but the unnamed-source branch is unit-tested only and never appears in the evidence population.\nVERDICT write_paths: read the declared list against git diff 6e12ff2..688408ac - 9 paths changed, 7 inside the declared paths, the two test files outside are disclosed under outside_scope, and declared docs/figures/sn-case-file-generation/scfg-case-file has no file in the diff.\nVERDICT manifest: read - both gate arms are recorded with identical failure sets (base 22 failed/8813 passed, head 22 failed/8829 passed, EXIT=1) and a red negative control that names its mutation; the quoted counts match gate-base.log and gate-head.log.\nVERDICT diff: read all five commits against base - the new case_file.py, the context.py additions (channel_status, fetch_locus_neighbours), three test files, the evidence script, JSON and two fragments; everything serves the goal except the two disclosed test files and the malformed meta tag at scfg-case-file.html:5.\nCALL_SITES: none\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: imas_codex/standard_names/case_file.py:1133 builds content, :1158 the digest and :1159 the verdict into the single record the goal asks for.\nSCORE evidence: 16\nJUSTIFICATION evidence: docs/evidence/fragments/sn-case-file-generation/case-file.json carries revision e85641fc and 284 per-name rows with digest and verdict, while the manifest's tests line names only tests/standard_names.\nSCORE scope_discipline: 15\nJUSTIFICATION scope_discipline: tests/standard_names/test_review_neighbours.py and tests/standard_names/test_source_reads.py lie outside the declared write paths, disclosed in the manifest's outside_scope rather than kept out of the diff.\nSCORE durability: 14\nJUSTIFICATION durability: the negative control at negative-control-enclosing-withheld.log removes the enclosing_structure_text branch and turns case_file.py:247's sibling guard red, but tests/standard_names/test_review_neighbours.py:329 and tests/standard_names/test_case_file.py:181 cannot fail for their claimed regressions.\nSCORE fit: 16\nJUSTIFICATION fit: case_file.py follows the pydantic-record and context-reader idiom of imas_codex/standard_names/context.py, while the evidence generator at docs/evidence/fragments/sn-case-file-generation/case-file.py:667 emits a meta tag without its opener.\nSCORE reuse: 17\nJUSTIFICATION reuse: case_file.py:571,734,778,884,965,1044 and :190 reuse ancestor_statements, build_compose_context, conventions_context_for, locus_context_for, fetch_sibling_family, fetch_review_neighbours and batching.estimate_tokens, and the one new walk at context.py:1051 sits beside the owner it extends.\nFINDING docs/evidence/fragments/sn-case-file-generation/scfg-case-file.html:5 non-blocking: the plan-slug meta is emitted without `<meta` or `>` (case-file.html:5 too), so the slug is inert text and no meta reader finds it.\nFINDING tests/standard_names/test_review_neighbours.py:329 non-blocking: the locus test asserts the fake's own rows and the literal `replace(`, so removing the ranking ORDER BY would clear it, and the one new capability has no failing-on-regression assertion.\nFINDING imas_codex/standard_names/case_file.py:247 non-blocking: `len(chain) > 1` exempts a source with one textless enclosing ancestor from the missing list, contradicting the verdict's own docstring at :205, though no evidence row reaches that shape.\nFINDING tests/standard_names/test_case_file.py:181 non-blocking: `tokens > 1` and the constant `graph_writes == 0` at :199 cannot fail for the regressions they sit beside.",
+  "reviewed_base_sha": "6e12ff2bcf548d3c16736d65dacb9b3a12ae0ce8",
+  "reviewed_head_sha": "688408ac12dcef1b12397c99aa46598b51a56d84",
+  "reviewed_run_id": "r-20261118T064806928346-scfg-case-file",
+  "scores": {
+    "durability": 14,
+    "evidence": 16,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 17,
+    "scope_discipline": 15
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T11:19:37.856720+00:00",
+  "total": 95,
+  "verdicts": {
+    "diff": "Read all five commits 47449db, e85641f, bdfbd5d, a0044b2, 688408ac against base 6e12ff2: the new case-file module, the channel_status and fetch_locus_neighbours additions to context.py, three test files, the evidence script, JSON and two HTML fragments; everything serves the goal except the two disclosed test files and a malformed meta tag in both fragments.",
+    "done_when": "Read the done_when against tests/standard_names/test_case_file.py (16 tests, name and source branches) and the committed docs/evidence/fragments/sn-case-file-generation/case-file.json (284 rows, each with digest and verdict); the population measure (284 records, 225 complete / 59 refused for bound_source, tokens min 2201 p50 5075 max 34097) is recorded there, but no unnamed-source record was produced at scale, only unit-tested.",
+    "goal": "Read the goal and imas_codex/standard_names/case_file.py:1128 (_assemble): one record carries target, incumbent, adjudicator_reason, sources with units/coordinates and their enclosing chains, family, neighbours by subject and by locus with a separation per member, grammar segments/vocabulary/registry/conventions, plus digest, token size and its own completeness verdict, so every channel the goal names is present.",
+    "manifest": "Read the manifest: it records both gate arms with identical failure sets (base 22 failed/8813 passed, head 22 failed/8829 passed, EXIT=1), the red negative control, the 284-name run and the review record's rubric lines; the counts quoted match the tail of gate-base.log and gate-head.log.",
+    "write_paths": "Read the declared list against git diff 6e12ff2..688408ac: 9 paths changed, 7 inside the declared paths; tests/standard_names/test_review_neighbours.py and tests/standard_names/test_source_reads.py are outside it and are disclosed under outside_scope, and declared path docs/figures/sn-case-file-generation/scfg-case-file has no file in the diff."
+  }
+}
