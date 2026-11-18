@@ -381,9 +381,9 @@ def _table(identifier: str, headers: list[str], rows: list[tuple]) -> str:
     )
 
 
-def sections(report: dict[str, object]) -> str:
-    """Render the fragment's body: every section, in reading order."""
-    pid = NODE
+def sections(report: dict[str, object], prefix: str = NODE) -> str:
+    """Render the body: every section, in reading order, under ``prefix``."""
+    pid = prefix
     tokens = report["tokens"]
     populations = report["populations"]
     content = report["content"]
@@ -658,7 +658,11 @@ def sections(report: dict[str, object]) -> str:
 
 
 def document(report: dict[str, object], *, standalone: bool) -> str:
-    body = sections(report)
+    # The standalone page is a run artifact held beside the fragment, so its
+    # ids live in their own namespace; a shared id would resolve to whichever
+    # of the two the composed record reached first.
+    prefix = "case-file-run" if standalone else NODE
+    body = sections(report, prefix)
     if standalone:
         slug = 'name="plan-slug" content="sn-case-file-generation"'
         title = "Case files for the equilibrium members and the calibration names"
@@ -679,7 +683,18 @@ def document(report: dict[str, object], *, standalone: bool) -> str:
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--limit", type=int, default=0)
+    parser.add_argument(
+        "--render-only",
+        action="store_true",
+        help="re-render the pages from case-file.json without rebuilding records",
+    )
     args = parser.parse_args()
+    if args.render_only:
+        report = json.loads(DATA.read_text())
+        FRAGMENT.write_text(document(report, standalone=False))
+        PAGE.write_text(document(report, standalone=True))
+        print("re-rendered the fragment and the page")
+        return 0
     equilibrium, calibration, combined = populations()
     result = build(combined, limit=args.limit)
     report = summarise(equilibrium, calibration, combined, result)
