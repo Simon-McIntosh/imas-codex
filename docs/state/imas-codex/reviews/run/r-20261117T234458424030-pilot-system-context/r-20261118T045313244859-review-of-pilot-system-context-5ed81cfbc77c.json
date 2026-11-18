@@ -1,0 +1,194 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "Derived from the reviewed run's own arm logs. The manifest carries after_suite only (manifest.md:21); head-gate.log:36 is '508 passed, 1 warning in 27.80s' at revision ab5820479 with exit_status 0 and failure_ids [], so the head arm's failure set is empty. No baseline_suite field exists, and a base arm over the same selection cannot exist because the three test files are added by 3e78ec3 and 55c3def; the difference therefore reduces to the head's empty set and no failure id is added. The separate mutation arm (negative-control.log:110, '12 failed, 12 passed') is a deliberate red arm, not a suite delta.",
+  "assertion_audit": [
+    {
+      "assertion": "== PlantContextMatch.exact",
+      "fails_if": "removes the literal branch at plant_context.py:243",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "71",
+      "test": "exact_and_derived"
+    },
+    {
+      "assertion": "counts == absent 1",
+      "fails_if": "removes the sequence guard at plant_context.py:248",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "87",
+      "test": "absent_row"
+    },
+    {
+      "assertion": "== absent",
+      "fails_if": "removes the source-system check at plant_context.py:239",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "95",
+      "test": "cross_system"
+    },
+    {
+      "assertion": "counts == exact 1",
+      "fails_if": "reverses precedence at plant_context.py:406-412",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "127",
+      "test": "exact_precedence"
+    },
+    {
+      "assertion": "len(rows) == 510",
+      "fails_if": "uses the preview extractor and its row limit",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "179",
+      "test": "row_count_510"
+    },
+    {
+      "assertion": "raises ValueError facility",
+      "fails_if": "removes the facility check at plant_context.py:305",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "198",
+      "test": "other_facility"
+    },
+    {
+      "assertion": "no MERGE of catalogue labels",
+      "fails_if": "a MERGE replaces a MATCH at plant_context_graph.py:138-157",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "214",
+      "test": "statement_shape"
+    },
+    {
+      "assertion": "counts derived one",
+      "fails_if": "removes the alias number join at plant_context.py:371-375",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "257",
+      "test": "alias_join"
+    },
+    {
+      "assertion": "row field == literal the test passed in",
+      "fails_if": "nothing about the join: the literal is the value supplied, so it holds with the alias logic removed",
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "258",
+      "test": "alias_input_echo"
+    },
+    {
+      "assertion": "nodes == 5 and replay equal",
+      "fails_if": "drops an AT_FACILITY edge or changes a MERGE identity",
+      "file": "tests/graph/test_plant_context_graph.py",
+      "line": "127",
+      "test": "replay_nodes"
+    },
+    {
+      "assertion": "state derived with one link",
+      "fails_if": "drops the HAS_PLANT_CONTEXT merge at plant_context_graph.py:37",
+      "file": "tests/graph/test_plant_context_graph.py",
+      "line": "135",
+      "test": "signal_readback"
+    },
+    {
+      "assertion": "raises not fully acknowledged",
+      "fails_if": "removes the written-count check at plant_context_graph.py:94-99",
+      "file": "tests/graph/test_plant_context_graph.py",
+      "line": "142",
+      "test": "ack_refusal"
+    }
+  ],
+  "assertion_independence": "Every added assertion names a code change that would redden it except tests/discovery/test_plant_context.py:258, which compares a field of the test's own constructed row against the literal it passed to row(); the join's guard is the counts literal at :257. The graph tests read expected counts from the live transaction rather than from the bundle. The statement-shape assertion at :214 is a text check over emitted Cypher and says nothing about the statements' results, and negative-control.log:98-109 shows the join and archive-equality assertions listed above do fire when those guards are disabled.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-18T05:55:10.068Z",
+  "dispatched_at": "2026-11-18T05:54:59Z",
+  "evidence_limits": [
+    "No suite, mutation arm or live import was re-run during this bounded read-only review; the reviewed run's recorded logs at its own revisions are read as its evidence.",
+    "The reviewed manifest carries after_suite only and no baseline_suite, so the added-failure set difference has no recorded base arm and rests on the head's empty failure set.",
+    "The head gate log names revision ab5820479, one commit below the delivered head 5ed81cfc; that final commit changes only the evidence fragment.",
+    "The dispatched done_when at prompt.txt:191 names a private facility-scoped archive with package name and digest. Plan section 4 at docs/plans/iter-signal-context-and-enrichment.html:60 records the lead's 2026-11-18 decision that the section lands without an archive of its own, and archive-preflight.log records private_target_exists false, so that clause is waived by the plan rather than met.",
+    "The handed-over quantities (609 nodes, 2,691 links, 190 derived, 20 hand readings, zero-hit privacy scan) are read from the reviewed run's logs and private receipts, not independently reproduced.",
+    "Twenty hand-checked links of each present kind is satisfied by derived links only, which leaves the exact-link path checked by unit tests alone."
+  ],
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/plant_context_graph.py",
+      "line": "64",
+      "severity": "non-blocking",
+      "text": "non-blocking: snapshot_pilot_signals re-implements the selector-presence and population-stability guard the repository already owns at imas_codex/discovery/signals/variable_name_graph.py:63 (snapshot_archive_signals, whose docstring calls it the shared guard for archive reads) and inlines a second copy of its COUNT_QUERY at plant_context_graph.py:68-73, so that guard now exists twice and can drift; extend the owner with a prefix and a bound instead of forking it."
+    },
+    {
+      "file": "imas_codex/discovery/signals/plant_context_graph.py",
+      "line": "222",
+      "severity": "non-blocking",
+      "text": "non-blocking: persist_plant_context, write_context, extract_signal_rows and snapshot_pilot_signals have no production call site; the live import that produced the recorded 609 nodes and 2,691 links ran from /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T234458424030-pilot-system-context/import_live.py, so the plan's statement at docs/plans/iter-signal-context-and-enrichment.html:60 that the import can be repeated from the documents on disk rests on a driver that was never committed."
+    },
+    {
+      "file": "imas_codex/discovery/signals/plant_context.py",
+      "line": "15",
+      "severity": "non-blocking",
+      "text": "non-blocking: the importer imports _format_row_with_headers, a private symbol of imas_codex/discovery/wiki/excel.py:90, and is its first cross-package consumer, so a rename inside the wiki extractor breaks the plant importer at import time; promote the formatter in its owner rather than depend on another domain's private name."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T234458424030-pilot-system-context/manifest.md",
+      "line": "21",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reviewed manifest carries after_suite only (head-gate.log, 508 passed, EXIT=0) and no baseline_suite arm, so added_failure_count cannot be derived as the set difference over the pair the record contract names and rests on the head's empty failure set alone; record the base arm, or record why an arm over the added test files is impossible, beside the head arm."
+    },
+    {
+      "file": "tests/discovery/test_plant_context.py",
+      "line": "258",
+      "severity": "non-blocking",
+      "text": "non-blocking: assert b.rows[0].control_path == 'DEMO-TEST-SENS' compares a field of the row the test constructed against the literal it passed to row(control_path=...), so it stays true with the alias join removed; the decisive assertion is the counts literal at line 257."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "none: git grep at 5ed81cfc for plant_context, PlantContext and records_only outside tests and docs returns only the two new modules, their test files and unrelated historical run state; the live import ran from the run directory's import_live.py, and records_only defaults to False so no production path sets it.",
+    "diff": "Read the four commits 3e78ec3, 55c3def, ab58204 and 5ed81cfc against base 22a5de7b commit by commit: they add the records-only request boundary at imas_codex/discovery/icp/client.py:134-157, the importer at imas_codex/discovery/signals/plant_context.py, the writer at imas_codex/discovery/signals/plant_context_graph.py, six classes and one enum with two PlantComponent attributes in imas_codex/schemas/facility.yaml, and three test files.",
+    "done_when": "The dispatched measure at prompt.txt:191 names nine quantities; the landing record at manifest.md:15 carries eight of them against named logs (18 plant records, 16 categories, 7 documents, 343 rows, 0 exact / 190 derived / 1576 absent, 609 nodes and 2,691 links reaching ITER with 0/0 added on replay, a zero-hit tracked-tree scan, and four graph-marked tests at binding-graph-tests.log:25); the ninth, a private facility-scoped archive with package name and digest, is not produced and is waived by plan section 4 at docs/plans/iter-signal-context-and-enrichment.html:60.",
+    "goal": "The node goal at prompt.txt:38 is to import the dispatch's pilot plant structure, signal-list rows and specification references under the ITER facility and link each catalogued pilot signal; live-import.log:2 records 609 nodes and 2,691 links with signal states exact 0, derived 190 and absent 1576, so the graph content the goal names exists, but no production call site reaches imas_codex/discovery/signals/plant_context_graph.py:222 and the driver that produced it is the run directory's import_live.py.",
+    "manifest": "Read manifest.md in full: it records the four commit shas, 508 passing gate tests (head-gate.log:36), four graph-marker tests, a twelve-failure mutation arm (negative-control.log:110), a zero-hit privacy scan and a live receipt digest, and it states the archive outstanding; it carries after_suite at line 21 and no baseline_suite arm.",
+    "write_paths": "manifest.md:3 declares imas_codex/schemas/facility.yaml, imas_codex/discovery/icp, imas_codex/discovery/signals, tests/discovery, tests/graph, the evidence fragment and a figures directory; all eight changed paths in 22a5de7b4bdc..5ed81cfbc77c lie inside them, and docs/figures/iter-signal-context-and-enrichment/pilot-system-context is declared but never written."
+  },
+  "justifications": {
+    "durability": "negative-control.log:98-109 fails twelve tests, including test_component_absent_from_source_gets_no_link and both archive-equality guards, when the declared joins and the equality refusal are disabled, while tests/discovery/test_plant_context.py:258 is an input echo that survives that removal.",
+    "evidence": "The landing record at manifest.md:15 records eight of the done_when quantities against live-import.log:2, privacy-scan-final.log and binding-graph-tests.log:25, yet manifest.md:17's gate command measures only the test suite and manifest.md:21 records no base arm.",
+    "fit": "imas_codex/discovery/signals/plant_context_graph.py:12-61 declares module-level Cypher constants and persist_ and snapshot_ entry points in the idiom of archive_grouping_graph.py:20-60, but plant_context.py:15 imports the private _format_row_with_headers of imas_codex/discovery/wiki/excel.py:90.",
+    "goal_fidelity": "imas_codex/discovery/signals/plant_context_graph.py:222 wrote the 609-node, 2,691-link ITER cohort that live-import.log:2 records, but no production code reaches the module and the repeat driver is the run directory's import_live.py.",
+    "reuse": "plant_context_graph.py:64 duplicates the shared snapshot guard at imas_codex/discovery/signals/variable_name_graph.py:63 and inlines its count query at :68, whereas plant_context.py:236 and :14 extend parse_variable_name and the ICP record models, and plant_context_graph.py:106 extends GraphSchema.get_relationships_from.",
+    "scope_discipline": "git diff --stat 22a5de7b4bdc 5ed81cfbc77c lists eight paths, all inside manifest.md:3, and the only edit to pre-existing code is the records-only boundary at imas_codex/discovery/icp/client.py:134-157 that the brief's no-download rule requires."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: The node goal at prompt.txt:38 is to import the dispatch's pilot plant structure, signal-list rows and specification references under the ITER facility and link each catalogued pilot signal; live-import.log:2 records 609 nodes and 2,691 links with signal states exact 0, derived 190 and absent 1576, so the graph content the goal names exists, but no production call site reaches imas_codex/discovery/signals/plant_context_graph.py:222 and the driver that produced it is the run directory's import_live.py.\nVERDICT done_when: The dispatched measure at prompt.txt:191 names nine quantities; the landing record at manifest.md:15 carries eight of them against named logs (18 plant records, 16 categories, 7 documents, 343 rows, 0 exact / 190 derived / 1576 absent, 609 nodes and 2,691 links reaching ITER with 0/0 added on replay, a zero-hit tracked-tree scan, and four graph-marked tests at binding-graph-tests.log:25); the ninth, a private facility-scoped archive with package name and digest, is not produced and is waived by plan section 4 at docs/plans/iter-signal-context-and-enrichment.html:60.\nVERDICT write_paths: manifest.md:3 declares imas_codex/schemas/facility.yaml, imas_codex/discovery/icp, imas_codex/discovery/signals, tests/discovery, tests/graph, the evidence fragment and a figures directory; all eight changed paths in 22a5de7b4bdc..5ed81cfbc77c lie inside them, and docs/figures/iter-signal-context-and-enrichment/pilot-system-context is declared but never written.\nVERDICT manifest: Read manifest.md in full: it records the four commit shas, 508 passing gate tests (head-gate.log:36), four graph-marker tests, a twelve-failure mutation arm (negative-control.log:110), a zero-hit privacy scan and a live receipt digest, and it states the archive outstanding; it carries after_suite at line 21 and no baseline_suite arm.\nVERDICT diff: Read the four commits 3e78ec3, 55c3def, ab58204 and 5ed81cfc against base 22a5de7b commit by commit: they add the records-only request boundary at imas_codex/discovery/icp/client.py:134-157, the importer at imas_codex/discovery/signals/plant_context.py, the writer at imas_codex/discovery/signals/plant_context_graph.py, six classes and one enum with two PlantComponent attributes in imas_codex/schemas/facility.yaml, and three test files.\nCALL_SITES: none\nSCORE goal_fidelity: 16\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/plant_context_graph.py:222 wrote the 609-node, 2,691-link ITER cohort that live-import.log:2 records, but no production code reaches the module and the repeat driver is the run directory's import_live.py.\nSCORE evidence: 13\nJUSTIFICATION evidence: The landing record at manifest.md:15 records eight of the done_when quantities against live-import.log:2, privacy-scan-final.log and binding-graph-tests.log:25, yet manifest.md:17's gate command measures only the test suite and manifest.md:21 records no base arm.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: git diff --stat 22a5de7b4bdc 5ed81cfbc77c lists eight paths, all inside manifest.md:3, and the only edit to pre-existing code is the records-only boundary at imas_codex/discovery/icp/client.py:134-157 that the brief's no-download rule requires.\nSCORE durability: 16\nJUSTIFICATION durability: negative-control.log:98-109 fails twelve tests, including test_component_absent_from_source_gets_no_link and both archive-equality guards, when the declared joins and the equality refusal are disabled, while tests/discovery/test_plant_context.py:258 is an input echo that survives that removal.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/discovery/signals/plant_context_graph.py:12-61 declares module-level Cypher constants and persist_ and snapshot_ entry points in the idiom of archive_grouping_graph.py:20-60, but plant_context.py:15 imports the private _format_row_with_headers of imas_codex/discovery/wiki/excel.py:90.\nSCORE reuse: 5\nJUSTIFICATION reuse: plant_context_graph.py:64 duplicates the shared snapshot guard at imas_codex/discovery/signals/variable_name_graph.py:63 and inlines its count query at :68, whereas plant_context.py:236 and :14 extend parse_variable_name and the ICP record models, and plant_context_graph.py:106 extends GraphSchema.get_relationships_from.\nFINDING imas_codex/discovery/signals/plant_context_graph.py:64 non-blocking: snapshot_pilot_signals re-implements the selector-presence and population-stability guard the repository already owns at imas_codex/discovery/signals/variable_name_graph.py:63 (snapshot_archive_signals, whose docstring calls it the shared guard for archive reads) and inlines a second copy of its COUNT_QUERY at plant_context_graph.py:68-73, so that guard now exists twice and can drift; extend the owner with a prefix and a bound instead of forking it.\nFINDING imas_codex/discovery/signals/plant_context_graph.py:222 non-blocking: persist_plant_context, write_context, extract_signal_rows and snapshot_pilot_signals have no production call site; the live import that produced the recorded 609 nodes and 2,691 links ran from /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T234458424030-pilot-system-context/import_live.py, so the plan's statement at docs/plans/iter-signal-context-and-enrichment.html:60 that the import can be repeated from the documents on disk rests on a driver that was never committed.\nFINDING imas_codex/discovery/signals/plant_context.py:15 non-blocking: the importer imports _format_row_with_headers, a private symbol of imas_codex/discovery/wiki/excel.py:90, and is its first cross-package consumer, so a rename inside the wiki extractor breaks the plant importer at import time; promote the formatter in its owner rather than depend on another domain's private name.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T234458424030-pilot-system-context/manifest.md:21 non-blocking: the reviewed manifest carries after_suite only (head-gate.log, 508 passed, EXIT=0) and no baseline_suite arm, so added_failure_count cannot be derived as the set difference over the pair the record contract names and rests on the head's empty failure set alone; record the base arm, or record why an arm over the added test files is impossible, beside the head arm.\nFINDING tests/discovery/test_plant_context.py:258 non-blocking: assert b.rows[0].control_path == 'DEMO-TEST-SENS' compares a field of the row the test constructed against the literal it passed to row(control_path=...), so it stays true with the alias join removed; the decisive assertion is the counts literal at line 257.\n",
+  "reuse_search": {
+    "capabilities": [
+      "archive catalogue snapshot with selector-presence and population-stability control",
+      "spreadsheet row formatting with header context",
+      "selector parsing and component identity",
+      "plant and function-category record models",
+      "schema-driven node and relationship statement construction"
+    ],
+    "judgement": "The catalogue snapshot is duplicated rather than extended: snapshot_pilot_signals at plant_context_graph.py:64 repeats the control and stability reads of snapshot_archive_signals at variable_name_graph.py:63 and inlines its COUNT_QUERY. The row formatter, selector parser and record models are reused from their owners, and the writer consumes GraphSchema.get_relationships_from rather than re-deriving relationship metadata; the trivial merge_node_query at graph/schema.py:859 has no facility scoping or acknowledgement and is unused in production, so the new writer is not a fork of it, though it does not extend it either.",
+    "owners_opened": [
+      "imas_codex/discovery/signals/variable_name_graph.py:52-92",
+      "imas_codex/discovery/wiki/excel.py:90-114",
+      "imas_codex/discovery/signals/variable_names.py:106-140",
+      "imas_codex/discovery/icp/records.py:67-83",
+      "imas_codex/graph/schema.py:859-887",
+      "imas_codex/discovery/signals/archive_grouping_graph.py:1-60"
+    ]
+  },
+  "review_run_id": "r-20261118T045313244859-review-of-pilot-system-context-5ed81cfbc77c",
+  "reviewed_base_sha": "22a5de7b4bdc240268144c5ec7a54a36677795ee",
+  "reviewed_head_sha": "5ed81cfbc77ce1c4117bb05bbf47bf4e3080e59f",
+  "reviewed_run_id": "r-20261117T234458424030-pilot-system-context",
+  "reviewed_worker_commits": [
+    "3e78ec3290e5686694575e4e84e6ebd2e88e6061",
+    "55c3def62a96636ee15f62200780557418b9cb68",
+    "ab5820479d5be1717154573e8f31d0323f35fdac",
+    "5ed81cfbc77ce1c4117bb05bbf47bf4e3080e59f"
+  ],
+  "scores": {
+    "durability": 16,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 16,
+    "reuse": 5,
+    "scope_discipline": 19
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:31:56.068806+00:00",
+  "total": 86
+}
