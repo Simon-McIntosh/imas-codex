@@ -26,6 +26,12 @@
       "recorded_at": "2026-11-18T23:24:53.804493+00:00",
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261118T064807925154-scfg-benchmark"
+    },
+    "1": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-18T23:24:53.804493+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261118T064807925154-scfg-benchmark"
     }
   },
   "findings": [
