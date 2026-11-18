@@ -43,9 +43,28 @@
       "note": "Sections 10 and 11 now link the rehearsal section in their own declarations, matching the declared waits.",
       "reason": "",
       "when": "2026-11-18T19:56:40.206882+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f9b3b1e0c6ef64d79fca8c580a236ea86386f51b",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The alias clause is removed from the rehearsal's done-when; the transition alias stays section 10's alone.",
+      "reason": "",
+      "when": "2026-11-18T19:56:48.570628+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f9b3b1e0c6ef64d79fca8c580a236ea86386f51b",
+      "commit_basis": "edit",
+      "note": "The alias clause is removed from the rehearsal's done-when; the transition alias stays section 10's alone.",
+      "reason": "",
+      "when": "2026-11-18T19:56:48.570628+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
