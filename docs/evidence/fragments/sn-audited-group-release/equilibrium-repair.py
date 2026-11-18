@@ -364,7 +364,8 @@ def render(record):
         f"<p>{e(record.get('pilot', {}).get('result', 'Pilot not completed.'))}</p>",
         f"<pre>{e(json.dumps(counts(record), indent=2))}</pre>",
         "<p>The two pending adjudications remain excluded. Full command receipts, source packets, "
-        "and guard measurements are preserved in the run directory recorded in the data file's receipts.</p>",
+        f"and guard measurements are preserved in <code>{e(RUN)}</code>. "
+        "Receipt basenames below resolve in that directory; --show decodes the full JSON record.</p>",
         "<table><thead><tr><th>Before → after</th><th>Source and adjudication</th>"
         "<th>Proposal and review</th><th>Outcome / cost / question for the lead</th></tr></thead><tbody>",
     ]
@@ -375,11 +376,10 @@ def render(record):
             args = proposal["arguments"]
             text = " ".join(args[:2])
             if "--dry-run" in args:
-                text += " (dry run; full proposal in the command receipt)"
-            else:
-                for flag in ("--rename", "--docs", "--hint", "--reason"):
-                    if flag in args:
-                        text += "\n" + flag + ": " + args[args.index(flag) + 1]
+                text += " (dry run)"
+            elif "--rename" in args:
+                text += " → " + args[args.index("--rename") + 1]
+            text += "\nReceipt: " + Path(proposal["receipt"]).name
             scores = [
                 (v["axis"], v["score"])
                 for v in proposal["reviews"]
@@ -388,18 +388,28 @@ def render(record):
             text += f"\nreview scores: {scores}; exit: {proposal['exit_status']}; USD {proposal['cost_usd']:.6f}"
             summaries.append(text)
         proposals = "\n\n".join(summaries)
+        if r.get("proposal_reason"):
+            proposals += "\nProposal reason: " + r["proposal_reason"]
         if r.get("intended_proposal"):
             proposals += "\nProposed correction: " + r["intended_proposal"]
         if r.get("parked_gate"):
             proposals += "\nRefusing gate: " + r["parked_gate"]
         if r.get("source_words"):
             proposals += "\nSource words: " + r["source_words"]
+        detail = ""
+        if r["outcome"] == "accepted_repair":
+            detail = (
+                "<details><summary>Stored documentation and source bindings</summary>"
+                f"<pre>{e(after.get('documentation'))}\n\n"
+                f"{e(json.dumps(r.get('source_bindings', {}), indent=2))}</pre></details>"
+            )
         content.append(
             f"<tr><td><code>{e(r['id'])}</code> → <code>{e(after.get('id'))}</code>"
             f"<p>{e((r.get('before') or {}).get('description'))}</p><p>{e(after.get('description'))}</p>"
             f"<p>Units: {e(after.get('units'))}; domains: {e(after.get('domains'))}. "
             f"Name score: {e(after.get('reviewer_score_name'))}; "
             f"documentation score: {e(after.get('reviewer_score_docs'))}.</p>"
+            f"{detail}"
             f"</td><td>{e(r['judgment']['evidence_path'])}<p>{e(r['judgment']['reason'])}</p>"
             f"</td><td><pre>{e(proposals)}</pre></td><td>{e(r['outcome'])}; USD {r['cost_usd']:.6f}"
             f"<p>{e(r['lead_question'])}</p></td></tr>"
