@@ -33,7 +33,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 71,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f9b3b1e0c6ef64d79fca8c580a236ea86386f51b",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Sections 10 and 11 now link the rehearsal section in their own declarations, matching the declared waits.",
+      "reason": "",
+      "when": "2026-11-18T19:56:40.206882+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f9b3b1e0c6ef64d79fca8c580a236ea86386f51b",
+      "commit_basis": "edit",
+      "note": "Sections 10 and 11 now link the rehearsal section in their own declarations, matching the declared waits.",
+      "reason": "",
+      "when": "2026-11-18T19:56:40.206882+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261118T063516827287-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261118T063516827287-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "360904f3dd9ae05cd0b468d5f97f724ef55eff2d",
   "rubric": "content",
