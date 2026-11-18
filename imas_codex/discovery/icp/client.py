@@ -131,6 +131,7 @@ class _RequestPolicy:
         gateway_paths: frozenset[str],
         description_path: str,
         documents: _DocumentAccess | None = None,
+        records_only: bool = False,
     ) -> None:
         self.readable_origins = readable_origins
         self.pacer = RequestPacer(interval)
@@ -139,6 +140,7 @@ class _RequestPolicy:
         self.gateway_paths = gateway_paths
         self.description_path = description_path
         self.documents = documents
+        self.records_only = records_only
         self.document_requests: dict[str, int] = {}
         self.document_stopped = False
         self.authenticating = False
@@ -150,6 +152,10 @@ class _RequestPolicy:
     def check(self, request: requests.PreparedRequest) -> str:
         """Refuse a method or origin before any transport can send it."""
         origin = _origin(request.url or "")
+        if self.records_only and self.documents and origin == self.documents.origin:
+            raise ICPRequestRefused(
+                "Document access is disabled for records-only reads"
+            )
         host_header = request.headers.get("Host")
         if host_header and host_header.lower() not in {
             urlsplit(origin).netloc,
@@ -292,7 +298,7 @@ class _RequestPolicy:
             raise ICPRequestRefused("Only identity-provider login forms are allowed")
 
     def before_send(self, request: requests.PreparedRequest) -> None:
-        if self.documents and len(self.records) >= 40:
+        if self.documents and not self.records_only and len(self.records) >= 40:
             raise ICPRequestRefused("The document session request budget was exhausted")
         if (
             self.documents
@@ -432,6 +438,7 @@ class ICPClient:
         origin: str | None = None,
         timeout: float = 30,
         min_interval: float = 0.5,
+        records_only: bool = False,
     ) -> None:
         facility = facility or os.environ.get("IMAS_CODEX_ICP_FACILITY")
         if not facility:
@@ -546,6 +553,7 @@ class ICPClient:
             gateway_paths,
             urlsplit(self._description_url).path,
             documents,
+            records_only,
         )
         self._session = _GuardedSession(self._policy)
         self._login = _APILogin(
