@@ -60,7 +60,8 @@ LOCAL_MODEL = "local/deepseek-v4.1-flash"
 FRONTIER_MODEL = "openrouter/openai/gpt-6.1-sol"
 JUDGE_MODEL = "openrouter/google/gemini-3.8-flash"
 KIMI_COMMAND = (
-    "KIMI_BASE_URL=<B300-server>/v1 uv run --no-sync python "
+    'KIMI_BASE_URL="${KIMI_BASE_URL:?set KIMI_BASE_URL to the B300 server /v1 root}" '
+    "uv run --no-sync python "
     "docs/evidence/fragments/sn-case-file-generation/benchmark.py --stage all "
     "--models kimi"
 )
@@ -735,10 +736,23 @@ def report_arms(
 
 
 def dependent_members(
-    members: list[dict[str, Any]], bucket: dict[str, Any]
+    members: list[dict[str, Any]],
+    bucket: dict[str, Any],
+    right_members: set[str],
 ) -> list[str]:
+    """Members whose right answer rests only on the enclosing text, and that
+    the full arm actually got right.
+
+    Restricting to members the full arm answered correctly is what makes the
+    withheld control a comparison: on this subset the full arm has something
+    to lose. Without it the control could count a member the full arm already
+    failed, and withholding a text no arm used would look like a failure of
+    the text.
+    """
     dependent = []
     for member in members:
+        if member["id"] not in right_members:
+            continue
         case = bucket.get(member["id"])
         if not case:
             continue
@@ -818,25 +832,50 @@ def build_document(
     reports_2 = report_arms(development_2, arms, len(development))
     final_reports = report_arms(held_out_rows, arms, len(held_out))
 
-    dependent = dependent_members(held_out, bucket)
+    full_right = {
+        row.member for row in held_out_rows if row.arm == best_arm and row.right
+    }
+    dependent = dependent_members(held_out, bucket, full_right)
     final_objects = [
         bench.summarize_record_arm(held_out_rows, arm)
         for name, arm in arms.items()
         if any(row.arm == name for row in held_out_rows)
     ]
-    controls = bench.evaluate_controls(
-        final_objects,
-        held_out_rows,
-        incumbent_arm="incumbent",
-        withheld_arm=withheld_name,
-        withheld_compared_to=best_arm,
-        dependent_members=dependent,
-        seed=SPLIT_SEED,
-    )
+    if dependent:
+        controls = bench.evaluate_controls(
+            final_objects,
+            held_out_rows,
+            incumbent_arm="incumbent",
+            withheld_arm=withheld_name,
+            withheld_compared_to=best_arm,
+            dependent_members=dependent,
+            seed=SPLIT_SEED,
+        )
+    else:
+        controls = bench.evaluate_controls(
+            final_objects,
+            held_out_rows,
+            incumbent_arm="incumbent",
+            seed=SPLIT_SEED,
+        )
+        controls["withheld"] = {
+            "arm": withheld_name,
+            "separated": False,
+            "dependent_members": 0,
+            "unmeasurable": (
+                "no held-out member has its right answer only in the enclosing "
+                f"text and is right for {best_arm}"
+            ),
+        }
     whole_split = bench.compare_record_arms(
         held_out_rows, best_arm, withheld_name, seed=SPLIT_SEED
     )
     controls["withheld"]["whole_split"] = whole_split
+    try:
+        bench.assert_controls_separate(controls)
+        controls["refusal"] = None
+    except bench.BenchmarkControlDidNotSeparate as exc:
+        controls["refusal"] = str(exc)
     best_repair_share = max(
         (
             report["share_right"]
@@ -845,12 +884,21 @@ def build_document(
         ),
         default=0.0,
     )
-    admission = (
-        "the controls separated"
-        if controls["measuring"]
-        else (
+    if controls["measuring"]:
+        admission = "the controls separated"
+    elif controls["withheld"].get("unmeasurable"):
+        admission = (
             "the controls did not separate: "
             f"the incumbent-unchanged arm scored {percent(controls['incumbent'].get('share_right', 0.0))} "
+            f"against {percent(best_repair_share)} for the best repairing arm; "
+            "the withheld-text control is unmeasurable because "
+            f"{controls['withheld']['unmeasurable']}."
+        )
+    else:
+        admission = (
+            "the controls did not separate: "
+            f"the incumbent-unchanged arm scored "
+            f"{percent(controls['incumbent'].get('share_right', 0.0))} "
             f"against {percent(best_repair_share)} for the best repairing arm; "
             f"the withheld-text arm scored {whole_split['right_b']}/{whole_split['members']} "
             f"against {whole_split['right_a']}/{whole_split['members']} "
@@ -858,7 +906,6 @@ def build_document(
             f"losing {whole_split['only_a_right']} members and gaining {whole_split['only_b_right']}. "
             "No arm difference is called a win on this run."
         )
-    )
     repair_names = [
         report["arm"]
         for report in final_reports
@@ -994,14 +1041,6 @@ def build_document(
                 "reason": "the B300 server that will serve Kimi is not up",
                 "command": KIMI_COMMAND,
             },
-            {
-                "arm": "subscription/worker-lane",
-                "reason": "the subscription worker lane was not exercised by this run",
-                "command": (
-                    "uv run --no-sync python docs/evidence/fragments/"
-                    "sn-case-file-generation/benchmark.py --stage measure --models subscription"
-                ),
-            },
         ],
         "spend": {
             "ceiling_usd": SPEND_CEILING_USD,
@@ -1083,14 +1122,21 @@ def render_html(document: dict[str, Any]) -> str:
     lines.append("<h2>Final arms, held out</h2>")
     lines.append(_arm_table(document["final"]["arms"]))
     lines.append("<h2>Controls</h2>")
+    withheld_control = document["final"]["controls"]["withheld"]
+    if withheld_control.get("unmeasurable"):
+        withheld_html = "unmeasurable: " + withheld_control["unmeasurable"]
+    else:
+        withheld_html = (
+            str(withheld_control["separated"]).lower()
+            + " over "
+            + str(withheld_control.get("dependent_members", 0))
+            + " members"
+        )
     lines.append(
         f"<p>Measuring: <strong>{str(document['final']['measuring']).lower()}</strong>. "
         f"Incumbent-unchanged separated: "
         f"{str(document['final']['controls']['incumbent']['separated']).lower()}; "
-        f"withheld-text separated: "
-        f"{str(document['final']['controls']['withheld']['separated']).lower()} "
-        f"over {document['final']['controls']['withheld'].get('dependent_members', 0)} "
-        "members</p>"
+        f"withheld-text: {withheld_html}</p>"
     )
     lines.append("<h2>Member-by-member comparisons</h2>")
     lines.append(
@@ -1187,6 +1233,15 @@ def render_fragment(document: dict[str, Any]) -> str:
     final = document["final"]
     controls = final["controls"]
     spend = document["spend"]
+    withheld = controls["withheld"]
+    if withheld.get("unmeasurable"):
+        withheld_sentence = "unmeasurable: " + withheld["unmeasurable"]
+    else:
+        count = withheld.get("dependent_members", 0)
+        withheld_sentence = (
+            f"separated: {str(withheld['separated']).lower()}"
+            f" on {count} members whose right answer rests on the enclosing text"
+        )
     lines = [
         '<section data-reckon="evidence">',
         '<h3 id="scfg-benchmark-record-benchmark">A blind record benchmark</h3>',
@@ -1197,10 +1252,9 @@ def render_fragment(document: dict[str, Any]) -> str:
         '<div id="scfg-benchmark-final">' + _arm_table(final["arms"]) + "</div>",
         '<h4 id="scfg-benchmark-controls">Controls</h4>',
         "<p>Incumbent-unchanged separated: "
-        f"{str(controls['incumbent']['separated']).lower()}; withheld-text separated: "
-        f"{str(controls['withheld']['separated']).lower()} on "
-        f"{controls['withheld'].get('dependent_members', 0)} members whose right "
-        f"answer rests on the enclosing text. Measuring: {str(final['measuring']).lower()}.</p>",
+        f"{str(controls['incumbent']['separated']).lower()}; withheld-text "
+        f"{withheld_sentence}. "
+        f"Measuring: {str(final['measuring']).lower()}.</p>",
         f'<p id="scfg-benchmark-admission">{escape(document["decision"]["admission"])}</p>',
         '<h4 id="scfg-benchmark-choice">The choice</h4>',
         _decision_table(document["decision"]),

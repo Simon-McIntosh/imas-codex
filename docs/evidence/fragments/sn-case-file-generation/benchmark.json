@@ -1,7 +1,7 @@
 {
   "schema": "imas-codex.standard-name-record-benchmark/1",
-  "built_at": "2026-11-18T20:38:14.102964+00:00",
-  "revision": "fc42585d2ce56690354c396dd6098bcdf105a45f",
+  "built_at": "2026-11-18T21:47:22.004572+00:00",
+  "revision": "4c8c3687ea7d1de22ea0cd751784cde74ea66d09",
   "reference": {
     "path": "docs/evidence/fragments/sn-case-file-generation/reference-set.json",
     "members": 176,
@@ -79,10 +79,8 @@
             0.3699664220080721
           ],
           "blocked_by_type": {
-            "bound_source": 1,
-            "missing_bound_source": 2,
-            "scope_conflict": 1,
-            "source_conflict": 1
+            "insufficient-source-text": 3,
+            "other": 2
           },
           "changed_right_incumbent": 65,
           "right_incumbent_total": 65,
@@ -110,8 +108,8 @@
             0.2210390345134806
           ],
           "blocked_by_type": {
-            "generation-failure:LLMStructuredCallError": 15,
-            "missing_bound_source": 1
+            "generation-failure": 15,
+            "insufficient-source-text": 1
           },
           "changed_right_incumbent": 52,
           "right_incumbent_total": 65,
@@ -139,9 +137,9 @@
             0.2079044763304847
           ],
           "blocked_by_type": {
-            "generation-failure:LLMStructuredCallError": 17,
-            "judge-failure:LLMStructuredCallError": 1,
-            "missing_bound_source": 1
+            "generation-failure": 17,
+            "insufficient-source-text": 1,
+            "judge-failure": 1
           },
           "changed_right_incumbent": 52,
           "right_incumbent_total": 65,
@@ -213,10 +211,8 @@
             0.39363505884110656
           ],
           "blocked_by_type": {
-            "missing_bound_source": 2,
-            "scope_conflict": 1,
-            "source_conflict": 1,
-            "source_metadata_conflict": 1
+            "insufficient-source-text": 2,
+            "other": 3
           },
           "changed_right_incumbent": 65,
           "right_incumbent_total": 65,
@@ -244,7 +240,7 @@
             0.2340292438937695
           ],
           "blocked_by_type": {
-            "generation-failure:LLMStructuredCallError": 21
+            "generation-failure": 21
           },
           "changed_right_incumbent": 47,
           "right_incumbent_total": 65,
@@ -272,8 +268,8 @@
             0.2079044763304847
           ],
           "blocked_by_type": {
-            "bound_source": 1,
-            "generation-failure:LLMStructuredCallError": 18
+            "generation-failure": 18,
+            "insufficient-source-text": 1
           },
           "changed_right_incumbent": 51,
           "right_incumbent_total": 65,
@@ -394,10 +390,9 @@
           0.3777377157580035
         ],
         "blocked_by_type": {
-          "bound_source": 1,
-          "missing_bound_source": 4,
-          "missing_coordinate_convention": 1,
-          "source_scope_conflict": 1
+          "grammar-gap": 1,
+          "insufficient-source-text": 5,
+          "registry-conflict": 1
         },
         "changed_right_incumbent": 64,
         "right_incumbent_total": 64,
@@ -425,9 +420,9 @@
           0.2651702687391985
         ],
         "blocked_by_type": {
-          "bound_source": 3,
-          "e": 1,
-          "generation-failure:LLMStructuredCallError": 9
+          "generation-failure": 9,
+          "insufficient-source-text": 3,
+          "other": 1
         },
         "changed_right_incumbent": 54,
         "right_incumbent_total": 64,
@@ -455,8 +450,8 @@
           0.1568818899092207
         ],
         "blocked_by_type": {
-          "bound_source": 1,
-          "generation-failure:LLMStructuredCallError": 17
+          "generation-failure": 17,
+          "insufficient-source-text": 1
         },
         "changed_right_incumbent": 53,
         "right_incumbent_total": 64,
@@ -504,7 +499,7 @@
         "difference": -0.14942528735632185,
         "interval": [
           -0.25287356321839083,
-          -0.03448275862068967
+          -0.04597701149425287
         ],
         "called_win": true
       },
@@ -539,10 +534,10 @@
         "only_b_right": 5,
         "difference": -0.10344827586206896,
         "interval": [
-          -0.19540229885057472,
-          -0.011494252873563204
+          -0.2068965517241379,
+          -0.0
         ],
-        "called_win": true
+        "called_win": false
       },
       {
         "arms": [
@@ -576,7 +571,7 @@
         "difference": -0.09195402298850575,
         "interval": [
           -0.16091954022988508,
-          -0.03448275862068964
+          -0.022988505747126436
         ],
         "called_win": true
       }
@@ -623,8 +618,8 @@
             "only_b_right": 1,
             "difference": -0.5977011494252874,
             "interval": [
-              -0.7126436781609194,
-              -0.48275862068965525
+              -0.7011494252873564,
+              -0.4827586206896552
             ],
             "called_win": true
           },
@@ -642,8 +637,8 @@
             "only_b_right": 2,
             "difference": -0.3563218390804598,
             "interval": [
-              -0.47126436781609193,
-              -0.2528735632183908
+              -0.45977011494252873,
+              -0.24137931034482762
             ],
             "called_win": true
           },
@@ -661,8 +656,27 @@
             "only_b_right": 0,
             "difference": -0.40229885057471265,
             "interval": [
-              -0.5057471264367817,
+              -0.5057471264367815,
               -0.2988505747126437
+            ],
+            "called_win": true
+          },
+          {
+            "arm": "withheld/one-pass/frontier",
+            "arms": [
+              "incumbent",
+              "withheld/one-pass/frontier"
+            ],
+            "members": 87,
+            "right_a": 59,
+            "right_b": 27,
+            "both_right": 24,
+            "only_a_right": 35,
+            "only_b_right": 3,
+            "difference": -0.367816091954023,
+            "interval": [
+              -0.48275862068965514,
+              -0.2528735632183908
             ],
             "called_win": true
           }
@@ -671,29 +685,9 @@
       },
       "withheld": {
         "arm": "withheld/one-pass/frontier",
-        "compared_to": "one-pass/frontier",
-        "dependent_members": 3,
-        "share_right_full": 0.0,
-        "share_right_withheld": 0.0,
-        "comparison": {
-          "arms": [
-            "one-pass/frontier",
-            "withheld/one-pass/frontier"
-          ],
-          "members": 3,
-          "right_a": 0,
-          "right_b": 0,
-          "both_right": 0,
-          "only_a_right": 0,
-          "only_b_right": 0,
-          "difference": 0.0,
-          "interval": [
-            0.0,
-            0.0
-          ],
-          "called_win": false
-        },
         "separated": false,
+        "dependent_members": 0,
+        "unmeasurable": "no held-out member has its right answer only in the enclosing text and is right for one-pass/frontier",
         "whole_split": {
           "arms": [
             "one-pass/frontier",
@@ -707,20 +701,17 @@
           "only_b_right": 5,
           "difference": -0.011494252873563218,
           "interval": [
-            -0.08045977011494254,
-            0.06896551724137928
+            -0.09195402298850572,
+            0.05747126436781613
           ],
           "called_win": false
         }
       },
-      "measuring": false
+      "measuring": false,
+      "refusal": "the incumbent-unchanged control did not score below a repairing arm"
     },
     "measuring": false,
-    "dependent_members": [
-      "hydrogen_density_at_limiter",
-      "accumulated_tritium_prefill_count",
-      "right_hand_circularly_polarized_wave_electric_field"
-    ]
+    "dependent_members": []
   },
   "decision": {
     "question": "which structure and model should generate the record",
@@ -756,10 +747,9 @@
         ],
         "complete": true,
         "blocked_by_type": {
-          "bound_source": 1,
-          "missing_bound_source": 4,
-          "missing_coordinate_convention": 1,
-          "source_scope_conflict": 1
+          "grammar-gap": 1,
+          "insufficient-source-text": 5,
+          "registry-conflict": 1
         },
         "changed_right_incumbent_share": 1.0,
         "cost_per_name": 0.03267346551724138,
@@ -777,9 +767,9 @@
         ],
         "complete": true,
         "blocked_by_type": {
-          "bound_source": 3,
-          "e": 1,
-          "generation-failure:LLMStructuredCallError": 9
+          "generation-failure": 9,
+          "insufficient-source-text": 3,
+          "other": 1
         },
         "changed_right_incumbent_share": 0.84375,
         "cost_per_name": 0.0,
@@ -797,8 +787,8 @@
         ],
         "complete": true,
         "blocked_by_type": {
-          "bound_source": 1,
-          "generation-failure:LLMStructuredCallError": 17
+          "generation-failure": 17,
+          "insufficient-source-text": 1
         },
         "changed_right_incumbent_share": 0.828125,
         "cost_per_name": 0.0,
@@ -827,18 +817,13 @@
       "tokens_read_per_name": 5559.0
     },
     "ruling": "awaiting the lead's ruling",
-    "admission": "the controls did not separate: the incumbent-unchanged arm scored 67.8 % against 32.2 % for the best repairing arm; the withheld-text arm scored 27/87 against 28/87 (32.2 %), losing 6 members and gaining 5. No arm difference is called a win on this run."
+    "admission": "the controls did not separate: the incumbent-unchanged arm scored 67.8 % against 32.2 % for the best repairing arm; the withheld-text control is unmeasurable because no held-out member has its right answer only in the enclosing text and is right for one-pass/frontier."
   },
   "not_run": [
     {
       "arm": "kimi/local",
       "reason": "the B300 server that will serve Kimi is not up",
-      "command": "KIMI_BASE_URL=<B300-server>/v1 uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/benchmark.py --stage all --models kimi"
-    },
-    {
-      "arm": "subscription/worker-lane",
-      "reason": "the subscription worker lane was not exercised by this run",
-      "command": "uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/benchmark.py --stage measure --models subscription"
+      "command": "KIMI_BASE_URL=\"${KIMI_BASE_URL:?set KIMI_BASE_URL to the B300 server /v1 root}\" uv run --no-sync python docs/evidence/fragments/sn-case-file-generation/benchmark.py --stage all --models kimi"
     }
   ],
   "spend": {
