@@ -35,9 +35,28 @@
       "note": "Section 6 now declares its wait on section 3, whose ruling of structure and model it uses.",
       "reason": "",
       "when": "2026-11-18T07:18:33.736816+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f25830340d985a2c0ae4ba0e384b3b8d321413d1",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 6 now closes only on the release candidate cut, stays open with the holding members named until the lead rules each, and must show the cut refusing a disposable copy of the group with one planted defective member.",
+      "reason": "",
+      "when": "2026-11-18T07:18:42.963261+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f25830340d985a2c0ae4ba0e384b3b8d321413d1",
+      "commit_basis": "edit",
+      "note": "Section 6 now closes only on the release candidate cut, stays open with the holding members named until the lead rules each, and must show the cut refusing a disposable copy of the group with one planted defective member.",
+      "reason": "",
+      "when": "2026-11-18T07:18:42.963261+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
