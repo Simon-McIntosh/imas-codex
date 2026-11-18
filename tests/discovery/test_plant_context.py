@@ -242,3 +242,76 @@ def test_pilot_snapshot_refuses_broken_selector_instrument():
 
     with pytest.raises(RuntimeError, match="instrument"):
         snapshot_pilot_signals(EmptyGraph(), "synthetic", "DEMO-COIL")
+
+
+def test_curated_source_alias_allows_only_unambiguous_component_join(document):
+    document.source_system_codes = ["DEMO-TEST"]
+    document.system_binding_note = (
+        "Invented specification identifies both system spellings"
+    )
+    b = bundle([row(control_path="DEMO-TEST-SENS", plant_reference="invented-owner")])
+    b.documents = [document]
+    counts = b.link_signals(
+        [{"id": "synthetic:signal:present", "selector": "DEMO-COIL-CTRL:ZZ0042-TT"}]
+    )
+    assert counts == {"exact": 0, "derived": 1, "absent": 0}
+    assert b.rows[0].control_path == "DEMO-TEST-SENS"
+    assert b.links[0].match_kind == PlantContextMatch.derived
+
+
+def test_source_alias_without_evidence_is_refused(document):
+    document.source_system_codes = ["DEMO-TEST"]
+    b = bundle([row(control_path="DEMO-TEST-SENS")])
+    b.documents = [document]
+    with pytest.raises(ValueError, match="supporting evidence"):
+        b.link_signals([])
+
+
+def test_repeated_number_under_different_source_owners_stays_absent():
+    b = bundle(
+        [
+            row(plant_reference="invented-owner-a"),
+            row(id="synthetic:row:other", plant_reference="invented-owner-b"),
+        ]
+    )
+    assert (
+        b.link_signals(
+            [{"id": "synthetic:signal:present", "selector": "DEMO-COIL-CTRL:ZZ0042-TT"}]
+        )["absent"]
+        == 1
+    )
+    assert b.links == []
+
+
+def test_component_number_fallback_cannot_choose_between_archive_components():
+    b = bundle([row(control_path="DEMO-COIL-SENS", plant_reference="invented-owner")])
+    signals = [
+        {"id": "synthetic:signal:a", "selector": "DEMO-COIL-LEFT:ZZ0042-TT"},
+        {"id": "synthetic:signal:b", "selector": "DEMO-COIL-RGHT:ZZ0042-TT"},
+    ]
+    assert b.link_signals(signals)["absent"] == 2
+    assert b.links == []
+
+
+def test_nonconforming_pilot_name_is_counted_absent_without_inferred_component():
+    b = bundle([row()])
+    assert (
+        b.link_signals(
+            [
+                {
+                    "id": "synthetic:signal:unparsed",
+                    "selector": "DEMO-COIL-LONGCTRL:ZZ0042-TT",
+                }
+            ]
+        )["absent"]
+        == 1
+    )
+    assert b.links == []
+
+
+def test_literal_source_identity_does_not_need_a_convention_parse():
+    selector = "DEMO-COIL-LONGCTRL:ZZ0042-TT"
+    assert (
+        match_signal_row(selector, row(source_selectors=[selector]), "DEMO-COIL")
+        == PlantContextMatch.exact
+    )

@@ -1771,6 +1771,11 @@ classes:
       sha256: {required: true, description: Digest of the complete cached document bytes}
       text: {description: Text extracted with the project's existing document extraction}
       system_code: {required: true, description: Full control-system prefix delimiting the curated context}
+      source_system_codes:
+        multivalued: true
+        description: Source system spellings explicitly curated as the same plant system
+      system_binding_note:
+        description: Private source evidence supporting a binding between source and archive system spellings
       plant_structure:
         range: PlantStructure
         required: true
@@ -1796,6 +1801,7 @@ classes:
       component_category: {description: Source component category code}
       component_sequence: {description: "Source component sequence, before join normalization"}
       field_code: {description: "Source field code, if present"}
+      plant_reference: {description: Untouched plant-owner code from the source row}
       source_selectors:
         multivalued: true
         description: Unchanged explicit selectors found in the source cells

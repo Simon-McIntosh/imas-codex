@@ -23,7 +23,7 @@ from imas_codex.graph.models import (
 )
 
 _SELECTOR = re.compile(
-    r"(?<![A-Za-z0-9_:-])[A-Z0-9]{1,4}(?:-[A-Z0-9]{1,4}){0,4}:"
+    r"(?<![A-Za-z0-9_:-])[A-Z0-9]{1,24}(?:-[A-Z0-9]{1,24}){0,4}:"
     r"[A-Z0-9-]{1,24}(?![A-Za-z0-9_:-])"
 )
 
@@ -161,6 +161,7 @@ def extract_signal_rows(
                         component_category=category,
                         component_sequence=value(layout.sequence_column),
                         field_code=value(layout.field_column),
+                        plant_reference=value(layout.plant_column),
                         source_selectors=selectors,
                         plant_structure=(plant_bindings or {}).get(
                             value(layout.plant_column)
@@ -218,7 +219,12 @@ def category_nodes(
 
 
 def match_signal_row(
-    selector: str, row: PlantSignalRow, system: str
+    selector: str,
+    row: PlantSignalRow,
+    system: str,
+    *,
+    source_systems: tuple[str, ...] = (),
+    number_join: bool = False,
 ) -> PlantContextMatch:
     """Never join across systems or through a bare component number.
 
@@ -228,9 +234,11 @@ def match_signal_row(
     context, not the meaning of every field exposed by that component.
     """
     parsed = parse_variable_name(selector)
-    if not in_system(parsed.control_path, system):
+    if selector.count(":") != 1 or not in_system(selector.split(":")[0], system):
         return PlantContextMatch.absent
-    if row.control_path and not in_system(row.control_path, system):
+    if row.control_path and not any(
+        in_system(row.control_path, source) for source in (system, *source_systems)
+    ):
         return PlantContextMatch.absent
     if selector in (row.source_selectors or []):
         return PlantContextMatch.exact
@@ -239,6 +247,16 @@ def match_signal_row(
     )
     if key is not None and key == component_key(
         row.control_path, row.component_category, row.component_sequence
+    ):
+        return PlantContextMatch.derived
+    row_key = component_key(
+        row.control_path, row.component_category, row.component_sequence
+    )
+    if (
+        number_join
+        and key is not None
+        and row_key is not None
+        and key[1:] == row_key[1:]
     ):
         return PlantContextMatch.derived
     return PlantContextMatch.absent
@@ -269,7 +287,20 @@ class PlantContextBundle:
         """Index rows by complete component key and retain all supporting rows."""
         if self.links or self.signals:
             raise ValueError("Build associations once per bundle")
-        by_selector, by_component = defaultdict(list), defaultdict(list)
+        by_selector, by_component, by_number = (
+            defaultdict(list),
+            defaultdict(list),
+            defaultdict(list),
+        )
+        source_systems = set()
+        for document in self.documents:
+            if document.system_code != self.system:
+                raise ValueError("Document belongs to a different plant system")
+            aliases = set(document.source_system_codes or []) - {self.system}
+            if aliases and not document.system_binding_note:
+                raise ValueError("A source system alias needs supporting evidence")
+            source_systems.update(aliases)
+        source_identities, archive_identities = defaultdict(set), defaultdict(set)
         for row in self.rows:
             if row.facility_id != self.facility or row.context_scope != self.scope:
                 raise ValueError(
@@ -282,6 +313,23 @@ class PlantContextBundle:
             )
             if key is not None:
                 by_component[key].append(row)
+                if any(
+                    in_system(row.control_path, source)
+                    for source in (self.system, *source_systems)
+                ):
+                    by_number[key[1:]].append(row)
+                    source_identities[key[1:]].add(
+                        row.plant_reference or row.control_path
+                    )
+        for signal in signals:
+            parsed = parse_variable_name(signal["selector"])
+            key = component_key(
+                parsed.control_path,
+                parsed.component_category,
+                parsed.component_sequence,
+            )
+            if key is not None:
+                archive_identities[key[1:]].add(parsed.plant_component_code)
         counts = Counter({state.value: 0 for state in PlantContextMatch})
         seen = set()
         for signal in signals:
@@ -289,7 +337,9 @@ class PlantContextBundle:
                 raise ValueError("Catalogue snapshot repeated a signal identity")
             seen.add(signal["id"])
             parsed = parse_variable_name(signal["selector"])
-            if not in_system(parsed.control_path, self.system):
+            if signal["selector"].count(":") != 1 or not in_system(
+                signal["selector"].split(":")[0], self.system
+            ):
                 raise ValueError("Catalogue snapshot contains a different system")
             candidates = {
                 row.id: row
@@ -302,11 +352,40 @@ class PlantContextBundle:
                             parsed.component_sequence,
                         )
                     ]
+                    + by_number[
+                        component_key(
+                            parsed.control_path,
+                            parsed.component_category,
+                            parsed.component_sequence,
+                        )[1:]
+                        if parsed.component_category
+                        else None
+                    ]
                 )
             }
             links = []
             for row in sorted(candidates.values(), key=lambda r: r.id):
-                kind = match_signal_row(signal["selector"], row, self.system)
+                key = component_key(
+                    row.control_path, row.component_category, row.component_sequence
+                )
+                number_join = bool(
+                    key is not None
+                    and len(source_identities[key[1:]]) == 1
+                    and len(archive_identities[key[1:]]) == 1
+                )
+                kind = match_signal_row(
+                    signal["selector"],
+                    row,
+                    self.system,
+                    source_systems=tuple(source_systems),
+                    number_join=number_join,
+                )
+                if (
+                    kind == PlantContextMatch.derived
+                    and key is not None
+                    and len(source_identities[key[1:]]) > 1
+                ):
+                    kind = PlantContextMatch.absent
                 if kind == PlantContextMatch.absent:
                     continue
                 link = SignalContextLink(
@@ -320,7 +399,7 @@ class PlantContextBundle:
                     description=(
                         "Unchanged archive selector explicitly present in the source row"
                         if kind == PlantContextMatch.exact
-                        else "Full control path, category and numeric component sequence agree; field meaning remains unasserted"
+                        else "Source-scoped category and numeric component join; unique source and archive component when control paths differ; field meaning remains unasserted"
                     ),
                 )
                 links.append(link)

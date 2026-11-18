@@ -46,6 +46,7 @@ MATCH (n {context_scope: $scope})
 RETURN n.id AS id, n.facility_id AS facility,
        EXISTS { MATCH (n)-[:AT_FACILITY]->(:Facility {id: $facility}) } AS at_facility
 ORDER BY id
+LIMIT $limit
 """
 
 SCOPE_LINKS_QUERY = """
@@ -56,6 +57,7 @@ RETURN a.id AS source, type(r) AS type, b.id AS target,
        (b:Facility AND b.id = $facility OR
         EXISTS { MATCH (b)-[:AT_FACILITY]->(:Facility {id: $facility}) }) AS target_scoped
 ORDER BY source, type, target
+LIMIT $limit
 """
 
 
@@ -127,6 +129,8 @@ def context_statements(bundle: PlantContextBundle):
         MATCH (f:Facility {{id: $facility}})
         UNWIND $items AS item
         MERGE (n:{label} {{id: item.id}})
+        ON CREATE SET n.facility_id = $facility
+        WITH n, item WHERE n.facility_id = $facility
         SET n = item
         RETURN count(n) AS written
         """
@@ -222,10 +226,18 @@ def persist_plant_context(graph, bundle: PlantContextBundle):
     return context_snapshot(graph, bundle.facility, bundle.scope)
 
 
-def context_snapshot(graph, facility: str, scope: str):
+def context_snapshot(
+    graph, facility: str, scope: str, *, node_limit=10000, link_limit=50000
+):
     """Count owned content and hash identities, checking both ends of every edge."""
-    nodes = graph.query(SCOPE_NODES_QUERY, facility=facility, scope=scope)
-    links = graph.query(SCOPE_LINKS_QUERY, facility=facility, scope=scope)
+    nodes = graph.query(
+        SCOPE_NODES_QUERY, facility=facility, scope=scope, limit=node_limit + 1
+    )
+    links = graph.query(
+        SCOPE_LINKS_QUERY, facility=facility, scope=scope, limit=link_limit + 1
+    )
+    if len(nodes) > node_limit or len(links) > link_limit:
+        raise RuntimeError("Imported context exceeds its declared snapshot bound")
     if not nodes or not links:
         raise RuntimeError("Imported context snapshot is empty")
     if any(n["facility"] != facility or not n["at_facility"] for n in nodes):
