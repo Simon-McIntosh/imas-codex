@@ -12,8 +12,12 @@ import asyncio
 import hashlib
 import json
 import logging
+import math
 import os
+import random
 import time
+from collections import Counter
+from collections.abc import Mapping, Sequence
 from dataclasses import asdict, dataclass, field
 from datetime import UTC, datetime
 from typing import Any
@@ -2316,3 +2320,405 @@ def _render_cost_summary(console: Any, report: BenchmarkReport) -> None:
         f"Temperature: provider default{reviewer_str} | "
         f"Timestamp: {report.timestamp}{prov_str}[/dim]"
     )
+
+
+# ---------------------------------------------------------------------------
+# Record benchmark: a structure crossed with a model, scored blind
+# ---------------------------------------------------------------------------
+
+RECORD_BENCHMARK_SCHEMA = "imas-codex.standard-name-record-benchmark/1"
+RECORD_STRUCTURES = ("one-pass", "staged")
+RECORD_VERDICTS = ("right", "wrong", "blocked")
+RECORD_SPLITS = ("development", "held_out")
+
+
+class BenchmarkControlDidNotSeparate(RuntimeError):
+    """Raised when a control arm does not move the way the measure requires."""
+
+
+def wilson_interval(
+    successes: int,
+    total: int,
+    z: float = 1.9599639845400546,
+) -> tuple[float, float]:
+    """Return the Wilson score interval for ``successes`` of ``total``.
+
+    The report quotes this interval per arm. It is bounded in [0, 1] and keeps
+    a non-zero width at a perfect or zero share, so a small arm never reports
+    [1.0, 1.0] as certainty.
+    """
+    if total <= 0:
+        return (0.0, 0.0)
+    if not 0 <= successes <= total:
+        raise ValueError("successes must lie between zero and total")
+    share = successes / total
+    denominator = 1.0 + z * z / total
+    centre = (share + z * z / (2 * total)) / denominator
+    spread = (
+        z
+        * math.sqrt(share * (1.0 - share) / total + z * z / (2 * total) ** 2)
+        / denominator
+    )
+    return (max(0.0, centre - spread), min(1.0, centre + spread))
+
+
+def assign_development_split(
+    members: Sequence[str],
+    *,
+    seed: int,
+    strata: Mapping[str, str] | None = None,
+) -> dict[str, str]:
+    """Split members into ``development`` and ``held_out`` halves once.
+
+    Members are ranked by a salted digest inside their stratum and alternate
+    between the halves. The assignment depends only on the seed and the
+    members' names, so a rerun of the runner reproduces the split, and a
+    member's stratum (a defective or sound reference answer, say) is spread
+    evenly rather than landing on one side.
+    """
+    if isinstance(seed, bool) or not isinstance(seed, int):
+        raise TypeError("seed must be an integer")
+    names = list(dict.fromkeys(members))
+    if not names:
+        return {}
+    if len(names) != len(members):
+        raise ValueError("members must be unique")
+    labels = dict(strata or {})
+    unknown = [name for name in names if name not in labels]
+    for name in unknown:
+        labels[name] = "all"
+    by_stratum: dict[str, list[str]] = {}
+    for name in names:
+        by_stratum.setdefault(stratum := str(labels[name]), []).append(name)
+    split: dict[str, str] = {}
+    for stratum in sorted(by_stratum):
+        group = by_stratum[stratum]
+        ranked = sorted(
+            group,
+            key=lambda name: hashlib.sha256(f"{seed}:{name}".encode()).hexdigest(),
+        )
+        for index, name in enumerate(ranked):
+            split[name] = "development" if index % 2 == 0 else "held_out"
+    return split
+
+
+@dataclass(frozen=True)
+class RecordBenchmarkArm:
+    """One arm of the record benchmark: a structure crossed with a model."""
+
+    name: str
+    structure: str
+    model: str
+    withheld_enclosing_text: bool = False
+    incumbent_unchanged: bool = False
+
+    def __post_init__(self) -> None:
+        if not self.name.strip():
+            raise ValueError("an arm needs a name")
+        if self.incumbent_unchanged:
+            if self.structure:
+                raise ValueError(
+                    "the incumbent-unchanged control has no generation structure"
+                )
+            return
+        if self.structure not in RECORD_STRUCTURES:
+            raise ValueError(f"unknown structure {self.structure!r}")
+        if not self.model.strip():
+            raise ValueError(f"arm {self.name!r} needs a model")
+
+
+@dataclass(frozen=True)
+class RecordBenchmarkRow:
+    """One arm's scored record for one reference member."""
+
+    member: str
+    arm: str
+    verdict: str
+    blocker: str | None = None
+    changed_incumbent: bool | None = None
+    incumbent_right: bool | None = None
+    cost_usd: float = 0.0
+    seconds: float = 0.0
+    input_tokens: int = 0
+    output_tokens: int = 0
+
+    def __post_init__(self) -> None:
+        if not self.member.strip():
+            raise ValueError("a row needs a member")
+        if not self.arm.strip():
+            raise ValueError("a row needs an arm")
+        if self.verdict not in RECORD_VERDICTS:
+            raise ValueError(f"unknown verdict {self.verdict!r}")
+        if self.verdict == "blocked" and not (self.blocker or "").strip():
+            raise ValueError("a blocked row must name its blocker type")
+        if self.verdict != "blocked" and self.blocker:
+            raise ValueError("only a blocked row carries a blocker type")
+        for field_name in ("cost_usd", "seconds"):
+            value = getattr(self, field_name)
+            if (
+                not isinstance(value, int | float)
+                or not math.isfinite(value)
+                or value < 0
+            ):
+                raise ValueError(f"{field_name} must be finite and non-negative")
+        for field_name in ("input_tokens", "output_tokens"):
+            value = getattr(self, field_name)
+            if isinstance(value, bool) or not isinstance(value, int) or value < 0:
+                raise ValueError(f"{field_name} must be a non-negative integer")
+
+    @property
+    def right(self) -> bool:
+        return self.verdict == "right"
+
+
+@dataclass(frozen=True)
+class RecordArmReport:
+    """Per-arm figures the choice between structures and models is read from."""
+
+    arm: str
+    structure: str
+    model: str
+    total: int
+    right: int
+    wrong: int
+    blocked: int
+    share_right: float
+    interval: tuple[float, float]
+    blocked_by_type: dict[str, int]
+    changed_right_incumbent: int
+    right_incumbent_total: int
+    changed_right_incumbent_share: float
+    cost_usd: float
+    seconds: float
+    input_tokens: int
+    output_tokens: int
+    cost_per_name: float
+    seconds_per_name: float
+    tokens_read_per_name: float
+
+    def to_dict(self) -> dict[str, Any]:
+        result = asdict(self)
+        result["interval"] = list(self.interval)
+        return result
+
+
+def summarize_record_arm(
+    rows: Sequence[RecordBenchmarkRow],
+    arm: RecordBenchmarkArm,
+) -> RecordArmReport:
+    """Tally one arm's rows into the share right, blockers, drift and spend.
+
+    A row whose ``member`` is not unique is refused: the same member scored
+    twice would silently weight one name more than another.
+    """
+    arm_rows = [row for row in rows if row.arm == arm.name]
+    if not arm_rows:
+        raise ValueError(f"arm {arm.name!r} has no scored rows")
+    members = [row.member for row in arm_rows]
+    if len(set(members)) != len(members):
+        raise ValueError(f"arm {arm.name!r} scores a member more than once")
+    right = sum(row.right for row in arm_rows)
+    wrong = sum(row.verdict == "wrong" for row in arm_rows)
+    blocked_rows = [row for row in arm_rows if row.verdict == "blocked"]
+    right_incumbent = [row for row in arm_rows if row.incumbent_right]
+    changed_right = sum(bool(row.changed_incumbent) for row in right_incumbent)
+    total = len(arm_rows)
+    seconds = sum(row.seconds for row in arm_rows)
+    cost = sum(row.cost_usd for row in arm_rows)
+    tokens_in = sum(row.input_tokens for row in arm_rows)
+    return RecordArmReport(
+        arm=arm.name,
+        structure=arm.structure,
+        model=arm.model,
+        total=total,
+        right=right,
+        wrong=wrong,
+        blocked=len(blocked_rows),
+        share_right=right / total,
+        interval=wilson_interval(right, total),
+        blocked_by_type=dict(
+            sorted(
+                Counter(row.blocker or "unspecified" for row in blocked_rows).items()
+            )
+        ),
+        changed_right_incumbent=changed_right,
+        right_incumbent_total=len(right_incumbent),
+        changed_right_incumbent_share=(
+            changed_right / len(right_incumbent) if right_incumbent else 0.0
+        ),
+        cost_usd=cost,
+        seconds=seconds,
+        input_tokens=tokens_in,
+        output_tokens=sum(row.output_tokens for row in arm_rows),
+        cost_per_name=cost / total,
+        seconds_per_name=seconds / total,
+        tokens_read_per_name=tokens_in / total,
+    )
+
+
+def _paired_rights(
+    rows: Sequence[RecordBenchmarkRow],
+    arm_a: str,
+    arm_b: str,
+    members: Sequence[str] | None = None,
+) -> tuple[list[str], list[int], list[int]]:
+    wanted = set(members) if members is not None else None
+    by_arm: dict[str, dict[str, int]] = {arm_a: {}, arm_b: {}}
+    for row in rows:
+        if row.arm not in by_arm:
+            continue
+        if wanted is not None and row.member not in wanted:
+            continue
+        by_arm[row.arm][row.member] = int(row.right)
+    shared = sorted(set(by_arm[arm_a]) & set(by_arm[arm_b]))
+    if not shared:
+        raise ValueError("the two arms share no scored member")
+    return (
+        shared,
+        [by_arm[arm_a][member] for member in shared],
+        [by_arm[arm_b][member] for member in shared],
+    )
+
+
+def compare_record_arms(
+    rows: Sequence[RecordBenchmarkRow],
+    arm_a: str,
+    arm_b: str,
+    *,
+    members: Sequence[str] | None = None,
+    seed: int = 0,
+    draws: int = 4000,
+) -> dict[str, Any]:
+    """Compare two arms member by member, not on their totals.
+
+    The difference is ``share(right in b) - share(right in a)`` over the
+    members both arms scored. Its 95 % interval is a paired bootstrap over
+    those members, and ``called_win`` is true only when the interval excludes
+    zero: a difference smaller than the interval is a tie, not a win.
+    """
+    shared, rights_a, rights_b = _paired_rights(rows, arm_a, arm_b, members)
+    count = len(shared)
+    differences: list[float] = []
+    generator = random.Random(seed)
+    for _ in range(max(1, draws)):
+        index_sample = [generator.randrange(count) for _ in range(count)]
+        share_a = sum(rights_a[index] for index in index_sample) / count
+        share_b = sum(rights_b[index] for index in index_sample) / count
+        differences.append(share_b - share_a)
+    differences.sort()
+    low = differences[int(0.025 * (len(differences) - 1))]
+    high = differences[int(0.975 * (len(differences) - 1))]
+    difference = (sum(rights_b) - sum(rights_a)) / count
+    return {
+        "arms": [arm_a, arm_b],
+        "members": count,
+        "right_a": sum(rights_a),
+        "right_b": sum(rights_b),
+        "both_right": sum(a and b for a, b in zip(rights_a, rights_b, strict=True)),
+        "only_a_right": sum(
+            a and not b for a, b in zip(rights_a, rights_b, strict=True)
+        ),
+        "only_b_right": sum(
+            b and not a for a, b in zip(rights_a, rights_b, strict=True)
+        ),
+        "difference": difference,
+        "interval": [low, high],
+        "called_win": low > 0.0 or high < 0.0,
+    }
+
+
+def evaluate_controls(
+    reports: Sequence[RecordArmReport],
+    rows: Sequence[RecordBenchmarkRow],
+    *,
+    incumbent_arm: str | None = None,
+    withheld_arm: str | None = None,
+    withheld_compared_to: str | None = None,
+    dependent_members: Sequence[str] | None = None,
+    seed: int = 0,
+) -> dict[str, Any]:
+    """Score the two control arms against the arms they are meant to separate.
+
+    ``incumbent_arm`` is the arm that returns every incumbent unchanged; it
+    must score below at least one repairing arm on the shared members.
+    ``withheld_arm`` is the best arm rerun with the enclosing-structure text
+    left out; on the members whose right answer rests on that text it must
+    score below the arm it was rerun from. A benchmark in which either control
+    fails to separate is measuring nothing.
+    """
+    if not reports:
+        raise ValueError("no arm report was supplied")
+    by_name = {report.arm: report for report in reports}
+    repair_arms = [
+        report for report in reports if report.arm not in {incumbent_arm, withheld_arm}
+    ]
+    if not repair_arms:
+        raise ValueError("no repairing arm was supplied to compare a control against")
+
+    incumbent: dict[str, Any] = {"arm": incumbent_arm, "separated": False}
+    if incumbent_arm:
+        if incumbent_arm not in by_name:
+            raise ValueError(f"control arm {incumbent_arm!r} has no report")
+        comparisons = []
+        for report in repair_arms:
+            comparison = compare_record_arms(rows, incumbent_arm, report.arm, seed=seed)
+            comparisons.append({"arm": report.arm, **comparison})
+        incumbent = {
+            "arm": incumbent_arm,
+            "share_right": by_name[incumbent_arm].share_right,
+            "interval": list(by_name[incumbent_arm].interval),
+            "comparisons": comparisons,
+            "separated": any(
+                row["called_win"] and row["difference"] > 0 for row in comparisons
+            ),
+        }
+
+    withheld: dict[str, Any] = {"arm": withheld_arm, "separated": False}
+    if withheld_arm:
+        if withheld_arm not in by_name:
+            raise ValueError(f"control arm {withheld_arm!r} has no report")
+        if not withheld_compared_to:
+            raise ValueError("a withheld-text control needs the arm it was rerun from")
+        dependent = list(dependent_members or ())
+        if not dependent:
+            raise ValueError(
+                "a withheld-text control needs the members whose answer rests on "
+                "the withheld text"
+            )
+        comparison = compare_record_arms(
+            rows,
+            withheld_compared_to,
+            withheld_arm,
+            members=dependent,
+            seed=seed,
+        )
+        withheld = {
+            "arm": withheld_arm,
+            "compared_to": withheld_compared_to,
+            "dependent_members": len(dependent),
+            "share_right_full": comparison["right_a"] / comparison["members"],
+            "share_right_withheld": comparison["right_b"] / comparison["members"],
+            "comparison": comparison,
+            "separated": bool(
+                comparison["called_win"] and comparison["difference"] < 0
+            ),
+        }
+
+    return {
+        "incumbent": incumbent,
+        "withheld": withheld,
+        "measuring": bool(incumbent["separated"] and withheld["separated"]),
+    }
+
+
+def assert_controls_separate(controls: Mapping[str, Any]) -> None:
+    """Refuse a benchmark whose controls did not separate."""
+    if controls.get("incumbent", {}).get("separated") is not True:
+        raise BenchmarkControlDidNotSeparate(
+            "the incumbent-unchanged control did not score below a repairing arm"
+        )
+    if controls.get("withheld", {}).get("separated") is not True:
+        raise BenchmarkControlDidNotSeparate(
+            "the withheld-text control did not score below the full arm on the "
+            "members whose answer rests on that text"
+        )
