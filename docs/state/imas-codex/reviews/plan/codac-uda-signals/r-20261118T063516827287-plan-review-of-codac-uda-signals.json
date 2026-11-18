@@ -53,6 +53,16 @@
       "note": "The alias clause is removed from the rehearsal's done-when; the transition alias stays section 10's alone.",
       "reason": "",
       "when": "2026-11-18T19:56:48.570628+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f9b3b1e0c6ef64d79fca8c580a236ea86386f51b",
+      "commit_basis": "edit",
+      "finding": "evidence_paths-1",
+      "note": "The rehearsal now states that the repeatable rename and the kept-name list with its reasons are committed to the tracked tree, and the cutover sequence is in the landing record; only the scratch copies and scratch environment are removed.",
+      "reason": "",
+      "when": "2026-11-18T19:56:55.641665+00:00"
     }
   ],
   "responses": {
@@ -64,6 +74,15 @@
       "note": "The alias clause is removed from the rehearsal's done-when; the transition alias stays section 10's alone.",
       "reason": "",
       "when": "2026-11-18T19:56:48.570628+00:00"
+    },
+    "evidence_paths-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f9b3b1e0c6ef64d79fca8c580a236ea86386f51b",
+      "commit_basis": "edit",
+      "note": "The rehearsal now states that the repeatable rename and the kept-name list with its reasons are committed to the tracked tree, and the cutover sequence is in the landing record; only the scratch copies and scratch environment are removed.",
+      "reason": "",
+      "when": "2026-11-18T19:56:55.641665+00:00"
     },
     "wiring-1": {
       "action": "acted",
