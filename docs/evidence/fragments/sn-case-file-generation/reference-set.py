@@ -816,7 +816,6 @@ def member_entry(member: dict, verdict: dict) -> dict:
         "cohorts": member["cohorts"],
         "group": member["record"]["physics_domain"],
         "unit": member["record"]["unit"],
-        "source_paths": member["source_paths"],
         "right_names": verdict["right_names"],
         "definition_points": verdict["definition_points"],
         "verdict": verdict["verdict"],
@@ -932,15 +931,30 @@ def build(sealed: dict, members: list[dict]) -> dict:
 def save(data: dict, path=DATA) -> None:
     """Write the record.
 
-    The readable part stays at the top; the per-member records and the packets
-    are compressed, as the sibling evidence scripts do, so one data file carries
+    The readable counts, the rule and the source digests stay at the top; the
+    per-member rows, the packet texts and the long comparison rows are
+    compressed, as the sibling evidence scripts do, so one data file carries
     both inside the repository's size ceiling.
     """
-    payload = dict(data)
+    changes = dict(data["changes"])
+    change_rows = changes.pop("rows")
+    reclass = dict(data["reclassification"])
+    reclass_rows = reclass.pop("rows")
+    payload = dict(data) | {"changes": changes, "reclassification": reclass}
     members = payload.pop("members")
     packets = payload.pop("packets")
+    undecidable = payload.pop("undecidable")
+    unjudged = payload.pop("unjudged")
     payload["member_payload_zlib_base85"] = encode_payload(members)
     payload["packet_payload_zlib_base85"] = encode_payload(packets)
+    payload["row_payload_zlib_base85"] = encode_payload(
+        {
+            "changes": change_rows,
+            "reclass": reclass_rows,
+            "undecidable": undecidable,
+            "unjudged": unjudged,
+        }
+    )
     text = json.dumps(payload, ensure_ascii=False, separators=(",", ":")) + "\n"
     size = len(text.encode())
     if size > 300_000:
@@ -952,7 +966,14 @@ def load(path=DATA) -> dict:
     data = json.loads(Path(path).read_text())
     data["members"] = decode_payload(data.pop("member_payload_zlib_base85"))
     data["packets"] = decode_payload(data.pop("packet_payload_zlib_base85"))
+    rows = decode_payload(data.pop("row_payload_zlib_base85"))
+    data["changes"]["rows"] = rows["changes"]
+    data["reclassification"]["rows"] = rows["reclass"]
+    data["undecidable"] = rows["undecidable"]
+    data["unjudged"] = rows["unjudged"]
     return data
+
+
 def check_problems(data: dict) -> list[str]:
     """Every reason the stored reference set cannot be trusted as an answer key."""
     problems = []
