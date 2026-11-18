@@ -65,6 +65,7 @@ import hashlib
 import html
 import json
 import platform
+import re
 import subprocess
 import sys
 from datetime import UTC, datetime
@@ -79,6 +80,7 @@ from imas_codex.standard_names.families import detect_families
 FRAGMENTS = Path(__file__).resolve().parent
 OUT_JSON = FRAGMENTS / "data-structure-groups.json"
 OUT_HTML = FRAGMENTS / "data-structure-groups.html"
+OUT_LANDING = FRAGMENTS / "sagr-data-structure-groups.html"
 SECTION_TWO_JSON = FRAGMENTS / "domain-groups.json"
 
 #: The five parts ``transport`` divides into, each named for the quantities it
@@ -964,6 +966,10 @@ def instrument_checks(payload: dict[str, Any]) -> list[tuple[str, bool]]:
             "every statement this run hands the graph is a read",
             payload["read_only"]["passed"],
         ),
+        (
+            "the landed fragment publishes this run's partition",
+            landing_agrees(payload),
+        ),
     ]
     for control in payload["controls"]["disposable"]["arms"]:
         checks.append((control["description"], control["passed"]))
@@ -1342,6 +1348,205 @@ def render_page(payload: dict[str, Any]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# The landing fragment
+# ---------------------------------------------------------------------------
+
+#: What a name placed in each part holds, one line per part.
+PART_HOLDS = {
+    "transport_coefficients": (
+        "diffusivities, conductivities, convection velocities and damping rates"
+    ),
+    "profile_quantities": "profile quantities and their general-grid forms",
+    "distribution_quantities": ("distribution functions and their orbit-class moments"),
+    "summary_quantities": (
+        "local, volume-, line- and flux-surface-averaged or integrated forms"
+    ),
+    "source_quantities": "particle, energy, momentum and current source terms",
+}
+
+
+def render_landing(payload: dict[str, Any]) -> str:
+    """The landing fragment, every figure taken from this run's measurement."""
+    catalog = payload["catalog"]
+    transport = payload["transport"]
+    families = payload["families"]
+    node = "sagr-data-structure-groups"
+    listed = transport["listed"]
+    out = [
+        '<!doctype html><html lang="en"><head><meta charset="utf-8">',
+        '<meta name="docs-project" content="imas-codex">',
+        '<meta name="reckon-type" content="evidence-fragment">',
+        '<meta name="plan-slug" content="sn-audited-group-release">',
+        '<meta name="node-id" content="' + node + '">',
+        "<title>Transport divided along the data dictionary&rsquo;s "
+        "structures</title></head><body><main>",
+        '<h1 id="' + node + '-title">Transport divided along the data '
+        "dictionary&rsquo;s structures</h1>",
+        '<p id="' + node + '-summary">' + str(catalog["live"]) + " live names "
+        "were read in one pass, and each name&rsquo;s group was read from the "
+        "data structures of its sources: the structure is the path&rsquo;s "
+        "(IDS, first structural container), the "
+        "five quantity classes name their structures and every other structure "
+        "takes its IDS&rsquo;s domain. <strong>"
+        + str(catalog["settled"])
+        + " names settle in their stored group</strong> ("
+        + str(catalog["settled_with_structure"])
+        + " from their structures, "
+        + str(catalog["settled_without_structure"])
+        + " with no data structure to read), <strong>"
+        + str(catalog["moved"])
+        + " move</strong> to the group their sources&rsquo; structures name, "
+        "and <strong>"
+        + str(catalog["spanning"])
+        + " span</strong> more than one group; the three sum to the live names "
+        "read. <code>transport</code> is " + str(transport["live"]) + " live "
+        "names and divides into "
+        + str(len(transport["parts"]))
+        + " parts named for the quantities their structures hold, with "
+        + str(transport["placed"])
+        + " placed and "
+        + str(transport["listed_total"])
+        + " listed with a reason. The "
+        + str(families["families"])
+        + " DD families are recounted on one family "
+        "set: " + str(families["today_spanning"]) + " span stored domains, the "
+        "count section 2 records, and "
+        + str(families["rule_spanning"])
+        + " would span under the rule, "
+        + str(families["part_spanning_count"])
+        + " of them across two parts. No stored domain moved; the proposal is "
+        "put to the lead as a choice. The full evidence page is "
+        '<a href="/imas-codex/evidence/fragments/sn-audited-group-release/'
+        'data-structure-groups.html">data-structure-groups.html</a> and its '
+        "data file is <code>data-structure-groups.json</code>.</p>",
+        '<h2 id="' + node + '-partition-head">The partition the gate checks</h2>',
+        '<table id="' + node + '-partition-table"><thead><tr><th>Reading</th>'
+        "<th>Names</th></tr></thead><tbody>",
+        "<tr><td>settled: one reading, the stored group</td><td>"
+        + str(catalog["settled_with_structure"])
+        + "</td></tr>",
+        "<tr><td>settled: no data structure, left where it stands</td><td>"
+        + str(catalog["settled_without_structure"])
+        + "</td></tr>",
+        "<tr><td>moved: one reading, a different group</td><td>"
+        + str(catalog["moved"])
+        + "</td></tr>",
+        "<tr><td>spanning: more than one group</td><td>"
+        + str(catalog["spanning"])
+        + "</td></tr>",
+        "<tr><td><strong>live names read</strong></td><td><strong>"
+        + str(catalog["live"])
+        + "</strong></td></tr>",
+        "</tbody></table>",
+        '<h2 id="'
+        + node
+        + '-parts-head">transport&rsquo;s '
+        + str(len(transport["parts"]))
+        + " parts</h2>",
+        '<table id="' + node + '-parts-table"><thead><tr><th>Part</th>'
+        "<th>Names</th><th>Holds</th></tr></thead><tbody>",
+    ]
+    for part in transport["parts"]:
+        out.append(
+            "<tr><td><code>"
+            + part["part"]
+            + "</code></td><td>"
+            + str(part["count"])
+            + "</td><td>"
+            + PART_HOLDS[part["part"]]
+            + "</td></tr>"
+        )
+    out += [
+        "</tbody></table>",
+        '<p id="'
+        + node
+        + '-parts-note">The listed '
+        + str(transport["listed_total"])
+        + " are "
+        + str(len(listed["spans_parts"]))
+        + " names whose sources span two "
+        "parts, "
+        + str(len(listed["no_data_structure"]))
+        + " with no data structure to read, and "
+        + str(len(listed["moves_to_existing_group"]))
+        + " whose one reading is an existing group. The page states each "
+        "part&rsquo;s structures, its families spanning two parts, the proposed "
+        "names against the domain vocabulary, and the hand-read sample of moved "
+        "names, with which reading is right for each.</p>",
+        '<h2 id="' + node + '-controls-head">Controls and the gate</h2>',
+        '<p id="' + node + '-controls-note">A disposable graph plants three '
+        "names: one transported to a part, one outside transport left where it "
+        "was, one spanning and listed, and the same build functions read it. "
+        "The gate <code>--check</code> exits 0 at this revision with the three "
+        "counts summing to " + str(catalog["live"]) + ", and "
+        "<code>--check --plant-double-count</code> exits 1 on the planted name "
+        "counted in two parts. Every statement handed the graph is checked for "
+        "a write clause before it is sent, so the run cannot change a stored "
+        "domain.</p>",
+        "</main></body></html>",
+    ]
+    return "".join(out)
+
+
+#: The figures the landing fragment publishes, read back out of its text.
+LANDING_FIGURES = (
+    ("live", r"(\d+) live names were read in one pass"),
+    ("settled", r"<strong>(\d+) names settle in their stored group</strong>"),
+    ("settled_with_structure", r"\((\d+) from their structures"),
+    ("settled_without_structure", r"(\d+) with no data structure to read"),
+    ("moved", r"<strong>(\d+) move</strong>"),
+    ("spanning", r"<strong>(\d+) span</strong>"),
+    ("transport_live", r"<code>transport</code> is (\d+) live names"),
+    ("placed", r"with (\d+) placed and"),
+    ("listed_total", r"placed and (\d+) listed with a reason"),
+    ("families", r"The (\d+) DD families are recounted"),
+    ("today_spanning", r"set: (\d+) span stored domains"),
+    ("rule_spanning", r"and (\d+) would span under the rule"),
+)
+
+
+def published_figures(text: str) -> dict[str, int] | None:
+    """The partition the landing fragment states, or ``None`` if it states none."""
+    figures: dict[str, int] = {}
+    for key, pattern in LANDING_FIGURES:
+        match = re.search(pattern, text)
+        if match is None:
+            return None
+        figures[key] = int(match.group(1))
+    return figures
+
+
+def landing_partition(payload: dict[str, Any]) -> dict[str, int]:
+    """The same figures taken from the measurement, in the fragment's names."""
+    catalog = payload["catalog"]
+    transport = payload["transport"]
+    families = payload["families"]
+    return {
+        "live": catalog["live"],
+        "settled": catalog["settled"],
+        "settled_with_structure": catalog["settled_with_structure"],
+        "settled_without_structure": catalog["settled_without_structure"],
+        "moved": catalog["moved"],
+        "spanning": catalog["spanning"],
+        "transport_live": transport["live"],
+        "placed": transport["placed"],
+        "listed_total": transport["listed_total"],
+        "families": families["families"],
+        "today_spanning": families["today_spanning"],
+        "rule_spanning": families["rule_spanning"],
+    }
+
+
+def landing_agrees(payload: dict[str, Any]) -> bool:
+    """True when the landed fragment states this run's partition and no other."""
+    try:
+        text = OUT_LANDING.read_text(encoding="utf-8")
+    except OSError:
+        return False
+    return published_figures(text) == landing_partition(payload)
+
+
+# ---------------------------------------------------------------------------
 # Entry point
 # ---------------------------------------------------------------------------
 
@@ -1509,6 +1714,12 @@ def main(argv: list[str] | None = None) -> int:
         planted = payload["transport"]["parts"][0]["names"][0]
         payload["transport"]["parts"][1]["names"].append(planted)
 
+    if not args.check:
+        # The landing fragment is regenerated from this run's payload before the
+        # gate reads it, so a write can never publish one measurement and land
+        # another. In ``--check`` mode nothing is written and the arm compares
+        # the committed fragment against this run.
+        OUT_LANDING.write_text(render_landing(payload) + "\n", encoding="utf-8")
     checks = instrument_checks(payload)
     for description, ok in checks:
         print(f"{'PASS' if ok else 'FAIL'} {description}")
@@ -1540,7 +1751,7 @@ def main(argv: list[str] | None = None) -> int:
         encoding="utf-8",
     )
     OUT_HTML.write_text(render_page(payload) + "\n", encoding="utf-8")
-    print(f"wrote {OUT_JSON.name} and {OUT_HTML.name}")
+    print(f"wrote {OUT_JSON.name}, {OUT_HTML.name} and {OUT_LANDING.name}")
     return 0
 
 
