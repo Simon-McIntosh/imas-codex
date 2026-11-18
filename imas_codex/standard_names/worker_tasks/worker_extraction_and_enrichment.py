@@ -1262,6 +1262,49 @@ def _dd_standard_name_units_dimensionally_agree(
     )
 
 
+#: Operations a DD source states about how its value is formed. Each class is
+#: matched only on wording that states the operation outright, so a definition
+#: that merely uses the word in passing (``the average of the maximum and
+#: minimum extents``, which names a midpoint) does not claim it.
+_STATED_OPERATION_CLASSES: dict[str, _re.Pattern[str]] = {
+    "average": _re.compile(
+        r"\baveraged over\b[^.;]{0,60}"
+        r"|\bvolume[- ]averaged\b[^.;]{0,60}"
+        r"|\baverage position\b"
+        r"|\bposition_average\b"
+        r"|\baverage of the (?:measurements|values|signals|collectors|channels)\b",
+        _re.IGNORECASE,
+    ),
+    "ratio": _re.compile(r"\bratio of [^.;]{2,40} to [^.;]{2,40}", _re.IGNORECASE),
+}
+
+#: The underscore tokens each class is spelled with when a name carries it.
+_STATED_OPERATION_NAME_TOKENS: dict[str, frozenset[str]] = {
+    "average": frozenset({"average", "averaged", "mean"}),
+    "ratio": frozenset({"ratio"}),
+}
+
+
+def _stated_operations(text: str | None) -> dict[str, str]:
+    """Return the operations *text* states outright, with the wording that states them.
+
+    A source that states how its value is aggregated (``averaged over the sensor
+    volume``) or combined (``ratio of loop voltage to plasma angle``) describes a
+    different quantity from one that states a point value, so the source's own
+    text decides which name it may share. Only outright statements count: the
+    patterns require the operation to be predicated of the value, not merely
+    mentioned, because an arithmetic midpoint is also called an average.
+    """
+    stated: dict[str, str] = {}
+    if not text:
+        return stated
+    for operation, pattern in _STATED_OPERATION_CLASSES.items():
+        match = pattern.search(text)
+        if match:
+            stated[operation] = match.group(0)
+    return stated
+
+
 def _is_attachment_consistent(
     _worker_dependency,
     /,
@@ -1271,6 +1314,8 @@ def _is_attachment_consistent(
     *,
     dd_unit: str | None = None,
     sn_unit: str | None = None,
+    dd_text: str | None = None,
+    existing_texts: Sequence[str] = (),
 ) -> tuple[bool, str]:
     """Reject attachments where the DD path tense disagrees with the SN tense.
 
@@ -1285,6 +1330,15 @@ def _is_attachment_consistent(
     ``dd_unit`` / ``sn_unit`` enable the dimensionality rule. Both are optional
     because the lexical rules are unit-independent; a caller with no unit
     context gets exactly the pre-unit behaviour.
+
+    ``dd_text`` / ``existing_texts`` carry the sources' own stated descriptions
+    and documentation, which the spelling rules cannot read. A source that
+    states an operation (``averaged over the sensor volume``, ``the ratio of
+    loop voltage to plasma current``) describes a different quantity from one
+    that does not, so such a source may not share a name that neither spells
+    that operation nor has a companion source stating it. Callers with no text
+    in hand (the compose-time attachment path) get exactly the pre-text
+    behaviour.
     """
     change_path_tokens = ("instant_changes", "/change/", "_delta", "tendency_")
     sn_claims_derivative = _worker_dependency("_name_claims_time_change")(sn_name)
@@ -1393,6 +1447,26 @@ def _is_attachment_consistent(
             return (
                 False,
                 f"unit dimensionality mismatch: path '{source_id}' declares '{dd_unit}' but SN '{sn_name}' declares '{sn_unit}' — physically distinct quantities",
+            )
+    stated = _stated_operations(dd_text)
+    if stated:
+        name_tokens = set(sn_name.split("_"))
+        carried = {
+            operation
+            for operation in stated
+            if _STATED_OPERATION_NAME_TOKENS[operation] & name_tokens
+        }
+        companions: set[str] = set()
+        for text in existing_texts:
+            companions |= set(_stated_operations(text))
+        missing = set(stated) - carried - companions
+        if missing:
+            operation = sorted(missing)[0]
+            return (
+                False,
+                f"stated operation mismatch: path '{source_id}' states "
+                f"'{stated[operation]}' but SN '{sn_name}' and its other sources "
+                f"state no {operation}",
             )
     return (True, "")
 
