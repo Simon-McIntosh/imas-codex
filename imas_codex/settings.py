@@ -1394,6 +1394,40 @@ def get_sn_staging_dir() -> Path:
     return Path(cfg).expanduser()
 
 
+def get_sn_group_release_bar() -> Path | None:
+    """Override path for the group-release bar ruling, or None for the default.
+
+    Resolution order: ``IMAS_CODEX_SN_GROUP_RELEASE_BAR`` env var →
+    ``[tool.imas-codex.sn].group-release-bar`` config → ``None``. ``None`` is
+    not an unruled bar: the cut then reads the ruling committed beside the
+    package (``imas_codex/standard_names/release_bar.json``), so a checkout
+    reads the same bar on every host. These keys exist for a ruling being
+    tried before it lands; a document found at the resulting path that carries
+    no numeric ``max_defect_rate`` still refuses with ``release_bar_not_ruled``.
+    """
+    env = os.environ.get("IMAS_CODEX_SN_GROUP_RELEASE_BAR")
+    if env:
+        return Path(env).expanduser()
+    cfg = _get_section("sn").get("group-release-bar")
+    return Path(cfg).expanduser() if cfg else None
+
+
+def get_sn_group_audit_dir() -> Path:
+    """Directory holding one audit record per physics-domain group.
+
+    Resolution order: ``IMAS_CODEX_SN_GROUP_AUDIT_DIR`` env var →
+    ``[tool.imas-codex.sn].group-audit-dir`` config →
+    ``~/.cache/imas-codex/group-audit``. A group with no record there is
+    refused as never measured, so the default names a place to write rather
+    than a measurement to assume.
+    """
+    env = os.environ.get("IMAS_CODEX_SN_GROUP_AUDIT_DIR")
+    if env:
+        return Path(env).expanduser()
+    cfg = _get_section("sn").get("group-audit-dir", "~/.cache/imas-codex/group-audit")
+    return Path(cfg).expanduser()
+
+
 def get_sn_isnc_dir() -> Path | None:
     """Path to ISNC (imas-standard-names-catalog) git checkout.
 

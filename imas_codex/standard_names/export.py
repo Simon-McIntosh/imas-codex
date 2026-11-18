@@ -20,7 +20,7 @@ import logging
 import os
 import re
 import subprocess
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from functools import lru_cache
@@ -187,6 +187,11 @@ GATE_EXPORT_POPULATION = "export_population"
 GATE_IDENTITY_TOKEN_COLLISION = "identity_token_collision"
 GATE_CATALOG_STATUS = "catalog_status"
 GATE_MANIFEST_GENERABILITY = "manifest_generability"
+GATE_GROUP_BAR = "group_release_bar"
+#: The document the group cut reads its bar from when no other path is
+#: configured. It carries the lead's ruling as recorded on the plan, so the
+#: bar is reviewable in the repository rather than in a user's environment.
+RULED_GROUP_RELEASE_BAR = Path(__file__).with_name("release_bar.json")
 
 # Fields that must NOT appear in exported YAML
 _PROVENANCE_FIELDS = frozenset({"source_paths", "dd_paths"})
@@ -1069,6 +1074,9 @@ def _run_gate_b(
     *,
     graph_names: set[str] | None = None,
     final: bool = False,
+    domain: str | None = None,
+    ruling: GroupReleaseRuling | None = None,
+    family_paths: list[dict[str, Any]] | None = None,
 ) -> GateResult:
     """Gate B: Cross-field consistency checks.
 
@@ -1077,6 +1085,10 @@ def _run_gate_b(
     - All names parse via ISN grammar.
     - Link targets absent from the graph are defects (hard for final).
     - Graph-known targets absent from this publication are always advisory.
+    - A group's family that has a member in another group is a defect, unless
+      the ruling lists that family as an exception or names the two groups as
+      cut together. This is the cross-field census: a family is one quantity
+      stated across groups, so half of it in this cut is a defect of the cut.
     """
     issues: list[dict[str, Any]] = []
     advisories: list[dict[str, Any]] = []
@@ -1163,6 +1175,16 @@ def _run_gate_b(
                     issues.append(entry)
                 else:
                     advisories.append(entry)
+
+    if domain is not None and family_paths is not None:
+        family_issues = _group_family_issues(family_paths, domain, ruling)
+        if family_issues:
+            logger.warning(
+                "Gate B: %d family with a member outside group %r",
+                len(family_issues),
+                domain,
+            )
+        issues.extend(family_issues)
 
     if advisories:
         logger.warning(
@@ -1415,6 +1437,745 @@ def _run_exclusion_accounting_gate(
         passed=not issues,
         issues=issues,
     )
+
+
+# =============================================================================
+# The group release bar
+# =============================================================================
+
+#: The defect classes a group audit records, fixed before the group is read.
+#: A record carrying a class outside this list cannot be compared with the bar,
+#: so the group is refused as incompletely measured rather than read as clean.
+GROUP_AUDIT_DEFECT_CLASSES: tuple[str, ...] = (
+    "name_contradicts_source",
+    "name_omits_source",
+    "definition_contradicts_source",
+    "name_definition_disagree",
+    "unit_wrong",
+    "wrong_physics_domain",
+    "duplicate_of_live_name",
+)
+
+#: Eligibility reasons that leave a live group member out of the cut because
+#: the name or its documentation is not accepted. A score threshold is not one
+#: of them: score exclusions are the gate's ordinary filter and the group cut
+#: proceeds over the remainder.
+_GROUP_MEMBER_ACCEPTANCE_REASONS: frozenset[str] = frozenset(
+    {
+        "name_not_accepted",
+        "documentation_not_accepted",
+        "never_reviewed",
+        "resolution_unrecorded",
+        "name_review_quorum_shortfall",
+        "documentation_review_quorum_shortfall",
+        "invalid_validation_status",
+    }
+)
+
+
+@dataclass(frozen=True)
+class GroupReleaseRuling:
+    """The ruled release bar and the exceptions it grants.
+
+    ``max_defect_rate`` is the largest share of a group's live members an audit
+    may read as defective in any class. A class whose rate differs in
+    consequence carries its own bound in ``class_maxima``; a class left out is
+    governed by ``max_defect_rate``. ``defect_exceptions`` are member ids a
+    ruling lets stand even though the audit read them as defective,
+    ``sourceless_exceptions`` are member ids a ruling lets stand without a
+    producing source, ``family_exceptions`` are family ids allowed to span
+    groups, and ``groups_cut_together`` are group pairs released as one cut.
+    """
+
+    max_defect_rate: float
+    class_maxima: Mapping[str, float] = field(default_factory=dict)
+    defect_exceptions: frozenset[str] = frozenset()
+    sourceless_exceptions: frozenset[str] = frozenset()
+    family_exceptions: frozenset[str] = frozenset()
+    groups_cut_together: frozenset[frozenset[str]] = frozenset()
+
+    def cut_with(self, left: str, right: str) -> bool:
+        """Whether the ruling releases *left* and *right* as one cut."""
+        return frozenset({left, right}) in self.groups_cut_together
+
+
+def load_group_release_ruling(
+    path: str | Path,
+) -> tuple[GroupReleaseRuling | None, str]:
+    """Read the ruled release bar a group cut refuses against.
+
+    Returns the ruling and an empty problem string when the document reads, or
+    ``None`` and the reason when no bar is recorded. A missing file is the
+    ordinary "not ruled yet" case; a document that does not carry every field
+    is reported as a problem rather than read as a looser bar, because a bar
+    read loosely is a bar nobody ruled.
+
+    The document is JSON (YAML is accepted, since it is the same loader)::
+
+        {
+          "max_defect_rate": 0,
+          "class_maxima": {"name_omits_source": 0},
+          "defect_exceptions": ["<standard_name_id>"],
+          "sourceless_exceptions": ["<standard_name_id>"],
+          "family_exceptions": ["<parent_path>|<family_type>|<digest>"],
+          "groups_cut_together": [["equilibrium", "magnetohydrodynamics"]]
+        }
+
+    A member named in ``defect_exceptions`` may stand although the blind
+    adjudication read it as defective or could not decide it; that is the
+    ruling's one way past the audit, and it is recorded by name for that
+    reason.
+    """
+    ruling_path = Path(path)
+    if not ruling_path.is_file():
+        return None, f"no release bar ruling is recorded at {ruling_path}"
+    try:
+        payload = yaml.safe_load(ruling_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        return None, f"the release bar ruling at {ruling_path} could not be read: {exc}"
+    if not isinstance(payload, dict):
+        return None, f"the release bar ruling at {ruling_path} is not a mapping"
+
+    rate = payload.get("max_defect_rate")
+    if isinstance(rate, bool) or not isinstance(rate, (int, float)):
+        return None, (
+            f"the release bar ruling at {ruling_path} carries no numeric "
+            "max_defect_rate"
+        )
+    class_maxima = payload.get("class_maxima") or {}
+    if not isinstance(class_maxima, dict):
+        return None, (
+            f"the release bar ruling at {ruling_path} carries a class_maxima "
+            "that is not a mapping"
+        )
+    maxima: dict[str, float] = {}
+    for key, value in class_maxima.items():
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            return None, (
+                f"the release bar ruling at {ruling_path} gives class {key!r} a "
+                "maximum that is not numeric"
+            )
+        maxima[str(key)] = float(value)
+
+    def _names(key: str) -> frozenset[str]:
+        values = payload.get(key) or []
+        if not isinstance(values, list):
+            raise ValueError(
+                f"the release bar ruling at {ruling_path} carries a {key} that "
+                "is not a list"
+            )
+        return frozenset(str(value) for value in values)
+
+    try:
+        defect_exceptions = _names("defect_exceptions")
+        sourceless = _names("sourceless_exceptions")
+        families = _names("family_exceptions")
+    except ValueError as exc:
+        return None, str(exc)
+
+    pairs = payload.get("groups_cut_together") or []
+    if not isinstance(pairs, list) or any(
+        not isinstance(pair, list) or len(pair) != 2 for pair in pairs
+    ):
+        return None, (
+            f"the release bar ruling at {ruling_path} carries a "
+            "groups_cut_together that is not a list of pairs"
+        )
+    together = frozenset(frozenset(str(name) for name in pair) for pair in pairs)
+
+    return (
+        GroupReleaseRuling(
+            max_defect_rate=float(rate),
+            class_maxima=maxima,
+            defect_exceptions=defect_exceptions,
+            sourceless_exceptions=sourceless,
+            family_exceptions=families,
+            groups_cut_together=together,
+        ),
+        "",
+    )
+
+
+def audited_text_digest(
+    description: str | None,
+    documentation: str | None,
+    /,
+) -> str:
+    """Digest of a name's stored reviewable text, as an audit read it.
+
+    The text an audit read is the definition and the documentation that framed
+    it; a group audit records this digest per member, so a cut compares the
+    stored text with the text that was read rather than trusting a timestamp
+    that any idempotent writeback also moves.
+
+    The digest is the repository's own content identity for that pair, the
+    ``content_hashes.combined_sha256`` a refine claim records (see
+    ``graph_claim_release``), taken through the same hashing service rather
+    than restated here: one text therefore has one identity, and an audit's
+    digest can be compared with the claim ledger's for the same name instead
+    of being a second, incomparable spelling of it.
+    """
+    from imas_codex.standard_names.graph_store.graph_review_persistence import (
+        _authority_payload_hash,
+    )
+
+    return _authority_payload_hash(
+        {
+            "description": description or "",
+            "documentation": documentation or "",
+        }
+    )
+
+
+@dataclass(frozen=True)
+class GroupAuditRecord:
+    """One group's audit: every member read, with the text read and its verdict.
+
+    ``defects`` maps a member id to the classes the blind adjudication assigned
+    it, empty for a member it judged sound. ``undecided`` holds the members the
+    adjudication could not decide: the ruled bar counts those as defective
+    until the lead rules on them, so they are kept apart rather than folded
+    into ``defects``, which would attribute a class the adjudication did not
+    name. ``text_digests`` maps every read member to the digest of the stored
+    text the audit read, which is what makes a later change to a member's text
+    detectable.
+    """
+
+    group: str
+    read_at: datetime | None
+    defects: Mapping[str, frozenset[str]]
+    undecided: frozenset[str]
+    text_digests: Mapping[str, str]
+
+
+def load_group_audit_record(
+    directory: str | Path,
+    group: str,
+) -> tuple[GroupAuditRecord | None, str]:
+    """Read the audit record for *group* from *directory*.
+
+    Returns the record and an empty problem string, or ``None`` and the reason
+    the group has no readable measurement. The record is
+    ``<directory>/<group>.json``::
+
+        {
+          "group": "equilibrium",
+          "read_at": "2026-11-17T12:00:00+00:00",
+          "members": [
+            {"name": "<standard_name_id>", "text_sha256": "<digest>",
+             "verdict": "defective", "defects": ["name_omits_source"]}
+          ]
+        }
+
+    ``verdict`` is ``sound``, ``defective`` or ``undecided``. A defective
+    verdict names at least one class and a sound or undecided verdict names
+    none, because a class the adjudication did not name cannot be counted in
+    that class's rate.
+    """
+    record_path = Path(directory) / f"{group}.json"
+    if not record_path.is_file():
+        return None, f"no audit record for group {group!r} at {record_path}"
+    try:
+        payload = yaml.safe_load(record_path.read_text(encoding="utf-8"))
+    except (OSError, yaml.YAMLError) as exc:
+        return None, f"the audit record at {record_path} could not be read: {exc}"
+    if not isinstance(payload, dict):
+        return None, f"the audit record at {record_path} is not a mapping"
+    named = payload.get("group")
+    if named != group:
+        return None, (
+            f"the audit record at {record_path} names group {named!r}, not {group!r}"
+        )
+    rows = payload.get("members")
+    if not isinstance(rows, list):
+        return None, f"the audit record at {record_path} carries no members list"
+
+    defects: dict[str, frozenset[str]] = {}
+    undecided: set[str] = set()
+    digests: dict[str, str] = {}
+    for row in rows:
+        if not isinstance(row, dict) or not isinstance(row.get("name"), str):
+            return None, (
+                f"the audit record at {record_path} carries a member row with no name"
+            )
+        name = row["name"]
+        verdict = row.get("verdict")
+        if verdict not in {"sound", "defective", "undecided"}:
+            return None, (
+                f"the audit record at {record_path} gives member {name!r} the "
+                f"verdict {verdict!r}, which is not sound, defective or undecided"
+            )
+        classes = row.get("defects") or []
+        if isinstance(classes, str) or not isinstance(classes, list):
+            return None, (
+                f"the audit record at {record_path} gives member {name!r} a "
+                "defects value that is not a list"
+            )
+        classes = frozenset(str(value) for value in classes)
+        if verdict == "defective" and not classes:
+            return None, (
+                f"the audit record at {record_path} reads member {name!r} as "
+                "defective without naming a defect class"
+            )
+        if verdict != "defective" and classes:
+            return None, (
+                f"the audit record at {record_path} gives member {name!r} the "
+                f"verdict {verdict!r} and also defect classes, which only a "
+                "defective verdict may carry"
+            )
+        digest = row.get("text_sha256")
+        if not isinstance(digest, str) or not digest:
+            return None, (
+                f"the audit record at {record_path} gives member {name!r} no "
+                "text_sha256, so a later text change cannot be detected"
+            )
+        defects[name] = classes
+        if verdict == "undecided":
+            undecided.add(name)
+        digests[name] = digest
+
+    read_at: datetime | None = None
+    raw_read_at = payload.get("read_at")
+    if isinstance(raw_read_at, str):
+        try:
+            read_at = datetime.fromisoformat(raw_read_at.replace("Z", "+00:00"))
+        except ValueError:
+            read_at = None
+
+    return GroupAuditRecord(
+        group=group,
+        read_at=read_at,
+        defects=defects,
+        undecided=frozenset(undecided),
+        text_digests=digests,
+    ), ""
+
+
+@lru_cache(maxsize=1)
+def _conventions_registry() -> Any:
+    """The convention registry, loaded once for a whole gate run."""
+    from imas_standard_names.grammar.terms import load_conventions
+
+    return load_conventions()
+
+
+def _applied_conventions(name: str) -> Any:
+    """The registry conventions *name* selects, or ``None`` when unparseable."""
+    from imas_standard_names.grammar.parser import ParseError
+    from imas_standard_names.grammar.terms import select_conventions
+
+    try:
+        return select_conventions(name, registry=_conventions_registry())
+    except ParseError:
+        return None
+
+
+def _group_acceptance_issues(
+    group: str,
+    members: Mapping[str, str],
+    exclusions: Iterable[ExclusionRecord],
+) -> list[dict[str, Any]]:
+    """Refuse a live member the cut would silently leave behind."""
+    excluded_reason = {record.standard_name_id: record.reason for record in exclusions}
+    issues: list[dict[str, Any]] = []
+    for name in sorted(members):
+        stage = members[name]
+        if stage not in _SHIPPING_NAME_STAGES:
+            issues.append(
+                {
+                    "type": "group_member_not_accepted",
+                    "group": group,
+                    "name": name,
+                    "cause": "name_not_accepted",
+                    "detail": f"member is live in the group at name_stage={stage!r}",
+                }
+            )
+            continue
+        reason = excluded_reason.get(name)
+        if reason in _GROUP_MEMBER_ACCEPTANCE_REASONS:
+            issues.append(
+                {
+                    "type": "group_member_not_accepted",
+                    "group": group,
+                    "name": name,
+                    "cause": reason,
+                    "detail": (
+                        f"member is live in the group but the cut excludes it "
+                        f"for {reason}"
+                    ),
+                }
+            )
+    return issues
+
+
+def _group_sourceless_issues(
+    group: str,
+    members: Mapping[str, str],
+    sourceless_ids: Iterable[str],
+    ruling: GroupReleaseRuling | None,
+) -> list[dict[str, Any]]:
+    """Refuse a sourceless member the ruling does not list as an exception."""
+    excepted = ruling.sourceless_exceptions if ruling is not None else frozenset()
+    return [
+        {
+            "type": "group_member_sourceless",
+            "group": group,
+            "name": name,
+            "detail": (
+                "member has no producing source and the ruling records no "
+                "exception for it"
+            ),
+        }
+        for name in sorted(set(sourceless_ids) & set(members))
+        if name not in excepted
+    ]
+
+
+def _group_shared_wording_issues(
+    group: str,
+    members: Mapping[str, str],
+    candidates: Mapping[str, dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Refuse a member whose written definition is not its stored sentence."""
+    from imas_codex.standard_names.docs_gates import shared_part_findings
+
+    issues: list[dict[str, Any]] = []
+    for name in sorted(members):
+        candidate = candidates.get(name)
+        if candidate is None:
+            continue
+        findings = shared_part_findings(
+            name,
+            _applied_conventions(name),
+            candidate.get("documentation") or "",
+            candidate.get("description") or "",
+        )
+        for finding in findings:
+            issues.append(
+                {
+                    "type": "member_shared_wording_altered",
+                    "group": group,
+                    "name": name,
+                    "shared_part": finding.registry_entry,
+                    "detail": finding.detail,
+                }
+            )
+    return issues
+
+
+def _group_audit_issues(
+    group: str,
+    members: Mapping[str, str],
+    candidates: Mapping[str, dict[str, Any]],
+    ruling: GroupReleaseRuling | None,
+    audit_dir: str | Path | None,
+) -> list[dict[str, Any]]:
+    """Refuse a group whose audited defect rate cannot be read against the bar.
+
+    The rate is the share of the group's live members the blind adjudication
+    read as defective in any class, taken over every member and uncorrected;
+    a member it could not decide is counted defective and reported as its own
+    share, and a member the ruling names as a defect exception is not counted.
+    It is refused when it was never measured, when the record does not cover
+    every member, when the text read is not the text the cut would ship, and
+    when the rate or a class rate stands above the ruling. A class the ruling
+    gives no maximum of its own is governed by ``max_defect_rate``, so a zero
+    group bar is a zero bound in every class.
+    """
+    if audit_dir is not None:
+        record, problem = load_group_audit_record(audit_dir, group)
+    else:
+        record, problem = None, "no group audit directory is configured"
+    if record is None:
+        return [
+            {
+                "type": "group_audit_never_measured",
+                "group": group,
+                "detail": problem,
+            }
+        ]
+
+    issues: list[dict[str, Any]] = []
+    read = set(record.defects) | set(record.undecided)
+    missing = sorted(set(members) - read)
+    not_a_member = sorted(read - set(members))
+    unknown_classes = sorted(
+        {
+            defect_class
+            for classes in record.defects.values()
+            for defect_class in classes
+        }
+        - set(GROUP_AUDIT_DEFECT_CLASSES)
+    )
+    if missing or not_a_member or unknown_classes:
+        issues.append(
+            {
+                "type": "group_audit_incomplete",
+                "group": group,
+                "missing_members": missing,
+                "not_a_member": not_a_member,
+                "unknown_classes": unknown_classes,
+                "detail": (
+                    "the audit does not measure every member of the group in "
+                    "the fixed class list"
+                ),
+            }
+        )
+
+    current: dict[str, str] = {}
+    for name in sorted(read & set(members)):
+        candidate = candidates.get(name)
+        if candidate is not None:
+            current[name] = audited_text_digest(
+                candidate.get("description"), candidate.get("documentation")
+            )
+    stale = sorted(
+        name
+        for name in read & set(members)
+        if current.get(name) != record.text_digests.get(name)
+    )
+    if stale:
+        issues.append(
+            {
+                "type": "group_audit_stale",
+                "group": group,
+                "names": stale,
+                "detail": (
+                    "the recorded audit read text that is not the stored text "
+                    "the cut would ship"
+                ),
+            }
+        )
+
+    total = len(members)
+    if ruling is not None and total:
+        allowed = set(ruling.defect_exceptions)
+        undecided = [
+            name
+            for name in sorted(members)
+            if name in record.undecided and name not in allowed
+        ]
+        defective = [
+            name
+            for name in members
+            if (record.defects.get(name) or name in record.undecided)
+            and name not in allowed
+        ]
+        rate = len(defective) / total
+        if rate > ruling.max_defect_rate:
+            issues.append(
+                {
+                    "type": "group_defect_rate_above_bar",
+                    "group": group,
+                    "rate": round(rate, 6),
+                    "bar": ruling.max_defect_rate,
+                    "defective": len(defective),
+                    "undecided": len(undecided),
+                    "members": total,
+                    "names": defective[:20],
+                    "detail": (
+                        "the adjudicated share read as defective, with the "
+                        "members it could not decide counted defective"
+                        if undecided
+                        else "the adjudicated share read as defective"
+                    ),
+                }
+            )
+        for defect_class in GROUP_AUDIT_DEFECT_CLASSES:
+            maximum = ruling.class_maxima.get(defect_class, ruling.max_defect_rate)
+            in_class = sum(
+                1
+                for name in members
+                if defect_class in record.defects.get(name, ()) and name not in allowed
+            )
+            class_rate = in_class / total
+            if class_rate > maximum:
+                issues.append(
+                    {
+                        "type": "group_defect_class_rate_above_bar",
+                        "group": group,
+                        "defect_class": defect_class,
+                        "rate": round(class_rate, 6),
+                        "maximum": maximum,
+                        "defective": in_class,
+                        "members": total,
+                    }
+                )
+    elif total == 0:
+        issues.append(
+            {
+                "type": "group_audit_never_measured",
+                "group": group,
+                "detail": "the group has no live member to audit",
+            }
+        )
+    return issues
+
+
+def _run_group_bar_gate(
+    *,
+    group: str,
+    members: Mapping[str, str],
+    candidates: Mapping[str, dict[str, Any]],
+    exclusions: Iterable[ExclusionRecord],
+    sourceless_ids: Iterable[str],
+    ruling: GroupReleaseRuling | None,
+    bar_problem: str = "",
+    audit_dir: str | Path | None = None,
+) -> GateResult:
+    """Refuse a group-scoped cut that does not meet the ruled bar.
+
+    The causes: a member not accepted on name or documentation, a member with
+    no source and no ruled exception, a member whose shared wording is not the
+    rendering of its stored sentence, and a group defect rate that is above the
+    ruled bar, above a class maximum, never measured over every member, or
+    measured before the newest change to any member's stored text.
+    """
+    issues: list[dict[str, Any]] = []
+    if ruling is None:
+        issues.append(
+            {
+                "type": "release_bar_not_ruled",
+                "group": group,
+                "detail": (
+                    bar_problem
+                    or "no release bar is recorded, so the group has no bar to meet"
+                ),
+            }
+        )
+    issues.extend(_group_acceptance_issues(group, members, exclusions))
+    issues.extend(_group_sourceless_issues(group, members, sourceless_ids, ruling))
+    issues.extend(_group_shared_wording_issues(group, members, candidates))
+    issues.extend(_group_audit_issues(group, members, candidates, ruling, audit_dir))
+    return GateResult(
+        gate=GATE_GROUP_BAR,
+        passed=not issues,
+        issues=issues,
+        scope=f"group:{group}",
+    )
+
+
+def _fetch_group_live_members(domain: str) -> dict[str, str]:
+    """Live member ids of one physics-domain group, mapped to their name stage."""
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.domain_audit import LIVE_NAME_STAGES
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.name_stage IN $live
+              AND sn.physics_domain = $group
+            RETURN sn.id AS id, sn.name_stage AS name_stage
+            ORDER BY id
+            """,
+            live=sorted(LIVE_NAME_STAGES),
+            group=domain,
+        )
+    return {str(row["id"]): str(row.get("name_stage") or "") for row in rows or []}
+
+
+def _fetch_group_family_paths() -> list[dict[str, Any]]:
+    """Every live name's Data Dictionary source path, with its stored group.
+
+    A family is a set of Data Dictionary paths, so this is the row set family
+    detection needs: one row per live name's source-to-path hop. The group is
+    carried along so a family's members can be read back onto their groups.
+    """
+    from imas_codex.graph.client import GraphClient
+    from imas_codex.standard_names.domain_audit import LIVE_NAME_STAGES
+
+    with GraphClient() as gc:
+        rows = gc.query(
+            """
+            MATCH (sn:StandardName)
+            WHERE sn.name_stage IN $live
+            MATCH (src:StandardNameSource)-[:PRODUCED_NAME]->(sn)
+            MATCH (src)-[:FROM_DD_PATH]->(dd:IMASNode)
+            RETURN dd.id AS dd_path,
+                   dd.unit AS unit,
+                   sn.id AS sn_id,
+                   sn.physics_domain AS physics_domain
+            ORDER BY sn_id, dd_path
+            """,
+            live=sorted(LIVE_NAME_STAGES),
+        )
+    return list(rows or [])
+
+
+def _group_family_issues(
+    family_paths: Iterable[dict[str, Any]],
+    group: str,
+    ruling: GroupReleaseRuling | None,
+) -> list[dict[str, Any]]:
+    """Refuse a family of the group that has a member in another group.
+
+    ``detect_families`` owns what a family is; this supplies the population and
+    reads each family's live names back onto their stored groups. A family is
+    cleared when the ruling lists it as an exception or names the two groups as
+    cut together. The family id is the one the group measurement records, so a
+    ruling's exception list can name it directly.
+    """
+    from imas_codex.standard_names.families import (
+        detect_families,
+        family_identifier,
+    )
+
+    path_names: dict[str, set[str]] = {}
+    path_unit: dict[str, str] = {}
+    name_group: dict[str, str] = {}
+    for row in family_paths:
+        path = row.get("dd_path")
+        name = row.get("sn_id")
+        if not path or not name:
+            continue
+        path_names.setdefault(str(path), set()).add(str(name))
+        path_unit[str(path)] = str(row.get("unit") or "")
+        stored = row.get("physics_domain")
+        if stored:
+            name_group[str(name)] = str(stored)
+
+    items = [{"path": path, "unit": path_unit[path]} for path in sorted(path_names)]
+    issues: list[dict[str, Any]] = []
+    for family in detect_families(items):
+        member_paths = sorted(
+            member.dd_path for member in family.members if member.dd_path in path_names
+        )
+        by_group: dict[str, set[str]] = {}
+        for path in member_paths:
+            for name in path_names[path]:
+                stored = name_group.get(name)
+                if stored:
+                    by_group.setdefault(stored, set()).add(name)
+        if group not in by_group or len(by_group) < 2:
+            continue
+        others = sorted(set(by_group) - {group})
+        family_id = family_identifier(
+            family.parent_path, family.family_type, member_paths
+        )
+        cleared = ruling is not None and (
+            family_id in ruling.family_exceptions
+            or all(ruling.cut_with(group, other) for other in others)
+        )
+        if cleared:
+            continue
+        issues.append(
+            {
+                "type": "family_spans_groups",
+                "group": group,
+                "family": family_id,
+                "parent_path": family.parent_path,
+                "family_type": family.family_type,
+                "members_in_group": sorted(by_group[group]),
+                "other_groups": {other: sorted(by_group[other]) for other in others},
+                "detail": (
+                    "a family of the group has members in another group and the "
+                    "ruling neither lists the family as an exception nor names "
+                    "the groups as cut together"
+                ),
+            }
+        )
+    return issues
 
 
 def _catalog_entry_files(entry_dir: Path) -> list[Path]:
@@ -3056,6 +3817,21 @@ def run_export(
         [str(source["source_path"]) for source in manifest_sources or []],
         waived_paths,
     )
+    # The ruled bar every refusal in this cut reads. One document, read once,
+    # so the source-exception list and the group gate cannot disagree. The
+    # lead's ruling is committed beside the package, so a checkout reads the
+    # same bar on every host; the environment and pyproject keys override it
+    # when a ruling is being tried before it lands.
+    from imas_codex.settings import (
+        get_sn_group_audit_dir,
+        get_sn_group_release_bar,
+    )
+
+    bar_path = get_sn_group_release_bar() or RULED_GROUP_RELEASE_BAR
+    bar_ruling, bar_problem = load_group_release_ruling(bar_path)
+    ruled_source_exceptions = (
+        bar_ruling.sourceless_exceptions if bar_ruling is not None else frozenset()
+    )
 
     from imas_codex.graph.client import GraphClient
     from imas_codex.standard_names.graph_store.graph_supersession import (
@@ -3105,6 +3881,7 @@ def run_export(
         for row in sourceless
         if row["name_stage"] in _SHIPPING_NAME_STAGES
         and row["id"] not in _RELEASE_IDENTITY_HOLDS
+        and row["id"] not in ruled_source_exceptions
     ]
     report.dormant_sourceless_names = [
         {
@@ -3187,6 +3964,13 @@ def run_export(
         population,
         domain=domain,
         names_only=names_only,
+    )
+    # Keep the classified records beside the filtered list: the group bar reads
+    # a member's stored text whether or not a score threshold later drops it,
+    # so the cut can refuse a group it would otherwise silently narrow.
+    classified_candidates = {candidate["id"]: candidate for candidate in candidates}
+    group_members: dict[str, str] = (
+        _fetch_group_live_members(domain) if domain is not None else {}
     )
     population_ids = [candidate["id"] for candidate in population]
     # The accounting universe is what the caller handed in, not the shrunk
@@ -3282,13 +4066,35 @@ def run_export(
         report.record_exclusions(_gate_c_exclusion_records(gate_c))
 
         # Gate B: Cross-field consistency (on filtered candidates)
+        family_paths = _fetch_group_family_paths() if domain is not None else None
         gate_b = _run_gate_b(
             candidates,
             cocos_convention,
             graph_names=graph_names,
             final=final,
+            domain=domain,
+            ruling=bar_ruling,
+            family_paths=family_paths,
         )
         report.gate_results.append(gate_b)
+
+        # The group bar refuses a group-scoped cut rather than narrowing it: a
+        # member the cut cannot accept, a family half of which sits in another
+        # group, a written definition away from its stored sentence, or a
+        # defect rate the ruled bar does not allow holds the whole cut.
+        if domain is not None:
+            report.gate_results.append(
+                _run_group_bar_gate(
+                    group=domain,
+                    members=group_members,
+                    candidates=classified_candidates,
+                    exclusions=report.exclusion_records,
+                    sourceless_ids=[row["id"] for row in sourceless],
+                    ruling=bar_ruling,
+                    bar_problem=bar_problem,
+                    audit_dir=get_sn_group_audit_dir(),
+                )
+            )
 
         # For RC: exclude names that fail grammar parse rather than
         # blocking the entire export.  Final releases still hard-fail.
