@@ -25,7 +25,30 @@
   "plan_slug": "sn-case-file-generation",
   "plan_version": 6,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "f25830340d985a2c0ae4ba0e384b3b8d321413d1",
+      "commit_basis": "edit",
+      "finding": "wiring-1",
+      "note": "Section 6 now declares its wait on section 3, whose ruling of structure and model it uses.",
+      "reason": "",
+      "when": "2026-11-18T07:18:33.736816+00:00"
+    }
+  ],
+  "responses": {
+    "wiring-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "f25830340d985a2c0ae4ba0e384b3b8d321413d1",
+      "commit_basis": "edit",
+      "note": "Section 6 now declares its wait on section 3, whose ruling of structure and model it uses.",
+      "reason": "",
+      "when": "2026-11-18T07:18:33.736816+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/sn-case-file-generation/r-20261118T064726828674-plan-review-of-sn-case-file-generation.json",
   "review_run_id": "r-20261118T064726828674-plan-review-of-sn-case-file-generation",
   "reviewed_blob_sha": "e6cdc1113b46e3ad826ff55c95142edd5439d56c",
   "rubric": "content",
