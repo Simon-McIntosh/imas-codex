@@ -16,6 +16,13 @@
       "table_form": "pass \u2014 a six-row comparison of share-right with a 95 % interval is appropriately a bar chart rather than a table; the same numbers also appear as a table in the evidence fragment, which this chart is meant to summarise."
     }
   },
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-scfg-benchmark-c752333edbef",
+      "recorded_at": "2026-11-18T22:49:27.106710+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg",
