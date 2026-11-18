@@ -1,0 +1,58 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T20:17:05.905Z",
+  "dispatched_at": "2026-11-18T20:16:43Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:70",
+      "id": "done_when-1",
+      "reason": "without that reconciliation the section closes on counts that cannot show it did the work its Delivers paragraph claims.",
+      "text": "\u00a76's landing record is asked for \"the number of component descriptions, pattern descriptions and member descriptions written\" and \"the number of signals left awaiting context\", with no equality tying those figures to the pilot's assessed population (1,766 catalogued pilot signals, 190 derived links, 1,576 absent in the \u00a74 landing record); a run that described one pilot component and marked the rest awaiting context would satisfy every stated figure and the negative control, which covers only a failed group",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:70",
+      "id": "reasoning-1",
+      "reason": "with \u00a76 now declared implementable a dispatcher sends a node at a measure whose comparison input the plan does not place on any path that node can open.",
+      "text": "the section's sole quality measure is a hand read against the functional specification, whose text the plan places nowhere a reading against it can resolve; \u00a74's landing record says the importer preserved \"versioned private document references\" and its fragment says the binding evidence stays in the private context cache, while the one-off fetch that produced those files was recorded on 2026-11-17 as not repeatable by the pipeline",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "b8dc0bfad578976d05f86c93eec25697a58a5301",
+  "plan_fingerprint": "12663a43566158e91ec52a12fc3d4a76d7ee88e3aaf8da930d14a1df2dab72ff",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 65,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261118T200002811668-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "a2aab5706942a8486039dae229c3704bdbd05273",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited `docs/plans/icp-api-access.html` sections s3, s4 and s5 exist and are `done`, `docs/plans/codac-uda-signals.html` resolves for \u00a710's `#s12` link, and the plan's own section anchors s1\u2013s10 resolve, with extensionless hrefs read as `<path>.html`.",
+    "done_when": "a finding \u2014 \u00a76's done-when records counts of descriptions written but never reconciles them against the pilot population \u00a74 assessed, so a landing that described only part of the pilot satisfies every stated figure.",
+    "evidence_paths": "pass \u2014 every evidence reference resolves on a saved path: `docs/evidence/fragments/iter-signal-context-and-enrichment/` holds the pilot-context, benchmark, refinement and grouping fragments the comments cite, and `docs/figures/iter-signal-context-and-enrichment/pipeline.svg` exists.",
+    "naming": "pass \u2014 \u00a76 carries no plan label, stage name or ticket number into anything a worker would name, naming the locally served model with its grounded settings as the `local-model-confirmed-on-quality` decision records instead.",
+    "reasoning": "a finding \u2014 \u00a76 now requires a hand comparison \"against the functional specification\", but no section states where that document can be read: \u00a74 landed seven document *references*, and its evidence fragment records source identities, titles and row contents as private evidence under a private context cache the plan never names.",
+    "single_goal": "pass \u2014 \u00a76 names one deliverable (descriptions for the pilot's components, patterns and members, measured by hand) and hands the whole-catalogue projection to the `full-enrichment-cost-accepted` decision rather than owning it.",
+    "wiring": "pass \u2014 \u00a76's declared dependencies `iter-signal-context-and-enrichment#s4` and `#s5` are both `done` in the snapshot's `plan-section-declarations`, so its `implementable` status is consistent, and the other sections' declared dependencies resolve to sections that exist."
+  },
+  "section_digests": {
+    "_document": "ef6b59ee2a51cb80dc0dd9867527d9cdb661a5ff865be1a1f16f31a5ff549a37",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "9e51f8ba217e7d0bed83b1b1befdddbaeba215a0d94df9a98fe95e3d3b93eb42",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T20:29:26.153978+00:00",
+  "total": null
+}
