@@ -457,7 +457,18 @@ def render(record):
 
 
 def check(path=DATA, *, checkpoint=False):
-    print(json.dumps({"module": __file__, "cwd": str(Path.cwd().resolve())}))
+    print(
+        json.dumps(
+            {
+                "module": __file__,
+                "cwd": str(Path.cwd().resolve()),
+                "main_revision": revision(),
+            }
+        )
+    )
+    from imas_codex.standard_names import source_invariant
+
+    print(json.dumps({"source_reader_module": source_invariant.__file__}))
     record = load(path)
     module = audit()
     expected = {j["id"] for j in module.load()["judgments"] if j["verdict"] != "sound"}

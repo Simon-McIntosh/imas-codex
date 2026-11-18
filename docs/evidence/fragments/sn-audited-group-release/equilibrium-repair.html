@@ -3,18 +3,18 @@
 <link rel='stylesheet' href='/_shared/foundation.css'><main>
 <style>table{table-layout:fixed;width:100%}td,th{vertical-align:top;overflow-wrap:anywhere}pre{white-space:pre-wrap;overflow-wrap:anywhere}code{overflow-wrap:anywhere}</style>
 <h1>Equilibrium repair record</h1>
-<p><strong>in progress</strong>: Six accepted pilot members; USD 0.826609 total, USD 0.137768 per member; conservative 126-member projection USD 17.444540 including USD 0.085751 already-spent overhead, beside USD 30 ceiling.</p>
-<p>Recorded spend USD 2.146228 / USD 30.00. Initial live names without a source: 10. Pipeline acceptance is recorded here; correctness awaits a fresh blind adjudication.</p>
+<p><strong>complete</strong>: All 126 members accounted for: 17 repaired and accepted; 109 individually listed for the lead. Fresh blind adjudication remains separate.</p>
+<p>Recorded spend USD 2.420026 / USD 30.00. Initial live names without a source: 10. Pipeline acceptance is recorded here; correctness awaits a fresh blind adjudication.</p>
 <p>Scores describe the stored identity. A held member with no submitted command has no fresh review claimed. Refused counts mean two scored name-review refusals; deterministic vetoes and source questions are included among members left for the lead.</p>
 <p>Six accepted pilot members; USD 0.826609 total, USD 0.137768 per member; conservative 126-member projection USD 17.444540 including USD 0.085751 already-spent overhead, beside USD 30 ceiling.</p>
-<p>Member outcomes: {&#x27;lead&#x27;: 108, &#x27;accepted_repair&#x27;: 13, &#x27;pending&#x27;: 5}. Class and cause counts may overlap.</p>
+<p>Member outcomes: {&#x27;lead&#x27;: 109, &#x27;accepted_repair&#x27;: 17}. Class and cause counts may overlap.</p>
 <table><thead><tr><th>Defect class</th><th>Repaired</th><th>Refused</th><th>For the lead</th><th>Pending</th></tr></thead><tbody>
 <tr><td>name_contradicts_source</td><td>1</td><td>0</td><td>12</td><td>0</td></tr>
-<tr><td>name_omits_source</td><td>10</td><td>0</td><td>41</td><td>1</td></tr>
-<tr><td>definition_contradicts_source</td><td>5</td><td>0</td><td>44</td><td>3</td></tr>
-<tr><td>name_definition_disagree</td><td>3</td><td>0</td><td>8</td><td>3</td></tr>
+<tr><td>name_omits_source</td><td>11</td><td>0</td><td>41</td><td>0</td></tr>
+<tr><td>definition_contradicts_source</td><td>7</td><td>0</td><td>45</td><td>0</td></tr>
+<tr><td>name_definition_disagree</td><td>5</td><td>0</td><td>9</td><td>0</td></tr>
 <tr><td>unit_wrong</td><td>0</td><td>0</td><td>4</td><td>0</td></tr>
-<tr><td>wrong_physics_domain</td><td>0</td><td>0</td><td>2</td><td>1</td></tr>
+<tr><td>wrong_physics_domain</td><td>1</td><td>0</td><td>2</td><td>0</td></tr>
 <tr><td>duplicate_of_live_name</td><td>0</td><td>0</td><td>2</td><td>0</td></tr>
 </tbody></table>
 <table><thead><tr><th>Shared cause</th><th>Repaired</th><th>Refused</th><th>For the lead</th><th>Pending</th></tr></thead><tbody>
@@ -27,10 +27,10 @@
 <tr><td>pressure_pedestal_qualifier_lost</td><td>0</td><td>0</td><td>5</td><td>0</td></tr>
 <tr><td>absolute_extremum_substituted_for_signed_extremum</td><td>1</td><td>0</td><td>3</td><td>0</td></tr>
 <tr><td>averaging_qualifier_lost</td><td>1</td><td>0</td><td>3</td><td>0</td></tr>
-<tr><td>transformation_equation_replaced_by_base_quantity</td><td>2</td><td>0</td><td>0</td><td>2</td></tr>
-<tr><td>consumer_context_used_as_quantity_domain</td><td>0</td><td>0</td><td>2</td><td>1</td></tr>
+<tr><td>transformation_equation_replaced_by_base_quantity</td><td>3</td><td>0</td><td>1</td><td>0</td></tr>
+<tr><td>consumer_context_used_as_quantity_domain</td><td>1</td><td>0</td><td>2</td><td>0</td></tr>
 <tr><td>locus_template_overrides_source</td><td>0</td><td>0</td><td>3</td><td>0</td></tr>
-<tr><td>physical_scope_qualifier_replaced</td><td>0</td><td>0</td><td>2</td><td>1</td></tr>
+<tr><td>physical_scope_qualifier_replaced</td><td>1</td><td>0</td><td>2</td><td>0</td></tr>
 <tr><td>population_basis_qualifier_lost</td><td>1</td><td>0</td><td>2</td><td>0</td></tr>
 </tbody></table>
 <p>The two pending adjudications remain excluded. Full command receipts, source packets, and guard measurements are preserved in <code>/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225452416830-sagr-equilibrium-agent-repair</code>. Receipt basenames below resolve in that directory; --show decodes the full JSON record.</p>
@@ -145,7 +145,7 @@ Proposal reason: pf_plasma/element/geometry/oblique/length_alpha specifies &quot
 Proposed correction: Rename to alpha_length_of_plasma_filament</pre></td><td>accepted_repair; USD 0.213155<p></p></td></tr>
 <tr><td><code>maximum_magnetic_field</code> → <code>maximum_magnetic_field</code><p>Spatial maximum of a specified magnetic-field quantity, with the field reduction and evaluation domain determined by the specialized form.</p><p>Spatial maximum of a specified magnetic-field quantity, with the field reduction and evaluation domain determined by the specialized form.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;equilibrium&#x27;, &#x27;magnetic_field_systems&#x27;]. Name score: None; documentation score: 0.9532259287491559.</p></td><td>derived:maximum_magnetic_field<p>The derived source states “Maximum of the magnetic field magnitude on a toroidal magnetic flux surface”, but the name omits both magnitude and surface locus and its definition explicitly leaves both choices open.</p></td><td><pre>
 Proposed correction: Rename the structural parent to maximum_over_flux_surface_magnetic_field_magnitude, preserving its descriptive derived source maximum magnitude on a toroidal magnetic flux surface.
-Refusing gate: The signed rename eligibility gate refuses derived/structural identities; its descendants and producer lifecycle require a pipeline-supported structural repair.
+Refusing gate: The signed rename eligibility gate refuses derived/structural identities; its descendants and producer lifecycle require a pipeline-supported structural repair. The explicit destination is now occupied by the separately accepted equilibrium-source maximum; do not force the pair.
 Source words: Maximum of the magnetic field magnitude on a toroidal magnetic flux surface</pre></td><td>lead; USD 0.000000<p>Provide the sanctioned structural-parent rename/rederivation path for this source-stated surface maximum; do not leave its operator domain open.</p></td></tr>
 <tr><td><code>maximum_magnetic_field_magnitude</code> → <code>maximum_over_flux_surface_magnetic_field_magnitude</code><p>Maximum magnetic-field magnitude is the largest value of the total local magnetic-field magnitude over a specified spatial domain. The result is nonnegative and independent of field direction; the domain may be an equilibrium magnetic flux surface or a coil-conductor surface.</p><p>Maximum magnetic-field magnitude attained on a single magnetic flux surface in a specified plasma equilibrium.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 0.9391407973586147; documentation score: 0.9560125863680596.</p><details><summary>Stored documentation and source bindings</summary><pre>Maximum magnetic-field magnitude is the greatest strength of the total equilibrium magnetic field attained on one specified magnetic flux surface, rather than the greatest value of an individual field component.
 
@@ -408,7 +408,14 @@ This quantity is the [motional Stark polarization angle](name:motional_stark_pol
 
 Sign convention: Positive when the polarization axis turns from the first transverse reference axis toward the second; the absolute orientation and handedness of these reference axes must be specified for the viewing geometry.
 
-{}</pre></details></td><td>equilibrium/time_slice/constraints/mse_polarization_angle/measured<p>The source specifies “Set of MSE polarization angles”, but polarization_angle_at_constraint_position omits the motional-Stark-emission mechanism that distinguishes it from other polarization angles.</p></td><td><pre>edit polarization_angle_at_constraint_position (dry run)
+{
+  &quot;dd:equilibrium/time_slice/constraints/mse_polarization_angle/measured&quot;: [
+    &quot;motional_stark_polarization_angle_at_constraint_position&quot;
+  ],
+  &quot;dd:equilibrium/time_slice/constraints/mse_polarization_angle/reconstructed&quot;: [
+    &quot;motional_stark_polarization_angle_at_constraint_position&quot;
+  ]
+}</pre></details></td><td>equilibrium/time_slice/constraints/mse_polarization_angle/measured<p>The source specifies “Set of MSE polarization angles”, but polarization_angle_at_constraint_position omits the motional-Stark-emission mechanism that distinguishes it from other polarization angles.</p></td><td><pre>edit polarization_angle_at_constraint_position (dry run)
 Receipt: command-0000.json
 review scores: []; exit: 0; USD 0.000000
 
@@ -451,7 +458,7 @@ Proposed correction: Rename to radial_oblique_position_of_plasma_filament and re
 Refusing gate: Pydantic scalar.name vocabulary consistency: Token &#x27;radial_oblique&#x27; used as coordinate prefix is missing from coordinate_axes vocabulary. Canonical parser accepted this spelling; full validation quarantined it. See filament-lifecycle.json. Accepted predecessor and binding restored via signed closing-lineage rename.
 Source words: Major radius of the reference point (from which the alpha and beta angles are defined); Parallelogram description of the element.</pre></td><td>lead; USD 0.000161<p>Align the registered oblique geometry representation with coordinate-axis projection, or supply a registered spelling retaining the source reference point. Then resume this correction; do not drop the anchor or leave the rectangular gloss.</p></td></tr>
 <tr><td><code>radial_coordinate_of_strike_point</code> → <code>radial_coordinate_of_strike_point</code><p>Major-radius coordinate of a strike point, given by its nonnegative perpendicular distance from the toroidal symmetry axis.</p><p>Major-radius coordinate of a strike point, given by its nonnegative perpendicular distance from the toroidal symmetry axis.</p><p>Units: [&#x27;m&#x27;]; domains: [&#x27;divertor_physics&#x27;, &#x27;equilibrium&#x27;]. Name score: 1.0; documentation score: None.</p></td><td>summary/boundary/strike_point_inner_r/value<p>One source explicitly selects “R position of the inner strike point” and another the outer branch, but the name omits the branch selection.</p></td><td><pre>
-Proposed correction: Split the inner and outer summary strike-point coordinates to their corresponding inner/outer branch identities; retain the generic constraint array separately. Do not add an unstated primary-X-point selection.
+Proposed correction: Split the exact inner/outer summary sources as {&quot;dd:summary/boundary/strike_point_inner_r/value&quot;: &quot;radial_coordinate_of_inner_strike_point&quot;, &quot;dd:summary/boundary/strike_point_outer_r/value&quot;: &quot;radial_coordinate_of_outer_strike_point&quot;}; retain the generic constraint-array sources on radial_coordinate_of_strike_point. Define the branch intersection without an unstated primary-X-point selection.
 Refusing gate: Offline conformance_findings on both proposed branch identities requires the strike_point registry equation psi(R_s,Z_s)=psi_X with psi_X at the primary X-point. The source distinguishes inner and outer branches without specifying that primary selection; no already-known veto is submitted. See docs-preflight.json.
 Source words: R position of the inner strike point; generic constraints: Array of strike points, for each of them the RZ position is given.</pre></td><td>lead; USD 0.000000<p>Do these sources specifically mean legs of the primary X-point, or any described divertor separatrix branch? State which X-point is selected, or permit the generic strike-point registry to represent a specified branch without forcing primary. Then split the branches through the source pipeline.</p></td></tr>
 <tr><td><code>radial_coordinate_of_x_point</code> → <code>radial_coordinate_of_x_point</code><p>Major-radius coordinate of an X-point position in the right-handed cylindrical (R, φ, Z) frame, measured perpendicular to the toroidal symmetry axis.</p><p>Major-radius coordinate of an X-point position in the right-handed cylindrical (R, φ, Z) frame, measured perpendicular to the toroidal symmetry axis.</p><p>Units: [&#x27;m&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 0.96875; documentation score: None.</p></td><td>summary/boundary/x_point_main/r<p>One source fixes the “RZ position of the main X-point”, but the name omits main and thus loses that branch-selection qualifier.</p></td><td><pre>
@@ -496,7 +503,7 @@ Proposed correction: Separate tf/field_map/b_field_tor from the B0 reference-rad
 Refusing gate: Per-cause stop: two source-device consistency vetoes on the plasma_resistance split; not a claim that this member independently failed. See resume-pilot-bindings.log and cause_holds.
 Source words: Toroidal component of the vacuum magnetic field, given on various grid subsets</pre></td><td>lead; USD 0.000000<p>Keep the map free to vary over its grid and require an explicit R0 for the reference-field subset. Do not set every map point to R0 by definition. Resume this source subset after the shared-definition cause is reopened.</p></td></tr>
 <tr><td><code>vertical_coordinate_of_strike_point</code> → <code>vertical_coordinate_of_strike_point</code><p>Vertical coordinate of a selected divertor strike point, specifying its signed height relative to the coordinate origin in the right-handed cylindrical (R, φ, Z) frame.</p><p>Vertical coordinate of a selected divertor strike point, specifying its signed height relative to the coordinate origin in the right-handed cylindrical (R, φ, Z) frame.</p><p>Units: [&#x27;m&#x27;]; domains: [&#x27;divertor_physics&#x27;, &#x27;equilibrium&#x27;]. Name score: 0.925; documentation score: 0.9414741420411147.</p></td><td>summary/boundary/strike_point_inner_z/value<p>The source specifies “Z position of the inner strike point” and another binding specifies the outer strike point, but the generic name loses the inner-versus-outer physical branch even though the documentation acknowledges both.</p></td><td><pre>
-Proposed correction: Split the inner and outer summary strike-point coordinates to their corresponding inner/outer branch identities; retain the generic constraint array separately. Do not add an unstated primary-X-point selection.
+Proposed correction: Split the exact inner/outer summary sources as {&quot;dd:summary/boundary/strike_point_inner_z/value&quot;: &quot;vertical_coordinate_of_inner_strike_point&quot;, &quot;dd:summary/boundary/strike_point_outer_z/value&quot;: &quot;vertical_coordinate_of_outer_strike_point&quot;}; retain the generic constraint-array sources on vertical_coordinate_of_strike_point. Define the branch intersection without an unstated primary-X-point selection.
 Refusing gate: Offline conformance_findings on both proposed branch identities requires the strike_point registry equation psi(R_s,Z_s)=psi_X with psi_X at the primary X-point. The source distinguishes inner and outer branches without specifying that primary selection; no already-known veto is submitted. See docs-preflight.json.
 Source words: Z position of the inner strike point; generic constraints: Array of strike points, for each of them the RZ position is given.</pre></td><td>lead; USD 0.000000<p>Do these sources specifically mean legs of the primary X-point, or any described divertor separatrix branch? State which X-point is selected, or permit the generic strike-point registry to represent a specified branch without forcing primary. Then split the branches through the source pipeline.</p></td></tr>
 <tr><td><code>plasma_resistance</code> → <code>plasma_resistance</code><p>Effective plasma-column resistance defined by the volume-integrated electric-field power transfer divided by the square of the total plasma current.</p><p>Effective plasma-column resistance defined by the volume-integrated electric-field power transfer divided by the square of the total plasma current.</p><p>Units: [&#x27;ohm&#x27;]; domains: [&#x27;core_plasma_physics&#x27;, &#x27;equilibrium&#x27;]. Name score: 0.99375; documentation score: None.</p></td><td>summary/global_quantities/resistance/value<p>One source defines resistance as “the ratio of loop voltage to plasma current”, while the stored definition limits that identity to a special steady ohmic case and substitutes a different general power ratio.</p></td><td><pre>detach summary/global_quantities/resistance/value (dry run)
@@ -901,30 +908,30 @@ review scores: []; exit: 0; USD 0.000000
 run --name
 Receipt: command-0125.json
 review scores: []; exit: 0; USD 0.025161
-Proposed correction: radial_vacuum_magnetic_field_due_to_toroidal_field_coil; separate the exact TF field-map contribution from total-field sources.
+Proposed correction: After this cause is reopened, dry-run radial_sourced_vacuum_magnetic_field for the held TF-only candidate, preserving dd:tf/field_map/b_field_r/values; retain the eight general-field sources on radial_magnetic_field. This spelling passes full read-only validation; no third review was submitted under the per-cause stop.
 Refusing gate: Per-cause stop after two radial-vacuum definition-scope vetoes; this is not a claim that each other member was independently refused. 1 validation error for StandardName
 process
   Input should be &#x27;conduction&#x27;, &#x27;convection&#x27;, &#x27;diffusion&#x27;, &#x27;anomalous_transport&#x27;, &#x27;neoclassical_transport&#x27;, &#x27;classical_transport&#x27;, &#x27;turbulent_transport&#x27;, &#x27;collisional_transport&#x27;, &#x27;resistive_diffusion&#x27;, &#x27;ion_inertia&#x27;, &#x27;ohmic_heating&#x27;, &#x27;ohmic_current_drive&#x27;, &#x27;electron_cyclotron_heating&#x27;, &#x27;ion_cyclotron_heating&#x27;, &#x27;ion_cyclotron_current_drive&#x27;, &#x27;lower_hybrid_current_drive&#x27;, &#x27;neutral_beam_injection&#x27;, &#x27;electron_cyclotron_current_drive&#x27;, &#x27;radiation&#x27;, &#x27;impurity_radiation&#x27;, &#x27;recombination&#x27;, &#x27;ionization&#x27;, &#x27;charge_exchange&#x27;, &#x27;recycling&#x27;, &#x27;induction&#x27;, &#x27;bootstrap_current_drive&#x27;, &#x27;non_inductive_current_drive&#x27;, &#x27;wave_driven_current_drive&#x27;, &#x27;gas_injection&#x27;, &#x27;pellet_injection&#x27;, &#x27;fusion_reactions&#x27;, &#x27;beam_beam_fusion&#x27;, &#x27;beam_thermal_fusion&#x27;, &#x27;magnetohydrodynamic&#x27;, &#x27;external_coil&#x27;, &#x27;eddy_current&#x27;, &#x27;passive_structure&#x27;, &#x27;disruption&#x27;, &#x27;neoclassical_tearing_mode&#x27;, &#x27;ohmic_dissipation&#x27;, &#x27;resistive_flux_consumption&#x27;, &#x27;parallel_viscosity&#x27;, &#x27;perpendicular_viscosity&#x27;, &#x27;heat_viscosity&#x27;, &#x27;j_cross_b_force&#x27;, &#x27;poloidal_current&#x27;, &#x27;viscous_heat_flux&#x27;, &#x27;collisions&#x27;, &#x27;thermalization&#x27;, &#x27;fast_ion&#x27;, &#x27;e_cross_b_drift&#x27;, &#x27;thermal_fusion&#x27;, &#x27;halo_current&#x27;, &#x27;diamagnetic_drift&#x27;, &#x27;resistive_dissipation&#x27;, &#x27;dreicer&#x27;, &#x27;neutral_beam_shinethrough&#x27;, &#x27;surface_emission&#x27;, &#x27;coulomb_collisions_with_electrons&#x27;, &#x27;coulomb_collisions_with_ion&#x27;, &#x27;coulomb_collisions_with_ion_state&#x27;, &#x27;wave_particle_interaction&#x27;, &#x27;conductive_losses&#x27;, &#x27;fast_particle_source&#x27;, &#x27;distribution_function_driven&#x27;, &#x27;fusion_born_alpha&#x27;, &#x27;fusion&#x27;, &#x27;heating&#x27;, &#x27;injection&#x27;, &#x27;sputtering&#x27;, &#x27;viscosity&#x27;, &#x27;ohmic_induction&#x27;, &#x27;ion_neutral_friction&#x27;, &#x27;hot_tail&#x27;, &#x27;compton_scattering&#x27;, &#x27;perturbed_parallel_magnetic_field&#x27;, &#x27;perturbed_parallel_vector_potential&#x27;, &#x27;avalanche&#x27;, &#x27;first_orbit_loss&#x27;, &#x27;line_radiation&#x27;, &#x27;synchrotron_radiation&#x27;, &#x27;pumping&#x27;, &#x27;tritium_decay&#x27;, &#x27;fragmentation&#x27; or &#x27;sublimation&#x27; [type=enum, input_value=&#x27;toroidal_field_coil&#x27;, input_type=str]
     For further information visit https://errors.pydantic.dev/2.12/v/enum
 Source words: R component of the vacuum magnetic field
 Parked live state: Original radial_magnetic_field identity remains name-accepted with its eight general-field sources. The TF source is on the separately name-accepted radial_vacuum_magnetic_field candidate, docs_stage=reviewed after the second veto; no complete repair or restoration is claimed.
-Documentation refusal attempts: [{&quot;attempt&quot;: 1, &quot;score&quot;: 0.75, &quot;log&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225452416830-sagr-equilibrium-agent-repair/field-first.log&quot;, &quot;quote&quot;: &quot;The definition restricts the vacuum field to that generated by the toroidal field coil system. The name covers the vacuum field from all external sources.&quot;}, {&quot;attempt&quot;: 2, &quot;score&quot;: 0.9455508805697499, &quot;log&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225452416830-sagr-equilibrium-agent-repair/resume-radial-generation.log&quot;, &quot;quote&quot;: &quot;The definition restricts the quantity to a specified external source system vacuum field ... not the combined contribution of all external coil systems. The name covers the radial vacuum field generally.&quot;}]</pre></td><td>lead; USD 0.199999<p>Provide a registered representation for the TF-system vacuum contribution without calling it the combined external field, or rule whether the general vacuum component may retain a specified external-source set. Then reopen this cause and review each exact source partition.</p></td></tr>
+Documentation refusal attempts: [{&quot;attempt&quot;: 1, &quot;score&quot;: 0.75, &quot;log&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225452416830-sagr-equilibrium-agent-repair/field-first.log&quot;, &quot;quote&quot;: &quot;The definition restricts the vacuum field to that generated by the toroidal field coil system. The name covers the vacuum field from all external sources.&quot;}, {&quot;attempt&quot;: 2, &quot;score&quot;: 0.9455508805697499, &quot;log&quot;: &quot;/home/ITER/mcintos/.config/reckon/crew/runs/r-20261117T225452416830-sagr-equilibrium-agent-repair/resume-radial-generation.log&quot;, &quot;quote&quot;: &quot;The definition restricts the quantity to a specified external source system vacuum field ... not the combined contribution of all external coil systems. The name covers the radial vacuum field generally.&quot;}]</pre></td><td>lead; USD 0.199999<p>Reopen this cause after the two-refusal stop. Preserve the exact source contribution and dry-run the next proposed spelling before submission. For a TF-only field-map contribution, the already-registered sourced qualifier is a candidate; an unqualified vacuum field must not silently mean both a selected TF contribution and the combined external field.</p></td></tr>
 <tr><td><code>radial_non_axisymmetric_magnetic_field</code> → <code>radial_non_axisymmetric_magnetic_field</code><p>Radial non-axisymmetric magnetic field is the signed major-radius component of the external-coil vacuum field with its toroidal mean removed, evaluated at specified points including control-surface points.</p><p>Radial non-axisymmetric magnetic field is the signed major-radius component of the external-coil vacuum field with its toroidal mean removed, evaluated at specified points including control-surface points.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 0.975; documentation score: None.</p></td><td>b_field_non_axisymmetric/time_slice/control_surface/b_field_r<p>The source states “R component of the vacuum error magnetic field”, but radial_non_axisymmetric_magnetic_field omits the vacuum-source restriction that excludes plasma response.</p></td><td><pre>
 Proposed correction: radial_non_axisymmetric_vacuum_magnetic_field; preserve its component, toroidal-mean subtraction and evaluation sources.
 Refusing gate: Per-cause stop after two radial-vacuum definition-scope vetoes; this is not a claim that each other member was independently refused. The recorded attempts and scores are in cause_holds.vacuum_source_qualifier_lost.
-Source words: R component of the vacuum error magnetic field</pre></td><td>lead; USD 0.000000<p>Provide a registered representation for the TF-system vacuum contribution without calling it the combined external field, or rule whether the general vacuum component may retain a specified external-source set. Then reopen this cause and review each exact source partition.</p></td></tr>
+Source words: R component of the vacuum error magnetic field</pre></td><td>lead; USD 0.000000<p>Reopen this cause after the two-refusal stop. Preserve the exact source contribution and dry-run the next proposed spelling before submission. For a TF-only field-map contribution, the already-registered sourced qualifier is a candidate; an unqualified vacuum field must not silently mean both a selected TF contribution and the combined external field.</p></td></tr>
 <tr><td><code>toroidal_non_axisymmetric_magnetic_field</code> → <code>toroidal_non_axisymmetric_magnetic_field</code><p>Toroidal non-axisymmetric magnetic field is the signed toroidal projection of the external-coil vacuum error field, with its toroidal mean removed, evaluated locally including at control-surface points.</p><p>Toroidal non-axisymmetric magnetic field is the signed toroidal projection of the external-coil vacuum error field, with its toroidal mean removed, evaluated locally including at control-surface points.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 0.9875; documentation score: None.</p></td><td>b_field_non_axisymmetric/time_slice/control_surface/b_field_phi<p>The source specifies “Toroidal component of the vacuum error magnetic field”, but toroidal_non_axisymmetric_magnetic_field omits the vacuum-source restriction excluding plasma response.</p></td><td><pre>
 Proposed correction: toroidal_non_axisymmetric_vacuum_magnetic_field; preserve its component, toroidal-mean subtraction and evaluation sources.
 Refusing gate: Per-cause stop after two radial-vacuum definition-scope vetoes; this is not a claim that each other member was independently refused. The recorded attempts and scores are in cause_holds.vacuum_source_qualifier_lost.
-Source words: Toroidal component of the vacuum error magnetic field</pre></td><td>lead; USD 0.000000<p>Provide a registered representation for the TF-system vacuum contribution without calling it the combined external field, or rule whether the general vacuum component may retain a specified external-source set. Then reopen this cause and review each exact source partition.</p></td></tr>
+Source words: Toroidal component of the vacuum error magnetic field</pre></td><td>lead; USD 0.000000<p>Reopen this cause after the two-refusal stop. Preserve the exact source contribution and dry-run the next proposed spelling before submission. For a TF-only field-map contribution, the already-registered sourced qualifier is a candidate; an unqualified vacuum field must not silently mean both a selected TF contribution and the combined external field.</p></td></tr>
 <tr><td><code>vertical_magnetic_field</code> → <code>vertical_magnetic_field</code><p>Vertical magnetic field is the signed height-axis projection of local magnetic induction, parallel to the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.</p><p>Vertical magnetic field is the signed height-axis projection of local magnetic induction, parallel to the toroidal symmetry axis in the right-handed cylindrical (R, φ, Z) frame.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;equilibrium&#x27;, &#x27;magnetic_field_systems&#x27;, &#x27;magnetohydrodynamics&#x27;]. Name score: 0.9875; documentation score: None.</p></td><td>tf/field_map/b_field_z/values<p>A bound source says “Z component of the vacuum magnetic field, given on various grid subsets”, while the name omits vacuum and the documentation explicitly insists on total induction without any source-contribution restriction.</p></td><td><pre>
 Proposed correction: vertical_vacuum_magnetic_field_due_to_toroidal_field_coil; separate the exact TF field-map contribution from total-field sources.
 Refusing gate: Per-cause stop after two radial-vacuum definition-scope vetoes; this is not a claim that each other member was independently refused. The recorded attempts and scores are in cause_holds.vacuum_source_qualifier_lost.
-Source words: Z component of the vacuum magnetic field, given on various grid subsets</pre></td><td>lead; USD 0.000000<p>Provide a registered representation for the TF-system vacuum contribution without calling it the combined external field, or rule whether the general vacuum component may retain a specified external-source set. Then reopen this cause and review each exact source partition.</p></td></tr>
+Source words: Z component of the vacuum magnetic field, given on various grid subsets</pre></td><td>lead; USD 0.000000<p>Reopen this cause after the two-refusal stop. Preserve the exact source contribution and dry-run the next proposed spelling before submission. For a TF-only field-map contribution, the already-registered sourced qualifier is a candidate; an unqualified vacuum field must not silently mean both a selected TF contribution and the combined external field.</p></td></tr>
 <tr><td><code>vertical_non_axisymmetric_magnetic_field</code> → <code>vertical_non_axisymmetric_magnetic_field</code><p>Vertical magnetic field is the signed symmetry-axis component of the external-coil vacuum field after subtraction of its toroidal mean.</p><p>Vertical magnetic field is the signed symmetry-axis component of the external-coil vacuum field after subtraction of its toroidal mean.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 1.0; documentation score: 0.9418156027595128.</p></td><td>b_field_non_axisymmetric/time_slice/control_surface/b_field_z<p>The source explicitly supplies “Z component of the vacuum error magnetic field”, but the name drops vacuum and consequently admits plasma-response fields that its own definition excludes.</p></td><td><pre>
 Proposed correction: vertical_non_axisymmetric_vacuum_magnetic_field; preserve its component, toroidal-mean subtraction and evaluation sources.
 Refusing gate: Per-cause stop after two radial-vacuum definition-scope vetoes; this is not a claim that each other member was independently refused. The recorded attempts and scores are in cause_holds.vacuum_source_qualifier_lost.
-Source words: Z component of the vacuum error magnetic field</pre></td><td>lead; USD 0.000000<p>Provide a registered representation for the TF-system vacuum contribution without calling it the combined external field, or rule whether the general vacuum component may retain a specified external-source set. Then reopen this cause and review each exact source partition.</p></td></tr>
+Source words: Z component of the vacuum error magnetic field</pre></td><td>lead; USD 0.000000<p>Reopen this cause after the two-refusal stop. Preserve the exact source contribution and dry-run the next proposed spelling before submission. For a TF-only field-map contribution, the already-registered sourced qualifier is a candidate; an unqualified vacuum field must not silently mean both a selected TF contribution and the combined external field.</p></td></tr>
 <tr><td><code>flux_surface_averaged_poloidal_magnetic_field_at_pedestal_top</code> → <code>flux_surface_averaged_poloidal_magnetic_field_at_pedestal_top</code><p>Flux-surface-averaged poloidal magnetic-field magnitude at the pedestal top measures the equilibrium field strength excluding its toroidal component.</p><p>Flux-surface-averaged poloidal magnetic-field magnitude at the pedestal top measures the equilibrium field strength excluding its toroidal component.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 0.86309002730924; documentation score: 0.9429884481106081.</p></td><td>summary/pedestal_fits/linear/b_field_pol_pedestal_top_average/value<p>The source fixes the “pressure pedestal top”, but the name leaves out pressure and can therefore denote a different population&#x27;s pedestal top.</p></td><td><pre>
 Proposed correction: Proposed spelling flux_surface_averaged_poloidal_magnetic_field_at_pressure_pedestal_top. Preserve the source-stated distinction: The source fixes the “pressure pedestal top”, but the name leaves out pressure and can therefore denote a different population&#x27;s pedestal top.
 Refusing gate: Closed-vocabulary parser: locus token &#x27;pressure_pedestal_top&#x27; (relation &#x27;at&#x27;) is not a registered &#x27;position&#x27; segment token; cannot project onto the model without dropping the locus
@@ -1261,15 +1268,86 @@ Proposal reason: The raw normalized-beta sources explicitly define 100 * beta_to
 Proposed correction: The raw normalized-beta sources explicitly define 100 * beta_tor * a[m] * B0[T] / ip[MA]. Reading the accepted generated text at score 0.865 reproduced the recorded defect: its defining normalization display remained only 2 mu0 &lt;p&gt;/B^2 and never stated beta_N. State the complete source rescaling first, retain the canonical pressure ratio only as the underlying operand, and preserve the separate thermal-source binding.
 Source words: 100 * beta_tor * a[m] * B0 [T] / ip [MA]</pre></td><td>accepted_repair; USD 0.136951<p></p></td></tr>
 <tr><td><code>poloidal_angle_of_plasma_boundary_gap</code> → <code>poloidal_angle_of_plasma_boundary_gap</code><p>Poloidal angle of a plasma-boundary gap is the clockwise orientation of its directed gap vector from the outward major-radius direction in a poloidal cross-section.</p><p>Poloidal angle of a plasma-boundary gap is the clockwise orientation of its directed gap vector from the outward major-radius direction in a poloidal cross-section.</p><p>Units: [&#x27;rad&#x27;]; domains: [&#x27;equilibrium&#x27;, &#x27;plasma_control&#x27;]. Name score: 0.9375; documentation score: 0.9086741511167374.</p></td><td>equilibrium/time_slice/boundary/gap/angle<p>The source requires the direction of a “gap vector (pointing away from reference point)”, but the displayed equation uses magnetic-axis-to-position coordinates and therefore disagrees with the source and named gap angle.</p></td><td><pre>
-Source words: gap vector (pointing away from reference point)</pre></td><td>pending; USD 0.000000<p></p></td></tr>
-<tr><td><code>poloidal_beta</code> → <code>poloidal_beta</code><p>Poloidal beta compares volume-averaged total perpendicular plasma pressure with an effective poloidal magnetic-pressure scale set by net plasma current and plasma geometry.</p><p>Poloidal beta compares volume-averaged total perpendicular plasma pressure with an effective poloidal magnetic-pressure scale set by net plasma current and plasma geometry.</p><p>Units: [&#x27;1&#x27;]; domains: [&#x27;core_plasma_physics&#x27;, &#x27;equilibrium&#x27;]. Name score: 0.9875; documentation score: 0.8957977857849806.</p></td><td>core_profiles/global_quantities/beta_pol<p>The source requires “betap = 4 int(p dV) / [R_0 * mu_0 * Ip^2]”, but the stored reference-field square puts volume over major radius rather than the reverse and cannot reproduce that poloidal-beta normalization.</p></td><td><pre>
-Source words: betap = 4 int(p dV) / [R_0 * mu_0 * Ip^2]</pre></td><td>pending; USD 0.000000<p></p></td></tr>
+Proposed correction: Replace the magnetic-axis position angle by the clockwise angle of the directed gap vector: theta=atan2(Z_tail-Z_head,R_head-R_tail).
+Refusing gate: Offline conformance_findings requires the magnetic-axis position-angle equation theta=atan2(Z_axis-Z,R-R_axis); the source instead defines a gap vector directed away from its reference point. See docs-preflight.json. No known veto is submitted.
+Source words: gap vector (pointing away from reference point)</pre></td><td>lead; USD 0.000000<p>Permit a directed gap-vector angle convention in the registry, or show source words equating the gap reference point with the magnetic axis and selecting the same vector orientation. The current source specifies neither equivalence.</p></td></tr>
+<tr><td><code>poloidal_beta</code> → <code>poloidal_beta</code><p>Poloidal beta compares volume-averaged total perpendicular plasma pressure with an effective poloidal magnetic-pressure scale set by net plasma current and plasma geometry.</p><p>Poloidal beta compares volume-averaged total perpendicular plasma pressure with an effective poloidal magnetic-pressure scale set by net plasma current and plasma geometry.</p><p>Units: [&#x27;1&#x27;]; domains: [&#x27;core_plasma_physics&#x27;, &#x27;equilibrium&#x27;]. Name score: 0.9875; documentation score: 0.9307980298244717.</p><details><summary>Stored documentation and source bindings</summary><pre>Poloidal beta compares the volume-averaged plasma pressure with a current-based poloidal magnetic-pressure scale. Its source normalization is $\beta_p=4\int_V p\,dV/(R_0\mu_0 I_p^2)$. Here $p$ is the pressure supplied by the plasma or equilibrium representation, $V$ is the evaluation volume, $R_0$ is the reference major radius, $\mu_0$ is vacuum permeability and $I_p$ is the plasma current used by that normalization. The global value uses the plasma volume; a profile reports the source&#x27;s specified evaluation volume. Writing $\langle p\rangle_V=V^{-1}\int_Vp\,dV$, the same quantity obeys the canonical beta relation $$\beta = \frac{2\mu_0 \langle p\rangle}{B^2}$$ with $\beta=\beta_p$, $\langle p\rangle=\langle p\rangle_V$ and $B=B_{p,\mathrm{ref}}$. The effective reference field satisfies $B_{p,\mathrm{ref}}^2=\frac{\mu_0^2I_p^2R_0}{2V}$. The reference field is an effective current-based scale rather than a pointwise poloidal field. The normalization requires nonzero $I_p$ and positive evaluation volume. It is neither an average of local pressure-to-field ratios nor an unnormalized pressure. Unlike [toroidal beta](name:toroidal_beta), it uses the current-based poloidal scale.
+
+{
+  &quot;dd:core_profiles/global_quantities/beta_pol&quot;: [
+    &quot;poloidal_beta&quot;
+  ],
+  &quot;dd:equilibrium/time_slice/global_quantities/beta_pol&quot;: [
+    &quot;poloidal_beta&quot;
+  ],
+  &quot;dd:equilibrium/time_slice/profiles_1d/beta_pol&quot;: [
+    &quot;poloidal_beta&quot;
+  ],
+  &quot;dd:plasma_profiles/global_quantities/beta_pol&quot;: [
+    &quot;poloidal_beta&quot;
+  ],
+  &quot;dd:summary/global_quantities/beta_pol/value&quot;: [
+    &quot;poloidal_beta&quot;
+  ],
+  &quot;dd:summary/global_quantities/beta_pol_mhd/value&quot;: [
+    &quot;poloidal_beta&quot;
+  ]
+}</pre></details></td><td>core_profiles/global_quantities/beta_pol<p>The source requires “betap = 4 int(p dV) / [R_0 * mu_0 * Ip^2]”, but the stored reference-field square puts volume over major radius rather than the reverse and cannot reproduce that poloidal-beta normalization.</p></td><td><pre>edit poloidal_beta (dry run)
+Receipt: command-0176.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_beta
+Receipt: command-0177.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0178.json
+review scores: []; exit: 0; USD 0.026085
+Proposal reason: All beta_pol source formulas require betap=4 int(p dV)/(R_0 mu_0 Ip^2). The stored B_p,ref squared uses V/(2R0) and cannot reproduce that expression. Use the explicit source equation and its algebraically equivalent field square mu0^2 Ip^2 R0/(2V); do not substitute the inverse geometric factor.
+Proposed correction: All beta_pol source formulas require betap=4 int(p dV)/(R_0 mu_0 Ip^2). The stored B_p,ref squared uses V/(2R0) and cannot reproduce that expression. Use the explicit source equation and its algebraically equivalent field square mu0^2 Ip^2 R0/(2V); do not substitute the inverse geometric factor.
+Source words: betap = 4 int(p dV) / [R_0 * mu_0 * Ip^2]</pre></td><td>accepted_repair; USD 0.026085<p></p></td></tr>
 <tr><td><code>radial_magnetization_of_iron_core_segment</code> → <code>radial_magnetization_of_iron_core_segment</code><p>Signed radial component of an iron-core segment’s uniform material magnetization, expressed as equivalent magnetic flux density in the right-handed cylindrical (R, φ, Z) frame.</p><p>Signed radial component of an iron-core segment’s uniform material magnetization, expressed as equivalent magnetic flux density in the right-handed cylindrical (R, φ, Z) frame.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;magnetic_field_systems&#x27;]. Name score: 0.975; documentation score: None.</p></td><td>iron_core/segment/magnetization_r<p>The source relation “H = 1/mu0 * B - mur * M” identifies material magnetization rather than its flux-density equivalent, so the definition&#x27;s μ0M and tesla unit change the named quantity, whose material-circuit domain is magnetic field systems.</p></td><td><pre>
 Proposed correction: Define the radial component of material magnetization M in A/m, retaining H=B/mu0-mur*M; move its domain to magnetic_field_systems. Do not substitute mu0*M to accommodate tesla.
 Refusing gate: The raw material relation implies A/m while the DD leaf and stored unit say T; the signed edit API cannot replace unit bindings.
 Source words: H = 1/mu0 * B - mur * M</pre></td><td>lead; USD 0.000000<p>Does the DD intend M in A/m as H=B/mu0-mur*M requires, or a different tesla-valued quantity with an explicitly corrected equation? Correct the authoritative unit/scale, then use the pipeline unit and domain paths together.</p></td></tr>
-<tr><td><code>radial_outline_of_iron_core_segment</code> → <code>radial_outline_of_iron_core_segment</code><p>Non-negative major-radius coordinate of a point on an iron-core segment cross-sectional outline in the right-handed cylindrical (R, φ, Z) frame, where R is measured away from the symmetry axis.</p><p>Non-negative major-radius coordinate of a point on an iron-core segment cross-sectional outline in the right-handed cylindrical (R, φ, Z) frame, where R is measured away from the symmetry axis.</p><p>Units: [&#x27;m&#x27;]; domains: [&#x27;magnetic_field_systems&#x27;]. Name score: 0.95; documentation score: 0.98125.</p></td><td>iron_core/segment/geometry/outline/r<p>The source locates the iron-core outline under “Cross-sectional shape of the segment”, so this engineering magnetic-circuit geometry belongs to magnetic field systems rather than the equilibrium plasma domain.</p></td><td><pre>
-Source words: Cross-sectional shape of the segment</pre></td><td>pending; USD 0.000000<p></p></td></tr>
+<tr><td><code>radial_outline_of_iron_core_segment</code> → <code>radial_outline_of_iron_core_segment</code><p>Non-negative major-radius coordinate of a point on an iron-core segment cross-sectional outline in the right-handed cylindrical (R, φ, Z) frame, where R is measured away from the symmetry axis.</p><p>Non-negative major-radius coordinate of a point on an iron-core segment cross-sectional outline in the right-handed cylindrical (R, φ, Z) frame, where R is measured away from the symmetry axis.</p><p>Units: [&#x27;m&#x27;]; domains: [&#x27;magnetic_field_systems&#x27;]. Name score: 0.95; documentation score: 0.9589483278671258.</p><details><summary>Stored documentation and source bindings</summary><pre>Radial coordinate of each point on the outline of an iron-core segment is the distance of that point from the toroidal symmetry axis in the right-handed cylindrical $(R,\phi,Z)$ frame, where $R$ is major radius, $\phi$ is toroidal angle, and $Z$ is vertical height. It identifies the radial location of an outline point; increasing $R$ is directed away from the symmetry axis along $+\hat{R}$.
+
+For a point whose position perpendicular to the symmetry axis is described in the right-handed Cartesian $(\hat{x},\hat{y},\hat{z})$ basis with $\hat{z}=\hat{Z}$, the coordinate is
+
+$$
+R = \sqrt{x^2 + y^2}
+$$
+
+where $x$ and $y$ are the Cartesian coordinates in the plane normal to the symmetry axis.
+
+The quantity applies only to the outline locus of the iron-core segment. It is distinct from the [radial coordinate of an arc-of-circle center](name:radial_coordinate_of_arc_of_circle_center), which locates a geometry-defining center rather than the radial coordinate of each outline point.
+
+{
+  &quot;dd:iron_core/segment/geometry/outline/r&quot;: [
+    &quot;radial_outline_of_iron_core_segment&quot;
+  ]
+}</pre></details></td><td>iron_core/segment/geometry/outline/r<p>The source locates the iron-core outline under “Cross-sectional shape of the segment”, so this engineering magnetic-circuit geometry belongs to magnetic field systems rather than the equilibrium plasma domain.</p></td><td><pre>reclassify radial_outline_of_iron_core_segment (dry run)
+Receipt: command-0179.json
+review scores: []; exit: 0; USD 0.000000
+
+reclassify radial_outline_of_iron_core_segment
+Receipt: command-0180.json
+review scores: []; exit: 0; USD 0.000000
+
+edit radial_outline_of_iron_core_segment (dry run)
+Receipt: command-0181.json
+review scores: []; exit: 0; USD 0.000000
+
+edit radial_outline_of_iron_core_segment
+Receipt: command-0182.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0183.json
+review scores: []; exit: 0; USD 0.004311
+Proposal reason: iron_core/segment/geometry/outline/r is the cross-sectional outline of a segment of the transformer magnetic circuit. Its physics domain is magnetic_field_systems rather than equilibrium merely because an equilibrium calculation consumes it.
+Proposed correction: iron_core/segment/geometry/outline/r is the cross-sectional outline of a segment of the transformer magnetic circuit. Its physics domain is magnetic_field_systems rather than equilibrium merely because an equilibrium calculation consumes it.
+Source words: Cross-sectional shape of the segment</pre></td><td>accepted_repair; USD 0.004311<p></p></td></tr>
 <tr><td><code>vertical_magnetization_of_iron_core_segment</code> → <code>vertical_magnetization_of_iron_core_segment</code><p>Magnetization of an iron-core segment expressed as magnetic flux density, projected parallel to the toroidal symmetry axis and uniform within the segment.</p><p>Magnetization of an iron-core segment expressed as magnetic flux density, projected parallel to the toroidal symmetry axis and uniform within the segment.</p><p>Units: [&#x27;T&#x27;]; domains: [&#x27;magnetic_field_systems&#x27;]. Name score: 1.0; documentation score: None.</p></td><td>equilibrium/time_slice/constraints/iron_core_segment/magnetization_z/measured<p>The source relation “H = 1/mu0 * B - mur * M” gives magnetization the dimensions of magnetic-field strength, whereas the definition silently substitutes mu0 times magnetization, stores tesla and assigns an iron-core material property to equilibrium instead of its magnetic-system domain.</p></td><td><pre>
 Proposed correction: Define the vertical component of material magnetization M in A/m, retaining H=B/mu0-mur*M; move its domain to magnetic_field_systems. Do not substitute mu0*M to accommodate tesla.
 Refusing gate: The raw material relation implies A/m while the DD leaf and stored unit say T; the signed edit API cannot replace unit bindings.
@@ -1294,8 +1372,66 @@ Source words: species dependent effective potential energy</pre></td><td>lead; U
 Proposed correction: Proposed spelling inverse_curvature_of_plasma_filament. Preserve the source-stated distinction: The source specifies “Curvature radius of each arc of circle”, but the name omits curvature and the definition explicitly excludes it in favor of annular inner-or-outer boundary radii.
 Refusing gate: Closed-vocabulary parser: operator spelling for &#x27;inverse&#x27; requires &#x27;inverse_of_&lt;operand&gt;&#x27;; the glued form is not canonical
 Source words: Curvature radius of each arc of circle</pre></td><td>lead; USD 0.000000<p>Provide a registered representation of inverse_curvature_of_plasma_filament preserving this source distinction; do not drop it to get through the grammar. The source specifies “Curvature radius of each arc of circle”, but the name omits curvature and the definition explicitly excludes it in favor of annular inner-or-outer boundary radii.</p></td></tr>
-<tr><td><code>ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code> → <code>ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code><p>Geometric equilibrium coefficient representing a squared flux-coordinate gradient scaled by the inverse square of major radius.</p><p>Geometric equilibrium coefficient representing a squared flux-coordinate gradient scaled by the inverse square of major radius.</p><p>Units: [&#x27;m^-2&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: None; documentation score: 0.93125.</p></td><td>derived:ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius<p>The source fixes the “gradient of the toroidal flux coordinate”, but the definition explicitly substitutes a relevant generic flux label and thereby broadens the named toroidal-coordinate scope.</p></td><td><pre>
-Source words: gradient of the toroidal flux coordinate</pre></td><td>pending; USD 0.000000<p></p></td></tr>
+<tr><td><code>ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code> → <code>ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius</code><p>Geometric equilibrium coefficient representing a squared flux-coordinate gradient scaled by the inverse square of major radius.</p><p>Ratio of the squared gradient magnitude of the length-valued toroidal-flux coordinate to squared major radius, defining a local equilibrium metric coefficient.</p><p>Units: [&#x27;m^-2&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: None; documentation score: 0.904377711122328.</p><details><summary>Stored documentation and source bindings</summary><pre>Ratio of the squared toroidal-flux-coordinate gradient magnitude to squared major radius is a local equilibrium metric coefficient. It encodes flux-surface spacing with inverse-square major-radius weighting.
+
+The defining relation is:
+
+$$
+G = \frac{|\nabla \rho_{\mathrm{tor}}|^2}{R^2}
+$$
+
+where $G$ is this local coefficient, $\rho_{\mathrm{tor}}$ is the length-valued toroidal-flux coordinate, and $\nabla$ is the spatial gradient operator. In the right-handed cylindrical $(R, \phi, Z)$ frame, $R$ is the distance from the toroidal symmetry axis, $\phi$ is the toroidal angle, and $Z$ is the vertical height.
+
+The toroidal-flux coordinate retains its prescribed scale; no boundary normalization or substitution of an arbitrary flux label is implied. The denominator is squared major radius, not its inverse. The squared gradient magnitude distinguishes this coefficient from inverse squared major radius alone.
+
+This quantity is a pointwise ratio without spatial averaging. Its flux-surface-averaged counterpart averages the complete ratio over a closed magnetic flux surface; it is not the ratio of separately averaged numerator and denominator.
+
+$$a/b$$
+
+The magnitude is the Euclidean norm of a vector quantity, or the modulus of a complex one.
+
+The ratio is one quantity divided by another.
+
+The square is a scalar quantity multiplied by itself, or a vector&#x27;s dot product with itself.
+
+{
+  &quot;derived:ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius&quot;: [
+    &quot;ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius&quot;
+  ]
+}</pre></details></td><td>derived:ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius<p>The source fixes the “gradient of the toroidal flux coordinate”, but the definition explicitly substitutes a relevant generic flux label and thereby broadens the named toroidal-coordinate scope.</p></td><td><pre>edit ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius (dry run)
+Receipt: command-0184.json
+review scores: []; exit: 0; USD 0.000000
+
+edit ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+Receipt: command-0185.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0186.json
+review scores: []; exit: 0; USD 0.031415
+
+edit ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius (dry run)
+Receipt: command-0187.json
+review scores: []; exit: 0; USD 0.000000
+
+edit ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+Receipt: command-0188.json
+review scores: []; exit: 0; USD 0.000000
+
+edit ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius (dry run)
+Receipt: command-0189.json
+review scores: []; exit: 0; USD 0.000000
+
+edit ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius
+Receipt: command-0190.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0191.json
+review scores: []; exit: 0; USD 0.025654
+Proposal reason: Its descriptive derived source specifies the ratio of the squared gradient of the toroidal flux coordinate to squared major radius. The stored definition instead uses a relevant generic flux label xi. Fix both short and long definitions to the named toroidal coordinate, retaining its length-valued coordinate and m^-2 coefficient unit.
+Proposed correction: Its descriptive derived source specifies the ratio of the squared gradient of the toroidal flux coordinate to squared major radius. The stored definition instead uses a relevant generic flux label xi. Fix both short and long definitions to the named toroidal coordinate, retaining its length-valued coordinate and m^-2 coefficient unit.
+Source words: gradient of the toroidal flux coordinate</pre></td><td>accepted_repair; USD 0.057069<p></p></td></tr>
 <tr><td><code>electron_density</code> → <code>electron_density</code><p>Number density of electrons is the local number of plasma electrons per physical volume.</p><p>Number density of electrons is the local number of plasma electrons per physical volume.</p><p>Units: [&#x27;m^-3&#x27;]; domains: [&#x27;core_plasma_physics&#x27;, &#x27;edge_plasma_physics&#x27;, &#x27;electromagnetic_wave_diagnostics&#x27;, &#x27;equilibrium&#x27;, &#x27;particle_measurement_diagnostics&#x27;, &#x27;spectroscopy&#x27;]. Name score: 1.0; documentation score: 0.9400850338864264.</p></td><td>sawteeth/profiles_1d/n_e<p>One source explicitly requires “Electron density (thermal+non-thermal)”, but the name and generic definition leave the total thermal-plus-nonthermal population qualifier unstated.</p></td><td><pre>
 Proposed correction: Reconcile electron_density with total_electron_density without forcing a rename collision; preserve the exact original producer set.
 Refusing gate: Live-name collision: electron_density -&gt; total_electron_density; destination stage accepted.
@@ -1304,8 +1440,100 @@ Source words: Electron density (thermal+non-thermal)</pre></td><td>lead; USD 0.0
 Proposed correction: Reconcile plasma_pressure with total_plasma_pressure without forcing a rename collision; preserve the exact original producer set.
 Refusing gate: Live-name collision: plasma_pressure -&gt; total_plasma_pressure; destination stage accepted.
 Source words: Set of total pressure estimates</pre></td><td>lead; USD 0.000000<p>Rule how the pair plasma_pressure / total_plasma_pressure should be reconciled through the existing identity pipeline; the occupied destination is not overwritten.</p></td></tr>
-<tr><td><code>area_of_plasma_filament</code> → <code>area_of_plasma_filament</code><p>Cross-sectional area of a plasma current filament element</p><p>Cross-sectional area of a plasma current filament element</p><p>Units: [&#x27;m^2&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 0.9532530289883768; documentation score: None.</p></td><td>pf_plasma/element/area<p>The source states “Cross-sectional area of the element”, but area_of_plasma_filament omits the cross-sectional qualifier that distinguishes this from a filament surface area.</p></td><td><pre>
-Source words: Cross-sectional area of the element</pre></td><td>pending; USD 0.000000<p></p></td></tr>
+<tr><td><code>area_of_plasma_filament</code> → <code>poloidal_plane_cross_sectional_area_of_plasma_filament</code><p>Cross-sectional area of a plasma current filament element</p><p>Poloidal-plane cross-sectional area of a plasma current filament element.</p><p>Units: [&#x27;m^2&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 0.9453051966454541; documentation score: 0.956596458157212.</p><details><summary>Stored documentation and source bindings</summary><pre>Area of plasma filament. The defining relation is:
+
+$$
+A_\mathrm{p} = \int_{S_\mathrm{p}} dR\,dZ
+$$
+
+where $A_\mathrm{p}$ is the poloidal-plane cross-sectional area and $S_\mathrm{p}$ is the element&#x27;s cross-sectional domain. In the right-handed cylindrical $(R,\phi,Z)$ frame, $R$ is the major radius, $\phi$ is the toroidal angle held fixed for the section, and $Z$ is the vertical height.
+
+No universal cross-sectional shape is imposed. For a rectangle, the area equals the product of the width and height. The [alpha length](name:alpha_length_of_plasma_filament) and [second-inclination length](name:second_inclination_length_of_plasma_filament) specify sides of an oblique parallelogram; their product alone does not give its area without the included-angle factor.
+
+The filament current satisfies $I = \int_{S_\mathrm{p}} j_\phi\,dR\,dZ$, where $I$ is the current carried by the element and $j_\phi$ is the toroidal component of current density. For uniform toroidal current density, this reduces to $I = j_\phi A_\mathrm{p}$. Area alone does not determine mutual inductance, which also depends on the geometry and relative placement of the coupled current distributions.
+
+{
+  &quot;dd:pf_plasma/element/area&quot;: [
+    &quot;poloidal_plane_cross_sectional_area_of_plasma_filament&quot;
+  ]
+}</pre></details></td><td>pf_plasma/element/area<p>The source states “Cross-sectional area of the element”, but area_of_plasma_filament omits the cross-sectional qualifier that distinguishes this from a filament surface area.</p></td><td><pre>edit area_of_plasma_filament (dry run)
+Receipt: command-0192.json
+review scores: []; exit: 0; USD 0.000000
+
+edit area_of_plasma_filament → poloidal_plane_cross_sectional_area_of_plasma_filament
+Receipt: command-0193.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0194.json
+review scores: []; exit: 0; USD 0.000145
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament (dry run)
+Receipt: command-0195.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament
+Receipt: command-0196.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0197.json
+review scores: [(&#x27;docs&#x27;, 0.6875)]; exit: 0; USD 0.069710
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament (dry run)
+Receipt: command-0198.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament
+Receipt: command-0199.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0200.json
+review scores: []; exit: 0; USD 0.087426
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament (dry run)
+Receipt: command-0201.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament
+Receipt: command-0202.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament (dry run)
+Receipt: command-0203.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament
+Receipt: command-0204.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0205.json
+review scores: []; exit: 0; USD 0.024675
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament (dry run)
+Receipt: command-0206.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament
+Receipt: command-0207.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament (dry run)
+Receipt: command-0208.json
+review scores: []; exit: 0; USD 0.000000
+
+edit poloidal_plane_cross_sectional_area_of_plasma_filament
+Receipt: command-0209.json
+review scores: []; exit: 0; USD 0.000000
+
+run --name
+Receipt: command-0210.json
+review scores: []; exit: 0; USD 0.004377
+Proposal reason: The regenerated area definition scored 0.956122 accept but persistence refused one mismatched generated link. Preserve its accepted physical text, canonical A_p symbol and explicit poloidal short description. Use plain prose for unverified cross-reference targets and retain only the alpha and second-inclination sibling links whose accepted identities were verified in this repair record.
+Proposed correction: The regenerated area definition scored 0.956122 accept but persistence refused one mismatched generated link. Preserve its accepted physical text, canonical A_p symbol and explicit poloidal short description. Use plain prose for unverified cross-reference targets and retain only the alpha and second-inclination sibling links whose accepted identities were verified in this repair record.
+Source words: Cross-sectional area of the element</pre></td><td>accepted_repair; USD 0.186333<p></p></td></tr>
 <tr><td><code>factor_at_limiter</code> → <code>factor_at_limiter</code><p>Ratio of poloidal magnetic-field strength at the outboard-midplane separatrix to that at the limiter, expressing local magnetic flux expansion.</p><p>Ratio of poloidal magnetic-field strength at the outboard-midplane separatrix to that at the limiter, expressing local magnetic flux expansion.</p><p>Units: [&#x27;1&#x27;]; domains: [&#x27;equilibrium&#x27;]. Name score: 0.9370783522644659; documentation score: 0.9444754390715897.</p></td><td>summary/local/limiter/flux_expansion/value<p>The source identifies “Flux expansion”, but factor_at_limiter omits the physical quantity that the factor represents.</p></td><td><pre>
 Proposed correction: Proposed spelling flux_expansion_factor_at_limiter. Preserve the source-stated distinction: The source identifies “Flux expansion”, but factor_at_limiter omits the physical quantity that the factor represents.
 Refusing gate: Closed-vocabulary parser: Unknown physical_base token &#x27;flux_expansion_factor&#x27; — not in closed vocabulary (222 tokens). Report as a vocab_gap or choose from the registered tokens.
