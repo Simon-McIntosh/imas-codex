@@ -674,10 +674,16 @@ def _incumbent(props: Mapping[str, Any], paths: Sequence[str]) -> dict[str, Any]
 
 
 def _bound_paths(source_ids: Iterable[str]) -> list[str]:
-    """Return the DD paths the producer edges bind, without the ``dd:`` prefix."""
+    """Return the DD paths the producer edges bind, without the ``dd:`` prefix.
+
+    A producer id that is not a DD path — the ``derived:`` provenance node a
+    composed name is produced by — binds no DD text, so it is not a source of
+    the name's case file and its presence must not read as a missing source.
+    """
     return sorted(
-        path[3:] if path.startswith("dd:") else path
+        path[3:]
         for path in normalize_source_ids(source_ids)
+        if path.startswith("dd:") and len(path) > 3
     )
 
 

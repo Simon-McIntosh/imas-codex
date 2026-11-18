@@ -376,6 +376,23 @@ def test_source_target_states_what_it_has_not():
     assert record.completeness["verdict"] == "complete"
 
 
+def test_a_derived_producer_is_not_read_as_a_missing_dd_source():
+    """A composed name's provenance binds no DD text, so it is not a source."""
+    target = dict(_TARGET, source_ids=["derived:elongation_of_flux_surface"])
+    record = build_name_case_file(
+        "elongation_of_flux_surface",
+        gc=_FakeGraph(**{"CASE_FILE_TARGET": [target]}),
+        compose_context=_CONTEXT,
+        family_reader=_family,
+        neighbour_reader=_neighbours,
+        locus_reader=_locus,
+    )
+
+    assert record.content["sources"] == []
+    assert record.content["incumbent"]["bound_paths"] == []
+    assert record.completeness["missing"] == ["bound_source"]
+
+
 def test_unknown_withheld_channel_is_refused():
     with pytest.raises(ValueError, match="unknown withheld channel"):
         _build(withhold=["everything"])
