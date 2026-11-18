@@ -20,6 +20,14 @@
   ],
   "completed_at": "2026-11-18T23:06:35.448Z",
   "dispatched_at": "2026-11-18T23:06:21Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-18T23:24:53.804493+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261118T064807925154-scfg-benchmark"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
