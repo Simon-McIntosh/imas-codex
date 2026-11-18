@@ -345,6 +345,26 @@ def render(record):
     def e(x):
         return escape(str(x))
 
+    summary_tables = []
+    for label, groups in (
+        ("Defect class", counts(record)["classes"]),
+        ("Shared cause", counts(record)["causes"]),
+    ):
+        table = [
+            f"<table><thead><tr><th>{label}</th><th>Repaired</th>"
+            "<th>Refused</th><th>For the lead</th><th>Pending</th></tr></thead><tbody>"
+        ]
+        for group, values in groups.items():
+            table.append(
+                f"<tr><td>{e(group)}</td>"
+                + "".join(
+                    f"<td>{values[key]}</td>"
+                    for key in ("repaired", "refused", "left_for_lead", "pending")
+                )
+                + "</tr>"
+            )
+        table.append("</tbody></table>")
+        summary_tables.extend(table)
     content = [
         "<!doctype html><html lang='en'><meta charset='utf-8'>",
         "<meta name='reckon-type' content='evidence'><title>Equilibrium repair record</title>",
@@ -362,7 +382,9 @@ def render(record):
         "has no fresh review claimed. Refused counts mean two scored name-review refusals; "
         "deterministic vetoes and source questions are included among members left for the lead.</p>",
         f"<p>{e(record.get('pilot', {}).get('result', 'Pilot not completed.'))}</p>",
-        f"<pre>{e(json.dumps(counts(record), indent=2))}</pre>",
+        f"<p>Member outcomes: {e(counts(record)['outcomes'])}. "
+        "Class and cause counts may overlap.</p>",
+        *summary_tables,
         "<p>The two pending adjudications remain excluded. Full command receipts, source packets, "
         f"and guard measurements are preserved in <code>{e(RUN)}</code>. "
         "Receipt basenames below resolve in that directory; --show decodes the full JSON record.</p>",
@@ -403,6 +425,16 @@ def render(record):
                 f"<pre>{e(after.get('documentation'))}\n\n"
                 f"{e(json.dumps(r.get('source_bindings', {}), indent=2))}</pre></details>"
             )
+        if r["outcome"] == "accepted_repair":
+            for name, related in r.get("related_identities", {}).items():
+                if name != after.get("id"):
+                    detail += (
+                        f"<p>Related accepted identity: <code>{e(name)}</code>. "
+                        f"{e(related['description'])} Name/docs scores: "
+                        f"{e(related['reviewer_score_name'])} / "
+                        f"{e(related['reviewer_score_docs'])}. "
+                        f"Sources: {e(related['sources'])}.</p>"
+                    )
         content.append(
             f"<tr><td><code>{e(r['id'])}</code> → <code>{e(after.get('id'))}</code>"
             f"<p>{e((r.get('before') or {}).get('description'))}</p><p>{e(after.get('description'))}</p>"
