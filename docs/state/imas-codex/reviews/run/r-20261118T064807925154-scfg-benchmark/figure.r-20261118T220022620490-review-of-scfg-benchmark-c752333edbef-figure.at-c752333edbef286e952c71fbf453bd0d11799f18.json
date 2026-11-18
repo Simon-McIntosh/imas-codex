@@ -1,0 +1,77 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "attachments_judged": [
+    "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261118T220022620490-review-of-scfg-benchmark-c752333edbef-figure/image-0.png"
+  ],
+  "completed_at": "2026-11-18T22:25:40.319Z",
+  "dispatched_at": "2026-11-18T22:02:05Z",
+  "figures": {
+    "docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg": {
+      "contrast": "defect \u2014 no text is rendered anywhere, so there is no rendered text whose contrast can be judged; the bar fills (#4b7bec blue, #e07a5f orange) and the #222 whiskers read clearly against white.",
+      "data_ink": "pass \u2014 the plot area carries only the six bars and their interval whiskers on white; no gradients, patterned fills or drop shadows.",
+      "decoration": "defect \u2014 six full-height vertical gridlines at stroke #eee, one per 20 % tick, plus a full-canvas white background rect. The gridlines are non-data ink the house plot style removes; they do not distract from the bars, but they are decoration.",
+      "label_collision": "defect \u2014 no label renders at all, so neither clipping nor overlap can be assessed; labels are absent rather than colliding, and the absence is the legibility defect above.",
+      "legibility": "defect \u2014 the rendered PNG carries no text at all. The title band (y < 45 px) and the arm-label column (x < 300 px) hold zero non-white pixels, and the only dark pixels in the 1399x473 image are the six interval whiskers (x 366-1032, y 66-416). The six bars render, but no arm name, no share/interval figure, no axis percent ticks, so a reader cannot say which bar is which arm or what the length means.",
+      "table_form": "pass \u2014 a six-row comparison of share-right with a 95 % interval is appropriately a bar chart rather than a table; the same numbers also appear as a table in the evidence fragment, which this chart is meant to summarise."
+    }
+  },
+  "findings": [
+    {
+      "file": "docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg",
+      "line": null,
+      "severity": "blocking",
+      "summary": "the rendered PNG carries no text: no title, no arm names, no share/interval labels and no axis tick labels. Pixel analysis of the attached image is unambiguous \u2014 the title band (y < 45) and the arm label column (x < 300) contain zero non-white pixels, and the only dark marks are the interval whiskers \u2014 so the six bars are unattributable and their values unreadable. This is the reader-facing artifact the review judges, and it does not let a reader read the figure."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": 1276,
+      "severity": "non-blocking",
+      "summary": "the SVG root declares only font-family=\"system-ui, sans-serif\" and font-size=\"13\"; the rasterizer that produced the attached PNG resolved no glyphs for it (while this host's fontconfig falls the list back to DejaVu Sans). The script does emit every missing label (title at :1278, arm names at :1292, share/interval at :1309, tick labels at :1318), so the anomaly is a text-rendering dependency: the figure's legibility depends on the renderer's font discovery rather than on the document. Naming an installed family, or re-rendering with a font-capable rasterizer, would settle whether the artifact or the export path is at fault."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": 1286,
+      "severity": "non-blocking",
+      "summary": "colour is the only marker separating the control arms (orange #e07a5f: incumbent and withheld/one-pass/frontier) from the model arms (blue #4b7bec), and nothing identifies that mapping: the script draws no legend, the evidence fragment says nothing about colour, and the figure has no caption. Even once text renders, a reader cannot learn what the orange bars are from the figure."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": 1315,
+      "severity": "non-blocking",
+      "summary": "vertical gridlines are the only decoration in the plot area; the house plot style leaves gridlines out and despines the axes, and the tick labels they every 20 % sit under are themselves missing from the rendered PNG. Removing them costs no data."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": 45,
+      "severity": "non-blocking",
+      "summary": "the figure is written to docs/figures/sn-case-file-generation/scfg-benchmark/heldout-arm-right.svg but referenced nowhere: `git grep heldout-arm-right c752333edbef -- docs/` finds only this line, so no evidence fragment or plan page embeds it and a reader of the evidence page never sees the artifact."
+    }
+  ],
+  "gate_evidence": {
+    "checks": {
+      "arm_label_column_nonwhite_px": 0,
+      "bars": 6,
+      "dark_pixels_bbox": "x 366-1032, y 66-416",
+      "geometry_check": "1100x372 scaled 1.2718x = 1399x473, matching render_figure's width/height formula for six arms",
+      "title_band_nonwhite_px": 0
+    },
+    "image": "image-0.png 1399x473 RGBA",
+    "reviewed_tool": "Read (rendered PNG only; no SVG opened, listed or rendered)"
+  },
+  "project": "imas-codex",
+  "review_run_id": "r-20261118T220022620490-review-of-scfg-benchmark-c752333edbef-figure",
+  "reviewed_base_sha": "0f38d7d5b6dd07706ec496230bcde3369dc27693",
+  "reviewed_head_sha": "c752333edbef286e952c71fbf453bd0d11799f18",
+  "reviewed_run_id": "r-20261118T064807925154-scfg-benchmark",
+  "reviewer": {
+    "model": "deepseek-v4.1-flash",
+    "reviewed_at": "2026-11-18T22:20:36.049537+00:00",
+    "reviewer_run_id": "r-20261118T220022620490-review-of-scfg-benchmark-c752333edbef-figure"
+  },
+  "rubric": "figure",
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T22:26:35.405860+00:00",
+  "total": null
+}
