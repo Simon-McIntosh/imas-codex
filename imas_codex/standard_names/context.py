@@ -20,6 +20,8 @@ from typing import Any
 
 import yaml
 
+from imas_codex.standard_names.source_reads import source_paths_projection
+
 logger = logging.getLogger(__name__)
 
 # ---------------------------------------------------------------------------
@@ -1046,15 +1048,16 @@ def fetch_sibling_family(
     }
 
 
-_LOCUS_NEIGHBOUR_QUERY = """
+_LOCUS_NEIGHBOUR_QUERY = f"""
 // SN_LOCUS_NEIGHBOURS
 UNWIND $paths AS own_path
 WITH replace(own_path, 'dd:', '') AS own
 MATCH (sn:StandardName)
 WHERE sn.id <> $sn_id
   AND coalesce(sn.validation_status, '') <> 'quarantined'
-  AND coalesce(sn.source_paths, []) <> []
-UNWIND sn.source_paths AS other_path
+WITH sn, own, {source_paths_projection()} AS others
+WHERE size(others) > 0
+UNWIND others AS other_path
 WITH sn, own, replace(other_path, 'dd:', '') AS other
 WITH sn, other,
      [i IN range(0, size(split(own, '/')) - 1)
@@ -1062,7 +1065,7 @@ WITH sn, other,
         AND split(own, '/')[i] = split(other, '/')[i]] AS same
 WITH sn, other, size(same) AS shared
 WITH sn, max(shared) AS deepest,
-     collect(DISTINCT {path: other, depth: shared}) AS pairs
+     collect(DISTINCT {{path: other, depth: shared}}) AS pairs
 WHERE deepest >= $min_shared
 WITH sn, deepest, [p IN pairs WHERE p.depth = deepest | p.path] AS shared_paths
 OPTIONAL MATCH (sn)-[:HAS_UNIT]->(u:Unit)

@@ -33,6 +33,7 @@ _TARGET = {
         "name_stage": "accepted",
         "source_paths": ["dd:equilibrium/time_slice/profiles_1d/elongation"],
     },
+    "source_ids": ["dd:equilibrium/time_slice/profiles_1d/elongation"],
     "reason": {"review_axis": "name", "comments": "Source states a ratio."},
 }
 

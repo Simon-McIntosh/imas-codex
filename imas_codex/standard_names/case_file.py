@@ -47,6 +47,11 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from imas_codex.standard_names.source_reads import (
+    normalize_source_ids,
+    source_paths_projection,
+)
+
 logger = logging.getLogger(__name__)
 
 CASE_FILE_SCHEMA = "imas-codex.standard-name-case-file"
@@ -82,15 +87,16 @@ _REASON_FIELDS = (
     "resolution_method",
 )
 
-_TARGET_QUERY = """
+_TARGET_QUERY = f"""
 // CASE_FILE_TARGET
-MATCH (sn:StandardName {id: $id})
+MATCH (sn:StandardName {{id: $id}})
 OPTIONAL MATCH (sn)-[:HAS_REVIEW]->(review:StandardNameReview)
 WITH sn, review
 ORDER BY coalesce(review.reviewed_at, datetime('1970-01-01T00:00:00Z')) DESC,
          coalesce(review.id, '')
 WITH sn, [r IN collect(review) WHERE r IS NOT NULL] AS reviews
 RETURN properties(sn) AS name,
+       {source_paths_projection()} AS source_ids,
        CASE WHEN size(reviews) = 0 THEN null ELSE properties(reviews[0]) END
          AS reason
 """
@@ -651,7 +657,7 @@ def _read_sources(
     return sources
 
 
-def _incumbent(props: Mapping[str, Any]) -> dict[str, Any]:
+def _incumbent(props: Mapping[str, Any], paths: Sequence[str]) -> dict[str, Any]:
     """Read the standing name, definition and documentation from the node."""
     return {
         key: _plain(props.get(key))
@@ -664,15 +670,14 @@ def _incumbent(props: Mapping[str, Any]) -> dict[str, Any]:
             "physical_base",
             "name_stage",
         )
-    } | {"name": _plain(props.get("id")), "source_paths": _source_paths(props)}
+    } | {"name": _plain(props.get("id")), "bound_paths": list(paths)}
 
 
-def _source_paths(props: Mapping[str, Any]) -> list[str]:
-    """Return the DD paths bound to a name, without the ``dd:`` prefix."""
+def _bound_paths(source_ids: Iterable[str]) -> list[str]:
+    """Return the DD paths the producer edges bind, without the ``dd:`` prefix."""
     return sorted(
-        str(path)[3:] if str(path).startswith("dd:") else str(path)
-        for path in props.get("source_paths") or ()
-        if path
+        path[3:] if path.startswith("dd:") else path
+        for path in normalize_source_ids(source_ids)
     )
 
 
@@ -724,8 +729,7 @@ def _grammar_block(
 
             context = build_compose_context()
         sections = [
-            dict(section)
-            for section in context.get("vocabulary_sections") or ()
+            dict(section) for section in context.get("vocabulary_sections") or ()
         ]
     except Exception:
         logger.debug("case_file: compose context unavailable", exc_info=True)
@@ -1205,7 +1209,7 @@ def build_name_case_file(
             raise ValueError(f"no StandardName {name!r} exists to hold a case file")
         props = dict(rows[0].get("name") or {})
         facts = name_facts(name)
-        paths = _source_paths(props)
+        paths = _bound_paths(rows[0].get("source_ids") or ())
         sources = _read_sources(reader, paths, withheld)
         grammar = (
             _withheld_grammar()
@@ -1236,7 +1240,7 @@ def build_name_case_file(
         )
         return _assemble(
             {"kind": "name", "id": name, "paths": paths},
-            incumbent=None if "incumbent" in withheld else _incumbent(props),
+            incumbent=None if "incumbent" in withheld else _incumbent(props, paths),
             reason=_reason_block(rows[0].get("reason")),
             sources=sources,
             family=family,
