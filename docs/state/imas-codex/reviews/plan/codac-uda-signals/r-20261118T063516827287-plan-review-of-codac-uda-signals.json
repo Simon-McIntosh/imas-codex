@@ -1,0 +1,77 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-18T06:42:27.183Z",
+  "dispatched_at": "2026-11-18T06:41:58Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261118T063516827287-plan-review-of-codac-uda-signals/plan.html:96",
+      "id": "wiring-1",
+      "reason": "a section a worker dispatches from is read by its own declaration, which would let the package rename be built before the rehearsal it depends on, and this is the same disagreement the review of version 35 had corrected for sections 6 and 15.",
+      "text": "`plan-section-depends-on` now declares `s10:[\"#s9\",\"#s21\"]` and `s11:[\"#s10\",\"#s21\"]`, but the `s10` and `s11` section tags still declare `data-links=\"codac-uda-signals#s9\"` and `data-links=\"codac-uda-signals#s10\"`, so the two declarations of the same wait disagree and a reader of the section alone does not see that the rename rehearsal must precede them",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261118T063516827287-plan-review-of-codac-uda-signals/plan.html:145",
+      "id": "done_when-1",
+      "reason": "a worker either invents an alias outside its declared scope or closes on a clause it cannot satisfy within the tree the section produces, so the measure can be neither failed nor passed honestly.",
+      "text": "the done-when requires \"the new command and the transition alias report the same revision\" on the renamed scratch tree, but \u00a710 is the only section that delivers the alias (\"the old command kept only as a transition alias\") and \u00a710 declares its own wait on `s21`, while `s21`'s Delivers names a rename of \"the distribution and commands\" and no alias at all, so the tree the section describes yields `iter-codex` alone and the clause can only pass by building a surface the plan assigns to a deferred section, whose own removal-by-zero-consumer rule then conflicts with the closing search for old-name references",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261118T063516827287-plan-review-of-codac-uda-signals/plan.html:145",
+      "id": "evidence_paths-1",
+      "reason": "without a durable home the deferred package rename has to re-derive the rename (and the kept-name reasons) from nothing, which is the work this section exists to do once and prove.",
+      "text": "the done-when ends by removing \"the scratch copies and the scratch environment\", while the section's deliverable is one repeatable rename plus a kept-name list that `s10` and `s11` declare themselves dependent on, and no tracked or durable path is named for either artifact, so the thing two later sections consume has no stated existence after the rehearsal ends and cannot be re-run by a later reader",
+      "type": "evidence_paths",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "f9b3b1e0c6ef64d79fca8c580a236ea86386f51b",
+  "plan_fingerprint": "24aa5849d75e94062c6b6ad56b49b1eecbf7c732de27024ef46c60cc025756a5",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 71,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261118T063516827287-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "360904f3dd9ae05cd0b468d5f97f724ef55eff2d",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `s21`'s link to `#s9` and the meta's `s21` entry agree, \u00a79 resolves and carries the kept-name surfaces, and the three decisions it cites are present and locked.",
+    "done_when": "a finding \u2014 `s21`'s done-when requires \"the new command and the transition alias report the same revision\", and the transition alias is a surface only `s10` delivers (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261118T063516827287-plan-review-of-codac-uda-signals/plan.html:145).",
+    "evidence_paths": "a finding \u2014 `s21` removes the scratch copies and scratch environment with no stated durable home for the repeatable rename or the kept-name list that `s10` and `s11` wait on (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261118T063516827287-plan-review-of-codac-uda-signals/plan.html:145).",
+    "naming": "pass \u2014 the section names no symbol, file or stage label, and its heading carries no plan or ticket identifier.",
+    "reasoning": "pass \u2014 the section's premise (the tracked-tree rename can be proven off the shared checkout while live work continues) follows from \u00a710's at-rest gate, and each stated measure can fail; no code path, step sequence or function is prescribed.",
+    "single_goal": "pass \u2014 `s21` has one subject, proving the rename on a scratch copy, and the cutover sequence is that same rename's own procedure rather than a second deliverable.",
+    "wiring": "a finding \u2014 the metadata adds `s21` to the declared waits of `s10` and `s11`, but neither section's own `data-links` names it (/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261118T063516827287-plan-review-of-codac-uda-signals/plan.html:96,102)."
+  },
+  "section_digests": {
+    "_document": "83b39310b4f6099143ca4e6a1a14926f496e54066576450bbb1c477b8999c785",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "9e078dca862b4b772edc9dcd6f9449edd49573198526057e0ac0f7b5f6a7ecd9",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "5b6478a19c4933df522a5f65b5029c4d8c8fbaa56108cf7537380f3b2160b330",
+    "s21": "863bc51831b8dbe554b7be7842ca1801d7ca113cc104704d047e945b04477f07",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-18T06:53:33.044455+00:00",
+  "total": null
+}
