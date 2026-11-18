@@ -69,6 +69,16 @@
       "note": "Section 5's collision check must report a planted term that collides with a live name and a planted term that respells an existing one.",
       "reason": "",
       "when": "2026-11-18T06:46:53.997802+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Section 3 gains two control arms that must separate, an incumbent-copy arm and the best arm with enclosing-structure text withheld, and a benchmark where neither separates is reported as measuring nothing.",
+      "reason": "",
+      "when": "2026-11-18T06:47:00.867698+00:00"
     }
   ],
   "responses": {
@@ -80,6 +90,15 @@
       "note": "Section 5's collision check must report a planted term that collides with a live name and a planted term that respells an existing one.",
       "reason": "",
       "when": "2026-11-18T06:46:53.997802+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "222f521a1fa076f1df4ceceb55728a82ae7c3d2d",
+      "commit_basis": "edit",
+      "note": "Section 3 gains two control arms that must separate, an incumbent-copy arm and the best arm with enclosing-structure text withheld, and a benchmark where neither separates is reported as measuring nothing.",
+      "reason": "",
+      "when": "2026-11-18T06:47:00.867698+00:00"
     },
     "wiring-1": {
       "action": "acted",
