@@ -6,6 +6,13 @@
   "call_sites": [],
   "completed_at": "2026-11-17T23:56:34.396Z",
   "dispatched_at": "2026-11-17T23:55:55Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-sagr-data-structure-groups-2097bc3e63e7",
+      "recorded_at": "2026-11-18T00:20:35.281593+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/sn-audited-group-release/sagr-data-structure-groups.html",
