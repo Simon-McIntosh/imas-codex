@@ -1,0 +1,57 @@
+<section id="signal-loading-recipe-tool-evidence">
+  <h3>A read-only server tool returns the archive signal load recipe</h3>
+  <p>The single source of the recipe is
+    <code>imas_codex/remote/archive_access.py</code>: two module constants,
+    <code>LOAD_RECIPE_ACCESS</code> (the ordered access pattern, the returned
+    units and time bases, and the read limits) and <code>LOAD_RECIPE_EXAMPLE</code>
+    (the runnable example), composed by <code>SIGNAL_LOAD_RECIPE</code> and
+    returned through <code>load_recipe_text()</code>. The server tool
+    <code>get_signal_load_recipe</code> returns that composition, and
+    <code>.claude/skills/archive-signals/SKILL.md</code> carries both blocks
+    verbatim between <code>&lt;!-- recipe:…:start --&gt;</code> and
+    <code>&lt;!-- recipe:…:end --&gt;</code> markers. The tool reads no samples
+    and holds no endpoint, selector or pulse identity.</p>
+  <table id="signal-loading-recipe-tool-measures">
+    <thead><tr><th>Measure</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Client outside the checkout</td><td>A stdio client launched with
+        its working directory in the run's outside-checkout scratch directory
+        connected to <code>imas-codex serve --read-only --no-embed</code> and
+        fetched the recipe: 33 tools, no write tool present, 4,457 bytes of
+        text.</td></tr>
+      <tr><td>Three things beyond the server</td><td>The served text's second
+        paragraph names the installed <code>imas-codex</code> package, the
+        <code>m-uda-client</code> module environment and the private host
+        configuration including the excluded operator archive.</td></tr>
+      <tr><td>Worked example executed</td><td>The fenced python block is taken
+        out of the served text and run against a recorded reader receipt served
+        in place of the archive transport: an absolute window returns a
+        2-sample array with unit <code>K</code> and time base
+        <code>epoch_ns</code>; a relative pulse read returns a 3-sample array
+        with unit <code>K</code> and time base <code>pulse_seconds</code>.</td></tr>
+      <tr><td>Real identities in the served text</td><td>Zero matches for 6
+        private host names, 10,259 private variable selectors and 6,677 private
+        pulse and category names. Positive controls found all 6 hosts and the
+        sampled selectors, and all 6,677 pulse names, in their own source text,
+        so the zeros are absences rather than a blind scan.</td></tr>
+      <tr><td>Tool and skill agreement</td><td>Both marked blocks are byte-equal
+        to their constants; changing one word of the skill's limit line reddens the
+        comparison test.</td></tr>
+      <tr><td>Gate</td><td>39 passed, 1 skipped in 7.15 s; exit 0, over the new
+        recipe tests, the plant tool tests and the serve-mode tool surface.</td></tr>
+      <tr><td>Declared mutation</td><td>With the example's import line removed
+        from the source, <code>test_recipe_example_runs_and_returns_arrays_with_units</code>
+        fails with <code>NameError: name 'ArchiveReader' is not defined</code>;
+        1 failed, exit 1.</td></tr>
+    </tbody>
+  </table>
+  <h4 id="signal-loading-recipe-tool-mechanism">Why the example is executed and not only printed</h4>
+  <p>Each test builds the example from the text the tool returns, so editing the
+    served example without editing what runs cannot pass. The only step the test
+    replaces is the archive transport, with a recorded reader receipt; the
+    configuration, reader construction, bounded reads, cache write and array
+    decoding all run as written.</p>
+  <p>Private host, selector and pulse values are held only in the run's private
+    receipts and the private cache; the served text, the skill, the tests and
+    this fragment use invented names.</p>
+</section>
