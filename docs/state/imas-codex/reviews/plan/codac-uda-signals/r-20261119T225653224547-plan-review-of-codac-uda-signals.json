@@ -25,7 +25,24 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 79,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The node's dispatch contract carries it: kinds are enumerated from the shared graph, and a control package built with one kind's nodes omitted must fail the equality. The section's endpoint is unchanged.",
+      "when": "2026-11-19T23:10:28.843183+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The node's dispatch contract carries it: kinds are enumerated from the shared graph, and a control package built with one kind's nodes omitted must fail the equality. The section's endpoint is unchanged.",
+      "when": "2026-11-19T23:10:28.843183+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261119T225653224547-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261119T225653224547-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "8a16363a352a38795d7022ea055f3381e3893b22",
   "rubric": "content",
