@@ -81,7 +81,7 @@
       "path": "scripts/rename",
       "surface": "The repeatable rename itself",
       "disposition": "kept",
-      "reason": "The rename tool holds the old name as data - the replacement table, the kept-name list and the checks - so rewriting it would erase the mapping it exists to apply.",
+      "reason": "The rename tool holds the old name as data - the replacement pattern, the kept-name list and the checks - so rewriting it would erase the mapping it exists to apply.",
       "min_hits": 2
     },
     {
