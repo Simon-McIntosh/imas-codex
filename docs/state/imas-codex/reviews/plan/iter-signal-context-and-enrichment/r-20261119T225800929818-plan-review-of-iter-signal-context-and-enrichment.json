@@ -17,7 +17,24 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 71,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The node's dispatch contract carries it: the sample is drawn per value, fifteen decided values per credited source for each of the three values, each read against the source credited for that value, and the tolerance is at most one disagreement in twenty values read. The section's endpoint is unchanged.",
+      "when": "2026-11-19T23:10:35.818098+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The node's dispatch contract carries it: the sample is drawn per value, fifteen decided values per credited source for each of the three values, each read against the source credited for that value, and the tolerance is at most one disagreement in twenty values read. The section's endpoint is unchanged.",
+      "when": "2026-11-19T23:10:35.818098+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261119T225800929818-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261119T225800929818-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "5bbfb27928c09f0819c444a1d1d75c05c81b5284",
   "rubric": "content",
