@@ -1,0 +1,51 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-19T22:59:09.825Z",
+  "dispatched_at": "2026-11-19T22:58:57Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261119T225800929818-plan-review-of-iter-signal-context-and-enrichment/plan.html:94",
+      "id": "done_when-1",
+      "reason": "the sample's unit and the read's scope must be restated (per value credited to the cited source, with the count of values read fixed by that allocation) or the section's sole quality measure is undefined and can be satisfied by reading only the values most likely to agree.",
+      "text": "the sample reads \"sixty signals ... fifteen per credited source, or every such signal where a source is credited for fewer, a hand reading against that source with the count of values that agree\", but under this version's own rule credit attaches to a value (\"for each value a signal has exactly one outcome ... credited to the first such source\"), not to a signal: one signal can be credited to the linked row for its quantity, the archive for its unit and the pattern for its role, so it belongs to three of the four source groups, \"fifteen per credited source\" does not yield sixty signals, and a signal read \"against that source\" carries values that source never decided \u2014 the only quality control in the section can then charge a disagreement to a source that gave nothing, and the \"at most one value in twenty read\" tolerance has no defined denominator",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0f3dcd6679d3f5dfece0c089b896f5d833986162",
+  "plan_fingerprint": "cb3b8e8e1124146d638cf41d18881edf3aa5ba0b125984def4587ac36a2f1882",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 71,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261119T225800929818-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "5bbfb27928c09f0819c444a1d1d75c05c81b5284",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the cited lead choice resolves to the decision `vocabulary-before-description` at plan.html:135 (`data-by=\"lead\"`, `data-when=\"2026-11-19T22:14:04+00:00\"`, `data-sections=\"s11,s6\"`), whose context and rationale match s11's \"the lead chose this on 2026-11-19\"; s11 cites no file href whose extension needs resolving.",
+    "done_when": "a finding \u2014 the hand-reading sample at plan.html:94 allocates \"fifteen per credited source\" of signals while credit is defined per value, so the sample is not a partition and its tolerance has no defined denominator.",
+    "evidence_paths": "pass \u2014 the census, the vocabulary members and the digest of the pre-registered sample land in the section's landing record; nothing in s11 points at a session scratchpad or a node-local temporary path.",
+    "naming": "pass \u2014 s11 introduces no symbol, module, stage label or ticket number; the vocabulary members it names are domain terms.",
+    "reasoning": "pass \u2014 the stated cause (missing context and model-written guesses caused most of the standard-names session's wrong text) is exactly what the decision `vocabulary-before-description` records, each of the four sources is readable from a landed record (`#s4`'s signal-list rows and links, the controls metadata feed's stored description/unit/type in `codac-uda-signals#s19`, the archive's unit interface, `#s5`'s field patterns), and s11 prescribes no code path, step sequence or function.",
+    "single_goal": "pass \u2014 s11 carries one deliverable, the three-value assignment with its census; the search-matchability and tracked-tree arms are acceptance conditions on that same assignment, not a second deliverable.",
+    "wiring": "pass \u2014 s11's `data-links` names `iter-signal-context-and-enrichment#s4` and `#s5`, both declared `done` in the snapshot's declaration table (plan.html:20), and s6's `depends-on` names s11 with s6 declared `deferred`, so the declarations resolve and order the work correctly."
+  },
+  "section_digests": {
+    "_document": "6779747f528ff1f6b31e591ec2714dffa68a783ad3f84f0902f50c5d83739420",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "0a44a06e3ce743fddcb14d83e8d2791ca5977f2a3959db6c4f0b59b17f876c9d",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "9e51f8ba217e7d0bed83b1b1befdddbaeba215a0d94df9a98fe95e3d3b93eb42",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T23:06:08.370641+00:00",
+  "total": null
+}
