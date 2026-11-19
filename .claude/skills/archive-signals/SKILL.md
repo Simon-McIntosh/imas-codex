@@ -15,6 +15,62 @@ reports. Examples below are invented. Get real values from the user's request,
 private configuration and graph results. Do not substitute a similar variable
 when an exact named variable is absent or ambiguous.
 
+## Access pattern
+
+This block is the single source of the pattern: the server tool
+`get_signal_load_recipe` returns the same text, and a test fails if the two
+disagree. Change it in `imas_codex/remote/archive_access.py`, not here.
+
+<!-- recipe:access-pattern:start -->
+Access pattern, in order.
+
+1. Find the pulse window. The server's search_pulses(designation=...) returns
+   categories with id, name, archive, kind and pulse_count; pass a returned
+   category id to the same tool to list its pulses with id, name, archive,
+   status, start_ns, end_ns and description. From a shell, find_categories and
+   list_pulses in imas_codex.remote.archive_access return the same rows. Times
+   are absolute Unix epoch nanoseconds. A null end_ns is an open pulse and
+   needs an explicit end when it is read.
+2. Resolve the exact signal. The server's search_signals(facility, query=...)
+   matches a graph name or accessor exactly, and find_signals returns the same
+   rows from a shell; a returned signal id is the argument to load. The
+   designation is a literal case-insensitive substring of a category name or
+   description, never a wildcard or semantic match.
+3. Load arrays with the package, not with the server:
+   imas_codex.remote.codac_uda.ArchiveSignalLoader.load(signal_id, start=...,
+   end=...) over an absolute window, or load(signal_id, pulse_id=...) over a
+   closed pulse. An exact native selector with no graph identity is read through
+   ArchiveReader.read(selector, ...); keep the requested selector instead of
+   substituting a similar graph name.
+4. Bound every read. Supply start and end as integer epoch nanoseconds, or a
+   closed pulse_id, or a pulse with time_format="relative" and bounds in
+   seconds. An open pulse needs explicit bounds. max_samples, max_bytes and
+   max_window_ns are checked before any fetch, and an over-budget request is
+   refused rather than truncated.
+
+Returned values.
+
+- signal.time and signal.values are NumPy arrays of equal length.
+- metadata["unit"] is the archive's unit. An empty unit is unknown, not
+  dimensionless.
+- metadata["time_base"] is "epoch_ns" (integer Unix epoch nanoseconds) for an
+  absolute window and "pulse_seconds" (floats relative to the pulse) for a
+  pulse read with time_format="relative". Subtract an integer origin before
+  converting epoch timestamps to float seconds.
+- metadata also carries mode, decimated, sampling_verification, query and cache
+  evidence. Raw mode is not proof of no decimation.
+- An empty window is a refusal, never a measurement.
+
+Limits.
+
+- The search tools page at 100 rows and return a continuation for the next page.
+- A read is refused when its window exceeds max_window_ns, its samples exceed
+  max_samples, its serialized reply exceeds max_bytes, or its bounds are
+  missing.
+- Do not interpolate event values as continuous samples and do not resample
+  across different time bases.
+<!-- recipe:access-pattern:end -->
+
 ## Shell and environment
 
 Run from the project checkout using its root environment, e.g. `uv run --no-sync
@@ -187,6 +243,58 @@ combined. Do not interpolate event values as though they were continuous samples
 An empty unit is unknown, not dimensionless. For several named variables, repeat
 the exact lookup and bounded load for each; retain each array's own time base
 and sampling evidence rather than automatically resampling them.
+
+## Worked example
+
+The server tool `get_signal_load_recipe` returns this same example; a test fails
+if the two disagree. It runs in the project environment against a private
+`ARCHIVE_CONFIG` file, with invented names.
+
+<!-- recipe:example:start -->
+```python
+import os
+from pathlib import Path
+
+import numpy as np
+import yaml
+
+from imas_codex.remote.codac_uda import ArchiveReader
+
+# The private configuration names the endpoints and the excluded operator
+# archive; it is never tracked and never printed.
+config = yaml.safe_load(Path(os.environ["ARCHIVE_CONFIG"]).expanduser().read_text())
+if "data_systems" not in config:
+    config = {"data_systems": {"codac_uda": config}}
+reader = ArchiveReader("demo", "slow", config=config)
+
+# One signal over an absolute window: integer Unix epoch nanoseconds.
+window = reader.read(
+    "DEMO-PLANT:TEMP",
+    start=1_700_000_000_000_000_000,
+    end=1_700_000_002_000_000_000,
+    mode="raw",
+    max_samples=100_000,
+    max_bytes=8_000_000,
+)
+
+# The same signal over a closed pulse: seconds relative to the pulse start.
+pulse = reader.read(
+    "DEMO-PLANT:TEMP",
+    pulse="DEMO:TRIAL/7",
+    start=0.0,
+    end=2.0,
+    time_format="relative",
+    mode="raw",
+    max_samples=100_000,
+    max_bytes=8_000_000,
+)
+
+print(np.shape(window.time), np.shape(window.values),
+      window.metadata["unit"], window.metadata["time_base"])
+print(np.shape(pulse.time), np.shape(pulse.values),
+      pulse.metadata["unit"], pulse.metadata["time_base"])
+```
+<!-- recipe:example:end -->
 
 Return the commands run, category and pulse counts, selected-window sample
 counts, unit, time base, sampling evidence and private artifact paths. State

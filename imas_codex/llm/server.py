@@ -6,6 +6,7 @@ This server provides MCP tools organized by purpose:
 Unified Search (primary interface):
 - search_signals: Signal search with data access and IMAS enrichment
 - search_pulses: Test-category search and paged pulse windows
+- get_signal_load_recipe: Recipe for loading a plant signal from the archive
 - search_docs: Wiki/document/image search with cross-links
 - search_code: Code search with data reference enrichment
 - search_dd_paths: IMAS DD search with cluster and facility cross-refs
@@ -1815,6 +1816,7 @@ class AgentsServer:
     Tools:
     - search_signals: Signal search with data access and IMAS enrichment
     - search_pulses: Test categories and exact pulse windows
+    - get_signal_load_recipe: Recipe for loading a plant signal from the archive
     - fetch_content: Resource content and signal component/system/sibling context
     - search_docs: Wiki/document/image search with cross-links
     - search_code: Code search with data reference enrichment
@@ -1851,6 +1853,7 @@ class AgentsServer:
         {
             "search_signals",
             "search_pulses",
+            "get_signal_load_recipe",
             "signal_analytics",
             "search_docs",
             "search_code",
@@ -2540,6 +2543,26 @@ class AgentsServer:
                         limit=limit,
                         offset=offset,
                     )
+
+            @self.mcp.tool()
+            def get_signal_load_recipe() -> str:
+                """Return the recipe for loading a plant signal from the archive.
+
+                The recipe is text only: it names what a load needs beyond this
+                server, the access pattern for one signal over a time window and
+                over a pulse, the units and time bases the reader returns, the
+                limits a caller must respect, and a worked example with invented
+                names. Fetch it before writing a load script; this tool reads no
+                samples and contacts no archive.
+
+                Returns:
+                    The recipe as plain text, ending with a Python example that
+                    runs in the project environment against a private
+                    ARCHIVE_CONFIG file.
+                """
+                from imas_codex.remote.archive_access import load_recipe_text
+
+                return load_recipe_text()
 
             @self.mcp.tool()
             def signal_analytics(
