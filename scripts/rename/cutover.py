@@ -8,6 +8,7 @@ from pathlib import Path
 
 CUTOVER_FILE = Path(__file__).with_name("cutover.json")
 DISPOSITIONS = frozenset({"renamed", "kept", "migrated", "not measured"})
+ORIGINS = frozenset({"inventory", "brief"})
 
 
 @dataclass
@@ -43,6 +44,18 @@ def check_cutover(path: Path = CUTOVER_FILE) -> CutoverReport:
     report.inventory = {row["id"]: row for row in data["inventory"]}
 
     covered = dict.fromkeys(report.inventory, 0)
+    for row in report.inventory.values():
+        if row.get("origin") not in ORIGINS:
+            report.violations.append(
+                f"surface {row['id']!r} has origin {row.get('origin')!r}"
+            )
+        elif (
+            row["origin"] == "inventory"
+            and not (row.get("document_label") or "").strip()
+        ):
+            report.violations.append(
+                f"surface {row['id']!r} claims the inventory document but names no label"
+            )
     for step in report.steps:
         if not step.get("id"):
             report.violations.append("a cutover step has no id")

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 
 import pytest
@@ -11,6 +12,31 @@ from scripts.rename.__main__ import main
 from scripts.rename.apply import apply_rename, tree_digest
 from scripts.rename.check import check_tree
 from scripts.rename.cutover import check_cutover
+
+INVENTORY = Path(
+    "docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html"
+)
+SURFACE_TABLES = (("-results", "-commands"), ("-preserve", "-recommendations"))
+
+
+def inventory_labels(*, surfaces_only: bool = True) -> set[str]:
+    """The surface labels the consumer inventory document carries.
+
+    Two tables name the surfaces: the measured snapshot and the scientific
+    names to retain. Their rows open with a plain ``<td>`` label, while the
+    command and item tables open with ``<code>``, so the label pattern is what
+    separates a surface from a receipt row. With ``surfaces_only`` false, the
+    decision table is included as well, since cutover rows that are not a
+    collector surface cite a decision instead.
+    """
+    text = INVENTORY.read_text()
+    blocks = [
+        text[text.index(start) : text.index(end)] for start, end in SURFACE_TABLES
+    ]
+    if not surfaces_only:
+        blocks.append(text[text.index("-recommendations") :])
+    return set(re.findall(r"<tr><td>([^<]+)</td>", "".join(blocks)))
+
 
 KEPT_LIST = {
     "version": 1,
@@ -251,13 +277,102 @@ def test_cli_exit_status_reflects_the_violations(tree: Path, kept_list: Path) ->
     assert main(["check", "--tree", str(tree), "--kept-list", str(kept_list)]) == 1
 
 
+def test_check_refuses_an_empty_scan(tmp_path: Path, kept_list: Path) -> None:
+    empty = tmp_path / "empty"
+    empty.mkdir()
+
+    report = check_tree(empty, kept_list=kept_list)
+
+    assert report.files_scanned == 0
+    assert "empty-scan" in {v.kind for v in report.violations}
+    assert main(["check", "--tree", str(empty), "--kept-list", str(kept_list)]) == 1
+
+
+def test_check_reports_a_blind_kept_search(
+    tree: Path, kept_list: Path, tmp_path: Path
+) -> None:
+    apply_rename(tree, kept_list=kept_list)
+    (tree / "docs" / "evidence" / "run.md").write_text(
+        "renamed evidence, no old name\n"
+    )
+    data = json.loads(kept_list.read_text())
+    data["kept_paths"][0]["min_hits"] = 0
+    blind = tmp_path / "blind.json"
+    blind.write_text(json.dumps(data))
+
+    report = check_tree(tree, kept_list=blind)
+
+    assert report.files_scanned > 0
+    assert report.kept_hits == 0
+    assert "kept-search-blind" in {v.kind for v in report.violations}
+
+
+def test_check_refuses_a_receipt_that_unaccounts_a_kept_path(
+    tree: Path, kept_list: Path, tmp_path: Path
+) -> None:
+    applied = apply_rename(tree, kept_list=kept_list)
+    data = {"kept_digests": dict(applied.kept_digests)}
+    data["kept_digests"].pop("evidence")
+    stripped = tmp_path / "stripped-receipt.json"
+    stripped.write_text(json.dumps(data))
+
+    report = check_tree(tree, kept_list=kept_list, receipt=stripped)
+
+    assert "kept-path-unaccounted" in {v.kind for v in report.violations}
+
+
+def test_check_reconciles_hits_kept_protected_and_leftover(
+    tree: Path, kept_list: Path
+) -> None:
+    (tree / "docs" / "evidence" / "run.md").write_text(
+        "The imas_codex run measured 3 surfaces.\n"
+        '{"schema": "imas-codex.authority.v1"}\n'
+    )
+    (tree / "schemas.yaml").write_text('{"schema": "imas-codex.authority.v1"}\n')
+
+    report = check_tree(tree, kept_list=kept_list)
+    data = report.as_dict()
+
+    assert data["protected"] == 1
+    assert data["reconciled"], data
+    assert data["old_name_hits"] == (
+        data["kept_hits"] + data["protected"] + data["leftover_count"]
+    )
+
+
 def test_cutover_accounts_for_every_inventory_surface() -> None:
+    data = json.loads(Path("scripts/rename/cutover.json").read_text())
+    claimed_inventory = {
+        row["document_label"]
+        for row in data["inventory"]
+        if row["origin"] == "inventory"
+    }
+    claimed_brief = {row["id"] for row in data["inventory"] if row["origin"] == "brief"}
+    surfaces = inventory_labels()
+
+    # Every surface the document names is claimed, and no row invents one.
+    assert surfaces <= claimed_inventory
+    assert claimed_inventory <= inventory_labels(surfaces_only=False)
+    assert claimed_brief == {"worktrees", "docs-state", "gate-scripts", "node-briefs"}
+    assert len(data["inventory"]) == len(claimed_inventory) + len(claimed_brief) + 1
+
     report = check_cutover()
 
     assert report.ok, report.violations
-    data = report.as_dict()
-    assert data["inventory_count"] >= 16
-    assert data["unaccounted"] == []
+    assert report.as_dict()["unaccounted"] == []
+
+
+def test_cutover_reports_a_surface_the_document_does_not_carry(
+    tmp_path: Path,
+) -> None:
+    data = json.loads(Path("scripts/rename/cutover.json").read_text())
+    row = next(r for r in data["inventory"] if r["origin"] == "inventory")
+    row["document_label"] = "Invented surface"
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    assert "Invented surface" not in inventory_labels(surfaces_only=False)
+    assert check_cutover(path).ok  # the tool judges coverage, the test judges labels
 
 
 def test_cutover_reports_an_unaccounted_surface(tmp_path: Path) -> None:

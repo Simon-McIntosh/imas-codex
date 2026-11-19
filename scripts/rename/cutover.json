@@ -5,87 +5,125 @@
   "inventory": [
     {
       "id": "units",
-      "source": "Installed service and timer units: 5 files, 2 enablement links"
+      "source": "Installed service and timer units: 5 files, 2 enablement links",
+      "origin": "inventory",
+      "document_label": "Installed units"
     },
     {
       "id": "scheduler",
-      "source": "Scheduler jobs: 2 matching jobs of 23 account jobs"
+      "source": "Scheduler jobs: 2 matching jobs of 23 account jobs",
+      "origin": "inventory",
+      "document_label": "Scheduler jobs"
     },
     {
       "id": "editable",
-      "source": "Editable install and console scripts: 1 distribution, 11 declared entry points, 175 name-bound bin files"
+      "source": "Editable install and console scripts: 1 distribution, 11 declared entry points, 175 name-bound bin files",
+      "origin": "inventory",
+      "document_label": "Editable install / scripts"
     },
     {
       "id": "roots",
-      "source": "Cache, state and config roots: 53 entries (cache 51, config 1, local share 1, local state 0)"
+      "source": "Cache, state and config roots: 53 entries (cache 51, config 1, local share 1, local state 0)",
+      "origin": "inventory",
+      "document_label": "Cache, state and config"
     },
     {
       "id": "registry",
-      "source": "Registry package identities: 11 (fork 5, organisation 6), 1 local pushed-image receipt"
+      "source": "Registry package identities: 11 (fork 5, organisation 6), 1 local pushed-image receipt",
+      "origin": "inventory",
+      "document_label": "Registry images"
     },
     {
       "id": "mcp",
-      "source": "MCP client definitions: 3 external in 2 files, 2 tracked controls"
+      "source": "MCP client definitions: 3 external in 2 files, 2 tracked controls",
+      "origin": "inventory",
+      "document_label": "MCP client configuration"
     },
     {
       "id": "graph",
-      "source": "Stored graph paths and imports: 28 values on 11 nodes, 17 historical relationship errors"
+      "source": "Stored graph paths and imports: 28 values on 11 nodes, 17 historical relationship errors",
+      "origin": "inventory",
+      "document_label": "Stored graph paths/imports"
     },
     {
       "id": "reckon",
-      "source": "Reckon live and queued pointers: 23 (7 working, 15 awaiting-upstream, 1 held), 1109 retained history records"
+      "source": "Reckon live and queued pointers: 23 (7 working, 15 awaiting-upstream, 1 held), 1109 retained history records",
+      "origin": "inventory",
+      "document_label": "Reckon live/queued pointers"
     },
     {
       "id": "supplement",
-      "source": "Additional launch consumers: 6 service scripts, 1 user-bin wrapper, 3 matching shell lines"
+      "source": "Additional launch consumers: 6 service scripts, 1 user-bin wrapper, 3 matching shell lines",
+      "origin": "inventory",
+      "document_label": "Additional launch consumers"
     },
     {
       "id": "azure",
-      "source": "Azure registry image iterorganization/imas-codex: inventory recorded not measured, az absent"
+      "source": "Azure registry image iterorganization/imas-codex: inventory recorded not measured, az absent",
+      "origin": "inventory",
+      "document_label": "Registry images"
     },
     {
       "id": "repositories",
-      "source": "Git repositories: fork Simon-McIntosh/imas-codex and organisation iterorganization/imas-codex, plus SoftwareRepo.remote_url"
+      "source": "Git repositories: fork Simon-McIntosh/imas-codex and organisation iterorganization/imas-codex, plus SoftwareRepo.remote_url",
+      "origin": "inventory",
+      "document_label": "github-repository-rename"
     },
     {
       "id": "worktrees",
-      "source": "Worktrees retained with unmerged commits, listed from git worktree list at cutover time"
+      "source": "Worktrees retained with unmerged commits, listed from git worktree list at cutover time",
+      "origin": "brief"
     },
     {
       "id": "docs-state",
-      "source": "In-tree project state, run records, reviews and crew file under docs/state/<project>"
+      "source": "In-tree project state, run records, reviews and crew file under docs/state/<project>",
+      "origin": "brief"
     },
     {
       "id": "gate-scripts",
-      "source": "Saved gate scripts under ~/.cache/imas-codex-live-rewrite that write the checkout path or package name"
+      "source": "Saved gate scripts under ~/.cache/imas-codex-live-rewrite that write the checkout path or package name",
+      "origin": "brief"
     },
     {
       "id": "node-briefs",
-      "source": "Node briefs on the primary branch that write the checkout path or package name"
+      "source": "Node briefs on the primary branch that write the checkout path or package name",
+      "origin": "brief"
     },
     {
       "id": "sn-catalog",
-      "source": "Kept: standard-names catalog repository and fork, imas-standard-names-catalog path"
+      "source": "Kept: standard-names catalog repository and fork, imas-standard-names-catalog path",
+      "origin": "inventory",
+      "document_label": "Standard-names catalogue"
     },
     {
       "id": "sn-grammar",
-      "source": "Kept: imas-standard-names distribution and imas_standard_names grammar import"
+      "source": "Kept: imas-standard-names distribution and imas_standard_names grammar import",
+      "origin": "inventory",
+      "document_label": "Grammar library and import"
     },
     {
       "id": "dd-identity",
-      "source": "Kept: data-dictionary-only server identity imas-dd in client configuration"
+      "source": "Kept: data-dictionary-only server identity imas-dd in client configuration",
+      "origin": "inventory",
+      "document_label": "DD server client identity"
     },
     {
       "id": "dd-vocabulary",
-      "source": "Kept: DD and IMAS command vocabulary (imas, dd groups; dd-version entry point)"
+      "source": "Kept: DD and IMAS command vocabulary (imas, dd groups; dd-version entry point)",
+      "origin": "inventory",
+      "document_label": "DD and IMAS command vocabulary"
     },
     {
       "id": "dd-schema",
-      "source": "Kept: DD graph labels and schema classes (IMASNode, DDVersion, ...) from schemas/imas_dd.yaml"
+      "source": "Kept: DD graph labels and schema classes (IMASNode, DDVersion, ...) from schemas/imas_dd.yaml",
+      "origin": "inventory",
+      "document_label": "DD graph schema identities"
     },
     {
       "id": "imas-deps",
-      "source": "Kept: imas-python, imas-data-dictionaries and imas-data-dictionary declarations"
+      "source": "Kept: imas-python, imas-data-dictionaries and imas-data-dictionary declarations",
+      "origin": "inventory",
+      "document_label": "IMAS Python and DD dependencies"
     }
   ],
   "steps": [

@@ -36,7 +36,12 @@ class CheckReport:
     kept_paths: dict[str, dict] = field(default_factory=dict)
     kept_names: dict[str, int] = field(default_factory=dict)
     kept_identifiers: dict[str, dict[str, int]] = field(default_factory=dict)
+    protected: int = 0
     violations: list[Violation] = field(default_factory=list)
+
+    @property
+    def leftover_count(self) -> int:
+        return sum(self.leftover.values())
 
     @property
     def ok(self) -> bool:
@@ -46,7 +51,11 @@ class CheckReport:
         data = dict(self.__dict__)
         data["violations"] = [v.as_dict() for v in self.violations]
         data["ok"] = self.ok
-        data["leftover_count"] = len(self.leftover)
+        data["leftover_count"] = sum(self.leftover.values())
+        data["reconciled"] = (
+            self.old_name_hits
+            == self.kept_hits + self.protected + data["leftover_count"]
+        )
         return data
 
 
@@ -99,6 +108,20 @@ def check_tree(
         if hits:
             stats["files"] += 1
         report.kept_hits += hits
+
+    report.protected = sum(
+        stats["covered"] for stats in report.kept_identifiers.values()
+    )
+    leftover_total = sum(report.leftover.values())
+    if report.kept_hits + report.protected + leftover_total != report.old_name_hits:
+        report.violations.append(
+            Violation(
+                "counts-unreconciled",
+                f"{report.old_name_hits} old-name hits but "
+                f"{report.kept_hits} kept + {report.protected} protected + "
+                f"{leftover_total} leftover",
+            )
+        )
 
     # Instrument control: a search that saw no file at all cannot report an
     # absence, and a tree with no kept hit at all means the classified paths
@@ -169,7 +192,7 @@ def format_report(report: CheckReport) -> str:
         f"tree: {report.tree}",
         f"files scanned: {report.files_scanned}",
         f"old-name hits: {report.old_name_hits} (kept {report.kept_hits}, "
-        f"leftover {sum(report.leftover.values())})",
+        f"protected {report.protected}, leftover {report.leftover_count}),"
         "kept paths:",
     ]
     for entry_id, stats in report.kept_paths.items():
