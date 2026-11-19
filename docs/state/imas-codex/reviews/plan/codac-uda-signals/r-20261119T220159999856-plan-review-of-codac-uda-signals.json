@@ -43,6 +43,16 @@
       "note": "The container section's equality is now stated for ITER-facility nodes only, and facility-less nodes are counted separately by named kind.",
       "reason": "",
       "when": "2026-11-19T22:15:40.818419+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "eccbb4bfd005f27da9cb93262c0c7a12ad70a33d",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The search subjects are written to a private file before the build, with its digest in the landing record.",
+      "reason": "",
+      "when": "2026-11-19T22:15:45.741500+00:00"
     }
   ],
   "responses": {
@@ -54,6 +64,15 @@
       "note": "The container section's equality is now stated for ITER-facility nodes only, and facility-less nodes are counted separately by named kind.",
       "reason": "",
       "when": "2026-11-19T22:15:40.818419+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "eccbb4bfd005f27da9cb93262c0c7a12ad70a33d",
+      "commit_basis": "edit",
+      "note": "The search subjects are written to a private file before the build, with its digest in the landing record.",
+      "reason": "",
+      "when": "2026-11-19T22:15:45.741500+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261119T220159999856-plan-review-of-codac-uda-signals.json",
