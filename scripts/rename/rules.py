@@ -21,8 +21,11 @@ OLD_NAME_PATTERN = re.compile(r"imas([-_ ])(codex|cx)", re.IGNORECASE)
 # verbatim, and the evidence that carries them keeps its bytes.  The rename
 # protects every identifier that appears in a kept path, so the set comes from
 # the ground truth rather than from a hand-maintained list that would go stale.
+# The shape is deliberately narrow: hyphenated artifact names, optionally
+# versioned, and never a Python module path - `imas_codex.remote.executor` in
+# evidence is prose, and the build hook's import must follow the package.
 IDENTIFIER_PATTERN = re.compile(
-    r"imas([-_ ])(codex|cx)\.([A-Za-z0-9_.\-]+)", re.IGNORECASE
+    r"imas-(codex|cx)\.([a-z0-9]+(?:-[a-z0-9]+)+(?:\.v1)?)", re.IGNORECASE
 )
 
 

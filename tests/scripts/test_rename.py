@@ -224,6 +224,24 @@ def test_a_persisted_identifier_in_a_kept_path_survives_the_rename(
     assert renamed.kept_identifiers["imas-codex.repair-authority.v1"]["covered"] == 1
 
 
+def test_a_module_path_in_evidence_does_not_protect_an_import(
+    tree: Path, kept_list: Path
+) -> None:
+    evidence = tree / "docs" / "evidence" / "run.md"
+    evidence.write_text(
+        evidence.read_text() + "the inventory ran imas_codex.remote.executor\n"
+    )
+    hook = tree / "hatch_build_hooks.py"
+    hook.write_text(
+        "from imas_codex.resource_path_accessor import ResourcePathAccessor\n"
+    )
+
+    report = apply_rename(tree, kept_list=kept_list)
+
+    assert report.kept_identifiers == {}
+    assert "from iter_codex.resource_path_accessor import" in hook.read_text()
+
+
 def test_cli_exit_status_reflects_the_violations(tree: Path, kept_list: Path) -> None:
     apply_rename(tree, kept_list=kept_list)
     assert main(["check", "--tree", str(tree), "--kept-list", str(kept_list)]) == 0
