@@ -53,6 +53,16 @@
       "note": "The search subjects are written to a private file before the build, with its digest in the landing record.",
       "reason": "",
       "when": "2026-11-19T22:15:45.741500+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "eccbb4bfd005f27da9cb93262c0c7a12ad70a33d",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "The recipe section now claims only that a server-only client can fetch the recipe, states what a load needs beyond the server, and checks the fetch from a client outside the checkout.",
+      "reason": "",
+      "when": "2026-11-19T22:15:50.060739+00:00"
     }
   ],
   "responses": {
@@ -73,6 +83,15 @@
       "note": "The search subjects are written to a private file before the build, with its digest in the landing record.",
       "reason": "",
       "when": "2026-11-19T22:15:45.741500+00:00"
+    },
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "eccbb4bfd005f27da9cb93262c0c7a12ad70a33d",
+      "commit_basis": "edit",
+      "note": "The recipe section now claims only that a server-only client can fetch the recipe, states what a load needs beyond the server, and checks the fetch from a client outside the checkout.",
+      "reason": "",
+      "when": "2026-11-19T22:15:50.060739+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261119T220159999856-plan-review-of-codac-uda-signals.json",
