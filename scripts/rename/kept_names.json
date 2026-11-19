@@ -1,0 +1,133 @@
+{
+  "version": 1,
+  "note": "Every path here keeps the old name deliberately. `check` reports the hit count it finds under each path and refuses a path that falls below its floor, so a hand-alteration of a kept surface is reported rather than silently accepted.",
+  "old_names": ["imas_codex", "imas-codex", "IMAS_CODEX", "IMAS Codex"],
+  "kept_paths": [
+    {
+      "id": "historical-evidence",
+      "path": "docs/evidence",
+      "surface": "Historical evidence records: landing fragments, inventory, prototype reports",
+      "disposition": "kept",
+      "reason": "The plan requires historical evidence to keep its bytes; these fragments are the measured record the plan and its reviews cite, and rewriting them would restate measurements as what they were not.",
+      "min_hits": 1
+    },
+    {
+      "id": "plan-records",
+      "path": "docs/plans",
+      "surface": "Plan documents",
+      "disposition": "kept",
+      "reason": "Plan text records the decisions and the wording in force before the cutover, including this plan, which names both names by design.",
+      "min_hits": 1
+    },
+    {
+      "id": "sprint-records",
+      "path": "docs/sprints",
+      "surface": "Sprint records",
+      "disposition": "kept",
+      "reason": "Closed sprint records describe work as it was delivered under the old name.",
+      "min_hits": 1
+    },
+    {
+      "id": "research-notes",
+      "path": "docs/research",
+      "surface": "Research notes",
+      "disposition": "kept",
+      "reason": "Research notes are historical probe records; no build or test reads them.",
+      "min_hits": 8
+    },
+    {
+      "id": "archived-records",
+      "path": "docs/archive",
+      "surface": "Archived landed records",
+      "disposition": "kept",
+      "reason": "Archived records are history and are not read by the product.",
+      "min_hits": 1
+    },
+    {
+      "id": "project-state",
+      "path": "docs/state",
+      "surface": "In-tree reckon project state, run records, reviews and crew file",
+      "disposition": "migrated",
+      "reason": "Run records and review payloads are preserved byte-for-byte here; the project key and the directory itself move to the new name in the cutover step that serves reckon, not in the tracked-tree rename.",
+      "min_hits": 1000
+    },
+    {
+      "id": "crew-reports",
+      "path": "crew/reports",
+      "surface": "Crew run reports",
+      "disposition": "kept",
+      "reason": "Crew reports are historical records of completed runs.",
+      "min_hits": 1
+    },
+    {
+      "id": "research-artifacts",
+      "path": "research",
+      "surface": "Local research artifacts",
+      "disposition": "kept",
+      "reason": "Tracked research probes and evaluation logs are historical records; nothing imports or executes them from the package.",
+      "min_hits": 1
+    },
+    {
+      "id": "figure-artifacts",
+      "path": "docs/figures",
+      "include": ["*.svg", "*.json"],
+      "surface": "Rendered figures and their raw measurement JSON",
+      "disposition": "kept",
+      "reason": "A rendered figure and its raw measurement JSON are evidence of the run that produced them. The figure scripts beside them are live code and are renamed.",
+      "min_hits": 1
+    },
+    {
+      "id": "rename-tool",
+      "path": "scripts/rename",
+      "surface": "The repeatable rename itself",
+      "disposition": "kept",
+      "reason": "The rename tool holds the old name as data - the replacement table, the kept-name list and the checks - so rewriting it would erase the mapping it exists to apply.",
+      "min_hits": 2
+    },
+    {
+      "id": "rename-tool-tests",
+      "path": "tests/scripts",
+      "surface": "The rename tool's tests",
+      "disposition": "kept",
+      "reason": "The tests plant an old-name reference and alter a kept-name surface to prove the checks fire; the fixtures must spell what they detect.",
+      "min_hits": 2
+    }
+  ],
+  "kept_names": [
+    {
+      "id": "standard-names-distribution",
+      "marker": "imas-standard-names",
+      "reason": "the independently named standard-names catalog and grammar distribution keeps its name"
+    },
+    {
+      "id": "standard-names-import",
+      "marker": "imas_standard_names",
+      "reason": "the grammar library import names the IMAS standard names, not the product"
+    },
+    {
+      "id": "dd-server-grammar",
+      "marker": "imas-dd",
+      "reason": "the data-dictionary-only server keeps its imas-dd client key and kind"
+    },
+    {
+      "id": "dd-schema-spelling",
+      "marker": "imas_dd",
+      "reason": "the data-dictionary schema file, module and accessor keep their IMAS spelling"
+    },
+    {
+      "id": "imas-python-dependency",
+      "marker": "imas-python",
+      "reason": "the IMAS Python dependency is an independent scientific library"
+    },
+    {
+      "id": "dd-dependency",
+      "marker": "imas-data-dictionary",
+      "reason": "IMAS data-dictionary version settings name the IMAS dependency"
+    },
+    {
+      "id": "dd-graph-label",
+      "marker": "IMASNode",
+      "reason": "DD graph labels and schema classes identify the IMAS data model"
+    }
+  ]
+}
