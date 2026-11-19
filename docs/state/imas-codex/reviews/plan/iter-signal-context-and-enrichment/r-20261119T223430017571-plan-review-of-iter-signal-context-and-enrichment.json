@@ -35,6 +35,16 @@
       "note": "The archive is named as a fourth source, for the unit, with its place in the precedence order; the separate unit-equality clause is replaced by one that follows from the outcome definitions.",
       "reason": "",
       "when": "2026-11-19T22:54:58.893304+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d08c864989a074a32aa9db1082103405b9b3cefa",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "Each value now has exactly one outcome per signal: decided when every source that gives a value agrees, conflict when two differ, undecided when none gives one; credit applies only to decided values.",
+      "reason": "",
+      "when": "2026-11-19T22:55:03.440074+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The archive is named as a fourth source, for the unit, with its place in the precedence order; the separate unit-equality clause is replaced by one that follows from the outcome definitions.",
       "reason": "",
       "when": "2026-11-19T22:54:58.893304+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "d08c864989a074a32aa9db1082103405b9b3cefa",
+      "commit_basis": "edit",
+      "note": "Each value now has exactly one outcome per signal: decided when every source that gives a value agrees, conflict when two differ, undecided when none gives one; credit applies only to decided values.",
+      "reason": "",
+      "when": "2026-11-19T22:55:03.440074+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261119T223430017571-plan-review-of-iter-signal-context-and-enrichment.json",
