@@ -8813,6 +8813,25 @@
     "reason": "the admission landing pass advances the run's plan section in its landing beat, after this merge; the impl has not moved at the moment of completion",
     "verdict": "waived"
   },
+  "integrated_gate_check": {
+    "base_verdict": "passed",
+    "exit_status": 0,
+    "failure_ids": [],
+    "finding": null,
+    "gate_command": "env UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/signal-loading-recipe-tool uv run --no-sync pytest -p no:cacheprovider tests/llm/test_signal_load_recipe.py tests/llm/test_plant_search_tools.py tests/llm/test_tool_schemas.py",
+    "integrated_revision": "9cf758769500970029e7d937bdc5cbe05188748d",
+    "integrated_verdict": "passed",
+    "log_path": "/home/ITER/mcintos/.config/reckon/crew/archive/runs/r-20261119T223601646628-signal-loading-recipe-tool/review-landing/gate-9cf758769500970029e7d937bdc5cbe05188748d.log",
+    "measure_partition": "all_debug",
+    "ok": true,
+    "ran": true,
+    "reason": "",
+    "replayed_command": "sh -c 'env UV_PROJECT_ENVIRONMENT=./.venv PYTHONPATH=. uv run --no-sync pytest -p no:cacheprovider tests/llm/test_signal_load_recipe.py tests/llm/test_plant_search_tools.py tests/llm/test_tool_schemas.py'",
+    "worktree_roots_rewritten": [
+      "/home/ITER/mcintos/Code/.reckon-worktrees/imas-codex-c994bf55fb01/3033c27a-2b8f-4e32-bb6d-7fca8603a9ff/signal-loading-recipe-tool",
+      "/home/ITER/mcintos/Code/imas-codex"
+    ]
+  },
   "lane": null,
   "lane_advisory": {
     "backend": "omp-local",
