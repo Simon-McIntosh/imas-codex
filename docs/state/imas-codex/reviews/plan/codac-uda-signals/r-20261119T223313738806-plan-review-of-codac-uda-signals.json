@@ -1,0 +1,63 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-19T22:34:32.715Z",
+  "dispatched_at": "2026-11-19T22:34:17Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/codac-uda-signals.html:150",
+      "id": "done_when-1",
+      "reason": "the done-when must state the selection condition (the chosen signal is linked to a component and a control node, the chosen designation has at least one pulse), otherwise the check can fail for a reason fixed before the build and the run cannot re-choose without breaking its own pre-registration.",
+      "text": "the new walk and category clauses are asserted of subjects whose only declared selection property is that one signal is described and one designation is known, while the graph makes signal\u2192component (`candidate_plant_component`) and signal\u2192control node (`control_node`) separate optional links and admits an `archive_grouping_state` of `ungrouped`, and section 16 counts categories that hold no pulse, so a pre-registered signal with neither link or a pre-registered empty designation makes the check unsatisfiable after the digest is recorded",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "d08c864989a074a32aa9db1082103405b9b3cefa",
+  "plan_fingerprint": "8ac0202dce29921ecd4760bb2945c122cb6307cc3801872b783cfbd10ef290cd",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 78,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261119T223313738806-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "38af0a1222e3f978aa5fc2105264301641ac682c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `#s18` and `#s20` both resolve to sections in the snapshot, and the section's other references are to the plan's own landing-record convention.",
+    "done_when": "a finding \u2014 s22:150 now requires the pre-registered described signal to walk to a component and a control node and the pre-registered designation to yield categories and a category's pulses, but the section fixes both subjects in a private file before the build without stating any property that the chosen signal carries either link or that the chosen designation has a pulse.",
+    "evidence_paths": "pass \u2014 every figure goes into the landing record and the pre-registered subjects into a private file whose digest lands there, so nothing rests on a node-local temporary path.",
+    "naming": "pass \u2014 no plan label, stage name or ticket number enters a container name, tool name or record field; the subject of each check is stated mechanically.",
+    "reasoning": "pass \u2014 the new relationship equality and the walks are obtainable from an exported database and can fail (a dropped relationship kind, or a missing component/control node, shows as an unequal count or an absent node), and the section prescribes no code path.",
+    "single_goal": "pass \u2014 the section delivers one private, read-only container image over an ITER-only graph package.",
+    "wiring": "pass \u2014 s22 declares `data-links=\"codac-uda-signals#s18,codac-uda-signals#s20\"` and `plan-section-depends-on` carries the same two targets, both of which exist, and the container has no other undeclared wait once section 20's pulse status and kind are in place."
+  },
+  "section_digests": {
+    "_document": "d6f5961d61a0c831cebb5fd3d04ed35f208aaa0201b650f7897a24859885fb21",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "759b1a8a0d0172458970abb033b7b0891dbfbea4a146fe46e1d40088ad5b1e2b",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "5b6478a19c4933df522a5f65b5029c4d8c8fbaa56108cf7537380f3b2160b330",
+    "s21": "766504c3cf6d6cb5fbb80fc49533f32eb2dd8d9f7686b55ca616d9cac1f04941",
+    "s22": "9e61a4052153025fbe1e59063a853301c3f3aec1843722b25af0ae7e52f9de5d",
+    "s23": "b2db24284a629203a22b94e1fd6d97616eb45f4402ca4961f80fa1017f98cf3b",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T22:39:46.374784+00:00",
+  "total": null
+}
