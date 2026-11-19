@@ -413,6 +413,12 @@ def graph_export(
     """
     from imas_codex.graph.profiles import resolve_neo4j
 
+    if without_dd and not facilities and not dd_only:
+        raise click.UsageError(
+            "--without-dd removes the data dictionary, so it needs "
+            "--facility to say which facility's content the package holds"
+        )
+
     profile = resolve_neo4j()
 
     git_info = get_git_info()
@@ -558,6 +564,7 @@ def graph_export(
                     archive_dir / "graph.dump",
                     fac,
                     archive_dir / "graph.dump",
+                    without_dd=without_dd,
                 )
         if dd_only:
             click.echo("  Filtering dump to DD-only...")

@@ -48,6 +48,12 @@ logger = logging.getLogger(__name__)
     help="Force DD-only mode (hide facility tools, implies --read-only). Auto-detected from graph if omitted.",
 )
 @click.option(
+    "--plant-only",
+    is_flag=True,
+    default=False,
+    help="Serve only the plant catalogue tools (implies --read-only; for the plant container).",
+)
+@click.option(
     "--no-embed",
     is_flag=True,
     default=False,
@@ -65,6 +71,7 @@ def serve(
     log_level: str,
     read_only: bool,
     dd_only: bool | None,
+    plant_only: bool,
     no_embed: bool,
     include_standard_names: bool,
 ) -> None:
@@ -83,6 +90,9 @@ def serve(
 
         # Run in read-only mode (for containers)
         imas-codex serve --read-only --transport streamable-http
+
+        # Serve the plant catalogue alone (the plant container)
+        imas-codex serve --plant-only --transport streamable-http
     """
     # Configure logging
     root_logger = logging.getLogger()
@@ -92,7 +102,9 @@ def serve(
 
     logger.info("Starting IMAS Codex MCP server")
 
-    if read_only:
+    if plant_only:
+        logger.info("Plant-only mode: plant catalogue tools, no write tools")
+    elif read_only:
         logger.info("Read-only mode: write tools and Python REPL suppressed")
 
     if no_embed:
@@ -112,6 +124,7 @@ def serve(
     server = AgentsServer(
         read_only=read_only,
         dd_only=dd_only,
+        plant_only=plant_only,
         no_embed=no_embed,
         include_standard_names=include_standard_names,
     )

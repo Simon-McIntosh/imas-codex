@@ -1842,6 +1842,7 @@ class AgentsServer:
 
     read_only: bool = False
     dd_only: bool | None = None
+    plant_only: bool = False
     no_embed: bool = False
     include_standard_names: bool = True
     mcp: FastMCP = field(init=False, repr=False)
@@ -1857,6 +1858,22 @@ class AgentsServer:
             "signal_analytics",
             "search_docs",
             "search_code",
+            "fetch_content",
+            "get_facility_coverage",
+        }
+    )
+
+    # Tools a plant-only server publishes. A plant-only package carries no IMAS
+    # data dictionary, documentation or code content, so the server exposes
+    # exactly the plant catalogue reads and the loading recipe: a whitelist
+    # rather than a set of guards keeps a newly added write tool off the
+    # listing automatically.
+    PLANT_TOOLS: ClassVar[frozenset[str]] = frozenset(
+        {
+            "search_signals",
+            "search_pulses",
+            "get_signal_load_recipe",
+            "signal_analytics",
             "fetch_content",
             "get_facility_coverage",
         }
@@ -1892,6 +1909,11 @@ class AgentsServer:
         if self.dd_only:
             self.read_only = True
 
+        # A plant-only package has no DD, documentation or code content, so it
+        # serves the plant catalogue read-only and publishes nothing else.
+        if self.plant_only:
+            self.read_only = True
+
         # A full or facility server reranks DD-path search through the shared
         # search-time Jev rerank; a read-only or DD-only server (the public
         # containers) never does, so an external query spends nothing. The
@@ -1907,10 +1929,14 @@ class AgentsServer:
         _rerank_signals = not (self.read_only or self.dd_only)
 
         name = "imas-codex-readonly" if self.read_only else "imas-codex"
+        if self.plant_only:
+            name = "imas-codex-plant"
         self.mcp = FastMCP(name=name)
         self._prompts = load_prompts()
 
         self._register_tools()
+        if self.plant_only:
+            self._restrict_to_plant_tools()
         self._register_prompts()
         self._register_health_check()
 
@@ -1929,6 +1955,8 @@ class AgentsServer:
             1 for k in self.mcp._local_provider._components if k.startswith("tool:")
         )
         mode_parts = []
+        if self.plant_only:
+            mode_parts.append("plant-only")
         if self.read_only:
             mode_parts.append("read-only")
         if self.dd_only:
@@ -2001,6 +2029,22 @@ class AgentsServer:
             self.dd_only = result
         except Exception as e:
             logger.warning("DD-only background detection failed: %s", e)
+
+    def _restrict_to_plant_tools(self) -> None:
+        """Publish only the plant catalogue tools on a plant-only server.
+
+        The package carries no DD, documentation or code content, so every
+        other tool would fail at call time; removing them from the provider is
+        what makes the published listing the whole capability, write tools
+        included.
+        """
+        components = self.mcp._local_provider._components
+        for key in list(components):
+            if not key.startswith("tool:"):
+                continue
+            if key.removeprefix("tool:").rstrip("@") in self.PLANT_TOOLS:
+                continue
+            del components[key]
 
     def _register_tools(self):
         """Register all MCP tools."""

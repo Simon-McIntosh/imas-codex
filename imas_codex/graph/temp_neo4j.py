@@ -447,8 +447,16 @@ def _filter_to_dd_only(bolt_port: int, neo4j_log: Path) -> None:
         driver.close()
 
 
-def _filter_to_facility(bolt_port: int, facility: str, neo4j_log: Path) -> None:
+def _filter_to_facility(
+    bolt_port: int, facility: str, neo4j_log: Path, *, without_dd: bool = False
+) -> None:
     """Delete nodes not belonging to *facility* from the temp instance.
+
+    With ``without_dd`` the result is a plant package: every node owned by
+    *facility* survives, and the only facility-less nodes kept are the
+    facility node itself and ``GraphMeta``, which the server reads on
+    startup. The data dictionary and every other facility-less kind are
+    removed.
 
     Uses ``CALL {} IN TRANSACTIONS`` for server-side batched commits.
     """
@@ -472,6 +480,30 @@ def _filter_to_facility(bolt_port: int, facility: str, neo4j_log: Path) -> None:
             deleted = result.single()["deleted"]
             click.echo(f"    Removed {deleted:,} non-{facility} nodes")
 
+            if without_dd:
+                # Facility nodes use ``id``, not ``facility_id`` — drop the
+                # other facilities' nodes explicitly.
+                result = session.run(
+                    "MATCH (n:Facility) WHERE n.id <> $facility "
+                    "CALL { WITH n DETACH DELETE n } IN TRANSACTIONS OF 1000 ROWS "
+                    "RETURN count(*) AS deleted",
+                    facility=facility,
+                )
+                click.echo(
+                    f"    Removed {result.single()['deleted']:,} other facility nodes"
+                )
+
+                # Keep only the facility-less kinds the plant server reads.
+                result = session.run(
+                    "MATCH (n) WHERE n.facility_id IS NULL "
+                    "AND NOT n:Facility AND NOT n:GraphMeta "
+                    "CALL { WITH n DETACH DELETE n } IN TRANSACTIONS OF 1000 ROWS "
+                    "RETURN count(*) AS deleted"
+                )
+                click.echo(
+                    f"    Removed {result.single()['deleted']:,} facility-less nodes"
+                )
+
             # Remove orphaned nodes (no relationships, not core DD types)
             result = session.run(
                 "MATCH (n) WHERE NOT (n)--() "
@@ -489,8 +521,10 @@ def _filter_to_facility(bolt_port: int, facility: str, neo4j_log: Path) -> None:
             session.run(
                 'MATCH (m:GraphMeta {id: "meta"}) '
                 "SET m.facilities = [$facility], "
+                "    m.plant_only = $plant_only, "
                 "    m.updated_at = datetime().epochMillis",
                 facility=facility,
+                plant_only=without_dd,
             )
     except Exception:
         if neo4j_log.exists():
@@ -536,6 +570,7 @@ def _build_filter_script(
     output_dump: str,
     mode: str,
     facility: str = "",
+    without_dd: bool = False,
 ) -> str:
     """Build a bash script for the temp Neo4j filter lifecycle.
 
@@ -576,17 +611,48 @@ def _build_filter_script(
             $CYPHER "MATCH (m:GraphMeta {{id: 'meta'}}) SET m.facilities = [], m.imas = true, m.updated_at = datetime().epochMillis;"
         """)
     else:
+        # A plant package keeps the facility's own content and nothing that
+        # belongs to no facility but the facility node itself and GraphMeta.
+        plant_cypher = (
+            textwrap.dedent(f"""\
+            # Delete the other facilities' nodes (Facility uses id, not facility_id)
+            echo "    Deleting other facility nodes..."
+            $CYPHER "MATCH (n:Facility) WHERE n.id <> '{facility}' CALL {{ WITH n DETACH DELETE n }} IN TRANSACTIONS OF 10000 ROWS RETURN count(*) AS deleted;"
+
+            # Delete every facility-less kind but Facility and GraphMeta
+            echo "    Deleting facility-less nodes..."
+            $CYPHER "MATCH (n) WHERE n.facility_id IS NULL AND NOT n:Facility AND NOT n:GraphMeta CALL {{ WITH n DETACH DELETE n }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
+
+            """)
+            if without_dd
+            else ""
+        )
+        orphan_keep = (
+            "NOT n:Facility AND NOT n:GraphMeta"
+            if without_dd
+            else "NOT n:IMASNode AND NOT n:DDVersion AND NOT n:Unit "
+            "AND NOT n:IMASCoordinateSpec AND NOT n:PhysicsDomain "
+            "AND NOT n:IMASSemanticCluster AND NOT n:GraphMeta"
+        )
+        graph_meta = (
+            f"SET m.facilities = ['{facility}'], m.plant_only = true, "
+            "m.updated_at = datetime().epochMillis;"
+            if without_dd
+            else f"SET m.facilities = ['{facility}'], "
+            "m.updated_at = datetime().epochMillis;"
+        )
         filter_cypher = textwrap.dedent(f"""\
             # Delete nodes from other facilities
             echo "    Deleting non-{facility} nodes..."
             $CYPHER "MATCH (n) WHERE n.facility_id IS NOT NULL AND n.facility_id <> '{facility}' CALL {{ WITH n DETACH DELETE n }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
 
-            # Remove orphaned nodes (no relationships, not DD types)
+            {plant_cypher}
+            # Remove orphaned nodes
             echo "    Cleaning orphaned nodes..."
-            $CYPHER "MATCH (n) WHERE NOT (n)--() AND NOT n:IMASNode AND NOT n:DDVersion AND NOT n:Unit AND NOT n:IMASCoordinateSpec AND NOT n:PhysicsDomain AND NOT n:IMASSemanticCluster AND NOT n:GraphMeta CALL {{ WITH n DELETE n }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
+            $CYPHER "MATCH (n) WHERE NOT (n)--() AND {orphan_keep} CALL {{ WITH n DELETE n }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
 
             # Update GraphMeta
-            $CYPHER "MATCH (m:GraphMeta {{id: 'meta'}}) SET m.facilities = ['{facility}'], m.updated_at = datetime().epochMillis;"
+            $CYPHER "MATCH (m:GraphMeta {{id: 'meta'}}) {graph_meta}"
         """)
 
     return textwrap.dedent(f"""\
@@ -705,6 +771,7 @@ def _run_filter_via_slurm(
     *,
     mode: str,
     facility: str = "",
+    without_dd: bool = False,
 ) -> None:
     """Run the temp Neo4j filter lifecycle on a SLURM compute node.
 
@@ -724,6 +791,7 @@ def _run_filter_via_slurm(
         output_dump=str(output_path),
         mode=mode,
         facility=facility,
+        without_dd=without_dd,
     )
 
     click.echo(f"  Submitting filter job to SLURM ({partition})...")
@@ -798,7 +866,11 @@ def create_dd_only_dump(source_dump_path: Path, output_path: Path) -> None:
 
 
 def create_facility_dump(
-    source_dump_path: Path, facility: str, output_path: Path
+    source_dump_path: Path,
+    facility: str,
+    output_path: Path,
+    *,
+    without_dd: bool = False,
 ) -> None:
     """Create a per-facility dump by filtering a full graph dump.
 
@@ -809,10 +881,17 @@ def create_facility_dump(
         source_dump_path: Path to the full ``neo4j.dump`` file.
         facility: Facility ID to keep (e.g. ``"tcv"``).
         output_path: Where to write the filtered dump file.
+        without_dd: Also remove the data dictionary and every facility-less
+            kind but the facility node and ``GraphMeta``, leaving a package
+            that holds only the facility's own content.
     """
     if _should_use_slurm():
         _run_filter_via_slurm(
-            source_dump_path, output_path, mode="facility", facility=facility
+            source_dump_path,
+            output_path,
+            mode="facility",
+            facility=facility,
+            without_dd=without_dd,
         )
         return
 
@@ -832,7 +911,9 @@ def create_facility_dump(
         proc, neo4j_log = start_temp_neo4j(temp_dir, temp_bolt_port, temp_http_port)
 
         try:
-            _filter_to_facility(temp_bolt_port, facility, neo4j_log)
+            _filter_to_facility(
+                temp_bolt_port, facility, neo4j_log, without_dd=without_dd
+            )
         finally:
             stop_temp_neo4j(proc)
 

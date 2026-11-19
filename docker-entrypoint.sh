@@ -31,6 +31,16 @@ cleanup() {
 
 trap cleanup SIGTERM SIGINT
 
+# The serve mode is a property of the image, not of the command line: the
+# data-dictionary image is built with --dd-only and the plant image with
+# --plant-only, while both start the server the same way. An explicit flag
+# still appends, so the mode can be narrowed at run time.
+if [ "$1" = "serve" ]; then
+    shift
+    # shellcheck disable=SC2086
+    set -- serve ${IMAS_CODEX_SERVE_MODE---dd-only} "$@"
+fi
+
 # Start Neo4j in background
 echo "Starting Neo4j..."
 "${NEO4J_HOME}/bin/neo4j" console > "$NEO4J_LOG" 2>&1 &

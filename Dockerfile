@@ -265,6 +265,12 @@ WORKDIR /app
 # Re-declare build args for runtime stage
 ARG IDS_FILTER=""
 
+# The image's server mode. The data-dictionary image serves --dd-only; the
+# plant image is built from this file with SERVE_MODE="--plant-only" and a
+# facility-scoped graph package, and the entrypoint inserts the mode after
+# `serve`.
+ARG SERVE_MODE="--dd-only"
+
 # Set runtime environment variables
 # NEO4J_URI points to embedded Neo4j (internal, not exposed externally)
 ENV PYTHONPATH="/app" \
@@ -273,6 +279,7 @@ ENV PYTHONPATH="/app" \
     OPENROUTER_BASE_URL=https://openrouter.ai/api/v1 \
     PATH="/app/.venv/bin:${PATH}" \
     IDS_FILTER=${IDS_FILTER} \
+    IMAS_CODEX_SERVE_MODE=${SERVE_MODE} \
     TRANSPORT="streamable-http" \
     NEO4J_URI="bolt://127.0.0.1:7687" \
     NEO4J_USERNAME="neo4j" \
@@ -293,5 +300,15 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=240s \
     CMD curl -sf http://127.0.0.1:8000/health > /dev/null
 
 ## Entrypoint starts Neo4j then MCP server
+##
+## Data-dictionary image (unchanged default):
+##   docker build -t imas-codex .
+## Plant image — the ITER plant graph alone, read-only, private:
+##   docker build -t imas-codex-plant \
+##     --build-arg GRAPH_REGISTRY=ghcr.io/<owner> \
+##     --build-arg GRAPH_PACKAGE=imas-codex-graph-iter-without-dd \
+##     --build-arg GRAPH_TAG=<tag> \
+##     --build-arg SERVE_MODE=--plant-only \
+##     --secret id=GHCR_TOKEN .
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
-CMD ["serve", "--dd-only", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["serve", "--host", "0.0.0.0", "--port", "8000"]
