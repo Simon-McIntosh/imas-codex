@@ -1,0 +1,62 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-19T22:04:20.670Z",
+  "dispatched_at": "2026-11-19T22:03:58Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html",
+      "line": 56,
+      "severity": "non-blocking",
+      "text": "the later-revision copy was run with an overlay (2b8eb66f) whose apply report carries neither kept_identifiers nor kept_altered (logs/copy-b-apply-report.json), so \"the same tool\" was not applied and the identifier protection and kept-path receipt were never exercised at eccbb4bfd."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html",
+      "line": 50,
+      "severity": "non-blocking",
+      "text": "the 29 protected-identifier occurrences are stated twice in one paragraph in two wordings, so the landing record repeats a numeric claim it already made."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html",
+      "line": 85,
+      "severity": "non-blocking",
+      "text": "the sentence attributes 21 surfaces to current-name-consumer-inventory.html, whose measured table has 9 rows; the other 12 come from the brief's cutover conditions and the kept list, so the record overstates what that document contains."
+    },
+    {
+      "file": "scripts/rename/check.py",
+      "line": 171,
+      "severity": "non-blocking",
+      "text": "format_report prints \"old-name hits: N (kept K, leftover L)\" while N also counts protected identifiers, so the measured N=194748, K=194719, L=0 does not reconcile in the line an operator reads."
+    },
+    {
+      "file": "scripts/rename/check.py",
+      "line": 107,
+      "severity": "non-blocking",
+      "text": "the empty-scan and kept-search-blind guards, and apply's exit 1 on altered kept paths (scripts/rename/__main__.py:79), are unreachable by the suite; no test makes them fire, so a regression that disables them leaves the gate green."
+    },
+    {
+      "file": "tests/scripts/test_rename.py",
+      "line": 259,
+      "severity": "non-blocking",
+      "text": "cutover accounting is checked only against cutover.json itself and floors the inventory at 16 while it holds 21 surfaces, so up to five surfaces could be dropped from both the inventory and the steps and the gate would still pass."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261119T220323538509-review-of-rehearse-the-rename-656b6b87ac3a",
+  "review_text": "VERDICT goal: read plan codac-uda-signals \u00a721 (docs/plans/codac-uda-signals.html:143) and the node's brief; the landed change is the repeatable rename (scripts/rename/__main__.py:1), its kept-name list (scripts/rename/kept_names.json:1) and the written cutover (scripts/rename/cutover.json:1), all confined to scratch copies.\nVERDICT done_when: read the manifest's tests and test_logs lines plus logs/base-suite.log and logs/clean-after-suite.log; both arms end at 44 failed with identical FAILED id sets (comm empty on both sides), and the environment, import, count, idempotence, cutover and removal items each name a log on disk.\nVERDICT write_paths: the node's declared paths are scripts/rename, tests/scripts, docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html and docs/figures/codac-uda-signals/rehearse-the-rename; all 12 delivered paths sit inside the first three, and the fourth is unused.\nVERDICT manifest: read /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T181831529109-rehearse-the-rename/manifest.md; it states 13 passed on tests/scripts, names five gate logs, and records the 44-vs-44 tier comparison, but it carries no baseline_suite/after_suite JSON blocks, so the failure ids had to be derived from logs/base-suite.log and logs/clean-after-suite.log.\nVERDICT diff: read all seven commits c8a99be96..656b6b87 one by one; they add the tool (six modules plus two JSON data files), its 13 tests and the landing fragment, with no other path touched.\nCALL_SITES: none\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: scripts/rename/apply.py:96 rewrites tracked text and moves name-bearing paths while holding kept bytes to account, and scripts/rename/cutover.json:1 accounts for every surface the sequence must reach.\nSCORE evidence: 15\nJUSTIFICATION evidence: logs/clean-after-suite.log and logs/base-suite.log carry the 44-vs-44 comparison that yields 0 added ids, but the later-revision arm (logs/copy-b-apply-report.json) ran a tool revision without the identifier protection or the kept-path receipt.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: every path in c8a99be96..656b6b87 is under scripts/rename, tests/scripts or docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html, exactly the declared scope.\nSCORE durability: 15\nJUSTIFICATION durability: tests/scripts/test_rename.py:220 makes the receipt catch an insertion the hit floor cannot see, but the guards at scripts/rename/check.py:107 and scripts/rename/check.py:111 have no test that makes them fire and tests/scripts/test_rename.py:259 floors the inventory at 16 of 21 surfaces.\nSCORE fit: 17\nJUSTIFICATION fit: scripts/rename follows the scripts/ package layout (scripts/__init__.py) and dataclass style of scripts/build_models.py, though rules.py:3 claims to be the one place that knows the old name while apply.py:29 hardcodes a second mapping.\nSCORE reuse: 20\nJUSTIFICATION reuse: no repository owner exists for a repeatable whole-tree rename; a capability search over imas_codex/ and scripts/ for a tracked-file walker, tree digester and text rewriter found only unrelated callers (imas_codex/clusters/label_cache.py:431, docs/evidence/fragments/sn-review-through-jev/srtj-forwarder-retirement-codemod.py:288).\nFINDING docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html:56 non-blocking: the later-revision copy was run with an overlay (2b8eb66f) whose apply report carries neither kept_identifiers nor kept_altered (logs/copy-b-apply-report.json), so \"the same tool\" was not applied and the identifier protection and kept-path receipt were never exercised at eccbb4bfd.\nFINDING docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html:50 non-blocking: the 29 protected-identifier occurrences are stated twice in one paragraph in two wordings, so the landing record repeats a numeric claim it already made.\nFINDING docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html:85 non-blocking: the sentence attributes 21 surfaces to current-name-consumer-inventory.html, whose measured table has 9 rows; the other 12 come from the brief's cutover conditions and the kept list, so the record overstates what that document contains.\nFINDING scripts/rename/check.py:171 non-blocking: format_report prints \"old-name hits: N (kept K, leftover L)\" while N also counts protected identifiers, so the measured N=194748, K=194719, L=0 does not reconcile in the line an operator reads.\nFINDING scripts/rename/check.py:107 non-blocking: the empty-scan and kept-search-blind guards, and apply's exit 1 on altered kept paths (scripts/rename/__main__.py:79), are unreachable by the suite; no test makes them fire, so a regression that disables them leaves the gate green.\nFINDING tests/scripts/test_rename.py:259 non-blocking: cutover accounting is checked only against cutover.json itself and floors the inventory at 16 while it holds 21 surfaces, so up to five surfaces could be dropped from both the inventory and the steps and the gate would still pass.\n",
+  "reviewed_base_sha": "c8a99be9645f2bd7a8a7ca99642d906ba04c5dc4",
+  "reviewed_head_sha": "656b6b87ac3af32b819abd1b3b21316211be96b5",
+  "reviewed_run_id": "r-20261119T181831529109-rehearse-the-rename",
+  "scores": {
+    "durability": 15,
+    "evidence": 15,
+    "fit": 17,
+    "goal_fidelity": 18,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T22:15:52.937768+00:00",
+  "total": 105
+}
