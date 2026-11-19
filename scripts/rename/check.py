@@ -8,7 +8,12 @@ from pathlib import Path
 
 from scripts.rename.apply import KEPT_LIST
 from scripts.rename.rules import OLD_NAME_PATTERN
-from scripts.rename.tree import load_kept_list, read_text, tracked_files
+from scripts.rename.tree import (
+    load_kept_list,
+    read_text,
+    subtree_digest,
+    tracked_files,
+)
 
 
 @dataclass
@@ -43,7 +48,9 @@ class CheckReport:
         return data
 
 
-def check_tree(tree: Path, *, kept_list: Path = KEPT_LIST) -> CheckReport:
+def check_tree(
+    tree: Path, *, kept_list: Path = KEPT_LIST, receipt: Path | None = None
+) -> CheckReport:
     """Search a tree for the old name and hold the kept-name list to account.
 
     Every hit outside a kept path is a leftover.  A kept path whose counted
@@ -123,6 +130,26 @@ def check_tree(tree: Path, *, kept_list: Path = KEPT_LIST) -> CheckReport:
         report.violations.append(
             Violation("leftover", f"{rel}: {hits} old-name hit(s) in a covered file")
         )
+
+    if receipt is not None:
+        expected = json.loads(Path(receipt).read_text())["kept_digests"]
+        for entry in kept.kept_paths:
+            live = subtree_digest(tree, entry)
+            if entry.id not in expected:
+                report.violations.append(
+                    Violation(
+                        "kept-path-unaccounted",
+                        f"{entry.path} has no digest in the receipt {receipt}",
+                    )
+                )
+            elif live != expected[entry.id]:
+                report.violations.append(
+                    Violation(
+                        "kept-path-altered",
+                        f"{entry.path} differs byte for byte from the tree the "
+                        f"rename started on; the kept surface must survive untouched",
+                    )
+                )
     return report
 
 
@@ -150,7 +177,13 @@ def format_report(report: CheckReport) -> str:
     return "\n".join(lines)
 
 
-def main(tree: Path, *, kept_list: Path = KEPT_LIST, as_json: bool = False) -> int:
-    report = check_tree(tree, kept_list=kept_list)
+def main(
+    tree: Path,
+    *,
+    kept_list: Path = KEPT_LIST,
+    receipt: Path | None = None,
+    as_json: bool = False,
+) -> int:
+    report = check_tree(tree, kept_list=kept_list, receipt=receipt)
     print(json.dumps(report.as_dict(), indent=2) if as_json else format_report(report))
     return 0 if report.ok else 1

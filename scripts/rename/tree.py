@@ -83,6 +83,26 @@ def path_digest(tree: Path) -> str:
     return digest.hexdigest()
 
 
+def subtree_digest(tree: Path, entry: KeptPath) -> str:
+    """Digest of every file under one kept path, paths and bytes together.
+
+    The hit floor in the closing search cannot see an addition that carries no
+    old name, and cannot see a reworded line that keeps the count.  This digest
+    is the exact form of the claim the kept list makes - these bytes are
+    evidence, not a product surface - so the presence of an old name is not the
+    only thing it can be surprised by.
+    """
+    digest = hashlib.sha256()
+    for rel in _walk(tree):
+        if not entry.covers(rel):
+            continue
+        digest.update(rel.encode())
+        digest.update(b"\0")
+        digest.update(hashlib.sha256((tree / rel).read_bytes()).digest())
+        digest.update(b"\0")
+    return digest.hexdigest()
+
+
 @dataclass(frozen=True)
 class KeptPath:
     """A path whose bytes the rename must not touch, with why."""

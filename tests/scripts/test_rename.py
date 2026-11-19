@@ -154,6 +154,53 @@ def test_check_reports_a_kept_path_altered_by_hand(tree: Path, kept_list: Path) 
     assert any(v.kind == "kept-path-altered" for v in report.violations)
 
 
+def test_check_reports_a_kept_file_altered_without_losing_a_hit(
+    tree: Path, kept_list: Path, tmp_path: Path
+) -> None:
+    report_path = tmp_path / "apply-report.json"
+    assert (
+        main(
+            [
+                "apply",
+                "--tree",
+                str(tree),
+                "--kept-list",
+                str(kept_list),
+                "--report",
+                str(report_path),
+            ]
+        )
+        == 0
+    )
+    receipt = json.loads(report_path.read_text())
+    assert receipt["kept_altered"] == []
+
+    evidence = tree / "docs" / "evidence" / "run.md"
+    evidence.write_text(evidence.read_text() + "\nreworded by hand, no old name\n")
+
+    # The hit floor is unchanged, so only the recorded bytes can see this.
+    assert check_tree(tree, kept_list=kept_list).ok
+    report = check_tree(tree, kept_list=kept_list, receipt=report_path)
+
+    assert not report.ok
+    altered = [v for v in report.violations if v.kind == "kept-path-altered"]
+    assert [v.detail.split(" ")[0] for v in altered] == ["docs/evidence"]
+    assert (
+        main(
+            [
+                "check",
+                "--tree",
+                str(tree),
+                "--kept-list",
+                str(kept_list),
+                "--receipt",
+                str(report_path),
+            ]
+        )
+        == 1
+    )
+
+
 def test_cli_exit_status_reflects_the_violations(tree: Path, kept_list: Path) -> None:
     apply_rename(tree, kept_list=kept_list)
     assert main(["check", "--tree", str(tree), "--kept-list", str(kept_list)]) == 0

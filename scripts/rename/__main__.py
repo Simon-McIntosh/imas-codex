@@ -36,6 +36,11 @@ def main(argv: list[str] | None = None) -> int:
     check_parser = sub.add_parser("check", help="closing search and kept-name check")
     check_parser.add_argument("--tree", type=Path, default=Path("."))
     check_parser.add_argument("--kept-list", type=Path, default=KEPT_LIST)
+    check_parser.add_argument(
+        "--receipt",
+        type=Path,
+        help="apply report whose kept-path digests the tree must still match",
+    )
     check_parser.add_argument("--json", action="store_true")
 
     cutover_parser = sub.add_parser("cutover", help="inventory accounting check")
@@ -54,10 +59,22 @@ def main(argv: list[str] | None = None) -> int:
         if args.report:
             args.report.write_text(text + "\n")
         print(text)
+        if report.kept_altered:
+            print(
+                "kept paths changed during the rename: "
+                + ", ".join(report.kept_altered),
+                file=sys.stderr,
+            )
+            return 1
         return 0
 
     if args.command == "check":
-        return check_cmd.main(args.tree, kept_list=args.kept_list, as_json=args.json)
+        return check_cmd.main(
+            args.tree,
+            kept_list=args.kept_list,
+            receipt=args.receipt,
+            as_json=args.json,
+        )
 
     if args.command == "cutover":
         return cutover_cmd.main(args.file, as_json=args.json)

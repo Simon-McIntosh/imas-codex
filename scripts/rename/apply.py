@@ -10,12 +10,13 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from scripts.rename.rules import OLD_NAME_PATTERN, PATH_TOKENS, REPLACEMENTS
+from scripts.rename.rules import PATH_TOKENS, count_hits, rename_text
 from scripts.rename.tree import (
     KeptList,
     load_kept_list,
     path_digest,
     read_text,
+    subtree_digest,
     tracked_files,
 )
 
@@ -35,6 +36,8 @@ class ApplyReport:
     changed_files: list[str] = field(default_factory=list)
     renamed: list[dict[str, str]] = field(default_factory=list)
     kept_hits: int = 0
+    kept_digests: dict[str, str] = field(default_factory=dict)
+    kept_altered: list[str] = field(default_factory=list)
     binary_skipped: int = 0
     dry_run: bool = False
     elapsed_seconds: float = 0.0
@@ -52,20 +55,6 @@ class ApplyReport:
         data["changed_file_count"] = self.changed_file_count
         data["renamed_count"] = self.renamed_count
         return data
-
-
-def _count_hits(text: str) -> int:
-    return len(OLD_NAME_PATTERN.findall(text))
-
-
-def _replace(text: str) -> tuple[str, dict[str, int]]:
-    counts: dict[str, int] = {}
-    for old, new in REPLACEMENTS:
-        found = text.count(old)
-        if found:
-            counts[old] = found
-            text = text.replace(old, new)
-    return text, counts
 
 
 def _rename_pass(tree: Path, kept: KeptList) -> list[dict[str, str]]:
@@ -110,20 +99,22 @@ def apply_rename(
     kept = load_kept_list(kept_list)
     report = ApplyReport(tree=str(tree), kept_list=str(kept_list), dry_run=dry_run)
     started = time.monotonic()
+    before = {entry.id: subtree_digest(tree, entry) for entry in kept.kept_paths}
+    report.kept_digests = before
 
     for rel in tracked_files(tree):
         text = read_text(tree / rel)
         if text is None:
             report.binary_skipped += 1
             continue
-        hits = _count_hits(text)
+        hits = count_hits(text)
         if kept.covering(rel) is not None:
             report.kept_hits += hits
             report.old_name_hits_before += hits
             report.old_name_hits_after += hits
             continue
         report.old_name_hits_before += hits
-        replaced, counts = _replace(text)
+        replaced, counts = rename_text(text)
         for spelling, found in counts.items():
             report.hits_by_spelling[spelling] = (
                 report.hits_by_spelling.get(spelling, 0) + found
@@ -132,10 +123,15 @@ def apply_rename(
             report.changed_files.append(rel)
             if not dry_run:
                 (tree / rel).write_bytes(replaced.encode("utf-8"))
-        report.old_name_hits_after += _count_hits(replaced)
+        report.old_name_hits_after += count_hits(replaced)
 
     if not dry_run:
         report.renamed = _rename_pass(tree, kept)
+        report.kept_altered = [
+            entry.id
+            for entry in kept.kept_paths
+            if subtree_digest(tree, entry) != before[entry.id]
+        ]
 
     report.elapsed_seconds = round(time.monotonic() - started, 3)
     return report
