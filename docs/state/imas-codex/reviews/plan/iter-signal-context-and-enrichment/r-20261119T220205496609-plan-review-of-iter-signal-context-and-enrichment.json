@@ -43,9 +43,28 @@
       "note": "Section 6 is declared deferred until the vocabulary section lands.",
       "reason": "",
       "when": "2026-11-19T22:12:59.925726+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "eccbb4bfd005f27da9cb93262c0c7a12ad70a33d",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The census now has five figures for each value: three deciding sources, undecided and conflict, summing to 1,766.",
+      "reason": "",
+      "when": "2026-11-19T22:13:05.202988+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "eccbb4bfd005f27da9cb93262c0c7a12ad70a33d",
+      "commit_basis": "edit",
+      "note": "The census now has five figures for each value: three deciding sources, undecided and conflict, summing to 1,766.",
+      "reason": "",
+      "when": "2026-11-19T22:13:05.202988+00:00"
+    },
     "wiring-1": {
       "action": "acted",
       "by": "",
