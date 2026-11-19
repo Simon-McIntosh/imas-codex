@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Pilot signal vocabulary assignment</title>
+</head>
+<body>
+  <h2 id="pilot-signal-vocabulary-summary">Closed vocabulary on the pilot signals</h2>
+  <p id="pilot-signal-vocabulary-scope">1,766 ITER pilot signals carry a quantity, unit and role decided by rule from four sources in precedence: a linked signal-list row, the controls metadata the signal carries, the unit the archive reports, and the field pattern of the signal's name. Each axis has one outcome per signal; the three outcomes on an axis sum to 1,766.</p>
+
+  <h3 id="pilot-signal-vocabulary-counts">Outcome by axis and credited source</h3>
+  <table id="pilot-signal-vocabulary-table">
+    <thead>
+      <tr><th>Axis</th><th>Decided</th><th>Row</th><th>Controls metadata</th><th>Archive unit</th><th>Field pattern</th><th>Conflict</th><th>Undecided</th><th>Sum</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Quantity</td><td>742</td><td>155</td><td>522</td><td>—</td><td>65</td><td>4</td><td>1,020</td><td>1,766</td></tr>
+      <tr><td>Unit</td><td>1,156</td><td>—</td><td>1,038</td><td>118</td><td>—</td><td>2</td><td>608</td><td>1,766</td></tr>
+      <tr><td>Role</td><td>202</td><td>3</td><td>134</td><td>—</td><td>65</td><td>1</td><td>1,563</td><td>1,766</td></tr>
+    </tbody>
+  </table>
+  <p id="pilot-signal-vocabulary-counts-note">A dash marks a source the axis does not consult: the archive unit gives the unit only, as the plan declares. Of the 190 signals with a linked row, 225 rows are attached; a row states a value only when the link names the selector, the component has one row, or the row carries the signal's own field code, so a sibling channel's row cannot decide a signal.</p>
+
+  <h3 id="pilot-signal-vocabulary-pattern">Why the field-pattern rule is not a guess</h3>
+  <p id="pilot-signal-vocabulary-pattern-rule">The field-pattern source reads the population: other signals that share the field code contribute the value their own sources decided, and the pattern states a member only when at least three of them agree unanimously. The signal itself never contributes, so no value is supported by itself. Where the pattern disagrees with a signal's own source the result is a conflict — the four quantity conflicts and one role conflict are that case, plus two unit conflicts between controls metadata and the archive unit.</p>
+
+  <h3 id="pilot-signal-vocabulary-checks">Checks that could have failed</h3>
+  <ul id="pilot-signal-vocabulary-check-list">
+    <li id="pilot-signal-vocabulary-check-units">1,156 decided units compared against 2,188 source spellings through the shared unit authority: 0 disagreements. A source writing the same unit another way (KA against kA) agrees rather than conflicts.</li>
+    <li id="pilot-signal-vocabulary-check-repeat">A second assignment wrote 0 signals and changed 0; the write sets all nine slots explicitly, so a member that no longer applies is removed rather than left behind.</li>
+    <li id="pilot-signal-vocabulary-check-reading">108 values read by hand (sample digest <code>c7d7be9f6c2a6b1cc479656a945f87ca2364067d4d03b69d2eecc466238ec738</code>, chosen before the run): 15 per credited source and axis, 3 where fewer. 0 disagreements.</li>
+    <li id="pilot-signal-vocabulary-check-search">A served search for quantity <code>current</code> and role <code>command</code> returned 20 signals, all 20 carrying both and all inside the pilot; the same query unfiltered returned 20 of which 0 carried both, so the filter changes the page it serves.</li>
+    <li id="pilot-signal-vocabulary-check-mutation">Mutating the assignment to guess a default member and to resolve a disagreement silently fails 16 of 40 tests in the two vocabulary suites, including the declared negative controls.</li>
+    <li id="pilot-signal-vocabulary-check-scan">2,792 real accessors, component codes, document titles and row prefixes searched across the tracked tree: one match, the generic function-category phrase "Temperature Transmitter" in a pre-existing fixture, and no signal name, component number, document identity or row content.</li>
+  </ul>
+
+  <h3 id="pilot-signal-vocabulary-undecided">What stays undecided</h3>
+  <p id="pilot-signal-vocabulary-undecided-note">1,020 quantities and 1,563 roles have no source that states them: the controls feed describes many channels only as an analogue input, a field code or a signal value, and the signal list has one row per component rather than one per archive variable. The rule set does not fill that gap with a default; a signal absent from the feed, the row and a unanimous pattern stays undecided until a source states the value.</p>
+</body>
+</html>

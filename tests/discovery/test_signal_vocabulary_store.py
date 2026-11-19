@@ -109,11 +109,80 @@ class TestAssignCohort:
 
     def test_a_linked_row_supplies_the_row_text(self):
         signals = [_signal("inv:e")]
-        rows = [{"id": "inv:e", "description": "Signal purpose: Absolute pressure"}]
+        rows = [
+            {
+                "id": "inv:e",
+                "description": "Signal purpose: Absolute pressure",
+                "field_code": "AA",
+                "match_kind": "derived",
+            }
+        ]
         result = assign_cohort(signals, rows)
         record = result["ledger"][0]
         assert record["vocabulary_quantity"] == "pressure"
         assert record["vocabulary_quantity_source"] == "signal_list_row"
+
+    def test_a_sibling_channel_row_does_not_state_this_signal(self):
+        """Several rows for one component describe their own channels only."""
+        signals = [_signal("inv:sib", field_code="FL")]
+        rows = [
+            {
+                "id": "inv:sib",
+                "description": "Heater current measurement",
+                "field_code": "IT",
+                "match_kind": "derived",
+            },
+            {
+                "id": "inv:sib",
+                "description": "Heater fault state",
+                "field_code": "FL",
+                "match_kind": "derived",
+            },
+        ]
+        result = assign_cohort(signals, rows)
+        assert result["ledger"][0]["vocabulary_quantity_state"] == "undecided"
+
+    def test_the_row_of_this_signals_own_field_code_states_it(self):
+        signals = [_signal("inv:own", field_code="IT")]
+        rows = [
+            {
+                "id": "inv:own",
+                "description": "Heater current measurement",
+                "field_code": "IT",
+                "match_kind": "derived",
+            },
+            {
+                "id": "inv:own",
+                "description": "Heater fault state",
+                "field_code": "FL",
+                "match_kind": "derived",
+            },
+        ]
+        result = assign_cohort(signals, rows)
+        record = result["ledger"][0]
+        assert record["vocabulary_quantity"] == "current"
+        assert record["vocabulary_quantity_source"] == "signal_list_row"
+
+    def test_an_exact_row_states_the_signal_whatever_its_field_code(self):
+        signals = [_signal("inv:exact", field_code="XI")]
+        rows = [
+            {
+                "id": "inv:exact",
+                "description": "Signal purpose: Absolute pressure",
+                "field_code": "PT",
+                "match_kind": "exact",
+            },
+            {
+                "id": "inv:exact",
+                "description": "Sibling temperature channel",
+                "field_code": "TT",
+                "match_kind": "derived",
+            },
+        ]
+        result = assign_cohort(signals, rows)
+        record = result["ledger"][0]
+        assert record["vocabulary_quantity"] == "pressure"
+        assert record["vocabulary_quantity_state"] == "decided"
 
 
 class TestUnitAgreement:
@@ -142,7 +211,9 @@ class TestUnitAgreement:
                 "inv:g",
                 unit="K",
                 description_source="controlsmetadata:/feed",
-                archive_metadata=json.dumps({"full": [{"name": "Units", "value": "bar"}]}),
+                archive_metadata=json.dumps(
+                    {"full": [{"name": "Units", "value": "bar"}]}
+                ),
             )
         ]
         result = assign_cohort(signals, [])

@@ -115,7 +115,7 @@ def vocabulary_transaction():
                 CREATE (r:PlantSignalRow {id:$facility + ':row:demo',
                     facility_id:$facility, description:$text})
                 CREATE (l:SignalContextLink {id:$facility + ':link:demo',
-                    facility_id:$facility})
+                    facility_id:$facility, match_kind:'derived'})
                 WITH d, r, l
                 MATCH (s:FacilitySignal {id:$signal})
                 CREATE (s)-[:HAS_PLANT_CONTEXT]->(l)

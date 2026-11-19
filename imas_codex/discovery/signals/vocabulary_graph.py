@@ -58,8 +58,9 @@ LIMIT $limit
 
 COHORT_ROWS_QUERY = """
 MATCH (s:FacilitySignal {facility_id: $facility})-[:HAS_PLANT_CONTEXT]
-      ->(:SignalContextLink)-[:CONTEXT_SOURCE_ROW]->(row:PlantSignalRow)
-RETURN DISTINCT s.id AS id, row.description AS description
+      ->(link:SignalContextLink)-[:CONTEXT_SOURCE_ROW]->(row:PlantSignalRow)
+RETURN DISTINCT s.id AS id, row.description AS description,
+       row.field_code AS field_code, link.match_kind AS match_kind
 ORDER BY id, description
 """
 
@@ -102,8 +103,32 @@ def archive_unit(document: str | None) -> str | None:
     return None
 
 
+def qualifying_row_texts(
+    signal: Mapping[str, Any], rows: Sequence[Mapping[str, Any]]
+) -> tuple[str, ...]:
+    """Rows that may state this signal's values, and no sibling channel's.
+
+    An exact link names the archive selector, so it states the signal. A
+    component with one row has one channel, so that row states it. A component
+    whose channels each have a row may state a value only through the row of
+    this signal's own field code; the other rows describe sibling channels and
+    are ignored, because a derived join establishes component context rather
+    than the meaning of every field the component exposes.
+    """
+    exact = [row for row in rows if row.get("match_kind") == "exact"]
+    if exact:
+        chosen = exact
+    elif len(rows) == 1:
+        chosen = list(rows)
+    else:
+        field = signal.get("field_code")
+        chosen = [row for row in rows if field and row.get("field_code") == field]
+    return tuple(str(row["description"]) for row in chosen if row.get("description"))
+
+
 def cohort_sources(
-    signals: Sequence[Mapping[str, Any]], rows_by_signal: Mapping[str, Sequence[str]]
+    signals: Sequence[Mapping[str, Any]],
+    rows_by_signal: Mapping[str, Sequence[Mapping[str, Any]]],
 ) -> list[SignalSources]:
     """Turn the cohort snapshot into one source record per signal."""
     sources = []
@@ -115,7 +140,9 @@ def cohort_sources(
             SignalSources(
                 signal_id=signal["id"],
                 field_code=signal.get("field_code"),
-                row_texts=tuple(rows_by_signal.get(signal["id"], ())),
+                row_texts=qualifying_row_texts(
+                    signal, rows_by_signal.get(signal["id"], ())
+                ),
                 controls_text=signal.get("description") if controls else None,
                 controls_unit=signal.get("unit") if controls else None,
                 archive_unit=archive_unit(signal.get("archive_metadata")),
@@ -142,12 +169,13 @@ def snapshot_cohort(
     return signals, rows
 
 
-def _rows_by_signal(rows: Sequence[Mapping[str, Any]]) -> dict[str, list[str]]:
-    grouped: dict[str, list[str]] = {}
+def _rows_by_signal(
+    rows: Sequence[Mapping[str, Any]],
+) -> dict[str, list[Mapping[str, Any]]]:
+    grouped: dict[str, list[Mapping[str, Any]]] = {}
     for row in rows:
-        description = row.get("description")
-        if description:
-            grouped.setdefault(row["id"], []).append(str(description))
+        if row.get("description"):
+            grouped.setdefault(row["id"], []).append(row)
     return grouped
 
 
