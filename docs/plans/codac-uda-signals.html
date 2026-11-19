@@ -23,7 +23,7 @@
   <title>CODAC UDA signals in the graph, and the rename to iter-codex | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="80">
+<meta name="plan-version" content="81">
 <meta name="plan-modified" content="2026-11-20">
 </head>
 <body>
@@ -305,7 +305,10 @@
     <div class="r-comment-body"><p>Review of run r-20261119T181831529109-rehearse-the-rename at c8a99be9645f2bd7a8a7ca99642d906ba04c5dc4..656b6b87ac3af32b819abd1b3b21316211be96b5: parsed record with scores goal_fidelity 18, evidence 15, scope_discipline 20, durability 15, fit 17, reuse 20, added_failure_count 0 and added_failure_ids [], six non-blocking findings, stored at the reviewed run's review-records path and not in the worktree.</p></div>
 </div>
 <div class="r-comment" data-section="s23" data-id="c-run-r-20261119T225245798128-review-of-signal-loading-recipe-tool-741eb645fa2a" data-who="reckon-build" data-when="2026-11-19T22:53:50.206Z">
-    <div class="r-comment-body"><p>Filed a parsed review of r-20261119T223601646628-signal-loading-recipe-tool at d08c86498..741eb645f scoring goal_fidelity 20, evidence 17, scope_discipline 20, durability 16, fit 19, reuse 20 with 3 non-blocking findings and added_failure_count 0 (the reviewed run&#x27;s single head arm, 39 passed 1 skipped EXIT=0, has no failing ids to add).</p></div>
+    <div class="r-comment-body"><p>Filed a parsed review of r-20261119T223601646628-signal-loading-recipe-tool at d08c86498..741eb645f scoring goal_fidelity 20, evidence 17, scope_discipline 20, durability 16, fit 19, reuse 20 with 3 non-blocking findings and added_failure_count 0 (the reviewed run's single head arm, 39 passed 1 skipped EXIT=0, has no failing ids to add).</p></div>
+</div>
+<div class="r-comment" data-section="s23" data-id="c-run-r-20261119T223601646628-signal-loading-recipe-tool" data-who="reckon-build" data-when="2026-11-19T22:38:02.028Z">
+    <div class="r-comment-body"><p>Added the read-only server tool `get_signal_load_recipe`, which returns the load recipe for a plant signal: the three things a load needs beyond the server (the installed imas-codex package, the m-uda-client module environment, and the private host configuration with the excluded operator archive), the ordered access pattern for one signal over a time window and over a pulse, the returned units and time bases, the read limits, and a runnable example with invented names. The single source of both the tool&#x27;s text and the archive-signals skill is two module constants in imas_codex/remote/archive_access.py (LOAD_RECIPE_ACCESS and LOAD_RECIPE_EXAMPLE, composed by SIGNAL_LOAD_RECIPE); the skill quotes both verbatim between recipe markers and a test compares them. A stdio client run from a directory outside the checkout fetched it from a read-only server (33 tools, no write tool, 4,457 bytes); the example taken from the served text, run against a recorded reader receipt, returned 2-sample and 3-sample arrays with unit K and time bases epoch_ns and pulse_seconds; the served text matched none of 6 private hosts, 10,259 private selectors and 6,677 private pulse and category names, with positive controls finding all of each in their own source; the gate ran 39 passed, 1 skipped, exit 0.</p></div>
 </div>
 </section>
 </main>
