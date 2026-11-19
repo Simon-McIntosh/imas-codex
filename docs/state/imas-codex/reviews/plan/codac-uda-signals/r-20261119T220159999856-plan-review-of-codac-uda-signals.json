@@ -1,0 +1,79 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-19T22:02:58.610Z",
+  "dispatched_at": "2026-11-19T22:02:45Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:150",
+      "id": "done_when-1",
+      "reason": "the equality must carry the same exemption the following sentence grants, or the gate fails for a correctly built package.",
+      "text": "s22 requires \"the number of nodes per kind in the package equal to the number of ITER-facility nodes of that kind in the shared graph\", then permits \"nodes that belong to no facility ... apart from the kinds the search tools need and the landing record names\"; for exactly those permitted kinds the package holds nodes with no facility, so the per-kind equality is false by construction and the node cannot satisfy both clauses",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:150",
+      "id": "done_when-2",
+      "reason": "without a stated durable pre-registration the positive controls can be satisfied post hoc, which is precisely the repair section 20's controls already received.",
+      "text": "the two searches are keyed on \"a described signal known beforehand\" and \"a designation known beforehand\", but the section forbids any real signal, pulse or host name in a tracked file and names no private record where that selection is fixed before the run, so a reader cannot tell a pre-selected subject from one chosen after seeing the container's answers",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/Code/imas-codex/docs/plans/codac-uda-signals.html:154",
+      "id": "reasoning-1",
+      "reason": "the deliverable's central claim is either impossible as stated or needs a check that exercises a client without the checkout actually producing a load, and the author must choose one.",
+      "text": "s23's \"an agent connected to the server alone, without the repository or its skill files, can fetch the recipe and write a working load\" is unreachable under the section's own constraints (the returned text carries no real host, endpoints come from private configuration, and the pattern runs under the project's archive-client environment) while its only execution check runs the example \"inside the project environment\" against a fixture, so a delivery that never satisfies the server-alone claim closes on a green record",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "eccbb4bfd005f27da9cb93262c0c7a12ad70a33d",
+  "plan_fingerprint": "c4701d31bb57ff421985e79f95110ae4534e9af654e13b562df389b386044a8b",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 75,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261119T220159999856-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "7ba31769e54989bef475702f2856a7049113bbb5",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 \"the data-dictionary image\" resolves to the repository's image build and its public DD package, and \"the repository's skill\" resolves to the archive-signals skill that section 17 landed; no extensionless href is claimed.",
+    "done_when": "a finding \u2014 s22's per-kind node equality (plan.html:150) is contradicted by the facility-less exception declared three sentences later in the same done-when, and neither \"known beforehand\" selection has a durable pre-registration.",
+    "evidence_paths": "pass \u2014 both sections put their figures in the landing record, and the only scratch artefacts are the deliberately disposable control builds.",
+    "naming": "pass \u2014 the two new sections carry no plan label, ticket number or stage name into any named artifact.",
+    "reasoning": "a finding \u2014 s23's server-alone claim (plan.html:154) is neither reachable from the section's own constraints nor measured by its done-when.",
+    "single_goal": "pass \u2014 s22 delivers one image carrying its package and s23 delivers one server tool; each closes on one verdict.",
+    "wiring": "pass \u2014 `s22` depends on `#s18,#s20` and `s23` on `#s17,#s18`, each matching its section tag's `data-links` and resolving to sections that exist and are done."
+  },
+  "section_digests": {
+    "_document": "d6f5961d61a0c831cebb5fd3d04ed35f208aaa0201b650f7897a24859885fb21",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "759b1a8a0d0172458970abb033b7b0891dbfbea4a146fe46e1d40088ad5b1e2b",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "5b6478a19c4933df522a5f65b5029c4d8c8fbaa56108cf7537380f3b2160b330",
+    "s21": "766504c3cf6d6cb5fbb80fc49533f32eb2dd8d9f7686b55ca616d9cac1f04941",
+    "s22": "f963d6fbd57420e4e31885339e85eabcbb76040b84087febf7490ec4cee53e88",
+    "s23": "09e0d08d88759e1defa9ed530b0e6f467bf2532f85064227d0b2994b3c4ef11c",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T22:09:29.216887+00:00",
+  "total": null
+}
