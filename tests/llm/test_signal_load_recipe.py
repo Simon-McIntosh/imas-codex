@@ -149,12 +149,21 @@ def private_config(tmp_path, monkeypatch):
     return path
 
 
+def _served_example() -> str:
+    """The fenced python block exactly as the tool returns it."""
+    recipe = load_recipe_text()
+    assert recipe.count("```python\n") == 1
+    body = recipe.split("```python\n", 1)[1].split("```", 1)[0]
+    assert body.strip()
+    return body
+
+
 def test_recipe_example_runs_and_returns_arrays_with_units(
     recorded_response, private_config
 ):
-    """The example is executed as written, not only printed."""
+    """The example in the returned text is executed as written, not only printed."""
     namespace: dict = {"__name__": "__main__", "__builtins__": __builtins__}
-    exec(compile(LOAD_RECIPE_EXAMPLE, "<recipe example>", "exec"), namespace)
+    exec(compile(_served_example(), "<recipe example>", "exec"), namespace)
 
     window, pulse = namespace["window"], namespace["pulse"]
     assert isinstance(window.time, np.ndarray)
