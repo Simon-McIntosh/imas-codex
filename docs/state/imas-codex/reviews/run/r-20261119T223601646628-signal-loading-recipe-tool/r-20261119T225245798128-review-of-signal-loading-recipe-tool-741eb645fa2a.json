@@ -1,0 +1,73 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_basis": "The reviewed run records no baseline_suite/after_suite pair: its gate is a single head arm, logs/gate.log at revision 741eb645f, completed with `39 passed, 1 skipped` and EXIT=0, so the after-failure set is empty and the added set is empty whatever the base would have shown.",
+  "call_sites": [
+    "imas_codex/llm/server.py:2563 get_signal_load_recipe -> load_recipe_text",
+    "imas_codex/llm/server.py:1856 AgentsServer.FACILITY_TOOLS membership",
+    "imas_codex/cli/serve.py:112 AgentsServer(...) construction used by `imas-codex serve`"
+  ],
+  "completed_at": "2026-11-19T22:53:50.206Z",
+  "dispatched_at": "2026-11-19T22:53:22Z",
+  "findings": [
+    {
+      "file": "tests/llm/test_signal_load_recipe.py",
+      "line": "243",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert SIGNAL_LOAD_RECIPE.startswith(text[:40])` cannot fail once :241 has established `text.strip() == load_recipe_text().strip()` and load_recipe_text returns SIGNAL_LOAD_RECIPE, so it compares a value with itself and adds no coverage while reading as an independent check."
+    },
+    {
+      "file": "tests/llm/test_signal_load_recipe.py",
+      "line": "79",
+      "severity": "non-blocking",
+      "text": "non-blocking: the only assertion comparing the recipe against real host names skips when `~/.cache/imas-codex-codac-uda/catalogue-private-config.yaml` is absent, which is the case inside a reckon run because HOME is the run home, so the gate's zero-real-host-names clause rests on the ad-hoc logs/identity-scan.py scan at revision 540795b rather than on a durable test."
+    },
+    {
+      "file": "docs/evidence/fragments/codac-uda-signals/signal-loading-recipe-tool.html",
+      "line": "4",
+      "severity": "non-blocking",
+      "text": "non-blocking: the fragment says the recipe is 'two module constants ... composed by SIGNAL_LOAD_RECIPE' and the manifest's landing line repeats that, but imas_codex/remote/archive_access.py:113 composes three constants (LOAD_RECIPE_REQUIREMENTS joins LOAD_RECIPE_ACCESS and LOAD_RECIPE_EXAMPLE), so a reader tracing the single source is given an incomplete list."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "verified three production call sites: imas_codex/llm/server.py:2563 tool body, imas_codex/llm/server.py:1856 FACILITY_TOOLS membership, imas_codex/cli/serve.py:112 server construction.",
+    "diff": "read all three commits against base d08c86498; the recipe text, the tool registration, 11 added test lines at 540795b38, and the evidence fragment at 741eb645f.",
+    "done_when": "the done_when's clauses map to tests/llm/test_signal_load_recipe.py:42,56,63,161,201 and tests/llm/test_tool_schemas.py:204, and the gate log records 39 passed, 1 skipped at revision 741eb645f, EXIT=0.",
+    "goal": "the node goal is 'Add a read-only server tool that returns the recipe for loading a plant signal'; imas_codex/llm/server.py:2548-2565 registers get_signal_load_recipe inside the `not self.dd_only` block, returns the constant text, and reads no samples and contacts no archive.",
+    "manifest": "read; status complete, three commits, tests naming the three-file pytest gate, test_logs naming logs/gate.log (39 passed, 1 skipped, EXIT=0), negative-control.log and drift-guard.log at 1 failed, EXIT=1 each.",
+    "write_paths": "read the reviewed manifest's eight declared paths; `git diff d08c86498..741eb645f` touches six files, every one inside that fence and none outside it."
+  },
+  "justifications": {
+    "call_sites": "verified three production call sites: the tool body, the FACILITY_TOOLS membership it is registered under, and the serve command that constructs the server.",
+    "diff": "read all three commits against base d08c86498: 221f32339 adds the three text constants, load_recipe_text and the tool registration, 540795b38 adds 11 lines to the new test file, and 741eb645f adds only the 57-line evidence fragment.",
+    "done_when": "the done_when's clauses map to tests/llm/test_signal_load_recipe.py:42,56,63,161,201 and tests/llm/test_tool_schemas.py:204, and tests: logs/gate.log records 39 passed, 1 skipped at revision 741eb645f, EXIT=0.",
+    "durability": "tests/llm/test_signal_load_recipe.py:45 reddens on a one-word skill drift (logs/drift-guard.log EXIT=1) and :161 reddens when the example's import is removed (logs/negative-control.log, NameError), but :243 is a tautology and :79-84 skips the only real-host-name comparison inside a reckon run.",
+    "evidence": "logs/gate.log carries a header naming revision 741eb645f and ends with `39 passed, 1 skipped` then EXIT=0, and its assertions cover the done_when's clauses, though the zero-real-host-names clause is covered there only by a scan run outside pytest.",
+    "fit": "the constants and load_recipe_text in imas_codex/remote/archive_access.py:14-127 follow the module's plain-function idiom and the tool name follows server.py's get_* convention, with both server docstring tool lists updated at :9 and :1819.",
+    "goal": "the node goal is 'Add a read-only server tool that returns the recipe for loading a plant signal'; imas_codex/llm/server.py:2548-2565 registers get_signal_load_recipe inside the `not self.dd_only` block, returns the constant text, and reads no samples and contacts no archive.",
+    "goal_fidelity": "imas_codex/llm/server.py:2548 defines get_signal_load_recipe inside the `not self.dd_only` registration block and returns load_recipe_text() without contacting an archive, which is the read-only tool the goal names.",
+    "manifest": "read; status complete, commits 221f32339/540795b38/741eb645f, tests naming the three-file pytest gate, test_logs naming logs/gate.log (39 passed, 1 skipped, EXIT=0), and negative-control.log plus drift-guard.log at 1 failed, EXIT=1 each.",
+    "reuse": "a capability search over `git grep -n recipe 741eb645f -- imas_codex`, the served-guidance tools (imas_codex/llm/server.py:3215 get_dd_migration_guide) and imas_codex/graph/schema_context.py found no owner of a static archive-load recipe, and the added text extends the module that already owns the archive lookups.",
+    "scope_discipline": "all six paths in `git diff d08c86498..741eb645f` are inside the manifest's declared write paths, with nothing added that the goal does not imply.",
+    "write_paths": "read the reviewed manifest's eight declared paths; `git diff --stat d08c86498..741eb645f` touches six files (.claude/skills/archive-signals/SKILL.md, the evidence fragment, imas_codex/llm/server.py, imas_codex/remote/archive_access.py and two tests/llm files), every one inside that fence and none outside it."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the node goal is 'Add a read-only server tool that returns the recipe for loading a plant signal'; imas_codex/llm/server.py:2548-2565 registers get_signal_load_recipe inside the `not self.dd_only` block, returns the constant text, and reads no samples and contacts no archive.\nVERDICT done_when: the done_when's clauses map to tests/llm/test_signal_load_recipe.py:42,56,63,161,201 and tests/llm/test_tool_schemas.py:204, and logs/gate.log records 39 passed, 1 skipped at revision 741eb645f, EXIT=0.\nVERDICT write_paths: read the reviewed manifest's eight declared paths; git diff --stat d08c86498..741eb645f touches six files (.claude/skills/archive-signals/SKILL.md, docs/evidence/fragments/codac-uda-signals/signal-loading-recipe-tool.html, imas_codex/llm/server.py, imas_codex/remote/archive_access.py and two tests/llm files), every one inside that fence and none outside it.\nVERDICT manifest: read; status complete, commits 221f32339/540795b38/741eb645f, tests naming the three-file pytest gate, test_logs naming logs/gate.log (39 passed, 1 skipped, EXIT=0), and negative-control.log plus drift-guard.log at 1 failed, EXIT=1 each.\nVERDICT diff: read all three commits against base d08c86498 - 221f32339 adds the three text constants, load_recipe_text and the tool registration, 540795b38 adds 11 lines to the new test file, and 741eb645f adds only the 57-line evidence fragment.\nCALL_SITES: imas_codex/llm/server.py:2563, imas_codex/llm/server.py:1856, imas_codex/cli/serve.py:112\nSCORE goal_fidelity: 20\nJUSTIFICATION goal_fidelity: imas_codex/llm/server.py:2548 defines get_signal_load_recipe inside the `not self.dd_only` registration block and returns load_recipe_text() without contacting an archive, which is the read-only tool the goal names.\nSCORE evidence: 17\nJUSTIFICATION evidence: logs/gate.log carries a header naming revision 741eb645f and ends with `39 passed, 1 skipped` then EXIT=0, and its assertions cover the done_when's clauses, though the zero-real-host-names clause is covered there only by a scan run outside pytest.\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: all six paths in git diff d08c86498..741eb645f are inside the manifest's declared write paths, with nothing added that the goal does not imply.\nSCORE durability: 16\nJUSTIFICATION durability: tests/llm/test_signal_load_recipe.py:45 reddens on a one-word skill drift (logs/drift-guard.log EXIT=1) and :161 reddens when the example's import is removed (logs/negative-control.log, NameError), but :243 is a tautology and :79-84 skips the only real-host-name comparison inside a reckon run.\nSCORE fit: 19\nJUSTIFICATION fit: the constants and load_recipe_text in imas_codex/remote/archive_access.py:14-127 follow the module's plain-function idiom and the tool name follows server.py's get_* convention, with both server docstring tool lists updated at :9 and :1819.\nSCORE reuse: 20\nJUSTIFICATION reuse: a capability search over `git grep -n recipe 741eb645f -- imas_codex`, the served-guidance tools (imas_codex/llm/server.py:3215 get_dd_migration_guide) and imas_codex/graph/schema_context.py found no owner of a static archive-load recipe, and the added text extends the module that already owns the archive lookups.\nFINDING tests/llm/test_signal_load_recipe.py:243 non-blocking: the assertion compares SIGNAL_LOAD_RECIPE with a prefix of itself after :241 already asserted equality, so no regression can redden it alone.\nFINDING tests/llm/test_signal_load_recipe.py:79 non-blocking: the only real-host-name comparison skips when the private configuration is absent, which is the case inside a reckon run, so that clause is backed by logs/identity-scan.py rather than a durable test.\nFINDING docs/evidence/fragments/codac-uda-signals/signal-loading-recipe-tool.html:4 non-blocking: the fragment and the manifest's landing line say the recipe is composed of two module constants, but imas_codex/remote/archive_access.py:113 composes three, omitting LOAD_RECIPE_REQUIREMENTS.",
+  "review_run_id": "r-20261119T225245798128-review-of-signal-loading-recipe-tool-741eb645fa2a",
+  "reviewed_base_sha": "d08c864989a074a32aa9db1082103405b9b3cefa",
+  "reviewed_head_sha": "741eb645fa2a1db304cd8fde3dcb0fc2d1478a69",
+  "reviewed_run_id": "r-20261119T223601646628-signal-loading-recipe-tool",
+  "reviewer_run_id": "r-20261119T225245798128-review-of-signal-loading-recipe-tool-741eb645fa2a",
+  "scores": {
+    "durability": 16,
+    "evidence": 17,
+    "fit": 19,
+    "goal_fidelity": 20,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T23:03:25.683950+00:00",
+  "total": 112
+}
