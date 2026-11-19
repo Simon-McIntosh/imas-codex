@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-19T22:19:05.891Z",
+  "dispatched_at": "2026-11-19T22:18:53Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:94",
+      "id": "done_when-1",
+      "reason": "without a declared attribution rule the census is a worker choice rather than a measured quantity, so the node's central figure is unreproducible and its comparison across a re-run means nothing.",
+      "text": "the census asks for a value's signals \"split by deciding source ... the five figures for each value summing to 1,766\", but the section names three sources and never says which single bucket a signal belongs to when two of them agree (the pilot's 190 signal-list-linked signals are exactly the population where the archive's unit and the linked row's unit are most likely to agree); the sum forces one bucket per signal while the rule that picks it is unstated, so two correct readings produce different five-figure tables that both sum to 1,766 and the figure cannot fail on attribution",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:94",
+      "id": "done_when-2",
+      "reason": "the node must either fail an absolute done-when clause or silently resolve the disagreement the same line forbids resolving, so the two halves of the gate contradict each other and one of them needs the conflict carve-out written in.",
+      "text": "\"Where a signal already carries a unit from the archive or the controls metadata, the assigned unit equals it for every such signal\" is unqualified, while the negative control on the same line requires \"a signal whose sources disagree on the unit\" to be recorded as a conflict; for a signal whose archived unit and controls-metadata unit differ the assigned unit cannot equal both, so the equality clause is unsatisfiable exactly for the population the conflict state exists to hold, and the census expects conflicts to exist",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "9b4c337fa13332d10075a5d40f6c38366fa237b9",
+  "plan_fingerprint": "71e5c8a3f50d9d3d0bcce4f656125d1d1767db85b1e7fd66091e38aa188aa867",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 68,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261119T221802500329-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "445e40e033352a787dd572cb87f817023d384d1c",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the snapshot is byte-identical to docs/plans/iter-signal-context-and-enrichment.html (md5 f2379c78e772ae9e987517651d9c1482), s11's `data-links` name s4 and s5, both declared `done`, and the plan's 1,766-pilot figure matches the s4 landing record's assessed population.",
+    "done_when": "a finding \u2014 s11's done-when (docs/plans/iter-signal-context-and-enrichment.html:94) leaves the deciding-source attribution undecided for a value two sources agree on, and its unit-equality clause contradicts the conflict state its negative control declares.",
+    "evidence_paths": "pass \u2014 s11's evidence is the landing record plus a private sample file whose digest is recorded, and the figure the document cites resolves at docs/figures/iter-signal-context-and-enrichment/pipeline.svg.",
+    "naming": "pass \u2014 s11 names domain objects (measured quantity, unit, role, field pattern, controls metadata, undecided, conflict) and carries no plan label, stage name or ticket number into them.",
+    "reasoning": "pass \u2014 the 2026-11-19 lead choice s11 cites is now the locked decision `vocabulary-before-description` scoped to s11 and s6, and s11's ordering claim (\"before any description is written\") is the one s6's deferred status and `depends-on` implement.",
+    "single_goal": "pass \u2014 s11 carries one deliverable (three vocabulary values per pilot signal with their deciding source), and the ordering it imposes on play is carried by the decision record and s6's `depends-on`, not by a second deliverable in s11.",
+    "wiring": "pass \u2014 s6 is now deferred with `depends-on` naming s11 alongside s4 and s5 (all of s4/s5 `done`), s11 declares `depends-on` s4 and s5 and is declared `implementable` in `plan-section-declarations`, and the new `vocabulary-before-description` decision's `data-sections=\"s11,s6\"` matches the section that cites it."
+  },
+  "section_digests": {
+    "_document": "6779747f528ff1f6b31e591ec2714dffa68a783ad3f84f0902f50c5d83739420",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "9cd69e9ad1188dd43f29d825b03092c0f171bf7cadf55c00c658120289edcff6",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "9e51f8ba217e7d0bed83b1b1befdddbaeba215a0d94df9a98fe95e3d3b93eb42",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T22:25:52.074012+00:00",
+  "total": null
+}
