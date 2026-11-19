@@ -10,9 +10,10 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from scripts.rename.rules import PATH_TOKENS, count_hits, rename_text
+from scripts.rename.rules import PATH_TOKENS, count_hits, protect, rename_text, restore
 from scripts.rename.tree import (
     KeptList,
+    kept_identifiers,
     load_kept_list,
     path_digest,
     read_text,
@@ -37,6 +38,7 @@ class ApplyReport:
     renamed: list[dict[str, str]] = field(default_factory=list)
     kept_hits: int = 0
     kept_digests: dict[str, str] = field(default_factory=dict)
+    kept_identifiers: dict[str, int] = field(default_factory=dict)
     kept_altered: list[str] = field(default_factory=list)
     binary_skipped: int = 0
     dry_run: bool = False
@@ -101,6 +103,9 @@ def apply_rename(
     started = time.monotonic()
     before = {entry.id: subtree_digest(tree, entry) for entry in kept.kept_paths}
     report.kept_digests = before
+    persisted = kept_identifiers(tree, kept)
+    report.kept_identifiers = persisted
+    identifiers = sorted(persisted)
 
     for rel in tracked_files(tree):
         text = read_text(tree / rel)
@@ -114,7 +119,9 @@ def apply_rename(
             report.old_name_hits_after += hits
             continue
         report.old_name_hits_before += hits
-        replaced, counts = rename_text(text)
+        guarded, stand_ins = protect(text, identifiers)
+        replaced, counts = rename_text(guarded)
+        replaced = restore(replaced, stand_ins)
         for spelling, found in counts.items():
             report.hits_by_spelling[spelling] = (
                 report.hits_by_spelling.get(spelling, 0) + found

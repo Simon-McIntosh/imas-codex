@@ -3,33 +3,101 @@
   "inventory_source": "docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html",
   "note": "One step per surface of the consumer inventory. The tracked-tree rename is not a step here: it runs first (python -m scripts.rename apply) and this sequence covers everything the rename cannot reach by itself. Steps are ordered; each names what it changes, the check that proves it, and how it is undone.",
   "inventory": [
-    {"id": "units", "source": "Installed service and timer units: 5 files, 2 enablement links"},
-    {"id": "scheduler", "source": "Scheduler jobs: 2 matching jobs of 23 account jobs"},
-    {"id": "editable", "source": "Editable install and console scripts: 1 distribution, 11 declared entry points, 175 name-bound bin files"},
-    {"id": "roots", "source": "Cache, state and config roots: 53 entries (cache 51, config 1, local share 1, local state 0)"},
-    {"id": "registry", "source": "Registry package identities: 11 (fork 5, organisation 6), 1 local pushed-image receipt"},
-    {"id": "mcp", "source": "MCP client definitions: 3 external in 2 files, 2 tracked controls"},
-    {"id": "graph", "source": "Stored graph paths and imports: 28 values on 11 nodes, 17 historical relationship errors"},
-    {"id": "reckon", "source": "Reckon live and queued pointers: 23 (7 working, 15 awaiting-upstream, 1 held), 1109 retained history records"},
-    {"id": "supplement", "source": "Additional launch consumers: 6 service scripts, 1 user-bin wrapper, 3 matching shell lines"},
-    {"id": "azure", "source": "Azure registry image iterorganization/imas-codex: inventory recorded not measured, az absent"},
-    {"id": "repositories", "source": "Git repositories: fork Simon-McIntosh/imas-codex and organisation iterorganization/imas-codex, plus SoftwareRepo.remote_url"},
-    {"id": "worktrees", "source": "Worktrees retained with unmerged commits, listed from git worktree list at cutover time"},
-    {"id": "docs-state", "source": "In-tree project state, run records, reviews and crew file under docs/state/<project>"},
-    {"id": "gate-scripts", "source": "Saved gate scripts under ~/.cache/imas-codex-live-rewrite that write the checkout path or package name"},
-    {"id": "node-briefs", "source": "Node briefs on the primary branch that write the checkout path or package name"},
-    {"id": "sn-catalog", "source": "Kept: standard-names catalog repository and fork, imas-standard-names-catalog path"},
-    {"id": "sn-grammar", "source": "Kept: imas-standard-names distribution and imas_standard_names grammar import"},
-    {"id": "dd-identity", "source": "Kept: data-dictionary-only server identity imas-dd in client configuration"},
-    {"id": "dd-vocabulary", "source": "Kept: DD and IMAS command vocabulary (imas, dd groups; dd-version entry point)"},
-    {"id": "dd-schema", "source": "Kept: DD graph labels and schema classes (IMASNode, DDVersion, ...) from schemas/imas_dd.yaml"},
-    {"id": "imas-deps", "source": "Kept: imas-python, imas-data-dictionaries and imas-data-dictionary declarations"}
+    {
+      "id": "units",
+      "source": "Installed service and timer units: 5 files, 2 enablement links"
+    },
+    {
+      "id": "scheduler",
+      "source": "Scheduler jobs: 2 matching jobs of 23 account jobs"
+    },
+    {
+      "id": "editable",
+      "source": "Editable install and console scripts: 1 distribution, 11 declared entry points, 175 name-bound bin files"
+    },
+    {
+      "id": "roots",
+      "source": "Cache, state and config roots: 53 entries (cache 51, config 1, local share 1, local state 0)"
+    },
+    {
+      "id": "registry",
+      "source": "Registry package identities: 11 (fork 5, organisation 6), 1 local pushed-image receipt"
+    },
+    {
+      "id": "mcp",
+      "source": "MCP client definitions: 3 external in 2 files, 2 tracked controls"
+    },
+    {
+      "id": "graph",
+      "source": "Stored graph paths and imports: 28 values on 11 nodes, 17 historical relationship errors"
+    },
+    {
+      "id": "reckon",
+      "source": "Reckon live and queued pointers: 23 (7 working, 15 awaiting-upstream, 1 held), 1109 retained history records"
+    },
+    {
+      "id": "supplement",
+      "source": "Additional launch consumers: 6 service scripts, 1 user-bin wrapper, 3 matching shell lines"
+    },
+    {
+      "id": "azure",
+      "source": "Azure registry image iterorganization/imas-codex: inventory recorded not measured, az absent"
+    },
+    {
+      "id": "repositories",
+      "source": "Git repositories: fork Simon-McIntosh/imas-codex and organisation iterorganization/imas-codex, plus SoftwareRepo.remote_url"
+    },
+    {
+      "id": "worktrees",
+      "source": "Worktrees retained with unmerged commits, listed from git worktree list at cutover time"
+    },
+    {
+      "id": "docs-state",
+      "source": "In-tree project state, run records, reviews and crew file under docs/state/<project>"
+    },
+    {
+      "id": "gate-scripts",
+      "source": "Saved gate scripts under ~/.cache/imas-codex-live-rewrite that write the checkout path or package name"
+    },
+    {
+      "id": "node-briefs",
+      "source": "Node briefs on the primary branch that write the checkout path or package name"
+    },
+    {
+      "id": "sn-catalog",
+      "source": "Kept: standard-names catalog repository and fork, imas-standard-names-catalog path"
+    },
+    {
+      "id": "sn-grammar",
+      "source": "Kept: imas-standard-names distribution and imas_standard_names grammar import"
+    },
+    {
+      "id": "dd-identity",
+      "source": "Kept: data-dictionary-only server identity imas-dd in client configuration"
+    },
+    {
+      "id": "dd-vocabulary",
+      "source": "Kept: DD and IMAS command vocabulary (imas, dd groups; dd-version entry point)"
+    },
+    {
+      "id": "dd-schema",
+      "source": "Kept: DD graph labels and schema classes (IMASNode, DDVersion, ...) from schemas/imas_dd.yaml"
+    },
+    {
+      "id": "imas-deps",
+      "source": "Kept: imas-python, imas-data-dictionaries and imas-data-dictionary declarations"
+    }
   ],
   "steps": [
     {
       "id": "C0-freeze",
       "title": "Freeze writers and record the at-rest evidence",
-      "surfaces": ["worktrees", "reckon", "scheduler", "units"],
+      "surfaces": [
+        "worktrees",
+        "reckon",
+        "scheduler",
+        "units"
+      ],
       "disposition": "not measured",
       "step": "Record `git worktree list --porcelain`, `squeue -u $USER -h -o '%i|%j|%T|%M|%N'`, `scontrol show job` for each job, `systemctl --user list-units --all 'imas-codex*' 'reckon-watch-imas-codex*'` and the live pointer listing under `~/.config/reckon/crew/live/` filtered on project imas-codex. Resolve or carry every worktree that holds unmerged commits: list it, and for each either merge its commits or park them on a named branch before any path moves. Do not touch a retained worktree's files. Stop writers: no graph writer, no scheduler job using the shared environment, the graph stopped for C5/C7.",
       "check": "Every retained worktree appears in the recorded list with a disposition (merged, carried, or abandoned with its commit sha named); the live pointer listing prints for project imas-codex; the scheduler listing shows no job whose working directory or command is the shared environment. The recorded list is committed with the cutover landing record.",
@@ -38,25 +106,36 @@
     {
       "id": "C1-tracked-rename",
       "title": "Apply the repeatable rename to the primary branch",
-      "surfaces": ["editable", "supplement", "mcp", "docs-state"],
+      "surfaces": [
+        "editable",
+        "supplement",
+        "mcp",
+        "docs-state"
+      ],
       "disposition": "renamed",
       "step": "On the primary branch at the quiet window, from the repository root: `python -m scripts.rename apply`, then `python -m scripts.rename check` (exit 0) and commit. The tracked change carries the distribution name, the import package, the [tool.iter-codex] settings table, the IMAS_CODEX->ITER_CODEX environment prefix, the root path constants the code resolves, unit and container names as tracked files declare them, and both tracked MCP client files (.mcp.json, .vscode/mcp.json: key iter-cx, project path and command renamed).",
-      "check": "`python -m scripts.rename check` exits 0 and reports every old-name hit under a kept path; `python -m scripts.rename cutover` reports zero unaccounted surfaces; a second `apply` reports zero changed files; `git grep -n imas_codex -- ':!docs/evidence' ':!docs/state' and the rest of the kept list` returns only kept entries. NOTE: use `git grep` on the kept list, never a bare prefix replacement, so imas_standard_names and imas-dd are not casualties.",
+      "check": "`python -m scripts.rename check` exits 0 and reports every old-name hit under a kept path; `python -m scripts.rename cutover` reports zero unaccounted surfaces; a second `apply` reports zero changed files; `git grep -n imas_codex -- ':!docs/evidence' ':!docs/state' and the rest of the kept list` returns only kept entries. NOTE: use `git grep` on the kept list, never a bare prefix replacement, so imas_standard_names and imas-dd are not casualties.; every dotted identifier that appears in a kept path (`<old name>.<artifact>`, a stored schema or receipt identity) is unchanged in the code that reads it",
       "undo": "`git revert` the single rename commit on the primary branch; the tree returns byte-identically because the tool only rewrites text and moves paths it names in its report."
     },
     {
       "id": "C2-rebuild-environment",
       "title": "Rebuild the shared environment under the new distribution name",
-      "surfaces": ["editable", "supplement"],
+      "surfaces": [
+        "editable",
+        "supplement"
+      ],
       "disposition": "migrated",
-      "step": "In the main checkout after C1: `uv sync --extra test` (the extra cannot be a default; without it the suite aborts at collection). The sync regenerates the console scripts (11 declared entry points, now iter-codex etc.), the 175 venv bin wrappers that embed the checkout path, and the generated models. Reinstall the user-bin wrapper `~/.local/bin/plan` and edit the three matching ~/.bashrc lines (22, 23, 160) that name the checkout or the command.",
-      "check": "`uv pip show iter-codex` reports the new distribution and editable path; `command -v iter-codex` resolves inside the environment; `iter-codex --version` (or the CLI's revision report) prints the cutover commit; `rg -l imas_codex /home/ITER/mcintos/Code/imas-codex/.venv/bin | wc -l` falls to the third-party wrappers only (activation files are regenerated, and the editable .pth now names iter_codex).",
-      "undo": "Check out the pre-rename commit in the main checkout and run the same sync, or restore the environment from the recorded pre-cutover `uv pip freeze`; the environment is a build artifact and no tracked file is involved."
+      "step": "In the main checkout after C1: `uv sync --extra test` (the extra cannot be a default; without it the suite aborts at collection). The sync regenerates the console scripts (11 declared entry points, now iter-codex etc.), the 175 venv bin wrappers that embed the checkout path, and the generated models. Migrate the untracked `.env` in the same checkout: the settings prefix moves with the code, so every key the settings table composes from it must be renamed too (the measured example is `OPENROUTER_API_KEY_IMAS_CODEX` to `OPENROUTER_API_KEY_ITER_CODEX`; values are copied, never printed), and the same applies to any private YAML under the config root that names an environment variable. Reinstall the user-bin wrapper `~/.local/bin/plan` and edit the three matching ~/.bashrc lines (22, 23, 160) that name the checkout or the command.",
+      "check": "`uv pip show iter-codex` reports the new distribution and editable path; `command -v iter-codex` resolves inside the environment; `iter-codex --version` (or the CLI's revision report) prints the cutover commit; `rg -l imas_codex /home/ITER/mcintos/Code/imas-codex/.venv/bin | wc -l` falls to the third-party wrappers only (activation files are regenerated, and the editable .pth now names iter_codex).; every settings-derived variable the code now reads resolves in `.env`, proven by the LLM-dependent default-tier tests that failed without it",
+      "undo": "Check out the pre-rename commit in the main checkout and run the same sync, or restore the environment from the recorded pre-cutover `uv pip freeze`; the environment is a build artifact and no tracked file is involved.; restore the saved `.env` copy"
     },
     {
       "id": "C3-units-and-launchers",
       "title": "Install the renamed user units and launch scripts",
-      "surfaces": ["units", "scheduler"],
+      "surfaces": [
+        "units",
+        "scheduler"
+      ],
       "disposition": "renamed",
       "step": "Install `iter-codex-embed.service`, `iter-codex-graph-push.service`, `iter-codex-graph-push.timer`, `iter-codex-llm.service` and `reckon-watch-iter-codex.service` beside the old units, install the six launch scripts under `~/.local/share/iter-codex/services/` (codex-embed.sh, codex-neo4j.sh, embed.sh, llm-launcher.sh, llm.sh, neo4j.sh), re-point the two enablement links, `systemctl --user daemon-reload`, `disable` the old units, then `enable --now` the new timer. The scheduler job names themselves (`codex-neo4j`, `codex-embed`) carry no project name and stay: their command and working directory move to the new share root, which is what the inventory matched on.",
       "check": "`systemctl --user list-units 'iter-codex*' 'reckon-watch-iter-codex*'` shows the timer active/waiting and no old unit loaded or enabled; `ls ~/.config/systemd/user/*.wants` names the new units; `squeue-style` listing (`squeue -u $USER -h -o '%i|%j|%T|%M|%N'`) shows codex-neo4j and codex-embed running with `~/.local/share/iter-codex/services/...` commands, and the graph client discovers the service from inside a SLURM step as well as on a login node.",
@@ -65,7 +144,10 @@
     {
       "id": "C4-roots-and-keyring",
       "title": "Move the live state, cache and config roots and migrate stored credentials",
-      "surfaces": ["roots", "editable"],
+      "surfaces": [
+        "roots",
+        "editable"
+      ],
       "disposition": "migrated",
       "step": "With the graph and embedding services stopped: `mv ~/.local/share/imas-codex ~/.local/share/iter-codex`, `mv ~/.config/imas-codex ~/.config/iter-codex`, `mv ~/.cache/imas-codex ~/.cache/iter-codex`. The retained cache entries (51) are historical reports and checkouts: move them with the root, do not rewrite their bytes. Copy each keyring entry `imas-codex/<service>` to `iter-codex/<service>` (`keyring get`/`keyring set` per service, never printing the value) and leave the old entries until C8's zero-consumer check; the private gist id in the config root and the graph manifest move with the root.",
       "check": "The new CLI resolves all three roots (`iter-codex config paths` or the equivalent reports ~/.config/iter-codex, ~/.local/share/iter-codex, ~/.cache/iter-codex); the graph manifest is found at the new location and its pushed_to image identity is unchanged; credentials resolve for a read-only probe first, then `iter-codex graph status` succeeds against the running service.",
@@ -74,7 +156,9 @@
     {
       "id": "C5-mcp-clients",
       "title": "Re-point the external MCP clients",
-      "surfaces": ["mcp"],
+      "surfaces": [
+        "mcp"
+      ],
       "disposition": "renamed",
       "step": "In `~/.codex/config.toml` replace the `imas-cx` server key with `iter-cx`, its project path with the renamed checkout and its command with `iter-codex`. In `~/.claude.json` keep both `imas-dd` definitions unchanged and replace only a full-server `imas-cx` definition if one is present. Both tracked files (.mcp.json, .vscode/mcp.json) already moved in C1. Take a copy of each external file before editing.",
       "check": "Each client's own listing (e.g. `codex mcp list`) shows `iter-cx` and `imas-dd`; a reconnected client lists the full server's tools; the DD-only definition still resolves to the same endpoint. `rg --hidden 'imas-cx' ~/.codex/config.toml ~/.claude.json` returns nothing.",
@@ -83,7 +167,9 @@
     {
       "id": "C6-graph-templates",
       "title": "Migrate the two stored graph templates and keep the error evidence",
-      "surfaces": ["graph"],
+      "surfaces": [
+        "graph"
+      ],
       "disposition": "migrated",
       "step": "Query the two `DataAccess.connection_template` values that embed `from imas_codex.remote.executor import run_python_script` (exact node ids in the inventory receipt) and rewrite only the import module to `iter_codex.remote.executor`, after reading the current value into the cutover receipt. Do not touch the six FacilityPath checkout descriptions or the two ancestor listings: they describe a discovery provenance at the observed path, and the checkout keeps its directory name through a repository rename, so re-discover rather than rewrite them if it moves. Leave the 17 `CHECKED_WITH.error` values alone.",
       "check": "A bounded read (`MATCH (d:DataAccess) WHERE d.connection_template CONTAINS 'imas_codex' RETURN count(d)`) returns 0, and the same query for `iter_codex` returns the same two nodes; `MATCH (n)-[r:CHECKED_WITH]->() WHERE r.error CONTAINS 'imas-codex' RETURN count(r)` still returns 17. The templates execute on a bounded trial read from a compute node.",
@@ -92,7 +178,11 @@
     {
       "id": "C7-reckon-project-key",
       "title": "Serve reckon under the new project key with its history intact",
-      "surfaces": ["reckon", "docs-state", "worktrees"],
+      "surfaces": [
+        "reckon",
+        "docs-state",
+        "worktrees"
+      ],
       "disposition": "migrated",
       "step": "Back up `~/.config/reckon/mounts.json`, then replace the project key `imas-codex` with `iter-codex`. Update `docs/state/imas-codex` to `docs/state/iter-codex` (`git mv`) and rewrite only the live project keys: `project`/`slug` in project.json, index.json and crew.json. Leave `runs/` and `reviews/` payloads byte-identical: they are the preserved history. Re-register the project with reckon (`reckon mount`/`crew` according to its CLI) and let new run ids register under the new key; the retained worktrees from C0 are re-attached or drained under the new key before this step.",
       "check": "`reckon` lists the project under `iter-codex` and the run history count is at least the recorded 1109 plus runs made since (a drop is a failure); `python -m scripts.rename check` still exits 0 and reports `docs/state` under its kept entry; opening one historical review by id resolves.",
@@ -101,7 +191,13 @@
     {
       "id": "C8-registry-and-repositories",
       "title": "Rename the two repositories and publish the images under the new name",
-      "surfaces": ["repositories", "registry", "azure", "graph", "node-briefs"],
+      "surfaces": [
+        "repositories",
+        "registry",
+        "azure",
+        "graph",
+        "node-briefs"
+      ],
       "disposition": "migrated",
       "step": "Rename the fork `Simon-McIntosh/imas-codex` and, once the organisation's agreement is recorded, `iterorganization/imas-codex` to `iter-codex`; update both remotes and the badges and URLs the tracked files carry. GitHub redirects the old address, but container packages do not move: publish `iter-codex-graph`, `iter-codex-graph-*` and the application image under the new owner names and keep every published old tag. Build the separate Azure image as `iterorganization/iter-codex` and confirm the workflow derives the GHCR name from the repository. Node briefs on the primary branch: those under docs/evidence are kept bytes and are not rewritten; a re-dispatched brief is regenerated by its owner from the current template, which C1 renamed.",
       "check": "`git remote -v` shows the new URLs; `gh repo view` resolves both; `docker pull ghcr.io/<owner>/iter-codex-graph:<tag>` succeeds and the graph manifest records the new image; the old package identities still list their published tags; the Azure count is re-measured with `az` present or recorded as still not measured, never as zero.",
@@ -110,7 +206,9 @@
     {
       "id": "C9-gate-scripts",
       "title": "Rewrite or regenerate the saved gate scripts",
-      "surfaces": ["gate-scripts"],
+      "surfaces": [
+        "gate-scripts"
+      ],
       "disposition": "renamed",
       "step": "Enumerate `~/.cache/imas-codex-live-rewrite/`. Copy the directory, then run the rename's replacement rules over its text scripts because each one writes the checkout path or the package name and would otherwise drive a stale interpreter: `python -c` with scripts.rename.rules' replacement table and path tokens, restricted to that directory. A script the owning session still needs live is regenerated by its owner from the current brief instead; record per file which one applies. The directory name itself moves to `~/.cache/iter-codex-live-rewrite/` only when no saved script is still referenced by path.",
       "check": "`rg -l 'imas[-_]codex' ~/.cache/iter-codex-live-rewrite` is empty except files recorded as owner-regenerated, and each recorded file is listed with its reason in the cutover receipt; running one rewritten script that used to fail resolves the new interpreter.",
@@ -119,9 +217,31 @@
     {
       "id": "C10-zero-consumer-check",
       "title": "Re-run the inventory and close the transition",
-      "surfaces": ["units", "scheduler", "editable", "roots", "registry", "mcp", "graph", "reckon", "supplement", "azure", "repositories", "worktrees", "docs-state", "gate-scripts", "node-briefs", "sn-catalog", "sn-grammar", "dd-identity", "dd-vocabulary", "dd-schema", "imas-deps"],
+      "surfaces": [
+        "units",
+        "scheduler",
+        "editable",
+        "roots",
+        "registry",
+        "mcp",
+        "graph",
+        "reckon",
+        "supplement",
+        "azure",
+        "repositories",
+        "worktrees",
+        "docs-state",
+        "gate-scripts",
+        "node-briefs",
+        "sn-catalog",
+        "sn-grammar",
+        "dd-identity",
+        "dd-vocabulary",
+        "dd-schema",
+        "imas-deps"
+      ],
       "disposition": "renamed",
-      "step": "Re-run the inventory collectors named in docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html against the live system and compare row by row: each row must be renamed (count now zero or naming the new identity), kept (the IMAS surfaces, with their count unchanged), migrated (the value now names the new root, key or template), or still recorded as not measured. No new live reference to the old name may remain outside the kept list. Only then remove the §10 transition alias, if the earlier stage created one; this rehearsal's rename ships no old console script, so the alias removal is a no-op unless the transition stage installed it.",
+      "step": "Re-run the inventory collectors named in docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html against the live system and compare row by row: each row must be renamed (count now zero or naming the new identity), kept (the IMAS surfaces, with their count unchanged), migrated (the value now names the new root, key or template), or still recorded as not measured. No new live reference to the old name may remain outside the kept list. Only then remove the \u00a710 transition alias, if the earlier stage created one; this rehearsal's rename ships no old console script, so the alias removal is a no-op unless the transition stage installed it.",
       "check": "The row-by-row comparison has zero unaccounted surfaces and zero rows still naming the old name in a renamed surface; the two kept DD client keys, the standard-names distribution and import, and the IMAS dependencies are present; `python -m scripts.rename check` and `python -m scripts.rename cutover` both exit 0 on the merged tree.",
       "undo": "This step only reads and compares. A row that disagrees sends the operator back to the step that owns it with that step's undo."
     }

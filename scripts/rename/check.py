@@ -9,6 +9,7 @@ from pathlib import Path
 from scripts.rename.apply import KEPT_LIST
 from scripts.rename.rules import OLD_NAME_PATTERN
 from scripts.rename.tree import (
+    kept_identifiers,
     load_kept_list,
     read_text,
     subtree_digest,
@@ -34,6 +35,7 @@ class CheckReport:
     leftover: dict[str, int] = field(default_factory=dict)
     kept_paths: dict[str, dict] = field(default_factory=dict)
     kept_names: dict[str, int] = field(default_factory=dict)
+    kept_identifiers: dict[str, dict[str, int]] = field(default_factory=dict)
     violations: list[Violation] = field(default_factory=list)
 
     @property
@@ -68,6 +70,12 @@ def check_tree(
             "files": 0,
         }
 
+    persisted = kept_identifiers(tree, kept)
+    report.kept_identifiers = {
+        identifier: {"kept": count, "covered": 0}
+        for identifier, count in sorted(persisted.items())
+    }
+
     live_texts: dict[str, str] = {}
     for rel in tracked_files(tree):
         text = read_text(tree / rel)
@@ -75,13 +83,16 @@ def check_tree(
             continue
         report.files_scanned += 1
         hits = len(OLD_NAME_PATTERN.findall(text))
+        persisted_hits = sum(text.count(name) for name in report.kept_identifiers)
         entry = kept.covering(rel)
         if hits:
             report.old_name_hits += hits
         if entry is None:
             live_texts[rel] = text
-            if hits:
-                report.leftover[rel] = hits
+            for name, stats in report.kept_identifiers.items():
+                stats["covered"] += text.count(name)
+            if hits > persisted_hits:
+                report.leftover[rel] = hits - persisted_hits
             continue
         stats = report.kept_paths[entry.id]
         stats["hits"] += hits
@@ -169,6 +180,12 @@ def format_report(report: CheckReport) -> str:
     lines.append(
         "kept names: " + ", ".join(f"{k}={v}" for k, v in report.kept_names.items())
     )
+    if report.kept_identifiers:
+        lines.append("kept identifiers (kept/covered):")
+        lines.extend(
+            f"  {name}: {stats['kept']}/{stats['covered']}"
+            for name, stats in report.kept_identifiers.items()
+        )
     if report.violations:
         lines.append("violations:")
         lines.extend(f"  {v.kind}: {v.detail}" for v in report.violations)

@@ -16,6 +16,21 @@ from collections import Counter
 # `imas_standard_names`, `imas_dd` or `imas-dd` spellings.
 OLD_NAME_PATTERN = re.compile(r"imas([-_ ])(codex|cx)", re.IGNORECASE)
 
+# A dotted identifier - `<old name>.<artifact>` - is a persisted artifact
+# identity, not a product name: signed authorities and receipts store it
+# verbatim, and the evidence that carries them keeps its bytes.  The rename
+# protects every identifier that appears in a kept path, so the set comes from
+# the ground truth rather than from a hand-maintained list that would go stale.
+IDENTIFIER_PATTERN = re.compile(
+    r"imas([-_ ])(codex|cx)\.([A-Za-z0-9_.\-]+)", re.IGNORECASE
+)
+
+
+def placeholder(index: int) -> str:
+    """A stand-in for a protected literal; contains no part of the old name."""
+    return f"\x01rename-kept-{index}\x01"
+
+
 # Basenames that carry the project name and therefore move with the rename.
 # `imas_dd` and `imas_standard_names` are deliberately absent: they name the
 # IMAS data dictionary and the standard-names grammar, which keep their names.
@@ -52,3 +67,20 @@ def rename_text(text: str) -> tuple[str, Counter[str]]:
 
 def count_hits(text: str) -> int:
     return len(OLD_NAME_PATTERN.findall(text))
+
+
+def protect(text: str, identifiers: list[str]) -> tuple[str, list[tuple[str, str]]]:
+    """Replace protected identifiers with stand-ins before the rename runs."""
+    used: list[tuple[str, str]] = []
+    for index, identifier in enumerate(identifiers):
+        if identifier in text:
+            stand_in = placeholder(index)
+            text = text.replace(identifier, stand_in)
+            used.append((stand_in, identifier))
+    return text, used
+
+
+def restore(text: str, used: list[tuple[str, str]]) -> str:
+    for stand_in, identifier in used:
+        text = text.replace(stand_in, identifier)
+    return text

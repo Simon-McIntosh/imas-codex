@@ -201,6 +201,29 @@ def test_check_reports_a_kept_file_altered_without_losing_a_hit(
     )
 
 
+def test_a_persisted_identifier_in_a_kept_path_survives_the_rename(
+    tree: Path, kept_list: Path
+) -> None:
+    evidence = tree / "docs" / "evidence" / "run.md"
+    evidence.write_text(
+        evidence.read_text() + '{"schema": "imas-codex.repair-authority.v1"}\n'
+    )
+    module = tree / "imas_codex" / "__init__.py"
+    module.write_text(
+        module.read_text() + 'SCHEMA = "imas-codex.repair-authority.v1"\n'
+    )
+
+    report = apply_rename(tree, kept_list=kept_list)
+
+    kept_module = tree / "iter_codex" / "__init__.py"
+    assert 'SCHEMA = "imas-codex.repair-authority.v1"' in kept_module.read_text()
+    assert report.kept_identifiers == {"imas-codex.repair-authority.v1": 1}
+    renamed = check_tree(tree, kept_list=kept_list)
+    assert renamed.ok
+    assert renamed.leftover == {}
+    assert renamed.kept_identifiers["imas-codex.repair-authority.v1"]["covered"] == 1
+
+
 def test_cli_exit_status_reflects_the_violations(tree: Path, kept_list: Path) -> None:
     apply_rename(tree, kept_list=kept_list)
     assert main(["check", "--tree", str(tree), "--kept-list", str(kept_list)]) == 0

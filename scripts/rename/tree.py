@@ -10,7 +10,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.rename.rules import SKIP_DIRS
+from scripts.rename.rules import IDENTIFIER_PATTERN, SKIP_DIRS
 
 
 def tracked_files(tree: Path) -> list[str]:
@@ -81,6 +81,28 @@ def path_digest(tree: Path) -> str:
         digest.update(hashlib.sha256(path.read_bytes()).digest())
         digest.update(b"\0")
     return digest.hexdigest()
+
+
+def kept_identifiers(tree: Path, kept: KeptList) -> dict[str, int]:
+    """Dotted artifact identities that appear in a kept path, with their counts.
+
+    A signed authority or a receipt stores `<old name>.<artifact>` verbatim, and
+    the evidence carrying it is kept byte-for-byte.  Rewriting the identifier in
+    the code that reads it makes the stored file unreadable - the signature and
+    the schema both stop matching - so the identifiers the kept bytes actually
+    use are the ones the rename must leave alone.
+    """
+    counts: dict[str, int] = {}
+    for rel in _walk(tree):
+        if kept.covering(rel) is None:
+            continue
+        text = read_text(tree / rel)
+        if text is None:
+            continue
+        for match in IDENTIFIER_PATTERN.finditer(text):
+            identifier = match.group(0).rstrip(".")
+            counts[identifier] = counts.get(identifier, 0) + 1
+    return counts
 
 
 def subtree_digest(tree: Path, entry: KeptPath) -> str:
