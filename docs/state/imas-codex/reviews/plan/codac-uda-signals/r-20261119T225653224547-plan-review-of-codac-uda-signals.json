@@ -1,0 +1,71 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-19T22:58:03.315Z",
+  "dispatched_at": "2026-11-19T22:57:47Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261119T225653224547-plan-review-of-codac-uda-signals/plan.html:150",
+      "id": "done_when-1",
+      "reason": "an export that drops a kind, the failure the equality is the only guard for, can be landed under a gate that never demonstrates the guard fires; a control that builds one package with a kind's nodes omitted and requires the equality to fail closes it.",
+      "text": "the per-kind equality \"for each kind of node that belongs to the ITER facility, the number in the package equal to the number in the shared graph at the export revision\" does not state whether kinds are enumerated from the shared graph or from the package, so a package that silently omits a whole kind satisfies the clause when the enumeration comes from the package; and neither declared control omits a kind \u2014 one leaves a foreign facility in and the other switches read-only off \u2014 so nothing shows the equality can fail, and the missing-content case it exists for is exactly the one no arm exercises.",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/codac-uda-signals/r-20261119T225653224547-plan-review-of-codac-uda-signals/plan.html:150",
+      "id": "done_when-2",
+      "reason": "adding the empty-result term to the pre-registered private file turns a post-hoc observation into a check that can fail, which is the fix the section already applied to the other two searches.",
+      "text": "\"a search for a term no signal carries returns an explicit empty result\" selects its search term by the result it produces: whether a term carries no signal is only knowable from the answers, so a run can pick one that returns empty after the tools have been exercised, and the clause then passes whether or not the empty path is produced deliberately; the change written to fix this same defect for the two positive searches (a private file written before the build, its digest in the landing record) stops one clause short of the third search.",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "0f3dcd6679d3f5dfece0c089b896f5d833986162",
+  "plan_fingerprint": "362860e297096ce49857f7eb27c4127f67020699fe7654d4c4f175458d2ae6e1",
+  "plan_slug": "codac-uda-signals",
+  "plan_version": 79,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261119T225653224547-plan-review-of-codac-uda-signals",
+  "reviewed_blob_sha": "8a16363a352a38795d7022ea055f3381e3893b22",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 `#s18` and `#s20` resolve in the snapshot and no other anchor is cited; the change adds no href.",
+    "done_when": "a finding \u2014 the per-kind node equality in s22's done-when names no control that omits a kind, and the empty-result search term is chosen after the fact rather than fixed with the two positive subjects.",
+    "evidence_paths": "pass \u2014 package name and digest, the registry's privacy report, the per-kind counts and the selection-file digest all land in the landing record, and the section keeps the selected names out of tracked files by its own rule.",
+    "naming": "pass \u2014 the section names no symbol and carries no plan label, ticket number or version tag into anything a builder would name.",
+    "reasoning": "pass \u2014 the selection condition the change adds is reachable: a bounded query over the shared graph on 2026-11-19 returned 29,879 ITER signals that carry a non-empty description and both a component and a control-node link (of 97,525 signals, 91,122 described), and the signal-context tool the section serves returns the component and the control hierarchy; the section prescribes no code path, step sequence or function.",
+    "single_goal": "pass \u2014 the section delivers one thing: a private image holding a read-only ITER plant graph package; the data-dictionary no-regression clause is a check on that change, not a second deliverable.",
+    "wiring": "pass \u2014 s22's `data-links=\"codac-uda-signals#s18,codac-uda-signals#s20\"` matches the `plan-section-depends-on` entry `s22:[\"#s18\",\"#s20\"]`, both cited sections exist, and the data-dictionary image it builds alongside is existing infrastructure the plan does not deliver, so no dependency is missing."
+  },
+  "section_digests": {
+    "_document": "d6f5961d61a0c831cebb5fd3d04ed35f208aaa0201b650f7897a24859885fb21",
+    "s1": "ddb44f157af068a7c0a26577ebfd22c54a54de0d1b80632af098f1ffa2656109",
+    "s10": "759b1a8a0d0172458970abb033b7b0891dbfbea4a146fe46e1d40088ad5b1e2b",
+    "s11": "69990c67b2503aae3226cc2ce35d828a7c024196282cddf695699ba30ebeeef4",
+    "s12": "14780bfbfe348401f732bdce2f5ce145d517a45aae174fcb4601acf07463f76a",
+    "s13": "b4bdace63f510dec0d88f07cb08f17680c2409d8f54a423ccb128ff365d77c7d",
+    "s14": "415219f3d3b6ac1ba70841d56e5d52b2cceb4044afc3efdba1dc16562dd7f076",
+    "s15": "6a794488c6993bb560f44ef4b037f8dde5fe65588e3d5dde527e821fd8fe8b04",
+    "s16": "210c417a1f066fe923870a6e8053c76cb308181f6dd40abe83ad1c825a5ee841",
+    "s17": "1248a439748dd67b21ae960b27139bec3de10548cf816770cc6fa457dc3cbd77",
+    "s18": "4234dc0444b89df1ba3c2fb0011becde6760366f41d1b857f7f45b9020491430",
+    "s19": "62a9fac261c2abc0b6c2cadd655ec95a4ad2338cf99289d0b35221256277cd7c",
+    "s2": "7b6a496a2dea20649a971e8835188a5adcdda1eb52ed414aee013457ffc9858a",
+    "s20": "5b6478a19c4933df522a5f65b5029c4d8c8fbaa56108cf7537380f3b2160b330",
+    "s21": "766504c3cf6d6cb5fbb80fc49533f32eb2dd8d9f7686b55ca616d9cac1f04941",
+    "s22": "6e220f5b29e47a2a3d17bfd49b65b741c49f7f976c2b12c97a1036066b587ad8",
+    "s23": "b2db24284a629203a22b94e1fd6d97616eb45f4402ca4961f80fa1017f98cf3b",
+    "s3": "33a303f8bcdaa77d408ad092a4fdff102ee3b28d858330a63a7d29240138cc9c",
+    "s4": "447d57eae2a40e29a493f9166964a1b76fbe7aa4379b1772feba46875c0aab9c",
+    "s5": "035a8b533ec74b1167e5408ee488444b39c6c1f3db723dd46f9abdd6e6556ce3",
+    "s6": "0b707a946ea06fda4d9e98c8f6be8f9d5ef025bdc21508b5898247d1c9b78057",
+    "s7": "ba4bb9ecc772f8b7dcf2ade1e01798bd90bca480fd8e2ef25339d00ea5beb069",
+    "s8": "f79bcece738a83cc4c9045bb472215ce381a6fe0e5d742e78f0263dc4968bfe5",
+    "s9": "a81abac574c10e2fbce3cd731f78c58c11cb2140313fc8f1e75fef1efc2b2946"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T23:04:58.291298+00:00",
+  "total": null
+}
