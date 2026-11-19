@@ -32,6 +32,13 @@
       "finding": "done_when-1",
       "reason": "The node's dispatch contract carries it: kinds are enumerated from the shared graph, and a control package built with one kind's nodes omitted must fail the equality. The section's endpoint is unchanged.",
       "when": "2026-11-19T23:10:28.843183+00:00"
+    },
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-2",
+      "reason": "The node's dispatch contract carries it: the empty-result term is written to the same private file as the two positive subjects before the build.",
+      "when": "2026-11-19T23:10:32.271827+00:00"
     }
   ],
   "responses": {
@@ -40,6 +47,12 @@
       "by": "",
       "reason": "The node's dispatch contract carries it: kinds are enumerated from the shared graph, and a control package built with one kind's nodes omitted must fail the equality. The section's endpoint is unchanged.",
       "when": "2026-11-19T23:10:28.843183+00:00"
+    },
+    "done_when-2": {
+      "action": "declined",
+      "by": "",
+      "reason": "The node's dispatch contract carries it: the empty-result term is written to the same private file as the two positive subjects before the build.",
+      "when": "2026-11-19T23:10:32.271827+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261119T225653224547-plan-review-of-codac-uda-signals.json",
