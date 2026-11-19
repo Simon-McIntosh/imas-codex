@@ -192,6 +192,114 @@ enums:
       derived_or_computed:
         description: A calculated, reconstructed, fitted, or aggregated result
 
+  SignalQuantity:
+    description: >-
+      Closed vocabulary of the physical quantity a plant signal measures.
+      Assigned by rule from a source that states it, never by inference from an
+      unstated meaning: a signal whose sources give no member stays undecided.
+    permissible_values:
+      current:
+        description: Electric current in a conductor or circuit
+      voltage:
+        description: Electric potential difference
+      temperature:
+        description: Thermodynamic temperature of a body, fluid or component
+      pressure:
+        description: Fluid pressure, absolute, gauge or differential
+      flow:
+        description: Fluid mass or volume flow rate through a path
+      valve_position:
+        description: Opening or travel of a valve
+      position:
+        description: Mechanical position or displacement of a component
+      resistance:
+        description: Electrical resistance of a conductor, sensor or joint
+      strain:
+        description: Mechanical strain of a structure
+      frequency:
+        description: Repetition rate of a periodic quantity
+      energy:
+        description: Accumulated or transferred energy
+      force:
+        description: Mechanical force
+      power:
+        description: Rate of energy transfer
+      speed:
+        description: Rate of motion of a rotating or translating part
+      duration:
+        description: Elapsed or remaining time interval
+      ratio:
+        description: Dimensionless proportion of a whole
+  SignalVocabularyUnit:
+    description: >-
+      Closed vocabulary of units a plant signal's decided unit may take. Each
+      member names one physical unit; a source spelling resolves to it only
+      when the shared unit authority reads both as exactly the same unit.
+    permissible_values:
+      kelvin: {description: "K, thermodynamic temperature"}
+      degree_celsius: {description: "degC, Celsius temperature"}
+      volt: {description: "V, electric potential difference"}
+      ohm: {description: "ohm, electrical resistance"}
+      millibar: {description: "mbar, pressure"}
+      bar: {description: "bar, pressure"}
+      megapascal: {description: "MPa, pressure"}
+      ampere: {description: "A, electric current"}
+      kiloampere: {description: "kA, electric current"}
+      millimetre: {description: "mm, length or displacement"}
+      percent: {description: "percent, dimensionless proportion"}
+      gram_per_second: {description: "g/s, mass flow rate"}
+      kilogram_per_minute: {description: "kg/min, mass flow rate"}
+      millisecond: {description: "ms, time interval"}
+      microsecond: {description: "us, time interval"}
+      second: {description: "s, time interval"}
+      kelvin_per_hour: {description: "K/h, rate of temperature change"}
+      microstrain: {description: "um/m, mechanical strain"}
+      kilovolt_ampere: {description: "kVA, apparent power"}
+      hertz: {description: "Hz, frequency"}
+      kilowatt_hour: {description: "kWh, energy"}
+      newton: {description: "N, force"}
+  SignalVocabularyRole:
+    description: >-
+      Closed vocabulary of the part a plant signal plays in the control and
+      instrumentation scheme. Kept apart from SignalRole, which is judged by a
+      model from a signal's prose: this one is assigned by rule from a source
+      that states it, and stays undecided when no source does.
+    permissible_values:
+      measurement:
+        description: An observed value of a physical quantity
+      setpoint:
+        description: A target the control compares an observed value against
+      state:
+        description: A discrete condition of equipment, such as running, open or ready
+      alarm:
+        description: A discrete indication of a fault, trip, interlock or out-of-limit condition
+      command:
+        description: An instruction sent to equipment to change its behaviour
+  SignalVocabularyOutcome:
+    description: >-
+      Result of comparing every source that gives a value for one signal and
+      one vocabulary axis. Exactly one outcome holds per axis per signal.
+    permissible_values:
+      decided:
+        description: Every source that gives the value gives the same member; it is stored, credited to the first source in precedence
+      conflict:
+        description: Two sources give different members; nothing is stored for that axis
+      undecided:
+        description: No source gives a member; nothing is stored
+  SignalVocabularySource:
+    description: >-
+      Where a decided vocabulary value came from, in precedence order. A source
+      credited here is the first, in this order, that gives the stored member.
+    permissible_values:
+      signal_list_row:
+        description: The linked signal-list row states the value
+      controls_metadata:
+        description: The controls metadata feed the signal already carries states the value
+      archive_unit:
+        description: The archive's own metadata gives the unit; applies to the unit only
+      field_pattern:
+        description: Other signals sharing this signal's field code state the value unanimously
+
   DiagnosticCategory:
     description: Categories of fusion plasma diagnostics
     permissible_values:
@@ -3028,6 +3136,35 @@ classes:
         multivalued: true
         description: Evidence associations to versioned source rows
         annotations: {relationship_type: HAS_PLANT_CONTEXT}
+      # Closed-vocabulary assignment. Each axis stores its member, the source
+      # credited by precedence, and the outcome; a conflict stores no member.
+      vocabulary_quantity:
+        range: SignalQuantity
+        description: Decided measured quantity from the closed vocabulary; unset when conflicted or undecided
+      vocabulary_quantity_source:
+        range: SignalVocabularySource
+        description: First source in precedence that gave the stored quantity
+      vocabulary_quantity_state:
+        range: SignalVocabularyOutcome
+        description: Decided, conflict or undecided result for the quantity axis
+      vocabulary_unit:
+        range: SignalVocabularyUnit
+        description: Decided unit from the closed vocabulary; unset when conflicted or undecided
+      vocabulary_unit_source:
+        range: SignalVocabularySource
+        description: First source in precedence that gave the stored unit
+      vocabulary_unit_state:
+        range: SignalVocabularyOutcome
+        description: Decided, conflict or undecided result for the unit axis
+      vocabulary_role:
+        range: SignalVocabularyRole
+        description: Decided role from the closed vocabulary; unset when conflicted or undecided
+      vocabulary_role_source:
+        range: SignalVocabularySource
+        description: First source in precedence that gave the stored role
+      vocabulary_role_state:
+        range: SignalVocabularyOutcome
+        description: Decided, conflict or undecided result for the role axis
       id:
         identifier: true
         description: >-

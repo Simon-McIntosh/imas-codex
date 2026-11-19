@@ -22,7 +22,11 @@ from neo4j.exceptions import ClientError, DatabaseError, ServiceUnavailable
 from imas_codex.embeddings.encoder import EmbeddingBackendError, Encoder
 from imas_codex.graph.client import GraphClient
 from imas_codex.graph.domain_queries import signal_vector_search_block
-from imas_codex.graph.models import SignalRole
+from imas_codex.graph.models import (
+    SignalQuantity,
+    SignalRole,
+    SignalVocabularyRole,
+)
 from imas_codex.graph.query_builder import render_chunk_source
 from imas_codex.graph.signal_descriptions import (
     description_is_name,
@@ -104,6 +108,23 @@ SIGNAL_ROLES = tuple(role.value for role in SignalRole)
 
 _SIGNAL_ROLE_REFUSAL = (
     "Unknown role {role!r}. A signal role is one of: " + ", ".join(SIGNAL_ROLES) + "."
+)
+
+# The closed vocabularies assigned by rule from a signal's own sources. A
+# quantity or vocabulary-role search accepts one member and refuses anything
+# else, so an unknown member cannot read as an empty result.
+VOCABULARY_QUANTITIES = tuple(member.value for member in SignalQuantity)
+VOCABULARY_ROLES = tuple(member.value for member in SignalVocabularyRole)
+
+_VOCABULARY_QUANTITY_REFUSAL = (
+    "Unknown quantity {value!r}. A signal quantity is one of: "
+    + ", ".join(VOCABULARY_QUANTITIES)
+    + "."
+)
+_VOCABULARY_ROLE_REFUSAL = (
+    "Unknown vocabulary_role {value!r}. A signal vocabulary role is one of: "
+    + ", ".join(VOCABULARY_ROLES)
+    + "."
 )
 
 _RERANK_QUESTION = {
@@ -335,6 +356,8 @@ def _rank_signals(
     physics_domain: str | None = None,
     role: str | None = None,
     *,
+    quantity: str | None = None,
+    vocabulary_role: str | None = None,
     matches: dict[str, list[str]] | None = None,
 ) -> tuple[list[str], dict[str, float]]:
     """Rank facility signals by reciprocal rank fusion; return (ordered ids, scores).
@@ -343,14 +366,26 @@ def _rank_signals(
     are fused by rank. Each stream is over-fetched before the fusion and the
     fused order is cut at ``k``. The fused mass is the returned score.
 
-    ``diagnostic``, ``physics_domain`` and ``role`` narrow both streams before
-    the fusion cut, so a filtered search still draws up to ``k`` signals.
+    ``diagnostic``, ``physics_domain``, ``role``, ``quantity`` and
+    ``vocabulary_role`` narrow both streams before the fusion cut, so a filtered
+    search still draws up to ``k`` signals.
     """
+    vocabulary = {"quantity": quantity, "vocabulary_role": vocabulary_role}
+    vocabulary = {name: value for name, value in vocabulary.items() if value is not None}
     signal_ids, _ = _vector_search_signals(
-        gc, embedding, facility, SIGNAL_VECTOR_POOL, diagnostic, physics_domain, role
+        gc,
+        embedding,
+        facility,
+        SIGNAL_VECTOR_POOL,
+        diagnostic,
+        physics_domain,
+        role,
+        **vocabulary,
     )
 
-    text_signals = _text_search_signals(gc, query, facility, SIGNAL_TEXT_POOL, role)
+    text_signals = _text_search_signals(
+        gc, query, facility, SIGNAL_TEXT_POOL, role, **vocabulary
+    )
 
     if matches is not None:
         for sid in signal_ids:
@@ -374,6 +409,8 @@ def _search_signals(
     diagnostic: str | None = None,
     physics_domain: str | None = None,
     role: str | None = None,
+    quantity: str | None = None,
+    vocabulary_role: str | None = None,
     check_status: str | None = None,
     error_type: str | None = None,
     include_check_details: bool = False,
@@ -397,6 +434,12 @@ def _search_signals(
     of :data:`SIGNAL_ROLES`; the predicate narrows both the vector and keyword
     streams before the fusion cut, so a role-filtered search still returns up
     to ``k`` signals. A role outside the six is refused, naming the set.
+
+    ``quantity`` and ``vocabulary_role`` keep only signals carrying that member
+    of the closed vocabulary assigned from the signal's own sources, one of
+    :data:`VOCABULARY_QUANTITIES` and :data:`VOCABULARY_ROLES`. They narrow both
+    streams the same way and refuse an unknown member rather than returning an
+    empty report that reads as "no such signal".
 
     ``rerank`` reorders the fused pool through the shared Jev relevance rerank
     on the role-aware signal question, spending on the discovery-relevance
@@ -428,6 +471,8 @@ def _search_signals(
                 diagnostic,
                 physics_domain,
                 role,
+                quantity,
+                vocabulary_role,
                 check_status,
                 error_type,
                 include_check_details,
@@ -447,6 +492,10 @@ def _search_signals(
 
     if role is not None and role not in SIGNAL_ROLES:
         return _SIGNAL_ROLE_REFUSAL.format(role=role)
+    if quantity is not None and quantity not in VOCABULARY_QUANTITIES:
+        return _VOCABULARY_QUANTITY_REFUSAL.format(value=quantity)
+    if vocabulary_role is not None and vocabulary_role not in VOCABULARY_ROLES:
+        return _VOCABULARY_ROLE_REFUSAL.format(value=vocabulary_role)
 
     try:
         if gc is None:
@@ -480,6 +529,8 @@ def _search_signals(
             diagnostic,
             physics_domain,
             role,
+            quantity=quantity,
+            vocabulary_role=vocabulary_role,
             matches=matches,
         )
         fused_ranks = {sid: rank for rank, sid in enumerate(signal_ids, 1)}
@@ -821,14 +872,16 @@ def _vector_search_signals(
     diagnostic: str | None,
     physics_domain: str | None,
     role: str | None = None,
+    quantity: str | None = None,
+    vocabulary_role: str | None = None,
 ) -> tuple[list[str], dict[str, float]]:
     """Vector search on facility_signal_desc_embedding index.
 
     The facility predicate is pushed inside SEARCH as an in-index pre-filter by
     :func:`signal_vector_search_block`, which owns the query; ``diagnostic``,
-    ``physics_domain`` and ``role`` stay as post-filters, so the ANN limit is
-    widened to ``max(k*2, 50)`` when any is present and the cut is the requested
-    ``k`` otherwise.
+    ``physics_domain``, ``role``, ``quantity`` and ``vocabulary_role`` stay as
+    post-filters, so the ANN limit is widened to ``max(k*2, 50)`` when any is
+    present and the cut is the requested ``k`` otherwise.
     """
     params: dict[str, Any] = {
         "k": k,
@@ -843,11 +896,18 @@ def _vector_search_signals(
         params["physics_domain"] = physics_domain
     if role is not None:
         params["role"] = role
+    if quantity is not None:
+        params["quantity"] = quantity
+    if vocabulary_role is not None:
+        params["vocabulary_role"] = vocabulary_role
 
-    # diagnostic/physics_domain/role discard rows after the ANN cut, so the cut
-    # is widened to keep the requested k reachable; with no such post-filter the
-    # facility pre-filter alone bounds the cut and the over-fetch is retired.
-    if diagnostic is not None or physics_domain is not None or role is not None:
+    # diagnostic/physics_domain/role/quantity/vocabulary_role discard rows after
+    # the ANN cut, so the cut is widened to keep the requested k reachable; with
+    # no such post-filter the facility pre-filter alone bounds the cut.
+    if any(
+        value is not None
+        for value in (diagnostic, physics_domain, role, quantity, vocabulary_role)
+    ):
         params["k"] = max(k * 2, 50)
 
     cypher = (
@@ -855,6 +915,8 @@ def _vector_search_signals(
             diagnostic=diagnostic is not None,
             physics_domain=physics_domain is not None,
             role=role is not None,
+            quantity=quantity is not None,
+            vocabulary_role=vocabulary_role is not None,
             node_alias="s",
         )
         + "\n"
@@ -880,16 +942,27 @@ def _text_search_signals(
     facility: str,
     k: int,
     role: str | None = None,
+    quantity: str | None = None,
+    vocabulary_role: str | None = None,
 ) -> list[dict[str, Any]]:
     """Retrieve keyword matches with the fields that actually supplied them.
 
     Field-scoped fulltext queries exclude descriptions that repeat an identity
     before scoring and limiting; those values remain stored and discoverable
     through the name field. The fallback applies the same eligibility rule.
-    Facility and role narrow matches before the cut in either branch.
+    Facility, role, quantity and vocabulary role narrow matches before the cut
+    in either branch.
     """
     role_clause = "          AND s.signal_role = $role\n" if role is not None else ""
-    role_param = {"role": role} if role is not None else {}
+    role_param: dict[str, str] = (
+        {"role": role} if role is not None else {}
+    )
+    if quantity is not None:
+        role_clause += "          AND s.vocabulary_quantity = $quantity\n"
+        role_param["quantity"] = quantity
+    if vocabulary_role is not None:
+        role_clause += "          AND s.vocabulary_role = $vocabulary_role\n"
+        role_param["vocabulary_role"] = vocabulary_role
     eligible = searchable_description_predicate(text="s[field]")
     field_guard = (
         f"(NOT (field IN ['description', 'source_description']) OR {eligible})"
