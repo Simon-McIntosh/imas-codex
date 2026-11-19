@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-19T22:36:02.196Z",
+  "dispatched_at": "2026-11-19T22:35:45Z",
+  "findings": [
+    {
+      "anchor": "plan.html:94",
+      "id": "done_when-1",
+      "reason": "without a fourth source named and a precedence that covers it, a node cannot compute the unit's five census figures or decide which unit to store, and the delivered census would be internally unreconcilable with the stored property.",
+      "text": "\u00a711's source list and its unit rules do not compose: the three deciding sources are \"the field pattern of its name, the controls metadata it already carries, or a linked signal-list row\", yet the very next sentence treats \"the units a signal already carries from the archive and the controls metadata\" as authoritative and requires \"the assigned unit equals it for every such signal\". A unit that only the archive supplies therefore has no bucket among the three sources, so it is counted undecided while the assignment is required to preserve it; and where a linked row's unit differs from the archive's, the added precedence order credits the row while the equality clause \u2014 seeing only the archive as giving a unit \u2014 demands the archive's value, so two rules require two different stored units for one signal",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:94",
+      "id": "done_when-2",
+      "reason": "the mixed case is the one the pilot's 190 row-linked signals can actually present (a row plus controls metadata plus a field pattern), and the two readings put those signals in different census buckets, so the five figures summing to 1,766 and the conflict count are not determined by the plan text.",
+      "text": "the credit rule and the conflict bucket both claim the same case: a value \"that more than one source decides alike is credited to the first of them in the order linked signal-list row, controls metadata, field pattern\", while the conflict figure counts a value \"because its sources disagree\" and the negative control says \"a signal whose sources disagree on the plan's unit is recorded as a conflict\". Where two of three sources agree and the third differs, the credit rule makes the value decided-by-the-first-agreeing source and the conflict rule makes it a conflict; the section states no rule for the mixed case",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "d08c864989a074a32aa9db1082103405b9b3cefa",
+  "plan_fingerprint": "5793d72e7ecbf317b8bbba959e0d8d4cab9c0f17b0bfb9e9f6499b57f55c2b94",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 69,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261119T223430017571-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "b1f027561cdfbb6613f4c73f1653168f74b83623",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 s11's `#s4`/`#s5` links, the `figure` at plan.html:44 (`docs/figures/iter-signal-context-and-enrichment/pipeline.svg` exists), and the decision's `data-sections=\"s11,s6\"` all resolve; the 1,766 population and the 190-row link count it rests on are recorded in s4's landing comment.",
+    "done_when": "two findings \u2014 on plan.html:94 the census's source list and its unit rules do not compose, so the unit's five figures are not computable, and the credit rule and the conflict bucket both claim the case where two of three sources agree.",
+    "evidence_paths": "pass \u2014 the landing record and the pre-run sample file with its digest recorded are durable by the plan's own convention, and no section-local scratch path is named.",
+    "naming": "pass \u2014 \u00a711 names no symbol, file, ticket or version, and its closed-vocabulary members are stated as domain values rather than as tracker labels.",
+    "reasoning": "pass \u2014 the stated root cause (missing context and model-written guesses caused most of the standard-name session's wrong text) is the one the locked `vocabulary-before-description` decision records as measured, and \u00a711 prescribes no code path, step sequence or function; its two defects are of measurability and are filed under done_when.",
+    "single_goal": "pass \u2014 \u00a711 delivers one endpoint (three vocabulary values per pilot signal, each with its deciding source); the search check and the invented-name check are properties of that same assignment, not second deliverables.",
+    "wiring": "pass \u2014 s11's `data-links` (`#s4`, `#s5`) resolve to sections declared `done`, and `s6` carries `iter-signal-context-and-enrichment#s11` in its `depends-on`, so the vocabulary-before-description ordering the decision records is the relationship the declarations carry; the decision `vocabulary-before-description` names `data-sections=\"s11,s6\"`."
+  },
+  "section_digests": {
+    "_document": "6779747f528ff1f6b31e591ec2714dffa68a783ad3f84f0902f50c5d83739420",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "8d56c2d44ec327aaec499f8461ad0f025efdd7034e9b78e7f051c315401db66e",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "9e51f8ba217e7d0bed83b1b1befdddbaeba215a0d94df9a98fe95e3d3b93eb42",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T22:39:41.696722+00:00",
+  "total": null
+}
