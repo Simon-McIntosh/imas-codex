@@ -10,7 +10,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
-from scripts.rename.rules import IDENTIFIER_PATTERN, SKIP_DIRS
+from scripts.rename.rules import OLD_NAME_PATTERN, SCHEMA_VALUE_PATTERN, SKIP_DIRS
 
 
 def tracked_files(tree: Path) -> list[str]:
@@ -84,24 +84,27 @@ def path_digest(tree: Path) -> str:
 
 
 def kept_identifiers(tree: Path, kept: KeptList) -> dict[str, int]:
-    """Dotted artifact identities that appear in a kept path, with their counts.
+    """Stored artifact identities that the kept bytes actually name.
 
-    A signed authority or a receipt stores `<old name>.<artifact>` verbatim, and
-    the evidence carrying it is kept byte-for-byte.  Rewriting the identifier in
-    the code that reads it makes the stored file unreadable - the signature and
-    the schema both stop matching - so the identifiers the kept bytes actually
-    use are the ones the rename must leave alone.
+    A signed authority or a receipt carries its identity in a ``schema`` value,
+    and the evidence holding it keeps its bytes.  Rewriting that identity in the
+    code that reads it makes the stored file unreadable - the schema and the
+    signature both stop matching.  Reading the identities out of the kept bytes
+    themselves keeps the set honest: a TOML section name such as
+    ``tool.kept.sn-enrich`` is not an artifact identity and is not protected,
+    while a stored schema is, even when only a historical receipt still names
+    it.
     """
     counts: dict[str, int] = {}
     for rel in _walk(tree):
         if kept.covering(rel) is None:
             continue
         text = read_text(tree / rel)
-        if text is None:
-            continue
-        for match in IDENTIFIER_PATTERN.finditer(text):
-            identifier = match.group(0).rstrip(".")
-            counts[identifier] = counts.get(identifier, 0) + 1
+        if text is not None:
+            for match in SCHEMA_VALUE_PATTERN.finditer(text):
+                value = match.group(1)
+                if OLD_NAME_PATTERN.search(value):
+                    counts[value] = counts.get(value, 0) + 1
     return counts
 
 

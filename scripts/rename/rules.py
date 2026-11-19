@@ -16,17 +16,13 @@ from collections import Counter
 # `imas_standard_names`, `imas_dd` or `imas-dd` spellings.
 OLD_NAME_PATTERN = re.compile(r"imas([-_ ])(codex|cx)", re.IGNORECASE)
 
-# A dotted identifier - `<old name>.<artifact>` - is a persisted artifact
-# identity, not a product name: signed authorities and receipts store it
-# verbatim, and the evidence that carries them keeps its bytes.  The rename
-# protects every identifier that appears in a kept path, so the set comes from
-# the ground truth rather than from a hand-maintained list that would go stale.
-# The shape is deliberately narrow: hyphenated artifact names, optionally
-# versioned, and never a Python module path - `imas_codex.remote.executor` in
-# evidence is prose, and the build hook's import must follow the package.
-IDENTIFIER_PATTERN = re.compile(
-    r"imas-(codex|cx)\.([a-z0-9]+(?:-[a-z0-9]+)+(?:\.v1)?)", re.IGNORECASE
-)
+# A stored artifact identity - the value of a `schema` key - is data, not a
+# product name: signed authorities and receipts carry it verbatim and the
+# evidence that holds them keeps its bytes.  The identities the rename must
+# protect are read out of the kept paths themselves (see
+# scripts.rename.tree.kept_identifiers), so the set cannot go stale and no
+# section name or module path is swept in with it.
+SCHEMA_VALUE_PATTERN = re.compile(r"""["']schema["']\s*:\s*["']([^"']+)["']""")
 
 
 def placeholder(index: int) -> str:
