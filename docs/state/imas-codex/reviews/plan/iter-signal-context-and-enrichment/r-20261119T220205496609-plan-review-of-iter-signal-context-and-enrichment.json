@@ -1,0 +1,67 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-19T22:03:22.487Z",
+  "dispatched_at": "2026-11-19T22:03:08Z",
+  "findings": [
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:68",
+      "id": "wiring-1",
+      "reason": "s6 must be deferred until s11 lands, or its declared dependency is a build dispatched onto a missing input.",
+      "text": "s6 declares `data-status=\"implementable\"` and the declaration table carries `s6: implementable` with `depends-on` now including `iter-signal-context-and-enrichment#s11`, which is `implementable` (unbuilt); \u00a76 writes descriptions \"with its unit and its physics or engineering classification\" from a signal whose values only s11 assigns, so a dispatcher reading declarations alone starts s6 against an absent prerequisite \u2014 the same failure earlier acted on for s4 and s6",
+      "type": "wiring",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:94",
+      "id": "done_when-1",
+      "reason": "the endpoint's arithmetic and its own required negative control are mutually exclusive until the conflict outcome is placed in the value's outcome taxonomy and the sum restated.",
+      "text": "the census asks, for each value, for three deciding-source figures plus the undecided figure summing to 1,766, while the declared negative control requires a signal whose sources disagree to be \"recorded as a conflict and counted, not resolved silently\"; a conflict is neither decided by a source nor a signal \"no source decides\", so with any such signal the sum is either short of 1,766 or absorbs a conflict into a bucket the section defines against it",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "docs/plans/iter-signal-context-and-enrichment.html:93",
+      "id": "reasoning-1",
+      "reason": "recording the closed-vocabulary choice (or pointing at the evidence that carries the standard-names measurement) changes the plan's record, and without it \u00a76's declared dependency rests on a choice no reader can confirm.",
+      "text": "s11 states \"the lead chose this on 2026-11-19\", but the plan's decisions record holds four decisions, the latest lead choice dated 2026-11-17 (`local-model-confirmed-on-quality`), and none lists s11 in `data-sections`; the rationale a node would cite for the section's ordering claim is therefore absent from the record the plan keeps for such choices",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "eccbb4bfd005f27da9cb93262c0c7a12ad70a33d",
+  "plan_fingerprint": "5b2225c4c800e33c0a453bea39eca3a1dec33bd87cfac150d21c52bc67662e68",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 66,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261119T220205496609-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "604ef5df0c3117529b37c70eb72cd6a2fcb620fb",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 s11's `data-links` resolve to `#s4` and `#s5` in this document, its own `id=\"s11\"` resolves, and the changed document's figure target `docs/figures/iter-signal-context-and-enrichment/pipeline.svg` exists.",
+    "done_when": "a finding \u2014 s11's four-figure census for each value (\"three deciding sources + undecided, summing to 1,766\") cannot hold alongside the negative control's separately counted conflict outcome.",
+    "evidence_paths": "pass \u2014 the landing record and the digest-identified private sample file are the same durable, non-repository stores sections 4 and 6 already use, and no scratch path.",
+    "naming": "pass \u2014 the section names quantities, roles and outcomes, no symbol or tracker label; nothing needs a plan entry to be read.",
+    "reasoning": "a finding \u2014 s11 grounds the work in a lead choice dated 2026-11-19 that the plan's own decisions record does not carry.",
+    "single_goal": "pass \u2014 s11 delivers one thing: three closed-vocabulary values with their deciding source on each pilot signal, with standard names explicitly excluded.",
+    "wiring": "a finding \u2014 section 6 is declared `implementable` while its newly declared dependency s11 is `implementable` and unbuilt, so the declarations alone send a dispatcher to build \u00a76 before the vocabulary it consumes exists."
+  },
+  "section_digests": {
+    "_document": "52b8d211dc078a39f0f7249ec3beef1e207d3ca1b0679ef5e57127dd0182aa2a",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "61f7debd39a030942be4990b075f18dc384d8a0c5ee6bf8a6535ff885919a7c1",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "9e51f8ba217e7d0bed83b1b1befdddbaeba215a0d94df9a98fe95e3d3b93eb42",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-19T22:07:09.536387+00:00",
+  "total": null
+}
