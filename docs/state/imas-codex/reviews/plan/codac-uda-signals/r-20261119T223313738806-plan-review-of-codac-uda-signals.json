@@ -17,7 +17,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 78,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d08c864989a074a32aa9db1082103405b9b3cefa",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The container section now states the selection condition: the chosen signal is linked to a component and a control node, and the chosen designation has at least one pulse.",
+      "reason": "",
+      "when": "2026-11-19T22:55:06.814503+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d08c864989a074a32aa9db1082103405b9b3cefa",
+      "commit_basis": "edit",
+      "note": "The container section now states the selection condition: the chosen signal is linked to a component and a control node, and the chosen designation has at least one pulse.",
+      "reason": "",
+      "when": "2026-11-19T22:55:06.814503+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261119T223313738806-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261119T223313738806-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "38af0a1222e3f978aa5fc2105264301641ac682c",
   "rubric": "content",
