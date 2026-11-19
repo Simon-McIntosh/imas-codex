@@ -25,7 +25,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 69,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "d08c864989a074a32aa9db1082103405b9b3cefa",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The archive is named as a fourth source, for the unit, with its place in the precedence order; the separate unit-equality clause is replaced by one that follows from the outcome definitions.",
+      "reason": "",
+      "when": "2026-11-19T22:54:58.893304+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "d08c864989a074a32aa9db1082103405b9b3cefa",
+      "commit_basis": "edit",
+      "note": "The archive is named as a fourth source, for the unit, with its place in the precedence order; the separate unit-equality clause is replaced by one that follows from the outcome definitions.",
+      "reason": "",
+      "when": "2026-11-19T22:54:58.893304+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261119T223430017571-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261119T223430017571-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "b1f027561cdfbb6613f4c73f1653168f74b83623",
   "rubric": "content",
