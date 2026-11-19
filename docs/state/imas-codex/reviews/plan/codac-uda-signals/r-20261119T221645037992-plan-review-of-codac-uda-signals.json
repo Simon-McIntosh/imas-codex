@@ -17,7 +17,30 @@
   "plan_slug": "codac-uda-signals",
   "plan_version": 77,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "9b4c337fa13332d10075a5d40f6c38366fa237b9",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "The container's done-when now compares relationship counts per kind and walks from the chosen signal to its component and from the chosen designation's category to its pulses.",
+      "reason": "",
+      "when": "2026-11-19T22:31:54.541928+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "9b4c337fa13332d10075a5d40f6c38366fa237b9",
+      "commit_basis": "edit",
+      "note": "The container's done-when now compares relationship counts per kind and walks from the chosen signal to its component and from the chosen designation's category to its pulses.",
+      "reason": "",
+      "when": "2026-11-19T22:31:54.541928+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/codac-uda-signals/r-20261119T221645037992-plan-review-of-codac-uda-signals.json",
   "review_run_id": "r-20261119T221645037992-plan-review-of-codac-uda-signals",
   "reviewed_blob_sha": "6001ae7d23be44ffb96449fc4d9d266d9f8711da",
   "rubric": "content",
