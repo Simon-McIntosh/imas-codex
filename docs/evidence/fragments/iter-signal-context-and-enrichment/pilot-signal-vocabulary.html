@@ -8,6 +8,12 @@
   <h2 id="pilot-signal-vocabulary-summary">Closed vocabulary on the pilot signals</h2>
   <p id="pilot-signal-vocabulary-scope">1,766 ITER pilot signals carry a quantity, unit and role decided by rule from four sources in precedence: a linked signal-list row, the controls metadata the signal carries, the unit the archive reports, and the field pattern of the signal's name. Each axis has one outcome per signal; the three outcomes on an axis sum to 1,766.</p>
 
+  <h3 id="pilot-signal-vocabulary-members">The vocabulary</h3>
+  <p id="pilot-signal-vocabulary-members-list"><strong>Quantity</strong> (16): <code>current</code>, <code>voltage</code>, <code>temperature</code>, <code>pressure</code>, <code>flow</code>, <code>valve_position</code>, <code>position</code>, <code>resistance</code>, <code>strain</code>, <code>frequency</code>, <code>energy</code>, <code>force</code>, <code>power</code>, <code>speed</code>, <code>duration</code>, <code>ratio</code>.</p>
+  <p id="pilot-signal-vocabulary-members-unit"><strong>Unit</strong> (22): <code>kelvin</code>, <code>degree_celsius</code>, <code>volt</code>, <code>ohm</code>, <code>millibar</code>, <code>bar</code>, <code>megapascal</code>, <code>ampere</code>, <code>kiloampere</code>, <code>millimetre</code>, <code>percent</code>, <code>gram_per_second</code>, <code>kilogram_per_minute</code>, <code>millisecond</code>, <code>microsecond</code>, <code>second</code>, <code>kelvin_per_hour</code>, <code>microstrain</code>, <code>kilovolt_ampere</code>, <code>hertz</code>, <code>kilowatt_hour</code>, <code>newton</code>.</p>
+  <p id="pilot-signal-vocabulary-members-role"><strong>Role</strong> (5): <code>measurement</code>, <code>setpoint</code>, <code>state</code>, <code>alarm</code>, <code>command</code>.</p>
+  <p id="pilot-signal-vocabulary-members-outcome"><strong>Outcome</strong> (3): <code>decided</code>, <code>conflict</code>, <code>undecided</code>; exactly one holds per axis per signal. <strong>Source</strong> (4), in precedence: <code>signal_list_row</code>, <code>controls_metadata</code>, <code>archive_unit</code>, <code>field_pattern</code>.</p>
+
   <h3 id="pilot-signal-vocabulary-counts">Outcome by axis and credited source</h3>
   <table id="pilot-signal-vocabulary-table">
     <thead>
