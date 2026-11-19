@@ -35,6 +35,16 @@
       "note": "The section now states the attribution rule: a value is credited to the first source that decides it, in the order linked signal-list row, controls metadata, field pattern.",
       "reason": "",
       "when": "2026-11-19T22:31:47.945445+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "9b4c337fa13332d10075a5d40f6c38366fa237b9",
+      "commit_basis": "edit",
+      "finding": "done_when-2",
+      "note": "The unit-equality clause now applies only where a signal's existing units agree; where they differ the signal is a conflict.",
+      "reason": "",
+      "when": "2026-11-19T22:31:50.978357+00:00"
     }
   ],
   "responses": {
@@ -46,6 +56,15 @@
       "note": "The section now states the attribution rule: a value is credited to the first source that decides it, in the order linked signal-list row, controls metadata, field pattern.",
       "reason": "",
       "when": "2026-11-19T22:31:47.945445+00:00"
+    },
+    "done_when-2": {
+      "action": "acted",
+      "by": "",
+      "commit": "9b4c337fa13332d10075a5d40f6c38366fa237b9",
+      "commit_basis": "edit",
+      "note": "The unit-equality clause now applies only where a signal's existing units agree; where they differ the signal is a conflict.",
+      "reason": "",
+      "when": "2026-11-19T22:31:50.978357+00:00"
     }
   },
   "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261119T221802500329-plan-review-of-iter-signal-context-and-enrichment.json",
