@@ -21,6 +21,12 @@
       "recorded_at": "2026-11-19T23:07:56.609007+00:00",
       "rule": "landing-defers-non-blocking-findings",
       "run": "r-20261119T223601646628-signal-loading-recipe-tool"
+    },
+    "2": {
+      "kind": "deferred",
+      "recorded_at": "2026-11-19T23:07:56.609007+00:00",
+      "rule": "landing-defers-non-blocking-findings",
+      "run": "r-20261119T223601646628-signal-loading-recipe-tool"
     }
   },
   "findings": [
