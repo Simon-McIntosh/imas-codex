@@ -22,7 +22,7 @@
   <title>ITER plant signals carry context and are enriched by group | imas-codex</title>
   <link rel="stylesheet" href="/_shared/foundation.css">
   <link rel="stylesheet" href="/_shared/dashboard.css">
-<meta name="plan-version" content="81">
+<meta name="plan-version" content="82">
 <meta name="plan-modified" content="2026-11-20">
 </head>
 <body>
@@ -237,11 +237,39 @@
 <div class="r-comment" data-section="s6" data-id="c-run-r-20261120T053156923714-review-of-pilot-enrichment-by-group-04b35d54e902" data-who="reckon-build" data-when="2026-11-20T05:33:18.598Z">
     <div class="r-comment-body"><p>Review of run r-20261120T022442269568-pilot-enrichment-by-group at head 04b35d54e, covering the two commits it gained since the
 previous review (8a70880..04b35d54e): ace609ef restores the single transient lane-fault retry through recovered_call
-(transient_attempts=1 on the group draft) and 04b35d54e replaces the caller-schema test&#x27;s early return with rendered-schema
+(transient_attempts=1 on the group draft) and 04b35d54e replaces the caller-schema test's early return with rendered-schema
 assertions for signals/enrichment, signals/enrichment_grounding and signals/enrichment_output. Scores: goal_fidelity 19,
 evidence 17, scope_discipline 20, durability 17, fit 15, reuse 20. Two non-blocking findings: the recovered_call docstring names a
-transient_counter parameter that does not exist (counting is hardcoded to the &quot;transient_retries&quot; key), and one prompt-test
+transient_counter parameter that does not exist (counting is hardcoded to the "transient_retries" key), and one prompt-test
 assertion compares a literal the test itself passed in. Both records pass crew check --review.</p></div>
+</div>
+<div class="r-comment" data-section="s6" data-id="c-run-r-20261120T022442269568-pilot-enrichment-by-group" data-who="reckon-build" data-when="2026-11-20T02:28:25Z">
+    <div class="r-comment-body"><p>Pilot system, group enrichment. 1,766 pilot signals; 190 have linked context and all 190 now carry a
+description composed from their component description, their pattern description and the decided
+quantity/unit/role; the other 1,576 are marked awaiting context and carry no description (none inferred
+from a name). Described: 190 member signals, 74 of 583 components, 11 of 108 field patterns; none failed.
+The prerequisite grouping replay wrote archive grouping for 97,525 graph variables, so the 190 derived
+signals moved from ungrouped to 74 component groups and 11 field patterns. The writing run made 170 calls
+for 85 groups (draft plus the seat&#x27;s review per group) in 3m43s at the seat&#x27;s 3-worker cap, cost $0.0000
+on the local lane and delivered every group; tokens were not recorded by that run. A second pass over the
+same 85 groups delivered 84 of them — one group&#x27;s answer was refused, where the run&#x27;s was not — and
+measured 174 calls, 214,600 tokens and 130s at 8 workers, so the run&#x27;s 170 calls at 1,233 tokens per call
+is about 210k, an extrapolation from a pass that differed in one refused group. Hand reading, forty member
+signals drawn and digested before the run (sha256 f5117f89e55df61fc44c3750c4cdadbfaa02777cb414614357fb1f5687ab3ca7):
+38 right, 0 partly right, 2 wrong against the bar of at most 2 wrong and at least 32 right, so the section
+is delivered as met. Both wrong verdicts state a thermal-shield branch is an 80K circuit where the
+functional specification places it at 4K supply in this configuration; the partly-right class is empty
+because no description withholds a value the vocabulary decided. Of the 190 members, 180 state a quantity,
+188 a unit and 16 a role, and every stated value is the decided one. Recorded search reaching members from
+groups: the 74 group descriptions are the prefix of all 190 member descriptions and the 11 pattern
+descriptions are substrings of 174, the other 16 carrying their pattern&#x27;s meaning for their own field code.
+Catalogue projection from the section 5 grouping (27,253 components, 1,777 control groups, 1,802 field
+patterns with a field list, 413 without): 31,245 groups, 62,490 calls, about 77 million tokens, about 13
+hours at 8 workers or 23 hours at the seat&#x27;s 3, zero currency on the local lane.
+Gates at the repair head: tests/discovery 2,455 passed; the graph statement gate 11 passed (EXPLAIN of all
+nine statements with their own parameters, a structural check that a statement constant without an entry
+fails, and the cohort-selector positive control, live); the group suite 22 passed; the prompt-coverage file
+11 passed with 1 pre-existing failure, reproduced at the base sha.</p></div>
 </div>
 </section>
 </main>
