@@ -8,6 +8,13 @@
     "imas_codex/cli/discover/__init__.py:discover_group_enrich"
   ],
   "completed_at": "2026-11-20T04:24:42.572Z",
+  "dimension_dispositions": {
+    "reuse": {
+      "kind": "folded",
+      "node": "repair-of-pilot-enrichment-by-group-cf48cb0e574a",
+      "recorded_at": "2026-11-20T04:54:49.701178+00:00"
+    }
+  },
   "dispatched_at": "2026-11-20T04:24:23Z",
   "findings": [
     {
