@@ -35,9 +35,28 @@
       "note": "Section 6 now says a description states the quantity, unit and role only where the vocabulary decided them, and leaves out any that is undecided or in conflict.",
       "reason": "",
       "when": "2026-11-20T01:34:44.462135+00:00"
+    },
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ee4373ec8f2d4bbbe903fe3bb57ac7c65128278",
+      "commit_basis": "edit",
+      "finding": "done_when-1",
+      "note": "Section 6 now scopes component and pattern descriptions to those with linked context and counts the components and patterns awaiting context.",
+      "reason": "",
+      "when": "2026-11-20T01:34:54.026690+00:00"
     }
   ],
   "responses": {
+    "done_when-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ee4373ec8f2d4bbbe903fe3bb57ac7c65128278",
+      "commit_basis": "edit",
+      "note": "Section 6 now scopes component and pattern descriptions to those with linked context and counts the components and patterns awaiting context.",
+      "reason": "",
+      "when": "2026-11-20T01:34:54.026690+00:00"
+    },
     "reasoning-1": {
       "action": "acted",
       "by": "",
