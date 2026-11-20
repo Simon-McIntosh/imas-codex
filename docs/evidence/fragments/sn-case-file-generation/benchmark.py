@@ -24,6 +24,7 @@ import base64
 import hashlib
 import json
 import os
+import random
 import sys
 import time
 import zlib
@@ -1460,11 +1461,1672 @@ def write_report(
     return document
 
 
+# --------------------------------------------------------------------------- #
+# The second round: keep-or-repair arms, a perturbed control, a blind packet
+# --------------------------------------------------------------------------- #
+
+SECOND_ROUND_SCHEMA = "imas-codex.standard-name-record-benchmark/second-round"
+SECOND_RECORDS = ROOT / "benchmark-second-round-records.jsonl"
+SECOND_PACKET = ROOT / "benchmark-second-round-packet.jsonl"
+SECOND_KEY = ROOT / "benchmark-second-round-key.json"
+SECOND_DATA = ROOT / "benchmark-second-round.json"
+SECOND_PAGE = ROOT / "benchmark-second-round.html"
+SECOND_RUN = Path(
+    os.environ.get(
+        "BENCHMARK_SECOND_ROUND_RUN",
+        "/home/ITER/mcintos/.config/reckon/crew/runs/"
+        "r-20261120T074941732698-scfg-benchmark-second-round",
+    )
+)
+SECOND_WORK = SECOND_RUN / "development-iteration.jsonl"
+ARCHIVED_CASE_FILES = Path(
+    "/home/ITER/mcintos/.config/reckon/crew/archive/runs/"
+    "r-20261118T064806928346-scfg-case-file/case-files"
+)
+SECOND_SPEND_CEILING_USD = 30.0
+SECOND_SEED = 20261120
+ESTIMATED_CALL_USD = 0.06
+SECOND_ARMS = (
+    ("keep-or-repair/frontier", "keep-or-repair", FRONTIER_MODEL, "full"),
+    ("keep-or-repair/local", "keep-or-repair", LOCAL_MODEL, "full"),
+    ("one-pass/frontier", "one-pass", FRONTIER_MODEL, "full"),
+    ("incumbent", "", "", "full"),
+    ("perturbed/frontier", "keep-or-repair", FRONTIER_MODEL, "perturbed"),
+)
+SECOND_MODELS = {"frontier": FRONTIER_MODEL, "local": LOCAL_MODEL}
+KIMI_SECOND_COMMAND = (
+    'KIMI_BASE_URL="${KIMI_BASE_URL:?set KIMI_BASE_URL to the B300 server /v1 root}" '
+    "uv run --no-sync python "
+    "docs/evidence/fragments/sn-case-file-generation/benchmark.py "
+    "--stage second-round"
+)
+PACKET_FIELDS = (
+    "packet_id",
+    "source_descriptions",
+    "enclosing_statements",
+    "name",
+    "definition",
+    "documentation",
+    "unit",
+)
+# An arm label or the incumbent's identity in a packet value would break the
+# blind read. These are the strings that could carry one; a physics word such
+# as "local" is deliberately not in the list because definitions use it.
+PACKET_LEAK_TOKENS = (
+    "keep-or-repair",
+    "one-pass",
+    "perturbed",
+    "incumbent",
+    "frontier",
+    "kimi",
+)
+
+KEEP_OR_REPAIR_SYSTEM = (
+    """\
+You are given one standard-name case file. It opens with the incumbent record:
+the name, definition, documentation and unit the catalog already holds. Decide
+whether to keep it, repair it, or report that the case file cannot decide.
+
+Return decision "keep" when the case file neither contradicts the incumbent nor
+under-identifies the quantity. A keep copies the incumbent's name, definition
+and documentation unchanged, with its unit and its physics group.
+Return decision "repair" when the case file contradicts the incumbent or states
+a detail the incumbent omits. A repair returns the corrected record, and the
+reason quotes the words of the case file that forced the repair.
+Return decision "blocked" only when the case file cannot determine a record;
+then blocker names one of grammar-gap, registry-conflict,
+insufficient-source-text or collision, and the reason quotes the source words
+that stop it. Otherwise leave blocker and reason empty.
+"""
+    + IDENTITY_RULE
+)
+
+KEEP_OR_REPAIR_CHANGE_ONE = """
+Two failures the previous round counted are answered here.
+First, every detail the case file states that affects the number must appear in
+the definition: a time dependence, a coordinate frame, a normalisation, a
+weighting, an averaging convention or a dimension the source states is not to
+be summarised away. State each one.
+Second, derive a name the case file determines. When the case file supplies the
+locus, the vocabulary and a registry entry, compose the record; a collision, a
+grammar gap or an insufficient-source-text blocker applies only when the term
+the answer needs is genuinely absent from what the case file supplies.
+"""
+
+KEEP_OR_REPAIR_CHANGE_TWO = """
+A repair changes only what the case file contradicts or under-identifies: keep
+every other word of the incumbent's name, definition and documentation, so a
+reader comparing the two records sees the repaired clause and nothing else. A
+keep returns the incumbent's text verbatim; do not reword a record you judge
+sound.
+"""
+
+SECOND_PROMPTS = {
+    "v1": KEEP_OR_REPAIR_SYSTEM,
+    "v2": KEEP_OR_REPAIR_SYSTEM + KEEP_OR_REPAIR_CHANGE_ONE,
+    "v3": KEEP_OR_REPAIR_SYSTEM + KEEP_OR_REPAIR_CHANGE_ONE + KEEP_OR_REPAIR_CHANGE_TWO,
+}
+DEVELOPMENT_ARMS = ("keep-or-repair/frontier", "keep-or-repair/local")
+
+
+class KeepOrRepairDraft(BaseModel):
+    """One author's decision on an incumbent, with the words that forced it."""
+
+    decision: str = Field(description="keep, repair or blocked.")
+    name: str = Field(description="The record's name; the incumbent's on a keep.")
+    description: str = Field(description="The definition.")
+    documentation: str = Field(description="One paragraph of documentation.")
+    unit: str = Field(description="The unit.")
+    group: str = Field(default="", description="The physics group.")
+    blocker: str = Field(
+        default="",
+        description=(
+            "Empty unless decision is blocked: grammar-gap, registry-conflict, "
+            "insufficient-source-text or collision."
+        ),
+    )
+    reason: str = Field(
+        default="",
+        description="The words of the case file that forced a repair or a block.",
+    )
+
+
+def second_prompt(version: str) -> str:
+    return SECOND_PROMPTS[version]
+
+
+def one_pass_prompt() -> str:
+    """Round one's best arm, unchanged: the v2 one-pass system prompt.
+
+    The answered-failure sentence is rebuilt from the committed round-one
+    document so the comparison arm reads exactly what it read then.
+    """
+    answered: dict[str, int] = {}
+    if DATA.exists():
+        try:
+            document = json.loads(DATA.read_text(encoding="utf-8"))
+            for round_row in document.get("rounds", []):
+                if round_row.get("prompt_version") == "v2":
+                    answered = dict(round_row.get("answered_failures") or {})
+        except (json.JSONDecodeError, OSError):
+            answered = {}
+    return system_for("one-pass", "v2", answered)
+
+
+# --------------------------------------------------------------------------- #
+# Archived case files, the perturbed draw and the source-text block
+# --------------------------------------------------------------------------- #
+
+
+def load_second_cases(members: list[dict[str, Any]]) -> dict[str, dict[str, Any]]:
+    """Load each member's archived case file; rebuild from the graph if missing.
+
+    The archive holds the case files the reference set and the failure read were
+    built from, so the round reads no graph when it serves. A missing member is
+    rebuilt through the same code that wrote the archive and its digest is
+    recorded, so the reader can see which source each case file came from.
+    """
+    cases: dict[str, dict[str, Any]] = {}
+    missing: list[str] = []
+    for member in members:
+        path = ARCHIVED_CASE_FILES / f"{member['id']}.json"
+        if path.exists():
+            cases[member["id"]] = json.loads(path.read_text(encoding="utf-8"))
+        else:
+            missing.append(member["id"])
+    if missing:
+        from imas_codex.graph.client import GraphClient
+        from imas_codex.standard_names.case_file import build_name_case_file
+
+        with GraphClient() as client:
+            for member_id in missing:
+                cases[member_id] = build_name_case_file(
+                    member_id, gc=client
+                ).model_dump()
+    return cases
+
+
+def second_case_text(case: dict[str, Any]) -> str:
+    from imas_codex.standard_names.case_file import render_case_file
+
+    return render_case_file(case)
+
+
+def incumbent_record(content: dict[str, Any]) -> dict[str, str] | None:
+    incumbent = content.get("incumbent")
+    if not incumbent:
+        return None
+    return {
+        "name": incumbent.get("name") or "",
+        "description": incumbent.get("description") or "",
+        "documentation": incumbent.get("documentation") or "",
+        "unit": incumbent.get("unit") or "",
+        "group": "",
+    }
+
+
+def record_changed_from_incumbent(
+    record: dict[str, Any], content: dict[str, Any]
+) -> bool | None:
+    incumbent = incumbent_record(content)
+    if incumbent is None:
+        return None
+    return any(
+        squash(record.get(field)) != squash(incumbent.get(field))
+        and bool(squash(record.get(field)))
+        and bool(squash(incumbent.get(field)))
+        for field in ("name", "description", "documentation", "unit")
+    )
+
+
+def perturb_content(
+    case: dict[str, Any], donor: dict[str, Any]
+) -> dict[str, Any] | None:
+    """Replace the source descriptions and enclosing text with a donor's.
+
+    Every channel except these two is left as it was, so the only thing that
+    moves is the text a case file gives about the data dictionary -- which is
+    what the control is for: if the answer does not follow this text, the
+    control moves nothing and the round says so.
+    """
+    import copy
+
+    donor_sources = [
+        source
+        for source in (donor.get("content", {}).get("sources") or [])
+        if source.get("text")
+    ]
+    if not donor_sources:
+        return None
+    content = copy.deepcopy(case["content"])
+    for index, source in enumerate(content.get("sources") or []):
+        replacement = donor_sources[index % len(donor_sources)]
+        source["text"] = replacement.get("text") or ""
+        enclosing = source.get("enclosing")
+        if isinstance(enclosing, dict):
+            enclosing["statements"] = [
+                dict(statement)
+                for statement in (
+                    (replacement.get("enclosing") or {}).get("statements") or []
+                )
+            ]
+    return content
+
+
+def donor_for(
+    member: dict[str, Any],
+    members: list[dict[str, Any]],
+    cases: dict[str, dict[str, Any]],
+) -> tuple[str, dict[str, Any]] | None:
+    candidates = sorted(
+        other["id"]
+        for other in members
+        if other["id"] != member["id"] and other.get("group") != member.get("group")
+    )
+    if not candidates:
+        return None
+    pick = random.Random(f"{SECOND_SEED}:{member['id']}  Perturbation draw")
+    donor_id = pick.choice(candidates)
+    return donor_id, cases[donor_id]
+
+
+def source_blocks(case: dict[str, Any]) -> dict[str, list[str]]:
+    """The data-dictionary description and enclosing-structure text, deduped."""
+    descriptions: list[str] = []
+    statements: list[str] = []
+    seen_descriptions: set[str] = set()
+    seen_statements: set[str] = set()
+    for source in case.get("content", {}).get("sources") or []:
+        text = (source.get("text") or "").strip()
+        if text and text not in seen_descriptions:
+            seen_descriptions.add(text)
+            descriptions.append(text)
+        for statement in (source.get("enclosing") or {}).get("statements") or []:
+            line = (statement.get("text") or "").strip()
+            if line and line not in seen_statements:
+                seen_statements.add(line)
+                statements.append(line)
+    return {"source_descriptions": descriptions, "enclosing_statements": statements}
+
+
+# --------------------------------------------------------------------------- #
+# Generation and the arms
+# --------------------------------------------------------------------------- #
+
+
+class SpendGuard:
+    """Stop before a call that would take the round past its ceiling."""
+
+    def __init__(self, ceiling: float, spent: float = 0.0) -> None:
+        self.ceiling = ceiling
+        self.spent = spent
+
+    def reserve(self) -> None:
+        if self.spent + ESTIMATED_CALL_USD > self.ceiling:
+            raise RuntimeError(
+                f"the next call would take spend past USD {self.ceiling:.2f} "
+                f"(spent USD {self.spent:.2f}); the round stops here"
+            )
+
+    def add(self, cost: float) -> None:
+        self.spent += float(cost)
+
+
+def normalise_decision(raw: str, blocker: str) -> str:
+    decision = squash(raw)
+    if decision in {"keep", "repair", "blocked"}:
+        return decision
+    return "blocked" if blocker else "repair"
+
+
+def second_row(
+    phase: str,
+    arm: str,
+    member: dict[str, Any],
+    case: dict[str, Any],
+    version: str,
+    structure: str,
+    model: str,
+    body: dict[str, Any],
+) -> dict[str, Any]:
+    record = {
+        "name": body.get("name") or "",
+        "description": body.get("description") or "",
+        "documentation": body.get("documentation") or "",
+        "unit": body.get("unit") or "",
+        "group": body.get("group") or "",
+    }
+    decision = body["decision"]
+    return {
+        "phase": phase,
+        "arm": arm,
+        "member": member["id"],
+        "decision": decision,
+        "record": record,
+        "blocker": (body.get("blocker") or "") if decision == "blocked" else "",
+        "reason": body.get("reason") or "",
+        "structure": structure,
+        "model": model,
+        "prompt_version": version,
+        "prompt_hash": body.get("prompt_hash") or "",
+        "cost_usd": float(body.get("cost_usd") or 0.0),
+        "input_tokens": int(body.get("input_tokens") or 0),
+        "output_tokens": int(body.get("output_tokens") or 0),
+        "seconds": float(body.get("seconds") or 0.0),
+        "changed_incumbent": record_changed_from_incumbent(
+            record, case.get("content", {})
+        ),
+        "incumbent_right": member.get("verdict") == "sound",
+        "case_digest": case.get("digest") or "",
+        "target_group": member.get("group") or "",
+    }
+
+
+async def generate_second_one(
+    structure: str,
+    model: str,
+    case_text: str,
+    version: str,
+    semaphores: dict[str, asyncio.Semaphore],
+    guard: SpendGuard,
+) -> dict[str, Any]:
+    lane = "local" if model.startswith("local/") else "frontier"
+    if structure == "one-pass":
+        system = one_pass_prompt()
+        schema: type[BaseModel] = RecordDraft
+    else:
+        system = second_prompt(version)
+        schema = KeepOrRepairDraft
+    started = time.time()
+    cost = 0.0
+    input_tokens = 0
+    output_tokens = 0
+    try:
+        async with semaphores[lane]:
+            guard.reserve()
+            parsed, meta = await call_model(model, system, case_text, schema)
+        cost = float(meta["cost"])
+        input_tokens = int(meta["input_tokens"])
+        output_tokens = int(meta["output_tokens"])
+        raw = parsed.model_dump()
+        blocker = str(raw.get("blocker") or "").strip()
+        if structure == "one-pass":
+            decision = "blocked" if blocker else "repair"
+            reason = ""
+        else:
+            decision = normalise_decision(str(raw.get("decision") or ""), blocker)
+            reason = str(raw.get("reason") or "").strip()
+        body = {
+            "decision": decision,
+            "name": raw.get("name") or "",
+            "description": raw.get("description") or "",
+            "documentation": raw.get("documentation") or "",
+            "unit": raw.get("unit") or "",
+            "group": str(raw.get("group") or ""),
+            "blocker": blocker,
+            "reason": reason,
+            "prompt_hash": digest_text(system),
+            "cost_usd": cost,
+            "seconds": time.time() - started,
+        }
+    except RuntimeError:
+        raise
+    except Exception as exc:  # a failed call is a blocked member, never a right
+        body = {
+            "decision": "blocked",
+            "blocker": "generation-failure:" + type(exc).__name__,
+            "reason": str(exc)[:300],
+            "prompt_hash": digest_text(system),
+            "cost_usd": cost,
+            "seconds": time.time() - started,
+        }
+    body["input_tokens"] = input_tokens
+    body["output_tokens"] = output_tokens
+    guard.add(cost)
+    return body
+
+
+def incumbent_body(case: dict[str, Any]) -> dict[str, Any]:
+    record = incumbent_record(case.get("content", {}))
+    if record is None:
+        return {
+            "decision": "blocked",
+            "blocker": "no-incumbent",
+            "reason": "the case file carries no incumbent record",
+        }
+    return {
+        "decision": "keep",
+        "name": record["name"],
+        "description": record["description"],
+        "documentation": record["documentation"],
+        "unit": record["unit"],
+        "group": "",
+        "blocker": "",
+        "reason": "",
+        "prompt_hash": "",
+    }
+
+
+async def run_second_arm(
+    phase: str,
+    arm: str,
+    structure: str,
+    model: str,
+    members: list[dict[str, Any]],
+    cases: dict[str, dict[str, Any]],
+    version: str,
+    log_path: Path,
+    guard: SpendGuard,
+) -> None:
+    seen = {
+        (row.get("phase"), row.get("arm"), row.get("prompt_version"), row.get("member"))
+        for row in read_jsonl(log_path)
+    }
+    semaphores = {
+        "local": asyncio.Semaphore(CONCURRENCY["local"]),
+        "frontier": asyncio.Semaphore(CONCURRENCY["frontier"]),
+    }
+
+    async def one(member: dict[str, Any]) -> None:
+        key = (phase, arm, version, member["id"])
+        if key in seen:
+            return
+        case = cases[member["id"]]
+        if structure == "incumbent":
+            body = incumbent_body(case)
+        else:
+            body = await generate_second_one(
+                structure, model, second_case_text(case), version, semaphores, guard
+            )
+        append_jsonl(
+            log_path,
+            second_row(phase, arm, member, case, version, structure, model, body),
+        )
+
+    await asyncio.gather(*(one(member) for member in members))
+
+
+# --------------------------------------------------------------------------- #
+# The development iteration: a mechanical proxy, labelled as one
+# --------------------------------------------------------------------------- #
+
+PROXY_DEFINITION = (
+    "A proxy, not a verdict: the share of a member's records whose name is one of "
+    "the reference's right names and whose unit agrees. It is mechanical, it is "
+    "read only on the development half, and it decides nothing about the "
+    "held-out half."
+)
+
+DEVELOPMENT_CHANGES = {
+    "v1": (
+        "the keep-or-repair prompt as first written: decide keep, repair or "
+        "blocked, and quote the case-file words that forced a repair"
+    ),
+    "v2": (
+        "answers a stated detail being dropped (8 of 50 in the failure read) by "
+        "requiring every stated detail to appear in the definition, and answers "
+        "blocking on a derivable name (7 of 50) by naming when a blocker is allowed"
+    ),
+    "v3": (
+        "answers a repair that rewrites a sound clause: a repair changes only "
+        "what the case file contradicts, and a keep copies the incumbent verbatim"
+    ),
+}
+
+DEVELOPMENT_ANSWERS = {
+    "v1": {},
+    "v2": {
+        "detail-the-case-file-states-dropped": 8,
+        "blocked-on-a-name-the-generator-can-derive": 7,
+    },
+    "v3": {
+        "detail-the-case-file-states-dropped": 8,
+        "blocked-on-a-name-the-generator-can-derive": 7,
+    },
+}
+
+
+def proxy_figures(
+    rows: list[dict[str, Any]], members: list[dict[str, Any]]
+) -> dict[str, Any]:
+    by_id = {member["id"]: member for member in members}
+    right = 0
+    total = 0
+    blocked = 0
+    name_hits = 0
+    unit_hits = 0
+    for row in rows:
+        total += 1
+        if row["decision"] == "blocked":
+            blocked += 1
+            continue
+        member = by_id[row["member"]]
+        right_names = {squash(name) for name in member.get("right_names") or []}
+        hit_name = squash(row["record"].get("name")) in right_names
+        hit_unit = not member.get("unit") or squash(
+            row["record"].get("unit")
+        ) == squash(member.get("unit"))
+        name_hits += 1 if hit_name else 0
+        unit_hits += 1 if hit_unit else 0
+        right += 1 if (hit_name and hit_unit) else 0
+    return {
+        "members": total,
+        "right": right,
+        "share": (right / total) if total else 0.0,
+        "interval": list(bench.wilson_interval(right, total)),
+        "blocked": blocked,
+        "name_in_reference": name_hits,
+        "unit_agrees": unit_hits,
+    }
+
+
+def failure_counts_from_rows(
+    rows: list[dict[str, Any]], members: list[dict[str, Any]]
+) -> dict[str, int]:
+    by_id = {member["id"]: member for member in members}
+    counts: Counter[str] = Counter()
+    for row in rows:
+        if row["decision"] == "blocked":
+            counts["blocked"] += 1
+            continue
+        member = by_id[row["member"]]
+        right_names = {squash(name) for name in member.get("right_names") or []}
+        if squash(row["record"].get("name")) not in right_names:
+            counts["name-not-in-reference"] += 1
+        if member.get("unit") and squash(row["record"].get("unit")) != squash(
+            member.get("unit")
+        ):
+            counts["unit-mismatch"] += 1
+    return dict(sorted(counts.items()))
+
+
+def development_model(arm: str) -> str:
+    return FRONTIER_MODEL if arm.endswith("/frontier") else LOCAL_MODEL
+
+
+async def run_development(
+    development: list[dict[str, Any]],
+    cases: dict[str, dict[str, Any]],
+    guard: SpendGuard,
+) -> list[dict[str, Any]]:
+    rounds: list[dict[str, Any]] = []
+    for version in ("v1", "v2", "v3"):
+        for arm in DEVELOPMENT_ARMS:
+            await run_second_arm(
+                "development",
+                arm,
+                "keep-or-repair",
+                development_model(arm),
+                development,
+                cases,
+                version,
+                SECOND_WORK,
+                guard,
+            )
+        arms: list[dict[str, Any]] = []
+        failures: dict[str, int] = {}
+        for arm in DEVELOPMENT_ARMS:
+            rows = [
+                row
+                for row in read_jsonl(SECOND_WORK)
+                if row["arm"] == arm and row["prompt_version"] == version
+            ]
+            arms.append({"arm": arm, **proxy_figures(rows, development)})
+            failures.update(failure_counts_from_rows(rows, development))
+        rounds.append(
+            {
+                "prompt_version": version,
+                "prompt_hash": digest_text(second_prompt(version)),
+                "change": DEVELOPMENT_CHANGES[version],
+                "answers": DEVELOPMENT_ANSWERS[version],
+                "failures_counted_on_this_half": failures,
+                "arms": arms,
+                "measure": PROXY_DEFINITION,
+            }
+        )
+    return rounds
+
+
+# --------------------------------------------------------------------------- #
+# The blind packet, its key, and the records digest
+# --------------------------------------------------------------------------- #
+
+
+def second_record_key(row: dict[str, Any]) -> tuple[str, str, str, str]:
+    record = row["record"]
+    return (
+        row["member"],
+        (record.get("name") or "").strip(),
+        (record.get("description") or "").strip(),
+        (record.get("unit") or "").strip(),
+    )
+
+
+def packet_id_for(key: tuple[str, str, str, str]) -> str:
+    raw = "|".join(key)
+    return "pkt-" + hashlib.sha256(raw.encode("utf-8")).hexdigest()[:16]
+
+
+def records_digest(rows: list[dict[str, Any]]) -> str:
+    raw = "\n".join(
+        json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+        for row in rows
+    )
+    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+
+
+def build_packet_and_key(
+    records: list[dict[str, Any]],
+    members: list[dict[str, Any]],
+    cases: dict[str, dict[str, Any]],
+) -> tuple[list[dict[str, Any]], dict[str, Any]]:
+    members_by_id = {member["id"]: member for member in members}
+    by_pair = {(row["member"], row["arm"]): row for row in records}
+    groups: dict[tuple[str, str, str, str], list[list[str]]] = {}
+    for row in sorted(records, key=lambda item: (item["member"], item["arm"])):
+        if row["decision"] == "blocked":
+            continue
+        if not (row["record"].get("name") or "").strip():
+            continue
+        key = second_record_key(row)
+        groups.setdefault(key, []).append([row["member"], row["arm"]])
+    lines: list[dict[str, Any]] = []
+    packets: dict[str, Any] = {}
+    for key, pairs in groups.items():
+        member_id, name, definition, unit = key
+        blocks = source_blocks(cases[member_id])
+        packet_id = packet_id_for(key)
+        first = by_pair[(pairs[0][0], pairs[0][1])]
+        lines.append(
+            {
+                "packet_id": packet_id,
+                "source_descriptions": blocks["source_descriptions"],
+                "enclosing_statements": blocks["enclosing_statements"],
+                "name": name,
+                "definition": definition,
+                "documentation": first["record"]["documentation"],
+                "unit": unit,
+            }
+        )
+        packets[packet_id] = {"member": member_id, "arms": pairs}
+    random.Random(SECOND_SEED).shuffle(lines)
+    key_document: dict[str, Any] = {
+        "rule": (
+            "The adjudicator does not open this file until its verdicts are "
+            "committed. It maps a packet id back to the member and arms it "
+            "stands for, and carries the reference's right names and definition "
+            "points."
+        ),
+        "seed": SECOND_SEED,
+        "records_digest": records_digest(records),
+        "packets": packets,
+        "members": {
+            member_id: {
+                "right_names": members_by_id[member_id].get("right_names") or [],
+                "definition_points": members_by_id[member_id].get("definition_points")
+                or [],
+                "unit": members_by_id[member_id].get("unit") or "",
+                "verdict": members_by_id[member_id].get("verdict") or "",
+            }
+            for member_id in sorted({packet["member"] for packet in packets.values()})
+        },
+    }
+    return (
+        lines,
+        key_document,
+    )  # --------------------------------------------------------------------------- #
+
+
+# Scoring a committed verdicts file
+# --------------------------------------------------------------------------- #
+
+VERDICT_VALUES = ("right", "wrong", "undecidable")
+
+
+def load_verdicts(path: Path) -> dict[str, dict[str, str]]:
+    """Read the adjudicator's file: one line per packet id, name and definition."""
+    verdicts: dict[str, dict[str, str]] = {}
+    for row in read_jsonl(path):
+        packet_id = str(row.get("packet_id") or "").strip()
+        if not packet_id:
+            continue
+        verdicts[packet_id] = {
+            "name": squash(row.get("name_verdict") or row.get("name") or ""),
+            "definition": squash(
+                row.get("definition_verdict") or row.get("definition") or ""
+            ),
+        }
+    return verdicts
+
+
+def score_rows(
+    records: list[dict[str, Any]],
+    packet: list[dict[str, Any]],
+    key: dict[str, Any],
+    verdicts: dict[str, dict[str, str]],
+) -> dict[str, Any]:
+    """Turn a blind verdicts file into the per-arm figures the round reports."""
+    pair_to_packet: dict[tuple[str, str], str] = {}
+    for packet_id, entry in key["packets"].items():
+        for member, arm in entry["arms"]:
+            pair_to_packet[(member, arm)] = packet_id
+    arms = sorted({row["arm"] for row in records})
+    compare_rows: list[bench.RecordBenchmarkRow] = []
+    reports: dict[str, Any] = {}
+    for arm in arms:
+        arm_records = [row for row in records if row["arm"] == arm]
+        total = len(arm_records)
+        name_right = 0
+        definition_right = 0
+        both_right = 0
+        blocked = 0
+        blocked_types: Counter[str] = Counter()
+        changed_right = 0
+        right_incumbent_total = 0
+        cost = 0.0
+        seconds = 0.0
+        for row in arm_records:
+            cost += float(row.get("cost_usd") or 0.0)
+            seconds += float(row.get("seconds") or 0.0)
+            incumbent_right = bool(row.get("incumbent_right"))
+            if incumbent_right:
+                right_incumbent_total += 1
+                if row["decision"] != "keep" or row.get("changed_incumbent"):
+                    changed_right += 1
+            if row["decision"] == "blocked":
+                blocked += 1
+                blocked_types[bench.blocker_bucket(row.get("blocker") or "other")] += 1
+                compare_rows.append(
+                    bench.RecordBenchmarkRow(
+                        member=row["member"],
+                        arm=arm,
+                        verdict="blocked",
+                        blocker=row.get("blocker") or "other",
+                        changed_incumbent=row.get("changed_incumbent"),
+                        incumbent_right=row.get("incumbent_right"),
+                        cost_usd=float(row.get("cost_usd") or 0.0),
+                        seconds=float(row.get("seconds") or 0.0),
+                        input_tokens=int(row.get("input_tokens") or 0),
+                        output_tokens=int(row.get("output_tokens") or 0),
+                    )
+                )
+                continue
+            packet_id = pair_to_packet.get((row["member"], arm))
+            verdict = verdicts.get(packet_id) if packet_id else None
+            name_ok = bool(verdict and verdict.get("name") == "right")
+            definition_ok = bool(verdict and verdict.get("definition") == "right")
+            both_ok = name_ok and definition_ok
+            name_right += 1 if name_ok else 0
+            definition_right += 1 if definition_ok else 0
+            both_right += 1 if both_ok else 0
+            compare_rows.append(
+                bench.RecordBenchmarkRow(
+                    member=row["member"],
+                    arm=arm,
+                    verdict="right" if both_ok else "wrong",
+                    changed_incumbent=row.get("changed_incumbent"),
+                    incumbent_right=row.get("incumbent_right"),
+                    cost_usd=float(row.get("cost_usd") or 0.0),
+                    seconds=float(row.get("seconds") or 0.0),
+                    input_tokens=int(row.get("input_tokens") or 0),
+                    output_tokens=int(row.get("output_tokens") or 0),
+                )
+            )
+        reports[arm] = {
+            "members": total,
+            "name_right": name_right,
+            "name_share": (name_right / total) if total else 0.0,
+            "name_interval": list(bench.wilson_interval(name_right, total)),
+            "definition_right": definition_right,
+            "definition_share": (definition_right / total) if total else 0.0,
+            "definition_interval": list(bench.wilson_interval(definition_right, total)),
+            "both_right": both_right,
+            "both_share": (both_right / total) if total else 0.0,
+            "both_interval": list(bench.wilson_interval(both_right, total)),
+            "blocked": blocked,
+            "blocked_by_type": dict(sorted(blocked_types.items())),
+            "changed_right_incumbent": changed_right,
+            "right_incumbent_total": right_incumbent_total,
+            "changed_right_incumbent_share": (
+                changed_right / right_incumbent_total if right_incumbent_total else 0.0
+            ),
+            "cost_usd": cost,
+            "seconds": seconds,
+            "cost_per_name": (cost / total) if total else 0.0,
+            "seconds_per_name": (seconds / total) if total else 0.0,
+        }
+    comparisons: list[dict[str, Any]] = []
+    for index, first in enumerate(arms):
+        for second in arms[index + 1 :]:
+            try:
+                comparisons.append(
+                    bench.compare_record_arms(
+                        compare_rows, first, second, seed=SECOND_SEED
+                    )
+                )
+            except ValueError:
+                continue
+    undecided = sum(
+        1
+        for packet_id in key["packets"]
+        if "name" not in verdicts.get(packet_id, {})
+        or "definition" not in verdicts.get(packet_id, {})
+    )
+    return {
+        "schema": SECOND_ROUND_SCHEMA + "/scores",
+        "packets": len(packet),
+        "verdicts": len(verdicts),
+        "undecided_packet_lines": undecided,
+        "rule": "A name is right when it denotes the same quantity; a definition "
+        "is right when it states every reference definition point. Both right "
+        "means both. Group is not scored.",
+        "arms": reports,
+        "comparisons": comparisons,
+    }
+
+
+def score_files(
+    verdicts_path: Path,
+    records_path: Path = SECOND_RECORDS,
+    packet_path: Path = SECOND_PACKET,
+    key_path: Path = SECOND_KEY,
+) -> dict[str, Any]:
+    return score_rows(
+        read_jsonl(records_path),
+        read_jsonl(packet_path),
+        json.loads(key_path.read_text(encoding="utf-8")),
+        load_verdicts(verdicts_path),
+    )
+
+
+# --------------------------------------------------------------------------- #
+# The check: a failure for an altered record, a leaking packet, a broken key
+# --------------------------------------------------------------------------- #
+
+
+def score_self_test() -> list[str]:
+    """Prove the score subcommand on a synthetic verdicts file, never on real ones."""
+    problems: list[str] = []
+    cases = {
+        member: {"content": {"sources": []}, "digest": "digest-" + member}
+        for member in ("m1", "m2")
+    }
+    members = [
+        {
+            "id": "m1",
+            "group": "g",
+            "unit": "W",
+            "right_names": ["n1"],
+            "definition_points": ["p"],
+            "verdict": "sound",
+        },
+        {
+            "id": "m2",
+            "group": "g",
+            "unit": "W",
+            "right_names": ["n2"],
+            "definition_points": ["p"],
+            "verdict": "definition_defect",
+        },
+    ]
+
+    def row(
+        member: str, arm: str, name: str, decision: str = "repair", blocker: str = ""
+    ):
+        return {
+            "phase": "held_out",
+            "arm": arm,
+            "member": member,
+            "decision": decision,
+            "record": {
+                "name": name,
+                "description": "definition",
+                "documentation": "documentation",
+                "unit": "W",
+                "group": "g",
+            },
+            "blocker": blocker,
+            "reason": "",
+            "structure": "keep-or-repair",
+            "model": "synthetic",
+            "prompt_version": "v3",
+            "prompt_hash": "hash",
+            "cost_usd": 0.5,
+            "input_tokens": 100,
+            "output_tokens": 10,
+            "seconds": 2.0,
+            "changed_incumbent": True,
+            "incumbent_right": True,
+            "case_digest": "digest-" + member,
+            "target_group": "g",
+        }
+
+    records = [
+        row("m1", "A", "n1"),
+        row("m2", "A", "n2"),
+        row("m1", "B", "", decision="blocked", blocker="collision"),
+        row("m2", "B", "n3"),
+    ]
+    packet, key = build_packet_and_key(records, members, cases)
+    lookup: dict[tuple[str, str], str] = {}
+    for packet_id, entry in key["packets"].items():
+        for member, arm in entry["arms"]:
+            lookup[(member, arm)] = packet_id
+    verdicts = {
+        lookup[("m1", "A")]: {"name": "right", "definition": "right"},
+        lookup[("m2", "A")]: {"name": "right", "definition": "wrong"},
+        lookup[("m2", "B")]: {"name": "wrong", "definition": "wrong"},
+    }
+    scored = score_rows(records, packet, key, verdicts)
+    figures = scored["arms"]
+    if figures["A"]["name_right"] != 2:
+        problems.append("score self-test: A name_right is not 2")
+    if figures["A"]["definition_right"] != 1:
+        problems.append("score self-test: A definition_right is not 1")
+    if figures["A"]["both_right"] != 1:
+        problems.append("score self-test: A both_right is not 1")
+    if abs(figures["A"]["both_share"] - 0.5) > 1e-9:
+        problems.append("score self-test: A both_share is not 0.5")
+    if figures["B"]["blocked"] != 1:
+        problems.append("score self-test: B blocked is not 1")
+    if figures["B"]["blocked_by_type"].get("collision") != 1:
+        problems.append("score self-test: B blocker is not counted as collision")
+    if figures["B"]["both_right"] != 0:
+        problems.append("score self-test: B both_right is not 0")
+    if not scored["comparisons"]:
+        problems.append("score self-test: no arm comparison was produced")
+    low, high = figures["A"]["both_interval"]
+    if not (0.0 <= low <= 0.5 <= high <= 1.0):
+        problems.append("score self-test: the interval does not bracket the share")
+    return problems
+
+
+def check_second_round(
+    records_path: Path = SECOND_RECORDS,
+    packet_path: Path = SECOND_PACKET,
+    key_path: Path = SECOND_KEY,
+    data_path: Path = SECOND_DATA,
+) -> list[str]:
+    """Return every problem in the committed round, empty when the round holds."""
+    problems: list[str] = []
+    for path in (records_path, packet_path, key_path, data_path):
+        if not path.exists():
+            problems.append(f"missing {path.name}")
+    if problems:
+        return problems
+    records = read_jsonl(records_path)
+    packet = read_jsonl(packet_path)
+    key = json.loads(key_path.read_text(encoding="utf-8"))
+    document = json.loads(data_path.read_text(encoding="utf-8"))
+
+    if not records:
+        problems.append("the records file is empty")
+    else:
+        digest = records_digest(records)
+        if key.get("records_digest") != digest:
+            problems.append(
+                "the records file does not match the key's records digest: a line "
+                "was altered"
+            )
+        if document.get("records_digest") != digest:
+            problems.append("the round document does not carry the records digest")
+
+    for line in packet:
+        fields = set(line)
+        if fields != set(PACKET_FIELDS):
+            extra = sorted(fields - set(PACKET_FIELDS))
+            missing = sorted(set(PACKET_FIELDS) - fields)
+            problems.append(
+                f"packet line {line.get('packet_id', '?')} fields differ "
+                f"(extra={extra}, missing={missing})"
+            )
+        for field, value in line.items():
+            if not isinstance(value, str):
+                continue
+            lowered = value.lower()
+            for token in PACKET_LEAK_TOKENS:
+                if token in lowered:
+                    problems.append(
+                        f"packet line {line.get('packet_id', '?')} reveals "
+                        f"{token!r} in {field!r}"
+                    )
+
+    packet_ids = [line.get("packet_id") for line in packet]
+    if len(set(packet_ids)) != len(packet_ids):
+        problems.append("a packet id appears more than once")
+    key_packets = key.get("packets") or {}
+    if set(packet_ids) != set(key_packets):
+        only_packet = sorted(set(packet_ids) - set(key_packets))
+        only_key = sorted(set(key_packets) - set(packet_ids))
+        problems.append(
+            "the key and the packet disagree on packet ids "
+            f"(packet only={only_packet}, key only={only_key})"
+        )
+
+    arm_names = {name for name, _, _, _ in SECOND_ARMS}
+    pair_records = {(row["member"], row["arm"]): row for row in records}
+    packet_by_id = {line["packet_id"]: line for line in packet}
+    for packet_id, entry in key_packets.items():
+        line = packet_by_id.get(packet_id)
+        if line is None:
+            continue
+        for member, arm in entry["arms"]:
+            if arm not in arm_names:
+                problems.append(f"{packet_id}: unknown arm {arm!r}")
+            row = pair_records.get((member, arm))
+            if row is None:
+                problems.append(f"{packet_id}: names a (member, arm) with no record")
+                continue
+            expected = second_record_key(row)
+            actual = (
+                packet_id.split()[0],
+                line["name"],
+                line["definition"],
+                line["unit"],
+            )
+            if expected[1:] != actual[1:]:
+                problems.append(
+                    f"{packet_id}: the packet record differs from the record line "
+                    f"for {member} / {arm}"
+                )
+
+    covered: set[tuple[str, str]] = set()
+    for entry in key_packets.values():
+        for member, arm in entry["arms"]:
+            covered.add((member, arm))
+    for row in records:
+        if row["decision"] == "blocked":
+            continue
+        if (row["member"], row["arm"]) not in covered:
+            problems.append(
+                f"{row['member']} / {row['arm']}: a non-blocked record has no "
+                "packet line"
+            )
+
+    members_in_key = key.get("members") or {}
+    for member in {pair[0] for pair in covered}:
+        entry = members_in_key.get(member)
+        if not entry:
+            problems.append(f"key members: {member} missing")
+            continue
+        if not entry.get("right_names"):
+            problems.append(f"key members: {member} carries no right name")
+        if not entry.get("definition_points"):
+            problems.append(f"key members: {member} carries no definition point")
+
+    if document.get("packet", {}).get("lines") != len(packet):
+        problems.append("the round document's packet line count is wrong")
+    if document.get("records", {}).get("lines") != len(records):
+        problems.append("the round document's records line count is wrong")
+    ceiling = float(document.get("spend", {}).get("ceiling_usd") or 0.0)
+    if ceiling != SECOND_SPEND_CEILING_USD:
+        problems.append("the round document's ceiling is not the authorized one")
+    if document.get("spend", {}).get("within_ceiling") is not True:
+        problems.append("the round's spend is not within its ceiling")
+
+    problems.extend(score_self_test())
+    return problems
+
+
+def run_check() -> int:
+    problems = check_second_round()
+    if problems:
+        for problem in problems:
+            print(f"FAIL: {problem}", file=sys.stderr)
+        return 1
+    print(
+        json.dumps(
+            {
+                "check": "passed",
+                "records": SECOND_RECORDS.name,
+                "packet": SECOND_PACKET.name,
+                "key": SECOND_KEY.name,
+                "note": (
+                    "passes on the committed files; fails on an altered records "
+                    "line, a packet line that reveals an arm, and a key whose "
+                    "packet id is absent from the packet"
+                ),
+            },
+            indent=2,
+        )
+    )
+    return 0  # --------------------------------------------------------------------------- #
+
+
+# The perturbed control
+# --------------------------------------------------------------------------- #
+
+
+def perturbed_cases(
+    members: list[dict[str, Any]], cases: dict[str, dict[str, Any]]
+) -> tuple[dict[str, dict[str, Any]], dict[str, str]]:
+    """Return each member's perturbed case and the donor it was drawn from."""
+    perturbed: dict[str, dict[str, Any]] = {}
+    donors: dict[str, str] = {}
+    for member in members:
+        choice = donor_for(member, members, cases)
+        if choice is None:
+            continue
+        donor_id, donor = choice
+        content = perturb_content(cases[member["id"]], donor)
+        if content is None:
+            continue
+        perturbed[member["id"]] = {
+            "content": content,
+            "digest": digest_json(content),
+        }
+        donors[member["id"]] = donor_id
+    return perturbed, donors
+
+
+def perturbed_change(
+    records: list[dict[str, Any]],
+    donors: dict[str, str],
+) -> dict[str, Any]:
+    """The share of members whose perturbed answer moved from the plain one."""
+    plain: dict[str, dict[str, Any]] = {}
+    moved: dict[str, dict[str, Any]] = {}
+    for row in records:
+        if row.get("phase") != "held_out":
+            continue
+        if row["arm"] == "keep-or-repair/frontier":
+            plain[row["member"]] = row
+        elif row["arm"] == "perturbed/frontier":
+            moved[row["member"]] = row
+    compared = 0
+    changed = 0
+    changed_decision = 0
+    by_member: dict[str, bool] = {}
+    for member_id, plain_row in sorted(plain.items()):
+        moved_row = moved.get(member_id)
+        if moved_row is None:
+            continue
+        compared += 1
+        plain_record = plain_row.get("record") or {}
+        moved_record = moved_row.get("record") or {}
+        differs = (
+            plain_row.get("decision") != moved_row.get("decision")
+            or squash(plain_record.get("name")) != squash(moved_record.get("name"))
+            or squash(plain_record.get("description"))
+            != squash(moved_record.get("description"))
+            or squash(plain_record.get("unit")) != squash(moved_record.get("unit"))
+        )
+        changed += 1 if differs else 0
+        if plain_row.get("decision") != moved_row.get("decision"):
+            changed_decision += 1
+        by_member[member_id] = differs
+    share = (changed / compared) if compared else 0.0
+    if compared == 0:
+        reading = (
+            "No member carries both a plain and a perturbed answer, so the "
+            "control measured nothing."
+        )
+    elif share >= 0.5:
+        reading = (
+            "At least half of the answers follow the source text the control replaced."
+        )
+    else:
+        reading = (
+            f"Fewer than half of the answers ({changed} of {compared}) follow "
+            "the source text the control replaced: over half are unchanged by "
+            "it, and the round says so plainly rather than reading the control "
+            "as a pass."
+        )
+    return {
+        "compared_members": compared,
+        "changed_members": changed,
+        "changed_share": share,
+        "decision_changed_members": changed_decision,
+        "donors": donors,
+        "by_member": dict(sorted(by_member.items())),
+        "reading": reading,
+    }
+
+
+# --------------------------------------------------------------------------- #
+# The round document and its page
+# --------------------------------------------------------------------------- #
+
+
+def arm_decision_counts(records: list[dict[str, Any]]) -> dict[str, Any]:
+    counts: dict[str, Any] = {}
+    for row in records:
+        arm = row["arm"]
+        entry = counts.setdefault(
+            arm,
+            {"members": 0, "keep": 0, "repair": 0, "blocked": 0, "blocked_by_type": {}},
+        )
+        entry["members"] += 1
+        decision = row["decision"]
+        if decision in {"keep", "repair", "blocked"}:
+            entry[decision] += 1
+        if decision == "blocked":
+            bucket = bench.blocker_bucket(row.get("blocker") or "other")
+            entry["blocked_by_type"][bucket] = (
+                entry["blocked_by_type"].get(bucket, 0) + 1
+            )
+    for entry in counts.values():
+        entry["blocked_by_type"] = dict(sorted(entry["blocked_by_type"].items()))
+    return dict(sorted(counts.items()))
+
+
+def spend_report(records: list[dict[str, Any]]) -> dict[str, Any]:
+    development = read_jsonl(SECOND_WORK) if SECOND_WORK.exists() else []
+    spent = sum(float(row.get("cost_usd") or 0.0) for row in development)
+    spent += sum(float(row.get("cost_usd") or 0.0) for row in records)
+    return {
+        "spent_usd": round(spent, 4),
+        "ceiling_usd": SECOND_SPEND_CEILING_USD,
+        "within_ceiling": spent <= SECOND_SPEND_CEILING_USD,
+        "development_calls": len(development),
+        "held_out_generation_calls": sum(
+            1 for row in records if row["arm"] != "incumbent"
+        ),
+    }
+
+
+def save_development(rounds: list[dict[str, Any]]) -> Path:
+    path = SECOND_RUN / "development-iteration.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(rounds, indent=2, ensure_ascii=False), encoding="utf-8")
+    return path
+
+
+def load_development() -> list[dict[str, Any]]:
+    path = SECOND_RUN / "development-iteration.json"
+    if not path.exists():
+        return []
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def build_second_document(
+    records: list[dict[str, Any]],
+    packet: list[dict[str, Any]],
+    development: list[dict[str, Any]],
+    donors: dict[str, str],
+    members: list[dict[str, Any]],
+) -> dict[str, Any]:
+    development_ids: list[str] = []
+    if SECOND_WORK.exists():
+        development_ids = sorted({row["member"] for row in read_jsonl(SECOND_WORK)})
+    return {
+        "schema": SECOND_ROUND_SCHEMA,
+        "generated": datetime.now(UTC).isoformat(timespec="seconds"),
+        "seat": "Standard-name record generation, second round",
+        "models": {
+            "frontier": FRONTIER_MODEL,
+            "local": LOCAL_MODEL,
+            "kimi": {"run": False, "command": KIMI_SECOND_COMMAND},
+        },
+        "split": {
+            "seed": SPLIT_SEED,
+            "second_seed": SECOND_SEED,
+            "members": len(members),
+            "development": len(development_ids),
+            "held_out": len({row["member"] for row in records}),
+        },
+        "records": {
+            "file": SECOND_RECORDS.name,
+            "lines": len(records),
+            "digest": records_digest(records),
+        },
+        "records_digest": records_digest(records),
+        "packet": {
+            "file": SECOND_PACKET.name,
+            "lines": len(packet),
+            "fields": list(PACKET_FIELDS),
+            "key": SECOND_KEY.name,
+            "shuffled_by_seed": SECOND_SEED,
+        },
+        "arms": [
+            {"arm": name, "structure": structure, "model": model, "case": case}
+            for name, structure, model, case in SECOND_ARMS
+        ],
+        "prompts": {
+            "versions": {
+                version: {"hash": digest_text(prompt), "text": prompt}
+                for version, prompt in SECOND_PROMPTS.items()
+            },
+            "one_pass": {
+                "hash": digest_text(one_pass_prompt()),
+                "note": "round one's v2 one-pass prompt, unchanged",
+            },
+            "final_version": "v3",
+        },
+        "development": {
+            "half": "development",
+            "measure": PROXY_DEFINITION,
+            "rounds": development,
+        },
+        "decisions": arm_decision_counts(records),
+        "perturbed": perturbed_change(records, donors),
+        "spend": spend_report(records),
+        "adjudication": {
+            "state": "pending",
+            "statement": (
+                "The held-out names and definitions are in the blind packet and "
+                "have not been scored. No held-out score appears here; the round "
+                "reports what was generated and waits for the adjudicator's "
+                "verdicts."
+            ),
+            "adjudicator": "the coordinating session, adjudicating blind",
+        },
+        "not_run": [
+            {
+                "arm": "keep-or-repair/kimi",
+                "reason": "the Kimi endpoint did not answer",
+                "command": KIMI_SECOND_COMMAND,
+            }
+        ],
+    }
+
+
+def render_second_svg(development: list[dict[str, Any]]) -> str:
+    """Proxy share by prompt version, one bar per arm, drawn by hand."""
+    width = 1400
+    height = 520
+    left = 90
+    right = 40
+    top = 70
+    bottom = 80
+    plot_w = width - left - right
+    plot_h = height - top - bottom
+    colours = {
+        "keep-or-repair/frontier": "#2b6cb0",
+        "keep-or-repair/local": "#2e8b57",
+    }
+    versions = [row["prompt_version"] for row in development]
+    if not versions:
+        return '<svg viewBox="0 0 1400 120" width="100%"></svg>'
+    group_w = plot_w / max(len(versions), 1)
+    bar_w = group_w * 0.22
+    parts: list[str] = [
+        f'<svg viewBox="0 0 {width} {height}" width="100%" '
+        'font-family="system-ui, sans-serif" role="img" '
+        'aria-label="proxy share by prompt version and arm">'
+    ]
+    for tick in (0, 25, 50, 75, 100):
+        y = top + plot_h * (1 - tick / 100.0)
+        parts.append(
+            f'<line x1="{left}" y1="{y:.1f}" x2="{left + plot_w}" y2="{y:.1f}" '
+            'stroke="#d9d9d9" stroke-width="1"/>'
+        )
+        parts.append(
+            f'<text x="{left - 12}" y="{y + 5:.1f}" font-size="14" '
+            f'text-anchor="end" fill="#444">{tick}</text>'
+        )
+    parts.append(
+        f'<text x="{left - 12}" y="{top - 28}" font-size="16" '
+        f'text-anchor="end" fill="#1a1a1a">proxy share [%]</text>'
+    )
+    legend_x = left
+    for arm, colour in colours.items():
+        parts.append(
+            f'<rect x="{legend_x}" y="26" width="22" height="6" fill="{colour}"/>'
+        )
+        parts.append(
+            f'<text x="{legend_x + 30}" y="35" font-size="14" fill="#1a1a1a">'
+            f"{arm}</text>"
+        )
+        legend_x += 320
+    for group_index, round_row in enumerate(development):
+        centre = left + group_w * (group_index + 0.5)
+        parts.append(
+            f'<text x="{centre:.1f}" y="{top + plot_h + 34}" font-size="16" '
+            f'text-anchor="middle" fill="#1a1a1a">{round_row["prompt_version"]}</text>'
+        )
+        for arm_index, arm in enumerate(round_row["arms"]):
+            share = 100.0 * float(arm["share"])
+            bar_h = plot_h * share / 100.0
+            x = centre - bar_w + 6 + arm_index * (bar_w + 12)
+            y = top + plot_h - bar_h
+            colour = colours.get(arm["arm"], "#929292")
+            parts.append(
+                f'<rect x="{x:.1f}" y="{y:.1f}" width="{bar_w:.1f}" '
+                f'height="{bar_h:.1f}" fill="{colour}"/>'
+            )
+            parts.append(
+                f'<text x="{x + bar_w / 2:.1f}" y="{y - 8:.1f}" font-size="14" '
+                f'text-anchor="middle" fill="#1a1a1a">{share:.1f}</text>'
+            )
+    parts.append(
+        f'<line x1="{left}" y1="{top + plot_h}" x2="{left + plot_w}" '
+        f'y2="{top + plot_h}" stroke="#1a1a1a" stroke-width="1.2"/>'
+    )
+    parts.append("</svg>")
+    return "".join(parts)
+
+
+def render_second_html(document: dict[str, Any]) -> str:
+    development = document["development"]["rounds"]
+    tables: list[str] = []
+
+    arm_rows: list[str] = []
+    for arm, entry in document["decisions"].items():
+        arm_rows.append(
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+                arm, entry["members"], entry["keep"], entry["repair"], entry["blocked"]
+            )
+        )
+    tables.append(
+        "<table><tr><th>Arm</th><th>Members</th><th>Keep</th><th>Repair</th>"
+        "<th>Blocked</th></tr>" + "".join(arm_rows) + "</table>"
+    )
+
+    development_rows: list[str] = []
+    for round_row in development:
+        for arm in round_row["arms"]:
+            development_rows.append(
+                "<tr><td>{}</td><td>{}</td><td>{} / {}</td>"
+                "<td>{:.1f}% [{:.1f}, {:.1f}]</td><td>{}</td></tr>".format(
+                    round_row["prompt_version"],
+                    arm["arm"],
+                    arm["right"],
+                    arm["members"],
+                    100.0 * arm["share"],
+                    100.0 * arm["interval"][0],
+                    100.0 * arm["interval"][1],
+                    arm["blocked"],
+                )
+            )
+
+    change_rows: list[str] = []
+    for round_row in development:
+        answers = round_row["answers"]
+        change_rows.append(
+            "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>".format(
+                round_row["prompt_version"],
+                answers.get("detail-the-case-file-states-dropped", 0),
+                answers.get("blocked-on-a-name-the-generator-can-derive", 0),
+                round_row["change"],
+            )
+        )
+
+    svg = render_second_svg(development)
+    perturbed = document["perturbed"]
+    spend = document["spend"]
+    models = document["models"]
+    arm_table = tables[0]
+
+    return f"""<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Standard-name record generation, second round</title>
+<style>
+body {{ font-family: system-ui, sans-serif; max-width: 62rem; margin: 2rem auto;
+  padding: 0 1rem; line-height: 1.5; color: #1a1a1a; }}
+table {{ border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem;
+  max-width: 100%; }}
+th, td {{ padding: 0.25rem 0.75rem; text-align: left;
+  border-bottom: 1px solid #e2e2e2; vertical-align: top; }}
+code {{ background: #f4f4f4; padding: 0.1rem 0.3rem; }}
+.pending {{ padding: 0.75rem 1rem; border-left: 3px solid #2b6cb0;
+  background: #f0f6fc; margin: 1rem 0; }}
+figure {{ margin: 1.5rem 0; }}
+figcaption {{ font-size: 0.85rem; color: #555; }}
+</style>
+</head>
+<body>
+<h1>Standard-name record generation, second round</h1>
+<p>{document["adjudication"]["statement"]}</p>
+<div class="pending"><strong>Held-out scores are pending adjudication.</strong>
+The packet holds {document["packet"]["lines"]} distinct records. The key is not
+opened until the adjudicator's verdicts are committed.</div>
+
+<h2>Arms and models</h2>
+<table>
+<tr><th>Arm</th><th>Structure</th><th>Model</th><th>Case file</th></tr>
+{"".join(f"<tr><td>{a['arm']}</td><td>{a['structure']}</td><td><code>{a['model']}</code></td><td>{a['case']}</td></tr>" for a in document["arms"])}
+</table>
+<p>Frontier model: <code>{models["frontier"]}</code>. Local model:
+<code>{models["local"]}</code>.</p>
+<p>Kimi: not run. The command that will run it is
+<code>{models["kimi"]["command"]}</code>.</p>
+
+<h2>Development iteration (proxy, development half only)</h2>
+<p>{document["development"]["measure"]}</p>
+<figure>{svg}<figcaption>Mechanical proxy by prompt version and arm on the
+development half. It is not a verdict and it says nothing about the held-out
+half.</figcaption></figure>
+<table>
+<tr><th>Version</th><th>Arm</th><th>Proxy right</th><th>Share [95%]</th>
+<th>Blocked</th></tr>
+{"".join(development_rows)}
+</table>
+<table>
+<tr><th>Version</th><th>Stated detail dropped</th>
+<th>Blocked on a derivable name</th><th>Change</th></tr>
+{"".join(change_rows)}
+</table>
+
+<h2>Generated decisions, held-out half</h2>
+{arm_table}
+<p>Blocked types by arm: {json.dumps({a: e["blocked_by_type"] for a, e in document["decisions"].items()})}</p>
+
+<h2>Perturbed control</h2>
+<p>{perturbed["changed_members"]} of {perturbed["compared_members"]} answers
+moved when the source description and enclosing-structure text were replaced
+({100.0 * perturbed["changed_share"]:.1f}%). {perturbed["reading"]}</p>
+
+<h2>Spend</h2>
+<p>USD {spend["spent_usd"]:.2f} spent beside a ceiling of
+USD {spend["ceiling_usd"]:.2f}. Within the ceiling:
+<strong>{spend["within_ceiling"]}</strong>.</p>
+<p>Records file <code>{document["records"]["file"]}</code>
+({document["records"]["lines"]} lines). Packet
+<code>{document["packet"]["file"]}</code> ({document["packet"]["lines"]} lines),
+fields: {", ".join(document["packet"]["fields"])}.</p>
+</body>
+</html>
+"""  # --------------------------------------------------------------------------- #
+
+
+# The held-out run, the report, and the command line
+# --------------------------------------------------------------------------- #
+
+
+def existing_spend() -> float:
+    spent = 0.0
+    for path in (SECOND_WORK, SECOND_RECORDS):
+        if path.exists():
+            spent += sum(float(row.get("cost_usd") or 0.0) for row in read_jsonl(path))
+    return spent
+
+
+async def run_held_out(
+    held_out: list[dict[str, Any]],
+    cases: dict[str, dict[str, Any]],
+    guard: SpendGuard,
+) -> None:
+    perturbed, _donors = perturbed_cases(held_out, cases)
+    for name, structure, model, case_kind in SECOND_ARMS:
+        arm_cases = perturbed if case_kind == "perturbed" else cases
+        await run_second_arm(
+            "held_out",
+            name,
+            structure,
+            model,
+            held_out,
+            arm_cases,
+            "v3",
+            SECOND_RECORDS,
+            guard,
+        )
+
+
+def write_second_round(
+    members: list[dict[str, Any]],
+    held_out: list[dict[str, Any]],
+    cases: dict[str, dict[str, Any]],
+) -> dict[str, Any]:
+    records = read_jsonl(SECOND_RECORDS)
+    packet, key = build_packet_and_key(records, members, cases)
+    SECOND_PACKET.parent.mkdir(parents=True, exist_ok=True)
+    SECOND_PACKET.write_text("", encoding="utf-8")
+    for line in packet:
+        append_jsonl(SECOND_PACKET, line)
+    SECOND_KEY.write_text(
+        json.dumps(key, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    _perturbed, donors = perturbed_cases(held_out, cases)
+    document = build_second_document(
+        records, packet, load_development(), donors, members
+    )
+    SECOND_DATA.write_text(
+        json.dumps(document, indent=2, ensure_ascii=False), encoding="utf-8"
+    )
+    SECOND_PAGE.write_text(render_second_html(document), encoding="utf-8")
+    return document
+
+
+def run_score(verdicts_path: Path, out_path: Path | None = None) -> int:
+    scores = score_files(verdicts_path)
+    text = json.dumps(scores, indent=2, ensure_ascii=False)
+    if out_path is not None:
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        out_path.write_text(text + "\n", encoding="utf-8")
+        print(f"wrote {out_path}")
+    else:
+        print(text)
+    return 0
+
+
+def second_stage_summary(document: dict[str, Any]) -> str:
+    return json.dumps(
+        {
+            "packet_lines": document["packet"]["lines"],
+            "records_lines": document["records"]["lines"],
+            "decisions": {
+                arm: {
+                    "keep": entry["keep"],
+                    "repair": entry["repair"],
+                    "blocked": entry["blocked"],
+                }
+                for arm, entry in document["decisions"].items()
+            },
+            "perturbed_changed_share": round(document["perturbed"]["changed_share"], 4),
+            "spend": document["spend"],
+            "adjudication": document["adjudication"]["state"],
+        },
+        indent=2,
+    )
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--stage",
-        choices=("build", "measure", "report", "all"),
+        choices=(
+            "build",
+            "measure",
+            "report",
+            "all",
+            "second-development",
+            "second-heldout",
+            "second-report",
+            "second-round",
+        ),
         default="all",
         help="which part of the run to execute; every stage resumes its logs",
     )
@@ -1474,17 +3136,48 @@ def main() -> int:
         default="all",
         help="which model lanes this run may use",
     )
+    parser.add_argument(
+        "--check",
+        action="store_true",
+        help="verify the committed second-round files without generating anything",
+    )
+    parser.add_argument(
+        "--score",
+        type=Path,
+        metavar="VERDICTS",
+        help="score a committed verdicts file against the packet and key",
+    )
+    parser.add_argument(
+        "--out",
+        type=Path,
+        help="write the score report here instead of standard output",
+    )
     args = parser.parse_args()
+
+    if args.check:
+        return run_check()
+    if args.score is not None:
+        return run_score(args.score, args.out)
 
     if args.models in {"kimi", "subscription"}:
         print(
-            f"{args.models} is not run: the server or lane is not up. "
-            f"The command that will run it: {KIMI_COMMAND if args.models == 'kimi' else 'see benchmark.json not_run'}",
+            f"{args.models} is not run: the endpoint or lane is not up. "
+            f"The command that will run it: "
+            f"{KIMI_SECOND_COMMAND if args.models == 'kimi' else 'see benchmark.json not_run'}",
             file=sys.stderr,
         )
         return 0
 
     _, members, _, development, held_out = split_inputs()
+
+    if args.stage in {
+        "second-development",
+        "second-heldout",
+        "second-report",
+        "second-round",
+    }:
+        return run_second_stages(args.stage, members, development, held_out)
+
     bucket = load_case_cache().get("full", {})
     withheld_bucket = load_case_cache().get("withheld", {})
     best_name = ""
@@ -1527,6 +3220,65 @@ def main() -> int:
                 indent=2,
             )
         )
+    return 0
+
+
+def run_second_stages(
+    stage: str,
+    members: list[dict[str, Any]],
+    development: list[dict[str, Any]],
+    held_out: list[dict[str, Any]],
+) -> int:
+    if stage in {"second-development", "second-round"}:
+        cases = load_second_cases(development)
+        guard = SpendGuard(SECOND_SPEND_CEILING_USD, existing_spend())
+        rounds = asyncio.run(run_development(development, cases, guard))
+        path = save_development(rounds)
+        print(
+            json.dumps(
+                {
+                    "development_members": len(development),
+                    "saved": str(path),
+                    "rounds": [
+                        {
+                            "prompt_version": round_row["prompt_version"],
+                            "arms": [
+                                {
+                                    "arm": arm["arm"],
+                                    "proxy_share": round(arm["share"], 4),
+                                    "blocked": arm["blocked"],
+                                }
+                                for arm in round_row["arms"]
+                            ],
+                        }
+                        for round_row in rounds
+                    ],
+                    "spend": round(guard.spent, 4),
+                },
+                indent=2,
+            )
+        )
+
+    if stage in {"second-heldout", "second-round"}:
+        cases = load_second_cases(held_out)
+        guard = SpendGuard(SECOND_SPEND_CEILING_USD, existing_spend())
+        asyncio.run(run_held_out(held_out, cases, guard))
+        print(
+            json.dumps(
+                {
+                    "held_out_members": len(held_out),
+                    "records": len(read_jsonl(SECOND_RECORDS)),
+                    "spend": round(guard.spent, 4),
+                    "ceiling_usd": SECOND_SPEND_CEILING_USD,
+                },
+                indent=2,
+            )
+        )
+
+    if stage in {"second-report", "second-round"}:
+        cases = load_second_cases(held_out)
+        document = write_second_round(members, held_out, cases)
+        print(second_stage_summary(document))
     return 0
 
 
