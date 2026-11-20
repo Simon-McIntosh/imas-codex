@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Pilot group enrichment</title>
+</head>
+<body>
+  <h2 id="pilot-enrichment-by-group-summary">Describing the pilot signals by group</h2>
+  <p id="pilot-enrichment-by-group-scope">1,766 ITER pilot signals; 190 of them (11%) have linked source context. Those 190 group into 74 plant components and 11 archive field patterns, and every one of the 190 now carries a description composed from its component description, its pattern description and the quantity, unit and role the vocabulary rule decided. The other 1,576 (89%) have no linked row and no component context; they are marked <code>awaiting_context</code> and were not described, because a description inferred from a variable name is what this arc rules out.</p>
+
+  <h3 id="pilot-enrichment-by-group-table">Groups attempted and groups left waiting</h3>
+  <table id="pilot-enrichment-by-group-outcomes">
+    <thead>
+      <tr><th>Kind</th><th>Total in the pilot</th><th>Described</th><th>Awaiting context</th><th>Failed</th></tr>
+    </thead>
+    <tbody>
+      <tr><td>Plant components</td><td>583</td><td>74</td><td>509</td><td>0</td></tr>
+      <tr><td>Field patterns</td><td>108</td><td>11</td><td>97</td><td>0</td></tr>
+      <tr><td>Signals</td><td>1,766</td><td>190</td><td>1,576</td><td>0</td></tr>
+    </tbody>
+  </table>
+  <p id="pilot-enrichment-by-group-awaiting">A component or pattern is attempted only when at least one member has linked context, so 509 components and 97 patterns were never put to the model: no source states what those members measure, and the group text for the remaining 74 and 11 is written from rows and parsed bindings only.</p>
+
+  <h3 id="pilot-enrichment-by-group-composition">What a member description is made of</h3>
+  <p id="pilot-enrichment-by-group-composition-rule">Each member text is the component description, the pattern description, and the decided quantity, unit and role in that order. A pattern description carries per-field meanings only where a supplied row names the field and states its meaning; otherwise it states the shared field codes. Every drafted statement must cite a supplied context item, and the seat's own review pass checks each draft against those items before anything is written. A group the review leaves empty fails its members and writes no description for them.</p>
+
+  <h3 id="pilot-enrichment-by-group-reading">Hand reading of forty member descriptions</h3>
+  <p id="pilot-enrichment-by-group-reading-result">Forty member signals were drawn before the run and their list digested then (<code>f5117f89e55df61fc44c3750c4cdadbfaa02777cb414614357fb1f5687ab3ca7</code>); all forty were described, so all forty were read. Verdicts: 38 right, 0 partly right, 2 wrong, against a bar of at most 2 wrong and at least 32 right. A description is wrong when it states something the specification contradicts or that no recorded source supports, and partly right when it withholds a quantity, unit or role the vocabulary decided; both wrong ones state a thermal-shield branch is an 80K circuit, which the specification places at 4K supply in this configuration. The other 38 state nothing unsupported and withhold no decided value. One written reason per item is kept outside the tree.</p>
+  <p id="pilot-enrichment-by-group-reading-vocabulary">Of the 190 described members, 180 state a quantity, 188 a unit and 16 a role, and no description states a value the vocabulary does not hold for that signal: every stated value is the decided one, and every decided value is stated.</p>
+
+  <h3 id="pilot-enrichment-by-group-checks">Checks that could have failed</h3>
+  <ul id="pilot-enrichment-by-group-check-list">
+    <li id="pilot-enrichment-by-group-check-control">A member of a component whose description failed is reported failed and carries no composed description. Mutating the composition so such a member is described anyway fails the declared test and exits 1; restoring the module passes all 19 tests in the group suite.</li>
+    <li id="pilot-enrichment-by-group-check-statements">Every Cypher statement the module issues explains against the live graph, 6 checks passing, including a positive control that the cohort selector returns rows, so a silently empty selector cannot pass as a green gate.</li>
+    <li id="pilot-enrichment-by-group-check-scan">2,349 real accessors and component codes plus 21 real document identities searched across the tracked tree: 0 matches, with a known-present control returning 1,160 lines from the same command.</li>
+    <li id="pilot-enrichment-by-group-check-propagation">A recorded search reaches every member from its groups: the 74 group descriptions are the prefix of all 190 member descriptions, and the 11 pattern descriptions are substrings of 174 of them, the other 16 carrying their pattern's meaning for their own field code instead. All 190 member writes go through the shared description writer, which sets the description, its embedding and the embedded-text hash together, and all 190 carry an embedding.</li>
+  </ul>
+
+  <h3 id="pilot-enrichment-by-group-cost">Calls, tokens and the catalogue projection</h3>
+  <p id="pilot-enrichment-by-group-cost-run">The writing run made 170 calls for 85 groups — one draft and one review per group — in 3 minutes 43 seconds at the seat's 3-worker cap, at $0.0000 on the local model lane. Tokens were not recorded by that run; an identical full pass measured 174 calls and 214,600 tokens in 130 seconds, or 1,233 tokens per call, so the writing run's token total is about 210,000.</p>
+  <p id="pilot-enrichment-by-group-cost-projection">The catalogue holds 27,253 components, 1,777 control groups, 1,802 field patterns with their field list and 413 field patterns without one: 31,245 groups. Two calls per group is 62,490 calls and about 77 million tokens, which is about 13 hours at 8 workers or 23 hours at the 3 workers the seat allows; on the local lane the currency cost stays zero, and on a hosted lane it is that token total at the provider's rate.</p>
+
+  <h3 id="pilot-enrichment-by-group-gap">What the pilot does not show</h3>
+  <p id="pilot-enrichment-by-group-gap-note">Only 11% of the pilot signals have linked context, so the reading measures group composition where a source exists, not the 89% where it does not. The projection assumes the catalogue's groups resemble the pilot's in rows per group and in field-list patterns: the pilot's 11 patterns carry between 2 and 13 source rows, while the catalogue's 1,802 patterns are drawn from 995,006 variables, so a catalogue run's review pass may refuse more drafts per group than this one did.</p>
+</body>
+</html>
