@@ -10,6 +10,13 @@
   ],
   "completed_at": "2026-11-19T23:53:14.928Z",
   "dispatched_at": "2026-11-19T23:53:01Z",
+  "finding_dispositions": {
+    "0": {
+      "kind": "folded",
+      "node": "repair-of-pilot-signal-vocabulary-48ac67407d87",
+      "recorded_at": "2026-11-20T00:23:19.512515+00:00"
+    }
+  },
   "findings": [
     {
       "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-signal-vocabulary.html",
