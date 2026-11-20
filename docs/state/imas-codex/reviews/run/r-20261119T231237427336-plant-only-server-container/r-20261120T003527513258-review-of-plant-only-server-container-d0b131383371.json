@@ -1,0 +1,100 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_basis": "The reviewed manifest names one gate arm and no baseline arm: plant-gate.log (revision 277057c1d + working tree, completed, 5 failed / 1355 passed / 10 skipped, EXIT=1) is the after arm and its baseline_suite/after_suite fields are empty. All five FAILED ids name files outside this diff (tests/llm/test_prompt_schema_coverage.py x2, tests/graph/test_cypher_property_check.py, tests/graph/test_dd_path_domain_upsert.py, tests/graph/test_updated_at_coverage.py); the changed files imas_codex/graph/temp_neo4j.py, imas_codex/graph/plant_scope.py, imas_codex/graph/ghcr.py, imas_codex/cli/serve.py, imas_codex/llm/server.py, Dockerfile and docker-entrypoint.sh appear in none of the failure texts, so no recorded failure is attributable to the change and the added set is empty.",
+  "call_sites": [
+    "imas_codex/cli/serve.py:127 AgentsServer(plant_only=plant_only)",
+    "imas_codex/llm/server.py:1939 _restrict_to_plant_tools from __post_init__",
+    "imas_codex/cli/graph/data.py:566 _create_facility_dump(..., without_dd=without_dd)",
+    "imas_codex/graph/temp_neo4j.py:895 create_facility_dump forwards without_dd to _run_filter_via_slurm",
+    "imas_codex/graph/temp_neo4j.py:916 _filter_to_facility(..., without_dd=without_dd)",
+    "imas_codex/cli/graph/registry.py:566 require_private_package",
+    "docker-entrypoint.sh:41 serve-mode injection from IMAS_CODEX_SERVE_MODE"
+  ],
+  "completed_at": "2026-11-20T00:36:39.603Z",
+  "dispatched_at": "2026-11-20T00:36:27Z",
+  "findings": [
+    {
+      "file": "Dockerfile",
+      "line": "308",
+      "severity": "non-blocking",
+      "text": "non-blocking: the new plant-image build recipe passes `--build-arg GRAPH_REGISTRY=ghcr.io/<owner>`, but the Dockerfile declares `ARG GHCR_REGISTRY` at Dockerfile:131, so following the documented command leaves the default registry in place and the build silently skips the graph pull."
+    },
+    {
+      "file": "imas_codex/graph/plant_scope.py",
+      "line": "53",
+      "severity": "non-blocking",
+      "text": "non-blocking: compare_plant_scope has no production caller \u2014 `git grep compare_plant_scope d0b131383 -- '*.py'` finds only the module and tests/graph/test_plant_scope.py \u2014 so the repo's own `graph export --without-dd` path can still produce an out-of-scope package; the equality was measured by the run's private export_plant_scope.py, not by the product."
+    },
+    {
+      "file": "imas_codex/graph/temp_neo4j.py",
+      "line": "496",
+      "severity": "non-blocking",
+      "text": "non-blocking: the plant deletion logic is written twice in this diff \u2014 imas_codex/graph/temp_neo4j.py:496 (bolt arm, batches of 1000, DD-typed orphan exemptions) and imas_codex/graph/temp_neo4j.py:624 (SLURM arm, batches of 10000/50000, different orphan keep list) \u2014 so a future correction can be applied to one arm and leave the other silently divergent."
+    },
+    {
+      "file": "imas_codex/llm/server.py",
+      "line": "1871",
+      "severity": "non-blocking",
+      "text": "non-blocking: PLANT_TOOLS re-lists seven names already written at imas_codex/llm/server.py:1853 in FACILITY_TOOLS instead of deriving the plant subset from it, so adding a plant tool requires two edits and a drift leaves the whitelist stale while its own comment claims a newly added tool is handled automatically."
+    },
+    {
+      "file": "imas_codex/llm/server.py",
+      "line": "1866",
+      "severity": "non-blocking",
+      "text": "non-blocking: the rationale says a plant-only package carries no documentation content, but scope-report-live.json's copied_labels keeps 808 Document, 951 WikiPage and 2901 WikiChunk nodes (fetch_content is even whitelisted at :1876) while search_docs and search_code are excluded, so the comment misstates both the package's content and why those two tools are absent."
+    },
+    {
+      "file": "tests/llm/test_plant_only_server.py",
+      "line": "31",
+      "severity": "non-blocking",
+      "text": "non-blocking: `assert _tool_names(plant_server) == set(AgentsServer.PLANT_TOOLS)` compares the published listing against the same constant imas_codex/llm/server.py:2038 filters by, so editing that constant (adding a write tool, dropping search_pulses) leaves the assertion true; only the four parametrised names at :39 constrain the whitelist independently."
+    },
+    {
+      "file": "imas_codex/graph/ghcr.py",
+      "line": "776",
+      "severity": "non-blocking",
+      "text": "non-blocking: require_private_package and its caller imas_codex/cli/graph/registry.py:566 have no test \u2014 no test file names the symbol \u2014 so removing the visibility check from the push path stays green even though the done_when's privacy clause depends on it."
+    },
+    {
+      "file": "manifest.md",
+      "line": "5",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reviewed run's orientation_write_paths rewrites the dispatch's declared fence to add imas_codex/graph/temp_neo4j.py and imas_codex/graph/plant_scope.py, so the record's own scope list conceals that two of its changed files were outside the paths it was given."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "Read commit by commit against 1875455e: 277057c1d adds the plant filter both arms, the plant server mode with its whitelist, the container entrypoint mode, the GHCR visibility helpers and four test files; d0b131383 splits the filter's two Cypher literals, forwards the flag, adjusts the manifest-scope stub and adds the 158-line evidence fragment.",
+    "done_when": "Read in full from node.json; the package clauses are measured in plant-package/scope-report-live.json (expected 21 node kinds and 31 relationship types, after_filter violations [], foreign_nodes 0, facility-less Facility 1 and GraphMeta 1), the private-scenario clause in ~/.cache/imas-codex-codac-uda/plant-only-server/scenario.json (sha256 d3ed0a692d120694e143eb5035bd56b00cd2ae62838730f991735352f3a196d2, matching the manifest), the registry clause in plant-package/publish-report.json.",
+    "goal": "The source node has no `goal` key in node.json, so I read the dispatch goal `Build a private container that serves the ITER plant graph alone, read-only`; Dockerfile:272/282 plus docker-entrypoint.sh:41 build the image mode in, imas_codex/llm/server.py:1914/1939/2033 force read-only and reduce the listing to PLANT_TOOLS, and plant-container-run.log:59-96 shows the built image answering from a loopback-only namespace.",
+    "manifest": "Read; it records two commits (277057c1d, d0b131383), the focused trio 19 passed at exit 0, the broad gate 1355 passed / 10 skipped / 5 failed with the five attributed to untouched files, the three-mutation negative control, and landing digests for both private packages; baseline_suite and after_suite are empty.",
+    "write_paths": "Read the eleven declared paths; git diff 1875455e..d0b131383 touches 15 files, of which imas_codex/graph/plant_scope.py and imas_codex/graph/temp_neo4j.py are outside that list and the reviewed manifest's own orientation_write_paths (manifest.md:5) was rewritten to include them."
+  },
+  "justifications": {
+    "durability": "tests/graph/test_plant_scope.py:20-96 asserts independent violation strings that redden if any comparison branch is removed and tests/llm/test_plant_only_server.py:36-48 reddens if the whitelist is dropped, but imas_codex/graph/temp_neo4j.py:496 (the arm export_plant_scope.py actually ran) and imas_codex/graph/ghcr.py:776 have no test at all.",
+    "evidence": "plant-package/scope-report-live.json records 0 violations with per-kind equality and plant-container-run.log ends EXIT=0, so the done_when's measures are recorded rather than claimed, but the reviewed manifest (manifest.md:18-19) records no baseline arm for its 5 failed gate ids.",
+    "fit": "The change follows the file's FACILITY_TOOLS ClassVar precedent at imas_codex/llm/server.py:1853 and the click-option idiom in imas_codex/cli/serve.py:50, with no plan-named file or symbol; the plant restriction is nevertheless applied by post-registration deletion at imas_codex/llm/server.py:2033 rather than the dd_only registration guard used elsewhere in the same class.",
+    "goal_fidelity": "docker-entrypoint.sh:41 plus imas_codex/llm/server.py:2033 deliver a read-only plant-only image, and plant-container-run.log:59-96 records it answering a signal walk, a designation and an empty term with no route to the shared graph; the delivered container is real, while Dockerfile:308 documents the build with the wrong registry arg name.",
+    "reuse": "imas_codex/graph/ghcr.py:718-810 extends the module's own resolve_token/get_ghcr_owner_and_type/github_api_call owners rather than forking a client, but imas_codex/graph/temp_neo4j.py:496 duplicates the plant deletion logic already added at imas_codex/graph/temp_neo4j.py:624 for the SLURM arm.",
+    "scope_discipline": "imas_codex/graph/plant_scope.py and imas_codex/graph/temp_neo4j.py sit outside the eleven declared write paths, though temp_neo4j.py is genuinely needed to apply the flag and the worker rewrote its own orientation list at manifest.md:5 to cover both."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the source node has no goal key in node.json, so I read the dispatch goal 'Build a private container that serves the ITER plant graph alone, read-only'; Dockerfile:272/282 and docker-entrypoint.sh:41 fix the serve mode in the image, imas_codex/llm/server.py:1914/1939/2033 force read-only and cut the listing to PLANT_TOOLS, and plant-container-run.log records the built image answering from a loopback-only namespace.\nVERDICT done_when: read in full from node.json; its package clauses are measured in plant-package/scope-report-live.json (21 node kinds / 31 relationship types at the export revision, after_filter violations [], foreign_nodes 0, facility-less only Facility 1 and GraphMeta 1), its scenario clause in ~/.cache/imas-codex-codac-uda/plant-only-server/scenario.json (sha256 d3ed0a692d120694e143eb5035bd56b00cd2ae62838730f991735352f3a196d2), and its registry and container clauses in publish-report.json and plant-container-run.log.\nVERDICT write_paths: read the eleven declared paths; git diff 1875455e..d0b131383 changes 15 files, with imas_codex/graph/plant_scope.py and imas_codex/graph/temp_neo4j.py outside that list, and the reviewed manifest (manifest.md:5) rewrote its own orientation list to include them.\nVERDICT manifest: read; it records commits 277057c1d and d0b131383, the focused trio at 19 passed / exit 0, the broad gate at 1355 passed / 10 skipped / 5 failed with the five attributed to untouched files, the three-mutation negative control (6 failed, EXIT=1), and landing digests for both private packages; baseline_suite and after_suite are empty.\nVERDICT diff: read commit by commit against 1875455e; 277057c1d adds the plant filter in both arms, the plant server mode and whitelist, the container entrypoint mode, the GHCR visibility helpers and four test files, and d0b131383 splits the two Cypher literals, forwards the flag, adapts the manifest-scope stub and adds the evidence fragment \u2014 15 files, 827 insertions and 10 deletions.\nCALL_SITES: imas_codex/cli/serve.py:127, imas_codex/llm/server.py:1939, imas_codex/cli/graph/data.py:566, imas_codex/graph/temp_neo4j.py:895, imas_codex/graph/temp_neo4j.py:916, imas_codex/cli/graph/registry.py:566, docker-entrypoint.sh:41\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docker-entrypoint.sh:41 with imas_codex/llm/server.py:2033 delivers the read-only plant-only image, and plant-container-run.log shows it answering the chosen signal, its component and control node, the designation and an empty term with no route to the shared graph.\nSCORE evidence: 15\nJUSTIFICATION evidence: plant-package/scope-report-live.json records 0 violations and per-kind equality and plant-container-run.log ends EXIT=0, but manifest.md records no baseline gate arm for the five failures its after arm names.\nSCORE scope_discipline: 13\nJUSTIFICATION scope_discipline: imas_codex/graph/plant_scope.py and imas_codex/graph/temp_neo4j.py are outside the declared eleven paths even though the manifest's own orientation list (manifest.md:5) was widened to cover them.\nSCORE durability: 13\nJUSTIFICATION durability: tests/graph/test_plant_scope.py:28-96 and tests/llm/test_plant_only_server.py:36-48 are real guards, but imas_codex/graph/temp_neo4j.py:496 and imas_codex/graph/ghcr.py:776 have no test and tests/llm/test_plant_only_server.py:31 compares against the constant it guards.\nSCORE fit: 16\nJUSTIFICATION fit: imas_codex/llm/server.py:1871 follows the FACILITY_TOOLS ClassVar idiom at :1853 and the click options follow imas_codex/cli/serve.py:50, but restriction by deleting registered components at :2033 departs from the dd_only registration guards used in the same class.\nSCORE reuse: 13\nJUSTIFICATION reuse: imas_codex/graph/ghcr.py:718-810 extends that module's own token and API owners, while imas_codex/graph/temp_neo4j.py:496 re-implements the plant deletion already written at :624 for the other filter arm.\nFINDING Dockerfile:308 non-blocking: the documented plant-image build passes --build-arg GRAPH_REGISTRY while Dockerfile:131 declares ARG GHCR_REGISTRY, so following the recipe silently keeps the default registry and skips the graph pull.\nFINDING imas_codex/graph/plant_scope.py:53 non-blocking: compare_plant_scope has no production caller, so graph export --without-dd can still emit an out-of-scope package and only the run's private script applied the rule.\nFINDING imas_codex/graph/temp_neo4j.py:496 non-blocking: the plant deletion logic is duplicated at :624 with different batch sizes and orphan keep lists, so a future fix can diverge between the bolt and SLURM arms.\nFINDING imas_codex/llm/server.py:1871 non-blocking: PLANT_TOOLS re-lists the names already in FACILITY_TOOLS at :1853, so a new plant tool needs two edits and drift leaves the whitelist stale.\nFINDING imas_codex/llm/server.py:1866 non-blocking: the no-documentation rationale is false \u2014 the package keeps 808 Document, 951 WikiPage and 2901 WikiChunk nodes \u2014 while search_docs and search_code are excluded.\nFINDING tests/llm/test_plant_only_server.py:31 non-blocking: the listing is compared against the same PLANT_TOOLS constant the code filters by, so editing the whitelist leaves the assertion true.\nFINDING imas_codex/graph/ghcr.py:776 non-blocking: require_private_package and its registry.py:566 caller have no test, so removing the private-visibility check stays green.\nFINDING manifest.md:5 non-blocking: the reviewed run rewrote its orientation_write_paths to add two files outside the dispatch's declared fence, hiding the scope drift in its own record.",
+  "review_run_id": "r-20261120T003527513258-review-of-plant-only-server-container-d0b131383371",
+  "reviewed_base_sha": "1875455ec8bb3cba6136a5e6750f138fef0c6c74",
+  "reviewed_head_sha": "d0b13138337134aa841378538376064a49255788",
+  "reviewed_run_id": "r-20261119T231237427336-plant-only-server-container",
+  "reviewer_run_id": "r-20261120T003527513258-review-of-plant-only-server-container-d0b131383371",
+  "scores": {
+    "durability": 13,
+    "evidence": 15,
+    "fit": 16,
+    "goal_fidelity": 17,
+    "reuse": 13,
+    "scope_discipline": 13
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T00:47:00.452425+00:00",
+  "total": 87
+}
