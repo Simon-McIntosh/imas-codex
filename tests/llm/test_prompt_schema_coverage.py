@@ -31,6 +31,19 @@ _RENDERERS = {"render_prompt", "render_prompt_strict"}
 # not be paired with it even when it also builds the questions.
 _DECISIONS_PROMPTS = {"code/triage"}
 
+_PROMPT_ROOT = Path(prompt_loader.__file__).parent / "prompts"
+
+
+def _carries_generated_example(prompt_name: str) -> bool:
+    """Whether the prompt embeds a static example rather than a caller's schema.
+
+    A prompt that templates ``output_schema`` is handed the JSON Schema its
+    caller chooses, so the generated example is not what it carries and the
+    verbatim assertion below does not apply to it.
+    """
+    template = _PROMPT_ROOT / f"{prompt_name}.md"
+    return template.is_file() and "output_schema" not in template.read_text()
+
 # The prompts whose call sites this walk must reach; a positive control that the
 # analysis actually follows discovery's render→builder→call dataflow rather than
 # silently returning nothing.
@@ -169,7 +182,7 @@ def _collect_pairs() -> dict[str, str]:
             if enclosing is None:
                 continue
             prompt = _resolve_prompt(enclosing, imports, render_map, module)
-            if prompt:
+            if prompt and _carries_generated_example(prompt):
                 pairs[prompt] = model
     return pairs
 
