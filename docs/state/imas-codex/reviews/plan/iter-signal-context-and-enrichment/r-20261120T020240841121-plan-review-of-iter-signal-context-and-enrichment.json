@@ -25,7 +25,24 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 78,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "declined",
+      "by": "",
+      "finding": "done_when-1",
+      "reason": "The node's dispatch contract carries it: described, awaiting context and failed counts sum to the pilot total of each kind. The section's endpoint is unchanged.",
+      "when": "2026-11-20T02:24:08.682719+00:00"
+    }
+  ],
+  "responses": {
+    "done_when-1": {
+      "action": "declined",
+      "by": "",
+      "reason": "The node's dispatch contract carries it: described, awaiting context and failed counts sum to the pilot total of each kind. The section's endpoint is unchanged.",
+      "when": "2026-11-20T02:24:08.682719+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261120T020240841121-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261120T020240841121-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "50bcacfe398c55c777e266908814346336b18e80",
   "rubric": "content",
