@@ -163,6 +163,74 @@ def test_a_key_id_absent_from_the_packet_fails(tmp_path):
     assert any("disagree on packet ids" in problem for problem in problems)
 
 
+def test_the_second_round_reads_the_one_incumbent_pair_the_harness_owns():
+    assert not hasattr(bm, "incumbent_record")
+    assert not hasattr(bm, "record_changed_from_incumbent")
+    content = {
+        "incumbent": {
+            "name": "n",
+            "description": "d",
+            "documentation": "",
+            "unit": "W",
+        }
+    }
+    flat = {"content": content, "digest": "z"}
+    nested = {"record": {"content": content}}
+    assert bm.incumbent_draft(flat) == bm.incumbent_draft(nested)
+    keep = dict(content["incumbent"])
+    assert bm.changed_from_incumbent(keep, flat) is False
+    assert bm.changed_from_incumbent(keep | {"name": "m"}, flat) is True
+    assert bm.incumbent_body(flat)["decision"] == "keep"
+
+
+def test_one_canonical_serialisation_backs_every_digest():
+    rows = [{"b": 1, "a": "é"}, {"b": 2, "a": ""}]
+    assert bm.records_digest(rows) == bm.digest_text(
+        "\n".join(bm.canonical_json(row) for row in rows)
+    )
+    value = {"b": 1, "a": "é"}
+    assert bm.digest_json(value) == bm.digest_text(bm.canonical_json(value))
+
+
+def test_a_mistyped_verdict_is_undecided_and_named(tmp_path):
+    path = tmp_path / "verdicts.jsonl"
+    path.write_text(
+        json.dumps(
+            {
+                "packet_id": "pkt-1",
+                "name_verdict": "Right",
+                "definition_verdict": "right",
+            }
+        )
+        + "\n"
+        + json.dumps(
+            {
+                "packet_id": "pkt-2",
+                "name_verdict": "rigth",
+                "definition_verdict": "right",
+            }
+        )
+        + "\n",
+        encoding="utf-8",
+    )
+    verdicts, unrecognised = bm.load_verdicts(path)
+    assert verdicts["pkt-1"] == {"name": "right", "definition": "right"}
+    assert "name" not in verdicts["pkt-2"]
+    assert unrecognised == [{"packet_id": "pkt-2", "field": "name", "value": "rigth"}]
+
+
+def test_the_proxy_figure_takes_the_projects_slide_canvas():
+    svg = bm.render_second_svg(
+        [
+            {
+                "prompt_version": "v1",
+                "arms": [{"arm": "keep-or-repair/frontier", "share": 0.5}],
+            }
+        ]
+    )
+    assert 'viewBox="0 0 1400 722"' in svg
+
+
 @pytest.mark.parametrize("field", ["name", "definition", "unit"])
 def test_a_packet_record_that_differs_from_its_record_fails(tmp_path, field):
     paths = write_round(tmp_path, RECORDS)
