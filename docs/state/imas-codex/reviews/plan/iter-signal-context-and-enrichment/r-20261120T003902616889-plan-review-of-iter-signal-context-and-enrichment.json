@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T00:40:22.202Z",
+  "dispatched_at": "2026-11-20T00:40:05Z",
+  "findings": [
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261120T003902616889-plan-review-of-iter-signal-context-and-enrichment/plan.html:69",
+      "id": "reasoning-1",
+      "reason": "without an endpoint for a member whose unit or classification is undecided or in conflict, the node's central deliverable is unattainable as written and its measure cannot say which signals were legitimately left bare.",
+      "text": "\u00a76 Delivers promises \"every member signal carries a description composed from the two, with its unit and its physics or engineering classification\", but its declared dependency s11 landed on 2026-11-20 (c-s11-landed, line 169) with quantity decided for 742 of 1,766, in conflict for 4, undecided for 1,020, and role undecided for more than 1,500, and s11's rule is that conflict stores nothing and \"nothing is guessed\"; the section states a not-enriched endpoint only for a signal with no linked context, so a worker must either write a classification s11 says does not exist or leave the stated deliverable unmet for the majority of the population, and the negative control and the done-when never distinguish the two groups",
+      "type": "reasoning",
+      "would_change": true
+    },
+    {
+      "anchor": "/home/ITER/mcintos/.config/reckon/crew/reports/imas-codex/plan-review/iter-signal-context-and-enrichment/r-20261120T003902616889-plan-review-of-iter-signal-context-and-enrichment/plan.html:70",
+      "id": "done_when-1",
+      "reason": "the section must state the endpoint (and a count) for components and patterns with no linked context, or the delivery's headline count measures an unknown fraction of the pilot system and its awaiting-context figure covers the wrong unit.",
+      "text": "\u00a76 Delivers promises \"each component of the pilot system\" and \"each field pattern\" one description, while its not-enriched rule is scoped to signals (\"A signal with no linked context is not enriched\"), and c-s4-landed records that of 1,766 pilot signals only 190 carry any link, spread over 74 components, so components and patterns with no linked context have neither a description nor a declared state, yet the done-when asks only for \"the number of component descriptions, pattern descriptions and member descriptions written\" and \"the number of signals left awaiting context\", figures that are satisfied by whatever was written \u2014 the gate passes with those component and pattern descriptions absent and no control shows it",
+      "type": "done_when",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "027b322b31260547fc493e7bd451105a9069aa34",
+  "plan_fingerprint": "cb3b8e8e1124146d638cf41d18881edf3aa5ba0b125984def4587ac36a2f1882",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 73,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261120T003902616889-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "42e91c764e06e4cc865720e38b88f1087211cb54",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 the functional specification s6 reads against is placed on disk by \u00a74 line 59 (\"the private store that plan's section 5 filled on 2026-11-18 \u2026 the other six as PDF files\"), the figure /imas-codex/figures/iter-signal-context-and-enrichment/pipeline.svg exists, and both decisions s6 relies on (`local-model-confirmed-on-quality`, `vocabulary-before-description`) resolve at lines 125 and 135.",
+    "done_when": "a finding \u2014 s6's done-when counts component and pattern descriptions but states no population, failure state or control for components and field patterns that have no linked context, so the gate passes with those descriptions missing.",
+    "evidence_paths": "pass \u2014 s6 requires its readings and the projection to sit in the landing record, and the plan's landed sections cite durable fragment paths under docs/evidence/fragments/iter-signal-context-and-enrichment/ (all eleven named fragments exist); nothing in s6 points at a scratchpad.",
+    "naming": "pass \u2014 s6 names no symbol, file or function, and no plan label, stage name or ticket number appears in its text.",
+    "reasoning": "a finding \u2014 s6 requires every member description to carry a unit and a classification, while its own dependency s11 landed with those values undecided for most of the 1,766 pilot signals and stores nothing in the conflict and undecided cases.",
+    "single_goal": "pass \u2014 s6's deliverables (component, pattern and member descriptions, their quality read, and the projection the s7 decision consumes) are measures of the one goal in its title, and the projection is obtainable from s5's grouping whether or not the quality bar is met.",
+    "wiring": "pass \u2014 every s6 dependency (`#s4`, `#s5`, `#s11`, line 68) is declared `done` in the declaration table and each has a landed comment (c-s4-landed, grouping-rerun comment, c-s11-landed), so `implementable` now composes; s6 does not appear among s7\u2013s10's dependencies without being declared, and s9's dependency on s6 is intact."
+  },
+  "section_digests": {
+    "_document": "6779747f528ff1f6b31e591ec2714dffa68a783ad3f84f0902f50c5d83739420",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "0a44a06e3ce743fddcb14d83e8d2791ca5977f2a3959db6c4f0b59b17f876c9d",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "9e51f8ba217e7d0bed83b1b1befdddbaeba215a0d94df9a98fe95e3d3b93eb42",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T00:43:30.610738+00:00",
+  "total": null
+}
