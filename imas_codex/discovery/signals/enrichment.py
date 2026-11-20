@@ -1,5 +1,6 @@
 """Seat-scoped controls for signal enrichment requests and output contracts."""
 
+import asyncio
 from collections.abc import Mapping, Sequence
 from typing import Any
 
@@ -215,15 +216,34 @@ def supported_source_statement(text: str, source: dict) -> bool:
     return bool(label) and normalize(text) == normalize(label)
 
 
-async def recovered_call(call, *, attempts, validate, counters, counter, **kwargs):
-    """Retry only the failed structured call, retaining its consumed telemetry."""
+async def recovered_call(
+    call,
+    *,
+    attempts,
+    validate,
+    counters,
+    counter,
+    transient_attempts=0,
+    transient_delay=5.0,
+    **kwargs,
+):
+    """Retry the failed structured call, retaining its consumed telemetry.
+
+    A validation failure is re-asked with the fault named, up to ``attempts``
+    times. A transient fault that is not a validation failure is retried
+    ``transient_attempts`` times after ``transient_delay`` seconds, and is
+    counted under ``transient_counter`` when given, because nothing about the
+    request changed and the same messages are reissued.
+    """
     from imas_codex.discovery.base.llm import (
         LLMStructuredCallError,
         ProviderBudgetExhausted,
     )
 
     cost, tokens = 0.0, 0
-    for attempt in range(attempts + 1):
+    validation_attempt = 0
+    transient_left = max(0, transient_attempts)
+    while True:
         try:
             value, call_cost, call_tokens = await call(**kwargs)
             cost += call_cost
@@ -238,8 +258,9 @@ async def recovered_call(call, *, attempts, validate, counters, counter, **kwarg
                     raise
             cost += getattr(exc, "cost", 0) or 0
             tokens += getattr(exc, "tokens", 0) or 0
-            if attempt == attempts:
+            if validation_attempt == attempts:
                 raise
+            validation_attempt += 1
             counters[counter] += 1
             kwargs = dict(kwargs)
             kwargs["messages"] = [
@@ -251,6 +272,15 @@ async def recovered_call(call, *, attempts, validate, counters, counter, **kwarg
                     + "\nReturn corrected JSON for the same supplied signals and context.",
                 },
             ]
+        except Exception as exc:
+            cost += getattr(exc, "cost", 0) or 0
+            tokens += getattr(exc, "tokens", 0) or 0
+            if transient_left == 0:
+                raise
+            transient_left -= 1
+            if "transient_retries" in counters:
+                counters["transient_retries"] += 1
+            await asyncio.sleep(transient_delay)
 
 
 def context_items(text: str) -> dict[str, str]:
@@ -500,19 +530,20 @@ async def enrich_signal_batch(*, model, messages, options, call, **kwargs):
             async def review_call(**request):
                 return await batched_review(call, options.review_batch_size, **request)
 
-        kept_by_index, review_cost, review_tokens, review_drops = (
-            await review_draft_statements(
-                call=review_call,
-                model=model,
-                items=items,
-                drafts={
-                    index: draft_statements[index] for index in review_statements
-                },
-                attempts=options.recovery_attempts,
-                counters=counters,
-                counter="review_retries",
-                review_kwargs=review_kwargs,
-            )
+        (
+            kept_by_index,
+            review_cost,
+            review_tokens,
+            review_drops,
+        ) = await review_draft_statements(
+            call=review_call,
+            model=model,
+            items=items,
+            drafts={index: draft_statements[index] for index in review_statements},
+            attempts=options.recovery_attempts,
+            counters=counters,
+            counter="review_retries",
+            review_kwargs=review_kwargs,
         )
         cost += review_cost
         tokens += review_tokens

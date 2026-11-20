@@ -571,11 +571,14 @@ async def _describe_once(
         if len(rows) != 1:
             raise ValueError("draft must describe the requested group exactly once")
 
-    counters = {"draft_retries": 0, "review_retries": 0}
+    # One retry for a transient lane fault, as the group path always had: a
+    # hiccup must not cost a group the run's only attempt.
+    counters = {"draft_retries": 0, "review_retries": 0, "transient_retries": 0}
     try:
         batch, cost, tokens = await recovered_call(
             call,
             attempts=recovery_attempts,
+            transient_attempts=1,
             validate=validate_draft,
             counters=counters,
             counter="draft_retries",
@@ -588,10 +591,10 @@ async def _describe_once(
         return GroupOutcome(
             cost=float(getattr(exc, "cost", 0) or 0.0),
             tokens=int(getattr(exc, "tokens", 0) or 0),
-            calls=1 + counters["draft_retries"],
+            calls=1 + counters["draft_retries"] + counters["transient_retries"],
             error=f"{type(exc).__name__}: {exc}",
         )
-    calls = 1 + counters["draft_retries"]
+    calls = 1 + counters["draft_retries"] + counters["transient_retries"]
     cost, tokens = float(cost or 0.0), int(tokens or 0)
     rows = [row for row in batch.results if row.group_id == request.group_id]
     if not rows and len(batch.results) == 1:
@@ -603,17 +606,20 @@ async def _describe_once(
         review_kwargs["reasoning_effort"] = "high" if review_thinking else None
         review_kwargs["temperature"] = 0
         try:
-            kept_by_index, review_cost, review_tokens, review_drops = (
-                await review_draft_statements(
-                    call=call,
-                    model=model,
-                    items=items,
-                    drafts={1: rows[0].statements},
-                    attempts=recovery_attempts,
-                    counters=counters,
-                    counter="review_retries",
-                    review_kwargs=review_kwargs,
-                )
+            (
+                kept_by_index,
+                review_cost,
+                review_tokens,
+                review_drops,
+            ) = await review_draft_statements(
+                call=call,
+                model=model,
+                items=items,
+                drafts={1: rows[0].statements},
+                attempts=recovery_attempts,
+                counters=counters,
+                counter="review_retries",
+                review_kwargs=review_kwargs,
             )
         except Exception as exc:
             return GroupOutcome(

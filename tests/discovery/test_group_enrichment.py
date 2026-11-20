@@ -1,5 +1,7 @@
 """Group enrichment composes member text only from delivered group descriptions."""
 
+import asyncio
+
 import pytest
 
 from imas_codex.discovery.signals.enrichment import (
@@ -22,6 +24,16 @@ from imas_codex.discovery.signals.group_enrichment import (
     describe_groups,
     summarise,
 )
+
+
+@pytest.fixture(autouse=True)
+def no_transient_backoff(monkeypatch):
+    """A retry test must not spend the retry delay in wall time."""
+
+    async def immediate(_delay):
+        return None
+
+    monkeypatch.setattr(asyncio, "sleep", immediate)
 
 
 def member(**changes):
@@ -293,7 +305,9 @@ async def test_an_unsupported_answer_is_asked_once_more_and_accumulates_cost():
     assert outcome.cost == pytest.approx(0.2)
     assert outcome.tokens == 8
     assert len(call.calls) == 2
-    assert "delivered no supported statement" in call.calls[1]["messages"][-1]["content"]
+    assert (
+        "delivered no supported statement" in call.calls[1]["messages"][-1]["content"]
+    )
 
 
 @pytest.mark.asyncio
@@ -426,7 +440,8 @@ async def test_review_pass_removes_a_statement_its_check_refuses():
                 group_id=COMPONENT,
                 statements=[
                     GroupStatement(
-                        text="Cooling circuit valve assembly.", context_items=["context-1"]
+                        text="Cooling circuit valve assembly.",
+                        context_items=["context-1"],
                     ),
                     GroupStatement(
                         text="He supply at 4 K.", context_items=["context-1"]
@@ -496,7 +511,6 @@ async def test_review_failure_delivers_nothing_and_keeps_both_costs():
     assert outcome.cost == pytest.approx(0.1)
     assert outcome.calls == 2
     assert outcome.error is not None and outcome.error.startswith("Review failed:")
-
 
 
 def test_awaiting_and_failed_groups_are_counted_from_their_own_attempts():
@@ -595,6 +609,42 @@ async def test_a_group_draft_that_fails_validation_is_retried_like_a_signal_batc
 
 
 @pytest.mark.asyncio
+async def test_a_transient_lane_fault_is_retried_once_through_the_shared_call():
+    """The group path keeps its one retry for a fault that is not validation."""
+    valid = GroupDescriptionBatch(
+        results=[
+            GroupDescription(
+                group_id=COMPONENT,
+                statements=[
+                    GroupStatement(text="Cooling circuit.", context_items=["context-1"])
+                ],
+            )
+        ]
+    )
+
+    class FlakyCall(RecordingCall):
+        async def __call__(self, **kwargs):
+            self.calls.append(kwargs)
+            if len(self.calls) == 1:
+                raise TimeoutError("local endpoint did not answer")
+            return self.batch, 0.25, 7
+
+    call = FlakyCall(valid)
+    outcome = await describe_group(
+        GroupRequest(group_id=COMPONENT, kind="component", context=("Meaning.",)),
+        model="local/demo",
+        call=call,
+    )
+    assert outcome.delivered
+    assert outcome.text == "Cooling circuit."
+    assert outcome.calls == 2
+    assert outcome.cost == pytest.approx(0.25)
+    assert outcome.tokens == 7
+    assert len(call.calls) == 2
+    assert call.calls[1]["messages"] == call.calls[0]["messages"]
+
+
+@pytest.mark.asyncio
 async def test_both_enrichment_paths_review_through_one_implementation(monkeypatch):
     """Group and signal enrichment reach the same reviewed-statement helper."""
     from imas_codex.discovery.signals import enrichment as enrichment_module
@@ -637,12 +687,12 @@ async def test_both_enrichment_paths_review_through_one_implementation(monkeypat
     )
     assert group_outcome.delivered
 
-    from tests.discovery.test_signal_enrichment_benchmark import answer
     from imas_codex.discovery.signals.enrichment import (
         EnrichmentOptions,
         enrich_signal_batch,
     )
     from imas_codex.discovery.signals.models import SignalEnrichmentBatch
+    from tests.discovery.test_signal_enrichment_benchmark import answer
 
     batch_value = answer()
     batch_value["results"][0]["description"] = "Cooling temperature."
