@@ -529,3 +529,111 @@ def test_components_and_patterns_without_linked_context_are_awaiting():
     assert summary["patterns_awaiting_context"] == 1
     assert summary["patterns_failed"] == 0
 
+
+
+@pytest.mark.asyncio
+async def test_a_group_draft_that_fails_validation_is_retried_like_a_signal_batch():
+    """The group path shares the signal path's validation retry, not its own."""
+    two_results = GroupDescriptionBatch(
+        results=[
+            GroupDescription(
+                group_id="demo:plant_component:OTHER",
+                statements=[
+                    GroupStatement(text="Other circuit.", context_items=["context-1"])
+                ],
+            ),
+            GroupDescription(
+                group_id="demo:plant_component:THIRD",
+                statements=[
+                    GroupStatement(text="Third circuit.", context_items=["context-1"])
+                ],
+            ),
+        ]
+    )
+    valid = GroupDescriptionBatch(
+        results=[
+            GroupDescription(
+                group_id=COMPONENT,
+                statements=[
+                    GroupStatement(text="Cooling circuit.", context_items=["context-1"])
+                ],
+            )
+        ]
+    )
+    call = SequenceCall([two_results, valid])
+    outcome = await describe_group(
+        GroupRequest(group_id=COMPONENT, kind="component", context=("Meaning.",)),
+        model="local/demo",
+        call=call,
+        recovery_attempts=1,
+    )
+    assert outcome.delivered
+    assert outcome.calls == 2
+    assert len(call.calls) == 2
+    assert "failed validation" in call.calls[1]["messages"][-1]["content"]
+
+
+@pytest.mark.asyncio
+async def test_both_enrichment_paths_review_through_one_implementation(monkeypatch):
+    """Group and signal enrichment reach the same reviewed-statement helper."""
+    from imas_codex.discovery.signals import enrichment as enrichment_module
+
+    seen = []
+
+    async def fake_review(**kwargs):
+        seen.append((kwargs["model"], kwargs["counter"], sorted(kwargs["drafts"])))
+        return (
+            {index: [(1, "Cooling circuit.")] for index in kwargs["drafts"]},
+            0.1,
+            5,
+            0,
+        )
+
+    monkeypatch.setattr(
+        enrichment_module, "review_draft_statements", fake_review, raising=True
+    )
+    group_outcome = await describe_group(
+        GroupRequest(group_id=COMPONENT, kind="component", context=("Meaning.",)),
+        model="local/demo",
+        call=SequenceCall(
+            [
+                GroupDescriptionBatch(
+                    results=[
+                        GroupDescription(
+                            group_id=COMPONENT,
+                            statements=[
+                                GroupStatement(
+                                    text="Cooling circuit.",
+                                    context_items=["context-1"],
+                                )
+                            ],
+                        )
+                    ]
+                )
+            ]
+        ),
+        review=True,
+    )
+    assert group_outcome.delivered
+
+    from tests.discovery.test_signal_enrichment_benchmark import answer
+    from imas_codex.discovery.signals.enrichment import (
+        EnrichmentOptions,
+        enrich_signal_batch,
+    )
+    from imas_codex.discovery.signals.models import SignalEnrichmentBatch
+
+    batch_value = answer()
+    batch_value["results"][0]["description"] = "Cooling temperature."
+    signal_call = SequenceCall([SignalEnrichmentBatch.model_validate(batch_value)])
+    await enrich_signal_batch(
+        model="local/demo",
+        messages=[
+            {"role": "system", "content": "Original task"},
+            {"role": "user", "content": "source_description: Cooling temperature"},
+        ],
+        options=EnrichmentOptions(review=True, description_sentences=1),
+        call=signal_call,
+    )
+    assert len(seen) == 2
+    assert {entry[1] for entry in seen} == {"review_retries"}

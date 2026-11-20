@@ -21,7 +21,6 @@ carries the member's status and cost update in the same statement.
 from __future__ import annotations
 
 import asyncio
-import json
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -533,57 +532,48 @@ async def _describe_once(
     items: Mapping[str, str],
     review: bool,
     review_thinking: bool,
+    recovery_attempts: int,
     call_kwargs: Mapping[str, Any],
 ) -> GroupOutcome:
     """One draft, optionally the seat's review pass, and its citations."""
     from imas_codex.discovery.signals.enrichment import (
-        DescriptionReview,
         GroupDescriptionBatch,
+        recovered_call,
+        review_draft_statements,
     )
 
-    result, failure = None, None
-    for attempt in range(2):
-        try:
-            result = await call(
-                model=model,
-                messages=messages,
-                response_model=GroupDescriptionBatch,
-                **call_kwargs,
-            )
-            break
-        except ValueError as exc:
-            # A structured-call validation failure is not a transport fault and
-            # is not retried into existence; its spend is still recorded.
-            return GroupOutcome(
-                cost=float(getattr(exc, "cost", 0) or 0.0),
-                tokens=int(getattr(exc, "tokens", 0) or 0),
-                calls=1,
-                error=f"{type(exc).__name__}: {exc}",
-            )
-        except Exception as exc:  # A transient lane fault is retried once.
-            failure = exc
-            if attempt == 0:
-                await asyncio.sleep(5)
-    if result is None:
-        return GroupOutcome(
-            cost=float(getattr(failure, "cost", 0) or 0.0),
-            tokens=int(getattr(failure, "tokens", 0) or 0),
-            calls=1,
-            error=f"{type(failure).__name__}: {failure}",
+    def validate_draft(batch) -> None:
+        rows = [row for row in batch.results if row.group_id == request.group_id]
+        if not rows and len(batch.results) == 1:
+            rows = batch.results
+        if len(rows) != 1:
+            raise ValueError("draft must describe the requested group exactly once")
+
+    counters = {"draft_retries": 0, "review_retries": 0}
+    try:
+        batch, cost, tokens = await recovered_call(
+            call,
+            attempts=recovery_attempts,
+            validate=validate_draft,
+            counters=counters,
+            counter="draft_retries",
+            model=model,
+            messages=messages,
+            response_model=GroupDescriptionBatch,
+            **call_kwargs,
         )
-    calls = 1
-    batch, cost, tokens = result
+    except Exception as exc:
+        return GroupOutcome(
+            cost=float(getattr(exc, "cost", 0) or 0.0),
+            tokens=int(getattr(exc, "tokens", 0) or 0),
+            calls=1 + counters["draft_retries"],
+            error=f"{type(exc).__name__}: {exc}",
+        )
+    calls = 1 + counters["draft_retries"]
     cost, tokens = float(cost or 0.0), int(tokens or 0)
     rows = [row for row in batch.results if row.group_id == request.group_id]
     if not rows and len(batch.results) == 1:
         rows = batch.results
-    if len(rows) != 1:
-        return GroupOutcome(
-            cost=cost,
-            tokens=tokens,
-            calls=calls,
-            error="Response did not describe the requested group once",
-        )
     kept, drops = filter_statements(rows[0].statements, items)
     reviewed_statements: list[str] | None = None
     if review and kept:
@@ -591,77 +581,31 @@ async def _describe_once(
         review_kwargs["reasoning_effort"] = "high" if review_thinking else None
         review_kwargs["temperature"] = 0
         try:
-            reviewed = await call(
-                model=model,
-                messages=[
-                    {
-                        "role": "system",
-                        "content": render_prompt(
-                            "signals/enrichment_review",
-                            {"output_schema": DescriptionReview.model_json_schema()},
-                        ),
-                    },
-                    {
-                        "role": "user",
-                        "content": json.dumps(
-                            {
-                                "context_items": items,
-                                "drafts": {
-                                    "1": [
-                                        statement.model_dump()
-                                        for statement in rows[0].statements
-                                    ]
-                                },
-                            },
-                            ensure_ascii=False,
-                        ),
-                    },
-                ],
-                response_model=DescriptionReview,
-                **review_kwargs,
+            kept_by_index, review_cost, review_tokens, review_drops = (
+                await review_draft_statements(
+                    call=call,
+                    model=model,
+                    items=items,
+                    drafts={1: rows[0].statements},
+                    attempts=recovery_attempts,
+                    counters=counters,
+                    counter="review_retries",
+                    review_kwargs=review_kwargs,
+                )
             )
         except Exception as exc:
             return GroupOutcome(
                 cost=cost + float(getattr(exc, "cost", 0) or 0.0),
                 tokens=tokens + int(getattr(exc, "tokens", 0) or 0),
                 drops=drops,
-                calls=calls + 1,
+                calls=calls + 1 + counters["review_retries"],
                 error=f"Review failed: {type(exc).__name__}: {exc}",
             )
-        calls += 1
-        review_batch, review_cost, review_tokens = reviewed
-        cost += float(review_cost or 0.0)
-        tokens += int(review_tokens or 0)
-        drafts = rows[0].statements
-        results = [row for row in review_batch.results if row.signal_index == 1]
-        if len(results) != 1:
-            return GroupOutcome(
-                cost=cost,
-                tokens=tokens,
-                drops=drops,
-                calls=calls,
-                error="Review did not answer the requested group once",
-            )
-        original = [statement.text for statement in drafts]
-        kept, seen = [], set()
-        for statement in results[0].statements:
-            if (
-                not 1 <= statement.draft_index <= len(original)
-                or statement.draft_index in seen
-            ):
-                return GroupOutcome(
-                    cost=cost,
-                    tokens=tokens,
-                    drops=drops,
-                    calls=calls,
-                    error="Review referred to a missing or repeated draft statement",
-                )
-            seen.add(statement.draft_index)
-            valid, dropped = filter_statements([statement], items)
-            drops += dropped
-            if valid:
-                kept.append((statement.draft_index, valid[0]))
-        reviewed_statements = [text for _, text in sorted(kept)]
+        calls += 1 + counters["review_retries"]
+        cost += review_cost
+        tokens += review_tokens
+        drops += review_drops
+        reviewed_statements = [text for _, text in kept_by_index.get(1, [])]
     text = " ".join(
         reviewed_statements if reviewed_statements is not None else kept
     ).strip()
@@ -692,6 +636,7 @@ async def describe_group(
     review: bool = False,
     review_thinking: bool = False,
     attempts: int = 0,
+    recovery_attempts: int = 0,
     **call_kwargs: Any,
 ) -> GroupOutcome:
     """Draft, optionally review, and refuse an unsupported description.
@@ -714,6 +659,7 @@ async def describe_group(
             items=items,
             review=review,
             review_thinking=review_thinking,
+            recovery_attempts=recovery_attempts,
             call_kwargs=call_kwargs,
         )
         total_cost += outcome.cost
@@ -759,6 +705,7 @@ async def describe_groups(
     review: bool = False,
     review_thinking: bool = False,
     attempts: int = 0,
+    recovery_attempts: int = 0,
     **call_kwargs,
 ) -> dict[str, GroupOutcome]:
     """Describe groups with bounded concurrency, retaining every outcome."""
@@ -777,6 +724,7 @@ async def describe_groups(
                 review=review,
                 review_thinking=review_thinking,
                 attempts=attempts,
+                recovery_attempts=recovery_attempts,
                 **call_kwargs,
             )
 
@@ -1021,6 +969,7 @@ async def enrich_pilot_groups(
             review=options.review,
             review_thinking=options.review_thinking,
             attempts=options.recovery_attempts,
+            recovery_attempts=options.recovery_attempts,
             **call_kwargs,
         )
         component_outcomes = {
