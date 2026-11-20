@@ -28,6 +28,7 @@ import click
 from imas_codex.graph.plant_scope import (
     PlantPackageMismatch,
     PlantScope,
+    measure_plant_scope,
     verify_plant_package,
 )
 
@@ -547,8 +548,6 @@ def _filter_to_facility(
     Uses ``CALL {} IN TRANSACTIONS`` for server-side batched commits.
     """
     from neo4j import GraphDatabase
-
-    from imas_codex.graph.plant_scope import measure_plant_scope
 
     click.echo(f"  Filtering graph: keeping facility={facility}...")
 
