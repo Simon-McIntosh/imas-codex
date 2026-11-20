@@ -12,10 +12,10 @@ from __future__ import annotations
 import pytest
 
 from imas_codex.discovery.signals.vocabulary import (
-    SOURCE_ORDER,
     SignalSources,
     VocabularyRules,
     assign_vocabulary,
+    device_token,
     summarise,
     unit_member,
     values_from_text,
@@ -47,20 +47,20 @@ class TestPrecedence:
             )
         )["inv:one"]
         assert record["vocabulary_quantity"] == "pressure"
-        assert record["vocabulary_quantity_source"] == SOURCE_ORDER[0]
-        assert record["vocabulary_unit_source"] == SOURCE_ORDER[1]
+        assert record["vocabulary_quantity_source"] == "signal_list_row"
+        assert record["vocabulary_unit_source"] == "controls_metadata"
 
     def test_controls_metadata_decides_when_no_row_states_the_quantity(self):
         record = _assign(
             SignalSources("inv:two", controls_text="Raw water temperature H")
         )["inv:two"]
         assert record["vocabulary_quantity"] == "temperature"
-        assert record["vocabulary_quantity_source"] == SOURCE_ORDER[1]
+        assert record["vocabulary_quantity_source"] == "controls_metadata"
 
     def test_archive_unit_decides_the_unit_when_nothing_else_does(self):
         record = _assign(SignalSources("inv:three", archive_unit="mbar"))["inv:three"]
         assert record["vocabulary_unit"] == "millibar"
-        assert record["vocabulary_unit_source"] == SOURCE_ORDER[2]
+        assert record["vocabulary_unit_source"] == "archive_unit"
         assert record["vocabulary_quantity_state"] == "undecided"
 
     def test_archive_unit_never_gives_a_quantity_or_a_role(self):
@@ -158,7 +158,7 @@ class TestFieldPattern:
         ]
         record = _assign(*signals)["inv:target"]
         assert record["vocabulary_quantity"] == "temperature"
-        assert record["vocabulary_quantity_source"] == SOURCE_ORDER[3]
+        assert record["vocabulary_quantity_source"] == "field_pattern"
 
     def test_support_below_the_declared_minimum_states_nothing(self):
         signals = [
@@ -192,6 +192,83 @@ class TestFieldPattern:
         signals = [
             *self._supporting("TT", 2),
             SignalSources("inv:target", field_code="TT"),
+        ]
+        record = _assign(*signals)["inv:target"]
+        assert record["vocabulary_quantity_state"] == "undecided"
+
+    def test_a_consensus_from_one_family_does_not_reach_another_family(self):
+        """Four temperature transmitters do not state a pressure device's quantity."""
+        signals = [
+            *[
+                SignalSources(
+                    f"inv:{index}",
+                    field_code="MST",
+                    device_token="MT",
+                    controls_text=ROW_MEASURED,
+                )
+                for index in range(4)
+            ],
+            SignalSources("inv:target", field_code="MST", device_token="MP"),
+        ]
+        record = _assign(*signals)["inv:target"]
+        assert record["vocabulary_quantity_state"] == "undecided"
+
+    def test_a_consensus_from_one_family_reaches_a_related_family(self):
+        """MP and MPT are one instrument line, so the consensus transfers."""
+        signals = [
+            *[
+                SignalSources(
+                    f"inv:{index}",
+                    field_code="MST",
+                    device_token="MPT",
+                    controls_text=ROW_MEASURED,
+                )
+                for index in range(4)
+            ],
+            SignalSources("inv:target", field_code="MST", device_token="MP"),
+        ]
+        record = _assign(*signals)["inv:target"]
+        assert record["vocabulary_quantity"] == "temperature"
+
+    def test_a_consensus_across_families_states_the_code_not_one_family(self):
+        """Supporters of several device families state the code's own meaning."""
+        signals = [
+            SignalSources(
+                "inv:a",
+                field_code="YSTA",
+                device_token="FAN",
+                controls_text="Fan status",
+            ),
+            SignalSources(
+                "inv:b",
+                field_code="YSTA",
+                device_token="BJ",
+                controls_text="Door closed",
+            ),
+            SignalSources(
+                "inv:c",
+                field_code="YSTA",
+                device_token="CU",
+                controls_text="Power normal",
+            ),
+            SignalSources("inv:target", field_code="YSTA", device_token="CPC"),
+        ]
+        record = _assign(*signals)["inv:target"]
+        assert record["vocabulary_role"] == "state"
+        assert record["vocabulary_role_source"] == "field_pattern"
+
+    def test_a_signal_without_a_device_token_takes_no_single_family_consensus(self):
+        signals = [
+            *[
+                SignalSources(
+                    f"inv:{index}",
+                    field_code="MST",
+                    device_token="MT",
+                    controls_text=ROW_MEASURED,
+                )
+                for index in range(4)
+            ],
+            SignalSources("inv:target", field_code="MST"),
         ]
         record = _assign(*signals)["inv:target"]
         assert record["vocabulary_quantity_state"] == "undecided"
@@ -243,3 +320,14 @@ class TestRecordShape:
     def test_the_assignment_is_deterministic(self):
         signals = [SignalSources("inv:e", controls_text=ROW)]
         assert assign_vocabulary(signals) == assign_vocabulary(signals)
+
+
+class TestAccessionToken:
+    def test_the_token_is_the_letters_before_the_number(self):
+        assert device_token("inv:site:MT1100-TT-XI") == "MT"
+        assert device_token("inv:site:MPT8101-PT-XI") == "MPT"
+        assert device_token("inv:site:CPC4001-YSTA-XI") == "CPC"
+
+    def test_an_accession_without_a_letter_prefix_has_no_token(self):
+        assert device_token("inv:site:1234") is None
+        assert device_token(None) is None

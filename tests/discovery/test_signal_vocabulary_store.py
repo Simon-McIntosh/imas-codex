@@ -122,6 +122,29 @@ class TestAssignCohort:
         assert record["vocabulary_quantity"] == "pressure"
         assert record["vocabulary_quantity_source"] == "signal_list_row"
 
+    def test_a_row_states_no_unit_because_the_layout_has_no_unit_column(self):
+        """The formatted row carries every cell, and a unit-shaped cell is not a unit.
+
+        The source layout declares a control, category, sequence, field and plant
+        column and no unit column, so a row contributes text for the quantity and
+        role axes only; a unit word inside a cell, such as a signal type, does not
+        become the measured unit.
+        """
+        signals = [_signal("inv:u", field_code="AA")]
+        rows = [
+            {
+                "id": "inv:u",
+                "description": "Absolute pressure; signal type 2 wires 4-20 mA; supply 24 V",
+                "field_code": "AA",
+                "match_kind": "exact",
+            }
+        ]
+        record = assign_cohort(signals, rows)["ledger"][0]
+        assert record["vocabulary_quantity"] == "pressure"
+        assert record["vocabulary_quantity_source"] == "signal_list_row"
+        assert record["vocabulary_unit"] is None
+        assert record["vocabulary_unit_state"] == "undecided"
+
     def test_a_sibling_channel_row_does_not_state_this_signal(self):
         """Several rows for one component describe their own channels only."""
         signals = [_signal("inv:sib", field_code="FL")]

@@ -24,6 +24,7 @@ from imas_codex.discovery.signals.vocabulary import (
     SignalSources,
     VocabularyRules,
     assign_vocabulary,
+    device_token,
     summarise,
     vocabulary_properties,
 )
@@ -140,6 +141,7 @@ def cohort_sources(
             SignalSources(
                 signal_id=signal["id"],
                 field_code=signal.get("field_code"),
+                device_token=device_token(signal["id"]),
                 row_texts=qualifying_row_texts(
                     signal, rows_by_signal.get(signal["id"], ())
                 ),

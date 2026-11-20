@@ -18,7 +18,8 @@ The field-pattern rule is the only rule that reads the population rather than
 one signal: other signals that share the signal's field code contribute their
 own decided value, and the pattern states a member only when at least
 ``min_pattern_support`` of them agree unanimously. A signal never supplies its
-own pattern, so a value is never supported by itself.
+own pattern, so a value is never supported by itself, and a consensus drawn from
+a single device family does not transfer to an accession of another family.
 """
 
 from __future__ import annotations
@@ -211,8 +212,8 @@ class SignalSources:
 
     signal_id: str
     field_code: str | None = None
+    device_token: str | None = None
     row_texts: tuple[str, ...] = ()
-    row_units: tuple[str, ...] = ()
     controls_text: str | None = None
     controls_unit: str | None = None
     archive_unit: str | None = None
@@ -251,6 +252,42 @@ def unit_member(raw: str | None, lookup: Mapping[str, str]) -> str | None:
     return lookup.get(normalized)
 
 
+def device_token(accessor: str | None) -> str | None:
+    """The accession's device token: the letters before its number.
+
+    ``MAG-…-CIS:MT1100-TT-XI`` yields ``MT`` and ``…:MP2941-MST-XI`` yields
+    ``MP``. The token names the instrument family the accession belongs to, so
+    a pattern credited by one family does not transfer to another.
+    """
+    if not accessor:
+        return None
+    tail = accessor.rsplit(":", 1)[-1].rsplit("/", 1)[-1]
+    match = re.match(r"[A-Za-z]+", tail)
+    return match.group(0).upper() if match else None
+
+
+def _pattern_reaches(
+    signal: SignalSources, supporters: Sequence[SignalSources]
+) -> bool:
+    """Whether a code's consensus is evidence about *this* signal's family.
+
+    Supporters drawn from several device families state the code's meaning, so
+    the consensus transfers to any family. Supporters drawn from one family
+    state that family's practice: it transfers only when the signal's own token
+    shares a prefix with it, since ``MP`` and ``MPT`` are one instrument line
+    while ``MP`` and ``MT`` are not. A signal with no token takes no single-family
+    consensus, because nothing shows it belongs to that family.
+    """
+    tokens = {other.device_token for other in supporters if other.device_token}
+    if len(tokens) != 1:
+        return True
+    supporter = next(iter(tokens))
+    own = signal.device_token
+    if not own:
+        return False
+    return own.startswith(supporter) or supporter.startswith(own)
+
+
 def _own_candidates(
     sources: SignalSources, rules: VocabularyRules, lookup: Mapping[str, str]
 ) -> dict[str, list[tuple[str, str]]]:
@@ -263,12 +300,6 @@ def _own_candidates(
         if sources.controls_text
         else None
     )
-    row_units = {
-        member
-        for raw in sources.row_units
-        if (member := unit_member(raw, lookup)) is not None
-    }
-    row_unit = row_units.pop() if len(row_units) == 1 else None
     controls_unit = unit_member(sources.controls_unit, lookup)
     archive_unit = unit_member(sources.archive_unit, lookup)
     row_role = values_from_text(sources.row_texts, role_matchers)
@@ -286,8 +317,6 @@ def _own_candidates(
         candidates["quantity"].append((SOURCE_ORDER[0], row_quantity))
     if controls_quantity:
         candidates["quantity"].append((SOURCE_ORDER[1], controls_quantity))
-    if row_unit:
-        candidates["unit"].append((SOURCE_ORDER[0], row_unit))
     if controls_unit:
         candidates["unit"].append((SOURCE_ORDER[1], controls_unit))
     if archive_unit:
@@ -308,7 +337,8 @@ def _pattern_values(
 
     A pattern is the field code alone. A member is stated only when at least
     ``min_pattern_support`` other signals with that code give it from their own
-    sources and every one of them gives the same member.
+    sources, every one of them gives the same member, and the consensus is
+    evidence about this signal's device family (see ``_pattern_reaches``).
     """
     own: dict[str, dict[str, list[tuple[str, str]]]] = {
         signal.signal_id: _own_candidates(signal, rules, lookup) for signal in signals
@@ -330,7 +360,13 @@ def _pattern_values(
                     value = values.pop()
                     per_signal[signal.signal_id] = value
                     counts[value] += 1
+            supporters = [other for other in members if other.signal_id in per_signal]
             for signal in members:
+                if not _pattern_reaches(
+                    signal,
+                    [other for other in supporters if other is not signal],
+                ):
+                    continue
                 own_value = per_signal.get(signal.signal_id)
                 remaining = counts - Counter({own_value: 1}) if own_value else counts
                 if sum(remaining.values()) < rules.min_pattern_support:
