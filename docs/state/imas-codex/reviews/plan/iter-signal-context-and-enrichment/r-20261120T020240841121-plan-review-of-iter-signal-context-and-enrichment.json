@@ -1,0 +1,59 @@
+{
+  "absent_items": [],
+  "completed_at": "2026-11-20T02:04:37.729Z",
+  "dispatched_at": "2026-11-20T02:04:17Z",
+  "findings": [
+    {
+      "anchor": "plan.html:70",
+      "id": "done_when-1",
+      "reason": "the node must either omit the control or report a set of figures its own done-when declares impossible, so the failed count has to enter the sum.",
+      "text": "the done-when asks for \"the number of signals, of components and of field patterns left awaiting context, each with its described count summing to the pilot's total of that kind\", but its own negative control requires a member of a group whose component description failed to be \"reported in a failed state and carries no composed description\"; that member has linked context, so it is not awaiting context, and it has no composed description, so it is not described, leaving the two figures unable to sum to the pilot's total once the control fires and no failed bucket in the reconciliation",
+      "type": "done_when",
+      "would_change": true
+    },
+    {
+      "anchor": "plan.html:70",
+      "id": "reasoning-1",
+      "reason": "the hand-reader's support test omits the two sources the description is explicitly composed from, so the quality bar can fail a description for doing what Delivers asks.",
+      "text": "the grade makes a description wrong for stating \"something that neither the specification nor the signal's own recorded sources support\", while Delivers (line 69) requires each member description to be \"composed from the two\" \u2014 the component description and the pattern description \u2014 so a proposition carried over from the component's linked context is supported by neither the specification (which need not state it for that signal) nor the signal's recorded vocabulary sources, and a correctly grounded description can be graded wrong",
+      "type": "reasoning",
+      "would_change": true
+    }
+  ],
+  "plan_commit": "e000054c3a9f1a2fd67e2b747a9be5b63cbc824b",
+  "plan_fingerprint": "e79a8dfc2870397bd45c8565b40c457f22291c6ad14c8442b2328b0ef341dda3",
+  "plan_slug": "iter-signal-context-and-enrichment",
+  "plan_version": 78,
+  "project": "imas-codex",
+  "responses": {},
+  "review_run_id": "r-20261120T020240841121-plan-review-of-iter-signal-context-and-enrichment",
+  "reviewed_blob_sha": "50bcacfe398c55c777e266908814346336b18e80",
+  "rubric": "content",
+  "rubric_items": {
+    "anchors_resolve": "pass \u2014 s4, s5 and s11 resolve in the snapshot, the cited figure docs/figures/iter-signal-context-and-enrichment/pipeline.svg exists, and the decisions s6 relies on (local-model-confirmed-on-quality, vocabulary-before-description) are present.",
+    "done_when": "a finding \u2014 s6's done-when (line 70) reconciles described plus awaiting-context counts to the pilot total while its own negative control requires a failed member that is neither.",
+    "evidence_paths": "pass \u2014 s6 asks for a landing record and the projection held in the plan; it cites no scratchpad or node-local path.",
+    "naming": "pass \u2014 s6 names no code symbol, ticket or plan label.",
+    "reasoning": "a finding \u2014 s6's grade (line 70) tests support only against the functional specification and \"the signal's own recorded sources\", while its Delivers (line 69) composes each member description from the component and pattern descriptions.",
+    "single_goal": "pass \u2014 s6 names one deliverable, the pilot system's group-enriched descriptions and their measured quality.",
+    "wiring": "pass \u2014 s6 is declared implementable and its declared dependencies (s4, s5, s11) are all declared done in the snapshot's plan-section-declarations."
+  },
+  "section_digests": {
+    "_document": "6779747f528ff1f6b31e591ec2714dffa68a783ad3f84f0902f50c5d83739420",
+    "s1": "7f7b53ea41467148a861b3e435e0366c7a48cb403c26d1f86b549a199e07c297",
+    "s10": "4342ccb6f81130614809d11e618c1875e3d4846ddbc058596b48b431dd47af5b",
+    "s11": "0a44a06e3ce743fddcb14d83e8d2791ca5977f2a3959db6c4f0b59b17f876c9d",
+    "s2": "65f7a0bec8d7886fee3a3dc6fc779999402ae02926bfb5c008907ea0df5b143a",
+    "s3": "de123f84043f00e54ea413bc6b67cc1d557bace47cbeb8cf90cf7fbcfe444c0c",
+    "s4": "fd1a945694d78ed79d11ba0bb18c9253027f95d86dcf0d6e001a9629a4a0dc0a",
+    "s5": "4d757d6149f6d6fdda4e499e4d42fc705ca43bfd4a4bf6d24504599348f8af83",
+    "s6": "50b6e12267ff30f5571b048a9c664b594c88c014ef069ffc458ca324467d0e0a",
+    "s7": "177466ce099612ec74bc89700155604c5580270afaa97a1dce2b97fea48727f1",
+    "s8": "38a9a8d74b1e9da9b636b6540a1cc801fe66c297ed1e2a685c4078da14459389",
+    "s9": "71d89b5dd2c7f21ea471d679b55bfdd87dbbb30ab383c4c88419e9f03d6f92e5"
+  },
+  "status": "ready",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T02:08:05.519831+00:00",
+  "total": null
+}
