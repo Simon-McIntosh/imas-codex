@@ -708,3 +708,94 @@ def delete_tag(
         return False
 
     return True
+
+
+# ============================================================================
+# Package visibility
+# ============================================================================
+
+
+def get_package_visibility(
+    registry: str,
+    pkg_name: str,
+    token: str | None = None,
+) -> str | None:
+    """Return the registry's own report of a container package's visibility.
+
+    Returns ``"private"`` or ``"public"``, or ``None`` when the registry has
+    no such package. A package's visibility is what the registry serves, not
+    what the pusher asked for, so this is the value a private-content check
+    records.
+    """
+    resolved = resolve_token(token)
+    owner, api_type = get_ghcr_owner_and_type(registry, resolved)
+    status, body = github_api_call(
+        "GET",
+        f"/{api_type}/{owner}/packages/container/{pkg_name}",
+        token=resolved,
+    )
+    if status == 404:
+        return None
+    if status != 200:
+        raise click.ClickException(
+            f"Failed to read visibility of {registry}/{pkg_name} "
+            f"({github_error_detail(status, body)})"
+        )
+    visibility = body.get("visibility") if isinstance(body, dict) else None
+    return visibility if isinstance(visibility, str) else None
+
+
+def set_package_visibility(
+    registry: str,
+    pkg_name: str,
+    visibility: str,
+    token: str | None = None,
+) -> str | None:
+    """Set a container package's visibility and return the registry's report.
+
+    The returned value is read back after the write, so a private report means
+    the registry now serves the package as private rather than that the write
+    was accepted.
+    """
+    resolved = resolve_token(token)
+    owner, api_type = get_ghcr_owner_and_type(registry, resolved)
+    status, body = github_api_call(
+        "PATCH",
+        f"/{api_type}/{owner}/packages/container/{pkg_name}",
+        payload={"visibility": visibility},
+        token=resolved,
+    )
+    if status not in (200, 204):
+        raise click.ClickException(
+            f"Failed to set visibility of {registry}/{pkg_name} to {visibility} "
+            f"({github_error_detail(status, body)})"
+        )
+    return get_package_visibility(registry, pkg_name, token=resolved)
+
+
+def require_private_package(
+    registry: str,
+    pkg_name: str,
+    token: str | None = None,
+    *,
+    set_private: bool = True,
+) -> str:
+    """Make sure a container package is private and return the registry's report.
+
+    A package that carries ITER-internal content must never be publicly
+    readable. With ``set_private`` the visibility is set first; either way the
+    value returned is the registry's own report and a public one raises.
+    """
+    visibility = get_package_visibility(registry, pkg_name, token=token)
+    if visibility is None:
+        raise click.ClickException(
+            f"Package {registry}/{pkg_name} does not exist in the registry"
+        )
+    if visibility != "private" and set_private:
+        visibility = set_package_visibility(registry, pkg_name, "private", token=token)
+    if visibility != "private":
+        raise click.ClickException(
+            f"Package {registry}/{pkg_name} is {visibility!r}; "
+            "ITER-internal content must not be published publicly"
+        )
+    return visibility

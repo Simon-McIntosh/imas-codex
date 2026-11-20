@@ -32,6 +32,7 @@ from imas_codex.graph.ghcr import (
     login_to_ghcr,
     require_clean_git,
     require_oras,
+    require_private_package,
     resolve_latest_tag as _resolve_latest_tag,
     resolve_token,
     save_dev_revision as _save_dev_revision,
@@ -546,6 +547,26 @@ def _run_offsite_cycle(
         click.echo(f"Receipt: {result.receipt_path}")
 
 
+def _report_plant_package_visibility(
+    registry: str,
+    pkg_name: str,
+    token: str | None,
+    *,
+    facilities: tuple[str, ...],
+    without_dd: bool,
+) -> None:
+    """Require a facility-content package to be private and report what the registry says.
+
+    A package that holds a facility's own content is internal by definition.
+    The visibility read back after the write is what is echoed, so a package
+    that is still public fails the push rather than being recorded as private.
+    """
+    if not (facilities and without_dd):
+        return
+    visibility = require_private_package(registry, pkg_name, token)
+    click.echo(f"  Package {pkg_name}: {visibility} (registry-reported)")
+
+
 @click.command()
 @click.option("--dev", is_flag=True, help="Push as dev-{commit} tag")
 @click.option("--registry", envvar="IMAS_DATA_REGISTRY", default=None)
@@ -797,6 +818,14 @@ def graph_push(
                     size_str = line.split("=", 1)[1].strip()
             gp.complete_phase(size_str)
 
+        _report_plant_package_visibility(
+            target_registry,
+            pkg_name,
+            token,
+            facilities=facilities,
+            without_dd=without_dd,
+        )
+
         # Update local manifest
         manifest = get_local_graph_manifest() or {}
         manifest["pushed"] = True
@@ -892,6 +921,14 @@ def graph_push(
             gp.start_phase(f"Pushing to GHCR ({artifact_ref})")
             run_oras_with_progress(push_cmd, progress=gp, cwd=archive_path.parent)
             gp.complete_phase()
+
+            _report_plant_package_visibility(
+                target_registry,
+                pkg_name,
+                token,
+                facilities=facilities,
+                without_dd=without_dd,
+            )
 
             manifest = get_local_graph_manifest() or {}
             manifest["pushed"] = True

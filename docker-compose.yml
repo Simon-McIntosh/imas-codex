@@ -50,6 +50,38 @@ services:
       retries: 3
       start_period: 60s
 
+  # ITER plant graph alone: signals, pulses and their categories, plant
+  # components and control nodes, served read-only from a graph package inside
+  # the image. No route to the shared graph; nothing from another facility.
+  # Build it with the plant package pushed privately first:
+  #   imas-codex graph push --facility iter --without-dd --dev
+  imas-codex-plant:
+    image: imas-codex-plant:${PLANT_TAG:-latest}
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - BUILDKIT_INLINE_CACHE=1
+        - GRAPH_TAG=${PLANT_GRAPH_TAG:-latest}
+        - GRAPH_PACKAGE=${PLANT_GRAPH_PACKAGE:-imas-codex-graph-iter-without-dd}
+        - GHCR_REGISTRY=${GHCR_REGISTRY:-ghcr.io/iterorganization}
+      secrets:
+        - ghcr_token
+    # The serve mode is this service's command, so the image's own default
+    # (the data-dictionary mode) is untouched.
+    command: ["serve", "--plant-only", "--host", "0.0.0.0", "--port", "8000"]
+    ports:
+      - "8001:8000"
+    environment:
+      - PYTHONPATH=/app
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-sf", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
+
   # Optional: Add nginx reverse proxy for production
   nginx:
     image: nginx:alpine

@@ -293,5 +293,17 @@ HEALTHCHECK --interval=30s --timeout=10s --retries=5 --start-period=240s \
     CMD curl -sf http://127.0.0.1:8000/health > /dev/null
 
 ## Entrypoint starts Neo4j then MCP server
+##
+## Data-dictionary image (unchanged default):
+##   docker build -t imas-codex .
+## Plant image — the ITER plant graph alone, read-only, private. The image is
+## the same build; its serve mode is the service's own command, not a build
+## argument, so nothing here changes how the data-dictionary image starts:
+##   docker build -t imas-codex-plant \
+##     --build-arg GHCR_REGISTRY=ghcr.io/<owner> \
+##     --build-arg GRAPH_PACKAGE=imas-codex-graph-iter-without-dd \
+##     --build-arg GRAPH_TAG=<tag> \
+##     --secret id=GHCR_TOKEN .
+##   docker run ... imas-codex-plant serve --plant-only --host 0.0.0.0 --port 8000
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["serve", "--dd-only", "--host", "0.0.0.0", "--port", "8000"]

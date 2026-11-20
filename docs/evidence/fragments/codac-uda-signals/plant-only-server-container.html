@@ -1,0 +1,195 @@
+<section id="plant-only-server-container-evidence">
+  <h3>A private container that serves the ITER plant graph and nothing else</h3>
+  <p>The plant catalogue is served by an image built with
+    <code>apptainer</code> from a private definition in the run directory, not
+    by the Dockerfile: this cluster has no reachable Docker daemon, so the
+    Dockerfile's plant recipe exists but <strong>has not been built</strong>.
+    The image's serve mode is its start command — the compose service passes
+    <code>serve --plant-only …</code> — so the image's own default and the
+    entrypoint stay exactly what the data-dictionary image already starts with.
+    <code>AgentsServer(plant_only=True)</code>
+    forces read-only operation, names the MCP server
+    <code>imas-codex-plant</code>, and deletes every tool component outside
+    <code>PLANT_TOOLS</code> — <code>search_signals</code>,
+    <code>search_pulses</code>, <code>get_signal_load_recipe</code>,
+    <code>signal_analytics</code>, <code>fetch_content</code> and
+    <code>get_facility_coverage</code> — before prompts are registered.</p>
+  <p>The data-dictionary image's start path is unchanged, and the diff says so:
+    <code>git diff 1875455e..HEAD -- docker-entrypoint.sh</code> is empty (byte
+    for byte), and every changed line of
+    <code>git diff 1875455e..HEAD -- Dockerfile</code> is a <code>##</code>
+    comment line — <code>CMD</code> still reads
+    <code>["serve", "--dd-only", "--host", "0.0.0.0", "--port", "8000"]</code>,
+    there is no serve-mode build argument, and no
+    <code>IMAS_CODEX_SERVE_MODE</code> anywhere. A test runs the entrypoint
+    itself with Neo4j, <code>curl</code>, <code>cypher-shell</code> and
+    <code>imas-codex</code> stubbed, and compares the argument list the server
+    receives against the list each start command names: the Dockerfile's
+    <code>CMD</code> yields <code>serve --dd-only --host 0.0.0.0 --port 8000</code>,
+    the compose plant service's <code>command</code> yields
+    <code>serve --plant-only --host 0.0.0.0 --port 8000</code>, an environment
+    the plant image never sets changes neither list, and dropping
+    <code>--plant-only</code> from the plant command fails the test.</p>
+  <p>The package is produced by the export command's own filter.
+    <code>graph export --facility &lt;f&gt; --without-dd</code> refuses without
+    a facility, forwards the flag, and the filter deletes every node owned by
+    another facility (by <code>Facility</code>
+    <code>id</code>, since those nodes carry no <code>facility_id</code>),
+    every facility-less node except the facility node itself and
+    <code>GraphMeta</code>, and records <code>plant_only</code> on
+    <code>GraphMeta</code>. Each push then reports the registry's visibility
+    for the package and requires it to be private; the same report runs on the
+    local and the remote push path.</p>
+  <p><code>imas_codex.graph.plant_scope</code> holds the acceptance rule as
+    code: the package must hold the same number of nodes of every
+    facility-owned kind and of every relationship between two facility-owned
+    nodes as the graph it was exported from, no node of another facility, and
+    no facility-less kind beyond the two the server reads. Both filter paths
+    run that rule and refuse the package before the dump exists: the local Bolt
+    filter measures before it deletes and after, then verifies before calling
+    the dump, while the generated compute-node script prints
+    <code>SCOPE_BEFORE=</code> and <code>SCOPE_AFTER=</code>, runs the same
+    check through the same module, and aborts under <code>set -e</code> before
+    <code>neo4j-admin database dump</code>, so no dump file is written and none
+    is moved into place. The caller re-reads the two printed scopes after the
+    job as an independent check of what was measured.</p>
+  <p>The filter's statements have one definition, used by both paths: the local
+    filter executes them through a session with parameters, and the script
+    substitutes the same text for <code>cypher-shell</code>, which takes none.
+    Statement order, batch size and the orphan keep list therefore cannot
+    differ between a package filtered locally and one filtered on a compute
+    node.</p>
+  <table>
+    <thead><tr><th>Acceptance measurement</th><th>Observed result</th></tr></thead>
+    <tbody>
+      <tr><td>Export revision (shared graph, bounded read)</td>
+        <td>115,652 facility-owned nodes and 532,506 facility-to-facility
+        relationships; 21 node kinds and 31 relationship types.</td></tr>
+      <tr><td>Deliberate contamination before the filter</td>
+        <td>One <code>FacilitySignal</code> of a nonexistent second facility
+        was inserted into the exported copy: the pre-filter measurement reports
+        3 violations — 1 foreign node, 5 <code>Person</code> and 2
+        <code>SoftwareRepo</code> facility-less nodes — and a foreign-node
+        count of 1.</td></tr>
+      <tr><td>Package after the filter</td>
+        <td>0 violations, 0 foreign nodes, and the only facility-less kinds are
+        <code>Facility</code> 1 and <code>GraphMeta</code> 1. The filter
+        removed 1 foreign node, 3 other facility nodes and 7 facility-less
+        nodes; every per-kind and per-type count equals the graph it was
+        exported from.</td></tr>
+      <tr><td>Package artifact</td>
+        <td>130,440,769-byte dump, sha256
+        <code>c5539d43b03b1cb5b4d80b1d957f0973db62e43408de451d031ab05695b361e3</code>;
+        published as a 128,856,977-byte archive.</td></tr>
+      <tr><td>Registry report</td>
+        <td>Package <code>ghcr.io/simon-mcintosh/imas-codex-graph-iter-without-dd:plant-20261120T0023Z</code>
+        digest <code>sha256:c1c2d4aa5054f21cbfc46545efab71974529ec458f70bcc7c95e7d1f6be2757e</code>,
+        visibility reported <code>private</code>. Image
+        <code>ghcr.io/simon-mcintosh/imas-codex-plant:plant-20261120T0023Z</code>
+        digest <code>sha256:c483a01c019786ddadf26ca2192a42d19546e5793a76c81653089262d474270e</code>,
+        859,205,632 bytes, visibility reported <code>private</code>. Both were
+        read back from the registry after the push, not assumed from it.</td></tr>
+      <tr><td>Container started with no route to the shared graph</td>
+        <td>Positive control from the host namespace: shared graph reachable.
+        Inside a network namespace whose only interface is loopback:
+        <code>NS_CAN_REACH_SHARED_GRAPH no gaierror</code>. Server came up in
+        18 s on <code>streamable-http</code>.</td></tr>
+      <tr><td>Tool surface listed through the endpoint</td>
+        <td>Six tools — <code>fetch_content</code>,
+        <code>get_facility_coverage</code>, <code>get_signal_load_recipe</code>,
+        <code>search_pulses</code>, <code>search_signals</code>,
+        <code>signal_analytics</code> — and zero write tools among
+        <code>repl</code>, <code>add_to_graph</code>,
+        <code>update_facility_config</code>, <code>edit_standard_name</code>.</td></tr>
+      <tr><td>Chosen signal, from the private scenario receipt</td>
+        <td>A plant-code search over its system returns 36 signals and returns
+        the chosen one; the walk from that signal returns its plant component
+        and the control node, and the control-node ancestor chain the receipt
+        recorded.</td></tr>
+      <tr><td>Designation and pulses</td>
+        <td>The designation's name search returns 3 pulse categories with the
+        chosen one ranked first and 4,359 pulses; the pulse listing returns a
+        page of 5 of those 4,359.</td></tr>
+      <tr><td>A term no signal carries</td>
+        <td>Explicit empty result: total 0, no items, against a positive
+        control of 36 matches for the system term. The probe's exit status was
+        0 and the harness's <code>EXIT=0</code>.</td></tr>
+      <tr><td>Focused product tests</td>
+        <td>32 passed in 5.8 s, exit 0, covering the scope comparison and its
+        measurement against a hand-counted fixture, the plant tool derivation,
+        the export flag forwarding, the public-registry refusal, the refusal to
+        dump a mismatched package, the script's refusal before it dumps, and the
+        entrypoint's argument list for both images' start commands.</td></tr>
+      <tr><td>Gate over the touched surfaces</td>
+        <td>One suite (<code>tests/llm</code>, <code>tests/cli</code>,
+        <code>tests/graph</code>) run as two arms on the compute partition: at
+        the base revision 1,336 passed, 10 skipped, 5 failed; at this revision
+        1,368 passed, 10 skipped, 5 failed. The five failure ids are the same in
+        both arms — prompt schema coverage twice, the repository Cypher property
+        inventory, DD path domain classification and the updated-at debt
+        baseline — and the Cypher inventory no longer names
+        <code>temp_neo4j.py</code>, which it did while the two plant statements
+        shared one literal.</td></tr>
+      <tr><td>Declared negative control</td>
+        <td>Three mutations, each red with a non-zero exit:
+        (1) leaving the foreign signal in — <code>test_another_facility_left_in_fails_the_foreign_count</code>
+        fails; (2) omitting one kind's nodes —
+        <code>test_one_omitted_kind_fails_the_equality</code> fails; (3)
+        read-only off and the whitelist not applied —
+        <code>test_no_write_tool_is_listed[repl]</code> and three siblings
+        fail with <code>repl</code>, <code>add_to_graph</code>,
+        <code>update_facility_config</code> and <code>edit_standard_name</code>
+        present in the listing.</td></tr>
+      <tr><td>Private values in tracked files</td>
+        <td>10 values from the private receipt (signal id, name and
+        description, component id, control-node id, designation id and name,
+        two plant-system codes) across 8,936 tracked files: 0 hits. The same
+        scan against the receipt itself matches 5 of 5 sampled tokens, so the
+        scanner can see what it is looking for.</td></tr>
+    </tbody>
+  </table>
+  <p>The export is a bounded read of the live graph, not a dump of the recorded
+    archive. The newest recorded dump (2026-11-15, product git
+    <code>c266404</code>) predates the plant-component and pulse imports: it
+    holds 12 facility kinds, 5 <code>PlantComponent</code> nodes and no
+    <code>Pulse</code>, <code>ControlNode</code> or <code>PulseCategory</code>,
+    so a package built from it cannot serve any of the behaviours above. That
+    build ran and reported exactly one violation — the facility-less
+    <code>Facility</code> count — which is the comparison's own fixture
+    corrected in this change: the expected count now includes only the kept
+    facility node. The live export instead copies the facility scope into an
+    empty temporary Neo4j, injects the foreign node, applies the product filter
+    and dumps the result. The shared graph was never stopped, and no
+    <code>neo4j-admin dump</code> was attempted against a mounted database.</p>
+  <p>This cluster has no reachable Docker daemon, so the served image is built
+    with <code>apptainer build --fakeroot</code> from the private
+    <code>plant-only.def</code> in the run directory, over
+    <code>neo4j:2026.01.4-community</code>, copying the project's resolved
+    environment, the worktree's <code>imas_codex</code>, and the sibling
+    standard-name package the server imports during warmup, then loading the
+    package dump at build time. Two build faults were measured and repaired:
+    binding the environment onto <code>/opt</code> hid the image's JDK
+    (<code>JAVA_HOME is not defined correctly</code>), and the console script's
+    shebang names the build host's environment, so <code>python -m
+    imas_codex</code> started the legacy stdio module instead of the CLI; the
+    wrapper now runs the console script through the image's interpreter, and
+    <code>TRANSPORT=streamable-http</code> is part of the image environment as
+    it is in the Dockerfile.</p>
+  <p>The image's <code>/data</code>, <code>/logs</code> and
+    <code>/var/lib/neo4j</code> are read-only mounts, and an overlay image
+    created on GPFS cannot be made writable to the fenced user, so the
+    verification run gives the server a tmpfs root plus three writable binds:
+    a data directory seeded once from the image, a log directory, and the run
+    directory. That is a property of this cluster's build path, not of the
+    Docker image the <code>Dockerfile</code> produces.</p>
+  <p>Provenance: the export ran as batch job <code>1332723</code> on partition
+    <code>rigel</code> (1,052 s), the container verification under
+    <code>unshare -rn</code> on a login node. Run-directory receipts include
+    <code>plant-package/scope-report-live.json</code>,
+    <code>plant-package/publish-report.json</code>,
+    <code>plant-container-run.log</code>,
+    <code>plant-gate.log</code>,
+    <code>plant-negative-control.log</code> and
+    <code>plant-private-value-scan.log</code>. Generated models were not
+    rebuilt and the shared environment was not synced.</p>
+</section>
