@@ -1,0 +1,75 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_note": "derived from the reviewed run's own gate logs: classification.json records manifest.baseline_suite null and manifest.after_suite null, so the reviewed run carries no armed suite arm and no post-change arm; its only gate is the fragment's --check plus the focused tests/standard_names/test_record_benchmark_second_round.py run, whose tests.log ends '8 passed, 1 warning in 4.99s' with no FAILED id. Both arm sets are therefore empty and their difference is 0 with no ids. This is an absence of a suite measurement, not a measured zero: nothing in the reviewed run could have shown a regression outside that test file.",
+  "call_site_count": 0,
+  "call_sites": [],
+  "completed_at": "2026-11-20T09:56:31.905Z",
+  "dispatched_at": "2026-11-20T09:43:36Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "1663",
+      "severity": "non-blocking",
+      "text": "non-blocking: incumbent_record and record_changed_from_incumbent (:1676) re-implement incumbent_draft (:483) and changed_from_incumbent (:498) in the same file, changing only the argument from a case to its content and dropping the empty blocker key; the owner already does this work and the two copies can drift apart, and a signature that takes the case is what the second round already has in hand at :1829 and :1903."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "2199",
+      "severity": "non-blocking",
+      "text": "non-blocking: load_verdicts accepts any string as a verdict and never consults VERDICT_VALUES (:2196), which is declared and used nowhere, so a verdicts file carrying 'Right' or a typo scores that packet as wrong instead of undecidable and no reader is told; the same root cause makes undecided_packet_lines (:2329) miss a verdict row whose name or definition value is empty, because load_verdicts always inserts both keys."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "2123",
+      "severity": "non-blocking",
+      "text": "non-blocking: records_digest repeats digest_json's serialisation arguments (:91, sort_keys/separators/ensure_ascii) and digest_text's hashing (:88) inline rather than composing them, so the one sha256-of-canonical-json capability the file already owns now exists in a second spelling that a later separators change would leave behind."
+    },
+    {
+      "file": "docs/evidence/fragments/sn-case-file-generation/benchmark.py",
+      "line": "2875",
+      "severity": "non-blocking",
+      "text": "non-blocking: render_second_svg draws a 1400x520 canvas (2.69:1), where the project's figure rule takes the 14x7.2 in slide canvas (1.94:1, 1400x722) and allows more height only for a figure that needs it; a bar chart with three groups and two arms reads better on the default, and no other figure in the tree departs from it without a stated reason."
+    }
+  ],
+  "item_verdicts": {
+    "call_sites": "no production call sites found",
+    "diff": "read all twelve commits against base 8a54d6cb; 86469d0f4 adds 1810 lines to benchmark.py (second-round arms and prompts, case loading and the perturbation draw, the packet and key builders, the score subcommand, and the document and page renderers), 4eee662cc adds the 176-line test, and the remaining ten commits add the records, packet, key, round document and page; the only three deleted lines are the reformatted --stage choices tuple and two Kimi not-run strings, so round one's path is preserved.",
+    "done_when": "the done_when asks --check to pass on the committed files, fail on each of three named mutations, prove score on synthetic verdicts and state spend beside USD 30; benchmark.py:2468 check_second_round re-derives the records digest (:2496), compares each packet field set against PACKET_FIELDS (:2504), scans each packet value for arm tokens (:2511) and compares key and packet ids (:2530), :2368 score_self_test proves score_rows on a synthetic verdicts file, and check5.log records the passing run, which I reproduced at head with EXIT=0 and which my own altered-record mutation turned into 3 problems.",
+    "goal": "the goal is to run the second round up to a blind adjudication packet for the held-out half; benchmark.py:3281 run_second_stages runs the development iteration and the five held-out arms, benchmark-second-round-records.jsonl carries 435 rows (5 arms x 87 members, counted from the file) and benchmark-second-round-packet.jsonl carries 255 distinct lines, so the round stops exactly where the goal says and no held-out record is scored; benchmark-second-round.json adjudication.state is 'pending'.",
+    "manifest": "read; manifest.md:5 states status complete, :78 carries the literal --check command and its result, :80 names negative-control.log whose contents show 3 problems from each of the three mutations and 0 on a clean copy, :81 records 8 tests, :69 states USD 10.709 spent against the 30 ceiling, and :62-67 report the perturbed control at 74 of 87 members changed (0.8506); the manifest carries no baseline_suite and no after_suite arm.",
+    "write_paths": "the reviewed node declared nine paths under docs/evidence/fragments/sn-case-file-generation/ plus one test file; git show --stat 8a54d6cb..673a76c8 lists exactly 7 of them and nothing else, and the two declared paths left untouched are benchmark.json and benchmark.html."
+  },
+  "justifications": {
+    "durability": "tests/standard_names/test_record_benchmark_second_round.py:126 reinstates an altered record line and :140 an arm in a packet line and :152 a stale key id and each reddens on the refusal it asserts, and score_self_test (benchmark.py:2368) checks hard-coded counts such as name_right==2 rather than values the test passed in, though nothing guards the prompt hashes against their texts except the stored pair I verified by hand.",
+    "evidence": "the gate measures the done_when and its result is recorded: check5.log shows the passing run, benchmark.py:2196-2559 constrains exactly the three mutations the done_when names, and my own re-run at head printed 0 problems on the committed files and 3 on an altered records line, though no armed suite arm exists (classification.json: baseline_suite null, after_suite null).",
+    "fit": "the addition follows the file's own idiom (pydantic BaseModel at benchmark.py:1580, dict[str, Any] signatures, HERE-relative paths) and passes ruff clean, and its names state what they measure rather than naming a plan stage.",
+    "goal_fidelity": "benchmark-second-round.json carries the arms, both model identifiers, the three prompt texts with hashes that match their texts, the two development changes with before/after proxy figures, the perturbed share at 0.8506, the packet field list and spend, so everything the goal names is in the landed evidence.",
+    "reuse": "benchmark.py:1663 and :1676 re-implement the incumbent-record and incumbent-changed capability that benchmark.py:483 and :498 already own in the same file, and :2123 re-spells the digest helper at :88/:91, so the round forks two capabilities it could have extended while reusing imas_codex.standard_names.benchmark for wilson_interval, compare_record_arms and blocker_bucket.",
+    "scope_discipline": "git show --stat 8a54d6cb..673a76c8 lists only the seven declared paths, and the 1810 added benchmark.py lines all serve a deliverable the brief names (arms, packet, key, score subcommand, round document and page)."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the goal is to run the second round up to a blind adjudication packet for the held-out half; benchmark.py:3281 run_second_stages runs the development iteration and the five held-out arms, benchmark-second-round-records.jsonl carries 435 rows (5 arms x 87 members, counted from the file) and benchmark-second-round-packet.jsonl carries 255 distinct lines, so the round stops exactly where the goal says and no held-out record is scored; benchmark-second-round.json adjudication.state is 'pending'.\nVERDICT done_when: the done_when asks --check to pass on the committed files, fail on each of three named mutations, prove score on synthetic verdicts and state spend beside USD 30; benchmark.py:2468 check_second_round re-derives the records digest (:2496), compares each packet field set against PACKET_FIELDS (:2507), scans each packet value for arm tokens (:2511) and compares key and packet ids (:2530), :2368 score_self_test proves score_rows on a synthetic verdicts file, and check5.log records the passing run, which I reproduced at head with EXIT=0 and which my own altered-record mutation turned into 3 problems.\nVERDICT write_paths: the reviewed node declared nine paths under docs/evidence/fragments/sn-case-file-generation/ plus one test file; git show --stat 8a54d6cb..673a76c8 lists exactly 7 of them and nothing else, and the two declared paths left untouched are benchmark.json and benchmark.html.\nVERDICT manifest: read; manifest.md:5 states status complete, :78 carries the literal --check command and its result, :80 names negative-control.log whose contents show 3 problems from each of the three mutations and 0 on a clean copy, :81 records 8 tests, :69 states USD 10.709 spent against the 30 ceiling, and :62-67 report the perturbed control at 74 of 87 members changed (0.8506); the manifest carries no baseline_suite and no after_suite arm.\nVERDICT diff: read all twelve commits against base 8a54d6cb; 86469d0f4 adds 1810 lines to benchmark.py (second-round arms and prompts, case loading and the perturbation draw, the packet and key builders, the score subcommand, and the document and page renderers), 4eee662cc adds the 176-line test, and the remaining ten commits add the records, packet, key, round document and page; the only three deleted lines are the reformatted --stage choices tuple and two Kimi not-run strings, so round one's path is preserved.\nCALL_SITES: none\nSCORE goal_fidelity: 19\nJUSTIFICATION goal_fidelity: benchmark-second-round.json carries the arms, both model identifiers, the three prompt texts with matching hashes, the two development changes with before/after proxy figures, the perturbed share at 0.8506, the packet field list and spend, so everything the goal names is in the landed evidence.\nSCORE evidence: 18\nJUSTIFICATION evidence: check5.log records the passing run, benchmark.py:2468-2559 constrains exactly the three mutations the done_when names, and my own re-run at head printed 0 problems on the committed files and 3 on an altered records line, though no armed suite arm exists (classification.json: baseline_suite null, after_suite null).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: git show --stat 8a54d6cb..673a76c8 lists only the seven declared paths, and the 1810 added benchmark.py lines all serve a deliverable the brief names.\nSCORE durability: 17\nJUSTIFICATION durability: tests/standard_names/test_record_benchmark_second_round.py:126 reinstates the altered record line and :140 the arm in a packet line and :152 the stale key id and each reddens on the refusal it asserts, though nothing guards the prompt hashes against their texts except the stored pair I verified by hand.\nSCORE fit: 17\nJUSTIFICATION fit: the addition follows the file's idiom (pydantic BaseModel at benchmark.py:1580, dict[str, Any] signatures, HERE-relative paths) and passes ruff clean, and its names state what they measure.\nSCORE reuse: 5\nJUSTIFICATION reuse: benchmark.py:1663 and :1676 re-implement the incumbent-record capability that benchmark.py:483 and :498 already own in the same file, and :2123 re-spells the digest helper at :88/:91, while imas_codex.standard_names.benchmark supplies wilson_interval, compare_record_arms and blocker_bucket.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:1663 non-blocking: incumbent_record and record_changed_from_incumbent (:1676) re-implement incumbent_draft (:483) and changed_from_incumbent (:498) in the same file, changing only the argument from a case to its content and dropping the empty blocker key, so the same capability now exists twice and can drift apart.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:2199 non-blocking: load_verdicts accepts any string as a verdict and never consults VERDICT_VALUES (:2196), which is declared and used nowhere, so a verdicts file carrying 'Right' or a typo scores that packet as wrong instead of undecidable and no reader is told; undecided_packet_lines (:2329) also misses a verdict row whose name or definition value is empty.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:2123 non-blocking: records_digest repeats digest_json's serialisation arguments (:91) and digest_text's hashing (:88) inline rather than composing them, so the sha256-of-canonical-json capability the file already owns now exists in a second spelling.\nFINDING docs/evidence/fragments/sn-case-file-generation/benchmark.py:2875 non-blocking: render_second_svg draws a 1400x520 canvas (2.69:1) where the project's figure rule takes the 14x7.2 in slide canvas (1.94:1, 1400x722) and allows more height only for a figure that needs it.\n",
+  "review_node": "review-of-scfg-benchmark-second-round-673a76c80ee4",
+  "review_run_id": "r-20261120T094238499006-review-of-scfg-benchmark-second-round-673a76c80ee4",
+  "reviewed_base_sha": "8a54d6cb2c0ffd4ff91560de5a5ee08e7f8445bc",
+  "reviewed_head_sha": "673a76c80ee44a806b9edb43afe0e134035d0320",
+  "reviewed_run_id": "r-20261120T074941732698-scfg-benchmark-second-round",
+  "reviewer": {
+    "backend": null,
+    "model": "deepseek-v4.1-flash",
+    "reviewer_run_id": "r-20261120T094238499006-review-of-scfg-benchmark-second-round-673a76c80ee4"
+  },
+  "scores": {
+    "durability": 17,
+    "evidence": 18,
+    "fit": 17,
+    "goal_fidelity": 19,
+    "reuse": 5,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T09:56:44.007296+00:00",
+  "total": 96
+}
