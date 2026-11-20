@@ -25,7 +25,30 @@
   "plan_slug": "iter-signal-context-and-enrichment",
   "plan_version": 73,
   "project": "imas-codex",
-  "responses": {},
+  "response_events": [
+    {
+      "action": "acted",
+      "by": "",
+      "commit": "3ee4373ec8f2d4bbbe903fe3bb57ac7c65128278",
+      "commit_basis": "edit",
+      "finding": "reasoning-1",
+      "note": "Section 6 now says a description states the quantity, unit and role only where the vocabulary decided them, and leaves out any that is undecided or in conflict.",
+      "reason": "",
+      "when": "2026-11-20T01:34:44.462135+00:00"
+    }
+  ],
+  "responses": {
+    "reasoning-1": {
+      "action": "acted",
+      "by": "",
+      "commit": "3ee4373ec8f2d4bbbe903fe3bb57ac7c65128278",
+      "commit_basis": "edit",
+      "note": "Section 6 now says a description states the quantity, unit and role only where the vocabulary decided them, and leaves out any that is undecided or in conflict.",
+      "reason": "",
+      "when": "2026-11-20T01:34:44.462135+00:00"
+    }
+  },
+  "review_path": "/home/ITER/mcintos/Code/imas-codex/docs/state/imas-codex/reviews/plan/iter-signal-context-and-enrichment/r-20261120T003902616889-plan-review-of-iter-signal-context-and-enrichment.json",
   "review_run_id": "r-20261120T003902616889-plan-review-of-iter-signal-context-and-enrichment",
   "reviewed_blob_sha": "42e91c764e06e4cc865720e38b88f1087211cb54",
   "rubric": "content",
