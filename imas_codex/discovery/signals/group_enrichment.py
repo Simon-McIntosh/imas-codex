@@ -21,6 +21,7 @@ carries the member's status and cost update in the same statement.
 from __future__ import annotations
 
 import asyncio
+import json
 from collections.abc import Callable, Mapping, Sequence
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
@@ -364,6 +365,7 @@ def context_lines(
     function_category_code: str | None,
     plant_structure: str | None,
     rows: Sequence[Mapping[str, Any]],
+    fields: Sequence[str] = (),
     document_titles: Sequence[tuple[str | None, str | None]] = (),
 ) -> tuple[str, ...]:
     """Build the numbered context lines a group prompt cites.
@@ -372,6 +374,8 @@ def context_lines(
     be read as evidence about another field.
     """
     lines = []
+    if fields:
+        lines.append("pattern fields: " + ", ".join(sorted(str(f) for f in fields)))
     if function_category:
         code = f" ({function_category_code})" if function_category_code else ""
         lines.append(f"function category meaning: {function_category}{code}")
@@ -455,6 +459,7 @@ def build_group_plan(graph, facility: str) -> GroupPlan:
                 function_category_code=None,
                 plant_structure=None,
                 rows=pattern_rows,
+                fields=pattern["fields"] or (),
             ),
         )
 
@@ -495,10 +500,21 @@ async def describe_group(
     model: str,
     call: Callable,
     sentence_limit: int = 2,
+    review: bool = False,
+    review_thinking: bool = False,
     **call_kwargs,
 ) -> GroupOutcome:
-    """Call once, filter uncited statements, and refuse an empty description."""
-    from imas_codex.discovery.signals.enrichment import GroupDescriptionBatch
+    """Draft, optionally review, and refuse an unsupported description.
+
+    The review pass is the description seat's own: the drafted statements are
+    checked against the same supplied items and only supported statements
+    survive. A draft that fails validation is not retried into existence; the
+    group is reported failed and its members inherit that.
+    """
+    from imas_codex.discovery.signals.enrichment import (
+        DescriptionReview,
+        GroupDescriptionBatch,
+    )
 
     messages, items = _group_prompt(request, sentence_limit)
     try:
@@ -523,7 +539,83 @@ async def describe_group(
             error="Response did not describe the requested group once",
         )
     kept, drops = filter_statements(rows[0].statements, items)
-    text = " ".join(kept).strip()
+    reviewed_statements: list[str] | None = None
+    cost, tokens = float(cost or 0.0), int(tokens or 0)
+    if review and kept:
+        review_kwargs = dict(call_kwargs)
+        review_kwargs["reasoning_effort"] = "high" if review_thinking else None
+        review_kwargs["temperature"] = 0
+        try:
+            reviewed = await call(
+                model=model,
+                messages=[
+                    {
+                        "role": "system",
+                        "content": render_prompt(
+                            "signals/enrichment_review",
+                            {"output_schema": DescriptionReview.model_json_schema()},
+                        ),
+                    },
+                    {
+                        "role": "user",
+                        "content": json.dumps(
+                            {
+                                "context_items": items,
+                                "drafts": {
+                                    "1": [
+                                        statement.model_dump()
+                                        for statement in rows[0].statements
+                                    ]
+                                },
+                            },
+                            ensure_ascii=False,
+                        ),
+                    },
+                ],
+                response_model=DescriptionReview,
+                **review_kwargs,
+            )
+        except Exception as exc:
+            return GroupOutcome(
+                cost=cost + float(getattr(exc, "cost", 0) or 0.0),
+                tokens=tokens + int(getattr(exc, "tokens", 0) or 0),
+                drops=drops,
+                error=f"Review failed: {type(exc).__name__}: {exc}",
+            )
+        review_batch, review_cost, review_tokens = reviewed
+        cost += float(review_cost or 0.0)
+        tokens += int(review_tokens or 0)
+        drafts = rows[0].statements
+        results = [row for row in review_batch.results if row.signal_index == 1]
+        if len(results) != 1:
+            return GroupOutcome(
+                cost=cost,
+                tokens=tokens,
+                drops=drops,
+                error="Review did not answer the requested group once",
+            )
+        original = [statement.text for statement in drafts]
+        kept, seen = [], set()
+        for statement in results[0].statements:
+            if (
+                not 1 <= statement.draft_index <= len(original)
+                or statement.draft_index in seen
+            ):
+                return GroupOutcome(
+                    cost=cost,
+                    tokens=tokens,
+                    drops=drops,
+                    error="Review referred to a missing or repeated draft statement",
+                )
+            seen.add(statement.draft_index)
+            valid, dropped = filter_statements([statement], items)
+            drops += dropped
+            if valid:
+                kept.append((statement.draft_index, valid[0]))
+        reviewed_statements = [text for _, text in sorted(kept)]
+    text = " ".join(
+        reviewed_statements if reviewed_statements is not None else kept
+    ).strip()
     if not text:
         return GroupOutcome(
             cost=cost,
@@ -534,8 +626,8 @@ async def describe_group(
     return GroupOutcome(
         text=text,
         fields=dict(rows[0].fields),
-        cost=float(cost or 0.0),
-        tokens=int(tokens or 0),
+        cost=cost,
+        tokens=tokens,
         drops=drops,
     )
 
@@ -547,6 +639,8 @@ async def describe_groups(
     call: Callable,
     max_workers: int = 8,
     sentence_limit: int = 2,
+    review: bool = False,
+    review_thinking: bool = False,
     **call_kwargs,
 ) -> dict[str, GroupOutcome]:
     """Describe groups with bounded concurrency, retaining every outcome."""
@@ -562,6 +656,8 @@ async def describe_groups(
                 model=model,
                 call=call,
                 sentence_limit=sentence_limit,
+                review=review,
+                review_thinking=review_thinking,
                 **call_kwargs,
             )
 
@@ -799,6 +895,8 @@ async def enrich_pilot_groups(
             call=call,
             max_workers=min(max_workers, options.max_workers or 8),
             sentence_limit=options.description_sentences or 2,
+            review=options.review,
+            review_thinking=options.review_thinking,
             **call_kwargs,
         )
         component_outcomes = {

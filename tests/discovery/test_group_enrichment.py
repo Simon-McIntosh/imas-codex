@@ -329,3 +329,103 @@ def test_summary_counts_a_state_that_holds_a_non_member_value():
     )
     summary = summarise(cohort, composed)
     assert summary["invalid_vocabulary_values"] == 1
+
+
+class TwoCallReview:
+    """Return the draft first and the review second, recording both requests."""
+
+    def __init__(self, draft, reviewed, draft_cost=0.1, review_cost=0.2):
+        self.draft, self.reviewed = draft, reviewed
+        self.draft_cost, self.review_cost = draft_cost, review_cost
+        self.calls = []
+
+    async def __call__(self, **kwargs):
+        self.calls.append(kwargs)
+        if len(self.calls) == 1:
+            return self.draft, self.draft_cost, 5
+        return self.reviewed, self.review_cost, 7
+
+
+@pytest.mark.asyncio
+async def test_review_pass_removes_a_statement_its_check_refuses():
+    from imas_codex.discovery.signals.enrichment import (
+        DescriptionReview,
+        ReviewedDescription,
+        ReviewedStatement,
+    )
+
+    draft = GroupDescriptionBatch(
+        results=[
+            GroupDescription(
+                group_id=COMPONENT,
+                statements=[
+                    GroupStatement(
+                        text="Cooling circuit valve assembly.", context_items=["context-1"]
+                    ),
+                    GroupStatement(
+                        text="He supply at 4 K.", context_items=["context-1"]
+                    ),
+                ],
+            )
+        ]
+    )
+    reviewed = DescriptionReview(
+        results=[
+            ReviewedDescription(
+                signal_index=1,
+                statements=[
+                    ReviewedStatement(
+                        draft_index=1,
+                        text="Cooling circuit valve assembly.",
+                        context_items=["context-1"],
+                    )
+                ],
+            )
+        ]
+    )
+    call = TwoCallReview(draft, reviewed)
+    outcome = await describe_group(
+        GroupRequest(group_id=COMPONENT, kind="component", context=("Meaning.",)),
+        model="local/demo",
+        call=call,
+        review=True,
+        review_thinking=True,
+    )
+    assert outcome.text == "Cooling circuit valve assembly."
+    assert outcome.cost == pytest.approx(0.3)
+    assert outcome.tokens == 12
+    assert call.calls[1]["reasoning_effort"] == "high"
+    assert call.calls[1]["temperature"] == 0
+
+
+@pytest.mark.asyncio
+async def test_review_failure_delivers_nothing_and_keeps_both_costs():
+    draft = GroupDescriptionBatch(
+        results=[
+            GroupDescription(
+                group_id=COMPONENT,
+                statements=[
+                    GroupStatement(text="Component.", context_items=["context-1"])
+                ],
+            )
+        ]
+    )
+
+    class FailingReview(TwoCallReview):
+        async def __call__(self, **kwargs):
+            self.calls.append(kwargs)
+            if len(self.calls) == 1:
+                return self.draft, self.draft_cost, 5
+            raise ValueError("review response unparseable")
+
+    outcome = await describe_group(
+        GroupRequest(group_id=COMPONENT, kind="component", context=("Meaning.",)),
+        model="local/demo",
+        call=FailingReview(draft, None),
+        review=True,
+    )
+    assert not outcome.delivered
+    assert outcome.text == ""
+    assert outcome.cost == pytest.approx(0.1)
+    assert outcome.error is not None and outcome.error.startswith("Review failed:")
+
