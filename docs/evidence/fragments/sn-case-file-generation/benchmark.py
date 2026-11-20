@@ -1494,6 +1494,10 @@ SECOND_ARMS = (
     ("perturbed/frontier", "keep-or-repair", FRONTIER_MODEL, "perturbed"),
 )
 SECOND_MODELS = {"frontier": FRONTIER_MODEL, "local": LOCAL_MODEL}
+# The local server aborts a structured call under load ("empty response
+# content, finish_reason='abort'"), and the same member answers when it is asked
+# alone, so the local lane runs this round at a width it sustains.
+SECOND_CONCURRENCY = {"local": 4, "frontier": 8}
 KIMI_SECOND_COMMAND = (
     'KIMI_BASE_URL="${KIMI_BASE_URL:?set KIMI_BASE_URL to the B300 server /v1 root}" '
     "uv run --no-sync python "
@@ -1927,8 +1931,8 @@ async def run_second_arm(
         for row in read_jsonl(log_path)
     }
     semaphores = {
-        "local": asyncio.Semaphore(CONCURRENCY["local"]),
-        "frontier": asyncio.Semaphore(CONCURRENCY["frontier"]),
+        "local": asyncio.Semaphore(SECOND_CONCURRENCY["local"]),
+        "frontier": asyncio.Semaphore(SECOND_CONCURRENCY["frontier"]),
     }
 
     async def one(member: dict[str, Any]) -> None:
