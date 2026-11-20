@@ -701,7 +701,11 @@ def _build_filter_script(
     if facility and without_dd:
         import sys
 
-        repo_root = Path(__file__).resolve().parents[2]
+        import imas_codex
+
+        # The tree that is actually importing this module: the script runs on
+        # another node, so it must name the package it was generated from.
+        repo_root = Path(imas_codex.__file__).resolve().parents[1]
         python_preamble = textwrap.dedent(f"""\
             PYTHON="{sys.executable}"
             export PYTHONPATH="{repo_root}"
