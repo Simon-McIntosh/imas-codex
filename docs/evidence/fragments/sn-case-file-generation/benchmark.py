@@ -2899,18 +2899,14 @@ def render_second_svg(development: list[dict[str, Any]]) -> str:
     for tick in (0, 25, 50, 75, 100):
         y = top + plot_h * (1 - tick / 100.0)
         parts.append(
-            f'<line x1="{left}" y1="{y:.1f}" x2="{left + plot_w}" y2="{y:.1f}" '
-            'stroke="#d9d9d9" stroke-width="1"/>'
-        )
-        parts.append(
             f'<text x="{left - 12}" y="{y + 5:.1f}" font-size="14" '
             f'text-anchor="end" fill="#444">{tick}</text>'
         )
     parts.append(
-        f'<text x="{left - 12}" y="{top - 28}" font-size="16" '
-        f'text-anchor="end" fill="#1a1a1a">proxy share [%]</text>'
+        f'<text x="8" y="{top - 28}" font-size="16" '
+        f'text-anchor="start" fill="#1a1a1a">proxy share [%]</text>'
     )
-    legend_x = left
+    legend_x = left + 220
     for arm, colour in colours.items():
         parts.append(
             f'<rect x="{legend_x}" y="26" width="22" height="6" fill="{colour}"/>'
