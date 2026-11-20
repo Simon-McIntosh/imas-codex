@@ -1,0 +1,781 @@
+{
+ "schema": "imas-codex.benchmark-failure-read/1",
+ "read_seed": 20261120,
+ "regeneration": {
+  "arm": "one-pass/frontier",
+  "model": "openrouter/openai/gpt-6.1-sol",
+  "prompt_version": "v2",
+  "prompt_hash": "c91a3abde7303f683ba8144e03f1f19cad33f51281745ea7e6bb2d42cd0e1aba",
+  "judge_model": "openrouter/google/gemini-3.8-flash",
+  "case_source": "archived case files of run r-20261118T064806928346-scfg-case-file, rendered by imas_codex.standard_names.case_file.render_case_file",
+  "records": "docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read-records.jsonl",
+  "verdicts": "docs/evidence/fragments/sn-case-file-generation/benchmark-failure-read-verdicts.jsonl",
+  "generation_spend_usd": 0.8659,
+  "spend_ceiling_usd": 4.0,
+  "judge_comparison": "pending: not opened when these verdicts were committed"
+ },
+ "selection": {
+  "sound_wrong": [
+   "poloidal_magnetic_flux",
+   "radial_separatrix_distance_at_outboard_midplane",
+   "power_at_divertor_target_due_to_recombination",
+   "plasma_current",
+   "loop_voltage_at_plasma_boundary",
+   "toroidal_angle_of_poloidal_magnetic_field_probe",
+   "ethylene_source_rate",
+   "toroidal_angle_of_control_surface",
+   "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+   "poloidal_beta",
+   "current_of_divertor",
+   "second_local_tangential_width_of_optical_element",
+   "spectral_photon_radiance",
+   "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+   "toroidal_total_current_density",
+   "right_hand_circularly_polarized_wave_electric_field",
+   "flux_surface_averaged_major_radius",
+   "equilibrium_weight_of_interferometer_beam",
+   "total_external_heating_power",
+   "co_passing_fast_ion_charge_state_power_density_due_to_collisions"
+  ],
+  "defective_wrong": [
+   "toroidal_parity",
+   "thickness_of_breeder_blanket_layer",
+   "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+   "external_loop_voltage",
+   "wave_phase_of_wave_beam",
+   "decay_time_due_to_disruption",
+   "effective_turn_count_of_passive_loop",
+   "radial_coordinate_of_poloidal_field_coil",
+   "hydrogen_density_at_limiter",
+   "surface_temperature",
+   "lower_bound_photon_energy",
+   "radius_of_poloidal_field_coil",
+   "normalized_collisionality",
+   "field_aligned_surface_tilt_angle_of_langmuir_probe",
+   "minimum_gas_flow",
+   "temperature_of_sensor",
+   "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+   "resistivity_of_plasma_facing_component",
+   "polarization_angle_at_constraint_position",
+   "ratio_of_particle_temperature_to_particle_reference_temperature"
+  ],
+  "right": [
+   "lower_inner_squareness_of_flux_surface",
+   "radial_coordinate_at_inboard_midplane",
+   "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+   "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+   "vertical_coordinate_of_constraint_position",
+   "vertical_outline_of_plasma_boundary",
+   "poloidal_length_of_flux_surface",
+   "vertical_coordinate_of_current_center",
+   "toroidal_magnetic_field_at_magnetic_axis",
+   "safety_factor_at_magnetic_axis"
+  ]
+ },
+ "rows": [
+  {
+   "member": "poloidal_magnetic_flux",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "poloidal_magnetic_flux"
+   ],
+   "incumbent_name": "poloidal_magnetic_flux",
+   "generated_name": "poloidal_magnetic_flux",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries disk surface, full 2\u03c0 flux, contributions, sign and Wb",
+   "my_verdict_digest": "f4f995d787a892f9"
+  },
+  {
+   "member": "radial_separatrix_distance_at_outboard_midplane",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "radial_separatrix_distance_at_outboard_midplane"
+   ],
+   "incumbent_name": "radial_separatrix_distance_at_outboard_midplane",
+   "generated_name": "radial_separatrix_distance_at_outboard_midplane",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical to the one right name; definition carries mapping, sign, \u0394R form and unit; no definition point missing",
+   "my_verdict_digest": "ee3d88fe67410015"
+  },
+  {
+   "member": "power_at_divertor_target_due_to_recombination",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "power_at_divertor_target_due_to_recombination"
+   ],
+   "incumbent_name": "power_at_divertor_target_due_to_recombination",
+   "generated_name": "power_at_divertor_target_due_to_recombination",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries the sum of the two channels at the plasma-material interface and W",
+   "my_verdict_digest": "96dc841917cb6112"
+  },
+  {
+   "member": "plasma_current",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "plasma_current"
+   ],
+   "incumbent_name": "plasma_current",
+   "generated_name": "plasma_current",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries total signed toroidal current, algebraic sum, full cross-section integral, exclusions, sign and A",
+   "my_verdict_digest": "483f28ef5cb08bed"
+  },
+  {
+   "member": "loop_voltage_at_plasma_boundary",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "loop_voltage_at_plasma_boundary"
+   ],
+   "incumbent_name": "loop_voltage_at_plasma_boundary",
+   "generated_name": "loop_voltage_at_plasma_boundary",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries LCFS, circulation EMF, ohmic drive, sign and V",
+   "my_verdict_digest": "26f0aac2e714fcf5"
+  },
+  {
+   "member": "toroidal_angle_of_poloidal_magnetic_field_probe",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "toroidal_angle_of_poloidal_magnetic_field_probe"
+   ],
+   "incumbent_name": "toroidal_angle_of_poloidal_magnetic_field_probe",
+   "generated_name": "toroidal_angle_of_poloidal_magnetic_field_probe",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries atan2(n_phi,n_R), positive direction, use and rad",
+   "my_verdict_digest": "60c0b1c988abab15"
+  },
+  {
+   "member": "ethylene_source_rate",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "ethylene_source_rate"
+   ],
+   "incumbent_name": "ethylene_source_rate",
+   "generated_name": "",
+   "generated_blocker": "collision",
+   "my_verdict": "wrong",
+   "my_reason": "record is a collision blocker with empty name where the reference has a sound name; case file binds no source (paths=[], missing bound_source) so the generator refused",
+   "my_verdict_digest": "06908034953b3f4a"
+  },
+  {
+   "member": "toroidal_angle_of_control_surface",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "toroidal_angle_of_control_surface"
+   ],
+   "incumbent_name": "toroidal_angle_of_control_surface",
+   "generated_name": "toroidal_angle_of_control_surface",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries frame, zero reference, 2\u03c0 periodicity, sign and rad",
+   "my_verdict_digest": "d45609ff9088cfa9"
+  },
+  {
+   "member": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate"
+   ],
+   "incumbent_name": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+   "generated_name": "derivative_of_volume_of_flux_surface_with_respect_to_toroidal_flux_coordinate",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries dV/drho_tor, cumulative volume from the axis, m^2",
+   "my_verdict_digest": "6259433b104af652"
+  },
+  {
+   "member": "poloidal_beta",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "poloidal_beta"
+   ],
+   "incumbent_name": "poloidal_beta",
+   "generated_name": "poloidal_beta",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries the beta_p formula, volume averaging, R0, mu0, Ip, dimensionless unit",
+   "my_verdict_digest": "b7934199e125b121"
+  },
+  {
+   "member": "current_of_divertor",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "current_of_divertor"
+   ],
+   "incumbent_name": "current_of_divertor",
+   "generated_name": "current_of_divertor",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries sum over all targets, signed electron and ion contributions, integration, exclusions and A",
+   "my_verdict_digest": "5c3a1b6d0d7c1416"
+  },
+  {
+   "member": "second_local_tangential_width_of_optical_element",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "second_local_tangential_width_of_optical_element"
+   ],
+   "incumbent_name": "second_local_tangential_width_of_optical_element",
+   "generated_name": "second_local_tangential_width_of_optical_element",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries X2 full width, rectangular geometry_type=3, object-local frame and m",
+   "my_verdict_digest": "2fc789492363d4b0"
+  },
+  {
+   "member": "spectral_photon_radiance",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "spectral_photon_radiance"
+   ],
+   "incumbent_name": "spectral_photon_radiance",
+   "generated_name": "spectral_photon_radiance",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries photon-number radiance, direction, projected area, solid angle, wavelength, per time and plasma emission",
+   "my_verdict_digest": "aaa4162d7641293c"
+  },
+  {
+   "member": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "radial_perturbed_vacuum_magnetic_vector_potential_real_part"
+   ],
+   "incumbent_name": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+   "generated_name": "radial_perturbed_vacuum_magnetic_vector_potential_real_part",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries real part, radial component, vacuum region, one toroidal mode, linear MHD and T.m",
+   "my_verdict_digest": "0736c46e27ebf38f"
+  },
+  {
+   "member": "toroidal_total_current_density",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "toroidal_total_current_density"
+   ],
+   "incumbent_name": "toroidal_total_current_density",
+   "generated_name": "toroidal_total_current_density",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries the toroidal projection, algebraic sum, per-element locality, sign and A.m^-2",
+   "my_verdict_digest": "3b8e9d41d9dc7d9c"
+  },
+  {
+   "member": "right_hand_circularly_polarized_wave_electric_field",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "right_hand_circularly_polarized_wave_electric_field"
+   ],
+   "incumbent_name": "right_hand_circularly_polarized_wave_electric_field",
+   "generated_name": "right_hand_circularly_polarized_wave_electric_field",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries complex E-minus, perpendicular to B, right-hand polarization, amplitude and phase, V.m^-1",
+   "my_verdict_digest": "97fac824a7864d3c"
+  },
+  {
+   "member": "flux_surface_averaged_major_radius",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "flux_surface_averaged_major_radius"
+   ],
+   "incumbent_name": "flux_surface_averaged_major_radius",
+   "generated_name": "flux_surface_averaged_major_radius",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries the inverse-gradient weighted flux-surface average, mean major radius and m",
+   "my_verdict_digest": "7a02bb71f76f148d"
+  },
+  {
+   "member": "equilibrium_weight_of_interferometer_beam",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "equilibrium_weight_of_interferometer_beam"
+   ],
+   "incumbent_name": "equilibrium_weight_of_interferometer_beam",
+   "generated_name": "weight_of_interferometer_beam",
+   "generated_blocker": "collision",
+   "my_verdict": "wrong",
+   "my_reason": "blocker=collision with weight_of_interferometer_beam after the generator dropped the 'equilibrium' qualifier that separates this constraint weight from that existing name; the case file binds the source",
+   "my_verdict_digest": "a53613eef5c525af"
+  },
+  {
+   "member": "total_external_heating_power",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "total_external_heating_power"
+   ],
+   "incumbent_name": "total_external_heating_power",
+   "generated_name": "external_heating_power",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name dropped the separating qualifier: generated external_heating_power against the only right name total_external_heating_power; definition is complete",
+   "my_verdict_digest": "615f347327fd8adf"
+  },
+  {
+   "member": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+   "stratum": "sound_wrong",
+   "reference_verdict": "sound",
+   "right_names": [
+    "co_passing_fast_ion_charge_state_power_density_due_to_collisions"
+   ],
+   "incumbent_name": "co_passing_fast_ion_charge_state_power_density_due_to_collisions",
+   "generated_name": "co_passing_fast_power_density_due_to_coulomb_collisions_with_ion_state",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name restructured and definition reverses the direction: generated says power to the co-passing fast particles from one ion state, the reference says from co-passing fast particles to fast ions of one charge state",
+   "my_verdict_digest": "ce2df036dfcd0041"
+  },
+  {
+   "member": "toroidal_parity",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "b_field_phi_sign"
+   ],
+   "incumbent_name": "toroidal_parity",
+   "generated_name": "parity_of_toroidal_magnetic_field_at_flux_surface",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name keeps parity as its base (parity_of_toroidal_magnetic_field_at_flux_surface) where the reference requires a field-sign quantity; definition carries sgn(B_phi), +-1, undefined at zero, sign convention",
+   "my_verdict_digest": "7986754d3c117208"
+  },
+  {
+   "member": "thickness_of_breeder_blanket_layer",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "thickness_of_breeder_blanket_layer_at_midplane",
+    "midplane_thickness_of_breeder_blanket_layer"
+   ],
+   "incumbent_name": "thickness_of_breeder_blanket_layer",
+   "generated_name": "thickness_of_breeder_blanket_layer_at_midplane",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "repairs the incumbent: name is thickness_of_breeder_blanket_layer_at_midplane, one of the two right names; definition carries midplane, single layer and m",
+   "my_verdict_digest": "485fb04d9c5fb604"
+  },
+  {
+   "member": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "normalized_toroidal_flux_coordinate_displacement_of_pellet_deposition_relative_to_ablation_due_to_e_cross_b_drift"
+   ],
+   "incumbent_name": "normalized_toroidal_displacement_of_pellet_due_to_e_cross_b_drift",
+   "generated_name": "radial_displacement_of_pellet_deposition_due_to_e_cross_b_drift",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name drops the normalized-toroidal-flux-coordinate basis the source states ('in terms of the normalised toroidal flux coordinate'); definition carries it",
+   "my_verdict_digest": "cf12effab4721fd8"
+  },
+  {
+   "member": "external_loop_voltage",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "external_loop_voltage"
+   ],
+   "incumbent_name": "average_external_loop_voltage",
+   "generated_name": "external_loop_voltage",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name is the right one but the definition drops the averaged externally-applied flux operand: generated says 'external poloidal magnetic flux linked by the plasma circuit', reference requires -d(psi_external_average)/dt",
+   "my_verdict_digest": "1b5e73dea9723627"
+  },
+  {
+   "member": "wave_phase_of_wave_beam",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "wave_beam_envelope_phase_relative_to_launch_phase"
+   ],
+   "incumbent_name": "wave_phase_of_wave_beam",
+   "generated_name": "wave_phase_of_wave_beam",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name kept as wave_phase_of_wave_beam, naming neither the envelope nor the launch reference that the source states; definition carries both",
+   "my_verdict_digest": "0ab21570cba69fd9"
+  },
+  {
+   "member": "decay_time_due_to_disruption",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "current_decay_time_due_to_disruption"
+   ],
+   "incumbent_name": "decay_time_due_to_disruption",
+   "generated_name": "decay_time_due_to_disruption",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name kept as decay_time_due_to_disruption, which does not say the decaying quantity is electric current; the source states electric-current decrease",
+   "my_verdict_digest": "6b40367e694c567d"
+  },
+  {
+   "member": "effective_turn_count_of_passive_loop",
+   "stratum": "defective_wrong",
+   "reference_verdict": "definition_defect",
+   "right_names": [
+    "effective_turn_count_of_passive_loop"
+   ],
+   "incumbent_name": "effective_turn_count_of_passive_loop",
+   "generated_name": "turn_count_of_passive_loop_element",
+   "generated_blocker": "",
+   "my_verdict": "alternative",
+   "my_reason": "record is sound: definition carries effective turns, element-level application, positive counter-clockwise sign and unit; name turn_count_of_passive_loop_element is more precise than the reference's only name and is not listed",
+   "my_verdict_digest": "da5b29c7627e35ad"
+  },
+  {
+   "member": "radial_coordinate_of_poloidal_field_coil",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "radial_coordinate_of_first_point_of_poloidal_field_coil",
+    "radial_coordinate_of_second_point_of_poloidal_field_coil",
+    "radial_coordinate_of_annulus_centre_of_poloidal_field_coil"
+   ],
+   "incumbent_name": "radial_coordinate_of_poloidal_field_coil",
+   "generated_name": "radial_coordinate_of_poloidal_field_coil",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name unchanged and the definition hedges 'the annulus center or the first point' over three bound paths; the source supplies a distinct point per path",
+   "my_verdict_digest": "c35b629f069c4a89"
+  },
+  {
+   "member": "hydrogen_density_at_limiter",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "hydrogen_ion_density_at_limiter"
+   ],
+   "incumbent_name": "hydrogen_density_at_limiter",
+   "generated_name": "hydrogen_density_at_limiter",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name kept as hydrogen_density_at_limiter, which admits neutral hydrogen; the case file's enclosing source is 'Ion density per species'; definition itself says hydrogen ions",
+   "my_verdict_digest": "75845ec37e88c55b"
+  },
+  {
+   "member": "surface_temperature",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "apparent_surface_temperature"
+   ],
+   "incumbent_name": "surface_temperature",
+   "generated_name": "",
+   "generated_blocker": "grammar-gap",
+   "my_verdict": "wrong",
+   "my_reason": "blocker=grammar-gap stating the closed qualifier vocabulary has no 'apparent'; the reference's right name apparent_surface_temperature uses that word",
+   "my_verdict_digest": "ab5656e2d46aecfd"
+  },
+  {
+   "member": "lower_bound_photon_energy",
+   "stratum": "defective_wrong",
+   "reference_verdict": "definition_defect",
+   "right_names": [
+    "lower_bound_photon_energy"
+   ],
+   "incumbent_name": "lower_bound_photon_energy",
+   "generated_name": "lower_bound_photon_energy",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name is the right name; definition now carries the band boundary, the upper bound's partner role, the per-pixel threshold and the strict-exceed condition",
+   "my_verdict_digest": "ce438a0a3886d17a"
+  },
+  {
+   "member": "radius_of_poloidal_field_coil",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "curvature_radius_of_poloidal_field_coil"
+   ],
+   "incumbent_name": "radius_of_poloidal_field_coil",
+   "generated_name": "",
+   "generated_blocker": "insufficient-source-text",
+   "my_verdict": "wrong",
+   "my_reason": "blocker=insufficient-source-text with no bound source, yet the case file's incumbent definition states 'Non-negative curvature radius of one arc-of-circle segment' and the right name is curvature_radius_of_poloidal_field_coil",
+   "my_verdict_digest": "33bfd46b227f40bf"
+  },
+  {
+   "member": "normalized_collisionality",
+   "stratum": "defective_wrong",
+   "reference_verdict": "definition_defect",
+   "right_names": [
+    "normalized_collisionality"
+   ],
+   "incumbent_name": "normalized_collisionality",
+   "generated_name": "collisionality_between_species",
+   "generated_blocker": "",
+   "my_verdict": "alternative",
+   "my_reason": "record is sound: interspecies collision frequency over characteristic transit frequency for a species pair, unit 1; name collisionality_between_species is not in the reference's list but identifies it",
+   "my_verdict_digest": "8191cb02ae418c82"
+  },
+  {
+   "member": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "magnetic_field_incident_angle_with_respect_to_plasma_facing_surface_of_langmuir_probe"
+   ],
+   "incumbent_name": "field_aligned_surface_tilt_angle_of_langmuir_probe",
+   "generated_name": "surface_incident_angle_of_magnetic_field_at_langmuir_probe",
+   "generated_blocker": "",
+   "my_verdict": "alternative",
+   "my_reason": "record is sound: incident angle of the magnetic field on the plasma-facing surface at the probe, rad; name surface_incident_angle_of_magnetic_field_at_langmuir_probe identifies it and is not listed",
+   "my_verdict_digest": "05b2c00b98537d20"
+  },
+  {
+   "member": "minimum_gas_flow",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "minimum_volumetric_gas_flow_rate"
+   ],
+   "incumbent_name": "minimum_gas_flow",
+   "generated_name": "lower_bound_gas_flow",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "name lower_bound_gas_flow still omits the volumetric pressure-volume basis the unit Pa.m^3.s^-1 states; the reference needs minimum_volumetric_gas_flow_rate",
+   "my_verdict_digest": "e91dd091bed87dc2"
+  },
+  {
+   "member": "temperature_of_sensor",
+   "stratum": "defective_wrong",
+   "reference_verdict": "definition_defect",
+   "right_names": [
+    "temperature_of_sensor"
+   ],
+   "incumbent_name": "temperature_of_sensor",
+   "generated_name": "temperature_of_sensor",
+   "generated_blocker": "",
+   "my_verdict": "wrong",
+   "my_reason": "definition omits the time-resolved measurement and its structural-health monitoring purpose that the reference requires; the case file's source text says only 'Temperature measured by a thermocouple'",
+   "my_verdict_digest": "4a6b7746bf84a6dc"
+  },
+  {
+   "member": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+   "stratum": "defective_wrong",
+   "reference_verdict": "definition_defect",
+   "right_names": [
+    "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface"
+   ],
+   "incumbent_name": "flux_surface_normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+   "generated_name": "normal_non_axisymmetric_vacuum_magnetic_field_fourier_coefficient_at_control_surface",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name says normal ... at control_surface; definition carries the normal component, the Fourier decomposition over surface points and T",
+   "my_verdict_digest": "d528d119909cd103"
+  },
+  {
+   "member": "resistivity_of_plasma_facing_component",
+   "stratum": "defective_wrong",
+   "reference_verdict": "naming_defect",
+   "right_names": [
+    "resistivity_of_mobile_plasma_facing_component_unit"
+   ],
+   "incumbent_name": "resistivity_of_plasma_facing_component",
+   "generated_name": "",
+   "generated_blocker": "grammar-gap",
+   "my_verdict": "wrong",
+   "my_reason": "blocker=grammar-gap stating the vocabulary has plasma_facing_component but no token for the mobile unit the source binds",
+   "my_verdict_digest": "eb51b5ef3dcabe4d"
+  },
+  {
+   "member": "polarization_angle_at_constraint_position",
+   "stratum": "defective_wrong",
+   "reference_verdict": "definition_defect",
+   "right_names": [
+    "motional_stark_polarization_angle_at_constraint_position"
+   ],
+   "incumbent_name": "motional_stark_polarization_angle_at_constraint_position",
+   "generated_name": "",
+   "generated_blocker": "collision",
+   "my_verdict": "wrong",
+   "my_reason": "blocker=collision claiming motional_stark_polarization_angle_at_constraint_position already covers it, which is exactly the reference's right name; case binds no source",
+   "my_verdict_digest": "414d1965daa650a3"
+  },
+  {
+   "member": "ratio_of_particle_temperature_to_particle_reference_temperature",
+   "stratum": "defective_wrong",
+   "reference_verdict": "definition_defect",
+   "right_names": [
+    "ratio_of_particle_temperature_to_particle_reference_temperature"
+   ],
+   "incumbent_name": "ratio_of_particle_temperature_to_particle_reference_temperature",
+   "generated_name": "ratio_of_particle_temperature_to_particle_reference_temperature",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries T_p/T_ref, same flux surface, unit 1; documentation states the local gyrokinetic flux-tube setting",
+   "my_verdict_digest": "e293096b3104321c"
+  },
+  {
+   "member": "lower_inner_squareness_of_flux_surface",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "lower_inner_squareness_of_flux_surface"
+   ],
+   "incumbent_name": "lower_inner_squareness_of_flux_surface",
+   "generated_name": "lower_inner_squareness_of_flux_surface",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries the Luce convention, the lower-inner quadrant, signed ellipse departure and unit 1",
+   "my_verdict_digest": "d6d14a18501e1f36"
+  },
+  {
+   "member": "radial_coordinate_at_inboard_midplane",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "radial_coordinate_at_inboard_midplane"
+   ],
+   "incumbent_name": "radial_coordinate_at_inboard_midplane",
+   "generated_name": "radial_coordinate_at_inboard_midplane",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries the inboard midplane locus, the cylindrical R basis, one value per flux surface and m",
+   "my_verdict_digest": "39284aa8ed0530a9"
+  },
+  {
+   "member": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius"
+   ],
+   "incumbent_name": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+   "generated_name": "ratio_of_square_of_toroidal_flux_coordinate_gradient_magnitude_to_square_of_major_radius",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries |grad rho_tor|^2/R^2, the pointwise (un-averaged) convention, the frame and m^-2",
+   "my_verdict_digest": "53f21bf456d6291f"
+  },
+  {
+   "member": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate"
+   ],
+   "incumbent_name": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+   "generated_name": "derivative_of_volume_of_flux_surface_with_respect_to_poloidal_magnetic_flux_coordinate",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries dV/dpsi, cumulative volume, signed psi, sign convention and Wb^-1.m^3",
+   "my_verdict_digest": "f4ed317b516a4bc2"
+  },
+  {
+   "member": "vertical_coordinate_of_constraint_position",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "vertical_coordinate_of_constraint_position"
+   ],
+   "incumbent_name": "vertical_coordinate_of_constraint_position",
+   "generated_name": "vertical_coordinate_of_constraint_position",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries Z = x.zhat, the frame, per-point application, sign and m",
+   "my_verdict_digest": "98dd08e601f51eea"
+  },
+  {
+   "member": "vertical_outline_of_plasma_boundary",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "vertical_outline_of_plasma_boundary"
+   ],
+   "incumbent_name": "vertical_outline_of_plasma_boundary",
+   "generated_name": "vertical_outline_of_plasma_boundary",
+   "generated_blocker": "registry-conflict",
+   "my_verdict": "wrong",
+   "my_reason": "blocker=registry-conflict on the right name itself: the registry's plasma_boundary meaning contradicts the source's fixed-boundary outline at psi_norm ~99%",
+   "my_verdict_digest": "21dd8d3df1ad5f06"
+  },
+  {
+   "member": "poloidal_length_of_flux_surface",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "poloidal_length_of_flux_surface"
+   ],
+   "incumbent_name": "poloidal_length_of_flux_surface",
+   "generated_name": "poloidal_length_of_flux_surface",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries the closed poloidal contour perimeter, the integral form, no averaging and m",
+   "my_verdict_digest": "5e00fb557f9ff88a"
+  },
+  {
+   "member": "vertical_coordinate_of_current_center",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "vertical_coordinate_of_current_center"
+   ],
+   "incumbent_name": "vertical_coordinate_of_current_center",
+   "generated_name": "vertical_coordinate_of_current_center",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries Z_c = integral(Z j_tor dS)/I_p, the weighting, sign, frame and m",
+   "my_verdict_digest": "6a7410f14c9f6044"
+  },
+  {
+   "member": "toroidal_magnetic_field_at_magnetic_axis",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "toroidal_magnetic_field_at_magnetic_axis"
+   ],
+   "incumbent_name": "toroidal_magnetic_field_at_magnetic_axis",
+   "generated_name": "toroidal_magnetic_field_at_magnetic_axis",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries the total field including plasma current, projection, sign and T",
+   "my_verdict_digest": "358f207f56cd04a2"
+  },
+  {
+   "member": "safety_factor_at_magnetic_axis",
+   "stratum": "right",
+   "reference_verdict": "sound",
+   "right_names": [
+    "safety_factor_at_magnetic_axis"
+   ],
+   "incumbent_name": "safety_factor_at_magnetic_axis",
+   "generated_name": "safety_factor_at_magnetic_axis",
+   "generated_blocker": "",
+   "my_verdict": "right",
+   "my_reason": "name identical; definition carries q0 = lim q, the sign convention, locus specificity and unit 1",
+   "my_verdict_digest": "890adbdb5309b933"
+  }
+ ],
+ "verdict_digest": "aea31915cf10892d892978c1edda84bf0910189bb2669749468abb7abd5e1f14"
+}
