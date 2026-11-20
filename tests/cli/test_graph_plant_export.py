@@ -55,14 +55,14 @@ def _script(without_dd: bool) -> str:
 
 def test_plant_filter_deletes_every_facilityless_kind_but_the_kept_two():
     script = _script(without_dd=True)
-    assert "n.facility_id IS NULL AND NOT n:Facility AND NOT n:GraphMeta" in script
+    assert "x.facility_id IS NULL AND NOT x:Facility AND NOT x:GraphMeta" in script
     assert "MATCH (n:Facility) WHERE n.id <> 'demo'" in script
     assert "m.plant_only = true" in script
 
 
 def test_facility_filter_alone_keeps_facilityless_kinds():
     script = _script(without_dd=False)
-    assert "n.facility_id IS NULL AND NOT n:Facility" not in script
+    assert "facility_id IS NULL AND NOT" not in script
     assert "plant_only" not in script
 
 

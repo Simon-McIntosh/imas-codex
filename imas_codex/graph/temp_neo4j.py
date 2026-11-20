@@ -613,19 +613,20 @@ def _build_filter_script(
     else:
         # A plant package keeps the facility's own content and nothing that
         # belongs to no facility but the facility node itself and GraphMeta.
-        plant_cypher = (
-            textwrap.dedent(f"""\
+        # Two statements, two literals: a label binding in one statement
+        # must not become the label of the other statement's alias.
+        plant_facility_cypher = textwrap.dedent(f"""\
             # Delete the other facilities' nodes (Facility uses id, not facility_id)
             echo "    Deleting other facility nodes..."
             $CYPHER "MATCH (n:Facility) WHERE n.id <> '{facility}' CALL {{ WITH n DETACH DELETE n }} IN TRANSACTIONS OF 10000 ROWS RETURN count(*) AS deleted;"
-
+        """)
+        plant_facilityless_cypher = textwrap.dedent("""\
             # Delete every facility-less kind but Facility and GraphMeta
             echo "    Deleting facility-less nodes..."
-            $CYPHER "MATCH (n) WHERE n.facility_id IS NULL AND NOT n:Facility AND NOT n:GraphMeta CALL {{ WITH n DETACH DELETE n }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
-
-            """)
-            if without_dd
-            else ""
+            $CYPHER "MATCH (x) WHERE x.facility_id IS NULL AND NOT x:Facility AND NOT x:GraphMeta CALL {{ WITH x DETACH DELETE x }} IN TRANSACTIONS OF 50000 ROWS RETURN count(*) AS deleted;"
+        """)
+        plant_cypher = (
+            plant_facility_cypher + plant_facilityless_cypher if without_dd else ""
         )
         orphan_keep = (
             "NOT n:Facility AND NOT n:GraphMeta"

@@ -91,10 +91,13 @@ def test_unfiltered_archive_manifest_records_dump_scope(export_graph):
 def test_filtered_archive_manifest_records_post_filter_scope(export_graph, monkeypatch):
     filter_finished = False
 
-    def filter_dump(source: Path, facility: str, output: Path) -> None:
+    def filter_dump(
+        source: Path, facility: str, output: Path, *, without_dd: bool = False
+    ) -> None:
         nonlocal filter_finished
         assert facility == "tcv"
         assert source == output
+        assert without_dd is False
         filter_finished = True
 
     def measured_counts(dump_path: Path) -> dict:
