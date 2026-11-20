@@ -12,6 +12,7 @@ from scripts.rename.__main__ import main
 from scripts.rename.apply import apply_rename, tree_digest
 from scripts.rename.check import check_tree
 from scripts.rename.cutover import check_cutover
+from scripts.rename.tree import load_kept_list
 
 INVENTORY = Path(
     "docs/evidence/fragments/codac-uda-signals/current-name-consumer-inventory.html"
@@ -88,6 +89,45 @@ def tree(tmp_path: Path) -> Path:
 def kept_list(tmp_path: Path) -> Path:
     path = tmp_path / "kept_names.json"
     path.write_text(json.dumps(KEPT_LIST))
+    return path
+
+
+KEPT_SPLIT = {
+    **KEPT_LIST,
+    "kept_names": [],
+    "kept_paths": [
+        {
+            "id": "evidence",
+            "path": "docs/evidence",
+            "include": ["*.html", "*.json", "*.md"],
+            "surface": "evidence data and prose",
+            "disposition": "kept",
+            "reason": "only the data and prose bytes are evidence; the Python is live code",
+            "min_hits": 1,
+        }
+    ],
+}
+
+
+@pytest.fixture
+def split_tree(tmp_path: Path) -> Path:
+    """A tree whose evidence directory holds kept prose and live Python beside it."""
+    root = tmp_path / "split"
+    (root / "imas_codex").mkdir(parents=True)
+    (root / "imas_codex" / "__init__.py").write_text("")
+    fragment = root / "docs" / "evidence" / "fragments" / "probe"
+    fragment.mkdir(parents=True)
+    (fragment / "run.md").write_text("The imas_codex run measured 3 surfaces.\n")
+    (fragment / "measure.py").write_text(
+        "from imas_codex.graph import GraphClient\n\nprint(GraphClient)\n"
+    )
+    return root
+
+
+@pytest.fixture
+def split_list(tmp_path: Path) -> Path:
+    path = tmp_path / "split_kept_names.json"
+    path.write_text(json.dumps(KEPT_SPLIT))
     return path
 
 
@@ -362,6 +402,70 @@ def test_check_refuses_totals_that_do_not_reconcile(
     assert not report.as_dict()["reconciled"]
 
 
+def test_the_kept_list_keeps_evidence_data_and_prose_but_not_python() -> None:
+    kept = load_kept_list(Path("scripts/rename/kept_names.json"))
+    evidence = next(
+        entry for entry in kept.kept_paths if entry.id == "historical-evidence"
+    )
+
+    assert set(evidence.include) == {"*.html", "*.json", "*.md"}
+    assert kept.covering("docs/evidence/fragments/probe/measure.py") is None
+    for suffix in ("html", "json", "md"):
+        assert kept.covering(f"docs/evidence/fragments/probe/run.{suffix}") is not None
+
+
+def test_apply_renames_evidence_python_and_leaves_evidence_bytes(
+    split_tree: Path, split_list: Path
+) -> None:
+    evidence = split_tree / "docs/evidence/fragments/probe/run.md"
+    before = evidence.read_bytes()
+
+    report = apply_rename(split_tree, kept_list=split_list)
+
+    script = split_tree / "docs/evidence/fragments/probe/measure.py"
+    assert "from iter_codex.graph import GraphClient" in script.read_text()
+    assert evidence.read_bytes() == before
+    assert "docs/evidence/fragments/probe/measure.py" in report.changed_files
+    assert check_tree(split_tree, kept_list=split_list).ok
+
+
+def test_check_reports_a_python_file_under_evidence_that_keeps_the_old_name(
+    split_tree: Path, split_list: Path
+) -> None:
+    apply_rename(split_tree, kept_list=split_list)
+    planted = split_tree / "docs/evidence/fragments/probe/late.py"
+    planted.write_text("import imas_codex.cli\n")
+
+    report = check_tree(split_tree, kept_list=split_list)
+
+    assert not report.ok
+    leftovers = [v for v in report.violations if v.kind == "leftover"]
+    assert [v.detail.split(":")[0] for v in leftovers] == [
+        "docs/evidence/fragments/probe/late.py"
+    ]
+    assert (
+        main(["check", "--tree", str(split_tree), "--kept-list", str(split_list)]) == 1
+    )
+
+
+def test_apply_does_not_move_a_directory_that_holds_kept_bytes(
+    split_tree: Path, split_list: Path
+) -> None:
+    kept_dir = split_tree / "docs" / "evidence" / "imas-codex-s10"
+    kept_dir.mkdir()
+    (kept_dir / "drain.md").write_text("the imas_codex drain ledger\n")
+    (kept_dir / "probe.py").write_text("from imas_codex.graph import GraphClient\n")
+    before = (kept_dir / "drain.md").read_bytes()
+
+    report = apply_rename(split_tree, kept_list=split_list)
+
+    assert kept_dir.is_dir(), "a directory holding kept bytes keeps its name"
+    assert not (split_tree / "docs" / "evidence" / "iter-codex-s10").exists()
+    assert (kept_dir / "drain.md").read_bytes() == before
+    assert "from iter_codex.graph" in (kept_dir / "probe.py").read_text()
+    assert report.kept_altered == []
+
+
 def label_disagreements(data: dict) -> tuple[set[str], set[str]]:
     """The document labels no row claims, and the labels no document carries."""
     claimed = {
@@ -386,6 +490,115 @@ def test_cutover_accounts_for_every_inventory_surface() -> None:
 
     assert report.ok, report.violations
     assert report.as_dict()["unaccounted"] == []
+
+
+def cutover_data() -> dict:
+    return json.loads(Path("scripts/rename/cutover.json").read_text())
+
+
+def cutover_step(data: dict, step_id: str) -> dict:
+    return next(step for step in data["steps"] if step["id"] == step_id)
+
+
+def test_cutover_states_that_the_checkout_directory_does_not_move() -> None:
+    data = cutover_data()
+    checkout = data["checkout_directory"]
+
+    assert checkout["moves_at_cutover"] is False
+    assert "does not move at cutover" in checkout["statement"]
+    assert all("renamed checkout" not in step["step"] for step in data["steps"])
+
+
+def test_cutover_refuses_a_checkout_that_moves_at_cutover(tmp_path: Path) -> None:
+    data = cutover_data()
+    data["checkout_directory"]["moves_at_cutover"] = True
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    report = check_cutover(path)
+
+    assert not report.ok
+    assert any("moves_at_cutover" in v for v in report.violations)
+
+
+def test_cutover_lists_queued_requests_and_checks_the_ids_it_preserves() -> None:
+    data = cutover_data()
+    freeze = cutover_step(data, "C0-freeze")
+    project_key = cutover_step(data, "C7-reckon-project-key")
+
+    assert set(freeze["queued_requests"]) == {"listing", "rule", "parked_worktree"}
+    assert "drops" in freeze["queued_requests"]["rule"]
+    assert "re-dispatches" in freeze["queued_requests"]["rule"]
+    assert set(project_key["preserved_ids"]) == {"plans", "runs", "rule"}
+    assert "plan slugs and run ids are unchanged" in project_key["check"]
+    assert cutover_step(data, "C9-gate-scripts")["kept_directory"]["disposition"] == (
+        "kept"
+    )
+
+
+def test_cutover_refuses_a_sequence_without_the_queued_request_rule(
+    tmp_path: Path,
+) -> None:
+    data = cutover_data()
+    del cutover_step(data, "C0-freeze")["queued_requests"]
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    report = check_cutover(path)
+
+    assert not report.ok
+    assert any(
+        "C0-freeze" in violation and "queued_requests" in violation
+        for violation in report.violations
+    )
+
+
+def test_cutover_refuses_a_sequence_without_the_slug_and_run_id_check(
+    tmp_path: Path,
+) -> None:
+    data = cutover_data()
+    del cutover_step(data, "C7-reckon-project-key")["preserved_ids"]
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    report = check_cutover(path)
+
+    assert not report.ok
+    assert any("preserved_ids" in violation for violation in report.violations)
+
+
+def test_cutover_refuses_a_kept_list_that_holds_evidence_python(
+    tmp_path: Path,
+) -> None:
+    """The sequence's evidence split is read from the kept list, not trusted."""
+    data = cutover_data()
+    kept = json.loads(Path("scripts/rename/kept_names.json").read_text())
+    evidence = next(
+        entry for entry in kept["kept_paths"] if entry["id"] == "historical-evidence"
+    )
+    del evidence["include"]
+    split = tmp_path / "kept_names.json"
+    split.write_text(json.dumps(kept))
+    data["tracked_rename"]["kept_list"] = str(split)
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    report = check_cutover(path)
+
+    assert not report.ok
+    assert any("historical-evidence" in violation for violation in report.violations)
+
+
+def test_cutover_refuses_a_gate_script_directory_that_moves(tmp_path: Path) -> None:
+    data = cutover_data()
+    cutover_step(data, "C9-gate-scripts")["kept_directory"]["disposition"] = "renamed"
+    path = tmp_path / "cutover.json"
+    path.write_text(json.dumps(data))
+
+    report = check_cutover(path)
+
+    assert not report.ok
+    assert any("kept_directory" in violation for violation in report.violations)
 
 
 def test_cutover_rejects_a_label_the_document_does_not_carry(tmp_path: Path) -> None:
