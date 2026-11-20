@@ -1,0 +1,113 @@
+{
+  "absent": [],
+  "absent_items": [],
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "call_site_count": 3,
+  "call_sites": [
+    "imas_codex/cli/discover/__init__.py:discover_group_enrich",
+    "imas_codex/discovery/signals/group_enrichment.py:enrich_pilot_groups",
+    "imas_codex/discovery/signals/parallel.py:enrich_worker"
+  ],
+  "completed_at": "2026-11-20T04:56:19.925Z",
+  "dimension_dispositions": {},
+  "dispatched_at": "2026-11-20T04:55:59Z",
+  "findings": [
+    {
+      "file": "imas_codex/discovery/signals/group_enrichment.py",
+      "line": "576",
+      "severity": "non-blocking",
+      "text": "non-blocking: the refactor replaces the previous two-attempt loop, which retried any non-ValueError exception once after a 5s sleep, with recovered_call, which retries ValueError only; every other fault now escapes that call and is turned into a failed GroupOutcome by the except at :587, so with the CLI's default attempts=0 (imas_codex/cli/discover/__init__.py:377 passes no recovery flag) a transient lane fault that used to cost one retry now fails a group on the first attempt."
+    },
+    {
+      "file": "tests/discovery/test_group_enrichment.py",
+      "line": "640",
+      "severity": "non-blocking",
+      "text": "non-blocking: the block of imports added here is unsorted and ruff check raises I001, where the cf48cb0e blob of this file passes check; ruff format --diff also rewrites the newly added imas_codex/discovery/signals/enrichment.py:503, imas_codex/discovery/signals/group_enrichment.py:606 and tests/llm/test_prompt_schema_coverage.py:246, and both modules are format-clean at cf48cb0e, while the two test files already carried older deviations; the repository mandates ruff --fix and ruff format on touched files before staging, so the gained commits add a lint failure and three new formatting deviations."
+    },
+    {
+      "file": "tests/llm/test_prompt_schema_coverage.py",
+      "line": "218",
+      "severity": "non-blocking",
+      "text": "non-blocking: test_prompt_carries_its_response_model_schema returns before any assertion for a prompt that templates output_schema, so for signals/enrichment, signals/enrichment_grounding and signals/enrichment_output the only condition that can fail is a KeyError in _model_objects; the diff's own negative-control log exercises signals/enrichment_review only, so the three prompts that lost the verbatim assertion in cf48cb0e still have no assertion their rendered schema appears."
+    }
+  ],
+  "item_aggregate": 6,
+  "item_verdicts": {
+    "diff": "read all six commits against cf48cb0e: e86436d moves the draft/review/citation loop into enrichment.py:284 and routes both paths through it, 255ff33 removes STATES_QUERY and extracts COMPONENT_DESCRIPTION_WRITE, PATTERN_DESCRIPTION_WRITE and GROUP_STATE_WRITE to constants, c6f889c rewrites the graph gate for nine statements plus a structural coverage test, ac9ebf1 replaces the identity assertion with an awaiting/failed count test, e419d1d re-admits caller-schema prompts to _collect_pairs and adds two guards, and 8a70880 fixes the fragment's token sentence; six files changed, no others.",
+    "done_when": "the done_when in node.json asks for written counts, calls and cost, the pilot-total sum, vocabulary counts, a forty-signal hand reading, a propagation search and a projection; no gate asserts the pilot numbers, and the landed change's own gates are recorded at the head revision (logs/discovery-suite.log 2454 passed EXIT=0, logs/graph-gate.log 11 passed EXIT=0, logs/prompt-coverage.log 1 failed 9 passed EXIT=1), with the single prompt-coverage failure reproduced by my base arm at cf48cb0e.",
+    "goal": "the reviewed node's goal is plan section 6 (docs/plans/iter-signal-context-and-enrichment.html:69), and the six gained commits keep that delivery while repairing the prior review's findings: e86436d adds review_draft_statements at imas_codex/discovery/signals/enrichment.py:284 and calls it from group_enrichment.py:607, 255ff33 deletes the dead STATES_QUERY, c6f889c gates all nine statements, ac9ebf1 replaces the arithmetic identity, e419d1d restores the caller-schema pairing and 8a70880 corrects the token claim.",
+    "manifest": "read the reviewed manifest.md: status complete, fourteen commit shas, nine changed paths, a repair block naming six acted findings and six negative-control logs, and gate results at 8a70880; it carries no baseline_suite/after_suite JSON keys, so the added-failure pair was measured by this review from the same test file the prompt-coverage gate names and is recorded in suite_evidence.",
+    "write_paths": "read the declared set (imas_codex/discovery/signals, imas_codex/discovery/base, imas_codex/llm/prompts, imas_codex/schemas/facility.yaml, imas_codex/cli, tests/discovery, tests/llm, tests/graph, the pilot fragment html and its figures directory); the six paths in cf48cb0e..8a70880 are all inside it and no path outside it changed."
+  },
+  "justifications": {
+    "durability": "tests/discovery/test_group_enrichment.py:556 asserts a validation-failing draft is retried and :598 fails if either path stops using review_draft_statements, tests/graph/test_group_enrichment_statements.py:65 fails when a statement constant lacks a gate entry as logs/negative-control-dead-query.log shows (EXIT=1), and tests/discovery/test_group_enrichment.py:544 fails when awaiting is computed as a complement (logs/negative-control-summary-counts.log, 2 == 1), but the transient-fault retry removed at group_enrichment.py:576 has no test and tests/llm/test_prompt_schema_coverage.py:218 returns before asserting anything for caller-schema prompts.",
+    "evidence": "logs/discovery-suite.log (2,454 passed, EXIT=0) and logs/graph-gate.log (11 passed, EXIT=0) carry the head revision 8a70880407a8 on their header lines, and my own base arm in logs/base-prompt-coverage.log shows the same single failing id at cf48cb0e that logs/prompt-coverage.log shows at the head, so the recorded prompt-coverage result is pre-existing and measured rather than claimed.",
+    "fit": "ruff 0.15.1 with the repository's own pyproject configuration raises I001 at tests/discovery/test_group_enrichment.py:640, which is clean at cf48cb0e, and would reformat the newly added imas_codex/discovery/signals/enrichment.py:503 and imas_codex/discovery/signals/group_enrichment.py:606, which are format-clean at the base revision.",
+    "goal_fidelity": "imas_codex/discovery/signals/group_enrichment.py:607 now reviews a group draft through imas_codex/discovery/signals/enrichment.py:284, the same helper imas_codex/discovery/signals/enrichment.py:503 uses, so the two paths agree on validation retry and citation filtering while composition is unchanged.",
+    "reuse": "the fork the previous review named is gone: review_draft_statements at imas_codex/discovery/signals/enrichment.py:284 is the single implementation of draft-to-citation-review and group_enrichment.py:607 wraps it rather than duplicating it, and the add-or-delete judgement found no second owner of that loop.",
+    "scope_discipline": "every changed path in cf48cb0e..8a70880 is inside the declared set, and the tests/llm/test_prompt_schema_coverage.py change answers the prior review's pairing finding rather than adding a capability the goal does not imply."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed node's goal is plan section 6 (docs/plans/iter-signal-context-and-enrichment.html:69), and the six gained commits keep that delivery while repairing the prior review's findings: e86436d adds review_draft_statements at imas_codex/discovery/signals/enrichment.py:284 and calls it from group_enrichment.py:607, 255ff33 deletes the dead STATES_QUERY, c6f889c gates all nine statements, ac9ebf1 replaces the arithmetic identity, e419d1d restores the caller-schema pairing and 8a70880 corrects the token claim.\nVERDICT done_when: the done_when in node.json asks for written counts, calls and cost, the pilot-total sum, vocabulary counts, a forty-signal hand reading, a propagation search and a projection; no gate asserts the pilot numbers, and the landed change's own gates are recorded at the head revision (logs/discovery-suite.log 2454 passed EXIT=0, logs/graph-gate.log 11 passed EXIT=0, logs/prompt-coverage.log 1 failed 9 passed EXIT=1), with the single prompt-coverage failure reproduced by my base arm at cf48cb0e.\nVERDICT write_paths: read the declared set (imas_codex/discovery/signals, imas_codex/discovery/base, imas_codex/llm/prompts, imas_codex/schemas/facility.yaml, imas_codex/cli, tests/discovery, tests/llm, tests/graph, the pilot fragment html and its figures directory); the six paths in cf48cb0e..8a70880 are all inside it and no path outside it changed.\nVERDICT manifest: read the reviewed manifest.md: status complete, fourteen commit shas, nine changed paths, a repair block naming six acted findings and six negative-control logs, and gate results at 8a70880; it carries no baseline_suite/after_suite JSON keys, so the added-failure pair was measured by this review from the same test file the prompt-coverage gate names and is recorded in suite_evidence.\nVERDICT diff: read all six commits against cf48cb0e: e86436d moves the draft/review/citation loop into enrichment.py:284 and routes both paths through it, 255ff33 removes STATES_QUERY and extracts COMPONENT_DESCRIPTION_WRITE, PATTERN_DESCRIPTION_WRITE and GROUP_STATE_WRITE to constants, c6f889c rewrites the graph gate for nine statements plus a structural coverage test, ac9ebf1 replaces the identity assertion with an awaiting/failed count test, e419d1d re-admits caller-schema prompts to _collect_pairs and adds two guards, and 8a70880 fixes the fragment's token sentence; six files changed, no others.\nCALL_SITES: imas_codex/cli/discover/__init__.py:discover_group_enrich, imas_codex/discovery/signals/group_enrichment.py:enrich_pilot_groups, imas_codex/discovery/signals/parallel.py:enrich_worker\nSCORE goal_fidelity: 18\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/group_enrichment.py:607 now reviews a group draft through imas_codex/discovery/signals/enrichment.py:284, the same helper imas_codex/discovery/signals/enrichment.py:503 uses, so the two paths agree on validation retry and citation filtering while composition is unchanged.\nSCORE evidence: 16\nJUSTIFICATION evidence: logs/discovery-suite.log (2,454 passed, EXIT=0) and logs/graph-gate.log (11 passed, EXIT=0) carry the head revision 8a70880407a8 on their header lines, and my own base arm in logs/base-prompt-coverage.log shows the same single failing id at cf48cb0e that logs/prompt-coverage.log shows at the head, so the recorded prompt-coverage result is pre-existing and measured rather than claimed.\nSCORE scope_discipline: 19\nJUSTIFICATION scope_discipline: every changed path in cf48cb0e..8a70880 is inside the declared set, and the tests/llm/test_prompt_schema_coverage.py change answers the prior review's pairing finding rather than adding a capability the goal does not imply.\nSCORE durability: 15\nJUSTIFICATION durability: tests/discovery/test_group_enrichment.py:556 asserts a validation-failing draft is retried and :598 fails if either path stops using review_draft_statements, tests/graph/test_group_enrichment_statements.py:65 fails when a statement constant lacks a gate entry as logs/negative-control-dead-query.log shows (EXIT=1), and tests/discovery/test_group_enrichment.py:544 fails when awaiting is computed as a complement (logs/negative-control-summary-counts.log, 2 == 1), but the transient-fault retry removed at group_enrichment.py:576 has no test and tests/llm/test_prompt_schema_coverage.py:218 returns before asserting anything for caller-schema prompts.\nSCORE fit: 12\nJUSTIFICATION fit: ruff 0.15.1 with the repository's own pyproject configuration raises I001 at tests/discovery/test_group_enrichment.py:640, which is clean at cf48cb0e, and would reformat the newly added imas_codex/discovery/signals/enrichment.py:503 and imas_codex/discovery/signals/group_enrichment.py:606, which are format-clean at the base revision.\nSCORE reuse: 19\nJUSTIFICATION reuse: the fork the previous review named is gone: review_draft_statements at imas_codex/discovery/signals/enrichment.py:284 is the single implementation of draft-to-citation-review and group_enrichment.py:607 wraps it rather than duplicating it, and the add-or-delete judgement found no second owner of that loop.\nFINDING imas_codex/discovery/signals/group_enrichment.py:576 non-blocking: the refactor replaces the previous two-attempt loop, which retried any non-ValueError exception once after a 5s sleep, with recovered_call, which retries ValueError only; every other fault now escapes that call and is turned into a failed GroupOutcome by the except at :587, so with the CLI's default attempts=0 (imas_codex/cli/discover/__init__.py:377 passes no recovery flag) a transient lane fault that used to cost one retry now fails a group on the first attempt.\nFINDING tests/discovery/test_group_enrichment.py:640 non-blocking: the block of imports added here is unsorted and ruff check raises I001, where the cf48cb0e blob of this file passes check; ruff format --diff also rewrites the newly added imas_codex/discovery/signals/enrichment.py:503, imas_codex/discovery/signals/group_enrichment.py:606 and tests/llm/test_prompt_schema_coverage.py:246, and both modules are format-clean at cf48cb0e, while the two test files already carried older deviations; the repository mandates ruff --fix and ruff format on touched files before staging, so the gained commits add a lint failure and three new formatting deviations.\nFINDING tests/llm/test_prompt_schema_coverage.py:218 non-blocking: test_prompt_carries_its_response_model_schema returns before any assertion for a prompt that templates output_schema, so for signals/enrichment, signals/enrichment_grounding and signals/enrichment_output the only condition that can fail is a KeyError in _model_objects; the diff's own negative-control log exercises signals/enrichment_review only, so the three prompts that lost the verbatim assertion in cf48cb0e still have no assertion their rendered schema appears.",
+  "review_method": "Read-only review of the gained commits cf48cb0e..8a70880 against the reviewed brief, node.json, manifest.md, the repair negative-control logs and the head gate logs; ruff check/format applied to the landed blobs from git rather than a checked-out tree; one added-failure arm pair measured in scratch trees extracted from git, no suite rerun and no mutation of the reviewed code.",
+  "review_run_id": "r-20261120T045515987368-review-of-pilot-enrichment-by-group-8a70880407a8",
+  "reviewed_base_sha": "cf48cb0e574afc18a032bb2ddb4b25c8c9501bc5",
+  "reviewed_head_sha": "8a70880407a8c09022ea2afe580219ff5862d19f",
+  "reviewed_run_id": "r-20261120T022442269568-pilot-enrichment-by-group",
+  "scores": {
+    "durability": 15,
+    "evidence": 16,
+    "fit": 12,
+    "goal_fidelity": 18,
+    "reuse": 19,
+    "scope_discipline": 19
+  },
+  "source_commits": [
+    "e86436d02786d3dd5f211ac9b8b93f659335d4cb",
+    "255ff33f19f3be7ab4c84c0252eccecb277fc064",
+    "ac9ebf108191d80fdae76336056f77eeca91668e",
+    "c6f889c37844e039c834ee129ea11536d67dc356",
+    "e419d1d6fdab39a15912a32a6f20696ea1ac456f",
+    "8a70880407a8c09022ea2afe580219ff5862d19f"
+  ],
+  "status": "parsed",
+  "suite_evidence": {
+    "added_failure_derivation": "The reviewed run's manifest carries no baseline_suite/after_suite JSON, so this review measured the pair on the single test file the prompt-coverage gate names, in scratch trees extracted from git under the run's $TMPDIR with the shared environment. Base cf48cb0e574afc18a032bb2ddb4b25c8c9501bc5: 1 failed, 5 passed, EXIT=1 (logs/base-prompt-coverage.log). Head 8a70880407a8c09022ea2afe580219ff5862d19f: 1 failed, 9 passed, EXIT=1 (logs/head-prompt-coverage.log). Both arms fail the same id, tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts, so the set difference is empty and added_failure_count is 0. The head arm agrees with the reviewed run's own logs/prompt-coverage.log (1 failed, 9 passed, EXIT=1, same id, revision 8a70880407a8).",
+    "after_arm": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261120T045515987368-review-of-pilot-enrichment-by-group-8a70880407a8/r-20261120T045515987368-arms/head uv run --no-sync pytest tests/llm/test_prompt_schema_coverage.py -p no:cacheprovider",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T045515987368-review-of-pilot-enrichment-by-group-8a70880407a8/logs/head-prompt-coverage.log",
+      "revision": "8a70880407a8c09022ea2afe580219ff5862d19f"
+    },
+    "baseline_arm": {
+      "command": "UV_PROJECT_ENVIRONMENT=/home/ITER/mcintos/Code/imas-codex/.venv PYTHONPATH=/tmp/reckon-crew-scratch/r-20261120T045515987368-review-of-pilot-enrichment-by-group-8a70880407a8/r-20261120T045515987368-arms/base uv run --no-sync pytest tests/llm/test_prompt_schema_coverage.py -p no:cacheprovider",
+      "completed": true,
+      "exit_status": 1,
+      "failure_count": 1,
+      "failure_ids": [
+        "tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts"
+      ],
+      "log_path": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261120T045515987368-review-of-pilot-enrichment-by-group-8a70880407a8/logs/base-prompt-coverage.log",
+      "revision": "cf48cb0e574afc18a032bb2ddb4b25c8c9501bc5"
+    },
+    "reviewed_run_arms": [
+      "logs/discovery-suite.log 2454 passed EXIT=0 at 8a70880407a8",
+      "logs/graph-gate.log 11 passed EXIT=0 at 8a70880407a8",
+      "logs/prompt-coverage.log 1 failed 9 passed EXIT=1 at 8a70880407a8",
+      "logs/negative-control-dead-query.log 1 failed EXIT=1 (STATES_QUERY re-added against the structural gate)",
+      "logs/negative-control-statement-coverage.log 1 failed EXIT=1 (gate lists five read statements only)",
+      "logs/negative-control-reuse.log 2 failed EXIT=1 (retry disabled, review pass skipped)",
+      "logs/negative-control-prompt-pairing.log 2 failed EXIT=1 (caller-schema prompts filtered out)",
+      "logs/negative-control-summary-counts.log 1 failed EXIT=1 (awaiting computed as complement)"
+    ]
+  },
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T05:08:25.683936+00:00",
+  "total": 99
+}
