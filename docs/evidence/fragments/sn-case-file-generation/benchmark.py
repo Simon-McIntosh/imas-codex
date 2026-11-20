@@ -26,6 +26,7 @@ import json
 import os
 import random
 import sys
+import tempfile
 import time
 import zlib
 from collections import Counter
@@ -89,9 +90,13 @@ def digest_text(text: str) -> str:
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+def canonical_json(value: Any) -> str:
+    """The one serialisation every digest in this file hashes."""
+    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
+
+
 def digest_json(value: Any) -> str:
-    raw = json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    return digest_text(canonical_json(value))
 
 
 class RecordDraft(BaseModel):
@@ -480,8 +485,17 @@ def squash(text: Any) -> str:
     return " ".join(str(text or "").split()).lower()
 
 
+def case_content(case: dict[str, Any]) -> dict[str, Any]:
+    """The content a case file carries, under either shape a round builds."""
+    nested = case.get("record")
+    if isinstance(nested, dict) and isinstance(nested.get("content"), dict):
+        return nested["content"]
+    content = case.get("content")
+    return content if isinstance(content, dict) else {}
+
+
 def incumbent_draft(case: dict[str, Any]) -> dict[str, str] | None:
-    content = case["record"]["content"]
+    content = case_content(case)
     incumbent = content.get("incumbent")
     if not incumbent:
         return None
@@ -1660,33 +1674,6 @@ def second_case_text(case: dict[str, Any]) -> str:
     return render_case_file(case)
 
 
-def incumbent_record(content: dict[str, Any]) -> dict[str, str] | None:
-    incumbent = content.get("incumbent")
-    if not incumbent:
-        return None
-    return {
-        "name": incumbent.get("name") or "",
-        "description": incumbent.get("description") or "",
-        "documentation": incumbent.get("documentation") or "",
-        "unit": incumbent.get("unit") or "",
-        "group": "",
-    }
-
-
-def record_changed_from_incumbent(
-    record: dict[str, Any], content: dict[str, Any]
-) -> bool | None:
-    incumbent = incumbent_record(content)
-    if incumbent is None:
-        return None
-    return any(
-        squash(record.get(field)) != squash(incumbent.get(field))
-        and bool(squash(record.get(field)))
-        and bool(squash(incumbent.get(field)))
-        for field in ("name", "description", "documentation", "unit")
-    )
-
-
 def perturb_content(
     case: dict[str, Any], donor: dict[str, Any]
 ) -> dict[str, Any] | None:
@@ -1826,9 +1813,7 @@ def second_row(
         "input_tokens": int(body.get("input_tokens") or 0),
         "output_tokens": int(body.get("output_tokens") or 0),
         "seconds": float(body.get("seconds") or 0.0),
-        "changed_incumbent": record_changed_from_incumbent(
-            record, case.get("content", {})
-        ),
+        "changed_incumbent": changed_from_incumbent(record, case),
         "incumbent_right": member.get("verdict") == "sound",
         "case_digest": case.get("digest") or "",
         "target_group": member.get("group") or "",
@@ -1900,7 +1885,7 @@ async def generate_second_one(
 
 
 def incumbent_body(case: dict[str, Any]) -> dict[str, Any]:
-    record = incumbent_record(case.get("content", {}))
+    record = incumbent_draft(case)
     if record is None:
         return {
             "decision": "blocked",
@@ -2121,11 +2106,7 @@ def packet_id_for(key: tuple[str, str, str, str]) -> str:
 
 
 def records_digest(rows: list[dict[str, Any]]) -> str:
-    raw = "\n".join(
-        json.dumps(row, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-        for row in rows
-    )
-    return hashlib.sha256(raw.encode("utf-8")).hexdigest()
+    return digest_text("\n".join(canonical_json(row) for row in rows))
 
 
 def build_packet_and_key(
@@ -2196,20 +2177,34 @@ def build_packet_and_key(
 VERDICT_VALUES = ("right", "wrong", "undecidable")
 
 
-def load_verdicts(path: Path) -> dict[str, dict[str, str]]:
-    """Read the adjudicator's file: one line per packet id, name and definition."""
+def load_verdicts(
+    path: Path,
+) -> tuple[dict[str, dict[str, str]], list[dict[str, str]]]:
+    """Read the adjudicator's file: one line per packet id, name and definition.
+
+    A value outside the three recognised verdicts is not scored and is returned
+    beside the verdicts, so a typo leaves its packet undecided and is named to
+    the reader rather than counting as a wrong answer nobody can explain.
+    """
     verdicts: dict[str, dict[str, str]] = {}
+    unrecognised: list[dict[str, str]] = []
     for row in read_jsonl(path):
         packet_id = str(row.get("packet_id") or "").strip()
         if not packet_id:
             continue
-        verdicts[packet_id] = {
-            "name": squash(row.get("name_verdict") or row.get("name") or ""),
-            "definition": squash(
-                row.get("definition_verdict") or row.get("definition") or ""
-            ),
-        }
-    return verdicts
+        entry: dict[str, str] = {}
+        for field in ("name", "definition"):
+            raw = squash(row.get(f"{field}_verdict") or row.get(field) or "")
+            if not raw:
+                continue
+            if raw not in VERDICT_VALUES:
+                unrecognised.append(
+                    {"packet_id": packet_id, "field": field, "value": raw}
+                )
+                continue
+            entry[field] = raw
+        verdicts[packet_id] = entry
+    return verdicts, unrecognised
 
 
 def score_rows(
@@ -2217,6 +2212,7 @@ def score_rows(
     packet: list[dict[str, Any]],
     key: dict[str, Any],
     verdicts: dict[str, dict[str, str]],
+    unrecognised: list[dict[str, str]] | None = None,
 ) -> dict[str, Any]:
     """Turn a blind verdicts file into the per-arm figures the round reports."""
     pair_to_packet: dict[tuple[str, str], str] = {}
@@ -2225,6 +2221,7 @@ def score_rows(
             pair_to_packet[(member, arm)] = packet_id
     arms = sorted({row["arm"] for row in records})
     compare_rows: list[bench.RecordBenchmarkRow] = []
+    member_states: list[dict[str, str]] = []
     reports: dict[str, Any] = {}
     for arm in arms:
         arm_records = [row for row in records if row["arm"] == arm]
@@ -2232,6 +2229,9 @@ def score_rows(
         name_right = 0
         definition_right = 0
         both_right = 0
+        name_scored = 0
+        definition_scored = 0
+        both_scored = 0
         blocked = 0
         blocked_types: Counter[str] = Counter()
         changed_right = 0
@@ -2266,36 +2266,61 @@ def score_rows(
                 continue
             packet_id = pair_to_packet.get((row["member"], arm))
             verdict = verdicts.get(packet_id) if packet_id else None
-            name_ok = bool(verdict and verdict.get("name") == "right")
-            definition_ok = bool(verdict and verdict.get("definition") == "right")
+            name_value = (verdict or {}).get("name")
+            definition_value = (verdict or {}).get("definition")
+            name_decided = name_value in ("right", "wrong")
+            definition_decided = definition_value in ("right", "wrong")
+            both_decided = name_decided and definition_decided
+            name_ok = name_value == "right"
+            definition_ok = definition_value == "right"
             both_ok = name_ok and definition_ok
             name_right += 1 if name_ok else 0
             definition_right += 1 if definition_ok else 0
             both_right += 1 if both_ok else 0
-            compare_rows.append(
-                bench.RecordBenchmarkRow(
-                    member=row["member"],
-                    arm=arm,
-                    verdict="right" if both_ok else "wrong",
-                    changed_incumbent=row.get("changed_incumbent"),
-                    incumbent_right=row.get("incumbent_right"),
-                    cost_usd=float(row.get("cost_usd") or 0.0),
-                    seconds=float(row.get("seconds") or 0.0),
-                    input_tokens=int(row.get("input_tokens") or 0),
-                    output_tokens=int(row.get("output_tokens") or 0),
-                )
+            name_scored += 1 if name_decided else 0
+            definition_scored += 1 if definition_decided else 0
+            both_scored += 1 if both_decided else 0
+            member_states.append(
+                {
+                    "member": row["member"],
+                    "arm": arm,
+                    "verdict": (
+                        "right" if both_ok else ("wrong" if both_decided else "unscored")
+                    ),
+                }
             )
+            if both_decided:
+                compare_rows.append(
+                    bench.RecordBenchmarkRow(
+                        member=row["member"],
+                        arm=arm,
+                        verdict="right" if both_ok else "wrong",
+                        changed_incumbent=row.get("changed_incumbent"),
+                        incumbent_right=row.get("incumbent_right"),
+                        cost_usd=float(row.get("cost_usd") or 0.0),
+                        seconds=float(row.get("seconds") or 0.0),
+                        input_tokens=int(row.get("input_tokens") or 0),
+                        output_tokens=int(row.get("output_tokens") or 0),
+                    )
+                )
         reports[arm] = {
             "members": total,
+            "name_scored": name_scored,
             "name_right": name_right,
-            "name_share": (name_right / total) if total else 0.0,
-            "name_interval": list(bench.wilson_interval(name_right, total)),
+            "name_share": (name_right / name_scored) if name_scored else 0.0,
+            "name_interval": list(bench.wilson_interval(name_right, name_scored)),
+            "definition_scored": definition_scored,
             "definition_right": definition_right,
-            "definition_share": (definition_right / total) if total else 0.0,
-            "definition_interval": list(bench.wilson_interval(definition_right, total)),
+            "definition_share": (
+                definition_right / definition_scored if definition_scored else 0.0
+            ),
+            "definition_interval": list(
+                bench.wilson_interval(definition_right, definition_scored)
+            ),
+            "both_scored": both_scored,
             "both_right": both_right,
-            "both_share": (both_right / total) if total else 0.0,
-            "both_interval": list(bench.wilson_interval(both_right, total)),
+            "both_share": (both_right / both_scored) if both_scored else 0.0,
+            "both_interval": list(bench.wilson_interval(both_right, both_scored)),
             "blocked": blocked,
             "blocked_by_type": dict(sorted(blocked_types.items())),
             "changed_right_incumbent": changed_right,
@@ -2320,8 +2345,8 @@ def score_rows(
             except ValueError:
                 continue
     member_verdicts: dict[str, dict[str, str]] = {}
-    for row in compare_rows:
-        member_verdicts.setdefault(row.member, {})[row.arm] = row.verdict
+    for state in member_states:
+        member_verdicts.setdefault(state["member"], {})[state["arm"]] = state["verdict"]
     member_comparison = [
         {"member": member, "arms": dict(sorted(arms_seen.items()))}
         for member, arms_seen in sorted(member_verdicts.items())
@@ -2329,14 +2354,15 @@ def score_rows(
     undecided = sum(
         1
         for packet_id in key["packets"]
-        if "name" not in verdicts.get(packet_id, {})
-        or "definition" not in verdicts.get(packet_id, {})
+        if verdicts.get(packet_id, {}).get("name") not in VERDICT_VALUES
+        or verdicts.get(packet_id, {}).get("definition") not in VERDICT_VALUES
     )
     return {
         "schema": SECOND_ROUND_SCHEMA + "/scores",
         "packets": len(packet),
         "verdicts": len(verdicts),
         "undecided_packet_lines": undecided,
+        "unrecognised_verdicts": list(unrecognised or []),
         "rule": "A name is right when it denotes the same quantity; a definition "
         "is right when it states every reference definition point. Both right "
         "means both. Group is not scored.",
@@ -2352,11 +2378,13 @@ def score_files(
     packet_path: Path = SECOND_PACKET,
     key_path: Path = SECOND_KEY,
 ) -> dict[str, Any]:
+    verdicts, unrecognised = load_verdicts(verdicts_path)
     return score_rows(
         read_jsonl(records_path),
         read_jsonl(packet_path),
         json.loads(key_path.read_text(encoding="utf-8")),
-        load_verdicts(verdicts_path),
+        verdicts,
+        unrecognised,
     )
 
 
@@ -2462,6 +2490,51 @@ def score_self_test() -> list[str]:
     low, high = figures["A"]["both_interval"]
     if not (0.0 <= low <= 0.5 <= high <= 1.0):
         problems.append("score self-test: the interval does not bracket the share")
+
+    # A value outside the recognised set is not scored, and the reader is told
+    # which packet line carried it.
+    with tempfile.TemporaryDirectory() as raw:
+        path = Path(raw) / "verdicts.jsonl"
+        path.write_text(
+            json.dumps(
+                {
+                    "packet_id": lookup[("m1", "A")],
+                    "name_verdict": "rigth",
+                    "definition_verdict": "right",
+                }
+            )
+            + "\n"
+            + json.dumps(
+                {
+                    "packet_id": lookup[("m2", "A")],
+                    "name_verdict": "Right",
+                    "definition_verdict": "wrong",
+                }
+            )
+            + "\n",
+            encoding="utf-8",
+        )
+        loaded, unrecognised = load_verdicts(path)
+    expected = [
+        {"packet_id": lookup[("m1", "A")], "field": "name", "value": "rigth"}
+    ]
+    if unrecognised != expected:
+        problems.append(
+            f"score self-test: an unrecognised verdict is not reported: {unrecognised!r}"
+        )
+    if "name" in loaded.get(lookup[("m1", "A")], {}):
+        problems.append("score self-test: an unrecognised verdict is scored")
+    if loaded.get(lookup[("m2", "A")], {}).get("name") != "right":
+        problems.append("score self-test: 'Right' is not read as right")
+    typed = score_rows(records, packet, key, loaded, unrecognised)
+    if typed["arms"]["A"]["name_scored"] != 1:
+        problems.append(
+            "score self-test: an undecided name is counted in the name denominator"
+        )
+    if typed["undecided_packet_lines"] < 1:
+        problems.append("score self-test: an unreadable verdict is not undecided")
+    if len(typed["unrecognised_verdicts"]) != 1:
+        problems.append("score self-test: the scores do not carry the bad verdicts")
     return problems
 
 
@@ -2875,11 +2948,11 @@ def build_second_document(
 def render_second_svg(development: list[dict[str, Any]]) -> str:
     """Proxy share by prompt version, one bar per arm, drawn by hand."""
     width = 1400
-    height = 520
+    height = 722
     left = 90
     right = 40
-    top = 70
-    bottom = 80
+    top = 90
+    bottom = 90
     plot_w = width - left - right
     plot_h = height - top - bottom
     colours = {
