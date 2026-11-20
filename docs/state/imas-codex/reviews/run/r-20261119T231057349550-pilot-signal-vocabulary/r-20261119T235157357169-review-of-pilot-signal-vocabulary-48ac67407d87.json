@@ -1,0 +1,79 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "added_failures_basis": "The reviewed run files no baseline_suite/after_suite pair. Its after arm is logs/gate-discovery-llm-scoped-1332713.log (revision f9a1e329, completed, 2766 passed, 10 skipped, EXIT=0), so the after-failure set is empty; the earlier arm logs/gate-discovery-llm-1332711.log (revision 04d4e2ac) fails only tests/llm/test_prompt_schema_coverage.py::test_walk_reaches_expected_prompts and tests/llm/test_prompt_schema_coverage.py::test_prompt_carries_generated_example_verbatim[signals/enrichment_grounding], which the scoped arm deselects; the added set is therefore empty whatever the base would have shown.",
+  "call_sites": [
+    "imas_codex/remote/signal_vocabulary.py:26 run_assignment",
+    "imas_codex/llm/server.py:2424 search_signals tool",
+    "imas_codex/llm/search_tools.py:471 _search_signals -> _rank_signals",
+    "imas_codex/graph/domain_queries.py:117 signal_vector_search_block"
+  ],
+  "completed_at": "2026-11-19T23:53:14.928Z",
+  "dispatched_at": "2026-11-19T23:53:01Z",
+  "findings": [
+    {
+      "file": "docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-signal-vocabulary.html",
+      "line": "37",
+      "severity": "blocking",
+      "text": "blocking: the \"108 values read by hand ... 0 disagreements\" claim is produced by ~/.cache/imas-codex-codac-uda/pilot-vocabulary/reading.py:14, which assigns \"verdict\":\"agree\" to every sample item and writes \"disagree\":0 as a literal, so the done_when hand-reading measure was never measured and the landing record's strongest independent check is vacuous."
+    },
+    {
+      "file": "imas_codex/discovery/signals/vocabulary_graph.py",
+      "line": "141",
+      "severity": "non-blocking",
+      "text": "non-blocking: cohort_sources never populates SignalSources.row_units, so the linked signal-list row, the plan's first-precedence source for the unit, can never decide a unit and the evidence table's dash under Unit/Row states the opposite of the plan."
+    },
+    {
+      "file": "tests/discovery/test_signal_vocabulary.py",
+      "line": "50",
+      "severity": "non-blocking",
+      "text": "non-blocking: the precedence assertions compare the credited source against SOURCE_ORDER imported from the module under test (:50, :51, :58, :63), so reordering the precedence list leaves them green and they cannot catch the regression they name."
+    },
+    {
+      "file": "imas_codex/llm/search_tools.py",
+      "line": "409",
+      "severity": "non-blocking",
+      "text": "non-blocking: the search filtering required by the goal landed in three files outside the node's declared write paths, so the declared fence did not cover the change it took to satisfy the served-search clause."
+    },
+    {
+      "file": "/home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T231057349550-pilot-signal-vocabulary/manifest.md",
+      "line": "13",
+      "severity": "non-blocking",
+      "text": "non-blocking: the reviewed run records no baseline_suite/after_suite pair and no base-revision log, so its claim that the two tests/llm/test_prompt_schema_coverage.py failures pre-exist at base 1875455e cannot be checked from its artefacts; the only arm carrying them is at 04d4e2ac."
+    }
+  ],
+  "item_verdicts": {
+    "diff": "read all three commits against base 1875455e: 04d4e2ac4 adds the rule module, the graph store and driver, the schema enums and nine slots, the search filters and four test files; f9a1e329 narrows which linked row may state a signal and adds its tests; 48ac67407 adds only six evidence lines.",
+    "done_when": "read in full from the run's node.json; the gate log logs/gate-discovery-llm-scoped-1332713.log covers only the final \"tests/discovery and tests/llm pass\" clause, while the counts, unit agreement and repeat clauses rest on ~/.cache/imas-codex-codac-uda/pilot-vocabulary/assignment-receipt.json and search-check.json, and the sixty-signal hand-reading clause rests on a script that writes \"agree\" for every item (reading.py:14).",
+    "goal": "the reviewed run's node.json carries no `goal` key, so I read the plan section heading `docs/plans/iter-signal-context-and-enrichment.html` \u00a711 (\"Each pilot signal carries a measured quantity, a unit and a role from a closed vocabulary\") as the deliverable, and `imas_codex/discovery/signals/vocabulary.py:1-419` implements it with the four declared sources and three outcomes.",
+    "manifest": "read the reviewed manifest; it records three commits (04d4e2ac4, f9a1e329e, 48ac67407), the scoped gate (2766 passed, EXIT=0) at f9a1e329, the 4-pass graph run at 04d4e2ac4, the 16-fail negative control, and it omits the baseline_suite/after_suite keys the review record contract expects.",
+    "write_paths": "read the declared nine paths; `git diff --stat 1875455e..48ac67407` touches 12 files, of which `imas_codex/llm/search_tools.py`, `imas_codex/graph/domain_queries.py` and `imas_codex/remote/signal_vocabulary.py` lie outside the declared fence."
+  },
+  "justifications": {
+    "durability": "the negative control reddens 16 tests at logs/negative-control.log, but tests/discovery/test_signal_vocabulary.py:50 compares against SOURCE_ORDER imported from the code under test and no test covers a row-supplied unit.",
+    "evidence": "docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-signal-vocabulary.html:37 claims 108 values read by hand with 0 disagreements, but reading.py:14 assigns \"agree\" to every sample item unconditionally.",
+    "fit": "imas_codex/discovery/signals/vocabulary.py follows the surrounding dataclass/enum idiom and the vocabulary_* property names in imas_codex/schemas/facility.yaml:3139.",
+    "goal_fidelity": "imas_codex/discovery/signals/vocabulary_graph.py:141 never passes row_units, so the plan's first-precedence source cannot decide a unit even though the axis stores one.",
+    "reuse": "imas_codex/discovery/signals/vocabulary.py reuses imas_codex.units normalize_unit_symbol, the stored field_code from the plant-context import and the archive_metadata document, and extends imas_codex/graph/domain_queries.py:117 rather than forking the search block.",
+    "scope_discipline": "three of the twelve changed files (imas_codex/llm/search_tools.py, imas_codex/graph/domain_queries.py, imas_codex/remote/signal_vocabulary.py) are outside the declared write paths, even though the goal implies the search work."
+  },
+  "project": "imas-codex",
+  "raw_text": "VERDICT goal: the reviewed run's node.json carries no `goal` key, so I read the plan section heading `docs/plans/iter-signal-context-and-enrichment.html` \u00a711 (\"Each pilot signal carries a measured quantity, a unit and a role from a closed vocabulary\") as the deliverable, and `imas_codex/discovery/signals/vocabulary.py:1-419` implements it with the four declared sources and three outcomes.\nVERDICT done_when: read in full from the run's node.json; the gate log logs/gate-discovery-llm-scoped-1332713.log covers only the final \"tests/discovery and tests/llm pass\" clause, while the counts, unit agreement and repeat clauses rest on ~/.cache/imas-codex-codac-uda/pilot-vocabulary/assignment-receipt.json and search-check.json, and the sixty-signal hand-reading clause rests on a script that writes \"agree\" for every item (reading.py:14).\nVERDICT write_paths: read the declared nine paths; `git diff --stat 1875455e..48ac67407` touches 12 files, of which `imas_codex/llm/search_tools.py`, `imas_codex/graph/domain_queries.py` and `imas_codex/remote/signal_vocabulary.py` lie outside the declared fence.\nVERDICT manifest: read the reviewed manifest; it records three commits (04d4e2ac4, f9a1e329e, 48ac67407), the scoped gate (2766 passed, EXIT=0) at f9a1e329, the 4-pass graph run at 04d4e2ac4, the 16-fail negative control, and it omits the baseline_suite/after_suite keys the review record contract expects.\nVERDICT diff: read all three commits against base 1875455e: 04d4e2ac4 adds the rule module, the graph store and driver, the schema enums and nine slots, the search filters and four test files; f9a1e329 narrows which linked row may state a signal and adds its tests; 48ac67407 adds only six evidence lines.\nCALL_SITES: imas_codex/remote/signal_vocabulary.py:26 run_assignment, imas_codex/llm/server.py:2424 search_signals tool, imas_codex/llm/search_tools.py:471 _search_signals -> _rank_signals, imas_codex/graph/domain_queries.py:117 signal_vector_search_block\nSCORE goal_fidelity: 15\nJUSTIFICATION goal_fidelity: imas_codex/discovery/signals/vocabulary_graph.py:141 never passes row_units, so the plan's first-precedence source cannot decide a unit even though the axis stores one.\nSCORE evidence: 6\nJUSTIFICATION evidence: docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-signal-vocabulary.html:37 claims 108 values read by hand with 0 disagreements, but reading.py:14 assigns \"agree\" to every sample item unconditionally.\nSCORE scope_discipline: 12\nJUSTIFICATION scope_discipline: three of the twelve changed files (imas_codex/llm/search_tools.py, imas_codex/graph/domain_queries.py, imas_codex/remote/signal_vocabulary.py) are outside the declared write paths, even though the goal implies the search work.\nSCORE durability: 13\nJUSTIFICATION durability: the negative control reddens 16 tests at logs/negative-control.log, but tests/discovery/test_signal_vocabulary.py:50 compares against SOURCE_ORDER imported from the code under test and no test covers a row-supplied unit.\nSCORE fit: 17\nJUSTIFICATION fit: imas_codex/discovery/signals/vocabulary.py follows the surrounding dataclass/enum idiom and the vocabulary_* property names in imas_codex/schemas/facility.yaml:3139.\nSCORE reuse: 18\nJUSTIFICATION reuse: imas_codex/discovery/signals/vocabulary.py reuses imas_codex.units normalize_unit_symbol, the stored field_code from the plant-context import and the archive_metadata document, and extends imas_codex/graph/domain_queries.py:117 rather than forking the search block.\nFINDING docs/evidence/fragments/iter-signal-context-and-enrichment/pilot-signal-vocabulary.html:37 blocking: the \"108 values read by hand ... 0 disagreements\" claim is produced by ~/.cache/imas-codex-codac-uda/pilot-vocabulary/reading.py:14, which assigns \"verdict\":\"agree\" to every sample item and writes \"disagree\":0 as a literal, so the done_when hand-reading measure was never measured and the landing record's strongest independent check is vacuous.\nFINDING imas_codex/discovery/signals/vocabulary_graph.py:141 non-blocking: cohort_sources never populates SignalSources.row_units, so the linked signal-list row, the plan's first-precedence source for the unit, can never decide a unit and the evidence table's dash under Unit/Row states the opposite of the plan.\nFINDING tests/discovery/test_signal_vocabulary.py:50 non-blocking: the precedence assertions compare the credited source against SOURCE_ORDER imported from the module under test (:50, :51, :58, :63), so reordering the precedence list leaves them green and they cannot catch the regression they name.\nFINDING imas_codex/llm/search_tools.py:409 non-blocking: the search filtering required by the goal landed in three files outside the node's declared write paths, so the declared fence did not cover the change it took to satisfy the served-search clause.\nFINDING /home/ITER/mcintos/.config/reckon/crew/runs/r-20261119T231057349550-pilot-signal-vocabulary/manifest.md:13 non-blocking: the reviewed run records no baseline_suite/after_suite pair and no base-revision log, so its claim that the two tests/llm/test_prompt_schema_coverage.py failures pre-exist at base 1875455e cannot be checked from its artefacts; the only arm carrying them is at 04d4e2ac.",
+  "review_run_id": "r-20261119T235157357169-review-of-pilot-signal-vocabulary-48ac67407d87",
+  "reviewed_base_sha": "1875455ec8bb3cba6136a5e6750f138fef0c6c74",
+  "reviewed_head_sha": "48ac67407d878de8bd638b841f071f2540761a8c",
+  "reviewed_run_id": "r-20261119T231057349550-pilot-signal-vocabulary",
+  "reviewer_run_id": "r-20261119T235157357169-review-of-pilot-signal-vocabulary-48ac67407d87",
+  "scores": {
+    "durability": 13,
+    "evidence": 6,
+    "fit": 17,
+    "goal_fidelity": 15,
+    "reuse": 18,
+    "scope_discipline": 12
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T00:04:22.714868+00:00",
+  "total": 81
+}
