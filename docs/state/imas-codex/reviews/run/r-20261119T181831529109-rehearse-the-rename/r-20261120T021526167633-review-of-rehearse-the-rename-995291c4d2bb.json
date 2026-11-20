@@ -1,0 +1,44 @@
+{
+  "added_failure_count": 0,
+  "added_failure_ids": [],
+  "completed_at": "2026-11-20T02:17:03.091Z",
+  "dispatched_at": "2026-11-20T02:16:29Z",
+  "findings": [
+    {
+      "file": "tests/scripts/test_rename.py",
+      "line": 391,
+      "severity": "non-blocking",
+      "text": "test_cutover_rejects_a_label_the_document_does_not_carry never calls check_cutover and writes tmp_path/cutover.json without reading it, so the title claims a refusal by scripts/rename/cutover.py that the tool does not implement and the assertion exercises only the test-local label_disagreements() helper."
+    },
+    {
+      "file": "tests/scripts/test_rename.py",
+      "line": 401,
+      "severity": "non-blocking",
+      "text": "the assertion hard-codes Installed units, the document_label of whichever row happens to be first with origin inventory, so reordering cutover.json's inventory reddens a correct edit."
+    },
+    {
+      "file": "manifest.md",
+      "line": 10,
+      "severity": "non-blocking",
+      "text": "the tests/test_logs receipt names the 18-item run at 5603af804, not the 21-test reviewed head, so the two reviewed commits' own passing run is recorded only in the agent transcript rather than a gate log."
+    }
+  ],
+  "project": "imas-codex",
+  "review_run_id": "r-20261120T021526167633-review-of-rehearse-the-rename-995291c4d2bb",
+  "review_text": "VERDICT goal: read the source node's goal (prompt.txt:38, prove the whole rename to iter-codex on a scratch copy with its cutover sequence) and node.json's done_when; the two commits since the prior review add no rename behaviour, they replace a suite-arm quote with the logs' own summary lines (docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html:62-63) and turn three prior findings into firing guards (tests/scripts/test_rename.py:343,404,416).\nVERDICT done_when: read node.json's measure (zero added failures, identifiers recorded); manifest baseline_suite and after_suite each record 44 failures and I recomputed their id sets from logs/pair2-base-suite.log and logs/pair2-after-suite.log as identical, but the node's own test receipt names the 18-item run at 5603af804 rather than the 21-item reviewed head.\nVERDICT write_paths: read the reviewed prompt's declared paths (scripts/rename, tests/scripts, docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html, docs/figures/codac-uda-signals/rehearse-the-rename); the two commits touch only tests/scripts/test_rename.py and that evidence fragment, both inside.\nVERDICT manifest: read manifest.md; it lists 13 commits including edf671140 and 995291c4d and records both suite arms complete with log digests, but its tests and test_logs lines (manifest.md:9-10) still cite gate-test-rename.log, whose header reads at 5603af804 and whose total is 18 passed.\nVERDICT diff: read edf671140 and 995291c4d against 3a4610a0d; 2 files, +68/-17, the html lines 62-63 now quote the pair2 and earlier-pair logs verbatim, and the test file adds the reconciliation-refusal test, two cutover-refusal tests, a module-level label_disagreements helper, and renames the prior misnamed test.\nCALL_SITES: scripts/rename/__main__.py:22, scripts/rename/check.py:60, scripts/rename/cutover.py:39\nSCORE goal_fidelity: 17\nJUSTIFICATION goal_fidelity: docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html:62 now quotes = 44 failed, 17432 passed, 144 skipped, 1136 deselected, 1 xfailed, 48 warnings in 1715.93s (0:28:35) = exactly as logs/pair2-base-suite.log:4068 closes, closing the prior xfailed misquote.\nSCORE evidence: 13\nJUSTIFICATION evidence: manifest.md:10 names gate-test-rename.log, whose header reads at 5603af804 and whose total is 18 passed, so the reviewed head's 21-test pass is recorded only in the agent transcript (resume-2.jsonl).\nSCORE scope_discipline: 20\nJUSTIFICATION scope_discipline: both commits touch only tests/scripts/test_rename.py and docs/evidence/fragments/codac-uda-signals/rehearse-the-rename.html, inside the declared write paths.\nSCORE durability: 16\nJUSTIFICATION durability: tests/scripts/test_rename.py:343 reddens if the counts-unreconciled append at scripts/rename/check.py:112-123 is deleted, but tests/scripts/test_rename.py:391 never calls check_cutover, so its title guards no tool behaviour.\nSCORE fit: 17\nJUSTIFICATION fit: the additions follow the module's existing fixture-and-assert style beside inventory_labels (tests/scripts/test_rename.py:365) and introduce no plan-derived or forbidden name.\nSCORE reuse: 20\nJUSTIFICATION reuse: searched scripts/rename/check.py and scripts/rename/cutover.py and grepped the repository for document_label; the label-versus-document comparison has no production owner, and label_disagreements() reuses inventory_labels() rather than re-parsing the html.\nFINDING tests/scripts/test_rename.py:391 non-blocking: test_cutover_rejects_a_label_the_document_does_not_carry never calls check_cutover and writes tmp_path/cutover.json without reading it, so the title claims a refusal by scripts/rename/cutover.py that the tool does not implement and the assertion exercises only the test-local label_disagreements() helper.\nFINDING tests/scripts/test_rename.py:401 non-blocking: the assertion hard-codes Installed units, the document_label of whichever row happens to be first with origin inventory, so reordering cutover.json's inventory reddens a correct edit.\nFINDING manifest.md:10 non-blocking: the tests/test_logs receipt names the 18-item run at 5603af804, not the 21-test reviewed head, so the two reviewed commits' own passing run is recorded only in the agent transcript rather than a gate log.",
+  "reviewed_base_sha": "3a4610a0d9652279748ae62cc3f33cb343ab823b",
+  "reviewed_head_sha": "995291c4d2bb99c843813a21b4de2d8f8c6e7a27",
+  "reviewed_run_id": "r-20261119T181831529109-rehearse-the-rename",
+  "scores": {
+    "durability": 16,
+    "evidence": 13,
+    "fit": 17,
+    "goal_fidelity": 17,
+    "reuse": 20,
+    "scope_discipline": 20
+  },
+  "status": "parsed",
+  "times_source": "run-record",
+  "timestamp": "2026-11-20T02:27:28.264808+00:00",
+  "total": 103
+}
